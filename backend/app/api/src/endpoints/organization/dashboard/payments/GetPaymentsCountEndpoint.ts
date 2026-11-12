@@ -32,8 +32,7 @@ export class GetPaymentsCountEndpoint extends Endpoint<Params, Query, Body, Resp
         await Context.authenticate();
         const query = await GetPaymentsEndpoint.buildQuery(request.query);
 
-        const count = await query
-            .count();
+        const count = await query.count();
 
         return new Response(
             CountResponse.create({

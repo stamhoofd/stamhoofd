@@ -17,11 +17,18 @@ export class ViesServiceStatic {
      * If validating a company before a patch is applied, also send the patch (make sure company is already patched with that patch).
      * This will also apply small corrections to the patch itself, so it is safe to apply later.
      */
-    async checkCompany(company: Company, patch: AutoEncoderPatchType<Company> | null = null, { forceValidation = false }: { forceValidation?: boolean } = {}) {
+    async checkCompany(
+        company: Company,
+        patch: AutoEncoderPatchType<Company> | null = null,
+        { forceValidation = false }: { forceValidation?: boolean } = {},
+    ) {
         // Validate the custom PEPPOL endpoint id, but only when it actually changed.
         // In a patch, `customPeppolEndpointId` is undefined unless the client changed it;
         // for a full company it is always set (null or a value), so we validate a set value.
-        if ((forceValidation || (patch && patch.customPeppolEndpointId !== undefined)) && company.customPeppolEndpointId) {
+        if (
+            (forceValidation || (patch && patch.customPeppolEndpointId !== undefined)) &&
+            company.customPeppolEndpointId
+        ) {
             const endpointId = company.customPeppolEndpointId;
 
             // A KBO (0208) endpoint id is the Belgian enterprise number, so it must belong to a
@@ -37,7 +44,10 @@ export class ViesServiceStatic {
                 }
 
                 const companyPeppolId = company.peppolCompanyId;
-                if (!companyPeppolId || endpointId.id.replace(/\D+/g, '') !== companyPeppolId.id.replace(/\D+/g, '')) {
+                if (
+                    !companyPeppolId ||
+                    endpointId.id.replace(/\D+/g, '') !== companyPeppolId.id.replace(/\D+/g, '')
+                ) {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'A KBO PEPPOL id must match the company number',
@@ -100,7 +110,10 @@ export class ViesServiceStatic {
                 // Already validated
             } else {
                 // Need to validate
-                const result = await this.checkCompanyNumber(company.address.country, company.companyNumber);
+                const result = await this.checkCompanyNumber(
+                    company.address.country,
+                    company.companyNumber,
+                );
                 if (patch) {
                     patch.companyNumber = result.companyNumber;
                 }
@@ -116,7 +129,10 @@ export class ViesServiceStatic {
         }
     }
 
-    async checkCompanyNumber(country: Country, companyNumber: string): Promise<{ companyNumber: string | null; VATNumber?: string | null }> {
+    async checkCompanyNumber(
+        country: Country,
+        companyNumber: string,
+    ): Promise<{ companyNumber: string | null; VATNumber?: string | null }> {
         if (country !== Country.Belgium) {
             // Not supported
             return {
@@ -170,7 +186,10 @@ export class ViesServiceStatic {
     }
 
     async checkVATNumber(country: Country, vatNumber: string): Promise<string> {
-        const result = jsvat.checkVAT(vatNumber, country === Country.Belgium ? [jsvat.belgium] : [jsvat.netherlands]);
+        const result = jsvat.checkVAT(
+            vatNumber,
+            country === Country.Belgium ? [jsvat.belgium] : [jsvat.netherlands],
+        );
 
         if (!result.isValid) {
             throw new SimpleError({
@@ -187,7 +206,7 @@ export class ViesServiceStatic {
         }
 
         try {
-            if (!await this.isVATNumberValid(country, formatted)) {
+            if (!(await this.isVATNumberValid(country, formatted))) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: $t('%1TG', { 'vat-number': formatted }),

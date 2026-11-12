@@ -11,14 +11,20 @@ type OrganizersResponse = {
 
 function assertIsOrganizersResponse(json: unknown): asserts json is OrganizersResponse {
     if (
-        typeof json !== 'object'
-        || json === null
-        || !('totalItems' in json)
-        || typeof json.totalItems !== 'number'
-        || !('member' in json)
-        || !Array.isArray(json.member)
-        || !json.member.every(
-            (member: unknown) => typeof member === 'object' && member !== null && 'id' in member && typeof member.id === 'string' && 'name' in member && typeof member.name === 'string',
+        typeof json !== 'object' ||
+        json === null ||
+        !('totalItems' in json) ||
+        typeof json.totalItems !== 'number' ||
+        !('member' in json) ||
+        !Array.isArray(json.member) ||
+        !json.member.every(
+            (member: unknown) =>
+                typeof member === 'object' &&
+                member !== null &&
+                'id' in member &&
+                typeof member.id === 'string' &&
+                'name' in member &&
+                typeof member.name === 'string',
         )
     ) {
         console.error('Invalid response when searching for UiTPAS organizers:', json);
@@ -30,7 +36,10 @@ function assertIsOrganizersResponse(json: unknown): asserts json is OrganizersRe
     }
 }
 
-export async function searchUitpasOrganizers(access_token: string, name: string): Promise<UitpasOrganizersResponse> {
+export async function searchUitpasOrganizers(
+    access_token: string,
+    name: string,
+): Promise<UitpasOrganizersResponse> {
     // uses platform credentials
     // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-organizers
     if (name === '') {

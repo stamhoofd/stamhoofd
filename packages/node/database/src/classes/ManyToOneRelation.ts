@@ -26,7 +26,9 @@ export class ManyToOneRelation<Key extends keyof any, M extends Model> {
 
     /// Whether this relation is set
     isSet(model: Model): boolean /* model is Model & Record<Key, M> */ {
-        return (model as any)[this.modelKey] !== undefined && (model as any)[this.modelKey] !== null;
+        return (
+            (model as any)[this.modelKey] !== undefined && (model as any)[this.modelKey] !== null
+        );
     }
 
     /// Generate a join query
@@ -42,11 +44,11 @@ export class ManyToOneRelation<Key extends keyof any, M extends Model> {
         let str = `SELECT ${this.model.getDefaultSelect()} FROM ${this.model.table}\n`;
         str += `WHERE ${this.model.primary.name} IN (?)`;
 
-        const [rows] = await Database.select(str, [modelsA.map(m => m[this.foreignKey])]);
+        const [rows] = await Database.select(str, [modelsA.map((m) => m[this.foreignKey])]);
         const modelsB = this.model.fromRows(rows, this.model.table) as M[];
 
         for (const model of modelsA) {
-            const found = modelsB.find(m => m.getPrimaryKey() === model[this.foreignKey]);
+            const found = modelsB.find((m) => m.getPrimaryKey() === model[this.foreignKey]);
             if (!found) {
                 throw new Error('Could not load many to one relation: no match found when loading');
             }

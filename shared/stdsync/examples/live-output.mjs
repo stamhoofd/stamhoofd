@@ -9,13 +9,15 @@ if (!process.stdout.isTTY) {
 
     try {
         for (let step = 0; step <= 8; step++) {
-            output.setLive([
-                '┌────────────────┬──────────────┐',
-                '│ Service        │ Status       │',
-                '├────────────────┼──────────────┤',
-                `│ Example        │ ${`${step}/8 complete`.padEnd(12)} │`,
-                '└────────────────┴──────────────┘',
-            ].join('\n'));
+            output.setLive(
+                [
+                    '┌────────────────┬──────────────┐',
+                    '│ Service        │ Status       │',
+                    '├────────────────┼──────────────┤',
+                    `│ Example        │ ${`${step}/8 complete`.padEnd(12)} │`,
+                    '└────────────────┴──────────────┘',
+                ].join('\n'),
+            );
 
             if (step === 2) {
                 console.log('stdout: a log stays above the live table');

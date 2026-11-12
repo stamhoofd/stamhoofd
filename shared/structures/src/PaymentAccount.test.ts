@@ -13,14 +13,17 @@ describe('getPaymentAccount', () => {
         TestUtils.setEnvironment('platformName', 'stamhoofd');
     });
 
-    function createPayment(method: PaymentMethod, transferSettings: { iban?: string; creditor?: string } | null = null) {
+    function createPayment(
+        method: PaymentMethod,
+        transferSettings: { iban?: string; creditor?: string } | null = null,
+    ) {
         return PaymentGeneral.create({
             method,
             transferSettings: transferSettings
                 ? TransferSettings.create({
-                        iban: transferSettings.iban ?? null,
-                        creditor: transferSettings.creditor ?? null,
-                    })
+                      iban: transferSettings.iban ?? null,
+                      creditor: transferSettings.creditor ?? null,
+                  })
                 : null,
         });
     }
@@ -31,19 +34,26 @@ describe('getPaymentAccount', () => {
      */
     const paymentFilterCompilers: InMemoryFilterDefinitions = new Map([
         ...baseInMemoryFilterCompilers,
-        ['method', createValueCompiler(payment => payment.method)],
-        ['provider', createValueCompiler(payment => payment.provider)],
-        ['transferSettings', new Map([
-            ...baseInMemoryFilterCompilers,
-            ['iban', createValueCompiler(payment => payment.transferSettings?.iban ?? null)],
-            ['creditor', createValueCompiler(payment => payment.transferSettings?.creditor ?? null)],
-        ])],
+        ['method', createValueCompiler((payment) => payment.method)],
+        ['provider', createValueCompiler((payment) => payment.provider)],
+        [
+            'transferSettings',
+            new Map([
+                ...baseInMemoryFilterCompilers,
+                ['iban', createValueCompiler((payment) => payment.transferSettings?.iban ?? null)],
+                [
+                    'creditor',
+                    createValueCompiler((payment) => payment.transferSettings?.creditor ?? null),
+                ],
+            ]),
+        ],
     ]);
 
     function createValueCompiler(getValue: (payment: PaymentGeneral) => unknown) {
         return (filter: StamhoofdFilter) => {
             // A plain value has to be wrapped, as compileToInMemoryFilter reads a bare null as 'no filter'
-            const condition = filter !== null && typeof filter === 'object' ? filter : { $eq: filter };
+            const condition =
+                filter !== null && typeof filter === 'object' ? filter : { $eq: filter };
             const runner = compileToInMemoryFilter(condition, baseInMemoryFilterCompilers);
 
             return (payment: PaymentGeneral) => runner(getValue(payment));

@@ -7,7 +7,9 @@ export class Province extends QueryableModel {
     static table = 'provinces';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })

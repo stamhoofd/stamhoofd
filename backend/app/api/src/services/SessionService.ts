@@ -2,9 +2,18 @@ import { Database } from '@node/database';
 import { SimpleError } from '@common/errors';
 import { Token, User, UserSession } from '@stamhoofd/models';
 import type { SessionDurations, SessionType } from '@stamhoofd/models/constants/sessions.js';
-import { ACCESS_TOKEN_DURATION, SESSION_DURATIONS, SSO_HANDOFF_TOKEN_DURATION } from '@stamhoofd/models/constants/sessions.js';
+import {
+    ACCESS_TOKEN_DURATION,
+    SESSION_DURATIONS,
+    SSO_HANDOFF_TOKEN_DURATION,
+} from '@stamhoofd/models/constants/sessions.js';
 import { SQLWhereSign } from '@stamhoofd/sql';
-import { SessionClientType, SessionDeviceType, SessionLoginMethod, SessionOS } from '@stamhoofd/structures';
+import {
+    SessionClientType,
+    SessionDeviceType,
+    SessionLoginMethod,
+    SessionOS,
+} from '@stamhoofd/structures';
 import type { SessionMetaData } from '@stamhoofd/structures';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,7 +32,7 @@ export const IMPERSONATION_SESSION_DURATION = 2 * 60 * 60 * 1000;
 
 async function randomBytes(size: number): Promise<Buffer> {
     return await new Promise((resolve, reject) => {
-        crypto.randomBytes(size, (error, buffer) => error ? reject(error) : resolve(buffer));
+        crypto.randomBytes(size, (error, buffer) => (error ? reject(error) : resolve(buffer)));
     });
 }
 
@@ -32,7 +41,13 @@ export class SessionService {
      * @param authenticatedAt Pass the current date when a primary credential was verified
      * as part of this request, so the session counts as "fresh" for sensitive actions.
      */
-    static async createSession<U extends User>(user: U, { loginMethod = SessionLoginMethod.Password, authenticatedAt = null }: { loginMethod?: SessionLoginMethod; authenticatedAt?: Date | null } = {}): Promise<Token & { user: U }> {
+    static async createSession<U extends User>(
+        user: U,
+        {
+            loginMethod = SessionLoginMethod.Password,
+            authenticatedAt = null,
+        }: { loginMethod?: SessionLoginMethod; authenticatedAt?: Date | null } = {},
+    ): Promise<Token & { user: U }> {
         const tokenId = uuidv4();
         const session = await this.createUserSession(user, {
             tokenId,
@@ -52,15 +67,31 @@ export class SessionService {
      * session to the client is in the URL. Only the refresh token travels along, and the
      * client exchanges it for a usable access token.
      */
-    static async createSSOHandoff<U extends User>(user: U, { clientType = this.getClientType(), metaData = this.getMetaData() }: { clientType?: SessionClientType; metaData?: SessionMetaData } = {}): Promise<Token & { user: U }> {
+    static async createSSOHandoff<U extends User>(
+        user: U,
+        {
+            clientType = this.getClientType(),
+            metaData = this.getMetaData(),
+        }: { clientType?: SessionClientType; metaData?: SessionMetaData } = {},
+    ): Promise<Token & { user: U }> {
         const tokenId = uuidv4();
-        const session = await this.createUserSession(user, { tokenId, clientType, loginMethod: SessionLoginMethod.SSO, metaData });
+        const session = await this.createUserSession(user, {
+            tokenId,
+            clientType,
+            loginMethod: SessionLoginMethod.SSO,
+            metaData,
+        });
         const token = await this.createToken(user, { session, tokenId });
 
         token.accessTokenValidUntil = new Date(Date.now() - 31 * DAY);
         token.accessTokenValidUntil.setMilliseconds(0);
         this.applyLimits({ token, session, user });
-        token.refreshTokenValidUntil = new Date(Math.min(token.refreshTokenValidUntil.getTime(), Date.now() + SSO_HANDOFF_TOKEN_DURATION));
+        token.refreshTokenValidUntil = new Date(
+            Math.min(
+                token.refreshTokenValidUntil.getTime(),
+                Date.now() + SSO_HANDOFF_TOKEN_DURATION,
+            ),
+        );
         token.refreshTokenValidUntil.setMilliseconds(0);
         await token.save();
         return token;
@@ -88,7 +119,10 @@ export class SessionService {
      * Deliberately not created through createSession(): it is never fresh (so it cannot be
      * used for sensitive actions) and it is short lived, because it cannot be renewed.
      */
-    static async createImpersonationSession<U extends User>(user: U, impersonatedUser: User): Promise<Token & { user: U }> {
+    static async createImpersonationSession<U extends User>(
+        user: U,
+        impersonatedUser: User,
+    ): Promise<Token & { user: U }> {
         const tokenId = uuidv4();
         const session = await this.createUserSession(user, {
             tokenId,
@@ -109,7 +143,9 @@ export class SessionService {
      * The new token continues the session of the old one, so it keeps its start date and
      * cannot outlive it. Using the session is what postpones the inactivity limit.
      */
-    static async rotateSession<U extends User>(oldToken: Token & { user: U }): Promise<Token & { user: U }> {
+    static async rotateSession<U extends User>(
+        oldToken: Token & { user: U },
+    ): Promise<Token & { user: U }> {
         const session = await UserSession.getByID(oldToken.sessionId);
         if (!session || session.userId !== oldToken.userId) {
             throw this.invalidRefreshTokenError();
@@ -121,7 +157,10 @@ export class SessionService {
         }
 
         const durations = this.getDurations(session, oldToken.user);
-        if (durations.session !== null && session.startedAt.getTime() + durations.session <= Date.now()) {
+        if (
+            durations.session !== null &&
+            session.startedAt.getTime() + durations.session <= Date.now()
+        ) {
             await oldToken.delete();
             throw this.invalidRefreshTokenError();
         }
@@ -135,8 +174,16 @@ export class SessionService {
         // row, and upgrading that to the exclusive lock of the update deadlocks with a waiting activation.
         return await Database.beginTransaction(async () => {
             const didRotate = isSSOHandoff
-                ? await this.consumeSSOHandoff({ sessionId: session.id, handoffTokenId: oldToken.id, tokenId })
-                : await this.replaceLastUsedToken({ sessionId: session.id, previousTokenId: oldToken.id, tokenId });
+                ? await this.consumeSSOHandoff({
+                      sessionId: session.id,
+                      handoffTokenId: oldToken.id,
+                      tokenId,
+                  })
+                : await this.replaceLastUsedToken({
+                      sessionId: session.id,
+                      previousTokenId: oldToken.id,
+                      tokenId,
+                  });
             if (!didRotate) {
                 throw this.invalidRefreshTokenError();
             }
@@ -156,7 +203,10 @@ export class SessionService {
 
     private static isSSOHandoff(token: Token, session: UserSession): boolean {
         // Handoff access tokens expire before they are created; normal access tokens do not.
-        return session.loginMethod === SessionLoginMethod.SSO && token.accessTokenValidUntil < token.createdAt;
+        return (
+            session.loginMethod === SessionLoginMethod.SSO &&
+            token.accessTokenValidUntil < token.createdAt
+        );
     }
 
     static async getByRefreshToken(refreshToken: string) {
@@ -173,7 +223,10 @@ export class SessionService {
                 await session.delete();
                 return undefined;
             }
-            console.error('Detected an expired refresh token, deleting all sessions and tokens for user', token.userId);
+            console.error(
+                'Detected an expired refresh token, deleting all sessions and tokens for user',
+                token.userId,
+            );
             await UserSession.delete().where('userId', token.userId).delete();
             await Token.delete().where('userId', token.userId).delete();
             return undefined;
@@ -195,7 +248,10 @@ export class SessionService {
                 [token.id, token.sessionId, token.id],
             );
             if (result.affectedRows > 0) {
-                await Database.delete('DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ?', [token.sessionId, token.id]);
+                await Database.delete('DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ?', [
+                    token.sessionId,
+                    token.id,
+                ]);
                 return true;
             }
             return await this.isActiveToken(token);
@@ -203,7 +259,10 @@ export class SessionService {
     }
 
     private static async isActiveToken(token: Token): Promise<boolean> {
-        const [sessions] = await Database.select('SELECT `id` FROM `user_sessions` WHERE `id` = ? AND `lastActiveTokenId` = ? LIMIT 1', [token.sessionId, token.id]);
+        const [sessions] = await Database.select(
+            'SELECT `id` FROM `user_sessions` WHERE `id` = ? AND `lastActiveTokenId` = ? LIMIT 1',
+            [token.sessionId, token.id],
+        );
         return sessions.length > 0;
     }
 
@@ -211,7 +270,13 @@ export class SessionService {
         await UserSession.delete().where('id', token.sessionId).delete();
     }
 
-    static async deleteOtherSessions({ userId, keepAccessToken }: { userId: string; keepAccessToken: string | null }): Promise<number> {
+    static async deleteOtherSessions({
+        userId,
+        keepAccessToken,
+    }: {
+        userId: string;
+        keepAccessToken: string | null;
+    }): Promise<number> {
         const user = await User.getByID(userId);
         if (user?.isApiUser) {
             return 0;
@@ -219,7 +284,13 @@ export class SessionService {
         return await this.deleteForUsers({ userIds: [userId], keepAccessToken });
     }
 
-    static async deleteForUsers({ userIds, keepAccessToken }: { userIds: string[]; keepAccessToken: string | null }): Promise<number> {
+    static async deleteForUsers({
+        userIds,
+        keepAccessToken,
+    }: {
+        userIds: string[];
+        keepAccessToken: string | null;
+    }): Promise<number> {
         if (userIds.length === 0) {
             return 0;
         }
@@ -235,7 +306,13 @@ export class SessionService {
     /**
      * Sign out every session of this user, except the one the request was made with.
      */
-    static async clearFor({ userId, keepAccessToken }: { userId: string; keepAccessToken: string }): Promise<void> {
+    static async clearFor({
+        userId,
+        keepAccessToken,
+    }: {
+        userId: string;
+        keepAccessToken: string;
+    }): Promise<void> {
         await this.deleteForUsers({ userIds: [userId], keepAccessToken });
     }
 
@@ -256,7 +333,10 @@ export class SessionService {
         });
     }
 
-    private static async createToken<U extends User>(user: U, { session, tokenId = uuidv4() }: { session: UserSession; tokenId?: string }): Promise<Token & { user: U }> {
+    private static async createToken<U extends User>(
+        user: U,
+        { session, tokenId = uuidv4() }: { session: UserSession; tokenId?: string },
+    ): Promise<Token & { user: U }> {
         if (user.isSystemUser) {
             throw new SimpleError({
                 code: 'internal_error',
@@ -276,7 +356,22 @@ export class SessionService {
         return token;
     }
 
-    private static async createUserSession(user: User, { tokenId, clientType, loginMethod, metaData, impersonatedUserId = null }: { tokenId: string; clientType: SessionClientType; loginMethod: SessionLoginMethod; metaData: SessionMetaData; impersonatedUserId?: string | null }): Promise<UserSession> {
+    private static async createUserSession(
+        user: User,
+        {
+            tokenId,
+            clientType,
+            loginMethod,
+            metaData,
+            impersonatedUserId = null,
+        }: {
+            tokenId: string;
+            clientType: SessionClientType;
+            loginMethod: SessionLoginMethod;
+            metaData: SessionMetaData;
+            impersonatedUserId?: string | null;
+        },
+    ): Promise<UserSession> {
         const session = new UserSession();
         session.id = uuidv4();
         session.userId = user.id;
@@ -306,7 +401,15 @@ export class SessionService {
         session.browserName = metaData.browserName;
     }
 
-    private static async replaceLastUsedToken({ sessionId, previousTokenId, tokenId }: { sessionId: string; previousTokenId: string; tokenId: string }): Promise<boolean> {
+    private static async replaceLastUsedToken({
+        sessionId,
+        previousTokenId,
+        tokenId,
+    }: {
+        sessionId: string;
+        previousTokenId: string;
+        tokenId: string;
+    }): Promise<boolean> {
         const [result] = await Database.update(
             'UPDATE `user_sessions` SET `lastUsedTokenId` = ? WHERE `id` = ? AND (`lastUsedTokenId` = ? OR `lastActiveTokenId` = ?)',
             [tokenId, sessionId, previousTokenId, previousTokenId],
@@ -314,11 +417,22 @@ export class SessionService {
         if (result.affectedRows === 0) {
             return false;
         }
-        await Database.delete('DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ? AND `id` != (SELECT `lastActiveTokenId` FROM `user_sessions` WHERE `id` = ?)', [sessionId, tokenId, sessionId]);
+        await Database.delete(
+            'DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ? AND `id` != (SELECT `lastActiveTokenId` FROM `user_sessions` WHERE `id` = ?)',
+            [sessionId, tokenId, sessionId],
+        );
         return true;
     }
 
-    private static async consumeSSOHandoff({ sessionId, handoffTokenId, tokenId }: { sessionId: string; handoffTokenId: string; tokenId: string }): Promise<boolean> {
+    private static async consumeSSOHandoff({
+        sessionId,
+        handoffTokenId,
+        tokenId,
+    }: {
+        sessionId: string;
+        handoffTokenId: string;
+        tokenId: string;
+    }): Promise<boolean> {
         const [result] = await Database.update(
             'UPDATE `user_sessions` SET `lastUsedTokenId` = ? WHERE `id` = ? AND `lastUsedTokenId` = ?',
             [tokenId, sessionId, handoffTokenId],
@@ -326,7 +440,10 @@ export class SessionService {
         if (result.affectedRows === 0) {
             return false;
         }
-        await Database.delete('DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ?', [sessionId, tokenId]);
+        await Database.delete('DELETE FROM `tokens` WHERE `sessionId` = ? AND `id` != ?', [
+            sessionId,
+            tokenId,
+        ]);
         return true;
     }
 
@@ -373,14 +490,29 @@ export class SessionService {
         return 'admin';
     }
 
-    private static applyLimits({ token, session, user }: { token: Token; session: UserSession; user: User }) {
+    private static applyLimits({
+        token,
+        session,
+        user,
+    }: {
+        token: Token;
+        session: UserSession;
+        user: User;
+    }) {
         const durations = this.getDurations(session, user);
-        const sessionEndsAt = durations.session !== null ? (session.startedAt.getTime() + durations.session) : (Date.now() + durations.refreshToken);
+        const sessionEndsAt =
+            durations.session !== null
+                ? session.startedAt.getTime() + durations.session
+                : Date.now() + durations.refreshToken;
 
-        token.refreshTokenValidUntil = new Date(Math.min(Date.now() + durations.refreshToken, sessionEndsAt));
+        token.refreshTokenValidUntil = new Date(
+            Math.min(Date.now() + durations.refreshToken, sessionEndsAt),
+        );
         token.refreshTokenValidUntil.setMilliseconds(0);
 
-        token.accessTokenValidUntil = new Date(Math.min(token.accessTokenValidUntil.getTime(), sessionEndsAt));
+        token.accessTokenValidUntil = new Date(
+            Math.min(token.accessTokenValidUntil.getTime(), sessionEndsAt),
+        );
         token.accessTokenValidUntil.setMilliseconds(0);
     }
 
@@ -402,11 +534,20 @@ export class SessionService {
             } catch {
                 parsed = JSON.parse(decodeURIComponent(value)) as Partial<SessionMetaData>;
             }
-            const string = (candidate: unknown, max: number): string | null => typeof candidate === 'string' && candidate.length > 0 ? candidate.slice(0, max) : null;
+            const string = (candidate: unknown, max: number): string | null =>
+                typeof candidate === 'string' && candidate.length > 0
+                    ? candidate.slice(0, max)
+                    : null;
             return {
-                deviceType: Object.values(SessionDeviceType).includes(parsed.deviceType as SessionDeviceType) ? parsed.deviceType as SessionDeviceType : fallback.deviceType,
+                deviceType: Object.values(SessionDeviceType).includes(
+                    parsed.deviceType as SessionDeviceType,
+                )
+                    ? (parsed.deviceType as SessionDeviceType)
+                    : fallback.deviceType,
                 deviceName: string(parsed.deviceName, 255),
-                osName: Object.values(SessionOS).includes(parsed.osName as SessionOS) ? parsed.osName as SessionOS : null,
+                osName: Object.values(SessionOS).includes(parsed.osName as SessionOS)
+                    ? (parsed.osName as SessionOS)
+                    : null,
                 osVersion: string(parsed.osVersion, 64),
                 appVersion: string(parsed.appVersion, 64),
                 nativeAppVersion: string(parsed.nativeAppVersion, 64),

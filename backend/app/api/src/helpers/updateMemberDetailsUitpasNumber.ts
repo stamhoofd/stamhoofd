@@ -31,7 +31,11 @@ export async function updateMemberDetailsUitpasNumber(details: MemberDetails): P
  * @param details
  * @returns whether the social tariff was updated
  */
-export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, details: MemberDetails, previousUitpasNumber: string | null): Promise<boolean> {
+export async function updateMemberDetailsUitpasNumberForPatch(
+    memberId: string,
+    details: MemberDetails,
+    previousUitpasNumber: string | null,
+): Promise<boolean> {
     if (!details.uitpasNumberDetails) {
         return false;
     }
@@ -43,17 +47,24 @@ export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, 
     try {
         isUpdated = await updateMemberDetailsUitpasNumber(details);
     } catch (error: any) {
-        const isUitpasEqual = previousUitpasNumber !== null && previousUitpasNumber === details.uitpasNumberDetails.uitpasNumber;
+        const isUitpasEqual =
+            previousUitpasNumber !== null &&
+            previousUitpasNumber === details.uitpasNumberDetails.uitpasNumber;
 
         if (isSimpleError(error)) {
-            if (error.hasCode('https://api.publiq.be/probs/uitpas/pass-not-found') || error.hasCode('https://api.publiq.be/probs/uitpas/invalid-uitpas-number')) {
+            if (
+                error.hasCode('https://api.publiq.be/probs/uitpas/pass-not-found') ||
+                error.hasCode('https://api.publiq.be/probs/uitpas/invalid-uitpas-number')
+            ) {
                 if (isUitpasEqual) {
                     // set the status of the social tariff to unknown if the uitpas number did not change and the number is unknown
                     const member = await Member.getByID(memberId);
                     if (member && member.details.uitpasNumberDetails) {
-                        member.details.uitpasNumberDetails.socialTariff = UitpasSocialTariff.create({
-                            status: UitpasSocialTariffStatus.Unknown,
-                        });
+                        member.details.uitpasNumberDetails.socialTariff = UitpasSocialTariff.create(
+                            {
+                                status: UitpasSocialTariffStatus.Unknown,
+                            },
+                        );
                         member.details.reviewTimes.removeReview('uitpasNumber');
 
                         await member.save();
@@ -67,7 +78,10 @@ export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, 
 
         // do not throw if the number did not change
         if (isUitpasEqual) {
-            console.error(`Catched error while updating social tariff for member (uitpas number did not change) ${memberId}:`, error.message);
+            console.error(
+                `Catched error while updating social tariff for member (uitpas number did not change) ${memberId}:`,
+                error.message,
+            );
             return false;
         }
 
@@ -75,11 +89,15 @@ export async function updateMemberDetailsUitpasNumberForPatch(memberId: string, 
     }
 
     // force a review if the social tariff changed from active to not active (and the number did not change)
-    if (isUpdated
+    if (
+        isUpdated &&
         // is uitpas equal
-        && previousUitpasNumber !== null && previousUitpasNumber === details.uitpasNumberDetails.uitpasNumber
+        previousUitpasNumber !== null &&
+        previousUitpasNumber === details.uitpasNumberDetails.uitpasNumber &&
         // did change from active to not active
-        && wasActive && !details.uitpasNumberDetails.isActive) {
+        wasActive &&
+        !details.uitpasNumberDetails.isActive
+    ) {
         // force a review
         details.reviewTimes.removeReview('uitpasNumber');
     }
@@ -115,8 +133,11 @@ export function uitpasApiResponseToSocialTariff(response: GetPassResponse): Uitp
     });
 }
 
-export function didUitpasReviewChange(reviewTimesPatch: ReviewTimes | AutoEncoderPatchType<ReviewTimes> | undefined, originalReviewTimes: ReviewTimes): boolean {
-    const newReview = reviewTimesPatch?.times.find(t => t.name === 'uitpasNumber');
+export function didUitpasReviewChange(
+    reviewTimesPatch: ReviewTimes | AutoEncoderPatchType<ReviewTimes> | undefined,
+    originalReviewTimes: ReviewTimes,
+): boolean {
+    const newReview = reviewTimesPatch?.times.find((t) => t.name === 'uitpasNumber');
     if (!newReview) {
         return false;
     }
@@ -134,7 +155,9 @@ export function didUitpasReviewChange(reviewTimesPatch: ReviewTimes | AutoEncode
  * @param status
  * @returns
  */
-function uitpasSocialTariffStatusToEnum(status: 'ACTIVE' | 'EXPIRED' | 'NONE' | 'UNKNOWN'): UitpasSocialTariffStatus {
+function uitpasSocialTariffStatusToEnum(
+    status: 'ACTIVE' | 'EXPIRED' | 'NONE' | 'UNKNOWN',
+): UitpasSocialTariffStatus {
     switch (status) {
         case 'ACTIVE':
             return UitpasSocialTariffStatus.Active;

@@ -24,7 +24,12 @@ export class BreakdownRequest extends CountFilteredRequest {
      */
     narrowFilter: StamhoofdFilter | null;
 
-    constructor(data: { filter?: StamhoofdFilter | null; search?: string | null; path?: BreakdownPathItem[]; narrowFilter?: StamhoofdFilter | null }) {
+    constructor(data: {
+        filter?: StamhoofdFilter | null;
+        search?: string | null;
+        path?: BreakdownPathItem[];
+        narrowFilter?: StamhoofdFilter | null;
+    }) {
         super(data);
         this.path = data.path ?? [];
         this.narrowFilter = data.narrowFilter ?? null;
@@ -58,11 +63,13 @@ export class BreakdownRequest extends CountFilteredRequest {
             });
         }
 
-        return data.clone({
-            data: parsed,
-            field: 'path',
-            context: data.context,
-        }).decode(new ArrayDecoder(BreakdownPathItem as Decoder<BreakdownPathItem>));
+        return data
+            .clone({
+                data: parsed,
+                field: 'path',
+                context: data.context,
+            })
+            .decode(new ArrayDecoder(BreakdownPathItem as Decoder<BreakdownPathItem>));
     }
 
     /**
@@ -80,8 +87,13 @@ export class BreakdownRequest extends CountFilteredRequest {
     encode(context: EncodeContext): PlainObject {
         return {
             ...(super.encode(context) as Record<string, PlainObject>),
-            path: this.path.length > 0 ? JSON.stringify(this.path.map(item => item.encode(context))) : undefined,
-            narrowFilter: this.narrowFilter ? StamhoofdFilterJSONDecoder.encode(this.narrowFilter, context) : undefined,
+            path:
+                this.path.length > 0
+                    ? JSON.stringify(this.path.map((item) => item.encode(context)))
+                    : undefined,
+            narrowFilter: this.narrowFilter
+                ? StamhoofdFilterJSONDecoder.encode(this.narrowFilter, context)
+                : undefined,
         };
     }
 }

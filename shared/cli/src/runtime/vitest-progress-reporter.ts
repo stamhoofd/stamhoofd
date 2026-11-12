@@ -15,7 +15,14 @@ export default class VitestProgressReporter implements Reporter {
 
     private record(test: TestCase) {
         const state = test.result().state;
-        const outcome = test.options.mode === 'todo' ? 'todo' : state === 'passed' && test.diagnostic()?.flaky ? 'flaky' : state === 'passed' || state === 'failed' || state === 'skipped' ? state : 'pending';
+        const outcome =
+            test.options.mode === 'todo'
+                ? 'todo'
+                : state === 'passed' && test.diagnostic()?.flaky
+                  ? 'flaky'
+                  : state === 'passed' || state === 'failed' || state === 'skipped'
+                    ? state
+                    : 'pending';
         const previous = this.outcomes.get(test.id);
         if (previous) this.counts[previous]--;
         this.outcomes.set(test.id, outcome);
@@ -24,7 +31,12 @@ export default class VitestProgressReporter implements Reporter {
 
     private publish(finished: boolean) {
         const completed = this.outcomes.size - this.counts.pending;
-        this.emitter.emit({ ...this.counts, completed, ...(finished ? { total: this.outcomes.size } : {}), finished });
+        this.emitter.emit({
+            ...this.counts,
+            completed,
+            ...(finished ? { total: this.outcomes.size } : {}),
+            finished,
+        });
     }
 
     async onTestRunEnd(modules: ReadonlyArray<TestModule>) {

@@ -28,7 +28,10 @@ export class DeletePasskeyEndpoint extends Endpoint<Params, Query, Body, Respons
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
-        const { user, token } = await Context.authenticateFresh({ allowWithoutAccount: true, allowUnscoped: true });
+        const { user, token } = await Context.authenticateFresh({
+            allowWithoutAccount: true,
+            allowUnscoped: true,
+        });
 
         const credential = await WebauthnCredential.getByID(request.params.id);
         if (!credential || credential.userId !== user.id) {
@@ -42,8 +45,15 @@ export class DeletePasskeyEndpoint extends Endpoint<Params, Query, Body, Respons
 
         const confirmedTotp = await MFATOTP.getConfirmedForUser(user.id);
         const passkeys = await WebauthnCredential.getForUser(user.id);
-        const remaining = confirmedTotp.length + passkeys.filter(p => p.id !== credential.id).length;
-        if (remaining === 0 && await TwoFactorHelper.isTwoFactorRequired(user, organization ?? Context.organization ?? null)) {
+        const remaining =
+            confirmedTotp.length + passkeys.filter((p) => p.id !== credential.id).length;
+        if (
+            remaining === 0 &&
+            (await TwoFactorHelper.isTwoFactorRequired(
+                user,
+                organization ?? Context.organization ?? null,
+            ))
+        ) {
             throw new SimpleError({
                 code: 'cannot_remove_last_factor',
                 message: 'Cannot remove the last two-factor method',
@@ -54,7 +64,11 @@ export class DeletePasskeyEndpoint extends Endpoint<Params, Query, Body, Respons
 
         await credential.delete();
 
-        await TwoFactorAuditLogService.logMethodDeleted(user, MFAMethodType.Passkey, credential.name || credential.providerName || '');
+        await TwoFactorAuditLogService.logMethodDeleted(
+            user,
+            MFAMethodType.Passkey,
+            credential.name || credential.providerName || '',
+        );
 
         return new Response(await TwoFactorHelper.completeRemoval(user, token));
     }

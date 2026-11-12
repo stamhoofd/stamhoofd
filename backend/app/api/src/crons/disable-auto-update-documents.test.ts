@@ -1,6 +1,9 @@
 import { DocumentTemplate, DocumentTemplateFactory } from '@stamhoofd/models';
 import { DocumentStatus } from '@stamhoofd/structures';
-import { disableAutoUpdateForFiscalDocuments, disableAutoUpdateForOtherDocuments } from './disable-auto-update-documents.js';
+import {
+    disableAutoUpdateForFiscalDocuments,
+    disableAutoUpdateForOtherDocuments,
+} from './disable-auto-update-documents.js';
 
 describe('cron.disable-auto-update-documents', () => {
     describe('disableAutoUpdateForFiscalDocuments', () => {
@@ -157,8 +160,30 @@ describe('cron.disable-auto-update-documents', () => {
     });
 });
 
-async function createDocument({ year, status, createdAt, updatesEnabled, type, publishedAt }: { year: number; status: DocumentStatus; createdAt: Date; updatesEnabled: boolean; type: 'fiscal' | 'participation'; publishedAt: Date | null }) {
-    const document = await new DocumentTemplateFactory({ year, groups: [], status, updatesEnabled, publishedAt, createdAt, type }).create();
+async function createDocument({
+    year,
+    status,
+    createdAt,
+    updatesEnabled,
+    type,
+    publishedAt,
+}: {
+    year: number;
+    status: DocumentStatus;
+    createdAt: Date;
+    updatesEnabled: boolean;
+    type: 'fiscal' | 'participation';
+    publishedAt: Date | null;
+}) {
+    const document = await new DocumentTemplateFactory({
+        year,
+        groups: [],
+        status,
+        updatesEnabled,
+        publishedAt,
+        createdAt,
+        type,
+    }).create();
 
     return document;
-};
+}

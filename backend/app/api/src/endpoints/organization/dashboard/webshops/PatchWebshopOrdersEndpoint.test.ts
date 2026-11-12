@@ -3,7 +3,18 @@ import { PatchableArray } from '@common/encoding';
 import { Request } from '@node/endpoints';
 import { Order, OrganizationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Cart, CartItem, Customer, OrderData, PaymentMethod, Permissions, PrivateOrder, Product, ProductPrice, WebshopMetaData } from '@stamhoofd/structures';
+import {
+    Cart,
+    CartItem,
+    Customer,
+    OrderData,
+    PaymentMethod,
+    Permissions,
+    PrivateOrder,
+    Product,
+    ProductPrice,
+    WebshopMetaData,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
@@ -41,9 +52,7 @@ describe('Endpoint.PatchWebshopOrders', () => {
         const orderData = OrderData.create({
             paymentMethod: PaymentMethod.Unknown,
             cart: Cart.create({
-                items: [
-                    CartItem.create({ product, productPrice: freeProductPrice, amount: 1 }),
-                ],
+                items: [CartItem.create({ product, productPrice: freeProductPrice, amount: 1 })],
             }),
             customer: Customer.create({
                 firstName: 'John',
@@ -53,13 +62,20 @@ describe('Endpoint.PatchWebshopOrders', () => {
         });
 
         const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
-        patchArray.addPut(PrivateOrder.create({
-            id: uuidv4(),
-            data: orderData,
-            webshopId: webshop.id,
-        }));
+        patchArray.addPut(
+            PrivateOrder.create({
+                id: uuidv4(),
+                data: orderData,
+                webshopId: webshop.id,
+            }),
+        );
 
-        const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+        const r = Request.buildJson(
+            'PATCH',
+            `/webshop/${webshop.id}/orders`,
+            organization.getApiHost(),
+            patchArray,
+        );
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         const response = await testServer.test(endpoint, r);

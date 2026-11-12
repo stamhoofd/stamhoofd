@@ -2,10 +2,41 @@ import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
 import { Request } from '@node/endpoints';
 import type { Organization, StripeAccount, Token } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, BalanceItemPayment, Order, OrderFactory, OrganizationFactory, Payment, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemFactory,
+    BalanceItemPayment,
+    Order,
+    OrderFactory,
+    OrganizationFactory,
+    Payment,
+    UserFactory,
+    Webshop,
+    WebshopFactory,
+} from '@stamhoofd/models';
 import type { OrderResponse } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BalanceItemStatus, Cart, CartItem, Customer, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, PaymentStatus, Permissions, PrivateOrder, PrivatePaymentConfiguration, PrivateWebshop, Product, ProductPrice, TransferSettings, WebshopCrowdfunding, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import {
+    BalanceItemStatus,
+    Cart,
+    CartItem,
+    Customer,
+    OrderData,
+    OrderStatus,
+    PaymentConfiguration,
+    PaymentMethod,
+    PaymentStatus,
+    Permissions,
+    PrivateOrder,
+    PrivatePaymentConfiguration,
+    PrivateWebshop,
+    Product,
+    ProductPrice,
+    TransferSettings,
+    WebshopCrowdfunding,
+    WebshopMetaData,
+    WebshopPrivateMetaData,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { SessionService } from './SessionService.js';
 
@@ -29,7 +60,14 @@ describe('WebshopCrowdfundingService', () => {
         }).create();
     }
 
-    async function createOrderBalanceItem(order: Order, { pricePaid = 0, pricePending = 0, status = BalanceItemStatus.Due }: { pricePaid?: number; pricePending?: number; status?: BalanceItemStatus }) {
+    async function createOrderBalanceItem(
+        order: Order,
+        {
+            pricePaid = 0,
+            pricePending = 0,
+            status = BalanceItemStatus.Due,
+        }: { pricePaid?: number; pricePending?: number; status?: BalanceItemStatus },
+    ) {
         return await new BalanceItemFactory({
             organizationId: order.organizationId,
             orderId: order.id,
@@ -74,37 +112,49 @@ describe('WebshopCrowdfundingService', () => {
 
         // Hidden balance items are ignored (online payments keep their balance item hidden until
         // the payment succeeds)
-        await createOrderBalanceItem(order1, { pricePaid: 5_0000, pricePending: 3_0000, status: BalanceItemStatus.Hidden });
+        await createOrderBalanceItem(order1, {
+            pricePaid: 5_0000,
+            pricePending: 3_0000,
+            status: BalanceItemStatus.Hidden,
+        });
 
         // Balance items of other webshops are ignored
-        const otherWebshop = await new WebshopFactory({ organizationId: webshop.organizationId }).create();
+        const otherWebshop = await new WebshopFactory({
+            organizationId: webshop.organizationId,
+        }).create();
         const otherOrder = await new OrderFactory({ webshop: otherWebshop }).create();
         await createOrderBalanceItem(otherOrder, { pricePaid: 7_0000 });
 
         await WebshopCrowdfundingService.updateForWebshop(webshop.id);
 
         const meta = await getMeta(webshop);
-        expect(meta.crowdfunding).toEqual(WebshopCrowdfunding.create({
-            goalAmount: 500_0000,
-            progressAmount: 60_0000,
-            pendingAmount: 20_0000,
-        }));
+        expect(meta.crowdfunding).toEqual(
+            WebshopCrowdfunding.create({
+                goalAmount: 500_0000,
+                progressAmount: 60_0000,
+                pendingAmount: 20_0000,
+            }),
+        );
     });
 
     test('resets the amounts when there are no balance items', async () => {
-        const webshop = await createWebshop(WebshopCrowdfunding.create({
-            progressAmount: 60_0000,
-            pendingAmount: 20_0000,
-        }));
+        const webshop = await createWebshop(
+            WebshopCrowdfunding.create({
+                progressAmount: 60_0000,
+                pendingAmount: 20_0000,
+            }),
+        );
 
         await WebshopCrowdfundingService.updateForWebshop(webshop.id);
 
         const meta = await getMeta(webshop);
-        expect(meta.crowdfunding).toEqual(WebshopCrowdfunding.create({
-            goalAmount: null,
-            progressAmount: 0,
-            pendingAmount: 0,
-        }));
+        expect(meta.crowdfunding).toEqual(
+            WebshopCrowdfunding.create({
+                goalAmount: null,
+                progressAmount: 0,
+                pendingAmount: 0,
+            }),
+        );
     });
 
     test('does not calculate anything when crowdfunding is disabled', async () => {
@@ -152,10 +202,12 @@ describe('WebshopCrowdfundingService', () => {
         await WebshopCrowdfundingService.flush();
 
         const meta = await getMeta(webshop);
-        expect(meta.crowdfunding).toEqual(WebshopCrowdfunding.create({
-            progressAmount: 30_0000,
-            pendingAmount: 10_0000,
-        }));
+        expect(meta.crowdfunding).toEqual(
+            WebshopCrowdfunding.create({
+                progressAmount: 30_0000,
+                pendingAmount: 10_0000,
+            }),
+        );
     });
 
     test('paying an order updates the crowdfunding amounts', async () => {
@@ -172,10 +224,12 @@ describe('WebshopCrowdfundingService', () => {
         await WebshopCrowdfundingService.flush();
 
         const meta = await getMeta(webshop);
-        expect(meta.crowdfunding).toEqual(WebshopCrowdfunding.create({
-            progressAmount: 30_0000,
-            pendingAmount: 10_0000,
-        }));
+        expect(meta.crowdfunding).toEqual(
+            WebshopCrowdfunding.create({
+                progressAmount: 30_0000,
+                pendingAmount: 10_0000,
+            }),
+        );
     });
 
     test('canceling or deleting an order schedules a crowdfunding update', async () => {
@@ -247,7 +301,11 @@ describe('WebshopCrowdfundingService', () => {
             stripeMocker.reset();
         });
 
-        async function createLifecycleWebshop(crowdfunding: WebshopCrowdfunding | null = WebshopCrowdfunding.create({ goalAmount: 100_0000 })) {
+        async function createLifecycleWebshop(
+            crowdfunding: WebshopCrowdfunding | null = WebshopCrowdfunding.create({
+                goalAmount: 100_0000,
+            }),
+        ) {
             const paymentConfiguration = PaymentConfiguration.patch({
                 transferSettings: TransferSettings.create({
                     iban: 'BE56587127952688', // = random IBAN
@@ -288,7 +346,12 @@ describe('WebshopCrowdfundingService', () => {
         }
 
         async function placeOrder(webshop: Webshop, paymentMethod: PaymentMethod) {
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData(paymentMethod));
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                buildOrderData(paymentMethod),
+            );
             const response = await testServer.test(placeOrderEndpoint, r);
             const body = response.body as OrderResponse;
             const order = (await Order.getByID(body.order.id))!;
@@ -306,7 +369,10 @@ describe('WebshopCrowdfundingService', () => {
             const { payment } = await placeOrder(webshop, PaymentMethod.Bancontact);
 
             // Online payments don't count as pending: their balance item stays hidden
-            expect(await getCrowdfunding(webshop)).toMatchObject({ progressAmount: 0, pendingAmount: 0 });
+            expect(await getCrowdfunding(webshop)).toMatchObject({
+                progressAmount: 0,
+                pendingAmount: 0,
+            });
 
             // Payment becomes pending at the payment provider
             const intent = stripeMocker.getLastIntent() as StripeObject;
@@ -314,7 +380,10 @@ describe('WebshopCrowdfundingService', () => {
             await PaymentService.pollStatus(payment.id, organization);
             expect((await Payment.getByID(payment.id))!.status).toBe(PaymentStatus.Pending);
 
-            expect(await getCrowdfunding(webshop)).toMatchObject({ progressAmount: 0, pendingAmount: 0 });
+            expect(await getCrowdfunding(webshop)).toMatchObject({
+                progressAmount: 0,
+                pendingAmount: 0,
+            });
 
             // Payment succeeds
             intent.status = 'succeeded';
@@ -322,7 +391,10 @@ describe('WebshopCrowdfundingService', () => {
             await PaymentService.pollStatus(payment.id, organization);
             expect((await Payment.getByID(payment.id))!.status).toBe(PaymentStatus.Succeeded);
 
-            expect(await getCrowdfunding(webshop)).toMatchObject({ progressAmount: 10_0000, pendingAmount: 0 });
+            expect(await getCrowdfunding(webshop)).toMatchObject({
+                progressAmount: 10_0000,
+                pendingAmount: 0,
+            });
         });
 
         test('a failed online payment does not count', async () => {
@@ -337,7 +409,10 @@ describe('WebshopCrowdfundingService', () => {
             await PaymentService.pollStatus(payment.id, organization);
             expect((await Payment.getByID(payment.id))!.status).toBe(PaymentStatus.Failed);
 
-            expect(await getCrowdfunding(webshop)).toMatchObject({ progressAmount: 0, pendingAmount: 0 });
+            expect(await getCrowdfunding(webshop)).toMatchObject({
+                progressAmount: 0,
+                pendingAmount: 0,
+            });
         });
 
         test('a transfer order counts as pending and counts as progress once an admin marks the payment as paid', async () => {
@@ -345,74 +420,136 @@ describe('WebshopCrowdfundingService', () => {
             const { payment } = await placeOrder(webshop, PaymentMethod.Transfer);
 
             // The transfer that has not been received yet counts as pending
-            expect(await getCrowdfunding(webshop)).toMatchObject({ progressAmount: 0, pendingAmount: 10_0000 });
+            expect(await getCrowdfunding(webshop)).toMatchObject({
+                progressAmount: 0,
+                pendingAmount: 10_0000,
+            });
 
             // This is what PatchPaymentsEndpoint calls when an admin marks the transfer as paid
-            await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded);
+            await PaymentService.handlePaymentStatusUpdate(
+                payment,
+                organization,
+                PaymentStatus.Succeeded,
+            );
 
-            expect(await getCrowdfunding(webshop)).toMatchObject({ progressAmount: 10_0000, pendingAmount: 0 });
+            expect(await getCrowdfunding(webshop)).toMatchObject({
+                progressAmount: 10_0000,
+                pendingAmount: 0,
+            });
         });
 
         test('a transfer order stops counting when the payment is marked as failed afterwards', async () => {
             const webshop = await createLifecycleWebshop();
             const { payment } = await placeOrder(webshop, PaymentMethod.Transfer);
 
-            await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded);
-            expect(await getCrowdfunding(webshop)).toMatchObject({ progressAmount: 10_0000, pendingAmount: 0 });
+            await PaymentService.handlePaymentStatusUpdate(
+                payment,
+                organization,
+                PaymentStatus.Succeeded,
+            );
+            expect(await getCrowdfunding(webshop)).toMatchObject({
+                progressAmount: 10_0000,
+                pendingAmount: 0,
+            });
 
-            await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-            expect(await getCrowdfunding(webshop)).toMatchObject({ progressAmount: 0, pendingAmount: 0 });
+            await PaymentService.handlePaymentStatusUpdate(
+                payment,
+                organization,
+                PaymentStatus.Failed,
+            );
+            expect(await getCrowdfunding(webshop)).toMatchObject({
+                progressAmount: 0,
+                pendingAmount: 0,
+            });
         });
 
         test('an order created manually by an admin counts once paid', async () => {
             const webshop = await createLifecycleWebshop();
 
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
-            patchArray.addPut(PrivateOrder.create({
-                id: uuidv4(),
-                data: buildOrderData(PaymentMethod.Transfer),
-                webshopId: webshop.id,
-            }));
+            patchArray.addPut(
+                PrivateOrder.create({
+                    id: uuidv4(),
+                    data: buildOrderData(PaymentMethod.Transfer),
+                    webshopId: webshop.id,
+                }),
+            );
 
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
             const response = await testServer.test(patchWebshopOrdersEndpoint, r);
             expect(response.body).toHaveLength(1);
 
-            expect(await getCrowdfunding(webshop)).toMatchObject({ progressAmount: 0, pendingAmount: 10_0000 });
+            expect(await getCrowdfunding(webshop)).toMatchObject({
+                progressAmount: 0,
+                pendingAmount: 10_0000,
+            });
 
             const order = (await Order.getByID(response.body[0].id))!;
             const payment = (await Payment.getByID(order.paymentId!))!;
-            await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded);
+            await PaymentService.handlePaymentStatusUpdate(
+                payment,
+                organization,
+                PaymentStatus.Succeeded,
+            );
 
-            expect(await getCrowdfunding(webshop)).toMatchObject({ progressAmount: 10_0000, pendingAmount: 0 });
+            expect(await getCrowdfunding(webshop)).toMatchObject({
+                progressAmount: 10_0000,
+                pendingAmount: 0,
+            });
         });
 
         test('an order canceled by an admin no longer counts', async () => {
             const webshop = await createLifecycleWebshop();
             const { order, payment } = await placeOrder(webshop, PaymentMethod.Transfer);
 
-            await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded);
-            expect(await getCrowdfunding(webshop)).toMatchObject({ progressAmount: 10_0000, pendingAmount: 0 });
+            await PaymentService.handlePaymentStatusUpdate(
+                payment,
+                organization,
+                PaymentStatus.Succeeded,
+            );
+            expect(await getCrowdfunding(webshop)).toMatchObject({
+                progressAmount: 10_0000,
+                pendingAmount: 0,
+            });
 
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
-            patchArray.addPatch(PrivateOrder.patch({
-                id: order.id,
-                status: OrderStatus.Canceled,
-            }));
+            patchArray.addPatch(
+                PrivateOrder.patch({
+                    id: order.id,
+                    status: OrderStatus.Canceled,
+                }),
+            );
 
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
             await testServer.test(patchWebshopOrdersEndpoint, r);
 
             // Canceling cancels the balance items, so the paid amount no longer counts
-            expect(await getCrowdfunding(webshop)).toMatchObject({ progressAmount: 0, pendingAmount: 0 });
+            expect(await getCrowdfunding(webshop)).toMatchObject({
+                progressAmount: 0,
+                pendingAmount: 0,
+            });
         });
 
         test('enabling crowdfunding recalculates the amounts of existing orders', async () => {
             const webshop = await createLifecycleWebshop(null);
             const { payment } = await placeOrder(webshop, PaymentMethod.Transfer);
-            await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Succeeded);
+            await PaymentService.handlePaymentStatusUpdate(
+                payment,
+                organization,
+                PaymentStatus.Succeeded,
+            );
             await WebshopCrowdfundingService.flush();
 
             expect((await getMeta(webshop)).crowdfunding).toBeNull();
@@ -423,13 +560,24 @@ describe('WebshopCrowdfundingService', () => {
                 }),
             });
 
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}`, organization.getApiHost(), patch);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}`,
+                organization.getApiHost(),
+                patch,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
             const response = await testServer.test(patchWebshopEndpoint, r);
 
             // The response already contains the recalculated amounts
-            expect(response.body.meta.crowdfunding).toMatchObject({ progressAmount: 10_0000, pendingAmount: 0 });
-            expect((await getMeta(webshop)).crowdfunding).toMatchObject({ progressAmount: 10_0000, pendingAmount: 0 });
+            expect(response.body.meta.crowdfunding).toMatchObject({
+                progressAmount: 10_0000,
+                pendingAmount: 0,
+            });
+            expect((await getMeta(webshop)).crowdfunding).toMatchObject({
+                progressAmount: 10_0000,
+                pendingAmount: 0,
+            });
         });
     });
 });

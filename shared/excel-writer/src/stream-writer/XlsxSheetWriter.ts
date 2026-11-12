@@ -26,7 +26,7 @@ function numberToAlpha(num: number) {
         val = Math.floor((val - 1) / 26);
     }
 
-    return chars.map(c => String.fromCharCode(c)).join('');
+    return chars.map((c) => String.fromCharCode(c)).join('');
 }
 
 class ColumnInfo {
@@ -59,7 +59,9 @@ export class XlsxSheetWriter extends XlsxFileWriter {
 
     async writeHeader(columnCount = 0) {
         await this.write('<?xml version="1.0" encoding="UTF-8"?>\n');
-        await this.write('<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">');
+        await this.write(
+            '<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">',
+        );
 
         // Sadly <cols> must be before <sheetData> - so we cant calculate the best widths on the fly
         await this.write('<cols>');
@@ -159,7 +161,10 @@ export class XlsxSheetWriter extends XlsxFileWriter {
                     const dateTime = DateTime.fromJSDate(cell.value).setZone(this.timezone);
 
                     type = CellType.Number;
-                    str = ((cell.value.getTime() + dateTime.offset * 60 * 1000) / 1000 / 24 / 60 / 60 + 25569).toFixed(6);
+                    str = (
+                        (cell.value.getTime() + dateTime.offset * 60 * 1000) / 1000 / 24 / 60 / 60 +
+                        25569
+                    ).toFixed(6);
                 }
 
                 // Null

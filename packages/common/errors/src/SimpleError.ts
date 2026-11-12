@@ -16,11 +16,19 @@ export class SimpleError extends Error {
     meta: ErrorValue;
 
     /**
-    * Used to determine the associated HTTP status code when thrown in an endpoint
-    */
+     * Used to determine the associated HTTP status code when thrown in an endpoint
+     */
     statusCode?: number;
 
-    constructor(error: { code: string; message: string; human?: string; field?: string; statusCode?: number; id?: string; meta?: ErrorValue }) {
+    constructor(error: {
+        code: string;
+        message: string;
+        human?: string;
+        field?: string;
+        statusCode?: number;
+        id?: string;
+        meta?: ErrorValue;
+    }) {
         super(error.message);
         this.code = error.code;
         this.message = error.message;
@@ -36,7 +44,15 @@ export class SimpleError extends Error {
     }
 
     toString(): string {
-        return this.code + ': ' + this.message + (this.field ? ' at ' + this.field : '') + ' (' + this.id + ')';
+        return (
+            this.code +
+            ': ' +
+            this.message +
+            (this.field ? ' at ' + this.field : '') +
+            ' (' +
+            this.id +
+            ')'
+        );
     }
 
     /**
@@ -114,5 +130,15 @@ export class SimpleError extends Error {
 }
 
 export function isSimpleError(e: unknown): e is SimpleError {
-    return e !== null && typeof e === 'object' && 'code' in e && 'message' in e && typeof e.code === 'string' && typeof e.message === 'string' && 'encode' in e && 'doesMatchFields' in e && 'doesMatchField' in e;
+    return (
+        e !== null &&
+        typeof e === 'object' &&
+        'code' in e &&
+        'message' in e &&
+        typeof e.code === 'string' &&
+        typeof e.message === 'string' &&
+        'encode' in e &&
+        'doesMatchFields' in e &&
+        'doesMatchField' in e
+    );
 }

@@ -41,7 +41,9 @@ const allowedPersonalDataColumns = new Set([
 ]);
 
 describe('migration.platform-statistics-schema', () => {
-    async function getColumns(): Promise<{ tableName: string; columnName: string; dataType: string }[]> {
+    async function getColumns(): Promise<
+        { tableName: string; columnName: string; dataType: string }[]
+    > {
         const [rows] = await getStatisticsConnection().select(
             'SELECT TABLE_NAME as tableName, COLUMN_NAME as columnName, COLUMN_TYPE as dataType FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ?',
             [getStatisticsDatabaseConfig().DB_DATABASE],
@@ -51,7 +53,7 @@ describe('migration.platform-statistics-schema', () => {
     }
 
     it('creates every table the member reports read from', async () => {
-        const tables = new Set((await getColumns()).map(column => column.tableName));
+        const tables = new Set((await getColumns()).map((column) => column.tableName));
 
         expect([...tables].sort()).toEqual([
             '_organizations_organization_tags',
@@ -75,14 +77,20 @@ describe('migration.platform-statistics-schema', () => {
 
     it('keeps members and registrations at their source grain, so a member can hold several registrations', async () => {
         const columns = await getColumns();
-        const registrations = columns.filter(column => column.tableName === 'registrations').map(column => column.columnName);
+        const registrations = columns
+            .filter((column) => column.tableName === 'registrations')
+            .map((column) => column.columnName);
 
         expect(registrations).toContain('memberId');
         expect(registrations).toContain('groupId');
-        expect(columns.filter(column => column.tableName === 'members').map(column => column.columnName)).toContain('id');
+        expect(
+            columns
+                .filter((column) => column.tableName === 'members')
+                .map((column) => column.columnName),
+        ).toContain('id');
 
         // Nothing is pre-aggregated: no counts are stored, every figure is computed at query time.
-        expect(columns.filter(column => /count$/i.test(column.columnName))).toEqual([]);
+        expect(columns.filter((column) => /count$/i.test(column.columnName))).toEqual([]);
     });
 
     async function compositeKeyTables(): Promise<string[]> {
@@ -91,7 +99,7 @@ describe('migration.platform-statistics-schema', () => {
             [getStatisticsDatabaseConfig().DB_DATABASE, 'PRIMARY'],
             { nestTables: false },
         );
-        return (rows as unknown as { tableName: string }[]).map(row => row.tableName).sort();
+        return (rows as unknown as { tableName: string }[]).map((row) => row.tableName).sort();
     }
 
     /**
@@ -118,7 +126,10 @@ describe('migration.platform-statistics-schema', () => {
             { nestTables: false },
         );
 
-        expect((rows as unknown as { columnName: string }[]).map(row => row.columnName)).toEqual(['id', 'periodId']);
+        expect((rows as unknown as { columnName: string }[]).map((row) => row.columnName)).toEqual([
+            'id',
+            'periodId',
+        ]);
     });
 
     /**
@@ -129,7 +140,7 @@ describe('migration.platform-statistics-schema', () => {
     it('reconciles deletes only for the tables keyed on their id alone', async () => {
         const composite = new Set(await compositeKeyTables());
 
-        expect(reconciledTables().filter(table => composite.has(table))).toEqual([]);
+        expect(reconciledTables().filter((table) => composite.has(table))).toEqual([]);
     });
 
     /**
@@ -144,12 +155,19 @@ describe('migration.platform-statistics-schema', () => {
         );
         const composite = new Set(await compositeKeyTables());
 
-        expect((rows as unknown as { tableName: string }[]).map(row => row.tableName).filter(table => composite.has(table))).toEqual([]);
+        expect(
+            (rows as unknown as { tableName: string }[])
+                .map((row) => row.tableName)
+                .filter((table) => composite.has(table)),
+        ).toEqual([]);
     });
 
     it('mirrors the column types of the main database', async () => {
         const columns = await getColumns();
-        const typeOf = (tableName: string, columnName: string) => columns.find(column => column.tableName === tableName && column.columnName === columnName)?.dataType;
+        const typeOf = (tableName: string, columnName: string) =>
+            columns.find(
+                (column) => column.tableName === tableName && column.columnName === columnName,
+            )?.dataType;
 
         expect(typeOf('members', 'id')).toBe('varchar(36)');
         expect(typeOf('registrations', 'memberId')).toBe('varchar(36)');
@@ -175,7 +193,11 @@ describe('migration.platform-statistics-schema', () => {
      */
     it('records when a locked period stopped being followed, next to the lock itself', async () => {
         const columns = await getColumns();
-        const periodColumn = (columnName: string) => columns.find(column => column.tableName === 'registration_periods' && column.columnName === columnName)?.dataType;
+        const periodColumn = (columnName: string) =>
+            columns.find(
+                (column) =>
+                    column.tableName === 'registration_periods' && column.columnName === columnName,
+            )?.dataType;
 
         expect(periodColumn('locked')).toBe('tinyint');
         expect(periodColumn('lockedAt')).toBe('datetime');
@@ -187,7 +209,7 @@ describe('migration.platform-statistics-schema', () => {
                 return false;
             }
             const name = column.columnName.toLowerCase();
-            return personalDataColumns.some(forbidden => name.includes(forbidden));
+            return personalDataColumns.some((forbidden) => name.includes(forbidden));
         });
 
         expect(offending).toEqual([]);
@@ -195,7 +217,9 @@ describe('migration.platform-statistics-schema', () => {
 });
 
 describe('migration.postal-code-coordinates', () => {
-    async function getPostalCodes(): Promise<{ postalCode: string; latitude: number; longitude: number }[]> {
+    async function getPostalCodes(): Promise<
+        { postalCode: string; latitude: number; longitude: number }[]
+    > {
         // Its own connection: the main database has a `postal_codes` table of its own, which is what
         // the shared one would reach.
         const [rows] = await getStatisticsConnection().select(
@@ -212,19 +236,24 @@ describe('migration.postal-code-coordinates', () => {
         // Belgian postal codes run from 1000 to 9992. A handful are missing from any published list
         // and the count shifts when bpost adds one, so this only guards against a partly loaded table.
         expect(rows.length).toBeGreaterThan(1100);
-        expect(rows.every(row => /^\d{4}$/.test(row.postalCode))).toBe(true);
-        expect(new Set(rows.map(row => row.postalCode)).size).toBe(rows.length);
+        expect(rows.every((row) => /^\d{4}$/.test(row.postalCode))).toBe(true);
+        expect(new Set(rows.map((row) => row.postalCode)).size).toBe(rows.length);
     });
 
     it('places every point inside Belgium', async () => {
-        const outside = (await getPostalCodes()).filter(row =>
-            row.latitude < 49.4 || row.latitude > 51.6 || row.longitude < 2.5 || row.longitude > 6.5);
+        const outside = (await getPostalCodes()).filter(
+            (row) =>
+                row.latitude < 49.4 ||
+                row.latitude > 51.6 ||
+                row.longitude < 2.5 ||
+                row.longitude > 6.5,
+        );
 
         expect(outside).toEqual([]);
     });
 
     it('puts the largest cities where they belong', async () => {
-        const byPostalCode = new Map((await getPostalCodes()).map(row => [row.postalCode, row]));
+        const byPostalCode = new Map((await getPostalCodes()).map((row) => [row.postalCode, row]));
 
         // Kilometres between the loaded point and where the city actually is. A postal code covers an
         // area, so its centre is only ever near the city, not on it.
@@ -239,7 +268,7 @@ describe('migration.postal-code-coordinates', () => {
         }
 
         expect(distanceTo('1000', 50.85, 4.35)).toBeLessThan(5);
-        expect(distanceTo('2000', 51.22, 4.40)).toBeLessThan(5);
+        expect(distanceTo('2000', 51.22, 4.4)).toBeLessThan(5);
         expect(distanceTo('9000', 51.05, 3.72)).toBeLessThan(5);
         expect(distanceTo('8000', 51.21, 3.22)).toBeLessThan(5);
         expect(distanceTo('3500', 50.93, 5.34)).toBeLessThan(5);

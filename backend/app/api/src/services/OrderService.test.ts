@@ -1,8 +1,32 @@
 import { I18n } from '@stamhoofd/backend-i18n';
 import { EmailMocker } from '@stamhoofd/email';
 import type { Organization } from '@stamhoofd/models';
-import { EmailTemplateFactory, Order, OrganizationFactory, Payment, Webshop, WebshopCounter, WebshopFactory } from '@stamhoofd/models';
-import { Cart, CartItem, Customer, EmailContent, EmailTemplateType, OrderData, OrderStatus, PaymentMethod, PaymentStatus, Product, ProductPrice, ProductType, WebshopMetaData, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import {
+    EmailTemplateFactory,
+    Order,
+    OrganizationFactory,
+    Payment,
+    Webshop,
+    WebshopCounter,
+    WebshopFactory,
+} from '@stamhoofd/models';
+import {
+    Cart,
+    CartItem,
+    Customer,
+    EmailContent,
+    EmailTemplateType,
+    OrderData,
+    OrderStatus,
+    PaymentMethod,
+    PaymentStatus,
+    Product,
+    ProductPrice,
+    ProductType,
+    WebshopMetaData,
+    WebshopStatus,
+    WebshopTicketType,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -27,7 +51,15 @@ function createCustomer() {
     });
 }
 
-async function createOrder(webshop: Webshop, options: { consumerLanguage?: Language; valid?: boolean; cart?: Cart; paymentMethod?: PaymentMethod } = {}) {
+async function createOrder(
+    webshop: Webshop,
+    options: {
+        consumerLanguage?: Language;
+        valid?: boolean;
+        cart?: Cart;
+        paymentMethod?: PaymentMethod;
+    } = {},
+) {
     const order = new Order();
     order.organizationId = webshop.organizationId;
     order.webshopId = webshop.id;
@@ -49,7 +81,10 @@ async function createOrder(webshop: Webshop, options: { consumerLanguage?: Langu
 }
 
 function loadRelations(order: Order, webshop: Webshop, organization: Organization) {
-    return order.setRelation(Order.webshop, webshop.setRelation(Webshop.organization, organization));
+    return order.setRelation(
+        Order.webshop,
+        webshop.setRelation(Webshop.organization, organization),
+    );
 }
 
 async function createTransferPayment(organization: Organization) {
@@ -67,7 +102,9 @@ describe('OrderService', () => {
     describe('sendEmailTemplate', () => {
         test('renders the email in the language the customer ordered in, not the ambient language', async () => {
             // Make French a valid locale so its real translations (loaded from disk) are actually used.
-            TestUtils.setEnvironment('locales', { [Country.Belgium]: [Language.Dutch, Language.French] });
+            TestUtils.setEnvironment('locales', {
+                [Country.Belgium]: [Language.Dutch, Language.French],
+            });
 
             const organization = await new OrganizationFactory({}).create();
             const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
@@ -126,7 +163,9 @@ describe('OrderService', () => {
 
     describe('markValid', () => {
         test('sends the notification email without the customer name and in the webshop language', async () => {
-            TestUtils.setEnvironment('locales', { [Country.Belgium]: [Language.Dutch, Language.French] });
+            TestUtils.setEnvironment('locales', {
+                [Country.Belgium]: [Language.Dutch, Language.French],
+            });
 
             const organization = await new OrganizationFactory({}).create();
             const webshop = await new WebshopFactory({
@@ -155,16 +194,22 @@ describe('OrderService', () => {
                 text: 'Nederlandse melding',
                 language: Language.Dutch,
                 translations: new Map([
-                    [Language.French, EmailContent.create({
-                        subject: 'Franse melding',
-                        html: '<p>FR [{{firstName}}][{{lastName}}] {{orderUrl}}</p>',
-                        text: 'Franse melding',
-                    })],
+                    [
+                        Language.French,
+                        EmailContent.create({
+                            subject: 'Franse melding',
+                            html: '<p>FR [{{firstName}}][{{lastName}}] {{orderUrl}}</p>',
+                            text: 'Franse melding',
+                        }),
+                    ],
                 ]),
             }).create();
 
             // The customer ordered in Dutch, the webshop default language is French
-            const order = await createOrder(webshop, { consumerLanguage: Language.Dutch, valid: false });
+            const order = await createOrder(webshop, {
+                consumerLanguage: Language.Dutch,
+                valid: false,
+            });
             const loadedOrder = loadRelations(order, webshop, organization);
 
             await OrderService.markValid(loadedOrder, null, []);
@@ -172,8 +217,8 @@ describe('OrderService', () => {
             const emails = await EmailMocker.transactional.getSucceededEmails();
             expect(emails).toHaveLength(2);
 
-            const customerEmail = emails.find(e => e.to.includes('john@example.com'));
-            const notification = emails.find(e => e.to.includes('admin@example.com'));
+            const customerEmail = emails.find((e) => e.to.includes('john@example.com'));
+            const notification = emails.find((e) => e.to.includes('admin@example.com'));
             expect(customerEmail).toBeDefined();
             expect(notification).toBeDefined();
 

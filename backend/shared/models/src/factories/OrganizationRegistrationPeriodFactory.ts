@@ -9,7 +9,10 @@ class Options {
     period: RegistrationPeriod;
 }
 
-export class OrganizationRegistrationPeriodFactory extends Factory<Options, OrganizationRegistrationPeriod> {
+export class OrganizationRegistrationPeriodFactory extends Factory<
+    Options,
+    OrganizationRegistrationPeriod
+> {
     async create(): Promise<OrganizationRegistrationPeriod> {
         const organizationRegistrationPeriod = new OrganizationRegistrationPeriod();
 

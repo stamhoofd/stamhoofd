@@ -20,10 +20,10 @@ export type LogSink = (level: LogLevel, message: string, fields: Attributes) => 
  * Output with `always: true` uses info severity; other output and commands use
  * debug severity. Failures use error severity but do not mark the span failed.
  */
-export type DiagnosticEvent
-    = | { kind: 'command'; message: string }
-        | { kind: 'output'; stream: 'stdout' | 'stderr'; message: string; always?: boolean }
-        | { kind: 'failure'; message: string };
+export type DiagnosticEvent =
+    | { kind: 'command'; message: string }
+    | { kind: 'output'; stream: 'stdout' | 'stderr'; message: string; always?: boolean }
+    | { kind: 'failure'; message: string };
 
 /**
  * Presents a diagnostic with a {@link diagnosticKind} attribute.
@@ -34,9 +34,18 @@ export type DiagnosticEvent
  * @returns Whether the sink acknowledged the entire message; false if it throws.
  */
 export function diagnostic(event: DiagnosticEvent, sink: LogSink = log): boolean {
-    const level = event.kind === 'failure' ? 'error' : event.kind === 'output' && event.always ? 'info' : 'debug';
+    const level =
+        event.kind === 'failure'
+            ? 'error'
+            : event.kind === 'output' && event.always
+              ? 'info'
+              : 'debug';
     try {
-        return sink(level, event.message, { [diagnosticKind]: event.kind === 'output' ? event.stream : event.kind }) === true;
+        return (
+            sink(level, event.message, {
+                [diagnosticKind]: event.kind === 'output' ? event.stream : event.kind,
+            }) === true
+        );
     } catch {
         return false;
     }
@@ -55,7 +64,9 @@ export const diagnosticKind = 'diagnostic.kind';
 export function markSpanFailed(): void {
     try {
         trace.getActiveSpan()?.setStatus({ code: SpanStatusCode.ERROR });
-    } catch { /* Telemetry must not change application results. */ }
+    } catch {
+        /* Telemetry must not change application results. */
+    }
 }
 
 /**
@@ -92,12 +103,18 @@ export function log(level: LogLevel, message: string, fields: Attributes = {}): 
     const sink = active.getValue(sinkKey) as LogSink | undefined;
     const span = trace.getSpan(active)?.spanContext();
     try {
-        return sink?.(level, message, {
-            ...active.getValue(fieldsKey) as Attributes | undefined,
-            ...fields,
-            ...(span && trace.isSpanContextValid(span) ? { trace_id: span.traceId, span_id: span.spanId } : {}),
-        }) === true;
-    } catch { return false; }
+        return (
+            sink?.(level, message, {
+                ...(active.getValue(fieldsKey) as Attributes | undefined),
+                ...fields,
+                ...(span && trace.isSpanContextValid(span)
+                    ? { trace_id: span.traceId, span_id: span.spanId }
+                    : {}),
+            }) === true
+        );
+    } catch {
+        return false;
+    }
 }
 
 /** Options evaluated for each invocation of an instrumented function or method. */
@@ -108,14 +125,28 @@ export type InstrumentOptions<Args extends unknown[]> = {
     fields?: (args: Args) => Attributes;
 };
 
-function wrapFunction<This, Args extends unknown[], Result>(name: string, fn: (this: This, ...args: Args) => Result, options: InstrumentOptions<Args> = {}): (this: This, ...args: Args) => Result {
+function wrapFunction<This, Args extends unknown[], Result>(
+    name: string,
+    fn: (this: This, ...args: Args) => Result,
+    options: InstrumentOptions<Args> = {},
+): (this: This, ...args: Args) => Result {
     return function (this: This, ...args: Args): Result {
         let fields: Attributes = {};
         let span: Span | undefined;
         try {
-            fields = { ...context.active().getValue(fieldsKey) as Attributes | undefined, ...options.fields?.(args) };
-            span = trace.getTracer('@common/opentelemetry-decorators').startSpan(name, { attributes: { ...fields, ...(options.label ? { [operationLabel]: options.label } : {}) } });
-        } catch { /* Execute the application exactly once even if a processor fails. */ }
+            fields = {
+                ...(context.active().getValue(fieldsKey) as Attributes | undefined),
+                ...options.fields?.(args),
+            };
+            span = trace.getTracer('@common/opentelemetry-decorators').startSpan(name, {
+                attributes: {
+                    ...fields,
+                    ...(options.label ? { [operationLabel]: options.label } : {}),
+                },
+            });
+        } catch {
+            /* Execute the application exactly once even if a processor fails. */
+        }
         const active = context.active().setValue(fieldsKey, fields);
         return context.with(span ? trace.setSpan(active, span) : active, () => {
             const finish = (failed: boolean) => {
@@ -123,18 +154,23 @@ function wrapFunction<This, Args extends unknown[], Result>(name: string, fn: (t
                     if (failed) span?.setStatus({ code: SpanStatusCode.ERROR });
                     // Exception messages can contain subprocess input or credentials; callers log safe diagnostics.
                     span?.end();
-                } catch { /* Preserve the original result or error. */ }
+                } catch {
+                    /* Preserve the original result or error. */
+                }
             };
             try {
                 const result = fn.apply(this, args) as Result;
                 if (result instanceof Promise) {
-                    return result.then((value) => {
-                        finish(false);
-                        return value;
-                    }, (error: unknown) => {
-                        finish(true);
-                        throw error;
-                    }) as Result;
+                    return result.then(
+                        (value) => {
+                            finish(false);
+                            return value;
+                        },
+                        (error: unknown) => {
+                            finish(true);
+                            throw error;
+                        },
+                    ) as Result;
                 }
                 finish(false);
                 return result;
@@ -169,7 +205,11 @@ function wrapFunction<This, Args extends unknown[], Result>(name: string, fn: (t
  * await sync('production');
  * ```
  */
-export function instrument<This, Args extends unknown[], Result>(name: string, fn: (this: This, ...args: Args) => Result, options?: InstrumentOptions<Args>): (this: This, ...args: Args) => Result;
+export function instrument<This, Args extends unknown[], Result>(
+    name: string,
+    fn: (this: This, ...args: Args) => Result,
+    options?: InstrumentOptions<Args>,
+): (this: This, ...args: Args) => Result;
 /**
  * Decorates a method with the same span lifecycle as the function-wrapper overload.
  *
@@ -192,12 +232,27 @@ export function instrument<This, Args extends unknown[], Result>(name: string, f
  * }
  * ```
  */
-export function instrument<Args extends unknown[]>(name: string, options?: InstrumentOptions<Args>): <This, Result>(_target: object, _key: string | symbol, descriptor: TypedPropertyDescriptor<(this: This, ...args: Args) => Result>) => void;
-export function instrument<This, Args extends unknown[], Result>(name: string, fnOrOptions: ((this: This, ...args: Args) => Result) | InstrumentOptions<Args> = {}, options: InstrumentOptions<Args> = {}) {
+export function instrument<Args extends unknown[]>(
+    name: string,
+    options?: InstrumentOptions<Args>,
+): <This, Result>(
+    _target: object,
+    _key: string | symbol,
+    descriptor: TypedPropertyDescriptor<(this: This, ...args: Args) => Result>,
+) => void;
+export function instrument<This, Args extends unknown[], Result>(
+    name: string,
+    fnOrOptions: ((this: This, ...args: Args) => Result) | InstrumentOptions<Args> = {},
+    options: InstrumentOptions<Args> = {},
+) {
     if (typeof fnOrOptions === 'function') {
         return wrapFunction(name, fnOrOptions, options);
     }
-    return <This, Result>(_target: object, _key: string | symbol, descriptor: TypedPropertyDescriptor<(this: This, ...args: Args) => Result>): void => {
+    return <This, Result>(
+        _target: object,
+        _key: string | symbol,
+        descriptor: TypedPropertyDescriptor<(this: This, ...args: Args) => Result>,
+    ): void => {
         descriptor.value = wrapFunction(name, descriptor.value!, fnOrOptions);
     };
 }
@@ -234,6 +289,13 @@ export type WithSpanOptions = {
  * }, { label: 'Synchronizing', fields: { environment: 'production' } });
  * ```
  */
-export function withSpan<Result>(name: string, callback: () => Result, options: WithSpanOptions = {}): Result {
-    return wrapFunction(name, callback, { label: options.label, fields: () => options.fields ?? {} })();
+export function withSpan<Result>(
+    name: string,
+    callback: () => Result,
+    options: WithSpanOptions = {},
+): Result {
+    return wrapFunction(name, callback, {
+        label: options.label,
+        fields: () => options.fields ?? {},
+    })();
 }

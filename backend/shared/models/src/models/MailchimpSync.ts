@@ -1,6 +1,10 @@
 import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
-import { MailchimpSync as MailchimpSyncStruct, MailchimpSyncResult, MailchimpSyncStatus } from '@stamhoofd/structures/mailchimp/MailchimpSync.js';
+import {
+    MailchimpSync as MailchimpSyncStruct,
+    MailchimpSyncResult,
+    MailchimpSyncStatus,
+} from '@stamhoofd/structures/mailchimp/MailchimpSync.js';
 import { MailchimpSyncRequest } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -8,7 +12,9 @@ export class MailchimpSync extends QueryableModel {
     static table = 'mailchimp_syncs';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -42,7 +48,8 @@ export class MailchimpSync extends QueryableModel {
     finishedAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -54,7 +61,8 @@ export class MailchimpSync extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;

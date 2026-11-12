@@ -1,15 +1,38 @@
 import { Database } from '@node/database';
 import { SimpleError } from '@common/errors';
-import { BalanceItem, BalanceItemPayment, Organization, Payment, StripeAccount, User } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemPayment,
+    Organization,
+    Payment,
+    StripeAccount,
+    User,
+} from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL } from '@stamhoofd/sql';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, TranslatedString } from '@stamhoofd/structures';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    getPaymentProviderName,
+    PaymentCustomer,
+    PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+    PaymentType,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { Formatter, sleep } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
 
-import { ApplicationFeeService, FEE_PAYMENT_REFERENCE_PREFIX, ORPHANED_FEE_DELAY_DAYS } from '../services/ApplicationFeeService.js';
+import {
+    ApplicationFeeService,
+    FEE_PAYMENT_REFERENCE_PREFIX,
+    ORPHANED_FEE_DELAY_DAYS,
+} from '../services/ApplicationFeeService.js';
 import { PaymentService } from '../services/PaymentService.js';
 import { SettlementService } from '../services/SettlementService.js';
 import { VATService } from '../services/VATService.js';
@@ -110,13 +133,21 @@ export class ApplicationFeeInvoicer {
             return;
         }
 
-        const windowStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - MAXIMUM_INVOICE_MONTHS, 1));
+        const windowStart = new Date(
+            Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - MAXIMUM_INVOICE_MONTHS, 1),
+        );
         const oldestDay = startOfUtcDay(oldest.occurredAt);
 
         if (oldestDay < windowStart) {
             WebmasterReport.report(
-                'Applicatiekosten van voor ' + utcDateIso(windowStart) + ' worden niet meer aangerekend',
-                'Er staan nog niet-aangerekende applicatiekosten van ' + utcDateIso(oldestDay) + '. Die dag valt buiten het venster van ' + MAXIMUM_INVOICE_MONTHS + ' maanden en wordt niet meer automatisch aangerekend.',
+                'Applicatiekosten van voor ' +
+                    utcDateIso(windowStart) +
+                    ' worden niet meer aangerekend',
+                'Er staan nog niet-aangerekende applicatiekosten van ' +
+                    utcDateIso(oldestDay) +
+                    '. Die dag valt buiten het venster van ' +
+                    MAXIMUM_INVOICE_MONTHS +
+                    ' maanden en wordt niet meer automatisch aangerekend.',
             );
         }
 
@@ -140,7 +171,10 @@ export class ApplicationFeeInvoicer {
                 await this.generateInvoicesForDay(sellingOrganization, day);
             } catch (e) {
                 console.error('Invoicing application fees failed for day ' + utcDateIso(day), e);
-                WebmasterReport.report('Aanmaken kosten-facturatie voor ' + utcDateIso(day) + ' overgeslagen', e);
+                WebmasterReport.report(
+                    'Aanmaken kosten-facturatie voor ' + utcDateIso(day) + ' overgeslagen',
+                    e,
+                );
             }
 
             day = nextDay;
@@ -158,29 +192,58 @@ export class ApplicationFeeInvoicer {
         await QueueHandler.schedule(reference, async () => {
             const totalsPerPayer = new Map<string, AccountTotals>();
 
-            for await (const fee of this.#selectUninvoicedFees(sellingOrganization, periodStart, nextPeriodStart, snapshot, orphanedBefore).all()) {
-                const key = (fee.payingOrganizationId ?? '') + ':' + (fee.payingStripeAccountId ?? '');
+            for await (const fee of this.#selectUninvoicedFees(
+                sellingOrganization,
+                periodStart,
+                nextPeriodStart,
+                snapshot,
+                orphanedBefore,
+            ).all()) {
+                const key =
+                    (fee.payingOrganizationId ?? '') + ':' + (fee.payingStripeAccountId ?? '');
                 const totals = totalsPerPayer.get(key) ?? {
                     payingOrganizationId: fee.payingOrganizationId,
                     payingStripeAccountId: fee.payingStripeAccountId,
                     amountPerType: new Map<ApplicationFeeType, number>(),
                 };
-                totals.amountPerType.set(fee.type, (totals.amountPerType.get(fee.type) ?? 0) + fee.amount);
+                totals.amountPerType.set(
+                    fee.type,
+                    (totals.amountPerType.get(fee.type) ?? 0) + fee.amount,
+                );
                 totalsPerPayer.set(key, totals);
             }
 
             for (const [key, totals] of totalsPerPayer) {
                 try {
-                    await this.#invoiceGroup({ sellingOrganization, totals, periodStart, nextPeriodStart, snapshot, orphanedBefore });
+                    await this.#invoiceGroup({
+                        sellingOrganization,
+                        totals,
+                        periodStart,
+                        nextPeriodStart,
+                        snapshot,
+                        orphanedBefore,
+                    });
                 } catch (e) {
-                    console.error('Invoicing application fees failed for payer ' + key + ' - ' + reference, e);
-                    WebmasterReport.report('Aanrekenen applicatiekosten voor ' + key + ' - ' + reference + ' mislukt', e);
+                    console.error(
+                        'Invoicing application fees failed for payer ' + key + ' - ' + reference,
+                        e,
+                    );
+                    WebmasterReport.report(
+                        'Aanrekenen applicatiekosten voor ' + key + ' - ' + reference + ' mislukt',
+                        e,
+                    );
                 }
             }
         });
     }
 
-    #selectUninvoicedFees(sellingOrganization: Organization, periodStart: Date, nextPeriodStart: Date, snapshot: Date, orphanedBefore: Date) {
+    #selectUninvoicedFees(
+        sellingOrganization: Organization,
+        periodStart: Date,
+        nextPeriodStart: Date,
+        snapshot: Date,
+        orphanedBefore: Date,
+    ) {
         return this.#selectBillableFees(sellingOrganization, orphanedBefore)
             .where('occurredAt', '>=', periodStart)
             .where('occurredAt', '<', nextPeriodStart)
@@ -199,7 +262,14 @@ export class ApplicationFeeInvoicer {
             );
     }
 
-    async #invoiceGroup({ sellingOrganization, totals, periodStart, nextPeriodStart, snapshot, orphanedBefore }: {
+    async #invoiceGroup({
+        sellingOrganization,
+        totals,
+        periodStart,
+        nextPeriodStart,
+        snapshot,
+        orphanedBefore,
+    }: {
         sellingOrganization: Organization;
         totals: AccountTotals;
         periodStart: Date;
@@ -212,26 +282,38 @@ export class ApplicationFeeInvoicer {
             return;
         }
 
-        const stripeAccount = (totals.payingStripeAccountId ? await StripeAccount.getByID(totals.payingStripeAccountId) : null) ?? null;
+        const stripeAccount =
+            (totals.payingStripeAccountId
+                ? await StripeAccount.getByID(totals.payingStripeAccountId)
+                : null) ?? null;
         if (totals.payingStripeAccountId && !stripeAccount) {
             throw new SimpleError({
                 code: 'stripe_account_not_found',
-                message: 'Stripe account ' + totals.payingStripeAccountId + ' of uninvoiced application fees does not exist',
+                message:
+                    'Stripe account ' +
+                    totals.payingStripeAccountId +
+                    ' of uninvoiced application fees does not exist',
             });
         }
 
-        const organization = (totals.payingOrganizationId ? await Organization.getByID(totals.payingOrganizationId) : null) ?? null;
+        const organization =
+            (totals.payingOrganizationId
+                ? await Organization.getByID(totals.payingOrganizationId)
+                : null) ?? null;
         if (totals.payingOrganizationId && !organization) {
             throw new SimpleError({
                 code: 'organization_not_found',
-                message: 'Organization ' + totals.payingOrganizationId + ' of uninvoiced application fees does not exist',
+                message:
+                    'Organization ' +
+                    totals.payingOrganizationId +
+                    ' of uninvoiced application fees does not exist',
             });
         }
 
         const customer = organization
             ? PaymentCustomer.create({
-                    company: organization.defaultCompanies[0],
-                })
+                  company: organization.defaultCompanies[0],
+              })
             : null;
 
         if (customer?.company?.isSameEntity(seller)) {
@@ -241,7 +323,10 @@ export class ApplicationFeeInvoicer {
             });
         }
 
-        const totalAmount = [...totals.amountPerType.values()].reduce((total, amount) => total + amount, 0);
+        const totalAmount = [...totals.amountPerType.values()].reduce(
+            (total, amount) => total + amount,
+            0,
+        );
         if (totalAmount === 0) {
             return;
         }
@@ -255,7 +340,17 @@ export class ApplicationFeeInvoicer {
                 if (amount === 0) {
                     continue;
                 }
-                itemPerType.set(type, await this.#createBalanceItem({ sellingOrganization, organization, type, amount, periodStart, dayEnd }));
+                itemPerType.set(
+                    type,
+                    await this.#createBalanceItem({
+                        sellingOrganization,
+                        organization,
+                        type,
+                        amount,
+                        periodStart,
+                        dayEnd,
+                    }),
+                );
             }
 
             const balanceItems = [...itemPerType.values()];
@@ -266,12 +361,19 @@ export class ApplicationFeeInvoicer {
             if (total !== totalAmount) {
                 throw new SimpleError({
                     code: 'price_mismatched',
-                    message: 'The charged amount does not match the total application fee for the payment',
+                    message:
+                        'The charged amount does not match the total application fee for the payment',
                 });
             }
 
             let stampedAmount = 0;
-            for await (const fees of this.#selectUninvoicedFees(sellingOrganization, periodStart, nextPeriodStart, snapshot, orphanedBefore)
+            for await (const fees of this.#selectUninvoicedFees(
+                sellingOrganization,
+                periodStart,
+                nextPeriodStart,
+                snapshot,
+                orphanedBefore,
+            )
                 .where('payingOrganizationId', totals.payingOrganizationId)
                 .where('payingStripeAccountId', totals.payingStripeAccountId)
                 .allBatched()) {
@@ -280,7 +382,11 @@ export class ApplicationFeeInvoicer {
                     if (!item) {
                         throw new SimpleError({
                             code: 'missing_balance_item',
-                            message: 'No ' + fee.type + ' balance item was created for fee ' + fee.externalId,
+                            message:
+                                'No ' +
+                                fee.type +
+                                ' balance item was created for fee ' +
+                                fee.externalId,
                         });
                     }
                     await ApplicationFeeService.markInvoiced(fee, item.id, { payment: null });
@@ -291,7 +397,11 @@ export class ApplicationFeeInvoicer {
             if (stampedAmount !== totalAmount) {
                 throw new SimpleError({
                     code: 'price_mismatched',
-                    message: 'Stamped ' + stampedAmount + ' of application fees but billed ' + totalAmount,
+                    message:
+                        'Stamped ' +
+                        stampedAmount +
+                        ' of application fees but billed ' +
+                        totalAmount,
                 });
             }
 
@@ -331,11 +441,23 @@ export class ApplicationFeeInvoicer {
             return payment;
         });
 
-        await PaymentService.handlePaymentStatusUpdate(payment, sellingOrganization, PaymentStatus.Succeeded, ApplicationFeeInvoicer.paidAt(periodStart));
+        await PaymentService.handlePaymentStatusUpdate(
+            payment,
+            sellingOrganization,
+            PaymentStatus.Succeeded,
+            ApplicationFeeInvoicer.paidAt(periodStart),
+        );
         await SettlementService.updatePaymentSettlementsForApplicationFeePayment(payment);
     }
 
-    async #createBalanceItem({ sellingOrganization, organization, type, amount, periodStart, dayEnd }: {
+    async #createBalanceItem({
+        sellingOrganization,
+        organization,
+        type,
+        amount,
+        periodStart,
+        dayEnd,
+    }: {
         sellingOrganization: Organization;
         organization: Organization | null;
         type: ApplicationFeeType;
@@ -344,16 +466,21 @@ export class ApplicationFeeInvoicer {
         dayEnd: Date;
     }): Promise<BalanceItem> {
         const item = new BalanceItem();
-        item.type = type === ApplicationFeeType.Service ? BalanceItemType.ServiceFee : BalanceItemType.TransferFee;
+        item.type =
+            type === ApplicationFeeType.Service
+                ? BalanceItemType.ServiceFee
+                : BalanceItemType.TransferFee;
         const date = Formatter.date(periodStart, true, { timezone: 'UTC' });
-        item.name = type === ApplicationFeeType.Service
-            ? $t('%1cJ', { date })
-            : $t('%1Yq', { date });
+        item.name =
+            type === ApplicationFeeType.Service ? $t('%1cJ', { date }) : $t('%1Yq', { date });
         item.description = $t('%ZqV', { date });
-        item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({
-            id: PaymentProvider.Stripe,
-            name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe)),
-        }));
+        item.relations.set(
+            BalanceItemRelationType.PaymentProvider,
+            BalanceItemRelation.create({
+                id: PaymentProvider.Stripe,
+                name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe)),
+            }),
+        );
         item.payingOrganizationId = organization?.id ?? null;
         item.organizationId = sellingOrganization.id;
         item.VATPercentage = 21;

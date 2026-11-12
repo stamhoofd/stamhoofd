@@ -29,7 +29,13 @@ export type StockDefinition = {
 };
 
 export class CartStockHelper {
-    static getProductStock({ oldItem, cart, product, admin, amount }: StockLookupData): StockDefinition | null {
+    static getProductStock({
+        oldItem,
+        cart,
+        product,
+        admin,
+        amount,
+    }: StockLookupData): StockDefinition | null {
         if (product.remainingStock === null) {
             return null;
         }
@@ -85,11 +91,23 @@ export class CartStockHelper {
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? $t('%1DY', { 'product-name': product.name }) : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
+            text:
+                remainingStock === 0
+                    ? $t('%1DY', { 'product-name': product.name })
+                    : remaining < showStockBelow || (amount && remaining <= amount)
+                      ? text
+                      : null,
         };
     }
 
-    static getPriceStock({ productPrice, oldItem, cart, product, admin, amount }: StockLookupData & { productPrice: ProductPrice }): StockDefinition | null {
+    static getPriceStock({
+        productPrice,
+        oldItem,
+        cart,
+        product,
+        admin,
+        amount,
+    }: StockLookupData & { productPrice: ProductPrice }): StockDefinition | null {
         if (productPrice.remainingStock === null) {
             return null;
         }
@@ -156,18 +174,37 @@ export class CartStockHelper {
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? $t('%1DZ', { 'product-price-name': productPrice.name }) : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? $t('%12p') : (remaining === 0 ? $t('%zD') : (remaining < showStockBelow ? $t('%1H4', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
+            text:
+                remainingStock === 0
+                    ? $t('%1DZ', { 'product-price-name': productPrice.name })
+                    : remaining < showStockBelow || (amount && remaining <= amount)
+                      ? text
+                      : null,
+            shortText:
+                remainingStock === 0
+                    ? $t('%12p')
+                    : remaining === 0
+                      ? $t('%zD')
+                      : remaining < showStockBelow
+                        ? $t('%1H4', { 'x-items': product.getRemainingStockText(remaining) })
+                        : null,
         };
     }
 
-    static getOptionStock({ option, oldItem, cart, product, admin, amount }: StockLookupData & { option: Option }): StockDefinition | null {
+    static getOptionStock({
+        option,
+        oldItem,
+        cart,
+        product,
+        admin,
+        amount,
+    }: StockLookupData & { option: Option }): StockDefinition | null {
         if (option.remainingStock === null) {
             return null;
         }
 
         function hasOption(item: CartItem) {
-            return item.options.some(o => o.option.id === option.id);
+            return item.options.some((o) => o.option.id === option.id);
         }
 
         const inCart = cart.items.reduce((prev, item) => {
@@ -232,12 +269,31 @@ export class CartStockHelper {
         return {
             stock: remainingStock,
             remaining: admin ? null : remaining,
-            text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(option.name)} is uitverkocht` : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? $t('%12p') : (remaining === 0 ? $t('%zD') : (remaining < showStockBelow ? $t('%1H4', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
+            text:
+                remainingStock === 0
+                    ? `${Formatter.capitalizeFirstLetter(option.name)} is uitverkocht`
+                    : remaining < showStockBelow || (amount && remaining <= amount)
+                      ? text
+                      : null,
+            shortText:
+                remainingStock === 0
+                    ? $t('%12p')
+                    : remaining === 0
+                      ? $t('%zD')
+                      : remaining < showStockBelow
+                        ? $t('%1H4', { 'x-items': product.getRemainingStockText(remaining) })
+                        : null,
         };
     }
 
-    static getSeatsStock({ oldItem, cart, product, webshop, admin, amount }: StockLookupData): StockDefinition | null {
+    static getSeatsStock({
+        oldItem,
+        cart,
+        product,
+        webshop,
+        admin,
+        amount,
+    }: StockLookupData): StockDefinition | null {
         const remainingSeats = product.getRemainingSeats(webshop, admin);
         if (remainingSeats === null) {
             return null;
@@ -289,11 +345,22 @@ export class CartStockHelper {
         return {
             stock: remainingStock,
             remaining,
-            text: remainingStock === 0 ? $t('%sP') : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
+            text:
+                remainingStock === 0
+                    ? $t('%sP')
+                    : remaining < showStockBelow || (amount && remaining <= amount)
+                      ? text
+                      : null,
         };
     }
 
-    static getOrderMaximum({ amount, oldItem, cart, product, admin }: StockLookupData): StockDefinition | null {
+    static getOrderMaximum({
+        amount,
+        oldItem,
+        cart,
+        product,
+        admin,
+    }: StockLookupData): StockDefinition | null {
         if (product.maxPerOrder === null) {
             return null;
         }
@@ -313,7 +380,7 @@ export class CartStockHelper {
         }, 0);
 
         const remaining = product.maxPerOrder - inCart;
-        const show = (amount === undefined || (remaining <= amount));
+        const show = amount === undefined || remaining <= amount;
 
         let text = $t('%1HA', {
             '1-item-or-person-or-ticket': product.getRemainingStockText(product.maxPerOrder),
@@ -332,11 +399,15 @@ export class CartStockHelper {
 
             if (inCart === 1) {
                 text = $t('%1HD', {
-                    '5-items-or-persons-or-tickets': product.getRemainingStockText(product.maxPerOrder),
+                    '5-items-or-persons-or-tickets': product.getRemainingStockText(
+                        product.maxPerOrder,
+                    ),
                 });
             } else if (inCart > 0) {
                 text = $t('%1HE', {
-                    '5-items-or-persons-or-tickets': product.getRemainingStockText(product.maxPerOrder),
+                    '5-items-or-persons-or-tickets': product.getRemainingStockText(
+                        product.maxPerOrder,
+                    ),
                     '4': Formatter.integer(inCart),
                 });
             }
@@ -349,7 +420,14 @@ export class CartStockHelper {
         };
     }
 
-    static getAllowMultiple({ amount, oldItem, cart, product, webshop, admin }: StockLookupData): StockDefinition | null {
+    static getAllowMultiple({
+        amount,
+        oldItem,
+        cart,
+        product,
+        webshop,
+        admin,
+    }: StockLookupData): StockDefinition | null {
         if (webshop.allowsMultiple(product)) {
             return null;
         }
@@ -383,7 +461,10 @@ export class CartStockHelper {
         };
     }
 
-    static getFixedStockDefinitions(data: StockLookupData, options: { excludeOrder?: boolean } = {}): StockDefinition[] {
+    static getFixedStockDefinitions(
+        data: StockLookupData,
+        options: { excludeOrder?: boolean } = {},
+    ): StockDefinition[] {
         const definitions: StockDefinition[] = [];
 
         // General product amount
@@ -418,7 +499,9 @@ export class CartStockHelper {
      * Return all the stock definitions for this cart item with the currently selected options
      * = calculate how much you can order with these options
      */
-    static getAvailableStock(data: StockLookupData & { productPrice: ProductPrice; options: CartItemOption[] }): StockDefinition[] {
+    static getAvailableStock(
+        data: StockLookupData & { productPrice: ProductPrice; options: CartItemOption[] },
+    ): StockDefinition[] {
         const definitions: StockDefinition[] = this.getFixedStockDefinitions(data);
 
         const priceStock = CartStockHelper.getPriceStock(data);
@@ -436,7 +519,10 @@ export class CartStockHelper {
         return definitions;
     }
 
-    static getRemainingAcrossOptions(data: StockLookupData, options: { inMultipleCartItems?: boolean; excludeOrder?: boolean } = {}): number | null {
+    static getRemainingAcrossOptions(
+        data: StockLookupData,
+        options: { inMultipleCartItems?: boolean; excludeOrder?: boolean } = {},
+    ): number | null {
         let remaining = this.getRemaining(this.getFixedStockDefinitions(data, options));
 
         // We sum the amount of product price stock remaining
@@ -503,7 +589,7 @@ export class CartStockHelper {
     }
 
     static getRemaining(definitions: StockDefinition[]): number | null {
-        const minArr = definitions.map(s => s.remaining).filter(v => v !== null) as number[];
+        const minArr = definitions.map((s) => s.remaining).filter((v) => v !== null) as number[];
 
         if (minArr.length === 0) {
             return null;

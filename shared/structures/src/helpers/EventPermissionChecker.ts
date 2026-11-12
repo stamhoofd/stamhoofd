@@ -44,8 +44,7 @@ export class EventPermissionChecker {
         if (!userPermissions) {
             throw new SimpleError({
                 code: 'permission_denied',
-                message:
-                    $t('%qQ'),
+                message: $t('%qQ'),
                 statusCode: 403,
             });
         }
@@ -74,7 +73,13 @@ export class EventPermissionChecker {
             return organization;
         }
 
-        this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, userEmail, platform, isPeriodInUse);
+        this.throwIfNoPermissionToWriteNationalOrRegionalEvent(
+            event,
+            userPermissions,
+            userEmail,
+            platform,
+            isPeriodInUse,
+        );
         return null;
     }
 
@@ -102,8 +107,7 @@ export class EventPermissionChecker {
         if (!userPermissions) {
             throw new SimpleError({
                 code: 'permission_denied',
-                message:
-                    $t('%qQ'),
+                message: $t('%qQ'),
                 statusCode: 403,
             });
         }
@@ -121,7 +125,13 @@ export class EventPermissionChecker {
                 isPeriodInUse,
             );
         } else {
-            this.throwIfNoPermissionToWriteNationalOrRegionalEvent(event, userPermissions, userEmail, platform, isPeriodInUse);
+            this.throwIfNoPermissionToWriteNationalOrRegionalEvent(
+                event,
+                userPermissions,
+                userEmail,
+                platform,
+                isPeriodInUse,
+            );
         }
     }
 
@@ -147,7 +157,9 @@ export class EventPermissionChecker {
         return true;
     }
 
-    private static throwIfNoPermissionToWriteEventForOrganization<O extends OrganizationForPermissionCalculation>(
+    private static throwIfNoPermissionToWriteEventForOrganization<
+        O extends OrganizationForPermissionCalculation,
+    >(
         event: EventDataForPermission,
         organization: O,
         platform: Platform,
@@ -160,8 +172,7 @@ export class EventPermissionChecker {
         if (event.organizationId !== organization.id) {
             throw new SimpleError({
                 code: 'permission_denied',
-                message:
-                    $t('%qR'),
+                message: $t('%qR'),
                 statusCode: 403,
             });
         }
@@ -175,8 +186,7 @@ export class EventPermissionChecker {
         if (!organizationPermissions) {
             throw new SimpleError({
                 code: 'permission_denied',
-                message:
-                    $t('%qS'),
+                message: $t('%qS'),
                 statusCode: 403,
             });
         }
@@ -195,8 +205,7 @@ export class EventPermissionChecker {
             ) {
                 throw new SimpleError({
                     code: 'permission_denied',
-                    message:
-                            $t('%qS'),
+                    message: $t('%qS'),
                     statusCode: 403,
                 });
             }
@@ -211,8 +220,7 @@ export class EventPermissionChecker {
                 ) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message:
-                            $t('%qT'),
+                        message: $t('%qT'),
                         statusCode: 403,
                     });
                 }
@@ -220,8 +228,13 @@ export class EventPermissionChecker {
         }
     }
 
-    private static hasWriteAccessToEventResource(permissions: LoadedPermissions, eventId: string, isPeriodInUse: boolean): boolean {
-        return permissions.forPeriod(isPeriodInUse)
+    private static hasWriteAccessToEventResource(
+        permissions: LoadedPermissions,
+        eventId: string,
+        isPeriodInUse: boolean,
+    ): boolean {
+        return permissions
+            .forPeriod(isPeriodInUse)
             .hasResourceAccess(PermissionsResourceType.Events, eventId, PermissionLevel.Write);
     }
 
@@ -237,8 +250,7 @@ export class EventPermissionChecker {
         if (!platformPermissions) {
             throw new SimpleError({
                 code: 'permission_denied',
-                message:
-                    $t('%qU'),
+                message: $t('%qU'),
                 statusCode: 403,
             });
         }
@@ -250,17 +262,15 @@ export class EventPermissionChecker {
         // organization tags
         if (event.meta.organizationTagIds === null) {
             if (
-                !(platformPermissions.hasResourceAccessRight(
+                !platformPermissions.hasResourceAccessRight(
                     PermissionsResourceType.OrganizationTags,
                     PermissionsResourceKey.All,
                     accessRight,
                 )
-                )
             ) {
                 throw new SimpleError({
                     code: 'permission_denied',
-                    message:
-                        $t('%qV'),
+                    message: $t('%qV'),
                     statusCode: 403,
                 });
             }
@@ -275,8 +285,7 @@ export class EventPermissionChecker {
                 ) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message:
-                            $t('%qW'),
+                        message: $t('%qW'),
                         statusCode: 403,
                     });
                 }

@@ -2,7 +2,13 @@ import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@c
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
 
-export type ReviewTimeType = 'records' | 'parents' | 'emergencyContacts' | 'details' | 'uitpasNumber' | 'taxCertificates';
+export type ReviewTimeType =
+    | 'records'
+    | 'parents'
+    | 'emergencyContacts'
+    | 'details'
+    | 'uitpasNumber'
+    | 'taxCertificates';
 
 /**
  * Keep a timestamp of when certain information was reviewed of a member
@@ -41,14 +47,16 @@ export class ReviewTimes extends AutoEncoder {
                 return;
             }
         }
-        this.times.push(ReviewTime.create({
-            name,
-            reviewedAt: date ?? new Date(),
-        }));
+        this.times.push(
+            ReviewTime.create({
+                name,
+                reviewedAt: date ?? new Date(),
+            }),
+        );
     }
 
     removeReview(name: ReviewTimeType) {
-        this.times = this.times.filter(t => t.name !== name);
+        this.times = this.times.filter((t) => t.name !== name);
     }
 
     getLastReview(name?: ReviewTimeType): Date | undefined {
@@ -56,7 +64,7 @@ export class ReviewTimes extends AutoEncoder {
             if (this.times.length === 0) {
                 return;
             }
-            return new Date(Math.min(...this.times.map(t => t.reviewedAt.getTime())));
+            return new Date(Math.min(...this.times.map((t) => t.reviewedAt.getTime())));
         }
         for (const time of this.times) {
             if (time.name === name) {

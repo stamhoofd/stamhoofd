@@ -1,9 +1,20 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, SQL, SQLIfNull, SQLValueType } from '@stamhoofd/sql';
+import {
+    baseSQLFilterCompilers,
+    createColumnFilter,
+    createExistsFilter,
+    createJoinedRelationFilter,
+    SQL,
+    SQLIfNull,
+    SQLValueType,
+} from '@stamhoofd/sql';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Context } from '../helpers/Context.js';
-import { memberCachedBalanceForOrganizationJoin, registrationCachedBalanceJoin } from '../helpers/outstandingBalanceJoin.js';
+import {
+    memberCachedBalanceForOrganizationJoin,
+    registrationCachedBalanceJoin,
+} from '../helpers/outstandingBalanceJoin.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { StamhoofdFilterAccessHelper } from '../helpers/StamhoofdFilterAccessHelper.js';
 import { organizationFilterCompilers } from './organizations.js';
@@ -12,11 +23,17 @@ async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel
     const groupIds = StamhoofdFilterAccessHelper.getGroupIdsFromFilter(filter);
     const groups = await Context.auth.getGroups(groupIds as string[]);
 
-    console.log('Filtering registrations on groups', groups.map(g => g.settings.name.toString()));
+    console.log(
+        'Filtering registrations on groups',
+        groups.map((g) => g.settings.name.toString()),
+    );
 
     for (const group of groups) {
-        if (!await Context.auth.canAccessGroup(group, permissionLevel)) {
-            if (permissionLevel === PermissionLevel.Read && group.settings.implicitlyAllowViewRegistrations) {
+        if (!(await Context.auth.canAccessGroup(group, permissionLevel))) {
+            if (
+                permissionLevel === PermissionLevel.Read &&
+                group.settings.implicitlyAllowViewRegistrations
+            ) {
                 // Allowed to filter on this group, since we have view access.
                 continue;
             }
@@ -32,150 +49,240 @@ async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel
 
 export const baseRegistrationFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    ['id', createColumnFilter({
-        expression: SQL.column('id'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    /**
-     * @deprecated
-     */
-    ['price', createColumnFilter({
-        expression: SQL.column('price'),
-        type: SQLValueType.Number,
-        nullable: true,
-    })],
-    /**
-     * @deprecated
-     */
-    ['pricePaid', createColumnFilter({
-        expression: SQL.column('pricePaid'),
-        type: SQLValueType.Number,
-        nullable: false,
-    })],
-    ['groupPrice', createColumnFilter({
-        expression: new SQLTranslatedString(SQL.column('groupPrice'), '$.value.name'),
-        type: SQLValueType.String,
-        nullable: true,
-    }, new Map([
-        ...baseSQLFilterCompilers,
-        ['id', createColumnFilter({
-            expression: SQL.jsonExtract(SQL.column('groupPrice'), '$.value.id'),
-            type: SQLValueType.JSONString,
+    [
+        'id',
+        createColumnFilter({
+            expression: SQL.column('id'),
+            type: SQLValueType.String,
             nullable: false,
-        })],
-    ]))],
-    ['canRegister', createColumnFilter({
-        expression: SQL.column('canRegister'),
-        type: SQLValueType.Boolean,
-        nullable: false,
-    })],
-    ['organizationId', createColumnFilter({
-        expression: SQL.column('organizationId'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['groupId', createColumnFilter({
-        expression: SQL.column('groupId'),
-        type: SQLValueType.String,
-        nullable: false,
-        async checkPermission(filter) {
-            await checkGroupIdFilterAccess(filter, PermissionLevel.Read);
-        },
-    })],
-    ['registeredAt', createColumnFilter({
-        expression: SQL.column('registeredAt'),
-        type: SQLValueType.Datetime,
-        nullable: true,
-    })],
-    ['periodId', createColumnFilter({
-        expression: SQL.column('registrations', 'periodId'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['deactivatedAt', createColumnFilter({
-        expression: SQL.column('registrations', 'deactivatedAt'),
-        type: SQLValueType.Datetime,
-        nullable: true,
-    })],
-    ['trialUntil', createColumnFilter({
-        expression: SQL.column('registrations', 'trialUntil'),
-        type: SQLValueType.Datetime,
-        nullable: true,
-    })],
-    ['startDate', createColumnFilter({
-        expression: SQL.column('registrations', 'startDate'),
-        type: SQLValueType.Datetime,
-        nullable: true,
-    })],
-    ['endDate', createColumnFilter({
-        expression: SQL.column('registrations', 'endDate'),
-        type: SQLValueType.Datetime,
-        nullable: true,
-    })],
-    ['group', new Map([
-        ...baseSQLFilterCompilers,
-        ['id', createColumnFilter({
+        }),
+    ],
+    /**
+     * @deprecated
+     */
+    [
+        'price',
+        createColumnFilter({
+            expression: SQL.column('price'),
+            type: SQLValueType.Number,
+            nullable: true,
+        }),
+    ],
+    /**
+     * @deprecated
+     */
+    [
+        'pricePaid',
+        createColumnFilter({
+            expression: SQL.column('pricePaid'),
+            type: SQLValueType.Number,
+            nullable: false,
+        }),
+    ],
+    [
+        'groupPrice',
+        createColumnFilter(
+            {
+                expression: new SQLTranslatedString(SQL.column('groupPrice'), '$.value.name'),
+                type: SQLValueType.String,
+                nullable: true,
+            },
+            new Map([
+                ...baseSQLFilterCompilers,
+                [
+                    'id',
+                    createColumnFilter({
+                        expression: SQL.jsonExtract(SQL.column('groupPrice'), '$.value.id'),
+                        type: SQLValueType.JSONString,
+                        nullable: false,
+                    }),
+                ],
+            ]),
+        ),
+    ],
+    [
+        'canRegister',
+        createColumnFilter({
+            expression: SQL.column('canRegister'),
+            type: SQLValueType.Boolean,
+            nullable: false,
+        }),
+    ],
+    [
+        'organizationId',
+        createColumnFilter({
+            expression: SQL.column('organizationId'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'groupId',
+        createColumnFilter({
             expression: SQL.column('groupId'),
             type: SQLValueType.String,
             nullable: false,
             async checkPermission(filter) {
                 await checkGroupIdFilterAccess(filter, PermissionLevel.Read);
             },
-        })],
-        ['type', createColumnFilter({
-            expression: SQL.column('groups', 'type'),
-            type: SQLValueType.String,
-            nullable: false,
-        })],
-        ['name', createColumnFilter({
-            expression: SQL.jsonExtract(SQL.column('groups', 'settings'), '$.value.name'),
-            type: SQLValueType.JSONString,
-            nullable: false,
-        })],
-        ['status', createColumnFilter({
-            expression: SQL.column('groups', 'status'),
-            type: SQLValueType.String,
-            nullable: false,
-        })],
-        ['defaultAgeGroupId', createColumnFilter({
-            expression: SQL.column('groups', 'defaultAgeGroupId'),
-            type: SQLValueType.String,
+        }),
+    ],
+    [
+        'registeredAt',
+        createColumnFilter({
+            expression: SQL.column('registeredAt'),
+            type: SQLValueType.Datetime,
             nullable: true,
-        })],
-    ])],
-    ['organization', createExistsFilter(
-        SQL.select()
-            .from(SQL.table('organizations'))
-            .where(
-                SQL.column('organizations', 'id'),
-                SQL.column('registrations', 'organizationId'),
-            ),
-        organizationFilterCompilers,
-    )],
-    ['memberCachedBalance', createJoinedRelationFilter(
-        memberCachedBalanceForOrganizationJoin,
+        }),
+    ],
+    [
+        'periodId',
+        createColumnFilter({
+            expression: SQL.column('registrations', 'periodId'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'deactivatedAt',
+        createColumnFilter({
+            expression: SQL.column('registrations', 'deactivatedAt'),
+            type: SQLValueType.Datetime,
+            nullable: true,
+        }),
+    ],
+    [
+        'trialUntil',
+        createColumnFilter({
+            expression: SQL.column('registrations', 'trialUntil'),
+            type: SQLValueType.Datetime,
+            nullable: true,
+        }),
+    ],
+    [
+        'startDate',
+        createColumnFilter({
+            expression: SQL.column('registrations', 'startDate'),
+            type: SQLValueType.Datetime,
+            nullable: true,
+        }),
+    ],
+    [
+        'endDate',
+        createColumnFilter({
+            expression: SQL.column('registrations', 'endDate'),
+            type: SQLValueType.Datetime,
+            nullable: true,
+        }),
+    ],
+    [
+        'group',
         new Map([
-            ['amountOpen', createColumnFilter({
-                expression: new SQLIfNull(SQL.column('memberCachedBalance', 'amountOpen'), 0),
-                type: SQLValueType.Number,
-                nullable: false,
-            })],
+            ...baseSQLFilterCompilers,
+            [
+                'id',
+                createColumnFilter({
+                    expression: SQL.column('groupId'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                    async checkPermission(filter) {
+                        await checkGroupIdFilterAccess(filter, PermissionLevel.Read);
+                    },
+                }),
+            ],
+            [
+                'type',
+                createColumnFilter({
+                    expression: SQL.column('groups', 'type'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            ],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.jsonExtract(SQL.column('groups', 'settings'), '$.value.name'),
+                    type: SQLValueType.JSONString,
+                    nullable: false,
+                }),
+            ],
+            [
+                'status',
+                createColumnFilter({
+                    expression: SQL.column('groups', 'status'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            ],
+            [
+                'defaultAgeGroupId',
+                createColumnFilter({
+                    expression: SQL.column('groups', 'defaultAgeGroupId'),
+                    type: SQLValueType.String,
+                    nullable: true,
+                }),
+            ],
         ]),
-    )],
-    ['registrationCachedBalance', createJoinedRelationFilter(
-        registrationCachedBalanceJoin,
-        new Map([
-            ['toPay', createColumnFilter({
-                expression: new SQLIfNull(SQL.column('registrationCachedBalance', 'toPay'), 0),
-                type: SQLValueType.Number,
-                nullable: false,
-            })],
-            ['price', createColumnFilter({
-                expression: new SQLIfNull(SQL.column('registrationCachedBalance', 'price'), 0),
-                type: SQLValueType.Number,
-                nullable: false,
-            })],
-        ]),
-    )],
+    ],
+    [
+        'organization',
+        createExistsFilter(
+            SQL.select()
+                .from(SQL.table('organizations'))
+                .where(
+                    SQL.column('organizations', 'id'),
+                    SQL.column('registrations', 'organizationId'),
+                ),
+            organizationFilterCompilers,
+        ),
+    ],
+    [
+        'memberCachedBalance',
+        createJoinedRelationFilter(
+            memberCachedBalanceForOrganizationJoin,
+            new Map([
+                [
+                    'amountOpen',
+                    createColumnFilter({
+                        expression: new SQLIfNull(
+                            SQL.column('memberCachedBalance', 'amountOpen'),
+                            0,
+                        ),
+                        type: SQLValueType.Number,
+                        nullable: false,
+                    }),
+                ],
+            ]),
+        ),
+    ],
+    [
+        'registrationCachedBalance',
+        createJoinedRelationFilter(
+            registrationCachedBalanceJoin,
+            new Map([
+                [
+                    'toPay',
+                    createColumnFilter({
+                        expression: new SQLIfNull(
+                            SQL.column('registrationCachedBalance', 'toPay'),
+                            0,
+                        ),
+                        type: SQLValueType.Number,
+                        nullable: false,
+                    }),
+                ],
+                [
+                    'price',
+                    createColumnFilter({
+                        expression: new SQLIfNull(
+                            SQL.column('registrationCachedBalance', 'price'),
+                            0,
+                        ),
+                        type: SQLValueType.Number,
+                        nullable: false,
+                    }),
+                ],
+            ]),
+        ),
+    ],
 ]);

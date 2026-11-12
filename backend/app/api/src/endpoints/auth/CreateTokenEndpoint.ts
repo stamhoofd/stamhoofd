@@ -1,9 +1,32 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { EmailVerificationCode, MFATOTP, MFAToken, PasswordToken, Platform, Token, User, WebauthnCredential } from '@stamhoofd/models';
-import type { ChallengeGrantStruct, MFAGrantStruct, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct } from '@stamhoofd/structures';
-import { CreateTokenStruct, LoginMethod, MFAMethodType, SessionLoginMethod, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';
+import {
+    EmailVerificationCode,
+    MFATOTP,
+    MFAToken,
+    PasswordToken,
+    Platform,
+    Token,
+    User,
+    WebauthnCredential,
+} from '@stamhoofd/models';
+import type {
+    ChallengeGrantStruct,
+    MFAGrantStruct,
+    PasswordGrantStruct,
+    PasswordTokenGrantStruct,
+    RefreshTokenGrantStruct,
+    RequestChallengeGrantStruct,
+} from '@stamhoofd/structures';
+import {
+    CreateTokenStruct,
+    LoginMethod,
+    MFAMethodType,
+    SessionLoginMethod,
+    SignupResponse,
+    Token as TokenStruct,
+} from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
 import { RecoveryCodeHelper } from '../../helpers/RecoveryCodeHelper.js';
@@ -15,7 +38,13 @@ import { VerificationCodeService } from '../../services/VerificationCodeService.
 
 type Params = Record<string, never>;
 type Query = undefined;
-type Body = RequestChallengeGrantStruct | ChallengeGrantStruct | RefreshTokenGrantStruct | PasswordTokenGrantStruct | PasswordGrantStruct | MFAGrantStruct;
+type Body =
+    | RequestChallengeGrantStruct
+    | ChallengeGrantStruct
+    | RefreshTokenGrantStruct
+    | PasswordTokenGrantStruct
+    | PasswordGrantStruct
+    | MFAGrantStruct;
 type ResponseBody = TokenStruct;
 
 export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
@@ -42,7 +71,9 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // - check if not multiple attempts for the same username are started in parallel
         // - Limit the amount of failed attemps by IP (will only make it a bit harder)
         // - Detect attacks on random accounts (using email list + most used passwords) and temorary require CAPTCHA on all accounts
-        const organization = await Context.setOptionalOrganizationScope({ willAuthenticate: false });
+        const organization = await Context.setOptionalOrganizationScope({
+            willAuthenticate: false,
+        });
 
         switch (request.body.grantType) {
             case 'refresh_token': {
@@ -55,8 +86,11 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     });
                 }
 
-                if (oldToken.user.organizationId !== null && oldToken.user.organizationId !== (organization?.id ?? null)) {
-                // Invalid scope
+                if (
+                    oldToken.user.organizationId !== null &&
+                    oldToken.user.organizationId !== (organization?.id ?? null)
+                ) {
+                    // Invalid scope
                     throw new SimpleError({
                         code: 'invalid_refresh_token',
                         message: 'Invalid refresh token',
@@ -104,7 +138,11 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     }
                 }
 
-                const user = await User.login(organization?.id ?? null, request.body.username, request.body.password);
+                const user = await User.login(
+                    organization?.id ?? null,
+                    request.body.username,
+                    request.body.password,
+                );
 
                 const errBody = {
                     code: 'invalid_username_or_password',
@@ -114,7 +152,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 };
 
                 if (!user) {
-                // TODO: increase counter
+                    // TODO: increase counter
                     throw new SimpleError(errBody);
                 }
 
@@ -123,7 +161,9 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 // if not: throw a validation error (e-mail validation is required)
                 if (!user.verified) {
                     const code = await EmailVerificationCode.createFor(user, user.email);
-                    VerificationCodeService.send(code, user, organization, request.i18n).catch(console.error);
+                    VerificationCodeService.send(code, user, organization, request.i18n).catch(
+                        console.error,
+                    );
 
                     throw new SimpleError({
                         code: 'verify_email',
@@ -139,9 +179,17 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 // Second factor / forced enrollment: block the session until the user
                 // completes (or first sets up) a second factor. Shared with every other
                 // grant that mints a session from a single primary credential.
-                await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion(), { loginMethod: SessionLoginMethod.Password, i18n: request.i18n });
+                await TwoFactorHelper.assertSecondFactorOrThrow(
+                    user,
+                    organization,
+                    request.request.getVersion(),
+                    { loginMethod: SessionLoginMethod.Password, i18n: request.i18n },
+                );
 
-                const token = await SessionService.createSession(user, { loginMethod: SessionLoginMethod.Password, authenticatedAt: new Date() });
+                const token = await SessionService.createSession(user, {
+                    loginMethod: SessionLoginMethod.Password,
+                    authenticatedAt: new Date(),
+                });
 
                 if (!token) {
                     throw new SimpleError({
@@ -181,7 +229,12 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 }
 
                 // Scope check (same rules as refresh/password_token)
-                if ((organization && user.organizationId && user.organizationId !== organization.id) || (!organization && user.organizationId)) {
+                if (
+                    (organization &&
+                        user.organizationId &&
+                        user.organizationId !== organization.id) ||
+                    (!organization && user.organizationId)
+                ) {
                     throw new SimpleError({
                         code: 'invalid_mfa_token',
                         message: 'The MFA session is invalid or expired',
@@ -221,7 +274,11 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     if (mfaToken.webauthnChallenge && assertion && credentialId) {
                         const credential = await WebauthnCredential.getByCredentialId(credentialId);
                         if (credential && credential.userId === user.id) {
-                            const newCounter = await WebauthnHelper.verifyAuthentication(assertion, mfaToken.webauthnChallenge, credential);
+                            const newCounter = await WebauthnHelper.verifyAuthentication(
+                                assertion,
+                                mfaToken.webauthnChallenge,
+                                credential,
+                            );
                             if (newCounter !== null) {
                                 credential.counter = newCounter;
                                 credential.lastUsedAt = new Date();
@@ -243,7 +300,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     });
                 }
 
-                if (!await mfaToken.consume()) {
+                if (!(await mfaToken.consume())) {
                     // Another request already completed this challenge.
                     throw new SimpleError({
                         code: 'invalid_mfa_token',
@@ -253,7 +310,10 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     });
                 }
 
-                const token = await SessionService.createSession(user, { loginMethod: mfaToken.loginMethod, authenticatedAt: new Date() });
+                const token = await SessionService.createSession(user, {
+                    loginMethod: mfaToken.loginMethod,
+                    authenticatedAt: new Date(),
+                });
                 await user.markActive();
 
                 const st = new TokenStruct(token);
@@ -272,8 +332,12 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 }
 
                 // Check scope
-                if (organization && passwordToken.user.organizationId && passwordToken.user.organizationId !== organization.id) {
-                // user of a different organization
+                if (
+                    organization &&
+                    passwordToken.user.organizationId &&
+                    passwordToken.user.organizationId !== organization.id
+                ) {
+                    // user of a different organization
                     throw new SimpleError({
                         code: 'invalid_token',
                         message: 'Invalid token',
@@ -283,7 +347,7 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 }
 
                 if (!organization && passwordToken.user.organizationId) {
-                // User is scoped to a single organization, while the request is not
+                    // User is scoped to a single organization, while the request is not
                     throw new SimpleError({
                         code: 'invalid_token',
                         message: 'Invalid token',
@@ -303,10 +367,22 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 //
                 // The link was emailed to the account, so this is also how a long-inactive
                 // admin confirms their email address and gets to enroll after all.
-                await TwoFactorHelper.assertSecondFactorOrThrow(passwordToken.user, organization, request.request.getVersion(), { loginMethod: SessionLoginMethod.Email, i18n: request.i18n, allowTemporarySession: true });
+                await TwoFactorHelper.assertSecondFactorOrThrow(
+                    passwordToken.user,
+                    organization,
+                    request.request.getVersion(),
+                    {
+                        loginMethod: SessionLoginMethod.Email,
+                        i18n: request.i18n,
+                        allowTemporarySession: true,
+                    },
+                );
 
                 // Important to create a new token before adjusting the old token
-                const token = await SessionService.createSession(passwordToken.user, { loginMethod: SessionLoginMethod.Email, authenticatedAt: new Date() });
+                const token = await SessionService.createSession(passwordToken.user, {
+                    loginMethod: SessionLoginMethod.Email,
+                    authenticatedAt: new Date(),
+                });
 
                 // TODO: make token short lived until renewal
 
@@ -335,8 +411,8 @@ export class CreateTokenEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
 
             default: {
-            // t should always be 'never' so we get no compiler error when this compiles
-            // if you get a compiler error here, you missed a possible value for grantType
+                // t should always be 'never' so we get no compiler error when this compiles
+                // if you get a compiler error here, you missed a possible value for grantType
                 throw new Error('Grant type ' + request.body.grantType + ' not supported');
             }
         }

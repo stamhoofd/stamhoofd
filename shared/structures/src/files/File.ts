@@ -99,7 +99,10 @@ export class FileTypes {
 
     constructor(readonly definitions: FileTypeDefinition[]) {
         for (const definition of definitions) {
-            for (const contentType of [definition.contentType, ...(definition.alternativeContentTypes ?? [])]) {
+            for (const contentType of [
+                definition.contentType,
+                ...(definition.alternativeContentTypes ?? []),
+            ]) {
                 const key = normalizeContentType(contentType);
 
                 if (this.byContentType.has(key)) {
@@ -124,8 +127,10 @@ export class FileTypes {
      */
     get acceptAttribute(): string {
         return [
-            ...this.definitions.flatMap(definition => definition.extensions.map(extension => '.' + extension)),
-            ...this.definitions.map(definition => definition.contentType),
+            ...this.definitions.flatMap((definition) =>
+                definition.extensions.map((extension) => '.' + extension),
+            ),
+            ...this.definitions.map((definition) => definition.contentType),
         ].join(',');
     }
 
@@ -146,16 +151,23 @@ export class FileTypes {
      * two can never contradict each other. A content type that is not in this list is never used - we only
      * fall back to the extension of the filename, which has to be in this list as well.
      */
-    resolveUpload(upload: { contentType?: string | null; filename?: string | null }): ResolvedFileType | null {
+    resolveUpload(upload: {
+        contentType?: string | null;
+        filename?: string | null;
+    }): ResolvedFileType | null {
         const extension = upload.filename ? getFilenameExtension(upload.filename) : null;
-        const definitionFromContentType = upload.contentType ? this.byContentType.get(normalizeContentType(upload.contentType)) : undefined;
+        const definitionFromContentType = upload.contentType
+            ? this.byContentType.get(normalizeContentType(upload.contentType))
+            : undefined;
         const definitionFromExtension = extension ? this.byExtension.get(extension) : undefined;
 
         if (definitionFromContentType) {
             // Keep the uploaded extension when it is one of this content type, so we don't rename .jpeg to .jpg
             return this.resolveDefinition(
                 definitionFromContentType,
-                extension && definitionFromExtension === definitionFromContentType ? extension : definitionFromContentType.extensions[0],
+                extension && definitionFromExtension === definitionFromContentType
+                    ? extension
+                    : definitionFromContentType.extensions[0],
             );
         }
 
@@ -179,7 +191,12 @@ export const supportedFileTypes = new FileTypes([
     { contentType: 'application/pdf', extensions: ['pdf'], canRenderInline: true },
 
     // Images. Browsers only sniff images as other image types, so they can never turn into html
-    { contentType: 'image/jpeg', extensions: ['jpg', 'jpeg'], alternativeContentTypes: ['image/jpg'], canRenderInline: true },
+    {
+        contentType: 'image/jpeg',
+        extensions: ['jpg', 'jpeg'],
+        alternativeContentTypes: ['image/jpg'],
+        canRenderInline: true,
+    },
     { contentType: 'image/png', extensions: ['png'], canRenderInline: true },
     { contentType: 'image/gif', extensions: ['gif'], canRenderInline: true },
     { contentType: 'image/webp', extensions: ['webp'], canRenderInline: true },
@@ -188,15 +205,24 @@ export const supportedFileTypes = new FileTypes([
 
     // Word
     { contentType: 'application/msword', extensions: ['doc'] },
-    { contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', extensions: ['docx'] },
+    {
+        contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        extensions: ['docx'],
+    },
 
     // Excel
     { contentType: 'application/vnd.ms-excel', extensions: ['xls'] },
-    { contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', extensions: ['xlsx'] },
+    {
+        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        extensions: ['xlsx'],
+    },
 
     // PowerPoint
     { contentType: 'application/vnd.ms-powerpoint', extensions: ['ppt'] },
-    { contentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', extensions: ['pptx'] },
+    {
+        contentType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        extensions: ['pptx'],
+    },
 
     // OpenDocument
     { contentType: 'application/vnd.oasis.opendocument.text', extensions: ['odt'] },
@@ -216,7 +242,12 @@ export const supportedFileTypes = new FileTypes([
  */
 export const supportedImageTypes = new FileTypes([
     { contentType: 'image/png', extensions: ['png'], canRenderInline: true },
-    { contentType: 'image/jpeg', extensions: ['jpg', 'jpeg'], alternativeContentTypes: ['image/jpg'], canRenderInline: true },
+    {
+        contentType: 'image/jpeg',
+        extensions: ['jpg', 'jpeg'],
+        alternativeContentTypes: ['image/jpg'],
+        canRenderInline: true,
+    },
     { contentType: 'image/webp', extensions: ['webp'], canRenderInline: true },
     { contentType: 'image/gif', extensions: ['gif'], canRenderInline: true },
 
@@ -295,13 +326,26 @@ export class File implements Encodeable {
     }
 
     get signPayload() {
-        return 'id: ' + this.id + '\n'
-            + 'server: ' + this.server + '\n'
-            + 'path: ' + this.path + '\n'
-            + 'size: ' + this.size.toFixed(0) + '\n'
-            + 'name: ' + this.name + '\n'
-            + 'isPrivate: ' + (this.isPrivate ? 'true' : 'false')
-            + (this.contentType ? '\ncontentType: ' + this.contentType : '');
+        return (
+            'id: ' +
+            this.id +
+            '\n' +
+            'server: ' +
+            this.server +
+            '\n' +
+            'path: ' +
+            this.path +
+            '\n' +
+            'size: ' +
+            this.size.toFixed(0) +
+            '\n' +
+            'name: ' +
+            this.name +
+            '\n' +
+            'isPrivate: ' +
+            (this.isPrivate ? 'true' : 'false') +
+            (this.contentType ? '\ncontentType: ' + this.contentType : '')
+        );
     }
 
     static get signingEnabled() {
@@ -337,7 +381,7 @@ export class File implements Encodeable {
             return null;
         }
 
-        if (!await this.verify()) {
+        if (!(await this.verify())) {
             // Never generate a signed url for an untrusted file
             return null;
         }
@@ -369,7 +413,11 @@ export class File implements Encodeable {
             file.signedUrl = null;
         }
 
-        if (file.isPrivate && this.signingEnabled && (!data.context.medium || data.context.medium === EncodeMedium.Network)) {
+        if (
+            file.isPrivate &&
+            this.signingEnabled &&
+            (!data.context.medium || data.context.medium === EncodeMedium.Network)
+        ) {
             // A signature is required
             // Because of the sync nature of decoding, we cannot verify it here, but we need to do so when using the file
             if (!file.signature) {
@@ -448,7 +496,10 @@ export class File implements Encodeable {
      * See {@link FileTypes.resolveUpload}: determines the content type and extension we'll store an uploaded
      * file with, or null if we don't support the file type.
      */
-    static resolveUploadType(upload: { contentType?: string | null; filename?: string | null }): ResolvedFileType | null {
+    static resolveUploadType(upload: {
+        contentType?: string | null;
+        filename?: string | null;
+    }): ResolvedFileType | null {
         return supportedFileTypes.resolveUpload(upload);
     }
 
@@ -462,7 +513,9 @@ export class File implements Encodeable {
     get icon() {
         if (!this.contentType) {
             // Try based on extension
-            const extension = this.path.split('.').pop()?.toLowerCase() || this.name?.split('.').pop()?.toLowerCase();
+            const extension =
+                this.path.split('.').pop()?.toLowerCase() ||
+                this.name?.split('.').pop()?.toLowerCase();
             if (extension) {
                 switch (extension) {
                     case 'png':
@@ -493,10 +546,18 @@ export class File implements Encodeable {
         if (this.contentType === 'application/pdf') {
             return 'file-pdf color-pdf';
         }
-        if (this.contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || this.contentType === 'application/vnd.ms-excel') {
+        if (
+            this.contentType ===
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+            this.contentType === 'application/vnd.ms-excel'
+        ) {
             return 'file-excel color-excel';
         }
-        if (this.contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || this.contentType === 'application/msword') {
+        if (
+            this.contentType ===
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+            this.contentType === 'application/msword'
+        ) {
             return 'file-word color-word';
         }
 

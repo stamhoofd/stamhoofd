@@ -13,8 +13,12 @@ import { BackendApp } from '@stamhoofd/types/BackendApp';
  * External contributors never have the marker file, so this is a no-op for them and no
  * 1Password calls are made.
  */
-export async function applyInternalSecrets(context: CliContext, service: AppService, env: AppEnvironment): Promise<AppEnvironment> {
-    if (!await isInternalContributor(context.rootDir)) {
+export async function applyInternalSecrets(
+    context: CliContext,
+    service: AppService,
+    env: AppEnvironment,
+): Promise<AppEnvironment> {
+    if (!(await isInternalContributor(context.rootDir))) {
         return env;
     }
 

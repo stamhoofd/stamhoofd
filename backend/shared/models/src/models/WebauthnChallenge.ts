@@ -11,7 +11,9 @@ export class WebauthnChallenge extends QueryableModel {
     static EXPIRY_MS = 10 * 60 * 1000;
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -27,7 +29,8 @@ export class WebauthnChallenge extends QueryableModel {
     expiresAt: Date;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -59,7 +62,9 @@ export class WebauthnChallenge extends QueryableModel {
      * leaves a row behind that nothing else cleans up.
      */
     static async deleteExpired(): Promise<number> {
-        const { affectedRows } = await this.delete().where('expiresAt', SQLWhereSign.Less, new Date()).delete();
+        const { affectedRows } = await this.delete()
+            .where('expiresAt', SQLWhereSign.Less, new Date())
+            .delete();
         return affectedRows;
     }
 

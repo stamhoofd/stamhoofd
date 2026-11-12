@@ -1,12 +1,54 @@
 import type { Endpoint } from '@node/endpoints';
 import { Request } from '@node/endpoints';
-import type { Group, Member, MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token, User } from '@stamhoofd/models';
-import { CachedBalance, EventFactory, GroupFactory, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecordFactory, OrganizationFactory, OrganizationTagFactory, Platform, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import type {
+    Group,
+    Member,
+    MemberWithUsersRegistrationsAndGroups,
+    Organization,
+    RegistrationPeriod,
+    Token,
+    User,
+} from '@stamhoofd/models';
+import {
+    CachedBalance,
+    EventFactory,
+    GroupFactory,
+    MemberFactory,
+    MemberPlatformMembership,
+    MemberResponsibilityRecordFactory,
+    OrganizationFactory,
+    OrganizationTagFactory,
+    Platform,
+    RecordCategoryFactory,
+    RegistrationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { CountFilteredRequest, EventMeta, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ReceivableBalanceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection, STPackageBundle, STPackageType } from '@stamhoofd/structures';
+import {
+    CountFilteredRequest,
+    EventMeta,
+    GroupStatus,
+    GroupType,
+    LimitedFilteredRequest,
+    NamedObject,
+    OrganizationTag,
+    PermissionRoleDetailed,
+    Permissions,
+    PermissionsResourceKey,
+    ReceivableBalanceType,
+    RecordAnswer,
+    RecordDateAnswer,
+    RecordTextAnswer,
+    RecordType,
+    ResourcePermissions,
+    SortItemDirection,
+    STPackageBundle,
+    STPackageType,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
@@ -45,33 +87,32 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
 
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -118,35 +159,34 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
 
             // Give permission to a different group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group2.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group2.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -187,40 +227,40 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
 
             // Give permission to a different group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ], [
-                    group2.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                    [
+                        group2.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -268,35 +308,34 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
 
             // Only give permissions for one group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -339,42 +378,42 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const member3 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const member3 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
             const group3 = await new GroupFactory({ organization, period }).create();
 
             // Give permission for 2 / 3 groups
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ], [
-                    group2.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                    [
+                        group2.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -418,40 +457,48 @@ describe('Endpoint.GetMembersEndpoint', () => {
             }).create();
 
             // The organization already moved on to period
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const previousPeriodGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
-            const otherPreviousPeriodGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const previousPeriodGroup = await new GroupFactory({
+                organization,
+                period: previousPeriod,
+            }).create();
+            const otherPreviousPeriodGroup = await new GroupFactory({
+                organization,
+                period: previousPeriod,
+            }).create();
 
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    previousPeriodGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        previousPeriodGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
 
             await new RegistrationFactory({ member: member1, group: previousPeriodGroup }).create();
-            await new RegistrationFactory({ member: member2, group: otherPreviousPeriodGroup }).create();
+            await new RegistrationFactory({
+                member: member2,
+                group: otherPreviousPeriodGroup,
+            }).create();
 
             const request = Request.get({
                 path: baseUrl,
@@ -484,37 +531,68 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 const organization = await new OrganizationFactory({ period }).create();
 
                 const currentGroup = await new GroupFactory({ organization, period }).create();
-                const previousGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
-                const otherPreviousGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
+                const previousGroup = await new GroupFactory({
+                    organization,
+                    period: previousPeriod,
+                }).create();
+                const otherPreviousGroup = await new GroupFactory({
+                    organization,
+                    period: previousPeriod,
+                }).create();
 
                 const currentMember = await new MemberFactory({}).create();
                 const previousMember = await new MemberFactory({}).create();
                 const otherPreviousMember = await new MemberFactory({}).create();
 
-                await new RegistrationFactory({ member: currentMember, group: currentGroup }).create();
-                await new RegistrationFactory({ member: previousMember, group: previousGroup }).create();
-                await new RegistrationFactory({ member: otherPreviousMember, group: otherPreviousGroup }).create();
+                await new RegistrationFactory({
+                    member: currentMember,
+                    group: currentGroup,
+                }).create();
+                await new RegistrationFactory({
+                    member: previousMember,
+                    group: previousGroup,
+                }).create();
+                await new RegistrationFactory({
+                    member: otherPreviousMember,
+                    group: otherPreviousGroup,
+                }).create();
 
-                return { organization, currentGroup, previousGroup, currentMember, previousMember, otherPreviousMember };
+                return {
+                    organization,
+                    currentGroup,
+                    previousGroup,
+                    currentMember,
+                    previousMember,
+                    otherPreviousMember,
+                };
             }
 
-            async function fetchMembers(organization: Awaited<ReturnType<typeof setupPeriods>>['organization'], groupPermissions: [string, ResourcePermissions][], level: PermissionLevel = PermissionLevel.None) {
+            async function fetchMembers(
+                organization: Awaited<ReturnType<typeof setupPeriods>>['organization'],
+                groupPermissions: [string, ResourcePermissions][],
+                level: PermissionLevel = PermissionLevel.None,
+            ) {
                 const user = await new UserFactory({
                     organization,
                     permissions: Permissions.create({
                         level,
-                        resources: new Map([[PermissionsResourceType.Groups, new Map(groupPermissions)]]),
+                        resources: new Map([
+                            [PermissionsResourceType.Groups, new Map(groupPermissions)],
+                        ]),
                     }),
                 }).create();
 
                 const token = await SessionService.createSession(user);
 
-                return await testServer.test(endpoint, Request.get({
-                    path: baseUrl,
-                    host: organization.getApiHost(),
-                    query: new LimitedFilteredRequest({ limit: 100 }),
-                    headers: { authorization: 'Bearer ' + token.accessToken },
-                }));
+                return await testServer.test(
+                    endpoint,
+                    Request.get({
+                        path: baseUrl,
+                        host: organization.getApiHost(),
+                        query: new LimitedFilteredRequest({ limit: 100 }),
+                        headers: { authorization: 'Bearer ' + token.accessToken },
+                    }),
+                );
             }
 
             const read = () => ResourcePermissions.create({ level: PermissionLevel.Read });
@@ -533,7 +611,8 @@ describe('Endpoint.GetMembersEndpoint', () => {
             });
 
             test('An explicit grant on a previous period group is not lost by adding $currentPeriod', async () => {
-                const { organization, previousGroup, currentMember, previousMember } = await setupPeriods();
+                const { organization, previousGroup, currentMember, previousMember } =
+                    await setupPeriods();
 
                 const response = await fetchMembers(organization, [
                     [PermissionsResourceKey.CurrentPeriod, read()],
@@ -548,7 +627,8 @@ describe('Endpoint.GetMembersEndpoint', () => {
             });
 
             test('An $all grant does not reach archived groups', async () => {
-                const { organization, currentGroup, previousMember, otherPreviousMember } = await setupPeriods();
+                const { organization, currentGroup, previousMember, otherPreviousMember } =
+                    await setupPeriods();
 
                 currentGroup.status = GroupStatus.Archived;
                 await currentGroup.save();
@@ -565,7 +645,8 @@ describe('Endpoint.GetMembersEndpoint', () => {
             });
 
             test('A $currentPeriod grant does not reach an archived group of the current period', async () => {
-                const { organization, currentGroup, previousGroup, currentMember, previousMember } = await setupPeriods();
+                const { organization, currentGroup, previousGroup, currentMember, previousMember } =
+                    await setupPeriods();
 
                 currentGroup.status = GroupStatus.Archived;
                 await currentGroup.save();
@@ -586,7 +667,13 @@ describe('Endpoint.GetMembersEndpoint', () => {
             });
 
             test('Full access still reaches archived groups', async () => {
-                const { organization, currentGroup, currentMember, previousMember, otherPreviousMember } = await setupPeriods();
+                const {
+                    organization,
+                    currentGroup,
+                    currentMember,
+                    previousMember,
+                    otherPreviousMember,
+                } = await setupPeriods();
 
                 currentGroup.status = GroupStatus.Archived;
                 await currentGroup.save();
@@ -602,7 +689,8 @@ describe('Endpoint.GetMembersEndpoint', () => {
             });
 
             test('An $all grant reaches every period', async () => {
-                const { organization, currentMember, previousMember, otherPreviousMember } = await setupPeriods();
+                const { organization, currentMember, previousMember, otherPreviousMember } =
+                    await setupPeriods();
 
                 const response = await fetchMembers(organization, [
                     [PermissionsResourceKey.All, read()],
@@ -627,10 +715,17 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.Groups,
-                        new Map([[allowedGroup.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Groups,
+                            new Map([
+                                [
+                                    allowedGroup.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
 
@@ -674,25 +769,21 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const member3 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const member3 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
             const group3 = await new GroupFactory({ organization, period }).create();
@@ -729,27 +820,27 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
 
             const defaultGroup = await new GroupFactory({ organization, period }).create();
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
             const event = await new EventFactory({
                 organization,
                 group,
@@ -767,13 +858,16 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             // Give the user write permissions to all events targeted to the default group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    defaultGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.None,
-                        accessRights: [AccessRight.EventWrite],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        defaultGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.None,
+                            accessRights: [AccessRight.EventWrite],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -819,29 +913,34 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const member3 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const member3 = await new MemberFactory({}).create();
 
             const defaultGroup = await new GroupFactory({ organization, period }).create();
-            const waitingList = await new GroupFactory({ organization, period, type: GroupType.WaitingList }).create();
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration, waitingListId: waitingList.id }).create();
+            const waitingList = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.WaitingList,
+            }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+                waitingListId: waitingList.id,
+            }).create();
 
             const event = await new EventFactory({
                 organization,
@@ -860,13 +959,16 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             // Give the user write permissions to all events targeted to the default group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    defaultGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.None,
-                        accessRights: [AccessRight.EventWrite],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        defaultGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.None,
+                            accessRights: [AccessRight.EventWrite],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -913,27 +1015,27 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
 
             const defaultGroup = await new GroupFactory({ organization, period }).create();
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
             const event = await new EventFactory({
                 organization,
                 group,
@@ -951,13 +1053,16 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             // The user can read members registered for default group, but not events for default group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    defaultGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                        accessRights: [],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        defaultGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                            accessRights: [],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -998,27 +1103,27 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
 
             const defaultGroup = await new GroupFactory({ organization, period }).create();
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
 
             // Event for all members of the organization (so no permission to this event)
             const event = await new EventFactory({
@@ -1030,13 +1135,16 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             // The user can read members registered for default group, but not events for default group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    defaultGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                        accessRights: [AccessRight.EventWrite],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        defaultGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                            accessRights: [AccessRight.EventWrite],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -1077,29 +1185,34 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const member3 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const member3 = await new MemberFactory({}).create();
 
             const defaultGroup = await new GroupFactory({ organization, period }).create();
-            const waitingList = await new GroupFactory({ organization, period, type: GroupType.WaitingList }).create();
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration, waitingListId: waitingList.id }).create();
+            const waitingList = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.WaitingList,
+            }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+                waitingListId: waitingList.id,
+            }).create();
 
             const event = await new EventFactory({
                 organization,
@@ -1118,13 +1231,16 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             // The user can read members registered for default group, but not events for default group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    defaultGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                        accessRights: [],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        defaultGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                            accessRights: [],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -1166,8 +1282,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const recordCategory = await new RecordCategoryFactory({
                 records: [
@@ -1184,17 +1299,14 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
 
             // Make sure member1 has answered the question
             const answer = RecordTextAnswer.create({ settings: record });
@@ -1206,13 +1318,16 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             // The user can read members registered for default group, but not events for default group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                        accessRights: [],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                            accessRights: [],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -1256,8 +1371,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
         test('Allowed: A user can filter on record answer if permission for that category', async () => {
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [] }).create();
 
             const recordCategory = await new RecordCategoryFactory({
                 records: [
@@ -1277,12 +1391,11 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     roles: [],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
 
             // Make sure member1 has answered the question
             const answer = RecordTextAnswer.create({ settings: record });
@@ -1294,23 +1407,29 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             // The user can read members registered for default group, but not events for default group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                        accessRights: [],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                            accessRights: [],
+                        }),
+                    ],
+                ]),
             );
 
             resources.set(
-                PermissionsResourceType.RecordCategories, new Map([[
-                    recordCategory.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                        accessRights: [],
-                    }),
-                ]]),
+                PermissionsResourceType.RecordCategories,
+                new Map([
+                    [
+                        recordCategory.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                            accessRights: [],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -1359,8 +1478,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
         test('Allowed: A platform admin can filter on record answer if permission for all members', async () => {
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [] }).create();
 
             const recordCategory = await new RecordCategoryFactory({
                 records: [
@@ -1379,12 +1497,11 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     roles: [],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
 
             // Make sure member1 has answered the question
             const answer = RecordTextAnswer.create({ settings: record });
@@ -1395,13 +1512,16 @@ describe('Endpoint.GetMembersEndpoint', () => {
             const group = await new GroupFactory({ organization, period }).create();
 
             resources.set(
-                PermissionsResourceType.OrganizationTags, new Map([[
-                    PermissionsResourceKey.All,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Full,
-                        accessRights: [],
-                    }),
-                ]]),
+                PermissionsResourceType.OrganizationTags,
+                new Map([
+                    [
+                        PermissionsResourceKey.All,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Full,
+                            accessRights: [],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -1450,8 +1570,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
         test('Not allowed: A platform admin cannot filter on record answer if no permission for all members', async () => {
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [] }).create();
 
             const recordCategory = await new RecordCategoryFactory({
                 records: [
@@ -1469,27 +1588,31 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.Groups, new Map([[
-                            PermissionsResourceKey.CurrentPeriod,
-                            ResourcePermissions.create({
-                                level: PermissionLevel.Full,
-                                accessRights: [],
-                            }),
-                        ]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Groups,
+                            new Map([
+                                [
+                                    PermissionsResourceKey.CurrentPeriod,
+                                    ResourcePermissions.create({
+                                        level: PermissionLevel.Full,
+                                        accessRights: [],
+                                    }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
                 globalPermissions: Permissions.create({
                     level: PermissionLevel.None,
                     roles: [],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
 
             // Make sure member1 has answered the question
             const answer = RecordTextAnswer.create({ settings: record });
@@ -1498,13 +1621,16 @@ describe('Endpoint.GetMembersEndpoint', () => {
             await member1.save();
 
             resources.set(
-                PermissionsResourceType.OrganizationTags, new Map([[
-                    'tagtest',
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Full,
-                        accessRights: [],
-                    }),
-                ]]),
+                PermissionsResourceType.OrganizationTags,
+                new Map([
+                    [
+                        'tagtest',
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Full,
+                            accessRights: [],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -1566,76 +1692,114 @@ describe('Endpoint.GetMembersEndpoint', () => {
             await platform.save();
         });
 
-        test.each(['platform', 'organization'] as const)('Lists and counts members of every period of tagged organizations only (userMode %s)', async (userMode) => {
-            TestUtils.setEnvironment('userMode', userMode);
-            const tag = tags[userMode];
+        test.each(['platform', 'organization'] as const)(
+            'Lists and counts members of every period of tagged organizations only (userMode %s)',
+            async (userMode) => {
+                TestUtils.setEnvironment('userMode', userMode);
+                const tag = tags[userMode];
 
-            const organization = await new OrganizationFactory({ tags: [tag.id] }).create();
-            const otherOrganization = await new OrganizationFactory({}).create();
-            const previousPeriod = await new RegistrationPeriodFactory({
-                organization: userMode === 'organization' ? organization : undefined,
-                startDate: new Date(2023, 0, 1),
-                endDate: new Date(2023, 11, 31),
-            }).create();
+                const organization = await new OrganizationFactory({ tags: [tag.id] }).create();
+                const otherOrganization = await new OrganizationFactory({}).create();
+                const previousPeriod = await new RegistrationPeriodFactory({
+                    organization: userMode === 'organization' ? organization : undefined,
+                    startDate: new Date(2023, 0, 1),
+                    endDate: new Date(2023, 11, 31),
+                }).create();
 
-            const currentGroup = await new GroupFactory({ organization }).create();
-            const previousPeriodGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
-            const otherGroup = await new GroupFactory({ organization: otherOrganization }).create();
-            const archivedGroup = await new GroupFactory({ organization }).create();
-            archivedGroup.status = GroupStatus.Archived;
-            await archivedGroup.save();
+                const currentGroup = await new GroupFactory({ organization }).create();
+                const previousPeriodGroup = await new GroupFactory({
+                    organization,
+                    period: previousPeriod,
+                }).create();
+                const otherGroup = await new GroupFactory({
+                    organization: otherOrganization,
+                }).create();
+                const archivedGroup = await new GroupFactory({ organization }).create();
+                archivedGroup.status = GroupStatus.Archived;
+                await archivedGroup.save();
 
-            const currentMember = await new MemberFactory({}).create();
-            const previousPeriodMember = await new MemberFactory({}).create();
-            const otherMember = await new MemberFactory({}).create();
-            const archivedMember = await new MemberFactory({}).create();
+                const currentMember = await new MemberFactory({}).create();
+                const previousPeriodMember = await new MemberFactory({}).create();
+                const otherMember = await new MemberFactory({}).create();
+                const archivedMember = await new MemberFactory({}).create();
 
-            await new RegistrationFactory({ member: currentMember, group: currentGroup }).create();
-            await new RegistrationFactory({ member: previousPeriodMember, group: previousPeriodGroup }).create();
-            await new RegistrationFactory({ member: otherMember, group: otherGroup }).create();
+                await new RegistrationFactory({
+                    member: currentMember,
+                    group: currentGroup,
+                }).create();
+                await new RegistrationFactory({
+                    member: previousPeriodMember,
+                    group: previousPeriodGroup,
+                }).create();
+                await new RegistrationFactory({ member: otherMember, group: otherGroup }).create();
 
-            // Archived groups require full access to the organization
-            await new RegistrationFactory({ member: archivedMember, group: archivedGroup }).create();
+                // Archived groups require full access to the organization
+                await new RegistrationFactory({
+                    member: archivedMember,
+                    group: archivedGroup,
+                }).create();
 
-            const user = await new UserFactory({
-                globalPermissions: Permissions.create({
-                    level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.OrganizationTags, new Map([[
-                            tag.id,
-                            ResourcePermissions.create({ level: PermissionLevel.Read }),
-                        ]]),
-                    ]]),
-                }),
-            }).create();
-            const token = await SessionService.createSession(user);
-            const headers = { authorization: 'Bearer ' + token.accessToken };
+                const user = await new UserFactory({
+                    globalPermissions: Permissions.create({
+                        level: PermissionLevel.None,
+                        resources: new Map([
+                            [
+                                PermissionsResourceType.OrganizationTags,
+                                new Map([
+                                    [
+                                        tag.id,
+                                        ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                    ],
+                                ]),
+                            ],
+                        ]),
+                    }),
+                }).create();
+                const token = await SessionService.createSession(user);
+                const headers = { authorization: 'Bearer ' + token.accessToken };
 
-            const response = await testServer.test(endpoint, Request.get({
-                path: baseUrl,
-                query: new LimitedFilteredRequest({ limit: 10 }),
-                headers,
-            }));
-            expect(response.status).toBe(200);
-            expect(response.body.results.members.map(m => m.id)).toIncludeSameMembers([currentMember.id, previousPeriodMember.id]);
+                const response = await testServer.test(
+                    endpoint,
+                    Request.get({
+                        path: baseUrl,
+                        query: new LimitedFilteredRequest({ limit: 10 }),
+                        headers,
+                    }),
+                );
+                expect(response.status).toBe(200);
+                expect(response.body.results.members.map((m) => m.id)).toIncludeSameMembers([
+                    currentMember.id,
+                    previousPeriodMember.id,
+                ]);
 
-            const countResponse = await testServer.test(new GetMembersCountEndpoint(), Request.get({
-                path: `${baseUrl}/count`,
-                query: new CountFilteredRequest({}),
-                headers,
-            }));
-            expect(countResponse.body.count).toBe(2);
+                const countResponse = await testServer.test(
+                    new GetMembersCountEndpoint(),
+                    Request.get({
+                        path: `${baseUrl}/count`,
+                        query: new CountFilteredRequest({}),
+                        headers,
+                    }),
+                );
+                expect(countResponse.body.count).toBe(2);
 
-            // Filtering on another organization cannot reach outside the tag scope
-            const otherCountResponse = await testServer.test(new GetMembersCountEndpoint(), Request.get({
-                path: `${baseUrl}/count`,
-                query: new CountFilteredRequest({
-                    filter: { registrations: { $elemMatch: { organizationId: otherOrganization.id } } },
-                }),
-                headers,
-            }));
-            expect(otherCountResponse.body.count).toBe(0);
-        });
+                // Filtering on another organization cannot reach outside the tag scope
+                const otherCountResponse = await testServer.test(
+                    new GetMembersCountEndpoint(),
+                    Request.get({
+                        path: `${baseUrl}/count`,
+                        query: new CountFilteredRequest({
+                            filter: {
+                                registrations: {
+                                    $elemMatch: { organizationId: otherOrganization.id },
+                                },
+                            },
+                        }),
+                        headers,
+                    }),
+                );
+                expect(otherCountResponse.body.count).toBe(0);
+            },
+        );
     });
 
     describe('Default filtering', () => {
@@ -1649,50 +1813,55 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const member3 = await new MemberFactory({ }).create();
-            const member4 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const member3 = await new MemberFactory({}).create();
+            const member4 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
             const group3 = await new GroupFactory({ organization, period }).create();
 
-            const group4 = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group4 = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
 
             // Give permission for 2 / 3 groups + one event group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ], [
-                    group2.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ], [
-                    group4.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                    [
+                        group2.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                    [
+                        group4.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -1735,40 +1904,43 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const member3 = await new MemberFactory({ }).create();
-            const member4 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const member3 = await new MemberFactory({}).create();
+            const member4 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
             const group3 = await new GroupFactory({ organization, period }).create();
 
-            const group4 = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group4 = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
 
             // Give permission to all groups
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    PermissionsResourceKey.CurrentPeriod,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        PermissionsResourceKey.CurrentPeriod,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -1806,29 +1978,27 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
     describe('Language filtering', () => {
         async function setup() {
-            const organization = await new OrganizationFactory({ period })
-                .create();
+            const organization = await new OrganizationFactory({ period }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.Full,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
             const group = await new GroupFactory({ organization, period }).create();
 
-            const frenchMember = await new MemberFactory({ }).create();
+            const frenchMember = await new MemberFactory({}).create();
             frenchMember.details.language = Language.French;
             await frenchMember.save();
 
-            const dutchMember = await new MemberFactory({ }).create();
+            const dutchMember = await new MemberFactory({}).create();
             dutchMember.details.language = Language.Dutch;
             await dutchMember.save();
 
-            const defaultMember = await new MemberFactory({ }).create();
+            const defaultMember = await new MemberFactory({}).create();
 
             await new RegistrationFactory({ member: frenchMember, group }).create();
             await new RegistrationFactory({ member: dutchMember, group }).create();
@@ -1837,7 +2007,11 @@ describe('Endpoint.GetMembersEndpoint', () => {
             return { organization, token, frenchMember, dutchMember, defaultMember };
         }
 
-        async function fetchMembers(organization: Awaited<ReturnType<typeof setup>>['organization'], token: Token, filter: StamhoofdFilter) {
+        async function fetchMembers(
+            organization: Awaited<ReturnType<typeof setup>>['organization'],
+            token: Token,
+            filter: StamhoofdFilter,
+        ) {
             const request = Request.get({
                 path: baseUrl,
                 host: organization.getApiHost(),
@@ -1889,8 +2063,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
         test('A user can filter members on the date of a date record answer', async () => {
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [] }).create();
 
             const recordCategory = await new RecordCategoryFactory({
                 records: [
@@ -1910,8 +2083,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     roles: [],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
 
@@ -1935,23 +2107,29 @@ describe('Endpoint.GetMembersEndpoint', () => {
             const group = await new GroupFactory({ organization, period }).create();
 
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                        accessRights: [],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                            accessRights: [],
+                        }),
+                    ],
+                ]),
             );
 
             resources.set(
-                PermissionsResourceType.RecordCategories, new Map([[
-                    recordCategory.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                        accessRights: [],
-                    }),
-                ]]),
+                PermissionsResourceType.RecordCategories,
+                new Map([
+                    [
+                        recordCategory.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                            accessRights: [],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -2017,8 +2195,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const recordCategory = await new RecordCategoryFactory({
                 records: [
@@ -2046,16 +2223,13 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
 
             // Make sure member1 has answered the question
@@ -2070,22 +2244,28 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             // Give read permission to the group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             // Give permission to read the record category
             resources.set(
-                PermissionsResourceType.RecordCategories, new Map([[
-                    recordCategory.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.RecordCategories,
+                new Map([
+                    [
+                        recordCategory.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -2146,8 +2326,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const recordCategory = await new RecordCategoryFactory({
                 records: [
@@ -2175,16 +2354,13 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
 
             // Make sure member1 has answered the question
@@ -2277,15 +2453,17 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     roles: [],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const controlMember = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const controlMember = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const unauthorizedGroup = await new GroupFactory({ organization, period }).create();
-            const controlGroup = await new GroupFactory({ organization: organization2, period }).create();
+            const controlGroup = await new GroupFactory({
+                organization: organization2,
+                period,
+            }).create();
 
             // Make sure member1 has answered the question
             const answer = RecordTextAnswer.create({ settings: record });
@@ -2309,41 +2487,53 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             // Give read permission to the group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             // Do not give permission to read the record category
 
             // Give read permission to the control group
             resources2.set(
-                PermissionsResourceType.Groups, new Map([[
-                    controlGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        controlGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             // Give permission to read the record category
             resources2.set(
-                PermissionsResourceType.RecordCategories, new Map([[
-                    recordCategory.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.RecordCategories,
+                new Map([
+                    [
+                        recordCategory.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             // Add permission for organization2
-            user.permissions!.organizationPermissions.set(organization2.id, Permissions.create({
-                level: PermissionLevel.None,
-                resources: resources2,
-            }));
+            user.permissions!.organizationPermissions.set(
+                organization2.id,
+                Permissions.create({
+                    level: PermissionLevel.None,
+                    resources: resources2,
+                }),
+            );
             await user.save();
 
             // Register the memebr for group
@@ -2360,9 +2550,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                         registrations: {
                             $elemMatch: {
                                 groupId: {
-                                    $in: [
-                                        group.id, controlGroup.id,
-                                    ],
+                                    $in: [group.id, controlGroup.id],
                                 },
                             },
                         },
@@ -2383,8 +2571,10 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 expect.objectContaining({ id: controlMember.id }),
             ]);
 
-            const returnedMember = response.body.results.members.find(m => m.id === member1.id)!;
-            const returnedControlMember = response.body.results.members.find(m => m.id === controlMember.id)!;
+            const returnedMember = response.body.results.members.find((m) => m.id === member1.id)!;
+            const returnedControlMember = response.body.results.members.find(
+                (m) => m.id === controlMember.id,
+            )!;
 
             expect(returnedMember).toBeDefined();
             expect(returnedControlMember).toBeDefined();
@@ -2419,9 +2609,8 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
-            const member = await new MemberFactory({ }).create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
+            const member = await new MemberFactory({}).create();
 
             // Group we have access for, but with an active registration
             const accessGroup = await new GroupFactory({
@@ -2462,29 +2651,30 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             // Give read permission to the group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    accessGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ], [
-                    deactivatedGroup.id, // not for the control group
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        accessGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                    [
+                        deactivatedGroup.id, // not for the control group
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
 
@@ -2514,7 +2704,10 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             expect(returnedMember.registrations).toIncludeSameMembers([
                 expect.objectContaining({ id: accessRegistration.id, deactivatedAt: null }),
-                expect.objectContaining({ id: deactivatedRegistration.id, deactivatedAt: deactivatedRegistration.deactivatedAt }),
+                expect.objectContaining({
+                    id: deactivatedRegistration.id,
+                    deactivatedAt: deactivatedRegistration.deactivatedAt,
+                }),
             ]);
         });
     });
@@ -2527,9 +2720,28 @@ describe('Endpoint.GetMembersEndpoint', () => {
          *
          * Returns the ids of all members across all pages, in the order they were received.
          */
-        async function fetchAllPages({ host, token, sort, limit, filter, search }: { host: string; token: Token; sort: SortList; limit: number; filter?: StamhoofdFilter; search?: string }) {
+        async function fetchAllPages({
+            host,
+            token,
+            sort,
+            limit,
+            filter,
+            search,
+        }: {
+            host: string;
+            token: Token;
+            sort: SortList;
+            limit: number;
+            filter?: StamhoofdFilter;
+            search?: string;
+        }) {
             const ids: string[] = [];
-            let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ sort, limit, filter, search });
+            let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({
+                sort,
+                limit,
+                filter,
+                search,
+            });
             let pages = 0;
 
             while (query) {
@@ -2545,7 +2757,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 const response = await testServer.test(endpoint, request);
                 expect(response.status).toBe(200);
 
-                ids.push(...response.body.results.members.map(m => m.id));
+                ids.push(...response.body.results.members.map((m) => m.id));
                 query = response.body.next;
                 pages += 1;
 
@@ -2600,7 +2812,13 @@ describe('Endpoint.GetMembersEndpoint', () => {
             }
 
             test('Members are sorted by lastRegisteredAt ascending across all pages', async () => {
-                const { host, token, members } = await setupMembers([march, january, june, february, may]);
+                const { host, token, members } = await setupMembers([
+                    march,
+                    january,
+                    june,
+                    february,
+                    may,
+                ]);
                 const [marchMember, januaryMember, juneMember, februaryMember, mayMember] = members;
 
                 // A limit lower than the total forces the endpoint to build a next page filter from getValue
@@ -2621,7 +2839,13 @@ describe('Endpoint.GetMembersEndpoint', () => {
             });
 
             test('Members are sorted by lastRegisteredAt descending across all pages', async () => {
-                const { host, token, members } = await setupMembers([march, january, june, february, may]);
+                const { host, token, members } = await setupMembers([
+                    march,
+                    january,
+                    june,
+                    february,
+                    may,
+                ]);
                 const [marchMember, januaryMember, juneMember, februaryMember, mayMember] = members;
 
                 const ids = await fetchAllPages({
@@ -2653,11 +2877,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     limit: 1,
                 });
 
-                expect(ids).toEqual([
-                    neverRegisteredMember.id,
-                    januaryMember.id,
-                    marchMember.id,
-                ]);
+                expect(ids).toEqual([neverRegisteredMember.id, januaryMember.id, marchMember.id]);
             });
 
             test('Members without a lastRegisteredAt are sorted last when descending', async () => {
@@ -2671,11 +2891,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     limit: 1,
                 });
 
-                expect(ids).toEqual([
-                    marchMember.id,
-                    januaryMember.id,
-                    neverRegisteredMember.id,
-                ]);
+                expect(ids).toEqual([marchMember.id, januaryMember.id, neverRegisteredMember.id]);
             });
 
             test('The next page filter compares lastRegisteredAt as a UTC datetime string', async () => {
@@ -2733,11 +2949,7 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     limit: 1,
                 });
 
-                expect(ids).toEqual([
-                    second.id,
-                    third.id,
-                    first.id,
-                ]);
+                expect(ids).toEqual([second.id, third.id, first.id]);
             });
         });
 
@@ -2746,7 +2958,10 @@ describe('Endpoint.GetMembersEndpoint', () => {
              * Creates one member per passed value, all registered in the same group of a new organization,
              * and returns an admin with full access to that organization.
              */
-            async function setupMembers(outstandingBalances: (number | null)[], options: { firstName?: string } = {}) {
+            async function setupMembers(
+                outstandingBalances: (number | null)[],
+                options: { firstName?: string } = {},
+            ) {
                 const organization = await new OrganizationFactory({ period }).create();
 
                 const user = await new UserFactory({
@@ -2762,7 +2977,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 const members: MemberWithUsersRegistrationsAndGroups[] = [];
 
                 for (const outstandingBalance of outstandingBalances) {
-                    const member = await new MemberFactory({ firstName: options.firstName }).create();
+                    const member = await new MemberFactory({
+                        firstName: options.firstName,
+                    }).create();
                     await new RegistrationFactory({ member, group }).create();
 
                     if (outstandingBalance !== null) {
@@ -2782,7 +2999,8 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             test('Members are sorted by memberCachedBalance.amountOpen ascending across all pages', async () => {
                 const { host, token, members } = await setupMembers([30, 5, 7, 0, 15, 45, -20]);
-                const [member30, member5, member7, member0, member15, member45, memberMinus20] = members;
+                const [member30, member5, member7, member0, member15, member45, memberMinus20] =
+                    members;
 
                 // A limit lower than the total forces the endpoint to build a next page filter from getValue
                 const ids = await fetchAllPages({
@@ -2805,12 +3023,15 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             test('Members are sorted by memberCachedBalance.amountOpen descending across all pages', async () => {
                 const { host, token, members } = await setupMembers([30, 5, 7, 0, 15, 45, -20]);
-                const [member30, member5, member7, member0, member15, member45, memberMinus20] = members;
+                const [member30, member5, member7, member0, member15, member45, memberMinus20] =
+                    members;
 
                 const ids = await fetchAllPages({
                     host,
                     token,
-                    sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC }],
+                    sort: [
+                        { key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC },
+                    ],
                     limit: 2,
                 });
 
@@ -2854,7 +3075,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 const ids = await fetchAllPages({
                     host,
                     token,
-                    sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC }],
+                    sort: [
+                        { key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC },
+                    ],
                     limit: 10,
                 });
 
@@ -2877,7 +3100,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     path: baseUrl,
                     host,
                     query: new LimitedFilteredRequest({
-                        sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC }],
+                        sort: [
+                            { key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC },
+                        ],
                         limit: 1,
                     }),
                     headers: {
@@ -2940,24 +3165,27 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 [null, SortItemDirection.DESC],
                 [10, SortItemDirection.ASC],
                 [10, SortItemDirection.DESC],
-            ])('Sorting on same memberCachedBalance.amountOpen (%s) sorts on id instead: %s', async (cachedBalance, sortDirection) => {
-                const cachedBalanceArray = new Array(100).fill(cachedBalance);
-                const { host, token, members } = await setupMembers(cachedBalanceArray);
+            ])(
+                'Sorting on same memberCachedBalance.amountOpen (%s) sorts on id instead: %s',
+                async (cachedBalance, sortDirection) => {
+                    const cachedBalanceArray = new Array(100).fill(cachedBalance);
+                    const { host, token, members } = await setupMembers(cachedBalanceArray);
 
-                const ids = await fetchAllPages({
-                    host,
-                    token,
-                    sort: [{ key: 'memberCachedBalance.amountOpen', order: sortDirection }],
-                    limit: 1,
-                });
+                    const ids = await fetchAllPages({
+                        host,
+                        token,
+                        sort: [{ key: 'memberCachedBalance.amountOpen', order: sortDirection }],
+                        limit: 1,
+                    });
 
-                const sortedIds = members.map(m => m.id).sort();
+                    const sortedIds = members.map((m) => m.id).sort();
 
-                expect(ids).toHaveLength(100);
-                expect(ids).toEqual(sortDirection === SortItemDirection.ASC
-                    ? sortedIds
-                    : sortedIds.reverse());
-            });
+                    expect(ids).toHaveLength(100);
+                    expect(ids).toEqual(
+                        sortDirection === SortItemDirection.ASC ? sortedIds : sortedIds.reverse(),
+                    );
+                },
+            );
 
             async function createUserWithoutFinancialAccess(organization: Organization) {
                 const user = await new UserFactory({
@@ -2978,7 +3206,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     path: baseUrl,
                     host,
                     query: new LimitedFilteredRequest({
-                        sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC }],
+                        sort: [
+                            { key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC },
+                        ],
                         limit: 2,
                     }),
                     headers: {
@@ -3018,31 +3248,50 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 const headers = { authorization: 'Bearer ' + token.accessToken };
                 const filter = { memberCachedBalance: { amountOpen: { $gte: 7 } } };
 
-                const response = await testServer.test(endpoint, Request.get({
-                    path: baseUrl,
-                    host,
-                    query: new LimitedFilteredRequest({ filter, limit: 10 }),
-                    headers,
-                }));
+                const response = await testServer.test(
+                    endpoint,
+                    Request.get({
+                        path: baseUrl,
+                        host,
+                        query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                        headers,
+                    }),
+                );
                 expect(response.status).toBe(200);
-                expect(response.body.results.members.map(m => m.id)).toIncludeSameMembers([member30.id, member7.id, member15.id]);
+                expect(response.body.results.members.map((m) => m.id)).toIncludeSameMembers([
+                    member30.id,
+                    member7.id,
+                    member15.id,
+                ]);
 
-                const countResponse = await testServer.test(new GetMembersCountEndpoint(), Request.get({
-                    path: `${baseUrl}/count`,
-                    host,
-                    query: new CountFilteredRequest({ filter }),
-                    headers,
-                }));
+                const countResponse = await testServer.test(
+                    new GetMembersCountEndpoint(),
+                    Request.get({
+                        path: `${baseUrl}/count`,
+                        host,
+                        query: new CountFilteredRequest({ filter }),
+                        headers,
+                    }),
+                );
                 expect(countResponse.body.count).toBe(3);
 
                 // Members without a balance row count as 0
-                const zeroResponse = await testServer.test(endpoint, Request.get({
-                    path: baseUrl,
-                    host,
-                    query: new LimitedFilteredRequest({ filter: { memberCachedBalance: { amountOpen: 0 } }, limit: 10 }),
-                    headers,
-                }));
-                expect(zeroResponse.body.results.members.map(m => m.id)).toIncludeSameMembers([memberNull.id, member0.id]);
+                const zeroResponse = await testServer.test(
+                    endpoint,
+                    Request.get({
+                        path: baseUrl,
+                        host,
+                        query: new LimitedFilteredRequest({
+                            filter: { memberCachedBalance: { amountOpen: 0 } },
+                            limit: 10,
+                        }),
+                        headers,
+                    }),
+                );
+                expect(zeroResponse.body.results.members.map((m) => m.id)).toIncludeSameMembers([
+                    memberNull.id,
+                    member0.id,
+                ]);
             });
 
             test('Filtering and sorting on memberCachedBalance.amountOpen can be combined', async () => {
@@ -3053,7 +3302,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     host,
                     token,
                     filter: { memberCachedBalance: { amountOpen: { $gte: 7 } } },
-                    sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC }],
+                    sort: [
+                        { key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC },
+                    ],
                     limit: 2,
                 });
 
@@ -3062,7 +3313,10 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             test('Searching and sorting on memberCachedBalance.amountOpen can be combined', async () => {
                 const firstName = 'Searchable' + Math.random().toString(36).slice(2);
-                const { host, token, members, organization, group } = await setupMembers([30, null, 7], { firstName });
+                const { host, token, members, organization, group } = await setupMembers(
+                    [30, null, 7],
+                    { firstName },
+                );
                 const [member30, memberNull, member7] = members;
 
                 // Same organization, different name: must be excluded by the search
@@ -3102,10 +3356,17 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     permissions: Permissions.create({
                         level: PermissionLevel.None,
                         roles: [role],
-                        resources: new Map([[
-                            PermissionsResourceType.Groups,
-                            new Map([[group.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
-                        ]]),
+                        resources: new Map([
+                            [
+                                PermissionsResourceType.Groups,
+                                new Map([
+                                    [
+                                        group.id,
+                                        ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                    ],
+                                ]),
+                            ],
+                        ]),
                     }),
                 }).create();
                 const token = await SessionService.createSession(user);
@@ -3113,7 +3374,9 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 const ids = await fetchAllPages({
                     host,
                     token,
-                    sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC }],
+                    sort: [
+                        { key: 'memberCachedBalance.amountOpen', order: SortItemDirection.DESC },
+                    ],
                     limit: 2,
                 });
 
@@ -3122,14 +3385,18 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             test('memberCachedBalance.amountOpen is not available without an organization scope', async () => {
                 await setupMembers([30]);
-                const platformAdmin = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+                const platformAdmin = await new UserFactory({
+                    globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+                }).create();
                 const token = await SessionService.createSession(platformAdmin);
 
                 const request = Request.get({
                     path: baseUrl,
                     host: 'platform.stamhoofd.app',
                     query: new LimitedFilteredRequest({
-                        sort: [{ key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC }],
+                        sort: [
+                            { key: 'memberCachedBalance.amountOpen', order: SortItemDirection.ASC },
+                        ],
                         limit: 2,
                     }),
                     headers: {
@@ -3164,68 +3431,119 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
         async function fetchMemberIds(user: User, host: string, filter: StamhoofdFilter) {
             const token = await SessionService.createSession(user);
-            const response = await testServer.test(endpoint, Request.get({
-                path: baseUrl,
-                host,
-                query: new LimitedFilteredRequest({ filter, limit: 10 }),
-                headers: { authorization: 'Bearer ' + token.accessToken },
-            }));
-            return response.body.results.members.map(m => m.id);
+            const response = await testServer.test(
+                endpoint,
+                Request.get({
+                    path: baseUrl,
+                    host,
+                    query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                }),
+            );
+            return response.body.results.members.map((m) => m.id);
         }
 
         test('Organization admins cannot filter on relations of the organization', async () => {
             const organization = await new OrganizationFactory({ period }).create();
             const member = await new MemberFactory({}).create();
             await new RegistrationFactory({ member, organization }).create();
-            const organizationAdmin = await new UserFactory({ organization, permissions: fullPermissions() }).create();
+            const organizationAdmin = await new UserFactory({
+                organization,
+                permissions: fullPermissions(),
+            }).create();
             const host = organization.getApiHost();
 
-            expect(await fetchMemberIds(organizationAdmin, host, registrationOrganizationFilter({ name: organization.name }))).toEqual([member.id]);
+            expect(
+                await fetchMemberIds(
+                    organizationAdmin,
+                    host,
+                    registrationOrganizationFilter({ name: organization.name }),
+                ),
+            ).toEqual([member.id]);
 
             for (const [key, filter] of Object.entries(relationFilters)) {
-                await expect(fetchMemberIds(organizationAdmin, host, registrationOrganizationFilter({ [key]: filter }))).rejects.toThrow(
-                    STExpect.errorWithCode('permission_denied'),
-                );
+                await expect(
+                    fetchMemberIds(
+                        organizationAdmin,
+                        host,
+                        registrationOrganizationFilter({ [key]: filter }),
+                    ),
+                ).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
             }
 
-            await expect(fetchMemberIds(organizationAdmin, host, {
-                responsibilities: { $elemMatch: { organization: { admins: relationFilters.admins } } },
-            })).rejects.toThrow(
-                STExpect.errorWithCode('permission_denied'),
-            );
+            await expect(
+                fetchMemberIds(organizationAdmin, host, {
+                    responsibilities: {
+                        $elemMatch: { organization: { admins: relationFilters.admins } },
+                    },
+                }),
+            ).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
         });
 
         test('Platform admins can filter on relations of the organization', async () => {
-            const organization = await new OrganizationFactory({ period, packages: [STPackageBundle.Members] }).create();
+            const organization = await new OrganizationFactory({
+                period,
+                packages: [STPackageBundle.Members],
+            }).create();
             const otherOrganization = await new OrganizationFactory({ period }).create();
             const member = await new MemberFactory({}).create();
             await new RegistrationFactory({ member, organization }).create();
-            await new MemberResponsibilityRecordFactory({ member, organizationId: organization.id }).create();
-            const otherMember = await new MemberFactory({ firstName: 'Other ' + otherOrganization.id }).create();
-            await new RegistrationFactory({ member: otherMember, organization: otherOrganization }).create();
-            await new MemberResponsibilityRecordFactory({ member: otherMember, organizationId: otherOrganization.id }).create();
+            await new MemberResponsibilityRecordFactory({
+                member,
+                organizationId: organization.id,
+            }).create();
+            const otherMember = await new MemberFactory({
+                firstName: 'Other ' + otherOrganization.id,
+            }).create();
+            await new RegistrationFactory({
+                member: otherMember,
+                organization: otherOrganization,
+            }).create();
+            await new MemberResponsibilityRecordFactory({
+                member: otherMember,
+                organizationId: otherOrganization.id,
+            }).create();
 
-            const platformAdmin = await new UserFactory({ globalPermissions: fullPermissions() }).create();
+            const platformAdmin = await new UserFactory({
+                globalPermissions: fullPermissions(),
+            }).create();
             const bothMembers = { $in: [member.id, otherMember.id] };
 
             // Emailing organizations from the admin portal filters members on the organization of their responsibility
-            expect(await fetchMemberIds(platformAdmin, platformHost, {
-                id: bothMembers,
-                responsibilities: { $elemMatch: { endDate: null, organization: { packages: relationFilters.packages } } },
-            })).toEqual([member.id]);
+            expect(
+                await fetchMemberIds(platformAdmin, platformHost, {
+                    id: bothMembers,
+                    responsibilities: {
+                        $elemMatch: {
+                            endDate: null,
+                            organization: { packages: relationFilters.packages },
+                        },
+                    },
+                }),
+            ).toEqual([member.id]);
 
-            expect(await fetchMemberIds(platformAdmin, platformHost, {
-                id: bothMembers,
-                ...registrationOrganizationFilter({ packages: relationFilters.packages }),
-            })).toEqual([member.id]);
+            expect(
+                await fetchMemberIds(platformAdmin, platformHost, {
+                    id: bothMembers,
+                    ...registrationOrganizationFilter({ packages: relationFilters.packages }),
+                }),
+            ).toEqual([member.id]);
 
-            expect(await fetchMemberIds(platformAdmin, platformHost, {
-                id: bothMembers,
-                ...registrationOrganizationFilter({ members: { $elemMatch: { firstName: otherMember.firstName } } }),
-            })).toEqual([otherMember.id]);
+            expect(
+                await fetchMemberIds(platformAdmin, platformHost, {
+                    id: bothMembers,
+                    ...registrationOrganizationFilter({
+                        members: { $elemMatch: { firstName: otherMember.firstName } },
+                    }),
+                }),
+            ).toEqual([otherMember.id]);
 
             for (const [key, filter] of Object.entries(relationFilters)) {
-                await fetchMemberIds(platformAdmin, platformHost, registrationOrganizationFilter({ [key]: filter }));
+                await fetchMemberIds(
+                    platformAdmin,
+                    platformHost,
+                    registrationOrganizationFilter({ [key]: filter }),
+                );
             }
         });
 
@@ -3234,24 +3552,44 @@ describe('Endpoint.GetMembersEndpoint', () => {
             // With a single tag in the platform, access to that tag equals access to all organizations
             await new OrganizationTagFactory({}).create();
 
-            const taggedOrganization = await new OrganizationFactory({ period, tags: [tag.id] }).create();
+            const taggedOrganization = await new OrganizationFactory({
+                period,
+                tags: [tag.id],
+            }).create();
             const otherOrganization = await new OrganizationFactory({ period }).create();
             const member = await new MemberFactory({}).create();
             await new RegistrationFactory({ member, organization: taggedOrganization }).create();
             await new RegistrationFactory({ member, organization: otherOrganization }).create();
-            const taggedMember = await new MemberFactory({ firstName: 'Tagged ' + tag.id }).create();
-            await new RegistrationFactory({ member: taggedMember, organization: taggedOrganization }).create();
+            const taggedMember = await new MemberFactory({
+                firstName: 'Tagged ' + tag.id,
+            }).create();
+            await new RegistrationFactory({
+                member: taggedMember,
+                organization: taggedOrganization,
+            }).create();
             const otherMember = await new MemberFactory({ firstName: 'Other ' + tag.id }).create();
-            await new RegistrationFactory({ member: otherMember, organization: otherOrganization }).create();
+            await new RegistrationFactory({
+                member: otherMember,
+                organization: otherOrganization,
+            }).create();
 
-            const platformAdmin = await new UserFactory({ globalPermissions: fullPermissions() }).create();
+            const platformAdmin = await new UserFactory({
+                globalPermissions: fullPermissions(),
+            }).create();
             const tagAdmin = await new UserFactory({
                 globalPermissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.OrganizationTags,
-                        new Map([[tag.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.OrganizationTags,
+                            new Map([
+                                [
+                                    tag.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
 
@@ -3261,9 +3599,27 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 ...registrationOrganizationFilter({ members: { $elemMatch: { firstName } } }),
             });
 
-            expect(await fetchMemberIds(platformAdmin, platformHost, fellowMemberFilter(otherMember.firstName))).toEqual([member.id]);
-            expect(await fetchMemberIds(tagAdmin, platformHost, fellowMemberFilter(taggedMember.firstName))).toEqual([member.id]);
-            expect(await fetchMemberIds(tagAdmin, platformHost, fellowMemberFilter(otherMember.firstName))).toEqual([]);
+            expect(
+                await fetchMemberIds(
+                    platformAdmin,
+                    platformHost,
+                    fellowMemberFilter(otherMember.firstName),
+                ),
+            ).toEqual([member.id]);
+            expect(
+                await fetchMemberIds(
+                    tagAdmin,
+                    platformHost,
+                    fellowMemberFilter(taggedMember.firstName),
+                ),
+            ).toEqual([member.id]);
+            expect(
+                await fetchMemberIds(
+                    tagAdmin,
+                    platformHost,
+                    fellowMemberFilter(otherMember.firstName),
+                ),
+            ).toEqual([]);
         });
     });
 
@@ -3290,15 +3646,20 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
                     roles: [role],
-                    resources: new Map([[
-                        PermissionsResourceType.Groups, new Map([[
-                            group.id,
-                            ResourcePermissions.create({
-                                level: PermissionLevel.Read,
-                                accessRights,
-                            }),
-                        ]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Groups,
+                            new Map([
+                                [
+                                    group.id,
+                                    ResourcePermissions.create({
+                                        level: PermissionLevel.Read,
+                                        accessRights,
+                                    }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
 
@@ -3321,7 +3682,15 @@ describe('Endpoint.GetMembersEndpoint', () => {
             return { organization, member, membership, token };
         }
 
-        async function fetchMember({ organization, token, memberId }: { organization: Organization; token: Token; memberId: string }) {
+        async function fetchMember({
+            organization,
+            token,
+            memberId,
+        }: {
+            organization: Organization;
+            token: Token;
+            memberId: string;
+        }) {
             const request = Request.get({
                 path: baseUrl,
                 host: organization.getApiHost(),
@@ -3365,19 +3734,23 @@ describe('Endpoint.GetMembersEndpoint', () => {
             await expect(filterOnPrice({ price: { $eq: membershipPrice } })).rejects.toThrow(
                 STExpect.errorWithCode('permission_denied'),
             );
-            await expect(filterOnPrice({ priceWithoutDiscount: { $gt: membershipPrice - 1000 } })).rejects.toThrow(
-                STExpect.errorWithCode('permission_denied'),
-            );
+            await expect(
+                filterOnPrice({ priceWithoutDiscount: { $gt: membershipPrice - 1000 } }),
+            ).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
         });
 
         test('A user with MemberReadFinancialData can filter members on the price of a platform membership', async () => {
-            const { organization, member, token } = await setupMemberWithMembership([AccessRight.MemberReadFinancialData]);
+            const { organization, member, token } = await setupMemberWithMembership([
+                AccessRight.MemberReadFinancialData,
+            ]);
 
             const request = Request.get({
                 path: baseUrl,
                 host: organization.getApiHost(),
                 query: new LimitedFilteredRequest({
-                    filter: { platformMemberships: { $elemMatch: { price: { $eq: membershipPrice } } } },
+                    filter: {
+                        platformMemberships: { $elemMatch: { price: { $eq: membershipPrice } } },
+                    },
                     limit: 10,
                 }),
                 headers: {
@@ -3387,11 +3760,13 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
             const response = await testServer.test(endpoint, request);
             expect(response.status).toBe(200);
-            expect(response.body.results.members.map(m => m.id)).toEqual([member.id]);
+            expect(response.body.results.members.map((m) => m.id)).toEqual([member.id]);
         });
 
         test('A user with MemberReadFinancialData can see the price of a platform membership', async () => {
-            const { organization, member, token } = await setupMemberWithMembership([AccessRight.MemberReadFinancialData]);
+            const { organization, member, token } = await setupMemberWithMembership([
+                AccessRight.MemberReadFinancialData,
+            ]);
 
             const blob = await fetchMember({ organization, token, memberId: member.id });
 
@@ -3438,18 +3813,34 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.Groups,
-                        new Map([[allowedGroup.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Groups,
+                            new Map([
+                                [
+                                    allowedGroup.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
             const token = await SessionService.createSession(user);
             headers = { authorization: 'Bearer ' + token.accessToken };
 
-            allowedMember = await new MemberFactory({ firstName: 'Allowed', lastName: 'Member' }).create();
-            hiddenMember = await new MemberFactory({ firstName: 'Hidden', lastName: 'Member' }).create();
-            memberInBoth = await new MemberFactory({ firstName: 'Both', lastName: 'Member' }).create();
+            allowedMember = await new MemberFactory({
+                firstName: 'Allowed',
+                lastName: 'Member',
+            }).create();
+            hiddenMember = await new MemberFactory({
+                firstName: 'Hidden',
+                lastName: 'Member',
+            }).create();
+            memberInBoth = await new MemberFactory({
+                firstName: 'Both',
+                lastName: 'Member',
+            }).create();
 
             await new RegistrationFactory({ member: allowedMember, group: allowedGroup }).create();
             await new RegistrationFactory({ member: hiddenMember, group: forbiddenGroup }).create();
@@ -3458,29 +3849,39 @@ describe('Endpoint.GetMembersEndpoint', () => {
         });
 
         const fetchIds = async (filter: StamhoofdFilter) => {
-            const response = await testServer.test(endpoint, Request.get({
-                path: baseUrl,
-                host: organization.getApiHost(),
-                query: new LimitedFilteredRequest({ filter, limit: 10 }),
-                headers,
-            }));
+            const response = await testServer.test(
+                endpoint,
+                Request.get({
+                    path: baseUrl,
+                    host: organization.getApiHost(),
+                    query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                    headers,
+                }),
+            );
             expect(response.status).toBe(200);
-            return response.body.results.members.map(m => m.id);
+            return response.body.results.members.map((m) => m.id);
         };
 
         const count = async (filter: StamhoofdFilter) => {
-            const response = await testServer.test(new GetMembersCountEndpoint(), Request.get({
-                path: `${baseUrl}/count`,
-                host: organization.getApiHost(),
-                query: new CountFilteredRequest({ filter }),
-                headers,
-            }));
+            const response = await testServer.test(
+                new GetMembersCountEndpoint(),
+                Request.get({
+                    path: `${baseUrl}/count`,
+                    host: organization.getApiHost(),
+                    query: new CountFilteredRequest({ filter }),
+                    headers,
+                }),
+            );
             return response.body.count;
         };
 
         const expectDenied = async (filter: StamhoofdFilter) => {
-            await expect(fetchIds(filter)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
-            await expect(count(filter)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(fetchIds(filter)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+            await expect(count(filter)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         };
 
         const expectVisible = async (filter: StamhoofdFilter, memberIds: string[]) => {
@@ -3495,7 +3896,18 @@ describe('Endpoint.GetMembersEndpoint', () => {
             await expectVisible({ $and: [allowedElemMatch] }, expected);
             await expectVisible({ $and: [[allowedElemMatch]] }, expected);
             await expectVisible([{ $and: [allowedElemMatch] }, { lastName: 'Member' }], expected);
-            await expectVisible([{ registrations: { $elemMatch: { groupId: { $: '$rel', value: allowedGroup.id, name: 'Allowed' } } } }], expected);
+            await expectVisible(
+                [
+                    {
+                        registrations: {
+                            $elemMatch: {
+                                groupId: { $: '$rel', value: allowedGroup.id, name: 'Allowed' },
+                            },
+                        },
+                    },
+                ],
+                expected,
+            );
         });
 
         test('A group filter inside an $or does not lift the scope filter', async () => {
@@ -3506,7 +3918,10 @@ describe('Endpoint.GetMembersEndpoint', () => {
             await expectVisible([orFilter], expected);
             await expectVisible({ $and: [orFilter] }, expected);
             await expectVisible({ $and: [[orFilter]] }, expected);
-            await expectVisible({ $or: [{ $and: [allowedElemMatch] }, { firstName: 'Hidden' }] }, expected);
+            await expectVisible(
+                { $or: [{ $and: [allowedElemMatch] }, { firstName: 'Hidden' }] },
+                expected,
+            );
             await expectVisible([{ firstName: 'Hidden' }], []);
         });
 
@@ -3519,32 +3934,78 @@ describe('Endpoint.GetMembersEndpoint', () => {
 
         test('An $and object is applied as a normal conjunction', async () => {
             await expectVisible({ $and: allowedElemMatch }, [allowedMember.id, memberInBoth.id]);
-            await expectDenied({ $and: { registrations: { $elemMatch: { groupId: forbiddenGroup.id } } } });
+            await expectDenied({
+                $and: { registrations: { $elemMatch: { groupId: forbiddenGroup.id } } },
+            });
         });
 
         test('Extra conditions next to the group filter can only narrow the result', async () => {
-            await expectVisible({
-                $and: [allowedElemMatch],
-                $or: [{ firstName: 'Hidden' }, { firstName: 'Allowed' }],
-            }, [allowedMember.id]);
-            await expectVisible([allowedElemMatch, { $or: [{ firstName: 'Hidden' }, { firstName: 'Both' }] }], [memberInBoth.id]);
-            await expectVisible([allowedElemMatch, { $not: { firstName: 'Allowed' } }], [memberInBoth.id]);
+            await expectVisible(
+                {
+                    $and: [allowedElemMatch],
+                    $or: [{ firstName: 'Hidden' }, { firstName: 'Allowed' }],
+                },
+                [allowedMember.id],
+            );
+            await expectVisible(
+                [allowedElemMatch, { $or: [{ firstName: 'Hidden' }, { firstName: 'Both' }] }],
+                [memberInBoth.id],
+            );
+            await expectVisible(
+                [allowedElemMatch, { $not: { firstName: 'Allowed' } }],
+                [memberInBoth.id],
+            );
         });
 
         test('A forbidden group anywhere in the filter is rejected', async () => {
-            const forbiddenElemMatch: StamhoofdFilter = { registrations: { $elemMatch: { groupId: forbiddenGroup.id } } };
+            const forbiddenElemMatch: StamhoofdFilter = {
+                registrations: { $elemMatch: { groupId: forbiddenGroup.id } },
+            };
 
             await expectDenied([forbiddenElemMatch]);
             await expectDenied([allowedElemMatch, forbiddenElemMatch]);
             await expectDenied({ $and: [allowedElemMatch, forbiddenElemMatch] });
-            await expectDenied({ $and: [allowedElemMatch], $or: [forbiddenElemMatch, { firstName: 'Allowed' }] });
+            await expectDenied({
+                $and: [allowedElemMatch],
+                $or: [forbiddenElemMatch, { firstName: 'Allowed' }],
+            });
             await expectDenied({ $or: [allowedElemMatch, forbiddenElemMatch] });
             await expectDenied([{ $or: [allowedElemMatch, forbiddenElemMatch] }]);
             await expectDenied({ $not: forbiddenElemMatch });
-            await expectDenied({ registrations: { $elemMatch: { $or: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }] } } });
-            await expectDenied([{ registrations: { $elemMatch: { groupId: { $in: [allowedGroup.id, forbiddenGroup.id] } } } }]);
-            await expectDenied([{ registrations: { $elemMatch: { groupId: { $: '$rel', value: forbiddenGroup.id, name: 'Forbidden' } } } }]);
-            await expectDenied([{ registrations: { $elemMatch: { groupId: { $in: [{ $: '$rel', value: forbiddenGroup.id, name: 'Forbidden' }] } } } }]);
+            await expectDenied({
+                registrations: {
+                    $elemMatch: {
+                        $or: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }],
+                    },
+                },
+            });
+            await expectDenied([
+                {
+                    registrations: {
+                        $elemMatch: { groupId: { $in: [allowedGroup.id, forbiddenGroup.id] } },
+                    },
+                },
+            ]);
+            await expectDenied([
+                {
+                    registrations: {
+                        $elemMatch: {
+                            groupId: { $: '$rel', value: forbiddenGroup.id, name: 'Forbidden' },
+                        },
+                    },
+                },
+            ]);
+            await expectDenied([
+                {
+                    registrations: {
+                        $elemMatch: {
+                            groupId: {
+                                $in: [{ $: '$rel', value: forbiddenGroup.id, name: 'Forbidden' }],
+                            },
+                        },
+                    },
+                },
+            ]);
         });
 
         test('A user without any group access cannot use a wrapped filter to see members', async () => {
@@ -3562,12 +4023,17 @@ describe('Endpoint.GetMembersEndpoint', () => {
                 { $not: allowedElemMatch },
             ];
             for (const filter of filters) {
-                await expect(testServer.test(endpoint, Request.get({
-                    path: baseUrl,
-                    host: organization.getApiHost(),
-                    query: new LimitedFilteredRequest({ filter, limit: 10 }),
-                    headers: noAccessHeaders,
-                }))).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+                await expect(
+                    testServer.test(
+                        endpoint,
+                        Request.get({
+                            path: baseUrl,
+                            host: organization.getApiHost(),
+                            query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                            headers: noAccessHeaders,
+                        }),
+                    ),
+                ).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
             }
         });
     });

@@ -1,13 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { announceRelease, buildReleaseRootMessage, chunkReleaseNotes } from './release-announcement.js';
+import {
+    announceRelease,
+    buildReleaseRootMessage,
+    chunkReleaseNotes,
+} from './release-announcement.js';
 import type { SlackMessage } from './slack.js';
 
 const config = { token: 'xoxb-test', channel: 'C123' };
 
 describe('buildReleaseRootMessage', () => {
     it('links to the release when a url is given', () => {
-        expect(buildReleaseRootMessage('v2.124.0', 'https://github.com/x/y/releases/tag/v2.124.0'))
-            .toBe(':rocket: *Stamhoofd v2.124.0 released* — <https://github.com/x/y/releases/tag/v2.124.0|Release notes>');
+        expect(
+            buildReleaseRootMessage('v2.124.0', 'https://github.com/x/y/releases/tag/v2.124.0'),
+        ).toBe(
+            ':rocket: *Stamhoofd v2.124.0 released* — <https://github.com/x/y/releases/tag/v2.124.0|Release notes>',
+        );
     });
 
     it('omits the link when no url is available', () => {
@@ -23,7 +30,7 @@ describe('chunkReleaseNotes', () => {
     it('splits on line boundaries without exceeding the limit', () => {
         const chunks = chunkReleaseNotes('aaaa\nbbbb\ncccc', 9);
         expect(chunks).toEqual(['aaaa\nbbbb', 'cccc']);
-        expect(chunks.every(chunk => chunk.length <= 9)).toBe(true);
+        expect(chunks.every((chunk) => chunk.length <= 9)).toBe(true);
     });
 
     it('hard-splits a single line longer than the limit', () => {
@@ -52,7 +59,12 @@ describe('announceRelease', () => {
         });
 
         expect(result).toEqual({ rootTs: 'ts-0', replyCount: 1 });
-        expect(calls[0]).toEqual({ text: buildReleaseRootMessage('v2.124.0', 'https://github.com/x/y/releases/tag/v2.124.0') });
+        expect(calls[0]).toEqual({
+            text: buildReleaseRootMessage(
+                'v2.124.0',
+                'https://github.com/x/y/releases/tag/v2.124.0',
+            ),
+        });
         expect(calls[1]).toEqual({ text: 'line one\nline two', threadTs: 'ts-0' });
     });
 
@@ -69,7 +81,10 @@ describe('announceRelease', () => {
             post,
         });
 
-        expect(calls[1]).toEqual({ text: '*🐛 Bug fixes*\n• Fixed <https://x|it>', threadTs: 'root-ts' });
+        expect(calls[1]).toEqual({
+            text: '*🐛 Bug fixes*\n• Fixed <https://x|it>',
+            threadTs: 'root-ts',
+        });
     });
 
     it('trims the notes and posts every chunk into the root thread', async () => {
@@ -86,10 +101,10 @@ describe('announceRelease', () => {
 
         expect(result.replyCount).toBeGreaterThan(1);
         const replies = calls.slice(1);
-        expect(replies.every(reply => reply.threadTs === 'root-ts')).toBe(true);
-        expect(replies.every(reply => reply.text.length <= 3500)).toBe(true);
+        expect(replies.every((reply) => reply.threadTs === 'root-ts')).toBe(true);
+        expect(replies.every((reply) => reply.text.length <= 3500)).toBe(true);
         // Splitting on line boundaries keeps the notes intact when the replies are rejoined,
         // and the surrounding blank lines are trimmed away.
-        expect(replies.map(reply => reply.text).join('\n')).toBe(longNotes.trim());
+        expect(replies.map((reply) => reply.text).join('\n')).toBe(longNotes.trim());
     });
 });

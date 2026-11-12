@@ -6,18 +6,66 @@ import { test, testError } from '../utils/index.js';
 describe('Dot syntax', () => {
     const filters = new Map([
         ...baseSQLFilterCompilers,
-        ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
-        ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
-        ['settings', new Map([
-            ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true })],
-            ['age', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true })],
-            ['dog', new Map([
+        [
+            'name',
+            createColumnFilter({
+                expression: SQL.column('name'),
+                type: SQLValueType.String,
+                nullable: true,
+            }),
+        ],
+        [
+            'age',
+            createColumnFilter({
+                expression: SQL.column('age'),
+                type: SQLValueType.Number,
+                nullable: false,
+            }),
+        ],
+        [
+            'settings',
+            new Map([
                 ...baseSQLFilterCompilers,
-                ['name', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.dog.name'), type: SQLValueType.JSONString, nullable: true })],
-                ['age', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.dog.age'), type: SQLValueType.JSONNumber, nullable: true })],
-            ])],
-        ])],
+                [
+                    'name',
+                    createColumnFilter({
+                        expression: SQL.jsonExtract(SQL.column('settings'), '$.name'),
+                        type: SQLValueType.JSONString,
+                        nullable: true,
+                    }),
+                ],
+                [
+                    'age',
+                    createColumnFilter({
+                        expression: SQL.jsonExtract(SQL.column('settings'), '$.age'),
+                        type: SQLValueType.JSONNumber,
+                        nullable: true,
+                    }),
+                ],
+                [
+                    'dog',
+                    new Map([
+                        ...baseSQLFilterCompilers,
+                        [
+                            'name',
+                            createColumnFilter({
+                                expression: SQL.jsonExtract(SQL.column('settings'), '$.dog.name'),
+                                type: SQLValueType.JSONString,
+                                nullable: true,
+                            }),
+                        ],
+                        [
+                            'age',
+                            createColumnFilter({
+                                expression: SQL.jsonExtract(SQL.column('settings'), '$.dog.age'),
+                                type: SQLValueType.JSONNumber,
+                                nullable: true,
+                            }),
+                        ],
+                    ]),
+                ],
+            ]),
+        ],
     ]);
 
     it('Correctly finds the right filter when using object syntax', async () => {
@@ -34,9 +82,7 @@ describe('Dot syntax', () => {
             filters,
             query: {
                 query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ?',
-                params: [
-                    'rex',
-                ],
+                params: ['rex'],
             },
         });
     });
@@ -53,9 +99,7 @@ describe('Dot syntax', () => {
             filters,
             query: {
                 query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ?',
-                params: [
-                    'rex',
-                ],
+                params: ['rex'],
             },
         });
     });
@@ -74,9 +118,7 @@ describe('Dot syntax', () => {
             filters,
             query: {
                 query: 'JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ?',
-                params: [
-                    'rex',
-                ],
+                params: ['rex'],
             },
         });
     });
@@ -86,7 +128,7 @@ describe('Dot syntax', () => {
             filter: [
                 {
                     settings: {
-                        'age': 12,
+                        age: 12,
                         'dog.name': {
                             $eq: 'Rex',
                         },
@@ -99,11 +141,7 @@ describe('Dot syntax', () => {
             filters,
             query: {
                 query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING SIGNED NULL ON ERROR) <=> ?',
-                params: [
-                    12,
-                    'rex',
-                    4,
-                ],
+                params: [12, 'rex', 4],
             },
         });
     });
@@ -124,11 +162,7 @@ describe('Dot syntax', () => {
             filters,
             query: {
                 query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING SIGNED NULL ON ERROR) <=> ?',
-                params: [
-                    12,
-                    'rex',
-                    4,
-                ],
+                params: [12, 'rex', 4],
             },
         });
     });
@@ -157,11 +191,7 @@ describe('Dot syntax', () => {
             filters,
             query: {
                 query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ? AND JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING SIGNED NULL ON ERROR) <=> ?',
-                params: [
-                    12,
-                    'rex',
-                    4,
-                ],
+                params: [12, 'rex', 4],
             },
         });
     });
@@ -192,11 +222,7 @@ describe('Dot syntax', () => {
             filters,
             query: {
                 query: 'JSON_VALUE(`default`.`settings`,"$.age" RETURNING SIGNED NULL ON ERROR) <=> ? OR JSON_VALUE(`default`.`settings`,"$.dog.name" RETURNING CHAR CHARACTER SET utf8mb4 NULL ON ERROR) COLLATE utf8mb4_0900_ai_ci <=> ? OR JSON_VALUE(`default`.`settings`,"$.dog.age" RETURNING SIGNED NULL ON ERROR) <=> ?',
-                params: [
-                    12,
-                    'rex',
-                    4,
-                ],
+                params: [12, 'rex', 4],
             },
         });
     });

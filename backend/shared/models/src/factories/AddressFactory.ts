@@ -14,7 +14,13 @@ export class AddressFactory extends Factory<Options, Address> {
         const address = new Address();
         address.street = this.randomStreet();
         address.number = Math.floor(Math.random() * 300) + 1 + '';
-        address.city = this.randomArray(['Wetteren', 'Schellebelle', 'Wichelen', 'Massemen', 'Laarne']);
+        address.city = this.randomArray([
+            'Wetteren',
+            'Schellebelle',
+            'Wichelen',
+            'Massemen',
+            'Laarne',
+        ]);
         switch (address.city) {
             case 'Wetteren':
                 address.postalCode = '9230';

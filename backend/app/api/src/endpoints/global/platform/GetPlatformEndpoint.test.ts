@@ -33,8 +33,7 @@ describe('Endpoint.GetPlatformEndpoint', () => {
             globalPermissions: Permissions.create({
                 level: PermissionLevel.None,
             }),
-        })
-            .create();
+        }).create();
 
         const token = await SessionService.createSession(user);
         const platform = await getPlatform(token);
@@ -46,8 +45,7 @@ describe('Endpoint.GetPlatformEndpoint', () => {
             globalPermissions: Permissions.create({
                 level: PermissionLevel.Full,
             }),
-        })
-            .create();
+        }).create();
 
         const token = await SessionService.createSession(user);
         const platform = await getPlatform(token);
@@ -59,8 +57,7 @@ describe('Endpoint.GetPlatformEndpoint', () => {
             globalPermissions: Permissions.create({
                 level: PermissionLevel.Full,
             }),
-        })
-            .create();
+        }).create();
 
         const token = await SessionService.createSession(user);
         token.accessToken = 'invalid-token';
@@ -74,7 +71,9 @@ describe('Endpoint.GetPlatformEndpoint', () => {
             const viaPlatform = await getPlatform(undefined, 'platform');
 
             expect(viaTenant.body.privateConfig).toBeNull();
-            expect(viaTenant.body.encode({ version: Version })).toEqual(viaPlatform.body.encode({ version: Version }));
+            expect(viaTenant.body.encode({ version: Version })).toEqual(
+                viaPlatform.body.encode({ version: Version }),
+            );
         });
 
         test('it applies the same authorization', async () => {

@@ -4,7 +4,12 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { Event, EventNotification, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { EmailTemplateType, EventNotificationStatus, EventNotification as EventNotificationStruct, RecordCategory } from '@stamhoofd/structures';
+import {
+    EmailTemplateType,
+    EventNotificationStatus,
+    EventNotification as EventNotificationStruct,
+    RecordCategory,
+} from '@stamhoofd/structures';
 
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -17,7 +22,13 @@ type Body = PatchableArrayAutoEncoder<EventNotificationStruct>;
 type ResponseBody = EventNotificationStruct[];
 
 export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(EventNotificationStruct as Decoder<EventNotificationStruct>, EventNotificationStruct.patchType() as Decoder<AutoEncoderPatchType<EventNotificationStruct>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(
+        EventNotificationStruct as Decoder<EventNotificationStruct>,
+        EventNotificationStruct.patchType() as Decoder<
+            AutoEncoderPatchType<EventNotificationStruct>
+        >,
+        StringDecoder,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -37,7 +48,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
         const { user } = await Context.authenticate();
 
         if (organization) {
-            if (!await Context.auth.hasSomeAccess(organization.id)) {
+            if (!(await Context.auth.hasSomeAccess(organization.id))) {
                 throw Context.auth.error();
             }
         } else {
@@ -77,7 +88,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                         field: 'events',
                     });
                 }
-                if (!await Context.auth.canAccessEvent(model)) {
+                if (!(await Context.auth.canAccessEvent(model))) {
                     throw Context.auth.error('Cannot access event');
                 }
                 validatedEvents.push(model);
@@ -85,7 +96,10 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 if (index === 0) {
                     notification.startDate = model.startDate;
                     notification.endDate = model.endDate;
-                    const period = await RegistrationPeriod.getByDate(model.startDate, organization?.id ?? null);
+                    const period = await RegistrationPeriod.getByDate(
+                        model.startDate,
+                        organization?.id ?? null,
+                    );
 
                     if (!period) {
                         throw new SimpleError({
@@ -126,10 +140,12 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             notifications.push(notification);
         }
 
-        const patchingNotifications = await EventNotification.getByIDs(...request.body.getPatches().map(p => p.id));
+        const patchingNotifications = await EventNotification.getByIDs(
+            ...request.body.getPatches().map((p) => p.id),
+        );
 
         for (const patch of request.body.getPatches()) {
-            const notification = patchingNotifications.find(e => e.id === patch.id);
+            const notification = patchingNotifications.find((e) => e.id === patch.id);
 
             if (!notification) {
                 throw new SimpleError({
@@ -142,15 +158,24 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             let requiredPermissionLevel = PermissionLevel.Write;
 
             if (
-                notification.status === EventNotificationStatus.Pending
-                || notification.status === EventNotificationStatus.Accepted
-                || (patch.status && (patch.status !== EventNotificationStatus.Pending || (notification.status !== EventNotificationStatus.Draft && notification.status !== EventNotificationStatus.Rejected && notification.status !== EventNotificationStatus.PartiallyAccepted)))
-                || patch.feedbackText !== undefined
+                notification.status === EventNotificationStatus.Pending ||
+                notification.status === EventNotificationStatus.Accepted ||
+                (patch.status &&
+                    (patch.status !== EventNotificationStatus.Pending ||
+                        (notification.status !== EventNotificationStatus.Draft &&
+                            notification.status !== EventNotificationStatus.Rejected &&
+                            notification.status !== EventNotificationStatus.PartiallyAccepted))) ||
+                patch.feedbackText !== undefined
             ) {
                 requiredPermissionLevel = PermissionLevel.Full;
             }
 
-            if (!await Context.auth.canAccessEventNotification(notification, requiredPermissionLevel)) {
+            if (
+                !(await Context.auth.canAccessEventNotification(
+                    notification,
+                    requiredPermissionLevel,
+                ))
+            ) {
                 // Requires `OrganizationEventNotificationReviewer` access right for the organization
                 if (notification.status === EventNotificationStatus.Pending) {
                     throw Context.auth.error(Context.i18n.$t('%AO'));
@@ -179,14 +204,20 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
             }
 
             // Save answers
-            notification.recordAnswers = patchObject(notification.recordAnswers, patch.recordAnswers);
+            notification.recordAnswers = patchObject(
+                notification.recordAnswers,
+                patch.recordAnswers,
+            );
             if (patch.recordAnswers?.size) {
                 await EventNotificationService.cleanAnswers(notification);
             }
             notification.feedbackText = patchObject(notification.feedbackText, patch.feedbackText);
 
             if (patch.status && patch.status !== notification.status) {
-                if (patch.status !== EventNotificationStatus.Rejected && patch.status !== EventNotificationStatus.Draft) {
+                if (
+                    patch.status !== EventNotificationStatus.Rejected &&
+                    patch.status !== EventNotificationStatus.Draft
+                ) {
                     // Only allowed if complete
                     await this.validateAnswers(notification);
                 }
@@ -199,26 +230,48 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 }
 
                 if (patch.status === EventNotificationStatus.Pending) {
-                    await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationSubmittedCopy, notification);
-                    await EventNotificationService.sendReviewerEmail(EmailTemplateType.EventNotificationSubmittedReviewer, notification);
+                    await EventNotificationService.sendSubmitterEmail(
+                        EmailTemplateType.EventNotificationSubmittedCopy,
+                        notification,
+                    );
+                    await EventNotificationService.sendReviewerEmail(
+                        EmailTemplateType.EventNotificationSubmittedReviewer,
+                        notification,
+                    );
                 }
 
-                if ((patch.status === EventNotificationStatus.Accepted) && previousStatus !== EventNotificationStatus.Accepted) {
+                if (
+                    patch.status === EventNotificationStatus.Accepted &&
+                    previousStatus !== EventNotificationStatus.Accepted
+                ) {
                     // Make sure the accepted record answers stay in sync
                     notification.acceptedRecordAnswers = notification.recordAnswers;
 
-                    await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationAccepted, notification);
+                    await EventNotificationService.sendSubmitterEmail(
+                        EmailTemplateType.EventNotificationAccepted,
+                        notification,
+                    );
                 }
 
-                if ((patch.status === EventNotificationStatus.PartiallyAccepted) && previousStatus !== EventNotificationStatus.Accepted && previousStatus !== EventNotificationStatus.PartiallyAccepted) {
+                if (
+                    patch.status === EventNotificationStatus.PartiallyAccepted &&
+                    previousStatus !== EventNotificationStatus.Accepted &&
+                    previousStatus !== EventNotificationStatus.PartiallyAccepted
+                ) {
                     // Make sure the accepted record answers stay in sync
                     notification.acceptedRecordAnswers = notification.recordAnswers;
 
-                    await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationPartiallyAccepted, notification);
+                    await EventNotificationService.sendSubmitterEmail(
+                        EmailTemplateType.EventNotificationPartiallyAccepted,
+                        notification,
+                    );
                 }
 
                 if (patch.status === EventNotificationStatus.Rejected) {
-                    await EventNotificationService.sendSubmitterEmail(EmailTemplateType.EventNotificationRejected, notification);
+                    await EventNotificationService.sendSubmitterEmail(
+                        EmailTemplateType.EventNotificationRejected,
+                        notification,
+                    );
                 }
             }
 
@@ -242,7 +295,9 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                 });
             }
 
-            if (!await Context.auth.canAccessEventNotification(notification, PermissionLevel.Full)) {
+            if (
+                !(await Context.auth.canAccessEventNotification(notification, PermissionLevel.Full))
+            ) {
                 throw Context.auth.error();
             }
 
@@ -250,14 +305,14 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
         }
 
         const structures = await AuthenticatedStructures.eventNotifications(notifications);
-        return new Response(
-            structures,
-        );
+        return new Response(structures);
     }
 
     async validateType(notification: EventNotification) {
         const platform = await Platform.getSharedPrivateStruct();
-        const type = platform.config.eventNotificationTypes.find(t => t.id === notification.typeId);
+        const type = platform.config.eventNotificationTypes.find(
+            (t) => t.id === notification.typeId,
+        );
 
         if (!type) {
             throw new SimpleError({

@@ -32,7 +32,7 @@ export class GetBalanceItemEndpoint extends Endpoint<Params, Query, Body, Respon
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -47,7 +47,7 @@ export class GetBalanceItemEndpoint extends Endpoint<Params, Query, Body, Respon
             });
         }
 
-        if (!await Context.auth.canAccessBalanceItems([balanceItem])) {
+        if (!(await Context.auth.canAccessBalanceItems([balanceItem]))) {
             throw Context.auth.error();
         }
 

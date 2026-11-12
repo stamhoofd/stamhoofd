@@ -6,7 +6,10 @@ import { SettlementStatus } from '@stamhoofd/structures/settlements/SettlementSt
 import { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';
 
 import { SettlementService } from '../services/SettlementService.js';
-import type { ProviderSettlementSyncRunner, ProviderSyncRunOptions } from './ProviderSettlementSyncRunner.js';
+import type {
+    ProviderSettlementSyncRunner,
+    ProviderSyncRunOptions,
+} from './ProviderSettlementSyncRunner.js';
 import { StripeSettlementSync } from './StripeSettlementSync.js';
 import { WebmasterReport } from './WebmasterReport.js';
 
@@ -36,7 +39,11 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
     readonly #force: boolean;
     readonly #retryUnsynced: boolean;
 
-    constructor({ secretKey, force = false, retryUnsynced = false }: { secretKey: string } & StripeSyncOptions) {
+    constructor({
+        secretKey,
+        force = false,
+        retryUnsynced = false,
+    }: { secretKey: string } & StripeSyncOptions) {
         this.#secretKey = secretKey;
         this.#force = force;
         this.#retryUnsynced = retryUnsynced;
@@ -54,7 +61,8 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
         while (true) {
             abort.throwIfAborted();
 
-            const { start: monthStartUnix, end: monthEndUnix } = SettlementService.getMonthUnixStartEnd(currentMonth);
+            const { start: monthStartUnix, end: monthEndUnix } =
+                SettlementService.getMonthUnixStartEnd(currentMonth);
             if (monthStartUnix * 1000 > end.getTime()) {
                 break;
             }
@@ -74,12 +82,21 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
                 summary.failedFeeMonths += 1;
             }
 
-            const platformResult = await platformSync.syncPayouts({ start: windowStart, end: windowEnd, force: this.#force, abort });
+            const platformResult = await platformSync.syncPayouts({
+                start: windowStart,
+                end: windowEnd,
+                force: this.#force,
+                abort,
+            });
             summary.synced += platformResult.synced;
             summary.skipped += platformResult.skipped;
             summary.failed += platformResult.failed;
 
-            const connectedResult = await this.syncConnectedPayouts({ start: windowStart, end: windowEnd, abort });
+            const connectedResult = await this.syncConnectedPayouts({
+                start: windowStart,
+                end: windowEnd,
+                abort,
+            });
             summary.synced += connectedResult.synced;
             summary.skipped += connectedResult.skipped;
             summary.failed += connectedResult.failed;
@@ -96,7 +113,15 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
     /**
      * Walks the payouts of every active connected account.
      */
-    async syncConnectedPayouts({ start, end, abort = new AbortSignal() }: { start: Date; end?: Date; abort?: AbortSignal }): Promise<{ synced: number; skipped: number; failed: number }> {
+    async syncConnectedPayouts({
+        start,
+        end,
+        abort = new AbortSignal(),
+    }: {
+        start: Date;
+        end?: Date;
+        abort?: AbortSignal;
+    }): Promise<{ synced: number; skipped: number; failed: number }> {
         const totals = { synced: 0, skipped: 0, failed: 0 };
 
         const accounts = await StripeAccount.select().where('status', 'active').fetch();
@@ -105,7 +130,10 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
             abort.throwIfAborted();
 
             try {
-                const sync = new StripeSettlementSync({ secretKey: this.#secretKey, stripeAccount: account });
+                const sync = new StripeSettlementSync({
+                    secretKey: this.#secretKey,
+                    stripeAccount: account,
+                });
                 const result = await sync.syncPayouts({ start, end, force: this.#force, abort });
                 totals.synced += result.synced;
                 totals.skipped += result.skipped;
@@ -115,9 +143,22 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
                 // inaccessible, counted or reported
                 abort.throwIfAborted();
 
-                if (e !== null && typeof e === 'object' && 'type' in e && e.type === 'StripePermissionError' && e.message.includes(account.accountId) && e.message.includes('does not have access to account')) {
+                if (
+                    e !== null &&
+                    typeof e === 'object' &&
+                    'type' in e &&
+                    e.type === 'StripePermissionError' &&
+                    e.message.includes(account.accountId) &&
+                    e.message.includes('does not have access to account')
+                ) {
                     // Stripe account no longer in active use
-                    console.error(e, 'marking stripe account', account.id, account.accountId, 'as inaccessible because we do not seem to have access to it any longer');
+                    console.error(
+                        e,
+                        'marking stripe account',
+                        account.id,
+                        account.accountId,
+                        'as inaccessible because we do not seem to have access to it any longer',
+                    );
                     account.status = 'inaccessible';
                     await account.save();
                     totals.skipped += 1;
@@ -126,7 +167,12 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
                 console.error('Failed to sync payouts of Stripe account ' + account.accountId, e);
                 totals.failed += 1;
 
-                WebmasterReport.report('Synchroniseren Stripe uitbetalingen van account ' + account.accountId + ' mislukt', e);
+                WebmasterReport.report(
+                    'Synchroniseren Stripe uitbetalingen van account ' +
+                        account.accountId +
+                        ' mislukt',
+                    e,
+                );
             }
         }
 
@@ -139,7 +185,13 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
      * after MAXIMUM_FAILURE_COUNT attempts and waits in the problem report instead. Always forced,
      * regardless of the force configuration.
      */
-    async retryUnsyncedSettlements({ windowStart, abort = new AbortSignal() }: { windowStart: Date; abort?: AbortSignal }): Promise<void> {
+    async retryUnsyncedSettlements({
+        windowStart,
+        abort = new AbortSignal(),
+    }: {
+        windowStart: Date;
+        abort?: AbortSignal;
+    }): Promise<void> {
         const settlements = await Settlement.select()
             .where('provider', PaymentProvider.Stripe)
             .where('syncedAt', null)
@@ -156,8 +208,13 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
 
             const failureCountBefore = settlement.syncFailureCount;
             try {
-                const stripeAccount = settlement.stripeAccountId ? await StripeAccount.getByID(settlement.stripeAccountId) : null;
-                const sync = new StripeSettlementSync({ secretKey: this.#secretKey, stripeAccount: stripeAccount ?? null });
+                const stripeAccount = settlement.stripeAccountId
+                    ? await StripeAccount.getByID(settlement.stripeAccountId)
+                    : null;
+                const sync = new StripeSettlementSync({
+                    secretKey: this.#secretKey,
+                    stripeAccount: stripeAccount ?? null,
+                });
                 await sync.syncPayoutById(settlement.externalId, { force: true, abort });
             } catch (e) {
                 // An interrupted retry may not count towards the cap: the payout is still waiting
@@ -170,7 +227,9 @@ export class StripeSettlementSyncRunner implements ProviderSettlementSyncRunner 
                 // markSyncFailed: count them here or the retry cap never triggers
                 const fresh = await Settlement.getByID(settlement.id);
                 if (fresh && fresh.syncFailureCount === failureCountBefore) {
-                    await SettlementService.markSyncFailed(fresh, [SettlementSyncError.fromError(e)]);
+                    await SettlementService.markSyncFailed(fresh, [
+                        SettlementSyncError.fromError(e),
+                    ]);
                 }
             }
         }

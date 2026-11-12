@@ -22,12 +22,20 @@ type SocialTariffErrorResponse = {
 
 function assertsIsSocialTariffResponse(json: unknown): asserts json is SocialTariffReponse {
     if (
-        typeof json !== 'object'
-        || json === null
-        || !('available' in json)
-        || !Array.isArray(json.available)
-        || !json.available.every(
-            (item: unknown) => typeof item === 'object' && item !== null && 'id' in item && typeof item.id === 'string' && 'price' in item && typeof item.price === 'number' && 'remaining' in item && typeof item.remaining === 'number',
+        typeof json !== 'object' ||
+        json === null ||
+        !('available' in json) ||
+        !Array.isArray(json.available) ||
+        !json.available.every(
+            (item: unknown) =>
+                typeof item === 'object' &&
+                item !== null &&
+                'id' in item &&
+                typeof item.id === 'string' &&
+                'price' in item &&
+                typeof item.price === 'number' &&
+                'remaining' in item &&
+                typeof item.remaining === 'number',
         )
     ) {
         console.error('Invalid response when getting UiTPAS social tariff:', json);
@@ -39,19 +47,26 @@ function assertsIsSocialTariffResponse(json: unknown): asserts json is SocialTar
     }
 }
 
-function isSocialTariffErrorResponse(
-    json: unknown,
-): json is SocialTariffErrorResponse {
-    return typeof json === 'object'
-        && json !== null
-        && 'title' in json
-        && typeof json.title === 'string'
-        && (!('endUserMessage' in json)
-            || (typeof json.endUserMessage === 'object' && json.endUserMessage !== null && 'nl' in json.endUserMessage && typeof json.endUserMessage.nl === 'string')
-        );
+function isSocialTariffErrorResponse(json: unknown): json is SocialTariffErrorResponse {
+    return (
+        typeof json === 'object' &&
+        json !== null &&
+        'title' in json &&
+        typeof json.title === 'string' &&
+        (!('endUserMessage' in json) ||
+            (typeof json.endUserMessage === 'object' &&
+                json.endUserMessage !== null &&
+                'nl' in json.endUserMessage &&
+                typeof json.endUserMessage.nl === 'string'))
+    );
 }
 
-async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber: string, basePrice: number, uitpasEventUrl: string) {
+async function getSocialTariffForUitpasNumber(
+    access_token: string,
+    uitpasNumber: string,
+    basePrice: number,
+    uitpasEventUrl: string,
+) {
     const baseUrl = `${STAMHOOFD.UITPAS_API_URL}/tariffs`;
     const params = new URLSearchParams();
     params.append('regularPrice', (basePrice / 1_0000).toFixed(2));
@@ -85,13 +100,21 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
         });
     });
     if (!response.ok) {
-        const json: unknown = await response.json().catch(() => { /* ignore */ });
+        const json: unknown = await response.json().catch(() => {
+            /* ignore */
+        });
         let endUserMessage = '';
 
         if (json) {
-            console.error(`UiTPAS API returned an error for UiTPAS number ${uitpasNumber} with event id ${eventId}:`, json);
+            console.error(
+                `UiTPAS API returned an error for UiTPAS number ${uitpasNumber} with event id ${eventId}:`,
+                json,
+            );
         } else {
-            console.error(`UiTPAS API returned an error for UiTPAS number ${uitpasNumber} with event id ${eventId}:`, response.statusText);
+            console.error(
+                `UiTPAS API returned an error for UiTPAS number ${uitpasNumber} with event id ${eventId}:`,
+                response.statusText,
+            );
         }
 
         if (isSocialTariffErrorResponse(json)) {
@@ -108,7 +131,8 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
 
         throw new SimpleError({
             code: 'unsuccessful_and_unexpected_response_retrieving_social_tariff_by_uitpas_number',
-            message: 'Unsuccesful response without message when retrieving social tariff by UiTPAS number',
+            message:
+                'Unsuccesful response without message when retrieving social tariff by UiTPAS number',
             human: $t('%1BV'),
         });
     }
@@ -139,10 +163,22 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
         });
     }
     if (json.available.length > 1) {
-        console.warn('Multiple social tariffs available for event', uitpasEventUrl, '(used ', json.available[0].price, ' as base price. All options:', json.available);
+        console.warn(
+            'Multiple social tariffs available for event',
+            uitpasEventUrl,
+            '(used ',
+            json.available[0].price,
+            ' as base price. All options:',
+            json.available,
+        );
     }
     if (json.endUserMessage) {
-        console.warn('UiTPAS API returned an end user message for event', uitpasEventUrl, ':', json.endUserMessage.nl);
+        console.warn(
+            'UiTPAS API returned an end user message for event',
+            uitpasEventUrl,
+            ':',
+            json.endUserMessage.nl,
+        );
         console.warn('This message was not shown to the user, as a social tariff wass available.');
     }
     if (json.available[0].remaining < 1) {
@@ -152,21 +188,39 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
             human: $t('%1BW'),
         });
     }
-    console.log('Social tariff for UiTPAS number', uitpasNumber, 'with event id', uitpasEventUrl, 'is', json.available[0].price, 'euros');
+    console.log(
+        'Social tariff for UiTPAS number',
+        uitpasNumber,
+        'with event id',
+        uitpasEventUrl,
+        'is',
+        json.available[0].price,
+        'euros',
+    );
     return UitpasNumberAndPrice.create({
         uitpasNumber,
-        price: Math.round((json.available[0].price) * 100) * 100,
+        price: Math.round(json.available[0].price * 100) * 100,
         uitpasTariffId: json.available[0].id,
     });
 }
 
-export async function getSocialTariffForUitpasNumbers(access_token: string, uitpasNumbers: string[], basePrice: number, uitpasEventUrl: string) {
+export async function getSocialTariffForUitpasNumbers(
+    access_token: string,
+    uitpasNumbers: string[],
+    basePrice: number,
+    uitpasEventUrl: string,
+) {
     const simpleErrors = new SimpleErrors();
     const reducedPrices = new Array<UitpasNumberAndPrice>(uitpasNumbers.length);
     for (let i = 0; i < uitpasNumbers.length; i++) {
         const uitpasNumber = uitpasNumbers[i];
         try {
-            reducedPrices[i] = await getSocialTariffForUitpasNumber(access_token, uitpasNumber, basePrice, uitpasEventUrl);
+            reducedPrices[i] = await getSocialTariffForUitpasNumber(
+                access_token,
+                uitpasNumber,
+                basePrice,
+                uitpasEventUrl,
+            );
         } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 e.addNamespace(i.toString());

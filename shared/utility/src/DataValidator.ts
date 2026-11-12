@@ -5,12 +5,9 @@ export class DataValidator {
     static readonly UITPAS_NUMBER_REGEX = /^\d{10,13}$/;
 
     static isEmailValid(str: string) {
-        const blockList = [
-            'gmail.be',
-            'gmail.nl',
-            'icloud.be',
-        ];
-        const regex = /^[\w.!#$%&*+/=?^`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i;
+        const blockList = ['gmail.be', 'gmail.nl', 'icloud.be'];
+        const regex =
+            /^[\w.!#$%&*+/=?^`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/i;
 
         if (!regex.test(str)) {
             return false;
@@ -33,7 +30,22 @@ export class DataValidator {
             return true;
         }
 
-        const typo = ['gmail.com', 'hotmail.com', 'hotmail.fr', 'hotmail.be', 'yahoo.com', 'live.com', 'outlook.com', 'icloud.com', 'skynet.be', 'telenet.be', 'proximus.be', 'scarlet.be', 'vodafone.be', 'orange.be'];
+        const typo = [
+            'gmail.com',
+            'hotmail.com',
+            'hotmail.fr',
+            'hotmail.be',
+            'yahoo.com',
+            'live.com',
+            'outlook.com',
+            'icloud.com',
+            'skynet.be',
+            'telenet.be',
+            'proximus.be',
+            'scarlet.be',
+            'vodafone.be',
+            'orange.be',
+        ];
         let foundInvalid = false;
         for (const t of typo) {
             if (domain === t) {
@@ -64,7 +76,13 @@ export class DataValidator {
         if (typeof value !== 'string') {
             return false;
         }
-        return value.length === 36 && value[8] === '-' && value[13] === '-' && value[18] === '-' && value[23] === '-';
+        return (
+            value.length === 36 &&
+            value[8] === '-' &&
+            value[13] === '-' &&
+            value[18] === '-' &&
+            value[23] === '-'
+        );
     }
 
     static isUitpasNumberKansenTarief(str: string) {

@@ -4,11 +4,9 @@ import { success } from '../../runtime/ux.js';
 
 export default class ServicesRestart extends BaseCommand {
     static summary = 'Restart shared services';
-    static description = 'Use this when MySQL, Caddy, MailDev, RustFS, or another shared service gets into a bad state and needs a clean restart.';
-    static examples = [
-        'stam services restart',
-        'stam services restart --verbose',
-    ];
+    static description =
+        'Use this when MySQL, Caddy, MailDev, RustFS, or another shared service gets into a bad state and needs a clean restart.';
+    static examples = ['stam services restart', 'stam services restart --verbose'];
 
     static flags = this.verbosityFlags();
 

@@ -1,8 +1,18 @@
 import { ArrayDecoder, field } from '@common/encoding';
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { Group, Member, MemberResponsibilityRecord, Platform } from '@stamhoofd/models';
-import type { LimitedFilteredRequest, Platform as PlatformStruct, Premise } from '@stamhoofd/structures';
-import { ExcelExportType, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, Organization as OrganizationStruct, PaginatedResponse } from '@stamhoofd/structures';
+import type {
+    LimitedFilteredRequest,
+    Platform as PlatformStruct,
+    Premise,
+} from '@stamhoofd/structures';
+import {
+    ExcelExportType,
+    MemberResponsibilityRecord as MemberResponsibilityRecordStruct,
+    MemberWithRegistrationsBlob,
+    Organization as OrganizationStruct,
+    PaginatedResponse,
+} from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { GetOrganizationsEndpoint } from '../endpoints/admin/organizations/GetOrganizationsEndpoint.js';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
@@ -61,13 +71,18 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Object, Object
             width: 50,
             getValue: (object: Object) => {
                 return {
-                    value: object.meta.tags.map(tag => platform.config.tags.find(t => t.id === tag)?.name ?? $t('%Gr')).join(', '),
+                    value: object.meta.tags
+                        .map(
+                            (tag) =>
+                                platform.config.tags.find((t) => t.id === tag)?.name ?? $t('%Gr'),
+                        )
+                        .join(', '),
                 };
             },
         },
         XlsxTransformerColumnHelper.createAddressColumns<OrganizationStruct>({
             matchId: 'address',
-            getAddress: object => object.address,
+            getAddress: (object) => object.address,
         }),
         {
             id: 'website',
@@ -82,22 +97,24 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Object, Object
             matchId: 'recordAnswers',
             getRecordAnswers: (object: Object) => object.getRecordAnswers(),
             getRecordCategories: () => {
-                return [
-                    ...platform.config.organizationLevelRecordsConfiguration.recordCategories,
-                ];
+                return [...platform.config.organizationLevelRecordsConfiguration.recordCategories];
             },
         }),
     ],
 });
 
-const getResponsibilitiesSheet = (platform: PlatformStruct): XlsxTransformerSheet<Object, MemberResponsibilityRecordWithMemberAndOrganization> => ({
+const getResponsibilitiesSheet = (
+    platform: PlatformStruct,
+): XlsxTransformerSheet<Object, MemberResponsibilityRecordWithMemberAndOrganization> => ({
     id: 'responsibilities',
     name: $t('%7D'),
     transform(organization) {
-        return organization.responsibilities.map(r => MemberResponsibilityRecordWithMemberAndOrganization.create({
-            ...r,
-            organization,
-        }));
+        return organization.responsibilities.map((r) =>
+            MemberResponsibilityRecordWithMemberAndOrganization.create({
+                ...r,
+                organization,
+            }),
+        );
     },
     columns: [
         {
@@ -129,7 +146,13 @@ const getResponsibilitiesSheet = (platform: PlatformStruct): XlsxTransformerShee
             name: $t('%H2'),
             width: 50,
             getValue: (object: MemberResponsibilityRecordWithMemberAndOrganization) => {
-                const responsibility = platform.config.responsibilities.find(r => r.id === object.responsibilityId) ?? object.organization.privateMeta?.responsibilities.find(r => r.id === object.responsibilityId);
+                const responsibility =
+                    platform.config.responsibilities.find(
+                        (r) => r.id === object.responsibilityId,
+                    ) ??
+                    object.organization.privateMeta?.responsibilities.find(
+                        (r) => r.id === object.responsibilityId,
+                    );
 
                 if (!responsibility) {
                     return {
@@ -138,7 +161,11 @@ const getResponsibilitiesSheet = (platform: PlatformStruct): XlsxTransformerShee
                 }
 
                 return {
-                    value: responsibility.name + (responsibility.isGroupBased ? ' ' + $t('%wR') + ' ' + (object.group?.settings.name ?? $t('%wS')) : ''),
+                    value:
+                        responsibility.name +
+                        (responsibility.isGroupBased
+                            ? ' ' + $t('%wR') + ' ' + (object.group?.settings.name ?? $t('%wS'))
+                            : ''),
                 };
             },
         },
@@ -166,22 +193,32 @@ const getResponsibilitiesSheet = (platform: PlatformStruct): XlsxTransformerShee
                 value: object.member.details.email,
             }),
         },
-        XlsxTransformerColumnHelper.createAddressColumns<MemberResponsibilityRecordWithMemberAndOrganization>({
-            matchId: 'responsibility.member.address',
-            getAddress: object => object.member.details.address ?? object.member.details.parents[0]?.address ?? object.member.details.parents[1]?.address ?? null,
-        }),
+        XlsxTransformerColumnHelper.createAddressColumns<MemberResponsibilityRecordWithMemberAndOrganization>(
+            {
+                matchId: 'responsibility.member.address',
+                getAddress: (object) =>
+                    object.member.details.address ??
+                    object.member.details.parents[0]?.address ??
+                    object.member.details.parents[1]?.address ??
+                    null,
+            },
+        ),
     ],
 });
 
 type PremiseWithOrganization = { organization: Object; premise: Premise };
-const getPremisesSheet = (platform: PlatformStruct): XlsxTransformerSheet<Object, PremiseWithOrganization> => ({
+const getPremisesSheet = (
+    platform: PlatformStruct,
+): XlsxTransformerSheet<Object, PremiseWithOrganization> => ({
     id: 'premises',
     name: $t('%6c'),
     transform(organization) {
-        return organization.privateMeta?.premises.map(r => ({
-            organization,
-            premise: r,
-        })) ?? [];
+        return (
+            organization.privateMeta?.premises.map((r) => ({
+                organization,
+                premise: r,
+            })) ?? []
+        );
     },
     columns: [
         {
@@ -223,13 +260,19 @@ const getPremisesSheet = (platform: PlatformStruct): XlsxTransformerSheet<Object
             getValue: (object: PremiseWithOrganization) => {
                 const ids = object.premise.premiseTypeIds;
                 return {
-                    value: ids.map(id => platform.config.premiseTypes.find(t => t.id === id)?.name ?? $t('%Gr')).join(', '),
+                    value: ids
+                        .map(
+                            (id) =>
+                                platform.config.premiseTypes.find((t) => t.id === id)?.name ??
+                                $t('%Gr'),
+                        )
+                        .join(', '),
                 };
             },
         },
         XlsxTransformerColumnHelper.createAddressColumns<PremiseWithOrganization>({
             matchId: 'premise.address',
-            getAddress: object => object.premise.address,
+            getAddress: (object) => object.premise.address,
         }),
     ],
 });
@@ -239,17 +282,21 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Organizations, {
         const organizations = await GetOrganizationsEndpoint.buildData(query);
 
         // Now load all responsibilities with members with an active responsibility for theses organizations
-        const organizationIds = organizations.results.map(o => o.id);
+        const organizationIds = organizations.results.map((o) => o.id);
         const responsibilities = organizationIds.length
             ? await MemberResponsibilityRecord.select()
-                    .where('organizationId', organizationIds)
-                    .where('endDate', null)
-                    .fetch()
+                  .where('organizationId', organizationIds)
+                  .where('endDate', null)
+                  .fetch()
             : [];
 
         // Load groups and members
-        const groupIds = Formatter.uniqueArray(responsibilities.map(o => o.groupId).filter(g => g !== null));
-        const memberIds = Formatter.uniqueArray(responsibilities.map(o => o.memberId).filter(m => m !== null));
+        const groupIds = Formatter.uniqueArray(
+            responsibilities.map((o) => o.groupId).filter((g) => g !== null),
+        );
+        const memberIds = Formatter.uniqueArray(
+            responsibilities.map((o) => o.memberId).filter((m) => m !== null),
+        );
 
         const members = await Member.getBlobByIds(...memberIds);
         const groups = await Group.getByIDs(...groupIds);
@@ -258,11 +305,11 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Organizations, {
         const platform = await Platform.getSharedStruct();
 
         const mappedOrganizations = organizations.results.map((o) => {
-            const resp = responsibilities.filter(r => r.organizationId === o.id);
+            const resp = responsibilities.filter((r) => r.organizationId === o.id);
 
             const mappedResponsibilities = resp.map((r) => {
-                const member = memberStructs.find(m => m.id === r.memberId);
-                const group = groupStructs.find(g => g.id === r.groupId);
+                const member = memberStructs.find((m) => m.id === r.memberId);
+                const group = groupStructs.find((g) => g.id === r.groupId);
 
                 return MemberResponsibilityRecordWithMember.create({
                     ...r,
@@ -274,16 +321,21 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Organizations, {
             // Sort responsibilites by index in platform config
             // and, if the same, sort by order of default age group id if it has a group
             mappedResponsibilities.sort((a, b) => {
-                const aIndex = platform.config.responsibilities.findIndex(r => r.id === a.responsibilityId);
-                const bIndex = platform.config.responsibilities.findIndex(r => r.id === b.responsibilityId);
-
-                const groupAIndex = platform.config.defaultAgeGroups.findIndex(g => g.id === a.group?.defaultAgeGroupId);
-                const groupBIndex = platform.config.defaultAgeGroups.findIndex(g => g.id === b.group?.defaultAgeGroupId);
-
-                return Sorter.stack(
-                    aIndex - bIndex,
-                    groupAIndex - groupBIndex,
+                const aIndex = platform.config.responsibilities.findIndex(
+                    (r) => r.id === a.responsibilityId,
                 );
+                const bIndex = platform.config.responsibilities.findIndex(
+                    (r) => r.id === b.responsibilityId,
+                );
+
+                const groupAIndex = platform.config.defaultAgeGroups.findIndex(
+                    (g) => g.id === a.group?.defaultAgeGroupId,
+                );
+                const groupBIndex = platform.config.defaultAgeGroups.findIndex(
+                    (g) => g.id === b.group?.defaultAgeGroupId,
+                );
+
+                return Sorter.stack(aIndex - bIndex, groupAIndex - groupBIndex);
             });
 
             return OrganizationWithResponsibilities.create({
@@ -297,7 +349,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Organizations, {
             next: organizations.next,
         });
     },
-    getSheets: platform => [
+    getSheets: (platform) => [
         getSheet(platform),
         getResponsibilitiesSheet(platform),
         getPremisesSheet(platform),

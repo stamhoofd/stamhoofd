@@ -58,7 +58,13 @@ export class NotificationService {
         if (options.group) {
             const group = options.group;
             // Serializes merges per group within this process only; the notificationId_userId unique key catches cross-process races
-            const queue = 'notifications/group/' + (options.organizationId ?? '') + '/' + options.type + '/' + group.key;
+            const queue =
+                'notifications/group/' +
+                (options.organizationId ?? '') +
+                '/' +
+                options.type +
+                '/' +
+                group.key;
             return await QueueHandler.schedule(queue, async () => {
                 const existing = await this.findGroupedNotification(options, group.key);
                 if (existing) {
@@ -77,7 +83,7 @@ export class NotificationService {
      */
     static async markAsRead(recipient: NotificationRecipient): Promise<NotificationRecipient> {
         await this.markRead('r.id = ?', [recipient.id]);
-        return await NotificationRecipient.getByID(recipient.id) as NotificationRecipient;
+        return (await NotificationRecipient.getByID(recipient.id)) as NotificationRecipient;
     }
 
     /**
@@ -88,15 +94,16 @@ export class NotificationService {
     }
 
     static async getPreferences(user: User): Promise<NotificationPreference[]> {
-        return await NotificationPreference.select()
-            .where('userId', user.id)
-            .fetch();
+        return await NotificationPreference.select().where('userId', user.id).fetch();
     }
 
     /**
      * Upserts the given preferences; preferences of other types and channels are kept
      */
-    static async setPreferences(user: User, preferences: NotificationPreferenceStruct[]): Promise<void> {
+    static async setPreferences(
+        user: User,
+        preferences: NotificationPreferenceStruct[],
+    ): Promise<void> {
         if (preferences.length === 0) {
             return;
         }
@@ -105,8 +112,26 @@ export class NotificationService {
         now.setMilliseconds(0);
 
         await SQL.insert(NotificationPreference.table)
-            .columns('id', 'userId', 'notificationType', 'channel', 'enabled', 'createdAt', 'updatedAt')
-            .values(...preferences.map(p => [uuidv4(), user.id, p.type, p.channel, p.enabled, now, now]))
+            .columns(
+                'id',
+                'userId',
+                'notificationType',
+                'channel',
+                'enabled',
+                'createdAt',
+                'updatedAt',
+            )
+            .values(
+                ...preferences.map((p) => [
+                    uuidv4(),
+                    user.id,
+                    p.type,
+                    p.channel,
+                    p.enabled,
+                    now,
+                    now,
+                ]),
+            )
             .as('v')
             .onDuplicateKeyUpdate(
                 SQL.assignment('enabled', SQL.column('v', 'enabled')),
@@ -130,21 +155,24 @@ export class NotificationService {
     }
 
     private static async resolveUserIds(target: NotificationTarget): Promise<string[]> {
-        const userIds = (target.users ?? []).map(u => typeof u === 'string' ? u : u.id);
-        const memberIds = (target.members ?? []).map(m => typeof m === 'string' ? m : m.id);
+        const userIds = (target.users ?? []).map((u) => (typeof u === 'string' ? u : u.id));
+        const memberIds = (target.members ?? []).map((m) => (typeof m === 'string' ? m : m.id));
 
         if (memberIds.length > 0) {
             const rows = await SQL.select('usersId')
                 .from('_members_users')
                 .where('membersId', memberIds)
                 .fetch();
-            userIds.push(...rows.map(r => r._members_users.usersId as string));
+            userIds.push(...rows.map((r) => r._members_users.usersId as string));
         }
 
         return Formatter.uniqueArray(userIds);
     }
 
-    private static async filterDisabledUsers(userIds: string[], type: NotificationType): Promise<string[]> {
+    private static async filterDisabledUsers(
+        userIds: string[],
+        type: NotificationType,
+    ): Promise<string[]> {
         if (userIds.length === 0) {
             return [];
         }
@@ -156,11 +184,14 @@ export class NotificationService {
             .andWhere('enabled', false)
             .fetch();
 
-        const disabledIds = new Set(disabled.map(p => p.userId));
-        return userIds.filter(id => !disabledIds.has(id));
+        const disabledIds = new Set(disabled.map((p) => p.userId));
+        return userIds.filter((id) => !disabledIds.has(id));
     }
 
-    private static async findGroupedNotification(options: SendNotificationOptions, groupKey: string): Promise<Notification | null> {
+    private static async findGroupedNotification(
+        options: SendNotificationOptions,
+        groupKey: string,
+    ): Promise<Notification | null> {
         const windowStart = groupingWindowStart(new Date());
 
         return await Notification.select()
@@ -172,10 +203,16 @@ export class NotificationService {
             .first(false);
     }
 
-    private static async mergeInto(notification: Notification, resource: NamedObject | undefined, userIds: string[]) {
+    private static async mergeInto(
+        notification: Notification,
+        resource: NamedObject | undefined,
+        userIds: string[],
+    ) {
         notification.groupResourceCount += 1;
         if (resource) {
-            notification.groupResources = [...notification.groupResources, resource].slice(-maxGroupResources);
+            notification.groupResources = [...notification.groupResources, resource].slice(
+                -maxGroupResources,
+            );
         }
         await notification.save();
 
@@ -191,14 +228,17 @@ export class NotificationService {
             .where('notificationId', notification.id)
             .andWhere('userId', userIds)
             .fetch();
-        const existingUserIds = new Set(existingRecipients.map(r => r.userId));
-        const newUserIds = userIds.filter(id => !existingUserIds.has(id));
+        const existingUserIds = new Set(existingRecipients.map((r) => r.userId));
+        const newUserIds = userIds.filter((id) => !existingUserIds.has(id));
 
         // A new recipient only has the item that just arrived as unread
         await this.insertRecipients(notification, newUserIds, notification.groupResourceCount - 1);
     }
 
-    private static async create(options: SendNotificationOptions, userIds: string[]): Promise<Notification> {
+    private static async create(
+        options: SendNotificationOptions,
+        userIds: string[],
+    ): Promise<Notification> {
         const notification = new Notification();
         notification.type = options.type;
         notification.payload = options.payload;
@@ -217,7 +257,11 @@ export class NotificationService {
         return notification;
     }
 
-    private static async insertRecipients(notification: Notification, userIds: string[], readCount: number) {
+    private static async insertRecipients(
+        notification: Notification,
+        userIds: string[],
+        readCount: number,
+    ) {
         if (userIds.length === 0) {
             return;
         }
@@ -227,7 +271,15 @@ export class NotificationService {
 
         await SQL.insert(NotificationRecipient.table)
             .columns('id', 'notificationId', 'userId', 'readCount', 'createdAt')
-            .values(...userIds.map(userId => [uuidv7(), notification.id, userId, readCount, createdAt]))
+            .values(
+                ...userIds.map((userId) => [
+                    uuidv7(),
+                    notification.id,
+                    userId,
+                    readCount,
+                    createdAt,
+                ]),
+            )
             .insert();
     }
 }

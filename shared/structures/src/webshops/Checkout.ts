@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    NumberDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -28,7 +37,12 @@ import { DiscountCode } from './DiscountCode.js';
 import type { Webshop } from './Webshop.js';
 import { WebshopFieldAnswer } from './WebshopField.js';
 import type { CheckoutMethod } from './WebshopMetaData.js';
-import { AnyCheckoutMethodDecoder, CheckoutMethodType, WebshopDeliveryMethod, WebshopTimeSlot } from './WebshopMetaData.js';
+import {
+    AnyCheckoutMethodDecoder,
+    CheckoutMethodType,
+    WebshopDeliveryMethod,
+    WebshopTimeSlot,
+} from './WebshopMetaData.js';
 
 export class Checkout extends AutoEncoder implements ObjectWithRecords {
     @field({ decoder: WebshopTimeSlot, nullable: true })
@@ -133,7 +147,10 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             return 0;
         }
 
-        if (this.checkoutMethod.price.minimumPrice !== null && this.cart.price >= this.checkoutMethod.price.minimumPrice) {
+        if (
+            this.checkoutMethod.price.minimumPrice !== null &&
+            this.cart.price >= this.checkoutMethod.price.minimumPrice
+        ) {
             return this.checkoutMethod.price.discountPrice;
         }
 
@@ -141,14 +158,18 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
     }
 
     get appliedPercentageDiscount() {
-        return 100 * Math.round(this.cart.price * this.percentageDiscount / 10000_00);
+        return 100 * Math.round((this.cart.price * this.percentageDiscount) / 10000_00);
     }
 
     get totalPrice() {
         // Percentage discount
 
         // + this.administrationFee;
-        return Math.max(0, this.cart.price - this.appliedPercentageDiscount - this.fixedDiscount) + this.deliveryPrice + this.administrationFee;
+        return (
+            Math.max(0, this.cart.price - this.appliedPercentageDiscount - this.fixedDiscount) +
+            this.deliveryPrice +
+            this.administrationFee
+        );
     }
 
     get amount(): number {
@@ -173,7 +194,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 name: $t('%qs'),
                 price: this.administrationFee,
             },
-        ].filter(a => a.price !== 0);
+        ].filter((a) => a.price !== 0);
 
         if (all.length > 0) {
             all.unshift({
@@ -222,7 +243,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
     validateAnswers(webshop: Webshop) {
         const newAnswers: WebshopFieldAnswer[] = [];
         for (const field of webshop.meta.customFields) {
-            const answer = this.fieldAnswers.find(a => a.field.id === field.id);
+            const answer = this.fieldAnswers.find((a) => a.field.id === field.id);
 
             try {
                 if (!answer) {
@@ -244,7 +265,12 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         this.fieldAnswers = newAnswers;
     }
 
-    validateCart(webshop: Webshop, organizationMeta: OrganizationMetaData, asAdmin = false, options: { validateSeats?: boolean; validateDetails?: boolean } = {}) {
+    validateCart(
+        webshop: Webshop,
+        organizationMeta: OrganizationMetaData,
+        asAdmin = false,
+        options: { validateSeats?: boolean; validateDetails?: boolean } = {},
+    ) {
         if (this.cart.items.length === 0) {
             throw new SimpleError({
                 code: 'cart_empty',
@@ -254,10 +280,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             });
         }
 
-        const totalItems = this.cart.items.reduce(
-            (a, b) => a + b.amount,
-            0,
-        );
+        const totalItems = this.cart.items.reduce((a, b) => a + b.amount, 0);
 
         if (totalItems > 1000) {
             throw new SimpleError({
@@ -323,7 +346,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         }
 
         const current = this.checkoutMethod;
-        const checkoutMethod = webshop.meta.checkoutMethods.find(m => m.id === current.id);
+        const checkoutMethod = webshop.meta.checkoutMethods.find((m) => m.id === current.id);
 
         if (!checkoutMethod) {
             if (webshop.meta.checkoutMethods.length === 0) {
@@ -373,15 +396,18 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             return;
         }
 
-        if (this.checkoutMethod.provinces.map(p => p.id).includes(this.address.provinceId)) {
+        if (this.checkoutMethod.provinces.map((p) => p.id).includes(this.address.provinceId)) {
             return;
         }
 
-        if (this.checkoutMethod.cities.map(c => c.id).includes(this.address.cityId)) {
+        if (this.checkoutMethod.cities.map((c) => c.id).includes(this.address.cityId)) {
             return;
         }
 
-        if (this.address.parentCityId && this.checkoutMethod.cities.map(c => c.id).includes(this.address.parentCityId)) {
+        if (
+            this.address.parentCityId &&
+            this.checkoutMethod.cities.map((c) => c.id).includes(this.address.parentCityId)
+        ) {
             return;
         }
 
@@ -409,7 +435,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         }
 
         const current = this.timeSlot;
-        const timeSlot = this.checkoutMethod.timeSlots.timeSlots.find(s => s.id === current.id);
+        const timeSlot = this.checkoutMethod.timeSlots.timeSlots.find((s) => s.id === current.id);
         const availableTimeslots = this.checkoutMethod.timeSlots.timeSlots.length;
 
         if (!timeSlot) {
@@ -426,19 +452,22 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'timeslot_full',
                 message: 'Timeslot has reached maximum orders',
-                human: (availableTimeslots !== 1 ? $t('%se') : $t('%sf')),
+                human: availableTimeslots !== 1 ? $t('%se') : $t('%sf'),
                 field: 'timeSlot',
             });
         }
 
         // Check maximum
-        if (timeSlot.remainingPersons !== null && this.cart.persons - this.reservedPersons > timeSlot.remainingPersons) {
+        if (
+            timeSlot.remainingPersons !== null &&
+            this.cart.persons - this.reservedPersons > timeSlot.remainingPersons
+        ) {
             const remainingPersons = timeSlot.remainingPersons;
             if (remainingPersons === 0) {
                 throw new SimpleError({
                     code: 'timeslot_full',
                     message: 'Timeslot has reached maximum orders',
-                    human: (availableTimeslots !== 1 ? $t('%se') : $t('%sf')),
+                    human: availableTimeslots !== 1 ? $t('%se') : $t('%sf'),
                     field: 'timeSlot',
                 });
             }
@@ -446,7 +475,26 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
                 code: 'timeslot_full',
                 message: 'Timeslot has reached maximum persons',
                 // todo translation
-                human: $t('%sg') + ' ' + (remainingPersons !== 1 ? $t('%bR') : $t('%1q')) + ' ' + $t('%sh') + ' ' + remainingPersons + ' ' + (remainingPersons !== 1 ? $t('%UL') : $t('%12Y')) + ' ' + $t('%si') + ' ' + (availableTimeslots !== 1 ? $t('%sj') : $t('%sk')) + $t('%sl') + ' ' + this.cart.persons + ' ' + (this.cart.persons !== 1 ? $t('%12R') : $t('%12P')) + (availableTimeslots !== 1 ? $t('%sm') : ''),
+                human:
+                    $t('%sg') +
+                    ' ' +
+                    (remainingPersons !== 1 ? $t('%bR') : $t('%1q')) +
+                    ' ' +
+                    $t('%sh') +
+                    ' ' +
+                    remainingPersons +
+                    ' ' +
+                    (remainingPersons !== 1 ? $t('%UL') : $t('%12Y')) +
+                    ' ' +
+                    $t('%si') +
+                    ' ' +
+                    (availableTimeslots !== 1 ? $t('%sj') : $t('%sk')) +
+                    $t('%sl') +
+                    ' ' +
+                    this.cart.persons +
+                    ' ' +
+                    (this.cart.persons !== 1 ? $t('%12R') : $t('%12P')) +
+                    (availableTimeslots !== 1 ? $t('%sm') : ''),
                 field: 'timeSlot',
             });
         }
@@ -477,7 +525,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         if (this.customerCartItemId === null) {
             return null;
         }
-        return this.contactPersonCandidates.find(i => i.id === this.customerCartItemId) ?? null;
+        return this.contactPersonCandidates.find((i) => i.id === this.customerCartItemId) ?? null;
     }
 
     /**
@@ -487,7 +535,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
     get customerFieldsFromCartItem(): CustomerFieldKey[] {
         const fields = this.customerCartItem?.collectedCustomerFields ?? [];
         if (this.checkoutMethod?.type === CheckoutMethodType.Delivery) {
-            return fields.filter(key => key !== 'address');
+            return fields.filter((key) => key !== 'address');
         }
         return fields;
     }
@@ -499,7 +547,11 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
     selectDefaultContactPerson() {
         // A contact person whose cart item was removed is forgotten first, so a new default can take over
         this.syncCustomerFromCartItem();
-        if (this.customerCartItem || this.customer.hasValue('name') || this.customer.hasValue('email')) {
+        if (
+            this.customerCartItem ||
+            this.customer.hasValue('name') ||
+            this.customer.hasValue('email')
+        ) {
             return;
         }
         const item = this.defaultContactPerson;
@@ -514,7 +566,10 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
      * Younger candidates stay available, but are never chosen without asking.
      */
     get defaultContactPerson(): CartItem | null {
-        return this.contactPersonCandidates.find(i => Checkout.canBeAutomaticContactPerson(i)) ?? null;
+        return (
+            this.contactPersonCandidates.find((i) => Checkout.canBeAutomaticContactPerson(i)) ??
+            null
+        );
     }
 
     /**
@@ -522,7 +577,10 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
      */
     static canBeAutomaticContactPerson(item: CartItem): boolean {
         const age = item.customer?.age ?? null;
-        return item.customer !== null && (age === null || age >= Checkout.automaticContactPersonMinimumAge);
+        return (
+            item.customer !== null &&
+            (age === null || age >= Checkout.automaticContactPersonMinimumAge)
+        );
     }
 
     /**
@@ -563,7 +621,13 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         this.customer.copyFields(item.customer!, this.customerFieldsFromCartItem);
     }
 
-    validateCustomer(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n, asAdmin = false, user: User | null = null) {
+    validateCustomer(
+        webshop: Webshop,
+        organizationMeta: OrganizationMetaData,
+        i18n: I18n,
+        asAdmin = false,
+        user: User | null = null,
+    ) {
         if (user) {
             // The account is the contact person, even when a participant was chosen before logging in
             this.forgetContactPerson();
@@ -632,12 +696,14 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
     }
 
     private updateAdministrationFee(webshop: Webshop) {
-        this.administrationFee = webshop.meta.paymentConfiguration.administrationFee.calculate(this.totalPriceWithoutAdministrationFee);
+        this.administrationFee = webshop.meta.paymentConfiguration.administrationFee.calculate(
+            this.totalPriceWithoutAdministrationFee,
+        );
     }
 
     private updateDiscounts(webshop: Webshop) {
         this.discounts = webshop.meta.defaultDiscounts.slice();
-        this.discounts.push(...this.discountCodes.flatMap(c => c.discounts));
+        this.discounts.push(...this.discountCodes.flatMap((c) => c.discounts));
     }
 
     private calculatePrices() {
@@ -664,11 +730,15 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
 
             // Loop trackers and apply the one with the current highest potential
             while (true) {
-                let bestPotential: { tracker: ProductDiscountTracker; potential: number } | null = null;
+                let bestPotential: { tracker: ProductDiscountTracker; potential: number } | null =
+                    null;
 
                 for (const tracker of trackers) {
                     const potential = tracker.getPotentialDiscount();
-                    if (potential !== 0 && (bestPotential === null || potential > bestPotential.potential)) {
+                    if (
+                        potential !== 0 &&
+                        (bestPotential === null || potential > bestPotential.potential)
+                    ) {
                         bestPotential = { tracker, potential };
                     }
                 }
@@ -697,7 +767,13 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
         this.updateAdministrationFee(webshop);
     }
 
-    validate(webshop: Webshop, organizationMeta: OrganizationMetaData, i18n: I18n, asAdmin = false, user: User | null = null) {
+    validate(
+        webshop: Webshop,
+        organizationMeta: OrganizationMetaData,
+        i18n: I18n,
+        asAdmin = false,
+        user: User | null = null,
+    ) {
         try {
             this.validateCart(webshop, organizationMeta, asAdmin);
 

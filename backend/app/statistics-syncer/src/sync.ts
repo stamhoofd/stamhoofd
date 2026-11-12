@@ -1,10 +1,38 @@
 import type { SQLResultNamespacedRow } from '@node/database';
-import { Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
+import {
+    Group,
+    Member,
+    MemberPlatformMembership,
+    MemberResponsibilityRecord,
+    Organization,
+    Platform,
+    Registration,
+    RegistrationPeriod,
+} from '@stamhoofd/models';
 import { SQL, SQLSelect, SQLWhereSign } from '@stamhoofd/sql';
 import { getStatisticsConnection } from './database.js';
-import { applyImportedCutoff, getImportedUntil, isFrozen, loadFrozenPeriodIds, loadSettledPeriodIds, releaseUnlockedPeriods, settleLockedPeriods } from './periods.js';
+import {
+    applyImportedCutoff,
+    getImportedUntil,
+    isFrozen,
+    loadFrozenPeriodIds,
+    loadSettledPeriodIds,
+    releaseUnlockedPeriods,
+    settleLockedPeriods,
+} from './periods.js';
 import type { StatisticsRow } from './rows.js';
-import { flattenDefaultAgeGroup, flattenGroup, flattenMember, flattenMembership, flattenNamedConfig, flattenOrganization, flattenPlatform, flattenRegistration, flattenRegistrationPeriod, flattenResponsibilityRecord } from './rows.js';
+import {
+    flattenDefaultAgeGroup,
+    flattenGroup,
+    flattenMember,
+    flattenMembership,
+    flattenNamedConfig,
+    flattenOrganization,
+    flattenPlatform,
+    flattenRegistration,
+    flattenRegistrationPeriod,
+    flattenResponsibilityRecord,
+} from './rows.js';
 import { syncSource } from './sources.js';
 import { nextWatermark, readSyncState, writeSyncState } from './sync-state.js';
 import { deleteRows, iterateIds, upsertRows } from './writer.js';
@@ -27,7 +55,11 @@ type IncrementalTable = {
      * the id alone is what makes the cursor strictly advance; rows that move into the window while a
      * run is going are picked up by the next one through the overlap.
      */
-    fetch: (since: Date | null, afterId: string, limit: number) => Promise<{ rows: StatisticsRow[]; updatedAt: Date[]; lastId: string }>;
+    fetch: (
+        since: Date | null,
+        afterId: string,
+        limit: number,
+    ) => Promise<{ rows: StatisticsRow[]; updatedAt: Date[]; lastId: string }>;
     /** Which of these ids still exist in the source, used to reconcile deletes. */
     existingIds: (ids: string[]) => Promise<Set<string>>;
     /**
@@ -59,11 +91,11 @@ type IncrementalTable = {
 export const sourceColumns = ['source'];
 
 function withSource(rows: StatisticsRow[]): StatisticsRow[] {
-    return rows.map(row => ({ ...row, source: syncSource }));
+    return rows.map((row) => ({ ...row, source: syncSource }));
 }
 
 function idsOf(rows: { id: string }[]): string[] {
-    return rows.map(row => row.id);
+    return rows.map((row) => row.id);
 }
 
 function groupByPeriod(organizations: Organization[]): Map<string, Organization[]> {
@@ -96,7 +128,10 @@ async function existingModelIds(model: { select: () => any }, ids: string[]): Pr
  * that has not been synced yet, and a row for it would be refused by the foreign key, which would
  * stall the whole table over one row.
  */
-async function periodIdsByRegistration(column: 'memberId' | 'organizationId', ids: string[]): Promise<Map<string, Set<string>>> {
+async function periodIdsByRegistration(
+    column: 'memberId' | 'organizationId',
+    ids: string[],
+): Promise<Map<string, Set<string>>> {
     const byId = new Map<string, Set<string>>();
     if (ids.length === 0) {
         return byId;
@@ -114,7 +149,9 @@ async function periodIdsByRegistration(column: 'memberId' | 'organizationId', id
         .where(SQL.column(column), ids)
         .fetch();
 
-    const known = await existingPeriodIds(rows.map(row => row.periodId).filter((id): id is string => id !== null));
+    const known = await existingPeriodIds(
+        rows.map((row) => row.periodId).filter((id): id is string => id !== null),
+    );
 
     for (const row of rows) {
         if (row.periodId !== null && known.has(row.periodId)) {
@@ -146,8 +183,12 @@ async function reducedPriceByMember(memberIds: string[]): Promise<Set<string>> {
         return new Set();
     }
 
-    const members = await Member.select().where(SQL.column('id'), unique).fetch() as Member[];
-    return new Set(members.filter(member => member.details.shouldApplyReducedPrice).map(member => member.id));
+    const members = (await Member.select().where(SQL.column('id'), unique).fetch()) as Member[];
+    return new Set(
+        members
+            .filter((member) => member.details.shouldApplyReducedPrice)
+            .map((member) => member.id),
+    );
 }
 
 /**
@@ -155,9 +196,13 @@ async function reducedPriceByMember(memberIds: string[]): Promise<Set<string>> {
  * is recorded against that period, and a netwerk link to a unit that has no row yet is a link to
  * nothing.
  */
-async function periodIdsByOrganization(organizations: Organization[]): Promise<Map<string, Set<string>>> {
+async function periodIdsByOrganization(
+    organizations: Organization[],
+): Promise<Map<string, Set<string>>> {
     const byOrganization = await periodIdsByRegistration('organizationId', idsOf(organizations));
-    const known = await existingPeriodIds(organizations.map(organization => organization.periodId));
+    const known = await existingPeriodIds(
+        organizations.map((organization) => organization.periodId),
+    );
 
     for (const organization of organizations) {
         if (known.has(organization.periodId)) {
@@ -184,11 +229,20 @@ async function existingPeriodIds(ids: string[]): Promise<Set<string>> {
     }
 
     const connection = getStatisticsConnection();
-    const [rows] = await connection.select('SELECT `id` FROM `registration_periods` WHERE `id` IN (?)', [unique], { nestTables: false });
-    return new Set((rows as unknown as { id: string }[]).map(row => row.id));
+    const [rows] = await connection.select(
+        'SELECT `id` FROM `registration_periods` WHERE `id` IN (?)',
+        [unique],
+        { nestTables: false },
+    );
+    return new Set((rows as unknown as { id: string }[]).map((row) => row.id));
 }
 
-function incrementalQuery(model: { select: () => any }, since: Date | null, afterId: string, limit: number) {
+function incrementalQuery(
+    model: { select: () => any },
+    since: Date | null,
+    afterId: string,
+    limit: number,
+) {
     const query = model.select().where(SQL.column('id'), SQLWhereSign.Greater, afterId);
     if (since) {
         query.where(SQL.column('updatedAt'), SQLWhereSign.GreaterEqual, since);
@@ -204,8 +258,12 @@ function incrementalQuery(model: { select: () => any }, since: Date | null, afte
  */
 async function loadIdSet(table: string): Promise<Set<string>> {
     const connection = getStatisticsConnection();
-    const [rows] = await connection.select(`SELECT DISTINCT \`id\` FROM ${connection.escapeId(table)}`, [], { nestTables: false });
-    return new Set((rows as unknown as { id: string }[]).map(row => row.id));
+    const [rows] = await connection.select(
+        `SELECT DISTINCT \`id\` FROM ${connection.escapeId(table)}`,
+        [],
+        { nestTables: false },
+    );
+    return new Set((rows as unknown as { id: string }[]).map((row) => row.id));
 }
 
 /**
@@ -216,12 +274,33 @@ async function loadIdSet(table: string): Promise<Set<string>> {
 function periodsTable(): IncrementalTable {
     return {
         table: 'registration_periods',
-        columns: ['id', 'startDate', 'endDate', 'locked', 'organizationId', 'previousPeriodId', 'nextPeriodId', 'customName', 'name', 'createdAt', 'updatedAt'],
+        columns: [
+            'id',
+            'startDate',
+            'endDate',
+            'locked',
+            'organizationId',
+            'previousPeriodId',
+            'nextPeriodId',
+            'customName',
+            'name',
+            'createdAt',
+            'updatedAt',
+        ],
         fetch: async (since, afterId, limit) => {
-            const periods = await incrementalQuery(RegistrationPeriod, since, afterId, limit).fetch() as RegistrationPeriod[];
-            return { rows: periods.map(flattenRegistrationPeriod), updatedAt: periods.map(period => period.updatedAt), lastId: periods.at(-1)?.id ?? afterId };
+            const periods = (await incrementalQuery(
+                RegistrationPeriod,
+                since,
+                afterId,
+                limit,
+            ).fetch()) as RegistrationPeriod[];
+            return {
+                rows: periods.map(flattenRegistrationPeriod),
+                updatedAt: periods.map((period) => period.updatedAt),
+                lastId: periods.at(-1)?.id ?? afterId,
+            };
         },
-        existingIds: ids => existingModelIds(RegistrationPeriod, ids),
+        existingIds: (ids) => existingModelIds(RegistrationPeriod, ids),
         periodColumn: 'id',
         // A period is what every historical figure hangs off, and everything else points at it with
         // ON DELETE RESTRICT. Removing one would either be refused by the database or take a settled
@@ -231,75 +310,199 @@ function periodsTable(): IncrementalTable {
     };
 }
 
-function buildIncrementalTables(known: { ageGroups: Set<string>; membershipTypes: Set<string>; responsibilities: Set<string> }, frozen: Set<string>, openPeriodIds: string[]): IncrementalTable[] {
+function buildIncrementalTables(
+    known: { ageGroups: Set<string>; membershipTypes: Set<string>; responsibilities: Set<string> },
+    frozen: Set<string>,
+    openPeriodIds: string[],
+): IncrementalTable[] {
     return [
         {
             table: 'organizations',
-            columns: ['id', 'periodId', 'name', 'uri', 'postalCode', 'city', 'active', 'createdAt', 'updatedAt'],
+            columns: [
+                'id',
+                'periodId',
+                'name',
+                'uri',
+                'postalCode',
+                'city',
+                'active',
+                'createdAt',
+                'updatedAt',
+            ],
             fetch: async (since, afterId, limit) => {
-                const organizations = await incrementalQuery(Organization, since, afterId, limit).fetch() as Organization[];
+                const organizations = (await incrementalQuery(
+                    Organization,
+                    since,
+                    afterId,
+                    limit,
+                ).fetch()) as Organization[];
                 await syncOrganizationTagsAndResponsibilities(organizations, frozen, openPeriodIds);
                 const periodIds = await periodIdsByOrganization(organizations);
-                const rows = organizations.flatMap(organization => [...periodIds.get(organization.id) ?? []].map(periodId => flattenOrganization(organization, periodId)));
-                return { rows, updatedAt: organizations.map(organization => organization.updatedAt), lastId: organizations.at(-1)?.id ?? afterId };
+                const rows = organizations.flatMap((organization) =>
+                    [...(periodIds.get(organization.id) ?? [])].map((periodId) =>
+                        flattenOrganization(organization, periodId),
+                    ),
+                );
+                return {
+                    rows,
+                    updatedAt: organizations.map((organization) => organization.updatedAt),
+                    lastId: organizations.at(-1)?.id ?? afterId,
+                };
             },
-            existingIds: ids => existingModelIds(Organization, ids),
+            existingIds: (ids) => existingModelIds(Organization, ids),
             periodColumn: 'periodId',
             keyColumns: ['id', 'periodId'],
             neverDelete: true,
         },
         {
             table: 'groups',
-            columns: ['id', 'type', 'name', 'organizationId', 'periodId', 'defaultAgeGroupId', 'status', 'deletedAt', 'createdAt', 'updatedAt'],
+            columns: [
+                'id',
+                'type',
+                'name',
+                'organizationId',
+                'periodId',
+                'defaultAgeGroupId',
+                'status',
+                'deletedAt',
+                'createdAt',
+                'updatedAt',
+            ],
             fetch: async (since, afterId, limit) => {
-                const groups = await incrementalQuery(Group, since, afterId, limit).fetch() as Group[];
+                const groups = (await incrementalQuery(
+                    Group,
+                    since,
+                    afterId,
+                    limit,
+                ).fetch()) as Group[];
                 const rows = groups.map((group) => {
                     const row = flattenGroup(group);
-                    if (typeof row.defaultAgeGroupId === 'string' && !known.ageGroups.has(row.defaultAgeGroupId)) {
+                    if (
+                        typeof row.defaultAgeGroupId === 'string' &&
+                        !known.ageGroups.has(row.defaultAgeGroupId)
+                    ) {
                         row.defaultAgeGroupId = null;
                     }
                     return row;
                 });
-                return { rows, updatedAt: groups.map(group => group.updatedAt), lastId: groups.at(-1)?.id ?? afterId };
+                return {
+                    rows,
+                    updatedAt: groups.map((group) => group.updatedAt),
+                    lastId: groups.at(-1)?.id ?? afterId,
+                };
             },
-            existingIds: ids => existingModelIds(Group, ids),
+            existingIds: (ids) => existingModelIds(Group, ids),
             periodColumn: 'periodId',
         },
         {
             table: 'members',
-            columns: ['id', 'periodId', 'birthDate', 'gender', 'postalCode', 'organizationId', 'createdAt', 'updatedAt', 'lastRegisteredAt'],
+            columns: [
+                'id',
+                'periodId',
+                'birthDate',
+                'gender',
+                'postalCode',
+                'organizationId',
+                'createdAt',
+                'updatedAt',
+                'lastRegisteredAt',
+            ],
             fetch: async (since, afterId, limit) => {
-                const members = await incrementalQuery(Member, since, afterId, limit).fetch() as Member[];
-                const periodIds = await periodIdsByMember(members.map(member => member.id));
-                const rows = members.flatMap(member => [...periodIds.get(member.id) ?? []].map(periodId => flattenMember(member, periodId)));
-                return { rows, updatedAt: members.map(member => member.updatedAt), lastId: members.at(-1)?.id ?? afterId };
+                const members = (await incrementalQuery(
+                    Member,
+                    since,
+                    afterId,
+                    limit,
+                ).fetch()) as Member[];
+                const periodIds = await periodIdsByMember(members.map((member) => member.id));
+                const rows = members.flatMap((member) =>
+                    [...(periodIds.get(member.id) ?? [])].map((periodId) =>
+                        flattenMember(member, periodId),
+                    ),
+                );
+                return {
+                    rows,
+                    updatedAt: members.map((member) => member.updatedAt),
+                    lastId: members.at(-1)?.id ?? afterId,
+                };
             },
-            existingIds: ids => existingModelIds(Member, ids),
+            existingIds: (ids) => existingModelIds(Member, ids),
             periodColumn: 'periodId',
             keyColumns: ['id', 'periodId'],
             neverDelete: true,
         },
         {
             table: 'registrations',
-            columns: ['id', 'organizationId', 'memberId', 'groupId', 'periodId', 'registeredAt', 'startDate', 'endDate', 'trialUntil', 'deactivatedAt', 'createdAt', 'updatedAt'],
+            columns: [
+                'id',
+                'organizationId',
+                'memberId',
+                'groupId',
+                'periodId',
+                'registeredAt',
+                'startDate',
+                'endDate',
+                'trialUntil',
+                'deactivatedAt',
+                'createdAt',
+                'updatedAt',
+            ],
             fetch: async (since, afterId, limit) => {
-                const registrations = await incrementalQuery(Registration, since, afterId, limit).fetch() as Registration[];
-                return { rows: registrations.map(flattenRegistration), updatedAt: registrations.map(registration => registration.updatedAt), lastId: registrations.at(-1)?.id ?? afterId };
+                const registrations = (await incrementalQuery(
+                    Registration,
+                    since,
+                    afterId,
+                    limit,
+                ).fetch()) as Registration[];
+                return {
+                    rows: registrations.map(flattenRegistration),
+                    updatedAt: registrations.map((registration) => registration.updatedAt),
+                    lastId: registrations.at(-1)?.id ?? afterId,
+                };
             },
-            existingIds: ids => existingModelIds(Registration, ids),
+            existingIds: (ids) => existingModelIds(Registration, ids),
             periodColumn: 'periodId',
         },
         {
             table: 'member_platform_memberships',
-            columns: ['id', 'memberId', 'membershipTypeId', 'reducedPrice', 'organizationId', 'periodId', 'startDate', 'endDate', 'expireDate', 'trialUntil', 'deletedAt', 'createdAt', 'updatedAt'],
+            columns: [
+                'id',
+                'memberId',
+                'membershipTypeId',
+                'reducedPrice',
+                'organizationId',
+                'periodId',
+                'startDate',
+                'endDate',
+                'expireDate',
+                'trialUntil',
+                'deletedAt',
+                'createdAt',
+                'updatedAt',
+            ],
             fetch: async (since, afterId, limit) => {
-                const memberships = await incrementalQuery(MemberPlatformMembership, since, afterId, limit).fetch() as MemberPlatformMembership[];
-                const kept = memberships.filter(membership => known.membershipTypes.has(membership.membershipTypeId));
-                const reduced = await reducedPriceByMember(kept.map(membership => membership.memberId));
-                const rows = kept.map(membership => flattenMembership(membership, reduced.has(membership.memberId)));
-                return { rows, updatedAt: kept.map(membership => membership.updatedAt), lastId: memberships.at(-1)?.id ?? afterId };
+                const memberships = (await incrementalQuery(
+                    MemberPlatformMembership,
+                    since,
+                    afterId,
+                    limit,
+                ).fetch()) as MemberPlatformMembership[];
+                const kept = memberships.filter((membership) =>
+                    known.membershipTypes.has(membership.membershipTypeId),
+                );
+                const reduced = await reducedPriceByMember(
+                    kept.map((membership) => membership.memberId),
+                );
+                const rows = kept.map((membership) =>
+                    flattenMembership(membership, reduced.has(membership.memberId)),
+                );
+                return {
+                    rows,
+                    updatedAt: kept.map((membership) => membership.updatedAt),
+                    lastId: memberships.at(-1)?.id ?? afterId,
+                };
             },
-            existingIds: ids => existingModelIds(MemberPlatformMembership, ids),
+            existingIds: (ids) => existingModelIds(MemberPlatformMembership, ids),
             periodColumn: 'periodId',
         },
     ];
@@ -318,24 +521,54 @@ async function syncPlatformConfig(openPeriodIds: string[]): Promise<void> {
     const config = platform.config;
 
     const perPeriod = <T>(items: T[], flatten: (item: T, periodId: string) => StatisticsRow) =>
-        openPeriodIds.flatMap(periodId => items.map(item => flatten(item, periodId)));
+        openPeriodIds.flatMap((periodId) => items.map((item) => flatten(item, periodId)));
 
     // The platform record itself rather than its configuration, and therefore not per period: the
     // reports read which organization it runs and what it calls its verlaagd lidgeld, and what they
     // print of that organization comes from `organizations`, which is recorded per year like
     // everything else.
-    await upsertRows('platform', ['id', 'name', 'membershipOrganizationId', 'reducedPriceName'], [flattenPlatform(platform)], ['id']);
+    await upsertRows(
+        'platform',
+        ['id', 'name', 'membershipOrganizationId', 'reducedPriceName'],
+        [flattenPlatform(platform)],
+        ['id'],
+    );
 
-    await upsertRows('organization_tags', ['id', 'periodId', 'name'], perPeriod(config.tags, flattenNamedConfig), namedConfigKey);
+    await upsertRows(
+        'organization_tags',
+        ['id', 'periodId', 'name'],
+        perPeriod(config.tags, flattenNamedConfig),
+        namedConfigKey,
+    );
 
-    await upsertRows('default_age_groups', ['id', 'periodId', 'name', 'minAge', 'maxAge'], perPeriod(config.defaultAgeGroups, (group, periodId) => flattenDefaultAgeGroup({ id: group.id, names: group.names, minAge: group.minAge, maxAge: group.maxAge }, periodId)), namedConfigKey);
-    await upsertRows('platform_membership_types', ['id', 'periodId', 'name'], perPeriod(config.membershipTypes, flattenNamedConfig), namedConfigKey);
-    await upsertRows('responsibilities', ['id', 'periodId', 'name'], perPeriod(config.responsibilities, flattenNamedConfig), namedConfigKey);
+    await upsertRows(
+        'default_age_groups',
+        ['id', 'periodId', 'name', 'minAge', 'maxAge'],
+        perPeriod(config.defaultAgeGroups, (group, periodId) =>
+            flattenDefaultAgeGroup(
+                { id: group.id, names: group.names, minAge: group.minAge, maxAge: group.maxAge },
+                periodId,
+            ),
+        ),
+        namedConfigKey,
+    );
+    await upsertRows(
+        'platform_membership_types',
+        ['id', 'periodId', 'name'],
+        perPeriod(config.membershipTypes, flattenNamedConfig),
+        namedConfigKey,
+    );
+    await upsertRows(
+        'responsibilities',
+        ['id', 'periodId', 'name'],
+        perPeriod(config.responsibilities, flattenNamedConfig),
+        namedConfigKey,
+    );
 }
 
 /** The periods the sync still writes into: everything the statistics database knows, minus the frozen ones. */
 async function loadOpenPeriodIds(frozen: Set<string>): Promise<string[]> {
-    return [...await loadIdSet('registration_periods')].filter(id => !frozen.has(id));
+    return [...(await loadIdSet('registration_periods'))].filter((id) => !frozen.has(id));
 }
 
 const namedConfigKey = ['id', 'periodId'];
@@ -345,18 +578,36 @@ const namedConfigKey = ['id', 'periodId'];
  * organization record, so they are written along with the batch of organizations they belong to
  * rather than by scanning every organization again.
  */
-async function syncOrganizationTagsAndResponsibilities(organizations: Organization[], frozen: Set<string>, openPeriodIds: string[]): Promise<void> {
+async function syncOrganizationTagsAndResponsibilities(
+    organizations: Organization[],
+    frozen: Set<string>,
+    openPeriodIds: string[],
+): Promise<void> {
     if (organizations.length === 0) {
         return;
     }
 
-    const ownResponsibilities = organizations.flatMap(organization => organization.privateMeta.responsibilities);
-    await upsertRows('responsibilities', ['id', 'periodId', 'name'], openPeriodIds.flatMap(periodId => ownResponsibilities.map(responsibility => flattenNamedConfig(responsibility, periodId))), namedConfigKey);
+    const ownResponsibilities = organizations.flatMap(
+        (organization) => organization.privateMeta.responsibilities,
+    );
+    await upsertRows(
+        'responsibilities',
+        ['id', 'periodId', 'name'],
+        openPeriodIds.flatMap((periodId) =>
+            ownResponsibilities.map((responsibility) =>
+                flattenNamedConfig(responsibility, periodId),
+            ),
+        ),
+        namedConfigKey,
+    );
 
     // The source only knows the tags an organization carries now, so they are recorded against the
     // period it is in. A frozen period keeps the netwerk it was recorded with while it was live.
     const knownPeriods = await loadIdSet('registration_periods');
-    const live = organizations.filter(organization => knownPeriods.has(organization.periodId) && !isFrozen(frozen, organization.periodId));
+    const live = organizations.filter(
+        (organization) =>
+            knownPeriods.has(organization.periodId) && !isFrozen(frozen, organization.periodId),
+    );
     if (live.length === 0) {
         return;
     }
@@ -373,10 +624,20 @@ async function syncOrganizationTagsAndResponsibilities(organizations: Organizati
         );
     }
 
-    const links = live.flatMap(organization => organization.meta.tags
-        .filter(tagId => knownTags.has(tagId))
-        .map(tagId => ({ organizationsId: organization.id, organizationTagsId: tagId, periodId: organization.periodId })));
-    await upsertRows('_organizations_organization_tags', ['organizationsId', 'organizationTagsId', 'periodId', ...sourceColumns], withSource(links));
+    const links = live.flatMap((organization) =>
+        organization.meta.tags
+            .filter((tagId) => knownTags.has(tagId))
+            .map((tagId) => ({
+                organizationsId: organization.id,
+                organizationTagsId: tagId,
+                periodId: organization.periodId,
+            })),
+    );
+    await upsertRows(
+        '_organizations_organization_tags',
+        ['organizationsId', 'organizationTagsId', 'periodId', ...sourceColumns],
+        withSource(links),
+    );
 }
 
 type PeriodRange = { id: string; organizationId: string | null; startDate: Date; endDate: Date };
@@ -385,7 +646,9 @@ type PeriodRange = { id: string; organizationId: string | null; startDate: Date;
  * The years the sync still writes into, grouped by the unit holding them. Every unit keeps its own
  * row per year; the platform's own years are the ones under no unit at all.
  */
-async function loadOpenPeriodsByOrganization(frozen: Set<string>): Promise<Map<string | null, PeriodRange[]>> {
+async function loadOpenPeriodsByOrganization(
+    frozen: Set<string>,
+): Promise<Map<string | null, PeriodRange[]>> {
     const connection = getStatisticsConnection();
     const [rows] = await connection.select(
         'SELECT `id`, `organizationId`, `startDate`, `endDate` FROM `registration_periods`',
@@ -417,32 +680,48 @@ async function loadOpenPeriodsByOrganization(frozen: Set<string>): Promise<Map<s
  * A record with no end date runs until now rather than forever, so a functie someone still holds is
  * not also recorded against the years that have not happened yet.
  */
-function periodIdsOfRecord(record: MemberResponsibilityRecord, byOrganization: Map<string | null, PeriodRange[]>, now: Date): string[] {
+function periodIdsOfRecord(
+    record: MemberResponsibilityRecord,
+    byOrganization: Map<string | null, PeriodRange[]>,
+    now: Date,
+): string[] {
     const periods = byOrganization.get(record.organizationId) ?? byOrganization.get(null) ?? [];
     const runsUntil = record.endDate !== null && record.endDate < now ? record.endDate : now;
 
     return periods
-        .filter(period => period.startDate <= runsUntil && period.endDate >= record.startDate)
-        .map(period => period.id);
+        .filter((period) => period.startDate <= runsUntil && period.endDate >= record.startDate)
+        .map((period) => period.id);
 }
 
 /**
  * Responsibility records carry no `updatedAt`, so there is no watermark to advance: they are written
  * in full on every run. Records pointing at a responsibility that no longer exists are skipped.
  */
-async function syncResponsibilityRecords(knownResponsibilities: Set<string>, frozen: Set<string>): Promise<void> {
-    const columns = ['id', 'periodId', 'memberId', 'groupId', 'organizationId', 'responsibilityId', 'startDate', 'endDate'];
+async function syncResponsibilityRecords(
+    knownResponsibilities: Set<string>,
+    frozen: Set<string>,
+): Promise<void> {
+    const columns = [
+        'id',
+        'periodId',
+        'memberId',
+        'groupId',
+        'organizationId',
+        'responsibilityId',
+        'startDate',
+        'endDate',
+    ];
     const byOrganization = await loadOpenPeriodsByOrganization(frozen);
     const connection = getStatisticsConnection();
     const now = new Date();
     let afterId = '';
 
     for (;;) {
-        const records = await MemberResponsibilityRecord.select()
+        const records = (await MemberResponsibilityRecord.select()
             .where(SQL.column('id'), SQLWhereSign.Greater, afterId)
             .orderBy(SQL.column('id'), 'ASC')
             .limit(fetchBatchSize)
-            .fetch() as MemberResponsibilityRecord[];
+            .fetch()) as MemberResponsibilityRecord[];
 
         if (records.length === 0) {
             return;
@@ -452,14 +731,31 @@ async function syncResponsibilityRecords(knownResponsibilities: Set<string>, fro
         // has to lose the years it no longer covers. Only outside the frozen ones: those are settled.
         const ids = idsOf(records);
         if (frozen.size > 0) {
-            await connection.delete('DELETE FROM `member_responsibility_records` WHERE `id` IN (?) AND `periodId` NOT IN (?)', [ids, [...frozen]]);
+            await connection.delete(
+                'DELETE FROM `member_responsibility_records` WHERE `id` IN (?) AND `periodId` NOT IN (?)',
+                [ids, [...frozen]],
+            );
         } else {
-            await connection.delete('DELETE FROM `member_responsibility_records` WHERE `id` IN (?)', [ids]);
+            await connection.delete(
+                'DELETE FROM `member_responsibility_records` WHERE `id` IN (?)',
+                [ids],
+            );
         }
 
-        await upsertRows('member_responsibility_records', [...columns, ...sourceColumns], withSource(records
-            .filter(record => knownResponsibilities.has(record.responsibilityId))
-            .flatMap(record => periodIdsOfRecord(record, byOrganization, now).map(periodId => flattenResponsibilityRecord(record, periodId)))), ['id', 'periodId']);
+        await upsertRows(
+            'member_responsibility_records',
+            [...columns, ...sourceColumns],
+            withSource(
+                records
+                    .filter((record) => knownResponsibilities.has(record.responsibilityId))
+                    .flatMap((record) =>
+                        periodIdsOfRecord(record, byOrganization, now).map((periodId) =>
+                            flattenResponsibilityRecord(record, periodId),
+                        ),
+                    ),
+            ),
+            ['id', 'periodId'],
+        );
         afterId = records[records.length - 1].id;
     }
 }
@@ -468,7 +764,12 @@ async function syncResponsibilityRecords(knownResponsibilities: Set<string>, fro
  * Of these statistics rows, the ones that do not belong to a frozen period. A deleted source row in a
  * settled year stays exactly as it was counted.
  */
-async function withoutFrozen(table: string, ids: string[], frozen: Set<string>, periodColumn: string): Promise<string[]> {
+async function withoutFrozen(
+    table: string,
+    ids: string[],
+    frozen: Set<string>,
+    periodColumn: string,
+): Promise<string[]> {
     if (ids.length === 0 || frozen.size === 0) {
         return ids;
     }
@@ -480,10 +781,13 @@ async function withoutFrozen(table: string, ids: string[], frozen: Set<string>, 
         [ids, [...frozen]],
         { nestTables: false },
     );
-    return (rows as unknown as { id: string }[]).map(row => row.id);
+    return (rows as unknown as { id: string }[]).map((row) => row.id);
 }
 
-async function syncIncrementalTable(definition: IncrementalTable, frozen: Set<string>): Promise<void> {
+async function syncIncrementalTable(
+    definition: IncrementalTable,
+    frozen: Set<string>,
+): Promise<void> {
     const startedAt = new Date();
     const state = await readSyncState(definition.table);
     const since = state.watermark ? new Date(state.watermark.getTime() - watermarkOverlap) : null;
@@ -497,9 +801,16 @@ async function syncIncrementalTable(definition: IncrementalTable, frozen: Set<st
         }
 
         const live = definition.periodColumn
-            ? rows.filter(row => !isFrozen(frozen, row[definition.periodColumn!] as string | null))
+            ? rows.filter(
+                  (row) => !isFrozen(frozen, row[definition.periodColumn!] as string | null),
+              )
             : rows;
-        await upsertRows(definition.table, [...definition.columns, ...sourceColumns], withSource(live), definition.keyColumns);
+        await upsertRows(
+            definition.table,
+            [...definition.columns, ...sourceColumns],
+            withSource(live),
+            definition.keyColumns,
+        );
         seen.push(...updatedAt);
         afterId = lastId;
     }
@@ -511,14 +822,18 @@ async function syncIncrementalTable(definition: IncrementalTable, frozen: Set<st
 }
 
 function emptyKnownIds() {
-    return { ageGroups: new Set<string>(), membershipTypes: new Set<string>(), responsibilities: new Set<string>() };
+    return {
+        ageGroups: new Set<string>(),
+        membershipTypes: new Set<string>(),
+        responsibilities: new Set<string>(),
+    };
 }
 
 /** The tables the delete reconciliation walks, which is every table it may take a row out of. */
 export function reconciledTables(): string[] {
     return [periodsTable(), ...buildIncrementalTables(emptyKnownIds(), new Set(), [])]
-        .filter(definition => !definition.neverDelete)
-        .map(definition => definition.table);
+        .filter((definition) => !definition.neverDelete)
+        .map((definition) => definition.table);
 }
 
 /**
@@ -569,22 +884,38 @@ export async function syncStatistics(): Promise<void> {
 export async function syncStatisticsDeletes(): Promise<void> {
     const frozen = await loadFrozenPeriodIds();
 
-    for (const definition of [periodsTable(), ...buildIncrementalTables(emptyKnownIds(), frozen, [])]) {
+    for (const definition of [
+        periodsTable(),
+        ...buildIncrementalTables(emptyKnownIds(), frozen, []),
+    ]) {
         if (definition.neverDelete) {
             continue;
         }
 
         for await (const ids of iterateIds(definition.table, syncSource)) {
             const existing = await definition.existingIds(ids);
-            const missing = ids.filter(id => !existing.has(id));
-            await deleteRows(definition.table, definition.periodColumn ? await withoutFrozen(definition.table, missing, frozen, definition.periodColumn) : missing);
+            const missing = ids.filter((id) => !existing.has(id));
+            await deleteRows(
+                definition.table,
+                definition.periodColumn
+                    ? await withoutFrozen(
+                          definition.table,
+                          missing,
+                          frozen,
+                          definition.periodColumn,
+                      )
+                    : missing,
+            );
         }
         await writeSyncState(definition.table, { lastReconciledAt: new Date() });
     }
 
     for await (const ids of iterateIds('member_responsibility_records', syncSource)) {
         const existing = await existingModelIds(MemberResponsibilityRecord, ids);
-        await deleteRows('member_responsibility_records', ids.filter(id => !existing.has(id)));
+        await deleteRows(
+            'member_responsibility_records',
+            ids.filter((id) => !existing.has(id)),
+        );
     }
     await writeSyncState('member_responsibility_records', { lastReconciledAt: new Date() });
 }

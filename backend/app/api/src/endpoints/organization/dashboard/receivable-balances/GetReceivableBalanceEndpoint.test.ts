@@ -1,9 +1,24 @@
 import { Request } from '@node/endpoints';
 import type { BalanceItem, Organization, User } from '@stamhoofd/models';
-import { BalanceItemFactory, BalanceItemPayment, Invoice, InvoicedBalanceItem, MemberFactory, OrganizationFactory, Payment, Token, UserFactory } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    BalanceItemPayment,
+    Invoice,
+    InvoicedBalanceItem,
+    MemberFactory,
+    OrganizationFactory,
+    Payment,
+    Token,
+    UserFactory,
+} from '@stamhoofd/models';
 import type { DetailedReceivableBalance } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { PaymentMethod, PaymentStatus, Permissions, ReceivableBalanceType } from '@stamhoofd/structures';
+import {
+    PaymentMethod,
+    PaymentStatus,
+    Permissions,
+    ReceivableBalanceType,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetReceivableBalanceEndpoint } from './GetReceivableBalanceEndpoint.js';
@@ -16,7 +31,15 @@ describe('Endpoint.GetReceivableBalanceEndpoint', () => {
         TestUtils.setEnvironment('userMode', 'platform');
     });
 
-    const createPayment = async ({ organization, balanceItems, invoiceId }: { organization: Organization; balanceItems: BalanceItem[]; invoiceId?: string | null }) => {
+    const createPayment = async ({
+        organization,
+        balanceItems,
+        invoiceId,
+    }: {
+        organization: Organization;
+        balanceItems: BalanceItem[];
+        invoiceId?: string | null;
+    }) => {
         const payment = new Payment();
         payment.method = PaymentMethod.Transfer;
         payment.status = PaymentStatus.Succeeded;
@@ -37,7 +60,15 @@ describe('Endpoint.GetReceivableBalanceEndpoint', () => {
         return payment;
     };
 
-    const createInvoice = async ({ organization, balanceItems, payingOrganizationId }: { organization: Organization; balanceItems?: BalanceItem[]; payingOrganizationId?: string | null }) => {
+    const createInvoice = async ({
+        organization,
+        balanceItems,
+        payingOrganizationId,
+    }: {
+        organization: Organization;
+        balanceItems?: BalanceItem[];
+        payingOrganizationId?: string | null;
+    }) => {
         const invoice = new Invoice();
         invoice.organizationId = organization.id;
         invoice.payingOrganizationId = payingOrganizationId ?? null;
@@ -57,7 +88,17 @@ describe('Endpoint.GetReceivableBalanceEndpoint', () => {
         return invoice;
     };
 
-    const getReceivableBalance = async ({ type, id, organization, user }: { type: ReceivableBalanceType; id: string; organization: Organization; user: User }) => {
+    const getReceivableBalance = async ({
+        type,
+        id,
+        organization,
+        user,
+    }: {
+        type: ReceivableBalanceType;
+        id: string;
+        organization: Organization;
+        user: User;
+    }) => {
         const token = await SessionService.createSession(user);
 
         const request = Request.get({
@@ -100,10 +141,20 @@ describe('Endpoint.GetReceivableBalanceEndpoint', () => {
             }).create();
 
             const invoice = await createInvoice({ organization, balanceItems: [balanceItem] });
-            const otherInvoice = await createInvoice({ organization, balanceItems: [otherBalanceItem] });
+            const otherInvoice = await createInvoice({
+                organization,
+                balanceItems: [otherBalanceItem],
+            });
 
-            const invoicedPayment = await createPayment({ organization, balanceItems: [balanceItem], invoiceId: invoice.id });
-            const notInvoicedPayment = await createPayment({ organization, balanceItems: [balanceItem] });
+            const invoicedPayment = await createPayment({
+                organization,
+                balanceItems: [balanceItem],
+                invoiceId: invoice.id,
+            });
+            const notInvoicedPayment = await createPayment({
+                organization,
+                balanceItems: [balanceItem],
+            });
 
             const response = await getReceivableBalance({
                 type: ReceivableBalanceType.member,
@@ -113,12 +164,12 @@ describe('Endpoint.GetReceivableBalanceEndpoint', () => {
             });
 
             expect(response.status).toBe(200);
-            expect(response.body.invoices.map(i => i.id)).toEqual([invoice.id]);
-            expect(response.body.invoices.map(i => i.id)).not.toContain(otherInvoice.id);
+            expect(response.body.invoices.map((i) => i.id)).toEqual([invoice.id]);
+            expect(response.body.invoices.map((i) => i.id)).not.toContain(otherInvoice.id);
 
             const payments = response.body.payments;
-            expect(payments.find(p => p.id === invoicedPayment.id)?.invoiceId).toBe(invoice.id);
-            expect(payments.find(p => p.id === notInvoicedPayment.id)?.invoiceId).toBeNull();
+            expect(payments.find((p) => p.id === invoicedPayment.id)?.invoiceId).toBe(invoice.id);
+            expect(payments.find((p) => p.id === notInvoicedPayment.id)?.invoiceId).toBeNull();
         });
     });
 
@@ -136,18 +187,32 @@ describe('Endpoint.GetReceivableBalanceEndpoint', () => {
             }).create();
 
             // Linked both directly and via the invoiced balance item: should only be returned once
-            const invoiceViaBoth = await createInvoice({ organization, balanceItems: [balanceItem], payingOrganizationId: payingOrganization.id });
+            const invoiceViaBoth = await createInvoice({
+                organization,
+                balanceItems: [balanceItem],
+                payingOrganizationId: payingOrganization.id,
+            });
 
             // Only linked via the invoiced balance item: the invoice itself has no payingOrganizationId,
             // so it can only be found through the balance item that belongs to the paying organization
-            const invoiceViaItemOnly = await createInvoice({ organization, balanceItems: [balanceItem], payingOrganizationId: null });
+            const invoiceViaItemOnly = await createInvoice({
+                organization,
+                balanceItems: [balanceItem],
+                payingOrganizationId: null,
+            });
 
             // Only linked directly to the paying organization (no invoiced balance items)
-            const directInvoice = await createInvoice({ organization, payingOrganizationId: payingOrganization.id });
+            const directInvoice = await createInvoice({
+                organization,
+                payingOrganizationId: payingOrganization.id,
+            });
 
             // Invoice of another paying organization
             const otherPayingOrganization = await new OrganizationFactory({}).create();
-            const otherInvoice = await createInvoice({ organization, payingOrganizationId: otherPayingOrganization.id });
+            const otherInvoice = await createInvoice({
+                organization,
+                payingOrganizationId: otherPayingOrganization.id,
+            });
 
             const response = await getReceivableBalance({
                 type: ReceivableBalanceType.organization,
@@ -157,8 +222,10 @@ describe('Endpoint.GetReceivableBalanceEndpoint', () => {
             });
 
             expect(response.status).toBe(200);
-            expect(response.body.invoices.map(i => i.id).sort()).toEqual([invoiceViaBoth.id, invoiceViaItemOnly.id, directInvoice.id].sort());
-            expect(response.body.invoices.map(i => i.id)).not.toContain(otherInvoice.id);
+            expect(response.body.invoices.map((i) => i.id).sort()).toEqual(
+                [invoiceViaBoth.id, invoiceViaItemOnly.id, directInvoice.id].sort(),
+            );
+            expect(response.body.invoices.map((i) => i.id)).not.toContain(otherInvoice.id);
         });
 
         test('does not return invoices of a different selling organization', async () => {
@@ -167,7 +234,10 @@ describe('Endpoint.GetReceivableBalanceEndpoint', () => {
             const payingOrganization = await new OrganizationFactory({}).create();
             const admin = await createAdmin(organization);
 
-            await createInvoice({ organization: otherOrganization, payingOrganizationId: payingOrganization.id });
+            await createInvoice({
+                organization: otherOrganization,
+                payingOrganizationId: payingOrganization.id,
+            });
 
             const response = await getReceivableBalance({
                 type: ReceivableBalanceType.organization,
@@ -195,7 +265,11 @@ describe('Endpoint.GetReceivableBalanceEndpoint', () => {
             }).create();
 
             const invoice = await createInvoice({ organization, balanceItems: [balanceItem] });
-            await createPayment({ organization, balanceItems: [balanceItem], invoiceId: invoice.id });
+            await createPayment({
+                organization,
+                balanceItems: [balanceItem],
+                invoiceId: invoice.id,
+            });
 
             const response = await getReceivableBalance({
                 type: ReceivableBalanceType.user,
@@ -205,7 +279,7 @@ describe('Endpoint.GetReceivableBalanceEndpoint', () => {
             });
 
             expect(response.status).toBe(200);
-            expect(response.body.invoices.map(i => i.id)).toEqual([invoice.id]);
+            expect(response.body.invoices.map((i) => i.id)).toEqual([invoice.id]);
         });
     });
 });

@@ -1,7 +1,11 @@
 import * as commandRunner from '../runtime/command-runner.js';
 import { RunVerbosity } from '../runtime/command-runner.js';
 import type { RunCaptureResult, RunOptions } from '../runtime/command-runner.js';
-import { localIpv4Host, mysqlRootPassword, mysqlRootUser } from '../config/shared-service-config.js';
+import {
+    localIpv4Host,
+    mysqlRootPassword,
+    mysqlRootUser,
+} from '../config/shared-service-config.js';
 
 export enum ContainerRuntime {
     Podman = 'podman',
@@ -14,45 +18,88 @@ export async function requireDocker(): Promise<void> {
     await getContainerRuntime();
 }
 
-export async function getContainerRuntime(verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<ContainerRuntime> {
+export async function getContainerRuntime(
+    verbosity: RunVerbosity = RunVerbosity.Quiet,
+): Promise<ContainerRuntime> {
     containerRuntimePromise ??= resolveContainerRuntime(verbosity);
     return await containerRuntimePromise;
 }
 
-export async function run(args: string[], options: RunOptions & { capture: true }): Promise<RunCaptureResult>;
+export async function run(
+    args: string[],
+    options: RunOptions & { capture: true },
+): Promise<RunCaptureResult>;
 export async function run(args: string[], options?: RunOptions): Promise<void>;
-export async function run(args: string[], options: RunOptions = {}): Promise<void | RunCaptureResult> {
-    return await commandRunner.run(await getContainerRuntime(), args, options as RunOptions & { capture: true });
+export async function run(
+    args: string[],
+    options: RunOptions = {},
+): Promise<void | RunCaptureResult> {
+    return await commandRunner.run(
+        await getContainerRuntime(),
+        args,
+        options as RunOptions & { capture: true },
+    );
 }
 
-export async function containerIsRunning(name: string, verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<boolean> {
-    const result = await run(['inspect', '-f', '{{.State.Running}}', name], { capture: true, allowFailure: true, verbosity });
+export async function containerIsRunning(
+    name: string,
+    verbosity: RunVerbosity = RunVerbosity.Quiet,
+): Promise<boolean> {
+    const result = await run(['inspect', '-f', '{{.State.Running}}', name], {
+        capture: true,
+        allowFailure: true,
+        verbosity,
+    });
     return result.stdout.trim() === 'true';
 }
 
 export async function removeContainer(name: string, verbose = false): Promise<void> {
-    await run(['rm', '-f', name], { verbosity: verbose ? RunVerbosity.Command : RunVerbosity.Quiet, allowFailure: true });
+    await run(['rm', '-f', name], {
+        verbosity: verbose ? RunVerbosity.Command : RunVerbosity.Quiet,
+        allowFailure: true,
+    });
 }
 
 /**
  * Every container (running or not) whose name starts with `prefix`.
  */
 export async function listContainerNames(prefix: string): Promise<string[]> {
-    const result = await run(['ps', '-a', '--filter', `name=^${prefix}`, '--format', '{{.Names}}'], { capture: true, verbosity: RunVerbosity.Quiet, allowFailure: true });
-    return result.stdout.split('\n').map(name => name.trim()).filter(name => name.startsWith(prefix));
+    const result = await run(
+        ['ps', '-a', '--filter', `name=^${prefix}`, '--format', '{{.Names}}'],
+        { capture: true, verbosity: RunVerbosity.Quiet, allowFailure: true },
+    );
+    return result.stdout
+        .split('\n')
+        .map((name) => name.trim())
+        .filter((name) => name.startsWith(prefix));
 }
 
-export async function getContainerLogs(name: string, options: { tail?: number } = {}): Promise<string> {
-    const result = await run(['logs', '--tail', String(options.tail ?? 50), name], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+export async function getContainerLogs(
+    name: string,
+    options: { tail?: number } = {},
+): Promise<string> {
+    const result = await run(['logs', '--tail', String(options.tail ?? 50), name], {
+        capture: true,
+        allowFailure: true,
+        verbosity: RunVerbosity.Quiet,
+    });
     return [result.stdout, result.stderr].filter(Boolean).join('\n').trim();
 }
 
 export async function imageExists(image: string): Promise<boolean> {
-    const result = await run(['image', 'inspect', image], { capture: true, verbosity: RunVerbosity.Quiet, allowFailure: true });
+    const result = await run(['image', 'inspect', image], {
+        capture: true,
+        verbosity: RunVerbosity.Quiet,
+        allowFailure: true,
+    });
     return result.status === 0;
 }
 
-export async function buildImage(tag: string, contextDir: string, options: { dockerfile?: string; verbose?: boolean } = {}): Promise<void> {
+export async function buildImage(
+    tag: string,
+    contextDir: string,
+    options: { dockerfile?: string; verbose?: boolean } = {},
+): Promise<void> {
     const args = ['build', '-t', tag];
     if (options.dockerfile) {
         args.push('-f', options.dockerfile);
@@ -62,29 +109,72 @@ export async function buildImage(tag: string, contextDir: string, options: { doc
 }
 
 export async function createVolume(name: string, verbose = false): Promise<void> {
-    const existing = await run(['volume', 'exists', name], { capture: true, verbosity: verbose ? RunVerbosity.Command : RunVerbosity.Quiet, allowFailure: true });
+    const existing = await run(['volume', 'exists', name], {
+        capture: true,
+        verbosity: verbose ? RunVerbosity.Command : RunVerbosity.Quiet,
+        allowFailure: true,
+    });
     if (existing.status === 0) {
         return;
     }
-    await run(['volume', 'create', name], { verbosity: verbose ? RunVerbosity.Command : RunVerbosity.Quiet });
+    await run(['volume', 'create', name], {
+        verbosity: verbose ? RunVerbosity.Command : RunVerbosity.Quiet,
+    });
 }
 
 export async function removeVolume(name: string, verbose = false): Promise<void> {
-    await run(['volume', 'rm', '-f', name], { verbosity: verbose ? RunVerbosity.Command : RunVerbosity.Quiet, allowFailure: true });
+    await run(['volume', 'rm', '-f', name], {
+        verbosity: verbose ? RunVerbosity.Command : RunVerbosity.Quiet,
+        allowFailure: true,
+    });
 }
 
-export async function copyVolumeToDirectory(volume: string, hostDir: string, image: string, verbose = false): Promise<void> {
-    await run(['run', '--rm', '--entrypoint', 'sh',
-        '-v', `${volume}:/source:ro`,
-        '-v', `${hostDir}:/dest`,
-        image, '-c', 'cp -a /source/. /dest/'], { verbosity: verbose ? RunVerbosity.Output : RunVerbosity.Quiet });
+export async function copyVolumeToDirectory(
+    volume: string,
+    hostDir: string,
+    image: string,
+    verbose = false,
+): Promise<void> {
+    await run(
+        [
+            'run',
+            '--rm',
+            '--entrypoint',
+            'sh',
+            '-v',
+            `${volume}:/source:ro`,
+            '-v',
+            `${hostDir}:/dest`,
+            image,
+            '-c',
+            'cp -a /source/. /dest/',
+        ],
+        { verbosity: verbose ? RunVerbosity.Output : RunVerbosity.Quiet },
+    );
 }
 
-export async function copyDirectoryToVolume(hostDir: string, volume: string, image: string, verbose = false): Promise<void> {
-    await run(['run', '--rm', '--entrypoint', 'sh',
-        '-v', `${hostDir}:/source:ro`,
-        '-v', `${volume}:/dest`,
-        image, '-c', 'cp -a /source/. /dest/'], { verbosity: verbose ? RunVerbosity.Output : RunVerbosity.Quiet });
+export async function copyDirectoryToVolume(
+    hostDir: string,
+    volume: string,
+    image: string,
+    verbose = false,
+): Promise<void> {
+    await run(
+        [
+            'run',
+            '--rm',
+            '--entrypoint',
+            'sh',
+            '-v',
+            `${hostDir}:/source:ro`,
+            '-v',
+            `${volume}:/dest`,
+            image,
+            '-c',
+            'cp -a /source/. /dest/',
+        ],
+        { verbosity: verbose ? RunVerbosity.Output : RunVerbosity.Quiet },
+    );
 }
 
 export async function waitForMysql(container: string, verbose = false): Promise<void> {
@@ -92,14 +182,26 @@ export async function waitForMysql(container: string, verbose = false): Promise<
         console.log('Waiting for MySQL to accept connections...');
     }
     for (let i = 0; i < 60; i++) {
-        const result = await run(['exec', container, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', 'SELECT 1'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+        const result = await run(
+            [
+                'exec',
+                container,
+                'mysql',
+                `-h${localIpv4Host}`,
+                `-u${mysqlRootUser}`,
+                `-p${mysqlRootPassword}`,
+                '-e',
+                'SELECT 1',
+            ],
+            { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet },
+        );
         if (result.status === 0) {
             if (verbose) {
                 console.log('MySQL is ready.');
             }
             return;
         }
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
     }
     throw new Error('MySQL did not become ready in time.');
 }
@@ -115,19 +217,27 @@ async function resolveContainerRuntime(verbosity: RunVerbosity): Promise<Contain
     if (configured) {
         const supported: string[] = [ContainerRuntime.Docker, ContainerRuntime.Podman];
         if (!supported.includes(configured)) {
-            throw new Error(`Unknown STAMHOOFD_CONTAINER_RUNTIME "${configured}": expected ${supported.map(runtime => `"${runtime}"`).join(' or ')}`);
+            throw new Error(
+                `Unknown STAMHOOFD_CONTAINER_RUNTIME "${configured}": expected ${supported.map((runtime) => `"${runtime}"`).join(' or ')}`,
+            );
         }
         await commandRunner.run(configured, ['info'], { verbosity });
         return configured as ContainerRuntime;
     }
 
-    const podmanVersion = await commandRunner.run('podman', ['--version'], { capture: true, allowFailure: true, verbosity });
+    const podmanVersion = await commandRunner.run('podman', ['--version'], {
+        capture: true,
+        allowFailure: true,
+        verbosity,
+    });
     if (podmanVersion.status === 0) {
         await commandRunner.run('podman', ['info'], { verbosity });
         return ContainerRuntime.Podman;
     }
     if (!isCommandNotFound(podmanVersion.stderr)) {
-        throw new Error(`podman is available but not usable: ${podmanVersion.stderr.trim() || `exited with status ${podmanVersion.status}`}`);
+        throw new Error(
+            `podman is available but not usable: ${podmanVersion.stderr.trim() || `exited with status ${podmanVersion.status}`}`,
+        );
     }
 
     await commandRunner.run('docker', ['info'], { verbosity });

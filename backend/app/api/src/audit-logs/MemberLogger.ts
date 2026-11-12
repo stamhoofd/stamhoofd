@@ -14,11 +14,14 @@ export const MemberLogger = new ModelLogger(Member, {
 
     createReplacements(model) {
         return new Map([
-            ['m', AuditLogReplacement.create({
-                id: model.id,
-                value: model.details.name,
-                type: AuditLogReplacementType.Member,
-            })],
+            [
+                'm',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.details.name,
+                    type: AuditLogReplacementType.Member,
+                }),
+            ],
         ]);
     },
 });

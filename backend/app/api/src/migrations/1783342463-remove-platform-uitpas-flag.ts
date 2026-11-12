@@ -17,7 +17,7 @@ export default new Migration(async () => {
     // The uitpas (UiTPAS social tariff on webshops) feature flag is now controlled
     // per organization instead of platform-wide. Remove it from the platform config
     // so it no longer implicitly enables the feature for every organization.
-    platform.config.featureFlags = platform.config.featureFlags.filter(f => f !== 'uitpas');
+    platform.config.featureFlags = platform.config.featureFlags.filter((f) => f !== 'uitpas');
     await platform.save();
     await Platform.clearCache();
 

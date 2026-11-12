@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, patchObject, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    field,
+    IntegerDecoder,
+    patchObject,
+    StringDecoder,
+} from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -178,7 +187,9 @@ export class RegisterItem implements ObjectWithRecords {
             if (!this.groupPrice) {
                 // Probably all sold out
                 // Select the first one anyway
-                this.groupPrice = prices[0] ?? GroupPrice.create({ name: TranslatedString.create($t('%15L')), id: '' });
+                this.groupPrice =
+                    prices[0] ??
+                    GroupPrice.create({ name: TranslatedString.create($t('%15L')), id: '' });
             }
         } else {
             this.groupPrice = data.groupPrice;
@@ -197,7 +208,7 @@ export class RegisterItem implements ObjectWithRecords {
         // Select all defaults
         for (const optionMenu of this.group.settings.optionMenus) {
             if (!optionMenu.multipleChoice) {
-                if (this.options.find(o => o.optionMenu.id === optionMenu.id)) {
+                if (this.options.find((o) => o.optionMenu.id === optionMenu.id)) {
                     continue;
                 }
 
@@ -250,7 +261,11 @@ export class RegisterItem implements ObjectWithRecords {
         }
     }
 
-    static fromRegistration(registration: Registration, member: PlatformMember, organization: Organization) {
+    static fromRegistration(
+        registration: Registration,
+        member: PlatformMember,
+        organization: Organization,
+    ) {
         return new RegisterItem({
             id: registration.id,
             member,
@@ -272,9 +287,11 @@ export class RegisterItem implements ObjectWithRecords {
             group: this.group,
             organization: this.organization,
             groupPrice: this.groupPrice.clone(),
-            options: this.options.map(o => o.clone()),
-            recordAnswers: new Map([...this.recordAnswers.entries()].map(([k, v]) => [k, v.clone()])),
-            replaceRegistrations: this.replaceRegistrations.map(r => r.clone()),
+            options: this.options.map((o) => o.clone()),
+            recordAnswers: new Map(
+                [...this.recordAnswers.entries()].map(([k, v]) => [k, v.clone()]),
+            ),
+            replaceRegistrations: this.replaceRegistrations.map((r) => r.clone()),
             cartError: this.cartError,
             calculatedPrice: this.calculatedPrice,
             calculatedRefund: this.calculatedRefund,
@@ -287,8 +304,10 @@ export class RegisterItem implements ObjectWithRecords {
 
     copyFrom(item: RegisterItem) {
         this.groupPrice = item.groupPrice.clone();
-        this.options = item.options.map(o => o.clone());
-        this.recordAnswers = new Map([...item.recordAnswers.entries()].map(([k, v]) => [k, v.clone()]));
+        this.options = item.options.map((o) => o.clone());
+        this.recordAnswers = new Map(
+            [...item.recordAnswers.entries()].map(([k, v]) => [k, v.clone()]),
+        );
         this.calculatedPrice = item.calculatedPrice;
         this.calculatedRefund = item.calculatedRefund;
         this.calculatedPriceDueLater = item.calculatedPriceDueLater;
@@ -298,17 +317,19 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     static fromId(idRegisterItem: IDRegisterItem, context: RegisterContext) {
-        const member = context.members.find(m => m.member.id === idRegisterItem.memberId);
+        const member = context.members.find((m) => m.member.id === idRegisterItem.memberId);
         if (!member) {
             throw new Error('Member not found: ' + idRegisterItem.memberId);
         }
 
-        const organization = context.organizations.find(o => o.id === idRegisterItem.organizationId);
+        const organization = context.organizations.find(
+            (o) => o.id === idRegisterItem.organizationId,
+        );
         if (!organization) {
             throw new Error('Organization not found: ' + idRegisterItem.organizationId);
         }
 
-        const group = context.groups.find(g => g.id === idRegisterItem.groupId);
+        const group = context.groups.find((g) => g.id === idRegisterItem.groupId);
         if (!group) {
             throw new Error('Group not found: ' + idRegisterItem.groupId);
         }
@@ -316,7 +337,9 @@ export class RegisterItem implements ObjectWithRecords {
         const replaceRegistrations: RegistrationWithPlatformMember[] = [];
 
         for (const registrationId of idRegisterItem.replaceRegistrationIds) {
-            const registration = member.patchedMember.registrations.find(r => r.id === registrationId);
+            const registration = member.patchedMember.registrations.find(
+                (r) => r.id === registrationId,
+            );
             if (!registration) {
                 throw new Error('Registration not found: ' + registrationId);
             }
@@ -351,7 +374,7 @@ export class RegisterItem implements ObjectWithRecords {
             organizationId: this.organization.id,
             groupPrice: this.groupPrice,
             options: this.options,
-            replaceRegistrationIds: this.replaceRegistrations.map(r => r.registration.id),
+            replaceRegistrationIds: this.replaceRegistrations.map((r) => r.registration.id),
             recordAnswers: this.recordAnswers,
             trial: this.trial,
             customStartDate: this.customStartDate,
@@ -364,7 +387,16 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     get showItemView() {
-        return this.checkout.isAdminFromSameOrganization || !!this.replaceRegistrations.length || this.group.settings.prices.length !== 1 || this.group.settings.optionMenus.length > 0 || this.group.type === GroupType.WaitingList || this.group.settings.description.length > 2 || this.group.settings.prices[0].price.price > 0 || (!this.isInCart && !this.isValid);
+        return (
+            this.checkout.isAdminFromSameOrganization ||
+            !!this.replaceRegistrations.length ||
+            this.group.settings.prices.length !== 1 ||
+            this.group.settings.optionMenus.length > 0 ||
+            this.group.type === GroupType.WaitingList ||
+            this.group.settings.description.length > 2 ||
+            this.group.settings.prices[0].price.price > 0 ||
+            (!this.isInCart && !this.isValid)
+        );
     }
 
     calculatePrice() {
@@ -383,7 +415,11 @@ export class RegisterItem implements ObjectWithRecords {
         // The registrations we are going to replace, can be in trial, and it is possible they have a balance already (shows as - X.XX in the cart total)
         // but if we add an item in trial, with a very short trail period, it will get added to the balance immediately (if we add it to calculatedPriceDueLater, it won't count the two together)
         // in order to calculate the difference between the added and removed balance, we are using getDueOffset
-        if (this.calculatedTrialUntil && (this.replaceRegistrations.length === 0 || this.calculatedTrialUntil >= BalanceItem.getDueOffset())) {
+        if (
+            this.calculatedTrialUntil &&
+            (this.replaceRegistrations.length === 0 ||
+                this.calculatedTrialUntil >= BalanceItem.getDueOffset())
+        ) {
             this.calculatedPriceDueLater = this.calculatedPrice;
             this.calculatedPrice = 0;
         } else {
@@ -447,11 +483,13 @@ export class RegisterItem implements ObjectWithRecords {
             all.push({
                 name: $t('%10Z'),
                 price: this.calculatedPriceDueLater - discountsLater,
-                description: trialUntil ? $t('%va', { date: Formatter.date(trialUntil) }) : undefined,
+                description: trialUntil
+                    ? $t('%va', { date: Formatter.date(trialUntil) })
+                    : undefined,
             });
         }
 
-        all = all.filter(a => a.price !== 0);
+        all = all.filter((a) => a.price !== 0);
 
         if (all.length > 0) {
             all.unshift({
@@ -464,23 +502,36 @@ export class RegisterItem implements ObjectWithRecords {
         return [
             ...all,
             {
-                name: this.checkout.isAdminFromSameOrganization ? (correctedTotalPrice >= 0 ? $t('%vb') : $t('%vc')) : (this.calculatedPriceDueLater !== 0 ? $t('%10c') : $t('%xL')),
-                price: this.checkout.isAdminFromSameOrganization ? Math.abs(correctedTotalPrice) : correctedTotalPrice,
+                name: this.checkout.isAdminFromSameOrganization
+                    ? correctedTotalPrice >= 0
+                        ? $t('%vb')
+                        : $t('%vc')
+                    : this.calculatedPriceDueLater !== 0
+                      ? $t('%10c')
+                      : $t('%xL'),
+                price: this.checkout.isAdminFromSameOrganization
+                    ? Math.abs(correctedTotalPrice)
+                    : correctedTotalPrice,
             },
         ];
     }
 
     getFilteredPrices() {
-        const base = this.group.settings.getFilteredPrices({ admin: this.checkout.isAdminFromSameOrganization, date: this.calculatedRegistrationDate });
+        const base = this.group.settings.getFilteredPrices({
+            admin: this.checkout.isAdminFromSameOrganization,
+            date: this.calculatedRegistrationDate,
+        });
 
-        if (this.groupPrice && !base.some(b => b.id === this.groupPrice.id)) {
+        if (this.groupPrice && !base.some((b) => b.id === this.groupPrice.id)) {
             return [this.groupPrice, ...base];
         }
         return base;
     }
 
     getFilteredOptionMenus() {
-        return this.group.settings.getFilteredOptionMenus({ admin: this.checkout.isAdminFromSameOrganization });
+        return this.group.settings.getFilteredOptionMenus({
+            admin: this.checkout.isAdminFromSameOrganization,
+        });
     }
 
     getFilteredOptions(menu: GroupOptionMenu) {
@@ -506,7 +557,10 @@ export class RegisterItem implements ObjectWithRecords {
     /**
      * Update self to the newest available data, and throw error if something failed (only after refreshing other ones)
      */
-    refresh(group: Group, options?: { warnings?: boolean; forWaitingList?: boolean; final?: boolean }) {
+    refresh(
+        group: Group,
+        options?: { warnings?: boolean; forWaitingList?: boolean; final?: boolean },
+    ) {
         this.group = group;
 
         const errors = new SimpleErrors();
@@ -520,7 +574,7 @@ export class RegisterItem implements ObjectWithRecords {
                 }),
             );
         } else {
-            const groupPrice = this.group.settings.prices.find(p => p.id === this.groupPrice.id);
+            const groupPrice = this.group.settings.prices.find((p) => p.id === this.groupPrice.id);
             if (!groupPrice) {
                 errors.addError(
                     new SimpleError({
@@ -541,17 +595,19 @@ export class RegisterItem implements ObjectWithRecords {
         const remainingMenus = this.group.settings.optionMenus.slice();
 
         for (const o of this.options) {
-            const index = remainingMenus.findIndex(m => m.id === o.optionMenu.id);
+            const index = remainingMenus.findIndex((m) => m.id === o.optionMenu.id);
             if (index === -1) {
                 // Check if it has a multiple choice one
-                errors.addError(new SimpleError({
-                    code: 'option_menu_unavailable',
-                    message: 'Option menu unavailable',
-                    human: $t('%14K', {
-                        group: this.group.settings.name,
+                errors.addError(
+                    new SimpleError({
+                        code: 'option_menu_unavailable',
+                        message: 'Option menu unavailable',
+                        human: $t('%14K', {
+                            group: this.group.settings.name,
+                        }),
+                        meta: { recoverable: true },
                     }),
-                    meta: { recoverable: true },
-                }));
+                );
                 continue;
             }
 
@@ -561,17 +617,19 @@ export class RegisterItem implements ObjectWithRecords {
                 remainingMenus.splice(index, 1);
             }
 
-            const option = menu.options.find(m => m.id === o.option.id);
+            const option = menu.options.find((m) => m.id === o.option.id);
 
             if (!option) {
-                errors.addError(new SimpleError({
-                    code: 'option_unavailable',
-                    message: 'Option unavailable',
-                    human: $t('%14K', {
-                        group: this.group.settings.name,
+                errors.addError(
+                    new SimpleError({
+                        code: 'option_unavailable',
+                        message: 'Option unavailable',
+                        human: $t('%14K', {
+                            group: this.group.settings.name,
+                        }),
+                        meta: { recoverable: true },
                     }),
-                    meta: { recoverable: true },
-                }));
+                );
                 continue;
             }
 
@@ -580,11 +638,16 @@ export class RegisterItem implements ObjectWithRecords {
             o.option = option;
         }
 
-        if (remainingMenus.filter(m => !m.multipleChoice).length > 0) {
+        if (remainingMenus.filter((m) => !m.multipleChoice).length > 0) {
             errors.addError(
                 new SimpleError({
                     code: 'missing_menu',
-                    message: "Missing menu's " + remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(', '),
+                    message:
+                        "Missing menu's " +
+                        remainingMenus
+                            .filter((m) => !m.multipleChoice)
+                            .map((m) => m.name)
+                            .join(', '),
                     human: $t('%13p', { group: this.group.settings.name }),
                     meta: { recoverable: true },
                 }),
@@ -604,18 +667,27 @@ export class RegisterItem implements ObjectWithRecords {
             }
 
             // Remove unsued answers
-            this.recordAnswers = RecordCategory.removeOldAnswers(this.group.settings.recordCategories, this).getRecordAnswers();
+            this.recordAnswers = RecordCategory.removeOldAnswers(
+                this.group.settings.recordCategories,
+                this,
+            ).getRecordAnswers();
         }
 
         errors.throwIfNotEmpty();
     }
 
     willReplace(registrationId: string) {
-        return this.replaceRegistrations.some(rr => rr.registration.id === registrationId);
+        return this.replaceRegistrations.some((rr) => rr.registration.id === registrationId);
     }
 
     isAlreadyRegistered() {
-        return !!this.member.member.registrations.find(r => !this.willReplace(r.id) && r.groupId === this.group.id && r.registeredAt !== null && r.deactivatedAt === null);
+        return !!this.member.member.registrations.find(
+            (r) =>
+                !this.willReplace(r.id) &&
+                r.groupId === this.group.id &&
+                r.registeredAt !== null &&
+                r.deactivatedAt === null,
+        );
     }
 
     hasReachedCategoryMaximum(): { category: GroupCategory; groups: Group[] } | null {
@@ -623,12 +695,20 @@ export class RegisterItem implements ObjectWithRecords {
             return null;
         }
 
-        const parents = this.group.getParentCategories(this.organization.period.settings.categories, false);
+        const parents = this.group.getParentCategories(
+            this.organization.period.settings.categories,
+            false,
+        );
 
         for (const parent of parents) {
             if (parent.settings.maximumRegistrations !== null) {
                 const registrations = this.member.patchedMember.registrations.filter((r) => {
-                    if (!this.willReplace(r.id) && r.registeredAt !== null && r.deactivatedAt === null && parent.groupIds.includes(r.groupId)) {
+                    if (
+                        !this.willReplace(r.id) &&
+                        r.registeredAt !== null &&
+                        r.deactivatedAt === null &&
+                        parent.groupIds.includes(r.groupId)
+                    ) {
                         return true;
                     }
                     return false;
@@ -636,14 +716,21 @@ export class RegisterItem implements ObjectWithRecords {
                 const count = registrations.length;
 
                 const cartItems = this.checkout.cart.items.filter((item) => {
-                    return item.member.member.id === this.member.member.id && parent.groupIds.includes(item.group.id) && item.group.id !== this.group.id;
+                    return (
+                        item.member.member.id === this.member.member.id &&
+                        parent.groupIds.includes(item.group.id) &&
+                        item.group.id !== this.group.id
+                    );
                 });
 
                 const waiting = cartItems.length;
                 if (count + waiting >= parent.settings.maximumRegistrations) {
                     return {
                         category: parent,
-                        groups: [...registrations.map(registration => registration.group), ...cartItems.map(item => item.group)],
+                        groups: [
+                            ...registrations.map((registration) => registration.group),
+                            ...cartItems.map((item) => item.group),
+                        ],
                     };
                 }
             }
@@ -652,21 +739,44 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     isInvited() {
-        return this.member.member.registrationInvitations?.some(invitation => invitation.group.id === this.group.id
-            // ignore invitation if already registered (for trial period the invitation will be only removed on final registration)
-            && !this.member.member.registrations.some(r => r.groupId === invitation.group.id && r.registeredAt === null));
+        return this.member.member.registrationInvitations?.some(
+            (invitation) =>
+                invitation.group.id === this.group.id &&
+                // ignore invitation if already registered (for trial period the invitation will be only removed on final registration)
+                !this.member.member.registrations.some(
+                    (r) => r.groupId === invitation.group.id && r.registeredAt === null,
+                ),
+        );
     }
 
     getRequireGroupIdsError() {
         if (this.group.settings.requireGroupIds.length > 0) {
             const hasGroup = this.member.member.registrations.find((r) => {
-                return !this.willReplace(r.id) && r.registeredAt !== null && r.deactivatedAt === null && this.group.settings.requireGroupIds.includes(r.groupId);
+                return (
+                    !this.willReplace(r.id) &&
+                    r.registeredAt !== null &&
+                    r.deactivatedAt === null &&
+                    this.group.settings.requireGroupIds.includes(r.groupId)
+                );
             });
 
-            if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && this.group.settings.requireGroupIds.includes(item.group.id))) {
-                const requiredGroups = this.group.settings.requireGroupIds.map(id => this.organization.period.groups.find(g => g.id === id)).filter(g => !!g).map(g => g!.settings.name.toString());
+            if (
+                !hasGroup &&
+                !this.checkout.cart.items.find(
+                    (item) =>
+                        item.member.id === this.member.id &&
+                        this.group.settings.requireGroupIds.includes(item.group.id),
+                )
+            ) {
+                const requiredGroups = this.group.settings.requireGroupIds
+                    .map((id) => this.organization.period.groups.find((g) => g.id === id))
+                    .filter((g) => !!g)
+                    .map((g) => g!.settings.name.toString());
 
-                if (requiredGroups.length && requiredGroups.length === this.group.settings.requireGroupIds.length) {
+                if (
+                    requiredGroups.length &&
+                    requiredGroups.length === this.group.settings.requireGroupIds.length
+                ) {
                     return $t('%1GO', {
                         firstName: this.member.patchedMember.details.firstName,
                         aOrB: Formatter.joinLast(requiredGroups, ', ', ' ' + $t('%GT') + ' '),
@@ -693,14 +803,41 @@ export class RegisterItem implements ObjectWithRecords {
     getRequireDefaultAgeGroupIdsError() {
         if (this.group.settings.requireDefaultAgeGroupIds.length > 0) {
             const hasGroup = this.member.member.registrations.find((r) => {
-                return r.registeredAt !== null && r.deactivatedAt === null && r.group.defaultAgeGroupId && this.isActivePeriodId(r.group.periodId) && !this.willReplace(r.id) && this.group.settings.requireDefaultAgeGroupIds.includes(r.group.defaultAgeGroupId);
+                return (
+                    r.registeredAt !== null &&
+                    r.deactivatedAt === null &&
+                    r.group.defaultAgeGroupId &&
+                    this.isActivePeriodId(r.group.periodId) &&
+                    !this.willReplace(r.id) &&
+                    this.group.settings.requireDefaultAgeGroupIds.includes(
+                        r.group.defaultAgeGroupId,
+                    )
+                );
             });
 
-            if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && item.group.defaultAgeGroupId && this.group.settings.requireDefaultAgeGroupIds.includes(item.group.defaultAgeGroupId))) {
-                const defaultAgeGroups = this.group.settings.requireDefaultAgeGroupIds.map(id => this.member.platform.config.defaultAgeGroups.find(d => d.id === id)).filter(d => !!d).map(d => d!.name);
+            if (
+                !hasGroup &&
+                !this.checkout.cart.items.find(
+                    (item) =>
+                        item.member.id === this.member.id &&
+                        item.group.defaultAgeGroupId &&
+                        this.group.settings.requireDefaultAgeGroupIds.includes(
+                            item.group.defaultAgeGroupId,
+                        ),
+                )
+            ) {
+                const defaultAgeGroups = this.group.settings.requireDefaultAgeGroupIds
+                    .map((id) =>
+                        this.member.platform.config.defaultAgeGroups.find((d) => d.id === id),
+                    )
+                    .filter((d) => !!d)
+                    .map((d) => d!.name);
                 return $t('%1GO', {
                     firstName: this.member.patchedMember.details.firstName,
-                    aOrB: defaultAgeGroups.length > 0 ? Formatter.joinLast(defaultAgeGroups, ', ', ' ' + $t('%GT') + ' ') : $t('%1GN'),
+                    aOrB:
+                        defaultAgeGroups.length > 0
+                            ? Formatter.joinLast(defaultAgeGroups, ', ', ' ' + $t('%GT') + ' ')
+                            : $t('%1GN'),
                     group: this.group.settings.name.toString(),
                 });
             }
@@ -711,10 +848,22 @@ export class RegisterItem implements ObjectWithRecords {
     doesMeetPreventGroupIds() {
         if (this.group.settings.preventGroupIds.length > 0) {
             const hasGroup = this.member.member.registrations.find((r) => {
-                return !this.willReplace(r.id) && r.registeredAt !== null && r.deactivatedAt === null && this.group.settings.preventGroupIds.includes(r.groupId);
+                return (
+                    !this.willReplace(r.id) &&
+                    r.registeredAt !== null &&
+                    r.deactivatedAt === null &&
+                    this.group.settings.preventGroupIds.includes(r.groupId)
+                );
             });
 
-            if (hasGroup || this.checkout.cart.items.find(item => item.member.id === this.member.id && this.group.settings.preventGroupIds.includes(item.group.id))) {
+            if (
+                hasGroup ||
+                this.checkout.cart.items.find(
+                    (item) =>
+                        item.member.id === this.member.id &&
+                        this.group.settings.preventGroupIds.includes(item.group.id),
+                )
+            ) {
                 return false;
             }
         }
@@ -725,10 +874,24 @@ export class RegisterItem implements ObjectWithRecords {
     doesMeetRequireOrganizationIds() {
         if (this.group.settings.requireOrganizationIds.length > 0) {
             const hasGroup = this.member.member.registrations.find((r) => {
-                return r.group.type === GroupType.Membership && r.registeredAt !== null && r.deactivatedAt === null && this.group.settings.requireOrganizationIds.includes(r.organizationId) && this.isActivePeriodId(r.group.periodId) && !this.willReplace(r.id);
+                return (
+                    r.group.type === GroupType.Membership &&
+                    r.registeredAt !== null &&
+                    r.deactivatedAt === null &&
+                    this.group.settings.requireOrganizationIds.includes(r.organizationId) &&
+                    this.isActivePeriodId(r.group.periodId) &&
+                    !this.willReplace(r.id)
+                );
             });
 
-            if (!hasGroup && !this.checkout.cart.items.find(item => item.member.id === this.member.id && this.group.settings.requireOrganizationIds.includes(item.organization.id))) {
+            if (
+                !hasGroup &&
+                !this.checkout.cart.items.find(
+                    (item) =>
+                        item.member.id === this.member.id &&
+                        this.group.settings.requireOrganizationIds.includes(item.organization.id),
+                )
+            ) {
                 return false;
             }
         }
@@ -738,11 +901,22 @@ export class RegisterItem implements ObjectWithRecords {
     doesMeetRequireOrganizationTags() {
         if (this.group.settings.requireOrganizationTags.length > 0) {
             const periodIds = this.group.getActivePeriodIds(this.organization);
-            const hasOrganization = this.member.filterOrganizations({ periodIds, types: [GroupType.Membership] }).find((organization) => {
-                return organization.meta.matchTags(this.group.settings.requireOrganizationTags);
-            });
+            const hasOrganization = this.member
+                .filterOrganizations({ periodIds, types: [GroupType.Membership] })
+                .find((organization) => {
+                    return organization.meta.matchTags(this.group.settings.requireOrganizationTags);
+                });
 
-            if (!hasOrganization && !this.checkout.cart.items.find(item => item.member.id === this.member.id && item.organization.meta.matchTags(this.group.settings.requireOrganizationTags))) {
+            if (
+                !hasOrganization &&
+                !this.checkout.cart.items.find(
+                    (item) =>
+                        item.member.id === this.member.id &&
+                        item.organization.meta.matchTags(
+                            this.group.settings.requireOrganizationTags,
+                        ),
+                )
+            ) {
                 return false;
             }
         }
@@ -753,7 +927,11 @@ export class RegisterItem implements ObjectWithRecords {
         if (this.group.settings.requirePlatformMembershipOn !== null) {
             const requirePlatformMembershipOn = this.group.settings.requirePlatformMembershipOn;
             const now = new Date();
-            return !!this.member.patchedMember.platformMemberships.find(m => m.isActive(requirePlatformMembershipOn)) || !!this.member.patchedMember.platformMemberships.find(m => m.isActive(now));
+            return (
+                !!this.member.patchedMember.platformMemberships.find((m) =>
+                    m.isActive(requirePlatformMembershipOn),
+                ) || !!this.member.patchedMember.platformMemberships.find((m) => m.isActive(now))
+            );
         }
         return true;
     }
@@ -761,13 +939,17 @@ export class RegisterItem implements ObjectWithRecords {
     doesMeetRequirePlatformMembershipOnRegistrationDate() {
         if (this.group.settings.requirePlatformMembershipOnRegistrationDate === true) {
             const now = new Date();
-            return !!this.member.patchedMember.platformMemberships.find(m => m.isActive(now));
+            return !!this.member.patchedMember.platformMemberships.find((m) => m.isActive(now));
         }
         return true;
     }
 
     isExistingMemberOrFamily() {
-        return this.member.isExistingMember(this.organization) || (this.group.settings.priorityForFamily && !!this.family.members.find(f => f.isExistingMember(this.organization)));
+        return (
+            this.member.isExistingMember(this.organization) ||
+            (this.group.settings.priorityForFamily &&
+                !!this.family.members.find((f) => f.isExistingMember(this.organization)))
+        );
     }
 
     get description() {
@@ -784,7 +966,12 @@ export class RegisterItem implements ObjectWithRecords {
         }
 
         for (const option of this.options) {
-            descriptions.push(option.optionMenu.name + ': ' + option.option.name + (option.option.allowAmount ? ` x ${option.amount}` : ''));
+            descriptions.push(
+                option.optionMenu.name +
+                    ': ' +
+                    option.option.name +
+                    (option.option.allowAmount ? ` x ${option.amount}` : ''),
+            );
         }
 
         if (this.customStartDate) {
@@ -795,7 +982,7 @@ export class RegisterItem implements ObjectWithRecords {
             descriptions.push($t('%ZdR', { date: Formatter.endDate(this.calculatedEndDate) }));
         }
 
-        return descriptions.filter(d => !!d).join('\n');
+        return descriptions.filter((d) => !!d).join('\n');
     }
 
     hasReachedGroupMaximum() {
@@ -896,7 +1083,10 @@ export class RegisterItem implements ObjectWithRecords {
     get defaultStartDate() {
         if (this.replaceRegistrations.length > 0) {
             const { registration } = this.replaceRegistrations[0];
-            if (registration.startDate && registration.startDate.getTime() >= this.group.settings.startDate.getTime()) {
+            if (
+                registration.startDate &&
+                registration.startDate.getTime() >= this.group.settings.startDate.getTime()
+            ) {
                 return registration.startDate;
             }
             return this.group.settings.startDate;
@@ -910,13 +1100,18 @@ export class RegisterItem implements ObjectWithRecords {
 
         let startDate = Formatter.luxon(new Date());
         startDate = startDate.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-        return new Date(Math.max(startDate.toJSDate().getTime(), this.group.settings.startDate.getTime()));
+        return new Date(
+            Math.max(startDate.toJSDate().getTime(), this.group.settings.startDate.getTime()),
+        );
     }
 
     get defaultEndDate() {
         if (this.replaceRegistrations.length > 0) {
             const { registration } = this.replaceRegistrations[0];
-            if (registration.endDate && registration.endDate.getTime() <= this.group.settings.endDate.getTime()) {
+            if (
+                registration.endDate &&
+                registration.endDate.getTime() <= this.group.settings.endDate.getTime()
+            ) {
                 return registration.endDate;
             }
         }
@@ -949,7 +1144,9 @@ export class RegisterItem implements ObjectWithRecords {
             return null;
         }
 
-        let trialUntil = Formatter.luxon(this.calculatedStartDate).plus({ days: this.group.settings.trialDays });
+        let trialUntil = Formatter.luxon(this.calculatedStartDate).plus({
+            days: this.group.settings.trialDays,
+        });
         trialUntil = trialUntil.set({ hour: 23, minute: 59, second: 59, millisecond: 0 });
         return trialUntil.toJSDate();
     }
@@ -963,7 +1160,7 @@ export class RegisterItem implements ObjectWithRecords {
             return false;
         }
 
-        if (this.replaceRegistrations.find(r => r.registration.trialUntil !== null)) {
+        if (this.replaceRegistrations.find((r) => r.registration.trialUntil !== null)) {
             return true;
         }
         const currentPeriodId = this.organization.period.period.id;
@@ -980,24 +1177,28 @@ export class RegisterItem implements ObjectWithRecords {
 
         if (this.group.defaultAgeGroupId) {
             // Use platform based logic to determine if it is a new member by looking at memberships
-            const types = this.member.platform.config.membershipTypes.filter(m => m.behaviour === PlatformMembershipTypeBehaviour.Period).map(m => m.id);
-            const hasBlockingMemberships = !!this.member.patchedMember.platformMemberships.find((m) => {
-                if (!types.includes(m.membershipTypeId)) {
-                    return false;
-                }
+            const types = this.member.platform.config.membershipTypes
+                .filter((m) => m.behaviour === PlatformMembershipTypeBehaviour.Period)
+                .map((m) => m.id);
+            const hasBlockingMemberships = !!this.member.patchedMember.platformMemberships.find(
+                (m) => {
+                    if (!types.includes(m.membershipTypeId)) {
+                        return false;
+                    }
 
-                if (m.periodId === currentPeriodId && m.balanceItemId) {
-                    // Already has a membership for the current period - which is not deletable
+                    if (m.periodId === currentPeriodId && m.balanceItemId) {
+                        // Already has a membership for the current period - which is not deletable
+                        return true;
+                    }
+
+                    if (m.periodId !== previousPeriodId) {
+                        // Not previous period
+                        return false;
+                    }
+
                     return true;
-                }
-
-                if (m.periodId !== previousPeriodId) {
-                    // Not previous period
-                    return false;
-                }
-
-                return true;
-            });
+                },
+            );
 
             if (hasBlockingMemberships) {
                 return false;
@@ -1041,9 +1242,10 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'different_period',
                         message: 'Different period',
-                        human: type === 'register'
-                            ? $t('%Bs', { group: group.settings.name })
-                            : $t('%Bt', { group: group.settings.name }),
+                        human:
+                            type === 'register'
+                                ? $t('%Bs', { group: group.settings.name })
+                                : $t('%Bt', { group: group.settings.name }),
                     });
                 }
             }
@@ -1068,9 +1270,10 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'locked_period',
                 message: 'Locked period',
-                human: type === 'register'
-                    ? $t('%Bv', { group: group.settings.name, period: period.nameShort })
-                    : $t('%ql', { group: group.settings.name, period: period.nameShort }),
+                human:
+                    type === 'register'
+                        ? $t('%Bv', { group: group.settings.name, period: period.nameShort })
+                        : $t('%ql', { group: group.settings.name, period: period.nameShort }),
             });
         }
     }
@@ -1147,7 +1350,10 @@ export class RegisterItem implements ObjectWithRecords {
             }
         }
 
-        if (this.checkout.singleOrganization && this.checkout.singleOrganization.id !== this.organization.id) {
+        if (
+            this.checkout.singleOrganization &&
+            this.checkout.singleOrganization.id !== this.organization.id
+        ) {
             throw new SimpleError({
                 code: 'multiple_organizations',
                 message: 'Cannot add items of multiple organizations to the checkout',
@@ -1165,7 +1371,11 @@ export class RegisterItem implements ObjectWithRecords {
             });
         }
 
-        if (checkout.asOrganizationId && !checkout.isAdminFromSameOrganization && !this.group.settings.allowRegistrationsByOrganization) {
+        if (
+            checkout.asOrganizationId &&
+            !checkout.isAdminFromSameOrganization &&
+            !this.group.settings.allowRegistrationsByOrganization
+        ) {
             throw new SimpleError({
                 code: 'as_organization_disabled',
                 message: 'allowRegistrationsByOrganization disabled',
@@ -1193,7 +1403,8 @@ export class RegisterItem implements ObjectWithRecords {
                 });
             }
 
-            if (!checkout.isAdminFromSameOrganization) { // we don't use admins because this shouldn't raise a warning
+            if (!checkout.isAdminFromSameOrganization) {
+                // we don't use admins because this shouldn't raise a warning
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Not allowed to move registrations',
@@ -1223,20 +1434,33 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'maximum_reached',
                 message: 'Maximum reached',
-                human: (categoryMaximum.category.settings.maximumRegistrations ?? 1) === 1
-                    ? $t('%1NT', {
-                            otherGroup: Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('%M1') + ' '),
-                            group: this.group.settings.name,
-                            member: this.member.patchedMember.name,
-                            category: categoryMaximum.category.settings.name,
-                        })
-                    : $t('%1NU', {
-                            'group-a-and-group-b': Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('%M1') + ' '),
-                            'count': categoryMaximum.category.settings.maximumRegistrations ?? 2,
-                            'group': this.group.settings.name,
-                            'member': this.member.patchedMember.name,
-                            'category': categoryMaximum.category.settings.name,
-                        }),
+                human:
+                    (categoryMaximum.category.settings.maximumRegistrations ?? 1) === 1
+                        ? $t('%1NT', {
+                              otherGroup: Formatter.joinLast(
+                                  categoryMaximum.groups.map((group) =>
+                                      group.settings.name.toString(),
+                                  ),
+                                  ', ',
+                                  ' ' + $t('%M1') + ' ',
+                              ),
+                              group: this.group.settings.name,
+                              member: this.member.patchedMember.name,
+                              category: categoryMaximum.category.settings.name,
+                          })
+                        : $t('%1NU', {
+                              'group-a-and-group-b': Formatter.joinLast(
+                                  categoryMaximum.groups.map((group) =>
+                                      group.settings.name.toString(),
+                                  ),
+                                  ', ',
+                                  ' ' + $t('%M1') + ' ',
+                              ),
+                              count: categoryMaximum.category.settings.maximumRegistrations ?? 2,
+                              group: this.group.settings.name,
+                              member: this.member.patchedMember.name,
+                              category: categoryMaximum.category.settings.name,
+                          }),
             });
         }
 
@@ -1271,9 +1495,11 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'not_matching',
                         message: 'Not matching: memberDetails',
-                        human: error?.description ?? $t('%14M', {
-                            member: this.member.patchedMember.name,
-                        }),
+                        human:
+                            error?.description ??
+                            $t('%14M', {
+                                member: this.member.patchedMember.name,
+                            }),
                     });
                 }
             }
@@ -1309,12 +1535,17 @@ export class RegisterItem implements ObjectWithRecords {
 
             if (!this.doesMeetRequireOrganizationIds()) {
                 const ids = this.group.settings.requireOrganizationIds ?? [];
-                const organizations = ids.map(id => this.member.family.getOrganization(id)).filter(c => !!c);
+                const organizations = ids
+                    .map((id) => this.member.family.getOrganization(id))
+                    .filter((c) => !!c);
                 if (organizations.length === ids.length && ids.length === 1) {
                     throw new SimpleError({
                         code: 'not_matching',
                         message: 'Not matching: requireOrganizationIds',
-                        human: $t('%1Kw', { member: this.member.patchedMember.firstName, organization: organizations[0].name }),
+                        human: $t('%1Kw', {
+                            member: this.member.patchedMember.firstName,
+                            organization: organizations[0].name,
+                        }),
                     });
                 }
                 throw new SimpleError({
@@ -1358,9 +1589,12 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'pre_registrations',
                         message: 'Pre registrations',
-                        human: $t('%14O', {
-                            group: this.group.settings.name,
-                        }) + (this.group.settings.priorityForFamily ? ' ' + $t('%144') : '') + '.',
+                        human:
+                            $t('%14O', {
+                                group: this.group.settings.name,
+                            }) +
+                            (this.group.settings.priorityForFamily ? ' ' + $t('%144') : '') +
+                            '.',
                     });
                 }
             }
@@ -1378,7 +1612,10 @@ export class RegisterItem implements ObjectWithRecords {
                     });
                 }
 
-                if (this.group.settings.waitingListType === WaitingListType.ExistingMembersFirst && !existingMember) {
+                if (
+                    this.group.settings.waitingListType === WaitingListType.ExistingMembersFirst &&
+                    !existingMember
+                ) {
                     throw new SimpleError({
                         code: 'waiting_list_required',
                         message: 'Waiting list required',
@@ -1438,11 +1675,15 @@ export class RegisterItem implements ObjectWithRecords {
                         throw new SimpleError({
                             code: 'stock_empty',
                             message: 'Stock empty',
-                            human: remaining === 0
-                                ? $t('%149', { name: option.option.name })
-                                : remaining > 1
-                                    ? $t('%13n', { count: remaining.toString(), name: option.option.name })
-                                    : $t('%Zfz', { name: option.option.name }),
+                            human:
+                                remaining === 0
+                                    ? $t('%149', { name: option.option.name })
+                                    : remaining > 1
+                                      ? $t('%13n', {
+                                            count: remaining.toString(),
+                                            name: option.option.name,
+                                        })
+                                      : $t('%Zfz', { name: option.option.name }),
                             meta: { recoverable: true },
                         });
                     }
@@ -1462,7 +1703,11 @@ export class RegisterItem implements ObjectWithRecords {
 
             if (options?.forWaitingList) {
                 // Also check waiting list itself
-                const item = RegisterItem.defaultFor(this.member, this.group.waitingList!, this.organization);
+                const item = RegisterItem.defaultFor(
+                    this.member,
+                    this.group.waitingList!,
+                    this.organization,
+                );
                 item.validate({ warnings: options?.warnings });
             }
         }
@@ -1474,16 +1719,21 @@ export class RegisterItem implements ObjectWithRecords {
      */
     getCartPendingStockReservations() {
         const deleteRegistrations = [
-            ...this.checkout.cart.deleteRegistrations.map(r => r.registration).filter(r => r.registration.groupId === this.group.id),
-            ...this.replaceRegistrations.filter(r => r.registration.groupId === this.group.id),
+            ...this.checkout.cart.deleteRegistrations
+                .map((r) => r.registration)
+                .filter((r) => r.registration.groupId === this.group.id),
+            ...this.replaceRegistrations.filter((r) => r.registration.groupId === this.group.id),
         ];
 
-        const cartIndex = this.checkout.cart.items.findIndex(i => i.id === this.id);
-        const itemsBefore = this.checkout.cart.items.slice(0, cartIndex === -1 ? undefined : cartIndex);
+        const cartIndex = this.checkout.cart.items.findIndex((i) => i.id === this.id);
+        const itemsBefore = this.checkout.cart.items.slice(
+            0,
+            cartIndex === -1 ? undefined : cartIndex,
+        );
 
         return StockReservation.removed(
-            itemsBefore.flatMap(i => i.getPendingStockReservations()), // these will be removed
-            deleteRegistrations.flatMap(r => r.registration.stockReservations), // these will be freed up
+            itemsBefore.flatMap((i) => i.getPendingStockReservations()), // these will be removed
+            deleteRegistrations.flatMap((r) => r.registration.stockReservations), // these will be freed up
         );
     }
 
@@ -1516,13 +1766,16 @@ export class RegisterItem implements ObjectWithRecords {
             }),
         ];
 
-        const freed = this.replaceRegistrations.flatMap(r => r.registration.stockReservations);
+        const freed = this.replaceRegistrations.flatMap((r) => r.registration.stockReservations);
         return StockReservation.removed(base, freed);
     }
 
     doesMatchFilter(filter: StamhoofdFilter) {
         try {
-            const compiledFilter = compileToInMemoryFilter(filter, registerItemInMemoryFilterCompilers);
+            const compiledFilter = compileToInMemoryFilter(
+                filter,
+                registerItemInMemoryFilterCompilers,
+            );
             return compiledFilter(this);
         } catch (e) {
             console.error('Error while compiling filter', e, filter);
@@ -1545,6 +1798,10 @@ export class RegisterItem implements ObjectWithRecords {
     }
 
     isSameRegistration(item: RegisterItem) {
-        return item.memberId === this.memberId && item.groupId === this.groupId && item.organization.id === this.organization.id;
+        return (
+            item.memberId === this.memberId &&
+            item.groupId === this.groupId &&
+            item.organization.id === this.organization.id
+        );
     }
 }

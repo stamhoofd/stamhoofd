@@ -1,13 +1,40 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { cloneObject, isPatchableArray, isPatchMap, ObjectData, PatchableArray, PatchMap, patchObject } from '@common/encoding';
+import {
+    cloneObject,
+    isPatchableArray,
+    isPatchMap,
+    ObjectData,
+    PatchableArray,
+    PatchMap,
+    patchObject,
+} from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError, SimpleErrors } from '@common/errors';
-import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
+import {
+    Organization,
+    OrganizationRegistrationPeriod,
+    PayconiqPayment,
+    Platform,
+    RegistrationPeriod,
+    StripeAccount,
+    Webshop,
+} from '@stamhoofd/models';
 import type { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import type { Company, ResourcePermissions } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BuckarooSettings, MemberResponsibility, OrganizationMetaData, Organization as OrganizationStruct, PayconiqAccount, PaymentMethod, PaymentMethodHelper, PermissionRoleDetailed, PermissionRoleForResponsibility, UitpasClientCredentialsStatus } from '@stamhoofd/structures';
+import {
+    BuckarooSettings,
+    MemberResponsibility,
+    OrganizationMetaData,
+    Organization as OrganizationStruct,
+    PayconiqAccount,
+    PaymentMethod,
+    PaymentMethodHelper,
+    PermissionRoleDetailed,
+    PermissionRoleForResponsibility,
+    UitpasClientCredentialsStatus,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
@@ -32,7 +59,9 @@ type ResponseBody = OrganizationStruct;
  */
 
 export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = OrganizationStruct.patchType() as Decoder<AutoEncoderPatchType<OrganizationStruct>>;
+    bodyDecoder = OrganizationStruct.patchType() as Decoder<
+        AutoEncoderPatchType<OrganizationStruct>
+    >;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -51,7 +80,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -68,7 +97,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         if (request.body.id !== organization.id) {
             throw new SimpleError({
                 code: 'invalid_id',
-                message: 'You cannot modify an organization with a different ID than the organization you are signed in for',
+                message:
+                    'You cannot modify an organization with a different ID than the organization you are signed in for',
                 statusCode: 403,
             });
         }
@@ -83,7 +113,11 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             if (request.body.name) {
                 const platform = await Platform.getSharedStruct();
 
-                if (platform.config.onlyAdminCanChangeOrganizationName && !Context.auth.hasPlatformFullAccess() && organization.name !== request.body.name)
+                if (
+                    platform.config.onlyAdminCanChangeOrganizationName &&
+                    !Context.auth.hasPlatformFullAccess() &&
+                    organization.name !== request.body.name
+                )
                     throw Context.auth.error({
                         message: 'Only platform admin can change organization name',
                         human: $t('%Zzx'),
@@ -146,52 +180,91 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             }
 
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
-                organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(organization.privateMeta.emails);
+                organization.privateMeta.emails = request.body.privateMeta.emails.applyTo(
+                    organization.privateMeta.emails,
+                );
                 if (request.body.privateMeta.emails) {
                     shouldUpdateSetupSteps = true;
                 }
 
-                organization.privateMeta.premises = patchObject(organization.privateMeta.premises, request.body.privateMeta.premises);
+                organization.privateMeta.premises = patchObject(
+                    organization.privateMeta.premises,
+                    request.body.privateMeta.premises,
+                );
                 if (request.body.privateMeta.premises) {
                     shouldUpdateSetupSteps = true;
                 }
-                organization.privateMeta.roles = request.body.privateMeta.roles.applyTo(organization.privateMeta.roles);
+                organization.privateMeta.roles = request.body.privateMeta.roles.applyTo(
+                    organization.privateMeta.roles,
+                );
                 if (request.body.privateMeta.roles) {
                     for (const role of organization.privateMeta.roles) {
                         role.compress();
                     }
                 }
-                organization.privateMeta.responsibilities = request.body.privateMeta.responsibilities.applyTo(organization.privateMeta.responsibilities);
+                organization.privateMeta.responsibilities =
+                    request.body.privateMeta.responsibilities.applyTo(
+                        organization.privateMeta.responsibilities,
+                    );
                 if (request.body.privateMeta.responsibilities) {
                     for (const responsibility of organization.privateMeta.responsibilities) {
                         responsibility.compress();
                     }
                 }
-                organization.privateMeta.inheritedResponsibilityRoles = request.body.privateMeta.inheritedResponsibilityRoles.applyTo(organization.privateMeta.inheritedResponsibilityRoles);
+                organization.privateMeta.inheritedResponsibilityRoles =
+                    request.body.privateMeta.inheritedResponsibilityRoles.applyTo(
+                        organization.privateMeta.inheritedResponsibilityRoles,
+                    );
                 if (request.body.privateMeta.inheritedResponsibilityRoles) {
                     for (const role of organization.privateMeta.inheritedResponsibilityRoles) {
                         role.compress();
                     }
                 }
-                organization.privateMeta.privateKey = request.body.privateMeta.privateKey ?? organization.privateMeta.privateKey;
-                organization.privateMeta.featureFlags = patchObject(organization.privateMeta.featureFlags, request.body.privateMeta.featureFlags);
-                organization.privateMeta.externalSyncData = patchObject(organization.privateMeta.externalSyncData, request.body.privateMeta.externalSyncData);
-                organization.privateMeta.externalGroupNumber = patchObject(organization.privateMeta.externalGroupNumber, request.body.privateMeta.externalGroupNumber);
-                organization.privateMeta.balanceNotificationSettings = patchObject(organization.privateMeta.balanceNotificationSettings, request.body.privateMeta.balanceNotificationSettings);
-                organization.privateMeta.invoiceSettings = patchObject(organization.privateMeta.invoiceSettings, request.body.privateMeta.invoiceSettings);
-                organization.privateMeta.recordAnswers = request.body.privateMeta.recordAnswers.applyTo(organization.privateMeta.recordAnswers);
-                organization.privateMeta.requireTwoFactor = patchObject(organization.privateMeta.requireTwoFactor, request.body.privateMeta.requireTwoFactor);
+                organization.privateMeta.privateKey =
+                    request.body.privateMeta.privateKey ?? organization.privateMeta.privateKey;
+                organization.privateMeta.featureFlags = patchObject(
+                    organization.privateMeta.featureFlags,
+                    request.body.privateMeta.featureFlags,
+                );
+                organization.privateMeta.externalSyncData = patchObject(
+                    organization.privateMeta.externalSyncData,
+                    request.body.privateMeta.externalSyncData,
+                );
+                organization.privateMeta.externalGroupNumber = patchObject(
+                    organization.privateMeta.externalGroupNumber,
+                    request.body.privateMeta.externalGroupNumber,
+                );
+                organization.privateMeta.balanceNotificationSettings = patchObject(
+                    organization.privateMeta.balanceNotificationSettings,
+                    request.body.privateMeta.balanceNotificationSettings,
+                );
+                organization.privateMeta.invoiceSettings = patchObject(
+                    organization.privateMeta.invoiceSettings,
+                    request.body.privateMeta.invoiceSettings,
+                );
+                organization.privateMeta.recordAnswers =
+                    request.body.privateMeta.recordAnswers.applyTo(
+                        organization.privateMeta.recordAnswers,
+                    );
+                organization.privateMeta.requireTwoFactor = patchObject(
+                    organization.privateMeta.requireTwoFactor,
+                    request.body.privateMeta.requireTwoFactor,
+                );
 
                 if (request.body.privateMeta.responsibilities || request.body.privateMeta.roles) {
                     shouldUpdateUserPermissions = true;
                 }
 
                 if (request.body.privateMeta.mollieProfile !== undefined) {
-                    organization.privateMeta.mollieProfile = patchObject(organization.privateMeta.mollieProfile, request.body.privateMeta.mollieProfile);
+                    organization.privateMeta.mollieProfile = patchObject(
+                        organization.privateMeta.mollieProfile,
+                        request.body.privateMeta.mollieProfile,
+                    );
                 }
 
                 if (request.body.privateMeta.useTestPayments !== undefined) {
-                    organization.privateMeta.useTestPayments = request.body.privateMeta.useTestPayments;
+                    organization.privateMeta.useTestPayments =
+                        request.body.privateMeta.useTestPayments;
                 }
 
                 // Apply payconiq patch
@@ -199,7 +272,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     const originalAccounts = organization.privateMeta.payconiqAccounts;
 
                     // Ignore patches of payconiq accounts which contain a placeholder key
-                    organization.privateMeta.payconiqAccounts = patchObject(organization.privateMeta.payconiqAccounts, cloneObject(request.body.privateMeta.payconiqAccounts as any));
+                    organization.privateMeta.payconiqAccounts = patchObject(
+                        organization.privateMeta.payconiqAccounts,
+                        cloneObject(request.body.privateMeta.payconiqAccounts as any),
+                    );
 
                     for (const account of organization.privateMeta.payconiqAccounts) {
                         if (account.apiKey === PayconiqAccount.placeholderApiKey) {
@@ -214,18 +290,22 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             if (!payment) {
                                 throw new SimpleError({
                                     code: 'invalid_field',
-                                    message: 'De API-key voor Payconiq is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.',
+                                    message:
+                                        'De API-key voor Payconiq is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.',
                                     field: 'payconiqAccounts',
                                 });
                             }
 
                             // Save merchant id
                             const decoded = PayconiqAccount.decode(
-                                new ObjectData({
-                                    ...(payment as any).creditor,
-                                    id: account.id,
-                                    apiKey: account.apiKey,
-                                }, { version: 0 }),
+                                new ObjectData(
+                                    {
+                                        ...(payment as any).creditor,
+                                        id: account.id,
+                                        apiKey: account.apiKey,
+                                    },
+                                    { version: 0 },
+                                ),
                             );
 
                             account.merchantId = decoded.merchantId;
@@ -241,39 +321,63 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     if (request.body.privateMeta.buckarooSettings === null) {
                         organization.privateMeta.buckarooSettings = null;
                     } else {
-                        organization.privateMeta.buckarooSettings = organization.privateMeta.buckarooSettings ?? BuckarooSettings.create({});
+                        organization.privateMeta.buckarooSettings =
+                            organization.privateMeta.buckarooSettings ??
+                            BuckarooSettings.create({});
                         const originalSecret = organization.privateMeta.buckarooSettings.secret;
-                        organization.privateMeta.buckarooSettings.patchOrPut(request.body.privateMeta.buckarooSettings);
+                        organization.privateMeta.buckarooSettings.patchOrPut(
+                            request.body.privateMeta.buckarooSettings,
+                        );
 
-                        if (organization.privateMeta.buckarooSettings.secret === BuckarooSettings.placeholderSecret) {
+                        if (
+                            organization.privateMeta.buckarooSettings.secret ===
+                            BuckarooSettings.placeholderSecret
+                        ) {
                             organization.privateMeta.buckarooSettings.secret = originalSecret;
                         }
 
                         // Validate buckaroo settings
-                        const buckaroo = new BuckarooHelper(organization.privateMeta.buckarooSettings.key, organization.privateMeta.buckarooSettings.secret, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
+                        const buckaroo = new BuckarooHelper(
+                            organization.privateMeta.buckarooSettings.key,
+                            organization.privateMeta.buckarooSettings.secret,
+                            organization.privateMeta.useTestPayments ??
+                                STAMHOOFD.environment !== 'production',
+                        );
 
                         if (!(await buckaroo.createTest())) {
                             throw new SimpleError({
                                 code: 'invalid_field',
-                                message: 'De key of secret voor Buckaroo is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.',
+                                message:
+                                    'De key of secret voor Buckaroo is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.',
                                 field: 'buckarooSettings',
                             });
                         }
                     }
                 }
 
-                if (request.body.privateMeta.registrationPaymentConfiguration?.stripeAccountId !== undefined) {
-                    if (request.body.privateMeta.registrationPaymentConfiguration.stripeAccountId !== null) {
-                        const account = await StripeAccount.getByID(request.body.privateMeta.registrationPaymentConfiguration.stripeAccountId);
+                if (
+                    request.body.privateMeta.registrationPaymentConfiguration?.stripeAccountId !==
+                    undefined
+                ) {
+                    if (
+                        request.body.privateMeta.registrationPaymentConfiguration
+                            .stripeAccountId !== null
+                    ) {
+                        const account = await StripeAccount.getByID(
+                            request.body.privateMeta.registrationPaymentConfiguration
+                                .stripeAccountId,
+                        );
                         if (!account || account.organizationId !== organization.id) {
                             throw new SimpleError({
                                 code: 'invalid_field',
-                                message: 'Het Stripe account dat je hebt gekozen bestaat niet (meer)',
+                                message:
+                                    'Het Stripe account dat je hebt gekozen bestaat niet (meer)',
                                 field: 'registrationPaymentConfiguration.stripeAccountId',
                             });
                         }
                     }
-                    organization.privateMeta.registrationPaymentConfiguration.stripeAccountId = request.body.privateMeta.registrationPaymentConfiguration.stripeAccountId;
+                    organization.privateMeta.registrationPaymentConfiguration.stripeAccountId =
+                        request.body.privateMeta.registrationPaymentConfiguration.stripeAccountId;
                 }
             }
 
@@ -285,7 +389,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 }
 
                 if (request.body.meta.recordsConfiguration?.recordCategories) {
-                    RecordAnswerHelper.throwIfPatchOrPutIsInvalid(organization.meta.recordsConfiguration.recordCategories, request.body.meta.recordsConfiguration.recordCategories);
+                    RecordAnswerHelper.throwIfPatchOrPutIsInvalid(
+                        organization.meta.recordsConfiguration.recordCategories,
+                        request.body.meta.recordsConfiguration.recordCategories,
+                    );
                 }
 
                 if (request.body.meta.financialSupport) {
@@ -301,22 +408,39 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                 // check payconiq + mollie
                 if (request.body.meta.registrationPaymentConfiguration) {
-                    if (!organization.privateMeta.payconiqApiKey && !organization.privateMeta.buckarooSettings?.paymentMethods.includes(PaymentMethod.Payconiq)) {
-                        const i = organization.meta.paymentMethods.findIndex(p => p == PaymentMethod.Payconiq);
+                    if (
+                        !organization.privateMeta.payconiqApiKey &&
+                        !organization.privateMeta.buckarooSettings?.paymentMethods.includes(
+                            PaymentMethod.Payconiq,
+                        )
+                    ) {
+                        const i = organization.meta.paymentMethods.findIndex(
+                            (p) => p == PaymentMethod.Payconiq,
+                        );
                         if (i !== -1) {
                             throw new SimpleError({
                                 code: 'invalid_field',
-                                message: 'Je kan Payconiq niet activeren omdat je geen Payconiq API Key hebt ingesteld. Schakel Payconiq uit voor je verder gaat.',
+                                message:
+                                    'Je kan Payconiq niet activeren omdat je geen Payconiq API Key hebt ingesteld. Schakel Payconiq uit voor je verder gaat.',
                                 field: 'paymentMethods',
                             });
                         }
                     }
 
                     // check payconiq + mollie
-                    if (!organization.privateMeta.mollieOnboarding || !organization.privateMeta.mollieOnboarding.canReceivePayments) {
+                    if (
+                        !organization.privateMeta.mollieOnboarding ||
+                        !organization.privateMeta.mollieOnboarding.canReceivePayments
+                    ) {
                         let stripe: StripeAccount | undefined = undefined;
-                        if (organization.privateMeta.registrationPaymentConfiguration.stripeAccountId) {
-                            stripe = await StripeAccount.getByID(organization.privateMeta.registrationPaymentConfiguration.stripeAccountId);
+                        if (
+                            organization.privateMeta.registrationPaymentConfiguration
+                                .stripeAccountId
+                        ) {
+                            stripe = await StripeAccount.getByID(
+                                organization.privateMeta.registrationPaymentConfiguration
+                                    .stripeAccountId,
+                            );
                         }
 
                         const i = organization.meta.paymentMethods.findIndex((p) => {
@@ -324,7 +448,11 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             if (p === PaymentMethod.Transfer) return;
                             if (p === PaymentMethod.PointOfSale) return;
 
-                            if (!organization.privateMeta.buckarooSettings?.paymentMethods.includes(p)) {
+                            if (
+                                !organization.privateMeta.buckarooSettings?.paymentMethods.includes(
+                                    p,
+                                )
+                            ) {
                                 if (!stripe?.meta.paymentMethods.includes(p)) {
                                     return true;
                                 }
@@ -333,14 +461,27 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         if (i !== -1) {
                             throw new SimpleError({
                                 code: 'invalid_field',
-                                message: 'Je kan ' + PaymentMethodHelper.getName(organization.meta.paymentMethods[i]) + ' niet activeren omdat je daarvoor nog niet aangesloten bent bij een betaalpartner. Schakel ' + PaymentMethodHelper.getName(organization.meta.paymentMethods[i]) + ' uit voor je verder gaat.',
+                                message:
+                                    'Je kan ' +
+                                    PaymentMethodHelper.getName(
+                                        organization.meta.paymentMethods[i],
+                                    ) +
+                                    ' niet activeren omdat je daarvoor nog niet aangesloten bent bij een betaalpartner. Schakel ' +
+                                    PaymentMethodHelper.getName(
+                                        organization.meta.paymentMethods[i],
+                                    ) +
+                                    ' uit voor je verder gaat.',
                                 field: 'paymentMethods',
                             });
                         }
                     }
                 }
 
-                if (request.body.meta?.tags && (Array.isArray(request.body.meta?.tags) || request.body.meta?.tags.changes.length > 0)) {
+                if (
+                    request.body.meta?.tags &&
+                    (Array.isArray(request.body.meta?.tags) ||
+                        request.body.meta?.tags.changes.length > 0)
+                ) {
                     if (!Context.auth.hasPlatformFullAccess()) {
                         throw Context.auth.error();
                     }
@@ -352,12 +493,19 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     const platform = await Platform.getShared();
                     const patchedMeta: OrganizationMetaData = organization.meta.patch(cleanedPatch);
                     for (const tag of patchedMeta.tags) {
-                        if (!platform.config.tags.find(t => t.id === tag)) {
-                            throw new SimpleError({ code: 'invalid_tag', message: 'Invalid tag', statusCode: 400 });
+                        if (!platform.config.tags.find((t) => t.id === tag)) {
+                            throw new SimpleError({
+                                code: 'invalid_tag',
+                                message: 'Invalid tag',
+                                statusCode: 400,
+                            });
                         }
                     }
 
-                    organization.meta.tags = TagHelper.getAllTagsFromHierarchy(patchedMeta.tags, platform.config.tags);
+                    organization.meta.tags = TagHelper.getAllTagsFromHierarchy(
+                        patchedMeta.tags,
+                        platform.config.tags,
+                    );
 
                     updateTags = true;
                 }
@@ -374,9 +522,13 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     const oldStatus = organization.meta.uitpasClientCredentialsStatus;
                     // re-evaluate the status
                     if (oldStatus !== UitpasClientCredentialsStatus.NotConfigured) {
-                        organization.meta.uitpasClientCredentialsStatus = UitpasClientCredentialsStatus.NotChecked;
+                        organization.meta.uitpasClientCredentialsStatus =
+                            UitpasClientCredentialsStatus.NotChecked;
                         organization.meta.uitpasOrganizerId = request.body.meta.uitpasOrganizerId;
-                        const { status } = await UitpasService.checkPermissionsFor(organization.id, organization.meta.uitpasOrganizerId);
+                        const { status } = await UitpasService.checkPermissionsFor(
+                            organization.id,
+                            organization.meta.uitpasOrganizerId,
+                        );
                         organization.meta.uitpasClientCredentialsStatus = status;
                     }
 
@@ -419,7 +571,9 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             }
 
             if (request.body.period) {
-                const organizationPeriod = await OrganizationRegistrationPeriod.getByID(request.body.period.id);
+                const organizationPeriod = await OrganizationRegistrationPeriod.getByID(
+                    request.body.period.id,
+                );
                 if (!organizationPeriod || organizationPeriod.organizationId !== organization.id) {
                     throw new SimpleError({
                         code: 'invalid_field',
@@ -431,7 +585,10 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
 
                 if (organizationPeriod.periodId !== organization.periodId) {
                     const period = await RegistrationPeriod.getByID(organizationPeriod.periodId);
-                    if (!period || (period.organizationId && period.organizationId !== organization.id)) {
+                    if (
+                        !period ||
+                        (period.organizationId && period.organizationId !== organization.id)
+                    ) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The period you want to set does not exist (anymore)',
@@ -441,7 +598,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                     }
 
                     if (STAMHOOFD.userMode === 'organization' && period.organizationId === null) {
-                    // period should always have organization id if userMode is organization
+                        // period should always have organization id if userMode is organization
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The period has no organization id',
@@ -477,7 +634,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             if (period.startDate < platformPeriod.startDate) {
                                 throw new SimpleError({
                                     code: 'invalid_field',
-                                    message: 'Cannot return to period with a start date before the currently active platform period',
+                                    message:
+                                        'Cannot return to period with a start date before the currently active platform period',
                                     human: $t('%1Wt', {}),
                                     field: 'period',
                                 });
@@ -493,7 +651,14 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             // Save the organization
             await organization.save();
         } else {
-            if (request.body.name || request.body.address || request.body.website || request.body.meta?.companies || request.body.meta?.recordsConfiguration || request.body.meta?.registrationPaymentConfiguration) {
+            if (
+                request.body.name ||
+                request.body.address ||
+                request.body.website ||
+                request.body.meta?.companies ||
+                request.body.meta?.recordsConfiguration ||
+                request.body.meta?.registrationPaymentConfiguration
+            ) {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'You do not have permissions to edit the organization settings',
@@ -504,32 +669,58 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             // Give users without full access permission to alter responsibilities in order to give other users permissions to resources they also have full permissions to
             if (request.body.privateMeta && request.body.privateMeta.isPatch()) {
                 if (request.body.privateMeta.inheritedResponsibilityRoles) {
-                    const patchableArray: PatchableArrayAutoEncoder<PermissionRoleForResponsibility> = new PatchableArray();
+                    const patchableArray: PatchableArrayAutoEncoder<PermissionRoleForResponsibility> =
+                        new PatchableArray();
 
                     for (const patch of request.body.privateMeta.inheritedResponsibilityRoles.getPatches()) {
-                        const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = patch.resources.applyTo(new Map<PermissionsResourceType, Map<string, ResourcePermissions>>());
+                        const resources: Map<
+                            PermissionsResourceType,
+                            Map<string, ResourcePermissions>
+                        > = patch.resources.applyTo(
+                            new Map<PermissionsResourceType, Map<string, ResourcePermissions>>(),
+                        );
 
-                        if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
+                        if (
+                            !(await Context.auth.hasFullAccessForOrganizationResources(
+                                request.body.id,
+                                resources,
+                            ))
+                        ) {
                             throw new SimpleError({
                                 code: 'permission_denied',
-                                message: 'You do not have permissions to edit inherited responsibility roles',
+                                message:
+                                    'You do not have permissions to edit inherited responsibility roles',
                                 statusCode: 403,
                             });
                         }
 
-                        patchableArray.addPatch(PermissionRoleForResponsibility.patch({
-                            id: patch.id,
-                            resources: patch.resources,
-                        }));
+                        patchableArray.addPatch(
+                            PermissionRoleForResponsibility.patch({
+                                id: patch.id,
+                                resources: patch.resources,
+                            }),
+                        );
                     }
 
-                    for (const { put, afterId } of request.body.privateMeta.inheritedResponsibilityRoles.getPuts()) {
-                        const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = put.resources;
+                    for (const {
+                        put,
+                        afterId,
+                    } of request.body.privateMeta.inheritedResponsibilityRoles.getPuts()) {
+                        const resources: Map<
+                            PermissionsResourceType,
+                            Map<string, ResourcePermissions>
+                        > = put.resources;
 
-                        if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
+                        if (
+                            !(await Context.auth.hasFullAccessForOrganizationResources(
+                                request.body.id,
+                                resources,
+                            ))
+                        ) {
                             throw new SimpleError({
                                 code: 'permission_denied',
-                                message: 'You do not have permissions to add inherited responsibility roles',
+                                message:
+                                    'You do not have permissions to add inherited responsibility roles',
                                 statusCode: 403,
                             });
                         }
@@ -551,16 +742,32 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 }
 
                 if (request.body.privateMeta.responsibilities) {
-                    const patchableArray: PatchableArrayAutoEncoder<MemberResponsibility> = new PatchableArray();
+                    const patchableArray: PatchableArrayAutoEncoder<MemberResponsibility> =
+                        new PatchableArray();
 
                     for (const patch of request.body.privateMeta.responsibilities.getPatches()) {
                         if (!patch.permissions) {
                             continue;
-                        };
+                        }
 
-                        const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = isPatchMap(patch.permissions.resources) ? patch.permissions.resources.applyTo(new Map<PermissionsResourceType, Map<string, ResourcePermissions>>()) : patch.permissions.resources;
+                        const resources: Map<
+                            PermissionsResourceType,
+                            Map<string, ResourcePermissions>
+                        > = isPatchMap(patch.permissions.resources)
+                            ? patch.permissions.resources.applyTo(
+                                  new Map<
+                                      PermissionsResourceType,
+                                      Map<string, ResourcePermissions>
+                                  >(),
+                              )
+                            : patch.permissions.resources;
 
-                        if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
+                        if (
+                            !(await Context.auth.hasFullAccessForOrganizationResources(
+                                request.body.id,
+                                resources,
+                            ))
+                        ) {
                             throw new SimpleError({
                                 code: 'permission_denied',
                                 message: 'You do not have permissions to edit responsibilities',
@@ -568,12 +775,16 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             });
                         }
 
-                        patchableArray.addPatch(MemberResponsibility.patch({
-                            id: patch.id,
-                            permissions: PermissionRoleForResponsibility.patch({
-                                resources: isPatchMap(patch.permissions.resources) ? patch.permissions.resources : new PatchMap(patch.permissions.resources),
+                        patchableArray.addPatch(
+                            MemberResponsibility.patch({
+                                id: patch.id,
+                                permissions: PermissionRoleForResponsibility.patch({
+                                    resources: isPatchMap(patch.permissions.resources)
+                                        ? patch.permissions.resources
+                                        : new PatchMap(patch.permissions.resources),
+                                }),
                             }),
-                        }));
+                        );
                     }
 
                     if (request.body.privateMeta.responsibilities.getPuts().length > 0) {
@@ -590,12 +801,23 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 }
 
                 if (request.body.privateMeta.roles) {
-                    const patchableArray: PatchableArrayAutoEncoder<PermissionRoleDetailed> = new PatchableArray();
+                    const patchableArray: PatchableArrayAutoEncoder<PermissionRoleDetailed> =
+                        new PatchableArray();
 
                     for (const patch of request.body.privateMeta.roles.getPatches()) {
-                        const resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> = patch.resources.applyTo(new Map<PermissionsResourceType, Map<string, ResourcePermissions>>());
+                        const resources: Map<
+                            PermissionsResourceType,
+                            Map<string, ResourcePermissions>
+                        > = patch.resources.applyTo(
+                            new Map<PermissionsResourceType, Map<string, ResourcePermissions>>(),
+                        );
 
-                        if (!await Context.auth.hasFullAccessForOrganizationResources(request.body.id, resources)) {
+                        if (
+                            !(await Context.auth.hasFullAccessForOrganizationResources(
+                                request.body.id,
+                                resources,
+                            ))
+                        ) {
                             throw new SimpleError({
                                 code: 'permission_denied',
                                 message: 'You do not have permissions to edit roles',
@@ -603,10 +825,12 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             });
                         }
 
-                        patchableArray.addPatch(PermissionRoleDetailed.patch({
-                            id: patch.id,
-                            resources: patch.resources,
-                        }));
+                        patchableArray.addPatch(
+                            PermissionRoleDetailed.patch({
+                                id: patch.id,
+                                resources: patch.resources,
+                            }),
+                        );
                     }
 
                     if (request.body.privateMeta.roles.getPuts().length > 0) {
@@ -630,10 +854,8 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         for (const struct of request.body.webshops.getPatches()) {
             const model = await Webshop.getByID(struct.id);
 
-            if (!model || !await Context.auth.canAccessWebshop(model, PermissionLevel.Full)) {
-                errors.addError(
-                    Context.auth.error($t('%Ea')),
-                );
+            if (!model || !(await Context.auth.canAccessWebshop(model, PermissionLevel.Full))) {
+                errors.addError(Context.auth.error($t('%Ea')));
                 continue;
             }
 
@@ -696,11 +918,14 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
         }
     }
 
-    async validateCompanies(organization: Organization, companies: PatchableArrayAutoEncoder<Company> | Company[]) {
+    async validateCompanies(
+        organization: Organization,
+        companies: PatchableArrayAutoEncoder<Company> | Company[],
+    ) {
         if (isPatchableArray(companies)) {
             for (const patch of companies.getPatches()) {
                 // Changed VAT number
-                const original = organization.meta.companies.find(c => c.id === patch.id);
+                const original = organization.meta.companies.find((c) => c.id === patch.id);
 
                 if (!original) {
                     throw new SimpleError({
@@ -723,7 +948,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
             for (const { put } of companies.getPuts()) {
                 c++;
 
-                if ((organization.meta.companies.length + c) > 5) {
+                if (organization.meta.companies.length + c > 5) {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Too many companies',

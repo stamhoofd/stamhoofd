@@ -41,8 +41,6 @@ export class GetPaymentEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             });
         }
 
-        return new Response(
-            await AuthenticatedStructures.paymentGeneral(payment, true),
-        );
+        return new Response(await AuthenticatedStructures.paymentGeneral(payment, true));
     }
 }

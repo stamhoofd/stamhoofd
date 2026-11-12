@@ -25,7 +25,7 @@ const variables = [
 ];
 
 afterEach(() => {
-    variables.forEach(variable => delete process.env[variable]);
+    variables.forEach((variable) => delete process.env[variable]);
 });
 
 describe('resolveE2eMysqlTarget', () => {
@@ -34,13 +34,23 @@ describe('resolveE2eMysqlTarget', () => {
     });
 
     it('uses a local MySQL on 3306 with --local-db', () => {
-        expect(resolveE2eMysqlTarget({ localDb: true })).toEqual({ kind: 'local', port: 3306, user: 'root', password: 'root' });
+        expect(resolveE2eMysqlTarget({ localDb: true })).toEqual({
+            kind: 'local',
+            port: 3306,
+            user: 'root',
+            password: 'root',
+        });
     });
 
     it('uses a local MySQL when a port is configured', () => {
         process.env[e2eMysqlPortVariable] = '3307';
 
-        expect(resolveE2eMysqlTarget()).toEqual({ kind: 'local', port: 3307, user: 'root', password: 'root' });
+        expect(resolveE2eMysqlTarget()).toEqual({
+            kind: 'local',
+            port: 3307,
+            user: 'root',
+            password: 'root',
+        });
     });
 
     it('takes the configured credentials', () => {
@@ -48,7 +58,12 @@ describe('resolveE2eMysqlTarget', () => {
         process.env[e2eMysqlUserVariable] = 'tests';
         process.env[e2eMysqlPasswordVariable] = '';
 
-        expect(resolveE2eMysqlTarget()).toEqual({ kind: 'local', port: 3306, user: 'tests', password: '' });
+        expect(resolveE2eMysqlTarget()).toEqual({
+            kind: 'local',
+            port: 3306,
+            user: 'tests',
+            password: '',
+        });
     });
 
     it('lets --no-local-db win over a configured port', () => {
@@ -72,23 +87,36 @@ describe('resolveE2eMysqlTarget', () => {
 
 describe('buildPlaywrightDatabasePrefix', () => {
     it('keeps the bare name for the primary worktree', () => {
-        expect(buildPlaywrightDatabasePrefix({ name: 'stamhoofd', primary: true })).toBe('stamhoofd-playwright');
+        expect(buildPlaywrightDatabasePrefix({ name: 'stamhoofd', primary: true })).toBe(
+            'stamhoofd-playwright',
+        );
     });
 
     it('adds the instance name of another worktree', () => {
-        expect(buildPlaywrightDatabasePrefix({ name: 'stamhoofd-feature-sso', primary: false })).toBe('stamhoofd-playwright-stamhoofd-feature-sso');
+        expect(
+            buildPlaywrightDatabasePrefix({ name: 'stamhoofd-feature-sso', primary: false }),
+        ).toBe('stamhoofd-playwright-stamhoofd-feature-sso');
     });
 
     it('keeps long instance names within the MySQL identifier limit', () => {
-        const prefix = buildPlaywrightDatabasePrefix({ name: 'stamhoofd-a-very-long-worktree-name-that-keeps-on-going', primary: false });
+        const prefix = buildPlaywrightDatabasePrefix({
+            name: 'stamhoofd-a-very-long-worktree-name-that-keeps-on-going',
+            primary: false,
+        });
 
         expect(playwrightDatabaseName(29, prefix).length).toBeLessThanOrEqual(64);
         expect(prefix.startsWith('stamhoofd-playwright-stamhoofd-a-very-long-worktree')).toBe(true);
     });
 
     it('gives two long instance names different prefixes', () => {
-        const first = buildPlaywrightDatabasePrefix({ name: 'stamhoofd-a-very-long-worktree-name-that-keeps-on-going-one', primary: false });
-        const second = buildPlaywrightDatabasePrefix({ name: 'stamhoofd-a-very-long-worktree-name-that-keeps-on-going-two', primary: false });
+        const first = buildPlaywrightDatabasePrefix({
+            name: 'stamhoofd-a-very-long-worktree-name-that-keeps-on-going-one',
+            primary: false,
+        });
+        const second = buildPlaywrightDatabasePrefix({
+            name: 'stamhoofd-a-very-long-worktree-name-that-keeps-on-going-two',
+            primary: false,
+        });
 
         expect(first).not.toBe(second);
     });

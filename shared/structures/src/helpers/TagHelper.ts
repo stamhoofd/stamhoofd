@@ -39,8 +39,13 @@ export class TagHelper {
      * @param tagMap a map of all the tags
      * @returns true if the tag contains the tag to search recursively or false otherwise
      */
-    static containsDeep(tagId: string, tagIdToSearch: string, tags: { allTags: OrganizationTag[] } | { tagMap: Map<string, OrganizationTag> }): boolean {
-        const tagMap = 'tagMap' in tags ? tags.tagMap : new Map(tags.allTags.map(tag => [tag.id, tag]));
+    static containsDeep(
+        tagId: string,
+        tagIdToSearch: string,
+        tags: { allTags: OrganizationTag[] } | { tagMap: Map<string, OrganizationTag> },
+    ): boolean {
+        const tagMap =
+            'tagMap' in tags ? tags.tagMap : new Map(tags.allTags.map((tag) => [tag.id, tag]));
 
         const tag = tagMap.get(tagId);
         if (!tag) {
@@ -65,8 +70,12 @@ export class TagHelper {
         return false;
     }
 
-    static getAllDescendants(tagId: string, tags: { allTags: OrganizationTag[] } | { tagMap: Map<string, OrganizationTag> }): string[] {
-        const tagMap = 'tagMap' in tags ? tags.tagMap : new Map(tags.allTags.map(tag => [tag.id, tag]));
+    static getAllDescendants(
+        tagId: string,
+        tags: { allTags: OrganizationTag[] } | { tagMap: Map<string, OrganizationTag> },
+    ): string[] {
+        const tagMap =
+            'tagMap' in tags ? tags.tagMap : new Map(tags.allTags.map((tag) => [tag.id, tag]));
 
         const tag = tagMap.get(tagId);
         if (!tag) {
@@ -87,9 +96,13 @@ export class TagHelper {
         return descendants;
     }
 
-    static getAllAncestors(tagId: string, tags: { allTags: OrganizationTag[] } | { tagMap: Map<string, OrganizationTag> }): string[] {
-        const tagMap = 'tagMap' in tags ? tags.tagMap : new Map(tags.allTags.map(tag => [tag.id, tag]));
+    static getAllAncestors(
+        tagId: string,
+        tags: { allTags: OrganizationTag[] } | { tagMap: Map<string, OrganizationTag> },
+    ): string[] {
+        const tagMap =
+            'tagMap' in tags ? tags.tagMap : new Map(tags.allTags.map((tag) => [tag.id, tag]));
 
-        return [...tagMap.keys()].filter(id => this.containsDeep(id, tagId, { tagMap }));
+        return [...tagMap.keys()].filter((id) => this.containsDeep(id, tagId, { tagMap }));
     }
 }

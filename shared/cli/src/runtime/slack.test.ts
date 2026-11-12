@@ -9,7 +9,9 @@ vi.mock('./one-password.js', () => ({
 const config = { token: 'xoxb-test', channel: 'C123' };
 
 function mockFetch(body: unknown, status = 200) {
-    const fetchMock = vi.fn((_url: string, _init: RequestInit) => Promise.resolve(new Response(JSON.stringify(body), { status })));
+    const fetchMock = vi.fn((_url: string, _init: RequestInit) =>
+        Promise.resolve(new Response(JSON.stringify(body), { status })),
+    );
     vi.stubGlobal('fetch', fetchMock);
     return fetchMock;
 }
@@ -42,7 +44,11 @@ describe('postSlackMessage', () => {
         await postSlackMessage(config, { text: 'in thread', threadTs: '111.222' });
 
         const [, init] = fetchMock.mock.calls[0];
-        expect(JSON.parse(init.body as string)).toEqual({ channel: 'C123', text: 'in thread', thread_ts: '111.222' });
+        expect(JSON.parse(init.body as string)).toEqual({
+            channel: 'C123',
+            text: 'in thread',
+            thread_ts: '111.222',
+        });
     });
 
     it('honours SLACK_API_BASE', async () => {
@@ -78,7 +84,8 @@ describe('resolveSlackConfig', () => {
 
     it('falls back to 1Password for both values', async () => {
         vi.mocked(read1PasswordCli).mockImplementation(async (ref: string) =>
-            ref.endsWith('/token') ? 'xoxb-1p' : 'C-1p');
+            ref.endsWith('/token') ? 'xoxb-1p' : 'C-1p',
+        );
 
         const result = await resolveSlackConfig();
 

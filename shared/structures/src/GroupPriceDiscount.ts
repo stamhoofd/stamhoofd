@@ -18,7 +18,9 @@ export class GroupPriceDiscount extends AutoEncoder {
                 // Undo *100
                 return ReduceablePrice.create({
                     price: Math.round(old.price / 100),
-                    reducedPrice: old.reducedPrice ? Math.round(old.reducedPrice / 100) : old.reducedPrice,
+                    reducedPrice: old.reducedPrice
+                        ? Math.round(old.reducedPrice / 100)
+                        : old.reducedPrice,
                 });
             }
             return old;
@@ -28,7 +30,9 @@ export class GroupPriceDiscount extends AutoEncoder {
                 // Redo
                 return ReduceablePrice.create({
                     price: Math.round(old.price * 100),
-                    reducedPrice: old.reducedPrice ? Math.round(old.reducedPrice * 100) : old.reducedPrice,
+                    reducedPrice: old.reducedPrice
+                        ? Math.round(old.reducedPrice * 100)
+                        : old.reducedPrice,
                 });
             }
             return old;
@@ -46,10 +50,9 @@ export class GroupPriceDiscount extends AutoEncoder {
         }
 
         // Discounts should always be rounded to 2 decimals
-        return Math.max(0,
-            Math.min(price,
-                100 * Math.round(price * this.value.forMember(member) / 100_00_00),
-            ),
+        return Math.max(
+            0,
+            Math.min(price, 100 * Math.round((price * this.value.forMember(member)) / 100_00_00)),
         );
     }
 

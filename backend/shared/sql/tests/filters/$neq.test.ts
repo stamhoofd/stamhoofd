@@ -7,7 +7,14 @@ describe('$neq', () => {
     it('removes caps when filtering strings', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            ],
         ]);
 
         await test({

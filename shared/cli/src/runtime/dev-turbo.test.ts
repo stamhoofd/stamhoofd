@@ -10,11 +10,15 @@ it('keeps inspector HTTP discovery and warnings while hiding its normal-mode ban
     const supervisor = fileURLToPath(import.meta.resolve('@node/dev-tools/supervise'));
     const script = `import inspector from 'node:inspector'; const url = inspector.url(); const response = await fetch(new URL('/json/list', url.replace('ws:', 'http:'))); console.log((await response.json())[0].webSocketDebuggerUrl === url); console.warn('application warning');`;
     for (const verbose of ['0', '1']) {
-        const result = spawnSync(process.execPath, [supervisor, 'api', 'node', '--inspect=0', '--input-type=module', '-e', script], {
-            env: { ...process.env, STAM_DEV_SESSION: 'test', STAM_DEV_VERBOSE: verbose },
-            encoding: 'utf8',
-            timeout: 10_000,
-        });
+        const result = spawnSync(
+            process.execPath,
+            [supervisor, 'api', 'node', '--inspect=0', '--input-type=module', '-e', script],
+            {
+                env: { ...process.env, STAM_DEV_SESSION: 'test', STAM_DEV_VERBOSE: verbose },
+                encoding: 'utf8',
+                timeout: 10_000,
+            },
+        );
         expect(result.status).toBe(0);
         expect(result.stdout).toContain('true');
         expect(result.stderr).toContain('application warning');
@@ -25,8 +29,14 @@ it('keeps inspector HTTP discovery and warnings while hiding its normal-mode ban
 it('suppresses pnpm script echoes without suppressing child stdout or stderr', async () => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'stam-pnpm-logs-'));
     try {
-        await fs.writeFile(path.join(directory, 'package.json'), JSON.stringify({ scripts: { diagnostics: 'node diagnostics.cjs' } }));
-        await fs.writeFile(path.join(directory, 'diagnostics.cjs'), 'console.log("useful stdout"); console.warn("useful warning"); console.error("useful error");');
+        await fs.writeFile(
+            path.join(directory, 'package.json'),
+            JSON.stringify({ scripts: { diagnostics: 'node diagnostics.cjs' } }),
+        );
+        await fs.writeFile(
+            path.join(directory, 'diagnostics.cjs'),
+            'console.log("useful stdout"); console.warn("useful warning"); console.error("useful error");',
+        );
         const result = spawnSync('pnpm', ['--dir', directory, 'run', 'diagnostics'], {
             env: { ...process.env, PNPM_CONFIG_LOGLEVEL: 'warn' },
             encoding: 'utf8',
@@ -48,7 +58,12 @@ it('forwards subprocess streams and failure status with pnpm warning-level repor
     const script = `import { runTurbo } from ${JSON.stringify(adapter)}; process.exitCode = await runTurbo(['exec', 'node', '-e', ${JSON.stringify(childScript)}, '--']);`;
     for (const verbose of ['0', '1']) {
         const result = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
-            env: { ...process.env, STAM_DEV_SESSION: 'test', STAM_DEV_VERBOSE: verbose, PNPM_CONFIG_LOGLEVEL: 'warn' },
+            env: {
+                ...process.env,
+                STAM_DEV_SESSION: 'test',
+                STAM_DEV_VERBOSE: verbose,
+                PNPM_CONFIG_LOGLEVEL: 'warn',
+            },
             encoding: 'utf8',
             timeout: 10_000,
         });
@@ -67,7 +82,8 @@ it('forwards subprocess streams and failure status with pnpm warning-level repor
 it('uses structured levels while preserving every task message and Turbo warning/error', () => {
     const output: [string, string][] = [];
     const write = (stream: 'stdout' | 'stderr', text: string) => output.push([stream, text]);
-    const record = (source: string, level: string, text: string) => forwardTurboLine(JSON.stringify({ source, level, text }), write);
+    const record = (source: string, level: string, text: string) =>
+        forwardTurboLine(JSON.stringify({ source, level, text }), write);
     record('turbo', 'info', 'routine progress');
     record('@stamhoofd/backend#dev', 'stdout', 'WARN useful diagnostic');
     record('@stamhoofd/backend#dev', 'stderr', '    at boot (boot.ts:10)');
@@ -87,11 +103,21 @@ it('buffers successful shared builds, replays failed builds, and always streams 
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'stam-buffer-test-'));
     const adapter = import.meta.resolve('@node/dev-tools/turbo');
     try {
-        for (const [verbose, code] of [['0', 0], ['0', 7], ['1', 0]] as const) {
+        for (const [verbose, code] of [
+            ['0', 0],
+            ['0', 7],
+            ['1', 0],
+        ] as const) {
             const childScript = `console.log(JSON.stringify({ source: 'fixture#build', level: 'stdout', text: 'compiler diagnostic' })); console.error('build warning'); process.exitCode = ${code};`;
             const script = `import { runTurbo } from ${JSON.stringify(adapter)}; process.exitCode = await runTurbo(['exec', 'node', '-e', ${JSON.stringify(childScript)}, '--'], { bufferOutput: true });`;
             const result = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
-                env: { ...process.env, STAM_DEV_SESSION: 'test', STAM_DEV_VERBOSE: verbose, TMPDIR: directory, PNPM_CONFIG_LOGLEVEL: 'warn' },
+                env: {
+                    ...process.env,
+                    STAM_DEV_SESSION: 'test',
+                    STAM_DEV_VERBOSE: verbose,
+                    TMPDIR: directory,
+                    PNPM_CONFIG_LOGLEVEL: 'warn',
+                },
                 encoding: 'utf8',
                 timeout: 10_000,
             });
@@ -102,7 +128,9 @@ it('buffers successful shared builds, replays failed builds, and always streams 
                 expect(result.stdout + result.stderr).toContain('compiler diagnostic');
                 expect(result.stderr).toContain('build warning');
             }
-            expect((await fs.readdir(directory)).filter(name => name.startsWith('stam-shared-log-'))).toEqual([]);
+            expect(
+                (await fs.readdir(directory)).filter((name) => name.startsWith('stam-shared-log-')),
+            ).toEqual([]);
         }
     } finally {
         await fs.rm(directory, { recursive: true, force: true });
@@ -111,7 +139,12 @@ it('buffers successful shared builds, replays failed builds, and always streams 
 
 it('preserves malformed and unknown protocol records instead of silently dropping output', () => {
     const output: string[] = [];
-    for (const line of ['unexpected output', 'null', '{"source":"turbo","level":"future","text":"message"}', '{"source":"turbo","level":"info"}']) {
+    for (const line of [
+        'unexpected output',
+        'null',
+        '{"source":"turbo","level":"future","text":"message"}',
+        '{"source":"turbo","level":"info"}',
+    ]) {
         forwardTurboLine(line, (_stream: string, text: string) => output.push(text));
         expect(output.at(-1)).toBe(line + '\n');
     }

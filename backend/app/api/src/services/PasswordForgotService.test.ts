@@ -1,5 +1,11 @@
 import { I18n } from '@stamhoofd/backend-i18n';
-import { Organization, OrganizationFactory, PasswordToken, User, UserFactory } from '@stamhoofd/models';
+import {
+    Organization,
+    OrganizationFactory,
+    PasswordToken,
+    User,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Address, OrganizationMetaData, Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -55,7 +61,9 @@ describe('PasswordForgotService', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
 
-            const url = new URL(await PasswordForgotService.getPasswordRecoveryUrl(admin, organization, i18n));
+            const url = new URL(
+                await PasswordForgotService.getPasswordRecoveryUrl(admin, organization, i18n),
+            );
 
             expect(url.host).toBe(STAMHOOFD.domains.dashboard);
             expect(url.pathname).toMatch(/\/reset-password$/);
@@ -65,7 +73,9 @@ describe('PasswordForgotService', () => {
             const organization = await new OrganizationFactory({}).create();
             const member = await new UserFactory({ organization }).create();
 
-            const url = new URL(await PasswordForgotService.getPasswordRecoveryUrl(member, organization, i18n));
+            const url = new URL(
+                await PasswordForgotService.getPasswordRecoveryUrl(member, organization, i18n),
+            );
 
             expect(url.host).not.toBe(STAMHOOFD.domains.dashboard);
             expect(url.host.split('.')[0]).toBe(organization.uri);
@@ -76,7 +86,12 @@ describe('PasswordForgotService', () => {
             const organization = buildOrganization();
             const user = buildUser(organization.id);
 
-            const url = await PasswordForgotService.getPasswordRecoveryUrlForToken(buildToken(user, 'a+b/c=d&e'), organization, i18n, user);
+            const url = await PasswordForgotService.getPasswordRecoveryUrlForToken(
+                buildToken(user, 'a+b/c=d&e'),
+                organization,
+                i18n,
+                user,
+            );
 
             expect(url).toMatch(/\/reset-password\?token=a%2Bb%2Fc%3Dd%26e$/);
             expect(new URL(url).searchParams.get('token')).toBe('a+b/c=d&e');
@@ -85,16 +100,27 @@ describe('PasswordForgotService', () => {
         test('Throws when the user belongs to a different organization', async () => {
             const user = buildUser('a-different-organization');
 
-            await expect(PasswordForgotService.getPasswordRecoveryUrlForToken(buildToken(user, 'my-token'), buildOrganization(), i18n, user))
-                .rejects
-                .toThrow('Unexpected mismatch in organization id for PasswordToken');
+            await expect(
+                PasswordForgotService.getPasswordRecoveryUrlForToken(
+                    buildToken(user, 'my-token'),
+                    buildOrganization(),
+                    i18n,
+                    user,
+                ),
+            ).rejects.toThrow('Unexpected mismatch in organization id for PasswordToken');
         });
 
         test('Allows a user without an organization in every scope', async () => {
             const user = buildUser(null);
 
-            await expect(PasswordForgotService.getPasswordRecoveryUrlForToken(buildToken(user, 'my-token'), buildOrganization(), i18n, user))
-                .toResolve();
+            await expect(
+                PasswordForgotService.getPasswordRecoveryUrlForToken(
+                    buildToken(user, 'my-token'),
+                    buildOrganization(),
+                    i18n,
+                    user,
+                ),
+            ).toResolve();
         });
     });
 });

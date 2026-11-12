@@ -1,5 +1,10 @@
 import { SimpleError } from '@common/errors';
-import type { XlsxTransformerConcreteColumn, XlsxTransformerConcreteSheet, XlsxTransformerSheet, XlsxWorkbookFilter } from './interfaces.js';
+import type {
+    XlsxTransformerConcreteColumn,
+    XlsxTransformerConcreteSheet,
+    XlsxTransformerSheet,
+    XlsxWorkbookFilter,
+} from './interfaces.js';
 
 /**
  * Allows to specify which columns to include in the excel file.
@@ -15,7 +20,7 @@ export class XlsxColumnFilterer<T> {
     filterColumns(filter: XlsxWorkbookFilter): XlsxTransformerConcreteSheet<T, unknown>[] {
         // Validate sheetFilter
         for (const { id } of filter.sheets) {
-            if (!this.allSheets.find(sheet => sheet.id === id)) {
+            if (!this.allSheets.find((sheet) => sheet.id === id)) {
                 throw new SimpleError({
                     code: 'invalid_sheet',
                     message: 'Invalid sheet ' + id,
@@ -26,7 +31,7 @@ export class XlsxColumnFilterer<T> {
         }
 
         const sheets = this.allSheets.flatMap((sheet) => {
-            const sheetFilter = filter.sheets.find(s => s.id === sheet.id);
+            const sheetFilter = filter.sheets.find((s) => s.id === sheet.id);
 
             if (!sheetFilter) {
                 return [];
@@ -42,7 +47,8 @@ export class XlsxColumnFilterer<T> {
                         if (column.id === id) {
                             const c = { ...column };
                             c.name = name || c.name;
-                            c.category = (category !== undefined ? category : c.category) ?? undefined;
+                            c.category =
+                                (category !== undefined ? category : c.category) ?? undefined;
                             concreteColumns.push(c);
                             found = true;
                             break;
@@ -113,10 +119,12 @@ export class XlsxColumnFilterer<T> {
                 return [];
             }
 
-            return [{
-                ...sheet,
-                columns: concreteColumns,
-            }];
+            return [
+                {
+                    ...sheet,
+                    columns: concreteColumns,
+                },
+            ];
         });
 
         if (sheets.length === 0) {

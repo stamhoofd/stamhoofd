@@ -3,7 +3,12 @@ import { registerTenantCron } from './helpers/registerTenantCron.js';
 import type { Invoice } from '@stamhoofd/models';
 import { Organization, Payment } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
-import { EmailTemplateType, InvoiceStruct, PaymentStatus, Replacement } from '@stamhoofd/structures';
+import {
+    EmailTemplateType,
+    InvoiceStruct,
+    PaymentStatus,
+    Replacement,
+} from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 import { InvoiceService } from '../services/InvoiceService.js';
@@ -13,9 +18,12 @@ import { OrganizationAdminService } from '../services/OrganizationAdminService.j
 
 registerTenantCron('invoices', invoices);
 
-const iterator = useSavedIterator(() => {
-    return Organization.select();
-}, { limit: 10, maxQueries: 5 });
+const iterator = useSavedIterator(
+    () => {
+        return Organization.select();
+    },
+    { limit: 10, maxQueries: 5 },
+);
 
 const bootAt = new Date();
 
@@ -55,7 +63,9 @@ export async function createInvoicesFor(organization: Organization) {
     // Payments of the current month wait for next month's run
     const endDate = Formatter.luxon().startOf('month').toJSDate();
 
-    console.debug('Fetching all payments before ' + Formatter.dateTime(endDate) + ' for ' + organization.name);
+    console.debug(
+        'Fetching all payments before ' + Formatter.dateTime(endDate) + ' for ' + organization.name,
+    );
 
     const payments = await Payment.select()
         .where('organizationId', organization.id)
@@ -77,7 +87,11 @@ export async function createInvoicesFor(organization: Organization) {
         const blob = {
             // Grouping by payingOrganizationId avoid privacy issues and data leaks
             payingOrganizationId: payment.payingOrganizationId ?? null,
-            vatNumber: Formatter.slugVATNumber(payment.customer?.company?.VATNumber ?? payment.customer?.company?.companyNumber ?? ''),
+            vatNumber: Formatter.slugVATNumber(
+                payment.customer?.company?.VATNumber ??
+                    payment.customer?.company?.companyNumber ??
+                    '',
+            ),
             // Name and adress is ignored, because subject to changes
         };
         const id = JSON.stringify(blob);
@@ -113,16 +127,39 @@ export async function createInvoicesFor(organization: Organization) {
                 invoice.isReceipt = true;
             } else if (invoice.totalWithVAT === 0) {
                 // Goods did move (e.g. a swap), which needs a zero invoice: not supported yet
-                console.log('Skipping zero total with items for ' + customer + ' at ' + organization.id);
+                console.log(
+                    'Skipping zero total with items for ' + customer + ' at ' + organization.id,
+                );
                 continue;
             }
 
             const model = await InvoiceService.createFrom(organization, invoice);
             invoices.push(model);
         } catch (e) {
-            console.error(payments.map(p => p.id), e);
+            console.error(
+                payments.map((p) => p.id),
+                e,
+            );
 
-            const prefix = customer + ' (' + payments.map(p => '<a href="' + Formatter.escapeHtml('https://' + organization.getDashboardHost() + '/boekhouding/betalingen/' + p.id) + '">' + Formatter.escapeHtml($t('%14a') + ' ' + p.id.substring(0, 8)) + '</a>').join(', ') + '): ';
+            const prefix =
+                customer +
+                ' (' +
+                payments
+                    .map(
+                        (p) =>
+                            '<a href="' +
+                            Formatter.escapeHtml(
+                                'https://' +
+                                    organization.getDashboardHost() +
+                                    '/boekhouding/betalingen/' +
+                                    p.id,
+                            ) +
+                            '">' +
+                            Formatter.escapeHtml($t('%14a') + ' ' + p.id.substring(0, 8)) +
+                            '</a>',
+                    )
+                    .join(', ') +
+                '): ';
 
             if (isSimpleError(e) || isSimpleErrors(e)) {
                 errors.push(prefix + Formatter.escapeHtml(e.getHuman()));

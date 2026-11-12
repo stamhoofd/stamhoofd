@@ -33,7 +33,9 @@ function testOptimalSum(matrix: number[][]) {
 
     // Verify this is indeed optimal by checking all possible permutations for small matrices
     if (matrix.length <= 10) {
-        const allPermutations = generatePermutations(Array.from({ length: Math.min(matrix.length, matrix[0].length) }, (_, i) => i));
+        const allPermutations = generatePermutations(
+            Array.from({ length: Math.min(matrix.length, matrix[0].length) }, (_, i) => i),
+        );
         let maxSum = -Infinity;
 
         for (const perm of allPermutations) {
@@ -66,62 +68,83 @@ function generatePermutations<T>(arr: T[]): T[][] {
 
 describe('calculateHungarianAlgorithm', () => {
     it('should returns the highest possible combination', () => {
-        test([
-            [0, 10, 20],
-            [0, 30, 45],
-            [0, 50, 60],
-        ], [0, 2, 1]); // 45 + 50 = 95, which is the highest possible combination
+        test(
+            [
+                [0, 10, 20],
+                [0, 30, 45],
+                [0, 50, 60],
+            ],
+            [0, 2, 1],
+        ); // 45 + 50 = 95, which is the highest possible combination
     });
 
     describe('Handling indeterminate cases', () => {
         it('when there are two equal options, it returns the lowest indexes', () => {
-            test([
-                [0, 10, 20],
-                [0, 30, 40],
-                [0, 50, 60],
-            ], [0, 1, 2]); // not 0, 2, 1
+            test(
+                [
+                    [0, 10, 20],
+                    [0, 30, 40],
+                    [0, 50, 60],
+                ],
+                [0, 1, 2],
+            ); // not 0, 2, 1
 
-            test([
-                [0, 10, 20],
-                [0, 50, 60],
-                [0, 30, 40],
-            ], [0, 1, 2]);
+            test(
+                [
+                    [0, 10, 20],
+                    [0, 50, 60],
+                    [0, 30, 40],
+                ],
+                [0, 1, 2],
+            );
         });
 
         it('Last one in the list of indeterminate cases receives no discount 3x3', () => {
-            test([
-                [0, 10, 10],
-                [0, 10, 10],
-                [0, 10, 10],
-            ], [1, 2, 0]);
+            test(
+                [
+                    [0, 10, 10],
+                    [0, 10, 10],
+                    [0, 10, 10],
+                ],
+                [1, 2, 0],
+            );
         });
 
         it('Last one in the list of indeterminate cases receives no discount 4x4', () => {
-            test([
-                [0, 10, 10, 10],
-                [0, 10, 10, 10],
-                [0, 10, 10, 10],
-                [0, 10, 10, 10],
-            ], [1, 2, 3, 0]);
+            test(
+                [
+                    [0, 10, 10, 10],
+                    [0, 10, 10, 10],
+                    [0, 10, 10, 10],
+                    [0, 10, 10, 10],
+                ],
+                [1, 2, 3, 0],
+            );
         });
 
         it('Last two in the list of indeterminate cases receives no discount 4x4', () => {
-            test([
-                [0, 10, 10, 0],
-                [0, 10, 10, 0],
-                [0, 10, 10, 0],
-                [0, 10, 10, 0],
-            ], [1, 2, 0, 3]);
+            test(
+                [
+                    [0, 10, 10, 0],
+                    [0, 10, 10, 0],
+                    [0, 10, 10, 0],
+                    [0, 10, 10, 0],
+                ],
+                [1, 2, 0, 3],
+            );
         });
 
         it('Last three in the list of indeterminate cases receives no discount 5x5', () => {
-            test([
-                [0, 10, 10, 0, 0],
-                [0, 10, 10, 0, 0],
-                [0, 10, 10, 0, 0],
-                [0, 10, 10, 0, 0],
-                [0, 10, 10, 0, 0],
-            ], [1, 2, 0, 3, 4]);
+            test(
+                [
+                    [0, 10, 10, 0, 0],
+                    [0, 10, 10, 0, 0],
+                    [0, 10, 10, 0, 0],
+                    [0, 10, 10, 0, 0],
+                    [0, 10, 10, 0, 0],
+                ],
+                [1, 2, 0, 3, 4],
+            );
         });
     });
 
@@ -131,26 +154,35 @@ describe('calculateHungarianAlgorithm', () => {
         });
 
         it('should handle 2x2 matrix', () => {
-            test([
-                [10, 5],
-                [3, 8],
-            ], [0, 1]);
+            test(
+                [
+                    [10, 5],
+                    [3, 8],
+                ],
+                [0, 1],
+            );
         });
 
         it('should handle matrices with all zeros', () => {
-            test([
-                [0, 0, 0],
-                [0, 0, 0],
-                [0, 0, 0],
-            ], [0, 1, 2]); // always prefer the lowest indexes for first items
+            test(
+                [
+                    [0, 0, 0],
+                    [0, 0, 0],
+                    [0, 0, 0],
+                ],
+                [0, 1, 2],
+            ); // always prefer the lowest indexes for first items
         });
 
         it('should handle matrices with negative values', () => {
-            test([
-                [-10, -5, -1],
-                [-3, -8, -2],
-                [-6, -4, -9],
-            ], [2, 0, 1]); // -1 + (-3) + (-4) = -8 is the maximum (least negative)
+            test(
+                [
+                    [-10, -5, -1],
+                    [-3, -8, -2],
+                    [-6, -4, -9],
+                ],
+                [2, 0, 1],
+            ); // -1 + (-3) + (-4) = -8 is the maximum (least negative)
         });
 
         it('should handle matrices with mixed positive and negative values', () => {
@@ -196,19 +228,25 @@ describe('calculateHungarianAlgorithm', () => {
 
     describe('Special patterns', () => {
         it('should handle identity-like matrices (diagonal has highest values)', () => {
-            test([
-                [100, 1, 1],
-                [1, 100, 1],
-                [1, 1, 100],
-            ], [0, 1, 2]); // Should pick the diagonal
+            test(
+                [
+                    [100, 1, 1],
+                    [1, 100, 1],
+                    [1, 1, 100],
+                ],
+                [0, 1, 2],
+            ); // Should pick the diagonal
         });
 
         it('should handle anti-diagonal pattern', () => {
-            test([
-                [1, 1, 100],
-                [1, 100, 1],
-                [100, 1, 1],
-            ], [2, 1, 0]); // Should pick the anti-diagonal
+            test(
+                [
+                    [1, 1, 100],
+                    [1, 100, 1],
+                    [100, 1, 1],
+                ],
+                [2, 1, 0],
+            ); // Should pick the anti-diagonal
         });
 
         it('should handle matrices with duplicate maximum values', () => {
@@ -266,7 +304,9 @@ describe('calculateHungarianAlgorithm', () => {
                 Array.from({ length: size }, (_, j) => Math.floor(Math.random() * 1000)),
             );
 
-            expect(() => calculateHungarianAlgorithm(matrix)).toThrow('Too many items to process. Maximum is 500.');
+            expect(() => calculateHungarianAlgorithm(matrix)).toThrow(
+                'Too many items to process. Maximum is 500.',
+            );
         }, 1_000);
 
         it('should be deterministic (same input produces same output)', () => {
@@ -296,14 +336,10 @@ describe('calculateHungarianAlgorithm', () => {
             ];
 
             // Convert to maximization problem by negating
-            const maxMatrix = costMatrix.map(row => row.map(val => -val));
+            const maxMatrix = costMatrix.map((row) => row.map((val) => -val));
 
             // Verify this gives minimum cost assignment
-            test(maxMatrix, [
-                0,
-                2,
-                1,
-            ]);
+            test(maxMatrix, [0, 2, 1]);
         });
 
         it('should handle worker-task assignment scenario', () => {
@@ -337,13 +373,18 @@ describe('calculateHungarianAlgorithm', () => {
         });
 
         it('should handle zero and one combinations', () => {
-            test([
-                [0, 1, 0],
-                [1, 0, 1],
-                [0, 1, 0],
-            ], [
-                1, 0, 2, // Last one doesn't receive a discount (least priority)
-            ]);
+            test(
+                [
+                    [0, 1, 0],
+                    [1, 0, 1],
+                    [0, 1, 0],
+                ],
+                [
+                    1,
+                    0,
+                    2, // Last one doesn't receive a discount (least priority)
+                ],
+            );
         });
     });
 });

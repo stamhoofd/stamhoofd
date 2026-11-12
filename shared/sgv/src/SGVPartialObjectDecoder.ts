@@ -11,7 +11,7 @@ function copyObject(value: object): Record<string, unknown> {
 
 function copyValue(value: unknown): unknown {
     if (Array.isArray(value)) {
-        return value.map(item => copyValue(item));
+        return value.map((item) => copyValue(item));
     }
     return value !== null && typeof value === 'object' ? copyObject(value) : value;
 }
@@ -26,7 +26,11 @@ export class SGVPartialObjectDecoder<T extends object> implements Decoder<T> {
     decode(data: Data): T {
         const value: unknown = data.value;
         if (typeof value !== 'object' || value === null) {
-            throw new SimpleError({ code: 'invalid_field', message: `Expected an object at ${data.currentField}`, field: data.currentField });
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: `Expected an object at ${data.currentField}`,
+                field: data.currentField,
+            });
         }
         return copyObject(value) as T;
     }

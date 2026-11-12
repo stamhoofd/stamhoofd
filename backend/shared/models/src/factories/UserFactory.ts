@@ -27,7 +27,11 @@ export class UserFactory extends Factory<Options, User> {
     async create(): Promise<User> {
         let organization: Organization | null;
 
-        if (!this.options.organization && STAMHOOFD.userMode !== 'platform' && !this.options.globalPermissions) {
+        if (
+            !this.options.organization &&
+            STAMHOOFD.userMode !== 'platform' &&
+            !this.options.globalPermissions
+        ) {
             const organizationFactory = new OrganizationFactory({});
             organization = await organizationFactory.create();
         } else {
@@ -35,16 +39,21 @@ export class UserFactory extends Factory<Options, User> {
         }
 
         const emailDomain = this.options.isStamhoofd ? '@stamhoofd.be' : '@domain.com';
-        const email = this.options.email ?? 'generated-email-' + this.randomString(20) + emailDomain;
+        const email =
+            this.options.email ?? 'generated-email-' + this.randomString(20) + emailDomain;
         const password = this.options.password ?? this.randomString(20);
 
-        const user = await User.register(organization, NewUser.create({
-            email,
-            organizationId: organization?.id ?? null,
-            password,
-        }), {
-            allowPlatform: !!this.options.globalPermissions,
-        });
+        const user = await User.register(
+            organization,
+            NewUser.create({
+                email,
+                organizationId: organization?.id ?? null,
+                password,
+            }),
+            {
+                allowPlatform: !!this.options.globalPermissions,
+            },
+        );
         if (!user) {
             throw new Error('Unexpected failure when creating user in factory');
         }

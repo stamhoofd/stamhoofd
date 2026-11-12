@@ -39,7 +39,9 @@ export class SMSMocker {
                     return [500, { code: '0x0002', message: 'Forced failure' }];
                 }
 
-                const body = (typeof requestBody === 'string' ? JSON.parse(requestBody) : requestBody) as SentSMS;
+                const body = (
+                    typeof requestBody === 'string' ? JSON.parse(requestBody) : requestBody
+                ) as SentSMS;
                 this.sentMessages.push({
                     sender: body.sender,
                     message: body.message,

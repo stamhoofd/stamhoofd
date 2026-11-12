@@ -1,7 +1,12 @@
 import type { User } from '@stamhoofd/models';
 import { AuditLog } from '@stamhoofd/models';
 import type { MFAMethodType } from '@stamhoofd/structures';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
+import {
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    AuditLogSource,
+    AuditLogType,
+} from '@stamhoofd/structures';
 
 /**
  * Records the changes a user makes to their own two-factor authentication.
@@ -28,7 +33,12 @@ export class TwoFactorAuditLogService {
         await this.save(AuditLogType.UserRecoveryCodesRegenerated, user, null, '');
     }
 
-    private static async save(type: AuditLogType, user: User, method: MFAMethodType | null, name: string) {
+    private static async save(
+        type: AuditLogType,
+        user: User,
+        method: MFAMethodType | null,
+        name: string,
+    ) {
         const log = new AuditLog();
         log.type = type;
         log.source = AuditLogSource.User;
@@ -43,11 +53,14 @@ export class TwoFactorAuditLogService {
         log.organizationId = user.organizationId;
 
         log.replacements = new Map([
-            ['u', AuditLogReplacement.create({
-                id: user.id,
-                value: user.email,
-                type: AuditLogReplacementType.User,
-            })],
+            [
+                'u',
+                AuditLogReplacement.create({
+                    id: user.id,
+                    value: user.email,
+                    type: AuditLogReplacementType.User,
+                }),
+            ],
         ]);
 
         const methodReplacement = AuditLogReplacement.enum('MFAMethodType', method);

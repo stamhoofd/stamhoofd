@@ -3,7 +3,15 @@ import { PatchableArrayDecoder, StringDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { BalanceItem, Invoice, Organization, OrganizationRegistrationPeriod, Payment, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    Invoice,
+    Organization,
+    OrganizationRegistrationPeriod,
+    Payment,
+    Platform,
+    RegistrationPeriod,
+} from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { Organization as OrganizationStruct } from '@stamhoofd/structures';
@@ -21,7 +29,11 @@ type Body = PatchableArrayAutoEncoder<OrganizationStruct>;
 type ResponseBody = OrganizationStruct[];
 
 export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(OrganizationStruct as Decoder<OrganizationStruct>, OrganizationStruct.patchType() as Decoder<AutoEncoderPatchType<OrganizationStruct>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(
+        OrganizationStruct as Decoder<OrganizationStruct>,
+        OrganizationStruct.patchType() as Decoder<AutoEncoderPatchType<OrganizationStruct>>,
+        StringDecoder,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -55,10 +67,17 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
 
             const organization = await Organization.getByID(id);
             if (!organization) {
-                throw new SimpleError({ code: 'not_found', message: 'Organization not found', statusCode: 404 });
+                throw new SimpleError({
+                    code: 'not_found',
+                    message: 'Organization not found',
+                    statusCode: 404,
+                });
             }
 
-            if (organization.id === (await Platform.getSharedPrivateStruct()).membershipOrganizationId) {
+            if (
+                organization.id ===
+                (await Platform.getSharedPrivateStruct()).membershipOrganizationId
+            ) {
                 throw new SimpleError({
                     code: 'cannot_delete_membership_organization',
                     message: 'Cannot delete membership organization',
@@ -84,7 +103,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                     .first(false),
             ]);
 
-            if (payerRecordCounts.some(hasSome => hasSome !== null)) {
+            if (payerRecordCounts.some((hasSome) => hasSome !== null)) {
                 throw new SimpleError({
                     code: 'organization_has_financial_records',
                     message: 'Organization is still referenced as paying organization',
@@ -98,10 +117,20 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
         // Organization creation
         const puts = request.body.getPuts();
         const platform = await Platform.getShared();
-        const allowedTags = Context.auth.getOrganizationTagsWithAccessRight(AccessRight.PlatformCreateOrganizations);
+        const allowedTags = Context.auth.getOrganizationTagsWithAccessRight(
+            AccessRight.PlatformCreateOrganizations,
+        );
 
         // Organizations with one of these tags are managed by the admin
-        const managedTags = allowedTags === 'all' ? null : new Set(allowedTags.flatMap(id => [id, ...TagHelper.getAllDescendants(id, { allTags: platform.config.tags })]));
+        const managedTags =
+            allowedTags === 'all'
+                ? null
+                : new Set(
+                      allowedTags.flatMap((id) => [
+                          id,
+                          ...TagHelper.getAllDescendants(id, { allTags: platform.config.tags }),
+                      ]),
+                  );
 
         if (puts.length > 0 && managedTags?.size === 0) {
             throw Context.auth.error($t('%ZtS'));
@@ -112,8 +141,14 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
 
             if (managedTags) {
                 // Only managed tags and their parents are allowed
-                const permittedTags = TagHelper.getAllTagsFromHierarchy(put.meta.tags.filter(t => managedTags.has(t)), platform.config.tags);
-                if (permittedTags.length === 0 || put.meta.tags.some(t => !permittedTags.includes(t))) {
+                const permittedTags = TagHelper.getAllTagsFromHierarchy(
+                    put.meta.tags.filter((t) => managedTags.has(t)),
+                    platform.config.tags,
+                );
+                if (
+                    permittedTags.length === 0 ||
+                    put.meta.tags.some((t) => !permittedTags.includes(t))
+                ) {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: 'You can only create organizations with tags you manage',
@@ -223,7 +258,8 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 console.error(e);
                 throw new SimpleError({
                     code: 'creating_organization',
-                    message: 'Something went wrong while creating the organization. Please try again later or contact us.',
+                    message:
+                        'Something went wrong while creating the organization. Please try again later or contact us.',
                     statusCode: 500,
                 });
             }
@@ -241,7 +277,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             result.push(organization);
         }
 
-        if (result.some(organization => organization.meta.tags.length > 0)) {
+        if (result.some((organization) => organization.meta.tags.length > 0)) {
             try {
                 await TagHelper.updateOrganizations();
             } catch (e) {

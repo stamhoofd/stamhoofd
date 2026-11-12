@@ -7,7 +7,14 @@ import type { Organization } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemPayment, Payment, User } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PaymentType } from '@stamhoofd/structures';
+import {
+    PaymentCustomer,
+    PaymentGeneral,
+    PaymentMethod,
+    PaymentStatus,
+    Payment as PaymentStruct,
+    PaymentType,
+} from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
@@ -25,7 +32,11 @@ type ResponseBody = PaymentGeneral[];
  */
 
 export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(PaymentGeneral as Decoder<PaymentGeneral>, PaymentStruct.patchType() as Decoder<AutoEncoderPatchType<PaymentGeneral>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(
+        PaymentGeneral as Decoder<PaymentGeneral>,
+        PaymentStruct.patchType() as Decoder<AutoEncoderPatchType<PaymentGeneral>>,
+        StringDecoder,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -44,7 +55,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
         const organization = await Context.setOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -69,7 +80,13 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 continue;
             }
 
-            if (![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(put.method)) {
+            if (
+                ![
+                    PaymentMethod.Unknown,
+                    PaymentMethod.Transfer,
+                    PaymentMethod.PointOfSale,
+                ].includes(put.method)
+            ) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid payment method',
@@ -87,11 +104,14 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             payment.customer = put.customer;
             payment.adminUserId = user.id;
 
-            const payingOrganizationId = put.payingOrganizationId ?? put.payingOrganization?.id ?? null;
+            const payingOrganizationId =
+                put.payingOrganizationId ?? put.payingOrganization?.id ?? null;
 
             if (payingOrganizationId) {
                 if (Context.auth.hasSomePlatformAccess()) {
-                    if (await Context.auth.hasFullAccess(payingOrganizationId, PermissionLevel.Full)) {
+                    if (
+                        await Context.auth.hasFullAccess(payingOrganizationId, PermissionLevel.Full)
+                    ) {
                         payment.payingOrganizationId = payingOrganizationId;
                     } else {
                         // silently ignore
@@ -115,7 +135,9 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             }
 
             if (put.customer?.company) {
-                await ViesService.checkCompany(put.customer.company, null, { forceValidation: true });
+                await ViesService.checkCompany(put.customer.company, null, {
+                    forceValidation: true,
+                });
             }
             payment.type = put.type;
 
@@ -205,8 +227,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     break;
                 }
 
-                case PaymentType.Reallocation:
-                {
+                case PaymentType.Reallocation: {
                     if (totalPrice !== 0) {
                         throw new SimpleError({
                             code: 'invalid_field',
@@ -238,7 +259,12 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
 
             // Mark paid or failed
             if (put.status !== PaymentStatus.Created && put.status !== PaymentStatus.Pending) {
-                await PaymentService.handlePaymentStatusUpdate(payment, organization, put.status, put.status === PaymentStatus.Succeeded ? (put.paidAt ?? undefined) : undefined);
+                await PaymentService.handlePaymentStatusUpdate(
+                    payment,
+                    organization,
+                    put.status,
+                    put.status === PaymentStatus.Succeeded ? (put.paidAt ?? undefined) : undefined,
+                );
             } else {
                 await PaymentService.handlePaymentCreated(payment, organization);
             }
@@ -250,7 +276,10 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const patch of request.body.getPatches()) {
             await QueueHandler.schedule('payments/' + patch.id, async () => {
                 const payment = await Payment.getByID(patch.id);
-                if (!payment || !(await Context.auth.canAccessPayment(payment, PermissionLevel.Write))) {
+                if (
+                    !payment ||
+                    !(await Context.auth.canAccessPayment(payment, PermissionLevel.Write))
+                ) {
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Payment not found',
@@ -259,7 +288,13 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 }
 
                 if (patch.method || patch.paidAt !== undefined) {
-                    if (![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(payment.method)) {
+                    if (
+                        ![
+                            PaymentMethod.Unknown,
+                            PaymentMethod.Transfer,
+                            PaymentMethod.PointOfSale,
+                        ].includes(payment.method)
+                    ) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid payment method',
@@ -282,12 +317,20 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     if (patch.transferSettings.isPut()) {
                         payment.transferSettings = patch.transferSettings;
                     } else if (payment.transferSettings !== null) {
-                        payment.transferSettings = payment.transferSettings.patch(patch.transferSettings);
+                        payment.transferSettings = payment.transferSettings.patch(
+                            patch.transferSettings,
+                        );
                     }
                 }
 
                 if (patch.method) {
-                    if (![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(patch.method)) {
+                    if (
+                        ![
+                            PaymentMethod.Unknown,
+                            PaymentMethod.Transfer,
+                            PaymentMethod.PointOfSale,
+                        ].includes(patch.method)
+                    ) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid payment method',
@@ -297,8 +340,13 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     }
                     payment.method = patch.method;
 
-                    if (payment.method === PaymentMethod.Transfer && patch.transferDescription === undefined && !payment.transferDescription) {
-                        payment.transferSettings = payment.transferSettings ?? organization.meta.transferSettings;
+                    if (
+                        payment.method === PaymentMethod.Transfer &&
+                        patch.transferDescription === undefined &&
+                        !payment.transferDescription
+                    ) {
+                        payment.transferSettings =
+                            payment.transferSettings ?? organization.meta.transferSettings;
                         // TODO: fill in description!
                         payment.generateDescription(organization, '');
                     }
@@ -314,14 +362,22 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 }
 
                 if (patch.customer !== undefined) {
-                    payment.customer = patchObject(payment.customer, patch.customer, { getDefaultValue: () => PaymentCustomer.create({}) });
+                    payment.customer = patchObject(payment.customer, patch.customer, {
+                        getDefaultValue: () => PaymentCustomer.create({}),
+                    });
                 }
 
-                const payingOrganizationId = patch.payingOrganizationId ?? patch.payingOrganization?.id ?? null;
+                const payingOrganizationId =
+                    patch.payingOrganizationId ?? patch.payingOrganization?.id ?? null;
 
                 if (payingOrganizationId) {
                     if (Context.auth.hasSomePlatformAccess()) {
-                        if (await Context.auth.hasFullAccess(payingOrganizationId, PermissionLevel.Full)) {
+                        if (
+                            await Context.auth.hasFullAccess(
+                                payingOrganizationId,
+                                PermissionLevel.Full,
+                            )
+                        ) {
                             payment.payingOrganizationId = payingOrganizationId;
                         } else {
                             // silently ignore
@@ -347,23 +403,23 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 await payment.save();
 
                 if (patch.status && patch.status !== payment.status) {
-                    await PaymentService.handlePaymentStatusUpdate(payment, organization, patch.status);
+                    await PaymentService.handlePaymentStatusUpdate(
+                        payment,
+                        organization,
+                        patch.status,
+                    );
                 } else {
                     await PaymentService.handlePaymentUpdated(payment, organization);
                 }
 
-                changedPayments.push(
-                    payment,
-                );
+                changedPayments.push(payment);
             });
         }
 
         // Update balances before we return the up to date versions
         await BalanceItemService.flushCaches(organization.id);
 
-        return new Response(
-            await AuthenticatedStructures.paymentsGeneral(changedPayments, true),
-        );
+        return new Response(await AuthenticatedStructures.paymentsGeneral(changedPayments, true));
     }
 
     /**
@@ -373,7 +429,11 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
      * existing online payment that will be (partially) refunded via the payment provider. The
      * balance items of the new payment can differ from the balance items of the source payment.
      */
-    private async createOnlineRefund(organization: Organization, user: User, put: PaymentGeneral): Promise<Payment> {
+    private async createOnlineRefund(
+        organization: Organization,
+        user: User,
+        put: PaymentGeneral,
+    ): Promise<Payment> {
         if (put.type !== PaymentType.Refund) {
             throw new SimpleError({
                 code: 'invalid_field',
@@ -384,7 +444,11 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         const sourcePayment = await Payment.getByID(put.reversingPaymentId!);
-        if (!sourcePayment || sourcePayment.organizationId !== organization.id || !(await Context.auth.canAccessPayment(sourcePayment, PermissionLevel.Write))) {
+        if (
+            !sourcePayment ||
+            sourcePayment.organizationId !== organization.id ||
+            !(await Context.auth.canAccessPayment(sourcePayment, PermissionLevel.Write))
+        ) {
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Payment not found',
@@ -413,7 +477,12 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         // Check permissions
-        if (!(await Context.auth.canAccessBalanceItems([...balanceItems.keys()], PermissionLevel.Write))) {
+        if (
+            !(await Context.auth.canAccessBalanceItems(
+                [...balanceItems.keys()],
+                PermissionLevel.Write,
+            ))
+        ) {
             throw Context.auth.error($t('%Za9'));
         }
 

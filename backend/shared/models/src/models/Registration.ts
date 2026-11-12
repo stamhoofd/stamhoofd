@@ -1,7 +1,14 @@
 import type { ManyToOneRelation } from '@node/database';
 import { column } from '@node/database';
 import type { RecordAnswer } from '@stamhoofd/structures';
-import { AppliedRegistrationDiscount, GroupPrice, RecordAnswerMapDecoder, RegisterItemOption, Registration as RegistrationStructure, StockReservation } from '@stamhoofd/structures';
+import {
+    AppliedRegistrationDiscount,
+    GroupPrice,
+    RecordAnswerMapDecoder,
+    RegisterItemOption,
+    Registration as RegistrationStructure,
+    StockReservation,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder, MapDecoder, StringDecoder } from '@common/encoding';
@@ -12,7 +19,9 @@ export class Registration extends QueryableModel {
     static table = 'registrations';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -62,7 +71,8 @@ export class Registration extends QueryableModel {
     price: number | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -74,7 +84,8 @@ export class Registration extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -172,6 +183,9 @@ export class Registration extends QueryableModel {
     }
 
     shouldIncludeStock() {
-        return (this.registeredAt !== null && this.deactivatedAt === null) || (this.reservedUntil && this.reservedUntil > new Date());
+        return (
+            (this.registeredAt !== null && this.deactivatedAt === null) ||
+            (this.reservedUntil && this.reservedUntil > new Date())
+        );
     }
 }

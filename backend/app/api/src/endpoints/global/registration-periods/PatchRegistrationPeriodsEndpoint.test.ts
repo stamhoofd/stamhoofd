@@ -2,9 +2,22 @@ import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
 import { Request } from '@node/endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
-import { Group, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import {
+    Group,
+    GroupFactory,
+    MemberFactory,
+    OrganizationFactory,
+    RegistrationFactory,
+    RegistrationPeriod,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Permissions, RegistrationPeriod as RegistrationPeriodStruct, Version } from '@stamhoofd/structures';
+import {
+    Permissions,
+    RegistrationPeriod as RegistrationPeriodStruct,
+    Version,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { SessionService } from '../../../services/SessionService.js';
@@ -31,7 +44,12 @@ describe('Endpoint.PatchRegistrationPeriodsEndpoint', () => {
     });
 
     const patchPeriods = async (body: PatchableArrayAutoEncoder<RegistrationPeriodStruct>) => {
-        const request = Request.buildJson('PATCH', `/v${Version}/registration-periods`, organization.getApiHost(), body);
+        const request = Request.buildJson(
+            'PATCH',
+            `/v${Version}/registration-periods`,
+            organization.getApiHost(),
+            body,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -53,13 +71,18 @@ describe('Endpoint.PatchRegistrationPeriodsEndpoint', () => {
         const member = await new MemberFactory({ organization }).create();
         await new RegistrationFactory({ group, member }).create();
 
-        const newPeriod = RegistrationPeriodStruct.create({ startDate: new Date(), endDate: new Date(Date.now() + 1000) });
+        const newPeriod = RegistrationPeriodStruct.create({
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 1000),
+        });
         const body = new PatchableArray() as PatchableArrayAutoEncoder<RegistrationPeriodStruct>;
         body.addPut(newPeriod);
         body.addDelete(emptyPeriod.id);
         body.addDelete(period.id);
 
-        await expect(patchPeriods(body)).rejects.toThrow(STExpect.simpleError({ code: 'period_has_registrations' }));
+        await expect(patchPeriods(body)).rejects.toThrow(
+            STExpect.simpleError({ code: 'period_has_registrations' }),
+        );
 
         expect(await RegistrationPeriod.getByID(newPeriod.id)).toBeUndefined();
         expect(await RegistrationPeriod.getByID(emptyPeriod.id)).toBeDefined();
@@ -70,10 +93,17 @@ describe('Endpoint.PatchRegistrationPeriodsEndpoint', () => {
     test('Can delete a period with only unconfirmed, deactivated or deleted-group registrations', async () => {
         const period = await createPeriod();
         const group = await new GroupFactory({ organization, period }).create();
-        const cartRegistration = await new RegistrationFactory({ group, member: await new MemberFactory({ organization }).create() }).create();
+        const cartRegistration = await new RegistrationFactory({
+            group,
+            member: await new MemberFactory({ organization }).create(),
+        }).create();
         cartRegistration.registeredAt = null;
         await cartRegistration.save();
-        await new RegistrationFactory({ group, member: await new MemberFactory({ organization }).create(), deactivatedAt: new Date() }).create();
+        await new RegistrationFactory({
+            group,
+            member: await new MemberFactory({ organization }).create(),
+            deactivatedAt: new Date(),
+        }).create();
 
         const deletedGroup = await new GroupFactory({ organization, period }).create();
         const member = await new MemberFactory({ organization }).create();

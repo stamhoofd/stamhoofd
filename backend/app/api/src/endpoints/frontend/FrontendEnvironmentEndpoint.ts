@@ -1,10 +1,5 @@
-import type {
-    DecodedRequest,
-    Request } from '@node/endpoints';
-import {
-    Endpoint,
-    Response,
-} from '@node/endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { Version } from '@stamhoofd/structures';
 import type { FrontendSpecificEnvironment, SharedEnvironment } from '@stamhoofd/types/Environment';
@@ -14,12 +9,7 @@ type Query = undefined;
 type Body = undefined;
 type ResponseBody = string;
 
-export class FrontendEnvironmentEndpoint extends Endpoint<
-    Params,
-    Query,
-    Body,
-    ResponseBody
-> {
+export class FrontendEnvironmentEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
@@ -30,11 +20,7 @@ export class FrontendEnvironmentEndpoint extends Endpoint<
             return [false];
         }
 
-        const params = Endpoint.parseParameters(
-            request.url,
-            '/frontend-environment',
-            {},
-        );
+        const params = Endpoint.parseParameters(request.url, '/frontend-environment', {});
 
         if (params) {
             return [true, params as Params];

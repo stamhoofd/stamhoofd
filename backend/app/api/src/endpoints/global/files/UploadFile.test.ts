@@ -75,7 +75,14 @@ describe('Endpoint.UploadFile', () => {
      * extraFile adds a second PDF to trigger the file-count limit. These malformed
      * bodies still pass through Formidable and can create temporary files.
      */
-    const buildUploadRequest = async (data: { filename: string; contentType: string; content?: string; isPrivate?: boolean; field?: string; extraFile?: boolean }) => {
+    const buildUploadRequest = async (data: {
+        filename: string;
+        contentType: string;
+        content?: string;
+        isPrivate?: boolean;
+        field?: string;
+        extraFile?: boolean;
+    }) => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({
             organization,
@@ -85,9 +92,17 @@ describe('Endpoint.UploadFile', () => {
 
         const boundary = '--------------------------StamhoofdTest';
         const body = Buffer.concat([
-            Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${data.field ?? 'file'}"; filename="${data.filename}"\r\nContent-Type: ${data.contentType}\r\n\r\n`),
+            Buffer.from(
+                `--${boundary}\r\nContent-Disposition: form-data; name="${data.field ?? 'file'}"; filename="${data.filename}"\r\nContent-Type: ${data.contentType}\r\n\r\n`,
+            ),
             Buffer.from(data.content ?? 'Hello world'),
-            ...(data.extraFile ? [Buffer.from(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="extra"; filename="extra.pdf"\r\nContent-Type: application/pdf\r\n\r\nextra`)] : []),
+            ...(data.extraFile
+                ? [
+                      Buffer.from(
+                          `\r\n--${boundary}\r\nContent-Disposition: form-data; name="extra"; filename="extra.pdf"\r\nContent-Type: application/pdf\r\n\r\nextra`,
+                      ),
+                  ]
+                : []),
             Buffer.from(`\r\n--${boundary}--\r\n`),
         ]);
 
@@ -110,15 +125,25 @@ describe('Endpoint.UploadFile', () => {
      * Checking the real test root after rejection verifies removal of partial
      * uploads and endpoint-owned subdirectories, not merely a call to fs.rm.
      */
-    test.each([{ field: 'wrong' }, { extraFile: true }])('It removes temporary resources after rejecting %j', async (options) => {
-        const r = await buildUploadRequest({ filename: 'document.pdf', contentType: 'application/pdf', ...options });
-        await expect(testServer.test(endpoint, r)).rejects.toThrow();
-        expect(await fs.readdir(uploadDirectory)).toEqual([]);
-        expect(uploads).toHaveLength(0);
-    });
+    test.each([{ field: 'wrong' }, { extraFile: true }])(
+        'It removes temporary resources after rejecting %j',
+        async (options) => {
+            const r = await buildUploadRequest({
+                filename: 'document.pdf',
+                contentType: 'application/pdf',
+                ...options,
+            });
+            await expect(testServer.test(endpoint, r)).rejects.toThrow();
+            expect(await fs.readdir(uploadDirectory)).toEqual([]);
+            expect(uploads).toHaveLength(0);
+        },
+    );
 
     test('It stores a pdf with the reported content type, and lets the browser render it', async () => {
-        const r = await buildUploadRequest({ filename: 'Mijn document.pdf', contentType: 'application/pdf' });
+        const r = await buildUploadRequest({
+            filename: 'Mijn document.pdf',
+            contentType: 'application/pdf',
+        });
         const response = await testServer.test(endpoint, r);
 
         expect(response.body.contentType).toBe('application/pdf');
@@ -135,10 +160,15 @@ describe('Endpoint.UploadFile', () => {
     });
 
     test('It uses the extension when the uploader does not report a usable content type', async () => {
-        const r = await buildUploadRequest({ filename: 'ledenlijst.xlsx', contentType: 'application/octet-stream' });
+        const r = await buildUploadRequest({
+            filename: 'ledenlijst.xlsx',
+            contentType: 'application/octet-stream',
+        });
         const response = await testServer.test(endpoint, r);
 
-        expect(response.body.contentType).toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        expect(response.body.contentType).toBe(
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        );
         expect(uploads[0]).toMatchObject({
             ContentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             // A browser can execute an office document, so it is never rendered
@@ -147,7 +177,11 @@ describe('Endpoint.UploadFile', () => {
     });
 
     test('It ignores a content type we do not support, and uses the extension', async () => {
-        const r = await buildUploadRequest({ filename: 'document.pdf', contentType: 'text/html', content: '<script>alert(1)</script>' });
+        const r = await buildUploadRequest({
+            filename: 'document.pdf',
+            contentType: 'text/html',
+            content: '<script>alert(1)</script>',
+        });
         const response = await testServer.test(endpoint, r);
 
         // Whatever is inside the file, a browser only ever gets it as a pdf
@@ -189,32 +223,49 @@ describe('Endpoint.UploadFile', () => {
         expect(response.body.name).toBeNull();
 
         // Falls back to the id of the file, instead of storing it without a name
-        expect(response.body.path).toMatch(new RegExp('/' + response.body.id + '/' + response.body.id + '\\.pdf$'));
+        expect(response.body.path).toMatch(
+            new RegExp('/' + response.body.id + '/' + response.body.id + '\\.pdf$'),
+        );
     });
 
     test('It refuses a file with a content type browsers could execute', async () => {
-        const r = await buildUploadRequest({ filename: 'evil.html', contentType: 'text/html', content: '<script>alert(1)</script>' });
+        const r = await buildUploadRequest({
+            filename: 'evil.html',
+            contentType: 'text/html',
+            content: '<script>alert(1)</script>',
+        });
 
         await expect(testServer.test(endpoint, r)).rejects.toThrow(/unsupported file type/i);
         expect(uploads).toHaveLength(0);
     });
 
     test('It refuses an svg image', async () => {
-        const r = await buildUploadRequest({ filename: 'evil.svg', contentType: 'image/svg+xml', content: '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>' });
+        const r = await buildUploadRequest({
+            filename: 'evil.svg',
+            contentType: 'image/svg+xml',
+            content: '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
+        });
 
         await expect(testServer.test(endpoint, r)).rejects.toThrow(/unsupported file type/i);
         expect(uploads).toHaveLength(0);
     });
 
     test('It refuses a file we cannot determine a safe content type for', async () => {
-        const r = await buildUploadRequest({ filename: 'backup', contentType: 'application/octet-stream' });
+        const r = await buildUploadRequest({
+            filename: 'backup',
+            contentType: 'application/octet-stream',
+        });
 
         await expect(testServer.test(endpoint, r)).rejects.toThrow(/unsupported file type/i);
         expect(uploads).toHaveLength(0);
     });
 
     test('It stores private files as an attachment too', async () => {
-        const r = await buildUploadRequest({ filename: 'contract.pdf', contentType: 'application/pdf', isPrivate: true });
+        const r = await buildUploadRequest({
+            filename: 'contract.pdf',
+            contentType: 'application/pdf',
+            isPrivate: true,
+        });
         const response = await testServer.test(endpoint, r);
 
         expect(response.body.isPrivate).toBe(true);
@@ -226,10 +277,16 @@ describe('Endpoint.UploadFile', () => {
     });
 
     test('It cleans up the temporary file of the upload', async () => {
-        const rejected = await buildUploadRequest({ filename: 'evil.html', contentType: 'text/html' });
+        const rejected = await buildUploadRequest({
+            filename: 'evil.html',
+            contentType: 'text/html',
+        });
         await expect(testServer.test(endpoint, rejected)).rejects.toThrow(/unsupported file type/i);
 
-        const accepted = await buildUploadRequest({ filename: 'document.pdf', contentType: 'application/pdf' });
+        const accepted = await buildUploadRequest({
+            filename: 'document.pdf',
+            contentType: 'application/pdf',
+        });
         await testServer.test(endpoint, accepted);
 
         expect(temporaryFiles).toHaveLength(2);

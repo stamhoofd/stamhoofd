@@ -44,7 +44,10 @@ export class UserPermissions extends AutoEncoder {
             return null;
         }
 
-        if (globalPermissions.responsibilities.length === 0 || platform.config.canInheritPlatformResponsibilityPermissions(email)) {
+        if (
+            globalPermissions.responsibilities.length === 0 ||
+            platform.config.canInheritPlatformResponsibilityPermissions(email)
+        ) {
             return globalPermissions;
         }
 
@@ -88,17 +91,28 @@ export class UserPermissions extends AutoEncoder {
      * @param email See forPlatform
      * @param options.inheritFromPlatform Whether the permissions this user was granted at the platform level, and that apply to this organization, are included in the result. Defaults to true. Set to false to only take the permissions that were granted for this organization itself into account.
      */
-    forOrganization(organization: OrganizationForPermissionCalculation, platform: Platform, email: string | null, options?: { inheritFromPlatform?: boolean }): LoadedPermissions | null {
+    forOrganization(
+        organization: OrganizationForPermissionCalculation,
+        platform: Platform,
+        email: string | null,
+        options?: { inheritFromPlatform?: boolean },
+    ): LoadedPermissions | null {
         const base: LoadedPermissions = LoadedPermissions.create({});
 
         if (options?.inheritFromPlatform ?? true) {
             const platformPermissions = this.forPlatform(platform, email);
 
             if (platformPermissions) {
-                const tags = organization.meta.tags.length === 0 ? [PermissionsResourceKey.All] : organization.meta.tags;
+                const tags =
+                    organization.meta.tags.length === 0
+                        ? [PermissionsResourceKey.All]
+                        : organization.meta.tags;
 
                 for (const tag of tags) {
-                    const rp = platformPermissions.getMergedResourcePermissions(PermissionsResourceType.OrganizationTags, tag);
+                    const rp = platformPermissions.getMergedResourcePermissions(
+                        PermissionsResourceType.OrganizationTags,
+                        tag,
+                    );
                     if (rp) {
                         base.add(rp);
                     }
@@ -118,17 +132,29 @@ export class UserPermissions extends AutoEncoder {
         return specific;
     }
 
-    forWithoutInherit(organization: OrganizationForPermissionCalculation, platform: Platform): LoadedPermissions | null {
+    forWithoutInherit(
+        organization: OrganizationForPermissionCalculation,
+        platform: Platform,
+    ): LoadedPermissions | null {
         const permissions = this.organizationPermissions.get(organization.id) ?? null;
         if (!permissions) {
             return null;
         }
         const organizationRoles = organization?.privateMeta?.roles ?? [];
-        const inheritedResponsibilityRoles = organization?.privateMeta?.inheritedResponsibilityRoles ?? [];
-        const allResponsibilities = [...platform.config.responsibilities, ...(organization?.privateMeta?.responsibilities ?? [])];
+        const inheritedResponsibilityRoles =
+            organization?.privateMeta?.inheritedResponsibilityRoles ?? [];
+        const allResponsibilities = [
+            ...platform.config.responsibilities,
+            ...(organization?.privateMeta?.responsibilities ?? []),
+        ];
 
         // Clone all external data to avoid mutating them because of the removeAccessRights call
-        const result = LoadedPermissions.from(permissions.clone(), organizationRoles.map(r => r.clone()), inheritedResponsibilityRoles.map(r => r.clone()), allResponsibilities.map(r => r.clone()));
+        const result = LoadedPermissions.from(
+            permissions.clone(),
+            organizationRoles.map((r) => r.clone()),
+            inheritedResponsibilityRoles.map((r) => r.clone()),
+            allResponsibilities.map((r) => r.clone()),
+        );
 
         // Some access rights are not allowed to be used directly in the organization permissions
         // they can only be passed from the platform permissions towards the organization permissions as access rights for tags (e.g. review event notifications)
@@ -138,7 +164,9 @@ export class UserPermissions extends AutoEncoder {
         return result;
     }
 
-    convertPlatformPatch(patch: AutoEncoderPatchType<Permissions> | null): AutoEncoderPatchType<UserPermissions> {
+    convertPlatformPatch(
+        patch: AutoEncoderPatchType<Permissions> | null,
+    ): AutoEncoderPatchType<UserPermissions> {
         if (!this.globalPermissions) {
             const clonedPatch = UserPermissions.patch({
                 globalPermissions: patch === null ? null : Permissions.create({}).patch(patch),
@@ -150,7 +178,10 @@ export class UserPermissions extends AutoEncoder {
         });
     }
 
-    convertPatch(patch: AutoEncoderPatchType<Permissions> | null, organizationId: string): AutoEncoderPatchType<UserPermissions> {
+    convertPatch(
+        patch: AutoEncoderPatchType<Permissions> | null,
+        organizationId: string,
+    ): AutoEncoderPatchType<UserPermissions> {
         if (!this.organizationPermissions.get(organizationId)) {
             const clonedPatch = UserPermissions.patch({});
             const p = patch === null ? null : Permissions.create({}).patch(patch);
@@ -178,7 +209,11 @@ export class UserPermissions extends AutoEncoder {
         return this.globalPermissions === null && this.organizationPermissions.size === 0;
     }
 
-    static limitedPatch(old: UserPermissions | null, patch: UserPermissions | AutoEncoderPatchType<UserPermissions> | null, organizationId: string): UserPermissions | null {
+    static limitedPatch(
+        old: UserPermissions | null,
+        patch: UserPermissions | AutoEncoderPatchType<UserPermissions> | null,
+        organizationId: string,
+    ): UserPermissions | null {
         if (patch === null) {
             return old;
         }
@@ -187,9 +222,14 @@ export class UserPermissions extends AutoEncoder {
             // Only allow to set the permissions for the organization in scope
             if (patch.organizationPermissions.get(organizationId) !== undefined) {
                 const clonedPatch = UserPermissions.patch({});
-                clonedPatch.organizationPermissions.set(organizationId, patch.organizationPermissions.get(organizationId));
+                clonedPatch.organizationPermissions.set(
+                    organizationId,
+                    patch.organizationPermissions.get(organizationId),
+                );
 
-                const updated = old ? old.patch(clonedPatch) : UserPermissions.create({}).patch(clonedPatch);
+                const updated = old
+                    ? old.patch(clonedPatch)
+                    : UserPermissions.create({}).patch(clonedPatch);
 
                 // Maintain responsibilities (not editable with a limited patch)
                 const n = updated.organizationPermissions.get(organizationId);
@@ -215,8 +255,13 @@ export class UserPermissions extends AutoEncoder {
             // Only allow to set the permissions for the organization in scope
             if (patch.organizationPermissions.get(organizationId) !== undefined) {
                 const clonedPatch = UserPermissions.patch({});
-                clonedPatch.organizationPermissions.set(organizationId, patch.organizationPermissions.get(organizationId));
-                const updated = old ? old.patch(clonedPatch) : UserPermissions.create({}).patch(clonedPatch);
+                clonedPatch.organizationPermissions.set(
+                    organizationId,
+                    patch.organizationPermissions.get(organizationId),
+                );
+                const updated = old
+                    ? old.patch(clonedPatch)
+                    : UserPermissions.create({}).patch(clonedPatch);
 
                 // Maintain responsibilities (not editable with a limited patch)
                 const n = updated.organizationPermissions.get(organizationId);
@@ -243,7 +288,11 @@ export class UserPermissions extends AutoEncoder {
         return old;
     }
 
-    static limitedAdd(old: UserPermissions | null, add: UserPermissions, organizationId: string): UserPermissions | null {
+    static limitedAdd(
+        old: UserPermissions | null,
+        add: UserPermissions,
+        organizationId: string,
+    ): UserPermissions | null {
         if (add.organizationPermissions.get(organizationId)) {
             const cloned = old ? old.clone() : UserPermissions.create({});
             const realAdd = add.organizationPermissions.get(organizationId) as Permissions;

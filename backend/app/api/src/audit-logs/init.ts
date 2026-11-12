@@ -29,7 +29,10 @@ modelLogDefinitions.set(PlatformLogger.model, PlatformLogger);
 modelLogDefinitions.set(EventLogger.model, EventLogger);
 modelLogDefinitions.set(EventNotificationLogger.model, EventNotificationLogger);
 modelLogDefinitions.set(RegistrationPeriodLogger.model, RegistrationPeriodLogger);
-modelLogDefinitions.set(OrganizationRegistrationPeriodLogger.model, OrganizationRegistrationPeriodLogger);
+modelLogDefinitions.set(
+    OrganizationRegistrationPeriodLogger.model,
+    OrganizationRegistrationPeriodLogger,
+);
 modelLogDefinitions.set(StripeAccountLogger.model, StripeAccountLogger);
 modelLogDefinitions.set(MemberLogger.model, MemberLogger);
 modelLogDefinitions.set(WebshopLogger.model, WebshopLogger);

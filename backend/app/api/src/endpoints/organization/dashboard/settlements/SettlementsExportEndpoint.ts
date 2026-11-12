@@ -59,13 +59,14 @@ export class SettlementsExportEndpoint extends Endpoint<Params, Query, Body, Res
         const organization = await Context.setOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (!await Context.auth.canManageFinances(organization.id)) {
+        if (!(await Context.auth.canManageFinances(organization.id))) {
             throw Context.auth.error();
         }
 
         const platform = await Platform.getSharedStruct();
-        const enabled = platform.config.featureFlags.includes('settlements')
-            || organization.privateMeta.featureFlags.includes('settlements');
+        const enabled =
+            platform.config.featureFlags.includes('settlements') ||
+            organization.privateMeta.featureFlags.includes('settlements');
 
         if (!enabled) {
             throw new SimpleError({
@@ -100,7 +101,9 @@ export class SettlementsExportEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         // The membership organization sells the platform's fee invoices
-        const membershipOrganization = platform.membershipOrganizationId ? await Organization.getByID(platform.membershipOrganizationId) : null;
+        const membershipOrganization = platform.membershipOrganizationId
+            ? await Organization.getByID(platform.membershipOrganizationId)
+            : null;
         if (!membershipOrganization) {
             throw new SimpleError({
                 code: 'missing_membership_organization',
@@ -134,7 +137,12 @@ export class SettlementsExportEndpoint extends Endpoint<Params, Query, Body, Res
                 from: Email.getWebmasterFromEmail(),
                 to: [{ email: user.email, name: user.name }],
                 subject: 'Uitbetalingen export mislukt',
-                text: 'Het maken van de export van ' + Formatter.dateTime(start) + ' tot ' + Formatter.dateTime(end) + ' is mislukt. Probeer een kortere periode of neem contact op.\n',
+                text:
+                    'Het maken van de export van ' +
+                    Formatter.dateTime(start) +
+                    ' tot ' +
+                    Formatter.dateTime(end) +
+                    ' is mislukt. Probeer een kortere periode of neem contact op.\n',
                 type: 'transactional',
             });
         });

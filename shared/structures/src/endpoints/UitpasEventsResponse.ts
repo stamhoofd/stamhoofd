@@ -1,4 +1,11 @@
-import { AutoEncoder, StringDecoder, field, IntegerDecoder, ArrayDecoder, DateDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    StringDecoder,
+    field,
+    IntegerDecoder,
+    ArrayDecoder,
+    DateDecoder,
+} from '@common/encoding';
 
 export class UitpasEventResponse extends AutoEncoder {
     @field({ decoder: StringDecoder })

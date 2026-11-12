@@ -10,10 +10,13 @@ export default class CompletionEnvironments extends Command {
 
     async run(): Promise<void> {
         const { args } = await this.parse(CompletionEnvironments);
-        const provider = await getOptionalDocsPublishingProvider(path.join(getProjectPath(), 'devops'));
+        const provider = await getOptionalDocsPublishingProvider(
+            path.join(getProjectPath(), 'devops'),
+        );
         if (!provider) return;
         for (const { value } of await provider.listEnvironments()) {
-            if (/^[a-z][a-z0-9-]*$/.test(value) && value.startsWith(args.prefix ?? '')) this.log(value);
+            if (/^[a-z][a-z0-9-]*$/.test(value) && value.startsWith(args.prefix ?? ''))
+                this.log(value);
         }
     }
 }

@@ -1,7 +1,13 @@
 import { Database } from '@node/database';
 import { I18n } from '@stamhoofd/backend-i18n';
 import type { NormalizedSQLQuery, SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, compileToSQLFilter, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';
+import {
+    baseSQLFilterCompilers,
+    compileToSQLFilter,
+    createColumnFilter,
+    SQL,
+    SQLValueType,
+} from '@stamhoofd/sql';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
@@ -13,11 +19,14 @@ type Row = { settings: { name: TranslatedStringValue } };
 
 const filters: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    ['settings:name', createColumnFilter({
-        expression: new SQLTranslatedString(SQL.column('settings'), '$.name'),
-        type: SQLValueType.String,
-        nullable: true,
-    })],
+    [
+        'settings:name',
+        createColumnFilter({
+            expression: new SQLTranslatedString(SQL.column('settings'), '$.name'),
+            type: SQLValueType.String,
+            nullable: true,
+        }),
+    ],
 ]);
 
 /**
@@ -25,21 +34,42 @@ const filters: SQLFilterDefinitions = new Map([
  * `doMatch` filter returns all rows and every `doNotMatch` filter returns none, with `$getLanguage()`
  * resolving to `language`. Snapshots the queries.
  */
-async function testMatch({ language, rows, doMatch = [], doNotMatch = [] }: { language: Language; rows: Row[]; doMatch?: StamhoofdFilter[]; doNotMatch?: StamhoofdFilter[] }) {
+async function testMatch({
+    language,
+    rows,
+    doMatch = [],
+    doNotMatch = [],
+}: {
+    language: Language;
+    rows: Row[];
+    doMatch?: StamhoofdFilter[];
+    doNotMatch?: StamhoofdFilter[];
+}) {
     const tableName = 'test_translated_string_' + Math.random().toString(36).substring(2, 15);
-    await Database.statement(`CREATE TABLE \`${tableName}\` (\`settings\` json) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;`);
+    await Database.statement(
+        `CREATE TABLE \`${tableName}\` (\`settings\` json) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;`,
+    );
 
     try {
         for (const row of rows) {
-            await Database.insert('INSERT INTO `' + tableName + '` SET ?', [{ settings: JSON.stringify(row.settings) }]);
+            await Database.insert('INSERT INTO `' + tableName + '` SET ?', [
+                { settings: JSON.stringify(row.settings) },
+            ]);
         }
 
         await I18n.runWithLocale(new I18n(language, Country.Belgium), async () => {
-            for (const [filterList, expectedCount, label] of [[doMatch, rows.length, 'filter'], [doNotMatch, 0, 'not match filter']] as const) {
+            for (const [filterList, expectedCount, label] of [
+                [doMatch, rows.length, 'filter'],
+                [doNotMatch, 0, 'not match filter'],
+            ] as const) {
                 for (const filter of filterList) {
-                    const select = SQL.select().from(tableName).where(await compileToSQLFilter(filter, filters));
+                    const select = SQL.select()
+                        .from(tableName)
+                        .where(await compileToSQLFilter(filter, filters));
                     const results = await select.fetch();
-                    expect(results, `${label} ${JSON.stringify(filter)}`).toHaveLength(expectedCount);
+                    expect(results, `${label} ${JSON.stringify(filter)}`).toHaveLength(
+                        expectedCount,
+                    );
 
                     const query = select.getSQL() as NormalizedSQLQuery;
                     expect({
@@ -57,7 +87,9 @@ async function testMatch({ language, rows, doMatch = [], doNotMatch = [] }: { la
 describe('SQLTranslatedString', () => {
     beforeEach(() => {
         // The test env has no locales configured, and I18n coerces the language to one that is valid for the country
-        TestUtils.setEnvironment('locales', { [Country.Belgium]: [Language.Dutch, Language.English, Language.French] });
+        TestUtils.setEnvironment('locales', {
+            [Country.Belgium]: [Language.Dutch, Language.English, Language.French],
+        });
     });
 
     it('Comparing string values is case insensitive', async () => {
@@ -74,10 +106,7 @@ describe('SQLTranslatedString', () => {
                 { 'settings:name': 'ALICE' },
                 { 'settings:name': 'alICe' },
             ],
-            doNotMatch: [
-                { 'settings:name': 'b' },
-                { 'settings:name': 'alic' },
-            ],
+            doNotMatch: [{ 'settings:name': 'b' }, { 'settings:name': 'alic' }],
         });
     });
 
@@ -96,10 +125,7 @@ describe('SQLTranslatedString', () => {
                 { 'settings:name': 'ALICE' },
                 { 'settings:name': 'alICe' },
             ],
-            doNotMatch: [
-                { 'settings:name': 'b' },
-                { 'settings:name': 'alic' },
-            ],
+            doNotMatch: [{ 'settings:name': 'b' }, { 'settings:name': 'alic' }],
         });
     });
 
@@ -206,13 +232,8 @@ describe('SQLTranslatedString', () => {
     it('Empty json value should not match filter', async () => {
         await testMatch({
             language: Language.Dutch,
-            rows: [
-                { settings: { name: {} } },
-            ],
-            doNotMatch: [
-                { 'settings:name': '' },
-                { 'settings:name': 'test' },
-            ],
+            rows: [{ settings: { name: {} } }],
+            doNotMatch: [{ 'settings:name': '' }, { 'settings:name': 'test' }],
         });
     });
 });

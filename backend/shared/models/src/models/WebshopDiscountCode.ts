@@ -9,7 +9,9 @@ export class WebshopDiscountCode extends QueryableModel {
 
     // Columns
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -44,7 +46,8 @@ export class WebshopDiscountCode extends QueryableModel {
     maximumUsage: number | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -56,7 +59,8 @@ export class WebshopDiscountCode extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -87,7 +91,7 @@ export class WebshopDiscountCode extends QueryableModel {
         });
 
         // Remove used discount codes
-        models = models.filter(c => c.maximumUsage === null || c.maximumUsage > c.usageCount);
+        models = models.filter((c) => c.maximumUsage === null || c.maximumUsage > c.usageCount);
         return models;
     }
 }

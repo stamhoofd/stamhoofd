@@ -40,7 +40,9 @@ export class EmailVerificationCode extends QueryableModel {
     static table = 'email_verification_codes';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -90,7 +92,8 @@ export class EmailVerificationCode extends QueryableModel {
      * createdAt behaves more like createdAt for verificationCode. Since every save is considered to have a new verificationCode
      */
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -102,7 +105,9 @@ export class EmailVerificationCode extends QueryableModel {
     static MAX_TRIES = 9; // minus 0..MAX_TRIES_VARY
 
     async generateCode() {
-        this.code = ((await randomInt(Math.pow(10, EmailVerificationCode.CODE_LENGTH))) + '').padStart(EmailVerificationCode.CODE_LENGTH, '0');
+        this.code = (
+            (await randomInt(Math.pow(10, EmailVerificationCode.CODE_LENGTH))) + ''
+        ).padStart(EmailVerificationCode.CODE_LENGTH, '0');
         this.token = bs58.encode(await randomBytes(100)).toLowerCase();
 
         // Increase generatedCount if we changed the code
@@ -122,13 +127,16 @@ export class EmailVerificationCode extends QueryableModel {
      * Return true if this token is still valid (used for automatic polling in code view)
      */
     static async poll(organizationId: string | null, token: string): Promise<boolean> {
-        const verificationCodes = await this.where({
-            token,
-            organizationId: {
-                sign: 'IN',
-                value: [organizationId, null],
+        const verificationCodes = await this.where(
+            {
+                token,
+                organizationId: {
+                    sign: 'IN',
+                    value: [organizationId, null],
+                },
             },
-        }, { limit: 1 });
+            { limit: 1 },
+        );
 
         if (verificationCodes.length == 0) {
             return false; // = expired or invalid
@@ -163,18 +171,25 @@ export class EmailVerificationCode extends QueryableModel {
      * Error => token okay, but too many attempts checking the code
      *
      */
-    static async verify(organizationId: string | null, token: string, code: string): Promise<EmailVerificationCode | undefined> {
+    static async verify(
+        organizationId: string | null,
+        token: string,
+        code: string,
+    ): Promise<EmailVerificationCode | undefined> {
         if (code.length !== EmailVerificationCode.CODE_LENGTH) {
             return;
         }
 
-        const verificationCodes = await this.where({
-            token,
-            organizationId: {
-                sign: 'IN',
-                value: [organizationId, null],
+        const verificationCodes = await this.where(
+            {
+                token,
+                organizationId: {
+                    sign: 'IN',
+                    value: [organizationId, null],
+                },
             },
-        }, { limit: 1 });
+            { limit: 1 },
+        );
 
         if (verificationCodes.length == 0) {
             return; // = expired or invalid
@@ -222,7 +237,11 @@ export class EmailVerificationCode extends QueryableModel {
         }
         verificationCode.tries++;
 
-        if (verificationCode.code === code || (code === '111111' && (STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'test'))) {
+        if (
+            verificationCode.code === code ||
+            (code === '111111' &&
+                (STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'test'))
+        ) {
             // Delete all remaining information!
             // To avoid leaving information about the existince of this user (tries)
             await verificationCode.delete();
@@ -244,8 +263,14 @@ export class EmailVerificationCode extends QueryableModel {
     /**
      * Behaves like a real code for the requester (including reuse on repeated requests), but is not linked to a user, so it can never be redeemed.
      */
-    static async createDecoy(organizationId: string | null, email: string): Promise<EmailVerificationCode> {
-        const verificationCodes = await this.where({ userId: null, organizationId, email }, { limit: 1 });
+    static async createDecoy(
+        organizationId: string | null,
+        email: string,
+    ): Promise<EmailVerificationCode> {
+        const verificationCodes = await this.where(
+            { userId: null, organizationId, email },
+            { limit: 1 },
+        );
         return await this.createOrReuse(verificationCodes[0], organizationId, null, email);
     }
 
@@ -266,7 +291,12 @@ export class EmailVerificationCode extends QueryableModel {
         return await this.createOrReuse(verificationCodes[0], user.organizationId, user.id, email);
     }
 
-    private static async createOrReuse(existing: EmailVerificationCode | undefined, organizationId: string | null, userId: string | null, email: string): Promise<EmailVerificationCode> {
+    private static async createOrReuse(
+        existing: EmailVerificationCode | undefined,
+        organizationId: string | null,
+        userId: string | null,
+        email: string,
+    ): Promise<EmailVerificationCode> {
         let verificationCode: EmailVerificationCode;
         if (!existing) {
             verificationCode = new EmailVerificationCode();
@@ -281,7 +311,11 @@ export class EmailVerificationCode extends QueryableModel {
         } else {
             verificationCode = existing;
 
-            if (verificationCode.email !== email || verificationCode.expiresAt < new Date(new Date().getTime() - 15 * 60 * 1000) || verificationCode.tries >= EmailVerificationCode.MAX_TRIES) {
+            if (
+                verificationCode.email !== email ||
+                verificationCode.expiresAt < new Date(new Date().getTime() - 15 * 60 * 1000) ||
+                verificationCode.tries >= EmailVerificationCode.MAX_TRIES
+            ) {
                 // Expired: also update the token
                 await verificationCode.generateCode();
             }

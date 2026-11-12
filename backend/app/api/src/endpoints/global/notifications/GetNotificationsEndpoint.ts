@@ -7,12 +7,19 @@ import { Notification } from '@stamhoofd/models/models/Notification.js';
 import { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
 import { SQL, SQLSelect, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PaginatedResponse, SortItemDirection } from '@stamhoofd/structures';
+import {
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    SortItemDirection,
+} from '@stamhoofd/structures';
 import type { UserNotification } from '@stamhoofd/structures/notifications/UserNotification.js';
 
 import { Context } from '../../../helpers/Context.js';
 import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper.js';
-import { notificationFilterCompilers, notificationJoin } from '../../../sql-filters/notifications.js';
+import {
+    notificationFilterCompilers,
+    notificationJoin,
+} from '../../../sql-filters/notifications.js';
 import { notificationSorters } from '../../../sql-sorters/notifications.js';
 
 type Params = Record<string, never>;
@@ -47,21 +54,31 @@ export class GetNotificationsEndpoint extends Endpoint<Params, Query, Body, Resp
             const notification = Notification.fromRow(row[Notification.table]);
 
             if (!recipient || !notification) {
-                console.error('Could not transform row', row, 'into notification models, check if the primary keys are returned in the query');
+                console.error(
+                    'Could not transform row',
+                    row,
+                    'into notification models, check if the primary keys are returned in the query',
+                );
                 throw new Error('Missing data for notification');
             }
 
             return Object.assign(recipient, { notification });
         };
 
-        return new SQLSelect(transformer, SQL.wildcard(NotificationRecipient.table), SQL.wildcard(Notification.table))
+        return new SQLSelect(
+            transformer,
+            SQL.wildcard(NotificationRecipient.table),
+            SQL.wildcard(Notification.table),
+        )
             .from(SQL.table(NotificationRecipient.table))
             .join(notificationJoin);
     }
 
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
-        const query = this.selectRecipientsWithNotification()
-            .where(SQL.column(NotificationRecipient.table, 'userId'), Context.impersonatedUserOrUser.id);
+        const query = this.selectRecipientsWithNotification().where(
+            SQL.column(NotificationRecipient.table, 'userId'),
+            Context.impersonatedUserOrUser.id,
+        );
 
         if (q.filter) {
             query.where(await compileToSQLFilter(q.filter, notificationFilterCompilers));
@@ -91,7 +108,9 @@ export class GetNotificationsEndpoint extends Endpoint<Params, Query, Body, Resp
     /**
      * Only the (indexed) newest-first order is supported
      */
-    private static assertSort(sort: LimitedFilteredRequest['sort']): LimitedFilteredRequest['sort'] {
+    private static assertSort(
+        sort: LimitedFilteredRequest['sort'],
+    ): LimitedFilteredRequest['sort'] {
         const allowed = [{ key: 'id', order: SortItemDirection.DESC }];
 
         if (sort.length === 0) {
@@ -120,7 +139,7 @@ export class GetNotificationsEndpoint extends Endpoint<Params, Query, Body, Resp
         });
 
         return new PaginatedResponse<UserNotification[], LimitedFilteredRequest>({
-            results: results.map(r => r.getStructure(r.notification)),
+            results: results.map((r) => r.getStructure(r.notification)),
             next,
         });
     }
@@ -131,8 +150,6 @@ export class GetNotificationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
         LimitedFilteredRequestHelper.throwIfInvalidLimit({ request: request.query, maxLimit: 100 });
 
-        return new Response(
-            await GetNotificationsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetNotificationsEndpoint.buildData(request.query));
     }
 }

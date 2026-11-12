@@ -15,7 +15,9 @@ export class DeactivatePackageEndpoint extends Endpoint<Params, Query, Body, Res
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/billing/deactivate-package/@id', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/billing/deactivate-package/@id', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -28,13 +30,13 @@ export class DeactivatePackageEndpoint extends Endpoint<Params, Query, Body, Res
         await Context.authenticate();
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!await Context.auth.canDeactivatePackages(organization.id)) {
+        if (!(await Context.auth.canDeactivatePackages(organization.id))) {
             throw Context.auth.error();
         }
 
         const packages = await STPackageService.getActivePackages(organization.id);
 
-        const pack = packages.find(p => p.id === request.params.id);
+        const pack = packages.find((p) => p.id === request.params.id);
         if (!pack) {
             throw new SimpleError({
                 code: 'not_found',

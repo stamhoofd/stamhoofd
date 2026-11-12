@@ -23,7 +23,7 @@ async function run(command: string) {
 async function calls(): Promise<string[][]> {
     try {
         const content = (await readFile(path.join(directory, 'calls'), 'utf8')).trim();
-        return content ? content.split('\n').map(line => JSON.parse(line)) : [];
+        return content ? content.split('\n').map((line) => JSON.parse(line)) : [];
     } catch (error) {
         if (error.code === 'ENOENT') {
             return [];
@@ -43,7 +43,9 @@ describe('CI MySQL bootstrap', () => {
             CI_MYSQL_IMAGE: image,
             GITHUB_STEP_SUMMARY: path.join(directory, 'summary'),
         };
-        await writeFile(path.join(directory, 'docker'), `#!/usr/bin/env node
+        await writeFile(
+            path.join(directory, 'docker'),
+            `#!/usr/bin/env node
 const fs = require('node:fs');
 const path = require('node:path');
 const args = process.argv.slice(2);
@@ -68,7 +70,9 @@ if (args[0] === 'exec' && !fs.existsSync(file('queried'))) {
     fs.writeFileSync(file('queried'), '');
     process.exit(1);
 }
-`, { mode: 0o755 });
+`,
+            { mode: 0o755 },
+        );
     });
 
     afterEach(async () => {
@@ -85,8 +89,10 @@ if (args[0] === 'exec' && !fs.existsSync(file('queried'))) {
     it('returns before provisioning finishes and waits for an authenticated TCP query', async () => {
         env.TEST_MYSQL_MODE = 'slow-pull';
         expect((await run('start')).stdout).toContain('provisioning in the background');
-        await expect.poll(async () => (await calls()).some(args => args[0] === 'pull')).toBe(true);
-        expect((await calls()).some(args => args[0] === 'run')).toBe(false);
+        await expect
+            .poll(async () => (await calls()).some((args) => args[0] === 'pull'))
+            .toBe(true);
+        expect((await calls()).some((args) => args[0] === 'run')).toBe(false);
 
         await writeFile(path.join(directory, 'release'), '');
         const result = await run('wait');
@@ -94,33 +100,70 @@ if (args[0] === 'exec' && !fs.existsSync(file('queried'))) {
         expect(await readFile(env.GITHUB_STEP_SUMMARY!, 'utf8')).toContain('MySQL provisioning:');
         const commands = await calls();
         expect(commands[0]).toEqual(['pull', image]);
-        expect(commands.find(args => args[0] === 'run')).toEqual([
-            'run', '-d', '--name', 'stamhoofd-ci-mysql',
-            '-e', 'MYSQL_ROOT_PASSWORD=root', '-e', 'MYSQL_DATABASE=stamhoofd-tests',
-            '-p', '127.0.0.1:3306:3306', image,
+        expect(commands.find((args) => args[0] === 'run')).toEqual([
+            'run',
+            '-d',
+            '--name',
+            'stamhoofd-ci-mysql',
+            '-e',
+            'MYSQL_ROOT_PASSWORD=root',
+            '-e',
+            'MYSQL_DATABASE=stamhoofd-tests',
+            '-p',
+            '127.0.0.1:3306:3306',
+            image,
         ]);
-        expect(commands.filter(args => args[0] === 'exec')).toEqual(Array(2).fill([
-            'exec', 'stamhoofd-ci-mysql', 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'SELECT 1',
-        ]));
-        expect(JSON.parse(await readFile(path.join(directory, 'stamhoofd-ci-mysql/status.json'), 'utf8')).ready).toBe(true);
+        expect(commands.filter((args) => args[0] === 'exec')).toEqual(
+            Array(2).fill([
+                'exec',
+                'stamhoofd-ci-mysql',
+                'mysql',
+                '-h127.0.0.1',
+                '-uroot',
+                '-proot',
+                '-e',
+                'SELECT 1',
+            ]),
+        );
+        expect(
+            JSON.parse(
+                await readFile(path.join(directory, 'stamhoofd-ci-mysql/status.json'), 'utf8'),
+            ).ready,
+        ).toBe(true);
     });
 
-    it.each(['fail-pull', 'fail-run'])('propagates %s failures and retains diagnostics', async (mode) => {
-        env.TEST_MYSQL_MODE = mode;
-        await run('start');
-        await expect(run('wait')).rejects.toThrow('MySQL provisioning failed');
-        const log = await readFile(path.join(directory, 'stamhoofd-ci-mysql/startup.log'), 'utf8');
-        expect(log).toContain(mode === 'fail-pull' ? 'Registry unavailable' : 'Container creation failed');
-    });
+    it.each(['fail-pull', 'fail-run'])(
+        'propagates %s failures and retains diagnostics',
+        async (mode) => {
+            env.TEST_MYSQL_MODE = mode;
+            await run('start');
+            await expect(run('wait')).rejects.toThrow('MySQL provisioning failed');
+            const log = await readFile(
+                path.join(directory, 'stamhoofd-ci-mysql/startup.log'),
+                'utf8',
+            );
+            expect(log).toContain(
+                mode === 'fail-pull' ? 'Registry unavailable' : 'Container creation failed',
+            );
+        },
+    );
 
     it('launches before dependency setup and relies on hosted runner teardown', async () => {
         const workflow = await readFile(new URL('.github/workflows/ci.yml', root), 'utf8');
-        const job = workflow.split('    job_test_playwright_shards:')[1].split('    job_test_playwright:')[0];
+        const job = workflow
+            .split('    job_test_playwright_shards:')[1]
+            .split('    job_test_playwright:')[0];
         expect(job).not.toContain('        services:');
         expect(job).toContain('runs-on: ubuntu-latest');
-        expect(job.indexOf('ci-mysql.mjs start')).toBeLessThan(job.indexOf('uses: ./.github/actions/setup'));
-        expect(job.indexOf('name: Compile API test helpers')).toBeLessThan(job.indexOf('ci-mysql.mjs wait'));
-        expect(job.indexOf('ci-mysql.mjs wait')).toBeLessThan(job.indexOf('name: Run Playwright tests'));
+        expect(job.indexOf('ci-mysql.mjs start')).toBeLessThan(
+            job.indexOf('uses: ./.github/actions/setup'),
+        );
+        expect(job.indexOf('name: Compile API test helpers')).toBeLessThan(
+            job.indexOf('ci-mysql.mjs wait'),
+        );
+        expect(job.indexOf('ci-mysql.mjs wait')).toBeLessThan(
+            job.indexOf('name: Run Playwright tests'),
+        );
         expect(job).not.toContain('ci-mysql.mjs stop');
     });
 });

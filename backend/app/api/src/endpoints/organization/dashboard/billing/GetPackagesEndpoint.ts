@@ -36,14 +36,18 @@ export class GetPackagesEndpoint extends Endpoint<Params, Query, Body, ResponseB
         await Context.authenticate();
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!await Context.auth.canManageFinances(organization.id)) {
+        if (!(await Context.auth.canManageFinances(organization.id))) {
             throw Context.auth.error();
         }
 
-        const packages = query.includeExpired ? await STPackageService.getValidPackagesWithExpired(organization.id) : await STPackageService.getActivePackages(organization.id);
+        const packages = query.includeExpired
+            ? await STPackageService.getValidPackagesWithExpired(organization.id)
+            : await STPackageService.getActivePackages(organization.id);
 
-        return new Response(OrganizationPackagesStatus.create({
-            packages: packages.map(p => STPackageStruct.create(p)),
-        }));
+        return new Response(
+            OrganizationPackagesStatus.create({
+                packages: packages.map((p) => STPackageStruct.create(p)),
+            }),
+        );
     }
 }

@@ -45,7 +45,8 @@ describe('AuditLogService', () => {
             },
         });
 
-        expect(() => AuditLogService.validateAuditLogEnumTranslations())
-            .toThrow('Missing audit log enum translation registration for: UnregisteredAuditLogModel.status');
+        expect(() => AuditLogService.validateAuditLogEnumTranslations()).toThrow(
+            'Missing audit log enum translation registration for: UnregisteredAuditLogModel.status',
+        );
     });
 });

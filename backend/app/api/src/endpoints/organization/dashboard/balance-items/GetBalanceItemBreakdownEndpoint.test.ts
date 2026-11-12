@@ -1,12 +1,47 @@
 import { Request } from '@node/endpoints';
 import type { BalanceItem, Organization, User } from '@stamhoofd/models';
-import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    BalanceItemPayment,
+    OrderFactory,
+    OrganizationFactory,
+    Payment,
+    Token,
+    UserFactory,
+    WebshopFactory,
+} from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, Cart, CartItem, CartItemOption, CartItemPrice, Customer, Option, OptionMenu, OrderData, PaymentMethod, PaymentProvider, PaymentStatus, Permissions, Product, ProductPrice, SettlementReference, TranslatedString } from '@stamhoofd/structures';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    Cart,
+    CartItem,
+    CartItemOption,
+    CartItemPrice,
+    Customer,
+    Option,
+    OptionMenu,
+    OrderData,
+    PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+    Permissions,
+    Product,
+    ProductPrice,
+    SettlementReference,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
 import type { BalanceItemBreakdown } from '@stamhoofd/structures/PaymentBreakdown.js';
-import { BreakdownAmountType, BreakdownObjectType, BreakdownPathItem, BreakdownTab } from '@stamhoofd/structures/PaymentBreakdown.js';
+import {
+    BreakdownAmountType,
+    BreakdownObjectType,
+    BreakdownPathItem,
+    BreakdownTab,
+} from '@stamhoofd/structures/PaymentBreakdown.js';
 import { exportSlice } from '../../../../../tests/helpers/ExportSlice.js';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetBalanceItemBreakdownEndpoint } from './GetBalanceItemBreakdownEndpoint.js';
@@ -16,7 +51,17 @@ import { SessionService } from '../../../../services/SessionService.js';
 describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
     const endpoint = new GetBalanceItemBreakdownEndpoint();
 
-    const getBreakdown = async ({ filter, path, organization, user }: { filter?: StamhoofdFilter; path?: BreakdownPathItem[]; organization: Organization; user: User }) => {
+    const getBreakdown = async ({
+        filter,
+        path,
+        organization,
+        user,
+    }: {
+        filter?: StamhoofdFilter;
+        path?: BreakdownPathItem[];
+        organization: Organization;
+        user: User;
+    }) => {
         const token = await SessionService.createSession(user);
 
         const request = Request.get({
@@ -38,15 +83,36 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         }).create();
     };
 
-    const createItem = async (organization: Organization, options: { price: number; quantity?: number; groupId: string; groupName: string; priceName?: string; status?: BalanceItemStatus; pricePaid?: number; pricePending?: number }) => {
+    const createItem = async (
+        organization: Organization,
+        options: {
+            price: number;
+            quantity?: number;
+            groupId: string;
+            groupName: string;
+            priceName?: string;
+            status?: BalanceItemStatus;
+            pricePaid?: number;
+            pricePending?: number;
+        },
+    ) => {
         const relations = new Map([
-            [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: options.groupId, name: new TranslatedString(options.groupName) })],
+            [
+                BalanceItemRelationType.Group,
+                BalanceItemRelation.create({
+                    id: options.groupId,
+                    name: new TranslatedString(options.groupName),
+                }),
+            ],
         ]);
 
         if (options.priceName) {
             relations.set(
                 BalanceItemRelationType.GroupPrice,
-                BalanceItemRelation.create({ id: 'price-' + options.priceName, name: new TranslatedString(options.priceName) }),
+                BalanceItemRelation.create({
+                    id: 'price-' + options.priceName,
+                    name: new TranslatedString(options.priceName),
+                }),
             );
         }
 
@@ -66,10 +132,31 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await createFinanceUser(organization);
 
-        await createItem(organization, { price: 40_00, groupId: 'group-a', groupName: 'Kapoenen', priceName: 'Standaardtarief', pricePaid: 40_00 });
-        await createItem(organization, { price: 40_00, groupId: 'group-a', groupName: 'Kapoenen', priceName: 'Standaardtarief' });
-        await createItem(organization, { price: 20_00, groupId: 'group-a', groupName: 'Kapoenen', priceName: 'Verminderd tarief' });
-        await createItem(organization, { price: 25_00, groupId: 'group-b', groupName: 'Welpen', priceName: 'Standaardtarief' });
+        await createItem(organization, {
+            price: 40_00,
+            groupId: 'group-a',
+            groupName: 'Kapoenen',
+            priceName: 'Standaardtarief',
+            pricePaid: 40_00,
+        });
+        await createItem(organization, {
+            price: 40_00,
+            groupId: 'group-a',
+            groupName: 'Kapoenen',
+            priceName: 'Standaardtarief',
+        });
+        await createItem(organization, {
+            price: 20_00,
+            groupId: 'group-a',
+            groupName: 'Kapoenen',
+            priceName: 'Verminderd tarief',
+        });
+        await createItem(organization, {
+            price: 25_00,
+            groupId: 'group-b',
+            groupName: 'Welpen',
+            priceName: 'Standaardtarief',
+        });
 
         const response = await getBreakdown({ organization, user });
 
@@ -78,7 +165,13 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         expect(response.body.pricePaid).toBe(40_00);
         expect(response.body.priceOpen).toBe(85_00);
 
-        expect(response.body.byCategory.map(g => ({ name: g.name.toString(), price: g.price, quantity: g.quantity }))).toEqual([
+        expect(
+            response.body.byCategory.map((g) => ({
+                name: g.name.toString(),
+                price: g.price,
+                quantity: g.quantity,
+            })),
+        ).toEqual([
             { name: 'Kapoenen', price: 100_00, quantity: 3 },
             { name: 'Welpen', price: 25_00, quantity: 1 },
         ]);
@@ -92,25 +185,43 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await createFinanceUser(organization);
 
-        const product = Product.create({ name: 'T-shirt', prices: [ProductPrice.create({ name: 'Standaard', price: 15_00 })] });
-        const optionMenu = OptionMenu.create({ name: 'Maat', options: [Option.create({ name: 'XL', price: 2_00 })] });
+        const product = Product.create({
+            name: 'T-shirt',
+            prices: [ProductPrice.create({ name: 'Standaard', price: 15_00 })],
+        });
+        const optionMenu = OptionMenu.create({
+            name: 'Maat',
+            options: [Option.create({ name: 'XL', price: 2_00 })],
+        });
         product.optionMenus.push(optionMenu);
 
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
         const order = await new OrderFactory({
             webshop,
             data: OrderData.create({
-                customer: Customer.create({ firstName: 'Eva', lastName: 'Peeters', email: 'eva@example.com' }),
+                customer: Customer.create({
+                    firstName: 'Eva',
+                    lastName: 'Peeters',
+                    email: 'eva@example.com',
+                }),
                 cart: Cart.create({
                     items: [
                         CartItem.create({
                             product,
                             productPrice: product.prices[0],
-                            options: [CartItemOption.create({ optionMenu, option: optionMenu.options[0] })],
+                            options: [
+                                CartItemOption.create({
+                                    optionMenu,
+                                    option: optionMenu.options[0],
+                                }),
+                            ],
                             amount: 2,
                             // Normally calculated during checkout
                             unitPrice: 17_00,
-                            calculatedPrices: [CartItemPrice.create({ price: 17_00 }), CartItemPrice.create({ price: 17_00 })],
+                            calculatedPrices: [
+                                CartItemPrice.create({ price: 17_00 }),
+                                CartItemPrice.create({ price: 17_00 }),
+                            ],
                         }),
                     ],
                 }),
@@ -124,7 +235,13 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             amount: 1,
             unitPrice: order.data.totalPrice,
             relations: new Map([
-                [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshop.id, name: new TranslatedString(webshop.meta.name) })],
+                [
+                    BalanceItemRelationType.Webshop,
+                    BalanceItemRelation.create({
+                        id: webshop.id,
+                        name: new TranslatedString(webshop.meta.name),
+                    }),
+                ],
             ]),
         }).create();
 
@@ -132,7 +249,14 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
 
         expect(response.status).toBe(200);
         expect(response.body.byCategory).toHaveLength(1);
-        expect(response.body.byArticle.map(g => ({ name: g.name.toString(), price: g.price, quantity: g.quantity, count: g.count }))).toEqual([
+        expect(
+            response.body.byArticle.map((g) => ({
+                name: g.name.toString(),
+                price: g.price,
+                quantity: g.quantity,
+                count: g.count,
+            })),
+        ).toEqual([
             { name: 'T-shirt', price: 30_00, quantity: 2, count: 1 },
             { name: 'Maat: XL', price: 4_00, quantity: 2, count: 1 },
         ]);
@@ -143,7 +267,12 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         const user = await createFinanceUser(organization);
 
         await createItem(organization, { price: 40_00, groupId: 'group-a', groupName: 'Kapoenen' });
-        await createItem(organization, { price: 999_00, groupId: 'group-a', groupName: 'Kapoenen', status: BalanceItemStatus.Canceled });
+        await createItem(organization, {
+            price: 999_00,
+            groupId: 'group-a',
+            groupName: 'Kapoenen',
+            status: BalanceItemStatus.Canceled,
+        });
 
         const response = await getBreakdown({ organization, user });
 
@@ -159,7 +288,7 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         await createItem(organization, { price: 25_00, groupId: 'group-b', groupName: 'Welpen' });
 
         const all = await getBreakdown({ organization, user });
-        const category = all.body.byCategory.find(g => g.name.toString() === 'Kapoenen')!;
+        const category = all.body.byCategory.find((g) => g.name.toString() === 'Kapoenen')!;
 
         const narrowed = await getBreakdown({
             organization,
@@ -185,7 +314,7 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         await createItem(organization, { price: 25_00, groupId: 'group-b', groupName: 'Welpen' });
 
         const all = await getBreakdown({ organization, user });
-        const category = all.body.byCategory.find(g => g.name.toString() === 'Kapoenen')!;
+        const category = all.body.byCategory.find((g) => g.name.toString() === 'Kapoenen')!;
 
         const narrowed = await getBreakdown({
             organization,
@@ -196,7 +325,11 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         expect(narrowed.body.price).toBe(40_00);
 
         // Running the export filter through the database selects the same balance items
-        const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.listFilter });
+        const exported = await getBreakdown({
+            organization,
+            user,
+            filter: narrowed.body.selection.listFilter,
+        });
         expect(exported.body.price).toBe(40_00);
         expect(exported.body.balanceItemCount).toBe(1);
     });
@@ -205,13 +338,28 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await createFinanceUser(organization);
 
-        await new BalanceItemFactory({ organizationId: organization.id, type: BalanceItemType.Other, amount: 1, unitPrice: 30_00, name: 'Kampinschrijving' }).create();
-        await new BalanceItemFactory({ organizationId: organization.id, type: BalanceItemType.Other, amount: 1, unitPrice: 12_00, name: 'Drankkaart' }).create();
+        await new BalanceItemFactory({
+            organizationId: organization.id,
+            type: BalanceItemType.Other,
+            amount: 1,
+            unitPrice: 30_00,
+            name: 'Kampinschrijving',
+        }).create();
+        await new BalanceItemFactory({
+            organizationId: organization.id,
+            type: BalanceItemType.Other,
+            amount: 1,
+            unitPrice: 12_00,
+            name: 'Drankkaart',
+        }).create();
 
         const all = await getBreakdown({ organization, user });
-        expect(all.body.byCategory.map(g => g.name.toString())).toEqual(['Kampinschrijving', 'Drankkaart']);
+        expect(all.body.byCategory.map((g) => g.name.toString())).toEqual([
+            'Kampinschrijving',
+            'Drankkaart',
+        ]);
 
-        const category = all.body.byCategory.find(g => g.name.toString() === 'Drankkaart')!;
+        const category = all.body.byCategory.find((g) => g.name.toString() === 'Drankkaart')!;
         const narrowed = await getBreakdown({
             organization,
             user,
@@ -220,7 +368,11 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
 
         expect(narrowed.body.price).toBe(12_00);
 
-        const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.listFilter });
+        const exported = await getBreakdown({
+            organization,
+            user,
+            filter: narrowed.body.selection.listFilter,
+        });
         expect(exported.body.price).toBe(12_00);
     });
 
@@ -228,8 +380,18 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await createFinanceUser(organization);
 
-        await createItem(organization, { price: 40_00, groupId: 'group-a', groupName: 'Kapoenen', priceName: 'Standaardtarief' });
-        await createItem(organization, { price: 40_00, groupId: 'group-a', groupName: 'Kapoenen', priceName: 'Standaardtarief' });
+        await createItem(organization, {
+            price: 40_00,
+            groupId: 'group-a',
+            groupName: 'Kapoenen',
+            priceName: 'Standaardtarief',
+        });
+        await createItem(organization, {
+            price: 40_00,
+            groupId: 'group-a',
+            groupName: 'Kapoenen',
+            priceName: 'Standaardtarief',
+        });
 
         // The same group and price, but for an option that was bought on top of it
         await new BalanceItemFactory({
@@ -238,35 +400,85 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             amount: 1,
             unitPrice: 5_00,
             relations: new Map([
-                [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-a', name: new TranslatedString('Kapoenen') })],
-                [BalanceItemRelationType.GroupPrice, BalanceItemRelation.create({ id: 'price-Standaardtarief', name: new TranslatedString('Standaardtarief') })],
-                [BalanceItemRelationType.GroupOptionMenu, BalanceItemRelation.create({ id: 'menu-a', name: new TranslatedString('Kamp') })],
-                [BalanceItemRelationType.GroupOption, BalanceItemRelation.create({ id: 'option-a', name: new TranslatedString('Met overnachting') })],
+                [
+                    BalanceItemRelationType.Group,
+                    BalanceItemRelation.create({
+                        id: 'group-a',
+                        name: new TranslatedString('Kapoenen'),
+                    }),
+                ],
+                [
+                    BalanceItemRelationType.GroupPrice,
+                    BalanceItemRelation.create({
+                        id: 'price-Standaardtarief',
+                        name: new TranslatedString('Standaardtarief'),
+                    }),
+                ],
+                [
+                    BalanceItemRelationType.GroupOptionMenu,
+                    BalanceItemRelation.create({
+                        id: 'menu-a',
+                        name: new TranslatedString('Kamp'),
+                    }),
+                ],
+                [
+                    BalanceItemRelationType.GroupOption,
+                    BalanceItemRelation.create({
+                        id: 'option-a',
+                        name: new TranslatedString('Met overnachting'),
+                    }),
+                ],
             ]),
         }).create();
 
         const all = await getBreakdown({ organization, user });
-        const article = all.body.byArticle.find(g => g.name.toString() === 'Inschrijving voor Kapoenen')!;
+        const article = all.body.byArticle.find(
+            (g) => g.name.toString() === 'Inschrijving voor Kapoenen',
+        )!;
 
         // Listing the article shows the two registrations, not the option that was bought on top
-        const listed = await getBreakdown({ organization, user, filter: article.selection!.listFilter });
+        const listed = await getBreakdown({
+            organization,
+            user,
+            filter: article.selection!.listFilter,
+        });
 
         expect(listed.body.price).toBe(80_00);
         expect(listed.body.balanceItemCount).toBe(2);
     });
 
     describe('Grouping by payout', () => {
-        const march = SettlementReference.create({ id: 'stl_march', reference: '1234567.0312.01', settledAt: new Date(2026, 2, 12), amount: 0 });
-        const april = SettlementReference.create({ id: 'stl_april', reference: '1234567.0409.01', settledAt: new Date(2026, 3, 9), amount: 0 });
+        const march = SettlementReference.create({
+            id: 'stl_march',
+            reference: '1234567.0312.01',
+            settledAt: new Date(2026, 2, 12),
+            amount: 0,
+        });
+        const april = SettlementReference.create({
+            id: 'stl_april',
+            reference: '1234567.0409.01',
+            settledAt: new Date(2026, 3, 9),
+            amount: 0,
+        });
 
         /**
          * Pays a part of a balance item, the way a payment provider settles it afterwards.
          */
-        const payItem = async (organization: Organization, balanceItem: BalanceItem, options: { price: number; settlement?: SettlementReference; status?: PaymentStatus; method?: PaymentMethod }) => {
+        const payItem = async (
+            organization: Organization,
+            balanceItem: BalanceItem,
+            options: {
+                price: number;
+                settlement?: SettlementReference;
+                status?: PaymentStatus;
+                method?: PaymentMethod;
+            },
+        ) => {
             const payment = new Payment();
             payment.organizationId = organization.id;
             payment.method = options.method ?? PaymentMethod.Bancontact;
-            payment.provider = payment.method === PaymentMethod.Bancontact ? PaymentProvider.Mollie : null;
+            payment.provider =
+                payment.method === PaymentMethod.Bancontact ? PaymentProvider.Mollie : null;
             payment.status = options.status ?? PaymentStatus.Succeeded;
             payment.price = options.price;
             payment.paidAt = new Date();
@@ -285,8 +497,18 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await createFinanceUser(organization);
 
-            const first = await createItem(organization, { price: 100_00, groupId: 'group-a', groupName: 'Kapoenen', pricePaid: 100_00 });
-            const second = await createItem(organization, { price: 25_00, groupId: 'group-b', groupName: 'Welpen', pricePaid: 25_00 });
+            const first = await createItem(organization, {
+                price: 100_00,
+                groupId: 'group-a',
+                groupName: 'Kapoenen',
+                pricePaid: 100_00,
+            });
+            const second = await createItem(organization, {
+                price: 25_00,
+                groupId: 'group-b',
+                groupName: 'Welpen',
+                pricePaid: 25_00,
+            });
 
             await payItem(organization, first, { price: 60_00, settlement: march });
             await payItem(organization, first, { price: 40_00, settlement: april });
@@ -298,7 +520,13 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
 
             // The price is still what was charged, the payouts only hold what was received
             expect(response.body.price).toBe(125_00);
-            expect(response.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price, count: g.count }))).toEqual([
+            expect(
+                response.body.bySettlement.map((g) => ({
+                    name: g.name.toString(),
+                    price: g.price,
+                    count: g.count,
+                })),
+            ).toEqual([
                 { name: '1234567.0312.01', price: 85_00, count: 2 },
                 { name: '1234567.0409.01', price: 40_00, count: 1 },
             ]);
@@ -308,16 +536,30 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await createFinanceUser(organization);
 
-            const item = await createItem(organization, { price: 100_00, groupId: 'group-a', groupName: 'Kapoenen', pricePaid: 40_00 });
+            const item = await createItem(organization, {
+                price: 100_00,
+                groupId: 'group-a',
+                groupName: 'Kapoenen',
+                pricePaid: 40_00,
+            });
 
             await payItem(organization, item, { price: 40_00, settlement: march });
             await payItem(organization, item, { price: 30_00, status: PaymentStatus.Pending });
-            await payItem(organization, item, { price: 20_00, status: PaymentStatus.Failed, settlement: april });
+            await payItem(organization, item, {
+                price: 20_00,
+                status: PaymentStatus.Failed,
+                settlement: april,
+            });
 
             const response = await getBreakdown({ organization, user });
 
             expect(response.status).toBe(200);
-            expect(response.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
+            expect(
+                response.body.bySettlement.map((g) => ({
+                    name: g.name.toString(),
+                    price: g.price,
+                })),
+            ).toEqual([
                 { name: '1234567.0312.01', price: 40_00 },
                 { name: $t('%1OL'), price: 30_00 },
                 // Only what was tried sits under the failed payment, the rest was never attempted
@@ -326,12 +568,18 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             ]);
 
             // Every part of what was charged ends up in exactly one row
-            expect(response.body.bySettlement.reduce((total, g) => total + g.price, 0)).toBe(response.body.price);
+            expect(response.body.bySettlement.reduce((total, g) => total + g.price, 0)).toBe(
+                response.body.price,
+            );
 
             // Running the rows through the database gives back the balance items they were added up from
             for (const name of [$t('%ZjW'), $t('%ZjC')]) {
-                const row = response.body.bySettlement.find(g => g.name.toString() === name)!;
-                const exported = await getBreakdown({ organization, user, filter: row.selection!.listFilter });
+                const row = response.body.bySettlement.find((g) => g.name.toString() === name)!;
+                const exported = await getBreakdown({
+                    organization,
+                    user,
+                    filter: row.selection!.listFilter,
+                });
                 expect(exported.body.balanceItemCount).toBe(1);
             }
         });
@@ -340,30 +588,57 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await createFinanceUser(organization);
 
-            const canceled = await createItem(organization, { price: 50_00, groupId: 'group-a', groupName: 'Kapoenen', status: BalanceItemStatus.Canceled, pricePaid: 50_00 });
-            await createItem(organization, { price: 25_00, groupId: 'group-b', groupName: 'Welpen' });
+            const canceled = await createItem(organization, {
+                price: 50_00,
+                groupId: 'group-a',
+                groupName: 'Kapoenen',
+                status: BalanceItemStatus.Canceled,
+                pricePaid: 50_00,
+            });
+            await createItem(organization, {
+                price: 25_00,
+                groupId: 'group-b',
+                groupName: 'Welpen',
+            });
 
             await payItem(organization, canceled, { price: 50_00, settlement: march });
 
             const response = await getBreakdown({ organization, user });
 
             expect(response.status).toBe(200);
-            expect(response.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
+            expect(
+                response.body.bySettlement.map((g) => ({
+                    name: g.name.toString(),
+                    price: g.price,
+                })),
+            ).toEqual([
                 { name: '1234567.0312.01', price: 50_00 },
                 { name: $t('%10b'), price: -50_00 },
                 { name: $t('%1Ni'), price: 25_00 },
             ]);
 
             // A canceled item is not charged anymore, so it doesn't add to what is open
-            expect(response.body.bySettlement.reduce((total, g) => total + g.price, 0)).toBe(response.body.price);
+            expect(response.body.bySettlement.reduce((total, g) => total + g.price, 0)).toBe(
+                response.body.price,
+            );
 
             // Each row selects exactly the balance items it was added up from
-            const refund = response.body.bySettlement.find(g => g.name.toString() === $t('%10b'))!;
-            const refunded = await getBreakdown({ organization, user, filter: refund.selection!.listFilter });
+            const refund = response.body.bySettlement.find(
+                (g) => g.name.toString() === $t('%10b'),
+            )!;
+            const refunded = await getBreakdown({
+                organization,
+                user,
+                filter: refund.selection!.listFilter,
+            });
             expect(refunded.body.balanceItemCount).toBe(1);
 
-            const open = response.body.bySettlement.find(g => g.name.toString() === $t('%1Ni'))!;
-            const stillOpen = await getBreakdown({ organization, user, filter: open.selection!.listFilter });
+            const open = response.body.bySettlement.find((g) => g.name.toString() === $t('%1Ni'))!;
+            const stillOpen = await getBreakdown({
+                organization,
+                user,
+                filter: open.selection!.listFilter,
+            });
             expect(stillOpen.body.balanceItemCount).toBe(1);
             expect(stillOpen.body.price).toBe(25_00);
         });
@@ -372,9 +647,22 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await createFinanceUser(organization);
 
-            const tried = await createItem(organization, { price: 100_00, groupId: 'group-a', groupName: 'Kapoenen' });
-            const untried = await createItem(organization, { price: 25_00, groupId: 'group-b', groupName: 'Welpen' });
-            const paid = await createItem(organization, { price: 40_00, groupId: 'group-c', groupName: 'Jonggivers', pricePaid: 40_00 });
+            const tried = await createItem(organization, {
+                price: 100_00,
+                groupId: 'group-a',
+                groupName: 'Kapoenen',
+            });
+            const untried = await createItem(organization, {
+                price: 25_00,
+                groupId: 'group-b',
+                groupName: 'Welpen',
+            });
+            const paid = await createItem(organization, {
+                price: 40_00,
+                groupId: 'group-c',
+                groupName: 'Jonggivers',
+                pricePaid: 40_00,
+            });
 
             await payItem(organization, tried, { price: 100_00, status: PaymentStatus.Failed });
             await payItem(organization, paid, { price: 40_00, settlement: march });
@@ -382,16 +670,28 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             const response = await getBreakdown({ organization, user });
 
             expect(response.status).toBe(200);
-            expect(response.body.bySettlement.map(g => ({ name: g.name.toString(), price: g.price }))).toEqual([
+            expect(
+                response.body.bySettlement.map((g) => ({
+                    name: g.name.toString(),
+                    price: g.price,
+                })),
+            ).toEqual([
                 { name: $t('%ZjW'), price: 100_00 },
                 { name: '1234567.0312.01', price: 40_00 },
                 { name: $t('%1Ni'), price: 25_00 },
             ]);
 
             // Both rows select exactly the balance items they were added up from
-            for (const [name, count] of [[$t('%ZjW'), 1], [$t('%1Ni'), 1]] as [string, number][]) {
-                const row = response.body.bySettlement.find(g => g.name.toString() === name)!;
-                const exported = await getBreakdown({ organization, user, filter: row.selection!.listFilter });
+            for (const [name, count] of [
+                [$t('%ZjW'), 1],
+                [$t('%1Ni'), 1],
+            ] as [string, number][]) {
+                const row = response.body.bySettlement.find((g) => g.name.toString() === name)!;
+                const exported = await getBreakdown({
+                    organization,
+                    user,
+                    filter: row.selection!.listFilter,
+                });
                 expect(exported.body.balanceItemCount).toBe(count);
             }
         });
@@ -400,14 +700,27 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await createFinanceUser(organization);
 
-            const paid = await createItem(organization, { price: 40_00, groupId: 'group-a', groupName: 'Kapoenen', pricePaid: 40_00 });
-            const processing = await createItem(organization, { price: 25_00, groupId: 'group-b', groupName: 'Welpen', pricePending: 25_00 });
+            const paid = await createItem(organization, {
+                price: 40_00,
+                groupId: 'group-a',
+                groupName: 'Kapoenen',
+                pricePaid: 40_00,
+            });
+            const processing = await createItem(organization, {
+                price: 25_00,
+                groupId: 'group-b',
+                groupName: 'Welpen',
+                pricePending: 25_00,
+            });
 
             await payItem(organization, paid, { price: 40_00, settlement: march });
-            await payItem(organization, processing, { price: 25_00, status: PaymentStatus.Pending });
+            await payItem(organization, processing, {
+                price: 25_00,
+                status: PaymentStatus.Pending,
+            });
 
             const all = await getBreakdown({ organization, user });
-            const row = all.body.bySettlement.find(g => g.name.toString() === $t('%1OL'))!;
+            const row = all.body.bySettlement.find((g) => g.name.toString() === $t('%1OL'))!;
 
             const narrowed = await getBreakdown({
                 organization,
@@ -420,7 +733,11 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             expect(narrowed.body.price).toBe(25_00);
 
             // Running the export filter through the database selects the same balance items
-            const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.listFilter });
+            const exported = await getBreakdown({
+                organization,
+                user,
+                filter: narrowed.body.selection.listFilter,
+            });
             expect(exported.body.balanceItemCount).toBe(1);
             expect(exported.body.price).toBe(25_00);
         });
@@ -429,7 +746,12 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await createFinanceUser(organization);
 
-            const item = await createItem(organization, { price: 40_00, groupId: 'group-a', groupName: 'Kapoenen', pricePaid: 40_00 });
+            const item = await createItem(organization, {
+                price: 40_00,
+                groupId: 'group-a',
+                groupName: 'Kapoenen',
+                pricePaid: 40_00,
+            });
             await payItem(organization, item, { price: 40_00, method: PaymentMethod.Transfer });
 
             const response = await getBreakdown({ organization, user });
@@ -442,15 +764,27 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await createFinanceUser(organization);
 
-            const first = await createItem(organization, { price: 100_00, groupId: 'group-a', groupName: 'Kapoenen', pricePaid: 100_00 });
-            const second = await createItem(organization, { price: 25_00, groupId: 'group-b', groupName: 'Welpen', pricePaid: 25_00 });
+            const first = await createItem(organization, {
+                price: 100_00,
+                groupId: 'group-a',
+                groupName: 'Kapoenen',
+                pricePaid: 100_00,
+            });
+            const second = await createItem(organization, {
+                price: 25_00,
+                groupId: 'group-b',
+                groupName: 'Welpen',
+                pricePaid: 25_00,
+            });
 
             await payItem(organization, first, { price: 60_00, settlement: march });
             await payItem(organization, first, { price: 40_00, settlement: april });
             await payItem(organization, second, { price: 25_00, settlement: april });
 
             const all = await getBreakdown({ organization, user });
-            const payout = all.body.bySettlement.find(g => g.name.toString() === '1234567.0312.01')!;
+            const payout = all.body.bySettlement.find(
+                (g) => g.name.toString() === '1234567.0312.01',
+            )!;
 
             const narrowed = await getBreakdown({
                 organization,
@@ -469,12 +803,20 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             expect(narrowed.body.selection.isListPartial).toBe(true);
 
             // Running the export filter through the database selects the same balance items
-            const exported = await getBreakdown({ organization, user, filter: narrowed.body.selection.listFilter });
+            const exported = await getBreakdown({
+                organization,
+                user,
+                filter: narrowed.body.selection.listFilter,
+            });
             expect(exported.body.balanceItemCount).toBe(1);
             expect(exported.body.price).toBe(100_00);
 
             // But the export itself holds the €60 that landed in this payout, not the whole €100 item
-            const slice = await exportSlice({ organization, user, filter: narrowed.body.selection.filter });
+            const slice = await exportSlice({
+                organization,
+                user,
+                filter: narrowed.body.selection.filter,
+            });
             expect(slice.price).toBe(60_00);
             expect(slice.count).toBe(1);
         });
@@ -483,12 +825,17 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await createFinanceUser(organization);
 
-            const item = await createItem(organization, { price: 100_00, groupId: 'group-a', groupName: 'Kapoenen', pricePaid: 100_00 });
+            const item = await createItem(organization, {
+                price: 100_00,
+                groupId: 'group-a',
+                groupName: 'Kapoenen',
+                pricePaid: 100_00,
+            });
             await payItem(organization, item, { price: 60_00, settlement: march });
             await payItem(organization, item, { price: 40_00, settlement: april });
 
             const all = await getBreakdown({ organization, user });
-            const row = all.body.bySettlement.find(g => g.name.toString() === '1234567.0312.01')!;
+            const row = all.body.bySettlement.find((g) => g.name.toString() === '1234567.0312.01')!;
 
             expect(row.price).toBe(60_00);
             expect(row.selection!.objectType).toBe(BreakdownObjectType.BalanceItemPayments);
@@ -516,7 +863,11 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
         const user = await createFinanceUser(organization);
 
         await createItem(organization, { price: 40_00, groupId: 'group-a', groupName: 'Kapoenen' });
-        await createItem(otherOrganization, { price: 999_00, groupId: 'group-x', groupName: 'Andere' });
+        await createItem(otherOrganization, {
+            price: 999_00,
+            groupId: 'group-x',
+            groupName: 'Andere',
+        });
 
         const response = await getBreakdown({ organization, user });
 

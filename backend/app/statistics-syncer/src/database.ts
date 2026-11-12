@@ -9,7 +9,9 @@ export function getStatisticsDatabaseConfig(): StatisticsDatabaseConfig {
     const config = STAMHOOFD.statisticsDatabase;
 
     if (!config?.DB_DATABASE) {
-        throw new Error('STAMHOOFD.statisticsDatabase is not set: configure the platform statistics database before running migrations');
+        throw new Error(
+            'STAMHOOFD.statisticsDatabase is not set: configure the platform statistics database before running migrations',
+        );
     }
 
     // The statistics migrations create tables that share their names with the main database
@@ -17,8 +19,15 @@ export function getStatisticsDatabaseConfig(): StatisticsDatabaseConfig {
     // it, so the one configuration that could damage it is refused outright. Each lives on its own
     // server, so it takes a match on the server as well as on the name to be the same database.
     const main = STAMHOOFD.stamhoofdDatabase;
-    if (main && config.DB_DATABASE === main.DB_DATABASE && config.DB_HOST === main.DB_HOST && (config.DB_PORT ?? main.DB_PORT) === main.DB_PORT) {
-        throw new Error(`STAMHOOFD.statisticsDatabase is the main database (${config.DB_DATABASE} on ${config.DB_HOST}): the platform statistics database has to be a separate one`);
+    if (
+        main &&
+        config.DB_DATABASE === main.DB_DATABASE &&
+        config.DB_HOST === main.DB_HOST &&
+        (config.DB_PORT ?? main.DB_PORT) === main.DB_PORT
+    ) {
+        throw new Error(
+            `STAMHOOFD.statisticsDatabase is the main database (${config.DB_DATABASE} on ${config.DB_HOST}): the platform statistics database has to be a separate one`,
+        );
     }
 
     return config;
@@ -51,14 +60,25 @@ function getStatisticsPort(config: StatisticsDatabaseConfig): number | undefined
  * Where to reach the statistics database. It lives next to Metabase rather than on the server this
  * runs on, so every connection detail is spelled out instead of inherited from the main database.
  */
-export function getStatisticsPoolOptions(): { host: string; user: string; password: string; port: number | undefined; useSSL: boolean; ca?: string; cert?: string; key?: string } {
+export function getStatisticsPoolOptions(): {
+    host: string;
+    user: string;
+    password: string;
+    port: number | undefined;
+    useSSL: boolean;
+    ca?: string;
+    cert?: string;
+    key?: string;
+} {
     const config = getStatisticsDatabaseConfig();
     const useSSL = isOnAnotherServer(config);
 
     // The login is created with REQUIRE X509: MySQL reports a missing client certificate as a plain
     // "access denied", so refuse early with a message that names the actual cause.
     if (useSSL && (!config.DB_CERT || !config.DB_KEY)) {
-        throw new Error('STAMHOOFD.statisticsDatabase.DB_CERT and DB_KEY are required to connect to a statistics database on another server');
+        throw new Error(
+            'STAMHOOFD.statisticsDatabase.DB_CERT and DB_KEY are required to connect to a statistics database on another server',
+        );
     }
 
     return {
@@ -85,7 +105,10 @@ let connection: DatabaseInstance | undefined;
  * MySQL to point a single connection at.
  */
 export function getStatisticsConnection(): DatabaseInstance {
-    connection ??= new DatabaseInstance({ ...getStatisticsPoolOptions(), database: getStatisticsDatabaseConfig().DB_DATABASE });
+    connection ??= new DatabaseInstance({
+        ...getStatisticsPoolOptions(),
+        database: getStatisticsDatabaseConfig().DB_DATABASE,
+    });
     return connection;
 }
 

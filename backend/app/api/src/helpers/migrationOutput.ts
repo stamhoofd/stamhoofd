@@ -1,7 +1,10 @@
 import { logger } from '@node/logging';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
-export async function withMigrationOutput(run: () => Promise<void>, verbose: boolean): Promise<void> {
+export async function withMigrationOutput(
+    run: () => Promise<void>,
+    verbose: boolean,
+): Promise<void> {
     if (verbose) {
         await run();
         return;
@@ -27,7 +30,7 @@ export async function withMigrationOutput(run: () => Promise<void>, verbose: boo
                 stdout.write(message);
             }
         },
-        clearLine: direction => stdout.clearLine(direction),
+        clearLine: (direction) => stdout.clearLine(direction),
     };
     logger.stderr = {
         write: (message) => {
@@ -36,7 +39,7 @@ export async function withMigrationOutput(run: () => Promise<void>, verbose: boo
             }
             stderr.write(message);
         },
-        clearLine: direction => stderr.clearLine(direction),
+        clearLine: (direction) => stderr.clearLine(direction),
     };
 
     try {

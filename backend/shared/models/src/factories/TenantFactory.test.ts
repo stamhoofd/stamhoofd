@@ -32,7 +32,10 @@ describe('TenantFactory', () => {
 
     test('a child tenant points at its parent and inherits its fees tenant', async () => {
         const parent = await new TenantFactory({}).create();
-        const child = await new TenantFactory({ parentTenant: parent, feesTenant: parent }).create();
+        const child = await new TenantFactory({
+            parentTenant: parent,
+            feesTenant: parent,
+        }).create();
 
         expect(child.parentTenantId).toBe(parent.id);
         expect(child.feesTenantId).toBe(parent.id);
@@ -46,7 +49,7 @@ describe('TenantFactory', () => {
         }).create();
 
         const struct = await Platform.getStructForTenant(tenant.id);
-        expect(struct.config.membershipTypes.map(m => m.name)).toEqual(['Factory type']);
+        expect(struct.config.membershipTypes.map((m) => m.name)).toEqual(['Factory type']);
     });
 
     test('getRoot returns the root tenant', async () => {

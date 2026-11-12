@@ -52,9 +52,12 @@ export class Image extends AutoEncoder {
     getResolutionForSize(width: number | undefined, height: number | undefined): Resolution {
         let bestResolution: Resolution | undefined;
 
-        const ratio = (
-            (typeof window !== 'undefined') ? ((window as any).devicePixelRatio ? (window as any).devicePixelRatio : 1) : 1
-        ) ?? 1;
+        const ratio =
+            (typeof window !== 'undefined'
+                ? (window as any).devicePixelRatio
+                    ? (window as any).devicePixelRatio
+                    : 1
+                : 1) ?? 1;
         if (ratio >= 2 && width) {
             width = ratio * width;
         }
@@ -65,9 +68,11 @@ export class Image extends AutoEncoder {
         // Search resolution bigger than width x height, but smaller than any other resolution that is bigger
         for (const resolution of this.resolutions) {
             if (
-                (bestResolution === undefined || ((!width || resolution.width <= bestResolution.width) && (!height || resolution.height <= bestResolution.height)))
-                && (!width || resolution.width >= width)
-                && (!height || resolution.height >= height)
+                (bestResolution === undefined ||
+                    ((!width || resolution.width <= bestResolution.width) &&
+                        (!height || resolution.height <= bestResolution.height))) &&
+                (!width || resolution.width >= width) &&
+                (!height || resolution.height >= height)
             ) {
                 bestResolution = resolution;
             }
@@ -79,7 +84,11 @@ export class Image extends AutoEncoder {
 
         // Get biggest resolution possible of we don't find anything bigger
         for (const resolution of this.resolutions) {
-            if (bestResolution === undefined || (resolution.width >= bestResolution.width && resolution.height >= bestResolution.height)) {
+            if (
+                bestResolution === undefined ||
+                (resolution.width >= bestResolution.width &&
+                    resolution.height >= bestResolution.height)
+            ) {
                 bestResolution = resolution;
             }
         }

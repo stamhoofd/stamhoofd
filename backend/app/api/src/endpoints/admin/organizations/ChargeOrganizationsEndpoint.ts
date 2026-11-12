@@ -54,12 +54,15 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
         }
 
         await QueueHandler.schedule(queueId, async () => {
-            const dataGenerator = fetchToAsyncIterator(new LimitedFilteredRequest({
-                filter: body.filter,
-                limit: 100,
-            }), {
-                fetch: request => GetOrganizationsEndpoint.buildData(request),
-            });
+            const dataGenerator = fetchToAsyncIterator(
+                new LimitedFilteredRequest({
+                    filter: body.filter,
+                    limit: 100,
+                }),
+                {
+                    fetch: (request) => GetOrganizationsEndpoint.buildData(request),
+                },
+            );
 
             for await (const data of dataGenerator) {
                 await OrganizationCharger.chargeMany({

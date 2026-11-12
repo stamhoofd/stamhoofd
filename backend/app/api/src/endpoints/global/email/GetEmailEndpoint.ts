@@ -34,12 +34,12 @@ export class GetEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody
         const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canReadEmails(organization)) {
+        if (!(await Context.auth.canReadEmails(organization))) {
             throw Context.auth.error();
         }
 
         const model = await Email.getByID(request.params.id);
-        if (!model || (model.organizationId !== (organization?.id ?? null))) {
+        if (!model || model.organizationId !== (organization?.id ?? null)) {
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Email not found',
@@ -48,10 +48,12 @@ export class GetEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBody
             });
         }
 
-        if (!await Context.auth.canAccessEmail(model)) {
+        if (!(await Context.auth.canAccessEmail(model))) {
             throw Context.auth.error();
         }
 
-        return new Response(await EmailPreviewService.getPreviewStructure(model, { allLanguages: true }));
+        return new Response(
+            await EmailPreviewService.getPreviewStructure(model, { allLanguages: true }),
+        );
     }
 }

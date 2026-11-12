@@ -1,6 +1,12 @@
 import { Factory } from '@node/database';
 import type { BundleDiscount, GroupPriceDiscount, GroupType } from '@stamhoofd/structures';
-import { BundleDiscountGroupPriceSettings, GroupPrice, GroupSettings, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
+import {
+    BundleDiscountGroupPriceSettings,
+    GroupPrice,
+    GroupSettings,
+    ReduceablePrice,
+    TranslatedString,
+} from '@stamhoofd/structures';
 
 import { SimpleError } from '@common/errors';
 import { Group } from '../models/Group.js';
@@ -28,7 +34,8 @@ class Options {
 
 export class GroupFactory extends Factory<Options, Group> {
     async create(): Promise<Group> {
-        const organization = this.options.organization ?? await new OrganizationFactory({}).create();
+        const organization =
+            this.options.organization ?? (await new OrganizationFactory({}).create());
 
         const group = new Group();
         group.organizationId = organization.id;
@@ -36,7 +43,10 @@ export class GroupFactory extends Factory<Options, Group> {
         let period: RegistrationPeriod | undefined = undefined;
 
         if (this.options.period) {
-            if (STAMHOOFD.userMode === 'organization' && this.options.period.organizationId !== group.organizationId) {
+            if (
+                STAMHOOFD.userMode === 'organization' &&
+                this.options.period.organizationId !== group.organizationId
+            ) {
                 throw new SimpleError({
                     code: 'invalid_period',
                     message: 'Period has different organization id',
@@ -75,9 +85,12 @@ export class GroupFactory extends Factory<Options, Group> {
         });
 
         if (this.options.bundleDiscount) {
-            group.settings.prices[0].bundleDiscounts.set(this.options.bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
-                name: this.options.bundleDiscount.name,
-            }));
+            group.settings.prices[0].bundleDiscounts.set(
+                this.options.bundleDiscount.id,
+                BundleDiscountGroupPriceSettings.create({
+                    name: this.options.bundleDiscount.name,
+                }),
+            );
         }
 
         if (this.options.bundleDiscounts) {
@@ -92,10 +105,13 @@ export class GroupFactory extends Factory<Options, Group> {
             }
 
             for (const [discount, customDiscounts] of map.entries()) {
-                group.settings.prices[0].bundleDiscounts.set(discount.id, BundleDiscountGroupPriceSettings.create({
-                    name: discount.name,
-                    customDiscounts,
-                }));
+                group.settings.prices[0].bundleDiscounts.set(
+                    discount.id,
+                    BundleDiscountGroupPriceSettings.create({
+                        name: discount.name,
+                        customDiscounts,
+                    }),
+                );
             }
         }
 

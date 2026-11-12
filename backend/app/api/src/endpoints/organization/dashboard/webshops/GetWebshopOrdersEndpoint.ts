@@ -1,7 +1,14 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import type { CountFilteredRequest, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PermissionsResourceKey } from '@stamhoofd/structures';
+import {
+    assertSort,
+    getOrderSearchFilter,
+    getSortFilter,
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    PermissionsResourceKey,
+} from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 
 import { Order, Webshop } from '@stamhoofd/models';
@@ -44,12 +51,16 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
      * Returns null when the user can access the orders of all webshops
      */
     static async getAccessibleWebshopIds(organizationId: string): Promise<string[] | null> {
-        if (await Context.auth.canAccessOrder({ id: PermissionsResourceKey.All, organizationId }, PermissionLevel.Read)) {
+        if (
+            await Context.auth.canAccessOrder(
+                { id: PermissionsResourceKey.All, organizationId },
+                PermissionLevel.Read,
+            )
+        ) {
             return null;
         }
 
-        const rows = await SQL
-            .select(SQL.column('id'))
+        const rows = await SQL.select(SQL.column('id'))
             .from(SQL.table(Webshop.table))
             .where('organizationId', organizationId)
             .fetch();
@@ -70,18 +81,24 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
 
         const ordersTable: string = Order.table;
 
-        const query = SQL
-            .select(SQL.wildcard(ordersTable))
+        const query = SQL.select(SQL.wildcard(ordersTable))
             .from(SQL.table(ordersTable))
-            .where(await compileToSQLFilter({
-                organizationId: organization.id,
-                number: {
-                    $neq: null,
-                },
-            }, filterCompilers));
+            .where(
+                await compileToSQLFilter(
+                    {
+                        organizationId: organization.id,
+                        number: {
+                            $neq: null,
+                        },
+                    },
+                    filterCompilers,
+                ),
+            );
 
         // Restricted in the query itself so orders of other webshops cannot influence counts or errors
-        const accessibleWebshopIds = await GetWebshopOrdersEndpoint.getAccessibleWebshopIds(organization.id);
+        const accessibleWebshopIds = await GetWebshopOrdersEndpoint.getAccessibleWebshopIds(
+            organization.id,
+        );
         if (accessibleWebshopIds !== null) {
             query.where('webshopId', accessibleWebshopIds);
         }
@@ -91,7 +108,10 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         }
 
         if (q.search) {
-            const searchFilter: StamhoofdFilter | null = getOrderSearchFilter(q.search, parsePhoneNumber);
+            const searchFilter: StamhoofdFilter | null = getOrderSearchFilter(
+                q.search,
+                parsePhoneNumber,
+            );
 
             if (searchFilter) {
                 query.where(await compileToSQLFilter(searchFilter, filterCompilers));
@@ -148,7 +168,7 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -157,9 +177,7 @@ export class GetWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Resp
             maxLimit: Context.auth.hasSomePlatformAccess() ? 1000 : 100,
         });
 
-        return new Response(
-            await GetWebshopOrdersEndpoint.buildData(request.query),
-        );
+        return new Response(await GetWebshopOrdersEndpoint.buildData(request.query));
 
         /*
 

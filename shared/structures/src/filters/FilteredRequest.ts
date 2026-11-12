@@ -31,7 +31,9 @@ export class CountFilteredRequest implements Encodeable {
 
     encode(context: EncodeContext): PlainObject {
         return {
-            filter: this.filter ? StamhoofdFilterJSONDecoder.encode(this.filter, context) : undefined,
+            filter: this.filter
+                ? StamhoofdFilterJSONDecoder.encode(this.filter, context)
+                : undefined,
             search: this.search ?? undefined,
         };
     }
@@ -52,7 +54,13 @@ export class LimitedFilteredRequest implements Encodeable {
     limit: number;
     search: string | null;
 
-    constructor(data: { filter?: StamhoofdFilter | null; pageFilter?: StamhoofdFilter | null; sort?: SortList; limit: number; search?: string | null }) {
+    constructor(data: {
+        filter?: StamhoofdFilter | null;
+        pageFilter?: StamhoofdFilter | null;
+        sort?: SortList;
+        limit: number;
+        search?: string | null;
+    }) {
         this.filter = data.filter ?? null;
         this.pageFilter = data.pageFilter ?? null;
         this.sort = data.sort ?? [];
@@ -72,8 +80,12 @@ export class LimitedFilteredRequest implements Encodeable {
 
     encode(context: EncodeContext): PlainObject {
         return {
-            filter: this.filter ? StamhoofdFilterJSONDecoder.encode(this.filter, context) : undefined,
-            pageFilter: this.pageFilter ? StamhoofdFilterJSONDecoder.encode(this.pageFilter, context) : undefined,
+            filter: this.filter
+                ? StamhoofdFilterJSONDecoder.encode(this.filter, context)
+                : undefined,
+            pageFilter: this.pageFilter
+                ? StamhoofdFilterJSONDecoder.encode(this.pageFilter, context)
+                : undefined,
             sort: encodeSortList(this.sort),
             limit: this.limit,
             search: this.search ?? undefined,

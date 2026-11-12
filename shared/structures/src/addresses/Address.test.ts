@@ -4,7 +4,9 @@ describe('Address', () => {
     test('splitAddressLine', async () => {
         function check([line, [street, number]]: [string, [string, string]]) {
             let splitted!: { number: string; street: string };
-            expect(() => { splitted = Address.splitAddressLine(line); }, line).not.toThrow();
+            expect(() => {
+                splitted = Address.splitAddressLine(line);
+            }, line).not.toThrow();
             expect(splitted).toEqual({ street, number });
         }
 

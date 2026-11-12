@@ -6,10 +6,7 @@ import path from 'node:path';
 export default class CheckFormat extends BaseCommand {
     static summary = 'Check repository formatting with ESLint and Oxfmt';
     static description = 'Check formatting across the repository, or apply formatting with --fix.';
-    static examples = [
-        'stam check format',
-        'stam check format --fix',
-    ];
+    static examples = ['stam check format', 'stam check format --fix'];
 
     static flags = {
         fix: fixFlag,
@@ -17,7 +14,10 @@ export default class CheckFormat extends BaseCommand {
 
     async run(): Promise<void> {
         const { flags, context } = await this.parseWithContext(CheckFormat);
-        await run('pnpm', ['exec', 'oxfmt', flags.fix ? '--write' : '--check'], { cwd: context.rootDir, verbosity: RunVerbosity.Output });
+        await run('pnpm', ['exec', 'oxfmt', flags.fix ? '--write' : '--check'], {
+            cwd: context.rootDir,
+            verbosity: RunVerbosity.Output,
+        });
         await run(
             'node',
             [

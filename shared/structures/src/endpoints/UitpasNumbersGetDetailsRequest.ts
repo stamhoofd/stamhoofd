@@ -27,7 +27,9 @@ class UitpasNumbersDecoder {
         const str = data.string;
         try {
             const decoded = JSON.parse(str);
-            return (new ArrayDecoder(StringDecoder)).decode(data.clone({ data: decoded, field: data.currentField, context: data.context }));
+            return new ArrayDecoder(StringDecoder).decode(
+                data.clone({ data: decoded, field: data.currentField, context: data.context }),
+            );
         } catch (e) {
             throw new SimpleError({
                 code: 'invalid_field',

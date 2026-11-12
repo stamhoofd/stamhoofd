@@ -3,10 +3,13 @@ import { Platform } from '@stamhoofd/models';
 import type { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionRoleDetailed } from '@stamhoofd/structures';
 
-export async function initPermissionRole(
-    { organization, accessRights }:
-    { organization?: Organization; accessRights?: AccessRight[] },
-): Promise<PermissionRoleDetailed> {
+export async function initPermissionRole({
+    organization,
+    accessRights,
+}: {
+    organization?: Organization;
+    accessRights?: AccessRight[];
+}): Promise<PermissionRoleDetailed> {
     const role = PermissionRoleDetailed.create({
         name: 'Test role',
         accessRights,

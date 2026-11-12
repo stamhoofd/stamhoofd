@@ -5,9 +5,24 @@ import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { CountFilteredRequest, EmailStatus, LimitedFilteredRequest, OrganizationEmail, Permissions, PermissionsResourceKey, Replacement, ResourcePermissions } from '@stamhoofd/structures';
+import {
+    CountFilteredRequest,
+    EmailStatus,
+    LimitedFilteredRequest,
+    OrganizationEmail,
+    Permissions,
+    PermissionsResourceKey,
+    Replacement,
+    ResourcePermissions,
+} from '@stamhoofd/structures';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
-import { Email, EmailRecipient, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import {
+    Email,
+    EmailRecipient,
+    OrganizationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { Request } from '@node/endpoints';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { SessionService } from '../../../services/SessionService.js';
@@ -34,8 +49,7 @@ describe('Endpoint.GetEmailRecipients', () => {
             endDate: new Date(2023, 11, 31),
         }).create();
 
-        organization = await new OrganizationFactory({ period })
-            .create();
+        organization = await new OrganizationFactory({ period }).create();
 
         sender = OrganizationEmail.create({
             email: 'groepsleiding@voorbeeld.com',
@@ -55,14 +69,21 @@ describe('Endpoint.GetEmailRecipients', () => {
             permissions: Permissions.create({
                 level: PermissionLevel.None,
                 resources: new Map([
-                    [PermissionsResourceType.Senders, new Map([[PermissionsResourceKey.All, ResourcePermissions.create({
-                        resourceName: sender.name!,
-                        level: PermissionLevel.Read,
-                    })]])],
+                    [
+                        PermissionsResourceType.Senders,
+                        new Map([
+                            [
+                                PermissionsResourceKey.All,
+                                ResourcePermissions.create({
+                                    resourceName: sender.name!,
+                                    level: PermissionLevel.Read,
+                                }),
+                            ],
+                        ]),
+                    ],
                 ]),
             }),
-        })
-            .create();
+        }).create();
 
         token = await SessionService.createSession(user);
 
@@ -71,14 +92,21 @@ describe('Endpoint.GetEmailRecipients', () => {
             permissions: Permissions.create({
                 level: PermissionLevel.None,
                 resources: new Map([
-                    [PermissionsResourceType.Senders, new Map([[sender2.id, ResourcePermissions.create({
-                        resourceName: sender.name!,
-                        level: PermissionLevel.Read,
-                    })]])],
+                    [
+                        PermissionsResourceType.Senders,
+                        new Map([
+                            [
+                                sender2.id,
+                                ResourcePermissions.create({
+                                    resourceName: sender.name!,
+                                    level: PermissionLevel.Read,
+                                }),
+                            ],
+                        ]),
+                    ],
                 ]),
             }),
-        })
-            .create();
+        }).create();
 
         token2 = await SessionService.createSession(user2);
     });
@@ -150,9 +178,9 @@ describe('Endpoint.GetEmailRecipients', () => {
                 authorization: 'Bearer ' + token2.accessToken,
             },
         });
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     test('It request all email recipients of a single email if read permission for that sender', async () => {
@@ -260,10 +288,7 @@ describe('Endpoint.GetEmailRecipients', () => {
             host: organization.getApiHost(),
             query: new LimitedFilteredRequest({
                 filter: {
-                    $and: [
-                        { emailId: email.id },
-                        { email: { $contains: 'jan' } },
-                    ],
+                    $and: [{ emailId: email.id }, { email: { $contains: 'jan' } }],
                 },
                 limit: 10,
             }),
@@ -302,10 +327,7 @@ describe('Endpoint.GetEmailRecipients', () => {
             host: organization.getApiHost(),
             query: new LimitedFilteredRequest({
                 filter: {
-                    $and: [
-                        { emailId: email.id },
-                        { email: { $contains: 'jan' } },
-                    ],
+                    $and: [{ emailId: email.id }, { email: { $contains: 'jan' } }],
                     email: { $contains: 'ssens' },
                 },
                 limit: 10,
@@ -345,10 +367,7 @@ describe('Endpoint.GetEmailRecipients', () => {
             host: organization.getApiHost(),
             query: new LimitedFilteredRequest({
                 filter: {
-                    $or: [
-                        { emailId: email.id },
-                        { email: { $contains: 'jan' } },
-                    ],
+                    $or: [{ emailId: email.id }, { email: { $contains: 'jan' } }],
                 },
                 limit: 10,
             }),
@@ -356,9 +375,9 @@ describe('Endpoint.GetEmailRecipients', () => {
                 authorization: 'Bearer ' + token2.accessToken,
             },
         });
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     test('It cannot request all email recipients of a single email if read permission for another sender', async () => {
@@ -393,9 +412,9 @@ describe('Endpoint.GetEmailRecipients', () => {
                 authorization: 'Bearer ' + token2.accessToken,
             },
         });
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     test('It masks secrets in stored replacements', async () => {
@@ -427,7 +446,9 @@ describe('Endpoint.GetEmailRecipients', () => {
         ];
 
         // Rows saved before loginDetails was removed on save still contain security codes
-        const spy = vi.spyOn(EmailRecipient, 'removeUnstoredReplacements').mockImplementation(r => r);
+        const spy = vi
+            .spyOn(EmailRecipient, 'removeUnstoredReplacements')
+            .mockImplementation((r) => r);
         await emailRecipient.save();
         spy.mockRestore();
 
@@ -491,29 +512,39 @@ describe('Endpoint.GetEmailRecipients', () => {
         });
 
         const fetchIds = async (filter: StamhoofdFilter) => {
-            const response = await testServer.test(endpoint, Request.get({
-                path: baseUrl,
-                host: organization.getApiHost(),
-                query: new LimitedFilteredRequest({ filter, limit: 10 }),
-                headers: { authorization: 'Bearer ' + token2.accessToken },
-            }));
+            const response = await testServer.test(
+                endpoint,
+                Request.get({
+                    path: baseUrl,
+                    host: organization.getApiHost(),
+                    query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                    headers: { authorization: 'Bearer ' + token2.accessToken },
+                }),
+            );
             expect(response.status).toBe(200);
-            return response.body.results.map(r => r.id);
+            return response.body.results.map((r) => r.id);
         };
 
         const count = async (filter: StamhoofdFilter) => {
-            const response = await testServer.test(new GetEmailRecipientsCountEndpoint(), Request.get({
-                path: `${baseUrl}/count`,
-                host: organization.getApiHost(),
-                query: new CountFilteredRequest({ filter }),
-                headers: { authorization: 'Bearer ' + token2.accessToken },
-            }));
+            const response = await testServer.test(
+                new GetEmailRecipientsCountEndpoint(),
+                Request.get({
+                    path: `${baseUrl}/count`,
+                    host: organization.getApiHost(),
+                    query: new CountFilteredRequest({ filter }),
+                    headers: { authorization: 'Bearer ' + token2.accessToken },
+                }),
+            );
             return response.body.count;
         };
 
         const expectDenied = async (filter: StamhoofdFilter) => {
-            await expect(fetchIds(filter)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
-            await expect(count(filter)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(fetchIds(filter)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+            await expect(count(filter)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         };
 
         const expectVisible = async (filter: StamhoofdFilter, recipientIds: string[]) => {
@@ -527,29 +558,63 @@ describe('Endpoint.GetEmailRecipients', () => {
             await expectVisible([{ emailId: allowedEmail.id }], expected);
             await expectVisible({ $and: [{ emailId: allowedEmail.id }] }, expected);
             await expectVisible({ $and: [[{ emailId: allowedEmail.id }]] }, expected);
-            await expectVisible([{ $and: [{ emailId: allowedEmail.id }] }, { lastName: 'Janssens' }], expected);
+            await expectVisible(
+                [{ $and: [{ emailId: allowedEmail.id }] }, { lastName: 'Janssens' }],
+                expected,
+            );
             await expectVisible([{ emailId: { $in: [allowedEmail.id] } }], expected);
         });
 
         test('Extra conditions next to the email filter can only narrow the result', async () => {
-            await expectVisible({
-                $and: [{ emailId: allowedEmail.id }],
-                $or: [{ firstName: 'Hidden' }, { firstName: 'Allowed' }],
-            }, [allowedRecipient.id]);
+            await expectVisible(
+                {
+                    $and: [{ emailId: allowedEmail.id }],
+                    $or: [{ firstName: 'Hidden' }, { firstName: 'Allowed' }],
+                },
+                [allowedRecipient.id],
+            );
             await expectVisible([{ emailId: allowedEmail.id }, { firstName: 'Hidden' }], []);
             await expectVisible([{ emailId: allowedEmail.id }, { emailId: forbiddenEmail.id }], []);
-            await expectVisible({ $and: [{ emailId: allowedEmail.id }], $or: [{ emailId: forbiddenEmail.id }, { firstName: 'Hidden' }] }, []);
-            await expectVisible([{ emailId: { $in: [allowedEmail.id], $neq: allowedEmail.id } }], []);
-            await expectVisible([{ emailId: { $in: [allowedEmail.id], $or: [{ $eq: forbiddenEmail.id }] } }], []);
-            await expectVisible({ emailId: allowedEmail.id, $or: [{ emailId: forbiddenEmail.id }, { firstName: 'Hidden' }] }, []);
-            await expectVisible({ $and: [{ emailId: allowedEmail.id }], $or: [{ emailId: forbiddenEmail.id }, { emailId: allowedEmail.id }] }, [allowedRecipient.id]);
+            await expectVisible(
+                {
+                    $and: [{ emailId: allowedEmail.id }],
+                    $or: [{ emailId: forbiddenEmail.id }, { firstName: 'Hidden' }],
+                },
+                [],
+            );
+            await expectVisible(
+                [{ emailId: { $in: [allowedEmail.id], $neq: allowedEmail.id } }],
+                [],
+            );
+            await expectVisible(
+                [{ emailId: { $in: [allowedEmail.id], $or: [{ $eq: forbiddenEmail.id }] } }],
+                [],
+            );
+            await expectVisible(
+                {
+                    emailId: allowedEmail.id,
+                    $or: [{ emailId: forbiddenEmail.id }, { firstName: 'Hidden' }],
+                },
+                [],
+            );
+            await expectVisible(
+                {
+                    $and: [{ emailId: allowedEmail.id }],
+                    $or: [{ emailId: forbiddenEmail.id }, { emailId: allowedEmail.id }],
+                },
+                [allowedRecipient.id],
+            );
         });
 
         test('An email filter that does not narrow the result is rejected', async () => {
             await expectDenied([{ $or: [{ emailId: allowedEmail.id }, { firstName: 'Hidden' }] }]);
-            await expectDenied({ $and: [{ $or: [{ emailId: allowedEmail.id }, { firstName: 'Hidden' }] }] });
+            await expectDenied({
+                $and: [{ $or: [{ emailId: allowedEmail.id }, { firstName: 'Hidden' }] }],
+            });
             await expectDenied({ $and: [[{ $or: [{ emailId: allowedEmail.id }] }]] });
-            await expectDenied({ $or: [{ $and: [{ emailId: allowedEmail.id }] }, { firstName: 'Hidden' }] });
+            await expectDenied({
+                $or: [{ $and: [{ emailId: allowedEmail.id }] }, { firstName: 'Hidden' }],
+            });
             await expectDenied({ $not: { emailId: allowedEmail.id } });
             await expectDenied([{ $not: { emailId: allowedEmail.id } }]);
             await expectDenied({ $and: { emailId: allowedEmail.id } });
@@ -560,9 +625,13 @@ describe('Endpoint.GetEmailRecipients', () => {
 
         test('A forbidden email anywhere in the required position is rejected', async () => {
             await expectDenied([{ emailId: forbiddenEmail.id }]);
-            await expectDenied({ $and: [{ emailId: forbiddenEmail.id }, { emailId: allowedEmail.id }] });
+            await expectDenied({
+                $and: [{ emailId: forbiddenEmail.id }, { emailId: allowedEmail.id }],
+            });
             await expectDenied([{ emailId: { $in: [allowedEmail.id, forbiddenEmail.id] } }]);
-            await expectDenied({ $or: [{ emailId: allowedEmail.id }, { emailId: forbiddenEmail.id }] });
+            await expectDenied({
+                $or: [{ emailId: allowedEmail.id }, { emailId: forbiddenEmail.id }],
+            });
         });
     });
 
@@ -591,15 +660,31 @@ describe('Endpoint.GetEmailRecipients', () => {
             const permissions = Permissions.create({
                 level: PermissionLevel.None,
                 resources: new Map([
-                    [PermissionsResourceType.Senders, new Map([[PermissionsResourceKey.All, ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    })]])],
+                    [
+                        PermissionsResourceType.Senders,
+                        new Map([
+                            [
+                                PermissionsResourceKey.All,
+                                ResourcePermissions.create({
+                                    level: PermissionLevel.Read,
+                                }),
+                            ],
+                        ]),
+                    ],
                 ]),
             });
             if (organizationTagsLevel) {
-                permissions.resources.set(PermissionsResourceType.OrganizationTags, new Map([[PermissionsResourceKey.All, ResourcePermissions.create({
-                    level: organizationTagsLevel,
-                })]]));
+                permissions.resources.set(
+                    PermissionsResourceType.OrganizationTags,
+                    new Map([
+                        [
+                            PermissionsResourceKey.All,
+                            ResourcePermissions.create({
+                                level: organizationTagsLevel,
+                            }),
+                        ],
+                    ]),
+                );
             }
             const platformUser = await new UserFactory({ globalPermissions: permissions }).create();
             return await SessionService.createSession(platformUser);
@@ -616,7 +701,7 @@ describe('Endpoint.GetEmailRecipients', () => {
                     authorization: 'Bearer ' + platformToken.accessToken,
                 },
             });
-            return (await testServer.test(endpoint, request)).body.results.map(r => r.id);
+            return (await testServer.test(endpoint, request)).body.results.map((r) => r.id);
         };
 
         test('A platform admin without access to all organization tags only gets recipients of platform emails', async () => {
@@ -637,7 +722,10 @@ describe('Endpoint.GetEmailRecipients', () => {
             const platformToken = await createPlatformToken(PermissionLevel.Full);
 
             const ids = await fetchRecipients(platformToken, { lastName });
-            expect(ids).toIncludeSameMembers([platform.emailRecipient.id, organizationRecipient.emailRecipient.id]);
+            expect(ids).toIncludeSameMembers([
+                platform.emailRecipient.id,
+                organizationRecipient.emailRecipient.id,
+            ]);
         });
     });
 });

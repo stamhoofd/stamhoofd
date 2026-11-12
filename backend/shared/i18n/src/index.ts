@@ -17,6 +17,10 @@ Object.defineProperty(DecodedRequest.prototype, 'i18n', {
     },
 });
 
-DecodedRequest.prototype.$t = function<Params, Query, Body>(this: DecodedRequest<Params, Query, Body>, key: string, replace?: Record<string, string>): string {
+DecodedRequest.prototype.$t = function <Params, Query, Body>(
+    this: DecodedRequest<Params, Query, Body>,
+    key: string,
+    replace?: Record<string, string>,
+): string {
     return this.i18n.$t(key, replace);
 };

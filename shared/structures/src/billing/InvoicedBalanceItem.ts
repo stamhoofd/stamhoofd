@@ -1,11 +1,29 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Sorter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import type { BalanceItem } from '../BalanceItem.js';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, getVATExcemptPeppolTaxCategoryCode, VATExcemptReason } from '../BalanceItem.js';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemType,
+    getVATExcemptPeppolTaxCategoryCode,
+    VATExcemptReason,
+} from '../BalanceItem.js';
 
-export function getPeppolCategoryCode(data: { VATPercentage: number; VATExcempt: VATExcemptReason | null }) {
+export function getPeppolCategoryCode(data: {
+    VATPercentage: number;
+    VATExcempt: VATExcemptReason | null;
+}) {
     if (data.VATExcempt) {
         return getVATExcemptPeppolTaxCategoryCode(data.VATExcempt);
     }
@@ -29,7 +47,10 @@ export class InvoicedBalanceItem extends AutoEncoder {
     /**
      * Copied from the balance item at the time of invoicing, so invoices can be ordered and grouped without loading the balance items.
      */
-    @field({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation), version: 420 })
+    @field({
+        decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation),
+        version: 420,
+    })
     relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map();
 
     @field({ decoder: DateDecoder, nullable: true, version: 420 })
@@ -103,7 +124,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
      * = LineExtensionAmount
      */
     get totalWithoutVAT() {
-        return STMath.round(this.unitPrice * this.quantity / 1_00_00_00) * 100;
+        return STMath.round((this.unitPrice * this.quantity) / 1_00_00_00) * 100;
     }
 
     /**
@@ -113,7 +134,7 @@ export class InvoicedBalanceItem extends AutoEncoder {
         if (this.VATExcempt) {
             return this.balanceInvoicedAmount;
         }
-        return this.balanceInvoicedAmount * 100 / (100 + this.VATPercentage);
+        return (this.balanceInvoicedAmount * 100) / (100 + this.VATPercentage);
     }
 
     /**
@@ -131,7 +152,8 @@ export class InvoicedBalanceItem extends AutoEncoder {
     static createFor(balanceItem: BalanceItem, amount: number) {
         if (balanceItem.VATPercentage === null) {
             throw new SimpleError({
-                message: 'Cannot create InvoicedBalanceItem for balance item without VAT percentage',
+                message:
+                    'Cannot create InvoicedBalanceItem for balance item without VAT percentage',
                 human: $t('%1TA', { item: balanceItem.itemTitle }),
                 code: 'balance_item_without_vat_percentage',
             });
@@ -155,8 +177,15 @@ export class InvoicedBalanceItem extends AutoEncoder {
         item.VATIncluded = balanceItem.VATIncluded;
 
         // Calculate amount and unit price
-        const balanceItemUnitPriceWithVAT = STMath.round(balanceItem.priceWithVAT / balanceItem.quantity);
-        const quantity = balanceItemUnitPriceWithVAT === 0 ? 1_00_00 : STMath.round(item.balanceInvoicedAmount * 1_00_00 / balanceItemUnitPriceWithVAT); // Amount per ten thousand
+        const balanceItemUnitPriceWithVAT = STMath.round(
+            balanceItem.priceWithVAT / balanceItem.quantity,
+        );
+        const quantity =
+            balanceItemUnitPriceWithVAT === 0
+                ? 1_00_00
+                : STMath.round(
+                      (item.balanceInvoicedAmount * 1_00_00) / balanceItemUnitPriceWithVAT,
+                  ); // Amount per ten thousand
 
         if (quantity === 0 || isNaN(quantity) || quantity === null || quantity === undefined) {
             throw new SimpleError({
@@ -166,11 +195,11 @@ export class InvoicedBalanceItem extends AutoEncoder {
             });
         }
         item.quantity = quantity;
-        item.unitPrice = amount * 1_00_00 / quantity;
+        item.unitPrice = (amount * 1_00_00) / quantity;
 
         // Remove VAT from unit price if needed
         if (!balanceItem.VATExcempt) {
-            item.unitPrice = item.unitPrice * 100 / (100 + balanceItem.VATPercentage);
+            item.unitPrice = (item.unitPrice * 100) / (100 + balanceItem.VATPercentage);
         }
 
         // Rounding the unit price is not a peppol requirement normally,
@@ -191,10 +220,17 @@ export class InvoicedBalanceItem extends AutoEncoder {
 
     roundUnitPriceWithoutDifferenceInTotal() {
         // Round unit price cleaner
-        const recalculated = STMath.round(this.totalWithoutVAT * 10_000 / this.quantity / 20) * 20;// 15_00_00
-        if (recalculated !== this.unitPrice && (recalculated % 100 === 0 || recalculated % 100 === 5)) {
+        const recalculated =
+            STMath.round((this.totalWithoutVAT * 10_000) / this.quantity / 20) * 20; // 15_00_00
+        if (
+            recalculated !== this.unitPrice &&
+            (recalculated % 100 === 0 || recalculated % 100 === 5)
+        ) {
             // Only allow clean rounding like 15,455 or 15,45.
-            if (STMath.round(recalculated * this.quantity / 1_00_00_00) * 100 === this.totalWithoutVAT) {
+            if (
+                STMath.round((recalculated * this.quantity) / 1_00_00_00) * 100 ===
+                this.totalWithoutVAT
+            ) {
                 if (this.addedToUnitPriceToCorrectVAT !== 0) {
                     const originalUnitPrice = this.unitPrice - this.addedToUnitPriceToCorrectVAT;
                     this.addedToUnitPriceToCorrectVAT = recalculated - originalUnitPrice;
@@ -208,7 +244,14 @@ export class InvoicedBalanceItem extends AutoEncoder {
      * Orders invoice lines: items with a start date first (oldest first), then items without one.
      * Within the same date, the highest price comes first.
      */
-    static sort<T extends { startDate: Date | null; totalWithoutVAT: number; name: string; description: string }>(items: T[]): T[] {
+    static sort<
+        T extends {
+            startDate: Date | null;
+            totalWithoutVAT: number;
+            name: string;
+            description: string;
+        },
+    >(items: T[]): T[] {
         return items.sort((a, b) => {
             if (a.startDate && b.startDate) {
                 return Sorter.stack(

@@ -3,24 +3,36 @@ import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@
 
 export const registrationPeriodFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    ['id', createColumnFilter({
-        expression: SQL.column('id'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['organizationId', createColumnFilter({
-        expression: SQL.column('organizationId'),
-        type: SQLValueType.String,
-        nullable: true,
-    })],
-    ['startDate', createColumnFilter({
-        expression: SQL.column('startDate'),
-        type: SQLValueType.Datetime,
-        nullable: false,
-    })],
-    ['endDate', createColumnFilter({
-        expression: SQL.column('endDate'),
-        type: SQLValueType.Datetime,
-        nullable: false,
-    })],
+    [
+        'id',
+        createColumnFilter({
+            expression: SQL.column('id'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'organizationId',
+        createColumnFilter({
+            expression: SQL.column('organizationId'),
+            type: SQLValueType.String,
+            nullable: true,
+        }),
+    ],
+    [
+        'startDate',
+        createColumnFilter({
+            expression: SQL.column('startDate'),
+            type: SQLValueType.Datetime,
+            nullable: false,
+        }),
+    ],
+    [
+        'endDate',
+        createColumnFilter({
+            expression: SQL.column('endDate'),
+            type: SQLValueType.Datetime,
+            nullable: false,
+        }),
+    ],
 ]);

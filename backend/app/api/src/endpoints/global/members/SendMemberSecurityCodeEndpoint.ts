@@ -5,7 +5,18 @@ import { SimpleError } from '@common/errors';
 import type { Organization } from '@stamhoofd/models';
 import { AuditLog, Member, Platform, RateLimiter } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../../../helpers/EmailBuilder.js';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmailTemplateType, Recipient, Replacement, SecurityCodeSendMethod, SendMemberSecurityCodeRequest, SendMemberSecurityCodeResponse } from '@stamhoofd/structures';
+import {
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    AuditLogSource,
+    AuditLogType,
+    EmailTemplateType,
+    Recipient,
+    Replacement,
+    SecurityCodeSendMethod,
+    SendMemberSecurityCodeRequest,
+    SendMemberSecurityCodeResponse,
+} from '@stamhoofd/structures';
 import type { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -155,7 +166,8 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'client_update_required',
                 statusCode: 400,
-                message: 'The name and birth day of the member are required to request a security code',
+                message:
+                    'The name and birth day of the member are required to request a security code',
                 human: $t('%G8'),
             });
         }
@@ -171,7 +183,9 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
         }
 
         if (body.method === SecurityCodeSendMethod.SMS) {
-            return new Response(await this.sendViaSMS(member, organization, body.tryCount, body.phone));
+            return new Response(
+                await this.sendViaSMS(member, organization, body.tryCount, body.phone),
+            );
         }
 
         return new Response(await this.sendViaEmail(member, organization));
@@ -183,20 +197,27 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
      * from another source is not enough to get a code sent. String matching relies on the case- and
      * accent-insensitive collation of the database.
      */
-    private async findMember(body: SendMemberSecurityCodeRequest, organization: Organization | null): Promise<Member | undefined> {
+    private async findMember(
+        body: SendMemberSecurityCodeRequest,
+        organization: Organization | null,
+    ): Promise<Member | undefined> {
         if (!body.firstName || !body.lastName || !body.birthDay) {
             return;
         }
 
         // The duplicate check matched on cleaned names (trimmed, single spaces); the collation does not ignore whitespace
-        const organizationId = STAMHOOFD.userMode === 'platform' ? null : (organization?.id ?? null);
-        const members = await Member.where({
-            id: body.memberId,
-            organizationId,
-            firstName: Formatter.removeDuplicateSpaces(body.firstName.trim()),
-            lastName: Formatter.removeDuplicateSpaces(body.lastName.trim()),
-            birthDay: Formatter.dateIso(body.birthDay),
-        }, { limit: 1 });
+        const organizationId =
+            STAMHOOFD.userMode === 'platform' ? null : (organization?.id ?? null);
+        const members = await Member.where(
+            {
+                id: body.memberId,
+                organizationId,
+                firstName: Formatter.removeDuplicateSpaces(body.firstName.trim()),
+                lastName: Formatter.removeDuplicateSpaces(body.lastName.trim()),
+                birthDay: Formatter.dateIso(body.birthDay),
+            },
+            { limit: 1 },
+        );
         return members[0];
     }
 
@@ -211,12 +232,17 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
         return member.details.securityCode;
     }
 
-    private async sendViaEmail(member: Member, organization: Organization | null): Promise<SendMemberSecurityCodeResponse> {
-        const emails = Formatter.uniqueArray([
-            ...member.details.getMemberEmails(),
-            ...member.details.getParentEmails(),
-            ...member.details.unverifiedEmails,
-        ].map(e => e.toLowerCase().trim()));
+    private async sendViaEmail(
+        member: Member,
+        organization: Organization | null,
+    ): Promise<SendMemberSecurityCodeResponse> {
+        const emails = Formatter.uniqueArray(
+            [
+                ...member.details.getMemberEmails(),
+                ...member.details.getParentEmails(),
+                ...member.details.unverifiedEmails,
+            ].map((e) => e.toLowerCase().trim()),
+        );
 
         if (emails.length === 0) {
             throw new SimpleError({
@@ -234,29 +260,44 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
         const formattedCode = Formatter.spaceString(code, 4, '-');
 
         await sendEmailTemplate(organization, {
-            recipients: emails.map(email => Recipient.create({
-                firstName: member.details.firstName,
-                lastName: member.details.lastName,
-                email,
-                language: member.details.language,
-                replacements: [
-                    Replacement.create({ token: 'requesterEmail', value: Context.auth.user.email }),
-                    Replacement.create({ token: 'firstNameMember', value: member.details.firstName }),
-                    Replacement.create({ token: 'lastNameMember', value: member.details.lastName }),
-                    Replacement.create({
-                        token: 'securityCode',
-                        value: formattedCode,
-                        html: `<p class="style-code-large">${Formatter.escapeHtml(formattedCode)}</p>`,
-                    }),
-                ],
-            })),
+            recipients: emails.map((email) =>
+                Recipient.create({
+                    firstName: member.details.firstName,
+                    lastName: member.details.lastName,
+                    email,
+                    language: member.details.language,
+                    replacements: [
+                        Replacement.create({
+                            token: 'requesterEmail',
+                            value: Context.auth.user.email,
+                        }),
+                        Replacement.create({
+                            token: 'firstNameMember',
+                            value: member.details.firstName,
+                        }),
+                        Replacement.create({
+                            token: 'lastNameMember',
+                            value: member.details.lastName,
+                        }),
+                        Replacement.create({
+                            token: 'securityCode',
+                            value: formattedCode,
+                            html: `<p class="style-code-large">${Formatter.escapeHtml(formattedCode)}</p>`,
+                        }),
+                    ],
+                }),
+            ),
             template: {
                 type: EmailTemplateType.MemberSecurityCode,
             },
             type: 'transactional',
         });
 
-        await this.logSecurityCodeRequested(member, SecurityCodeSendMethod.Email, emails.join(', '));
+        await this.logSecurityCodeRequested(
+            member,
+            SecurityCodeSendMethod.Email,
+            emails.join(', '),
+        );
 
         return SendMemberSecurityCodeResponse.create({
             method: SecurityCodeSendMethod.Email,
@@ -264,7 +305,12 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
         });
     }
 
-    private async sendViaSMS(member: Member, organization: Organization | null, tryCount: number, requestedPhone: string | null): Promise<SendMemberSecurityCodeResponse> {
+    private async sendViaSMS(
+        member: Member,
+        organization: Organization | null,
+        tryCount: number,
+        requestedPhone: string | null,
+    ): Promise<SendMemberSecurityCodeResponse> {
         // Collect candidate phone numbers, member first, then parents.
         const uniquePhones = member.details.getPhoneNumbersForVerification();
 
@@ -296,9 +342,12 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             }
 
             const requestedE164 = this.normalizePhone(requestedPhone, defaultCountry);
-            const match = requestedE164 === null
-                ? undefined
-                : uniquePhones.find(p => this.normalizePhone(p, defaultCountry) === requestedE164);
+            const match =
+                requestedE164 === null
+                    ? undefined
+                    : uniquePhones.find(
+                          (p) => this.normalizePhone(p, defaultCountry) === requestedE164,
+                      );
 
             if (!match) {
                 throw new SimpleError({
@@ -334,47 +383,54 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
         const code = await this.ensureSecurityCode(member);
         const formattedCode = Formatter.spaceString(code, 4, '-');
 
-        let message = Context.user?.name && !Context.auth.hasSomePlatformAccess()
-            ? $t('%Zav', {
-                    organization: organization?.name ?? (await Platform.getShared()).config.name,
-                    firstName: member.details.firstName,
-                    securityCode: formattedCode,
-                    user: Context.user.name,
-                })
-            : $t('%Zao', {
-                    organization: organization?.name ?? (await Platform.getShared()).config.name,
-                    firstName: member.details.firstName,
-                    securityCode: formattedCode,
-                });
+        let message =
+            Context.user?.name && !Context.auth.hasSomePlatformAccess()
+                ? $t('%Zav', {
+                      organization: organization?.name ?? (await Platform.getShared()).config.name,
+                      firstName: member.details.firstName,
+                      securityCode: formattedCode,
+                      user: Context.user.name,
+                  })
+                : $t('%Zao', {
+                      organization: organization?.name ?? (await Platform.getShared()).config.name,
+                      firstName: member.details.firstName,
+                      securityCode: formattedCode,
+                  });
 
         if (message.length > 160) {
-            message = Context.user?.firstName && !Context.auth.hasSomePlatformAccess()
-                ? $t('%Zaz', {
-                        organization: organization?.name ?? (await Platform.getShared()).config.name,
-                        firstName: member.details.firstName,
-                        securityCode: formattedCode,
-                        user: Context.user.firstName,
-                    })
-                : $t('%Zaq', {
-                        organization: organization?.name ?? (await Platform.getShared()).config.name,
-                        firstName: member.details.firstName,
-                        securityCode: formattedCode,
-                    });
+            message =
+                Context.user?.firstName && !Context.auth.hasSomePlatformAccess()
+                    ? $t('%Zaz', {
+                          organization:
+                              organization?.name ?? (await Platform.getShared()).config.name,
+                          firstName: member.details.firstName,
+                          securityCode: formattedCode,
+                          user: Context.user.firstName,
+                      })
+                    : $t('%Zaq', {
+                          organization:
+                              organization?.name ?? (await Platform.getShared()).config.name,
+                          firstName: member.details.firstName,
+                          securityCode: formattedCode,
+                      });
         }
 
         if (message.length > 160) {
-            message = Context.user?.firstName && !Context.auth.hasSomePlatformAccess()
-                ? $t('%Zb2', {
-                        organization: organization?.name ?? (await Platform.getShared()).config.name,
-                        firstName: member.details.firstName,
-                        securityCode: formattedCode,
-                        user: Context.user.firstName,
-                    })
-                : $t('%Zas', {
-                        organization: organization?.name ?? (await Platform.getShared()).config.name,
-                        firstName: member.details.firstName,
-                        securityCode: formattedCode,
-                    });
+            message =
+                Context.user?.firstName && !Context.auth.hasSomePlatformAccess()
+                    ? $t('%Zb2', {
+                          organization:
+                              organization?.name ?? (await Platform.getShared()).config.name,
+                          firstName: member.details.firstName,
+                          securityCode: formattedCode,
+                          user: Context.user.firstName,
+                      })
+                    : $t('%Zas', {
+                          organization:
+                              organization?.name ?? (await Platform.getShared()).config.name,
+                          firstName: member.details.firstName,
+                          securityCode: formattedCode,
+                      });
         }
 
         await SMSService.send({
@@ -395,7 +451,11 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
     /**
      * Record an audit log entry so it is traceable who requested a member's security code, how and to where.
      */
-    private async logSecurityCodeRequested(member: Member, method: SecurityCodeSendMethod, maskedRecipient: string) {
+    private async logSecurityCodeRequested(
+        member: Member,
+        method: SecurityCodeSendMethod,
+        maskedRecipient: string,
+    ) {
         const log = new AuditLog();
 
         // A member can belong to multiple organizations, so this is best-effort (mainly visible in the admin panel).
@@ -405,17 +465,26 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
         log.userId = Context.user?.id ?? null;
         log.objectId = member.id;
         log.replacements = new Map([
-            ['m', AuditLogReplacement.create({
-                value: member.details.name,
-                type: AuditLogReplacementType.Member,
-                id: member.id,
-            })],
-            ['method', AuditLogReplacement.create({
-                value: method === SecurityCodeSendMethod.SMS ? 'SMS' : 'e-mail',
-            })],
-            ['recipient', AuditLogReplacement.create({
-                value: maskedRecipient,
-            })],
+            [
+                'm',
+                AuditLogReplacement.create({
+                    value: member.details.name,
+                    type: AuditLogReplacementType.Member,
+                    id: member.id,
+                }),
+            ],
+            [
+                'method',
+                AuditLogReplacement.create({
+                    value: method === SecurityCodeSendMethod.SMS ? 'SMS' : 'e-mail',
+                }),
+            ],
+            [
+                'recipient',
+                AuditLogReplacement.create({
+                    value: maskedRecipient,
+                }),
+            ],
         ]);
         await log.save();
     }

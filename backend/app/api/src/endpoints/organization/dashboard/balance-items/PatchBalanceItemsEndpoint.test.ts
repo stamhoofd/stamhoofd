@@ -2,9 +2,23 @@ import type { AutoEncoderPatchType } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
 import { Request } from '@node/endpoints';
 import type { Organization, User } from '@stamhoofd/models';
-import { AuditLog, BalanceItem, BalanceItemFactory, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
+import {
+    AuditLog,
+    BalanceItem,
+    BalanceItemFactory,
+    MemberFactory,
+    OrganizationFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AuditLogReplacementType, AuditLogSource, AuditLogType, BalanceItemStatus, BalanceItemWithPayments, Permissions } from '@stamhoofd/structures';
+import {
+    AuditLogReplacementType,
+    AuditLogSource,
+    AuditLogType,
+    BalanceItemStatus,
+    BalanceItemWithPayments,
+    Permissions,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import '../../../../audit-logs/init.js';
@@ -16,9 +30,26 @@ import { PatchBalanceItemsEndpoint } from './PatchBalanceItemsEndpoint.js';
 describe('Endpoint.PatchBalanceItemsEndpoint', () => {
     const endpoint = new PatchBalanceItemsEndpoint();
 
-    const patchBalanceItems = async ({ body, organization, user }: { body: PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>; organization: Organization; user: User }) => {
+    const patchBalanceItems = async ({
+        body,
+        organization,
+        user,
+    }: {
+        body: PatchableArray<
+            string,
+            BalanceItemWithPayments,
+            AutoEncoderPatchType<BalanceItemWithPayments>
+        >;
+        organization: Organization;
+        user: User;
+    }) => {
         const token = await SessionService.createSession(user);
-        const request = Request.buildJson('PATCH', '/organization/balance', organization.getApiHost(), body);
+        const request = Request.buildJson(
+            'PATCH',
+            '/organization/balance',
+            organization.getApiHost(),
+            body,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -31,7 +62,10 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
         test('an admin of the paying organization cannot edit or cancel balance items charged by another organization', async () => {
             const sellingOrganization = await new OrganizationFactory({}).create();
             const payingOrganization = await new OrganizationFactory({}).create();
-            const payingAdmin = await new UserFactory({ organization: payingOrganization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const payingAdmin = await new UserFactory({
+                organization: payingOrganization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const balanceItem = await new BalanceItemFactory({
                 organizationId: sellingOrganization.id,
                 payingOrganizationId: payingOrganization.id,
@@ -41,9 +75,19 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
             }).create();
 
             for (const patch of [{ unitPrice: 0 }, { status: BalanceItemStatus.Canceled }]) {
-                const body = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
+                const body = new PatchableArray<
+                    string,
+                    BalanceItemWithPayments,
+                    AutoEncoderPatchType<BalanceItemWithPayments>
+                >();
                 body.addPatch(BalanceItemWithPayments.patch({ id: balanceItem.id, ...patch }));
-                await expect(patchBalanceItems({ body, organization: payingOrganization, user: payingAdmin })).rejects.toThrow(/BalanceItem not found/);
+                await expect(
+                    patchBalanceItems({
+                        body,
+                        organization: payingOrganization,
+                        user: payingAdmin,
+                    }),
+                ).rejects.toThrow(/BalanceItem not found/);
             }
 
             const model = await BalanceItem.getByID(balanceItem.id);
@@ -55,8 +99,14 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
             TestUtils.setEnvironment('userMode', 'platform');
             const sellingOrganization = await new OrganizationFactory({}).create();
             const payingOrganization = await new OrganizationFactory({}).create();
-            const user = await new UserFactory({ organization: payingOrganization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            user.permissions!.organizationPermissions.set(sellingOrganization.id, Permissions.create({ level: PermissionLevel.Read }));
+            const user = await new UserFactory({
+                organization: payingOrganization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            user.permissions!.organizationPermissions.set(
+                sellingOrganization.id,
+                Permissions.create({ level: PermissionLevel.Read }),
+            );
             await user.save();
 
             const balanceItem = await new BalanceItemFactory({
@@ -68,14 +118,24 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
             }).create();
 
             const token = await SessionService.createSession(user);
-            const getRequest = Request.buildJson('GET', '/balance-items/' + balanceItem.id, sellingOrganization.getApiHost());
+            const getRequest = Request.buildJson(
+                'GET',
+                '/balance-items/' + balanceItem.id,
+                sellingOrganization.getApiHost(),
+            );
             getRequest.headers.authorization = 'Bearer ' + token.accessToken;
             const getResponse = await testServer.test(new GetBalanceItemEndpoint(), getRequest);
             expect(getResponse.body.id).toBe(balanceItem.id);
 
-            const body = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
+            const body = new PatchableArray<
+                string,
+                BalanceItemWithPayments,
+                AutoEncoderPatchType<BalanceItemWithPayments>
+            >();
             body.addPatch(BalanceItemWithPayments.patch({ id: balanceItem.id, unitPrice: 0 }));
-            await expect(patchBalanceItems({ body, organization: sellingOrganization, user })).rejects.toThrow(/BalanceItem not found/);
+            await expect(
+                patchBalanceItems({ body, organization: sellingOrganization, user }),
+            ).rejects.toThrow(/BalanceItem not found/);
 
             const model = await BalanceItem.getByID(balanceItem.id);
             expect(model?.unitPrice).toBe(10_00);
@@ -85,31 +145,60 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
     describe('Description', () => {
         test('a balance item can be created with a description and the description can be changed or cleared', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const admin = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const member = await new MemberFactory({ organization }).create();
 
-            const putBody = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
-            putBody.addPut(BalanceItemWithPayments.create({
-                name: 'Kampgeld',
-                description: 'Weekend aan zee',
-                unitPrice: 25_00,
-                amount: 1,
-                memberId: member.id,
-            }));
+            const putBody = new PatchableArray<
+                string,
+                BalanceItemWithPayments,
+                AutoEncoderPatchType<BalanceItemWithPayments>
+            >();
+            putBody.addPut(
+                BalanceItemWithPayments.create({
+                    name: 'Kampgeld',
+                    description: 'Weekend aan zee',
+                    unitPrice: 25_00,
+                    amount: 1,
+                    memberId: member.id,
+                }),
+            );
 
-            const created = (await patchBalanceItems({ body: putBody, organization, user: admin })).body[0];
+            const created = (await patchBalanceItems({ body: putBody, organization, user: admin }))
+                .body[0];
             expect(created.name).toBe('Kampgeld');
             expect(created.description).toBe('Weekend aan zee');
 
-            const patchBody = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
-            patchBody.addPatch(BalanceItemWithPayments.patch({ id: created.id, description: 'Weekend in de Ardennen' }));
-            const patched = (await patchBalanceItems({ body: patchBody, organization, user: admin })).body[0];
+            const patchBody = new PatchableArray<
+                string,
+                BalanceItemWithPayments,
+                AutoEncoderPatchType<BalanceItemWithPayments>
+            >();
+            patchBody.addPatch(
+                BalanceItemWithPayments.patch({
+                    id: created.id,
+                    description: 'Weekend in de Ardennen',
+                }),
+            );
+            const patched = (
+                await patchBalanceItems({ body: patchBody, organization, user: admin })
+            ).body[0];
             expect(patched.name).toBe('Kampgeld');
             expect(patched.description).toBe('Weekend in de Ardennen');
 
-            const clearBody = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
-            clearBody.addPatch(BalanceItemWithPayments.patch({ id: created.id, description: null }));
-            const cleared = (await patchBalanceItems({ body: clearBody, organization, user: admin })).body[0];
+            const clearBody = new PatchableArray<
+                string,
+                BalanceItemWithPayments,
+                AutoEncoderPatchType<BalanceItemWithPayments>
+            >();
+            clearBody.addPatch(
+                BalanceItemWithPayments.patch({ id: created.id, description: null }),
+            );
+            const cleared = (
+                await patchBalanceItems({ body: clearBody, organization, user: admin })
+            ).body[0];
             expect(cleared.description).toBeNull();
 
             const model = await BalanceItem.getByID(created.id);
@@ -119,12 +208,28 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
 
         test('a patch without description keeps the existing description', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const admin = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const member = await new MemberFactory({ organization }).create();
-            const balanceItem = await new BalanceItemFactory({ organizationId: organization.id, memberId: member.id, name: 'Kampgeld', description: 'Weekend aan zee', amount: 1, unitPrice: 25_00 }).create();
+            const balanceItem = await new BalanceItemFactory({
+                organizationId: organization.id,
+                memberId: member.id,
+                name: 'Kampgeld',
+                description: 'Weekend aan zee',
+                amount: 1,
+                unitPrice: 25_00,
+            }).create();
 
-            const body = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
-            body.addPatch(BalanceItemWithPayments.patch({ id: balanceItem.id, name: 'Weekendgeld' }));
+            const body = new PatchableArray<
+                string,
+                BalanceItemWithPayments,
+                AutoEncoderPatchType<BalanceItemWithPayments>
+            >();
+            body.addPatch(
+                BalanceItemWithPayments.patch({ id: balanceItem.id, name: 'Weekendgeld' }),
+            );
             const patched = (await patchBalanceItems({ body, organization, user: admin })).body[0];
 
             expect(patched.name).toBe('Weekendgeld');
@@ -135,36 +240,59 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
     describe('Audit logs', () => {
         test('creating a balance item is logged with the member as payer', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const admin = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const member = await new MemberFactory({ organization }).create();
 
-            const body = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
-            body.addPut(BalanceItemWithPayments.create({
-                name: 'Kampgeld',
-                unitPrice: 25_00,
-                amount: 2,
-                memberId: member.id,
-            }));
+            const body = new PatchableArray<
+                string,
+                BalanceItemWithPayments,
+                AutoEncoderPatchType<BalanceItemWithPayments>
+            >();
+            body.addPut(
+                BalanceItemWithPayments.create({
+                    name: 'Kampgeld',
+                    unitPrice: 25_00,
+                    amount: 2,
+                    memberId: member.id,
+                }),
+            );
 
             const response = await patchBalanceItems({ body, organization, user: admin });
             expect(response.body).toHaveLength(1);
             const balanceItemId = response.body[0].id;
 
-            const logs = await AuditLog.select().where('type', AuditLogType.BalanceItemAdded).where('objectId', balanceItemId).fetch();
+            const logs = await AuditLog.select()
+                .where('type', AuditLogType.BalanceItemAdded)
+                .where('objectId', balanceItemId)
+                .fetch();
             expect(logs).toHaveLength(1);
 
             const log = logs[0];
             expect(log.userId).toBe(admin.id);
             expect(log.organizationId).toBe(organization.id);
             expect(log.source).toBe(AuditLogSource.User);
-            expect(log.replacements.get('b')).toMatchObject({ id: balanceItemId, value: 'Kampgeld', type: AuditLogReplacementType.BalanceItem });
-            expect(log.replacements.get('payer')).toMatchObject({ id: member.id, value: member.details.name, type: AuditLogReplacementType.Member });
+            expect(log.replacements.get('b')).toMatchObject({
+                id: balanceItemId,
+                value: 'Kampgeld',
+                type: AuditLogReplacementType.BalanceItem,
+            });
+            expect(log.replacements.get('payer')).toMatchObject({
+                id: member.id,
+                value: member.details.name,
+                type: AuditLogReplacementType.Member,
+            });
             expect(log.description).toContain('Bedrag');
         });
 
         test('editing a balance item logs the changed fields, not cached prices', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const admin = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const member = await new MemberFactory({ organization }).create();
             const balanceItem = await new BalanceItemFactory({
                 organizationId: organization.id,
@@ -175,51 +303,87 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
                 createdAt: new Date(Date.now() - 60_000),
             }).create();
 
-            const body = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
-            body.addPatch(BalanceItemWithPayments.patch({
-                id: balanceItem.id,
-                name: 'Weekendgeld',
-                unitPrice: 30_00,
-                status: BalanceItemStatus.Canceled,
-            }));
+            const body = new PatchableArray<
+                string,
+                BalanceItemWithPayments,
+                AutoEncoderPatchType<BalanceItemWithPayments>
+            >();
+            body.addPatch(
+                BalanceItemWithPayments.patch({
+                    id: balanceItem.id,
+                    name: 'Weekendgeld',
+                    unitPrice: 30_00,
+                    status: BalanceItemStatus.Canceled,
+                }),
+            );
 
             await patchBalanceItems({ body, organization, user: admin });
 
-            const logs = await AuditLog.select().where('type', AuditLogType.BalanceItemEdited).where('objectId', balanceItem.id).fetch();
+            const logs = await AuditLog.select()
+                .where('type', AuditLogType.BalanceItemEdited)
+                .where('objectId', balanceItem.id)
+                .fetch();
             expect(logs).toHaveLength(1);
 
             const log = logs[0];
-            expect(log.replacements.get('b')).toMatchObject({ id: balanceItem.id, value: 'Weekendgeld', type: AuditLogReplacementType.BalanceItem });
+            expect(log.replacements.get('b')).toMatchObject({
+                id: balanceItem.id,
+                value: 'Weekendgeld',
+                type: AuditLogReplacementType.BalanceItem,
+            });
 
-            const keys = log.patchList.map(p => p.key.toKey());
+            const keys = log.patchList.map((p) => p.key.toKey());
             expect(keys).toEqual(expect.arrayContaining(['name', 'unitPrice', 'status']));
             expect(keys).not.toEqual(expect.arrayContaining(['priceTotal']));
             expect(keys).not.toEqual(expect.arrayContaining(['priceOpen']));
 
-            const statusChange = log.patchList.find(p => p.key.toKey() === 'status');
-            expect(statusChange?.oldValue).toMatchObject({ id: 'BalanceItemStatus', value: BalanceItemStatus.Due, type: AuditLogReplacementType.Enum });
-            expect(statusChange?.value).toMatchObject({ id: 'BalanceItemStatus', value: BalanceItemStatus.Canceled, type: AuditLogReplacementType.Enum });
+            const statusChange = log.patchList.find((p) => p.key.toKey() === 'status');
+            expect(statusChange?.oldValue).toMatchObject({
+                id: 'BalanceItemStatus',
+                value: BalanceItemStatus.Due,
+                type: AuditLogReplacementType.Enum,
+            });
+            expect(statusChange?.value).toMatchObject({
+                id: 'BalanceItemStatus',
+                value: BalanceItemStatus.Canceled,
+                type: AuditLogReplacementType.Enum,
+            });
         });
 
         test('a balance item paid by an organization uses that organization as payer', async () => {
             const organization = await new OrganizationFactory({}).create();
             const payingOrganization = await new OrganizationFactory({}).create();
-            const admin = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
 
-            const body = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
-            body.addPut(BalanceItemWithPayments.create({
-                name: 'Lidgeld',
-                unitPrice: 10_00,
-                amount: 1,
-                payingOrganizationId: payingOrganization.id,
-            }));
+            const body = new PatchableArray<
+                string,
+                BalanceItemWithPayments,
+                AutoEncoderPatchType<BalanceItemWithPayments>
+            >();
+            body.addPut(
+                BalanceItemWithPayments.create({
+                    name: 'Lidgeld',
+                    unitPrice: 10_00,
+                    amount: 1,
+                    payingOrganizationId: payingOrganization.id,
+                }),
+            );
 
             const response = await patchBalanceItems({ body, organization, user: admin });
 
-            const logs = await AuditLog.select().where('type', AuditLogType.BalanceItemAdded).where('objectId', response.body[0].id).fetch();
+            const logs = await AuditLog.select()
+                .where('type', AuditLogType.BalanceItemAdded)
+                .where('objectId', response.body[0].id)
+                .fetch();
             expect(logs).toHaveLength(1);
             expect(logs[0].organizationId).toBe(organization.id);
-            expect(logs[0].replacements.get('payer')).toMatchObject({ id: payingOrganization.id, value: payingOrganization.name, type: AuditLogReplacementType.Organization });
+            expect(logs[0].replacements.get('payer')).toMatchObject({
+                id: payingOrganization.id,
+                value: payingOrganization.name,
+                type: AuditLogReplacementType.Organization,
+            });
         });
     });
 });

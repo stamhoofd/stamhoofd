@@ -1,7 +1,18 @@
 import { SimpleError } from '@common/errors';
-import { BalanceItem, Member, MemberPlatformMembership, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    Member,
+    MemberPlatformMembership,
+    Platform,
+    RegistrationPeriod,
+} from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLWhereSign } from '@stamhoofd/sql';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemType,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { Formatter, sleep } from '@stamhoofd/utility';
 import { PlatformMembershipService } from '../services/PlatformMembershipService.js';
 
@@ -22,7 +33,7 @@ export const MembershipCharger = {
         }
 
         function getType(id: string) {
-            return platform.config.membershipTypes.find(t => t.id === id);
+            return platform.config.membershipTypes.find((t) => t.id === id);
         }
 
         // Cache the registration period relation per periodId, so we only load each period once.
@@ -35,9 +46,9 @@ export const MembershipCharger = {
             const period = await RegistrationPeriod.getByID(periodId);
             const relation = period
                 ? BalanceItemRelation.create({
-                        id: period.id,
-                        name: new TranslatedString(period.getBaseStructure().name),
-                    })
+                      id: period.id,
+                      name: new TranslatedString(period.getBaseStructure().name),
+                  })
                 : null;
 
             periodRelationCache.set(periodId, relation);
@@ -49,7 +60,9 @@ export const MembershipCharger = {
         let q = MemberPlatformMembership.select()
             .where('deletedAt', null)
             .where('locked', false)
-            .where(SQL.where('trialUntil', null).or('trialUntil', SQLWhereSign.LessEqual, new Date()));
+            .where(
+                SQL.where('trialUntil', null).or('trialUntil', SQLWhereSign.LessEqual, new Date()),
+            );
 
         if (nextPeriodId) {
             q = q.where('periodId', '!=', nextPeriodId);
@@ -57,7 +70,7 @@ export const MembershipCharger = {
 
         // allBatched() paginates by id ASC internally, so we must not set a custom order by here.
         for await (const memberships of q.limit(100).allBatched()) {
-            const memberIds = Formatter.uniqueArray(memberships.map(m => m.memberId));
+            const memberIds = Formatter.uniqueArray(memberships.map((m) => m.memberId));
             const members = await Member.getByIDs(...memberIds);
             const createdBalanceItems: BalanceItem[] = [];
 
@@ -78,10 +91,15 @@ export const MembershipCharger = {
                     continue;
                 }
 
-                const member = members.find(m => m.id === membership.memberId);
+                const member = members.find((m) => m.id === membership.memberId);
 
                 if (!member) {
-                    console.error('Unexpected missing member id ', membership.memberId, 'for membership', membership.id);
+                    console.error(
+                        'Unexpected missing member id ',
+                        membership.memberId,
+                        'for membership',
+                        membership.id,
+                    );
                     continue;
                 }
 
@@ -89,7 +107,11 @@ export const MembershipCharger = {
                 try {
                     await PlatformMembershipService.calculatePrice(membership, member);
                 } catch (e) {
-                    console.error('Failed to update price for membership. Not charged.', membership.id, e);
+                    console.error(
+                        'Failed to update price for membership. Not charged.',
+                        membership.id,
+                        e,
+                    );
                     continue;
                 }
 
@@ -105,7 +127,12 @@ export const MembershipCharger = {
                 const balanceItem = new BalanceItem();
                 balanceItem.unitPrice = membership.price;
                 balanceItem.amount = 1;
-                balanceItem.name = Formatter.dateNumber(membership.startDate, true) + ' ' + $t('%10C') + ' ' + Formatter.dateNumber(membership.expireDate ?? membership.endDate, true);
+                balanceItem.name =
+                    Formatter.dateNumber(membership.startDate, true) +
+                    ' ' +
+                    $t('%10C') +
+                    ' ' +
+                    Formatter.dateNumber(membership.expireDate ?? membership.endDate, true);
                 balanceItem.relations = new Map([
                     [
                         BalanceItemRelationType.Member,
@@ -126,7 +153,10 @@ export const MembershipCharger = {
                 // Add the registration period (working year) relation so it is visible in the item description.
                 const periodRelation = await getPeriodRelation(membership.periodId);
                 if (periodRelation) {
-                    balanceItem.relations.set(BalanceItemRelationType.RegistrationPeriod, periodRelation);
+                    balanceItem.relations.set(
+                        BalanceItemRelationType.RegistrationPeriod,
+                        periodRelation,
+                    );
                 }
 
                 balanceItem.type = BalanceItemType.PlatformMembership;
@@ -145,7 +175,12 @@ export const MembershipCharger = {
             }
         }
 
-        console.log('Charged ' + Formatter.integer(createdCount) + '  memberships, for a total value of ' + Formatter.price(createdPrice));
+        console.log(
+            'Charged ' +
+                Formatter.integer(createdCount) +
+                '  memberships, for a total value of ' +
+                Formatter.price(createdPrice),
+        );
     },
 
     async updatePrices(organizationId?: string) {
@@ -182,14 +217,19 @@ export const MembershipCharger = {
                 break;
             }
 
-            const memberIds = Formatter.uniqueArray(memberships.map(m => m.memberId));
+            const memberIds = Formatter.uniqueArray(memberships.map((m) => m.memberId));
             const members = await Member.getByIDs(...memberIds);
 
             for (const membership of memberships) {
-                const member = members.find(m => m.id === membership.memberId);
+                const member = members.find((m) => m.id === membership.memberId);
 
                 if (!member) {
-                    console.error('Unexpected missing member id ', membership.memberId, 'for membership', membership.id);
+                    console.error(
+                        'Unexpected missing member id ',
+                        membership.memberId,
+                        'for membership',
+                        membership.id,
+                    );
                     continue;
                 }
 

@@ -24,7 +24,9 @@ export class EventFactory extends Factory<Options, Event> {
         event.typeId = this.options.typeId ?? (await new PlatformEventTypeFactory({}).create()).id;
         event.startDate = this.options.startDate ?? new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
         event.endDate = this.options.endDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-        event.name = this.options.name ?? 'Event ' + (new Date().getTime() + Math.floor(Math.random() * 999999));
+        event.name =
+            this.options.name ??
+            'Event ' + (new Date().getTime() + Math.floor(Math.random() * 999999));
         event.meta = this.options.meta ?? EventMeta.create({});
         event.groupId = this.options.group?.id ?? null;
 

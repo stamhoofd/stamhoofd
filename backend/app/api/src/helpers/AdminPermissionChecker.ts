@@ -1,14 +1,59 @@
 import type { AutoEncoderPatchType } from '@common/encoding';
 import { isEmptyPatch, PatchMap } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
-import type { BalanceItem, Document, Email, EmailTemplate, MemberWithUsers, MemberWithUsersAndRegistrations, MemberWithUsersRegistrationsAndGroups, Order, User } from '@stamhoofd/models';
-import { CachedBalance, Event, EventNotification, Group, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Registration, RegistrationPeriod, Webshop } from '@stamhoofd/models';
+import type {
+    BalanceItem,
+    Document,
+    Email,
+    EmailTemplate,
+    MemberWithUsers,
+    MemberWithUsersAndRegistrations,
+    MemberWithUsersRegistrationsAndGroups,
+    Order,
+    User,
+} from '@stamhoofd/models';
+import {
+    CachedBalance,
+    Event,
+    EventNotification,
+    Group,
+    Member,
+    MemberPlatformMembership,
+    MemberResponsibilityRecord,
+    Organization,
+    OrganizationRegistrationPeriod,
+    Payment,
+    Registration,
+    RegistrationPeriod,
+    Webshop,
+} from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import type { GroupCategory, MemberDetails, MemberWithRegistrationsBlob, Platform as PlatformStruct, RecordAnswer, RecordSettings, RegistrationPeriodBase, ResourcePermissions } from '@stamhoofd/structures';
+import type {
+    GroupCategory,
+    MemberDetails,
+    MemberWithRegistrationsBlob,
+    Platform as PlatformStruct,
+    RecordAnswer,
+    RecordSettings,
+    RegistrationPeriodBase,
+    ResourcePermissions,
+} from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { EmailTemplate as EmailTemplateStruct, EventPeriodHelper, EventPermissionChecker, FinancialSupportSettings, GroupStatus, GroupType, PermissionsResourceKey, ReceivableBalanceType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import {
+    EmailTemplate as EmailTemplateStruct,
+    EventPeriodHelper,
+    EventPermissionChecker,
+    FinancialSupportSettings,
+    GroupStatus,
+    GroupType,
+    PermissionsResourceKey,
+    ReceivableBalanceType,
+    UitpasNumberDetails,
+    UitpasSocialTariff,
+    UitpasSocialTariffStatus,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { RecordCacheEntry } from '../services/MemberRecordStore.js';
 import { MemberRecordStore } from '../services/MemberRecordStore.js';
@@ -33,7 +78,10 @@ export class AdminPermissionChecker {
     organizationCache: Map<string, Organization | Promise<Organization | undefined>> = new Map();
     groupsCache: Map<string, Group | null | Promise<Group | null>> = new Map();
     webshopsCache: Map<string, Webshop | null | Promise<Webshop | null>> = new Map();
-    organizationPeriodsCache: Map<string, OrganizationRegistrationPeriod | null | Promise<OrganizationRegistrationPeriod | null>> = new Map();
+    organizationPeriodsCache: Map<
+        string,
+        OrganizationRegistrationPeriod | null | Promise<OrganizationRegistrationPeriod | null>
+    > = new Map();
 
     constructor(user: User, platform: PlatformStruct, organization?: Organization) {
         this.user = user;
@@ -42,7 +90,8 @@ export class AdminPermissionChecker {
         if (user.organizationId && (!organization || organization.id !== user.organizationId)) {
             throw new SimpleError({
                 code: 'invalid_scope',
-                message: 'Tried accessing a resource without an organization context, but this user is limited to the organization context',
+                message:
+                    'Tried accessing a resource without an organization context, but this user is limited to the organization context',
                 statusCode: 403,
             });
         }
@@ -59,7 +108,9 @@ export class AdminPermissionChecker {
             if (c) {
                 const result = await c;
                 if (!result) {
-                    throw new Error('Unexpected missing organization in AdminPermissionChecker.getOrganization');
+                    throw new Error(
+                        'Unexpected missing organization in AdminPermissionChecker.getOrganization',
+                    );
                 }
                 return result;
             }
@@ -67,7 +118,10 @@ export class AdminPermissionChecker {
             this.organizationCache.set(id, promise);
             const result = await promise;
             if (!result) {
-                console.error('Unexpected missing organization in AdminPermissionChecker.getOrganization', id);
+                console.error(
+                    'Unexpected missing organization in AdminPermissionChecker.getOrganization',
+                    id,
+                );
                 this.organizationCache.delete(id);
 
                 throw new SimpleError({
@@ -87,9 +141,7 @@ export class AdminPermissionChecker {
             return await cache;
         }
 
-        const promise = Group.select()
-            .where('id', groupId)
-            .first(false);
+        const promise = Group.select().where('id', groupId).first(false);
 
         this.groupsCache.set(groupId, promise);
         const group = await promise;
@@ -116,18 +168,19 @@ export class AdminPermissionChecker {
         }
 
         if (remainingIds.length > 0) {
-            const promise = Group.select()
-                .where('id', remainingIds)
-                .fetch();
+            const promise = Group.select().where('id', remainingIds).fetch();
 
             for (const groupId of remainingIds) {
-                this.groupsCache.set(groupId, promise.then(list => list.find(l => l.id === groupId) ?? null));
+                this.groupsCache.set(
+                    groupId,
+                    promise.then((list) => list.find((l) => l.id === groupId) ?? null),
+                );
             }
             const groups = await promise;
             cached.push(...groups);
 
             for (const groupId of remainingIds) {
-                this.groupsCache.set(groupId, groups.find(l => l.id === groupId) ?? null);
+                this.groupsCache.set(groupId, groups.find((l) => l.id === groupId) ?? null);
             }
         }
 
@@ -140,9 +193,7 @@ export class AdminPermissionChecker {
             return await cache;
         }
 
-        const promise = Webshop.select()
-            .where('id', webshopId)
-            .first(false);
+        const promise = Webshop.select().where('id', webshopId).first(false);
 
         this.webshopsCache.set(webshopId, promise);
         const webshop = await promise;
@@ -160,7 +211,10 @@ export class AdminPermissionChecker {
         }
     }
 
-    async getOrganizationPeriod(id: string | Organization, periodId: string): Promise<OrganizationRegistrationPeriod | null> {
+    async getOrganizationPeriod(
+        id: string | Organization,
+        periodId: string,
+    ): Promise<OrganizationRegistrationPeriod | null> {
         const organization = await this.getOrganization(id);
 
         if (periodId === organization.periodId) {
@@ -185,8 +239,12 @@ export class AdminPermissionChecker {
     }
 
     error(humanOrData?: string | { message: string; human?: string }): SimpleError {
-        const human = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.human ?? $t('%Fg'));
-        const message = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.message ?? 'You do not have permissions for this action');
+        const human =
+            typeof humanOrData === 'string' ? humanOrData : (humanOrData?.human ?? $t('%Fg'));
+        const message =
+            typeof humanOrData === 'string'
+                ? humanOrData
+                : (humanOrData?.message ?? 'You do not have permissions for this action');
 
         return new SimpleError({
             code: 'permission_denied',
@@ -232,7 +290,11 @@ export class AdminPermissionChecker {
             return null;
         }
 
-        return this.user.permissions.organizationPermissions.get(typeof organizationOrId === 'string' ? organizationOrId : organizationOrId.id) ?? null;
+        return (
+            this.user.permissions.organizationPermissions.get(
+                typeof organizationOrId === 'string' ? organizationOrId : organizationOrId.id,
+            ) ?? null
+        );
     }
 
     getUnloadedPlatformPermissions() {
@@ -248,7 +310,7 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (!await this.hasSomeAccess(organization)) {
+        if (!(await this.hasSomeAccess(organization))) {
             return false;
         }
         return true;
@@ -266,7 +328,10 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (!await this.hasSomeUnloadedAccess(organization) && !this.hasSomeUnloadedPlatformAccess()) {
+        if (
+            !(await this.hasSomeUnloadedAccess(organization)) &&
+            !this.hasSomeUnloadedPlatformAccess()
+        ) {
             return false;
         }
         return true;
@@ -306,7 +371,10 @@ export class AdminPermissionChecker {
     }
 
     async isEventPeriodInUse(event: Event): Promise<boolean> {
-        return EventPeriodHelper.isInAnyPeriod(event, await this.getPeriodsInUse(event.organizationId));
+        return EventPeriodHelper.isInAnyPeriod(
+            event,
+            await this.getPeriodsInUse(event.organizationId),
+        );
     }
 
     /**
@@ -324,7 +392,10 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (STAMHOOFD.userMode !== 'organization' && !periods.some(p => p.id === this.platform.period.id)) {
+        if (
+            STAMHOOFD.userMode !== 'organization' &&
+            !periods.some((p) => p.id === this.platform.period.id)
+        ) {
             periods.push(this.platform.period);
         }
 
@@ -349,7 +420,10 @@ export class AdminPermissionChecker {
         if (scoped.level !== PermissionLevel.None || scoped.accessRights.length > 0) {
             return true;
         }
-        for (const type of [PermissionsResourceType.Groups, PermissionsResourceType.GroupCategories]) {
+        for (const type of [
+            PermissionsResourceType.Groups,
+            PermissionsResourceType.GroupCategories,
+        ]) {
             for (const key of [PermissionsResourceKey.All, PermissionsResourceKey.CurrentPeriod]) {
                 const r = scoped.resources.get(type)?.get(key);
                 if (r && !r.isEmpty) {
@@ -364,11 +438,20 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        const groups = await Group.getAll(organizationId, periodId, true, [GroupType.Membership, GroupType.WaitingList, GroupType.EventRegistration]);
-        return groups.some(group => group.getStructure().hasSomeAccess(scoped, organizationPeriod.settings.categories));
+        const groups = await Group.getAll(organizationId, periodId, true, [
+            GroupType.Membership,
+            GroupType.WaitingList,
+            GroupType.EventRegistration,
+        ]);
+        return groups.some((group) =>
+            group.getStructure().hasSomeAccess(scoped, organizationPeriod.settings.categories),
+        );
     }
 
-    async canAccessGroup(group: Group, permissionLevel: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+    async canAccessGroup(
+        group: Group,
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+    ): Promise<boolean> {
         // Check permissions aren't scoped to a specific organization, and they mismatch
         if (!this.checkScope(group.organizationId)) {
             // return false;
@@ -380,12 +463,17 @@ export class AdminPermissionChecker {
             return await this.canAccessArchivedGroups(group.organizationId);
         }
 
-        const event = group.type === GroupType.EventRegistration
-            ? await Event.select().where('groupId', group.id).first(false)
-            : null;
+        const event =
+            group.type === GroupType.EventRegistration
+                ? await Event.select().where('groupId', group.id).first(false)
+                : null;
 
         // National events are managed via platform roles, regardless of the organization that owns the group
-        if (event && event.organizationId === null && await this.canAccessNationalEvent(event, permissionLevel)) {
+        if (
+            event &&
+            event.organizationId === null &&
+            (await this.canAccessNationalEvent(event, permissionLevel))
+        ) {
             return true;
         }
 
@@ -397,7 +485,7 @@ export class AdminPermissionChecker {
                 .where('waitingListId', group.id)
                 .first(false);
 
-            if (parentGroup && await this.canAccessGroup(parentGroup, permissionLevel)) {
+            if (parentGroup && (await this.canAccessGroup(parentGroup, permissionLevel))) {
                 return true;
             }
         }
@@ -412,27 +500,50 @@ export class AdminPermissionChecker {
         organizationPermissions = organizationPermissions.forPeriod(isPeriodInUse);
 
         // Check global level permissions for this user
-        if (organizationPermissions.hasResourceAccess(PermissionsResourceType.Groups, group.id, permissionLevel)) {
+        if (
+            organizationPermissions.hasResourceAccess(
+                PermissionsResourceType.Groups,
+                group.id,
+                permissionLevel,
+            )
+        ) {
             return true;
         }
 
         if (event && event.organizationId === group.organizationId) {
-            if (organizationPermissions.hasResourceAccess(PermissionsResourceType.Events, event.id, permissionLevel)) {
+            if (
+                organizationPermissions.hasResourceAccess(
+                    PermissionsResourceType.Events,
+                    event.id,
+                    permissionLevel,
+                )
+            ) {
                 return true;
             }
 
             // Skip canAccessEvent outside the current period: it evaluates $currentPeriod-scoped grants and would not succeed cross-period.
-            if (isPeriodInUse && await this.canAccessEvent(event)) {
+            if (isPeriodInUse && (await this.canAccessEvent(event))) {
                 return true;
             }
         }
 
         // Check parent categories
         if (group.type === GroupType.Membership) {
-            const organizationPeriod = await this.getOrganizationPeriod(organization, group.periodId);
-            const parentCategories = organizationPeriod ? group.getParentCategories(organizationPeriod.settings.categories) : [];
+            const organizationPeriod = await this.getOrganizationPeriod(
+                organization,
+                group.periodId,
+            );
+            const parentCategories = organizationPeriod
+                ? group.getParentCategories(organizationPeriod.settings.categories)
+                : [];
             for (const category of parentCategories) {
-                if (organizationPermissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
+                if (
+                    organizationPermissions.hasResourceAccess(
+                        PermissionsResourceType.GroupCategories,
+                        category.id,
+                        permissionLevel,
+                    )
+                ) {
                     return true;
                 }
             }
@@ -441,18 +552,25 @@ export class AdminPermissionChecker {
         return false;
     }
 
-    private async canAccessNationalEvent(event: Event, permissionLevel: PermissionLevel): Promise<boolean> {
+    private async canAccessNationalEvent(
+        event: Event,
+        permissionLevel: PermissionLevel,
+    ): Promise<boolean> {
         const platformPermissions = this.platformPermissions;
         if (!platformPermissions) {
             return false;
         }
 
         const isPeriodInUse = await this.isEventPeriodInUse(event);
-        if (platformPermissions.forPeriod(isPeriodInUse).hasResourceAccess(PermissionsResourceType.Events, event.id, permissionLevel)) {
+        if (
+            platformPermissions
+                .forPeriod(isPeriodInUse)
+                .hasResourceAccess(PermissionsResourceType.Events, event.id, permissionLevel)
+        ) {
             return true;
         }
 
-        return isPeriodInUse && await this.canAccessEvent(event);
+        return isPeriodInUse && (await this.canAccessEvent(event));
     }
 
     async canRegisterMembersInGroup(group: Group, asOrganizationId: string | null) {
@@ -499,18 +617,23 @@ export class AdminPermissionChecker {
         }
     }
 
-    async canAccessEventNotification(notification: EventNotification, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    async canAccessEventNotification(
+        notification: EventNotification,
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+    ) {
         // todo: check if user has access to this notification
-        const events = EventNotification.events.isLoaded(notification) ? notification.events : await EventNotification.events.load(notification);
+        const events = EventNotification.events.isLoaded(notification)
+            ? notification.events
+            : await EventNotification.events.load(notification);
         for (const event of events) {
-            if (!await this.canAccessEvent(event)) {
+            if (!(await this.canAccessEvent(event))) {
                 return false;
             }
         }
 
         if (events.length === 0 || permissionLevel === PermissionLevel.Full) {
             // Requires `OrganizationEventNotificationReviewer` access right for the organization
-            if (!await this.canReviewEventNotification(notification)) {
+            if (!(await this.canReviewEventNotification(notification))) {
                 return false;
             }
         }
@@ -522,7 +645,10 @@ export class AdminPermissionChecker {
         return await this.hasFullAccess(organizationId);
     }
 
-    async canAccessMember(member: MemberWithUsersAndRegistrations, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    async canAccessMember(
+        member: MemberWithUsersAndRegistrations,
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+    ) {
         if (permissionLevel !== PermissionLevel.Full && this.isUserManager(member)) {
             return true;
         }
@@ -545,7 +671,10 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (member.organizationId && await this.hasFullAccess(member.organizationId, permissionLevel)) {
+        if (
+            member.organizationId &&
+            (await this.hasFullAccess(member.organizationId, permissionLevel))
+        ) {
             return true;
         }
 
@@ -568,7 +697,10 @@ export class AdminPermissionChecker {
      * The server will temporarily grant the user access to this member, and store this in the server
      * memory. This is required for adding new members to an organization (first add member -> then patch with registrations, which requires write access).
      */
-    async temporarilyGrantMemberAccess(member: MemberWithUsersRegistrationsAndGroups, permissionLevel: PermissionLevel = PermissionLevel.Write) {
+    async temporarilyGrantMemberAccess(
+        member: MemberWithUsersRegistrationsAndGroups,
+        permissionLevel: PermissionLevel = PermissionLevel.Write,
+    ) {
         console.log('Temporarily granting access to member', member.id, 'for user', this.user.id);
         addTemporaryMemberAccess(this.user.id, member.id, permissionLevel);
     }
@@ -578,9 +710,18 @@ export class AdminPermissionChecker {
      */
     async canDeleteMember(member: MemberWithUsersAndRegistrations) {
         if (member.registrations.length === 0 && this.isUserManager(member)) {
-            const cachedBalance = await CachedBalance.getForObjects([member.id], null, ReceivableBalanceType.member);
-            if (cachedBalance.length === 0 || (cachedBalance[0].amountOpen === 0 && cachedBalance[0].amountPending === 0)) {
-                const platformMemberships = await MemberPlatformMembership.select().where('memberId', member.id).fetch();
+            const cachedBalance = await CachedBalance.getForObjects(
+                [member.id],
+                null,
+                ReceivableBalanceType.member,
+            );
+            if (
+                cachedBalance.length === 0 ||
+                (cachedBalance[0].amountOpen === 0 && cachedBalance[0].amountPending === 0)
+            ) {
+                const platformMemberships = await MemberPlatformMembership.select()
+                    .where('memberId', member.id)
+                    .fetch();
                 if (platformMemberships.length === 0) {
                     return true;
                 }
@@ -597,13 +738,23 @@ export class AdminPermissionChecker {
     /**
      * Note: only checks admin permissions. Users that 'own' this member can also access it but that does not use the AdminPermissionChecker
      */
-    async canAccessRegistration(registration: Registration, permissionLevel: PermissionLevel = PermissionLevel.Read, checkMember: boolean | MemberWithUsersRegistrationsAndGroups = true) {
-        if (permissionLevel === PermissionLevel.Read && typeof checkMember === 'object' && this.isUserManager(checkMember)) {
+    async canAccessRegistration(
+        registration: Registration,
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+        checkMember: boolean | MemberWithUsersRegistrationsAndGroups = true,
+    ) {
+        if (
+            permissionLevel === PermissionLevel.Read &&
+            typeof checkMember === 'object' &&
+            this.isUserManager(checkMember)
+        ) {
             // Required for impersonation feature where both admin and user should have access
             return true;
         }
 
-        const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);
+        const organizationPermissions = await this.getOrganizationPermissions(
+            registration.organizationId,
+        );
 
         if (organizationPermissions?.hasAccess(PermissionLevel.Full)) {
             return true;
@@ -623,7 +774,9 @@ export class AdminPermissionChecker {
             }
         }
 
-        const group = Registration.group.isLoaded(registration) ? ((registration as any).group as Group) : await this.getGroup(registration.groupId);
+        const group = Registration.group.isLoaded(registration)
+            ? ((registration as any).group as Group)
+            : await this.getGroup(registration.groupId);
         if (!group || group.deletedAt) {
             return false;
         }
@@ -637,9 +790,16 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (permissionLevel === PermissionLevel.Read && checkMember && group.settings.implicitlyAllowViewRegistrations) {
+        if (
+            permissionLevel === PermissionLevel.Read &&
+            checkMember &&
+            group.settings.implicitlyAllowViewRegistrations
+        ) {
             // We can also view this registration if we have access to the member
-            const members = checkMember === true ? await Member.getBlobByIds(registration.memberId) : [checkMember];
+            const members =
+                checkMember === true
+                    ? await Member.getBlobByIds(registration.memberId)
+                    : [checkMember];
 
             if (members.length === 1) {
                 if (await this.canAccessMember(members[0], permissionLevel)) {
@@ -654,7 +814,10 @@ export class AdminPermissionChecker {
     /**
         Returns true if the user has full access to all resource ids in the provided resources map. The resource permissions in the map are ignored for now.
     */
-    async hasFullAccessForOrganizationResources(organizationId: string, resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>>): Promise<boolean> {
+    async hasFullAccessForOrganizationResources(
+        organizationId: string,
+        resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>>,
+    ): Promise<boolean> {
         const organizationPermissions = await this.getOrganizationPermissions(organizationId);
 
         if (!organizationPermissions) {
@@ -663,11 +826,20 @@ export class AdminPermissionChecker {
 
         for (const [resourceType, mapForType] of resources.entries()) {
             for (const resourceId of mapForType.keys()) {
-                if (organizationPermissions.hasResourceAccess(resourceType, resourceId, PermissionLevel.Full)) {
+                if (
+                    organizationPermissions.hasResourceAccess(
+                        resourceType,
+                        resourceId,
+                        PermissionLevel.Full,
+                    )
+                ) {
                     continue;
                 }
 
-                if (resourceType === PermissionsResourceType.Events && await this.canWriteOrganizationEvent(organizationId, resourceId)) {
+                if (
+                    resourceType === PermissionsResourceType.Events &&
+                    (await this.canWriteOrganizationEvent(organizationId, resourceId))
+                ) {
                     continue;
                 }
 
@@ -681,7 +853,10 @@ export class AdminPermissionChecker {
     /**
      * Write access to an event also grants full access to its registrations (see canAccessGroup).
      */
-    private async canWriteOrganizationEvent(organizationId: string, eventId: string): Promise<boolean> {
+    private async canWriteOrganizationEvent(
+        organizationId: string,
+        eventId: string,
+    ): Promise<boolean> {
         const event = await Event.getByID(eventId);
         if (!event || event.organizationId !== organizationId) {
             return false;
@@ -689,55 +864,101 @@ export class AdminPermissionChecker {
         return await this.canAccessEvent(event);
     }
 
-    async canAccessWebshop(webshop: { id: string; organizationId: string }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
-        const organizationPermissions = await this.getOrganizationPermissions(webshop.organizationId);
+    async canAccessWebshop(
+        webshop: { id: string; organizationId: string },
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+    ) {
+        const organizationPermissions = await this.getOrganizationPermissions(
+            webshop.organizationId,
+        );
 
         if (!organizationPermissions) {
             return false;
         }
 
-        if (organizationPermissions.hasResourceAccess(PermissionsResourceType.Webshops, webshop.id, permissionLevel)) {
+        if (
+            organizationPermissions.hasResourceAccess(
+                PermissionsResourceType.Webshops,
+                webshop.id,
+                permissionLevel,
+            )
+        ) {
             return true;
         }
 
-        if (permissionLevel === PermissionLevel.Read && organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Webshops, webshop.id, AccessRight.WebshopScanTickets)) {
+        if (
+            permissionLevel === PermissionLevel.Read &&
+            organizationPermissions.hasResourceAccessRight(
+                PermissionsResourceType.Webshops,
+                webshop.id,
+                AccessRight.WebshopScanTickets,
+            )
+        ) {
             return true;
         }
 
         return false;
     }
 
-    async canAccessWebshopTickets(webshop: { id: string; organizationId: string }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    async canAccessWebshopTickets(
+        webshop: { id: string; organizationId: string },
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+    ) {
         if (!this.checkScope(webshop.organizationId)) {
             return false;
         }
 
-        const organizationPermissions = await this.getOrganizationPermissions(webshop.organizationId);
+        const organizationPermissions = await this.getOrganizationPermissions(
+            webshop.organizationId,
+        );
 
         if (!organizationPermissions) {
             return false;
         }
 
-        if (organizationPermissions.hasResourceAccess(PermissionsResourceType.Webshops, webshop.id, permissionLevel)) {
+        if (
+            organizationPermissions.hasResourceAccess(
+                PermissionsResourceType.Webshops,
+                webshop.id,
+                permissionLevel,
+            )
+        ) {
             return true;
         }
 
-        if ((permissionLevel === PermissionLevel.Read || permissionLevel === PermissionLevel.Write) && organizationPermissions.hasResourceAccessRight(PermissionsResourceType.Webshops, webshop.id, AccessRight.WebshopScanTickets)) {
+        if (
+            (permissionLevel === PermissionLevel.Read ||
+                permissionLevel === PermissionLevel.Write) &&
+            organizationPermissions.hasResourceAccessRight(
+                PermissionsResourceType.Webshops,
+                webshop.id,
+                AccessRight.WebshopScanTickets,
+            )
+        ) {
             return true;
         }
 
         return false;
     }
 
-    async canAccessOrder(webshop: { id: string; organizationId: string }, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    async canAccessOrder(
+        webshop: { id: string; organizationId: string },
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+    ) {
         return await this.canAccessWebshop(webshop, permissionLevel);
     }
 
-    async canAccessPayment(payment: Payment, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    async canAccessPayment(
+        payment: Payment,
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+    ) {
         return await this.canAccessPayments([payment], permissionLevel);
     }
 
-    async canAccessPayments(payments: Payment[], permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    async canAccessPayments(
+        payments: Payment[],
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+    ) {
         for (const payment of payments) {
             if (!this.checkScope(payment.organizationId)) {
                 // Invalid scope
@@ -785,7 +1006,11 @@ export class AdminPermissionChecker {
         // The paying organization can view, but never change, balance items charged to it by another organization
         if (permissionLevel === PermissionLevel.Read) {
             for (const balanceItem of balanceItems) {
-                if (balanceItem.payingOrganizationId && (this.checkScope(balanceItem.payingOrganizationId) || this.checkScope(balanceItem.organizationId))) {
+                if (
+                    balanceItem.payingOrganizationId &&
+                    (this.checkScope(balanceItem.payingOrganizationId) ||
+                        this.checkScope(balanceItem.organizationId))
+                ) {
                     if (await this.canManagePayments(balanceItem.payingOrganizationId)) {
                         return true;
                     }
@@ -820,15 +1045,17 @@ export class AdminPermissionChecker {
         if (permissionLevel !== PermissionLevel.Read && balanceItems.length > 1) {
             // Reading a payment is allowed when one of its items is accessible, but changing it (manual payments,
             // reallocations, refunds) requires access to every item
-            const allData = data ?? await Payment.loadBalanceItemRelations(balanceItems);
+            const allData = data ?? (await Payment.loadBalanceItemRelations(balanceItems));
 
             for (const balanceItem of balanceItems) {
                 const itemData = {
-                    registrations: allData.registrations.filter(r => r.id === balanceItem.registrationId),
-                    orders: allData.orders.filter(o => o.id === balanceItem.orderId),
+                    registrations: allData.registrations.filter(
+                        (r) => r.id === balanceItem.registrationId,
+                    ),
+                    orders: allData.orders.filter((o) => o.id === balanceItem.orderId),
                 };
 
-                if (!await this.canAccessBalanceItems([balanceItem], permissionLevel, itemData)) {
+                if (!(await this.canAccessBalanceItems([balanceItem], permissionLevel, itemData))) {
                     return false;
                 }
             }
@@ -844,14 +1071,19 @@ export class AdminPermissionChecker {
         }
 
         // Slight optimization possible here
-        const { registrations, orders } = data ?? ((this.user.permissions || permissionLevel === PermissionLevel.Read) ? await Payment.loadBalanceItemRelations(balanceItems) : { registrations: [], orders: [] });
+        const { registrations, orders } =
+            data ??
+            (this.user.permissions || permissionLevel === PermissionLevel.Read
+                ? await Payment.loadBalanceItemRelations(balanceItems)
+                : { registrations: [], orders: [] });
 
         if (this.user.permissions) {
             // We grant permission for a whole payment when the user has at least permission for a part of that payment.
             const webshopCache: Map<string, Webshop> = new Map();
 
             for (const order of orders) {
-                const webshop = webshopCache.get(order.webshopId) ?? await Webshop.getByID(order.webshopId);
+                const webshop =
+                    webshopCache.get(order.webshopId) ?? (await Webshop.getByID(order.webshopId));
                 if (webshop) {
                     webshopCache.set(order.webshopId, webshop);
 
@@ -873,7 +1105,7 @@ export class AdminPermissionChecker {
                 if (!balanceItem.memberId || seenMemberIds.has(balanceItem.memberId)) continue;
                 seenMemberIds.add(balanceItem.memberId);
                 const member = await Member.getByIdWithUsersAndRegistrations(balanceItem.memberId);
-                if (member && await this.hasFinancialMemberAccess(member, permissionLevel)) {
+                if (member && (await this.hasFinancialMemberAccess(member, permissionLevel))) {
                     return true;
                 }
             }
@@ -883,7 +1115,7 @@ export class AdminPermissionChecker {
             // Check members
             const userMembers = await Member.getMembersWithRegistrationForUser(this.user);
             for (const member of userMembers) {
-                if (balanceItems.find(m => m.memberId === member.id)) {
+                if (balanceItems.find((m) => m.memberId === member.id)) {
                     return true;
                 }
             }
@@ -892,7 +1124,10 @@ export class AdminPermissionChecker {
         return false;
     }
 
-    async canAccessDocumentTemplate(documentTemplate: { organizationId: string }, _: PermissionLevel = PermissionLevel.Read) {
+    async canAccessDocumentTemplate(
+        documentTemplate: { organizationId: string },
+        _: PermissionLevel = PermissionLevel.Read,
+    ) {
         if (!this.checkScope(documentTemplate.organizationId)) {
             return false;
         }
@@ -912,7 +1147,7 @@ export class AdminPermissionChecker {
         if (level === PermissionLevel.Read && document.memberId) {
             const members = await Member.getMembersWithRegistrationForUser(this.user);
 
-            if (members.find(m => m.id == document.memberId)) {
+            if (members.find((m) => m.id == document.memberId)) {
                 return true;
             }
         }
@@ -923,7 +1158,10 @@ export class AdminPermissionChecker {
     async canAccessUser(user: User, level: PermissionLevel = PermissionLevel.Read) {
         // Write = edit email, name
         // full = edit permissions
-        if (user.id === this.user.id && (level === PermissionLevel.Read || level === PermissionLevel.Write)) {
+        if (
+            user.id === this.user.id &&
+            (level === PermissionLevel.Read || level === PermissionLevel.Write)
+        ) {
             return true;
         }
 
@@ -932,7 +1170,7 @@ export class AdminPermissionChecker {
         }
 
         if (level !== PermissionLevel.Read) {
-            if (!await this.coversPermissionsOf(user)) {
+            if (!(await this.coversPermissionsOf(user))) {
                 return false;
             }
         }
@@ -943,8 +1181,15 @@ export class AdminPermissionChecker {
             }
 
             // Check if this user has permissions for the current scoped organization
-            if (this.organization && await this.hasFullAccess(this.organization.id)) {
-                if (user.permissions?.forOrganization(this.organization, this.platform, user.email, { inheritFromPlatform: false })) {
+            if (this.organization && (await this.hasFullAccess(this.organization.id))) {
+                if (
+                    user.permissions?.forOrganization(
+                        this.organization,
+                        this.platform,
+                        user.email,
+                        { inheritFromPlatform: false },
+                    )
+                ) {
                     return true;
                 }
             }
@@ -970,7 +1215,7 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (!await this.coversPermissionsOf(user)) {
+        if (!(await this.coversPermissionsOf(user))) {
             return false;
         }
 
@@ -1006,7 +1251,9 @@ export class AdminPermissionChecker {
      * controls. A user manager can add email addresses to a member, and whoever signs in with such an address
      * inherits the responsibility's permissions, so looking through the user would hand those out.
      */
-    private async getMemberRelation(user: User): Promise<{ managesSome: boolean | null; coversResponsibilities: boolean }> {
+    private async getMemberRelation(
+        user: User,
+    ): Promise<{ managesSome: boolean | null; coversResponsibilities: boolean }> {
         if (this.hasPlatformFullAccess()) {
             return { managesSome: true, coversResponsibilities: true };
         }
@@ -1030,14 +1277,21 @@ export class AdminPermissionChecker {
         // In platform mode a member is only bound to an organization through its registrations, so a parent whose
         // children have no registration anywhere is nobody's yet
         let managesSome = false;
-        for (const organizationId of Formatter.uniqueArray(members.flatMap(m => [m.organizationId, ...m.registrations.map(r => r.organizationId)]))) {
+        for (const organizationId of Formatter.uniqueArray(
+            members.flatMap((m) => [
+                m.organizationId,
+                ...m.registrations.map((r) => r.organizationId),
+            ]),
+        )) {
             if (await hasFullAccessSafe(organizationId)) {
                 managesSome = true;
                 break;
             }
         }
 
-        const coversResponsibilities = await this.coversResponsibilities(await this.getResponsibilitiesForMembers(members.map(m => m.id)));
+        const coversResponsibilities = await this.coversResponsibilities(
+            await this.getResponsibilitiesForMembers(members.map((m) => m.id)),
+        );
 
         return { managesSome, coversResponsibilities };
     }
@@ -1046,7 +1300,9 @@ export class AdminPermissionChecker {
      * Whether every responsibility in the list is in an organization this user fully controls (platform-level ones
      * require platform full access).
      */
-    private async coversResponsibilities(responsibilities: { organizationId: string | null }[]): Promise<boolean> {
+    private async coversResponsibilities(
+        responsibilities: { organizationId: string | null }[],
+    ): Promise<boolean> {
         for (const { organizationId } of responsibilities) {
             if (organizationId === null) {
                 if (!this.hasPlatformFullAccess()) {
@@ -1057,12 +1313,16 @@ export class AdminPermissionChecker {
             }
 
             try {
-                if (!await this.hasFullAccess(organizationId)) {
+                if (!(await this.hasFullAccess(organizationId))) {
                     return false;
                 }
             } catch (e) {
                 // An organization that no longer exists cannot be judged, so don't allow it
-                console.error('Could not check responsibility coverage for organization', organizationId, e);
+                console.error(
+                    'Could not check responsibility coverage for organization',
+                    organizationId,
+                    e,
+                );
                 return false;
             }
         }
@@ -1122,22 +1382,33 @@ export class AdminPermissionChecker {
             return true;
         }
 
-        if (permissions.globalPermissions && !permissions.globalPermissions.isEmpty && !this.hasPlatformFullAccess()) {
+        if (
+            permissions.globalPermissions &&
+            !permissions.globalPermissions.isEmpty &&
+            !this.hasPlatformFullAccess()
+        ) {
             return false;
         }
 
-        for (const [organizationId, organizationPermissions] of permissions.organizationPermissions) {
+        for (const [
+            organizationId,
+            organizationPermissions,
+        ] of permissions.organizationPermissions) {
             if (organizationPermissions.isEmpty) {
                 continue;
             }
 
             try {
-                if (!await this.hasFullAccess(organizationId)) {
+                if (!(await this.hasFullAccess(organizationId))) {
                     return false;
                 }
             } catch (e) {
                 // An organization that no longer exists cannot be judged, so don't allow it
-                console.error('Could not check permissions coverage for organization', organizationId, e);
+                console.error(
+                    'Could not check permissions coverage for organization',
+                    organizationId,
+                    e,
+                );
                 return false;
             }
         }
@@ -1186,8 +1457,11 @@ export class AdminPermissionChecker {
             .fetch();
     }
 
-    async canEditMemberEmailAddresses(member: MemberWithUsers, responsibilities?: { organizationId: string | null }[]) {
-        if (member.users.some(u => u.id === this.user.id)) return true;
+    async canEditMemberEmailAddresses(
+        member: MemberWithUsers,
+        responsibilities?: { organizationId: string | null }[],
+    ) {
+        if (member.users.some((u) => u.id === this.user.id)) return true;
 
         if (!responsibilities) {
             responsibilities = await this.getResponsibilitiesForMembers([member.id]);
@@ -1211,10 +1485,15 @@ export class AdminPermissionChecker {
         };
 
         const existingPhones = oldDetails.getPhoneNumbersForVerification().map(normalize);
-        return newDetails.getPhoneNumbersForVerification().some(phone => !existingPhones.includes(normalize(phone)));
+        return newDetails
+            .getPhoneNumbersForVerification()
+            .some((phone) => !existingPhones.includes(normalize(phone)));
     }
 
-    async canAccessEmailTemplate(template: EmailTemplate, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+    async canAccessEmailTemplate(
+        template: EmailTemplate,
+        level: PermissionLevel = PermissionLevel.Read,
+    ): Promise<boolean> {
         if (level === PermissionLevel.Read && !EmailTemplateStruct.isSavedEmail(template.type)) {
             if (template.organizationId === null) {
                 // Public templates
@@ -1222,16 +1501,24 @@ export class AdminPermissionChecker {
                 return EmailTemplateStruct.allowPlatformLevel(template.type);
             }
 
-            if (!await this.canReadEmailTemplates(template.organizationId)) {
+            if (!(await this.canReadEmailTemplates(template.organizationId))) {
                 return false;
             }
 
             if (!this.organization) {
                 const org = await this.getOrganization(template.organizationId);
-                return EmailTemplateStruct.allowOrganizationLevel(template.type, org, this.platform);
+                return EmailTemplateStruct.allowOrganizationLevel(
+                    template.type,
+                    org,
+                    this.platform,
+                );
             }
 
-            return EmailTemplateStruct.allowOrganizationLevel(template.type, this.organization, this.platform);
+            return EmailTemplateStruct.allowOrganizationLevel(
+                template.type,
+                this.organization,
+                this.platform,
+            );
         }
 
         // Note: if the template has an organizationId of null, everyone can access it, but only for reading
@@ -1241,7 +1528,10 @@ export class AdminPermissionChecker {
         }
 
         if (!template.organizationId) {
-            return this.hasPlatformFullAccess() || !!this.platformPermissions?.hasAccessRight(AccessRight.ManageEmailTemplates);
+            return (
+                this.hasPlatformFullAccess() ||
+                !!this.platformPermissions?.hasAccessRight(AccessRight.ManageEmailTemplates)
+            );
         }
 
         if (await this.hasFullAccess(template.organizationId)) {
@@ -1300,7 +1590,9 @@ export class AdminPermissionChecker {
                 return true;
             }
         } else {
-            const organizationIds = Formatter.uniqueArray(member.registrations.map(r => r.organizationId));
+            const organizationIds = Formatter.uniqueArray(
+                member.registrations.map((r) => r.organizationId),
+            );
             for (const organizationId of organizationIds) {
                 if (await this.canManagePayments(organizationId)) {
                     return true;
@@ -1335,17 +1627,27 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        return !!organizationPermissions && (
-            organizationPermissions.hasAccessRight(AccessRight.OrganizationManagePayments)
-            || organizationPermissions.hasAccessRight(AccessRight.OrganizationFinanceDirector)
+        return (
+            !!organizationPermissions &&
+            (organizationPermissions.hasAccessRight(AccessRight.OrganizationManagePayments) ||
+                organizationPermissions.hasAccessRight(AccessRight.OrganizationFinanceDirector))
         );
     }
 
     /**
      * The selling organization can view its debtors' mandates so it can block them.
      */
-    async canViewPaymentMandates({ payingOrganizationId, sellingOrganizationId }: { payingOrganizationId: string; sellingOrganizationId: string }) {
-        return await this.canManageFinances(payingOrganizationId) || await this.canManagePayments(sellingOrganizationId);
+    async canViewPaymentMandates({
+        payingOrganizationId,
+        sellingOrganizationId,
+    }: {
+        payingOrganizationId: string;
+        sellingOrganizationId: string;
+    }) {
+        return (
+            (await this.canManageFinances(payingOrganizationId)) ||
+            (await this.canManagePayments(sellingOrganizationId))
+        );
     }
 
     async canCreateWebshops(organizationId: string) {
@@ -1355,10 +1657,16 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        return !!organizationPermissions && organizationPermissions.hasAccessRight(AccessRight.OrganizationCreateWebshops);
+        return (
+            !!organizationPermissions &&
+            organizationPermissions.hasAccessRight(AccessRight.OrganizationCreateWebshops)
+        );
     }
 
-    async canManagePaymentAccounts(organizationId: string, level: PermissionLevel = PermissionLevel.Read) {
+    async canManagePaymentAccounts(
+        organizationId: string,
+        level: PermissionLevel = PermissionLevel.Read,
+    ) {
         if (level === PermissionLevel.Read) {
             return await this.hasSomeAccess(organizationId);
         }
@@ -1393,9 +1701,21 @@ export class AdminPermissionChecker {
 
     async canSendEmails(organizationId: Organization | string | null) {
         if (organizationId) {
-            return (await this.getOrganizationPermissions(organizationId))?.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Senders, AccessRight.SendMessages) ?? false;
+            return (
+                (
+                    await this.getOrganizationPermissions(organizationId)
+                )?.hasAccessRightForSomeResourceOfType(
+                    PermissionsResourceType.Senders,
+                    AccessRight.SendMessages,
+                ) ?? false
+            );
         }
-        return this.platformPermissions?.hasAccessRightForSomeResourceOfType(PermissionsResourceType.Senders, AccessRight.SendMessages) ?? false;
+        return (
+            this.platformPermissions?.hasAccessRightForSomeResourceOfType(
+                PermissionsResourceType.Senders,
+                AccessRight.SendMessages,
+            ) ?? false
+        );
     }
 
     /**
@@ -1407,19 +1727,49 @@ export class AdminPermissionChecker {
             return true;
         }
         if (organizationId) {
-            return (await this.getOrganizationPermissions(organizationId))?.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders, PermissionLevel.Read) ?? false;
+            return (
+                (
+                    await this.getOrganizationPermissions(organizationId)
+                )?.hasAccessForSomeResourceOfType(
+                    PermissionsResourceType.Senders,
+                    PermissionLevel.Read,
+                ) ?? false
+            );
         }
-        return this.platformPermissions?.hasAccessForSomeResourceOfType(PermissionsResourceType.Senders, PermissionLevel.Read) ?? false;
+        return (
+            this.platformPermissions?.hasAccessForSomeResourceOfType(
+                PermissionsResourceType.Senders,
+                PermissionLevel.Read,
+            ) ?? false
+        );
     }
 
-    async canReadAllEmails(organizationId: Organization | string | null, senderId: string = PermissionsResourceKey.All): Promise<boolean> {
+    async canReadAllEmails(
+        organizationId: Organization | string | null,
+        senderId: string = PermissionsResourceKey.All,
+    ): Promise<boolean> {
         if (organizationId) {
-            return (await this.getOrganizationPermissions(organizationId))?.hasResourceAccess(PermissionsResourceType.Senders, senderId, PermissionLevel.Read) ?? false;
+            return (
+                (await this.getOrganizationPermissions(organizationId))?.hasResourceAccess(
+                    PermissionsResourceType.Senders,
+                    senderId,
+                    PermissionLevel.Read,
+                ) ?? false
+            );
         }
-        return this.platformPermissions?.hasResourceAccess(PermissionsResourceType.Senders, senderId, PermissionLevel.Read) ?? false;
+        return (
+            this.platformPermissions?.hasResourceAccess(
+                PermissionsResourceType.Senders,
+                senderId,
+                PermissionLevel.Read,
+            ) ?? false
+        );
     }
 
-    async canAccessEmail(email: Email, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+    async canAccessEmail(
+        email: Email,
+        level: PermissionLevel = PermissionLevel.Read,
+    ): Promise<boolean> {
         if (!this.checkScope(email.organizationId)) {
             return false;
         }
@@ -1435,14 +1785,24 @@ export class AdminPermissionChecker {
         }
 
         if (email.organizationId) {
-            const organizationPermissions = await this.getOrganizationPermissions(email.organizationId);
+            const organizationPermissions = await this.getOrganizationPermissions(
+                email.organizationId,
+            );
             if (!organizationPermissions) {
                 return false;
             }
             if (!email.senderId) {
-                return organizationPermissions.hasResourceAccess(PermissionsResourceType.Senders, PermissionsResourceKey.All, level);
+                return organizationPermissions.hasResourceAccess(
+                    PermissionsResourceType.Senders,
+                    PermissionsResourceKey.All,
+                    level,
+                );
             }
-            return organizationPermissions.hasResourceAccess(PermissionsResourceType.Senders, email.senderId, level);
+            return organizationPermissions.hasResourceAccess(
+                PermissionsResourceType.Senders,
+                email.senderId,
+                level,
+            );
         }
 
         // Platform email
@@ -1451,9 +1811,17 @@ export class AdminPermissionChecker {
             return false;
         }
         if (!email.senderId) {
-            return platformPermissions.hasResourceAccess(PermissionsResourceType.Senders, PermissionsResourceKey.All, level);
+            return platformPermissions.hasResourceAccess(
+                PermissionsResourceType.Senders,
+                PermissionsResourceKey.All,
+                level,
+            );
         }
-        return platformPermissions.hasResourceAccess(PermissionsResourceType.Senders, email.senderId, level);
+        return platformPermissions.hasResourceAccess(
+            PermissionsResourceType.Senders,
+            email.senderId,
+            level,
+        );
     }
 
     async canSendEmail(email: Email): Promise<boolean> {
@@ -1463,15 +1831,30 @@ export class AdminPermissionChecker {
         return await this.canSendEmails(email.organizationId);
     }
 
-    async canSendEmailsFrom(organizationId: Organization | string | null, senderId: string): Promise<boolean> {
+    async canSendEmailsFrom(
+        organizationId: Organization | string | null,
+        senderId: string,
+    ): Promise<boolean> {
         if (organizationId) {
-            return (await this.getOrganizationPermissions(organizationId))?.hasResourceAccessRight(PermissionsResourceType.Senders, senderId, AccessRight.SendMessages) ?? false;
+            return (
+                (await this.getOrganizationPermissions(organizationId))?.hasResourceAccessRight(
+                    PermissionsResourceType.Senders,
+                    senderId,
+                    AccessRight.SendMessages,
+                ) ?? false
+            );
         }
-        return this.platformPermissions?.hasResourceAccessRight(PermissionsResourceType.Senders, senderId, AccessRight.SendMessages) ?? false;
+        return (
+            this.platformPermissions?.hasResourceAccessRight(
+                PermissionsResourceType.Senders,
+                senderId,
+                AccessRight.SendMessages,
+            ) ?? false
+        );
     }
 
     async canReadEmailTemplates(organizationId: string) {
-        if (!await this.hasSomeAccess(organizationId) && !this.hasSomePlatformAccess()) {
+        if (!(await this.hasSomeAccess(organizationId)) && !this.hasSomePlatformAccess()) {
             return false;
         }
 
@@ -1485,17 +1868,34 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        if (organizationPermissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, category.id, AccessRight.OrganizationCreateGroups)) {
+        if (
+            organizationPermissions.hasResourceAccessRight(
+                PermissionsResourceType.GroupCategories,
+                category.id,
+                AccessRight.OrganizationCreateGroups,
+            )
+        ) {
             return true;
         }
 
         // Check parents
         const organization = await this.getOrganization(organizationId);
-        const organizationPeriod = await this.getOrganizationPeriod(organization, organization.periodId);
-        const parentCategories = organizationPeriod ? category.getParentCategories(organizationPeriod.settings.categories) : [];
+        const organizationPeriod = await this.getOrganizationPeriod(
+            organization,
+            organization.periodId,
+        );
+        const parentCategories = organizationPeriod
+            ? category.getParentCategories(organizationPeriod.settings.categories)
+            : [];
 
         for (const parentCategory of parentCategories) {
-            if (organizationPermissions.hasResourceAccessRight(PermissionsResourceType.GroupCategories, parentCategory.id, AccessRight.OrganizationCreateGroups)) {
+            if (
+                organizationPermissions.hasResourceAccessRight(
+                    PermissionsResourceType.GroupCategories,
+                    parentCategory.id,
+                    AccessRight.OrganizationCreateGroups,
+                )
+            ) {
                 return true;
             }
         }
@@ -1555,19 +1955,28 @@ export class AdminPermissionChecker {
             return false;
         }
 
-        const organizationPermissions = await this.getOrganizationPermissions(eventNotification.organizationId);
+        const organizationPermissions = await this.getOrganizationPermissions(
+            eventNotification.organizationId,
+        );
 
         if (!organizationPermissions) {
             return false;
         }
 
-        if (organizationPermissions.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer)) {
+        if (
+            organizationPermissions.hasAccessRight(
+                AccessRight.OrganizationEventNotificationReviewer,
+            )
+        ) {
             return true;
         }
         return false;
     }
 
-    async hasFullAccess(organizationId: string | Organization, level = PermissionLevel.Full): Promise<boolean> {
+    async hasFullAccess(
+        organizationId: string | Organization,
+        level = PermissionLevel.Full,
+    ): Promise<boolean> {
         const organizationPermissions = await this.getOrganizationPermissions(organizationId);
 
         if (!organizationPermissions) {
@@ -1578,13 +1987,17 @@ export class AdminPermissionChecker {
     }
 
     isUserManager(member: MemberWithUsers) {
-        return !!member.users.find(u => u.id === this.user.id);
+        return !!member.users.find((u) => u.id === this.user.id);
     }
 
     /**
      * Return a list of RecordSettings the current user can view or edit
      */
-    async hasFinancialMemberAccess(member: MemberWithUsersAndRegistrations, level: PermissionLevel = PermissionLevel.Read, organizationId?: string): Promise<boolean> {
+    async hasFinancialMemberAccess(
+        member: MemberWithUsersAndRegistrations,
+        level: PermissionLevel = PermissionLevel.Read,
+        organizationId?: string,
+    ): Promise<boolean> {
         const isUserManager = this.isUserManager(member);
 
         if (isUserManager && level === PermissionLevel.Read) {
@@ -1592,7 +2005,7 @@ export class AdminPermissionChecker {
         }
 
         // If you can't read the member, you can't have financial access
-        if (!await this.canAccessMember(member, PermissionLevel.Read)) {
+        if (!(await this.canAccessMember(member, PermissionLevel.Read))) {
             return false;
         }
 
@@ -1616,8 +2029,10 @@ export class AdminPermissionChecker {
             } else {
                 for (const registration of member.registrations) {
                     if (this.checkScope(registration.organizationId)) {
-                        if (!organizations.find(o => o.id === registration.organizationId)) {
-                            organizations.push(await this.getOrganization(registration.organizationId));
+                        if (!organizations.find((o) => o.id === registration.organizationId)) {
+                            organizations.push(
+                                await this.getOrganization(registration.organizationId),
+                            );
                         }
                     }
                 }
@@ -1640,7 +2055,13 @@ export class AdminPermissionChecker {
                 continue;
             }
 
-            if (permissions.hasAccessRight(level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
+            if (
+                permissions.hasAccessRight(
+                    level === PermissionLevel.Read
+                        ? AccessRight.MemberReadFinancialData
+                        : AccessRight.MemberWriteFinancialData,
+                )
+            ) {
                 return true;
             }
         }
@@ -1655,7 +2076,13 @@ export class AdminPermissionChecker {
                     return true;
                 }
             } else {
-                if (platformPermissions.hasAccessRight(level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
+                if (
+                    platformPermissions.hasAccessRight(
+                        level === PermissionLevel.Read
+                            ? AccessRight.MemberReadFinancialData
+                            : AccessRight.MemberWriteFinancialData,
+                    )
+                ) {
                     return true;
                 }
             }
@@ -1680,14 +2107,17 @@ export class AdminPermissionChecker {
     /**
      * Return a list of RecordSettings the current user can view or edit
      */
-    async hasNRNAccess(member: MemberWithUsersAndRegistrations, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+    async hasNRNAccess(
+        member: MemberWithUsersAndRegistrations,
+        level: PermissionLevel = PermissionLevel.Read,
+    ): Promise<boolean> {
         const isUserManager = this.isUserManager(member);
 
         if (isUserManager) {
             return true;
         }
 
-        if (!await this.canAccessMember(member, level)) {
+        if (!(await this.canAccessMember(member, level))) {
             return false;
         }
 
@@ -1706,7 +2136,7 @@ export class AdminPermissionChecker {
 
         for (const registration of member.registrations) {
             if (this.checkScope(registration.organizationId)) {
-                if (!organizations.find(o => o.id === registration.organizationId)) {
+                if (!organizations.find((o) => o.id === registration.organizationId)) {
                     organizations.push(await this.getOrganization(registration.organizationId));
                 }
             }
@@ -1739,7 +2169,8 @@ export class AdminPermissionChecker {
         // For userMode organization the records should not be cached
         if (STAMHOOFD.userMode === 'organization') {
             if (this.organization) {
-                for (const recordCategory of this.organization.meta.recordsConfiguration.recordCategories) {
+                for (const recordCategory of this.organization.meta.recordsConfiguration
+                    .recordCategories) {
                     for (const record of recordCategory.getAllRecords()) {
                         if (id === record.id) {
                             return {
@@ -1760,7 +2191,12 @@ export class AdminPermissionChecker {
         return MemberRecordStore.getRecord(id);
     }
 
-    async canFilterMembersOnRecordId(recordId: string): Promise<{ canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }> {
+    async canFilterMembersOnRecordId(
+        recordId: string,
+    ): Promise<
+        | { canAccess: false; record: RecordSettings | null }
+        | { canAccess: true; record: RecordSettings }
+    > {
         const record = await this.getSingleRecord(recordId);
         if (!record) {
             return {
@@ -1784,8 +2220,17 @@ export class AdminPermissionChecker {
         }
 
         if (record.organizationId) {
-            const organizationPermissions = await this.getOrganizationPermissions(record.organizationId);
-            if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, PermissionLevel.Read)) {
+            const organizationPermissions = await this.getOrganizationPermissions(
+                record.organizationId,
+            );
+            if (
+                organizationPermissions &&
+                organizationPermissions.hasResourceAccess(
+                    PermissionsResourceType.RecordCategories,
+                    record.rootCategoryId,
+                    PermissionLevel.Read,
+                )
+            ) {
                 return {
                     canAccess: true,
                     record: record.record,
@@ -1794,8 +2239,17 @@ export class AdminPermissionChecker {
         } else {
             // ONLY check current scoped organization
             if (this.organization) {
-                const organizationPermissions = await this.getOrganizationPermissions(this.organization.id);
-                if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, PermissionLevel.Read)) {
+                const organizationPermissions = await this.getOrganizationPermissions(
+                    this.organization.id,
+                );
+                if (
+                    organizationPermissions &&
+                    organizationPermissions.hasResourceAccess(
+                        PermissionsResourceType.RecordCategories,
+                        record.rootCategoryId,
+                        PermissionLevel.Read,
+                    )
+                ) {
                     return {
                         canAccess: true,
                         record: record.record,
@@ -1805,7 +2259,13 @@ export class AdminPermissionChecker {
         }
 
         // 2. Check platform permissions
-        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, record.rootCategoryId, PermissionLevel.Read)) {
+        if (
+            this.platformPermissions?.hasResourceAccess(
+                PermissionsResourceType.RecordCategories,
+                record.rootCategoryId,
+                PermissionLevel.Read,
+            )
+        ) {
             return {
                 canAccess: true,
                 record: record.record,
@@ -1826,12 +2286,23 @@ export class AdminPermissionChecker {
         };
     }
 
-    private async loopRecordAnswerSettingsAccess<T extends RecordAnswer | AutoEncoderPatchType<RecordAnswer>>({ member, level, recordAnswers, callback }:
-    {
+    private async loopRecordAnswerSettingsAccess<
+        T extends RecordAnswer | AutoEncoderPatchType<RecordAnswer>,
+    >({
+        member,
+        level,
+        recordAnswers,
+        callback,
+    }: {
         member: MemberWithUsersRegistrationsAndGroups;
         level: PermissionLevel;
         recordAnswers: PatchMap<string, T | null | undefined> | Map<string, T>;
-        callback: (result: { canAccess: false; record: RecordSettings | null } | { canAccess: true; record: RecordSettings }, entry: [keys: string, value: T | null | undefined]) => void;
+        callback: (
+            result:
+                | { canAccess: false; record: RecordSettings | null }
+                | { canAccess: true; record: RecordSettings },
+            entry: [keys: string, value: T | null | undefined],
+        ) => void;
     }): Promise<void> {
         if (STAMHOOFD.userMode !== 'platform') {
             let organization = this.organization;
@@ -1915,7 +2386,19 @@ export class AdminPermissionChecker {
     /**
      * Whether the answers of a member for a record in this category may be read or written.
      */
-    async canAccessRecordCategory({ member, level, record, organizationId, rootCategoryId }: { member: MemberWithUsersRegistrationsAndGroups; record: RecordSettings; organizationId: string | null; rootCategoryId: string; level: PermissionLevel }): Promise<boolean> {
+    async canAccessRecordCategory({
+        member,
+        level,
+        record,
+        organizationId,
+        rootCategoryId,
+    }: {
+        member: MemberWithUsersRegistrationsAndGroups;
+        record: RecordSettings;
+        organizationId: string | null;
+        rootCategoryId: string;
+        level: PermissionLevel;
+    }): Promise<boolean> {
         if (!this.checkScope(organizationId)) {
             return false;
         }
@@ -1933,26 +2416,49 @@ export class AdminPermissionChecker {
 
         if (organizationId) {
             const organizationPermissions = await this.getOrganizationPermissions(organizationId);
-            if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, rootCategoryId, level)) {
+            if (
+                organizationPermissions &&
+                organizationPermissions.hasResourceAccess(
+                    PermissionsResourceType.RecordCategories,
+                    rootCategoryId,
+                    level,
+                )
+            ) {
                 return true;
             }
         } else {
             // Also check current scoped organization
             if (this.organization) {
-                const organizationPermissions = await this.getOrganizationPermissions(this.organization.id);
-                if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, rootCategoryId, level)) {
+                const organizationPermissions = await this.getOrganizationPermissions(
+                    this.organization.id,
+                );
+                if (
+                    organizationPermissions &&
+                    organizationPermissions.hasResourceAccess(
+                        PermissionsResourceType.RecordCategories,
+                        rootCategoryId,
+                        level,
+                    )
+                ) {
                     return true;
                 }
             }
         }
 
         // 2. Check platform permissions
-        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.RecordCategories, rootCategoryId, level)) {
+        if (
+            this.platformPermissions?.hasResourceAccess(
+                PermissionsResourceType.RecordCategories,
+                rootCategoryId,
+                level,
+            )
+        ) {
             return true;
         }
 
         // All member access, means also having access to record categories of non-registered members
-        if (this.canAccessAllPlatformMembers(level)) { // needs to be full to also inherit record category access
+        if (this.canAccessAllPlatformMembers(level)) {
+            // needs to be full to also inherit record category access
             return true;
         }
 
@@ -1969,14 +2475,26 @@ export class AdminPermissionChecker {
 
                 // Checking the organization permissions is faster (and less data lookups required), so we do that first before doing the more expensive registration access check
                 if (permissions !== undefined) {
-                    if (permissions === true && await this.canAccessRegistration(registration, level)) {
+                    if (
+                        permissions === true &&
+                        (await this.canAccessRegistration(registration, level))
+                    ) {
                         return true;
                     }
                     continue;
                 }
 
-                const organizationPermissions = await this.getOrganizationPermissions(registration.organizationId);
-                if (organizationPermissions && organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, rootCategoryId, level)) {
+                const organizationPermissions = await this.getOrganizationPermissions(
+                    registration.organizationId,
+                );
+                if (
+                    organizationPermissions &&
+                    organizationPermissions.hasResourceAccess(
+                        PermissionsResourceType.RecordCategories,
+                        rootCategoryId,
+                        level,
+                    )
+                ) {
                     checkedOrganizations.set(registration.organizationId, true);
                     if (await this.canAccessRegistration(registration, level)) {
                         return true;
@@ -1993,28 +2511,49 @@ export class AdminPermissionChecker {
     /**
      * Performance helper
      */
-    async canAccessAllMembersInCurrentPeriod(organizationId: string, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+    async canAccessAllMembersInCurrentPeriod(
+        organizationId: string,
+        level: PermissionLevel = PermissionLevel.Read,
+    ): Promise<boolean> {
         const permissions = await this.getOrganizationPermissions(organizationId);
         if (!permissions) {
             return false;
         }
 
-        return permissions.hasResourceAccess(PermissionsResourceType.Groups, PermissionsResourceKey.CurrentPeriod, level);
+        return permissions.hasResourceAccess(
+            PermissionsResourceType.Groups,
+            PermissionsResourceKey.CurrentPeriod,
+            level,
+        );
     }
 
-    async canAccessAllMembersInEveryPeriod(organizationId: string, level: PermissionLevel = PermissionLevel.Read): Promise<boolean> {
+    async canAccessAllMembersInEveryPeriod(
+        organizationId: string,
+        level: PermissionLevel = PermissionLevel.Read,
+    ): Promise<boolean> {
         const permissions = await this.getOrganizationPermissions(organizationId);
         if (!permissions) {
             return false;
         }
 
-        return permissions.hasResourceAccess(PermissionsResourceType.Groups, PermissionsResourceKey.All, level);
+        return permissions.hasResourceAccess(
+            PermissionsResourceType.Groups,
+            PermissionsResourceKey.All,
+            level,
+        );
     }
 
     /**
      * Changes data inline
      */
-    async filterMemberData(member: MemberWithUsersRegistrationsAndGroups, data: MemberWithRegistrationsBlob, options?: { forAdminCartCalculation?: boolean; responsibilities?: { organizationId: string | null }[] }): Promise<MemberWithRegistrationsBlob> {
+    async filterMemberData(
+        member: MemberWithUsersRegistrationsAndGroups,
+        data: MemberWithRegistrationsBlob,
+        options?: {
+            forAdminCartCalculation?: boolean;
+            responsibilities?: { organizationId: string | null }[];
+        },
+    ): Promise<MemberWithRegistrationsBlob> {
         const cloned = data.clone();
 
         await this.loopRecordAnswerSettingsAccess({
@@ -2025,7 +2564,10 @@ export class AdminPermissionChecker {
                 if (!canAccess) {
                     cloned.details.recordAnswers.delete(key);
                 } else {
-                    if (value && RecordAnswerHelper.haveTypesSameClass(value.settings.type, record.type)) {
+                    if (
+                        value &&
+                        RecordAnswerHelper.haveTypesSameClass(value.settings.type, record.type)
+                    ) {
                         // Force update
                         value.settings = record;
                     }
@@ -2045,7 +2587,10 @@ export class AdminPermissionChecker {
         }
 
         // Has financial read access?
-        if (!options?.forAdminCartCalculation && !await this.hasFinancialMemberAccess(member, PermissionLevel.Read)) {
+        if (
+            !options?.forAdminCartCalculation &&
+            !(await this.hasFinancialMemberAccess(member, PermissionLevel.Read))
+        ) {
             cloned.details.requiresFinancialSupport = null;
             cloned.details.uitpasNumberDetails = null;
             cloned.outstandingBalance = 0;
@@ -2062,11 +2607,14 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (!(await this.canAccessMember(member, PermissionLevel.Write)) || !(await this.canEditMemberEmailAddresses(member, options?.responsibilities))) {
+        if (
+            !(await this.canAccessMember(member, PermissionLevel.Write)) ||
+            !(await this.canEditMemberEmailAddresses(member, options?.responsibilities))
+        ) {
             cloned.details.securityCode = null;
         }
 
-        if (!await this.hasNRNAccess(member, PermissionLevel.Read)) {
+        if (!(await this.hasNRNAccess(member, PermissionLevel.Read))) {
             cloned.details.nationalRegisterNumber = null;
 
             for (const parent of cloned.details.parents) {
@@ -2080,7 +2628,11 @@ export class AdminPermissionChecker {
     /**
      * Only for creating new members
      */
-    filterMemberPut(member: MemberWithUsersRegistrationsAndGroups, data: MemberWithRegistrationsBlob, options: { asUserManager: boolean }) {
+    filterMemberPut(
+        member: MemberWithUsersRegistrationsAndGroups,
+        data: MemberWithRegistrationsBlob,
+        options: { asUserManager: boolean },
+    ) {
         if (options.asUserManager || STAMHOOFD.userMode === 'platform') {
             // A user manager cannot choose the member number + in platform mode, nobody can choose the member number
             data.details.memberNumber = null;
@@ -2095,7 +2647,10 @@ export class AdminPermissionChecker {
         }
     }
 
-    async filterMemberPatch(member: MemberWithUsersRegistrationsAndGroups, data: AutoEncoderPatchType<MemberWithRegistrationsBlob>): Promise<AutoEncoderPatchType<MemberWithRegistrationsBlob>> {
+    async filterMemberPatch(
+        member: MemberWithUsersRegistrationsAndGroups,
+        data: AutoEncoderPatchType<MemberWithRegistrationsBlob>,
+    ): Promise<AutoEncoderPatchType<MemberWithRegistrationsBlob>> {
         if (!data.details) {
             return data;
         }
@@ -2128,7 +2683,7 @@ export class AdminPermissionChecker {
         if (data.details.securityCode !== undefined || data.details.trackingYear !== undefined) {
             const hasFullAccess = await this.canAccessMember(member, PermissionLevel.Full);
 
-            if (!hasFullAccess || !await getCanEditEmailAddresses()) {
+            if (!hasFullAccess || !(await getCanEditEmailAddresses())) {
                 if (data.details.securityCode !== undefined) {
                     // can only be set to null, and only if can access member with full access
                     if (data.details.securityCode !== null) {
@@ -2146,17 +2701,24 @@ export class AdminPermissionChecker {
             }
         }
 
-        if (data.details.uitpasNumberDetails && data.details.uitpasNumberDetails.socialTariff !== undefined) {
+        if (
+            data.details.uitpasNumberDetails &&
+            data.details.uitpasNumberDetails.socialTariff !== undefined
+        ) {
             if (data.details.uitpasNumberDetails.uitpasNumber === undefined) {
                 data.details.uitpasNumberDetails = undefined;
-            } else if (data.details.uitpasNumberDetails.uitpasNumber !== member.details.uitpasNumberDetails?.uitpasNumber) {
+            } else if (
+                data.details.uitpasNumberDetails.uitpasNumber !==
+                member.details.uitpasNumberDetails?.uitpasNumber
+            ) {
                 // if uitpas number did change -> status should be reset
                 data.details.uitpasNumberDetails = UitpasNumberDetails.create({
                     uitpasNumber: data.details.uitpasNumberDetails.uitpasNumber,
                 });
             } else {
                 // if uitpas number did not change
-                data.details.uitpasNumberDetails.socialTariff = member.details.uitpasNumberDetails?.socialTariff;
+                data.details.uitpasNumberDetails.socialTariff =
+                    member.details.uitpasNumberDetails?.socialTariff;
             }
         }
 
@@ -2176,21 +2738,26 @@ export class AdminPermissionChecker {
             }
             const patchedDetails = getPatchedDetails();
 
-            if (patchedDetails.getParentEmails().join('\n') !== member.details.getParentEmails().join('\n')) {
+            if (
+                patchedDetails.getParentEmails().join('\n') !==
+                member.details.getParentEmails().join('\n')
+            ) {
                 return true;
             }
 
             // Removing unverified emails only revokes access
-            return patchedDetails.unverifiedEmails.some(email => !member.details.unverifiedEmails.includes(email));
+            return patchedDetails.unverifiedEmails.some(
+                (email) => !member.details.unverifiedEmails.includes(email),
+            );
         };
 
         if (
-            data.details.email !== undefined
-            || Array.isArray(data.details.alternativeEmails)
-            || data.details.alternativeEmails.changes.length > 0
-            || willLinkedEmailsChange()
+            data.details.email !== undefined ||
+            Array.isArray(data.details.alternativeEmails) ||
+            data.details.alternativeEmails.changes.length > 0 ||
+            willLinkedEmailsChange()
         ) {
-            if (!await getCanEditEmailAddresses()) {
+            if (!(await getCanEditEmailAddresses())) {
                 throw this.error({
                     message: "You don't have access to change the emailaddresses of this user.",
                     human: $t('%ZtM'),
@@ -2206,7 +2773,7 @@ export class AdminPermissionChecker {
             return this.addsSecurityCodePhoneNumbers(member.details, getPatchedDetails());
         };
 
-        if (willVerificationPhonesChange() && !await getCanEditEmailAddresses()) {
+        if (willVerificationPhonesChange() && !(await getCanEditEmailAddresses())) {
             throw this.error({
                 message: "You don't have access to change the phone numbers of this member.",
                 human: $t('%Ztk'),
@@ -2246,11 +2813,18 @@ export class AdminPermissionChecker {
         const isUserManager = this.isUserManager(member);
 
         // In platform mode member numbers are assigned automatically. User managers can only set it when they also have admin access to the member.
-        if (STAMHOOFD.userMode === 'platform' || (isUserManager && !(await this.canAccessMember(member, PermissionLevel.Full)))) {
+        if (
+            STAMHOOFD.userMode === 'platform' ||
+            (isUserManager && !(await this.canAccessMember(member, PermissionLevel.Full)))
+        ) {
             delete data.details.memberNumber;
         }
 
-        if (hasNotes && isUserManager && !(await this.canAccessMember(member, PermissionLevel.Full))) {
+        if (
+            hasNotes &&
+            isUserManager &&
+            !(await this.canAccessMember(member, PermissionLevel.Full))
+        ) {
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'Cannot edit notes',
@@ -2259,22 +2833,28 @@ export class AdminPermissionChecker {
         }
 
         // Has financial write access?
-        if (!await this.hasFinancialMemberAccess(member, PermissionLevel.Write)) {
+        if (!(await this.hasFinancialMemberAccess(member, PermissionLevel.Write))) {
             if (isUserManager && isSetFinancialSupportTrue) {
-                const financialSupportSettings = await getFinancialSupportSettingsAsync(this.platform, async () => {
-                    if (member.organizationId) {
-                        return await this.getOrganization(member.organizationId);
-                    }
-                    return null;
-                });
+                const financialSupportSettings = await getFinancialSupportSettingsAsync(
+                    this.platform,
+                    async () => {
+                        if (member.organizationId) {
+                            return await this.getOrganization(member.organizationId);
+                        }
+                        return null;
+                    },
+                );
 
-                const preventSelfAssignment = financialSupportSettings?.preventSelfAssignment === true;
+                const preventSelfAssignment =
+                    financialSupportSettings?.preventSelfAssignment === true;
 
                 if (preventSelfAssignment) {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: 'No permissions to enable financial support for your own members',
-                        human: financialSupportSettings.preventSelfAssignmentText ?? FinancialSupportSettings.defaultPreventSelfAssignmentText,
+                        human:
+                            financialSupportSettings.preventSelfAssignmentText ??
+                            FinancialSupportSettings.defaultPreventSelfAssignmentText,
                         statusCode: 400,
                     });
                 }
@@ -2286,7 +2866,8 @@ export class AdminPermissionChecker {
                 } else {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message: 'Je hebt geen toegangsrechten om de financiële status van dit lid aan te passen',
+                        message:
+                            'Je hebt geen toegangsrechten om de financiële status van dit lid aan te passen',
                         statusCode: 400,
                     });
                 }
@@ -2296,7 +2877,8 @@ export class AdminPermissionChecker {
                 if (data.details.uitpasNumberDetails) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message: 'Je hebt geen toegangsrechten om het UiTPAS-nummer van dit lid aan te passen',
+                        message:
+                            'Je hebt geen toegangsrechten om het UiTPAS-nummer van dit lid aan te passen',
                         statusCode: 400,
                     });
                 }
@@ -2305,7 +2887,8 @@ export class AdminPermissionChecker {
             if (data.outstandingBalance) {
                 throw new SimpleError({
                     code: 'permission_denied',
-                    message: 'Je hebt geen toegangsrechten om het openstaande saldo van dit lid aan te passen',
+                    message:
+                        'Je hebt geen toegangsrechten om het openstaande saldo van dit lid aan te passen',
                     statusCode: 400,
                 });
             }
@@ -2314,7 +2897,8 @@ export class AdminPermissionChecker {
                 if (registration.price) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message: 'Je hebt geen toegangsrechten om de prijs van een inschrijving te bepalen',
+                        message:
+                            'Je hebt geen toegangsrechten om de prijs van een inschrijving te bepalen',
                         statusCode: 400,
                     });
                 }
@@ -2322,18 +2906,20 @@ export class AdminPermissionChecker {
                 if (registration.pricePaid) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message: 'Je hebt geen toegangsrechten om het betaalde bedrag van een inschrijving te bepalen',
+                        message:
+                            'Je hebt geen toegangsrechten om het betaalde bedrag van een inschrijving te bepalen',
                         statusCode: 400,
                     });
                 }
             }
         }
 
-        if (!await this.hasNRNAccess(member, PermissionLevel.Write)) {
+        if (!(await this.hasNRNAccess(member, PermissionLevel.Write))) {
             if (data.details.nationalRegisterNumber) {
                 throw new SimpleError({
                     code: 'permission_denied',
-                    message: 'Je hebt geen toegangsrechten om het rijksregisternummer van dit lid aan te passen',
+                    message:
+                        'Je hebt geen toegangsrechten om het rijksregisternummer van dit lid aan te passen',
                     statusCode: 400,
                 });
             }
@@ -2342,7 +2928,8 @@ export class AdminPermissionChecker {
                 if (parent.nationalRegisterNumber) {
                     throw new SimpleError({
                         code: 'permission_denied',
-                        message: 'Je hebt geen toegangsrechten om het rijksregisternummer van een ouder aan te passen',
+                        message:
+                            'Je hebt geen toegangsrechten om het rijksregisternummer van een ouder aan te passen',
                         statusCode: 400,
                     });
                 }
@@ -2373,7 +2960,13 @@ export class AdminPermissionChecker {
             return 'all';
         }
 
-        if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, PermissionsResourceKey.All, level)) {
+        if (
+            this.platformPermissions?.hasResourceAccess(
+                PermissionsResourceType.OrganizationTags,
+                PermissionsResourceKey.All,
+                level,
+            )
+        ) {
             return 'all';
         }
 
@@ -2381,7 +2974,13 @@ export class AdminPermissionChecker {
         const tags: string[] = [];
 
         for (const tag of allTags) {
-            if (this.platformPermissions?.hasResourceAccess(PermissionsResourceType.OrganizationTags, tag.id, level)) {
+            if (
+                this.platformPermissions?.hasResourceAccess(
+                    PermissionsResourceType.OrganizationTags,
+                    tag.id,
+                    level,
+                )
+            ) {
                 tags.push(tag.id);
             }
         }
@@ -2398,7 +2997,13 @@ export class AdminPermissionChecker {
             return 'all';
         }
 
-        if (this.platformPermissions?.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, PermissionsResourceKey.All, right)) {
+        if (
+            this.platformPermissions?.hasResourceAccessRight(
+                PermissionsResourceType.OrganizationTags,
+                PermissionsResourceKey.All,
+                right,
+            )
+        ) {
             return 'all';
         }
 
@@ -2406,7 +3011,13 @@ export class AdminPermissionChecker {
         const tags: string[] = [];
 
         for (const tag of allTags) {
-            if (this.platformPermissions?.hasResourceAccessRight(PermissionsResourceType.OrganizationTags, tag.id, right)) {
+            if (
+                this.platformPermissions?.hasResourceAccessRight(
+                    PermissionsResourceType.OrganizationTags,
+                    tag.id,
+                    right,
+                )
+            ) {
                 tags.push(tag.id);
             }
         }

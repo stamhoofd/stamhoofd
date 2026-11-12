@@ -25,7 +25,13 @@ function yearsAgo(years: number) {
  * A member of an organization (userMode organization) registered a year ago, so the age
  * at that registration decides whether a certificate is needed.
  */
-function build({ age, taxCertificates = true, nationalRegisterNumberFilter = null, nationalRegisterNumber = null, parents = [] }: {
+function build({
+    age,
+    taxCertificates = true,
+    nationalRegisterNumberFilter = null,
+    nationalRegisterNumber = null,
+    parents = [],
+}: {
     age: number;
     taxCertificates?: boolean;
     /** The plain national register number question of the organization */
@@ -42,17 +48,19 @@ function build({ age, taxCertificates = true, nationalRegisterNumberFilter = nul
     const registeredAt = yearsAgo(1);
     const member = MemberWithRegistrationsBlob.create({
         organizationId: organization.id,
-        registrations: [Registration.create({
-            registeredAt,
-            startDate: registeredAt,
-            organizationId: organization.id,
-            groupPrice: GroupPrice.create({}),
-            group: Group.create({
+        registrations: [
+            Registration.create({
+                registeredAt,
+                startDate: registeredAt,
                 organizationId: organization.id,
-                settings: GroupSettings.create({}),
-                periodId: 'period',
+                groupPrice: GroupPrice.create({}),
+                group: Group.create({
+                    organizationId: organization.id,
+                    settings: GroupSettings.create({}),
+                    periodId: 'period',
+                }),
             }),
-        })],
+        ],
         details: MemberDetails.create({
             firstName: 'Child',
             lastName: 'Doe',
@@ -63,7 +71,10 @@ function build({ age, taxCertificates = true, nationalRegisterNumberFilter = nul
         }),
     });
 
-    const family = new PlatformFamily({ platform: Platform.create({}), contextOrganization: organization });
+    const family = new PlatformFamily({
+        platform: Platform.create({}),
+        contextOrganization: organization,
+    });
     const platformMember = new PlatformMember({ member, family });
     family.members.push(platformMember);
 
@@ -99,45 +110,85 @@ describe('PlatformMember tax certificate properties', () => {
 
         test('a full admin can still collect it for a member under 22', () => {
             const { member, organization } = build({ age: 17 });
-            expect(member.isPropertyEnabled('taxCertificates', adminOptions(organization, PermissionLevel.Full))).toBe(true);
+            expect(
+                member.isPropertyEnabled(
+                    'taxCertificates',
+                    adminOptions(organization, PermissionLevel.Full),
+                ),
+            ).toBe(true);
         });
 
         test('a full admin cannot collect it for a member of 22 or older', () => {
             const { member, organization } = build({ age: 22 });
-            expect(member.isPropertyEnabled('taxCertificates', adminOptions(organization, PermissionLevel.Full))).toBe(false);
+            expect(
+                member.isPropertyEnabled(
+                    'taxCertificates',
+                    adminOptions(organization, PermissionLevel.Full),
+                ),
+            ).toBe(false);
         });
 
         test('an admin without full access cannot override the age', () => {
             const { member, organization } = build({ age: 17 });
-            expect(member.isPropertyEnabled('taxCertificates', adminOptions(organization, PermissionLevel.Write))).toBe(false);
+            expect(
+                member.isPropertyEnabled(
+                    'taxCertificates',
+                    adminOptions(organization, PermissionLevel.Write),
+                ),
+            ).toBe(false);
         });
 
         test('the override does not apply when the organization did not enable it', () => {
             const { member, organization } = build({ age: 17, taxCertificates: false });
-            expect(member.isPropertyEnabled('taxCertificates', adminOptions(organization, PermissionLevel.Full))).toBe(false);
+            expect(
+                member.isPropertyEnabled(
+                    'taxCertificates',
+                    adminOptions(organization, PermissionLevel.Full),
+                ),
+            ).toBe(false);
         });
     });
 
     describe("isPropertyEnabled('parents.nationalRegisterNumber')", () => {
         test('follows the tax certificate setting', () => {
-            expect(build({ age: 10 }).member.isPropertyEnabled('parents.nationalRegisterNumber')).toBe(true);
-            expect(build({ age: 10, taxCertificates: false }).member.isPropertyEnabled('parents.nationalRegisterNumber')).toBe(false);
-            expect(build({ age: 17 }).member.isPropertyEnabled('parents.nationalRegisterNumber')).toBe(false);
+            expect(
+                build({ age: 10 }).member.isPropertyEnabled('parents.nationalRegisterNumber'),
+            ).toBe(true);
+            expect(
+                build({ age: 10, taxCertificates: false }).member.isPropertyEnabled(
+                    'parents.nationalRegisterNumber',
+                ),
+            ).toBe(false);
+            expect(
+                build({ age: 17 }).member.isPropertyEnabled('parents.nationalRegisterNumber'),
+            ).toBe(false);
         });
 
         test('false when the member opted out of a national register number', () => {
-            const { member } = build({ age: 10, nationalRegisterNumber: NationalRegisterNumberOptOut });
+            const { member } = build({
+                age: 10,
+                nationalRegisterNumber: NationalRegisterNumberOptOut,
+            });
             expect(member.isPropertyEnabled('parents.nationalRegisterNumber')).toBe(false);
             expect(member.isPropertyEnabled('parents.isMemberTaxDependent')).toBe(false);
         });
 
         test('enabled through the full admin override', () => {
             const { member, organization } = build({ age: 17 });
-            expect(member.isPropertyEnabled('parents.nationalRegisterNumber', adminOptions(organization, PermissionLevel.Full))).toBe(true);
+            expect(
+                member.isPropertyEnabled(
+                    'parents.nationalRegisterNumber',
+                    adminOptions(organization, PermissionLevel.Full),
+                ),
+            ).toBe(true);
         });
 
         test('the plain national register number question does not enable it', () => {
-            const { member } = build({ age: 10, taxCertificates: false, nationalRegisterNumberFilter: PropertyFilter.createDefault() });
+            const { member } = build({
+                age: 10,
+                taxCertificates: false,
+                nationalRegisterNumberFilter: PropertyFilter.createDefault(),
+            });
             expect(member.isPropertyEnabled('parents.nationalRegisterNumber')).toBe(false);
         });
     });
@@ -149,13 +200,25 @@ describe('PlatformMember tax certificate properties', () => {
         });
 
         test('falls back to the plain question when no certificate is needed', () => {
-            expect(build({ age: 17 }).member.isPropertyEnabled('nationalRegisterNumber')).toBe(false);
-            expect(build({ age: 17, nationalRegisterNumberFilter: PropertyFilter.createDefault() }).member.isPropertyEnabled('nationalRegisterNumber')).toBe(true);
+            expect(build({ age: 17 }).member.isPropertyEnabled('nationalRegisterNumber')).toBe(
+                false,
+            );
+            expect(
+                build({
+                    age: 17,
+                    nationalRegisterNumberFilter: PropertyFilter.createDefault(),
+                }).member.isPropertyEnabled('nationalRegisterNumber'),
+            ).toBe(true);
         });
 
         test('asked through the full admin override', () => {
             const { member, organization } = build({ age: 17 });
-            expect(member.isPropertyEnabled('nationalRegisterNumber', adminOptions(organization, PermissionLevel.Full))).toBe(true);
+            expect(
+                member.isPropertyEnabled(
+                    'nationalRegisterNumber',
+                    adminOptions(organization, PermissionLevel.Full),
+                ),
+            ).toBe(true);
         });
     });
 
@@ -176,11 +239,16 @@ describe('PlatformMember tax certificate properties', () => {
             const { member, organization } = build({ age: 17 });
             const options = adminOptions(organization, PermissionLevel.Full);
             expect(member.isPropertyRequired('nationalRegisterNumber', options)).toBe(false);
-            expect(member.isPropertyRequired('parents.nationalRegisterNumber', options)).toBe(false);
+            expect(member.isPropertyRequired('parents.nationalRegisterNumber', options)).toBe(
+                false,
+            );
         });
 
         test('nothing is required after opting out', () => {
-            const { member } = build({ age: 10, nationalRegisterNumber: NationalRegisterNumberOptOut });
+            const { member } = build({
+                age: 10,
+                nationalRegisterNumber: NationalRegisterNumberOptOut,
+            });
             expect(member.isPropertyRequired('nationalRegisterNumber')).toBe(false);
             expect(member.isPropertyRequired('parents.nationalRegisterNumber')).toBe(false);
         });

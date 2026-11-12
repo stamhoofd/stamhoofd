@@ -11,7 +11,9 @@ export class BootChecksService {
 
         if (STAMHOOFD.environment === 'production') {
             console.error(collationMismatchError);
-            console.error('Health endpoint will keep returning a non-2xx status until the process is restarted with a fixed database collation.');
+            console.error(
+                'Health endpoint will keep returning a non-2xx status until the process is restarted with a fixed database collation.',
+            );
             StartupHealthService.markUnhealthy(collationMismatchError);
             return;
         }

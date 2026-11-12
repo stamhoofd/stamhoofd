@@ -29,10 +29,7 @@ if ('EncodeMedium' in simpleEncoding) {
     EncodeMedium = StubbedEncodeMedium as any;
 }
 
-const {
-    encodeObject,
-    ObjectData,
-} = simpleEncoding;
+const { encodeObject, ObjectData } = simpleEncoding;
 
 export type HTTPMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
 
@@ -157,7 +154,8 @@ export class Request<T> {
         this.responseContentTypeOverride = request.responseContentTypeOverride;
         this.shouldRetry = request.shouldRetry ?? this.shouldRetry;
         this.allowErrorRetry = request.allowErrorRetry ?? this.allowErrorRetry;
-        this.bag = request.bag ?? (request.owner ? RequestBag.getOrCreate(request.owner) : undefined);
+        this.bag =
+            request.bag ?? (request.owner ? RequestBag.getOrCreate(request.owner) : undefined);
         this.overrideXMLHttpRequest = request.overrideXMLHttpRequest;
         this.bag?.addRequest(this);
     }
@@ -189,10 +187,13 @@ export class Request<T> {
                 for (const middleware of this.getMiddlewares()) {
                     // Check if one of the middlewares decides to stop
                     if (middleware.onFatalNetworkError) {
-                        middleware.onFatalNetworkError(this, new SimpleError({
-                            code: 'network_abort',
-                            message: 'Network abort',
-                        }));
+                        middleware.onFatalNetworkError(
+                            this,
+                            new SimpleError({
+                                code: 'network_abort',
+                                message: 'Network abort',
+                            }),
+                        );
                     }
                 }
             }
@@ -209,17 +210,22 @@ export class Request<T> {
 
     /** Match the library's network_timeout error code. */
     static isTimeout(e: unknown): e is TimeoutError {
-        return !!((isSimpleError(e) || isSimpleErrors(e)) && (e.hasCode('network_timeout')));
+        return !!((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('network_timeout'));
     }
 
     /** Match network failures, timeouts and aborts; use isAbortError to hide only cancellation in the UI. */
     static isNetworkError(e: unknown): e is NetworkError {
-        return !!((isSimpleError(e) || isSimpleErrors(e)) && (e.hasCode('network_error') || e.hasCode('network_timeout') || e.hasCode('network_abort')));
+        return !!(
+            (isSimpleError(e) || isSimpleErrors(e)) &&
+            (e.hasCode('network_error') ||
+                e.hasCode('network_timeout') ||
+                e.hasCode('network_abort'))
+        );
     }
 
     /** Match cancellation (network_abort), excluding other network failures. */
     static isAbortError(e: unknown): e is AbortError {
-        return !!((isSimpleError(e) || isSimpleErrors(e)) && (e.hasCode('network_abort')));
+        return !!((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('network_abort'));
     }
 
     private async fetch(data: {
@@ -231,7 +237,9 @@ export class Request<T> {
     }): Promise<XMLHttpRequest> {
         return new Promise((resolve, reject) => {
             try {
-                const request: XMLHttpRequest = this.overrideXMLHttpRequest ? (new this.overrideXMLHttpRequest()) : new XMLHttpRequest();
+                const request: XMLHttpRequest = this.overrideXMLHttpRequest
+                    ? new this.overrideXMLHttpRequest()
+                    : new XMLHttpRequest();
                 request.responseType = this.responseType;
                 let finished = false;
 
@@ -259,10 +267,12 @@ export class Request<T> {
                     }
                     finished = true;
                     this.XMLHttpRequest = null;
-                    reject(new SimpleError({
-                        code: 'network_timeout',
-                        message: 'Timeout',
-                    }));
+                    reject(
+                        new SimpleError({
+                            code: 'network_timeout',
+                            message: 'Timeout',
+                        }),
+                    );
                 };
 
                 request.onerror = () => {
@@ -273,10 +283,12 @@ export class Request<T> {
                     // Your request timed out
                     finished = true;
                     this.XMLHttpRequest = null;
-                    reject(new SimpleError({
-                        code: 'network_error',
-                        message: 'Network error',
-                    }));
+                    reject(
+                        new SimpleError({
+                            code: 'network_error',
+                            message: 'Network error',
+                        }),
+                    );
                 };
 
                 request.onabort = () => {
@@ -289,10 +301,12 @@ export class Request<T> {
 
                     // Disable retries
                     this.shouldRetry = false;
-                    reject(new SimpleError({
-                        code: 'network_abort',
-                        message: 'Network abort',
-                    }));
+                    reject(
+                        new SimpleError({
+                            code: 'network_abort',
+                            message: 'Network abort',
+                        }),
+                    );
                 };
 
                 request.open(data.method, data.url);
@@ -363,35 +377,53 @@ export class Request<T> {
                         delete this.headers['content-type'];
                     }
 
-                    if (this.headers['Content-Type'] && (this.headers['Content-Type'] as string).startsWith('application/x-www-form-urlencoded')) {
+                    if (
+                        this.headers['Content-Type'] &&
+                        (this.headers['Content-Type'] as string).startsWith(
+                            'application/x-www-form-urlencoded',
+                        )
+                    ) {
                         const typeCopy = encodeObject(this.body, {
                             version: this.version ?? 0,
                             medium: EncodeMedium.Network,
                         });
                         if (typeCopy === null || typeCopy === undefined) {
-                            throw new Error('Invalid body, got null/undefined, which is not encodeable to a querystring');
+                            throw new Error(
+                                'Invalid body, got null/undefined, which is not encodeable to a querystring',
+                            );
                         }
                         if (Array.isArray(typeCopy)) {
-                            throw new Error('Invalid body, got an array which is not encodeable to a querystring');
+                            throw new Error(
+                                'Invalid body, got an array which is not encodeable to a querystring',
+                            );
                         }
                         if (typeof typeCopy === 'object') {
                             body = Object.keys(typeCopy)
-                                .filter(k => typeCopy[k] !== undefined)
+                                .filter((k) => typeCopy[k] !== undefined)
                                 .map((k) => {
                                     const v = typeCopy[k];
                                     if (typeof v === 'object') {
-                                        throw new Error('Invalid body, cannot encode deep objects or arrays in a querystring. Object found at ' + k);
+                                        throw new Error(
+                                            'Invalid body, cannot encode deep objects or arrays in a querystring. Object found at ' +
+                                                k,
+                                        );
                                     }
-                                    return encodeURIComponent(k) + '=' + encodeURIComponent(v === null ? 'null' : v!.toString());
+                                    return (
+                                        encodeURIComponent(k) +
+                                        '=' +
+                                        encodeURIComponent(v === null ? 'null' : v!.toString())
+                                    );
                                 })
                                 .join('&');
                         }
                     } else {
                         this.headers['Content-Type'] = 'application/json;charset=utf-8';
-                        body = JSON.stringify(encodeObject(this.body, {
-                            version: this.version ?? 0,
-                            medium: EncodeMedium.Network,
-                        }));
+                        body = JSON.stringify(
+                            encodeObject(this.body, {
+                                version: this.version ?? 0,
+                                medium: EncodeMedium.Network,
+                            }),
+                        );
                     }
                 }
             }
@@ -418,7 +450,9 @@ export class Request<T> {
                                 } else {
                                     throw new SimpleError({
                                         code: 'invalid_query',
-                                        message: 'Invalid query parameter with non-integer number value ' + value.toString(),
+                                        message:
+                                            'Invalid query parameter with non-integer number value ' +
+                                            value.toString(),
                                         human: 'Er ging iets mis bij het omvormen van dit verzoek',
                                     });
                                 }
@@ -434,7 +468,9 @@ export class Request<T> {
                                         } else {
                                             throw new SimpleError({
                                                 code: 'invalid_query',
-                                                message: 'Invalid query parameter with non-integer number value in array ' + v.toString(),
+                                                message:
+                                                    'Invalid query parameter with non-integer number value in array ' +
+                                                    v.toString(),
                                                 human: 'Er ging iets mis bij het omvormen van dit verzoek',
                                             });
                                         }
@@ -443,7 +479,8 @@ export class Request<T> {
                                     } else {
                                         throw new SimpleError({
                                             code: 'invalid_query',
-                                            message: 'Invalid query parameter with non-string array value',
+                                            message:
+                                                'Invalid query parameter with non-string array value',
                                             human: 'Er ging iets mis bij het omvormen van dit verzoek',
                                         });
                                     }
@@ -464,7 +501,7 @@ export class Request<T> {
                     } else {
                         throw new SimpleError({
                             code: 'invalid_query',
-                            message: 'Invalid query parameter of type ' + (typeof query),
+                            message: 'Invalid query parameter of type ' + typeof query,
                             human: 'Er ging iets mis bij het omvormen van dit verzoek',
                         });
                     }
@@ -473,18 +510,32 @@ export class Request<T> {
 
             if (this.static.verbose) {
                 console.log('Starting new request');
-                console.log('New request', this.method, this.path, this.body, this.query, this.headers);
+                console.log(
+                    'New request',
+                    this.method,
+                    this.path,
+                    this.body,
+                    this.query,
+                    this.headers,
+                );
             }
 
             response = await this.fetch({
-                url: this.server.host + (this.version !== undefined ? ('/v' + this.version) : '') + this.path + queryString,
+                url:
+                    this.server.host +
+                    (this.version !== undefined ? '/v' + this.version : '') +
+                    this.path +
+                    queryString,
                 method: this.method,
                 headers: this.headers,
                 body,
                 timeout,
             });
         } catch (error) {
-            if ((isSimpleError(error) || isSimpleErrors(error)) && error.hasCode('network_timeout')) {
+            if (
+                (isSimpleError(error) || isSimpleErrors(error)) &&
+                error.hasCode('network_timeout')
+            ) {
                 // Increase next timeout (note: upload will stay 1 minute)
                 this.timeout = Math.max(timeout, 45 * 1000);
             }
@@ -500,7 +551,9 @@ export class Request<T> {
                 for (const middleware of this.getMiddlewares()) {
                     // Check if one of the middlewares decides to stop
                     if (middleware.shouldRetryNetworkError) {
-                        retry = retry || (await middleware.shouldRetryNetworkError(this, error as Error));
+                        retry =
+                            retry ||
+                            (await middleware.shouldRetryNetworkError(this, error as Error));
                     }
 
                     if (!this.shouldRetry || this.didFailNetwork) {
@@ -557,7 +610,8 @@ export class Request<T> {
             responseVersion = this.version ?? 0;
         }
 
-        const contentType = this.responseContentTypeOverride ?? (response.getResponseHeader('Content-Type') || '');
+        const contentType =
+            this.responseContentTypeOverride ?? (response.getResponseHeader('Content-Type') || '');
         const mediaType = contentType.split(';')[0].trim().toLowerCase();
 
         if (response.status < 200 || response.status >= 300) {
@@ -602,7 +656,8 @@ export class Request<T> {
                     for (const middleware of this.getMiddlewares()) {
                         // Check if one of the middlewares decides to stop
                         if (middleware.shouldRetryError) {
-                            retry = retry || (await middleware.shouldRetryError(this, response, err));
+                            retry =
+                                retry || (await middleware.shouldRetryError(this, response, err));
                         }
                     }
 
@@ -623,11 +678,14 @@ export class Request<T> {
             }
 
             // A non 200 status code without json header is always considered as a server error.
-            return await this.retryOrThrowServerError(response, new SimpleError({
-                code: 'http_status_error',
-                message: typeof bodyText === 'string' ? bodyText : response.statusText,
-                statusCode: response.status,
-            }));
+            return await this.retryOrThrowServerError(
+                response,
+                new SimpleError({
+                    code: 'http_status_error',
+                    message: typeof bodyText === 'string' ? bodyText : response.statusText,
+                    statusCode: response.status,
+                }),
+            );
         }
 
         if (mediaType === 'application/json') {
@@ -646,19 +704,29 @@ export class Request<T> {
             }
 
             if (this.decoder) {
-                const decoded = this.decoder?.decode(new ObjectData(json, {
-                    version: responseVersion,
-                    medium: EncodeMedium.Network,
-                }));
+                const decoded = this.decoder?.decode(
+                    new ObjectData(json, {
+                        version: responseVersion,
+                        medium: EncodeMedium.Network,
+                    }),
+                );
                 if (this.static.verbose) {
                     console.info(decoded);
                 }
                 this.bag?.removeRequest(this);
-                return new RequestResult(decoded, Request.parseHeaders(response.getAllResponseHeaders()), responseVersion);
+                return new RequestResult(
+                    decoded,
+                    Request.parseHeaders(response.getAllResponseHeaders()),
+                    responseVersion,
+                );
             }
 
             this.bag?.removeRequest(this);
-            return new RequestResult(json, Request.parseHeaders(response.getAllResponseHeaders()), responseVersion);
+            return new RequestResult(
+                json,
+                Request.parseHeaders(response.getAllResponseHeaders()),
+                responseVersion,
+            );
         }
 
         if (this.decoder) {
@@ -666,11 +734,18 @@ export class Request<T> {
             if (this.static.verbose) {
                 console.error(response.response);
             }
-            return await this.retryOrThrowServerError(response, new Error('Missing JSON response from server'));
+            return await this.retryOrThrowServerError(
+                response,
+                new Error('Missing JSON response from server'),
+            );
         }
 
         this.bag?.removeRequest(this);
-        return new RequestResult(await response.response, Request.parseHeaders(response.getAllResponseHeaders()), responseVersion) as any;
+        return new RequestResult(
+            await response.response,
+            Request.parseHeaders(response.getAllResponseHeaders()),
+            responseVersion,
+        ) as any;
     }
 
     static parseHeaders(headers: string) {

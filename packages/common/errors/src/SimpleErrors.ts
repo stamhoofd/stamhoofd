@@ -3,7 +3,14 @@ import type { ErrorData } from './ErrorData.js';
 import { isSimpleError, SimpleError } from './SimpleError.js';
 
 export function isSimpleErrors(e: unknown): e is SimpleErrors {
-    return typeof e === 'object' && e !== null && 'errors' in e && Array.isArray(e.errors) && e.errors.length > 0 && isSimpleError(e.errors[0]);
+    return (
+        typeof e === 'object' &&
+        e !== null &&
+        'errors' in e &&
+        Array.isArray(e.errors) &&
+        e.errors.length > 0 &&
+        isSimpleError(e.errors[0])
+    );
 }
 
 // Error that is caused by a client and should be reported to the client
@@ -11,7 +18,7 @@ export class SimpleErrors extends Error {
     errors: SimpleError[];
 
     constructor(...errors: SimpleError[]) {
-        super(errors.map(e => e.message).join('\n'));
+        super(errors.map((e) => e.message).join('\n'));
         this.errors = errors;
     }
 
@@ -40,7 +47,7 @@ export class SimpleErrors extends Error {
     }
 
     get statusCode(): number | undefined {
-        return this.errors.find(e => e.statusCode !== undefined)?.statusCode;
+        return this.errors.find((e) => e.statusCode !== undefined)?.statusCode;
     }
 
     removeErrorAt(index: number) {
@@ -61,11 +68,11 @@ export class SimpleErrors extends Error {
     }
 
     hasCode(code: string): boolean {
-        return this.errors.findIndex(e => e.hasCode(code)) !== -1;
+        return this.errors.findIndex((e) => e.hasCode(code)) !== -1;
     }
 
     getCode(code: string): SimpleError | undefined {
-        return this.errors.find(e => e.hasCode(code));
+        return this.errors.find((e) => e.hasCode(code));
     }
 
     /**
@@ -76,7 +83,7 @@ export class SimpleErrors extends Error {
     }
 
     hasFieldThatStartsWith(prefix: string): boolean {
-        return this.errors.findIndex(e => e.hasFieldThatStartsWith(prefix)) !== -1;
+        return this.errors.findIndex((e) => e.hasFieldThatStartsWith(prefix)) !== -1;
     }
 
     /**
@@ -88,7 +95,7 @@ export class SimpleErrors extends Error {
 
     encode(context: unknown) {
         return {
-            errors: this.errors.map(e => e.encode(context)),
+            errors: this.errors.map((e) => e.encode(context)),
         };
     }
 
@@ -112,8 +119,8 @@ export class SimpleErrors extends Error {
     /// Returns a human description of all the errors
     getHuman(): string {
         return this.errors
-            .filter(e => !!e.getHuman())
-            .map(e => e.getHuman())
+            .filter((e) => !!e.getHuman())
+            .map((e) => e.getHuman())
             .join('\n');
     }
 }

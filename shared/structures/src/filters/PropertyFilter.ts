@@ -40,7 +40,11 @@ export class PropertyFilter implements Encodeable {
     }
 
     get isAlwaysEnabledAndRequired() {
-        return this.enabledWhen === null && isEmptyFilter(this.requiredWhen) && this.requiredWhen !== null;
+        return (
+            this.enabledWhen === null &&
+            isEmptyFilter(this.requiredWhen) &&
+            this.requiredWhen !== null
+        );
     }
 
     isRequired(object: Filterable): boolean {
@@ -74,10 +78,7 @@ export class PropertyFilter implements Encodeable {
     }
 
     clone() {
-        return new PropertyFilter(
-            cloneObject(this.enabledWhen),
-            cloneObject(this.requiredWhen),
-        );
+        return new PropertyFilter(cloneObject(this.enabledWhen), cloneObject(this.requiredWhen));
     }
 
     getDiffValue() {
@@ -110,10 +111,7 @@ export class PropertyFilter implements Encodeable {
             if (isEqualFilter(this.enabledWhen, other.enabledWhen)) {
                 base.enabledWhen = this.enabledWhen;
             } else {
-                base.enabledWhen = mergeFilters([
-                    this.enabledWhen,
-                    other.enabledWhen,
-                ], '$or');
+                base.enabledWhen = mergeFilters([this.enabledWhen, other.enabledWhen], '$or');
             }
         }
 
@@ -136,10 +134,7 @@ export class PropertyFilter implements Encodeable {
                         thisRequired = this.requiredWhen;
                     } else {
                         // required when it is also enabled
-                        thisRequired = mergeFilters([
-                            this.enabledWhen,
-                            this.requiredWhen,
-                        ], '$and');
+                        thisRequired = mergeFilters([this.enabledWhen, this.requiredWhen], '$and');
                     }
                 }
             }
@@ -162,10 +157,10 @@ export class PropertyFilter implements Encodeable {
                     if (isEqualFilter(other.enabledWhen, other.requiredWhen)) {
                         otherRequired = other.requiredWhen;
                     } else {
-                        otherRequired = mergeFilters([
-                            other.enabledWhen,
-                            other.requiredWhen,
-                        ], '$and');
+                        otherRequired = mergeFilters(
+                            [other.enabledWhen, other.requiredWhen],
+                            '$and',
+                        );
                     }
                 }
             }
@@ -185,10 +180,7 @@ export class PropertyFilter implements Encodeable {
             if (isEqualFilter(thisRequired, otherRequired)) {
                 base.requiredWhen = thisRequired;
             } else {
-                base.requiredWhen = mergeFilters([
-                    thisRequired,
-                    otherRequired,
-                ], '$or');
+                base.requiredWhen = mergeFilters([thisRequired, otherRequired], '$or');
             }
         }
 

@@ -62,7 +62,8 @@ export class PaymentGeneral extends PrivatePayment {
      * Customer name, phone, payment method and total price
      */
     getPaymentDataHTMLTable() {
-        let str = '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
+        let str =
+            '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
 
         const customer = this.customer;
 
@@ -71,13 +72,19 @@ export class PaymentGeneral extends PrivatePayment {
         if (customer) {
             if (customer.company) {
                 replacements.push({
-                    title: customer.company.VATNumber || customer.company.companyNumber ? $t('%1JI') : $t('%1PW'),
+                    title:
+                        customer.company.VATNumber || customer.company.companyNumber
+                            ? $t('%1JI')
+                            : $t('%1PW'),
                     value: customer.company.name,
                 });
 
                 if (customer.company.address) {
                     replacements.push({
-                        title: customer.company.VATNumber || customer.company.companyNumber ? $t('%MW') : $t('%1Sh'),
+                        title:
+                            customer.company.VATNumber || customer.company.companyNumber
+                                ? $t('%MW')
+                                : $t('%1Sh'),
                         value: customer.company.address.toString(),
                     });
                 }
@@ -138,11 +145,16 @@ export class PaymentGeneral extends PrivatePayment {
 
     /** Groups equal payment descriptions and prefixes repeated descriptions with their count. */
     getShortDescription() {
-        let shortDescriptions = this.balanceItemPayments.filter(p => p.price !== 0).map(p => p.balanceItem.paymentShortDescription!).filter(p => p !== null);
+        let shortDescriptions = this.balanceItemPayments
+            .filter((p) => p.price !== 0)
+            .map((p) => p.balanceItem.paymentShortDescription!)
+            .filter((p) => p !== null);
 
         if (shortDescriptions.length === 0) {
             // Include free items
-            shortDescriptions = this.balanceItemPayments.map(p => p.balanceItem.paymentShortDescription!).filter(p => p !== null);
+            shortDescriptions = this.balanceItemPayments
+                .map((p) => p.balanceItem.paymentShortDescription!)
+                .filter((p) => p !== null);
         }
 
         // Count the number of times each description occurs and add prefix if more than 1
@@ -154,7 +166,8 @@ export class PaymentGeneral extends PrivatePayment {
         // Add prefix if more than 1
         const arr: string[] = [];
         // Keep the former object's ordering for descriptions that are array-index strings.
-        const index = (key: string) => String(Number(key) >>> 0) === key && Number(key) < 2 ** 32 - 1 ? Number(key) : Infinity;
+        const index = (key: string) =>
+            String(Number(key) >>> 0) === key && Number(key) < 2 ** 32 - 1 ? Number(key) : Infinity;
         const sortedCounts = [...counts].sort(([a], [b]) => index(a) - index(b));
         for (const [shortDescription, count] of sortedCounts) {
             if (count > 1) {
@@ -164,16 +177,30 @@ export class PaymentGeneral extends PrivatePayment {
             }
         }
 
-        return Formatter.capitalizeFirstLetter(Formatter.joinLast(arr, ', ', ' ' + $t('%M1') + ' '));
+        return Formatter.capitalizeFirstLetter(
+            Formatter.joinLast(arr, ', ', ' ' + $t('%M1') + ' '),
+        );
     }
 }
 
-export type BalanceItemPaymentsHtmlTableItem = { price: number; itemDescription: string | null; balanceItem: { name: string }; itemTitle: string; quantity: number; unitPrice: number };
-export function getBalanceItemPaymentsHtmlTable(balanceItemPayments: BalanceItemPaymentsHtmlTableItem[]) {
+export type BalanceItemPaymentsHtmlTableItem = {
+    price: number;
+    itemDescription: string | null;
+    balanceItem: { name: string };
+    itemTitle: string;
+    quantity: number;
+    unitPrice: number;
+};
+export function getBalanceItemPaymentsHtmlTable(
+    balanceItemPayments: BalanceItemPaymentsHtmlTableItem[],
+) {
     const payments = balanceItemPayments.slice().sort((a, b) => {
         return Sorter.stack(
             Sorter.byNumberValue(a.price, b.price),
-            Sorter.byStringValue(a.itemDescription ?? a.balanceItem.name, b.itemDescription ?? b.balanceItem.name),
+            Sorter.byStringValue(
+                a.itemDescription ?? a.balanceItem.name,
+                b.itemDescription ?? b.balanceItem.name,
+            ),
         );
     });
 
@@ -191,7 +218,9 @@ export function getBalanceItemPaymentsHtmlTable(balanceItemPayments: BalanceItem
             description += `${Formatter.escapeHtml(Formatter.float(payment.quantity))} x ${Formatter.escapeHtml(Formatter.price(payment.unitPrice))}`;
         }
 
-        const descriptionText = description ? `<p class="email-style-description-small pre-wrap">${description}</p>` : '';
+        const descriptionText = description
+            ? `<p class="email-style-description-small pre-wrap">${description}</p>`
+            : '';
         const titleColumn = `<td><h4 class="email-style-title-list">${Formatter.escapeHtml(title)}</h4>${descriptionText}</td>`;
 
         const price = payment.price === 0 ? $t('%1Mn') : Formatter.price(payment.price);

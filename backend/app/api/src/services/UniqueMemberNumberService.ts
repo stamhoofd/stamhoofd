@@ -12,38 +12,54 @@ const UNIQUE_KEY_ORGANIZATION = 'memberNumber_organizationId';
  *  */
 export class UniqueMemberNumberService {
     static async check() {
-        await logger.setContext({
-            prefixes: [
-                new StyledText('[UniqueMemberNumberService] ').addClass('unique-member-number-service', 'tag'),
-            ],
-            tags: ['unique-member-number-service'],
-        }, async () => {
-            if (STAMHOOFD.userMode === 'platform') {
-                if (await this.hasUniqueConstraint(UNIQUE_KEY_ORGANIZATION)) {
-                    console.warn('Unique constraint for userMode organization exists but should be removed. Deleting it now...');
-                    await this.dropConstraint(UNIQUE_KEY_ORGANIZATION);
-                }
+        await logger.setContext(
+            {
+                prefixes: [
+                    new StyledText('[UniqueMemberNumberService] ').addClass(
+                        'unique-member-number-service',
+                        'tag',
+                    ),
+                ],
+                tags: ['unique-member-number-service'],
+            },
+            async () => {
+                if (STAMHOOFD.userMode === 'platform') {
+                    if (await this.hasUniqueConstraint(UNIQUE_KEY_ORGANIZATION)) {
+                        console.warn(
+                            'Unique constraint for userMode organization exists but should be removed. Deleting it now...',
+                        );
+                        await this.dropConstraint(UNIQUE_KEY_ORGANIZATION);
+                    }
 
-                if (!(await this.hasUniqueConstraint(UNIQUE_KEY_PLATFORM))) {
-                    console.warn('Unique constraint for userMode platform is missing. Creating it now...');
-                    await this.createConstraintForPlatform();
-                }
-            } else {
-                if (await this.hasUniqueConstraint(UNIQUE_KEY_PLATFORM)) {
-                    console.warn('Unique constraint for userMode platform exists but should be removed. Deleting it now...');
-                    await this.dropConstraint(UNIQUE_KEY_PLATFORM);
-                }
+                    if (!(await this.hasUniqueConstraint(UNIQUE_KEY_PLATFORM))) {
+                        console.warn(
+                            'Unique constraint for userMode platform is missing. Creating it now...',
+                        );
+                        await this.createConstraintForPlatform();
+                    }
+                } else {
+                    if (await this.hasUniqueConstraint(UNIQUE_KEY_PLATFORM)) {
+                        console.warn(
+                            'Unique constraint for userMode platform exists but should be removed. Deleting it now...',
+                        );
+                        await this.dropConstraint(UNIQUE_KEY_PLATFORM);
+                    }
 
-                if (await this.hasUniqueConstraint(UNIQUE_KEY_ORGANIZATION)) {
-                    console.warn('Unique constraint for userMode organization exists but should be removed. Deleting it now...');
-                    await this.dropConstraint(UNIQUE_KEY_ORGANIZATION);
+                    if (await this.hasUniqueConstraint(UNIQUE_KEY_ORGANIZATION)) {
+                        console.warn(
+                            'Unique constraint for userMode organization exists but should be removed. Deleting it now...',
+                        );
+                        await this.dropConstraint(UNIQUE_KEY_ORGANIZATION);
+                    }
                 }
-            }
-        });
+            },
+        );
     }
 
     private static async hasUniqueConstraint(key: string) {
-        const [results] = await Database.select('SHOW INDEX FROM `members` WHERE Key_name = ?', [key]);
+        const [results] = await Database.select('SHOW INDEX FROM `members` WHERE Key_name = ?', [
+            key,
+        ]);
         return results.length > 0;
     }
 
@@ -59,10 +75,18 @@ export class UniqueMemberNumberService {
 
     private static async createConstraintForPlatform() {
         try {
-            await Database.statement('ALTER TABLE `members` ADD UNIQUE INDEX `' + UNIQUE_KEY_PLATFORM + '` (`memberNumber`) USING BTREE;');
+            await Database.statement(
+                'ALTER TABLE `members` ADD UNIQUE INDEX `' +
+                    UNIQUE_KEY_PLATFORM +
+                    '` (`memberNumber`) USING BTREE;',
+            );
             console.log('Unique constraint created.');
         } catch (e) {
-            console.error(chalk.red('Failed to create unique constraint on memberNumber column of members table:'));
+            console.error(
+                chalk.red(
+                    'Failed to create unique constraint on memberNumber column of members table:',
+                ),
+            );
             console.error(e);
         }
     }

@@ -24,7 +24,10 @@ export class GetMFAStatusEndpoint extends Endpoint<Params, Query, Body, Response
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope();
-        const { user } = await Context.authenticate({ allowWithoutAccount: true, allowUnscoped: true });
+        const { user } = await Context.authenticate({
+            allowWithoutAccount: true,
+            allowUnscoped: true,
+        });
 
         Context.assertNotImpersonating();
 

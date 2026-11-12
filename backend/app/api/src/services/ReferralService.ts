@@ -2,7 +2,13 @@ import type { Model } from '@node/database';
 import { SimpleError } from '@common/errors';
 import type { EmailInterfaceBase } from '@stamhoofd/email';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, Organization, Platform, RegisterCode, UsedRegisterCode } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    Organization,
+    Platform,
+    RegisterCode,
+    UsedRegisterCode,
+} from '@stamhoofd/models';
 import { BalanceItemStatus, BalanceItemType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { VATService } from './VATService.js';
@@ -13,7 +19,10 @@ export class ReferralService {
      * Prepares a register code for usage.
      * Returns the models to save and the emails to send when succesful
      */
-    static async markUsed(organization: Organization, codeString: string): Promise<{ models: Model[]; emails: EmailInterfaceBase[] }> {
+    static async markUsed(
+        organization: Organization,
+        codeString: string,
+    ): Promise<{ models: Model[]; emails: EmailInterfaceBase[] }> {
         const alreadyUsed = await UsedRegisterCode.getFor(organization.id);
         if (alreadyUsed) {
             throw new SimpleError({
@@ -34,7 +43,9 @@ export class ReferralService {
             });
         }
 
-        const otherOrganization = code.organizationId ? await Organization.getByID(code.organizationId) : undefined;
+        const otherOrganization = code.organizationId
+            ? await Organization.getByID(code.organizationId)
+            : undefined;
 
         const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
         if (!membershipOrganizationId) {
@@ -53,7 +64,9 @@ export class ReferralService {
         if (code.value > 0) {
             credit = new BalanceItem();
             credit.type = BalanceItemType.ReferralDiscount;
-            credit.name = otherOrganization ? ('Tegoed gekregen van ' + otherOrganization.name) : code.description;
+            credit.name = otherOrganization
+                ? 'Tegoed gekregen van ' + otherOrganization.name
+                : code.description;
             credit.payingOrganizationId = organization.id;
             credit.organizationId = membershipOrganization.id;
             credit.VATPercentage = 21;
@@ -83,28 +96,43 @@ export class ReferralService {
                     // Delay email until everything is validated and saved
                     delayEmails.push({
                         to: admins,
-                        subject: organization.name + ' heeft jullie doorverwijzingslink gebruikt 🥳',
+                        subject:
+                            organization.name + ' heeft jullie doorverwijzingslink gebruikt 🥳',
                         type: 'transactional',
-                        text: 'Dag ' + otherOrganization.name + ',\n\nGoed nieuws! ' + organization.name + ' heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren.\n\n— Stamhoofd',
+                        text:
+                            'Dag ' +
+                            otherOrganization.name +
+                            ',\n\nGoed nieuws! ' +
+                            organization.name +
+                            ' heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren.\n\n— Stamhoofd',
                     });
                 } else {
                     // Delay email until everything is validated and saved
                     delayEmails.push({
                         to: admins,
-                        subject: organization.name + ' heeft jullie doorverwijzingslink gebruikt 🥳',
+                        subject:
+                            organization.name + ' heeft jullie doorverwijzingslink gebruikt 🥳',
                         type: 'transactional',
-                        text: 'Dag ' + otherOrganization.name + ',\n\nGoed nieuws! ' + organization.name + ' heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren. Als zij minstens 1 euro op Stamhoofd uitgeven ontvangen jullie een tegoed dat kan oplopen tot 100 euro per vereniging (zie daarvoor Stamhoofd > Instellingen). Lees zeker onze tips na om nog een groter bedrag te verzamelen.\n\n— Stamhoofd',
+                        text:
+                            'Dag ' +
+                            otherOrganization.name +
+                            ',\n\nGoed nieuws! ' +
+                            organization.name +
+                            ' heeft jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren. Als zij minstens 1 euro op Stamhoofd uitgeven ontvangen jullie een tegoed dat kan oplopen tot 100 euro per vereniging (zie daarvoor Stamhoofd > Instellingen). Lees zeker onze tips na om nog een groter bedrag te verzamelen.\n\n— Stamhoofd',
                     });
                 }
             }
         } else {
             delayEmails.push({
-                to: [
-                    { email: 'hallo@stamhoofd.be' },
-                ],
+                to: [{ email: 'hallo@stamhoofd.be' }],
                 subject: organization.name + ' heeft jullie doorverwijzingslink gebruikt 🥳',
                 type: 'transactional',
-                text: 'Dag Stamhoofd,\n\nGoed nieuws! ' + organization.name + ' heeft jullie doorverwijzingslink ' + code.code + ' gebruikt om zich op Stamhoofd te registreren. \n\n— Stamhoofd',
+                text:
+                    'Dag Stamhoofd,\n\nGoed nieuws! ' +
+                    organization.name +
+                    ' heeft jullie doorverwijzingslink ' +
+                    code.code +
+                    ' gebruikt om zich op Stamhoofd te registreren. \n\n— Stamhoofd',
             });
         }
 
@@ -129,25 +157,37 @@ export class ReferralService {
 
         const code = await RegisterCode.getByID(usedCode.code);
         if (!code || !code.organizationId) {
-            console.error("Couldn't find code " + usedCode.code + ' for used register code ' + usedCode.id);
+            console.error(
+                "Couldn't find code " + usedCode.code + ' for used register code ' + usedCode.id,
+            );
             return;
         }
 
         const organization = await Organization.getByID(usedCode.organizationId);
         if (!organization) {
-            console.error("Couldn't find organization with id " + usedCode.organizationId + ' for used register code ' + usedCode.id);
+            console.error(
+                "Couldn't find organization with id " +
+                    usedCode.organizationId +
+                    ' for used register code ' +
+                    usedCode.id,
+            );
             return;
         }
 
         const receivingOrganization = await Organization.getByID(code.organizationId);
         if (!receivingOrganization) {
-            console.error("Couldn't find receiving organization with id " + code.organizationId + ' for used register code ' + usedCode.id);
+            console.error(
+                "Couldn't find receiving organization with id " +
+                    code.organizationId +
+                    ' for used register code ' +
+                    usedCode.id,
+            );
             return;
         }
         const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId!;
         const membershipOrganization = await Organization.getByID(membershipOrganizationId, true);
 
-        const usedCount = await UsedRegisterCode.getUsedCount(usedCode.code) + 1;
+        const usedCount = (await UsedRegisterCode.getUsedCount(usedCode.code)) + 1;
 
         const credit = new BalanceItem();
         credit.type = BalanceItemType.ReferralDiscount;
@@ -162,7 +202,9 @@ export class ReferralService {
         });
         credit.VATIncluded = false;
         credit.quantity = 1;
-        credit.unitPrice = -(code.invoiceValue ? 0 : Math.min(100 * 100_00, usedCount * 10 * 100_00));
+        credit.unitPrice = -(code.invoiceValue
+            ? 0
+            : Math.min(100 * 100_00, usedCount * 10 * 100_00));
         credit.createdAt = new Date();
         credit.status = BalanceItemStatus.Due;
 
@@ -204,20 +246,41 @@ export class ReferralService {
                     to: admins,
                     from: Email.getQuickFromEmail(receivingOrganization.address.country),
                     subject: `${organization.name} heeft jullie tegoed gebruikt`,
-                    text: 'Dag ' + receivingOrganization.name + ',\n\n' + organization.name + ' had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze dit ook gebruikt. Zoals afgesproken wordt hiervoor ' + Formatter.price(code.invoiceValue) + ' aangerekend via jullie openstaand saldo in jullie Stamhoofd account.'
-                        + '\n\n— Stamhoofd',
+                    text:
+                        'Dag ' +
+                        receivingOrganization.name +
+                        ',\n\n' +
+                        organization.name +
+                        ' had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze dit ook gebruikt. Zoals afgesproken wordt hiervoor ' +
+                        Formatter.price(code.invoiceValue) +
+                        ' aangerekend via jullie openstaand saldo in jullie Stamhoofd account.' +
+                        '\n\n— Stamhoofd',
                 });
             } else {
                 // Delay email until everything is validated and saved
                 Email.send({
                     from: Email.getQuickFromEmail(receivingOrganization.address.country),
                     to: admins,
-                    subject: 'Je hebt ' + Formatter.price(-credit.unitPrice) + ' tegoed ontvangen 💰',
-                    // eslint-disable-next-line secure-coding/no-improper-sanitization -- This is a plain-text email body, not an HTML sink.
-                    text: 'Dag ' + receivingOrganization.name + ',\n\nGeweldig nieuws! ' + organization.name + ' had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze ook voor het eerst minstens één euro uitgegeven. Daardoor ontvangen jullie ' + Formatter.price(-credit.unitPrice) + ' tegoed voor Stamhoofd (zie daarvoor Stamhoofd > Instellingen). '
-                        + (-credit.unitPrice <= 90 * 100_00 ? ('Bij de volgende vereniging ontvangen jullie nog meer: ' + Formatter.price(-credit.unitPrice + 10 * 100_00) + '. ') : '')
-                        + (-credit.unitPrice <= 80 * 100_00 ? ('En dat blijft oplopen tot € 100,00 per vereniging die je aanbrengt.') : '')
-                        + 'Doe zo verder! Lees zeker onze tips na om nog een groter bedrag te verzamelen.\n\n— Stamhoofd',
+                    subject:
+                        'Je hebt ' + Formatter.price(-credit.unitPrice) + ' tegoed ontvangen 💰',
+                    text:
+                        'Dag ' +
+                        receivingOrganization.name +
+                        ',\n\nGeweldig nieuws! ' +
+                        organization.name +
+                        ' had jullie doorverwijzingslink gebruikt om zich op Stamhoofd te registreren, en nu hebben ze ook voor het eerst minstens één euro uitgegeven. Daardoor ontvangen jullie ' +
+                        Formatter.price(-credit.unitPrice) +
+                        // eslint-disable-next-line secure-coding/no-improper-sanitization -- This is a plain-text email body, not an HTML sink.
+                        ' tegoed voor Stamhoofd (zie daarvoor Stamhoofd > Instellingen). ' +
+                        (-credit.unitPrice <= 90 * 100_00
+                            ? 'Bij de volgende vereniging ontvangen jullie nog meer: ' +
+                              Formatter.price(-credit.unitPrice + 10 * 100_00) +
+                              '. '
+                            : '') +
+                        (-credit.unitPrice <= 80 * 100_00
+                            ? 'En dat blijft oplopen tot € 100,00 per vereniging die je aanbrengt.'
+                            : '') +
+                        'Doe zo verder! Lees zeker onze tips na om nog een groter bedrag te verzamelen.\n\n— Stamhoofd',
                 });
             }
         }

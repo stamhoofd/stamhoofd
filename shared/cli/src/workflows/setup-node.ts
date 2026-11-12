@@ -22,18 +22,22 @@ export async function checkNodeVersion(rootDir: string): Promise<NodeVersionChec
         ok,
         current,
         expected,
-        details: ok
-            ? `${current} matches .nvmrc`
-            : `Expected Node ${expected}, got ${current}`,
+        details: ok ? `${current} matches .nvmrc` : `Expected Node ${expected}, got ${current}`,
     };
 }
 
 export function nodeInstallCommand(rootDir: string, currentDir: string = process.cwd()): string {
-    const scriptPath = path.relative(currentDir, path.join(rootDir, '.development/install-node.sh'));
+    const scriptPath = path.relative(
+        currentDir,
+        path.join(rootDir, '.development/install-node.sh'),
+    );
     return `source ${JSON.stringify(scriptPath)}`;
 }
 
-export async function setupNodeVersion(rootDir: string, options: { dryRun?: boolean } = {}): Promise<void> {
+export async function setupNodeVersion(
+    rootDir: string,
+    options: { dryRun?: boolean } = {},
+): Promise<void> {
     if (options.dryRun) {
         console.log(command(nodeInstallCommand(rootDir)));
         return;
@@ -56,11 +60,13 @@ export async function setupNodeVersion(rootDir: string, options: { dryRun?: bool
 export function printNodeVersionStatus(check: NodeVersionCheck): void {
     table(
         ['Check', 'Status', 'Details'],
-        [[
-            'Node.js',
-            statusCell(check.ok ? CliStatus.Ready : CliStatus.Failed),
-            check.ok ? check.details : `${check.details} (run "stam setup node")`,
-        ]],
+        [
+            [
+                'Node.js',
+                statusCell(check.ok ? CliStatus.Ready : CliStatus.Failed),
+                check.ok ? check.details : `${check.details} (run "stam setup node")`,
+            ],
+        ],
         { title: 'Development runtime' },
     );
 }

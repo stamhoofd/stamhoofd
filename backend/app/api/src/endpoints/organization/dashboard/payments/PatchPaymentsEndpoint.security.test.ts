@@ -2,11 +2,30 @@ import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
 import { Request } from '@node/endpoints';
 import type { BalanceItem, Organization, User } from '@stamhoofd/models';
-import { BalanceItemFactory, BalanceItemPayment, GroupFactory, MemberFactory, OrganizationFactory, Payment, RegistrationFactory, UserFactory } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    BalanceItemPayment,
+    GroupFactory,
+    MemberFactory,
+    OrganizationFactory,
+    Payment,
+    RegistrationFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, Permissions, ResourcePermissions, Version } from '@stamhoofd/structures';
+import {
+    BalanceItemDetailed,
+    BalanceItemPaymentDetailed,
+    PaymentGeneral,
+    PaymentMethod,
+    PaymentStatus,
+    PaymentType,
+    Permissions,
+    ResourcePermissions,
+    Version,
+} from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
@@ -28,7 +47,12 @@ describe('Security.PatchPayments', () => {
         const otherGroup = await new GroupFactory({ organization }).create();
 
         const resources = new Map();
-        resources.set(PermissionsResourceType.Groups, new Map([[managedGroup.id, ResourcePermissions.create({ level: PermissionLevel.Write })]]));
+        resources.set(
+            PermissionsResourceType.Groups,
+            new Map([
+                [managedGroup.id, ResourcePermissions.create({ level: PermissionLevel.Write })],
+            ]),
+        );
         const admin = await new UserFactory({
             organization,
             permissions: Permissions.create({ level: PermissionLevel.None, resources }),
@@ -54,9 +78,18 @@ describe('Security.PatchPayments', () => {
         };
     }
 
-    async function send(organization: Organization, admin: User, body: PatchableArrayAutoEncoder<PaymentGeneral>) {
+    async function send(
+        organization: Organization,
+        admin: User,
+        body: PatchableArrayAutoEncoder<PaymentGeneral>,
+    ) {
         const token = await SessionService.createSession(admin);
-        const request = Request.buildJson('PATCH', `/v${Version}/organization/payments`, organization.getApiHost(), body);
+        const request = Request.buildJson(
+            'PATCH',
+            `/v${Version}/organization/payments`,
+            organization.getApiHost(),
+            body,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     }
@@ -66,10 +99,12 @@ describe('Security.PatchPayments', () => {
             type: PaymentType.Payment,
             method: PaymentMethod.PointOfSale,
             status: PaymentStatus.Succeeded,
-            balanceItemPayments: items.map(balanceItem => BalanceItemPaymentDetailed.create({
-                balanceItem: BalanceItemDetailed.create({ ...balanceItem }),
-                price,
-            })),
+            balanceItemPayments: items.map((balanceItem) =>
+                BalanceItemPaymentDetailed.create({
+                    balanceItem: BalanceItemDetailed.create({ ...balanceItem }),
+                    price,
+                }),
+            ),
         });
     }
 
@@ -100,7 +135,9 @@ describe('Security.PatchPayments', () => {
         const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
         arr.addPut(manualPayment([managedItem, otherItem]));
 
-        await expect(send(organization, admin, arr)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(send(organization, admin, arr)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
         expect(await Payment.where({ organizationId: organization.id })).toHaveLength(0);
     });
 
@@ -117,7 +154,10 @@ describe('Security.PatchPayments', () => {
 
     test('an admin who manages payments can register a manual payment covering both groups', async () => {
         const { organization, managedItem, otherItem } = await setup();
-        const { admin } = await initAdmin({ organization, accessRights: [AccessRight.OrganizationManagePayments] });
+        const { admin } = await initAdmin({
+            organization,
+            accessRights: [AccessRight.OrganizationManagePayments],
+        });
 
         const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
         arr.addPut(manualPayment([managedItem, otherItem]));
@@ -133,7 +173,9 @@ describe('Security.PatchPayments', () => {
         const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
         arr.addPatch(PaymentGeneral.patch({ id: payment.id, status: PaymentStatus.Succeeded }));
 
-        await expect(send(organization, admin, arr)).rejects.toThrow(STExpect.errorWithCode('not_found'));
+        await expect(send(organization, admin, arr)).rejects.toThrow(
+            STExpect.errorWithCode('not_found'),
+        );
         expect((await Payment.getByID(payment.id))!.status).toBe(PaymentStatus.Pending);
     });
 

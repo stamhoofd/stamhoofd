@@ -23,7 +23,11 @@ export class SearchUitpasEventsEndpoint extends Endpoint<Params, Query, Body, Re
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/search-uitpas-events', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/organization/search-uitpas-events',
+            {},
+        );
 
         if (params) {
             return [true, params as Params];
@@ -35,7 +39,7 @@ export class SearchUitpasEventsEndpoint extends Endpoint<Params, Query, Body, Re
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.hasFullAccess(organization.id)) {
+        if (!(await Context.auth.hasFullAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -46,7 +50,11 @@ export class SearchUitpasEventsEndpoint extends Endpoint<Params, Query, Body, Re
                 human: $t('%1BH'),
             });
         }
-        const uitpasOrganizersResponse = await UitpasService.searchUitpasEvents(organization.id, organization.meta.uitpasOrganizerId, request.query.text);
+        const uitpasOrganizersResponse = await UitpasService.searchUitpasEvents(
+            organization.id,
+            organization.meta.uitpasOrganizerId,
+            request.query.text,
+        );
 
         return new Response(uitpasOrganizersResponse);
     }

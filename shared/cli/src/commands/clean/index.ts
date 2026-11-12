@@ -3,7 +3,11 @@ import { BaseCommand } from '../../base-command.js';
 import { dryRunFlag, yesFlag } from '../../command-flags.js';
 import type { CliContext } from '../../context/create-context.js';
 import { metabaseAppDatabase } from '../../config/shared-service-config.js';
-import { currentDatabase, dropDatabase, ensureMysqlRunning } from '../../runtime/database-command-helpers.js';
+import {
+    currentDatabase,
+    dropDatabase,
+    ensureMysqlRunning,
+} from '../../runtime/database-command-helpers.js';
 import { cleanBuild } from '../../runtime/monorepo-runner.js';
 import { showHelp } from '../../runtime/show-help.js';
 import { confirm, warning } from '../../runtime/ux.js';
@@ -20,11 +24,19 @@ export enum CleanTarget {
     Sso = 'sso',
 }
 
-const cleanTargets = [CleanTarget.All, CleanTarget.Build, CleanTarget.Db, CleanTarget.Metabase, CleanTarget.Services, CleanTarget.Sso] as const;
+const cleanTargets = [
+    CleanTarget.All,
+    CleanTarget.Build,
+    CleanTarget.Db,
+    CleanTarget.Metabase,
+    CleanTarget.Services,
+    CleanTarget.Sso,
+] as const;
 
 export default class Clean extends BaseCommand {
     static summary = 'Remove local generated state';
-    static description = 'Use this when stale local data is causing confusing errors and you need to remove build output, local databases, service data, or local SSO state.';
+    static description =
+        'Use this when stale local data is causing confusing errors and you need to remove build output, local databases, service data, or local SSO state.';
     static examples = [
         'stam clean build --dry-run',
         'stam clean services --yes',
@@ -39,7 +51,7 @@ export default class Clean extends BaseCommand {
         }),
     };
 
-    static flags = { ...BaseCommand.instanceFlags, 'yes': yesFlag, 'dry-run': dryRunFlag };
+    static flags = { ...BaseCommand.instanceFlags, yes: yesFlag, 'dry-run': dryRunFlag };
 
     async run(): Promise<void> {
         const parsed = await this.parse(Clean);
@@ -83,7 +95,10 @@ export default class Clean extends BaseCommand {
         await this.cleanAll(context, { yes: flags.yes, dryRun: flags['dry-run'] });
     }
 
-    private async cleanAll(context: CliContext, options: { yes: boolean; dryRun: boolean }): Promise<void> {
+    private async cleanAll(
+        context: CliContext,
+        options: { yes: boolean; dryRun: boolean },
+    ): Promise<void> {
         if (options.dryRun) {
             await cleanBuild(context, { dryRun: true });
             console.log('Would stop local SSO server.');
@@ -92,7 +107,12 @@ export default class Clean extends BaseCommand {
             return;
         }
 
-        if (!options.yes && !(await confirm('Clean build artifacts, stop local SSO and Metabase, and delete shared service data, including every local database?'))) {
+        if (
+            !options.yes &&
+            !(await confirm(
+                'Clean build artifacts, stop local SSO and Metabase, and delete shared service data, including every local database?',
+            ))
+        ) {
             warning('Clean skipped.');
             return;
         }
@@ -105,7 +125,10 @@ export default class Clean extends BaseCommand {
         await deleteSharedServicesData(context);
     }
 
-    private async cleanDatabase(context: CliContext, options: { yes: boolean; dryRun: boolean }): Promise<void> {
+    private async cleanDatabase(
+        context: CliContext,
+        options: { yes: boolean; dryRun: boolean },
+    ): Promise<void> {
         const database = currentDatabase(context);
 
         if (options.dryRun) {
@@ -122,14 +145,20 @@ export default class Clean extends BaseCommand {
         await dropDatabase(database);
     }
 
-    private async cleanServices(context: CliContext, options: { yes: boolean; dryRun: boolean }): Promise<void> {
+    private async cleanServices(
+        context: CliContext,
+        options: { yes: boolean; dryRun: boolean },
+    ): Promise<void> {
         if (options.dryRun) {
             console.log('Would stop shared services.');
             console.log('Would delete MySQL, RustFS, and Caddy shared service data.');
             return;
         }
 
-        if (!options.yes && !(await confirm('Stop shared services and delete MySQL, RustFS, and Caddy data?'))) {
+        if (
+            !options.yes &&
+            !(await confirm('Stop shared services and delete MySQL, RustFS, and Caddy data?'))
+        ) {
             warning('Clean skipped.');
             return;
         }
@@ -138,14 +167,22 @@ export default class Clean extends BaseCommand {
         await deleteSharedServicesData(context);
     }
 
-    private async cleanMetabase(context: CliContext, options: { yes: boolean; dryRun: boolean }): Promise<void> {
+    private async cleanMetabase(
+        context: CliContext,
+        options: { yes: boolean; dryRun: boolean },
+    ): Promise<void> {
         if (options.dryRun) {
             console.log('Would stop local Metabase server.');
             console.log(`Would drop local MySQL database ${metabaseAppDatabase}.`);
             return;
         }
 
-        if (!options.yes && !(await confirm(`Stop local Metabase and drop its application database ${metabaseAppDatabase}? This deletes all local questions and dashboards.`))) {
+        if (
+            !options.yes &&
+            !(await confirm(
+                `Stop local Metabase and drop its application database ${metabaseAppDatabase}? This deletes all local questions and dashboards.`,
+            ))
+        ) {
             warning('Clean skipped.');
             return;
         }
@@ -172,11 +209,15 @@ export default class Clean extends BaseCommand {
         }
 
         if (flags.env && flags.env !== 'stamhoofd') {
-            this.error(`--env only applies to 'clean ${CleanTarget.Db}' and 'clean ${CleanTarget.All}'.`);
+            this.error(
+                `--env only applies to 'clean ${CleanTarget.Db}' and 'clean ${CleanTarget.All}'.`,
+            );
         }
 
         if (flags.name) {
-            this.error(`--name only applies to 'clean ${CleanTarget.Db}' and 'clean ${CleanTarget.All}'.`);
+            this.error(
+                `--name only applies to 'clean ${CleanTarget.Db}' and 'clean ${CleanTarget.All}'.`,
+            );
         }
     }
 }

@@ -35,7 +35,9 @@ export const Version = isRunningAhead() ? ReleasedVersion + 1 : ReleasedVersion;
  */
 export function isRunningAhead(): boolean {
     if (typeof STAMHOOFD === 'undefined') {
-        throw new Error('STAMHOOFD is not defined. Load the environment before importing @stamhoofd/structures');
+        throw new Error(
+            'STAMHOOFD is not defined. Load the environment before importing @stamhoofd/structures',
+        );
     }
     return STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'test';
 }

@@ -1,7 +1,16 @@
 import { PaymentMethod } from '../PaymentMethod.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
 import { PaymentMandate } from '../PaymentMandate.js';
-import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder, URLDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+    URLDecoder,
+} from '@common/encoding';
 import { CreateMandateSettings } from './CreateMandateSettings.js';
 import type { BalanceItem } from '../BalanceItem.js';
 

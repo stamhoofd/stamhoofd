@@ -9,7 +9,9 @@ export class Street extends QueryableModel {
     static table = 'streets';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })

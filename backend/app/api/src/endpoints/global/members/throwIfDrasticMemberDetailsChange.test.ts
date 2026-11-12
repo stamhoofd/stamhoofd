@@ -6,7 +6,10 @@ import { throwIfDrasticMemberDetailsChange } from './throwIfDrasticMemberDetails
 /**
  * Runs the check and returns the thrown SimpleError (as { code, field }), or null when nothing was thrown.
  */
-function runCheck(patch: AutoEncoderPatchType<MemberDetails>, original: MemberDetails): { code: string; field?: string } | null {
+function runCheck(
+    patch: AutoEncoderPatchType<MemberDetails>,
+    original: MemberDetails,
+): { code: string; field?: string } | null {
     try {
         throwIfDrasticMemberDetailsChange(patch, original);
         return null;
@@ -39,17 +42,31 @@ describe('throwIfDrasticMemberDetailsChange', () => {
         });
 
         test('A short name with a single typo is allowed', () => {
-            const jan = MemberDetails.create({ firstName: 'Jan', lastName: 'Peeters', birthDay: new Date(2010, 4, 15) });
+            const jan = MemberDetails.create({
+                firstName: 'Jan',
+                lastName: 'Peeters',
+                birthDay: new Date(2010, 4, 15),
+            });
             expect(runCheck(MemberDetails.patch({ firstName: 'Jana' }), jan)).toBeNull();
         });
 
         test('Completely changing the first name is not allowed', () => {
-            expect(runCheck(MemberDetails.patch({ firstName: 'Wannes' }), original)).toMatchObject({ code: 'not_allowed', field: 'firstName' });
+            expect(runCheck(MemberDetails.patch({ firstName: 'Wannes' }), original)).toMatchObject({
+                code: 'not_allowed',
+                field: 'firstName',
+            });
         });
 
         test('Swapping a short first name for a different one is not allowed', () => {
-            const jan = MemberDetails.create({ firstName: 'Jan', lastName: 'Peeters', birthDay: new Date(2010, 4, 15) });
-            expect(runCheck(MemberDetails.patch({ firstName: 'Tom' }), jan)).toMatchObject({ code: 'not_allowed', field: 'firstName' });
+            const jan = MemberDetails.create({
+                firstName: 'Jan',
+                lastName: 'Peeters',
+                birthDay: new Date(2010, 4, 15),
+            });
+            expect(runCheck(MemberDetails.patch({ firstName: 'Tom' }), jan)).toMatchObject({
+                code: 'not_allowed',
+                field: 'firstName',
+            });
         });
     });
 
@@ -61,28 +78,44 @@ describe('throwIfDrasticMemberDetailsChange', () => {
 
     describe('Birth date', () => {
         test('Changing only the year is allowed', () => {
-            expect(runCheck(MemberDetails.patch({ birthDay: new Date(2011, 4, 15) }), original)).toBeNull();
+            expect(
+                runCheck(MemberDetails.patch({ birthDay: new Date(2011, 4, 15) }), original),
+            ).toBeNull();
         });
 
         test('Changing only the day is allowed', () => {
-            expect(runCheck(MemberDetails.patch({ birthDay: new Date(2010, 4, 16) }), original)).toBeNull();
+            expect(
+                runCheck(MemberDetails.patch({ birthDay: new Date(2010, 4, 16) }), original),
+            ).toBeNull();
         });
 
         test('Changing only the month is allowed', () => {
-            expect(runCheck(MemberDetails.patch({ birthDay: new Date(2010, 5, 15) }), original)).toBeNull();
+            expect(
+                runCheck(MemberDetails.patch({ birthDay: new Date(2010, 5, 15) }), original),
+            ).toBeNull();
         });
 
         test('Changing two components is allowed', () => {
-            expect(runCheck(MemberDetails.patch({ birthDay: new Date(2010, 5, 16) }), original)).toBeNull();
+            expect(
+                runCheck(MemberDetails.patch({ birthDay: new Date(2010, 5, 16) }), original),
+            ).toBeNull();
         });
 
         test('Changing day, month and year all at once is not allowed', () => {
-            expect(runCheck(MemberDetails.patch({ birthDay: new Date(2012, 7, 20) }), original)).toMatchObject({ code: 'not_allowed', field: 'birthDay' });
+            expect(
+                runCheck(MemberDetails.patch({ birthDay: new Date(2012, 7, 20) }), original),
+            ).toMatchObject({ code: 'not_allowed', field: 'birthDay' });
         });
 
         test('Setting a birth date for the first time is allowed', () => {
-            const noBirthDay = MemberDetails.create({ firstName: 'Thomas', lastName: 'Peeters', birthDay: null });
-            expect(runCheck(MemberDetails.patch({ birthDay: new Date(2012, 7, 20) }), noBirthDay)).toBeNull();
+            const noBirthDay = MemberDetails.create({
+                firstName: 'Thomas',
+                lastName: 'Peeters',
+                birthDay: null,
+            });
+            expect(
+                runCheck(MemberDetails.patch({ birthDay: new Date(2012, 7, 20) }), noBirthDay),
+            ).toBeNull();
         });
 
         test('Clearing the birth date is allowed', () => {
@@ -91,6 +124,8 @@ describe('throwIfDrasticMemberDetailsChange', () => {
     });
 
     test('An unrelated patch is allowed', () => {
-        expect(runCheck(MemberDetails.patch({ email: 'someone@example.com' }), original)).toBeNull();
+        expect(
+            runCheck(MemberDetails.patch({ email: 'someone@example.com' }), original),
+        ).toBeNull();
     });
 });

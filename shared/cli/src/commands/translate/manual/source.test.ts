@@ -7,11 +7,29 @@ vi.mock('i18n-uuid/replace-text', () => ({ replaceText: vi.fn() }));
 
 it('forwards source options and makes previews noninteractive', async () => {
     const command = new TranslateSource([], {} as never);
-    vi.spyOn(command, 'parse').mockResolvedValue(await Parser.parse([
-        '--commits', 'HEAD~1', '--commits', 'HEAD', '--attribute-white-list', 'title', '--dry-run', '--prompt', '--fix',
-    ], { flags: TranslateSource.flags }) as never);
+    vi.spyOn(command, 'parse').mockResolvedValue(
+        (await Parser.parse(
+            [
+                '--commits',
+                'HEAD~1',
+                '--commits',
+                'HEAD',
+                '--attribute-white-list',
+                'title',
+                '--dry-run',
+                '--prompt',
+                '--fix',
+            ],
+            { flags: TranslateSource.flags },
+        )) as never,
+    );
     await command.run();
     expect(replaceText).toHaveBeenCalledWith({
-        changes: true, commits: ['HEAD~1', 'HEAD'], attributes: ['title'], dryRun: true, prompt: false, fix: true,
+        changes: true,
+        commits: ['HEAD~1', 'HEAD'],
+        attributes: ['title'],
+        dryRun: true,
+        prompt: false,
+        fix: true,
     });
 });

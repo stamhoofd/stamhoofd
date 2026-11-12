@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder, SymbolDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    StringDecoder,
+    SymbolDecoder,
+} from '@common/encoding';
 import { DataValidator, Formatter, StringCompare } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,7 +19,11 @@ export class Parent extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
-    @field({ decoder: new EnumDecoder(ParentType), defaultValue: () => ParentType.Mother, isDefaultValue: v => v === ParentType.Mother })
+    @field({
+        decoder: new EnumDecoder(ParentType),
+        defaultValue: () => ParentType.Mother,
+        isDefaultValue: (v) => v === ParentType.Mother,
+    })
     type: ParentType;
 
     @field({ decoder: StringDecoder })
@@ -24,7 +37,8 @@ export class Parent extends AutoEncoder {
         decoder: new SymbolDecoder(StringDecoder, NationalRegisterNumberOptOut),
         version: 349,
         nullable: true,
-        downgrade: (n: string | typeof NationalRegisterNumberOptOut | null) => n === NationalRegisterNumberOptOut ? null : n,
+        downgrade: (n: string | typeof NationalRegisterNumberOptOut | null) =>
+            n === NationalRegisterNumberOptOut ? null : n,
     })
     nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null;
 
@@ -90,10 +104,14 @@ export class Parent extends AutoEncoder {
      */
     cleanData() {
         if (StringCompare.isFullCaps(this.firstName)) {
-            this.firstName = Formatter.capitalizeWords(Formatter.removeDuplicateSpaces(this.firstName.toLowerCase()));
+            this.firstName = Formatter.capitalizeWords(
+                Formatter.removeDuplicateSpaces(this.firstName.toLowerCase()),
+            );
         }
         if (StringCompare.isFullCaps(this.lastName)) {
-            this.lastName = Formatter.capitalizeWords(Formatter.removeDuplicateSpaces(this.lastName.toLowerCase()));
+            this.lastName = Formatter.capitalizeWords(
+                Formatter.removeDuplicateSpaces(this.lastName.toLowerCase()),
+            );
         }
 
         if (this.email) {
@@ -104,22 +122,28 @@ export class Parent extends AutoEncoder {
             }
         }
 
-        this.alternativeEmails = Formatter.uniqueArray(this.alternativeEmails.map(e => e.toLowerCase().trim()).filter((email) => {
-            if (this.email && email === this.email) {
-                return false;
-            }
-            if (!DataValidator.isEmailValid(email)) {
-                return false;
-            }
+        this.alternativeEmails = Formatter.uniqueArray(
+            this.alternativeEmails
+                .map((e) => e.toLowerCase().trim())
+                .filter((email) => {
+                    if (this.email && email === this.email) {
+                        return false;
+                    }
+                    if (!DataValidator.isEmailValid(email)) {
+                        return false;
+                    }
 
-            return true;
-        }));
+                    return true;
+                }),
+        );
 
         if (this.phone) {
             this.phone = Formatter.removeDuplicateSpaces(this.phone.trim());
         }
 
-        this.firstName = Formatter.capitalizeFirstLetter(Formatter.removeDuplicateSpaces(this.firstName.trim()));
+        this.firstName = Formatter.capitalizeFirstLetter(
+            Formatter.removeDuplicateSpaces(this.firstName.trim()),
+        );
         this.lastName = Formatter.removeDuplicateSpaces(this.lastName.trim());
 
         if (this.lastName === this.lastName.toLocaleLowerCase()) {
@@ -133,7 +157,13 @@ export class Parent extends AutoEncoder {
     isEqual(other: Parent) {
         this.cleanData();
         other.cleanData();
-        return this.firstName === other.firstName && this.lastName === other.lastName && this.email === other.email && this.phone === other.phone && this.address?.toString() === other.address?.toString();
+        return (
+            this.firstName === other.firstName &&
+            this.lastName === other.lastName &&
+            this.email === other.email &&
+            this.phone === other.phone &&
+            this.address?.toString() === other.address?.toString()
+        );
     }
 
     /**

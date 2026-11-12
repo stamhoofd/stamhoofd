@@ -25,7 +25,10 @@ export class RecordConfigurationFactory {
      * Set default email, phone, partents, ... configuration
      * Except emergency contacts
      */
-    static setDefaultBuiltInFields(configuration: OrganizationRecordsConfiguration, type: OrganizationType) {
+    static setDefaultBuiltInFields(
+        configuration: OrganizationRecordsConfiguration,
+        type: OrganizationType,
+    ) {
         configuration.gender = PropertyFilter.createDefault();
         configuration.birthDay = PropertyFilter.createDefault();
 
@@ -55,7 +58,24 @@ export class RecordConfigurationFactory {
         );
 
         // Only make address optional for youth and sport organizations for now
-        if (type === OrganizationType.Youth || [OrganizationType.Student, OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
+        if (
+            type === OrganizationType.Youth ||
+            [
+                OrganizationType.Student,
+                OrganizationType.Sport,
+                OrganizationType.Athletics,
+                OrganizationType.Football,
+                OrganizationType.Hockey,
+                OrganizationType.Tennis,
+                OrganizationType.Volleyball,
+                OrganizationType.Swimming,
+                OrganizationType.HorseRiding,
+                OrganizationType.Basketball,
+                OrganizationType.Dance,
+                OrganizationType.Cycling,
+                OrganizationType.Judo,
+            ].includes(type)
+        ) {
             configuration.address = new PropertyFilter(
                 {
                     age: {
@@ -73,9 +93,29 @@ export class RecordConfigurationFactory {
         }
     }
 
-    static setDefaultParents(configuration: OrganizationRecordsConfiguration, type: OrganizationType) {
+    static setDefaultParents(
+        configuration: OrganizationRecordsConfiguration,
+        type: OrganizationType,
+    ) {
         // For now, only enable parents for youth and sport organizations
-        if (type === OrganizationType.Youth || [OrganizationType.Student, OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
+        if (
+            type === OrganizationType.Youth ||
+            [
+                OrganizationType.Student,
+                OrganizationType.Sport,
+                OrganizationType.Athletics,
+                OrganizationType.Football,
+                OrganizationType.Hockey,
+                OrganizationType.Tennis,
+                OrganizationType.Volleyball,
+                OrganizationType.Swimming,
+                OrganizationType.HorseRiding,
+                OrganizationType.Basketball,
+                OrganizationType.Dance,
+                OrganizationType.Cycling,
+                OrganizationType.Judo,
+            ].includes(type)
+        ) {
             configuration.parents = new PropertyFilter(
                 {
                     age: {
@@ -98,9 +138,29 @@ export class RecordConfigurationFactory {
         }
     }
 
-    static setDefaultEmergencyContacts(configuration: OrganizationRecordsConfiguration, type: OrganizationType) {
+    static setDefaultEmergencyContacts(
+        configuration: OrganizationRecordsConfiguration,
+        type: OrganizationType,
+    ) {
         // For now, only enable parents for youth and sport organizations
-        if (type === OrganizationType.Youth || [OrganizationType.Student, OrganizationType.Sport, OrganizationType.Athletics, OrganizationType.Football, OrganizationType.Hockey, OrganizationType.Tennis, OrganizationType.Volleyball, OrganizationType.Swimming, OrganizationType.HorseRiding, OrganizationType.Basketball, OrganizationType.Dance, OrganizationType.Cycling, OrganizationType.Judo].includes(type)) {
+        if (
+            type === OrganizationType.Youth ||
+            [
+                OrganizationType.Student,
+                OrganizationType.Sport,
+                OrganizationType.Athletics,
+                OrganizationType.Football,
+                OrganizationType.Hockey,
+                OrganizationType.Tennis,
+                OrganizationType.Volleyball,
+                OrganizationType.Swimming,
+                OrganizationType.HorseRiding,
+                OrganizationType.Basketball,
+                OrganizationType.Dance,
+                OrganizationType.Cycling,
+                OrganizationType.Judo,
+            ].includes(type)
+        ) {
             configuration.emergencyContacts = new PropertyFilter(
                 {
                     age: {
@@ -124,26 +184,37 @@ export class RecordConfigurationFactory {
             );
         } else if (type === OrganizationType.LGBTQ) {
             // Optional emergency contact
-            configuration.emergencyContacts = new PropertyFilter(
-                null,
-                null,
-            );
+            configuration.emergencyContacts = new PropertyFilter(null, null);
         }
     }
 
-    static setDefaultDataPermissions(configuration: OrganizationRecordsConfiguration, type: OrganizationType) {
+    static setDefaultDataPermissions(
+        configuration: OrganizationRecordsConfiguration,
+        type: OrganizationType,
+    ) {
         // For now, only enable parents for youth and sport organizations
-        if (configuration.recordCategories.flatMap(c => c.getAllRecords()).find(r => r.sensitive)) {
+        if (
+            configuration.recordCategories
+                .flatMap((c) => c.getAllRecords())
+                .find((r) => r.sensitive)
+        ) {
             configuration.dataPermission = true;
         }
 
-        if (type === OrganizationType.LGBTQ || type === OrganizationType.Politics || type === OrganizationType.Union) {
+        if (
+            type === OrganizationType.LGBTQ ||
+            type === OrganizationType.Politics ||
+            type === OrganizationType.Union
+        ) {
             // Sensitive membership: need to ask permission
             configuration.dataPermission = true;
         }
     }
 
-    static getDefaultRecordCategoriesFor(type: OrganizationType, country: Country): RecordCategory[] {
+    static getDefaultRecordCategoriesFor(
+        type: OrganizationType,
+        country: Country,
+    ): RecordCategory[] {
         if (type === OrganizationType.Youth && country === Country.Belgium) {
             // Enable all
             const recordCategories = RecordFactory.convert(Object.values(LegacyRecordType));

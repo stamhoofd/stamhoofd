@@ -20,20 +20,26 @@ describe('GetDocumentHtml renderer grants', () => {
      */
     test('issues version-bound grants and rechecks revoked permissions', async () => {
         const organization = await new OrganizationFactory({}).create();
-        const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
         const token = await SessionService.createSession(user);
         const document = new Document();
         document.id = 'document-grant-test';
         document.organizationId = organization.id;
         document.updatedAt = new Date(2000);
         vi.spyOn(Document, 'getByID').mockResolvedValue(document);
-        vi.spyOn(DocumentRenderService, 'getRenderedHtml').mockResolvedValue('<html>Document</html>');
+        vi.spyOn(DocumentRenderService, 'getRenderedHtml').mockResolvedValue(
+            '<html>Document</html>',
+        );
         // Reuse the same bearer session across both requests to exercise live permissions.
-        const request = () => Request.get({
-            path: `/documents/${document.id}/html`,
-            host: organization.getApiHost(),
-            headers: { authorization: `Bearer ${token.accessToken}` },
-        });
+        const request = () =>
+            Request.get({
+                path: `/documents/${document.id}/html`,
+                host: organization.getApiHost(),
+                headers: { authorization: `Bearer ${token.accessToken}` },
+            });
         const endpoint = new GetDocumentHtml();
         const response = await testServer.test(endpoint, request());
         const cacheId = String(response.headers['x-cache-id']);
@@ -41,8 +47,25 @@ describe('GetDocumentHtml renderer grants', () => {
         const expires = String(response.headers['x-cache-expires']);
         expect(Number(expires)).toBeGreaterThan(Date.now());
         expect(Number(expires)).toBeLessThanOrEqual(Date.now() + 60000);
-        expect(verifyInternalSignature(String(response.headers['x-cache-read-signature']), 'pdf-cache', cacheId, timestamp, expires)).toBe(true);
-        expect(verifyInternalSignature(String(response.headers['x-cache-signature']), 'html-to-pdf', cacheId, timestamp, expires, response.body.toString())).toBe(true);
+        expect(
+            verifyInternalSignature(
+                String(response.headers['x-cache-read-signature']),
+                'pdf-cache',
+                cacheId,
+                timestamp,
+                expires,
+            ),
+        ).toBe(true);
+        expect(
+            verifyInternalSignature(
+                String(response.headers['x-cache-signature']),
+                'html-to-pdf',
+                cacheId,
+                timestamp,
+                expires,
+                response.body.toString(),
+            ),
+        ).toBe(true);
         expect(response.headers['cache-control']).toBe('no-store');
 
         user.permissions = null;

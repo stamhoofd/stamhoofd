@@ -11,11 +11,14 @@ export const EventLogger = new ModelLogger(Event, {
 
     createReplacements(model) {
         return new Map([
-            ['e', AuditLogReplacement.create({
-                id: model.id,
-                value: model.name,
-                type: AuditLogReplacementType.Event,
-            })],
+            [
+                'e',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.name,
+                    type: AuditLogReplacementType.Event,
+                }),
+            ],
         ]);
     },
 

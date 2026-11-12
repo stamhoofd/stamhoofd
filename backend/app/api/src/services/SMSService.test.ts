@@ -22,7 +22,9 @@ describe('SMSService', () => {
         });
 
         test('throws for invalid phone numbers', () => {
-            expect(() => SMSService.toE164('not-a-number')).toThrow(STExpect.errorWithCode('invalid_phone'));
+            expect(() => SMSService.toE164('not-a-number')).toThrow(
+                STExpect.errorWithCode('invalid_phone'),
+            );
         });
     });
 
@@ -40,9 +42,9 @@ describe('SMSService', () => {
         test('throws sms_not_configured when GATEWAYAPI_TOKEN is missing', async () => {
             TestUtils.setEnvironment('GATEWAYAPI_TOKEN', undefined);
 
-            await expect(SMSService.send({ to: '+32470123456', message: 'hi' }))
-                .rejects
-                .toThrow(STExpect.errorWithCode('sms_not_configured'));
+            await expect(SMSService.send({ to: '+32470123456', message: 'hi' })).rejects.toThrow(
+                STExpect.errorWithCode('sms_not_configured'),
+            );
         });
     });
 });

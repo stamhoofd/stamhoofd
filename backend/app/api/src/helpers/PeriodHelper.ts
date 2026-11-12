@@ -1,6 +1,13 @@
 import { SimpleError } from '@common/errors';
 import type { RegistrationPeriod } from '@stamhoofd/models';
-import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform } from '@stamhoofd/models';
+import {
+    Group,
+    Member,
+    MemberResponsibilityRecord,
+    Organization,
+    OrganizationRegistrationPeriod,
+    Platform,
+} from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { AuditLogSource, Group as GroupStruct } from '@stamhoofd/structures';
@@ -23,8 +30,12 @@ export class PeriodHelper {
     static async stopAllResponsibilities() {
         console.log('Stopping all responsibilities');
         const platform = await Platform.getSharedPrivateStruct();
-        const keepPlatformResponsibilityIds = platform.config.responsibilities.filter(r => !r.organizationBased).map(r => r.id);
-        const keepResponsibilityIds = platform.config.responsibilities.filter(r => !r.organizationBased || r.permissions?.level === PermissionLevel.Full).map(r => r.id);
+        const keepPlatformResponsibilityIds = platform.config.responsibilities
+            .filter((r) => !r.organizationBased)
+            .map((r) => r.id);
+        const keepResponsibilityIds = platform.config.responsibilities
+            .filter((r) => !r.organizationBased || r.permissions?.level === PermissionLevel.Full)
+            .map((r) => r.id);
         const batchSize = 100;
 
         let lastId = '';
@@ -45,7 +56,9 @@ export class PeriodHelper {
             for (const record of records) {
                 lastId = record.id;
 
-                const invalid = keepPlatformResponsibilityIds.includes(record.responsibilityId) && record.organizationId;
+                const invalid =
+                    keepPlatformResponsibilityIds.includes(record.responsibilityId) &&
+                    record.organizationId;
 
                 if (!keepResponsibilityIds.includes(record.responsibilityId) || invalid) {
                     record.endDate = new Date();
@@ -62,8 +75,14 @@ export class PeriodHelper {
         console.log('Done: stopped all responsibilities: ' + c);
     }
 
-    static async createOrganizationPeriodForPeriod(organization: Organization, period: RegistrationPeriod) {
-        const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: period.id, organizationId: organization.id }, { limit: 1 });
+    static async createOrganizationPeriodForPeriod(
+        organization: Organization,
+        period: RegistrationPeriod,
+    ) {
+        const oPeriods = await OrganizationRegistrationPeriod.where(
+            { periodId: period.id, organizationId: organization.id },
+            { limit: 1 },
+        );
 
         if (oPeriods.length) {
             // Already created
@@ -78,7 +97,10 @@ export class PeriodHelper {
         const struct = await AuthenticatedStructures.organizationRegistrationPeriod(currentPeriod);
 
         const duplicate = struct.duplicate(period.getStructure());
-        return await PatchOrganizationRegistrationPeriodsEndpoint.createOrganizationPeriod(organization, duplicate);
+        return await PatchOrganizationRegistrationPeriodsEndpoint.createOrganizationPeriod(
+            organization,
+            duplicate,
+        );
     }
 
     static async moveAllOrganizationsToPeriod(period: RegistrationPeriod) {
@@ -116,7 +138,10 @@ export class PeriodHelper {
         await QueueHandler.schedule(tag, async () => {
             await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
                 for await (const group of Group.select().where('periodId', period.id).all()) {
-                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(GroupStruct.patch({ id: group.id, periodId: period.id }), period);
+                    await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(
+                        GroupStruct.patch({ id: group.id, periodId: period.id }),
+                        period,
+                    );
                 }
             });
         });

@@ -8,7 +8,12 @@ import { appToUri } from '../AppType.js';
 import type { Organization } from '../Organization.js';
 import { Category } from './Category.js';
 import { Product } from './Product.js';
-import { WebshopMetaData, WebshopOrderMode, WebshopPrivateMetaData, WebshopStatus } from './WebshopMetaData.js';
+import {
+    WebshopMetaData,
+    WebshopOrderMode,
+    WebshopPrivateMetaData,
+    WebshopStatus,
+} from './WebshopMetaData.js';
 
 export class WebshopPreview extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -65,7 +70,9 @@ export class WebshopPreview extends AutoEncoder {
             console.error('No webshop domains configured');
             return '';
         }
-        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop['']);
+        return (
+            STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop['']
+        );
     }
 
     getDefaultUrl(organization: { address: { country: string } }): string {
@@ -88,7 +95,12 @@ export class WebshopPreview extends AutoEncoder {
         if (!STAMHOOFD.domains.legacyWebshop || this.legacyUri === null) {
             return null;
         }
-        return organization.uri + '.' + STAMHOOFD.domains.legacyWebshop + (this.legacyUri ? '/' + this.legacyUri : '');
+        return (
+            organization.uri +
+            '.' +
+            STAMHOOFD.domains.legacyWebshop +
+            (this.legacyUri ? '/' + this.legacyUri : '')
+        );
     }
 
     getDomainSuffix(): string {
@@ -113,7 +125,11 @@ export class WebshopPreview extends AutoEncoder {
     }
 
     isClosed(margin = 0) {
-        if (this.meta.status !== WebshopStatus.Open || (this.meta.availableUntil && this.meta.availableUntil.getTime() < new Date().getTime() + margin)) {
+        if (
+            this.meta.status !== WebshopStatus.Open ||
+            (this.meta.availableUntil &&
+                this.meta.availableUntil.getTime() < new Date().getTime() + margin)
+        ) {
             return true;
         }
         return false;
@@ -175,7 +191,11 @@ export class Webshop extends AutoEncoder {
         version: 424,
         // Older clients don't know that a null allowMultiple follows the order mode: send them the result
         downgrade: function (this: Webshop, products: Product[]) {
-            return products.map(product => product.allowMultiple === null ? product.patch({ allowMultiple: this.allowsMultiple(product) }) : product);
+            return products.map((product) =>
+                product.allowMultiple === null
+                    ? product.patch({ allowMultiple: this.allowsMultiple(product) })
+                    : product,
+            );
         },
     })
     products: Product[] = [];
@@ -193,13 +213,15 @@ export class Webshop extends AutoEncoder {
 
     get productsInOrder() {
         if (this.categories.length > 0) {
-            return this.categories.flatMap(category => category.productIds.flatMap((id) => {
-                const product = this.products.find(product => product.id === id);
-                if (product) {
-                    return [product];
-                }
-                return [];
-            }));
+            return this.categories.flatMap((category) =>
+                category.productIds.flatMap((id) => {
+                    const product = this.products.find((product) => product.id === id);
+                    if (product) {
+                        return [product];
+                    }
+                    return [];
+                }),
+            );
         }
         return this.products;
     }
@@ -275,7 +297,9 @@ export class Webshop extends AutoEncoder {
             return '';
         }
 
-        return (STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop['']);
+        return (
+            STAMHOOFD.domains.webshop[organization.address.country] ?? STAMHOOFD.domains.webshop['']
+        );
     }
 
     getDefaultUrl(organization: { address: { country: string } }): string {
@@ -298,7 +322,12 @@ export class Webshop extends AutoEncoder {
         if (!STAMHOOFD.domains.legacyWebshop || this.legacyUri === null) {
             return null;
         }
-        return organization.uri + '.' + STAMHOOFD.domains.legacyWebshop + (this.legacyUri ? '/' + this.legacyUri : '');
+        return (
+            organization.uri +
+            '.' +
+            STAMHOOFD.domains.legacyWebshop +
+            (this.legacyUri ? '/' + this.legacyUri : '')
+        );
     }
 
     getDomainSuffix(): string {
@@ -330,7 +359,12 @@ export class Webshop extends AutoEncoder {
     }
 
     isClosed(margin = 0) {
-        if (this.meta.status !== WebshopStatus.Open || (this.meta.availableUntil && this.meta.availableUntil.getTime() < new Date().getTime() + margin) || this.opensInTheFuture()) {
+        if (
+            this.meta.status !== WebshopStatus.Open ||
+            (this.meta.availableUntil &&
+                this.meta.availableUntil.getTime() < new Date().getTime() + margin) ||
+            this.opensInTheFuture()
+        ) {
             return true;
         }
         return false;

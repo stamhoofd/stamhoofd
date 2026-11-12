@@ -9,8 +9,8 @@ describe('migration output', () => {
 
     beforeEach(() => {
         messages = [];
-        logger.stdout = { write: message => messages.push(message), clearLine: vi.fn() };
-        logger.stderr = { write: message => messages.push(message), clearLine: vi.fn() };
+        logger.stdout = { write: (message) => messages.push(message), clearLine: vi.fn() };
+        logger.stderr = { write: (message) => messages.push(message), clearLine: vi.fn() };
     });
 
     afterEach(() => {
@@ -40,22 +40,29 @@ describe('migration output', () => {
         const originalStdout = logger.stdout;
         const originalStderr = logger.stderr;
 
-        await expect(withMigrationOutput(async () => {
-            logger.log('[Migration] Running example.sql');
-            logger.error('[Migration] example.sql failed: invalid SQL');
-            throw error;
-        }, false)).rejects.toBe(error);
+        await expect(
+            withMigrationOutput(async () => {
+                logger.log('[Migration] Running example.sql');
+                logger.error('[Migration] example.sql failed: invalid SQL');
+                throw error;
+            }, false),
+        ).rejects.toBe(error);
 
-        expect(messages).toEqual(['[Migration] Running example.sql\n', '[Migration] example.sql failed: invalid SQL\n']);
+        expect(messages).toEqual([
+            '[Migration] Running example.sql\n',
+            '[Migration] example.sql failed: invalid SQL\n',
+        ]);
         expect(logger.stdout).toBe(originalStdout);
         expect(logger.stderr).toBe(originalStderr);
     });
 
     it('replays output when a migration throws without logging an error', async () => {
-        await expect(withMigrationOutput(async () => {
-            logger.log('[Migration] Running example.sql');
-            throw new Error('Connection lost');
-        }, false)).rejects.toThrow('Connection lost');
+        await expect(
+            withMigrationOutput(async () => {
+                logger.log('[Migration] Running example.sql');
+                throw new Error('Connection lost');
+            }, false),
+        ).rejects.toThrow('Connection lost');
 
         expect(messages).toEqual(['[Migration] Running example.sql\n']);
     });
@@ -70,7 +77,9 @@ describe('migration output', () => {
 
     it('does not swallow concurrent setup output and restores logging after success', async () => {
         let finish!: () => void;
-        const pending = new Promise<void>((resolve) => { finish = resolve; });
+        const pending = new Promise<void>((resolve) => {
+            finish = resolve;
+        });
         const migration = withMigrationOutput(async () => {
             logger.log('[Migration] Running example.sql');
             await pending;

@@ -22,7 +22,11 @@ export class SearchUitpasOrganizersEndpoint extends Endpoint<Params, Query, Body
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/search-uitpas-organizers', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/organization/search-uitpas-organizers',
+            {},
+        );
 
         if (params) {
             return [true, params as Params];
@@ -34,10 +38,12 @@ export class SearchUitpasOrganizersEndpoint extends Endpoint<Params, Query, Body
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.hasFullAccess(organization.id)) {
+        if (!(await Context.auth.hasFullAccess(organization.id))) {
             throw Context.auth.error();
         }
-        const uitpasOrganizersResponse = await UitpasService.searchUitpasOrganizers(request.query.name);
+        const uitpasOrganizersResponse = await UitpasService.searchUitpasOrganizers(
+            request.query.name,
+        );
 
         return new Response(uitpasOrganizersResponse);
     }

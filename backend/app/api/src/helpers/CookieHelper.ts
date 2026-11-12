@@ -32,20 +32,23 @@ export class CookieHelper {
         return cookies.get(name);
     }
 
-    static setCookie(response: Response<any>, name: string, value: string, options?: { httpOnly?: boolean; secure?: boolean; expires?: Date }) {
+    static setCookie(
+        response: Response<any>,
+        name: string,
+        value: string,
+        options?: { httpOnly?: boolean; secure?: boolean; expires?: Date },
+    ) {
         const cookies = cookie.stringifySetCookie({ name, value, ...options });
         let currentCookies = response.headers['set-cookie'];
         if (!currentCookies) {
-            response.headers['set-cookie'] = [
-                cookies,
-            ];
+            response.headers['set-cookie'] = [cookies];
         } else {
             if (!Array.isArray(currentCookies)) {
                 currentCookies = [currentCookies.toString()];
                 response.headers['set-cookie'] = currentCookies;
             }
 
-            (currentCookies).push(cookies);
+            currentCookies.push(cookies);
         }
     }
 }

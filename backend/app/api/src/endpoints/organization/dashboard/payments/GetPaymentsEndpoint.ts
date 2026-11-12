@@ -5,12 +5,20 @@ import { SimpleError } from '@common/errors';
 import { Payment } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
+import {
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    assertSort,
+    getSortFilter,
+} from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@node/database';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
-import { getPaymentSearchFilter, paymentFilterCompilers } from '../../../../sql-filters/payments.js';
+import {
+    getPaymentSearchFilter,
+    paymentFilterCompilers,
+} from '../../../../sql-filters/payments.js';
 import { paymentSorters } from '../../../../sql-sorters/payments.js';
 
 type Params = Record<string, never>;
@@ -45,7 +53,7 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw Context.auth.error();
         }
 
-        if (!await Context.auth.canManagePayments(organization.id)) {
+        if (!(await Context.auth.canManagePayments(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -53,12 +61,9 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             organizationId: organization.id,
         };
 
-        const query = SQL
-            .select()
+        const query = SQL.select()
             .setMaxExecutionTime(15 * 1000)
-            .from(
-                SQL.table('payments'),
-            );
+            .from(SQL.table('payments'));
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
@@ -69,7 +74,9 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         if (q.search) {
-            query.where(await compileToSQLFilter(getPaymentSearchFilter(q.search), filterCompilers));
+            query.where(
+                await compileToSQLFilter(getPaymentSearchFilter(q.search), filterCompilers),
+            );
         }
 
         if (q instanceof LimitedFilteredRequest) {
@@ -152,8 +159,6 @@ export class GetPaymentsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
-        return new Response(
-            await GetPaymentsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetPaymentsEndpoint.buildData(request.query));
     }
 }

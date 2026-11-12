@@ -11,37 +11,50 @@ const UNIQUE_KEY_NAME = 'email';
  */
 export class UniqueUserService {
     static async hasUniqueConstraint() {
-        const [results] = await Database.select('SHOW INDEX FROM `users` WHERE Key_name = ?', [UNIQUE_KEY_NAME]);
+        const [results] = await Database.select('SHOW INDEX FROM `users` WHERE Key_name = ?', [
+            UNIQUE_KEY_NAME,
+        ]);
         return results.length > 0;
     }
 
     static async check() {
-        await logger.setContext({
-            prefixes: [
-                new StyledText('[UniqueUserService] ').addClass('unique-user-service', 'tag'),
-            ],
-            tags: ['unique-user-service'],
-        }, async () => {
-            if (STAMHOOFD.userMode === 'platform') {
-                if (!(await this.hasUniqueConstraint())) {
-                    console.warn('Unique constraint is missing. Creating it now...');
-                    await this.createConstraint();
+        await logger.setContext(
+            {
+                prefixes: [
+                    new StyledText('[UniqueUserService] ').addClass('unique-user-service', 'tag'),
+                ],
+                tags: ['unique-user-service'],
+            },
+            async () => {
+                if (STAMHOOFD.userMode === 'platform') {
+                    if (!(await this.hasUniqueConstraint())) {
+                        console.warn('Unique constraint is missing. Creating it now...');
+                        await this.createConstraint();
+                    }
+                } else {
+                    if (await this.hasUniqueConstraint()) {
+                        console.warn(
+                            'Unique constraint exists but should be removed. Deleting it now...',
+                        );
+                        await this.dropConstraint();
+                    }
                 }
-            } else {
-                if (await this.hasUniqueConstraint()) {
-                    console.warn('Unique constraint exists but should be removed. Deleting it now...');
-                    await this.dropConstraint();
-                }
-            }
-        });
+            },
+        );
     }
 
     static async createConstraint() {
         try {
-            await Database.statement('ALTER TABLE `users` ADD UNIQUE INDEX `' + UNIQUE_KEY_NAME + '` (`email`) USING BTREE;');
+            await Database.statement(
+                'ALTER TABLE `users` ADD UNIQUE INDEX `' +
+                    UNIQUE_KEY_NAME +
+                    '` (`email`) USING BTREE;',
+            );
             console.log('Unique constraint created.');
         } catch (e) {
-            console.error(chalk.red('Failed to create unique constraint on email column of users table:'));
+            console.error(
+                chalk.red('Failed to create unique constraint on email column of users table:'),
+            );
             console.error(e);
         }
     }
@@ -51,7 +64,9 @@ export class UniqueUserService {
             await Database.statement('ALTER TABLE `users` DROP INDEX `' + UNIQUE_KEY_NAME + '`;');
             console.log('Unique constraint dropped.');
         } catch (e) {
-            console.error(chalk.red('Failed to drop unique constraint on email column of users table:'));
+            console.error(
+                chalk.red('Failed to drop unique constraint on email column of users table:'),
+            );
             console.error(e);
         }
     }

@@ -2,8 +2,13 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-const workflow = readFileSync(new URL('../../../../.github/workflows/ci.yml', import.meta.url), 'utf8');
-const aggregate = workflow.split('    job_test_backend_apps:\n')[1].split('    job_test_backend_shared:\n')[0];
+const workflow = readFileSync(
+    new URL('../../../../.github/workflows/ci.yml', import.meta.url),
+    'utf8',
+);
+const aggregate = workflow
+    .split('    job_test_backend_apps:\n')[1]
+    .split('    job_test_backend_shared:\n')[0];
 const checkShards = aggregate.split('              run: |\n')[1].replace(/^ {18}/gm, '');
 
 describe('backend app CI aggregation', () => {

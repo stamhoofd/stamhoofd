@@ -25,10 +25,12 @@ describe('Invoice', () => {
             expect(item.quantity).toEqual(815_00_00);
             expect(item.totalWithoutVAT).toEqual(673_52_00); // rounded unit price * quantity
 
-            payment.balanceItemPayments.push(BalanceItemPaymentDetailed.create({
-                balanceItem,
-                price: 815_00_00,
-            }));
+            payment.balanceItemPayments.push(
+                BalanceItemPaymentDetailed.create({
+                    balanceItem,
+                    price: 815_00_00,
+                }),
+            );
         }
 
         {
@@ -44,10 +46,12 @@ describe('Invoice', () => {
             expect(item.unitPrice).toEqual(82_64);
             expect(item.totalWithoutVAT).toEqual(1_65_00); // rounded
 
-            payment.balanceItemPayments.push(BalanceItemPaymentDetailed.create({
-                balanceItem,
-                price: 2_00_00,
-            }));
+            payment.balanceItemPayments.push(
+                BalanceItemPaymentDetailed.create({
+                    balanceItem,
+                    price: 2_00_00,
+                }),
+            );
         }
 
         {
@@ -63,10 +67,12 @@ describe('Invoice', () => {
             expect(item.unitPrice).toEqual(82_64);
             expect(item.totalWithoutVAT).toEqual(1_65_00); // rounded
 
-            payment.balanceItemPayments.push(BalanceItemPaymentDetailed.create({
-                balanceItem,
-                price: 2_00_00,
-            }));
+            payment.balanceItemPayments.push(
+                BalanceItemPaymentDetailed.create({
+                    balanceItem,
+                    price: 2_00_00,
+                }),
+            );
         }
         payment.price = payment.balanceItemPayments.reduce((a, b) => a + b.price, 0);
         expect(payment.price).toEqual(819_00_00);
@@ -92,10 +98,12 @@ describe('Invoice', () => {
             balanceItem.VATPercentage = 21;
             balanceItem.VATIncluded = true;
 
-            payment.balanceItemPayments.push(BalanceItemPaymentDetailed.create({
-                balanceItem,
-                price: 815_00_00,
-            }));
+            payment.balanceItemPayments.push(
+                BalanceItemPaymentDetailed.create({
+                    balanceItem,
+                    price: 815_00_00,
+                }),
+            );
         }
 
         payment.price = payment.balanceItemPayments.reduce((a, b) => a + b.price, 0);
@@ -113,7 +121,7 @@ describe('Invoice', () => {
             unitPrice: 3_00,
         });
 
-        expect(invoice.items[0].totalWithoutVAT).toEqual(Math.round(82_64 * 815 / 100) * 100); // because we need to round per item to 4 decimals
+        expect(invoice.items[0].totalWithoutVAT).toEqual(Math.round((82_64 * 815) / 100) * 100); // because we need to round per item to 4 decimals
         expect(invoice.items[1].totalWithoutVAT).toEqual(3_00); // because we need to round per item to 4 decimals
     });
 
@@ -128,7 +136,7 @@ describe('Invoice', () => {
             balanceItem.VATPercentage = 21;
             balanceItem.VATIncluded = false;
 
-            const item = InvoicedBalanceItem.createFor(balanceItem, 5 * 20_00 * 121 / 100);
+            const item = InvoicedBalanceItem.createFor(balanceItem, (5 * 20_00 * 121) / 100);
             invoice.addItem(item);
             expect(item.totalWithoutVAT).toEqual(5 * 20_00);
         }
@@ -141,7 +149,7 @@ describe('Invoice', () => {
             balanceItem.VATPercentage = 21;
             balanceItem.VATIncluded = false;
 
-            const item = InvoicedBalanceItem.createFor(balanceItem, 20_00 * 121 / 100);
+            const item = InvoicedBalanceItem.createFor(balanceItem, (20_00 * 121) / 100);
             invoice.addItem(item);
             expect(item.totalWithoutVAT).toEqual(20_00);
         }
@@ -150,7 +158,7 @@ describe('Invoice', () => {
         expect(invoice.items.length).toEqual(2);
         expect(invoice.totalWithoutVAT).toEqual(5 * 20_00 + 20_00);
 
-        const VAT = Math.round((5 * 20_00 + 20_00) * 21 / 100 / 100) * 100;
+        const VAT = Math.round(((5 * 20_00 + 20_00) * 21) / 100 / 100) * 100;
         expect(invoice.VATTotalAmount).toEqual(VAT);
         expect(invoice.VATTotal.length).toEqual(1);
         expect(invoice.VATTotal[0].VAT).toEqual(VAT);
@@ -159,7 +167,7 @@ describe('Invoice', () => {
         expect(invoice.totalWithVAT).toEqual(5 * 20_00 + 20_00 + VAT);
 
         // Check difference
-        const balanceTotal = (5 * 20_00 * 121 / 100 + 20_00 * 121 / 100); // 1_45_20
+        const balanceTotal = (5 * 20_00 * 121) / 100 + (20_00 * 121) / 100; // 1_45_20
         expect(invoice.totalBalanceInvoicedAmount).toEqual(balanceTotal);
         const difference = invoice.totalWithVAT - balanceTotal;
         expect(difference).toEqual(-20); // 0,002 can't be shown on the invoice and is the difference
@@ -177,7 +185,7 @@ describe('Invoice', () => {
             balanceItem.VATPercentage = 21;
             balanceItem.VATIncluded = false;
 
-            const item = InvoicedBalanceItem.createFor(balanceItem, 5 * 20_00 * 121 / 100);
+            const item = InvoicedBalanceItem.createFor(balanceItem, (5 * 20_00 * 121) / 100);
             invoice.addItem(item);
             expect(item.totalWithoutVAT).toEqual(5 * 20_00);
         }
@@ -229,10 +237,10 @@ describe('Invoice', () => {
         expect(invoice.totalWithoutVAT).toEqual(5 * 20_00 + 20_00 + 5_23_00 + 5_23_00);
 
         expect(invoice.VATTotal.length).toEqual(2); // 2 rates
-        const VAT = Math.round(5 * 20_00 * 21 / 100 / 100) * 100;
+        const VAT = Math.round((5 * 20_00 * 21) / 100 / 100) * 100;
 
-        const excemptItem = invoice.VATTotal.find(d => d.VATExcempt);
-        const notExemptItem = invoice.VATTotal.find(d => !d.VATExcempt);
+        const excemptItem = invoice.VATTotal.find((d) => d.VATExcempt);
+        const notExemptItem = invoice.VATTotal.find((d) => !d.VATExcempt);
 
         expect(excemptItem).not.toBeUndefined();
         expect(notExemptItem).not.toBeUndefined();
@@ -265,7 +273,7 @@ describe('Invoice', () => {
             balanceItem.VATPercentage = 21;
             balanceItem.VATIncluded = false;
 
-            const item = InvoicedBalanceItem.createFor(balanceItem, 20_00 * 121 / 100);
+            const item = InvoicedBalanceItem.createFor(balanceItem, (20_00 * 121) / 100);
             invoice.addItem(item);
             expect(item.totalWithoutVAT).toEqual(20_00);
         }
@@ -278,7 +286,7 @@ describe('Invoice', () => {
             balanceItem.VATPercentage = 21;
             balanceItem.VATIncluded = false;
 
-            const item = InvoicedBalanceItem.createFor(balanceItem, 20_00 * 121 / 100);
+            const item = InvoicedBalanceItem.createFor(balanceItem, (20_00 * 121) / 100);
             invoice.addItem(item);
             expect(item.totalWithoutVAT).toEqual(20_00);
         }
@@ -291,7 +299,7 @@ describe('Invoice', () => {
             balanceItem.VATPercentage = 6;
             balanceItem.VATIncluded = false;
 
-            const item = InvoicedBalanceItem.createFor(balanceItem, 20_00 * 106 / 100);
+            const item = InvoicedBalanceItem.createFor(balanceItem, (20_00 * 106) / 100);
             invoice.addItem(item);
             expect(item.totalWithoutVAT).toEqual(20_00);
         }
@@ -304,7 +312,7 @@ describe('Invoice', () => {
             balanceItem.VATPercentage = 6;
             balanceItem.VATIncluded = false;
 
-            const item = InvoicedBalanceItem.createFor(balanceItem, 20_00 * 106 / 100);
+            const item = InvoicedBalanceItem.createFor(balanceItem, (20_00 * 106) / 100);
             invoice.addItem(item);
             expect(item.totalWithoutVAT).toEqual(20_00);
         }
@@ -314,12 +322,12 @@ describe('Invoice', () => {
         expect(invoice.totalWithoutVAT).toEqual(4 * 20_00);
 
         expect(invoice.VATTotal.length).toEqual(2); // 2 rates
-        const VAT1 = Math.round(2 * 20_00 * 21 / 100 / 100) * 100;
-        const VAT2 = Math.round(2 * 20_00 * 6 / 100 / 100) * 100;
+        const VAT1 = Math.round((2 * 20_00 * 21) / 100 / 100) * 100;
+        const VAT2 = Math.round((2 * 20_00 * 6) / 100 / 100) * 100;
         const VAT = VAT1 + VAT2;
 
-        const item6 = invoice.VATTotal.find(d => d.VATPercentage === 6);
-        const item21 = invoice.VATTotal.find(d => d.VATPercentage === 21);
+        const item6 = invoice.VATTotal.find((d) => d.VATPercentage === 6);
+        const item21 = invoice.VATTotal.find((d) => d.VATPercentage === 21);
 
         expect(item6).not.toBeUndefined();
         expect(item21).not.toBeUndefined();

@@ -5,12 +5,26 @@ import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { CountryDecoder, CountryHelper } from './CountryDecoder.js';
 
 function trimAndJoin(parts: string[], separator: string = ', '): string {
-    return parts.map(part => part.trim()).filter(part => part !== '').join(separator).trim();
+    return parts
+        .map((part) => part.trim())
+        .filter((part) => part !== '')
+        .join(separator)
+        .trim();
 }
 
 export class Address extends AutoEncoder {
     get id() {
-        return this.street + ' ' + this.number + ', ' + this.postalCode + ' ' + this.city + ', ' + this.country;
+        return (
+            this.street +
+            ' ' +
+            this.number +
+            ', ' +
+            this.postalCode +
+            ' ' +
+            this.city +
+            ', ' +
+            this.country
+        );
     }
 
     static patchIdentifier() {
@@ -41,10 +55,7 @@ export class Address extends AutoEncoder {
     }
 
     shortString(): string {
-        return trimAndJoin([
-            this.street !== '' ? this.street + ' ' + this.number : '',
-            this.city,
-        ]);
+        return trimAndJoin([this.street !== '' ? this.street + ' ' + this.number : '', this.city]);
     }
 
     getDiffName() {
@@ -54,7 +65,9 @@ export class Address extends AutoEncoder {
     anonymousString(currentCountry: Country = $getCountry()): string {
         const location = trimAndJoin([this.street, this.city]);
         if (this.country !== currentCountry) {
-            return location === '' ? CountryHelper.getName(this.country) : location + ' (' + CountryHelper.getName(this.country) + ')';
+            return location === ''
+                ? CountryHelper.getName(this.country)
+                : location + ' (' + CountryHelper.getName(this.country) + ')';
         }
         return location; // empty or location without country
     }
@@ -95,7 +108,12 @@ export class Address extends AutoEncoder {
         this.postalCode = this.postalCode.trim().toLocaleUpperCase();
     }
 
-    static createFromFields(addressLine1: string, postalCode: string, city: string, country: string): Address {
+    static createFromFields(
+        addressLine1: string,
+        postalCode: string,
+        city: string,
+        country: string,
+    ): Address {
         const { street, number } = Address.splitAddressLine(addressLine1);
 
         if (postalCode.length == 0) {
@@ -154,7 +172,12 @@ export class Address extends AutoEncoder {
             const firstFour = postalCode.substring(0, 4);
             const remaining = postalCode.substring(4).trim().toLocaleUpperCase();
 
-            if (firstFour.length !== 4 || !firstFour.match(/^\d+$/) || remaining.length !== 2 || !remaining.match(/^[A-Z]+$/)) {
+            if (
+                firstFour.length !== 4 ||
+                !firstFour.match(/^\d+$/) ||
+                remaining.length !== 2 ||
+                !remaining.match(/^[A-Z]+$/)
+            ) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postalCode',
@@ -203,7 +226,9 @@ export class Address extends AutoEncoder {
                 human: $t('%nw'),
             });
         }
-        const cleanAddress = Formatter.removeDuplicateSpaces(Formatter.normalizeWhitespace(addressLine1)).trim();
+        const cleanAddress = Formatter.removeDuplicateSpaces(
+            Formatter.normalizeWhitespace(addressLine1),
+        ).trim();
 
         // STAP 1: De "Zonder Nummer" edge case aan het einde
         const znMatch = cleanAddress.match(/^(.*?)\s(z\/?n|s\/?n|z\.n\.|zonder nummer)$/i);
@@ -211,7 +236,8 @@ export class Address extends AutoEncoder {
             return { street: znMatch[1].trim(), number: znMatch[2].trim().toLowerCase() };
         }
 
-        const tailRegex = /\d{1,5}\.?\d{0,4}\s?[a-z]{0,2}\s?(?:bis|ter|quater)?\s?(?:(?:bus|bte\.?|b\.|box|boite|boîte|bt|[/\-&\s])\s?\d{0,8}\s?[a-z]{0,2}\s?[./]?\s?\d{0,4}[a-z]{0,2})?$/i;
+        const tailRegex =
+            /\d{1,5}\.?\d{0,4}\s?[a-z]{0,2}\s?(?:bis|ter|quater)?\s?(?:(?:bus|bte\.?|b\.|box|boite|boîte|bt|[/\-&\s])\s?\d{0,8}\s?[a-z]{0,2}\s?[./]?\s?\d{0,4}[a-z]{0,2})?$/i;
 
         const match = cleanAddress.match(tailRegex);
 

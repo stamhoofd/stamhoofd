@@ -6,20 +6,20 @@ import { buildMetabaseConfigOutput } from '../../services/metabase-config.js';
 
 export default class PlatformReportConfig extends BaseCommand {
     static summary = 'Print local Metabase URL, login and data source settings';
-    static description = 'Use this to look up the Metabase login of an environment, or the connection details of its platform statistics database when adding or repairing the data source by hand.';
-    static examples = [
-        'stam platform-report config',
-        'stam platform-report config --env keeo',
-    ];
+    static description =
+        'Use this to look up the Metabase login of an environment, or the connection details of its platform statistics database when adding or repairing the data source by hand.';
+    static examples = ['stam platform-report config', 'stam platform-report config --env keeo'];
 
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {
         const { context } = await this.parseWithContext(PlatformReportConfig);
-        this.log(buildMetabaseConfigOutput(buildDomains(context), {
-            name: metabaseDataSourceName(context.env),
-            database: buildDatabases(context).platformStatistics,
-            mysqlPort: buildPorts(context).mysql,
-        }));
+        this.log(
+            buildMetabaseConfigOutput(buildDomains(context), {
+                name: metabaseDataSourceName(context.env),
+                database: buildDatabases(context).platformStatistics,
+                mysqlPort: buildPorts(context).mysql,
+            }),
+        );
     }
 }

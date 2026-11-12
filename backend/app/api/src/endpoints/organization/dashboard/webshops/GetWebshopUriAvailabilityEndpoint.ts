@@ -29,7 +29,9 @@ export class GetWebshopUriAvailabilityEndpoint extends Endpoint<Params, Query, B
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/webshop/@id/check-uri', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/check-uri', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -42,12 +44,12 @@ export class GetWebshopUriAvailabilityEndpoint extends Endpoint<Params, Query, B
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
         const webshop = await Webshop.getByID(request.params.id);
-        if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+        if (!webshop || !(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full))) {
             throw Context.auth.notFoundOrNoAccess();
         }
 
@@ -59,16 +61,19 @@ export class GetWebshopUriAvailabilityEndpoint extends Endpoint<Params, Query, B
             );
         }
 
-        const q = await Webshop.where({
-            uri: request.query.uri,
-            id: {
-                sign: '!=',
-                value: request.params.id,
+        const q = await Webshop.where(
+            {
+                uri: request.query.uri,
+                id: {
+                    sign: '!=',
+                    value: request.params.id,
+                },
             },
-        }, {
-            limit: 1,
-            select: 'id',
-        });
+            {
+                limit: 1,
+                select: 'id',
+            },
+        );
 
         const available = q.length == 0;
 

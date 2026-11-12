@@ -35,8 +35,13 @@ export function isEmptyFilter(filter: StamhoofdFilter) {
     return false;
 }
 
-export function mergeFilters(filters: (StamhoofdFilter | null)[], type: '$and' | '$or' = '$and'): StamhoofdFilter | null {
-    const filteredFilters = filters.filter(f => !isEmptyFilter(f)).flatMap(f => Array.isArray(f) ? (type === '$and' ? f : [{ $and: f }]) : [f]);
+export function mergeFilters(
+    filters: (StamhoofdFilter | null)[],
+    type: '$and' | '$or' = '$and',
+): StamhoofdFilter | null {
+    const filteredFilters = filters
+        .filter((f) => !isEmptyFilter(f))
+        .flatMap((f) => (Array.isArray(f) ? (type === '$and' ? f : [{ $and: f }]) : [f]));
 
     if (filteredFilters.length === 0) {
         return null;
@@ -53,7 +58,7 @@ export function mergeFilters(filters: (StamhoofdFilter | null)[], type: '$and' |
 
 export function assertSort(list: SortList, assert: AssertSortList): SortList {
     for (const a of assert) {
-        if (list.find(l => l.key === a.key)) {
+        if (list.find((l) => l.key === a.key)) {
             continue;
         }
 
@@ -71,7 +76,7 @@ export function wrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): Stamho
     }
 
     if (Array.isArray(wrap)) {
-        return wrap.map(w => wrapFilter(filter, w));
+        return wrap.map((w) => wrapFilter(filter, w));
     }
 
     if (typeof wrap === 'object' && wrap !== null) {
@@ -91,7 +96,10 @@ export function wrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): Stamho
  * Returns the filter at FilterWrapperMarker if it is found
  * If no FilterWrapperMarker is found, the filter is returned if it is the same as wrap
  */
-export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): { match: boolean; markerValue?: StamhoofdFilter | undefined; leftOver?: StamhoofdFilter } {
+export function unwrapFilter(
+    filter: StamhoofdFilter,
+    wrap: WrapperFilter,
+): { match: boolean; markerValue?: StamhoofdFilter | undefined; leftOver?: StamhoofdFilter } {
     // Replace the FilterWrapperMarker symbol in wrap with filter
     if (wrap === FilterWrapperMarker) {
         return {
@@ -133,7 +141,10 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): { ma
                     if (same.markerValue) {
                         if (pendingMarkerValue !== undefined) {
                             // Check if equal
-                            const { match, leftOver } = unwrapFilter(pendingMarkerValue, same.markerValue);
+                            const { match, leftOver } = unwrapFilter(
+                                pendingMarkerValue,
+                                same.markerValue,
+                            );
 
                             if (!match || leftOver) {
                                 // Pattern did match, but multiple marker values with different values
@@ -200,7 +211,7 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): { ma
 
         let pendingMarkerValue: StamhoofdFilter | undefined = undefined;
         for (const key in wrap) {
-            const filterValue = (filter)[key] as StamhoofdFilter;
+            const filterValue = filter[key] as StamhoofdFilter;
 
             if (filterValue === undefined) {
                 // Required key not found
@@ -239,7 +250,7 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): { ma
         }
 
         // We have a match
-        const leftOverKeys = Object.keys(filter).filter(k => !(k in wrap));
+        const leftOverKeys = Object.keys(filter).filter((k) => !(k in wrap));
         const leftOver = {};
         for (const key of leftOverKeys) {
             (leftOver as any)[key] = (filter as any)[key];
@@ -265,7 +276,10 @@ export function unwrapFilter(filter: StamhoofdFilter, wrap: WrapperFilter): { ma
     };
 }
 
-export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string | number)[]): StamhoofdFilter | null | undefined {
+export function unwrapFilterByPath(
+    filter: StamhoofdFilter,
+    keyPath: (string | number)[],
+): StamhoofdFilter | null | undefined {
     if (keyPath.length === 0) {
         return filter;
     }
@@ -299,7 +313,10 @@ export function unwrapFilterByPath(filter: StamhoofdFilter, keyPath: (string | n
 /**
  * Does unwrapFilter(filter, wrap) but if filter is an array or an $and filter, it will recursively check all subfilters for a match
  */
-export function unwrapFilterRecursively(filter: StamhoofdFilter, wrap: WrapperFilter): { match: boolean; markerValue?: StamhoofdFilter | undefined; leftOver?: StamhoofdFilter } {
+export function unwrapFilterRecursively(
+    filter: StamhoofdFilter,
+    wrap: WrapperFilter,
+): { match: boolean; markerValue?: StamhoofdFilter | undefined; leftOver?: StamhoofdFilter } {
     const result = unwrapFilter(filter, wrap);
     if (result.match) {
         return result;
@@ -307,10 +324,7 @@ export function unwrapFilterRecursively(filter: StamhoofdFilter, wrap: WrapperFi
     let subFilters: StamhoofdFilter[] = [];
     if (Array.isArray(filter)) {
         subFilters = filter;
-    } else if (typeof filter === 'object'
-        && filter !== null
-        && Array.isArray(filter['$and'])
-    ) {
+    } else if (typeof filter === 'object' && filter !== null && Array.isArray(filter['$and'])) {
         subFilters = filter['$and'];
     }
     for (const subFilter of subFilters) {

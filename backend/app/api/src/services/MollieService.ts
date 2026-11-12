@@ -3,13 +3,34 @@ import type { Payment, User } from '@stamhoofd/models';
 import type { Organization } from '@stamhoofd/models';
 import { MolliePayment, MollieToken, Platform } from '@stamhoofd/models';
 import type { PaymentCustomer } from '@stamhoofd/structures';
-import { MollieOnboarding, MollieProfile, MollieProfileMode, MollieProfileStatus, MollieStatus, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
-import { PaymentMandate, PaymentMandateDetails, PaymentMandateStatus, PaymentMandateType } from '@stamhoofd/structures/PaymentMandate.js';
+import {
+    MollieOnboarding,
+    MollieProfile,
+    MollieProfileMode,
+    MollieProfileStatus,
+    MollieStatus,
+    PaymentMethod,
+    PaymentMethodHelper,
+    PaymentProvider,
+    PaymentStatus,
+} from '@stamhoofd/structures';
+import {
+    PaymentMandate,
+    PaymentMandateDetails,
+    PaymentMandateStatus,
+    PaymentMandateType,
+} from '@stamhoofd/structures/PaymentMandate.js';
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
 import { Client } from 'mollie-api-typescript';
 import { ClientError, ErrorResponse } from 'mollie-api-typescript/models/errors';
-import type { ListMandateResponse, ListRefundResponseStatus, MandateResponse, PaymentResponse, RefundResponseStatus } from 'mollie-api-typescript/models';
+import type {
+    ListMandateResponse,
+    ListRefundResponseStatus,
+    MandateResponse,
+    PaymentResponse,
+    RefundResponseStatus,
+} from 'mollie-api-typescript/models';
 import { Context } from '../helpers/Context.js';
 
 export class MollieService {
@@ -18,7 +39,15 @@ export class MollieService {
     createdAt: Date;
     missingScopes: string[];
 
-    private constructor({ sellingOrganization, accessToken, missingScopes }: { sellingOrganization: Organization; accessToken: string; missingScopes: string[] }) {
+    private constructor({
+        sellingOrganization,
+        accessToken,
+        missingScopes,
+    }: {
+        sellingOrganization: Organization;
+        accessToken: string;
+        missingScopes: string[];
+    }) {
         this.sellingOrganization = sellingOrganization;
         this.missingScopes = missingScopes;
         this.client = new Client({
@@ -49,7 +78,11 @@ export class MollieService {
             }
             return null;
         }
-        const service = new MollieService({ sellingOrganization, accessToken: await token.getAccessToken(), missingScopes: token.missingScopes });
+        const service = new MollieService({
+            sellingOrganization,
+            accessToken: await token.getAccessToken(),
+            missingScopes: token.missingScopes,
+        });
         this.#cachedServices.set(sellingOrganization.id, service);
         return service;
     }
@@ -68,14 +101,20 @@ export class MollieService {
         // Submit onboarding data
         this.sellingOrganization.privateMeta.mollieOnboarding = await this.getOnboardingStatus();
 
-        if (this.sellingOrganization.privateMeta.mollieOnboarding && this.sellingOrganization.privateMeta.mollieOnboarding.status === MollieStatus.NeedsData) {
+        if (
+            this.sellingOrganization.privateMeta.mollieOnboarding &&
+            this.sellingOrganization.privateMeta.mollieOnboarding.status === MollieStatus.NeedsData
+        ) {
             try {
                 await this.client.onboarding.submit({
                     requestBody: {
                         organization: {
                             name: this.sellingOrganization.name,
                             address: {
-                                streetAndNumber: this.sellingOrganization.address.street + ' ' + this.sellingOrganization.address.number,
+                                streetAndNumber:
+                                    this.sellingOrganization.address.street +
+                                    ' ' +
+                                    this.sellingOrganization.address.number,
                                 postalCode: this.sellingOrganization.address.postalCode,
                                 city: this.sellingOrganization.address.city,
                                 country: this.sellingOrganization.address.country,
@@ -101,7 +140,11 @@ export class MollieService {
      * Gets the customer id for a given payingOrganization or user.
      * If no customer exists, it will create a new mollie customer if customer (payment customer) is set as parameter
      */
-    async getCustomerId({ payingOrganization, user, customer }: {
+    async getCustomerId({
+        payingOrganization,
+        user,
+        customer,
+    }: {
         payingOrganization: Organization | null;
         user: User | null;
 
@@ -161,7 +204,12 @@ export class MollieService {
         this.#verifiedCustomerIds.add(customerId);
 
         payingOrganization.serverMeta.mollieCustomerId = mollieCustomer.id;
-        console.log('Saving new mollie customer', mollieCustomer, 'for organization', payingOrganization.id);
+        console.log(
+            'Saving new mollie customer',
+            mollieCustomer,
+            'for organization',
+            payingOrganization.id,
+        );
         await payingOrganization.save();
 
         return customerId;
@@ -169,7 +217,10 @@ export class MollieService {
 
     #cachedMandates: Map<string, PaymentMandate[]> = new Map();
 
-    async getMandates({ payingOrganization, user }: {
+    async getMandates({
+        payingOrganization,
+        user,
+    }: {
         payingOrganization: Organization | null;
         user: User | null;
     }): Promise<PaymentMandate[]> {
@@ -195,7 +246,11 @@ export class MollieService {
 
             for await (const page of pages) {
                 for (const mandate of page.result.embedded.mandates) {
-                    const paymentMandate = MollieService.mollieManateToStamhoofd({ mandate, payingOrganization, user });
+                    const paymentMandate = MollieService.mollieManateToStamhoofd({
+                        mandate,
+                        payingOrganization,
+                        user,
+                    });
                     if (paymentMandate) {
                         mandates.push(paymentMandate);
                     }
@@ -209,7 +264,11 @@ export class MollieService {
         return mandates;
     }
 
-    async deleteMandate({ mandateId, payingOrganization, user }: {
+    async deleteMandate({
+        mandateId,
+        payingOrganization,
+        user,
+    }: {
         mandateId: string;
         payingOrganization: Organization | null;
         user: User | null;
@@ -225,7 +284,11 @@ export class MollieService {
         });
     }
 
-    private static mollieManateToStamhoofd({ mandate, payingOrganization, user }: {
+    private static mollieManateToStamhoofd({
+        mandate,
+        payingOrganization,
+        user,
+    }: {
         mandate: MandateResponse | ListMandateResponse;
         payingOrganization: Organization | null;
         user: User | null;
@@ -262,17 +325,33 @@ export class MollieService {
             type,
 
             details: PaymentMandateDetails.create({
-                name: ('consumerName' in details ? details.consumerName : details.cardHolder) ?? undefined,
-                cardNumber: 'cardNumber' in details && details.cardNumber ? details.cardNumber : null,
-                iban: 'consumerAccount' in details && details.consumerAccount ? Formatter.iban(details.consumerAccount) : null,
-                bic: ('consumerBic' in details && details.consumerBic ? details.consumerBic : undefined),
-                expiryDate: ('cardExpiryDate' in details && details.cardExpiryDate ? DateTime.fromISO(details.cardExpiryDate, { zone: Formatter.timezone }).toJSDate() : null), // todo: parse date correctly in Brussels timezone!
-                brand: ('cardLabel' in details && details.cardLabel ? details.cardLabel : null),
+                name:
+                    ('consumerName' in details ? details.consumerName : details.cardHolder) ??
+                    undefined,
+                cardNumber:
+                    'cardNumber' in details && details.cardNumber ? details.cardNumber : null,
+                iban:
+                    'consumerAccount' in details && details.consumerAccount
+                        ? Formatter.iban(details.consumerAccount)
+                        : null,
+                bic:
+                    'consumerBic' in details && details.consumerBic
+                        ? details.consumerBic
+                        : undefined,
+                expiryDate:
+                    'cardExpiryDate' in details && details.cardExpiryDate
+                        ? DateTime.fromISO(details.cardExpiryDate, {
+                              zone: Formatter.timezone,
+                          }).toJSDate()
+                        : null, // todo: parse date correctly in Brussels timezone!
+                brand: 'cardLabel' in details && details.cardLabel ? details.cardLabel : null,
             }),
         });
     }
 
-    private static mollieMandateStatusToStamhoofd(mandate: MandateResponse | ListMandateResponse): PaymentMandateStatus {
+    private static mollieMandateStatusToStamhoofd(
+        mandate: MandateResponse | ListMandateResponse,
+    ): PaymentMandateStatus {
         switch (mandate.status) {
             case 'valid': {
                 return PaymentMandateStatus.Valid;
@@ -312,11 +391,21 @@ export class MollieService {
             const profiles: MollieProfile[] = [];
             for await (const page of pages) {
                 for (const profile of page.result.embedded.profiles) {
-                    profiles.push(MollieProfile.create({
-                        ...profile,
-                        mode: profile.mode === 'live' ? MollieProfileMode.Live : MollieProfileMode.Test,
-                        status: profile.status === 'unverified' ? MollieProfileStatus.Unverified : (profile.status === 'blocked' ? MollieProfileStatus.Blocked : MollieProfileStatus.Verified),
-                    }));
+                    profiles.push(
+                        MollieProfile.create({
+                            ...profile,
+                            mode:
+                                profile.mode === 'live'
+                                    ? MollieProfileMode.Live
+                                    : MollieProfileMode.Test,
+                            status:
+                                profile.status === 'unverified'
+                                    ? MollieProfileStatus.Unverified
+                                    : profile.status === 'blocked'
+                                      ? MollieProfileStatus.Blocked
+                                      : MollieProfileStatus.Verified,
+                        }),
+                    );
                 }
             }
             return profiles;
@@ -332,7 +421,12 @@ export class MollieService {
             return MollieOnboarding.create({
                 canReceivePayments: !!response.canReceivePayments,
                 canReceiveSettlements: !!response.canReceiveSettlements,
-                status: response.status === 'needs-data' ? MollieStatus.NeedsData : (response.status === 'in-review' ? MollieStatus.InReview : (MollieStatus.Completed)),
+                status:
+                    response.status === 'needs-data'
+                        ? MollieStatus.NeedsData
+                        : response.status === 'in-review'
+                          ? MollieStatus.InReview
+                          : MollieStatus.Completed,
                 missingScopes: this.missingScopes,
             });
         } catch (e) {
@@ -375,28 +469,66 @@ export class MollieService {
 
     get locale() {
         const preferredLocale = Context.i18n.locale.replace('-', '_');
-        return ['en_US', 'en_GB', 'nl_NL', 'nl_BE', 'fr_FR', 'fr_BE', 'de_DE', 'de_AT', 'de_CH', 'es_ES', 'ca_ES', 'pt_PT', 'it_IT', 'nb_NO', 'sv_SE', 'fi_FI', 'da_DK', 'is_IS', 'hu_HU', 'pl_PL', 'lv_LV', 'lt_LT'].includes(preferredLocale) ? (preferredLocale as any) : null;
+        return [
+            'en_US',
+            'en_GB',
+            'nl_NL',
+            'nl_BE',
+            'fr_FR',
+            'fr_BE',
+            'de_DE',
+            'de_AT',
+            'de_CH',
+            'es_ES',
+            'ca_ES',
+            'pt_PT',
+            'it_IT',
+            'nb_NO',
+            'sv_SE',
+            'fi_FI',
+            'da_DK',
+            'is_IS',
+            'hu_HU',
+            'pl_PL',
+            'lv_LV',
+            'lt_LT',
+        ].includes(preferredLocale)
+            ? (preferredLocale as any)
+            : null;
     }
 
     get testMode() {
-        return this.sellingOrganization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production';
+        return (
+            this.sellingOrganization.privateMeta.useTestPayments ??
+            STAMHOOFD.environment !== 'production'
+        );
     }
 
-    static async createPayment(
-        { sellingOrganization, payment, mandate, redirectUrl, webhookUrl, cancelUrl, description, metadata, payingOrganization, user, customer }: {
-            payment: Payment;
-            mandate: PaymentMandate | null;
-            redirectUrl: string;
-            cancelUrl: string;
-            webhookUrl: string;
-            description: string;
-            metadata: { [key: string]: string | undefined };
-            sellingOrganization: Organization;
-            payingOrganization: Organization | null;
-            user: User | null;
-            customer: PaymentCustomer;
-        },
-    ): Promise<{ paymentUrl: string | null }> {
+    static async createPayment({
+        sellingOrganization,
+        payment,
+        mandate,
+        redirectUrl,
+        webhookUrl,
+        cancelUrl,
+        description,
+        metadata,
+        payingOrganization,
+        user,
+        customer,
+    }: {
+        payment: Payment;
+        mandate: PaymentMandate | null;
+        redirectUrl: string;
+        cancelUrl: string;
+        webhookUrl: string;
+        description: string;
+        metadata: { [key: string]: string | undefined };
+        sellingOrganization: Organization;
+        payingOrganization: Organization | null;
+        user: User | null;
+        customer: PaymentCustomer;
+    }): Promise<{ paymentUrl: string | null }> {
         const mollieService = await MollieService.create({ sellingOrganization });
         const profileId = await mollieService?.getProfileId();
         const method = MollieService.paymentMethodToMollie(payment.method);
@@ -408,11 +540,12 @@ export class MollieService {
             });
         }
 
-        const customerId = await mollieService.getCustomerId({
-            payingOrganization: payingOrganization ?? null,
-            user,
-            customer,
-        }) ?? undefined;
+        const customerId =
+            (await mollieService.getCustomerId({
+                payingOrganization: payingOrganization ?? null,
+                user,
+                customer,
+            })) ?? undefined;
 
         const data: Parameters<typeof mollieService.client.payments.create>[0] = {
             paymentRequest: {
@@ -422,7 +555,7 @@ export class MollieService {
                 },
                 method,
                 mandateId: mandate?.id,
-                sequenceType: mandate ? 'recurring' : (payment.createMandate ? 'first' : 'oneoff'),
+                sequenceType: mandate ? 'recurring' : payment.createMandate ? 'first' : 'oneoff',
                 customerId,
                 profileId,
                 description,
@@ -485,7 +618,11 @@ export class MollieService {
         }
     }
 
-    async getStatusFor(mollieData: PaymentResponse, payment: Payment, cancel = false): Promise<{ status: PaymentStatus }> {
+    async getStatusFor(
+        mollieData: PaymentResponse,
+        payment: Payment,
+        cancel = false,
+    ): Promise<{ status: PaymentStatus }> {
         await MollieService.saveChargeInfo(mollieData, payment);
 
         if (mollieData.status === 'paid') {
@@ -546,7 +683,9 @@ export class MollieService {
      * Map a Mollie refund status to a payment status. A refund only succeeds once Mollie
      * reports it as refunded: before that it can still fail or be canceled.
      */
-    static refundStatusToPaymentStatus(status: RefundResponseStatus | ListRefundResponseStatus): PaymentStatus {
+    static refundStatusToPaymentStatus(
+        status: RefundResponseStatus | ListRefundResponseStatus,
+    ): PaymentStatus {
         switch (status) {
             case 'refunded':
                 return PaymentStatus.Succeeded;
@@ -559,13 +698,20 @@ export class MollieService {
         }
     }
 
-    async createRefund({ payment, amount, description, metadata }: {
+    async createRefund({
+        payment,
+        amount,
+        description,
+        metadata,
+    }: {
         payment: Payment;
         amount: number;
         description: string;
         metadata?: { [key: string]: string | undefined };
     }): Promise<{ mollieRefundId: string; createdAt: Date; status: PaymentStatus }> {
-        const molliePayment = await MolliePayment.select().where('paymentId', payment.id).first(false);
+        const molliePayment = await MolliePayment.select()
+            .where('paymentId', payment.id)
+            .first(false);
         if (!molliePayment) {
             throw new SimpleError({
                 code: 'refund_not_supported',
@@ -643,7 +789,9 @@ export class MollieService {
     }
 
     async getStatus(payment: Payment, cancel = false) {
-        const molliePayment = await MolliePayment.select().where('paymentId', payment.id).first(false);
+        const molliePayment = await MolliePayment.select()
+            .where('paymentId', payment.id)
+            .first(false);
         if (!molliePayment) {
             throw new Error('Mollie Payment not found for payment ' + payment.id);
         }
@@ -663,18 +811,26 @@ export class MollieService {
      * (tr_...) that is needed to address the refund in the Mollie API.
      */
     async getRefundStatus(refundPayment: Payment): Promise<{ status: PaymentStatus }> {
-        const mollieRefund = await MolliePayment.select().where('paymentId', refundPayment.id).first(false);
+        const mollieRefund = await MolliePayment.select()
+            .where('paymentId', refundPayment.id)
+            .first(false);
         if (!mollieRefund) {
             throw new Error('Mollie refund not found for payment ' + refundPayment.id);
         }
 
         if (!refundPayment.reversingPaymentId) {
-            throw new Error('Refund payment ' + refundPayment.id + ' is missing a reversing payment id');
+            throw new Error(
+                'Refund payment ' + refundPayment.id + ' is missing a reversing payment id',
+            );
         }
 
-        const sourceMolliePayment = await MolliePayment.select().where('paymentId', refundPayment.reversingPaymentId).first(false);
+        const sourceMolliePayment = await MolliePayment.select()
+            .where('paymentId', refundPayment.reversingPaymentId)
+            .first(false);
         if (!sourceMolliePayment) {
-            throw new Error('Mollie payment not found for source payment ' + refundPayment.reversingPaymentId);
+            throw new Error(
+                'Mollie payment not found for source payment ' + refundPayment.reversingPaymentId,
+            );
         }
 
         const refund = await this.client.refunds.get({

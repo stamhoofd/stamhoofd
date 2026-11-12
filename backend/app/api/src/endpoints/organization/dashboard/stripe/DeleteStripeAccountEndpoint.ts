@@ -20,7 +20,9 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/stripe/accounts/@id', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/stripe/accounts/@id', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -34,7 +36,7 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full)) {
+        if (!(await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full))) {
             throw Context.auth.error();
         }
 

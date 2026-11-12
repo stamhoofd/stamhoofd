@@ -4,15 +4,14 @@ export class FiscalDocumentYearHelper {
     /**
      * Current DateTime in Belgium
      */
-    private readonly now = DateTime.now()
-        .setZone('Europe/Brussels');
+    private readonly now = DateTime.now().setZone('Europe/Brussels');
 
     /**
-    * Allow to create fiscal document for current year if current month is after this month
-    */
-    private readonly allowCreationAfterMonth
-    // October
-        = 10;
+     * Allow to create fiscal document for current year if current month is after this month
+     */
+    private readonly allowCreationAfterMonth =
+        // October
+        10;
 
     /**
      * Current year in Belgium
@@ -36,14 +35,36 @@ export class FiscalDocumentYearHelper {
      */
     getPublishDeadlineForYear(calendarYear: number): DateTime {
         // max publish date is before 1 march of next year
-        return DateTime.fromObject({ year: calendarYear + 1, month: 3, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }, { zone: 'Europe/Brussels' });
+        return DateTime.fromObject(
+            {
+                year: calendarYear + 1,
+                month: 3,
+                day: 1,
+                hour: 0,
+                minute: 0,
+                second: 0,
+                millisecond: 0,
+            },
+            { zone: 'Europe/Brussels' },
+        );
     }
 
     /**
      * Should at the very very last date download Belcotax by 1st of july
      */
     getAbsoluteDeadlineForYear(calendarYear: number): DateTime {
-        return DateTime.fromObject({ year: calendarYear + 1, month: 7, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }, { zone: 'Europe/Brussels' });
+        return DateTime.fromObject(
+            {
+                year: calendarYear + 1,
+                month: 7,
+                day: 1,
+                hour: 0,
+                minute: 0,
+                second: 0,
+                millisecond: 0,
+            },
+            { zone: 'Europe/Brussels' },
+        );
     }
 
     /**

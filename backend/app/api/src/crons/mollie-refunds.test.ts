@@ -1,5 +1,12 @@
 import type { Organization } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, BalanceItemPayment, MolliePayment, OrganizationFactory, Payment } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemFactory,
+    BalanceItemPayment,
+    MolliePayment,
+    OrganizationFactory,
+    Payment,
+} from '@stamhoofd/models';
 import { PaymentMethod, PaymentProvider, PaymentStatus, PaymentType } from '@stamhoofd/structures';
 import type { MollieMockPayment } from '../../tests/helpers/MollieMocker.js';
 import { MollieMocker } from '../../tests/helpers/MollieMocker.js';
@@ -33,12 +40,14 @@ describe('Cron.mollie-refunds', () => {
         const balanceItems: BalanceItem[] = [];
         let price = 0;
         for (const itemPrice of prices) {
-            balanceItems.push(await new BalanceItemFactory({
-                organizationId: organization.id,
-                amount: 1,
-                unitPrice: itemPrice,
-                pricePaid: itemPrice,
-            }).create());
+            balanceItems.push(
+                await new BalanceItemFactory({
+                    organizationId: organization.id,
+                    amount: 1,
+                    unitPrice: itemPrice,
+                    pricePaid: itemPrice,
+                }).create(),
+            );
             price += itemPrice;
         }
 
@@ -224,7 +233,9 @@ describe('Cron.mollie-refunds', () => {
 
         await runCron(organization);
 
-        expect(await MolliePayment.select().where('paymentId', victimRefund.id).first(false)).toBeNull();
+        expect(
+            await MolliePayment.select().where('paymentId', victimRefund.id).first(false),
+        ).toBeNull();
         expect((await Payment.getByID(victimRefund.id))!.status).toBe(PaymentStatus.Pending);
 
         // Registered as a normal refund of the organization's own payment instead
@@ -274,7 +285,9 @@ describe('Cron.mollie-refunds', () => {
     });
 
     test('A partial refund is allocated across the balance items of the payment', async () => {
-        const { organization, balanceItems, payment, mockPayment } = await init({ prices: [30_0000, 20_0000] });
+        const { organization, balanceItems, payment, mockPayment } = await init({
+            prices: [30_0000, 20_0000],
+        });
 
         mollieMocker.createRefund(mockPayment, { value: '40.00', status: 'refunded' });
         await runCron(organization);
@@ -284,13 +297,15 @@ describe('Cron.mollie-refunds', () => {
         expect(refunds[0].price).toBe(-40_0000);
         expect(refunds[0].status).toBe(PaymentStatus.Succeeded);
 
-        const refundItems = await BalanceItemPayment.select().where('paymentId', refunds[0].id).fetch();
+        const refundItems = await BalanceItemPayment.select()
+            .where('paymentId', refunds[0].id)
+            .fetch();
         expect(refundItems).toHaveLength(2);
 
         // The allocation order over the balance items is not deterministic: only check that
         // every item stays within what was paid for it and that the total matches
-        const first = refundItems.find(i => i.balanceItemId === balanceItems[0].id);
-        const second = refundItems.find(i => i.balanceItemId === balanceItems[1].id);
+        const first = refundItems.find((i) => i.balanceItemId === balanceItems[0].id);
+        const second = refundItems.find((i) => i.balanceItemId === balanceItems[1].id);
         expect(first!.price + second!.price).toBe(-40_0000);
         expect(first!.price).toBeGreaterThanOrEqual(-30_0000);
         expect(first!.price).toBeLessThan(0);

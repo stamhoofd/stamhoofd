@@ -3,7 +3,11 @@ import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { City, Province } from '@stamhoofd/models';
-import { City as CityStruct, Province as ProvinceStruct, SearchRegions } from '@stamhoofd/structures';
+import {
+    City as CityStruct,
+    Province as ProvinceStruct,
+    SearchRegions,
+} from '@stamhoofd/structures';
 import { StringCompare } from '@stamhoofd/utility';
 import { Country } from '@stamhoofd/types/Country';
 
@@ -34,7 +38,7 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // Escape query
         const rawQuery = request.query.query.replace(/[-+><()~*"@\s]+/g, ' ');
-        const words = rawQuery.split(' ').filter(w => w.length > 0);
+        const words = rawQuery.split(' ').filter((w) => w.length > 0);
 
         // Escape words
         const cleanedWords: string[] = [];
@@ -54,11 +58,13 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
 
         if (query.length === 0) {
             // Do not try searching...
-            return new Response(SearchRegions.create({
-                cities: [],
-                provinces: [],
-                countries: [],
-            }));
+            return new Response(
+                SearchRegions.create({
+                    cities: [],
+                    provinces: [],
+                    countries: [],
+                }),
+            );
         }
 
         const match = {
@@ -68,26 +74,29 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
         };
 
         // We had to add an order by in the query to fix the limit. MySQL doesn't want to limit the results correctly if we don't explicitly sort the results on their relevance
-        const cities = await City.where({ name: match }, {
-            limit: 5,
-            sort: [
-                {
-                    column: { name: rawQuery },
-                    direction: 'DESC',
-                },
-                {
-                    column: { name: match },
-                    direction: 'DESC',
-                },
-            ],
-        });
+        const cities = await City.where(
+            { name: match },
+            {
+                limit: 5,
+                sort: [
+                    {
+                        column: { name: rawQuery },
+                        direction: 'DESC',
+                    },
+                    {
+                        column: { name: match },
+                        direction: 'DESC',
+                    },
+                ],
+            },
+        );
         const loadedCities: (City & { province: Province })[] = [];
 
         // We had to add an order by in the query to fix the limit. MySQL doesn't want to limit the results correctly if we don't explicitly sort the results on their relevance
         const allProvinces = await Province.all();
 
         for (const city of cities) {
-            const province = allProvinces.find(p => p.id == city.provinceId);
+            const province = allProvinces.find((p) => p.id == city.provinceId);
             if (!province) {
                 continue;
             }
@@ -122,10 +131,16 @@ export class SearchRegionsEndpoint extends Endpoint<Params, Query, Body, Respons
             countries.push(Country.France);
         }
 
-        return new Response(SearchRegions.create({
-            cities: loadedCities.map(c => CityStruct.create(Object.assign({ ...c }, { province: ProvinceStruct.create(c.province) }))),
-            provinces: provinces.map(c => ProvinceStruct.create(c)),
-            countries: countries,
-        }));
+        return new Response(
+            SearchRegions.create({
+                cities: loadedCities.map((c) =>
+                    CityStruct.create(
+                        Object.assign({ ...c }, { province: ProvinceStruct.create(c.province) }),
+                    ),
+                ),
+                provinces: provinces.map((c) => ProvinceStruct.create(c)),
+                countries: countries,
+            }),
+        );
     }
 }

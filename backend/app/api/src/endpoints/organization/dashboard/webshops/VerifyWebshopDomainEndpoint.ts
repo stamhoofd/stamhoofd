@@ -23,7 +23,9 @@ export class VerifyWebshopDomainEndpoint extends Endpoint<Params, Query, Body, R
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/webshop/@id/verify-domain', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/verify-domain', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -36,18 +38,20 @@ export class VerifyWebshopDomainEndpoint extends Endpoint<Params, Query, Body, R
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
         return await QueueHandler.schedule('webshop-stock/' + request.params.id, async () => {
             const webshop = await Webshop.getByID(request.params.id);
-            if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+            if (!webshop || !(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full))) {
                 throw Context.auth.notFoundOrNoAccess();
             }
 
             if (webshop.domain !== null) {
-                webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(webshop.domain);
+                webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(
+                    webshop.domain,
+                );
                 await webshop.updateDNSRecords();
             } else {
                 webshop.privateMeta.dnsRecords = [];

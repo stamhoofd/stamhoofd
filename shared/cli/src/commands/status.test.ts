@@ -3,7 +3,10 @@ import Status from './status.js';
 import { listActiveInstanceManifests } from '../runtime/manifest-store.js';
 import { printSharedServicesStatus } from '../services/shared-services.js';
 import { checkNodeVersion, printNodeVersionStatus } from '../workflows/setup-node.js';
-import { checkPackageManager, printPackageManagerStatus } from '../workflows/setup-package-manager.js';
+import {
+    checkPackageManager,
+    printPackageManagerStatus,
+} from '../workflows/setup-package-manager.js';
 
 vi.mock('../runtime/manifest-store.js', () => ({
     listActiveInstanceManifests: vi.fn(async () => []),
@@ -45,7 +48,9 @@ describe('Status command', () => {
         }));
 
         (command as any).config = {};
-        (command as any).parse = vi.fn(async () => ({ flags: { current: false, watch: false, verbose: true } }));
+        (command as any).parse = vi.fn(async () => ({
+            flags: { current: false, watch: false, verbose: true },
+        }));
         (command as any).createContext = createContext;
 
         await command.run();
@@ -54,7 +59,11 @@ describe('Status command', () => {
         expect(printNodeVersionStatus).toHaveBeenCalled();
         expect(checkPackageManager).toHaveBeenCalled();
         expect(printPackageManagerStatus).toHaveBeenCalled();
-        expect(createContext).toHaveBeenCalledWith({ current: false, watch: false, verbose: true }, Status.verbosity, undefined);
+        expect(createContext).toHaveBeenCalledWith(
+            { current: false, watch: false, verbose: true },
+            Status.verbosity,
+            undefined,
+        );
         expect(printSharedServicesStatus).toHaveBeenCalled();
         expect(listActiveInstanceManifests).toHaveBeenCalled();
     });

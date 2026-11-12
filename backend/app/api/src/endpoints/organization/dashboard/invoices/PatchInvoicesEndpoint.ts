@@ -1,5 +1,11 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { AutoEncoder, BooleanDecoder, field, PatchableArrayDecoder, StringDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    field,
+    PatchableArrayDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { Invoice as InvoiceStruct } from '@stamhoofd/structures';
@@ -19,7 +25,11 @@ type Body = PatchableArrayAutoEncoder<InvoiceStruct>;
 type ResponseBody = InvoiceStruct[];
 
 export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(InvoiceStruct as Decoder<InvoiceStruct>, InvoiceStruct.patchType() as Decoder<AutoEncoderPatchType<InvoiceStruct>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(
+        InvoiceStruct as Decoder<InvoiceStruct>,
+        InvoiceStruct.patchType() as Decoder<AutoEncoderPatchType<InvoiceStruct>>,
+        StringDecoder,
+    );
     queryDecoder = Query as Decoder<Query>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -40,7 +50,7 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasFullAccess(organization.id)) {
+        if (!(await Context.auth.hasFullAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -48,7 +58,7 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
 
         for (const { put } of request.body.getPuts()) {
             if (put.payingOrganizationId) {
-                if (!await Context.auth.hasFullAccess(put.payingOrganizationId)) {
+                if (!(await Context.auth.hasFullAccess(put.payingOrganizationId))) {
                     throw Context.auth.error($t('%1Xw'));
                 }
             }
@@ -56,7 +66,9 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
             put.stripeAccountId = null;
             put.reference = null;
 
-            const model = await InvoiceService.createFrom(organization, put, { confirmed: request.query.confirm });
+            const model = await InvoiceService.createFrom(organization, put, {
+                confirmed: request.query.confirm,
+            });
             invoices.push(model);
         }
 
@@ -87,8 +99,6 @@ export class PatchInvoicesEndpoint extends Endpoint<Params, Query, Body, Respons
             await InvoiceService.delete(model);
         }
 
-        return new Response(
-            await AuthenticatedStructures.invoices(invoices, true),
-        );
+        return new Response(await AuthenticatedStructures.invoices(invoices, true));
     }
 }

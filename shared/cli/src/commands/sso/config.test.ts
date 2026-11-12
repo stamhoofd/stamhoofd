@@ -13,12 +13,22 @@ describe('SsoConfig command', () => {
         await command.run();
 
         expect(log).toHaveBeenCalledWith(expect.stringContaining('Local SSO settings:'));
-        expect(log).toHaveBeenCalledWith(expect.stringContaining('Issuer:        https://sso.stamhoofd/dex/realms/stamhoofd'));
+        expect(log).toHaveBeenCalledWith(
+            expect.stringContaining('Issuer:        https://sso.stamhoofd/dex/realms/stamhoofd'),
+        );
         expect(log).toHaveBeenCalledWith(expect.stringContaining('Client ID:     stamhoofd-local'));
-        expect(log).toHaveBeenCalledWith(expect.stringContaining('Client secret: stamhoofd-local-secret'));
-        expect(log).toHaveBeenCalledWith(expect.stringContaining('Redirect URI:  https://<organization-id>.api.stamhoofd/openid/callback'));
+        expect(log).toHaveBeenCalledWith(
+            expect.stringContaining('Client secret: stamhoofd-local-secret'),
+        );
+        expect(log).toHaveBeenCalledWith(
+            expect.stringContaining(
+                'Redirect URI:  https://<organization-id>.api.stamhoofd/openid/callback',
+            ),
+        );
         expect(log).toHaveBeenCalledWith(expect.stringContaining('Email:         sso@example.com'));
-        expect(log).toHaveBeenCalledWith(expect.stringContaining('URL:           https://sso.stamhoofd/dex/admin'));
+        expect(log).toHaveBeenCalledWith(
+            expect.stringContaining('URL:           https://sso.stamhoofd/dex/admin'),
+        );
     });
 
     it('prints local SSO settings with the provided redirect URI', async () => {
@@ -29,11 +39,16 @@ describe('SsoConfig command', () => {
         await command.run();
 
         expect(log).toHaveBeenCalledWith(expect.stringContaining(`Redirect URI:  ${redirectUri}`));
-        expect(log).toHaveBeenCalledWith(expect.stringContaining(`stam sso start "${redirectUri}"`));
+        expect(log).toHaveBeenCalledWith(
+            expect.stringContaining(`stam sso start "${redirectUri}"`),
+        );
     });
 });
 
-function createCommand(parseResult: { args: { redirectUri: string | undefined }; flags: Record<string, unknown> }): SsoConfig {
+function createCommand(parseResult: {
+    args: { redirectUri: string | undefined };
+    flags: Record<string, unknown>;
+}): SsoConfig {
     const command = new SsoConfig([], {} as any);
     (command as any).config = {};
     (command as any).parse = vi.fn(async () => parseResult);

@@ -26,11 +26,14 @@ export const OrganizationLogger = new ModelLogger(Organization, {
 
     createReplacements: (model, options) => {
         return new Map([
-            ['org', AuditLogReplacement.create({
-                id: options.data.model.id,
-                value: options.data.model.name,
-                type: AuditLogReplacementType.Organization,
-            })],
+            [
+                'org',
+                AuditLogReplacement.create({
+                    id: options.data.model.id,
+                    value: options.data.model.name,
+                    type: AuditLogReplacementType.Organization,
+                }),
+            ],
         ]);
     },
 });

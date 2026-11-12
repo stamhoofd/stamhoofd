@@ -26,7 +26,12 @@ describe('Endpoint.MarkNotificationReadEndpoint', () => {
     async function post(user: User | null, id: string) {
         const request = Request.post({
             path: '/notifications/' + id + '/read',
-            headers: user ? { authorization: 'Bearer ' + (await SessionService.createSession(user)).accessToken } : {},
+            headers: user
+                ? {
+                      authorization:
+                          'Bearer ' + (await SessionService.createSession(user)).accessToken,
+                  }
+                : {},
         });
         return await testServer.test<UserNotification>(endpoint, request);
     }
@@ -35,7 +40,10 @@ describe('Endpoint.MarkNotificationReadEndpoint', () => {
         return (await NotificationService.send({
             type: NotificationType.RegistrationCreated,
             payload: {},
-            group: { key: 'registrations', resource: NamedObject.create({ id: resourceId, name: resourceId }) },
+            group: {
+                key: 'registrations',
+                resource: NamedObject.create({ id: resourceId, name: resourceId }),
+            },
             to: { users },
         }))!;
     }
@@ -80,7 +88,9 @@ describe('Endpoint.MarkNotificationReadEndpoint', () => {
         const user = await new UserFactory({}).create();
         const notification = await sendGrouped([user], '1');
 
-        const recipient = await NotificationRecipient.select().where('notificationId', notification.id).first(true);
+        const recipient = await NotificationRecipient.select()
+            .where('notificationId', notification.id)
+            .first(true);
         const readAt = new Date(2026, 0, 1);
         recipient.readAt = readAt;
         recipient.readCount = 1;
@@ -99,16 +109,24 @@ describe('Endpoint.MarkNotificationReadEndpoint', () => {
         const other = await new UserFactory({}).create();
 
         const notification = await sendGrouped([other], '1');
-        const recipient = await NotificationRecipient.select().where('notificationId', notification.id).first(true);
+        const recipient = await NotificationRecipient.select()
+            .where('notificationId', notification.id)
+            .first(true);
 
-        await expect(post(user, recipient.id)).rejects.toThrow(STExpect.simpleError({ code: 'not_found' }));
-        await expect(post(user, 'unknown-id')).rejects.toThrow(STExpect.simpleError({ code: 'not_found' }));
+        await expect(post(user, recipient.id)).rejects.toThrow(
+            STExpect.simpleError({ code: 'not_found' }),
+        );
+        await expect(post(user, 'unknown-id')).rejects.toThrow(
+            STExpect.simpleError({ code: 'not_found' }),
+        );
 
         const reloaded = await NotificationRecipient.getByID(recipient.id);
         expect(reloaded!.readAt).toBeNull();
     });
 
     test('requires authentication', async () => {
-        await expect(post(null, 'id')).rejects.toThrow(STExpect.simpleError({ code: 'not_authenticated' }));
+        await expect(post(null, 'id')).rejects.toThrow(
+            STExpect.simpleError({ code: 'not_authenticated' }),
+        );
     });
 });

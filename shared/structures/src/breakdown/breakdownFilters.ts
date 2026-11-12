@@ -7,7 +7,10 @@ import { mergeFilters } from '@stamhoofd/filters/StamhoofdFilter';
  *
  * @param balanceItemPaymentFilter Already at the level of a balance item payment, e.g. { payment: ... }.
  */
-export function toBalanceItemPaymentFilter(balanceItemFilter: StamhoofdFilter, balanceItemPaymentFilter: StamhoofdFilter): StamhoofdFilter {
+export function toBalanceItemPaymentFilter(
+    balanceItemFilter: StamhoofdFilter,
+    balanceItemPaymentFilter: StamhoofdFilter,
+): StamhoofdFilter {
     const filters: StamhoofdFilter[] = [];
 
     if (balanceItemFilter) {

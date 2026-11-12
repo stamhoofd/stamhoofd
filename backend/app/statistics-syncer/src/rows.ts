@@ -125,7 +125,11 @@ export type PlatformSource = {
  * a request to take a language from and throws in the sync. The years are resolved in the application
  * timezone, so a period starting at midnight in Brussels does not fall back into the previous year.
  */
-export function periodName(period: { customName: string | null; startDate: Date; endDate: Date }): string {
+export function periodName(period: {
+    customName: string | null;
+    startDate: Date;
+    endDate: Date;
+}): string {
     const customName = period.customName?.trim();
     if (customName) {
         return customName;
@@ -162,7 +166,10 @@ export function flattenRegistrationPeriod(period: RegistrationPeriodSource): Sta
  * Only the postal code and city of the address survive: the report maps units by postal code and
  * lists them by city. An organization is a legal entity rather than a natural person.
  */
-export function flattenOrganization(organization: OrganizationSource, periodId: string): StatisticsRow {
+export function flattenOrganization(
+    organization: OrganizationSource,
+    periodId: string,
+): StatisticsRow {
     return {
         id: organization.id,
         periodId,
@@ -242,7 +249,10 @@ export function flattenRegistration(registration: RegistrationSource): Statistic
  * member has financiële ondersteuning or an active UITPAS and only the amount is kept, so the caller
  * passes that same status here. It is what the reports split the lidgelden by.
  */
-export function flattenMembership(membership: MembershipSource, reducedPrice: boolean): StatisticsRow {
+export function flattenMembership(
+    membership: MembershipSource,
+    reducedPrice: boolean,
+): StatisticsRow {
     return {
         id: membership.id,
         memberId: membership.memberId,
@@ -264,7 +274,10 @@ export function flattenMembership(membership: MembershipSource, reducedPrice: bo
  * One row per period the record runs through: it carries a date range rather than a year, and a
  * functie held for three years was held in each of them.
  */
-export function flattenResponsibilityRecord(record: ResponsibilityRecordSource, periodId: string): StatisticsRow {
+export function flattenResponsibilityRecord(
+    record: ResponsibilityRecordSource,
+    periodId: string,
+): StatisticsRow {
     return {
         id: record.id,
         periodId,
@@ -318,8 +331,17 @@ export function defaultAgeGroupName(names: string[]): string {
     return Formatter.joinLast(names, ', ', ' of ');
 }
 
-export function flattenDefaultAgeGroup(group: { id: string; names: string[]; minAge: number | null; maxAge: number | null }, periodId: string): StatisticsRow {
-    return { id: group.id, periodId, name: defaultAgeGroupName(group.names), minAge: group.minAge, maxAge: group.maxAge };
+export function flattenDefaultAgeGroup(
+    group: { id: string; names: string[]; minAge: number | null; maxAge: number | null },
+    periodId: string,
+): StatisticsRow {
+    return {
+        id: group.id,
+        periodId,
+        name: defaultAgeGroupName(group.names),
+        minAge: group.minAge,
+        maxAge: group.maxAge,
+    };
 }
 
 function emptyToNull(value: string): string | null {

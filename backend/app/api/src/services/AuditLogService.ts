@@ -15,7 +15,10 @@ export type AuditLogContextSettings = {
     fallbackUserId?: string | null;
     fallbackOrganizationId?: string | null;
 };
-export const modelLogDefinitions = new Map<typeof Model, { logEvent: (event: ModelEvent) => Promise<any> }>();
+export const modelLogDefinitions = new Map<
+    typeof Model,
+    { logEvent: (event: ModelEvent) => Promise<any> }
+>();
 
 function getEnumDecoders(decoder: unknown): EnumDecoder<any>[] {
     if (decoder instanceof EnumDecoder) {
@@ -38,7 +41,7 @@ function getEnumDecoders(decoder: unknown): EnumDecoder<any>[] {
 }
 
 export class AuditLogService {
-    private constructor() { }
+    private constructor() {}
     static disableLocalStore = new AsyncLocalStorage<AuditLogContextSettings>();
 
     static disable<T>(run: () => T): T {
@@ -88,7 +91,9 @@ export class AuditLogService {
         }
 
         if (missing.length > 0) {
-            throw new Error(`Missing audit log enum translation registration for: ${missing.join(', ')}`);
+            throw new Error(
+                `Missing audit log enum translation registration for: ${missing.join(', ')}`,
+            );
         }
     }
 
@@ -112,4 +117,4 @@ export class AuditLogService {
             await definition.logEvent(event);
         });
     }
-};
+}

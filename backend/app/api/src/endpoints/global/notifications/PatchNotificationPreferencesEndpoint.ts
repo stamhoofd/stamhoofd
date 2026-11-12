@@ -3,9 +3,15 @@ import { ArrayDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { NotificationChannel, NotificationChannelHelper } from '@stamhoofd/structures/notifications/NotificationChannel.js';
+import {
+    NotificationChannel,
+    NotificationChannelHelper,
+} from '@stamhoofd/structures/notifications/NotificationChannel.js';
 import { NotificationPreference } from '@stamhoofd/structures/notifications/NotificationPreference.js';
-import { NotificationType, NotificationTypeHelper } from '@stamhoofd/structures/notifications/NotificationType.js';
+import {
+    NotificationType,
+    NotificationTypeHelper,
+} from '@stamhoofd/structures/notifications/NotificationType.js';
 
 import { Context } from '../../../helpers/Context.js';
 import { NotificationService } from '../../../services/NotificationService.js';
@@ -18,7 +24,12 @@ type ResponseBody = NotificationPreference[];
 /**
  * Sets the given preferences of the authenticated user and returns all stored preferences.
  */
-export class PatchNotificationPreferencesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class PatchNotificationPreferencesEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     bodyDecoder = new ArrayDecoder(NotificationPreference as Decoder<NotificationPreference>);
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -38,7 +49,8 @@ export class PatchNotificationPreferencesEndpoint extends Endpoint<Params, Query
         await Context.setUserOrganizationScope();
         await Context.authenticate();
 
-        const maxLength = Object.values(NotificationType).length * Object.values(NotificationChannel).length;
+        const maxLength =
+            Object.values(NotificationType).length * Object.values(NotificationChannel).length;
         if (request.body.length > maxLength) {
             throw new SimpleError({
                 code: 'invalid_field',
@@ -69,8 +81,6 @@ export class PatchNotificationPreferencesEndpoint extends Endpoint<Params, Query
         await NotificationService.setPreferences(user, request.body);
         const preferences = await NotificationService.getPreferences(user);
 
-        return new Response(
-            preferences.map(p => p.getStructure()),
-        );
+        return new Response(preferences.map((p) => p.getStructure()));
     }
 }

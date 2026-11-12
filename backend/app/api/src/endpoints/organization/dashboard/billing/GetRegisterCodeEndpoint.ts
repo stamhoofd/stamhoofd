@@ -1,7 +1,10 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { BalanceItem, Organization, RegisterCode, UsedRegisterCode } from '@stamhoofd/models';
-import { RegisterCodeStatus, UsedRegisterCode as UsedRegisterCodeStruct } from '@stamhoofd/structures';
+import {
+    RegisterCodeStatus,
+    UsedRegisterCode as UsedRegisterCodeStruct,
+} from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 
@@ -28,7 +31,7 @@ export class GetRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Respo
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -45,22 +48,34 @@ export class GetRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         const usedCodes = await UsedRegisterCode.getAll(code.code);
-        const allOrganizations = await Organization.getByIDs(...usedCodes.flatMap(u => u.organizationId ? [u.organizationId] : []));
-        const allBalances = await BalanceItem.getByIDs(...usedCodes.flatMap(u => u.balanceItemId ? [u.balanceItemId] : []));
+        const allOrganizations = await Organization.getByIDs(
+            ...usedCodes.flatMap((u) => (u.organizationId ? [u.organizationId] : [])),
+        );
+        const allBalances = await BalanceItem.getByIDs(
+            ...usedCodes.flatMap((u) => (u.balanceItemId ? [u.balanceItemId] : [])),
+        );
 
-        return new Response(RegisterCodeStatus.create({
-            code: code.code,
-            value: code.value,
-            invoiceValue: code.invoiceValue,
-            usedCodes: usedCodes.map((c) => {
-                const creditValue = (c.balanceItemId ? (allBalances.find(credit => credit.id === c.balanceItemId)?.priceWithoutVAT) : null) ?? null;
-                return UsedRegisterCodeStruct.create({
-                    id: c.id,
-                    organizationName: allOrganizations.find(o => o.id === c.organizationId)?.name ?? 'Onbekend',
-                    createdAt: c.createdAt,
-                    creditValue: creditValue !== null ? -creditValue : null,
-                });
+        return new Response(
+            RegisterCodeStatus.create({
+                code: code.code,
+                value: code.value,
+                invoiceValue: code.invoiceValue,
+                usedCodes: usedCodes.map((c) => {
+                    const creditValue =
+                        (c.balanceItemId
+                            ? allBalances.find((credit) => credit.id === c.balanceItemId)
+                                  ?.priceWithoutVAT
+                            : null) ?? null;
+                    return UsedRegisterCodeStruct.create({
+                        id: c.id,
+                        organizationName:
+                            allOrganizations.find((o) => o.id === c.organizationId)?.name ??
+                            'Onbekend',
+                        createdAt: c.createdAt,
+                        creditValue: creditValue !== null ? -creditValue : null,
+                    });
+                }),
             }),
-        }));
+        );
     }
 }

@@ -7,8 +7,22 @@ describe('Special filter cases', () => {
     it('Can combine $and with $or', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
-            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            ],
+            [
+                'age',
+                createColumnFilter({
+                    expression: SQL.column('age'),
+                    type: SQLValueType.Number,
+                    nullable: false,
+                }),
+            ],
         ]);
 
         await test({
@@ -33,20 +47,13 @@ describe('Special filter cases', () => {
             filters,
             query: {
                 query: '(`default`.`name` = ? OR `default`.`age` = ?) AND `default`.`age` = ? AND `default`.`name` = ?',
-                params: [
-                    'john doe',
-                    11,
-                    12,
-                    'jane doe',
-                ],
+                params: ['john doe', 11, 12, 'jane doe'],
             },
         });
     });
 
     it('Cannot filter on unknown columns', async () => {
-        const filters = new Map([
-            ...baseSQLFilterCompilers,
-        ]);
+        const filters = new Map([...baseSQLFilterCompilers]);
 
         await testError({
             filter: {
@@ -60,8 +67,22 @@ describe('Special filter cases', () => {
     it('Cannot stack column filters', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
-            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            ],
+            [
+                'age',
+                createColumnFilter({
+                    expression: SQL.column('age'),
+                    type: SQLValueType.Number,
+                    nullable: false,
+                }),
+            ],
         ]);
 
         await testError({
@@ -77,9 +98,7 @@ describe('Special filter cases', () => {
 
     describe('Empty filters', () => {
         it('an empty object filter is always true', async () => {
-            const filters = new Map([
-                ...baseSQLFilterCompilers,
-            ]);
+            const filters = new Map([...baseSQLFilterCompilers]);
 
             await test({
                 filter: {},
@@ -92,9 +111,7 @@ describe('Special filter cases', () => {
         });
 
         it('an empty array filter is always true', async () => {
-            const filters = new Map([
-                ...baseSQLFilterCompilers,
-            ]);
+            const filters = new Map([...baseSQLFilterCompilers]);
 
             await test({
                 filter: [],
@@ -107,9 +124,7 @@ describe('Special filter cases', () => {
         });
 
         it('a null filter is always true', async () => {
-            const filters = new Map([
-                ...baseSQLFilterCompilers,
-            ]);
+            const filters = new Map([...baseSQLFilterCompilers]);
 
             await test({
                 filter: null,

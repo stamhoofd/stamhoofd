@@ -2,7 +2,14 @@ import type { XlsxTransformerColumn } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { BalanceItem } from '@stamhoofd/models';
 import type { BalanceItemWithPayments } from '@stamhoofd/structures';
-import { BalanceItemRelationType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, PaginatedResponse, PaymentStatus } from '@stamhoofd/structures';
+import {
+    BalanceItemRelationType,
+    ExcelExportType,
+    getBalanceItemRelationTypeName,
+    getBalanceItemTypeName,
+    PaginatedResponse,
+    PaymentStatus,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetBalanceItemsEndpoint } from '../endpoints/organization/dashboard/balance-items/GetBalanceItemsEndpoint.js';
@@ -20,9 +27,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.BalanceItems, {
         {
             id: 'balanceItems',
             name: $t('%1LA'),
-            columns: [
-                ...getBalanceItemColumns(),
-            ],
+            columns: [...getBalanceItemColumns()],
         },
     ],
 });
@@ -210,7 +215,10 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
                                 getValue: (object: BalanceItemWithPayments) => {
                                     let value = 0;
                                     for (const p of object.payments) {
-                                        if (p.payment.status === PaymentStatus.Succeeded && p.payment.paidAt) {
+                                        if (
+                                            p.payment.status === PaymentStatus.Succeeded &&
+                                            p.payment.paidAt
+                                        ) {
                                             if (Formatter.year(p.payment.paidAt) === year) {
                                                 value += p.price;
                                             }

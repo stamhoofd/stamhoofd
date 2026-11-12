@@ -22,7 +22,9 @@ export class MarkNotificationReadEndpoint extends Endpoint<Params, Query, Body, 
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/notifications/@id/read', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/notifications/@id/read', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -44,12 +46,11 @@ export class MarkNotificationReadEndpoint extends Endpoint<Params, Query, Body, 
             });
         }
 
-        const notification = await Notification.getByID(recipient.notificationId) as Notification;
-        const isFullyRead = recipient.readAt !== null && recipient.readCount === notification.groupResourceCount;
+        const notification = (await Notification.getByID(recipient.notificationId)) as Notification;
+        const isFullyRead =
+            recipient.readAt !== null && recipient.readCount === notification.groupResourceCount;
         const updated = isFullyRead ? recipient : await NotificationService.markAsRead(recipient);
 
-        return new Response(
-            updated.getStructure(notification),
-        );
+        return new Response(updated.getStructure(notification));
     }
 }

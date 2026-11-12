@@ -13,9 +13,13 @@ import type { Organization } from './Organization.js';
 export class Image extends QueryableModel {
     static table = 'images';
 
-    @column({ primary: true, type: 'string', beforeSave(value) {
-        return value ?? uuidv4();
-    } })
+    @column({
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
+            return value ?? uuidv4();
+        },
+    })
     id!: string;
 
     @column({ type: 'json', decoder: File })
@@ -51,16 +55,28 @@ export class Image extends QueryableModel {
      */
     static validateResolutions(resolutions: ResolutionRequest[]) {
         // Share the same client-facing error for count, fit and dimension failures.
-        const invalid = () => new SimpleError({ code: 'invalid_resolutions', message: 'Image resolutions exceed the processing limits', field: 'resolutions', statusCode: 400 });
+        const invalid = () =>
+            new SimpleError({
+                code: 'invalid_resolutions',
+                message: 'Image resolutions exceed the processing limits',
+                field: 'resolutions',
+                statusCode: 400,
+            });
         if (resolutions.length > this.maxResolutions) {
             throw invalid();
         }
         for (const r of resolutions) {
-            if ((r.width == null && r.height == null) || !Object.values(ResolutionFit).includes(r.fit)) {
+            if (
+                (r.width == null && r.height == null) ||
+                !Object.values(ResolutionFit).includes(r.fit)
+            ) {
                 throw invalid();
             }
             for (const dimension of [r.width, r.height]) {
-                if (dimension != null && (!Number.isInteger(dimension) || dimension < 1 || dimension > this.maxDimension)) {
+                if (
+                    dimension != null &&
+                    (!Number.isInteger(dimension) || dimension < 1 || dimension > this.maxDimension)
+                ) {
                     throw invalid();
                 }
             }
@@ -92,9 +108,21 @@ export class Image extends QueryableModel {
      * independent clones to bound concurrent processing. An empty list stores
      * only the private attachment source and does not decode image pixels.
      */
-    static async create(fileContent: string | Buffer, type: string | undefined, resolutions: ResolutionRequest[], isPrivateFile: boolean = false, user: { id: string } | null = null, organization: Organization | null = null): Promise<Image> {
+    static async create(
+        fileContent: string | Buffer,
+        type: string | undefined,
+        resolutions: ResolutionRequest[],
+        isPrivateFile: boolean = false,
+        user: { id: string } | null = null,
+        organization: Organization | null = null,
+    ): Promise<Image> {
         this.validateResolutions(resolutions);
-        if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
+        if (
+            !STAMHOOFD.SPACES_BUCKET ||
+            !STAMHOOFD.SPACES_ENDPOINT ||
+            !STAMHOOFD.SPACES_KEY ||
+            !STAMHOOFD.SPACES_SECRET
+        ) {
             throw new SimpleError({
                 code: 'not_available',
                 message: 'Uploading is not available',
@@ -104,7 +132,9 @@ export class Image extends QueryableModel {
 
         // Fall back to png for content types we don't recognize: sharp detects the real format itself, so
         // this only decides how we store the file
-        const imageType = (type ? supportedImageTypes.resolveUpload({ contentType: type }) : null) ?? { contentType: 'image/png', extension: 'png' };
+        const imageType = (type
+            ? supportedImageTypes.resolveUpload({ contentType: type })
+            : null) ?? { contentType: 'image/png', extension: 'png' };
         const fileType = imageType.extension;
 
         console.log('creating image', fileType, type, resolutions);
@@ -115,7 +145,10 @@ export class Image extends QueryableModel {
         if (resolutions.length) {
             // Apply the input budget to the detected format, including SVGs with a misleading extension.
             // SVGs use natural 72 dpi dimensions for metadata and rasterization.
-            let sharpStream = sharp(fileContent, { limitInputPixels: this.maxInputPixels, density: 72 }).rotate();
+            let sharpStream = sharp(fileContent, {
+                limitInputPixels: this.maxInputPixels,
+                density: 72,
+            }).rotate();
             const metadata = await sharpStream.metadata();
             // Match rotate()'s EXIF axis swap when estimating aspect-ratio-derived sizes.
             const swapped = metadata.orientation !== undefined && metadata.orientation >= 5;
@@ -123,16 +156,32 @@ export class Image extends QueryableModel {
             const height = (swapped ? metadata.width : metadata.height)!;
             let totalPixels = 0;
             for (const r of resolutions) {
-                const scales = [r.width == null ? null : r.width / width, r.height == null ? null : r.height / height].filter(s => s !== null);
-                const scale = r.fit === ResolutionFit.Outside ? Math.max(...scales) : Math.min(...scales);
+                const scales = [
+                    r.width == null ? null : r.width / width,
+                    r.height == null ? null : r.height / height,
+                ].filter((s) => s !== null);
+                const scale =
+                    r.fit === ResolutionFit.Outside ? Math.max(...scales) : Math.min(...scales);
                 // Cover/contain/fill have a bounded canvas; outside and one-sided requests retain the aspect ratio.
-                const boundedCanvas = r.width != null && r.height != null && r.fit !== ResolutionFit.Outside;
+                const boundedCanvas =
+                    r.width != null && r.height != null && r.fit !== ResolutionFit.Outside;
                 const outputWidth = boundedCanvas ? r.width! : Math.ceil(width * scale);
                 const outputHeight = boundedCanvas ? r.height! : Math.ceil(height * scale);
                 const pixels = outputWidth * outputHeight;
                 totalPixels += pixels;
-                if (!Number.isFinite(pixels) || outputWidth > this.maxDimension || outputHeight > this.maxDimension || pixels > this.maxOutputPixels || totalPixels > this.maxTotalOutputPixels) {
-                    throw new SimpleError({ code: 'invalid_resolutions', message: 'Image resolutions exceed the processing limits', field: 'resolutions', statusCode: 400 });
+                if (
+                    !Number.isFinite(pixels) ||
+                    outputWidth > this.maxDimension ||
+                    outputHeight > this.maxDimension ||
+                    pixels > this.maxOutputPixels ||
+                    totalPixels > this.maxTotalOutputPixels
+                ) {
+                    throw new SimpleError({
+                        code: 'invalid_resolutions',
+                        message: 'Image resolutions exceed the processing limits',
+                        field: 'resolutions',
+                        statusCode: 400,
+                    });
                 }
             }
             if (!supportsTransparency) {
@@ -164,12 +213,12 @@ export class Image extends QueryableModel {
 
         const client = this.getS3Client();
 
-        let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
+        let prefix = STAMHOOFD.SPACES_PREFIX ?? '';
         if (prefix.length > 0) {
             prefix += '/';
         }
 
-        prefix += (STAMHOOFD.environment ?? 'development') === 'development' ? ('development/') : ('');
+        prefix += (STAMHOOFD.environment ?? 'development') === 'development' ? 'development/' : '';
 
         // Prepend user id to the file path
         if (isPrivateFile && user) {
@@ -189,7 +238,8 @@ export class Image extends QueryableModel {
         for (const f of files) {
             const fileId = uuidv4();
 
-            const key = prefix + image.id + '/' + fileId + (!supportsTransparency ? '.jpg' : '.png');
+            const key =
+                prefix + image.id + '/' + fileId + (!supportsTransparency ? '.jpg' : '.png');
             const cmd = new PutObjectCommand({
                 Bucket: STAMHOOFD.SPACES_BUCKET,
                 Key: key,
@@ -198,9 +248,7 @@ export class Image extends QueryableModel {
                 ACL: isPrivateFile ? 'private' : 'public-read',
             });
 
-            uploadPromises.push(
-                client.send(cmd),
-            );
+            uploadPromises.push(client.send(cmd));
 
             const _file = new File({
                 id: fileId,
@@ -212,7 +260,7 @@ export class Image extends QueryableModel {
             });
 
             if (isPrivateFile) {
-                if (!await _file.sign()) {
+                if (!(await _file.sign())) {
                     throw new SimpleError({
                         code: 'failed_to_sign',
                         message: 'Failed to sign file',
@@ -233,7 +281,15 @@ export class Image extends QueryableModel {
         // Also include the source, in private mode
         const fileId = uuidv4();
         const uploadExt = fileType;
-        const key = prefix + (STAMHOOFD.environment ?? 'development') + '/' + image.id + '/' + fileId + '.' + uploadExt;
+        const key =
+            prefix +
+            (STAMHOOFD.environment ?? 'development') +
+            '/' +
+            image.id +
+            '/' +
+            fileId +
+            '.' +
+            uploadExt;
         image.source = new File({
             id: fileId,
             server: 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT,

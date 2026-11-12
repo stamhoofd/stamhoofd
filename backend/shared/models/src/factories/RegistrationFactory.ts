@@ -8,14 +8,17 @@ import { Registration } from '../models/Registration.js';
 import type { Organization } from '../models/index.js';
 import { GroupFactory } from './GroupFactory.js';
 
-type Options = ({
-    member: Member;
-    group: Group;
-    groupPrice?: GroupPrice;
-} | {
-    member: Member;
-    organization: Organization;
-}) & {
+type Options = (
+    | {
+          member: Member;
+          group: Group;
+          groupPrice?: GroupPrice;
+      }
+    | {
+          member: Member;
+          organization: Organization;
+      }
+) & {
     deactivatedAt?: Date;
 };
 
@@ -24,7 +27,10 @@ export class RegistrationFactory extends Factory<Options, Registration> {
         const registration = new Registration();
         registration.memberId = this.options.member.id;
 
-        const group = 'group' in this.options ? this.options.group : await new GroupFactory({ organization: this.options.organization }).create();
+        const group =
+            'group' in this.options
+                ? this.options.group
+                : await new GroupFactory({ organization: this.options.organization }).create();
 
         registration.groupId = group.id;
         registration.periodId = group.periodId;
@@ -32,7 +38,10 @@ export class RegistrationFactory extends Factory<Options, Registration> {
 
         registration.registeredAt = new Date();
         registration.registeredAt.setMilliseconds(0);
-        registration.groupPrice = 'groupPrice' in this.options && this.options.groupPrice ? this.options.groupPrice : group.settings.prices[0];
+        registration.groupPrice =
+            'groupPrice' in this.options && this.options.groupPrice
+                ? this.options.groupPrice
+                : group.settings.prices[0];
 
         registration.deactivatedAt = this.options.deactivatedAt || null;
 

@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { OutputStream, setActiveOutputTarget, writeOutputChunk, writeOutputLine } from './output-target.js';
+import {
+    OutputStream,
+    setActiveOutputTarget,
+    writeOutputChunk,
+    writeOutputLine,
+} from './output-target.js';
 
 describe('output target', () => {
     afterEach(() => {

@@ -31,7 +31,12 @@ function createTestPeriod() {
     return { period, organizationRegistrationPeriod, organization };
 }
 
-function createTestGroups(organization: Organization, period: RegistrationPeriod, prices: number[] = [50_0000, 40_0000], names?: string[]) {
+function createTestGroups(
+    organization: Organization,
+    period: RegistrationPeriod,
+    prices: number[] = [50_0000, 40_0000],
+    names?: string[],
+) {
     return prices.map((price, index) => {
         return Group.create({
             organizationId: organization.id,
@@ -68,26 +73,30 @@ function createBundleDiscount({
         name: new TranslatedString(name),
         countWholeFamily,
         countPerGroup,
-        discounts: discounts.map(d => GroupPriceDiscount.create({
-            value: ReduceablePrice.create({
-                price: d.value,
-                reducedPrice: d.reducedValue ?? null,
+        discounts: discounts.map((d) =>
+            GroupPriceDiscount.create({
+                value: ReduceablePrice.create({
+                    price: d.value,
+                    reducedPrice: d.reducedValue ?? null,
+                }),
+                type: d.type,
             }),
-            type: d.type,
-        })),
+        ),
     });
 }
 
 function createTestFamily(memberCount = 3) {
-    const members = Array(memberCount).fill(null).map((_, i) => {
-        const names = ['John', 'Jane', 'Jack'];
-        return MemberWithRegistrationsBlob.create({
-            details: MemberDetails.create({
-                firstName: names[i] || `Member${i + 1}`,
-                lastName: 'Doe',
-            }),
+    const members = Array(memberCount)
+        .fill(null)
+        .map((_, i) => {
+            const names = ['John', 'Jane', 'Jack'];
+            return MemberWithRegistrationsBlob.create({
+                details: MemberDetails.create({
+                    firstName: names[i] || `Member${i + 1}`,
+                    lastName: 'Doe',
+                }),
+            });
         });
-    });
 
     const blob = MembersBlob.create({
         members,
@@ -116,9 +125,12 @@ function setupDiscountTest({
 
     // Setup bundle discounts on all groups
     groups.forEach((group) => {
-        group.settings.prices[0].bundleDiscounts.set(discount.id, BundleDiscountGroupPriceSettings.create({
-            name: discount.name,
-        }));
+        group.settings.prices[0].bundleDiscounts.set(
+            discount.id,
+            BundleDiscountGroupPriceSettings.create({
+                name: discount.name,
+            }),
+        );
     });
 
     const family = createTestFamily(memberCount);
@@ -133,7 +145,12 @@ function setupDiscountTest({
     };
 }
 
-function addHistoricRegistration(member: ReturnType<typeof createTestFamily>['members'][0], group: Group, organization: Organization, appliedDiscounts: Map<string, AppliedRegistrationDiscount> = new Map()) {
+function addHistoricRegistration(
+    member: ReturnType<typeof createTestFamily>['members'][0],
+    group: Group,
+    organization: Organization,
+    appliedDiscounts: Map<string, AppliedRegistrationDiscount> = new Map(),
+) {
     const registration = Registration.create({
         group: group,
         groupPrice: group.settings.prices[0],
@@ -146,7 +163,9 @@ function addHistoricRegistration(member: ReturnType<typeof createTestFamily>['me
             GenericBalance.create({
                 organizationId: organization.id,
                 amountPaid: 0,
-                amountOpen: group.settings.prices[0].price.price - [...appliedDiscounts.values()].reduce((acc, d) => acc + d.amount, 0),
+                amountOpen:
+                    group.settings.prices[0].price.price -
+                    [...appliedDiscounts.values()].reduce((acc, d) => acc + d.amount, 0),
                 amountPending: 0,
             }),
         ],
@@ -414,9 +433,12 @@ describe('Unit.RegisterCart', () => {
                     ],
                 }),
             });
-            otherPeriodGroup.settings.prices[0].bundleDiscounts.set(discount.id, BundleDiscountGroupPriceSettings.create({
-                name: discount.name,
-            }));
+            otherPeriodGroup.settings.prices[0].bundleDiscounts.set(
+                discount.id,
+                BundleDiscountGroupPriceSettings.create({
+                    name: discount.name,
+                }),
+            );
 
             // Member A is registered for that other period.
             addHistoricRegistration(memberA, otherPeriodGroup, organization);
@@ -463,15 +485,20 @@ describe('Unit.RegisterCart', () => {
             const [memberA, memberB] = family.members;
 
             const registrationA = addHistoricRegistration(memberA, groupA, organization);
-            const registrationB = addHistoricRegistration(memberB, groupB, organization, new Map([
-                [
-                    discount.id,
-                    AppliedRegistrationDiscount.create({
-                        name: discount.name,
-                        amount: 10_0000, // 10% discount on 100_0000 = 10_0000
-                    }),
-                ],
-            ]));
+            const registrationB = addHistoricRegistration(
+                memberB,
+                groupB,
+                organization,
+                new Map([
+                    [
+                        discount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: discount.name,
+                            amount: 10_0000, // 10% discount on 100_0000 = 10_0000
+                        }),
+                    ],
+                ]),
+            );
 
             // If we delete registration B, the discount won't be visible in the cart because it is included in the registration
             const checkout = family.checkout;
@@ -502,7 +529,8 @@ describe('Unit.RegisterCart', () => {
                 new RegistrationWithPlatformMember({
                     registration: registrationB,
                     member: memberB,
-                }));
+                }),
+            );
 
             // Remove registration A, this should show the discount because it is a side effect of deleting the registration
 
@@ -558,15 +586,20 @@ describe('Unit.RegisterCart', () => {
             const [memberA, memberB] = family.members;
 
             const registrationA = addHistoricRegistration(memberA, groupA, organization);
-            const registrationB = addHistoricRegistration(memberB, groupB, organization, new Map([
-                [
-                    discount.id,
-                    AppliedRegistrationDiscount.create({
-                        name: discount.name,
-                        amount: 10_0000, // 10% discount on 1_0000 = 10_00
-                    }),
-                ],
-            ]));
+            const registrationB = addHistoricRegistration(
+                memberB,
+                groupB,
+                organization,
+                new Map([
+                    [
+                        discount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: discount.name,
+                            amount: 10_0000, // 10% discount on 1_0000 = 10_00
+                        }),
+                    ],
+                ]),
+            );
 
             // If we delete registration B, the discount won't be visible in the cart because it is included in the registration
             const checkout = family.checkout;
@@ -602,7 +635,8 @@ describe('Unit.RegisterCart', () => {
                 new RegistrationWithPlatformMember({
                     registration: registrationB,
                     member: memberB,
-                }));
+                }),
+            );
 
             // Remove registration A, this should show the discount because it is a side effect of deleting the registration
 
@@ -661,15 +695,20 @@ describe('Unit.RegisterCart', () => {
             const [groupA, groupB] = groups;
             const [memberA, memberB] = family.members;
             const registrationA = addHistoricRegistration(memberA, groupA, organization);
-            addHistoricRegistration(memberB, groupB, organization, new Map([
-                [
-                    discount.id,
-                    AppliedRegistrationDiscount.create({
-                        name: discount.name,
-                        amount: 10_0000, // 10% discount on 100_0000 = 10_0000
-                    }),
-                ],
-            ]));
+            addHistoricRegistration(
+                memberB,
+                groupB,
+                organization,
+                new Map([
+                    [
+                        discount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: discount.name,
+                            amount: 10_0000, // 10% discount on 100_0000 = 10_0000
+                        }),
+                    ],
+                ]),
+            );
 
             const groupCPrice = GroupPrice.create({
                 price: ReduceablePrice.create({
@@ -681,9 +720,7 @@ describe('Unit.RegisterCart', () => {
                 periodId: organization.period.period.id,
                 settings: GroupSettings.create({
                     name: new TranslatedString('Group C'),
-                    prices: [
-                        groupCPrice,
-                    ],
+                    prices: [groupCPrice],
                 }),
             });
 
@@ -731,18 +768,21 @@ describe('Unit.RegisterCart', () => {
             ]);
 
             // Now, what if groupC does have a higher discount instead of no discount?
-            groupCPrice.bundleDiscounts.set(discount.id, BundleDiscountGroupPriceSettings.create({
-                name: discount.name,
-                customDiscounts: [
-                    // Custom discount for this price
-                    GroupPriceDiscount.create({
-                        value: ReduceablePrice.create({
-                            price: 25_0000,
+            groupCPrice.bundleDiscounts.set(
+                discount.id,
+                BundleDiscountGroupPriceSettings.create({
+                    name: discount.name,
+                    customDiscounts: [
+                        // Custom discount for this price
+                        GroupPriceDiscount.create({
+                            value: ReduceablePrice.create({
+                                price: 25_0000,
+                            }),
+                            type: GroupPriceDiscountType.Fixed,
                         }),
-                        type: GroupPriceDiscountType.Fixed,
-                    }),
-                ],
-            }));
+                    ],
+                }),
+            );
 
             // Recalculate
             cart.calculatePrices();
@@ -789,15 +829,20 @@ describe('Unit.RegisterCart', () => {
             });
             const [groupA, groupB] = groups;
             const [memberA, memberB] = family.members;
-            const registrationA = addHistoricRegistration(memberA, groupA, organization, new Map([
-                [
-                    discount.id,
-                    AppliedRegistrationDiscount.create({
-                        name: discount.name,
-                        amount: 10_0000, // 10% discount on 100_0000 = 10_0000
-                    }),
-                ],
-            ]));
+            const registrationA = addHistoricRegistration(
+                memberA,
+                groupA,
+                organization,
+                new Map([
+                    [
+                        discount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: discount.name,
+                            amount: 10_0000, // 10% discount on 100_0000 = 10_0000
+                        }),
+                    ],
+                ]),
+            );
             addHistoricRegistration(memberB, groupB, organization);
 
             const groupCPrice = GroupPrice.create({
@@ -810,9 +855,7 @@ describe('Unit.RegisterCart', () => {
                 periodId: organization.period.period.id,
                 settings: GroupSettings.create({
                     name: new TranslatedString('Group C'),
-                    prices: [
-                        groupCPrice,
-                    ],
+                    prices: [groupCPrice],
                 }),
             });
 
@@ -853,18 +896,21 @@ describe('Unit.RegisterCart', () => {
             ]);
 
             // Now, what if groupC does have a higher discount instead of no discount?
-            groupCPrice.bundleDiscounts.set(discount.id, BundleDiscountGroupPriceSettings.create({
-                name: discount.name,
-                customDiscounts: [
-                    // Custom discount for this price
-                    GroupPriceDiscount.create({
-                        value: ReduceablePrice.create({
-                            price: 25_0000,
+            groupCPrice.bundleDiscounts.set(
+                discount.id,
+                BundleDiscountGroupPriceSettings.create({
+                    name: discount.name,
+                    customDiscounts: [
+                        // Custom discount for this price
+                        GroupPriceDiscount.create({
+                            value: ReduceablePrice.create({
+                                price: 25_0000,
+                            }),
+                            type: GroupPriceDiscountType.Fixed,
                         }),
-                        type: GroupPriceDiscountType.Fixed,
-                    }),
-                ],
-            }));
+                    ],
+                }),
+            );
 
             // Recalculate
             cart.calculatePrices();
@@ -905,9 +951,7 @@ describe('Unit.RegisterCart', () => {
                 groupNames: ['Group A', 'Group B'],
                 bundleDiscount: createBundleDiscount({
                     name: 'Bundle discount',
-                    discounts: [
-                        { value: 10_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 10_00, type: GroupPriceDiscountType.Percentage }],
                 }),
             });
             const [groupA, groupB] = groups;
@@ -964,9 +1008,7 @@ describe('Unit.RegisterCart', () => {
                 groupNames: ['Group A', 'Group B'],
                 bundleDiscount: createBundleDiscount({
                     name: 'Bundle discount',
-                    discounts: [
-                        { value: 10_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 10_00, type: GroupPriceDiscountType.Percentage }],
                 }),
             });
 
@@ -977,23 +1019,26 @@ describe('Unit.RegisterCart', () => {
             const itemC = RegisterItem.defaultFor(memberC, groupB, organization);
 
             // Change group B to give 20 euro for the second item, and 0 for the third item
-            groupB.settings.prices[0].bundleDiscounts.set(discount.id, BundleDiscountGroupPriceSettings.create({
-                name: discount.name,
-                customDiscounts: [
-                    GroupPriceDiscount.create({
-                        value: ReduceablePrice.create({
-                            price: 20_0000,
+            groupB.settings.prices[0].bundleDiscounts.set(
+                discount.id,
+                BundleDiscountGroupPriceSettings.create({
+                    name: discount.name,
+                    customDiscounts: [
+                        GroupPriceDiscount.create({
+                            value: ReduceablePrice.create({
+                                price: 20_0000,
+                            }),
+                            type: GroupPriceDiscountType.Fixed,
                         }),
-                        type: GroupPriceDiscountType.Fixed,
-                    }),
-                    GroupPriceDiscount.create({
-                        value: ReduceablePrice.create({
-                            price: 0,
+                        GroupPriceDiscount.create({
+                            value: ReduceablePrice.create({
+                                price: 0,
+                            }),
+                            type: GroupPriceDiscountType.Fixed,
                         }),
-                        type: GroupPriceDiscountType.Fixed,
-                    }),
-                ],
-            }));
+                    ],
+                }),
+            );
 
             // Add to a single cart
             const checkout = family.checkout;
@@ -1042,35 +1087,35 @@ describe('Unit.RegisterCart', () => {
             // Camp A and/or campB gives a discount of 10, 20, 30... (all camp discount)
             // On top of that there is an extra discount if you combine multiple expensive camps (camp B) of 5 euro, 10 ...
 
-            const { organization, groups, family, organizationRegistrationPeriod } = setupDiscountTest({
-                memberCount: 5,
-                groupPrices: [100_0000, 150_0000],
-                groupNames: ['Camp A', 'Camp B'],
-                bundleDiscount: createBundleDiscount({
-                    name: 'All camp discount',
-                    discounts: [
-                        { value: 10_0000, type: GroupPriceDiscountType.Fixed },
-                    ],
-                }),
-            });
+            const { organization, groups, family, organizationRegistrationPeriod } =
+                setupDiscountTest({
+                    memberCount: 5,
+                    groupPrices: [100_0000, 150_0000],
+                    groupNames: ['Camp A', 'Camp B'],
+                    bundleDiscount: createBundleDiscount({
+                        name: 'All camp discount',
+                        discounts: [{ value: 10_0000, type: GroupPriceDiscountType.Fixed }],
+                    }),
+                });
 
             const [campA, campB] = groups;
             const [memberA, memberB, memberC, memberD, memberE] = family.members;
 
             const expensiveCampDiscount = createBundleDiscount({
                 name: 'Expensive camp discount',
-                discounts: [
-                    { value: 5_0000, type: GroupPriceDiscountType.Fixed },
-                ],
+                discounts: [{ value: 5_0000, type: GroupPriceDiscountType.Fixed }],
             });
 
             // Add discount to organizationRegistrationPeriod
             organizationRegistrationPeriod.settings.bundleDiscounts.push(expensiveCampDiscount);
 
             // Add camp B to the expensive camp discount
-            campB.settings.prices[0].bundleDiscounts.set(expensiveCampDiscount.id, BundleDiscountGroupPriceSettings.create({
-                name: expensiveCampDiscount.name,
-            }));
+            campB.settings.prices[0].bundleDiscounts.set(
+                expensiveCampDiscount.id,
+                BundleDiscountGroupPriceSettings.create({
+                    name: expensiveCampDiscount.name,
+                }),
+            );
 
             // Add to a single cart
             const checkout = family.checkout;
@@ -1091,13 +1136,15 @@ describe('Unit.RegisterCart', () => {
             cart.calculatePrices();
 
             expect(cart.bundleDiscounts).toHaveLength(2);
-            expect(cart.bundleDiscounts.map((d) => {
-                return {
-                    name: d.name,
-                    total: d.total,
-                    netTotal: d.netTotal,
-                };
-            })).toEqual([
+            expect(
+                cart.bundleDiscounts.map((d) => {
+                    return {
+                        name: d.name,
+                        total: d.total,
+                        netTotal: d.netTotal,
+                    };
+                }),
+            ).toEqual([
                 {
                     name: 'All camp discount',
                     total: 10_0000 * 4,
@@ -1155,10 +1202,13 @@ describe('Unit.RegisterCart', () => {
             const registrationA = addHistoricRegistration(memberA, groupA, organization);
             const registrationB = addHistoricRegistration(memberB, groupB, organization);
 
-            registrationA.discounts.set(discount.id, AppliedRegistrationDiscount.create({
-                name: discount.name,
-                amount: 10_0000, // 10% discount on 100_0000 = 10_0000
-            }));
+            registrationA.discounts.set(
+                discount.id,
+                AppliedRegistrationDiscount.create({
+                    name: discount.name,
+                    amount: 10_0000, // 10% discount on 100_0000 = 10_0000
+                }),
+            );
 
             // Now create itemC
             const itemC = RegisterItem.defaultFor(memberA, groupB, organization);
@@ -1272,8 +1322,16 @@ describe('Unit.RegisterCart', () => {
                 bundleDiscount: createBundleDiscount({
                     name: 'Bundle discount',
                     discounts: [
-                        { value: 5_00, type: GroupPriceDiscountType.Percentage, reducedValue: 50_00 },
-                        { value: 10_00, type: GroupPriceDiscountType.Percentage, reducedValue: 1_0000 },
+                        {
+                            value: 5_00,
+                            type: GroupPriceDiscountType.Percentage,
+                            reducedValue: 50_00,
+                        },
+                        {
+                            value: 10_00,
+                            type: GroupPriceDiscountType.Percentage,
+                            reducedValue: 1_0000,
+                        },
                     ],
                 }),
             });
@@ -1325,7 +1383,9 @@ describe('Unit.RegisterCart', () => {
             ]);
 
             // Remove requires financial support, then recalculate
-            memberC.member.details.requiresFinancialSupport = BooleanStatus.create({ value: false });
+            memberC.member.details.requiresFinancialSupport = BooleanStatus.create({
+                value: false,
+            });
 
             cart.calculatePrices();
 
@@ -1354,9 +1414,7 @@ describe('Unit.RegisterCart', () => {
                     name: 'Multiple lessons discount',
                     countWholeFamily: false,
                     countPerGroup: false,
-                    discounts: [
-                        { value: 10_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 10_00, type: GroupPriceDiscountType.Percentage }],
                 }),
             });
             const [groupA, groupB] = groups;
@@ -1380,7 +1438,7 @@ describe('Unit.RegisterCart', () => {
             expect(itemC.calculatedPrice).toEqual(50_0000);
 
             // Check calculated discount is 50_0000 * 0.10 = 5_0000
-            expect(cart.bundleDiscounts.map(c => c.netTotal)).toHaveLength(1);
+            expect(cart.bundleDiscounts.map((c) => c.netTotal)).toHaveLength(1);
             expect(cart.bundleDiscounts[0].total).toEqual(5_0000);
             expect(cart.bundleDiscounts[0].netTotal).toEqual(5_0000);
 
@@ -1430,9 +1488,7 @@ describe('Unit.RegisterCart', () => {
                     name: 'Multiple family members discount',
                     countWholeFamily: true,
                     countPerGroup: true,
-                    discounts: [
-                        { value: 10_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 10_00, type: GroupPriceDiscountType.Percentage }],
                 }),
             });
             const [groupA, groupB] = groups;
@@ -1506,9 +1562,7 @@ describe('Unit.RegisterCart', () => {
                     name: 'Multiple lessons discount',
                     countWholeFamily: false, // This means only count per unique member
                     countPerGroup: true, // This should be ignored since countWholeFamily is false
-                    discounts: [
-                        { value: 10_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 10_00, type: GroupPriceDiscountType.Percentage }],
                 }),
             });
             const [groupA, groupB] = groups;
@@ -1587,9 +1641,7 @@ describe('Unit.RegisterCart', () => {
                     name: 'Multiple family members discount',
                     countWholeFamily: true,
                     countPerGroup: false,
-                    discounts: [
-                        { value: 10_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 10_00, type: GroupPriceDiscountType.Percentage }],
                 }),
             });
 
@@ -1657,9 +1709,7 @@ describe('Unit.RegisterCart', () => {
                     name: 'Multiple family members discount',
                     countWholeFamily: true,
                     countPerGroup: false,
-                    discounts: [
-                        { value: 1000_0000, type: GroupPriceDiscountType.Fixed },
-                    ],
+                    discounts: [{ value: 1000_0000, type: GroupPriceDiscountType.Fixed }],
                 }),
             });
             const [groupA, groupB] = groups;
@@ -1707,20 +1757,30 @@ describe('Unit.RegisterCart', () => {
             const [groupA, groupB] = groups;
             const [memberA, memberB] = family.members;
 
-            const paid = new RegistrationWithPlatformMember({ registration: addHistoricRegistration(memberA, groupA, organization), member: memberA });
+            const paid = new RegistrationWithPlatformMember({
+                registration: addHistoricRegistration(memberA, groupA, organization),
+                member: memberA,
+            });
             paid.registration.balances[0].amountPaid = 10_0000;
-            const unpaid = new RegistrationWithPlatformMember({ registration: addHistoricRegistration(memberB, groupB, organization), member: memberB });
+            const unpaid = new RegistrationWithPlatformMember({
+                registration: addHistoricRegistration(memberB, groupB, organization),
+                member: memberB,
+            });
 
             const cart = family.checkout.cart;
             cart.removeRegistration(paid);
             cart.removeRegistration(unpaid);
-            expect(cart.deleteRegistrations.map(r => r.cancellationFeePercentage)).toEqual([100_00, 100_00]);
+            expect(cart.deleteRegistrations.map((r) => r.cancellationFeePercentage)).toEqual([
+                100_00, 100_00,
+            ]);
 
             cart.unremoveRegistration(paid);
             cart.unremoveRegistration(unpaid);
             cart.removeRegistration(unpaid);
             cart.removeRegistration(paid);
-            expect(cart.deleteRegistrations.map(r => r.cancellationFeePercentage)).toEqual([0, 0]);
+            expect(cart.deleteRegistrations.map((r) => r.cancellationFeePercentage)).toEqual([
+                0, 0,
+            ]);
         });
     });
 });

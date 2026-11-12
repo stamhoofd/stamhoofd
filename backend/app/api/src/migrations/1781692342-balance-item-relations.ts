@@ -8,6 +8,7 @@ export default new Migration(async () => {
     }
 
     // Imported dynamically so the migration loader does not need to resolve the helper at link time.
-    const { backfillBalanceItemRelations } = await import('../helpers/BalanceItemRelationsBackfiller.js');
+    const { backfillBalanceItemRelations } =
+        await import('../helpers/BalanceItemRelationsBackfiller.js');
     await backfillBalanceItemRelations();
 });

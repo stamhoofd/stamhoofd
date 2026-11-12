@@ -25,7 +25,7 @@ export const UserLogger = new ModelLogger(User, {
         if (!event.model.hasAccount() && !event.model.permissions) {
             // Do not log changes to placeholder users
 
-            if (event.type !== 'updated' || (event.originalFields.permissions === null)) {
+            if (event.type !== 'updated' || event.originalFields.permissions === null) {
                 return;
             }
         }
@@ -35,11 +35,14 @@ export const UserLogger = new ModelLogger(User, {
 
     createReplacements: (model, options) => {
         return new Map([
-            ['u', AuditLogReplacement.create({
-                id: model.id,
-                value: model.email,
-                type: AuditLogReplacementType.User,
-            })],
+            [
+                'u',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.email,
+                    type: AuditLogReplacementType.User,
+                }),
+            ],
         ]);
     },
 });

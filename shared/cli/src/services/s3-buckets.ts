@@ -1,5 +1,10 @@
 import type { CORSConfiguration } from '@aws-sdk/client-s3';
-import { CreateBucketCommand, HeadBucketCommand, PutBucketCorsCommand, PutBucketPolicyCommand } from '@aws-sdk/client-s3';
+import {
+    CreateBucketCommand,
+    HeadBucketCommand,
+    PutBucketCorsCommand,
+    PutBucketPolicyCommand,
+} from '@aws-sdk/client-s3';
 import fs from 'node:fs/promises';
 import { buildDevelopmentConfig } from '../config/development-config.js';
 import { createS3Client } from '../config/s3-client.js';
@@ -25,15 +30,19 @@ export async function setupDevelopmentS3Buckets(context: CliContext): Promise<vo
         await client.send(new CreateBucketCommand({ Bucket: bucket }));
     }
 
-    await client.send(new PutBucketPolicyCommand({
-        Bucket: bucket,
-        Policy: publicBucketPolicy(bucket),
-    }));
+    await client.send(
+        new PutBucketPolicyCommand({
+            Bucket: bucket,
+            Policy: publicBucketPolicy(bucket),
+        }),
+    );
 
-    await client.send(new PutBucketCorsCommand({
-        Bucket: bucket,
-        CORSConfiguration: bucketCorsConfiguration(),
-    }));
+    await client.send(
+        new PutBucketCorsCommand({
+            Bucket: bucket,
+            CORSConfiguration: bucketCorsConfiguration(),
+        }),
+    );
 }
 
 async function readCaddyRootCertificate(): Promise<Buffer | undefined> {
@@ -44,7 +53,10 @@ async function readCaddyRootCertificate(): Promise<Buffer | undefined> {
     }
 }
 
-async function bucketExists(client: ReturnType<typeof createS3Client>, bucket: string): Promise<boolean> {
+async function bucketExists(
+    client: ReturnType<typeof createS3Client>,
+    bucket: string,
+): Promise<boolean> {
     try {
         await client.send(new HeadBucketCommand({ Bucket: bucket }));
         return true;
@@ -98,5 +110,9 @@ function isNotFoundError(error: unknown): boolean {
     }
 
     const metadata = (error as { $metadata?: { httpStatusCode?: number } }).$metadata;
-    return metadata?.httpStatusCode === 404 || error.name === 'NotFound' || error.name === 'NoSuchBucket';
+    return (
+        metadata?.httpStatusCode === 404 ||
+        error.name === 'NotFound' ||
+        error.name === 'NoSuchBucket'
+    );
 }

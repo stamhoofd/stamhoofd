@@ -8,7 +8,21 @@ import { context, logs, SeverityNumber, SpanKind, SpanStatusCode, trace } from '
 export function observeRequest(method: string): { finish(status: number, route?: string): void } {
     const span = trace.getTracer('@node/observability').startSpan('http.server.request', {
         kind: SpanKind.SERVER,
-        attributes: { 'http.request.method': ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'CONNECT', 'TRACE'].includes(method) ? method : '_OTHER' },
+        attributes: {
+            'http.request.method': [
+                'GET',
+                'HEAD',
+                'POST',
+                'PUT',
+                'PATCH',
+                'DELETE',
+                'OPTIONS',
+                'CONNECT',
+                'TRACE',
+            ].includes(method)
+                ? method
+                : '_OTHER',
+        },
     });
     let ended = false;
     return {

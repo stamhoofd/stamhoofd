@@ -2,9 +2,47 @@ import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
 import { Request } from '@node/endpoints';
 import type { Organization, StripeAccount, Token } from '@stamhoofd/models';
-import { Order, OrganizationFactory, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import {
+    Order,
+    OrganizationFactory,
+    UserFactory,
+    Webshop,
+    WebshopFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Address, Cart, CartItem, CartItemOption, CartReservedSeat, Customer, Option, OptionMenu, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, ReservedSeat, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, ValidatedAddress, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import {
+    Address,
+    Cart,
+    CartItem,
+    CartItemOption,
+    CartReservedSeat,
+    Customer,
+    Option,
+    OptionMenu,
+    OrderData,
+    OrderStatus,
+    PaymentConfiguration,
+    PaymentMethod,
+    Permissions,
+    PrivateOrder,
+    PrivatePaymentConfiguration,
+    Product,
+    ProductPrice,
+    ProductType,
+    ReservedSeat,
+    SeatingPlan,
+    SeatingPlanRow,
+    SeatingPlanSeat,
+    SeatingPlanSection,
+    TransferSettings,
+    ValidatedAddress,
+    WebshopDeliveryMethod,
+    WebshopMetaData,
+    WebshopOnSiteMethod,
+    WebshopPrivateMetaData,
+    WebshopTakeoutMethod,
+    WebshopTimeSlot,
+} from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { v4 as uuidv4 } from 'uuid';
 import { SessionService } from '../../src/services/SessionService.js';
@@ -67,35 +105,43 @@ describe('E2E.Stock', () => {
 
     async function refreshAll() {
         webshop = (await Webshop.getByID(webshop.id))!;
-        product = webshop.products.find(p => p.id == product.id)!;
-        seatProduct = webshop.products.find(p => p.id == seatProduct.id)!;
-        personProduct = webshop.products.find(p => p.id == personProduct.id)!;
-        takeoutMethod = webshop.meta.checkoutMethods.find(m => m.id == takeoutMethod.id)! as WebshopTakeoutMethod;
-        deliveryMethod = webshop.meta.checkoutMethods.find(m => m.id == deliveryMethod.id)! as WebshopDeliveryMethod;
-        onSiteMethod = webshop.meta.checkoutMethods.find(m => m.id == onSiteMethod.id)! as WebshopOnSiteMethod;
-        slot1 = takeoutMethod.timeSlots.timeSlots.find(s => s.id == slot1.id)!;
-        slot2 = takeoutMethod.timeSlots.timeSlots.find(s => s.id == slot2.id)!;
-        slot3 = deliveryMethod.timeSlots.timeSlots.find(s => s.id == slot3.id)!;
-        slot4 = onSiteMethod.timeSlots.timeSlots.find(s => s.id == slot4.id)!;
-        productPrice1 = product.prices.find(p => p.id == productPrice1.id)!;
-        productPrice2 = product.prices.find(p => p.id == productPrice2.id)!;
-        freeProductPrice = product.prices.find(p => p.id == freeProductPrice.id)!;
-        multipleChoiceOptionMenu = product.optionMenus.find(m => m.id == multipleChoiceOptionMenu.id)!;
-        chooseOneOptionMenu = product.optionMenus.find(m => m.id == chooseOneOptionMenu.id)!;
-        checkboxOption1 = multipleChoiceOptionMenu.options.find(o => o.id == checkboxOption1.id)!;
-        checkboxOption2 = multipleChoiceOptionMenu.options.find(o => o.id == checkboxOption2.id)!;
-        radioOption1 = chooseOneOptionMenu.options.find(o => o.id == radioOption1.id)!;
-        radioOption2 = chooseOneOptionMenu.options.find(o => o.id == radioOption2.id)!;
-        personProductPrice = personProduct.prices.find(p => p.id == personProductPrice.id)!;
-        seatProductPrice = seatProduct.prices.find(p => p.id == seatProductPrice.id)!;
-        seatingPlan = webshop.meta.seatingPlans.find(s => s.id === seatingPlan.id)!;
+        product = webshop.products.find((p) => p.id == product.id)!;
+        seatProduct = webshop.products.find((p) => p.id == seatProduct.id)!;
+        personProduct = webshop.products.find((p) => p.id == personProduct.id)!;
+        takeoutMethod = webshop.meta.checkoutMethods.find(
+            (m) => m.id == takeoutMethod.id,
+        )! as WebshopTakeoutMethod;
+        deliveryMethod = webshop.meta.checkoutMethods.find(
+            (m) => m.id == deliveryMethod.id,
+        )! as WebshopDeliveryMethod;
+        onSiteMethod = webshop.meta.checkoutMethods.find(
+            (m) => m.id == onSiteMethod.id,
+        )! as WebshopOnSiteMethod;
+        slot1 = takeoutMethod.timeSlots.timeSlots.find((s) => s.id == slot1.id)!;
+        slot2 = takeoutMethod.timeSlots.timeSlots.find((s) => s.id == slot2.id)!;
+        slot3 = deliveryMethod.timeSlots.timeSlots.find((s) => s.id == slot3.id)!;
+        slot4 = onSiteMethod.timeSlots.timeSlots.find((s) => s.id == slot4.id)!;
+        productPrice1 = product.prices.find((p) => p.id == productPrice1.id)!;
+        productPrice2 = product.prices.find((p) => p.id == productPrice2.id)!;
+        freeProductPrice = product.prices.find((p) => p.id == freeProductPrice.id)!;
+        multipleChoiceOptionMenu = product.optionMenus.find(
+            (m) => m.id == multipleChoiceOptionMenu.id,
+        )!;
+        chooseOneOptionMenu = product.optionMenus.find((m) => m.id == chooseOneOptionMenu.id)!;
+        checkboxOption1 = multipleChoiceOptionMenu.options.find((o) => o.id == checkboxOption1.id)!;
+        checkboxOption2 = multipleChoiceOptionMenu.options.find((o) => o.id == checkboxOption2.id)!;
+        radioOption1 = chooseOneOptionMenu.options.find((o) => o.id == radioOption1.id)!;
+        radioOption2 = chooseOneOptionMenu.options.find((o) => o.id == radioOption2.id)!;
+        personProductPrice = personProduct.prices.find((p) => p.id == personProductPrice.id)!;
+        seatProductPrice = seatProduct.prices.find((p) => p.id == seatProductPrice.id)!;
+        seatingPlan = webshop.meta.seatingPlans.find((s) => s.id === seatingPlan.id)!;
     }
 
     async function refreshCartItems(orderId: string, cartItems: CartItem[]): Promise<Order> {
         const order = (await Order.getByID(orderId))!;
 
         for (const item of cartItems) {
-            const i = order.data.cart.items.find(i => i.id == item.id)!;
+            const i = order.data.cart.items.find((i) => i.id == item.id)!;
             if (i) {
                 item.set(i);
             }
@@ -103,7 +149,11 @@ describe('E2E.Stock', () => {
         return order;
     }
 
-    async function checkStocks(orderIds: string[], cartItems: CartItem[], excludedCartItems: CartItem[] = []) {
+    async function checkStocks(
+        orderIds: string[],
+        cartItems: CartItem[],
+        excludedCartItems: CartItem[] = [],
+    ) {
         await refreshAll();
         const orders: Order[] = [];
         for (const orderId of orderIds) {
@@ -120,7 +170,7 @@ describe('E2E.Stock', () => {
                     used += item.amount;
                     // All seats should be reserved
                     expect(item.reservedSeats).toIncludeSameMembers(item.seats);
-                    seats.push(...item.seats.map(s => ReservedSeat.create(s)));
+                    seats.push(...item.seats.map((s) => ReservedSeat.create(s)));
                 }
             }
             expect(product.usedStock).toBe(used);
@@ -190,7 +240,9 @@ describe('E2E.Stock', () => {
 
         // Check order stock
         for (const order of orders) {
-            const filteredItems = cartItems.filter(i => !!order.data.cart.items.find(c => c.id === i.id));
+            const filteredItems = cartItems.filter(
+                (i) => !!order.data.cart.items.find((c) => c.id === i.id),
+            );
             let persons = 0;
             for (const item of filteredItems) {
                 if (item.product.type === ProductType.Person) {
@@ -209,7 +261,9 @@ describe('E2E.Stock', () => {
             for (const order of orders) {
                 if (order.data.timeSlot?.id === slot.id) {
                     let persons = 0;
-                    const filteredItems = cartItems.filter(i => !!order.data.cart.items.find(c => c.id === i.id));
+                    const filteredItems = cartItems.filter(
+                        (i) => !!order.data.cart.items.find((c) => c.id === i.id),
+                    );
 
                     for (const item of filteredItems) {
                         if (item.product.type === ProductType.Person) {
@@ -229,9 +283,21 @@ describe('E2E.Stock', () => {
         return orders;
     }
 
-    async function checkStock(orderId: string, cartItems: CartItem[], excludedCartItems: CartItem[] = []) {
-        const otherOrders = (await Order.where({ webshopId: webshop.id })).filter(o => o.id !== orderId);
-        return (await checkStocks([orderId, ...otherOrders.map(o => o.id)], [...cartItems, ...otherOrders.flatMap(o => o.data.cart.items)], excludedCartItems))[0];
+    async function checkStock(
+        orderId: string,
+        cartItems: CartItem[],
+        excludedCartItems: CartItem[] = [],
+    ) {
+        const otherOrders = (await Order.where({ webshopId: webshop.id })).filter(
+            (o) => o.id !== orderId,
+        );
+        return (
+            await checkStocks(
+                [orderId, ...otherOrders.map((o) => o.id)],
+                [...cartItems, ...otherOrders.flatMap((o) => o.data.cart.items)],
+                excludedCartItems,
+            )
+        )[0];
     }
 
     /** Allows to change the stock */
@@ -503,7 +569,12 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -551,7 +622,12 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
             await expect(testServer.test(endpoint, r)).toReject();
             await checkStocks([], []);
@@ -584,7 +660,12 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -624,7 +705,12 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -667,7 +753,12 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
             await expect(testServer.test(endpoint, r)).rejects.toThrow('Missing IBAN');
             await checkStocks([], []);
@@ -700,7 +791,12 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -746,7 +842,12 @@ describe('E2E.Stock', () => {
             patchArray.addPut(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             const response = await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -795,10 +896,17 @@ describe('E2E.Stock', () => {
             patchArray.addPut(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
-            await expect(testServer.test(patchWebshopOrdersEndpoint, r)).rejects.toThrow('Missing IBAN');
+            await expect(testServer.test(patchWebshopOrdersEndpoint, r)).rejects.toThrow(
+                'Missing IBAN',
+            );
             await checkStocks([], []);
         });
 
@@ -831,7 +939,12 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -878,7 +991,12 @@ describe('E2E.Stock', () => {
             patchArray.addPut(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             const response = await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -911,7 +1029,12 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
             await expect(testServer.test(endpoint, r)).rejects.toThrow('Invalid seats');
         });
 
@@ -952,7 +1075,12 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
             await expect(testServer.test(endpoint, r)).rejects.toThrow('Product unavailable');
         });
@@ -988,9 +1116,17 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
-            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty('human', 'Er zijn nog maar 2 stuks van productPrice1 beschikbaar');
+            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty(
+                'human',
+                'Er zijn nog maar 2 stuks van productPrice1 beschikbaar',
+            );
         });
 
         test('Cannot place an order when option stock is full', async () => {
@@ -1024,9 +1160,17 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
-            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty('human', 'Er zijn nog maar 2 stuks van radioOption1 beschikbaar');
+            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty(
+                'human',
+                'Er zijn nog maar 2 stuks van radioOption1 beschikbaar',
+            );
         });
 
         test('Cannot place an order when multiple choice option stock is full', async () => {
@@ -1060,9 +1204,17 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
-            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty('human', 'Er zijn nog maar 2 stuks van checkboxOption2 beschikbaar');
+            await expect(testServer.test(endpoint, r)).rejects.toHaveProperty(
+                'human',
+                'Er zijn nog maar 2 stuks van checkboxOption2 beschikbaar',
+            );
         });
 
         test.todo('Cannot place an order when takeout persons stock is full');
@@ -1108,7 +1260,12 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
             await expect(testServer.test(endpoint, r)).rejects.toThrow('Seats unavailable');
         });
 
@@ -1160,9 +1317,16 @@ describe('E2E.Stock', () => {
             patchArray.addPut(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(patchWebshopOrdersEndpoint, r)).rejects.toThrow('Seats unavailable');
+            await expect(testServer.test(patchWebshopOrdersEndpoint, r)).rejects.toThrow(
+                'Seats unavailable',
+            );
         });
 
         test.todo('Admin cannot edit an an order to a reserved seat');
@@ -1200,7 +1364,12 @@ describe('E2E.Stock', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
             const response = await testServer.test(endpoint, r);
             expect(response.body).toBeDefined();
@@ -1251,15 +1420,17 @@ describe('E2E.Stock', () => {
                     checkoutMethod: takeoutMethod,
                     timeSlot: slot1,
                     cart: Cart.create({
-                        items: [
-                            productCartItem,
-                            personCartItem,
-                        ],
+                        items: [productCartItem, personCartItem],
                     }),
                     customer,
                 });
 
-                const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                const r = Request.buildJson(
+                    'POST',
+                    `/webshop/${webshop.id}/order`,
+                    organization.getApiHost(),
+                    orderData,
+                );
 
                 const response = await testServer.test(endpoint, r);
                 const orderStruct = response.body.order;
@@ -1317,14 +1488,22 @@ describe('E2E.Stock', () => {
                     customer,
                 });
 
-                const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                const r = Request.buildJson(
+                    'POST',
+                    `/webshop/${webshop.id}/order`,
+                    organization.getApiHost(),
+                    orderData,
+                );
 
                 const response = await testServer.test(endpoint, r);
                 const orderStruct = response.body.order;
 
                 // Now check the stock has changed for the product
-                const orders = await checkStocks([order.id, orderStruct.id], [productCartItem, personCartItem, ...orderStruct.data.cart.items]);
-                baseOrder = orders.find(o => o.id === orderStruct.id)!;
+                const orders = await checkStocks(
+                    [order.id, orderStruct.id],
+                    [productCartItem, personCartItem, ...orderStruct.data.cart.items],
+                );
+                baseOrder = orders.find((o) => o.id === orderStruct.id)!;
             }
         });
 
@@ -1334,11 +1513,19 @@ describe('E2E.Stock', () => {
 
                 const cartPatch = Cart.patch({});
                 cartPatch.items.addDelete(productCartItem!.id);
-                const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+                const orderPatch = PrivateOrder.patch({
+                    id: order.id,
+                    data: OrderData.patch({ cart: cartPatch }),
+                });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1363,15 +1550,21 @@ describe('E2E.Stock', () => {
                     ],
                 });
 
-                cartPatch.items.addPut(
-                    newItem,
-                );
+                cartPatch.items.addPut(newItem);
 
-                const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+                const orderPatch = PrivateOrder.patch({
+                    id: order.id,
+                    data: OrderData.patch({ cart: cartPatch }),
+                });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1400,15 +1593,21 @@ describe('E2E.Stock', () => {
                 ],
             });
 
-            cartPatch.items.addPut(
-                newItem,
-            );
+            cartPatch.items.addPut(newItem);
 
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1420,19 +1619,31 @@ describe('E2E.Stock', () => {
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const cartPatch = Cart.patch({});
-            cartPatch.items.addPatch(CartItem.patch({
-                id: productCartItem!.id,
-                amount: 6,
-            }));
-            cartPatch.items.addPatch(CartItem.patch({
-                id: personCartItem!.id,
-                amount: 13,
-            }));
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            cartPatch.items.addPatch(
+                CartItem.patch({
+                    id: productCartItem!.id,
+                    amount: 6,
+                }),
+            );
+            cartPatch.items.addPatch(
+                CartItem.patch({
+                    id: personCartItem!.id,
+                    amount: 13,
+                }),
+            );
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1452,7 +1663,12 @@ describe('E2E.Stock', () => {
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1464,16 +1680,26 @@ describe('E2E.Stock', () => {
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const cartPatch = Cart.patch({});
-            cartPatch.items.addPatch(CartItem.patch({
-                id: productCartItem!.id,
-                productPrice: productPrice2,
-            }));
+            cartPatch.items.addPatch(
+                CartItem.patch({
+                    id: productCartItem!.id,
+                    productPrice: productPrice2,
+                }),
+            );
 
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1485,21 +1711,31 @@ describe('E2E.Stock', () => {
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const cartPatch = Cart.patch({});
-            cartPatch.items.addPatch(CartItem.patch({
-                id: productCartItem!.id,
-                options: [
-                    CartItemOption.create({
-                        optionMenu: chooseOneOptionMenu,
-                        option: radioOption1,
-                    }),
-                ],
-            }));
+            cartPatch.items.addPatch(
+                CartItem.patch({
+                    id: productCartItem!.id,
+                    options: [
+                        CartItemOption.create({
+                            optionMenu: chooseOneOptionMenu,
+                            option: radioOption1,
+                        }),
+                    ],
+                }),
+            );
 
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1511,25 +1747,35 @@ describe('E2E.Stock', () => {
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const cartPatch = Cart.patch({});
-            cartPatch.items.addPatch(CartItem.patch({
-                id: productCartItem!.id,
-                options: [
-                    CartItemOption.create({
-                        optionMenu: chooseOneOptionMenu,
-                        option: radioOption2,
-                    }),
-                    CartItemOption.create({
-                        optionMenu: multipleChoiceOptionMenu,
-                        option: checkboxOption2,
-                    }),
-                ],
-            }));
+            cartPatch.items.addPatch(
+                CartItem.patch({
+                    id: productCartItem!.id,
+                    options: [
+                        CartItemOption.create({
+                            optionMenu: chooseOneOptionMenu,
+                            option: radioOption2,
+                        }),
+                        CartItemOption.create({
+                            optionMenu: multipleChoiceOptionMenu,
+                            option: checkboxOption2,
+                        }),
+                    ],
+                }),
+            );
 
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1541,29 +1787,39 @@ describe('E2E.Stock', () => {
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const cartPatch = Cart.patch({});
-            cartPatch.items.addPatch(CartItem.patch({
-                id: productCartItem!.id,
-                options: [
-                    CartItemOption.create({
-                        optionMenu: chooseOneOptionMenu,
-                        option: radioOption1,
-                    }),
-                    CartItemOption.create({
-                        optionMenu: multipleChoiceOptionMenu,
-                        option: checkboxOption1,
-                    }),
-                    CartItemOption.create({
-                        optionMenu: multipleChoiceOptionMenu,
-                        option: checkboxOption2,
-                    }),
-                ],
-            }));
+            cartPatch.items.addPatch(
+                CartItem.patch({
+                    id: productCartItem!.id,
+                    options: [
+                        CartItemOption.create({
+                            optionMenu: chooseOneOptionMenu,
+                            option: radioOption1,
+                        }),
+                        CartItemOption.create({
+                            optionMenu: multipleChoiceOptionMenu,
+                            option: checkboxOption1,
+                        }),
+                        CartItemOption.create({
+                            optionMenu: multipleChoiceOptionMenu,
+                            option: checkboxOption2,
+                        }),
+                    ],
+                }),
+            );
 
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1590,7 +1846,12 @@ describe('E2E.Stock', () => {
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1608,7 +1869,12 @@ describe('E2E.Stock', () => {
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1627,7 +1893,12 @@ describe('E2E.Stock', () => {
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1647,7 +1918,12 @@ describe('E2E.Stock', () => {
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1666,7 +1942,12 @@ describe('E2E.Stock', () => {
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1704,14 +1985,17 @@ describe('E2E.Stock', () => {
                 checkoutMethod: takeoutMethod,
                 timeSlot: slot1,
                 cart: Cart.create({
-                    items: [
-                        seatCartItem,
-                    ],
+                    items: [seatCartItem],
                 }),
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
             const response = await testServer.test(endpoint, r);
             const orderStruct = response.body.order;
@@ -1739,15 +2023,21 @@ describe('E2E.Stock', () => {
                 ],
             });
 
-            cartPatch.items.addPut(
-                newItem,
-            );
+            cartPatch.items.addPut(newItem);
 
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1782,11 +2072,19 @@ describe('E2E.Stock', () => {
             });
             cartPatch.items.addPatch(c);
 
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1798,26 +2096,36 @@ describe('E2E.Stock', () => {
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const cartPatch = Cart.patch({});
-            cartPatch.items.addPatch(CartItem.patch({
-                id: seatCartItem?.id,
-                seats: [
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'B',
-                        seat: '1',
-                    }),
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'B',
-                        seat: '2',
-                    }),
-                ],
-            }));
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            cartPatch.items.addPatch(
+                CartItem.patch({
+                    id: seatCartItem?.id,
+                    seats: [
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'B',
+                            seat: '1',
+                        }),
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'B',
+                            seat: '2',
+                        }),
+                    ],
+                }),
+            );
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1836,7 +2144,12 @@ describe('E2E.Stock', () => {
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1855,7 +2168,12 @@ describe('E2E.Stock', () => {
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1875,7 +2193,12 @@ describe('E2E.Stock', () => {
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1894,7 +2217,12 @@ describe('E2E.Stock', () => {
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1914,7 +2242,12 @@ describe('E2E.Stock', () => {
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -1946,16 +2279,19 @@ describe('E2E.Stock', () => {
                 checkoutMethod: takeoutMethod,
                 timeSlot: slot1,
                 cart: Cart.create({
-                    items: [
-                        newItem,
-                    ],
+                    items: [newItem],
                 }),
                 customer,
             });
             let orders: Order[];
 
             {
-                const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                const r = Request.buildJson(
+                    'POST',
+                    `/webshop/${webshop.id}/order`,
+                    organization.getApiHost(),
+                    orderData,
+                );
 
                 const response = await testServer.test(endpoint, r);
                 expect(response.body).toBeDefined();
@@ -1976,12 +2312,20 @@ describe('E2E.Stock', () => {
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
-                orders = await checkStocks(orders.map(o => o.id), [newItem, seatCartItem!]);
+                orders = await checkStocks(
+                    orders.map((o) => o.id),
+                    [newItem, seatCartItem!],
+                );
             }
 
             // Now we are in a duplicate seat selected situation.
@@ -2018,31 +2362,44 @@ describe('E2E.Stock', () => {
                 const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
                 const cartPatch = Cart.patch({});
-                cartPatch.items.addPatch(CartItem.patch({
-                    id: seatCartItem?.id,
-                    seats: [
-                        CartReservedSeat.create({
-                            section: seatingPlan.sections[0].id,
-                            row: 'B',
-                            seat: '1',
-                        }),
-                        CartReservedSeat.create({
-                            section: seatingPlan.sections[0].id,
-                            row: 'B',
-                            seat: '2',
-                        }),
-                    ],
-                }));
-                const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+                cartPatch.items.addPatch(
+                    CartItem.patch({
+                        id: seatCartItem?.id,
+                        seats: [
+                            CartReservedSeat.create({
+                                section: seatingPlan.sections[0].id,
+                                row: 'B',
+                                seat: '1',
+                            }),
+                            CartReservedSeat.create({
+                                section: seatingPlan.sections[0].id,
+                                row: 'B',
+                                seat: '2',
+                            }),
+                        ],
+                    }),
+                );
+                const orderPatch = PrivateOrder.patch({
+                    id: order.id,
+                    data: OrderData.patch({ cart: cartPatch }),
+                });
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);
 
-                await checkStocks(orders.map(o => o.id), [newItem, seatCartItem!]);
+                await checkStocks(
+                    orders.map((o) => o.id),
+                    [newItem, seatCartItem!],
+                );
             }
 
             // Manual check
@@ -2089,7 +2446,12 @@ describe('E2E.Stock', () => {
                 patchArray.addPatch(orderPatch);
 
                 // Send a patch
-                const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+                const r = Request.buildJson(
+                    'PATCH',
+                    `/webshop/${webshop.id}/orders`,
+                    organization.getApiHost(),
+                    patchArray,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 await testServer.test(patchWebshopOrdersEndpoint, r);

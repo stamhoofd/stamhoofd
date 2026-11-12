@@ -30,8 +30,8 @@ export type StamhoofdCompareValue = string | number | Date | null | boolean | St
 export const FilterWrapperMarker = Symbol('FilterWrapperMarker');
 export type WrapperFilter = StamhoofdFilter<StamhoofdCompareValue | typeof FilterWrapperMarker>;
 
-export type StamhoofdKeyFilterValue<T = StamhoofdCompareValue>
-    = { $eq: T }
+export type StamhoofdKeyFilterValue<T = StamhoofdCompareValue> =
+    | { $eq: T }
     | { $in: T[] }
     | { $neq: T }
     | { $gt: T }
@@ -42,7 +42,13 @@ export type StamhoofdKeyFilterValue<T = StamhoofdCompareValue>
     | T;
 
 export type StamhoofdKeyFilter<T = StamhoofdCompareValue> = {
-    [k in string]: StamhoofdFilter<T>
+    [k in string]: StamhoofdFilter<T>;
 };
 
-export type StamhoofdFilter<T = StamhoofdCompareValue> = StamhoofdAndFilter<T> | StamhoofdOrFilter<T> | StamhoofdNotFilter<T> | StamhoofdKeyFilterValue<T> | StamhoofdKeyFilter<T> | StamhoofdFilter<T>[];
+export type StamhoofdFilter<T = StamhoofdCompareValue> =
+    | StamhoofdAndFilter<T>
+    | StamhoofdOrFilter<T>
+    | StamhoofdNotFilter<T>
+    | StamhoofdKeyFilterValue<T>
+    | StamhoofdKeyFilter<T>
+    | StamhoofdFilter<T>[];

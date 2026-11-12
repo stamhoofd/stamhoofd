@@ -3,7 +3,8 @@ import { showHelp } from '../../runtime/show-help.js';
 
 export default class Check extends BaseCommand {
     static summary = 'Run build, lint, typecheck, and tests';
-    static description = 'Use these commands to run build, lint, type checks, or the full validation suite locally before opening a PR.';
+    static description =
+        'Use these commands to run build, lint, type checks, or the full validation suite locally before opening a PR.';
     static examples = [
         'stam check lint',
         'stam check typecheck',

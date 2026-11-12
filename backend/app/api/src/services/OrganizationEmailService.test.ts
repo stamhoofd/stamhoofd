@@ -24,7 +24,7 @@ function setupEnvironment() {
     // The notification emails localize the marketing domain, which the shared test environment does not set
     TestUtils.setEnvironment('domains', {
         ...STAMHOOFD.domains,
-        marketing: { '': 'stamhoofd.dev', 'BE': 'be.stamhoofd.dev', 'NL': 'nl.stamhoofd.dev' },
+        marketing: { '': 'stamhoofd.dev', BE: 'be.stamhoofd.dev', NL: 'nl.stamhoofd.dev' },
     });
 }
 
@@ -50,7 +50,9 @@ describe('OrganizationEmailService.checkDrips', () => {
         const emails = await EmailMocker.transactional.getSucceededEmails();
         expect(emails).toHaveLength(1);
         expect(emails[0].subject).toBe(EmailTemplateType.OrganizationDripWelcome);
-        expect(organization.serverMeta.hasEmail(EmailTemplateType.OrganizationDripWelcome)).toBe(true);
+        expect(organization.serverMeta.hasEmail(EmailTemplateType.OrganizationDripWelcome)).toBe(
+            true,
+        );
 
         await OrganizationEmailService.checkDrips(organization);
         expect(await EmailMocker.transactional.getSucceededEmails()).toHaveLength(1);

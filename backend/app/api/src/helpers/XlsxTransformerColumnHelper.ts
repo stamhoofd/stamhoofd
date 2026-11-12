@@ -1,6 +1,14 @@
 import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
-import type { Address, EmergencyContact, GroupCategory, Parent, PlatformMember, RecordAnswer, RecordSettings } from '@stamhoofd/structures';
+import type {
+    Address,
+    EmergencyContact,
+    GroupCategory,
+    Parent,
+    PlatformMember,
+    RecordAnswer,
+    RecordSettings,
+} from '@stamhoofd/structures';
 import { CountryHelper, ParentTypeHelper, RecordCategory, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -18,10 +26,7 @@ export class XlsxTransformerColumnHelper {
     }
 
     static creatColumnsForParents(): XlsxTransformerColumn<PlatformMember>[] {
-        return [
-            ...this.createColumnsForParent(0),
-            ...this.createColumnsForParent(1),
-        ];
+        return [...this.createColumnsForParent(0), ...this.createColumnsForParent(1)];
     }
 
     /**
@@ -35,8 +40,11 @@ export class XlsxTransformerColumnHelper {
         ];
     }
 
-    static createColumnsForEmergencyContact(contactIndex: number): XlsxTransformerColumn<PlatformMember>[] {
-        const getContact = (member: PlatformMember): EmergencyContact | null | undefined => member.patchedMember.details.emergencyContacts[contactIndex];
+    static createColumnsForEmergencyContact(
+        contactIndex: number,
+    ): XlsxTransformerColumn<PlatformMember>[] {
+        const getContact = (member: PlatformMember): EmergencyContact | null | undefined =>
+            member.patchedMember.details.emergencyContacts[contactIndex];
 
         const identifier = `Noodcontact ${contactIndex + 1}`;
         const getId = (value: string) => `emergencyContact.${contactIndex}.${value}`;
@@ -70,7 +78,15 @@ export class XlsxTransformerColumnHelper {
         ];
     }
 
-    static createColumnsForAddresses<T>({ limit, getAddresses, matchIdStart }: { limit: number; getAddresses: (object: T) => Address[]; matchIdStart: string }): XlsxTransformerColumn<T>[] {
+    static createColumnsForAddresses<T>({
+        limit,
+        getAddresses,
+        matchIdStart,
+    }: {
+        limit: number;
+        getAddresses: (object: T) => Address[];
+        matchIdStart: string;
+    }): XlsxTransformerColumn<T>[] {
         const result: XlsxTransformerColumn<unknown>[] = [];
 
         for (let i = 0; i <= limit; i++) {
@@ -86,7 +102,8 @@ export class XlsxTransformerColumnHelper {
     }
 
     static createColumnsForParent(parentIndex: number): XlsxTransformerColumn<PlatformMember>[] {
-        const getParent = (member: PlatformMember): Parent | null | undefined => member.patchedMember.details.parents[parentIndex];
+        const getParent = (member: PlatformMember): Parent | null | undefined =>
+            member.patchedMember.details.parents[parentIndex];
 
         const parentNumber = parentIndex + 1;
 
@@ -149,12 +166,18 @@ export class XlsxTransformerColumnHelper {
             },
             XlsxTransformerColumnHelper.createAddressColumns<PlatformMember>({
                 matchId: getId('address'),
-                getAddress: member => getParent(member)?.address,
+                getAddress: (member) => getParent(member)?.address,
             }),
         ];
     }
 
-    static createAddressColumns<T>({ matchId, getAddress }: { matchId: string; getAddress: (object: T) => Address | null | undefined }): XlsxTransformerColumn<T> {
+    static createAddressColumns<T>({
+        matchId,
+        getAddress,
+    }: {
+        matchId: string;
+        getAddress: (object: T) => Address | null | undefined;
+    }): XlsxTransformerColumn<T> {
         const getId = (value: string) => matchId + '.' + value;
 
         return {
@@ -228,12 +251,23 @@ export class XlsxTransformerColumnHelper {
         };
     }
 
-    static createRecordAnswersColumns<T>({ matchId, getRecordCategories, getRecordAnswers }: { matchId: string; getRecordCategories: () => RecordCategory[]; getRecordAnswers: (object: T) => Map<string, RecordAnswer> }): XlsxTransformerColumn<T> {
+    static createRecordAnswersColumns<T>({
+        matchId,
+        getRecordCategories,
+        getRecordAnswers,
+    }: {
+        matchId: string;
+        getRecordCategories: () => RecordCategory[];
+        getRecordAnswers: (object: T) => Map<string, RecordAnswer>;
+    }): XlsxTransformerColumn<T> {
         return {
             match(id) {
                 if (id.startsWith(matchId + '.')) {
                     const recordCategories = getRecordCategories();
-                    const flattenedCategories = RecordCategory.flattenCategoriesWith(recordCategories, r => r.excelColumns.length > 0);
+                    const flattenedCategories = RecordCategory.flattenCategoriesWith(
+                        recordCategories,
+                        (r) => r.excelColumns.length > 0,
+                    );
 
                     let recordCategory: RecordCategory | undefined;
                     let recordSetting: RecordSettings | undefined;
@@ -241,7 +275,7 @@ export class XlsxTransformerColumnHelper {
 
                     for (const category of flattenedCategories) {
                         const recordSettings = category.getAllRecords();
-                        const rr = recordSettings.find(r => r.id === recordSettingId);
+                        const rr = recordSettings.find((r) => r.id === recordSettingId);
 
                         if (rr) {
                             recordSetting = rr;
@@ -267,9 +301,9 @@ export class XlsxTransformerColumnHelper {
                             category: recordCategory.name.toString(),
                             getValue: (object: T) => {
                                 const answers = getRecordAnswers(object);
-                                const b = (answers.get(recordSettingId)?.excelValues[index] ?? {
+                                const b = answers.get(recordSettingId)?.excelValues[index] ?? {
                                     value: '',
-                                });
+                                };
 
                                 return {
                                     ...b,
@@ -295,7 +329,13 @@ export class XlsxTransformerColumnHelper {
      * comma separated list of all the groups the member is registered for in the current period that belong to that
      * category (including its subcategories).
      */
-    static createGroupCategoryColumns<T>({ matchId, getMember }: { matchId: string; getMember: (object: T) => PlatformMember }): XlsxTransformerColumn<T> {
+    static createGroupCategoryColumns<T>({
+        matchId,
+        getMember,
+    }: {
+        matchId: string;
+        getMember: (object: T) => PlatformMember;
+    }): XlsxTransformerColumn<T> {
         return {
             match(id) {
                 if (!id.startsWith(matchId + '.')) {
@@ -317,13 +357,22 @@ export class XlsxTransformerColumnHelper {
 
                             for (const organization of member.organizations) {
                                 const categories = organization.period.settings.categories;
-                                if (!categories.find(c => c.id === categoryId)) {
+                                if (!categories.find((c) => c.id === categoryId)) {
                                     continue;
                                 }
 
-                                const groupIds = XlsxTransformerColumnHelper.collectGroupIdsForCategory(categoryId, categories);
-                                const registrations = member.filterRegistrations({ groupIds, organizationId: organization.id });
-                                const names = Formatter.uniqueArray(registrations.map(r => r.group.settings.name.toString())).sort();
+                                const groupIds =
+                                    XlsxTransformerColumnHelper.collectGroupIdsForCategory(
+                                        categoryId,
+                                        categories,
+                                    );
+                                const registrations = member.filterRegistrations({
+                                    groupIds,
+                                    organizationId: organization.id,
+                                });
+                                const names = Formatter.uniqueArray(
+                                    registrations.map((r) => r.group.settings.name.toString()),
+                                ).sort();
 
                                 return {
                                     value: names.join(', '),
@@ -343,20 +392,26 @@ export class XlsxTransformerColumnHelper {
     /**
      * Recursively collects all group ids that belong to a category and its subcategories.
      */
-    private static collectGroupIdsForCategory(categoryId: string, categories: GroupCategory[], seen = new Set<string>()): string[] {
+    private static collectGroupIdsForCategory(
+        categoryId: string,
+        categories: GroupCategory[],
+        seen = new Set<string>(),
+    ): string[] {
         if (seen.has(categoryId)) {
             return [];
         }
         seen.add(categoryId);
 
-        const category = categories.find(c => c.id === categoryId);
+        const category = categories.find((c) => c.id === categoryId);
         if (!category) {
             return [];
         }
 
         return [
             ...category.groupIds,
-            ...category.categoryIds.flatMap(id => XlsxTransformerColumnHelper.collectGroupIdsForCategory(id, categories, seen)),
+            ...category.categoryIds.flatMap((id) =>
+                XlsxTransformerColumnHelper.collectGroupIdsForCategory(id, categories, seen),
+            ),
         ];
     }
 
@@ -366,7 +421,15 @@ export class XlsxTransformerColumnHelper {
      * @param param0
      * @returns
      */
-    private static transformConcreteColumnForProperty<T, O>({ column, key, getPropertyValue }: { column: XlsxTransformerConcreteColumn<T>; key: string; getPropertyValue: (object: O) => T }): XlsxTransformerConcreteColumn<O> {
+    private static transformConcreteColumnForProperty<T, O>({
+        column,
+        key,
+        getPropertyValue,
+    }: {
+        column: XlsxTransformerConcreteColumn<T>;
+        key: string;
+        getPropertyValue: (object: O) => T;
+    }): XlsxTransformerConcreteColumn<O> {
         return {
             ...column,
             id: `${key}.${column.id}`,
@@ -380,7 +443,15 @@ export class XlsxTransformerColumnHelper {
      * @param param0
      * @returns
      */
-    static transformColumnForProperty<T, O>({ column, key, getPropertyValue }: { column: XlsxTransformerColumn<T>; key: string; getPropertyValue: (object: O) => T }): XlsxTransformerColumn<O> {
+    static transformColumnForProperty<T, O>({
+        column,
+        key,
+        getPropertyValue,
+    }: {
+        column: XlsxTransformerColumn<T>;
+        key: string;
+        getPropertyValue: (object: O) => T;
+    }): XlsxTransformerColumn<O> {
         if (isXlsxTransformerConcreteColumn(column)) {
             return this.transformConcreteColumnForProperty({ column, key, getPropertyValue });
         }
@@ -398,7 +469,13 @@ export class XlsxTransformerColumnHelper {
                     return;
                 }
 
-                return subColumns.map(column => XlsxTransformerColumnHelper.transformConcreteColumnForProperty({ column, key, getPropertyValue }));
+                return subColumns.map((column) =>
+                    XlsxTransformerColumnHelper.transformConcreteColumnForProperty({
+                        column,
+                        key,
+                        getPropertyValue,
+                    }),
+                );
             },
         };
     }

@@ -1,7 +1,7 @@
 import type { Country } from './Country.js';
 import type { Language } from './Language.js';
 
-export { };
+export {};
 
 /**
  * Importing this file (for its side effects) registers the global helpers that Stamhoofd

@@ -1,6 +1,14 @@
 import { CachedBalance, Email } from '@stamhoofd/models';
 import type { LimitedFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
-import { BalanceItem as BalanceItemStruct, compileToInMemoryFilter, EmailRecipient, PaginatedResponse, receivableBalanceObjectContactInMemoryFilterCompilers, ReceivableBalanceType, Replacement } from '@stamhoofd/structures';
+import {
+    BalanceItem as BalanceItemStruct,
+    compileToInMemoryFilter,
+    EmailRecipient,
+    PaginatedResponse,
+    receivableBalanceObjectContactInMemoryFilterCompilers,
+    ReceivableBalanceType,
+    Replacement,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint.js';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
@@ -9,23 +17,40 @@ async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter |
     const result = await GetReceivableBalancesEndpoint.buildData(query);
 
     // Map all contacts to recipients
-    const compiledFilter = compileToInMemoryFilter(subfilter, receivableBalanceObjectContactInMemoryFilterCompilers);
+    const compiledFilter = compileToInMemoryFilter(
+        subfilter,
+        receivableBalanceObjectContactInMemoryFilterCompilers,
+    );
 
     // const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [request.params.id], request.params.type);
     // const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels);
 
     const recipients: EmailRecipient[] = [];
     for (const balance of result.results) {
-        const balanceItemModels = balance.objectType === ReceivableBalanceType.organization ? (await CachedBalance.balanceForObjects(balance.organizationId, [balance.object.id], balance.objectType)) : [];
-        const balanceItems = balanceItemModels.map(i => i.getStructure());
+        const balanceItemModels =
+            balance.objectType === ReceivableBalanceType.organization
+                ? await CachedBalance.balanceForObjects(
+                      balance.organizationId,
+                      [balance.object.id],
+                      balance.objectType,
+                  )
+                : [];
+        const balanceItems = balanceItemModels.map((i) => i.getStructure());
 
-        const filteredContacts = balance.object.contacts.filter(c => compiledFilter(c));
+        const filteredContacts = balance.object.contacts.filter((c) => compiledFilter(c));
         for (const contact of filteredContacts) {
             for (const email of contact.emails) {
                 const recipient = EmailRecipient.create({
                     objectId: balance.id, // Note: not set member, user or organization id here - should be the queryable balance id
-                    userId: balance.objectType === ReceivableBalanceType.user || balance.objectType === ReceivableBalanceType.userWithoutMembers ? balance.object.id : null,
-                    memberId: balance.objectType === ReceivableBalanceType.member ? balance.object.id : null,
+                    userId:
+                        balance.objectType === ReceivableBalanceType.user ||
+                        balance.objectType === ReceivableBalanceType.userWithoutMembers
+                            ? balance.object.id
+                            : null,
+                    memberId:
+                        balance.objectType === ReceivableBalanceType.member
+                            ? balance.object.id
+                            : null,
                     firstName: contact.firstName,
                     lastName: contact.lastName,
                     email,
@@ -34,27 +59,27 @@ async function fetch(query: LimitedFilteredRequest, subfilter: StamhoofdFilter |
                             token: 'objectName',
                             value: balance.object.name,
                         }),
-                        ...(
-                            balance.objectType === ReceivableBalanceType.organization
-                                ? [
-                                        Replacement.create({
-                                            token: 'outstandingBalance',
-                                            value: Formatter.price(balance.amountOpen),
-                                        }),
-                                        Replacement.create({
-                                            token: 'balanceTable',
-                                            value: '',
-                                            html: BalanceItemStruct.getDetailsHTMLTable(balanceItems),
-                                        }),
-                                    ]
-                                : []
-                        ),
+                        ...(balance.objectType === ReceivableBalanceType.organization
+                            ? [
+                                  Replacement.create({
+                                      token: 'outstandingBalance',
+                                      value: Formatter.price(balance.amountOpen),
+                                  }),
+                                  Replacement.create({
+                                      token: 'balanceTable',
+                                      value: '',
+                                      html: BalanceItemStruct.getDetailsHTMLTable(balanceItems),
+                                  }),
+                              ]
+                            : []),
 
                         ...(contact.meta && contact.meta.url && typeof contact.meta.url === 'string'
-                            ? [Replacement.create({
-                                    token: 'paymentUrl',
-                                    value: contact.meta.url,
-                                })]
+                            ? [
+                                  Replacement.create({
+                                      token: 'paymentUrl',
+                                      value: contact.meta.url,
+                                  }),
+                              ]
                             : []),
                     ],
                 });

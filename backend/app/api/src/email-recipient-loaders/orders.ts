@@ -18,14 +18,14 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Orders, {
         const result = await GetWebshopOrdersEndpoint.buildData(query);
 
         // #region get webshop previews
-        const webshopIds = new Set(result.results.map(order => order.webshopId));
+        const webshopIds = new Set(result.results.map((order) => order.webshopId));
         const webshopPreviewMap = new Map<string, WebshopPreview>();
 
         for (const webshopId of webshopIds) {
             const webshop = await Webshop.getByID(webshopId);
 
             if (webshop === undefined) {
-            // todo: change error?
+                // todo: change error?
                 throw new Error('Webshop is undefined');
             }
 
@@ -36,11 +36,16 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Orders, {
 
         for (const order of result.results) {
             const webshopPreview = webshopPreviewMap.get(order.webshopId)!;
-            await runWithRecipientLocale({ language: order.consumerLanguage }, organization, (i18n) => {
-                const r = order.getEmailRecipient(organizationStruct, webshopPreview);
-                r.language = i18n.language;
-                recipients.push(r);
-            }, options);
+            await runWithRecipientLocale(
+                { language: order.consumerLanguage },
+                organization,
+                (i18n) => {
+                    const r = order.getEmailRecipient(organizationStruct, webshopPreview);
+                    r.language = i18n.language;
+                    recipients.push(r);
+                },
+                options,
+            );
         }
 
         return new PaginatedResponse({
@@ -50,11 +55,14 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Orders, {
     },
 
     count: async (query: LimitedFilteredRequest) => {
-        query.filter = mergeFilters([query.filter, {
-            email: {
-                $neq: null,
+        query.filter = mergeFilters([
+            query.filter,
+            {
+                email: {
+                    $neq: null,
+                },
             },
-        }]);
+        ]);
         const q = await GetWebshopOrdersEndpoint.buildQuery(query);
         return await q.count();
     },

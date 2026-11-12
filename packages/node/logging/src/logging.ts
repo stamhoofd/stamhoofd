@@ -2,7 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import chalk from 'chalk';
 import type { Direction } from 'node:readline';
 
-type Modifier = (typeof chalk.Color | typeof chalk.Modifiers);
+type Modifier = typeof chalk.Color | typeof chalk.Modifiers;
 type Writeable = { write: (msg: string) => void; clearLine: (dir: Direction) => void };
 type Context = { prefixes?: unknown[]; tags?: string[] };
 
@@ -59,7 +59,11 @@ export class StyledText {
                 }
                 text = this.text.join(' ');
             }
-            if (typeof this.text === 'string' || typeof this.text === 'number' || typeof this.text === 'boolean') {
+            if (
+                typeof this.text === 'string' ||
+                typeof this.text === 'number' ||
+                typeof this.text === 'boolean'
+            ) {
                 if (typeof this.text === 'number' && isNaN(this.text)) {
                     text = 'NaN';
                 } else {
@@ -112,7 +116,7 @@ function registerClass(name: string[], map: RecursiveClassStyles, style: Modifie
     if (name.length === 1) {
         map.set(first, {
             style: [...(map.get(first)?.style ?? []), ...style],
-            with: map.get(first)?.with ?? new Map() as RecursiveClassStyles,
+            with: map.get(first)?.with ?? (new Map() as RecursiveClassStyles),
         });
         return;
     }

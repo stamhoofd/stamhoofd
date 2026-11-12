@@ -20,7 +20,14 @@ export class ThrottledQueue<T> {
     handler: (items: T[]) => Promise<void> | void;
     emptyHandler?: () => void;
 
-    constructor(handler: (items: T[]) => Promise<void> | void, options: { maxBatchSize?: number; maxDelay?: number | null; emptyHandler?: () => void } = {}) {
+    constructor(
+        handler: (items: T[]) => Promise<void> | void,
+        options: {
+            maxBatchSize?: number;
+            maxDelay?: number | null;
+            emptyHandler?: () => void;
+        } = {},
+    ) {
         this.handler = handler;
         this.maxBatchSize = options.maxBatchSize ?? 100;
         this.maxDelay = options.maxDelay ?? 10_000;
@@ -113,7 +120,7 @@ export class ThrottledQueue<T> {
                 this.pendingFlushes.delete(flush);
 
                 if (this.pendingFlushes.size === 0 && this.items.size === 0) {
-                // Call empty handler to signal that the queue is empty
+                    // Call empty handler to signal that the queue is empty
                     this.stopTimeout();
 
                     if (this.emptyHandler) {

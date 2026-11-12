@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder, StringOrNumberDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    MapDecoder,
+    StringDecoder,
+    StringOrNumberDecoder,
+} from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import type { RenderContext } from './AuditLogRenderer.js';
 import { renderTemplate } from './AuditLogRenderer.js';
@@ -840,35 +849,47 @@ export class AuditLogPatchItem extends AutoEncoder {
 }
 
 const helpers = new Map([
-    ['plural', (context: RenderContext, object: any, singular: string, plural: string) => {
-        if (object instanceof AuditLogReplacement) {
-            if (object.count === undefined) {
-                return object.value === '1' ? [singular] : [plural];
+    [
+        'plural',
+        (context: RenderContext, object: any, singular: string, plural: string) => {
+            if (object instanceof AuditLogReplacement) {
+                if (object.count === undefined) {
+                    return object.value === '1' ? [singular] : [plural];
+                }
+                return object.count === 1 ? [singular] : [plural];
             }
-            return object.count === 1 ? [singular] : [plural];
-        }
-        return [object === 1 || object === '1' ? singular : plural];
-    }],
-    ['capitalizeFirstLetter', (context: RenderContext, object: any) => {
-        if (object instanceof AuditLogReplacement) {
-            const clone = object.clone();
-            clone.value = Formatter.capitalizeFirstLetter(clone.value);
-            return [clone];
-        }
-        return [object];
-    }],
-    ['if', (context: RenderContext, object: any, ...prefixes) => {
-        if (object) {
-            return [...prefixes];
-        }
-        return [];
-    }],
-    ['unless', (context: RenderContext, object: any, ...prefixes) => {
-        if (!object) {
-            return [...prefixes];
-        }
-        return [];
-    }],
+            return [object === 1 || object === '1' ? singular : plural];
+        },
+    ],
+    [
+        'capitalizeFirstLetter',
+        (context: RenderContext, object: any) => {
+            if (object instanceof AuditLogReplacement) {
+                const clone = object.clone();
+                clone.value = Formatter.capitalizeFirstLetter(clone.value);
+                return [clone];
+            }
+            return [object];
+        },
+    ],
+    [
+        'if',
+        (context: RenderContext, object: any, ...prefixes) => {
+            if (object) {
+                return [...prefixes];
+            }
+            return [];
+        },
+    ],
+    [
+        'unless',
+        (context: RenderContext, object: any, ...prefixes) => {
+            if (!object) {
+                return [...prefixes];
+            }
+            return [];
+        },
+    ],
 ]);
 
 export class AuditLog extends AutoEncoder {
@@ -946,7 +967,7 @@ export class AuditLog extends AutoEncoder {
     }
 
     get title() {
-        return this.renderableTitle.map(v => v.toString()).join('');
+        return this.renderableTitle.map((v) => v.toString()).join('');
     }
 
     get icon() {

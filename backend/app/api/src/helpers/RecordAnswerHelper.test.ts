@@ -1,6 +1,13 @@
 import type { AutoEncoderPatchType } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { FileType, RecordCategory, RecordChoice, RecordSettings, RecordType, TranslatedString } from '@stamhoofd/structures';
+import {
+    FileType,
+    RecordCategory,
+    RecordChoice,
+    RecordSettings,
+    RecordType,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { RecordAnswerHelper } from './RecordAnswerHelper.js';
 
 describe('RecordAnswerHelper', () => {
@@ -74,8 +81,16 @@ describe('RecordAnswerHelper', () => {
 
     describe('throwIfPatchOrPutIsInvalid', () => {
         test('patch - happy path should not throw', () => {
-            const patches = new PatchableArray<string, RecordCategory, AutoEncoderPatchType<RecordCategory>>();
-            const recordPatches1 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const patches = new PatchableArray<
+                string,
+                RecordCategory,
+                AutoEncoderPatchType<RecordCategory>
+            >();
+            const recordPatches1 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
             const recordPatch1 = RecordSettings.patch({
                 id: record1.id,
@@ -92,7 +107,11 @@ describe('RecordAnswerHelper', () => {
             recordPatches1.addPatch(recordPatch1);
             recordPatches1.addPatch(recordPatch2);
 
-            const recordPatches2 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const recordPatches2 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
             const recordPatch3 = RecordSettings.patch({
                 id: record3.id,
@@ -108,7 +127,11 @@ describe('RecordAnswerHelper', () => {
             recordPatches2.addPatch(recordPatch3);
             recordPatches2.addPatch(recordPatch4);
 
-            const recordPatches3 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const recordPatches3 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
             const recordPatch5 = RecordSettings.patch({
                 id: record5.id,
@@ -117,7 +140,11 @@ describe('RecordAnswerHelper', () => {
 
             recordPatches3.addPatch(recordPatch5);
 
-            const recordPatches4 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const recordPatches4 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
             const recordPatch7 = RecordSettings.patch({
                 id: record7.id,
@@ -126,17 +153,25 @@ describe('RecordAnswerHelper', () => {
 
             recordPatches4.addPatch(recordPatch7);
 
-            const childCategoriesPatch1 = new PatchableArray<string, RecordCategory, AutoEncoderPatchType<RecordCategory>>();
+            const childCategoriesPatch1 = new PatchableArray<
+                string,
+                RecordCategory,
+                AutoEncoderPatchType<RecordCategory>
+            >();
 
-            childCategoriesPatch1.addPatch(RecordCategory.patch({
-                id: childCategory1.id,
-                records: recordPatches2,
-            }));
+            childCategoriesPatch1.addPatch(
+                RecordCategory.patch({
+                    id: childCategory1.id,
+                    records: recordPatches2,
+                }),
+            );
 
-            childCategoriesPatch1.addPatch(RecordCategory.patch({
-                id: childCategory2.id,
-                records: recordPatches3,
-            }));
+            childCategoriesPatch1.addPatch(
+                RecordCategory.patch({
+                    id: childCategory2.id,
+                    records: recordPatches3,
+                }),
+            );
 
             const patch1 = RecordCategory.patch({
                 id: recordCategory1.id,
@@ -153,13 +188,23 @@ describe('RecordAnswerHelper', () => {
             patches.addPatch(patch2);
 
             // should not throw
-            expect(() => RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, patches)).not.toThrow();
+            expect(() =>
+                RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, patches),
+            ).not.toThrow();
         });
 
         describe('patch - should throw if type changes', () => {
             test('case 1 - error in root category', () => {
-                const patches = new PatchableArray<string, RecordCategory, AutoEncoderPatchType<RecordCategory>>();
-                const recordPatches1 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+                const patches = new PatchableArray<
+                    string,
+                    RecordCategory,
+                    AutoEncoderPatchType<RecordCategory>
+                >();
+                const recordPatches1 = new PatchableArray<
+                    string,
+                    RecordSettings,
+                    AutoEncoderPatchType<RecordSettings>
+                >();
 
                 const recordPatch1 = RecordSettings.patch({
                     id: record1.id,
@@ -185,12 +230,25 @@ describe('RecordAnswerHelper', () => {
                 patches.addPatch(patch1);
 
                 // should throw
-                expect(() => RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, patches)).toThrow('Cannot change record type from Integer to Email');
+                expect(() =>
+                    RecordAnswerHelper.throwIfPatchOrPutIsInvalid(
+                        originalRecordCategories,
+                        patches,
+                    ),
+                ).toThrow('Cannot change record type from Integer to Email');
             });
 
             test('case 2 - error in child category', () => {
-                const patches = new PatchableArray<string, RecordCategory, AutoEncoderPatchType<RecordCategory>>();
-                const recordPatches1 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+                const patches = new PatchableArray<
+                    string,
+                    RecordCategory,
+                    AutoEncoderPatchType<RecordCategory>
+                >();
+                const recordPatches1 = new PatchableArray<
+                    string,
+                    RecordSettings,
+                    AutoEncoderPatchType<RecordSettings>
+                >();
 
                 const recordPatch1 = RecordSettings.patch({
                     id: record1.id,
@@ -207,7 +265,11 @@ describe('RecordAnswerHelper', () => {
                 recordPatches1.addPatch(recordPatch1);
                 recordPatches1.addPatch(recordPatch2);
 
-                const recordPatches2 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+                const recordPatches2 = new PatchableArray<
+                    string,
+                    RecordSettings,
+                    AutoEncoderPatchType<RecordSettings>
+                >();
 
                 const recordPatch3 = RecordSettings.patch({
                     id: record3.id,
@@ -225,7 +287,11 @@ describe('RecordAnswerHelper', () => {
                 recordPatches2.addPatch(recordPatch3);
                 recordPatches2.addPatch(recordPatch4);
 
-                const recordPatches3 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+                const recordPatches3 = new PatchableArray<
+                    string,
+                    RecordSettings,
+                    AutoEncoderPatchType<RecordSettings>
+                >();
 
                 const recordPatch5 = RecordSettings.patch({
                     id: record5.id,
@@ -234,17 +300,25 @@ describe('RecordAnswerHelper', () => {
 
                 recordPatches3.addPatch(recordPatch5);
 
-                const childCategoriesPatch1 = new PatchableArray<string, RecordCategory, AutoEncoderPatchType<RecordCategory>>();
+                const childCategoriesPatch1 = new PatchableArray<
+                    string,
+                    RecordCategory,
+                    AutoEncoderPatchType<RecordCategory>
+                >();
 
-                childCategoriesPatch1.addPatch(RecordCategory.patch({
-                    id: childCategory1.id,
-                    records: recordPatches2,
-                }));
+                childCategoriesPatch1.addPatch(
+                    RecordCategory.patch({
+                        id: childCategory1.id,
+                        records: recordPatches2,
+                    }),
+                );
 
-                childCategoriesPatch1.addPatch(RecordCategory.patch({
-                    id: childCategory2.id,
-                    records: recordPatches3,
-                }));
+                childCategoriesPatch1.addPatch(
+                    RecordCategory.patch({
+                        id: childCategory2.id,
+                        records: recordPatches3,
+                    }),
+                );
 
                 const patch1 = RecordCategory.patch({
                     id: recordCategory1.id,
@@ -255,28 +329,47 @@ describe('RecordAnswerHelper', () => {
                 patches.addPatch(patch1);
 
                 // should throw
-                expect(() => RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, patches)).toThrow('Cannot change record type from Date to Text');
+                expect(() =>
+                    RecordAnswerHelper.throwIfPatchOrPutIsInvalid(
+                        originalRecordCategories,
+                        patches,
+                    ),
+                ).toThrow('Cannot change record type from Date to Text');
             });
         });
 
         test('patch - should throw if file type changes', () => {
-            const patches = new PatchableArray<string, RecordCategory, AutoEncoderPatchType<RecordCategory>>();
-            const recordPatches1 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const patches = new PatchableArray<
+                string,
+                RecordCategory,
+                AutoEncoderPatchType<RecordCategory>
+            >();
+            const recordPatches1 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
-            recordPatches1.addPatch(RecordSettings.patch({
-                id: record8.id,
-                name: TranslatedString.create('vraag 8 - updated'),
-                type: RecordType.File,
-                fileType: FileType.Word,
-            }));
+            recordPatches1.addPatch(
+                RecordSettings.patch({
+                    id: record8.id,
+                    name: TranslatedString.create('vraag 8 - updated'),
+                    type: RecordType.File,
+                    fileType: FileType.Word,
+                }),
+            );
 
-            patches.addPatch(RecordCategory.patch({
-                id: recordCategory2.id,
-                records: recordPatches1,
-            }));
+            patches.addPatch(
+                RecordCategory.patch({
+                    id: recordCategory2.id,
+                    records: recordPatches1,
+                }),
+            );
 
             // should throw
-            expect(() => RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, patches)).toThrow('Cannot change record file type from PDF to Word');
+            expect(() =>
+                RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, patches),
+            ).toThrow('Cannot change record file type from PDF to Word');
         });
 
         test('put - happy path should not throw', () => {
@@ -362,7 +455,12 @@ describe('RecordAnswerHelper', () => {
             const newRecordCategories = [newRecordCategory1, newRecordCategory2];
 
             // should not throw
-            expect(() => RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, newRecordCategories)).not.toThrow();
+            expect(() =>
+                RecordAnswerHelper.throwIfPatchOrPutIsInvalid(
+                    originalRecordCategories,
+                    newRecordCategories,
+                ),
+            ).not.toThrow();
         });
 
         describe('put - should throw if type changes', () => {
@@ -450,7 +548,12 @@ describe('RecordAnswerHelper', () => {
                 const newRecordCategories = [newRecordCategory1, newRecordCategory2];
 
                 // should throw
-                expect(() => RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, newRecordCategories)).toThrow('Cannot change record type from Integer to Email');
+                expect(() =>
+                    RecordAnswerHelper.throwIfPatchOrPutIsInvalid(
+                        originalRecordCategories,
+                        newRecordCategories,
+                    ),
+                ).toThrow('Cannot change record type from Integer to Email');
             });
 
             test('case 2 - error in child category', () => {
@@ -537,13 +640,26 @@ describe('RecordAnswerHelper', () => {
                 const newRecordCategories = [newRecordCategory1, newRecordCategory2];
 
                 // should throw
-                expect(() => RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, newRecordCategories)).toThrow('Cannot change record type from Date to Text');
+                expect(() =>
+                    RecordAnswerHelper.throwIfPatchOrPutIsInvalid(
+                        originalRecordCategories,
+                        newRecordCategories,
+                    ),
+                ).toThrow('Cannot change record type from Date to Text');
             });
         });
 
         test('combination of patch and put - happy path should not throw', () => {
-            const patches = new PatchableArray<string, RecordCategory, AutoEncoderPatchType<RecordCategory>>();
-            const recordPatches1 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const patches = new PatchableArray<
+                string,
+                RecordCategory,
+                AutoEncoderPatchType<RecordCategory>
+            >();
+            const recordPatches1 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
             const recordPatch1 = RecordSettings.patch({
                 id: record1.id,
@@ -560,7 +676,11 @@ describe('RecordAnswerHelper', () => {
             recordPatches1.addPatch(recordPatch1);
             recordPatches1.addPatch(recordPatch2);
 
-            const recordPatches2 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const recordPatches2 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
             const recordPatch3 = RecordSettings.patch({
                 id: record3.id,
@@ -576,7 +696,11 @@ describe('RecordAnswerHelper', () => {
             recordPatches2.addPatch(recordPatch3);
             recordPatches2.addPatch(recordPatch4);
 
-            const recordPatches3 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const recordPatches3 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
             const recordPatch5 = RecordSettings.patch({
                 id: record5.id,
@@ -585,7 +709,11 @@ describe('RecordAnswerHelper', () => {
 
             recordPatches3.addPatch(recordPatch5);
 
-            const recordPatches4 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const recordPatches4 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
             const recordPatch7 = RecordSettings.patch({
                 id: record7.id,
@@ -594,7 +722,11 @@ describe('RecordAnswerHelper', () => {
 
             recordPatches4.addPatch(recordPatch7);
 
-            const childCategoriesPatch1 = new PatchableArray<string, RecordCategory, AutoEncoderPatchType<RecordCategory>>();
+            const childCategoriesPatch1 = new PatchableArray<
+                string,
+                RecordCategory,
+                AutoEncoderPatchType<RecordCategory>
+            >();
 
             const newRecord3 = RecordSettings.create({
                 id: record3.id,
@@ -616,10 +748,12 @@ describe('RecordAnswerHelper', () => {
 
             childCategoriesPatch1.addPut(newChildCategory1);
 
-            childCategoriesPatch1.addPatch(RecordCategory.patch({
-                id: childCategory2.id,
-                records: recordPatches3,
-            }));
+            childCategoriesPatch1.addPatch(
+                RecordCategory.patch({
+                    id: childCategory2.id,
+                    records: recordPatches3,
+                }),
+            );
 
             const patch1 = RecordCategory.patch({
                 id: recordCategory1.id,
@@ -636,12 +770,22 @@ describe('RecordAnswerHelper', () => {
             patches.addPatch(patch2);
 
             // should not throw
-            expect(() => RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, patches)).not.toThrow();
+            expect(() =>
+                RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, patches),
+            ).not.toThrow();
         });
 
         test('combination of patch and put - should throw if type changes', () => {
-            const patches = new PatchableArray<string, RecordCategory, AutoEncoderPatchType<RecordCategory>>();
-            const recordPatches1 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const patches = new PatchableArray<
+                string,
+                RecordCategory,
+                AutoEncoderPatchType<RecordCategory>
+            >();
+            const recordPatches1 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
             const recordPatch1 = RecordSettings.patch({
                 id: record1.id,
@@ -658,7 +802,11 @@ describe('RecordAnswerHelper', () => {
             recordPatches1.addPatch(recordPatch1);
             recordPatches1.addPatch(recordPatch2);
 
-            const recordPatches2 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const recordPatches2 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
             const recordPatch3 = RecordSettings.patch({
                 id: record3.id,
@@ -674,7 +822,11 @@ describe('RecordAnswerHelper', () => {
             recordPatches2.addPatch(recordPatch3);
             recordPatches2.addPatch(recordPatch4);
 
-            const recordPatches3 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const recordPatches3 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
             const recordPatch5 = RecordSettings.patch({
                 id: record5.id,
@@ -683,7 +835,11 @@ describe('RecordAnswerHelper', () => {
 
             recordPatches3.addPatch(recordPatch5);
 
-            const recordPatches4 = new PatchableArray<string, RecordSettings, AutoEncoderPatchType<RecordSettings>>();
+            const recordPatches4 = new PatchableArray<
+                string,
+                RecordSettings,
+                AutoEncoderPatchType<RecordSettings>
+            >();
 
             const recordPatch7 = RecordSettings.patch({
                 id: record7.id,
@@ -692,7 +848,11 @@ describe('RecordAnswerHelper', () => {
 
             recordPatches4.addPatch(recordPatch7);
 
-            const childCategoriesPatch1 = new PatchableArray<string, RecordCategory, AutoEncoderPatchType<RecordCategory>>();
+            const childCategoriesPatch1 = new PatchableArray<
+                string,
+                RecordCategory,
+                AutoEncoderPatchType<RecordCategory>
+            >();
 
             const newRecord3 = RecordSettings.create({
                 id: record3.id,
@@ -715,10 +875,12 @@ describe('RecordAnswerHelper', () => {
 
             childCategoriesPatch1.addPut(newChildCategory1);
 
-            childCategoriesPatch1.addPatch(RecordCategory.patch({
-                id: childCategory2.id,
-                records: recordPatches3,
-            }));
+            childCategoriesPatch1.addPatch(
+                RecordCategory.patch({
+                    id: childCategory2.id,
+                    records: recordPatches3,
+                }),
+            );
 
             const patch1 = RecordCategory.patch({
                 id: recordCategory1.id,
@@ -735,7 +897,9 @@ describe('RecordAnswerHelper', () => {
             patches.addPatch(patch2);
 
             // should not throw
-            expect(() => RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, patches)).toThrow('Cannot change record type from Date to Text');
+            expect(() =>
+                RecordAnswerHelper.throwIfPatchOrPutIsInvalid(originalRecordCategories, patches),
+            ).toThrow('Cannot change record type from Date to Text');
         });
     });
 });

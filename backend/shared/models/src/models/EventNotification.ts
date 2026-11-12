@@ -9,9 +9,13 @@ import { Event } from './Event.js';
 export class EventNotification extends QueryableModel {
     static table = 'event_notifications';
 
-    @column({ primary: true, type: 'string', beforeSave(value) {
-        return value ?? uuidv4();
-    } })
+    @column({
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
+            return value ?? uuidv4();
+        },
+    })
     id!: string;
 
     @column({ type: 'string' })
@@ -58,7 +62,8 @@ export class EventNotification extends QueryableModel {
     submittedAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -70,7 +75,8 @@ export class EventNotification extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -80,5 +86,9 @@ export class EventNotification extends QueryableModel {
     updatedAt: Date;
 
     // Note: all relations should point to their parents, not the other way around to avoid reference cycles
-    static events = new ManyToManyRelation<'events', EventNotification, Event>(EventNotification, Event, 'events');
+    static events = new ManyToManyRelation<'events', EventNotification, Event>(
+        EventNotification,
+        Event,
+        'events',
+    );
 }

@@ -4,9 +4,38 @@ import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, BalanceItemPayment, MolliePayment, Order, PayconiqPayment, Payment, RateLimiter, Webshop, WebshopDiscountCode } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemPayment,
+    MolliePayment,
+    Order,
+    PayconiqPayment,
+    Payment,
+    RateLimiter,
+    Webshop,
+    WebshopDiscountCode,
+} from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderData, OrderResponse, Order as OrderStruct, PaymentCustomer, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Payment as PaymentStruct, TranslatedString, Version, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
+import {
+    AuditLogSource,
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    OrderData,
+    OrderResponse,
+    Order as OrderStruct,
+    PaymentCustomer,
+    PaymentMethod,
+    PaymentMethodHelper,
+    PaymentProvider,
+    PaymentStatus,
+    Payment as PaymentStruct,
+    TranslatedString,
+    Version,
+    Webshop as WebshopStruct,
+    WebshopTicketType,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper.js';
@@ -65,98 +94,132 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const organization = await Context.setOrganizationScope();
 
         // Read + validate + update stock in one go, to prevent race conditions
-        const { webshop, order } = await QueueHandler.schedule('webshop-stock/' + request.params.id, async () => {
-            const webshopWithoutOrganization = await Webshop.getByID(request.params.id);
-            if (!webshopWithoutOrganization || webshopWithoutOrganization.organizationId !== organization.id) {
-                throw new SimpleError({
-                    code: 'not_found',
-                    message: 'Webshop not found',
-                    human: $t('%FX'),
-                });
-            }
-
-            // const organization = (await Organization.getByID(webshopWithoutOrganization.organizationId))!
-            const webshop = webshopWithoutOrganization.setRelation(Webshop.organization, organization);
-            await WebshopAuthHelper.optionalAuthenticateForWebshop(webshop);
-
-            // For non paid organizations, the limit is 10
-            if (!organization.meta.packages.isPaid && STAMHOOFD.environment !== 'test') {
-                const limiter = demoOrderLimiter;
-
-                try {
-                    limiter.track(organization.id, 1);
-                } catch (e) {
-                    Email.sendWebmaster({
-                        subject: '[Limiet] Limiet bereikt voor aantal bestellingen',
-                        text: 'Beste, \nDe limiet werd bereikt voor het aantal bestellingen per dag. \nVereniging: ' + organization.id + ' (' + organization.name + ')' + '\n\n' + e.message + '\n\nStamhoofd',
-                    });
-
+        const { webshop, order } = await QueueHandler.schedule(
+            'webshop-stock/' + request.params.id,
+            async () => {
+                const webshopWithoutOrganization = await Webshop.getByID(request.params.id);
+                if (
+                    !webshopWithoutOrganization ||
+                    webshopWithoutOrganization.organizationId !== organization.id
+                ) {
                     throw new SimpleError({
-                        code: 'too_many_emails_period',
-                        message: 'Too many e-mails limited',
-                        human: $t('%w6'),
-                        field: 'recipients',
+                        code: 'not_found',
+                        message: 'Webshop not found',
+                        human: $t('%FX'),
                     });
                 }
-            }
 
-            const webshopStruct = WebshopStruct.create(webshop);
+                // const organization = (await Organization.getByID(webshopWithoutOrganization.organizationId))!
+                const webshop = webshopWithoutOrganization.setRelation(
+                    Webshop.organization,
+                    organization,
+                );
+                await WebshopAuthHelper.optionalAuthenticateForWebshop(webshop);
 
-            const usedCodes = request.body.discountCodes.map(c => c.code);
-            const uniqueCodes = Formatter.uniqueArray(usedCodes);
-            if (uniqueCodes.length !== usedCodes.length) {
-                // Duplicate code usage is not allowed
-                throw new SimpleError({
-                    code: 'duplicate_codes',
-                    message: 'Duplicate usage of discount codes',
-                    human: $t('%w7'),
-                    field: 'cart.discountCodes',
-                });
-            }
-            if (uniqueCodes.length > 0) {
-                // Fetch new and update them
-                const codeModels = await WebshopDiscountCode.getActiveCodes(webshop.id, uniqueCodes);
+                // For non paid organizations, the limit is 10
+                if (!organization.meta.packages.isPaid && STAMHOOFD.environment !== 'test') {
+                    const limiter = demoOrderLimiter;
 
-                if (codeModels.length !== uniqueCodes.length) {
+                    try {
+                        limiter.track(organization.id, 1);
+                    } catch (e) {
+                        Email.sendWebmaster({
+                            subject: '[Limiet] Limiet bereikt voor aantal bestellingen',
+                            text:
+                                'Beste, \nDe limiet werd bereikt voor het aantal bestellingen per dag. \nVereniging: ' +
+                                organization.id +
+                                ' (' +
+                                organization.name +
+                                ')' +
+                                '\n\n' +
+                                e.message +
+                                '\n\nStamhoofd',
+                        });
+
+                        throw new SimpleError({
+                            code: 'too_many_emails_period',
+                            message: 'Too many e-mails limited',
+                            human: $t('%w6'),
+                            field: 'recipients',
+                        });
+                    }
+                }
+
+                const webshopStruct = WebshopStruct.create(webshop);
+
+                const usedCodes = request.body.discountCodes.map((c) => c.code);
+                const uniqueCodes = Formatter.uniqueArray(usedCodes);
+                if (uniqueCodes.length !== usedCodes.length) {
+                    // Duplicate code usage is not allowed
                     throw new SimpleError({
-                        code: 'invalid_code',
-                        message: 'Invalid discount code',
-                        human: $t('%w8'),
+                        code: 'duplicate_codes',
+                        message: 'Duplicate usage of discount codes',
+                        human: $t('%w7'),
                         field: 'cart.discountCodes',
                     });
                 }
-                request.body.discountCodes = codeModels.map(c => c.getStructure());
-            }
+                if (uniqueCodes.length > 0) {
+                    // Fetch new and update them
+                    const codeModels = await WebshopDiscountCode.getActiveCodes(
+                        webshop.id,
+                        uniqueCodes,
+                    );
 
-            clearOrderReservations(request.body);
-            request.body.validate(webshopStruct, organization.meta, request.i18n, false, Context.user?.getStructure());
-            request.body.update(webshopStruct);
+                    if (codeModels.length !== uniqueCodes.length) {
+                        throw new SimpleError({
+                            code: 'invalid_code',
+                            message: 'Invalid discount code',
+                            human: $t('%w8'),
+                            field: 'cart.discountCodes',
+                        });
+                    }
+                    request.body.discountCodes = codeModels.map((c) => c.getStructure());
+                }
 
-            request.body.cart = await UitpasService.validateCart(organization.id, webshop.id, request.body.cart);
+                clearOrderReservations(request.body);
+                request.body.validate(
+                    webshopStruct,
+                    organization.meta,
+                    request.i18n,
+                    false,
+                    Context.user?.getStructure(),
+                );
+                request.body.update(webshopStruct);
 
-            const order = new Order().setRelation(Order.webshop, webshop);
-            order.data = request.body; // TODO: validate
+                request.body.cart = await UitpasService.validateCart(
+                    organization.id,
+                    webshop.id,
+                    request.body.cart,
+                );
 
-            // Store the language the customer used while placing the order, so future emails to
-            // this order are rendered in the same language. Fall back to the webshop's default
-            // language when it can't be determined from the request.
-            const consumerLanguage = I18n.getLanguageFromRequest(request) ?? webshop.meta.defaultLanguage ?? organization.language ?? $getLanguage();
-            order.consumerLanguage = consumerLanguage;
+                const order = new Order().setRelation(Order.webshop, webshop);
+                order.data = request.body; // TODO: validate
 
-            order.organizationId = organization.id;
-            order.createdAt = new Date();
-            order.createdAt.setMilliseconds(0);
-            order.userId = Context.user?.id ?? null;
+                // Store the language the customer used while placing the order, so future emails to
+                // this order are rendered in the same language. Fall back to the webshop's default
+                // language when it can't be determined from the request.
+                const consumerLanguage =
+                    I18n.getLanguageFromRequest(request) ??
+                    webshop.meta.defaultLanguage ??
+                    organization.language ??
+                    $getLanguage();
+                order.consumerLanguage = consumerLanguage;
 
-            // Always reserve the stock
-            await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-                await order.updateStock(null, true);
-            });
+                order.organizationId = organization.id;
+                order.createdAt = new Date();
+                order.createdAt.setMilliseconds(0);
+                order.userId = Context.user?.id ?? null;
 
-            await order.save();
+                // Always reserve the stock
+                await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+                    await order.updateStock(null, true);
+                });
 
-            return { webshop, order, organization };
-        });
+                await order.save();
+
+                return { webshop, order, organization };
+            },
+        );
 
         // The order now is valid, the stock is reserved for now (until the payment fails or expires)
         let totalPrice = request.body.totalPrice;
@@ -164,7 +227,8 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         if (totalPrice % 100 !== 0) {
             throw new SimpleError({
                 code: 'more_than_2_decimal_places',
-                message: 'Unexpected total price. The total price should be rounded to maximum 2 decimal places',
+                message:
+                    'Unexpected total price. The total price should be rounded to maximum 2 decimal places',
             });
         }
 
@@ -193,7 +257,11 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
                 // Determine the payment provider
                 // Throws if invalid
-                const { provider, stripeAccount } = await organization.getPaymentProviderFor(payment.method, null, webshop.privateMeta.paymentConfiguration);
+                const { provider, stripeAccount } = await organization.getPaymentProviderFor(
+                    payment.method,
+                    null,
+                    webshop.privateMeta.paymentConfiguration,
+                );
                 payment.provider = provider;
                 payment.stripeAccountId = stripeAccount?.id ?? null;
 
@@ -202,7 +270,9 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         payment,
                         organization,
                         webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets',
-                        order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice)),
+                        order.data.cart.items.flatMap((i) =>
+                            i.calculatedPrices.map((p) => p.discountedPrice),
+                        ),
                     );
                 }
                 await ServiceFeeHelper.setTransferFee({ payment, organization, stripeAccount });
@@ -269,9 +339,25 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     await balanceItem.save();
                     await payment.save();
                 } else {
-                    const cancelUrl = 'https://' + webshop.getHost() + '/payment?id=' + encodeURIComponent(payment.id) + '&cancel=true';
-                    const redirectUrl = 'https://' + webshop.getHost() + '/payment?id=' + encodeURIComponent(payment.id);
-                    const exchangeUrl = 'https://' + organization.getApiHost() + '/v' + Version + '/payments/' + encodeURIComponent(payment.id) + '?exchange=true';
+                    const cancelUrl =
+                        'https://' +
+                        webshop.getHost() +
+                        '/payment?id=' +
+                        encodeURIComponent(payment.id) +
+                        '&cancel=true';
+                    const redirectUrl =
+                        'https://' +
+                        webshop.getHost() +
+                        '/payment?id=' +
+                        encodeURIComponent(payment.id);
+                    const exchangeUrl =
+                        'https://' +
+                        organization.getApiHost() +
+                        '/v' +
+                        Version +
+                        '/payments/' +
+                        encodeURIComponent(payment.id) +
+                        '?exchange=true';
 
                     if (payment.provider === PaymentProvider.Stripe) {
                         const stripeResult = await StripeHelper.createPayment({
@@ -296,18 +382,24 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         paymentUrl = stripeResult.paymentUrl;
                     } else if (payment.provider === PaymentProvider.Mollie) {
                         // Mollie payment
-                        const mollieService = await MollieService.create({ sellingOrganization: organization });
+                        const mollieService = await MollieService.create({
+                            sellingOrganization: organization,
+                        });
                         if (!mollieService) {
                             throw new SimpleError({
                                 code: '',
-                                message: $t('%w3', { method: PaymentMethodHelper.getName(payment.method) }),
+                                message: $t('%w3', {
+                                    method: PaymentMethodHelper.getName(payment.method),
+                                }),
                             });
                         }
                         const profileId = await mollieService.getProfileId(webshop.getHost());
                         if (!profileId) {
                             throw new SimpleError({
                                 code: '',
-                                message: $t('%w4', { method: PaymentMethodHelper.getName(payment.method) }),
+                                message: $t('%w4', {
+                                    method: PaymentMethodHelper.getName(payment.method),
+                                }),
                             });
                         }
                         const molliePayment = await mollieService.client.payments.create({
@@ -316,7 +408,9 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                                     currency: 'EUR',
                                     value: (totalPrice / 10000).toFixed(2), // from 4 decimals to 0 decimals
                                 },
-                                method: MollieService.paymentMethodToMollie(payment.method) ?? 'creditcard',
+                                method:
+                                    MollieService.paymentMethodToMollie(payment.method) ??
+                                    'creditcard',
                                 profileId,
                                 description,
                                 redirectUrl,
@@ -339,13 +433,30 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         dbPayment.mollieId = molliePayment.id;
                         await dbPayment.save();
                     } else if (payment.provider == PaymentProvider.Payconiq) {
-                        ({ paymentUrl, paymentQRCode } = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, exchangeUrl));
+                        ({ paymentUrl, paymentQRCode } = await PayconiqPayment.createPayment(
+                            payment,
+                            organization,
+                            description,
+                            redirectUrl,
+                            exchangeUrl,
+                        ));
                     } else if (payment.provider == PaymentProvider.Buckaroo) {
                         // Increase request timeout because buckaroo is super slow
                         request.request.request?.setTimeout(60 * 1000);
-                        const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? '', organization.privateMeta?.buckarooSettings?.secret ?? '', organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
+                        const buckaroo = new BuckarooHelper(
+                            organization.privateMeta?.buckarooSettings?.key ?? '',
+                            organization.privateMeta?.buckarooSettings?.secret ?? '',
+                            organization.privateMeta.useTestPayments ??
+                                STAMHOOFD.environment !== 'production',
+                        );
                         const ip = request.request.getIP();
-                        paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, exchangeUrl);
+                        paymentUrl = await buckaroo.createPayment(
+                            payment,
+                            ip,
+                            description,
+                            redirectUrl,
+                            exchangeUrl,
+                        );
                         await payment.save();
 
                         // TypeScript doesn't understand that the status can change and isn't a const....
@@ -365,11 +476,16 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 // Update the cached pricePending of the balance item, so the unresolved payment is visible
                 await BalanceItemService.updatePaidAndPending([balanceItem]);
 
-                return new Response(OrderResponse.create({
-                    paymentUrl: paymentUrl,
-                    paymentQRCode,
-                    order: OrderStruct.create({ ...order, payment: PaymentStruct.create(payment) }),
-                }));
+                return new Response(
+                    OrderResponse.create({
+                        paymentUrl: paymentUrl,
+                        paymentQRCode,
+                        order: OrderStruct.create({
+                            ...order,
+                            payment: PaymentStruct.create(payment),
+                        }),
+                    }),
+                );
             }
         } catch (e) {
             // Mark order as failed to release stock
@@ -379,8 +495,10 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw e;
         }
 
-        return new Response(OrderResponse.create({
-            order: order.getStructureWithoutPayment(),
-        }));
+        return new Response(
+            OrderResponse.create({
+                order: order.getStructureWithoutPayment(),
+            }),
+        );
     }
 }

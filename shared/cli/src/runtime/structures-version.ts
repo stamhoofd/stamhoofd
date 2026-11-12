@@ -2,7 +2,11 @@ import chalk from 'chalk';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { run, RunVerbosity } from './command-runner.js';
-import { readReleasedVersion, replaceNextVersion, writeReleasedVersion } from './next-version-scanner.js';
+import {
+    readReleasedVersion,
+    replaceNextVersion,
+    writeReleasedVersion,
+} from './next-version-scanner.js';
 import { info, success, warning } from './ux.js';
 import { detectVcs, Vcs } from './vcs.js';
 import { assertMainCheckout } from './checkout.js';
@@ -26,7 +30,9 @@ export type IncreaseStructuresVersionOptions = {
  * `Version.ts` and commits the result. Does nothing when no `...NextVersion` is used. Pushing is left
  * to the caller.
  */
-export async function increaseStructuresVersion(options: IncreaseStructuresVersionOptions): Promise<void> {
+export async function increaseStructuresVersion(
+    options: IncreaseStructuresVersionOptions,
+): Promise<void> {
     const { cwd, force = false, dryRun = false, verbosity = RunVerbosity.Quiet } = options;
     const versionPath = path.join(cwd, versionFile);
 
@@ -34,7 +40,13 @@ export async function increaseStructuresVersion(options: IncreaseStructuresVersi
     const nextVersion = currentVersion + 1;
     const replaceBy = 'version: ' + nextVersion;
 
-    info(chalk.bold(chalk.blueBright('Increasing structures version to ' + nextVersion + '... (if changed)\n')));
+    info(
+        chalk.bold(
+            chalk.blueBright(
+                'Increasing structures version to ' + nextVersion + '... (if changed)\n',
+            ),
+        ),
+    );
 
     if (!dryRun && !force) {
         await assertMainCheckout(cwd, verbosity);
@@ -83,7 +95,14 @@ export async function increaseStructuresVersion(options: IncreaseStructuresVersi
         warning(chalk.yellow('Dry run: Version.ts not updated.'));
     }
 
-    info(chalk.bold('Found and wrote new fields. Structures version bumped from ' + currentVersion + ' to ' + chalk.yellow(nextVersion)));
+    info(
+        chalk.bold(
+            'Found and wrote new fields. Structures version bumped from ' +
+                currentVersion +
+                ' to ' +
+                chalk.yellow(nextVersion),
+        ),
+    );
     info(chalk.bold('Commiting changes...'));
 
     if (!dryRun) {
@@ -100,7 +119,11 @@ export async function increaseStructuresVersion(options: IncreaseStructuresVersi
  * command, so it has no `add` step. Pushing is left to the caller: `pnpm ship` pushes through
  * `lerna version` after the packages are built.
  */
-async function commitVersionBump(cwd: string, nextVersion: number, verbosity: RunVerbosity): Promise<void> {
+async function commitVersionBump(
+    cwd: string,
+    nextVersion: number,
+    verbosity: RunVerbosity,
+): Promise<void> {
     const message = 'Increased structures to version ' + nextVersion;
     const vcs = await detectVcs(cwd, verbosity);
 
@@ -113,14 +136,17 @@ async function commitVersionBump(cwd: string, nextVersion: number, verbosity: Ru
     await run('git', ['commit', '-m', message], { cwd, verbosity });
 }
 
-async function loopFolder(folderPath: string, processFile: (filePath: string) => Promise<void>): Promise<void> {
+async function loopFolder(
+    folderPath: string,
+    processFile: (filePath: string) => Promise<void>,
+): Promise<void> {
     const files = await fs.readdir(folderPath);
 
     for (const file of files) {
         const filePath = path.join(folderPath, file);
         const stat = await fs.stat(filePath);
         if (stat.isDirectory()) {
-            if (excludedFolders.includes(file) || await isNestedCheckout(filePath)) {
+            if (excludedFolders.includes(file) || (await isNestedCheckout(filePath))) {
                 continue;
             }
             await loopFolder(filePath, processFile);

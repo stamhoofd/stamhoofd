@@ -1,6 +1,17 @@
 import { Request } from '@node/endpoints';
 import type { Token } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, BlockedPaymentMandate, GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, STPackage, STPackageFactory } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemFactory,
+    BlockedPaymentMandate,
+    GroupFactory,
+    MemberFactory,
+    Organization,
+    OrganizationFactory,
+    RegistrationFactory,
+    STPackage,
+    STPackageFactory,
+} from '@stamhoofd/models';
 import {
     Address,
     BalanceItemStatus,
@@ -38,24 +49,36 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
     let membershipOrganization: Organization;
     let mollieMocker: MollieMocker;
 
-    const belgianAddress = () => Address.create({
-        street: 'Demostraat',
-        number: '12',
-        city: 'Gent',
-        postalCode: '9000',
-        country: Country.Belgium,
-    });
+    const belgianAddress = () =>
+        Address.create({
+            street: 'Demostraat',
+            number: '12',
+            city: 'Gent',
+            postalCode: '9000',
+            country: Country.Belgium,
+        });
 
-    const dutchAddress = () => Address.create({
-        street: 'Demostraat',
-        number: '12',
-        city: 'Amsterdam',
-        postalCode: '1011 AA',
-        country: Country.Netherlands,
-    });
+    const dutchAddress = () =>
+        Address.create({
+            street: 'Demostraat',
+            number: '12',
+            city: 'Amsterdam',
+            postalCode: '1011 AA',
+            country: Country.Netherlands,
+        });
 
-    const post = async (sellingOrganizationId: string, body: OrganizationCheckout, organization: Organization, token: Token) => {
-        const request = Request.buildJson('POST', `/billing/${sellingOrganizationId}/checkout`, organization.getApiHost(), body);
+    const post = async (
+        sellingOrganizationId: string,
+        body: OrganizationCheckout,
+        organization: Organization,
+        token: Token,
+    ) => {
+        const request = Request.buildJson(
+            'POST',
+            `/billing/${sellingOrganizationId}/checkout`,
+            organization.getApiHost(),
+            body,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -98,7 +121,9 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
                 company: options.customerCompany,
             }),
             paymentMethod: options.createMandate ? PaymentMethod.CreditCard : null,
-            createMandate: options.createMandate ? CreateMandateSettings.create({ saveAsDefault: true }) : null,
+            createMandate: options.createMandate
+                ? CreateMandateSettings.create({ saveAsDefault: true })
+                : null,
             redirectUrl: new URL('https://www.example.com/success'),
             cancelUrl: new URL('https://www.example.com/cancel'),
         });
@@ -106,7 +131,7 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
 
     const getPackage = async (organization: Organization, type: STPackageType) => {
         const packages = await STPackage.select().where('organizationId', organization.id).fetch();
-        return packages.find(p => p.meta.type === type);
+        return packages.find((p) => p.meta.type === type);
     };
 
     const getPackageBalanceItem = async (pack: STPackage) => {
@@ -200,7 +225,9 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
      * Members package always charges its full unit price (€1 / member) and the totals are deterministic.
      */
     const freezeDate = () => {
-        vitest.useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] }).setSystemTime(new Date('2026-06-15T10:00:00.000Z'));
+        vitest
+            .useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] })
+            .setSystemTime(new Date('2026-06-15T10:00:00.000Z'));
     };
     const MEMBER_UNIT_PRICE = 1_0000; // €1 per member (stored with 4 decimals)
     const DAY = 1000 * 60 * 60 * 24;
@@ -209,18 +236,26 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
      * Create an already-active package for the organization (validated in the past) with a custom
      * validity window. Used to set up a "current" package that can be renewed.
      */
-    const createActivePackage = async (organization: Organization, options: {
-        bundle: STPackageBundle;
-        validUntil: Date | null;
-        createdAt?: Date;
-    }) => {
-        const template = STPackageBundleHelper.getCurrentPackage(options.bundle, new Date(Date.now() - 300 * DAY));
+    const createActivePackage = async (
+        organization: Organization,
+        options: {
+            bundle: STPackageBundle;
+            validUntil: Date | null;
+            createdAt?: Date;
+        },
+    ) => {
+        const template = STPackageBundleHelper.getCurrentPackage(
+            options.bundle,
+            new Date(Date.now() - 300 * DAY),
+        );
         const pack = new STPackage();
         pack.organizationId = organization.id;
         pack.meta = template.meta;
         pack.validAt = new Date(Date.now() - 300 * DAY);
         pack.validUntil = options.validUntil;
-        pack.removeAt = options.validUntil ? new Date(options.validUntil.getTime() + 31 * DAY) : null;
+        pack.removeAt = options.validUntil
+            ? new Date(options.validUntil.getTime() + 31 * DAY)
+            : null;
         pack.createdAt = options.createdAt ?? new Date(Date.now() - 300 * DAY);
         await pack.save();
         await STPackageService.markValid(pack.id);
@@ -246,7 +281,7 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
             sellingOrganization: (await Organization.getByID(membershipOrganization.id))!,
             user: null,
         });
-        const found = mandates.find(m => m.id === mandate.id);
+        const found = mandates.find((m) => m.id === mandate.id);
         if (!found) {
             throw new Error('Expected mandate to be returned by getMandates');
         }
@@ -306,7 +341,9 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
             const checkout = buildCheckout({ bundles: [], customerCompany });
             checkout.balances.set(otherItem.id, -1000);
 
-            await expect(post(membershipOrganization.id, checkout, organization, token)).rejects.toMatchObject({ code: 'balance_changed' });
+            await expect(
+                post(membershipOrganization.id, checkout, organization, token),
+            ).rejects.toMatchObject({ code: 'balance_changed' });
 
             await otherItem.refresh();
             expect(otherItem.pricePending).toBe(0);
@@ -680,7 +717,7 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
 
             // Sanity check: the trial is active before checkout
             const activeBefore = await STPackageService.getActivePackages(organization.id);
-            expect(activeBefore.map(p => p.meta.type)).toContain(STPackageType.TrialWebshops);
+            expect(activeBefore.map((p) => p.meta.type)).toContain(STPackageType.TrialWebshops);
 
             const checkout = buildCheckout({
                 bundles: [STPackageBundle.Webshops],
@@ -707,7 +744,7 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
             // (meta.packages cannot distinguish this on its own: isWebshopsTrial is false because a
             // full package is active, so we verify the trial end via the active packages directly.)
             const activeAfter = await STPackageService.getActivePackages(organization.id);
-            const activeTypes = activeAfter.map(p => p.meta.type);
+            const activeTypes = activeAfter.map((p) => p.meta.type);
             expect(activeTypes).toContain(STPackageType.Webshops);
             expect(activeTypes).not.toContain(STPackageType.TrialWebshops);
 
@@ -721,11 +758,13 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
         // Assert the renewed package starts when the current one ends (not now).
         const expectStartsAtEndOfCurrent = (renewed: STPackage, current: STPackage) => {
             expect(renewed.meta.startDate.getTime()).toBeGreaterThan(Date.now() + 20 * DAY);
-            expect(Math.abs(renewed.meta.startDate.getTime() - current.validUntil!.getTime())).toBeLessThan(DAY);
+            expect(
+                Math.abs(renewed.meta.startDate.getTime() - current.validUntil!.getTime()),
+            ).toBeLessThan(DAY);
         };
 
         const findRenewed = (packages: STPackage[], type: STPackageType, excludeId: string) => {
-            return packages.find(p => p.meta.type === type && p.id !== excludeId);
+            return packages.find((p) => p.meta.type === type && p.id !== excludeId);
         };
 
         test('Members renewal via renew ids, paying with a new payment method (Bancontact)', async () => {
@@ -750,7 +789,11 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
 
             await mollieMocker.succeedPayment();
 
-            const renewed = findRenewed(await getPackages(organization), STPackageType.Members, current.id)!;
+            const renewed = findRenewed(
+                await getPackages(organization),
+                STPackageType.Members,
+                current.id,
+            )!;
             expect(renewed).toBeDefined();
             await renewed.refresh();
             expect(renewed.validAt).not.toBeNull();
@@ -779,7 +822,11 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
             // A recurring Mollie payment is created against the existing mandate
             await mollieMocker.succeedPayment();
 
-            const renewed = findRenewed(await getPackages(organization), STPackageType.Members, current.id)!;
+            const renewed = findRenewed(
+                await getPackages(organization),
+                STPackageType.Members,
+                current.id,
+            )!;
             expect(renewed).toBeDefined();
             await renewed.refresh();
             expect(renewed.validAt).not.toBeNull();
@@ -806,7 +853,9 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
                 mandate,
             });
 
-            await expect(post(membershipOrganization.id, checkout, organization, token)).rejects.toMatchObject({ code: 'mandate_blocked' });
+            await expect(
+                post(membershipOrganization.id, checkout, organization, token),
+            ).rejects.toMatchObject({ code: 'mandate_blocked' });
             expect(mollieMocker.payments).toHaveLength(0);
         });
 
@@ -831,7 +880,11 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
 
             await mollieMocker.succeedPayment();
 
-            const renewed = findRenewed(await getPackages(organization), STPackageType.Members, current.id)!;
+            const renewed = findRenewed(
+                await getPackages(organization),
+                STPackageType.Members,
+                current.id,
+            )!;
             expect(renewed).toBeDefined();
             await renewed.refresh();
             expect(renewed.validAt).not.toBeNull();
@@ -859,7 +912,11 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
 
             await mollieMocker.succeedPayment();
 
-            const renewed = findRenewed(await getPackages(organization), STPackageType.Members, current.id)!;
+            const renewed = findRenewed(
+                await getPackages(organization),
+                STPackageType.Members,
+                current.id,
+            )!;
             expect(renewed).toBeDefined();
             await renewed.refresh();
             expect(renewed.validAt).not.toBeNull();
@@ -887,7 +944,11 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
             expect(response.status).toBe(200);
 
             // The webshops package itself is free; paying with an existing mandate settles immediately
-            const renewed = findRenewed(await getPackages(organization), STPackageType.Webshops, current.id)!;
+            const renewed = findRenewed(
+                await getPackages(organization),
+                STPackageType.Webshops,
+                current.id,
+            )!;
             expect(renewed).toBeDefined();
             await renewed.refresh();
             expect(renewed.validAt).not.toBeNull();
@@ -916,7 +977,11 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
             // A €2 minimum is charged to set up the new mandate
             await mollieMocker.succeedPayment();
 
-            const renewed = findRenewed(await getPackages(organization), STPackageType.Webshops, current.id)!;
+            const renewed = findRenewed(
+                await getPackages(organization),
+                STPackageType.Webshops,
+                current.id,
+            )!;
             expect(renewed).toBeDefined();
             await renewed.refresh();
             expect(renewed.validAt).not.toBeNull();
@@ -972,7 +1037,7 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
                 .where('packageId', pack.id)
                 .where('status', BalanceItemStatus.Due)
                 .fetch();
-            const extraItem = items.find(i => i.id !== initialItem.id);
+            const extraItem = items.find((i) => i.id !== initialItem.id);
             expect(extraItem).toBeDefined();
             expect(extraItem!.quantity).toBe(5);
             expect(extraItem!.unitPrice).toBe(MEMBER_UNIT_PRICE);

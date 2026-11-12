@@ -3,38 +3,50 @@ import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from 
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
-export const webshopSorters: SQLSortDefinitions<Webshop> = new Map<string, SQLSortDefinition<Webshop>>([
-    ['id', {
-        getValue(a) {
-            return a.id;
+export const webshopSorters: SQLSortDefinitions<Webshop> = new Map<
+    string,
+    SQLSortDefinition<Webshop>
+>([
+    [
+        'id',
+        {
+            getValue(a) {
+                return a.id;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('id'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction,
-            });
+    ],
+    [
+        'name',
+        {
+            getValue(a) {
+                return a.meta.name;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.jsonValue(SQL.column('meta'), '$.value.name', 'CHAR'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['name', {
-        getValue(a) {
-            return a.meta.name;
+    ],
+    [
+        'createdAt',
+        {
+            getValue(a) {
+                return Formatter.dateTimeIso(a.createdAt, 'UTC');
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('createdAt'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('meta'), '$.value.name', 'CHAR'),
-                direction,
-            });
-        },
-    }],
-    ['createdAt', {
-        getValue(a) {
-            return Formatter.dateTimeIso(a.createdAt, 'UTC');
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('createdAt'),
-                direction,
-            });
-        },
-    }],
+    ],
 ]);

@@ -7,18 +7,31 @@ import { promisify } from 'node:util';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { execSudo } from '../runtime/process.js';
-import { checkShellShortcut, removeLegacyShellFunction, setupShellShortcut } from './setup-shell.js';
+import {
+    checkShellShortcut,
+    removeLegacyShellFunction,
+    setupShellShortcut,
+} from './setup-shell.js';
 import { shellCompletionFiles, shellCompletionPaths } from './shell-completions.js';
 
-vi.mock(import('../runtime/command-runner.js'), async importOriginal => ({
-    ...await importOriginal(),
+vi.mock(import('../runtime/command-runner.js'), async (importOriginal) => ({
+    ...(await importOriginal()),
     run: vi.fn<typeof run>(),
 }));
-vi.mock('../runtime/ux.js', () => ({ command: (text: string) => text, info: vi.fn(), success: vi.fn() }));
-vi.mock('../runtime/process.js', () => ({ execSudo: vi.fn(async () => ({ code: 0, stdout: '', stderr: '', signal: null })) }));
+vi.mock('../runtime/ux.js', () => ({
+    command: (text: string) => text,
+    info: vi.fn(),
+    success: vi.fn(),
+}));
+vi.mock('../runtime/process.js', () => ({
+    execSudo: vi.fn(async () => ({ code: 0, stdout: '', stderr: '', signal: null })),
+}));
 vi.mock('./shell-completions.js', () => ({
     shellCompletionFiles: vi.fn(async () => []),
-    shellCompletionPaths: vi.fn(async () => ({ bash: '/usr/share/bash-completion/completions/stam', zsh: '/usr/share/zsh/site-functions/_stam' })),
+    shellCompletionPaths: vi.fn(async () => ({
+        bash: '/usr/share/bash-completion/completions/stam',
+        zsh: '/usr/share/zsh/site-functions/_stam',
+    })),
     homebrewCompletionGuidance: 'Homebrew completion guidance',
 }));
 
@@ -29,18 +42,24 @@ const legacySnippet = '# >>> stam cli >>>\nstam() { echo old; }\n# <<< stam cli 
 describe('shortcut freshness', () => {
     afterEach(() => vi.restoreAllMocks());
 
-    it.each([true, false])('compares installed contents against this checkout (current: %s)', async (current) => {
-        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
-        const read = vi.spyOn(fs, 'readFile')
-            .mockResolvedValueOnce(Buffer.from(current ? 'current launcher' : 'old launcher'))
-            .mockResolvedValueOnce(Buffer.from('current launcher'));
-        expect(await checkShellShortcut()).toEqual({
-            ok: current,
-            details: current ? 'stam and Bash/Zsh completion installed' : '/usr/local/bin/stam is out of date',
-        });
-        expect(read).toHaveBeenNthCalledWith(1, '/usr/local/bin/stam');
-        expect(read).toHaveBeenNthCalledWith(2, script);
-    });
+    it.each([true, false])(
+        'compares installed contents against this checkout (current: %s)',
+        async (current) => {
+            vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+            const read = vi
+                .spyOn(fs, 'readFile')
+                .mockResolvedValueOnce(Buffer.from(current ? 'current launcher' : 'old launcher'))
+                .mockResolvedValueOnce(Buffer.from('current launcher'));
+            expect(await checkShellShortcut()).toEqual({
+                ok: current,
+                details: current
+                    ? 'stam and Bash/Zsh completion installed'
+                    : '/usr/local/bin/stam is out of date',
+            });
+            expect(read).toHaveBeenNthCalledWith(1, '/usr/local/bin/stam');
+            expect(read).toHaveBeenNthCalledWith(2, script);
+        },
+    );
 
     it.each([
         ['ENOENT', 'stam not installed in /usr/local/bin'],
@@ -58,30 +77,58 @@ describe('shortcut installation directory', () => {
     afterEach(() => vi.restoreAllMocks());
 
     it('uses shared sudo prompt handling during shortcut installation', async () => {
-        vi.spyOn(fs, 'stat').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
-        vi.spyOn(fs, 'readFile').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
+        vi.spyOn(fs, 'stat').mockRejectedValue(
+            Object.assign(new Error('missing'), { code: 'ENOENT' }),
+        );
+        vi.spyOn(fs, 'readFile').mockRejectedValue(
+            Object.assign(new Error('missing'), { code: 'ENOENT' }),
+        );
         await setupShellShortcut();
         expect(execSudo).toHaveBeenNthCalledWith(1, ['mkdir', '-p', '/usr/local/bin']);
-        expect(execSudo).toHaveBeenNthCalledWith(2, ['install', '-m', '755', script, '/usr/local/bin/stam']);
+        expect(execSudo).toHaveBeenNthCalledWith(2, [
+            'install',
+            '-m',
+            '755',
+            script,
+            '/usr/local/bin/stam',
+        ]);
         expect(run).not.toHaveBeenCalled();
     });
 
     it('skips privileged directory creation when /usr/local/bin already exists', async () => {
         vi.mocked(run).mockClear();
         vi.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => true } as never);
-        vi.spyOn(fs, 'readFile').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
+        vi.spyOn(fs, 'readFile').mockRejectedValue(
+            Object.assign(new Error('missing'), { code: 'ENOENT' }),
+        );
         await setupShellShortcut();
         expect(execSudo).not.toHaveBeenCalledWith(['mkdir', '-p', '/usr/local/bin']);
-        expect(execSudo).toHaveBeenCalledWith(['install', '-m', '755', script, '/usr/local/bin/stam']);
+        expect(execSudo).toHaveBeenCalledWith([
+            'install',
+            '-m',
+            '755',
+            script,
+            '/usr/local/bin/stam',
+        ]);
     });
 
     it('creates the directory before installation when missing', async () => {
         vi.mocked(run).mockClear();
-        vi.spyOn(fs, 'stat').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
-        vi.spyOn(fs, 'readFile').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
+        vi.spyOn(fs, 'stat').mockRejectedValue(
+            Object.assign(new Error('missing'), { code: 'ENOENT' }),
+        );
+        vi.spyOn(fs, 'readFile').mockRejectedValue(
+            Object.assign(new Error('missing'), { code: 'ENOENT' }),
+        );
         await setupShellShortcut();
         expect(execSudo).toHaveBeenNthCalledWith(1, ['mkdir', '-p', '/usr/local/bin']);
-        expect(execSudo).toHaveBeenNthCalledWith(2, ['install', '-m', '755', script, '/usr/local/bin/stam']);
+        expect(execSudo).toHaveBeenNthCalledWith(2, [
+            'install',
+            '-m',
+            '755',
+            script,
+            '/usr/local/bin/stam',
+        ]);
     });
 });
 
@@ -91,25 +138,41 @@ describe('shortcut completion installation', () => {
 
     it('installs standalone files with readable permissions and removes temporary sources', async () => {
         const destination = '/usr/share/zsh/site-functions/_stam';
-        vi.mocked(shellCompletionFiles).mockResolvedValueOnce([{ destination, contents: '#compdef stam\n' }]);
+        vi.mocked(shellCompletionFiles).mockResolvedValueOnce([
+            { destination, contents: '#compdef stam\n' },
+        ]);
         vi.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => true } as never);
-        vi.spyOn(fs, 'readFile').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
+        vi.spyOn(fs, 'readFile').mockRejectedValue(
+            Object.assign(new Error('missing'), { code: 'ENOENT' }),
+        );
         await setupShellShortcut();
         expect(execSudo).toHaveBeenCalledWith(['mkdir', '-p', path.dirname(destination)]);
-        const install = vi.mocked(execSudo).mock.calls.find(([args]) => args[0] === 'install' && args[2] === '644')![0];
+        const install = vi
+            .mocked(execSudo)
+            .mock.calls.find(([args]) => args[0] === 'install' && args[2] === '644')![0];
         expect(install[4]).toBe(destination);
         await expect(fs.access(install[3])).rejects.toMatchObject({ code: 'ENOENT' });
     });
 
     it('reports stale completion even when the launcher is current', async () => {
-        vi.mocked(shellCompletionFiles).mockResolvedValueOnce([{ destination: '/completion', contents: 'current' }]);
+        vi.mocked(shellCompletionFiles).mockResolvedValueOnce([
+            { destination: '/completion', contents: 'current' },
+        ]);
         vi.spyOn(fs, 'access').mockResolvedValue(undefined);
-        vi.spyOn(fs, 'readFile').mockResolvedValueOnce(Buffer.from('launcher')).mockResolvedValueOnce(Buffer.from('launcher')).mockResolvedValueOnce('old');
-        expect(await checkShellShortcut()).toEqual({ ok: false, details: '/completion is missing, unreadable or out of date' });
+        vi.spyOn(fs, 'readFile')
+            .mockResolvedValueOnce(Buffer.from('launcher'))
+            .mockResolvedValueOnce(Buffer.from('launcher'))
+            .mockResolvedValueOnce('old');
+        expect(await checkShellShortcut()).toEqual({
+            ok: false,
+            details: '/completion is missing, unreadable or out of date',
+        });
     });
 
     it('removes temporary completion files when privileged installation fails', async () => {
-        vi.mocked(shellCompletionFiles).mockResolvedValueOnce([{ destination: '/completion/_stam', contents: '#compdef stam\n' }]);
+        vi.mocked(shellCompletionFiles).mockResolvedValueOnce([
+            { destination: '/completion/_stam', contents: '#compdef stam\n' },
+        ]);
         vi.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => true } as never);
         let temporarySource = '';
         vi.mocked(execSudo).mockImplementation(async (args) => {
@@ -124,7 +187,12 @@ describe('shortcut completion installation', () => {
             await expect(setupShellShortcut()).rejects.toThrow('installation denied');
             await expect(fs.access(temporarySource)).rejects.toMatchObject({ code: 'ENOENT' });
         } finally {
-            vi.mocked(execSudo).mockResolvedValue({ code: 0, stdout: '', stderr: '', signal: null } as never);
+            vi.mocked(execSudo).mockResolvedValue({
+                code: 0,
+                stdout: '',
+                stderr: '',
+                signal: null,
+            } as never);
         }
     });
 
@@ -153,12 +221,23 @@ describe.skip('setup-shell', () => {
 
     it('checks whether the shortcut is installed and executable', async () => {
         const access = vi.spyOn(fs, 'access').mockResolvedValue(undefined);
-        expect(await checkShellShortcut()).toEqual({ ok: true, details: 'stam installed in /usr/local/bin' });
+        expect(await checkShellShortcut()).toEqual({
+            ok: true,
+            details: 'stam installed in /usr/local/bin',
+        });
         expect(access).toHaveBeenCalledWith('/usr/local/bin/stam', fs.constants.X_OK);
         access.mockRejectedValueOnce(Object.assign(new Error('missing'), { code: 'ENOENT' }));
-        expect(await checkShellShortcut()).toEqual({ ok: false, details: 'stam not installed in /usr/local/bin' });
-        access.mockRejectedValueOnce(Object.assign(new Error('permission denied'), { code: 'EACCES' }));
-        expect(await checkShellShortcut()).toEqual({ ok: false, details: '/usr/local/bin/stam is not executable' });
+        expect(await checkShellShortcut()).toEqual({
+            ok: false,
+            details: 'stam not installed in /usr/local/bin',
+        });
+        access.mockRejectedValueOnce(
+            Object.assign(new Error('permission denied'), { code: 'EACCES' }),
+        );
+        expect(await checkShellShortcut()).toEqual({
+            ok: false,
+            details: '/usr/local/bin/stam is not executable',
+        });
     });
 
     it('installs the standalone executable and removes legacy functions from both shells', async () => {
@@ -166,8 +245,15 @@ describe.skip('setup-shell', () => {
             await fs.writeFile(path.join(tmpDir, name), `before\n${legacySnippet}after\n`);
         }
         await setupShellShortcut();
-        expect(run).toHaveBeenNthCalledWith(1, 'sudo', ['mkdir', '-p', '/usr/local/bin'], { verbosity: RunVerbosity.Output });
-        expect(run).toHaveBeenNthCalledWith(2, 'sudo', ['install', '-m', '755', script, '/usr/local/bin/stam'], { verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenNthCalledWith(1, 'sudo', ['mkdir', '-p', '/usr/local/bin'], {
+            verbosity: RunVerbosity.Output,
+        });
+        expect(run).toHaveBeenNthCalledWith(
+            2,
+            'sudo',
+            ['install', '-m', '755', script, '/usr/local/bin/stam'],
+            { verbosity: RunVerbosity.Output },
+        );
         expect(await fs.readFile(script, 'utf8')).toMatch(/^#!\/usr\/bin\/env bash\n/);
         for (const name of ['.zshrc', '.bashrc']) {
             expect(await fs.readFile(path.join(tmpDir, name), 'utf8')).toBe('before\nafter\n');
@@ -205,11 +291,25 @@ describe.skip('setup-shell', () => {
         let bin: string;
 
         const git = (cwd: string, ...args: string[]) => execFileAsync('git', ['-C', cwd, ...args]);
-        const invoke = (cwd: string, exitCode = '0') => execFileAsync(script, ['config', 'value with spaces', '--json'], {
-            cwd,
-            env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, STAM_TEST_PNPM_EXIT: exitCode },
-        });
-        const expectedArgs = (root: string) => ['--dir', root, '--silent', 'run', 'stam', 'config', 'value with spaces', '--json'];
+        const invoke = (cwd: string, exitCode = '0') =>
+            execFileAsync(script, ['config', 'value with spaces', '--json'], {
+                cwd,
+                env: {
+                    ...process.env,
+                    PATH: `${bin}:${process.env.PATH}`,
+                    STAM_TEST_PNPM_EXIT: exitCode,
+                },
+            });
+        const expectedArgs = (root: string) => [
+            '--dir',
+            root,
+            '--silent',
+            'run',
+            'stam',
+            'config',
+            'value with spaces',
+            '--json',
+        ];
 
         beforeEach(async () => {
             repo = path.join(tmpDir, 'checkout with spaces');
@@ -217,7 +317,11 @@ describe.skip('setup-shell', () => {
             await fs.mkdir(repo);
             await fs.mkdir(bin);
             await git(repo, 'init');
-            await fs.writeFile(path.join(bin, 'pnpm'), '#!/usr/bin/env node\nconsole.log(JSON.stringify(process.argv.slice(2)));\nprocess.exit(Number(process.env.STAM_TEST_PNPM_EXIT));\n', { mode: 0o755 });
+            await fs.writeFile(
+                path.join(bin, 'pnpm'),
+                '#!/usr/bin/env node\nconsole.log(JSON.stringify(process.argv.slice(2)));\nprocess.exit(Number(process.env.STAM_TEST_PNPM_EXIT));\n',
+                { mode: 0o755 },
+            );
         });
 
         it.each([
@@ -244,20 +348,46 @@ describe.skip('setup-shell', () => {
         });
 
         it('uses the current worktree rather than the original clone', async () => {
-            await git(repo, 'remote', 'add', 'origin', 'https://github.com/stamhoofd/stamhoofd.git');
-            await git(repo, '-c', 'user.name=Test', '-c', 'user.email=test@example.com', '-c', 'commit.gpgsign=false', 'commit', '--allow-empty', '-m', 'Initial commit');
+            await git(
+                repo,
+                'remote',
+                'add',
+                'origin',
+                'https://github.com/stamhoofd/stamhoofd.git',
+            );
+            await git(
+                repo,
+                '-c',
+                'user.name=Test',
+                '-c',
+                'user.email=test@example.com',
+                '-c',
+                'commit.gpgsign=false',
+                'commit',
+                '--allow-empty',
+                '-m',
+                'Initial commit',
+            );
             const worktree = path.join(tmpDir, 'worktree');
             await git(repo, 'worktree', 'add', '--detach', worktree);
             expect(JSON.parse((await invoke(worktree)).stdout)).toEqual(expectedArgs(worktree));
         });
 
         it('rejects unrelated repositories and directories outside Git', async () => {
-            await git(repo, 'remote', 'add', 'origin', 'https://github.com/stamhoofd/stamhoofd-other.git');
+            await git(
+                repo,
+                'remote',
+                'add',
+                'origin',
+                'https://github.com/stamhoofd/stamhoofd-other.git',
+            );
             for (const cwd of [repo, tmpDir]) {
                 await expect(invoke(cwd)).rejects.toMatchObject({
                     code: 1,
                     stdout: '',
-                    stderr: expect.stringContaining('not inside a repository with a stamhoofd/stamhoofd GitHub remote'),
+                    stderr: expect.stringContaining(
+                        'not inside a repository with a stamhoofd/stamhoofd GitHub remote',
+                    ),
                 });
             }
         });

@@ -1,4 +1,11 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Image } from './files/Image.js';
 
 export class OrganizationInvoiceSettings extends AutoEncoder {

@@ -5,9 +5,15 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-const workflow = readFileSync(new URL('../../../../.github/workflows/ci.yml', import.meta.url), 'utf8');
-const checkShards = workflow.split('            - name: Check all Playwright shards succeeded\n')[1]
-    .split('              run: |\n')[1].split('            - name:')[0].replace(/^ {18}/gm, '');
+const workflow = readFileSync(
+    new URL('../../../../.github/workflows/ci.yml', import.meta.url),
+    'utf8',
+);
+const checkShards = workflow
+    .split('            - name: Check all Playwright shards succeeded\n')[1]
+    .split('              run: |\n')[1]
+    .split('            - name:')[0]
+    .replace(/^ {18}/gm, '');
 const hasPlaywright = workflow.match(/^\s*(has_playwright\(\).*)$/m)![1];
 
 describe('Playwright CI aggregation', () => {
@@ -27,11 +33,14 @@ describe('Playwright CI aggregation', () => {
         expect(() => check('success')).not.toThrow();
     });
 
-    it.each(['failure', 'cancelled', 'skipped'])('fails when the matrix result is %s, even with four reports', async (result) => {
-        await createReports(4);
+    it.each(['failure', 'cancelled', 'skipped'])(
+        'fails when the matrix result is %s, even with four reports',
+        async (result) => {
+            await createReports(4);
 
-        expect(() => check(result)).toThrow();
-    });
+            expect(() => check(result)).toThrow();
+        },
+    );
 
     it.each([0, 3, 5])('rejects a successful matrix with %s reports', async (count) => {
         await createReports(count);
@@ -39,14 +48,25 @@ describe('Playwright CI aggregation', () => {
         expect(() => check('success')).toThrow();
     });
 
-    it.each(['Playwright Tests', 'Playwright Tests (shard 1/4)', 'Playwright Tests (shard 4/4)'])('recognizes previous failure %s', (failed) => {
-        // eslint-disable-next-line node-security/no-dynamic-command-string -- Tests the repository's shell function; the varying input is an environment variable.
-        expect(() => execFileSync('bash', ['-c', `${hasPlaywright}\nhas_playwright`], { env: { ...process.env, failed } })).not.toThrow();
-    });
+    it.each(['Playwright Tests', 'Playwright Tests (shard 1/4)', 'Playwright Tests (shard 4/4)'])(
+        'recognizes previous failure %s',
+        (failed) => {
+            expect(() =>
+                // eslint-disable-next-line node-security/no-dynamic-command-string -- Tests the repository's shell function; the varying input is an environment variable.
+                execFileSync('bash', ['-c', `${hasPlaywright}\nhas_playwright`], {
+                    env: { ...process.env, failed },
+                }),
+            ).not.toThrow();
+        },
+    );
 
     it('does not force Playwright after an unrelated job failed', () => {
-        // eslint-disable-next-line node-security/no-dynamic-command-string -- Tests the repository's shell function; the varying input is an environment variable.
-        expect(() => execFileSync('bash', ['-c', `${hasPlaywright}\nhas_playwright`], { env: { ...process.env, failed: 'Backend App Tests' } })).toThrow();
+        expect(() =>
+            // eslint-disable-next-line node-security/no-dynamic-command-string -- Tests the repository's shell function; the varying input is an environment variable.
+            execFileSync('bash', ['-c', `${hasPlaywright}\nhas_playwright`], {
+                env: { ...process.env, failed: 'Backend App Tests' },
+            }),
+        ).toThrow();
     });
 
     async function createReports(count: number) {
@@ -59,6 +79,9 @@ describe('Playwright CI aggregation', () => {
 
     function check(result: string) {
         // eslint-disable-next-line node-security/no-dynamic-command-string -- Executes the repository's CI shell script, not a command constructed from test inputs.
-        execFileSync('bash', ['-e', '-o', 'pipefail', '-c', checkShards], { cwd: directory, env: { ...process.env, SHARD_RESULT: result } });
+        execFileSync('bash', ['-e', '-o', 'pipefail', '-c', checkShards], {
+            cwd: directory,
+            env: { ...process.env, SHARD_RESULT: result },
+        });
     }
 });

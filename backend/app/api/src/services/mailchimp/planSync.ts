@@ -106,7 +106,7 @@ function joinList(values: string[], existing: unknown, keepExisting: boolean) {
     const result: string[] = [];
     if (keepExisting && typeof existing === 'string') {
         // A truncated value ends with a partial name
-        result.push(...existing.split(', ').filter(v => v.length > 0 && !v.endsWith('…')));
+        result.push(...existing.split(', ').filter((v) => v.length > 0 && !v.endsWith('…')));
     }
     for (const value of values) {
         if (!result.includes(value)) {
@@ -116,7 +116,10 @@ function joinList(values: string[], existing: unknown, keepExisting: boolean) {
     return truncate(result.join(', '));
 }
 
-function getSkipReason(contact: MailchimpContact, status: MailchimpEmailStatus | undefined): MailchimpSyncIssueReason | null {
+function getSkipReason(
+    contact: MailchimpContact,
+    status: MailchimpEmailStatus | undefined,
+): MailchimpSyncIssueReason | null {
     if (!DataValidator.isEmailValid(contact.email)) {
         return MailchimpSyncIssueReason.InvalidEmail;
     }
@@ -129,7 +132,11 @@ function getSkipReason(contact: MailchimpContact, status: MailchimpEmailStatus |
     return null;
 }
 
-function buildMergeFields(contact: MailchimpContact, existing: MailchimpExistingContact | undefined, options: MailchimpPlanOptions) {
+function buildMergeFields(
+    contact: MailchimpContact,
+    existing: MailchimpExistingContact | undefined,
+    options: MailchimpPlanOptions,
+) {
     const fields = new Map<string, string>();
     const tags = options.mergeFields;
 
@@ -150,19 +157,40 @@ function buildMergeFields(contact: MailchimpContact, existing: MailchimpExisting
         // A selection only contains part of the linked members, so keep the existing values
         const keepExisting = !options.full;
         if (tags.members) {
-            fields.set(tags.members, joinList(contact.memberFirstNames, existing?.mergeFields.get(tags.members), keepExisting));
+            fields.set(
+                tags.members,
+                joinList(
+                    contact.memberFirstNames,
+                    existing?.mergeFields.get(tags.members),
+                    keepExisting,
+                ),
+            );
         }
         if (tags.groups) {
-            fields.set(tags.groups, joinList(contact.groups, existing?.mergeFields.get(tags.groups), keepExisting));
+            fields.set(
+                tags.groups,
+                joinList(contact.groups, existing?.mergeFields.get(tags.groups), keepExisting),
+            );
         }
         if (tags.organizations) {
-            fields.set(tags.organizations, joinList(contact.organizations, existing?.mergeFields.get(tags.organizations), keepExisting));
+            fields.set(
+                tags.organizations,
+                joinList(
+                    contact.organizations,
+                    existing?.mergeFields.get(tags.organizations),
+                    keepExisting,
+                ),
+            );
         }
     }
     return fields;
 }
 
-function buildTagChanges(contact: MailchimpContact, existing: MailchimpExistingContact | undefined, options: MailchimpPlanOptions): MailchimpTagChange[] {
+function buildTagChanges(
+    contact: MailchimpContact,
+    existing: MailchimpExistingContact | undefined,
+    options: MailchimpPlanOptions,
+): MailchimpTagChange[] {
     const current = new Set(existing?.tags ?? []);
     const changes: MailchimpTagChange[] = [];
 
@@ -204,14 +232,20 @@ export function planSync(
 
         // Mailchimp accepts the update but keeps the contact archived, so it would silently stay out of the audience
         if (existing?.status === 'archived') {
-            plan.skips.push({ email: contact.email, reason: MailchimpSyncIssueReason.ArchivedInMailchimp });
+            plan.skips.push({
+                email: contact.email,
+                reason: MailchimpSyncIssueReason.ArchivedInMailchimp,
+            });
             continue;
         }
 
         let unsubscribe = false;
         if (status?.unsubscribed) {
             if (!existing) {
-                plan.skips.push({ email: contact.email, reason: MailchimpSyncIssueReason.Unsubscribed });
+                plan.skips.push({
+                    email: contact.email,
+                    reason: MailchimpSyncIssueReason.Unsubscribed,
+                });
                 continue;
             }
             unsubscribe = true;
@@ -220,7 +254,10 @@ export function planSync(
         if (contact.consent === false) {
             // Only a full sync knows all linked members, so only then can missing consent unsubscribe someone
             if (!existing || !options.full) {
-                plan.skips.push({ email: contact.email, reason: MailchimpSyncIssueReason.NoConsent });
+                plan.skips.push({
+                    email: contact.email,
+                    reason: MailchimpSyncIssueReason.NoConsent,
+                });
                 continue;
             }
             unsubscribe = true;
@@ -235,7 +272,12 @@ export function planSync(
             tags: buildTagChanges(contact, existing, options),
         };
 
-        if (existing && !upsert.unsubscribe && upsert.tags.length === 0 && [...upsert.mergeFields].every(([tag, value]) => existing.mergeFields.get(tag) === value)) {
+        if (
+            existing &&
+            !upsert.unsubscribe &&
+            upsert.tags.length === 0 &&
+            [...upsert.mergeFields].every(([tag, value]) => existing.mergeFields.get(tag) === value)
+        ) {
             plan.unchanged++;
             continue;
         }
@@ -243,7 +285,7 @@ export function planSync(
     }
 
     if (options.kind === 'members' && options.full) {
-        const included = new Set(contacts.map(c => c.email));
+        const included = new Set(contacts.map((c) => c.email));
 
         for (const existing of existingContacts.values()) {
             if (included.has(existing.email) || existing.status === 'archived') {
@@ -251,17 +293,20 @@ export function planSync(
             }
 
             const tags = options.tags;
-            const staleTags = existing.tags.filter(tag => tags.isMemberTag(tag) && tag !== tags.removed);
+            const staleTags = existing.tags.filter(
+                (tag) => tags.isMemberTag(tag) && tag !== tags.removed,
+            );
             const isMarked = existing.tags.includes(tags.removed);
 
             // Customers stay in the audience for their orders
-            const archive = options.archiveRemoved && !existing.tags.some(tag => tags.isOrderTag(tag));
+            const archive =
+                options.archiveRemoved && !existing.tags.some((tag) => tags.isOrderTag(tag));
 
             if (staleTags.length > 0) {
                 plan.removals.push({
                     email: existing.email,
                     tags: [
-                        ...staleTags.map(name => ({ name, status: 'inactive' as const })),
+                        ...staleTags.map((name) => ({ name, status: 'inactive' as const })),
                         ...(isMarked ? [] : [{ name: tags.removed, status: 'active' as const }]),
                     ],
                     archive,

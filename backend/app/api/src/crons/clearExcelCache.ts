@@ -21,7 +21,17 @@ export async function clearExcelCache() {
     }
 }
 
-export async function clearExcelCacheHelper({ lastExcelClear, now, cachePath, environment }: { lastExcelClear: number | null; now: Date; cachePath: string; environment: 'production' | 'development' | 'staging' | 'test' }): Promise<boolean> {
+export async function clearExcelCacheHelper({
+    lastExcelClear,
+    now,
+    cachePath,
+    environment,
+}: {
+    lastExcelClear: number | null;
+    now: Date;
+    cachePath: string;
+    environment: 'production' | 'development' | 'staging' | 'test';
+}): Promise<boolean> {
     if (environment === 'development') {
         return false;
     }

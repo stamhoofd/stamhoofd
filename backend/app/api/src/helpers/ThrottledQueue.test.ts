@@ -84,7 +84,7 @@ describe('ThrottledQueue', () => {
         ]);
 
         expect(processedItems.size).toBe(items.length);
-        items.forEach(item => expect(processedItems.has(item)).toBe(true));
+        items.forEach((item) => expect(processedItems.has(item)).toBe(true));
     });
 
     it('should call emptyHandler when queue becomes empty', async () => {
@@ -131,7 +131,9 @@ describe('ThrottledQueue', () => {
 
         expect(handler).toHaveBeenCalledWith([1]);
         expect(consoleErrorSpy).toHaveBeenCalled();
-        expect(consoleErrorSpy.mock.calls[0][0]).toContain('Error processing batch in ThrottledQueue:');
+        expect(consoleErrorSpy.mock.calls[0][0]).toContain(
+            'Error processing batch in ThrottledQueue:',
+        );
 
         consoleErrorSpy.mockRestore();
     });

@@ -3,29 +3,44 @@ import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@
 
 export const auditLogFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    ['id', createColumnFilter({
-        expression: SQL.column('id'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['organizationId', createColumnFilter({
-        expression: SQL.column('organizationId'),
-        type: SQLValueType.String,
-        nullable: true,
-    })],
-    ['type', createColumnFilter({
-        expression: SQL.column('type'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['objectId', createColumnFilter({
-        expression: SQL.column('objectId'),
-        type: SQLValueType.String,
-        nullable: true,
-    })],
-    ['createdAt', createColumnFilter({
-        expression: SQL.column('createdAt'),
-        type: SQLValueType.Datetime,
-        nullable: false,
-    })],
+    [
+        'id',
+        createColumnFilter({
+            expression: SQL.column('id'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'organizationId',
+        createColumnFilter({
+            expression: SQL.column('organizationId'),
+            type: SQLValueType.String,
+            nullable: true,
+        }),
+    ],
+    [
+        'type',
+        createColumnFilter({
+            expression: SQL.column('type'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'objectId',
+        createColumnFilter({
+            expression: SQL.column('objectId'),
+            type: SQLValueType.String,
+            nullable: true,
+        }),
+    ],
+    [
+        'createdAt',
+        createColumnFilter({
+            expression: SQL.column('createdAt'),
+            type: SQLValueType.Datetime,
+            nullable: false,
+        }),
+    ],
 ]);

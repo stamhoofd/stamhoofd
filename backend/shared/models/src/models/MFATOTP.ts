@@ -1,5 +1,13 @@
 import { column } from '@node/database';
-import { QueryableModel, SQL, SQLNull, SQLScalar, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
+import {
+    QueryableModel,
+    SQL,
+    SQLNull,
+    SQLScalar,
+    SQLWhereEqual,
+    SQLWhereOr,
+    SQLWhereSign,
+} from '@stamhoofd/sql';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -10,7 +18,9 @@ export class MFATOTP extends QueryableModel {
     static table = 'mfa_totp';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -46,7 +56,8 @@ export class MFATOTP extends QueryableModel {
     lastUsedCounter: number | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -58,7 +69,8 @@ export class MFATOTP extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -79,10 +91,20 @@ export class MFATOTP extends QueryableModel {
             .set('lastUsedCounter', counter)
             .set('lastUsedAt', new Date())
             .where('id', this.id)
-            .where(new SQLWhereOr([
-                new SQLWhereEqual(SQL.column('lastUsedCounter'), SQLWhereSign.Equal, new SQLNull()),
-                new SQLWhereEqual(SQL.column('lastUsedCounter'), SQLWhereSign.Less, new SQLScalar(counter)),
-            ]))
+            .where(
+                new SQLWhereOr([
+                    new SQLWhereEqual(
+                        SQL.column('lastUsedCounter'),
+                        SQLWhereSign.Equal,
+                        new SQLNull(),
+                    ),
+                    new SQLWhereEqual(
+                        SQL.column('lastUsedCounter'),
+                        SQLWhereSign.Less,
+                        new SQLScalar(counter),
+                    ),
+                ]),
+            )
             .update();
 
         if (changedRows !== 1) {
@@ -99,7 +121,7 @@ export class MFATOTP extends QueryableModel {
 
     static async getConfirmedForUser(userId: string): Promise<MFATOTP[]> {
         const all = await this.getForUser(userId);
-        return all.filter(t => t.confirmedAt !== null);
+        return all.filter((t) => t.confirmedAt !== null);
     }
 
     /**

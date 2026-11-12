@@ -1,33 +1,58 @@
 import type { InMemoryFilterDefinitions } from './InMemoryFilter.js';
-import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, createInMemoryWildcardCompilerSelector } from './InMemoryFilter.js';
+import {
+    baseInMemoryFilterCompilers,
+    compileToInMemoryFilter,
+    createInMemoryFilterCompiler,
+    createInMemoryWildcardCompilerSelector,
+} from './InMemoryFilter.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 
-function testError({ filter, filters, error }: { filter: StamhoofdFilter; filters: InMemoryFilterDefinitions; error: string | RegExp }) {
+function testError({
+    filter,
+    filters,
+    error,
+}: {
+    filter: StamhoofdFilter;
+    filters: InMemoryFilterDefinitions;
+    error: string | RegExp;
+}) {
     expect(() => {
         compileToInMemoryFilter(filter, filters);
     }).toThrow(error);
 }
 
-function test({ filter, filters, objects, doNotMatch }: { filter: StamhoofdFilter; filters: InMemoryFilterDefinitions; objects?: any[]; doNotMatch?: any[] }) {
+function test({
+    filter,
+    filters,
+    objects,
+    doNotMatch,
+}: {
+    filter: StamhoofdFilter;
+    filters: InMemoryFilterDefinitions;
+    objects?: any[];
+    doNotMatch?: any[];
+}) {
     const compiled = compileToInMemoryFilter(filter, filters);
     for (const object of objects ?? []) {
         if (compiled(object) !== true) {
-            expect.fail(`Object ${JSON.stringify(object)} did not match filter ${JSON.stringify(filter)}`);
+            expect.fail(
+                `Object ${JSON.stringify(object)} did not match filter ${JSON.stringify(filter)}`,
+            );
         }
     }
 
     for (const object of doNotMatch ?? []) {
         if (compiled(object) !== false) {
-            expect.fail(`Object ${JSON.stringify(object)} matched filter ${JSON.stringify(filter)}, but should not have`);
+            expect.fail(
+                `Object ${JSON.stringify(object)} matched filter ${JSON.stringify(filter)}, but should not have`,
+            );
         }
     }
 }
 
 describe('InMemoryFilter', () => {
     it('Cannot filter on unknown columns', async () => {
-        const filters = new Map([
-            ...baseInMemoryFilterCompilers,
-        ]);
+        const filters = new Map([...baseInMemoryFilterCompilers]);
 
         testError({
             filter: { name: 'John Doe' },
@@ -134,14 +159,8 @@ describe('InMemoryFilter', () => {
             test({
                 filter: { age: 12 },
                 filters,
-                objects: [
-                    { age: 12 },
-                ],
-                doNotMatch: [
-                    { age: 11 },
-                    { age: 13 },
-                    { age: null },
-                ],
+                objects: [{ age: 12 }],
+                doNotMatch: [{ age: 11 }, { age: 13 }, { age: null }],
             });
         });
     });
@@ -216,10 +235,7 @@ describe('InMemoryFilter', () => {
             test({
                 filter: {
                     name: {
-                        $and: [
-                            { $contains: 'John' },
-                            { $contains: 'doe' },
-                        ],
+                        $and: [{ $contains: 'John' }, { $contains: 'doe' }],
                     },
                 },
                 filters,
@@ -277,10 +293,7 @@ describe('InMemoryFilter', () => {
                     { name: 'John Doe', age: 11 },
                     { name: 'John Smith', age: 12 },
                 ],
-                doNotMatch: [
-                    { name: 'Jane Doe', age: 11 },
-                    {},
-                ],
+                doNotMatch: [{ name: 'Jane Doe', age: 11 }, {}],
             });
         });
 
@@ -338,7 +351,7 @@ describe('InMemoryFilter', () => {
                     { age: 12 },
                     { age: 13 },
                     { age: null },
-                    { },
+                    {},
                     null,
                     new Date(),
                     10,
@@ -352,10 +365,18 @@ describe('InMemoryFilter', () => {
     describe('Wildcards', () => {
         const filters: InMemoryFilterDefinitions = new Map([
             ...baseInMemoryFilterCompilers,
-            ['recordAnswers', createInMemoryFilterCompiler('details.recordAnswers', createInMemoryWildcardCompilerSelector(new Map([
-                ...baseInMemoryFilterCompilers,
-                ['id', createInMemoryFilterCompiler('id')],
-            ])))],
+            [
+                'recordAnswers',
+                createInMemoryFilterCompiler(
+                    'details.recordAnswers',
+                    createInMemoryWildcardCompilerSelector(
+                        new Map([
+                            ...baseInMemoryFilterCompilers,
+                            ['id', createInMemoryFilterCompiler('id')],
+                        ]),
+                    ),
+                ),
+            ],
         ]);
 
         it('Can filter on wildcards', async () => {
@@ -425,10 +446,7 @@ describe('InMemoryFilter', () => {
                     { age: 4 },
                     { age: -5 },
                 ],
-                doNotMatch: [
-                    { age: 5 },
-                    { age: 10 },
-                ],
+                doNotMatch: [{ age: 5 }, { age: 10 }],
             });
         });
 
@@ -447,11 +465,7 @@ describe('InMemoryFilter', () => {
                     { name: 'John Dod' },
                     { name: 'John Do' },
                 ],
-                doNotMatch: [
-                    { name: 'John Dof' },
-                    { name: 'John Doee' },
-                    { name: 'John Doe' },
-                ],
+                doNotMatch: [{ name: 'John Dof' }, { name: 'John Doee' }, { name: 'John Doe' }],
             });
         });
 
@@ -488,10 +502,7 @@ describe('InMemoryFilter', () => {
             test({
                 filter: { age: { $gt: 5 } },
                 filters,
-                objects: [
-                    { age: 10 },
-                    { age: 6 },
-                ],
+                objects: [{ age: 10 }, { age: 6 }],
                 doNotMatch: [
                     { age: null }, // null is always smaller than anything
                     { age: 5 },
@@ -510,10 +521,7 @@ describe('InMemoryFilter', () => {
             test({
                 filter: { name: { $gt: 'John Doe' } },
                 filters,
-                objects: [
-                    { name: 'John Dof' },
-                    { name: 'John Doee' },
-                ],
+                objects: [{ name: 'John Dof' }, { name: 'John Doee' }],
                 doNotMatch: [
                     { name: null }, // null is always smaller than anything
                     { name: 'Jane Doe' },
@@ -533,10 +541,7 @@ describe('InMemoryFilter', () => {
             test({
                 filter: { birthDay: { $gt: new Date(1994, 5, 24) } },
                 filters,
-                objects: [
-                    { birthDay: new Date(1994, 5, 25) },
-                    { birthDay: new Date(1995, 5, 24) },
-                ],
+                objects: [{ birthDay: new Date(1994, 5, 25) }, { birthDay: new Date(1995, 5, 24) }],
                 doNotMatch: [
                     { birthDay: null }, // null is always smaller than anything
                     { birthDay: new Date(1994, 5, 23) },

@@ -12,7 +12,8 @@ const devTargets = Object.values(DevTarget);
 
 export default class Dev extends BaseCommand {
     static summary = 'Run local development targets';
-    static description = 'Use this to start the full stack, only the backend, only the frontend, or a single inferred local instance.';
+    static description =
+        'Use this to start the full stack, only the backend, only the frontend, or a single inferred local instance.';
     static examples = [
         'stam dev all --env keeo --open',
         'stam dev backend --env keeo --name feature-payments --stripe',
@@ -51,7 +52,11 @@ export default class Dev extends BaseCommand {
             return;
         }
 
-        const { context } = await withSpan('dev.workspace', () => this.parseWithContext(Dev, parsed), { label: 'Resolving development workspace' });
+        const { context } = await withSpan(
+            'dev.workspace',
+            () => this.parseWithContext(Dev, parsed),
+            { label: 'Resolving development workspace' },
+        );
         await runDev(context, target, {
             services: flags.services ?? target !== DevTarget.Frontend,
             stripe: flags.stripe,

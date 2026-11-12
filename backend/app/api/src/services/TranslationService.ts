@@ -1,5 +1,8 @@
 import { SimpleError } from '@common/errors';
-import type { TipTapDocument, TranslatableValue } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
+import type {
+    TipTapDocument,
+    TranslatableValue,
+} from '@stamhoofd/structures/endpoints/TranslateRequest.js';
 import { isTipTapDocument } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
 import { Language } from '@stamhoofd/types/Language';
 import OpenAI from 'openai';
@@ -44,19 +47,27 @@ export class TranslationService {
      * Translates all inputs into every target language. Each language is a separate model call, so
      * one failing language fails the whole request.
      */
-    static async translate(request: TranslationRequest): Promise<Map<Language, Map<string, TranslatableValue>>> {
+    static async translate(
+        request: TranslationRequest,
+    ): Promise<Map<Language, Map<string, TranslatableValue>>> {
         const client = this.createClient();
         const uniqueLanguages = [...new Set(request.targetLanguages)];
 
-        const results = await Promise.all(uniqueLanguages.map(async (language) => {
-            const translations = await this.translateToLanguage(client, request, language);
-            return [language, translations] as const;
-        }));
+        const results = await Promise.all(
+            uniqueLanguages.map(async (language) => {
+                const translations = await this.translateToLanguage(client, request, language);
+                return [language, translations] as const;
+            }),
+        );
 
         return new Map(results);
     }
 
-    private static async translateToLanguage(client: OpenAI, request: TranslationRequest, targetLanguage: Language): Promise<Map<string, TranslatableValue>> {
+    private static async translateToLanguage(
+        client: OpenAI,
+        request: TranslationRequest,
+        targetLanguage: Language,
+    ): Promise<Map<string, TranslatableValue>> {
         const inputs = Object.fromEntries(request.inputs);
 
         let response: OpenAI.Chat.Completions.ChatCompletion;
@@ -94,10 +105,15 @@ export class TranslationService {
         return result;
     }
 
-    private static buildSystemPrompt(request: TranslationRequest, targetLanguage: Language): string {
+    private static buildSystemPrompt(
+        request: TranslationRequest,
+        targetLanguage: Language,
+    ): string {
         const lines = [
             `You are a professional translator. Translate the values of the "inputs" object in the user message into ${LANGUAGE_NAMES[targetLanguage]}.`,
-            request.sourceLanguage ? `The inputs are written in ${LANGUAGE_NAMES[request.sourceLanguage]}.` : 'Detect the source language of the inputs.',
+            request.sourceLanguage
+                ? `The inputs are written in ${LANGUAGE_NAMES[request.sourceLanguage]}.`
+                : 'Detect the source language of the inputs.',
             'The inputs belong together (e.g. a name and a description of the same item): use them as context for each other, keep terminology consistent across them.',
             'Input values are either plain strings or TipTap/ProseMirror JSON documents.',
             '- Plain strings: return the translated string. Keep placeholders like {{name}} or {firstName} exactly as they are.',
@@ -128,7 +144,11 @@ export class TranslationService {
         }
     }
 
-    private static validateTranslation(key: string, original: TranslatableValue, translated: unknown): TranslatableValue {
+    private static validateTranslation(
+        key: string,
+        original: TranslatableValue,
+        translated: unknown,
+    ): TranslatableValue {
         if (typeof original === 'string') {
             if (typeof translated !== 'string') {
                 throw this.invalidOutputError(`Missing or invalid translation for "${key}"`);

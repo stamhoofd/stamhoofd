@@ -1,9 +1,28 @@
 import { SimpleError } from '@common/errors';
 import type { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { User, Token } from '@stamhoofd/models';
-import { MFARecoveryCode, MFATOTP, MFAToken, Organization, Platform, RateLimiter, WebauthnCredential } from '@stamhoofd/models';
+import {
+    MFARecoveryCode,
+    MFATOTP,
+    MFAToken,
+    Organization,
+    Platform,
+    RateLimiter,
+    WebauthnCredential,
+} from '@stamhoofd/models';
 import type { User as UserStruct } from '@stamhoofd/structures';
-import { MFAChallengeResponse, MFAEnrollmentResult, MFAMethodType, MFASetupResponse, MFAStatus, PasskeyCredential, RecoveryCodes, SessionLoginMethod, TOTPCredential, Token as TokenStruct } from '@stamhoofd/structures';
+import {
+    MFAChallengeResponse,
+    MFAEnrollmentResult,
+    MFAMethodType,
+    MFASetupResponse,
+    MFAStatus,
+    PasskeyCredential,
+    RecoveryCodes,
+    SessionLoginMethod,
+    TOTPCredential,
+    Token as TokenStruct,
+} from '@stamhoofd/structures';
 
 import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/server';
 
@@ -64,18 +83,21 @@ const enrollmentConfirmationRateLimiter = new RateLimiter({
  * What still has to happen before a session may be issued for a user whose primary
  * credential was just accepted.
  */
-export type SecondFactorRequirement
-    = | { type: 'none' }
-        | { type: 'challenge'; challenge: MFAChallengeResponse }
-        | { type: 'setup'; setupToken: MFAToken }
-        | { type: 'confirm-email' };
+export type SecondFactorRequirement =
+    | { type: 'none' }
+    | { type: 'challenge'; challenge: MFAChallengeResponse }
+    | { type: 'setup'; setupToken: MFAToken }
+    | { type: 'confirm-email' };
 
 export class TwoFactorHelper {
     /**
      * Whether the user is required to have 2FA. Evaluated only on the password grant;
      * SSO/Google logins are trusted to provide their own 2FA.
      */
-    static async isTwoFactorRequired(user: User, organization: Organization | null): Promise<boolean> {
+    static async isTwoFactorRequired(
+        user: User,
+        organization: Organization | null,
+    ): Promise<boolean> {
         const perms = user.permissions;
         if (!perms) {
             return false;
@@ -102,11 +124,15 @@ export class TwoFactorHelper {
         }
 
         // Reuse the organization we already have in memory instead of fetching it again.
-        if (organization && organizationIds.includes(organization.id) && organization.privateMeta?.requireTwoFactor) {
+        if (
+            organization &&
+            organizationIds.includes(organization.id) &&
+            organization.privateMeta?.requireTwoFactor
+        ) {
             return true;
         }
 
-        const remaining = organizationIds.filter(id => id !== organization?.id);
+        const remaining = organizationIds.filter((id) => id !== organization?.id);
         if (remaining.length === 0) {
             return false;
         }
@@ -126,7 +152,10 @@ export class TwoFactorHelper {
      */
     static isInactiveForEnrollment(user: User): boolean {
         const lastActiveAt = user.lastActiveAt ?? user.createdAt;
-        return lastActiveAt.getTime() < Date.now() - INACTIVE_ADMIN_ENROLLMENT_DAYS * 24 * 60 * 60 * 1000;
+        return (
+            lastActiveAt.getTime() <
+            Date.now() - INACTIVE_ADMIN_ENROLLMENT_DAYS * 24 * 60 * 60 * 1000
+        );
     }
 
     /**
@@ -147,9 +176,16 @@ export class TwoFactorHelper {
      *    unless the account ALSO has a password, because then the password remains a way
      *    in that bypasses whatever the provider enforces.
      */
-    static async getSecondFactorRequirement(user: User, organization: Organization | null, { loginMethod }: { loginMethod: SessionLoginMethod }): Promise<SecondFactorRequirement> {
+    static async getSecondFactorRequirement(
+        user: User,
+        organization: Organization | null,
+        { loginMethod }: { loginMethod: SessionLoginMethod },
+    ): Promise<SecondFactorRequirement> {
         if (await TwoFactorHelper.userHasFactors(user.id)) {
-            return { type: 'challenge', challenge: await TwoFactorHelper.createLoginChallenge(user, { loginMethod }) };
+            return {
+                type: 'challenge',
+                challenge: await TwoFactorHelper.createLoginChallenge(user, { loginMethod }),
+            };
         }
 
         if (loginMethod === SessionLoginMethod.SSO && !user.hasPasswordBasedAccount()) {
@@ -157,10 +193,16 @@ export class TwoFactorHelper {
         }
 
         if (await TwoFactorHelper.isTwoFactorRequired(user, organization)) {
-            if (loginMethod === SessionLoginMethod.Password && TwoFactorHelper.isInactiveForEnrollment(user)) {
+            if (
+                loginMethod === SessionLoginMethod.Password &&
+                TwoFactorHelper.isInactiveForEnrollment(user)
+            ) {
                 return { type: 'confirm-email' };
             }
-            return { type: 'setup', setupToken: await MFAToken.createFor(user.id, 'setup', { loginMethod }) };
+            return {
+                type: 'setup',
+                setupToken: await MFAToken.createFor(user.id, 'setup', { loginMethod }),
+            };
         }
 
         return { type: 'none' };
@@ -171,7 +213,11 @@ export class TwoFactorHelper {
      * their second factor. Never throws: the login is blocked either way, and turning a
      * mail failure into a 500 would only hide why the user cannot sign in.
      */
-    static async sendEnrollmentConfirmationEmail(user: User, organization: Organization | null, i18n: I18n): Promise<void> {
+    static async sendEnrollmentConfirmationEmail(
+        user: User,
+        organization: Organization | null,
+        i18n: I18n,
+    ): Promise<void> {
         try {
             enrollmentConfirmationRateLimiter.track(user.id);
         } catch {
@@ -202,8 +248,23 @@ export class TwoFactorHelper {
      * whoever holds the link could enroll one and get a session anyway, and the client
      * needs a session to let the user choose a password before enrolling.
      */
-    static async assertSecondFactorOrThrow(user: User, organization: Organization | null, version: number, { loginMethod, i18n, allowTemporarySession = false }: { loginMethod: SessionLoginMethod.Password | SessionLoginMethod.Email; i18n: I18n; allowTemporarySession?: boolean }): Promise<void> {
-        const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod });
+    static async assertSecondFactorOrThrow(
+        user: User,
+        organization: Organization | null,
+        version: number,
+        {
+            loginMethod,
+            i18n,
+            allowTemporarySession = false,
+        }: {
+            loginMethod: SessionLoginMethod.Password | SessionLoginMethod.Email;
+            i18n: I18n;
+            allowTemporarySession?: boolean;
+        },
+    ): Promise<void> {
+        const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, {
+            loginMethod,
+        });
 
         if (requirement.type === 'confirm-email') {
             await TwoFactorHelper.sendEnrollmentConfirmationEmail(user, organization, i18n);
@@ -227,7 +288,14 @@ export class TwoFactorHelper {
         }
 
         if (requirement.type === 'setup') {
-            const temporaryToken = allowTemporarySession ? new TokenStruct(await SessionService.createSession(user, { loginMethod, authenticatedAt: new Date() })) : null;
+            const temporaryToken = allowTemporarySession
+                ? new TokenStruct(
+                      await SessionService.createSession(user, {
+                          loginMethod,
+                          authenticatedAt: new Date(),
+                      }),
+                  )
+                : null;
 
             throw new SimpleError({
                 code: 'require_mfa_setup',
@@ -269,7 +337,7 @@ export class TwoFactorHelper {
             WebauthnCredential.select().where('userId', unique).fetch(),
         ]);
 
-        return new Set([...totp.map(t => t.userId), ...passkeys.map(p => p.userId)]);
+        return new Set([...totp.map((t) => t.userId), ...passkeys.map((p) => p.userId)]);
     }
 
     /**
@@ -282,19 +350,23 @@ export class TwoFactorHelper {
             return;
         }
 
-        const withFactors = await TwoFactorHelper.filterUserIdsWithFactors(users.map(u => u.id));
+        const withFactors = await TwoFactorHelper.filterUserIdsWithFactors(users.map((u) => u.id));
         for (const user of users) {
             user.hasTwoFactor = withFactors.has(user.id);
         }
     }
 
-    static async getEnrolledMethods(userId: string): Promise<{ methods: MFAMethodType[]; passkeys: WebauthnCredential[] }> {
+    static async getEnrolledMethods(
+        userId: string,
+    ): Promise<{ methods: MFAMethodType[]; passkeys: WebauthnCredential[] }> {
         const totp = await MFATOTP.getConfirmedForUser(userId);
         const recovery = await MFARecoveryCode.getUnusedForUser(userId);
 
         // Only passkeys of the RP ID we authenticate against can actually be used; the
         // authenticator will not release the others.
-        const passkeys = WebauthnHelper.filterForCurrentRpID(await WebauthnCredential.getForUser(userId));
+        const passkeys = WebauthnHelper.filterForCurrentRpID(
+            await WebauthnCredential.getForUser(userId),
+        );
 
         const methods: MFAMethodType[] = [];
         if (totp.length > 0) {
@@ -312,7 +384,10 @@ export class TwoFactorHelper {
     /**
      * Create a login MFA session token and the challenge payload returned to the client.
      */
-    static async createLoginChallenge(user: User, { loginMethod }: { loginMethod: SessionLoginMethod }): Promise<MFAChallengeResponse> {
+    static async createLoginChallenge(
+        user: User,
+        { loginMethod }: { loginMethod: SessionLoginMethod },
+    ): Promise<MFAChallengeResponse> {
         const { methods, passkeys } = await TwoFactorHelper.getEnrolledMethods(user.id);
 
         let webauthnOptions: PublicKeyCredentialRequestOptionsJSON | null = null;
@@ -322,7 +397,10 @@ export class TwoFactorHelper {
             challenge = webauthnOptions.challenge;
         }
 
-        const mfaToken = await MFAToken.createFor(user.id, 'login', { webauthnChallenge: challenge, loginMethod });
+        const mfaToken = await MFAToken.createFor(user.id, 'login', {
+            webauthnChallenge: challenge,
+            loginMethod,
+        });
 
         return MFAChallengeResponse.create({
             token: mfaToken.token,
@@ -367,7 +445,12 @@ export class TwoFactorHelper {
      * signed out: enrolling a factor is how a user reacts to a suspected compromise, so it
      * has to end the sessions they did not make this request from.
      */
-    static async completeEnrollment(user: User, setupToken: MFAToken | null, wasFirstFactor: boolean, currentToken: Token | null): Promise<MFAEnrollmentResult> {
+    static async completeEnrollment(
+        user: User,
+        setupToken: MFAToken | null,
+        wasFirstFactor: boolean,
+        currentToken: Token | null,
+    ): Promise<MFAEnrollmentResult> {
         let recoveryCodes: RecoveryCodes | null = null;
         if (wasFirstFactor) {
             const codes = await RecoveryCodeHelper.regenerateForUser(user.id);
@@ -375,12 +458,18 @@ export class TwoFactorHelper {
         }
 
         // Before minting the new session, so it is never signed out by its own enrollment.
-        await SessionService.deleteOtherSessions({ userId: user.id, keepAccessToken: currentToken?.accessToken ?? null });
+        await SessionService.deleteOtherSessions({
+            userId: user.id,
+            keepAccessToken: currentToken?.accessToken ?? null,
+        });
 
         let token: TokenStruct | null = null;
         if (setupToken) {
             await setupToken.consume();
-            const t = await SessionService.createSession(user, { loginMethod: setupToken.loginMethod, authenticatedAt: new Date() });
+            const t = await SessionService.createSession(user, {
+                loginMethod: setupToken.loginMethod,
+                authenticatedAt: new Date(),
+            });
             await user.markActive();
             token = new TokenStruct(t);
         }
@@ -402,7 +491,10 @@ export class TwoFactorHelper {
             await MFARecoveryCode.deleteForUser(user.id);
         }
 
-        await SessionService.deleteOtherSessions({ userId: user.id, keepAccessToken: currentToken?.accessToken ?? null });
+        await SessionService.deleteOtherSessions({
+            userId: user.id,
+            keepAccessToken: currentToken?.accessToken ?? null,
+        });
 
         return await TwoFactorHelper.buildStatus(user);
     }
@@ -414,21 +506,33 @@ export class TwoFactorHelper {
         const recovery = await MFARecoveryCode.getUnusedForUser(userId);
 
         return MFAStatus.create({
-            totp: totp.map(t => TOTPCredential.create({
-                id: t.id,
-                name: t.name,
-                createdAt: t.createdAt,
-                lastUsedAt: t.lastUsedAt,
-            })).sort((a, b) => Sorter.byDateValue(a.lastUsedAt ?? a.createdAt, b.lastUsedAt ?? b.createdAt)),
-            passkeys: passkeys.map(p => PasskeyCredential.create({
-                id: p.id,
-                name: p.name,
-                createdAt: p.createdAt,
-                lastUsedAt: p.lastUsedAt,
-                providerId: p.providerId,
-                providerName: p.providerName,
-                transports: p.transportsArray,
-            })).sort((a, b) => Sorter.byDateValue(a.lastUsedAt ?? a.createdAt, b.lastUsedAt ?? b.createdAt)),
+            totp: totp
+                .map((t) =>
+                    TOTPCredential.create({
+                        id: t.id,
+                        name: t.name,
+                        createdAt: t.createdAt,
+                        lastUsedAt: t.lastUsedAt,
+                    }),
+                )
+                .sort((a, b) =>
+                    Sorter.byDateValue(a.lastUsedAt ?? a.createdAt, b.lastUsedAt ?? b.createdAt),
+                ),
+            passkeys: passkeys
+                .map((p) =>
+                    PasskeyCredential.create({
+                        id: p.id,
+                        name: p.name,
+                        createdAt: p.createdAt,
+                        lastUsedAt: p.lastUsedAt,
+                        providerId: p.providerId,
+                        providerName: p.providerName,
+                        transports: p.transportsArray,
+                    }),
+                )
+                .sort((a, b) =>
+                    Sorter.byDateValue(a.lastUsedAt ?? a.createdAt, b.lastUsedAt ?? b.createdAt),
+                ),
             hasRecoveryCodes: recovery.length > 0,
             recoveryCodesRemaining: recovery.length,
             canUsePasskeys: user.canUsePasskeys(),

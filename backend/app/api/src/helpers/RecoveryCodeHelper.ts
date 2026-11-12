@@ -18,7 +18,10 @@ const recoveryCodeBase = basex(RECOVERY_CODE_ALPHABET);
  * rather than hand-rolled modulo indexing.
  */
 function randomCode(): string {
-    const raw = recoveryCodeBase.encode(crypto.randomBytes(100)).toUpperCase().substring(0, CODE_LENGTH);
+    const raw = recoveryCodeBase
+        .encode(crypto.randomBytes(100))
+        .toUpperCase()
+        .substring(0, CODE_LENGTH);
     return raw.replace(/(.{4})(.{4})(.{4})(.{4})/, '$1-$2-$3-$4');
 }
 

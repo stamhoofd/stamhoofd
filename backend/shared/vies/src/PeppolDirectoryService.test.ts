@@ -23,9 +23,9 @@ describe('PeppolDirectoryService', () => {
      */
     function matchResponse(value: string) {
         return {
-            'version': '1.0',
+            version: '1.0',
             'total-result-count': 1,
-            'matches': [
+            matches: [
                 {
                     participantID: { scheme: 'iso6523-actorid-upis', value },
                     entities: [{ name: [{ name: 'Demo Company' }], countryCode: 'BE' }],
@@ -35,7 +35,10 @@ describe('PeppolDirectoryService', () => {
     }
 
     test('resolves when the participant is registered in the directory', async () => {
-        const scope = mockDirectory('iso6523-actorid-upis::0208:0123456789', matchResponse('0208:0123456789'));
+        const scope = mockDirectory(
+            'iso6523-actorid-upis::0208:0123456789',
+            matchResponse('0208:0123456789'),
+        );
 
         const endpointId = PeppolEndointId.create({ schemeID: '0208', id: '0123456789' });
         await expect(PeppolDirectoryService.validate(endpointId)).resolves.toBeUndefined();
@@ -48,7 +51,11 @@ describe('PeppolDirectoryService', () => {
     test('overwrites a pre-existing entityName with the value from the directory', async () => {
         mockDirectory('iso6523-actorid-upis::0208:0123456789', matchResponse('0208:0123456789'));
 
-        const endpointId = PeppolEndointId.create({ schemeID: '0208', id: '0123456789', entityName: 'Client supplied name' });
+        const endpointId = PeppolEndointId.create({
+            schemeID: '0208',
+            id: '0123456789',
+            entityName: 'Client supplied name',
+        });
         await PeppolDirectoryService.validate(endpointId);
 
         expect(endpointId.entityName).toBe('Demo Company');
@@ -57,20 +64,34 @@ describe('PeppolDirectoryService', () => {
     test('sets entityName to null when the directory match has no entity name', async () => {
         mockDirectory('iso6523-actorid-upis::0208:0123456789', {
             'total-result-count': 1,
-            'matches': [{ participantID: { scheme: 'iso6523-actorid-upis', value: '0208:0123456789' }, entities: [] }],
+            matches: [
+                {
+                    participantID: { scheme: 'iso6523-actorid-upis', value: '0208:0123456789' },
+                    entities: [],
+                },
+            ],
         });
 
-        const endpointId = PeppolEndointId.create({ schemeID: '0208', id: '0123456789', entityName: 'stale' });
+        const endpointId = PeppolEndointId.create({
+            schemeID: '0208',
+            id: '0123456789',
+            entityName: 'stale',
+        });
         await PeppolDirectoryService.validate(endpointId);
 
         expect(endpointId.entityName).toBeNull();
     });
 
     test('trims whitespace around the scheme and id before querying', async () => {
-        const scope = mockDirectory('iso6523-actorid-upis::0088:5412345000013', matchResponse('0088:5412345000013'));
+        const scope = mockDirectory(
+            'iso6523-actorid-upis::0088:5412345000013',
+            matchResponse('0088:5412345000013'),
+        );
 
         await expect(
-            PeppolDirectoryService.validate(PeppolEndointId.create({ schemeID: ' 0088 ', id: ' 5412345000013 ' })),
+            PeppolDirectoryService.validate(
+                PeppolEndointId.create({ schemeID: ' 0088 ', id: ' 5412345000013 ' }),
+            ),
         ).resolves.toBeUndefined();
 
         expect(scope.isDone()).toBe(true);
@@ -80,8 +101,12 @@ describe('PeppolDirectoryService', () => {
         const scope = mockDirectory('iso6523-actorid-upis::9999:123', matchResponse('9999:123'));
 
         await expect(
-            PeppolDirectoryService.validate(PeppolEndointId.create({ schemeID: '9999', id: '123' })),
-        ).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }));
+            PeppolDirectoryService.validate(
+                PeppolEndointId.create({ schemeID: '9999', id: '123' }),
+            ),
+        ).rejects.toThrow(
+            STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }),
+        );
 
         expect(scope.isDone()).toBe(false);
     });
@@ -90,45 +115,69 @@ describe('PeppolDirectoryService', () => {
         const scope = mockDirectory('iso6523-actorid-upis::0208:', matchResponse('0208:'));
 
         await expect(
-            PeppolDirectoryService.validate(PeppolEndointId.create({ schemeID: '0208', id: '   ' })),
-        ).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }));
+            PeppolDirectoryService.validate(
+                PeppolEndointId.create({ schemeID: '0208', id: '   ' }),
+            ),
+        ).rejects.toThrow(
+            STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }),
+        );
 
         expect(scope.isDone()).toBe(false);
     });
 
     test('rejects when the participant is not found in the directory', async () => {
         mockDirectory('iso6523-actorid-upis::0060:123456789', {
-            'version': '1.0',
+            version: '1.0',
             'total-result-count': 0,
-            'matches': [],
+            matches: [],
         });
 
         await expect(
-            PeppolDirectoryService.validate(PeppolEndointId.create({ schemeID: '0060', id: '123456789' })),
-        ).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }));
+            PeppolDirectoryService.validate(
+                PeppolEndointId.create({ schemeID: '0060', id: '123456789' }),
+            ),
+        ).rejects.toThrow(
+            STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }),
+        );
     });
 
     test('rejects when the directory only returns a different participant', async () => {
         mockDirectory('iso6523-actorid-upis::0208:0123456789', matchResponse('0208:9999999999'));
 
         await expect(
-            PeppolDirectoryService.validate(PeppolEndointId.create({ schemeID: '0208', id: '0123456789' })),
-        ).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }));
+            PeppolDirectoryService.validate(
+                PeppolEndointId.create({ schemeID: '0208', id: '0123456789' }),
+            ),
+        ).rejects.toThrow(
+            STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }),
+        );
     });
 
     test('throws service_unavailable when the directory errors out', async () => {
-        mockDirectory('iso6523-actorid-upis::0208:0123456789', { message: 'Internal Server Error' }, 500);
+        mockDirectory(
+            'iso6523-actorid-upis::0208:0123456789',
+            { message: 'Internal Server Error' },
+            500,
+        );
 
         await expect(
-            PeppolDirectoryService.validate(PeppolEndointId.create({ schemeID: '0208', id: '0123456789' })),
-        ).rejects.toThrow(STExpect.simpleError({ code: 'service_unavailable', field: 'customPeppolEndpointId' }));
+            PeppolDirectoryService.validate(
+                PeppolEndointId.create({ schemeID: '0208', id: '0123456789' }),
+            ),
+        ).rejects.toThrow(
+            STExpect.simpleError({ code: 'service_unavailable', field: 'customPeppolEndpointId' }),
+        );
     });
 
     test('throws service_unavailable when the directory returns an unexpected response', async () => {
         mockDirectory('iso6523-actorid-upis::0208:0123456789', { unexpected: true });
 
         await expect(
-            PeppolDirectoryService.validate(PeppolEndointId.create({ schemeID: '0208', id: '0123456789' })),
-        ).rejects.toThrow(STExpect.simpleError({ code: 'service_unavailable', field: 'customPeppolEndpointId' }));
+            PeppolDirectoryService.validate(
+                PeppolEndointId.create({ schemeID: '0208', id: '0123456789' }),
+            ),
+        ).rejects.toThrow(
+            STExpect.simpleError({ code: 'service_unavailable', field: 'customPeppolEndpointId' }),
+        );
     });
 });

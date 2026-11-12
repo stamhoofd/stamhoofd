@@ -41,7 +41,11 @@ describe('Endpoint.SettlementsSync', () => {
         stripeMocker.clear();
     });
 
-    const post = async (organization: Organization, token: Token, body: Record<string, unknown> = {}) => {
+    const post = async (
+        organization: Organization,
+        token: Token,
+        body: Record<string, unknown> = {},
+    ) => {
         const request = Request.buildJson('POST', '/settlements/sync', organization.getApiHost(), {
             start: new Date(2026, 0, 1).getTime(),
             end: new Date(2026, 0, 31).getTime(),
@@ -53,7 +57,11 @@ describe('Endpoint.SettlementsSync', () => {
     };
 
     const getStatus = async (organization: Organization, token: Token) => {
-        const request = Request.buildJson('GET', '/settlements/sync/status', organization.getApiHost());
+        const request = Request.buildJson(
+            'GET',
+            '/settlements/sync/status',
+            organization.getApiHost(),
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(statusEndpoint, request);
     };
@@ -70,7 +78,10 @@ describe('Endpoint.SettlementsSync', () => {
         payment.paidAt = new Date(2026, 0, 15);
         await payment.save();
 
-        const payout = stripeMocker.createPayout({ amount: 10000, arrivalDate: new Date(2026, 0, 20) });
+        const payout = stripeMocker.createPayout({
+            amount: 10000,
+            arrivalDate: new Date(2026, 0, 20),
+        });
         stripeMocker.createBalanceTransaction({
             type: 'charge',
             amount: 10000,
@@ -94,15 +105,20 @@ describe('Endpoint.SettlementsSync', () => {
     });
 
     const shutdown = () => {
-        QueueHandler.abortAll(new SimpleError({
-            code: 'SHUTDOWN',
-            message: 'Shutting down',
-            statusCode: 503,
-        }));
+        QueueHandler.abortAll(
+            new SimpleError({
+                code: 'SHUTDOWN',
+                message: 'Shutting down',
+                statusCode: 503,
+            }),
+        );
     };
 
     test('A sync that is canceled by a shutdown walks nothing and leaves no status behind', async () => {
-        const payout = stripeMocker.createPayout({ amount: 10000, arrivalDate: new Date(2026, 0, 20) });
+        const payout = stripeMocker.createPayout({
+            amount: 10000,
+            arrivalDate: new Date(2026, 0, 20),
+        });
         stripeMocker.createBalanceTransaction({
             type: 'stripe_fee',
             amount: 10000,
@@ -142,18 +158,20 @@ describe('Endpoint.SettlementsSync', () => {
         let running: AbortSignal | null = null;
         let stopWalking = () => {};
 
-        const spy = vi.spyOn(SettlementSyncRunner.prototype, 'run').mockImplementation(async ({ abort } = {}) => {
-            running = abort ?? null;
+        const spy = vi
+            .spyOn(SettlementSyncRunner.prototype, 'run')
+            .mockImplementation(async ({ abort } = {}) => {
+                running = abort ?? null;
 
-            // Walk until the shutdown asks us to stop
-            await new Promise<void>((resolve) => {
-                stopWalking = resolve;
-                abort?.on('abort', () => resolve());
+                // Walk until the shutdown asks us to stop
+                await new Promise<void>((resolve) => {
+                    stopWalking = resolve;
+                    abort?.on('abort', () => resolve());
+                });
+                abort?.throwIfAborted();
+
+                return { feeMonths: 0, failedFeeMonths: 0, synced: 0, skipped: 0, failed: 0 };
             });
-            abort?.throwIfAborted();
-
-            return { feeMonths: 0, failedFeeMonths: 0, synced: 0, skipped: 0, failed: 0 };
-        });
 
         try {
             const response = await post(membershipOrganization, adminToken);

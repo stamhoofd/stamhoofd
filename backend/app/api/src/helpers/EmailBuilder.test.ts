@@ -1,11 +1,22 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { Email as MailTransport, EmailMocker } from '@stamhoofd/email';
-import { EmailContent, EmailTemplateType, File, Recipient, Replacement } from '@stamhoofd/structures';
+import {
+    EmailContent,
+    EmailTemplateType,
+    File,
+    Recipient,
+    Replacement,
+} from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { Email, EmailTemplateFactory, OrganizationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
+import {
+    Email,
+    EmailTemplateFactory,
+    OrganizationFactory,
+    RegistrationPeriodFactory,
+} from '@stamhoofd/models';
 import { FileSignService } from '../services/FileSignService.js';
 import type { EmailBuilderOptions } from './EmailBuilder.js';
 import { getEmailBuilder, removeUnusedReplacements, sendEmailTemplate } from './EmailBuilder.js';
@@ -36,7 +47,14 @@ describe('sendEmailTemplate with translations', () => {
             text: 'Default text',
             language: Language.Dutch,
             translations: new Map([
-                [Language.French, EmailContent.create({ subject: 'Sujet français', html: '<p>Français</p>', text: 'Français' })],
+                [
+                    Language.French,
+                    EmailContent.create({
+                        subject: 'Sujet français',
+                        html: '<p>Français</p>',
+                        text: 'Français',
+                    }),
+                ],
             ]),
         }).create();
 
@@ -54,27 +72,29 @@ describe('sendEmailTemplate with translations', () => {
         const emails = await EmailMocker.transactional.getSucceededEmails();
         expect(emails).toHaveLength(4);
 
-        const french = emails.find(e => e.to.includes('french@example.com'))!;
+        const french = emails.find((e) => e.to.includes('french@example.com'))!;
         expect(french.subject).toBe('Sujet français');
         expect(french.html).toContain('Français');
 
         // Dutch is the default language: its content lives in the default content, not in the translations
-        const dutch = emails.find(e => e.to.includes('dutch@example.com'))!;
+        const dutch = emails.find((e) => e.to.includes('dutch@example.com'))!;
         expect(dutch.subject).toBe('Default subject');
         expect(dutch.html).toContain('Default html');
 
         // English has no translation: falls back to the default content
-        const english = emails.find(e => e.to.includes('english@example.com'))!;
+        const english = emails.find((e) => e.to.includes('english@example.com'))!;
         expect(english.subject).toBe('Default subject');
         expect(english.html).toContain('Default html');
 
-        const unknown = emails.find(e => e.to.includes('unknown@example.com'))!;
+        const unknown = emails.find((e) => e.to.includes('unknown@example.com'))!;
         expect(unknown.subject).toBe('Default subject');
     });
 
     test('generates recipient replacements in the recipient language', async () => {
         // French must be a valid locale, otherwise it gets corrected to the default language
-        TestUtils.setEnvironment('locales', { [Country.Belgium]: [Language.Dutch, Language.French] });
+        TestUtils.setEnvironment('locales', {
+            [Country.Belgium]: [Language.Dutch, Language.French],
+        });
 
         // The unsubscribe URL is localized per recipient (it is not part of the translatable content)
         await new EmailTemplateFactory({
@@ -96,9 +116,9 @@ describe('sendEmailTemplate with translations', () => {
         });
 
         const emails = await EmailMocker.transactional.getSucceededEmails();
-        const french = emails.find(e => e.to.includes('french@example.com'))!;
-        const dutch = emails.find(e => e.to.includes('dutch@example.com'))!;
-        const unknown = emails.find(e => e.to.includes('unknown@example.com'))!;
+        const french = emails.find((e) => e.to.includes('french@example.com'))!;
+        const dutch = emails.find((e) => e.to.includes('dutch@example.com'))!;
+        const unknown = emails.find((e) => e.to.includes('unknown@example.com'))!;
 
         // The unsubscribe page URL points to the recipient's localized page
         expect(french.html).toContain('/fr-BE/unsubscribe');
@@ -116,7 +136,14 @@ describe('sendEmailTemplate with translations', () => {
             text: 'Platform text',
             language: Language.Dutch,
             translations: new Map([
-                [Language.French, EmailContent.create({ subject: 'Sujet plateforme', html: '<p>Plateforme</p>', text: 'Plateforme' })],
+                [
+                    Language.French,
+                    EmailContent.create({
+                        subject: 'Sujet plateforme',
+                        html: '<p>Plateforme</p>',
+                        text: 'Plateforme',
+                    }),
+                ],
             ]),
         }).create();
 
@@ -155,7 +182,14 @@ describe('sendEmailTemplate with translations', () => {
             text: 'Default text',
             language: Language.Dutch,
             translations: new Map([
-                [Language.French, EmailContent.create({ subject: 'Sujet français', html: '<p>Français</p>', text: 'Français' })],
+                [
+                    Language.French,
+                    EmailContent.create({
+                        subject: 'Sujet français',
+                        html: '<p>Français</p>',
+                        text: 'Français',
+                    }),
+                ],
             ]),
         }).create();
 
@@ -177,7 +211,14 @@ describe('sendEmailTemplate with translations', () => {
             text: 'Default text',
             language: Language.Dutch,
             translations: new Map([
-                [Language.French, EmailContent.create({ subject: 'Sujet français', html: '<p>Français</p>', text: 'Français' })],
+                [
+                    Language.French,
+                    EmailContent.create({
+                        subject: 'Sujet français',
+                        html: '<p>Français</p>',
+                        text: 'Français',
+                    }),
+                ],
             ]),
         }).create();
 
@@ -200,7 +241,14 @@ describe('sendEmailTemplate with translations', () => {
             text: 'Default text',
             language: Language.Dutch,
             translations: new Map([
-                [Language.French, EmailContent.create({ subject: 'Sujet français', html: '<p>Français</p>', text: 'Français' })],
+                [
+                    Language.French,
+                    EmailContent.create({
+                        subject: 'Sujet français',
+                        html: '<p>Français</p>',
+                        text: 'Français',
+                    }),
+                ],
             ]),
         }).create();
 
@@ -224,7 +272,14 @@ describe('sendEmailTemplate with translations', () => {
             text: 'Default __PLACEHOLDER__',
             language: Language.Dutch,
             translations: new Map([
-                [Language.French, EmailContent.create({ subject: 'Sujet', html: '<p>Français __PLACEHOLDER__</p>', text: 'Français __PLACEHOLDER__' })],
+                [
+                    Language.French,
+                    EmailContent.create({
+                        subject: 'Sujet',
+                        html: '<p>Français __PLACEHOLDER__</p>',
+                        text: 'Français __PLACEHOLDER__',
+                    }),
+                ],
             ]),
         }).create();
 
@@ -239,8 +294,8 @@ describe('sendEmailTemplate with translations', () => {
         });
 
         const emails = await EmailMocker.transactional.getSucceededEmails();
-        const french = emails.find(e => e.to.includes('french@example.com'))!;
-        const fallback = emails.find(e => e.to.includes('default@example.com'))!;
+        const french = emails.find((e) => e.to.includes('french@example.com'))!;
+        const fallback = emails.find((e) => e.to.includes('default@example.com'))!;
 
         // The replaceAll must reach the translated html too, otherwise the placeholder leaks
         expect(french.html).toContain('Français REPLACED');
@@ -278,11 +333,16 @@ describe('Email.getCombinedHtml', () => {
         ];
 
         // Using only the default html would wrongly strip balanceTable (used only by the translation)
-        const usingDefaultHtml = removeUnusedReplacements(email.html ?? '', replacements).map(r => r.token);
+        const usingDefaultHtml = removeUnusedReplacements(email.html ?? '', replacements).map(
+            (r) => r.token,
+        );
         expect(usingDefaultHtml).not.toContain('balanceTable');
 
         // Using the combined html keeps every replacement that any language needs, and still drops the truly unused one
-        const usingCombinedHtml = removeUnusedReplacements(email.getCombinedHtml(), replacements).map(r => r.token);
+        const usingCombinedHtml = removeUnusedReplacements(
+            email.getCombinedHtml(),
+            replacements,
+        ).map((r) => r.token);
         expect(usingCombinedHtml).toContain('signInUrl');
         expect(usingCombinedHtml).toContain('balanceTable');
         expect(usingCombinedHtml).not.toContain('outstandingBalance');
@@ -313,12 +373,21 @@ describe('getEmailBuilder replacement file attachments', () => {
         MailTransport.send(email);
         const sent = await EmailMocker.broadcast.getSucceededEmails();
         expect(sent).toHaveLength(1);
-        expect(sent[0].headers).toMatchObject({ 'X-Custom': 'configured', 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' });
+        expect(sent[0].headers).toMatchObject({
+            'X-Custom': 'configured',
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        });
     });
 
     const ownServer = () => 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT;
 
-    const buildFile = (data: { id?: string; name?: string; size?: number; isPrivate?: boolean; server?: string }) => {
+    const buildFile = (data: {
+        id?: string;
+        name?: string;
+        size?: number;
+        isPrivate?: boolean;
+        server?: string;
+    }) => {
         return new File({
             id: data.id ?? 'file-1',
             server: data.server ?? ownServer(),
@@ -330,10 +399,17 @@ describe('getEmailBuilder replacement file attachments', () => {
         });
     };
 
-    const buildEmail = async (options: { html: string; replacements: Replacement[]; attachments?: EmailBuilderOptions['attachments'] }) => {
+    const buildEmail = async (options: {
+        html: string;
+        replacements: Replacement[];
+        attachments?: EmailBuilderOptions['attachments'];
+    }) => {
         const builder = await getEmailBuilder(null, {
             recipients: [
-                Recipient.create({ email: 'customer@example.com', replacements: options.replacements }),
+                Recipient.create({
+                    email: 'customer@example.com',
+                    replacements: options.replacements,
+                }),
             ],
             from,
             subject: 'Subject',
@@ -349,7 +425,11 @@ describe('getEmailBuilder replacement file attachments', () => {
         const email = await buildEmail({
             html: '<p>{{orderDetailsTable}}</p>',
             replacements: [
-                Replacement.create({ token: 'orderDetailsTable', html: '<table></table>', files: [buildFile({})] }),
+                Replacement.create({
+                    token: 'orderDetailsTable',
+                    html: '<table></table>',
+                    files: [buildFile({})],
+                }),
             ],
         });
 
@@ -368,7 +448,11 @@ describe('getEmailBuilder replacement file attachments', () => {
         const email = await buildEmail({
             html: '<p>{{header}}</p>',
             replacements: [
-                Replacement.create({ token: 'header', html: '<img src="' + file.inlineEmailSrc + '">', files: [file] }),
+                Replacement.create({
+                    token: 'header',
+                    html: '<img src="' + file.inlineEmailSrc + '">',
+                    files: [file],
+                }),
             ],
         });
 
@@ -381,7 +465,11 @@ describe('getEmailBuilder replacement file attachments', () => {
         const email = await buildEmail({
             html: '<p>No replacements</p>',
             replacements: [
-                Replacement.create({ token: 'orderDetailsTable', html: '<table></table>', files: [buildFile({})] }),
+                Replacement.create({
+                    token: 'orderDetailsTable',
+                    html: '<table></table>',
+                    files: [buildFile({})],
+                }),
             ],
         });
 
@@ -392,7 +480,11 @@ describe('getEmailBuilder replacement file attachments', () => {
         const email = await buildEmail({
             html: '<p>{{outer}}</p>',
             replacements: [
-                Replacement.create({ token: 'inner', html: '<table></table>', files: [buildFile({})] }),
+                Replacement.create({
+                    token: 'inner',
+                    html: '<table></table>',
+                    files: [buildFile({})],
+                }),
                 Replacement.create({ token: 'outer', html: '<div>{{inner}}</div>' }),
             ],
         });
@@ -414,12 +506,16 @@ describe('getEmailBuilder replacement file attachments', () => {
                 }),
             ],
             attachments: [
-                { filename: 'existing.pdf', content: Buffer.alloc(5 * 1024 * 1024), contentType: 'application/pdf' },
+                {
+                    filename: 'existing.pdf',
+                    content: Buffer.alloc(5 * 1024 * 1024),
+                    contentType: 'application/pdf',
+                },
             ],
         });
 
         // 5MB + 6MB > 9.5MB, so the big file is skipped; the small file still fits
-        expect(email.attachments!.map(a => a.filename)).toEqual(['existing.pdf', 'small.pdf']);
+        expect(email.attachments!.map((a) => a.filename)).toEqual(['existing.pdf', 'small.pdf']);
     });
 
     test('a private file is attached with a signed url', async () => {
@@ -442,7 +538,11 @@ describe('getEmailBuilder replacement file attachments', () => {
             const email = await buildEmail({
                 html: '<p>{{orderDetailsTable}}</p>',
                 replacements: [
-                    Replacement.create({ token: 'orderDetailsTable', html: '<table></table>', files: [file] }),
+                    Replacement.create({
+                        token: 'orderDetailsTable',
+                        html: '<table></table>',
+                        files: [file],
+                    }),
                 ],
             });
 
@@ -460,23 +560,43 @@ describe('getEmailBuilder replacement file attachments', () => {
         const email = await buildEmail({
             html: '<p>{{orderDetailsTable}}</p>',
             replacements: [
-                Replacement.create({ token: 'orderDetailsTable', html: '<table></table>', files: [
-                    buildFile({ id: 'metadata', server: 'http://169.254.169.254' }),
-                    buildFile({ id: 'lookalike', server: 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT + '.attacker.example' }),
-                    buildFile({ id: 'own', name: 'own.pdf' }),
-                ] }),
+                Replacement.create({
+                    token: 'orderDetailsTable',
+                    html: '<table></table>',
+                    files: [
+                        buildFile({ id: 'metadata', server: 'http://169.254.169.254' }),
+                        buildFile({
+                            id: 'lookalike',
+                            server:
+                                'https://' +
+                                STAMHOOFD.SPACES_BUCKET +
+                                '.' +
+                                STAMHOOFD.SPACES_ENDPOINT +
+                                '.attacker.example',
+                        }),
+                        buildFile({ id: 'own', name: 'own.pdf' }),
+                    ],
+                }),
             ],
         });
 
-        expect(email.attachments!.map(a => a.filename)).toEqual(['own.pdf']);
+        expect(email.attachments!.map((a) => a.filename)).toEqual(['own.pdf']);
     });
 
     test('a public file that is not stored on our own server is not attached inline either', async () => {
-        const file = buildFile({ id: 'inline-foreign', name: 'logo.png', server: 'http://10.0.0.1' });
+        const file = buildFile({
+            id: 'inline-foreign',
+            name: 'logo.png',
+            server: 'http://10.0.0.1',
+        });
         const email = await buildEmail({
             html: '<p>{{header}}</p>',
             replacements: [
-                Replacement.create({ token: 'header', html: '<img src="' + file.inlineEmailSrc + '">', files: [file] }),
+                Replacement.create({
+                    token: 'header',
+                    html: '<img src="' + file.inlineEmailSrc + '">',
+                    files: [file],
+                }),
             ],
         });
 
@@ -487,7 +607,11 @@ describe('getEmailBuilder replacement file attachments', () => {
         const email = await buildEmail({
             html: '<p>{{orderDetailsTable}}</p>',
             replacements: [
-                Replacement.create({ token: 'orderDetailsTable', html: '<table></table>', files: [buildFile({ isPrivate: true })] }),
+                Replacement.create({
+                    token: 'orderDetailsTable',
+                    html: '<table></table>',
+                    files: [buildFile({ isPrivate: true })],
+                }),
             ],
         });
 

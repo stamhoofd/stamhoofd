@@ -4,7 +4,11 @@ import { detectVcs, Vcs } from '../runtime/vcs.js';
 
 /** Converts a name to lowercase letters, digits, and hyphen-separated segments. */
 export function slug(value: string): string {
-    return value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    return value
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
 }
 
 /**
@@ -59,13 +63,20 @@ export async function resolvePrimaryInstance(rootDir: string): Promise<boolean> 
  * and missing workspace roots return null.
  */
 async function resolveJjPrimaryWorkspaceRoot(rootDir: string): Promise<string | null> {
-    const result = await run('jj', ['--ignore-working-copy', 'workspace', 'list', '-T', 'name ++ "\\t" ++ root ++ "\\n"'], { cwd: rootDir, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+    const result = await run(
+        'jj',
+        ['--ignore-working-copy', 'workspace', 'list', '-T', 'name ++ "\\t" ++ root ++ "\\n"'],
+        { cwd: rootDir, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet },
+    );
     if (result.status !== 0) {
         return null;
     }
 
-    const workspaces = result.stdout.trim().split('\n').filter(line => line.trim());
-    const primary = workspaces.find(line => line.startsWith('default\t')) ?? workspaces[0];
+    const workspaces = result.stdout
+        .trim()
+        .split('\n')
+        .filter((line) => line.trim());
+    const primary = workspaces.find((line) => line.startsWith('default\t')) ?? workspaces[0];
     return primary?.split('\t').at(1)?.trim() || null;
 }
 
@@ -76,12 +87,19 @@ async function resolveJjPrimaryWorkspaceRoot(rootDir: string): Promise<string | 
  * and missing worktree paths return null.
  */
 async function resolveGitPrimaryWorktreeRoot(rootDir: string): Promise<string | null> {
-    const result = await run('git', ['worktree', 'list', '--porcelain'], { cwd: rootDir, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+    const result = await run('git', ['worktree', 'list', '--porcelain'], {
+        cwd: rootDir,
+        capture: true,
+        allowFailure: true,
+        verbosity: RunVerbosity.Quiet,
+    });
     if (result.status !== 0) {
         return null;
     }
 
-    const firstWorktreeLine = result.stdout.split('\n').find(line => line.startsWith('worktree '));
+    const firstWorktreeLine = result.stdout
+        .split('\n')
+        .find((line) => line.startsWith('worktree '));
     return firstWorktreeLine?.slice('worktree '.length).trim() || null;
 }
 

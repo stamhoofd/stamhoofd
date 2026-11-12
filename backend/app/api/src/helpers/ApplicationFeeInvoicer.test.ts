@@ -4,7 +4,14 @@ import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
-import { Address, BalanceItemType, Company, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import {
+    Address,
+    BalanceItemType,
+    Company,
+    PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+} from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { Country } from '@stamhoofd/types/Country';
@@ -25,13 +32,14 @@ describe('ApplicationFeeInvoicer', () => {
     const occurredAt = new Date(Date.UTC(2024, 6, 10, 12));
     const reference = 'application-fees-2024-07-10';
 
-    const belgianAddress = () => Address.create({
-        street: 'Teststraat',
-        number: '1',
-        postalCode: '9000',
-        city: 'Gent',
-        country: Country.Belgium,
-    });
+    const belgianAddress = () =>
+        Address.create({
+            street: 'Teststraat',
+            number: '1',
+            postalCode: '9000',
+            city: 'Gent',
+            country: Country.Belgium,
+        });
 
     beforeAll(async () => {
         stripeMocker.start();
@@ -65,8 +73,7 @@ describe('ApplicationFeeInvoicer', () => {
         await ApplicationFee.delete()
             .where('occurredAt', '>=', new Date(Date.UTC(2024, 6, 1)))
             .where('occurredAt', '<', new Date(Date.UTC(2024, 7, 1)));
-        await ApplicationFee.delete()
-            .where('payingStripeAccountId', null);
+        await ApplicationFee.delete().where('payingStripeAccountId', null);
     });
 
     afterEach(() => {
@@ -90,10 +97,22 @@ describe('ApplicationFeeInvoicer', () => {
         return { organization, stripeAccount };
     };
 
-    const createFee = async (organization: Organization, stripeAccount: StripeAccount, { type = ApplicationFeeType.Service, amount = 30_00, settlement = null as Settlement | null, when = occurredAt } = {}) => {
+    const createFee = async (
+        organization: Organization,
+        stripeAccount: StripeAccount,
+        {
+            type = ApplicationFeeType.Service,
+            amount = 30_00,
+            settlement = null as Settlement | null,
+            when = occurredAt,
+        } = {},
+    ) => {
         const externalId = 'fee_' + uuidv4();
         const charge = await SettlementService.upsertCharge({
-            type: type === ApplicationFeeType.Service ? SettlementChargeType.ApplicationFeeService : SettlementChargeType.ApplicationFeeTransfer,
+            type:
+                type === ApplicationFeeType.Service
+                    ? SettlementChargeType.ApplicationFeeService
+                    : SettlementChargeType.ApplicationFeeTransfer,
             externalId: externalId + ':' + type,
             amount: -amount,
             applicationFeeId: externalId,
@@ -123,8 +142,10 @@ describe('ApplicationFeeInvoicer', () => {
             .fetch();
     };
 
-    const createInvoicer = () => new ApplicationFeeInvoicer({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY! });
-    const startOfUtcDay = (date: Date) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+    const createInvoicer = () =>
+        new ApplicationFeeInvoicer({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY! });
+    const startOfUtcDay = (date: Date) =>
+        new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 
     const invoiceDay = async (when = day) => {
         await createInvoicer().generateInvoicesForDay(membershipOrganization, when);
@@ -132,8 +153,14 @@ describe('ApplicationFeeInvoicer', () => {
 
     test('a day is billed per paying account, and every fee carries its balance item', async () => {
         const { organization, stripeAccount } = await init();
-        const serviceFee = await createFee(organization, stripeAccount, { type: ApplicationFeeType.Service, amount: 30_00 });
-        const transferFee = await createFee(organization, stripeAccount, { type: ApplicationFeeType.Transfer, amount: 2_20_00 });
+        const serviceFee = await createFee(organization, stripeAccount, {
+            type: ApplicationFeeType.Service,
+            amount: 30_00,
+        });
+        const transferFee = await createFee(organization, stripeAccount, {
+            type: ApplicationFeeType.Transfer,
+            amount: 2_20_00,
+        });
 
         await invoiceDay();
 
@@ -147,10 +174,17 @@ describe('ApplicationFeeInvoicer', () => {
             stripeAccountId: stripeAccount.id,
         });
 
-        const balanceItemPayments = await BalanceItemPayment.select().where('paymentId', payments[0].id).fetch();
-        const balanceItems = await BalanceItem.select().where('id', balanceItemPayments.map(b => b.balanceItemId)).fetch();
-        const serviceItem = balanceItems.find(i => i.type === BalanceItemType.ServiceFee)!;
-        const transferItem = balanceItems.find(i => i.type === BalanceItemType.TransferFee)!;
+        const balanceItemPayments = await BalanceItemPayment.select()
+            .where('paymentId', payments[0].id)
+            .fetch();
+        const balanceItems = await BalanceItem.select()
+            .where(
+                'id',
+                balanceItemPayments.map((b) => b.balanceItemId),
+            )
+            .fetch();
+        const serviceItem = balanceItems.find((i) => i.type === BalanceItemType.ServiceFee)!;
+        const transferItem = balanceItems.find((i) => i.type === BalanceItemType.TransferFee)!;
 
         expect(serviceItem.unitPrice).toBe(30_00);
         expect(transferItem.unitPrice).toBe(2_20_00);
@@ -182,14 +216,22 @@ describe('ApplicationFeeInvoicer', () => {
 
         const payments = await getFeePayments(organization);
         expect(payments).toHaveLength(2);
-        expect(payments.map(p => p.price).sort((a, b) => a - b)).toEqual([30_00, 40_00]);
-        expect(payments.map(p => p.stripeAccountId).sort()).toEqual([stripeAccount.id, second.id].sort());
+        expect(payments.map((p) => p.price).sort((a, b) => a - b)).toEqual([30_00, 40_00]);
+        expect(payments.map((p) => p.stripeAccountId).sort()).toEqual(
+            [stripeAccount.id, second.id].sort(),
+        );
     });
 
     test('days are cut at UTC midnight, one payment per day', async () => {
         const { organization, stripeAccount } = await init();
-        const lastOfDay = await createFee(organization, stripeAccount, { amount: 30_00, when: new Date(Date.UTC(2024, 6, 10, 23, 59, 59)) });
-        const firstOfNextDay = await createFee(organization, stripeAccount, { amount: 5_00, when: new Date(Date.UTC(2024, 6, 11, 0, 0, 0)) });
+        const lastOfDay = await createFee(organization, stripeAccount, {
+            amount: 30_00,
+            when: new Date(Date.UTC(2024, 6, 10, 23, 59, 59)),
+        });
+        const firstOfNextDay = await createFee(organization, stripeAccount, {
+            amount: 5_00,
+            when: new Date(Date.UTC(2024, 6, 11, 0, 0, 0)),
+        });
 
         await invoiceDay(new Date(Date.UTC(2024, 6, 10)));
         await invoiceDay(new Date(Date.UTC(2024, 6, 11)));
@@ -202,16 +244,26 @@ describe('ApplicationFeeInvoicer', () => {
         expect(nextDayPayments).toHaveLength(1);
         expect(nextDayPayments[0].price).toBe(5_00);
 
-        expect((await ApplicationFee.getByID(lastOfDay.id))!.balanceItemId).not.toBe((await ApplicationFee.getByID(firstOfNextDay.id))!.balanceItemId);
+        expect((await ApplicationFee.getByID(lastOfDay.id))!.balanceItemId).not.toBe(
+            (await ApplicationFee.getByID(firstOfNextDay.id))!.balanceItemId,
+        );
     });
 
     test('generateInvoices bills every past day separately', async () => {
         const { organization, stripeAccount } = await init();
 
-        vitest.useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] }).setSystemTime(new Date(Date.UTC(2024, 6, 20, 12)));
+        vitest
+            .useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] })
+            .setSystemTime(new Date(Date.UTC(2024, 6, 20, 12)));
         try {
-            await createFee(organization, stripeAccount, { amount: 30_00, when: new Date(Date.UTC(2024, 6, 10, 12)) });
-            await createFee(organization, stripeAccount, { amount: 5_00, when: new Date(Date.UTC(2024, 6, 12, 12)) });
+            await createFee(organization, stripeAccount, {
+                amount: 30_00,
+                when: new Date(Date.UTC(2024, 6, 10, 12)),
+            });
+            await createFee(organization, stripeAccount, {
+                amount: 5_00,
+                when: new Date(Date.UTC(2024, 6, 12, 12)),
+            });
 
             await createInvoicer().generateInvoices(membershipOrganization);
         } finally {
@@ -222,7 +274,7 @@ describe('ApplicationFeeInvoicer', () => {
             .where('payingOrganizationId', organization.id)
             .where('method', PaymentMethod.AccountDeductions)
             .fetch();
-        expect(payments.map(p => [p.reference, p.price]).sort()).toEqual([
+        expect(payments.map((p) => [p.reference, p.price]).sort()).toEqual([
             ['application-fees-2024-07-10', 30_00],
             ['application-fees-2024-07-12', 5_00],
         ]);
@@ -249,16 +301,19 @@ describe('ApplicationFeeInvoicer', () => {
 
         const payments = await getFeePayments(organization);
         expect(payments).toHaveLength(2);
-        expect(payments.map(p => p.price).sort((a, b) => a - b)).toEqual([5_00, 30_00]);
+        expect(payments.map((p) => p.price).sort((a, b) => a - b)).toEqual([5_00, 30_00]);
         expect((await ApplicationFee.getByID(late.id))!.balanceItemId).not.toBeNull();
     });
 
-    test('a fee the day\'s Stripe sync stores is billed in the same run', async () => {
+    test("a fee the day's Stripe sync stores is billed in the same run", async () => {
         const { organization, stripeAccount } = await init();
 
         const now = new Date();
         const lastMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 10, 12));
-        const stored = await createFee(organization, stripeAccount, { amount: 30_00, when: lastMonth });
+        const stored = await createFee(organization, stripeAccount, {
+            amount: 30_00,
+            when: lastMonth,
+        });
 
         const payment = new Payment();
         payment.organizationId = organization.id;
@@ -273,9 +328,16 @@ describe('ApplicationFeeInvoicer', () => {
         const stripeFee = stripeMocker.createApplicationFee({
             amount: 5,
             account: stripeAccount.accountId,
-            originatingTransaction: stripeMocker.createChargeObject({ metadata: { payment: payment.id, serviceFee: '5' } }),
+            originatingTransaction: stripeMocker.createChargeObject({
+                metadata: { payment: payment.id, serviceFee: '5' },
+            }),
         });
-        stripeMocker.createBalanceTransaction({ type: 'application_fee', amount: 5, created: lastMonth, source: stripeFee });
+        stripeMocker.createBalanceTransaction({
+            type: 'application_fee',
+            amount: 5,
+            created: lastMonth,
+            source: stripeFee,
+        });
 
         await createInvoicer().generateInvoices(membershipOrganization);
 
@@ -317,7 +379,9 @@ describe('ApplicationFeeInvoicer', () => {
     test('fees of the current UTC day are not billed yet', async () => {
         const { organization, stripeAccount } = await init();
         const now = new Date();
-        await createFee(organization, stripeAccount, { when: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())) });
+        await createFee(organization, stripeAccount, {
+            when: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())),
+        });
 
         await createInvoicer().generateInvoices(membershipOrganization);
 
@@ -360,7 +424,10 @@ describe('ApplicationFeeInvoicer', () => {
         await invoiceDay();
 
         const payments = await getFeePayments(organization);
-        expect(payments.map(p => [p.price, p.stripeAccountId]).sort()).toEqual([[30_00, stripeAccount.id], [40_00, null]]);
+        expect(payments.map((p) => [p.price, p.stripeAccountId]).sort()).toEqual([
+            [30_00, stripeAccount.id],
+            [40_00, null],
+        ]);
         expect((await ApplicationFee.getByID(orphaned.id))!.balanceItemId).not.toBeNull();
     });
 
@@ -370,8 +437,14 @@ describe('ApplicationFeeInvoicer', () => {
         const recentDay = startOfUtcDay(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000));
         const recentReference = 'application-fees-' + recentDay.toISOString().slice(0, 10);
 
-        await createFee(organization, stripeAccount, { amount: 30_00, when: new Date(recentDay.getTime() + 12 * 60 * 60 * 1000) });
-        const orphaned = await createFee(organization, removed, { amount: 40_00, when: new Date(recentDay.getTime() + 12 * 60 * 60 * 1000) });
+        await createFee(organization, stripeAccount, {
+            amount: 30_00,
+            when: new Date(recentDay.getTime() + 12 * 60 * 60 * 1000),
+        });
+        const orphaned = await createFee(organization, removed, {
+            amount: 40_00,
+            when: new Date(recentDay.getTime() + 12 * 60 * 60 * 1000),
+        });
         await removed.delete();
 
         await invoiceDay(recentDay);
@@ -384,13 +457,22 @@ describe('ApplicationFeeInvoicer', () => {
 
     test('a failure while stamping rolls back the balance items and stamps of that payer', async () => {
         const { organization, stripeAccount } = await init();
-        const first = await createFee(organization, stripeAccount, { type: ApplicationFeeType.Service, amount: 30_00 });
-        const second = await createFee(organization, stripeAccount, { type: ApplicationFeeType.Transfer, amount: 40_00 });
+        const first = await createFee(organization, stripeAccount, {
+            type: ApplicationFeeType.Service,
+            amount: 30_00,
+        });
+        const second = await createFee(organization, stripeAccount, {
+            type: ApplicationFeeType.Transfer,
+            amount: 40_00,
+        });
 
         const markInvoiced = ApplicationFeeService.markInvoiced.bind(ApplicationFeeService);
-        const spy = vi.spyOn(ApplicationFeeService, 'markInvoiced').mockImplementationOnce(markInvoiced).mockImplementationOnce(() => {
-            throw new Error('Simulated failure');
-        });
+        const spy = vi
+            .spyOn(ApplicationFeeService, 'markInvoiced')
+            .mockImplementationOnce(markInvoiced)
+            .mockImplementationOnce(() => {
+                throw new Error('Simulated failure');
+            });
         try {
             await invoiceDay();
         } finally {
@@ -400,7 +482,9 @@ describe('ApplicationFeeInvoicer', () => {
         expect(await getFeePayments(organization)).toHaveLength(0);
         expect((await ApplicationFee.getByID(first.id))!.balanceItemId).toBeNull();
         expect((await ApplicationFee.getByID(second.id))!.balanceItemId).toBeNull();
-        expect(await BalanceItem.select().where('payingOrganizationId', organization.id).fetch()).toHaveLength(0);
+        expect(
+            await BalanceItem.select().where('payingOrganizationId', organization.id).fetch(),
+        ).toHaveLength(0);
     });
 
     test('charges of a billed fee keep pointing at the deduction row', async () => {
@@ -439,7 +523,9 @@ describe('ApplicationFeeInvoicer', () => {
         expect(balanceItem.payingOrganizationId).toBeNull();
         expect(balanceItem.unitPrice).toBe(30_00);
 
-        const balanceItemPayment = (await BalanceItemPayment.select().where('balanceItemId', balanceItem.id).first(true));
+        const balanceItemPayment = await BalanceItemPayment.select()
+            .where('balanceItemId', balanceItem.id)
+            .first(true);
         const payment = (await Payment.getByID(balanceItemPayment.paymentId))!;
         expect(payment).toMatchObject({
             price: 30_00,

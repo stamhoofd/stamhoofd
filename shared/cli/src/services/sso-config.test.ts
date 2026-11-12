@@ -8,7 +8,9 @@ describe('buildKeycloakRealm', () => {
         expect(realm.realm).toBe('stamhoofd');
         expect(realm.clients[0].clientId).toBe(ssoClientId);
         expect(realm.clients[0].secret).toBe(ssoClientSecret);
-        expect(realm.clients[0].redirectUris).toEqual(['https://example.api.stamhoofd/openid/callback']);
+        expect(realm.clients[0].redirectUris).toEqual([
+            'https://example.api.stamhoofd/openid/callback',
+        ]);
         expect(realm.users[0].email).toBe(ssoUserEmail);
         expect(realm.users[0].credentials[0].temporary).toBe(false);
     });

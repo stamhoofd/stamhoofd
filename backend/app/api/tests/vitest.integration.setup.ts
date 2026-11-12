@@ -68,7 +68,10 @@ beforeAll(async () => {
     // payments restrict deleting stripe accounts (which cascade from organizations), and a payment
     // can reference a stripe account of a different organization, so payments have to be cleared first
     await Database.delete('DELETE FROM `payments`');
-    await Database.update('UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null', ['delete']);
+    await Database.update(
+        'UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null',
+        ['delete'],
+    );
     await Database.delete('DELETE FROM `organizations`');
     await Database.delete('DELETE FROM `registration_periods` where customName = ?', ['delete']);
 

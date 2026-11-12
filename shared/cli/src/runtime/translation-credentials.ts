@@ -12,7 +12,9 @@ const credentials = {
     [TranslatorType.MistralSmall]: ['MISTRAL_API_KEY', 'Mistral'],
 } as const;
 
-export async function resolveTranslationApiKey(provider: Exclude<TranslatorType, TranslatorType.Claude>): Promise<string> {
+export async function resolveTranslationApiKey(
+    provider: Exclude<TranslatorType, TranslatorType.Claude>,
+): Promise<string> {
     const [variable, item] = credentials[provider];
     const environmentKey = process.env[variable]?.trim();
     if (environmentKey) {
@@ -21,7 +23,9 @@ export async function resolveTranslationApiKey(provider: Exclude<TranslatorType,
 
     let localEnvironment: NodeJS.Dict<string> = {};
     try {
-        localEnvironment = parseEnv(await fs.readFile(path.join(getProjectPath(), '.development/i18n-uuid/.env'), 'utf8'));
+        localEnvironment = parseEnv(
+            await fs.readFile(path.join(getProjectPath(), '.development/i18n-uuid/.env'), 'utf8'),
+        );
     } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
             throw error;

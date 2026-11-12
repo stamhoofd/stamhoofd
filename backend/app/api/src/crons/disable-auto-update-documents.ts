@@ -47,13 +47,17 @@ export async function disableAutoUpdateForFiscalDocuments(now: Date): Promise<bo
     }
 
     // set updates enabled to false
-    await SQL.update(DocumentTemplate.table).set('updatesEnabled', false)
+    await SQL.update(DocumentTemplate.table)
+        .set('updatesEnabled', false)
         // where previous year
         .where('year', now.getFullYear() - 1)
         // where updates enabled
         .andWhere('updatesEnabled', true)
         // where type is fiscal
-        .andWhere(SQL.jsonExtract(SQL.column('privateSettings'), '$.value.templateDefinition.type'), 'fiscal')
+        .andWhere(
+            SQL.jsonExtract(SQL.column('privateSettings'), '$.value.templateDefinition.type'),
+            'fiscal',
+        )
         .update();
 
     return true;
@@ -70,13 +74,17 @@ export async function disableAutoUpdateForOtherDocuments(now: Date) {
     max.setDate(max.getDate() - 89);
 
     // set updates enabled to false
-    await SQL.update(DocumentTemplate.table).set('updatesEnabled', false)
+    await SQL.update(DocumentTemplate.table)
+        .set('updatesEnabled', false)
         // where updates enabled
         .where('updatesEnabled', true)
         // where published 90 days ago
         .andWhere('publishedAt', '>=', min)
         .andWhere('publishedAt', '<', max)
         // where type is not fiscal
-        .whereNot(SQL.jsonExtract(SQL.column('privateSettings'), '$.value.templateDefinition.type'), 'fiscal')
+        .whereNot(
+            SQL.jsonExtract(SQL.column('privateSettings'), '$.value.templateDefinition.type'),
+            'fiscal',
+        )
         .update();
 }

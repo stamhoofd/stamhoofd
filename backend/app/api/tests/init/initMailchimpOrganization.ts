@@ -17,10 +17,17 @@ import type { MailchimpMocker } from '../helpers/MailchimpMocker.js';
 import { testServer } from '../helpers/TestServer.js';
 import { initAdmin } from './initAdmin.js';
 
-export async function mailchimpRequest<T>(endpoint: Endpoint<any, any, any, any>, method: 'GET' | 'POST' | 'PATCH' | 'DELETE', path: string, host: string, token: Token, body?: unknown): Promise<{ body: T }> {
+export async function mailchimpRequest<T>(
+    endpoint: Endpoint<any, any, any, any>,
+    method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
+    path: string,
+    host: string,
+    token: Token,
+    body?: unknown,
+): Promise<{ body: T }> {
     const request = Request.buildJson(method, `/v${Version}${path}`, host, body);
     request.headers.authorization = 'Bearer ' + token.accessToken;
-    return await testServer.test(endpoint, request) as unknown as { body: T };
+    return (await testServer.test(endpoint, request)) as unknown as { body: T };
 }
 
 /**
@@ -29,7 +36,11 @@ export async function mailchimpRequest<T>(endpoint: Endpoint<any, any, any, any>
 export async function initMailchimpOrganization({ featureFlag = true, members = true } = {}) {
     MailchimpClient.retryDelay = 1;
 
-    const organization = await new OrganizationFactory({ packages: members ? [STPackageBundle.Members, STPackageBundle.Webshops] : [STPackageBundle.Webshops] }).create();
+    const organization = await new OrganizationFactory({
+        packages: members
+            ? [STPackageBundle.Members, STPackageBundle.Webshops]
+            : [STPackageBundle.Webshops],
+    }).create();
     await STPackageService.updateOrganizationPackages(organization.id);
     await organization.refresh();
     if (featureFlag) {
@@ -40,9 +51,31 @@ export async function initMailchimpOrganization({ featureFlag = true, members = 
     return { organization, admin, token: adminToken, host: organization.getApiHost() };
 }
 
-export async function connectMailchimp(mailchimp: MailchimpMocker, { organization, token, host }: { organization: Organization | null; token: Token; host: string }, audienceId = 'list1') {
-    await mailchimpRequest(new ConnectMailchimpEndpoint(), 'POST', '/mailchimp/connect', host, token, { apiKey: mailchimp.apiKey });
-    await mailchimpRequest(new PatchMailchimpSettingsEndpoint(), 'PATCH', '/mailchimp/settings', host, token, MailchimpSettings.patch({ audienceId }).encode({ version: Version }));
+export async function connectMailchimp(
+    mailchimp: MailchimpMocker,
+    {
+        organization,
+        token,
+        host,
+    }: { organization: Organization | null; token: Token; host: string },
+    audienceId = 'list1',
+) {
+    await mailchimpRequest(
+        new ConnectMailchimpEndpoint(),
+        'POST',
+        '/mailchimp/connect',
+        host,
+        token,
+        { apiKey: mailchimp.apiKey },
+    );
+    await mailchimpRequest(
+        new PatchMailchimpSettingsEndpoint(),
+        'PATCH',
+        '/mailchimp/settings',
+        host,
+        token,
+        MailchimpSettings.patch({ audienceId }).encode({ version: Version }),
+    );
     if (organization) {
         await organization.refresh();
     }
@@ -51,8 +84,26 @@ export async function connectMailchimp(mailchimp: MailchimpMocker, { organizatio
 /**
  * Starts a synchronisation, waits until it is done and returns the result
  */
-export async function runMailchimpSync({ token, host }: { token: Token; host: string }, request: MailchimpSyncRequest) {
-    const started = await mailchimpRequest<MailchimpSync>(new StartMailchimpSyncEndpoint(), 'POST', '/mailchimp/syncs', host, token, request.encode({ version: Version }));
+export async function runMailchimpSync(
+    { token, host }: { token: Token; host: string },
+    request: MailchimpSyncRequest,
+) {
+    const started = await mailchimpRequest<MailchimpSync>(
+        new StartMailchimpSyncEndpoint(),
+        'POST',
+        '/mailchimp/syncs',
+        host,
+        token,
+        request.encode({ version: Version }),
+    );
     await QueueHandler.awaitAll();
-    return (await mailchimpRequest<MailchimpSync>(new GetMailchimpSyncEndpoint(), 'GET', `/mailchimp/syncs/${started.body.id}`, host, token)).body;
+    return (
+        await mailchimpRequest<MailchimpSync>(
+            new GetMailchimpSyncEndpoint(),
+            'GET',
+            `/mailchimp/syncs/${started.body.id}`,
+            host,
+            token,
+        )
+    ).body;
 }

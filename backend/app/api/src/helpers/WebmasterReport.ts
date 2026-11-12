@@ -75,12 +75,20 @@ export class WebmasterReport {
         const notListed = this.#count - this.#problems.length;
 
         Email.sendWebmaster({
-            subject: this.#subject + ': ' + this.#count + (this.#count === 1 ? ' probleem' : ' problemen'),
-            html: this.#problems.join('<br><br>')
-                + (notListed > 0
-                    ? '<br><br>' + (notListed === 1
-                        ? 'En nog 1 ander probleem dat niet in deze mail past.'
-                        : 'En nog ' + notListed + ' andere problemen die niet in deze mail passen.')
+            subject:
+                this.#subject +
+                ': ' +
+                this.#count +
+                (this.#count === 1 ? ' probleem' : ' problemen'),
+            html:
+                this.#problems.join('<br><br>') +
+                (notListed > 0
+                    ? '<br><br>' +
+                      (notListed === 1
+                          ? 'En nog 1 ander probleem dat niet in deze mail past.'
+                          : 'En nog ' +
+                            notListed +
+                            ' andere problemen die niet in deze mail passen.')
                     : ''),
         });
     }
@@ -88,7 +96,9 @@ export class WebmasterReport {
 
 function describeProblem(title: string, detail: unknown): string {
     const description = describe(detail);
-    return '<strong>' + escapeLines(title) + '</strong>' + (description ? '<br>' + description : '');
+    return (
+        '<strong>' + escapeLines(title) + '</strong>' + (description ? '<br>' + description : '')
+    );
 }
 
 function describe(detail: unknown): string | null {

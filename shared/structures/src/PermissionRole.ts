@@ -1,4 +1,12 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, MapDecoder, StringDecoder, field } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    EnumDecoder,
+    MapDecoder,
+    StringDecoder,
+    field,
+} from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
@@ -6,7 +14,12 @@ import { AccessRightHelper } from './AccessRight.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { getPermissionLevelNumber } from './PermissionLevel.js';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { downgradeResourceKeys, isPeriodScopedResourceType, PermissionsResourceKey, upgradeResourceKeys } from './PermissionsResourceType.js';
+import {
+    downgradeResourceKeys,
+    isPeriodScopedResourceType,
+    PermissionsResourceKey,
+    upgradeResourceKeys,
+} from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
 export class PermissionRole extends AutoEncoder {
@@ -116,7 +129,10 @@ export class PermissionRoleDetailed extends PermissionRole {
                 if (id === PermissionsResourceKey.All) {
                     continue;
                 }
-                if (resource.isEmpty || (id !== PermissionsResourceKey.CurrentPeriod && resource.isCoveredBy(coverage))) {
+                if (
+                    resource.isEmpty ||
+                    (id !== PermissionsResourceKey.CurrentPeriod && resource.isCoveredBy(coverage))
+                ) {
                     resources.delete(id);
                 }
             }
@@ -141,7 +157,9 @@ export class PermissionRoleDetailed extends PermissionRole {
         }
         if (this.level === PermissionLevel.Full) {
             stack.push($t('%m9'));
-            return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t('%M1') + ' '));
+            return Formatter.capitalizeFirstLetter(
+                Formatter.joinLast(stack, ', ', ' ' + $t('%M1') + ' '),
+            );
         }
 
         for (const right of this.accessRights) {
@@ -154,7 +172,9 @@ export class PermissionRoleDetailed extends PermissionRole {
             return $t('%8v');
         }
 
-        return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t('%M1') + ' '));
+        return Formatter.capitalizeFirstLetter(
+            Formatter.joinLast(stack, ', ', ' ' + $t('%M1') + ' '),
+        );
     }
 
     hasAccess(level: PermissionLevel): boolean {
@@ -190,17 +210,25 @@ export class PermissionRoleDetailed extends PermissionRole {
                 keys.push(PermissionsResourceKey.CurrentPeriod);
             }
         }
-        const instances = keys.map(key => resource.get(key)).filter(instance => instance !== undefined) as ResourcePermissions[];
+        const instances = keys
+            .map((key) => resource.get(key))
+            .filter((instance) => instance !== undefined) as ResourcePermissions[];
         if (instances.length === 0) {
             return null;
         }
         return instances.reduce((merged, instance) => merged.merge(instance));
     }
 
-    getMergedResourcePermissions(type: PermissionsResourceType, id: string): ResourcePermissions | null {
+    getMergedResourcePermissions(
+        type: PermissionsResourceType,
+        id: string,
+    ): ResourcePermissions | null {
         let base = this.getResourcePermissions(type, id);
 
-        if (getPermissionLevelNumber(this.level) > getPermissionLevelNumber(base?.level ?? PermissionLevel.None)) {
+        if (
+            getPermissionLevelNumber(this.level) >
+            getPermissionLevelNumber(base?.level ?? PermissionLevel.None)
+        ) {
             if (!base) {
                 base = ResourcePermissions.create({ level: this.level });
             }
@@ -226,7 +254,10 @@ export class PermissionRoleDetailed extends PermissionRole {
         return this.getResourcePermissions(type, id)?.hasAccessRight(right) ?? false;
     }
 
-    hasAccessRightForSomeResourceOfType(type: PermissionsResourceType, right: AccessRight): boolean {
+    hasAccessRightForSomeResourceOfType(
+        type: PermissionsResourceType,
+        right: AccessRight,
+    ): boolean {
         if (this.hasAccessRight(right)) {
             return true;
         }
@@ -282,11 +313,13 @@ export class PermissionRoleDetailed extends PermissionRole {
                 }
             }
         }
-        return this.level === PermissionLevel.None && this.accessRights.length === 0 && resourcesEmpty;
+        return (
+            this.level === PermissionLevel.None && this.accessRights.length === 0 && resourcesEmpty
+        );
     }
 
     removeAccessRights(rights: AccessRight[]) {
-        this.accessRights = this.accessRights.filter(r => !rights.includes(r));
+        this.accessRights = this.accessRights.filter((r) => !rights.includes(r));
 
         for (const resource of this.resources.values()) {
             for (const r of resource.values()) {

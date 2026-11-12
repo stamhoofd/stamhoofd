@@ -1,10 +1,23 @@
-import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, VATExcemptReason } from '../BalanceItem.js';
+import {
+    BalanceItem,
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemType,
+    VATExcemptReason,
+} from '../BalanceItem.js';
 import { TranslatedString } from '../TranslatedString.js';
 import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
 
 describe('InvoicedBalanceItem', () => {
     describe('createFor', () => {
-        function createBalanceItem(overrides: Partial<{ name: string; description: string | null; type: BalanceItemType; relations: Map<BalanceItemRelationType, BalanceItemRelation> }> = {}) {
+        function createBalanceItem(
+            overrides: Partial<{
+                name: string;
+                description: string | null;
+                type: BalanceItemType;
+                relations: Map<BalanceItemRelationType, BalanceItemRelation>;
+            }> = {},
+        ) {
             return BalanceItem.create({
                 unitPrice: 5_00_00,
                 amount: 1,
@@ -15,14 +28,20 @@ describe('InvoicedBalanceItem', () => {
         }
 
         test('copies the name and description of an item without relations', () => {
-            const invoicedItem = InvoicedBalanceItem.createFor(createBalanceItem({ name: 'Kampgeld', description: 'Weekend aan zee' }), 5_00_00);
+            const invoicedItem = InvoicedBalanceItem.createFor(
+                createBalanceItem({ name: 'Kampgeld', description: 'Weekend aan zee' }),
+                5_00_00,
+            );
 
             expect(invoicedItem.name).toBe('Kampgeld');
             expect(invoicedItem.description).toBe('Weekend aan zee');
         });
 
         test('an item without relations and without description is invoiced with an empty description', () => {
-            const invoicedItem = InvoicedBalanceItem.createFor(createBalanceItem({ name: 'Kampgeld', description: null }), 5_00_00);
+            const invoicedItem = InvoicedBalanceItem.createFor(
+                createBalanceItem({ name: 'Kampgeld', description: null }),
+                5_00_00,
+            );
 
             expect(invoicedItem.name).toBe('Kampgeld');
             expect(invoicedItem.description).toBe('');
@@ -34,8 +53,20 @@ describe('InvoicedBalanceItem', () => {
                 name: 'Jan bij Kapoenen',
                 description: null,
                 relations: new Map([
-                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-1', name: new TranslatedString('Kapoenen') })],
-                    [BalanceItemRelationType.Member, BalanceItemRelation.create({ id: 'member-1', name: new TranslatedString('Jan Janssens') })],
+                    [
+                        BalanceItemRelationType.Group,
+                        BalanceItemRelation.create({
+                            id: 'group-1',
+                            name: new TranslatedString('Kapoenen'),
+                        }),
+                    ],
+                    [
+                        BalanceItemRelationType.Member,
+                        BalanceItemRelation.create({
+                            id: 'member-1',
+                            name: new TranslatedString('Jan Janssens'),
+                        }),
+                    ],
                 ]),
             });
             const invoicedItem = InvoicedBalanceItem.createFor(balanceItem, 5_00_00);
@@ -51,7 +82,13 @@ describe('InvoicedBalanceItem', () => {
                 name: 'Jan bij Kapoenen',
                 description: 'Inclusief kampvuur',
                 relations: new Map([
-                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-1', name: new TranslatedString('Kapoenen') })],
+                    [
+                        BalanceItemRelationType.Group,
+                        BalanceItemRelation.create({
+                            id: 'group-1',
+                            name: new TranslatedString('Kapoenen'),
+                        }),
+                    ],
                 ]),
             });
             const invoicedItem = InvoicedBalanceItem.createFor(balanceItem, 5_00_00);
@@ -309,7 +346,13 @@ describe('InvoicedBalanceItem', () => {
     describe('createFor details', () => {
         test('copies relations, startDate and endDate from the balance item', () => {
             const relations = new Map([
-                [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-1', name: new TranslatedString('Kapoenen') })],
+                [
+                    BalanceItemRelationType.Group,
+                    BalanceItemRelation.create({
+                        id: 'group-1',
+                        name: new TranslatedString('Kapoenen'),
+                    }),
+                ],
             ]);
             const balanceItem = BalanceItem.create({
                 unitPrice: 5_00_00,
@@ -332,7 +375,12 @@ describe('InvoicedBalanceItem', () => {
 
     describe('sort', () => {
         function item(name: string, totalWithoutVAT: number, startDate: Date | null) {
-            return InvoicedBalanceItem.create({ name, unitPrice: totalWithoutVAT * 100, quantity: 1_00_00, startDate });
+            return InvoicedBalanceItem.create({
+                name,
+                unitPrice: totalWithoutVAT * 100,
+                quantity: 1_00_00,
+                startDate,
+            });
         }
 
         test('dated items come first from old to new, then undated items, both from high to low price', () => {
@@ -344,7 +392,7 @@ describe('InvoicedBalanceItem', () => {
                 item('new expensive', 20_00, new Date('2026-01-01')),
             ];
 
-            expect(InvoicedBalanceItem.sort(items).map(i => i.name)).toEqual([
+            expect(InvoicedBalanceItem.sort(items).map((i) => i.name)).toEqual([
                 'old',
                 'new expensive',
                 'new cheap',
@@ -357,7 +405,7 @@ describe('InvoicedBalanceItem', () => {
             const date = new Date('2025-01-01');
             const items = [item('B', 10_00, date), item('A', 10_00, date)];
 
-            expect(InvoicedBalanceItem.sort(items).map(i => i.name)).toEqual(['A', 'B']);
+            expect(InvoicedBalanceItem.sort(items).map((i) => i.name)).toEqual(['A', 'B']);
         });
     });
 });

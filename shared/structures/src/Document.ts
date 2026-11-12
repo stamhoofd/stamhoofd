@@ -1,8 +1,23 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    NumberDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { NamedObject } from './Event.js';
-import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler } from './filters/InMemoryFilter.js';
+import {
+    baseInMemoryFilterCompilers,
+    compileToInMemoryFilter,
+    createInMemoryFilterCompiler,
+} from './filters/InMemoryFilter.js';
 import { documentInMemoryFilterCompilers } from './filters/inMemoryFilterDefinitions.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import type { ObjectWithRecords, PatchAnswers } from './members/ObjectWithRecords.js';
@@ -21,19 +36,27 @@ export enum DocumentStatus {
 export class DocumentStatusHelper {
     static getName(status: DocumentStatus): string {
         switch (status) {
-            case DocumentStatus.Draft: return $t('%Kn');
-            case DocumentStatus.MissingData: return $t('%Ni');
-            case DocumentStatus.Published: return $t('%m5');
-            case DocumentStatus.Deleted: return $t('%1FX');
+            case DocumentStatus.Draft:
+                return $t('%Kn');
+            case DocumentStatus.MissingData:
+                return $t('%Ni');
+            case DocumentStatus.Published:
+                return $t('%m5');
+            case DocumentStatus.Deleted:
+                return $t('%1FX');
         }
     }
 
     static getColor(status: DocumentStatus): string {
         switch (status) {
-            case DocumentStatus.Draft: return 'info';
-            case DocumentStatus.MissingData: return 'tertiary';
-            case DocumentStatus.Published: return 'secundary';
-            case DocumentStatus.Deleted: return 'error';
+            case DocumentStatus.Draft:
+                return 'info';
+            case DocumentStatus.MissingData:
+                return 'tertiary';
+            case DocumentStatus.Published:
+                return 'secundary';
+            case DocumentStatus.Deleted:
+                return 'error';
         }
     }
 }
@@ -148,7 +171,11 @@ export class DocumentTemplateGroup extends AutoEncoder implements ObjectWithReco
     id: string;
 
     @field({ decoder: StringDecoder, field: 'groupId' })
-    @field({ decoder: NamedObject, version: 344, upgrade: (old: any) => NamedObject.create({ id: old, name: $t('%Gr') }) })
+    @field({
+        decoder: NamedObject,
+        version: 344,
+        upgrade: (old: any) => NamedObject.create({ id: old, name: $t('%Gr') }),
+    })
     group: NamedObject;
 
     /**
@@ -261,15 +288,19 @@ export class DocumentTemplatePrivate extends AutoEncoder implements ObjectWithRe
     /** Evaluates conditions against the configured literal answer IDs, including dotted IDs. */
     doesMatchFilter(filter: StamhoofdFilter): boolean {
         try {
-            const recordAnswerFilters = new Map([
-                ...baseInMemoryFilterCompilers,
-            ]);
+            const recordAnswerFilters = new Map([...baseInMemoryFilterCompilers]);
             for (const a of this.settings.fieldAnswers.values()) {
-                recordAnswerFilters.set(a.settings.id, createInMemoryFilterCompiler([a.settings.id, 'objectValue']));
+                recordAnswerFilters.set(
+                    a.settings.id,
+                    createInMemoryFilterCompiler([a.settings.id, 'objectValue']),
+                );
             }
             const defs = new Map([
                 ...documentInMemoryFilterCompilers,
-                ['fieldAnswers', createInMemoryFilterCompiler('settings.fieldAnswers', recordAnswerFilters)],
+                [
+                    'fieldAnswers',
+                    createInMemoryFilterCompiler('settings.fieldAnswers', recordAnswerFilters),
+                ],
             ]);
 
             const compiledFilter = compileToInMemoryFilter(filter, defs);

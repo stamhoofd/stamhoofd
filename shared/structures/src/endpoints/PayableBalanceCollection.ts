@@ -61,7 +61,7 @@ export class DetailedPayableBalance extends AutoEncoder {
      * prices excluding VAT together with a separate VAT overview instead.
      */
     get hasExclusiveVAT() {
-        return this.payableBalanceItems.some(item => !item.VATIncluded && !!item.VATPercentage);
+        return this.payableBalanceItems.some((item) => !item.VATIncluded && !!item.VATPercentage);
     }
 
     /**

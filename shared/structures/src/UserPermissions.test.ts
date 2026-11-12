@@ -4,7 +4,11 @@ import { AccessRightHelper } from './AccessRight.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
 import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { PermissionRole, PermissionRoleDetailed, PermissionRoleForResponsibility } from './PermissionRole.js';
+import {
+    PermissionRole,
+    PermissionRoleDetailed,
+    PermissionRoleForResponsibility,
+} from './PermissionRole.js';
 import { Permissions } from './Permissions.js';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { PermissionsResourceKey } from './PermissionsResourceType.js';
@@ -26,7 +30,10 @@ function createTagResources(tagPermissions: Record<string, ResourcePermissions>)
 /**
  * A user that only received permissions at the platform level, limited to specific organization tags.
  */
-function createUserWithTagPermissions(tagPermissions: Record<string, ResourcePermissions>, organizationPermissions?: Record<string, Permissions>) {
+function createUserWithTagPermissions(
+    tagPermissions: Record<string, ResourcePermissions>,
+    organizationPermissions?: Record<string, Permissions>,
+) {
     return UserPermissions.create({
         globalPermissions: Permissions.create({
             resources: createTagResources(tagPermissions),
@@ -35,7 +42,10 @@ function createUserWithTagPermissions(tagPermissions: Record<string, ResourcePer
     });
 }
 
-function createPlatform(options?: { responsibilities?: MemberResponsibility[]; roles?: PermissionRoleDetailed[] }) {
+function createPlatform(options?: {
+    responsibilities?: MemberResponsibility[];
+    roles?: PermissionRoleDetailed[];
+}) {
     return Platform.create({
         config: PlatformConfig.create({
             responsibilities: options?.responsibilities ?? [],
@@ -46,7 +56,12 @@ function createPlatform(options?: { responsibilities?: MemberResponsibility[]; r
     });
 }
 
-function createOrganization(options?: { id?: string; tags?: string[]; roles?: PermissionRoleDetailed[]; responsibilities?: MemberResponsibility[] }): OrganizationForPermissionCalculation {
+function createOrganization(options?: {
+    id?: string;
+    tags?: string[];
+    roles?: PermissionRoleDetailed[];
+    responsibilities?: MemberResponsibility[];
+}): OrganizationForPermissionCalculation {
     return {
         id: options?.id ?? 'organization-1',
         meta: {
@@ -78,27 +93,32 @@ describe('Unit.UserPermissions', () => {
             return platform;
         };
 
-        const createUser = (globalPermissions?: Partial<Permissions>) => UserPermissions.create({
-            globalPermissions: Permissions.create({
-                responsibilities: [
-                    MemberResponsibilityRecordBase.create({
-                        responsibilityId: responsibility.id,
-                        memberId: 'member-1',
-                        groupId: null,
-                        startDate: new Date(0),
-                        endDate: null,
-                    }),
-                ],
-                ...globalPermissions,
-            }),
-        });
+        const createUser = (globalPermissions?: Partial<Permissions>) =>
+            UserPermissions.create({
+                globalPermissions: Permissions.create({
+                    responsibilities: [
+                        MemberResponsibilityRecordBase.create({
+                            responsibilityId: responsibility.id,
+                            memberId: 'member-1',
+                            groupId: null,
+                            startDate: new Date(0),
+                            endDate: null,
+                        }),
+                    ],
+                    ...globalPermissions,
+                }),
+            });
 
         test('platform responsibilities resolve to permissions for exactly matching email domains', () => {
             const platform = createPlatformWithDomains(['ksa.be']);
             const user = createUser();
 
             expect(user.forPlatform(platform, 'john@KSA.be')?.hasFullAccess()).toBe(true);
-            expect(user.forOrganization(createOrganization(), platform, 'john@ksa.be')?.hasFullAccess()).toBe(true);
+            expect(
+                user
+                    .forOrganization(createOrganization(), platform, 'john@ksa.be')
+                    ?.hasFullAccess(),
+            ).toBe(true);
         });
 
         test('platform responsibilities are ignored for other email domains, including subdomains', () => {
@@ -130,7 +150,9 @@ describe('Unit.UserPermissions', () => {
 
             expect(createUser().forPlatform(platform, 'john@gmail.com')).toBeNull();
             expect(createUser().applicableGlobalPermissions(platform, 'john@gmail.com')).toBeNull();
-            expect(createUser().applicableGlobalPermissions(platform, 'john@ksa.be')?.responsibilities).toHaveLength(1);
+            expect(
+                createUser().applicableGlobalPermissions(platform, 'john@ksa.be')?.responsibilities,
+            ).toHaveLength(1);
         });
 
         test('applicableGlobalPermissions keeps the other permissions', () => {
@@ -147,7 +169,9 @@ describe('Unit.UserPermissions', () => {
 
         test('no restrictions without domains', () => {
             const user = createUser();
-            expect(user.forPlatform(createPlatformWithDomains([]), 'john@gmail.com')?.hasFullAccess()).toBe(true);
+            expect(
+                user.forPlatform(createPlatformWithDomains([]), 'john@gmail.com')?.hasFullAccess(),
+            ).toBe(true);
         });
     });
 
@@ -212,7 +236,9 @@ describe('Unit.UserPermissions', () => {
 
             for (const result of [
                 userPermissions.forOrganization(organization, platform, null),
-                userPermissions.forOrganization(organization, platform, null, { inheritFromPlatform: true }),
+                userPermissions.forOrganization(organization, platform, null, {
+                    inheritFromPlatform: true,
+                }),
             ]) {
                 expect(result).not.toBeNull();
                 expect(result!.hasWriteAccess()).toBe(true);
@@ -232,7 +258,11 @@ describe('Unit.UserPermissions', () => {
             const organization = createOrganization({ tags: ['tag-a'] });
 
             // Same user and same organization as the test above, which does get access
-            expect(userPermissions.forOrganization(organization, platform, null, { inheritFromPlatform: false })).toBeNull();
+            expect(
+                userPermissions.forOrganization(organization, platform, null, {
+                    inheritFromPlatform: false,
+                }),
+            ).toBeNull();
         });
 
         test('does not inherit the permissions of a tag the organization does not have', () => {
@@ -243,7 +273,11 @@ describe('Unit.UserPermissions', () => {
             });
 
             expect(
-                userPermissions.forOrganization(createOrganization({ tags: ['tag-b'] }), createPlatform(), null),
+                userPermissions.forOrganization(
+                    createOrganization({ tags: ['tag-b'] }),
+                    createPlatform(),
+                    null,
+                ),
             ).toBeNull();
         });
 
@@ -255,13 +289,21 @@ describe('Unit.UserPermissions', () => {
             });
             const platform = createPlatform();
 
-            const untagged = userPermissions.forOrganization(createOrganization({ tags: [] }), platform, null);
+            const untagged = userPermissions.forOrganization(
+                createOrganization({ tags: [] }),
+                platform,
+                null,
+            );
             expect(untagged).not.toBeNull();
             expect(untagged!.hasReadAccess()).toBe(true);
             expect(untagged!.hasWriteAccess()).toBe(false);
 
             // ...and to tagged organizations too
-            const tagged = userPermissions.forOrganization(createOrganization({ tags: ['tag-a'] }), platform, null);
+            const tagged = userPermissions.forOrganization(
+                createOrganization({ tags: ['tag-a'] }),
+                platform,
+                null,
+            );
             expect(tagged).not.toBeNull();
             expect(tagged!.hasReadAccess()).toBe(true);
         });
@@ -273,15 +315,23 @@ describe('Unit.UserPermissions', () => {
                     level: PermissionLevel.None,
                     resources: {
                         [PermissionsResourceType.OrganizationTags]: {
-                            '': ResourcePermissions.create({ level: PermissionLevel.Read }).encode({ version: 417 }),
+                            '': ResourcePermissions.create({ level: PermissionLevel.Read }).encode({
+                                version: 417,
+                            }),
                         },
                     },
                 },
                 organizationPermissions: {},
             };
-            const userPermissions = UserPermissions.decode(new ObjectData(encoded, { version: 417 }));
+            const userPermissions = UserPermissions.decode(
+                new ObjectData(encoded, { version: 417 }),
+            );
 
-            const result = userPermissions.forOrganization(createOrganization({ tags: [] }), createPlatform(), null);
+            const result = userPermissions.forOrganization(
+                createOrganization({ tags: [] }),
+                createPlatform(),
+                null,
+            );
             expect(result).not.toBeNull();
             expect(result!.hasReadAccess()).toBe(true);
             expect(result!.hasWriteAccess()).toBe(false);
@@ -295,7 +345,11 @@ describe('Unit.UserPermissions', () => {
             });
 
             expect(
-                userPermissions.forOrganization(createOrganization({ tags: [] }), createPlatform(), null),
+                userPermissions.forOrganization(
+                    createOrganization({ tags: [] }),
+                    createPlatform(),
+                    null,
+                ),
             ).toBeNull();
         });
 
@@ -327,7 +381,9 @@ describe('Unit.UserPermissions', () => {
             expect(result!.hasFullAccess()).toBe(false);
 
             expect(result!.hasAccessRight(AccessRight.MemberManageNRN)).toBe(true);
-            expect(result!.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer)).toBe(true);
+            expect(result!.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer)).toBe(
+                true,
+            );
         });
 
         test('returns null when there are no inherited and no organization specific permissions', () => {
@@ -336,7 +392,11 @@ describe('Unit.UserPermissions', () => {
             });
 
             expect(
-                userPermissions.forOrganization(createOrganization({ tags: ['tag-a'] }), createPlatform(), null),
+                userPermissions.forOrganization(
+                    createOrganization({ tags: ['tag-a'] }),
+                    createPlatform(),
+                    null,
+                ),
             ).toBeNull();
         });
 
@@ -364,13 +424,19 @@ describe('Unit.UserPermissions', () => {
             expect(result!.hasWriteAccess()).toBe(true);
 
             // Prohibited organization level access rights survive when they are inherited from the platform
-            expect(result!.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer)).toBe(true);
+            expect(result!.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer)).toBe(
+                true,
+            );
 
             // Without inheriting, only the organization specific permissions remain
-            const withoutInherit = userPermissions.forOrganization(organization, platform, null, { inheritFromPlatform: false });
+            const withoutInherit = userPermissions.forOrganization(organization, platform, null, {
+                inheritFromPlatform: false,
+            });
             expect(withoutInherit).not.toBeNull();
             expect(withoutInherit!.hasWriteAccess()).toBe(true);
-            expect(withoutInherit!.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer)).toBe(false);
+            expect(
+                withoutInherit!.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer),
+            ).toBe(false);
         });
     });
 
@@ -383,7 +449,10 @@ describe('Unit.UserPermissions', () => {
             });
 
             expect(
-                userPermissions.forWithoutInherit(createOrganization({ tags: ['tag-a'] }), createPlatform()),
+                userPermissions.forWithoutInherit(
+                    createOrganization({ tags: ['tag-a'] }),
+                    createPlatform(),
+                ),
             ).toBeNull();
         });
 
@@ -433,7 +502,9 @@ describe('Unit.UserPermissions', () => {
             expect(result!.hasFullAccess()).toBe(false);
 
             // While forOrganization does inherit it
-            expect(userPermissions.forOrganization(organization, platform, null)!.hasFullAccess()).toBe(true);
+            expect(
+                userPermissions.forOrganization(organization, platform, null)!.hasFullAccess(),
+            ).toBe(true);
         });
 
         test('removes prohibited organization level access rights from organization roles', () => {
@@ -441,14 +512,20 @@ describe('Unit.UserPermissions', () => {
                 id: 'role-1',
                 name: 'Rolnaam',
                 level: PermissionLevel.Read,
-                accessRights: [AccessRight.OrganizationEventNotificationReviewer, AccessRight.MemberManageNRN],
+                accessRights: [
+                    AccessRight.OrganizationEventNotificationReviewer,
+                    AccessRight.MemberManageNRN,
+                ],
             });
 
             const userPermissions = UserPermissions.create({
                 organizationPermissions: new Map([
-                    ['organization-1', Permissions.create({
-                        roles: [PermissionRole.create({ id: role.id, name: role.name })],
-                    })],
+                    [
+                        'organization-1',
+                        Permissions.create({
+                            roles: [PermissionRole.create({ id: role.id, name: role.name })],
+                        }),
+                    ],
                 ]),
             });
 
@@ -460,10 +537,15 @@ describe('Unit.UserPermissions', () => {
             expect(result).not.toBeNull();
             expect(result!.hasReadAccess()).toBe(true);
             expect(result!.hasAccessRight(AccessRight.MemberManageNRN)).toBe(true);
-            expect(result!.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer)).toBe(false);
+            expect(result!.hasAccessRight(AccessRight.OrganizationEventNotificationReviewer)).toBe(
+                false,
+            );
 
             // The original role is not altered
-            expect(role.accessRights).toEqual([AccessRight.OrganizationEventNotificationReviewer, AccessRight.MemberManageNRN]);
+            expect(role.accessRights).toEqual([
+                AccessRight.OrganizationEventNotificationReviewer,
+                AccessRight.MemberManageNRN,
+            ]);
         });
     });
 });

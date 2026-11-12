@@ -11,17 +11,28 @@ export type PackageManagerCheck = {
     details: string;
 };
 
-export async function checkPackageManager(rootDir: string, verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<PackageManagerCheck> {
-    const packageJson = JSON.parse(await fs.readFile(path.join(rootDir, 'package.json'), 'utf8')) as { packageManager?: unknown };
-    const match = typeof packageJson.packageManager === 'string'
-        ? /^pnpm@([^+\s]+)(?:\+.+)?$/.exec(packageJson.packageManager)
-        : null;
+export async function checkPackageManager(
+    rootDir: string,
+    verbosity: RunVerbosity = RunVerbosity.Quiet,
+): Promise<PackageManagerCheck> {
+    const packageJson = JSON.parse(
+        await fs.readFile(path.join(rootDir, 'package.json'), 'utf8'),
+    ) as { packageManager?: unknown };
+    const match =
+        typeof packageJson.packageManager === 'string'
+            ? /^pnpm@([^+\s]+)(?:\+.+)?$/.exec(packageJson.packageManager)
+            : null;
     if (!match) {
         throw new Error('Root package.json must pin pnpm in the packageManager field.');
     }
 
     const expected = match[1];
-    const result = await run('pnpm', ['--version'], { capture: true, allowFailure: true, cwd: rootDir, verbosity });
+    const result = await run('pnpm', ['--version'], {
+        capture: true,
+        allowFailure: true,
+        cwd: rootDir,
+        verbosity,
+    });
     if (result.status !== 0) {
         const error = result.stderr.trim();
         return {
@@ -46,7 +57,10 @@ export async function checkPackageManager(rootDir: string, verbosity: RunVerbosi
     };
 }
 
-export async function setupPackageManager(rootDir: string, options: { dryRun?: boolean } = {}): Promise<void> {
+export async function setupPackageManager(
+    rootDir: string,
+    options: { dryRun?: boolean } = {},
+): Promise<void> {
     if (options.dryRun) {
         console.log(command('corepack enable'));
         console.log(command('corepack install'));
@@ -62,11 +76,13 @@ export async function setupPackageManager(rootDir: string, options: { dryRun?: b
 export function printPackageManagerStatus(check: PackageManagerCheck): void {
     table(
         ['Check', 'Status', 'Details'],
-        [[
-            'pnpm',
-            statusCell(check.ok ? CliStatus.Ready : CliStatus.Failed),
-            check.ok ? check.details : `${check.details} (run "stam setup pnpm")`,
-        ]],
+        [
+            [
+                'pnpm',
+                statusCell(check.ok ? CliStatus.Ready : CliStatus.Failed),
+                check.ok ? check.details : `${check.details} (run "stam setup pnpm")`,
+            ],
+        ],
         { title: 'Package manager' },
     );
 }

@@ -4,8 +4,17 @@ import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { BalanceItem } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { BalanceItem as BalanceItemStruct, CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
+import type {
+    BalanceItem as BalanceItemStruct,
+    CountFilteredRequest,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
+import {
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    assertSort,
+    getSortFilter,
+} from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
@@ -44,7 +53,7 @@ export class GetBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Respo
             throw Context.auth.error();
         }
 
-        if (!await Context.auth.canManagePayments(organization.id)) {
+        if (!(await Context.auth.canManagePayments(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -52,8 +61,7 @@ export class GetBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Respo
             organizationId: organization.id,
         };
 
-        const query = BalanceItem.select()
-            .setMaxExecutionTime(15 * 1000);
+        const query = BalanceItem.select().setMaxExecutionTime(15 * 1000);
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
@@ -154,8 +162,6 @@ export class GetBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Respo
             });
         }
 
-        return new Response(
-            await GetBalanceItemsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetBalanceItemsEndpoint.buildData(request.query));
     }
 }

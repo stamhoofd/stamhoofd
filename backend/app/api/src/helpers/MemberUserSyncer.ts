@@ -1,9 +1,22 @@
 import type { MemberWithUsers } from '@stamhoofd/models';
-import { CachedBalance, Member, MemberResponsibilityRecord, MemberUser, Organization, Platform, User } from '@stamhoofd/models';
+import {
+    CachedBalance,
+    Member,
+    MemberResponsibilityRecord,
+    MemberUser,
+    Organization,
+    Platform,
+    User,
+} from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLAlias, SQLCount, SQLSelectAs } from '@stamhoofd/sql';
 import type { MemberDetails, PermissionRole } from '@stamhoofd/structures';
-import { AuditLogSource, Permissions, ReceivableBalanceType, UserPermissions } from '@stamhoofd/structures';
+import {
+    AuditLogSource,
+    Permissions,
+    ReceivableBalanceType,
+    UserPermissions,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from '../services/AuditLogService.js';
 
@@ -38,9 +51,19 @@ export class MemberUserSyncerStatic {
             .from(SQL.table(MemberUser.table, 'duplicate'))
             .join(
                 SQL.join(duplicateGroups.as('duplicate_group'))
-                    .where(SQL.column('duplicate_group', 'membersId'), SQL.column('duplicate', 'membersId'))
-                    .where(SQL.column('duplicate_group', 'usersId'), SQL.column('duplicate', 'usersId'))
-                    .where(SQL.column('duplicate', 'id'), '>', SQL.column('duplicate_group', 'keepId')),
+                    .where(
+                        SQL.column('duplicate_group', 'membersId'),
+                        SQL.column('duplicate', 'membersId'),
+                    )
+                    .where(
+                        SQL.column('duplicate_group', 'usersId'),
+                        SQL.column('duplicate', 'usersId'),
+                    )
+                    .where(
+                        SQL.column('duplicate', 'id'),
+                        '>',
+                        SQL.column('duplicate_group', 'keepId'),
+                    ),
             );
 
         if (memberId !== null) {
@@ -69,7 +92,7 @@ export class MemberUserSyncerStatic {
                 // Cleanup legacy bugs, but also cleans up merges
                 let removeDuplicates = false;
                 for (const user of member.users) {
-                    const o = member.users.filter(u => u.id === user.id);
+                    const o = member.users.filter((u) => u.id === user.id);
                     if (o.length > 1) {
                         removeDuplicates = true;
                         break;
@@ -81,7 +104,8 @@ export class MemberUserSyncerStatic {
                     await Member.users.load(member);
                 }
 
-                const { userEmails, parentEmails, unverifiedEmails, allEmails } = this.getMemberAccessEmails(member.details);
+                const { userEmails, parentEmails, unverifiedEmails, allEmails } =
+                    this.getMemberAccessEmails(member.details);
 
                 // Make sure all these users have access to the member
                 for (const email of userEmails) {
@@ -132,7 +156,11 @@ export class MemberUserSyncerStatic {
                             // This makes sure we don't inherit permissions and aren't counted as 'being' the member
                             await this.linkUser(user.email, member, true);
                         }
-                    } else if (member.details.parentsHaveAccess?.value === false && parentEmails.includes(user.email.toLocaleLowerCase()) && !userEmails.includes(user.email.toLocaleLowerCase())) {
+                    } else if (
+                        member.details.parentsHaveAccess?.value === false &&
+                        parentEmails.includes(user.email.toLocaleLowerCase()) &&
+                        !userEmails.includes(user.email.toLocaleLowerCase())
+                    ) {
                         // Only remove if manually set to false for now
                         await this.unlinkUser(user, member);
                     }
@@ -150,9 +178,9 @@ export class MemberUserSyncerStatic {
     }
 
     getMemberAccessEmails(details: MemberDetails) {
-        const userEmails = details.getMemberEmails().map(e => e.toLocaleLowerCase());
-        const parentEmails = details.getParentEmails().map(e => e.toLocaleLowerCase());
-        const unverifiedEmails = details.unverifiedEmails.map(e => e.toLocaleLowerCase());
+        const userEmails = details.getMemberEmails().map((e) => e.toLocaleLowerCase());
+        const parentEmails = details.getParentEmails().map((e) => e.toLocaleLowerCase());
+        const unverifiedEmails = details.unverifiedEmails.map((e) => e.toLocaleLowerCase());
         const allEmails = [...userEmails, ...parentEmails, ...unverifiedEmails];
 
         return {
@@ -171,7 +199,7 @@ export class MemberUserSyncerStatic {
         return [
             ...userEmails,
             ...(details.calculatedParentsHaveAccess ? parentEmails : []),
-            ...unverifiedEmails.filter(email => !parentEmails.includes(email)),
+            ...unverifiedEmails.filter((email) => !parentEmails.includes(email)),
         ];
     }
 
@@ -215,7 +243,9 @@ export class MemberUserSyncerStatic {
 
     async updateInheritedPermissions(user: User) {
         // Fetch all members for this user
-        const responsibilities = user.memberId ? (await this.getResponsibilitiesForMembers([user.memberId])) : [];
+        const responsibilities = user.memberId
+            ? await this.getResponsibilitiesForMembers([user.memberId])
+            : [];
 
         // Check if the member has active registrations
         // otherwise -> do not inherit any permissions
@@ -223,7 +253,8 @@ export class MemberUserSyncerStatic {
         user.permissions = user.permissions ?? UserPermissions.create({});
 
         // Group responsibilities by organization
-        const responsibilitiesByOrganization: Map<string | null, MemberResponsibilityRecord[]> = new Map();
+        const responsibilitiesByOrganization: Map<string | null, MemberResponsibilityRecord[]> =
+            new Map();
 
         responsibilitiesByOrganization.set(null, []);
 
@@ -242,14 +273,18 @@ export class MemberUserSyncerStatic {
             if (organizationId === null) {
                 const patch = user.permissions.convertPlatformPatch(
                     Permissions.patch({
-                        responsibilities: (responsibilitiesByOrganization.get(organizationId) ?? []).map(r => r.getBaseStructure()) as any,
+                        responsibilities: (
+                            responsibilitiesByOrganization.get(organizationId) ?? []
+                        ).map((r) => r.getBaseStructure()) as any,
                     }),
                 );
                 user.permissions = user.permissions.patch(patch);
             } else {
                 const patch = user.permissions.convertPatch(
                     Permissions.patch({
-                        responsibilities: (responsibilitiesByOrganization.get(organizationId) ?? []).map(r => r.getBaseStructure()) as any,
+                        responsibilities: (
+                            responsibilitiesByOrganization.get(organizationId) ?? []
+                        ).map((r) => r.getBaseStructure()) as any,
                     }),
                     organizationId,
                 );
@@ -259,7 +294,8 @@ export class MemberUserSyncerStatic {
 
         // Update roles (remove roles from permissions that no longer exist)
         for (const organizationId of user.permissions.organizationPermissions.keys()) {
-            const organizationPermissions = user.permissions.organizationPermissions.get(organizationId);
+            const organizationPermissions =
+                user.permissions.organizationPermissions.get(organizationId);
             if (!organizationPermissions) {
                 continue;
             }
@@ -279,7 +315,7 @@ export class MemberUserSyncerStatic {
             const availableRoles = organization.privateMeta.roles;
             const newRoles: PermissionRole[] = [];
             for (const role of roles) {
-                const roleInfo = availableRoles.find(r => r.id === role.id);
+                const roleInfo = availableRoles.find((r) => r.id === role.id);
                 if (roleInfo) {
                     role.name = roleInfo.name;
                     newRoles.push(role);
@@ -292,10 +328,11 @@ export class MemberUserSyncerStatic {
         if (globalPermissions) {
             const roles = globalPermissions.roles;
             if (roles.length > 0) {
-                const availableRoles = (await Platform.getSharedPrivateStruct()).privateConfig.roles;
+                const availableRoles = (await Platform.getSharedPrivateStruct()).privateConfig
+                    .roles;
                 const newRoles: PermissionRole[] = [];
                 for (const role of roles) {
-                    const roleInfo = availableRoles.find(r => r.id === role.id);
+                    const roleInfo = availableRoles.find((r) => r.id === role.id);
                     if (roleInfo) {
                         role.name = roleInfo.name;
                         newRoles.push(role);
@@ -325,14 +362,17 @@ export class MemberUserSyncerStatic {
         if (user.memberId === member.id) {
             user.memberId = null;
 
-            if (user.firstName === member.details.firstName && user.lastName === member.details.lastName) {
+            if (
+                user.firstName === member.details.firstName &&
+                user.lastName === member.details.lastName
+            ) {
                 user.firstName = null;
                 user.lastName = null;
             }
         }
 
         // Update model relation to correct response
-        const existingIndex = member.users.findIndex(u => u.id === user.id);
+        const existingIndex = member.users.findIndex((u) => u.id === user.id);
         if (existingIndex !== -1) {
             member.users.splice(existingIndex, 1);
         }
@@ -340,11 +380,21 @@ export class MemberUserSyncerStatic {
         await this.updateInheritedPermissions(user);
     }
 
-    private async resolveUserWithMultipleMembers(currentMemberId: string, otherMember: Member): Promise<'current' | 'other'> {
+    private async resolveUserWithMultipleMembers(
+        currentMemberId: string,
+        otherMember: Member,
+    ): Promise<'current' | 'other'> {
         const otherMemberId = otherMember.id;
-        const responsibilities = await this.getResponsibilitiesForMembers([otherMemberId, currentMemberId]);
-        const responsibilitiesOther = responsibilities.filter(r => r.memberId === otherMemberId && r.getBaseStructure().isActive);
-        const responsibilitiesCurrent = responsibilities.filter(r => r.memberId === currentMemberId && r.getBaseStructure().isActive);
+        const responsibilities = await this.getResponsibilitiesForMembers([
+            otherMemberId,
+            currentMemberId,
+        ]);
+        const responsibilitiesOther = responsibilities.filter(
+            (r) => r.memberId === otherMemberId && r.getBaseStructure().isActive,
+        );
+        const responsibilitiesCurrent = responsibilities.filter(
+            (r) => r.memberId === currentMemberId && r.getBaseStructure().isActive,
+        );
 
         if (responsibilitiesOther.length > 0 && responsibilitiesCurrent.length === 0) {
             return 'other';
@@ -375,16 +425,30 @@ export class MemberUserSyncerStatic {
         return 'other';
     }
 
-    async linkUser(email: string, member: MemberWithUsers, asParent: boolean, name: { firstName: string; lastName: string } | null = null) {
+    async linkUser(
+        email: string,
+        member: MemberWithUsers,
+        asParent: boolean,
+        name: { firstName: string; lastName: string } | null = null,
+    ) {
         // This needs to happen in the queue to prevent creating duplicate users in the database
         await QueueHandler.schedule('link-user/' + email, async () => {
-            let user = member.users.find(u => u.email.toLocaleLowerCase() === email.toLocaleLowerCase()) ?? await User.getForAuthentication(member.organizationId, email, { allowWithoutAccount: true });
+            let user =
+                member.users.find(
+                    (u) => u.email.toLocaleLowerCase() === email.toLocaleLowerCase(),
+                ) ??
+                (await User.getForAuthentication(member.organizationId, email, {
+                    allowWithoutAccount: true,
+                }));
 
             if (user) {
                 if (!asParent) {
                     let setMemberId = true;
                     if (user.memberId && user.memberId !== member.id) {
-                        const resolveTo = await this.resolveUserWithMultipleMembers(user.memberId, member);
+                        const resolveTo = await this.resolveUserWithMultipleMembers(
+                            user.memberId,
+                            member,
+                        );
 
                         if (resolveTo === 'current') {
                             // Do not change memberId
@@ -409,8 +473,16 @@ export class MemberUserSyncerStatic {
                     let shouldSave = false;
 
                     // Clear clearly wrong name
-                    if (user.firstName?.toLocaleLowerCase() === member.details.firstName?.toLocaleLowerCase() && user.lastName?.toLocaleLowerCase() === member.details.lastName?.toLocaleLowerCase()) {
-                        if (!name || (name.firstName !== user.firstName && name.lastName !== user.lastName)) {
+                    if (
+                        user.firstName?.toLocaleLowerCase() ===
+                            member.details.firstName?.toLocaleLowerCase() &&
+                        user.lastName?.toLocaleLowerCase() ===
+                            member.details.lastName?.toLocaleLowerCase()
+                    ) {
+                        if (
+                            !name ||
+                            (name.firstName !== user.firstName && name.lastName !== user.lastName)
+                        ) {
                             user.firstName = null;
                             user.lastName = null;
                             shouldSave = true;
@@ -448,7 +520,13 @@ export class MemberUserSyncerStatic {
                     user.memberId = member.id;
                     await this.updateInheritedPermissions(user);
                 } else {
-                    if (!name && user.firstName?.toLocaleLowerCase() === member.details.firstName?.toLocaleLowerCase() && user.lastName?.toLocaleLowerCase() === member.details.lastName?.toLocaleLowerCase()) {
+                    if (
+                        !name &&
+                        user.firstName?.toLocaleLowerCase() ===
+                            member.details.firstName?.toLocaleLowerCase() &&
+                        user.lastName?.toLocaleLowerCase() ===
+                            member.details.lastName?.toLocaleLowerCase()
+                    ) {
                         user.firstName = null;
                         user.lastName = null;
                     }
@@ -456,11 +534,13 @@ export class MemberUserSyncerStatic {
                     await user.save();
                 }
 
-                console.log('Created new (placeholder) user that has access to a member: ' + user.id);
+                console.log(
+                    'Created new (placeholder) user that has access to a member: ' + user.id,
+                );
             }
 
             // Update model relation to correct response
-            if (!member.users.find(u => u.id === user.id)) {
+            if (!member.users.find((u) => u.id === user.id)) {
                 await Member.users.reverse('members').link(user, [member]);
                 member.users.push(user);
 
@@ -475,9 +555,15 @@ export class MemberUserSyncerStatic {
      */
     async updateUserBalance(userId: string, memberId: string) {
         // Update balance of this user, as it could have changed
-        const memberBalances = await CachedBalance.getForObjects([memberId], null, ReceivableBalanceType.member);
+        const memberBalances = await CachedBalance.getForObjects(
+            [memberId],
+            null,
+            ReceivableBalanceType.member,
+        );
         if (memberBalances.length > 0) {
-            const organizationIds = Formatter.uniqueArray(memberBalances.map(b => b.organizationId));
+            const organizationIds = Formatter.uniqueArray(
+                memberBalances.map((b) => b.organizationId),
+            );
             for (const organizationId of organizationIds) {
                 await CachedBalance.updateForUsers(organizationId, [userId]);
             }

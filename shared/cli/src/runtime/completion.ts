@@ -1,7 +1,8 @@
 /** Keep private environment names out of generated scripts: request them from the active checkout at Tab time. */
 export function docsEnvironmentCompletionScript(shell: string, cacheDir: string): string {
     const quote = (value: string) => `'${value.replaceAll("'", "'\\''")}'`;
-    if (shell === 'bash') return `source ${quote(`${cacheDir}/bash_setup`)}
+    if (shell === 'bash')
+        return `source ${quote(`${cacheDir}/bash_setup`)}
 _stam_local_completion() {
     local cur="\${COMP_WORDS[COMP_CWORD]}" prefix=""
     if [[ "\${COMP_WORDS[1]} \${COMP_WORDS[2]} \${COMP_WORDS[3]}" != "docs image publish" ]]; then
@@ -52,7 +53,9 @@ compdef _stam_local_completion stam`;
 export function standaloneCompletionScript(shell: string, generated: string): string {
     const bridge = docsEnvironmentCompletionScript(shell, '').replace(/^source .*\n/, '');
     if (shell === 'bash') return `${generated}\n${bridge}\n`;
-    const definitions = generated.replace(/\b_stam\b/g, '_stam_generated').replace(/\n_stam_generated\s*$/, '\n');
+    const definitions = generated
+        .replace(/\b_stam\b/g, '_stam_generated')
+        .replace(/\n_stam_generated\s*$/, '\n');
     return `${definitions}\n${bridge
         .replaceAll('_stam_local_completion', '_stam')
         .replace('        autoload -Uz _stam\n', '')

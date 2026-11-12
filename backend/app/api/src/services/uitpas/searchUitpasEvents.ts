@@ -6,7 +6,9 @@ function pickTranslation(value: unknown): string {
     if (typeof value !== 'object' || value === null) {
         return '';
     }
-    const entries = Object.entries(value as Record<string, unknown>).filter((e): e is [string, string] => typeof e[1] === 'string');
+    const entries = Object.entries(value as Record<string, unknown>).filter(
+        (e): e is [string, string] => typeof e[1] === 'string',
+    );
     if (entries.length === 0) {
         return '';
     }
@@ -19,39 +21,40 @@ type EventsResponse = {
     itemsPerPage: number;
     member: Array<{
         '@id': string;
-        'name': Record<string, string>;
-        'location': {
+        name: Record<string, string>;
+        location: {
             name: Record<string, string>;
         };
-        'startDate'?: string;
-        'endDate'?: string;
+        startDate?: string;
+        endDate?: string;
     }>;
 };
 
 function assertIsEventsResponse(json: unknown): asserts json is EventsResponse {
     if (
-        typeof json !== 'object'
-        || json === null
-        || !('totalItems' in json)
-        || typeof json.totalItems !== 'number'
-        || !('itemsPerPage' in json)
-        || typeof json.itemsPerPage !== 'number'
-        || !('member' in json)
-        || !Array.isArray(json.member)
-        || json.member.some(member => (
-            typeof member !== 'object'
-            || member === null
-            || !('@id' in member)
-            || typeof member['@id'] !== 'string'
-            || !('name' in member)
-            || pickTranslation(member.name) === ''
-            || !('location' in member)
-            || typeof member.location !== 'object'
-            || member.location === null
-            || !('name' in member.location)
-            || typeof member.location.name !== 'object'
-            || member.location.name === null
-        ))
+        typeof json !== 'object' ||
+        json === null ||
+        !('totalItems' in json) ||
+        typeof json.totalItems !== 'number' ||
+        !('itemsPerPage' in json) ||
+        typeof json.itemsPerPage !== 'number' ||
+        !('member' in json) ||
+        !Array.isArray(json.member) ||
+        json.member.some(
+            (member) =>
+                typeof member !== 'object' ||
+                member === null ||
+                !('@id' in member) ||
+                typeof member['@id'] !== 'string' ||
+                !('name' in member) ||
+                pickTranslation(member.name) === '' ||
+                !('location' in member) ||
+                typeof member.location !== 'object' ||
+                member.location === null ||
+                !('name' in member.location) ||
+                typeof member.location.name !== 'object' ||
+                member.location.name === null,
+        )
     ) {
         console.error('Invalid events response', json);
         throw new SimpleError({
@@ -62,7 +65,11 @@ function assertIsEventsResponse(json: unknown): asserts json is EventsResponse {
     }
 }
 
-export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: string, textQuery?: string): Promise<UitpasEventsResponse> {
+export async function searchUitpasEvents(
+    clientId: string,
+    uitpasOrganizerId: string,
+    textQuery?: string,
+): Promise<UitpasEventsResponse> {
     // uses no credentials (only client id of the organization)
     // https://docs.publiq.be/docs/uitpas/events/searching
     if (!clientId) {
@@ -72,7 +79,9 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
             human: $t('%1BZ'),
         });
     }
-    const baseUrl = STAMHOOFD.UITPAS_API_URL?.includes('test') ? 'https://search-test.uitdatabank.be/events' : 'https://search.uitdatabank.be/events';
+    const baseUrl = STAMHOOFD.UITPAS_API_URL?.includes('test')
+        ? 'https://search-test.uitdatabank.be/events'
+        : 'https://search.uitdatabank.be/events';
     const params = new URLSearchParams();
     params.append('clientId', clientId);
     params.append('organizerId', uitpasOrganizerId);

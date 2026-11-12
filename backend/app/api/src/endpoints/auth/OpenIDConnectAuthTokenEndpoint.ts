@@ -41,8 +41,10 @@ export class OpenIDConnectAuthTokenEndpoint extends Endpoint<Params, Query, Body
         // Create a SSO auth token that can only be used once
         const token = await SSOService.createToken(sessionToken);
 
-        return new Response(OpenIDAuthTokenResponse.create({
-            ssoAuthToken: token,
-        }));
+        return new Response(
+            OpenIDAuthTokenResponse.create({
+                ssoAuthToken: token,
+            }),
+        );
     }
 }

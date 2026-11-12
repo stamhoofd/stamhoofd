@@ -2,7 +2,13 @@ import { Model } from '@node/database';
 import { isSimpleError, SimpleError } from '@common/errors';
 import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { Cart, Product, ProductPrice, UitpasClientCredentialsStatus, UitpasOrganizersResponse } from '@stamhoofd/structures';
+import type {
+    Cart,
+    Product,
+    ProductPrice,
+    UitpasClientCredentialsStatus,
+    UitpasOrganizersResponse,
+} from '@stamhoofd/structures';
 import { OrderStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,7 +20,10 @@ import { getSocialTariffForEvent } from './getSocialTariffForEvent.js';
 import { getSocialTariffForUitpasNumbers } from './getSocialTariffForUitpasNumbers.js';
 import type { GetPassResponse } from './PassholderEndpoints.js';
 import { PassholderEndpoints } from './PassholderEndpoints.js';
-import type { RegisterTicketSaleRequest, RegisterTicketSaleResponse } from './registerTicketSales.js';
+import type {
+    RegisterTicketSaleRequest,
+    RegisterTicketSaleResponse,
+} from './registerTicketSales.js';
 import { registerTicketSales } from './registerTicketSales.js';
 import { searchUitpasEvents } from './searchUitpasEvents.js';
 import { searchUitpasOrganizers } from './searchUitpasOrganizers.js';
@@ -48,20 +57,23 @@ export function shouldReserveUitpasNumbers(status: OrderStatus): boolean {
     return status !== OrderStatus.Canceled && status !== OrderStatus.Deleted;
 }
 
-function areThereUitpasChanges(oldTicketSales: UitpasTicketSale[], newTicketSales: UitpasTicketSale[]): boolean {
+function areThereUitpasChanges(
+    oldTicketSales: UitpasTicketSale[],
+    newTicketSales: UitpasTicketSale[],
+): boolean {
     if (oldTicketSales.length !== newTicketSales.length) {
         return true;
     }
     for (const oldTicketSale of oldTicketSales) {
         const newTicketSale = newTicketSales.find(
-            ts =>
-                ts.uitpasNumber === oldTicketSale.uitpasNumber
-                && ts.basePrice === oldTicketSale.basePrice
-                && ts.basePriceLabel === oldTicketSale.basePriceLabel
-                && ts.reducedPrice === oldTicketSale.reducedPrice
-                && ts.uitpasTariffId === oldTicketSale.uitpasTariffId
-                && ts.uitpasEventUrl === oldTicketSale.uitpasEventUrl
-                && ts.productId === oldTicketSale.productId,
+            (ts) =>
+                ts.uitpasNumber === oldTicketSale.uitpasNumber &&
+                ts.basePrice === oldTicketSale.basePrice &&
+                ts.basePriceLabel === oldTicketSale.basePriceLabel &&
+                ts.reducedPrice === oldTicketSale.reducedPrice &&
+                ts.uitpasTariffId === oldTicketSale.uitpasTariffId &&
+                ts.uitpasEventUrl === oldTicketSale.uitpasEventUrl &&
+                ts.productId === oldTicketSale.productId,
         );
         if (!newTicketSale) {
             return true;
@@ -77,7 +89,9 @@ function getUitpasTicketSales(order: Order): UitpasTicketSale[] {
     }
     for (const item of order.data.cart.items) {
         if (item.uitpasNumbers.length > 0) {
-            const baseProductPrice = item.product.prices.filter(price => price.id === item.productPrice.uitpasBaseProductPriceId)[0];
+            const baseProductPrice = item.product.prices.filter(
+                (price) => price.id === item.productPrice.uitpasBaseProductPriceId,
+            )[0];
             if (!baseProductPrice) {
                 throw new SimpleError({
                     code: 'missing_uitpas_base_product_price',
@@ -116,7 +130,10 @@ export class UitpasService {
     static listening = false;
 
     static async getWebshopUitpasNumberFromDb(order: Order): Promise<WebshopUitpasNumber[]> {
-        return await WebshopUitpasNumber.select().where('webshopId', order.webshopId).andWhere('orderId', order.id).fetch();
+        return await WebshopUitpasNumber.select()
+            .where('webshopId', order.webshopId)
+            .andWhere('orderId', order.id)
+            .fetch();
     }
 
     static async createUitpasNumbers(toBeInserted: InsertUitpasNumber[]) {
@@ -162,7 +179,11 @@ export class UitpasService {
         await insert.insert();
     }
 
-    static async updateTicketSales(order: Order, isNewOrder: boolean, ticketSalesHint?: UitpasTicketSale[]): Promise<void> {
+    static async updateTicketSales(
+        order: Order,
+        isNewOrder: boolean,
+        ticketSalesHint?: UitpasTicketSale[],
+    ): Promise<void> {
         const ticketSales = ticketSalesHint ?? getUitpasTicketSales(order);
 
         // queue on order, so no race conditions if the same order is updated multiple times in short time period
@@ -173,7 +194,12 @@ export class UitpasService {
             const toBeRegistered: UitpasTicketSale[] = [];
 
             for (const ticketSale of ticketSales) {
-                const i = registered.findIndex(request => request.uitpasNumber === ticketSale.uitpasNumber && request.basePrice === ticketSale.basePrice && request.basePriceLabel === ticketSale.basePriceLabel);
+                const i = registered.findIndex(
+                    (request) =>
+                        request.uitpasNumber === ticketSale.uitpasNumber &&
+                        request.basePrice === ticketSale.basePrice &&
+                        request.basePriceLabel === ticketSale.basePriceLabel,
+                );
                 if (i !== -1) {
                     unchangedRegistered.push(registered[i]);
                     registered.splice(i, 1);
@@ -185,31 +211,57 @@ export class UitpasService {
             const toBeCanceled = registered;
 
             // Only register/cancel tickets if official flow is/was used
-            const toBeCanceledUitpasIds = toBeCanceled.filter(c => c.uitpasEventUrl && c.uitpasTariffId && c.ticketSaleId).map(c => c.ticketSaleId!);
-            const toBeRegisteredUitpasRequests: RegisterTicketSaleRequest[] = toBeRegistered.filter(c => c.uitpasEventUrl && c.uitpasTariffId) as RegisterTicketSaleRequest[];
-            const noUitpasTariffId = toBeRegistered.filter(c => c.uitpasEventUrl && !c.uitpasTariffId);
+            const toBeCanceledUitpasIds = toBeCanceled
+                .filter((c) => c.uitpasEventUrl && c.uitpasTariffId && c.ticketSaleId)
+                .map((c) => c.ticketSaleId!);
+            const toBeRegisteredUitpasRequests: RegisterTicketSaleRequest[] = toBeRegistered.filter(
+                (c) => c.uitpasEventUrl && c.uitpasTariffId,
+            ) as RegisterTicketSaleRequest[];
+            const noUitpasTariffId = toBeRegistered.filter(
+                (c) => c.uitpasEventUrl && !c.uitpasTariffId,
+            );
             if (noUitpasTariffId.length > 0) {
-                console.warn('Some UiTPAS do not have an uitpasTariffId, although an UiTPAS event is linked (official flow)', noUitpasTariffId);
+                console.warn(
+                    'Some UiTPAS do not have an uitpasTariffId, although an UiTPAS event is linked (official flow)',
+                    noUitpasTariffId,
+                );
             }
 
             let canceledUitpasId: string[] = [];
-            let newlyRegistered: Map<RegisterTicketSaleRequest, RegisterTicketSaleResponse> = new Map();
+            let newlyRegistered: Map<RegisterTicketSaleRequest, RegisterTicketSaleResponse> =
+                new Map();
             if (toBeRegisteredUitpasRequests.length !== 0 || toBeCanceledUitpasIds.length !== 0) {
-                const access_token = await UitpasTokenRepository.getAccessTokenFor(order.organizationId);
+                const access_token = await UitpasTokenRepository.getAccessTokenFor(
+                    order.organizationId,
+                );
                 canceledUitpasId = await cancelTicketSales(access_token, toBeCanceledUitpasIds);
                 if (canceledUitpasId.length !== toBeCanceledUitpasIds.length) {
-                    console.error('Failed to cancel some UiTPAS ticket sales, successfully canceled:', canceledUitpasId, 'but tried to cancel:', toBeCanceledUitpasIds);
+                    console.error(
+                        'Failed to cancel some UiTPAS ticket sales, successfully canceled:',
+                        canceledUitpasId,
+                        'but tried to cancel:',
+                        toBeCanceledUitpasIds,
+                    );
                 }
                 try {
-                    newlyRegistered = await registerTicketSales(access_token, toBeRegisteredUitpasRequests);
+                    newlyRegistered = await registerTicketSales(
+                        access_token,
+                        toBeRegisteredUitpasRequests,
+                    );
                 } catch (e) {
                     console.error('Failed to register UiTPAS ticket sales', e);
                 }
             }
 
-            const effectiveDeletes = toBeCanceled.filter(c => c.ticketSaleId === null || canceledUitpasId.find(id => id === c.ticketSaleId));
+            const effectiveDeletes = toBeCanceled.filter(
+                (c) =>
+                    c.ticketSaleId === null || canceledUitpasId.find((id) => id === c.ticketSaleId),
+            );
             if (effectiveDeletes.length !== 0) {
-                await WebshopUitpasNumber.delete().where('id', effectiveDeletes.map(c => c.id));
+                await WebshopUitpasNumber.delete().where(
+                    'id',
+                    effectiveDeletes.map((c) => c.id),
+                );
             }
 
             const inserts = toBeRegistered.map((c) => {
@@ -244,7 +296,10 @@ export class UitpasService {
                     // if (event.type === 'deleted') {
                     // delete from db is not not needed as foreign key will delete the order
                     // we do not cancel the ticket sales
-                    if (event.type === 'created' && shouldReserveUitpasNumbers(event.model.status)) {
+                    if (
+                        event.type === 'created' &&
+                        shouldReserveUitpasNumbers(event.model.status)
+                    ) {
                         await this.updateTicketSales(event.model, true);
                         return;
                     }
@@ -259,7 +314,9 @@ export class UitpasService {
                             }
                         }
                         if (event.changedFields.data) {
-                            const oldTicketSales = getUitpasTicketSales(event.getOldModel() as Order);
+                            const oldTicketSales = getUitpasTicketSales(
+                                event.getOldModel() as Order,
+                            );
                             const newTicketSales = getUitpasTicketSales(event.model);
                             if (areThereUitpasChanges(oldTicketSales, newTicketSales)) {
                                 await this.updateTicketSales(event.model, false, newTicketSales);
@@ -274,13 +331,27 @@ export class UitpasService {
         });
     }
 
-    static async getSocialTariffForUitpasNumbers(organizationId: string, uitpasNumbers: string[], basePrice: number, uitpasEventUrl: string) {
+    static async getSocialTariffForUitpasNumbers(
+        organizationId: string,
+        uitpasNumbers: string[],
+        basePrice: number,
+        uitpasEventUrl: string,
+    ) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/list-tariffs
         const access_token = await UitpasTokenRepository.getAccessTokenFor(organizationId);
-        return await getSocialTariffForUitpasNumbers(access_token, uitpasNumbers, basePrice, uitpasEventUrl);
+        return await getSocialTariffForUitpasNumbers(
+            access_token,
+            uitpasNumbers,
+            basePrice,
+            uitpasEventUrl,
+        );
     }
 
-    static async getSocialTariffForEvent(organizationId: string, basePrice: number, uitpasEventUrl: string) {
+    static async getSocialTariffForEvent(
+        organizationId: string,
+        basePrice: number,
+        uitpasEventUrl: string,
+    ) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-tariff-static
         const access_token = await UitpasTokenRepository.getAccessTokenFor(organizationId);
         return await getSocialTariffForEvent(access_token, basePrice, uitpasEventUrl);
@@ -300,7 +371,11 @@ export class UitpasService {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/create-a-checkin
     }
 
-    static async searchUitpasEvents(organizationId: string, uitpasOrganizerId: string, textQuery?: string) {
+    static async searchUitpasEvents(
+        organizationId: string,
+        uitpasOrganizerId: string,
+        textQuery?: string,
+    ) {
         // input = client id of organization (never platform0 & uitpasOrganizerId
         // https://docs.publiq.be/docs/uitpas/events/searching#searching-for-uitpas-events-of-one-specific-organizer
         const clientId = await UitpasTokenRepository.getClientIdFor(organizationId);
@@ -313,7 +388,10 @@ export class UitpasService {
         return await searchUitpasOrganizers(access_token, name);
     }
 
-    static async checkPermissionsFor(organizationId: string | null, uitpasOrganizerId: string): Promise<{
+    static async checkPermissionsFor(
+        organizationId: string | null,
+        uitpasOrganizerId: string,
+    ): Promise<{
         status: UitpasClientCredentialsStatus;
         human?: string;
     }> {
@@ -340,7 +418,8 @@ export class UitpasService {
      */
     static async checkUitpasNumbers(organizationId: string, uitpasNumbers: string[]) {
         // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-pass
-        const access_token = await UitpasTokenRepository.getAccessTokenForWithPlatformFallback(organizationId);
+        const access_token =
+            await UitpasTokenRepository.getAccessTokenForWithPlatformFallback(organizationId);
         return await checkUitpasNumbers(access_token, uitpasNumbers);
     }
 
@@ -353,7 +432,10 @@ export class UitpasService {
             access_token = await UitpasTokenRepository.getAccessTokenFor(null); // always use platform credentials (for now)
         } catch (e) {
             if (isSimpleError(e) && e.hasCode('uitpas_api_not_configured_for_platform')) {
-                console.error('UiTPAS API has not been configured for this platform, so defaulting to an unknown status for number ', uitpasNumber);
+                console.error(
+                    'UiTPAS API has not been configured for this platform, so defaulting to an unknown status for number ',
+                    uitpasNumber,
+                );
                 // Ignore and return status of unknown
                 return {
                     uitpasNumber,
@@ -373,7 +455,11 @@ export class UitpasService {
      * @param clientId
      * @param clientSecret
      */
-    static async storeIfValid(organizationId: string | null, clientId: string, clientSecret: string): Promise<void> {
+    static async storeIfValid(
+        organizationId: string | null,
+        clientId: string,
+        clientSecret: string,
+    ): Promise<void> {
         await UitpasTokenRepository.storeIfValid(organizationId, clientId, clientSecret);
     }
 
@@ -386,7 +472,12 @@ export class UitpasService {
         return await WebshopUitpasNumber.areThereRegisteredTicketSales(webshopId);
     }
 
-    static async validateCart(organizationId: string, webshopId: string, cart: Cart, exisitingOrderId?: string): Promise<Cart> {
+    static async validateCart(
+        organizationId: string,
+        webshopId: string,
+        cart: Cart,
+        exisitingOrderId?: string,
+    ): Promise<Cart> {
         let access_token: string | undefined;
         const unofficialsToBeChecked: string[][] = [];
         for (const item of cart.items) {
@@ -395,7 +486,13 @@ export class UitpasService {
             }
 
             // verify the UiTPAS numbers are not already used for this product
-            const hasBeenUsed = await WebshopUitpasNumber.areUitpasNumbersUsed(webshopId, item.product.id, item.uitpasNumbers.map(p => p.uitpasNumber), item.product.uitpasEvent?.url, exisitingOrderId);
+            const hasBeenUsed = await WebshopUitpasNumber.areUitpasNumbersUsed(
+                webshopId,
+                item.product.id,
+                item.uitpasNumbers.map((p) => p.uitpasNumber),
+                item.product.uitpasEvent?.url,
+                exisitingOrderId,
+            );
             if (hasBeenUsed) {
                 throw new SimpleError({
                     code: 'uitpas_number_already_used',
@@ -407,7 +504,9 @@ export class UitpasService {
 
             if (item.product.uitpasEvent) {
                 // official flow
-                const basePrice = item.product.prices.filter(price => price.id === item.productPrice.uitpasBaseProductPriceId)[0]?.price;
+                const basePrice = item.product.prices.filter(
+                    (price) => price.id === item.productPrice.uitpasBaseProductPriceId,
+                )[0]?.price;
                 if (!basePrice) {
                     throw new SimpleError({
                         code: 'missing_uitpas_base_product_price',
@@ -416,8 +515,14 @@ export class UitpasService {
                     });
                 }
 
-                access_token = access_token ?? await UitpasTokenRepository.getAccessTokenFor(organizationId);
-                const verified = await getSocialTariffForUitpasNumbers(access_token, item.uitpasNumbers.map(p => p.uitpasNumber), basePrice, item.product.uitpasEvent.url);
+                access_token =
+                    access_token ?? (await UitpasTokenRepository.getAccessTokenFor(organizationId));
+                const verified = await getSocialTariffForUitpasNumbers(
+                    access_token,
+                    item.uitpasNumbers.map((p) => p.uitpasNumber),
+                    basePrice,
+                    item.product.uitpasEvent.url,
+                );
                 if (verified.length < item.uitpasNumbers.length) {
                     throw new SimpleError({
                         code: 'uitpas_social_tariff_price_mismatch',
@@ -435,22 +540,27 @@ export class UitpasService {
                         throw new SimpleError({
                             code: 'uitpas_social_tariff_price_mismatch',
                             message: 'UiTPAS social tariff have a different price',
-                            human: $t('%1DO', { correctPrice: Formatter.price(verified[i].price), orderPrice: Formatter.price(item.uitpasNumbers[i].price) }),
+                            human: $t('%1DO', {
+                                correctPrice: Formatter.price(verified[i].price),
+                                orderPrice: Formatter.price(item.uitpasNumbers[i].price),
+                            }),
                             field: 'uitpasNumbers.' + i.toString(),
                         });
                     }
                 }
             } else {
                 // non-official flow: do all checks after official flows (for maximum token re-usage), but retaining index numbering for error reporting
-                unofficialsToBeChecked.push(item.uitpasNumbers.map(p => p.uitpasNumber));
+                unofficialsToBeChecked.push(item.uitpasNumbers.map((p) => p.uitpasNumber));
             }
         }
         if (unofficialsToBeChecked.length > 0) {
-            const token = access_token ?? await UitpasTokenRepository.getAccessTokenForWithPlatformFallback(organizationId);
+            const token =
+                access_token ??
+                (await UitpasTokenRepository.getAccessTokenForWithPlatformFallback(organizationId));
             for (const uitpasNumbers of unofficialsToBeChecked) {
                 await checkUitpasNumbers(token, uitpasNumbers);
             }
         }
         return cart;
     }
-};
+}

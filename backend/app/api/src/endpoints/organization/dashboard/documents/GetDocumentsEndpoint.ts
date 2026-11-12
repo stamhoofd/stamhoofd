@@ -1,8 +1,18 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { Document } from '@stamhoofd/models';
-import type { CountFilteredRequest, Document as DocumentStruct, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, SearchFilterFactory } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    Document as DocumentStruct,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
+import {
+    assertSort,
+    getSortFilter,
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    SearchFilterFactory,
+} from '@stamhoofd/structures';
 
 import type { Decoder } from '@common/encoding';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
@@ -46,8 +56,7 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
 
         const documentTable: string = Document.table;
 
-        const query = SQL
-            .select(SQL.wildcard(documentTable))
+        const query = SQL.select(SQL.wildcard(documentTable))
             .setMaxExecutionTime(15 * 1000)
             .from(SQL.table(documentTable))
             .where('organizationId', organization.id);
@@ -113,7 +122,7 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canManageDocuments(organization.id)) {
+        if (!(await Context.auth.canManageDocuments(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -122,9 +131,7 @@ export class GetDocumentsEndpoint extends Endpoint<Params, Query, Body, Response
             maxLimit: Context.auth.hasSomePlatformAccess() ? 1000 : 100,
         });
 
-        return new Response(
-            await GetDocumentsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetDocumentsEndpoint.buildData(request.query));
     }
 }
 

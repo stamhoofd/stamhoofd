@@ -4,7 +4,13 @@ import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
-import { PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, SettlementReference } from '@stamhoofd/structures';
+import {
+    PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+    PaymentType,
+    SettlementReference,
+} from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -35,10 +41,25 @@ describe('Cron.fake-settlements', () => {
      * on is a week that is paid out no matter which day the test runs on.
      */
     const inWeek = (weeksAgo: number) => {
-        return Formatter.luxon(new Date()).startOf('week').minus({ weeks: weeksAgo }).plus({ days: 2, hours: 12 }).toJSDate();
+        return Formatter.luxon(new Date())
+            .startOf('week')
+            .minus({ weeks: weeksAgo })
+            .plus({ days: 2, hours: 12 })
+            .toJSDate();
     };
 
-    const createPayment = async ({ price = 50_0000, paidAt = inWeek(2), provider = PaymentProvider.Mollie as PaymentProvider | null, status = PaymentStatus.Succeeded, method = PaymentMethod.Bancontact, type = PaymentType.Payment, organizationId = undefined as string | undefined, stripeAccountId = null as string | null, serviceFeePayout = 0, transferFee = 0 }: {
+    const createPayment = async ({
+        price = 50_0000,
+        paidAt = inWeek(2),
+        provider = PaymentProvider.Mollie as PaymentProvider | null,
+        status = PaymentStatus.Succeeded,
+        method = PaymentMethod.Bancontact,
+        type = PaymentType.Payment,
+        organizationId = undefined as string | undefined,
+        stripeAccountId = null as string | null,
+        serviceFeePayout = 0,
+        transferFee = 0,
+    }: {
         price?: number;
         paidAt?: Date | null;
         provider?: PaymentProvider | null;
@@ -87,7 +108,10 @@ describe('Cron.fake-settlements', () => {
 
         const settlement = await getSettlement(first);
         expect(settlement).toMatchObject({
-            settledAt: Formatter.luxon(inWeek(2)).startOf('week').plus({ weeks: 1, days: 2 }).toJSDate(),
+            settledAt: Formatter.luxon(inWeek(2))
+                .startOf('week')
+                .plus({ weeks: 1, days: 2 })
+                .toJSDate(),
 
             // Refunds are taken out of the payout, just like the provider does, and so are the
             // fake Mollie fees: 3 payments x 0.363
@@ -112,7 +136,9 @@ describe('Cron.fake-settlements', () => {
         expect(newerSettlement).not.toBeNull();
         expect(olderSettlement!.id).not.toBe(newerSettlement!.id);
         expect(olderSettlement!.reference).not.toBe(newerSettlement!.reference);
-        expect(olderSettlement!.settledAt.getTime()).toBeLessThan(newerSettlement!.settledAt.getTime());
+        expect(olderSettlement!.settledAt.getTime()).toBeLessThan(
+            newerSettlement!.settledAt.getTime(),
+        );
     });
 
     test('Money held on another account is paid out separately', async () => {
@@ -121,9 +147,20 @@ describe('Cron.fake-settlements', () => {
         const otherStripeAccount = await createStripeAccount(organization);
 
         const mollie = await createPayment({ price: 50_0000 });
-        const otherMollie = await createPayment({ price: 30_0000, organizationId: otherOrganization.id });
-        const stripe = await createPayment({ price: 20_0000, provider: PaymentProvider.Stripe, stripeAccountId: stripeAccount.id });
-        const otherStripe = await createPayment({ price: 15_0000, provider: PaymentProvider.Stripe, stripeAccountId: otherStripeAccount.id });
+        const otherMollie = await createPayment({
+            price: 30_0000,
+            organizationId: otherOrganization.id,
+        });
+        const stripe = await createPayment({
+            price: 20_0000,
+            provider: PaymentProvider.Stripe,
+            stripeAccountId: stripeAccount.id,
+        });
+        const otherStripe = await createPayment({
+            price: 15_0000,
+            provider: PaymentProvider.Stripe,
+            stripeAccountId: otherStripeAccount.id,
+        });
 
         await createFakeSettlements();
 
@@ -136,9 +173,14 @@ describe('Cron.fake-settlements', () => {
 
         // Same week, but four accounts: four payouts, each holding only its own money. The Mollie
         // payouts are reduced by the fake fee of one payment; the Stripe payments carry no fees here
-        expect(settlements.map(s => s!.amount)).toEqual([50_0000 - 36_30, 30_0000 - 36_30, 20_0000, 15_0000]);
-        expect(new Set(settlements.map(s => s!.id)).size).toBe(4);
-        expect(new Set(settlements.map(s => s!.reference)).size).toBe(4);
+        expect(settlements.map((s) => s!.amount)).toEqual([
+            50_0000 - 36_30,
+            30_0000 - 36_30,
+            20_0000,
+            15_0000,
+        ]);
+        expect(new Set(settlements.map((s) => s!.id)).size).toBe(4);
+        expect(new Set(settlements.map((s) => s!.reference)).size).toBe(4);
     });
 
     test('Payments that a provider would still be holding on to are not paid out', async () => {
@@ -150,7 +192,10 @@ describe('Cron.fake-settlements', () => {
 
         // These providers don't hold on to the money
         const transfer = await createPayment({ method: PaymentMethod.Transfer, provider: null });
-        const payconiq = await createPayment({ provider: PaymentProvider.Payconiq, method: PaymentMethod.Payconiq });
+        const payconiq = await createPayment({
+            provider: PaymentProvider.Payconiq,
+            method: PaymentMethod.Payconiq,
+        });
 
         await createFakeSettlements();
 
@@ -204,17 +249,25 @@ describe('Cron.fake-settlements', () => {
             expect(settlement.unexplainedAmount).toBe(0);
             expect(settlement.syncedAt).not.toBeNull();
 
-            const lines = await PaymentSettlement.select().where('settlementId', settlement.id).fetch();
-            expect(lines.map(l => [l.paymentId, l.amount]).sort()).toEqual([
-                [first.id, 50_0000],
-                [second.id, -10_0000],
-            ].sort());
+            const lines = await PaymentSettlement.select()
+                .where('settlementId', settlement.id)
+                .fetch();
+            expect(lines.map((l) => [l.paymentId, l.amount]).sort()).toEqual(
+                [
+                    [first.id, 50_0000],
+                    [second.id, -10_0000],
+                ].sort(),
+            );
 
-            const charges = await SettlementCharge.select().where('settlementId', settlement.id).fetch();
-            expect(charges.map(c => [c.paymentId, c.type, c.amount]).sort()).toEqual([
-                [first.id, SettlementChargeType.ProviderTransactionFee, -36_30],
-                [second.id, SettlementChargeType.ProviderTransactionFee, -36_30],
-            ].sort());
+            const charges = await SettlementCharge.select()
+                .where('settlementId', settlement.id)
+                .fetch();
+            expect(charges.map((c) => [c.paymentId, c.type, c.amount]).sort()).toEqual(
+                [
+                    [first.id, SettlementChargeType.ProviderTransactionFee, -36_30],
+                    [second.id, SettlementChargeType.ProviderTransactionFee, -36_30],
+                ].sort(),
+            );
 
             // Each settled payment holds its own fee
             expect((await Payment.getByID(first.id))!.transferFee).toBe(36_30);
@@ -239,20 +292,28 @@ describe('Cron.fake-settlements', () => {
             expect(settlement.stripeAccountId).toBe(stripeAccount.id);
 
             const applicationFeeId = 'fake-fee-' + payment.id;
-            const feeRows = await SettlementCharge.select().where('applicationFeeId', applicationFeeId).fetch();
+            const feeRows = await SettlementCharge.select()
+                .where('applicationFeeId', applicationFeeId)
+                .fetch();
 
-            const byType = new Map(feeRows.map(row => [row.type, row]));
+            const byType = new Map(feeRows.map((row) => [row.type, row]));
             expect(byType.get(SettlementChargeType.ApplicationFeeService)).toMatchObject({
-                amount: -2_0000, settlementId: settlement.id, paymentId: payment.id, stripeAccountId: stripeAccount.id,
+                amount: -2_0000,
+                settlementId: settlement.id,
+                paymentId: payment.id,
+                stripeAccountId: stripeAccount.id,
             });
             expect(byType.get(SettlementChargeType.ApplicationFeeTransfer)).toMatchObject({
-                amount: -50_00, settlementId: settlement.id,
+                amount: -50_00,
+                settlementId: settlement.id,
             });
 
             // The platform side receives the same fee: per application fee both sides of one kind
             // sum to zero
-            const fees = await ApplicationFee.select().where('externalId', applicationFeeId).fetch();
-            const feeByType = new Map(fees.map(fee => [fee.type, fee]));
+            const fees = await ApplicationFee.select()
+                .where('externalId', applicationFeeId)
+                .fetch();
+            const feeByType = new Map(fees.map((fee) => [fee.type, fee]));
             expect(feeByType.get(ApplicationFeeType.Service)).toMatchObject({
                 amount: 2_0000,
                 organizationId: membershipOrganization.id,
@@ -262,7 +323,9 @@ describe('Cron.fake-settlements', () => {
             });
             expect(feeByType.get(ApplicationFeeType.Transfer)!.amount).toBe(50_00);
 
-            const platformSettlement = await Settlement.getByID(feeByType.get(ApplicationFeeType.Service)!.settlementId!);
+            const platformSettlement = await Settlement.getByID(
+                feeByType.get(ApplicationFeeType.Service)!.settlementId!,
+            );
             expect(platformSettlement!.stripeAccountId).toBeNull();
             expect(platformSettlement!.organizationId).toBe(membershipOrganization.id);
             expect(platformSettlement!.externalId).toContain('fake-settlement-Stripe-platform-');
@@ -275,14 +338,20 @@ describe('Cron.fake-settlements', () => {
 
         test('Payments without fees write no charge rows', async () => {
             const stripeAccount = await createStripeAccount(organization);
-            const payment = await createPayment({ price: 20_0000, provider: PaymentProvider.Stripe, stripeAccountId: stripeAccount.id });
+            const payment = await createPayment({
+                price: 20_0000,
+                provider: PaymentProvider.Stripe,
+                stripeAccountId: stripeAccount.id,
+            });
 
             await createFakeSettlements();
 
             const settlement = await getSettlementRow(payment);
             expect(settlement.amount).toBe(20_0000);
             expect(settlement.unexplainedAmount).toBe(0);
-            expect(await SettlementCharge.select().where('settlementId', settlement.id).count()).toBe(0);
+            expect(
+                await SettlementCharge.select().where('settlementId', settlement.id).count(),
+            ).toBe(0);
         });
     });
 });

@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { PaymentCustomer } from './PaymentCustomer.js';
@@ -97,11 +106,15 @@ export class AdministrationFeeSettings extends AutoEncoder {
         if (price <= 0 && this.zeroIfZero) {
             return 0;
         }
-        return 100 * Math.round(price * this.percentage / 10000_00) + this.fixed; // we round the percentage fee up to 1 cent
+        return 100 * Math.round((price * this.percentage) / 10000_00) + this.fixed; // we round the percentage fee up to 1 cent
     }
 
     isEqual(other: AdministrationFeeSettings) {
-        return this.percentage === other.percentage && this.fixed === other.fixed && this.zeroIfZero === other.zeroIfZero;
+        return (
+            this.percentage === other.percentage &&
+            this.fixed === other.fixed &&
+            this.zeroIfZero === other.zeroIfZero
+        );
     }
 
     isZero() {
@@ -142,13 +155,20 @@ export class PaymentConfiguration extends AutoEncoder {
     @field({ decoder: AdministrationFeeSettings })
     administrationFee = AdministrationFeeSettings.create({});
 
-    @field({ decoder: new MapDecoder(new EnumDecoder(PaymentMethod), PaymentMethodSettings), version: 340 })
+    @field({
+        decoder: new MapDecoder(new EnumDecoder(PaymentMethod), PaymentMethodSettings),
+        version: 340,
+    })
     paymentMethodSettings: Map<PaymentMethod, PaymentMethodSettings> = new Map();
 
     @field({ decoder: BooleanDecoder, version: 398, defaultValue: () => false })
     enableMandates: boolean;
 
-    getAvailablePaymentMethods(data: { amount: number; customer: PaymentCustomer | null; forMandate?: boolean }) {
+    getAvailablePaymentMethods(data: {
+        amount: number;
+        customer: PaymentCustomer | null;
+        forMandate?: boolean;
+    }) {
         return this.paymentMethods.filter((method) => {
             if (data.forMandate) {
                 if (!this.enableMandates) {

@@ -1,12 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { dockerHostGateway, metabaseAppDatabase, metabaseContainer, metabaseImage, metabaseInternalPort, mysqlRootPassword, mysqlRootUser } from '../../config/shared-service-config.js';
+import {
+    dockerHostGateway,
+    metabaseAppDatabase,
+    metabaseContainer,
+    metabaseImage,
+    metabaseInternalPort,
+    mysqlRootPassword,
+    mysqlRootUser,
+} from '../../config/shared-service-config.js';
 import { MetabaseService } from './metabase-service.js';
 
 describe('MetabaseService.dockerArgs', () => {
     const args = MetabaseService.dockerArgs(3030, 3307, 'https://metabase.stamhoofd');
 
     function envValue(name: string): string | undefined {
-        return args.find(arg => arg.startsWith(`${name}=`))?.slice(name.length + 1);
+        return args.find((arg) => arg.startsWith(`${name}=`))?.slice(name.length + 1);
     }
 
     it('publishes the container port on the host port', () => {

@@ -1,6 +1,11 @@
 import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
-import { Group as GroupStruct, OrganizationRegistrationPeriodSettings, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, SetupSteps } from '@stamhoofd/structures';
+import {
+    Group as GroupStruct,
+    OrganizationRegistrationPeriodSettings,
+    OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct,
+    SetupSteps,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import type { Group } from './Group.js';
@@ -9,7 +14,9 @@ export class OrganizationRegistrationPeriod extends QueryableModel {
     static table = 'organization_registration_periods';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -25,7 +32,8 @@ export class OrganizationRegistrationPeriod extends QueryableModel {
     settings = OrganizationRegistrationPeriodSettings.create({});
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -37,7 +45,8 @@ export class OrganizationRegistrationPeriod extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -49,19 +58,27 @@ export class OrganizationRegistrationPeriod extends QueryableModel {
     @column({ type: 'json', decoder: SetupSteps })
     setupSteps = SetupSteps.create({});
 
-    getStructure(this: OrganizationRegistrationPeriod, period: RegistrationPeriod, groups: Group[]) {
+    getStructure(
+        this: OrganizationRegistrationPeriod,
+        period: RegistrationPeriod,
+        groups: Group[],
+    ) {
         return OrganizationRegistrationPeriodStruct.create({
             ...this,
             period: period.getStructure(),
-            groups: groups.map(g => g.getStructure()).sort(GroupStruct.defaultSort),
+            groups: groups.map((g) => g.getStructure()).sort(GroupStruct.defaultSort),
         });
     }
 
-    getPrivateStructure(this: OrganizationRegistrationPeriod, period: RegistrationPeriod, groups: Group[]) {
+    getPrivateStructure(
+        this: OrganizationRegistrationPeriod,
+        period: RegistrationPeriod,
+        groups: Group[],
+    ) {
         return OrganizationRegistrationPeriodStruct.create({
             ...this,
             period: period.getStructure(),
-            groups: groups.map(g => g.getPrivateStructure()).sort(GroupStruct.defaultSort),
+            groups: groups.map((g) => g.getPrivateStructure()).sort(GroupStruct.defaultSort),
         });
     }
 
@@ -79,18 +96,29 @@ export class OrganizationRegistrationPeriod extends QueryableModel {
                 break;
             }
 
-            const category = this.settings.categories.find(c => c.id === id);
+            const category = this.settings.categories.find((c) => c.id === id);
             if (!category) {
                 continue;
             }
 
             // Filter own categoryIds on existing categories
             const before = category.categoryIds.length;
-            category.categoryIds = Formatter.uniqueArray(category.categoryIds.filter(childId => !!this.settings.categories.find(c => c.id === childId)));
+            category.categoryIds = Formatter.uniqueArray(
+                category.categoryIds.filter(
+                    (childId) => !!this.settings.categories.find((c) => c.id === childId),
+                ),
+            );
 
             if (before !== category.categoryIds.length) {
                 shouldSave = true;
-                console.log('Deleted ' + (before - category.categoryIds.length) + ' category ids from category ' + category.id + ', in organization period ' + this.id);
+                console.log(
+                    'Deleted ' +
+                        (before - category.categoryIds.length) +
+                        ' category ids from category ' +
+                        category.id +
+                        ', in organization period ' +
+                        this.id,
+                );
             }
 
             for (const i of category.categoryIds) {
@@ -101,14 +129,23 @@ export class OrganizationRegistrationPeriod extends QueryableModel {
             }
 
             // Remove groupIds that no longer exist or are in a different category already
-            let filtered = category.groupIds.filter(id => !!groups.find(g => g.id === id) && !usedGroupIds.has(id));
+            let filtered = category.groupIds.filter(
+                (id) => !!groups.find((g) => g.id === id) && !usedGroupIds.has(id),
+            );
 
             // Remove duplicate groups
             filtered = Formatter.uniqueArray(filtered);
 
             if (filtered.length !== category.groupIds.length) {
                 shouldSave = true;
-                console.log('Deleted ' + (category.groupIds.length - filtered.length) + ' group ids from category ' + category.id + ', in organization period ' + this.id);
+                console.log(
+                    'Deleted ' +
+                        (category.groupIds.length - filtered.length) +
+                        ' group ids from category ' +
+                        category.id +
+                        ', in organization period ' +
+                        this.id,
+                );
                 category.groupIds = filtered;
             }
 
@@ -121,11 +158,18 @@ export class OrganizationRegistrationPeriod extends QueryableModel {
 
         // Delete all categories that are not reachable anymore
         const beforeCount = this.settings.categories.length;
-        this.settings.categories = this.settings.categories.filter(c => reachableCategoryIds.includes(c.id));
+        this.settings.categories = this.settings.categories.filter((c) =>
+            reachableCategoryIds.includes(c.id),
+        );
 
         if (!options?.disableSave) {
             if (this.settings.categories.length !== beforeCount) {
-                console.log('Deleted ' + (beforeCount - this.settings.categories.length) + ' categories from organizaton period ' + this.id);
+                console.log(
+                    'Deleted ' +
+                        (beforeCount - this.settings.categories.length) +
+                        ' categories from organizaton period ' +
+                        this.id,
+                );
                 await this.save();
             } else {
                 if (shouldSave) {

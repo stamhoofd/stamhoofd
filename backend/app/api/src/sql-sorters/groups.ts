@@ -12,37 +12,46 @@ export const groupSorters: SQLSortDefinitions<Group> = new Map<string, SQLSortDe
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    ['id', {
-        getValue(a) {
-            return a.id;
+    [
+        'id',
+        {
+            getValue(a) {
+                return a.id;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('id'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction,
-            });
+    ],
+    [
+        'periodId',
+        {
+            getValue(a) {
+                return a.periodId;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('periodId'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['periodId', {
-        getValue(a) {
-            return a.periodId;
+    ],
+    [
+        'name',
+        {
+            getValue(a) {
+                return a.settings.name.toString();
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: new SQLTranslatedString(SQL.column('settings'), '$.value.name'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('periodId'),
-                direction,
-            });
-        },
-    }],
-    ['name', {
-        getValue(a) {
-            return a.settings.name.toString();
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: new SQLTranslatedString(SQL.column('settings'), '$.value.name'),
-                direction,
-            });
-        },
-    }],
+    ],
 ]);

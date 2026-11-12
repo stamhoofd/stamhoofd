@@ -23,7 +23,9 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
         try {
             switch (record.type) {
                 case DNSRecordType.CNAME: {
-                    const addresses: string[] = await resolver.resolveCname(record.name.substr(0, record.name.length - 1));
+                    const addresses: string[] = await resolver.resolveCname(
+                        record.name.substr(0, record.name.length - 1),
+                    );
                     record.errors = null;
 
                     if (addresses.length === 0) {
@@ -33,22 +35,26 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                             allValid = false;
                             hasAllNonTXT = false;
 
-                            record.errors = new SimpleErrors(new SimpleError({
-                                code: 'not_found',
-                                message: '',
-                                human: $t('%GA') + ' ' + record.name + ' ' + $t('%GB'),
-                            }));
+                            record.errors = new SimpleErrors(
+                                new SimpleError({
+                                    code: 'not_found',
+                                    message: '',
+                                    human: $t('%GA') + ' ' + record.name + ' ' + $t('%GB'),
+                                }),
+                            );
                         }
                     } else if (addresses.length > 1) {
                         record.status = DNSRecordStatus.Failed;
                         allValid = false;
                         hasAllNonTXT = false;
 
-                        record.errors = new SimpleErrors(new SimpleError({
-                            code: 'too_many_fields',
-                            message: '',
-                            human: $t('%GC') + ' ' + record.name + $t('%GD'),
-                        }));
+                        record.errors = new SimpleErrors(
+                            new SimpleError({
+                                code: 'too_many_fields',
+                                message: '',
+                                human: $t('%GC') + ' ' + record.name + $t('%GD'),
+                            }),
+                        );
                     } else {
                         if (addresses[0] + '.' === record.value) {
                             record.status = DNSRecordStatus.Valid;
@@ -59,11 +65,20 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                                 allValid = false;
                                 hasAllNonTXT = false;
 
-                                record.errors = new SimpleErrors(new SimpleError({
-                                    code: 'wrong_value',
-                                    message: '',
-                                    human: $t('%GE') + ' ' + record.name + $t('%GF') + ' ' + addresses[0] + '.',
-                                }));
+                                record.errors = new SimpleErrors(
+                                    new SimpleError({
+                                        code: 'wrong_value',
+                                        message: '',
+                                        human:
+                                            $t('%GE') +
+                                            ' ' +
+                                            record.name +
+                                            $t('%GF') +
+                                            ' ' +
+                                            addresses[0] +
+                                            '.',
+                                    }),
+                                );
                             }
                         }
                     }
@@ -72,7 +87,9 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                 }
 
                 case DNSRecordType.TXT: {
-                    const records: string[][] = await resolver.resolveTxt(record.name.substr(0, record.name.length - 1));
+                    const records: string[][] = await resolver.resolveTxt(
+                        record.name.substr(0, record.name.length - 1),
+                    );
 
                     record.errors = null;
 
@@ -82,20 +99,24 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                         if (!record.optional) {
                             allValid = false;
 
-                            record.errors = new SimpleErrors(new SimpleError({
-                                code: 'not_found',
-                                message: '',
-                                human: $t('%GG') + ' ' + record.name + ' ' + $t('%GB'),
-                            }));
+                            record.errors = new SimpleErrors(
+                                new SimpleError({
+                                    code: 'not_found',
+                                    message: '',
+                                    human: $t('%GG') + ' ' + record.name + ' ' + $t('%GB'),
+                                }),
+                            );
                         }
                     } else if (records.length > 1) {
                         record.status = DNSRecordStatus.Failed;
                         allValid = false;
-                        record.errors = new SimpleErrors(new SimpleError({
-                            code: 'too_many_fields',
-                            message: '',
-                            human: $t('%GH') + ' ' + record.name + $t('%GD'),
-                        }));
+                        record.errors = new SimpleErrors(
+                            new SimpleError({
+                                code: 'too_many_fields',
+                                message: '',
+                                human: $t('%GH') + ' ' + record.name + $t('%GD'),
+                            }),
+                        );
                     } else {
                         const val = records[0].join('').trim();
                         if (val === record.value.trim()) {
@@ -106,11 +127,19 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                             if (!record.optional) {
                                 allValid = false;
 
-                                record.errors = new SimpleErrors(new SimpleError({
-                                    code: 'wrong_value',
-                                    message: '',
-                                    human: $t('%GI') + ' ' + record.name + $t('%GF') + ' ' + records[0].join(''),
-                                }));
+                                record.errors = new SimpleErrors(
+                                    new SimpleError({
+                                        code: 'wrong_value',
+                                        message: '',
+                                        human:
+                                            $t('%GI') +
+                                            ' ' +
+                                            record.name +
+                                            $t('%GF') +
+                                            ' ' +
+                                            records[0].join(''),
+                                    }),
+                                );
                             }
                         }
                     }
@@ -122,20 +151,24 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
 
             if (e.code && (e.code === 'ENOTFOUND' || e.code === 'ENODATA')) {
                 if (!record.optional) {
-                    record.errors = new SimpleErrors(new SimpleError({
-                        code: 'not_found',
-                        message: '',
-                        human: $t('%GJ') + ' ' + record.name + ' ' + $t('%GB'),
-                    }));
+                    record.errors = new SimpleErrors(
+                        new SimpleError({
+                            code: 'not_found',
+                            message: '',
+                            human: $t('%GJ') + ' ' + record.name + ' ' + $t('%GB'),
+                        }),
+                    );
                 }
             } else {
                 console.error(e);
                 if (!record.optional) {
-                    record.errors = new SimpleErrors(new SimpleError({
-                        code: 'not_found',
-                        message: '',
-                        human: $t('%GK'),
-                    }));
+                    record.errors = new SimpleErrors(
+                        new SimpleError({
+                            code: 'not_found',
+                            message: '',
+                            human: $t('%GK'),
+                        }),
+                    );
                 }
             }
 

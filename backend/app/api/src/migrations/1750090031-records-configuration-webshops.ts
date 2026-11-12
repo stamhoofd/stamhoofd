@@ -10,15 +10,23 @@ export async function startWebshopRecordsConfigurationMigration() {
         query: Webshop.select(),
         useTransactionPerBatch: true,
         action: async (webshop: Webshop) => {
-            if (await webshop.save({
-                skipMarkSaved: true,
-                skipSendEvents: true,
-            })) {
+            if (
+                await webshop.save({
+                    skipMarkSaved: true,
+                    skipSendEvents: true,
+                })
+            ) {
                 realSave += 1;
             }
         },
     });
-    console.log('Succesfully fetched and saved ' + realSave + ' webshops of ' + result.total + ' looped webshops');
+    console.log(
+        'Succesfully fetched and saved ' +
+            realSave +
+            ' webshops of ' +
+            result.total +
+            ' looped webshops',
+    );
 }
 
 export default new Migration(async () => {

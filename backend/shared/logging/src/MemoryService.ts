@@ -127,18 +127,32 @@ class StaticMemoryService {
         const errors: string[] = [];
         const averageHeapRatio = this.getHeapRatio();
         const averageSystemUsedRatio = this.getSystemUsedRatio();
-        const averageSystemAvailable = this.average(sample => sample.systemAvailable);
+        const averageSystemAvailable = this.average((sample) => sample.systemAvailable);
 
         if (heapRatio(last) >= this.heapCriticalRatio) {
-            errors.push(`Heap memory usage is critical: ${formatBytes(last.heapUsed)} of ${formatBytes(last.heapLimit)} (${formatPercentage(heapRatio(last))})`);
+            errors.push(
+                `Heap memory usage is critical: ${formatBytes(last.heapUsed)} of ${formatBytes(last.heapLimit)} (${formatPercentage(heapRatio(last))})`,
+            );
         } else if (averageHeapRatio > this.heapWarningRatio) {
-            errors.push(`Heap memory usage is too high: ${formatBytes(last.heapUsed)} of ${formatBytes(last.heapLimit)} (${formatPercentage(averageHeapRatio)} average)`);
+            errors.push(
+                `Heap memory usage is too high: ${formatBytes(last.heapUsed)} of ${formatBytes(last.heapLimit)} (${formatPercentage(averageHeapRatio)} average)`,
+            );
         }
 
-        if (systemUsedRatio(last) >= this.systemUsedCriticalRatio && last.systemAvailable < this.systemAvailableThresholdBytes) {
-            errors.push(`System memory is exhausted: ${formatBytes(last.systemAvailable)} available of ${formatBytes(last.systemTotal)} (${formatPercentage(systemUsedRatio(last))} used)`);
-        } else if (averageSystemUsedRatio > this.systemUsedWarningRatio && averageSystemAvailable < this.systemAvailableThresholdBytes) {
-            errors.push(`System memory is almost exhausted: ${formatBytes(averageSystemAvailable)} available of ${formatBytes(last.systemTotal)} on average (${formatPercentage(averageSystemUsedRatio)} used)`);
+        if (
+            systemUsedRatio(last) >= this.systemUsedCriticalRatio &&
+            last.systemAvailable < this.systemAvailableThresholdBytes
+        ) {
+            errors.push(
+                `System memory is exhausted: ${formatBytes(last.systemAvailable)} available of ${formatBytes(last.systemTotal)} (${formatPercentage(systemUsedRatio(last))} used)`,
+            );
+        } else if (
+            averageSystemUsedRatio > this.systemUsedWarningRatio &&
+            averageSystemAvailable < this.systemAvailableThresholdBytes
+        ) {
+            errors.push(
+                `System memory is almost exhausted: ${formatBytes(averageSystemAvailable)} available of ${formatBytes(last.systemTotal)} on average (${formatPercentage(averageSystemUsedRatio)} used)`,
+            );
         }
 
         return errors;
@@ -149,8 +163,10 @@ class StaticMemoryService {
     }
 
     formatSample(sample: MemorySample): string {
-        return `[MEMORY] heap: ${formatBytes(sample.heapUsed)} / ${formatBytes(sample.heapLimit)} (${formatPercentage(heapRatio(sample))}), rss: ${formatBytes(sample.rss)}, external: ${formatBytes(sample.external)}\n`
-            + `[MEMORY] system available: ${formatBytes(sample.systemAvailable)} / ${formatBytes(sample.systemTotal)} (${formatPercentage(sample.systemAvailable / sample.systemTotal)})`;
+        return (
+            `[MEMORY] heap: ${formatBytes(sample.heapUsed)} / ${formatBytes(sample.heapLimit)} (${formatPercentage(heapRatio(sample))}), rss: ${formatBytes(sample.rss)}, external: ${formatBytes(sample.external)}\n` +
+            `[MEMORY] system available: ${formatBytes(sample.systemAvailable)} / ${formatBytes(sample.systemTotal)} (${formatPercentage(sample.systemAvailable / sample.systemTotal)})`
+        );
     }
 
     private saveSample() {

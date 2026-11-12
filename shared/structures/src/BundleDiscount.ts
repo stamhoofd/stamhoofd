@@ -48,18 +48,20 @@ export class BundleDiscount extends AutoEncoder {
         if (discounts.length === 0) {
             return $t('%17B');
         }
-        return discounts.map((d, i) => {
-            if (i === discounts.length - 1) {
-                return $t('%17C', {
+        return discounts
+            .map((d, i) => {
+                if (i === discounts.length - 1) {
+                    return $t('%17C', {
+                        '5%': d.toString(),
+                        '2': i + 2,
+                    });
+                }
+                return $t('%17D', {
                     '5%': d.toString(),
                     '2': i + 2,
                 });
-            }
-            return $t('%17D', {
-                '5%': d.toString(),
-                '2': i + 2,
-            });
-        }).join(', ');
+            })
+            .join(', ');
     }
 
     get discountsText() {
@@ -92,8 +94,8 @@ export class BundleDiscount extends AutoEncoder {
         const loopedMembers = new Set<string>();
 
         for (const family of [
-            ...cart.items.map(item => item.member.family),
-            ...cart.deleteRegistrations.map(item => item.registration.member.family),
+            ...cart.items.map((item) => item.member.family),
+            ...cart.deleteRegistrations.map((item) => item.registration.member.family),
         ]) {
             if (loopedFamilies.has(family)) {
                 continue;
@@ -132,7 +134,10 @@ export class BundleDiscount extends AutoEncoder {
             return false;
         }
 
-        const groupPrice = item instanceof RegistrationWithPlatformMember ? item.registration.updatedGroupPrice : item.groupPrice;
+        const groupPrice =
+            item instanceof RegistrationWithPlatformMember
+                ? item.registration.updatedGroupPrice
+                : item.groupPrice;
         if (groupPrice.bundleDiscounts.has(this.id)) {
             return true;
         }
@@ -152,10 +157,7 @@ class BundleDiscountCalculationGroup {
 
     calculations: Map<string, BundleDiscountCalculation> = new Map();
 
-    constructor(options: {
-        bundle: BundleDiscount;
-        periodId: string;
-    }) {
+    constructor(options: { bundle: BundleDiscount; periodId: string }) {
         this.bundle = options.bundle;
         this.periodId = options.periodId;
     }
@@ -166,7 +168,10 @@ class BundleDiscountCalculationGroup {
         }
     }
 
-    getCalculationFor(item: RegisterItem | RegistrationWithPlatformMember, options?: { onlyExisting?: boolean }) {
+    getCalculationFor(
+        item: RegisterItem | RegistrationWithPlatformMember,
+        options?: { onlyExisting?: boolean },
+    ) {
         if (!this.bundle.applyableTo(item, this.periodId)) {
             return null;
         }
@@ -222,7 +227,7 @@ export class BundleDiscountCalculation {
 
     /**
      * Keeps track of the deleted registrations so we can exclude these registrations from the calculation
-    */
+     */
     deleteRegistrations: RegistrationWithPlatformMember[];
 
     constructor(options: {
@@ -256,8 +261,10 @@ export class BundleDiscountCalculation {
         The total dicount, not taking into account what has already been given in the past
     */
     get total() {
-        return [...this.items.values()].reduce((a, b) => a + b, 0)
-            + [...this.registrations.values()].reduce((a, b) => a + b, 0);
+        return (
+            [...this.items.values()].reduce((a, b) => a + b, 0) +
+            [...this.registrations.values()].reduce((a, b) => a + b, 0)
+        );
     }
 
     get totalAlreadyApplied() {
@@ -295,7 +302,7 @@ export class BundleDiscountCalculation {
         if (item instanceof RegisterItem) {
             return this.items.get(item) ?? 0;
         } else if (item instanceof RegistrationWithPlatformMember) {
-            return (this.registrations.get(item) ?? 0);
+            return this.registrations.get(item) ?? 0;
         }
         return 0;
     }
@@ -303,7 +310,7 @@ export class BundleDiscountCalculation {
     addIfNotBeingRemoved(item: RegisterItem | RegistrationWithPlatformMember) {
         // Only add if it is not being removed at the same time
         if (item instanceof RegistrationWithPlatformMember) {
-            if (this.deleteRegistrations.find(r => r.registration.id === item.registration.id)) {
+            if (this.deleteRegistrations.find((r) => r.registration.id === item.registration.id)) {
                 return;
             }
         }
@@ -336,30 +343,35 @@ export class BundleDiscountCalculation {
         const itemsWithSortingData = itemsOrder.map((item) => {
             return {
                 item,
-                appliedDiscount: item.replaceRegistrations.length >= 1 ? (item.replaceRegistrations[0].registration.discounts.get(this.bundle.id)?.amount ?? 0) : 0,
-                createdAt: item.replaceRegistrations.length >= 1 ? (item.replaceRegistrations[0].registration.createdAt) : now,
+                appliedDiscount:
+                    item.replaceRegistrations.length >= 1
+                        ? (item.replaceRegistrations[0].registration.discounts.get(this.bundle.id)
+                              ?.amount ?? 0)
+                        : 0,
+                createdAt:
+                    item.replaceRegistrations.length >= 1
+                        ? item.replaceRegistrations[0].registration.createdAt
+                        : now,
             };
         });
 
         const registrationsWithSortingData = registrations.map((registration) => {
             return {
                 item: registration,
-                appliedDiscount: registration.registration.discounts.get(this.bundle.id)?.amount ?? 0,
+                appliedDiscount:
+                    registration.registration.discounts.get(this.bundle.id)?.amount ?? 0,
                 createdAt: registration.registration.createdAt,
             };
         });
 
-        const base = [
-            ...itemsWithSortingData,
-            ...registrationsWithSortingData,
-        ].sort((a, b) => {
+        const base = [...itemsWithSortingData, ...registrationsWithSortingData].sort((a, b) => {
             return Sorter.stack(
                 Sorter.byNumberValue(a.appliedDiscount, b.appliedDiscount),
                 Sorter.byDateValue(a.createdAt, b.createdAt),
             );
         });
 
-        return base.map(b => b.item);
+        return base.map((b) => b.item);
     }
 
     calculate() {
@@ -371,10 +383,16 @@ export class BundleDiscountCalculation {
 
         for (const item of arr) {
             // We always use the group price here, because this is safer, also for registrations (in case we have deactivated registrations with cancallation fees)
-            const price = item instanceof RegisterItem ? (item.groupPrice.price.forMember(item.member)) : item.registration.groupPrice.price.forMember(item.member);
-            const discounts = item instanceof RegisterItem
-                ? (item.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts)
-                : (item.registration.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ?? this.bundle.discounts);
+            const price =
+                item instanceof RegisterItem
+                    ? item.groupPrice.price.forMember(item.member)
+                    : item.registration.groupPrice.price.forMember(item.member);
+            const discounts =
+                item instanceof RegisterItem
+                    ? (item.groupPrice.bundleDiscounts.get(this.bundle.id)?.customDiscounts ??
+                      this.bundle.discounts)
+                    : (item.registration.groupPrice.bundleDiscounts.get(this.bundle.id)
+                          ?.customDiscounts ?? this.bundle.discounts);
 
             const row: number[] = [];
 

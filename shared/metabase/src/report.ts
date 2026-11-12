@@ -199,19 +199,27 @@ export type ReportTab = {
 };
 
 export const reportCardSizes = ['full', 'two-thirds', 'half', 'third', 'quarter', 'sixth'] as const;
-export type ReportCardSize = typeof reportCardSizes[number];
+export type ReportCardSize = (typeof reportCardSizes)[number];
 
 export const reportCardXLabels = ['show', 'hide', 'compact', 'rotate-45', 'rotate-90'] as const;
-export type ReportCardXLabels = typeof reportCardXLabels[number];
+export type ReportCardXLabels = (typeof reportCardXLabels)[number];
 
 export const reportCardXScales = ['ordinal', 'linear'] as const;
-export type ReportCardXScale = typeof reportCardXScales[number];
+export type ReportCardXScale = (typeof reportCardXScales)[number];
 
 export const reportCardBest = ['low', 'high'] as const;
-export type ReportCardBest = typeof reportCardBest[number];
+export type ReportCardBest = (typeof reportCardBest)[number];
 
 /** The order the tabs are written in: the pages of the client's report first, then what is not one. */
-export const reportTabOrder = ['nationaal', 'eenheden', 'gtp', 'netwerk', 'varia', 'jeugdbewegingen', 'filters'];
+export const reportTabOrder = [
+    'nationaal',
+    'eenheden',
+    'gtp',
+    'netwerk',
+    'varia',
+    'jeugdbewegingen',
+    'filters',
+];
 
 export function getReportDirectory(): string {
     return path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'report');
@@ -224,16 +232,21 @@ export function getReportDirectory(): string {
  * for ravot -- and a statistics database holds one platform, so which variant a card gets is decided
  * here rather than in the queries. `env` is the same name the data source carries.
  */
-export async function loadReport(env: string, directory = getReportDirectory()): Promise<ReportTab[]> {
+export async function loadReport(
+    env: string,
+    directory = getReportDirectory(),
+): Promise<ReportTab[]> {
     const written = (await readTabs(env, directory))
-        .filter(tab => !tab.except.includes(env))
-        .map(tab => ({ ...tab, cards: tab.cards.filter(card => isWrittenIn(card, env)) }));
+        .filter((tab) => !tab.except.includes(env))
+        .map((tab) => ({ ...tab, cards: tab.cards.filter((card) => isWrittenIn(card, env)) }));
 
     // A tab is written as a page whether or not it has anything left to put on it, so a tab that
     // lost every card to the environment has to be left out as a tab instead of card by card.
-    const empty = written.find(tab => tab.cards.length === 0);
+    const empty = written.find((tab) => tab.cards.length === 0);
     if (empty) {
-        throw new Error(`Tab "${empty.key}" has every card left out of ${env}, which would write the page empty. Leave the tab out instead: "-- except: ${env}".`);
+        throw new Error(
+            `Tab "${empty.key}" has every card left out of ${env}, which would write the page empty. Leave the tab out instead: "-- except: ${env}".`,
+        );
     }
 
     return written.sort((a, b) => orderOf(a.key) - orderOf(b.key));
@@ -246,10 +259,17 @@ export async function loadReport(env: string, directory = getReportDirectory()):
  * A question is stored under its card and its tab both, so clearing away one an earlier run wrote
  * needs the two of them -- and the report this environment loads no longer holds either.
  */
-export async function loadRetiredReport(env: string, directory = getReportDirectory()): Promise<ReportTab[]> {
+export async function loadRetiredReport(
+    env: string,
+    directory = getReportDirectory(),
+): Promise<ReportTab[]> {
     return (await readTabs(env, directory))
-        .map(tab => tab.except.includes(env) ? tab : { ...tab, cards: tab.cards.filter(card => !isWrittenIn(card, env)) })
-        .filter(tab => tab.cards.length > 0)
+        .map((tab) =>
+            tab.except.includes(env)
+                ? tab
+                : { ...tab, cards: tab.cards.filter((card) => !isWrittenIn(card, env)) },
+        )
+        .filter((tab) => tab.cards.length > 0)
         .sort((a, b) => orderOf(a.key) - orderOf(b.key));
 }
 
@@ -262,11 +282,13 @@ function isWrittenIn(card: ReportCard, env: string): boolean {
 async function readTabs(env: string, directory: string): Promise<ReportTab[]> {
     const includes = await loadIncludes(path.join(directory, 'includes'), env);
     const sql = new Map([...includes].map(([name, include]) => [name, include.sql]));
-    const files = (await fs.readdir(directory)).filter(file => file.endsWith('.sql')).sort();
+    const files = (await fs.readdir(directory)).filter((file) => file.endsWith('.sql')).sort();
 
-    return await Promise.all(files.map(async (file) => {
-        return parseTab(await fs.readFile(path.join(directory, file), 'utf-8'), file, sql, env);
-    }));
+    return await Promise.all(
+        files.map(async (file) => {
+            return parseTab(await fs.readFile(path.join(directory, file), 'utf-8'), file, sql, env);
+        }),
+    );
 }
 
 /**
@@ -277,18 +299,29 @@ async function readTabs(env: string, directory: string): Promise<ReportTab[]> {
  * card that counts one. Which variant a fragment has is settled here, the same way it is for a card,
  * so a snippet carries what this platform counts without saying which platform that is.
  */
-export async function loadSnippets(env: string, directory = getReportDirectory()): Promise<ReportSnippet[]> {
+export async function loadSnippets(
+    env: string,
+    directory = getReportDirectory(),
+): Promise<ReportSnippet[]> {
     const includes = await loadIncludes(path.join(directory, 'includes'), env);
     const sql = new Map([...includes].map(([name, include]) => [name, include.sql]));
 
     // A fragment is a snippet because a question refers to it. One that is only ever inlined is
     // written out wherever it is read, so a snippet of it would stand in the sidebar unreferred to --
     // and it is a line of sql rather than a definition anyone would open.
-    const referred = new Set((await readTabs(env, directory)).flatMap(tab => tab.cards.flatMap(card => card.snippets)));
+    const referred = new Set(
+        (await readTabs(env, directory)).flatMap((tab) =>
+            tab.cards.flatMap((card) => card.snippets),
+        ),
+    );
 
     return [...includes]
         .filter(([name]) => referred.has(name))
-        .map(([name, include]) => ({ name, sql: referenceIncludes(include.sql, sql), description: include.description }))
+        .map(([name, include]) => ({
+            name,
+            sql: referenceIncludes(include.sql, sql),
+            description: include.description,
+        }))
         .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -313,10 +346,15 @@ async function loadIncludes(directory: string, env: string): Promise<Map<string,
     for (const [name, include] of await readIncludes(path.join(directory, env))) {
         const base = includes.get(name);
         if (base === undefined) {
-            throw new Error(`includes/${env}/${name}.sql overrides "${name}", which has no includes/${name}.sql`);
+            throw new Error(
+                `includes/${env}/${name}.sql overrides "${name}", which has no includes/${name}.sql`,
+            );
         }
         // A variant that says nothing about itself keeps the words of the fragment it replaces.
-        includes.set(name, { sql: include.sql, description: include.description ?? base.description });
+        includes.set(name, {
+            sql: include.sql,
+            description: include.description ?? base.description,
+        });
     }
 
     return includes;
@@ -335,8 +373,11 @@ async function readIncludes(directory: string): Promise<Map<string, Include>> {
     }
 
     const includes = new Map<string, Include>();
-    for (const file of entries.filter(entry => entry.endsWith('.sql'))) {
-        includes.set(path.basename(file, '.sql'), parseInclude((await fs.readFile(path.join(directory, file), 'utf-8')).trim()));
+    for (const file of entries.filter((entry) => entry.endsWith('.sql'))) {
+        includes.set(
+            path.basename(file, '.sql'),
+            parseInclude((await fs.readFile(path.join(directory, file), 'utf-8')).trim()),
+        );
     }
     return includes;
 }
@@ -353,22 +394,32 @@ function parseInclude(contents: string): Include {
     if (!description) {
         return { sql: contents };
     }
-    return { description: description[1].trim(), sql: contents.slice(description[0].length).trim() };
+    return {
+        description: description[1].trim(),
+        sql: contents.slice(description[0].length).trim(),
+    };
 }
 
 /**
  * Splits a file into its `@tab` header and `@card` sections. Everything that is not a directive
  * stays as it is, so a card's sql keeps the comments written above it.
  */
-export function parseTab(contents: string, file: string, includes: Map<string, string>, env?: string): ReportTab {
+export function parseTab(
+    contents: string,
+    file: string,
+    includes: Map<string, string>,
+    env?: string,
+): ReportTab {
     const sections = splitSections(contents, file, env);
-    const header = sections.find(section => section.kind === 'tab');
+    const header = sections.find((section) => section.kind === 'tab');
 
     if (!header) {
         throw new Error(`${file} has no "-- @tab <key>" header`);
     }
 
-    const cards = sections.filter(section => section.kind === 'card').map(section => parseCard(section, file, includes));
+    const cards = sections
+        .filter((section) => section.kind === 'card')
+        .map((section) => parseCard(section, file, includes));
     if (cards.length === 0) {
         throw new Error(`${file} declares no cards`);
     }
@@ -376,25 +427,33 @@ export function parseTab(contents: string, file: string, includes: Map<string, s
     // A question is stored under its title, so two cards sharing one on the same tab would end up as
     // the same question: whichever is written last decides what both show. Read among the cards this
     // environment writes, since two shapes of one figure that leave each other out are never both.
-    const written = env === undefined ? cards : cards.filter(card => isWrittenIn(card, env));
-    const duplicate = written.find((card, index) => written.findIndex(other => other.title === card.title) !== index);
+    const written = env === undefined ? cards : cards.filter((card) => isWrittenIn(card, env));
+    const duplicate = written.find(
+        (card, index) => written.findIndex((other) => other.title === card.title) !== index,
+    );
     if (duplicate) {
-        throw new Error(`${file}: two cards are titled "${duplicate.title}", which would store them as one question`);
+        throw new Error(
+            `${file}: two cards are titled "${duplicate.title}", which would store them as one question`,
+        );
     }
 
     const filters = splitList(header.attributes.get('filters'));
-    const offered = new Set(cards.flatMap(card => card.parameters));
-    const unused = filters.filter(filter => !offered.has(filter));
+    const offered = new Set(cards.flatMap((card) => card.parameters));
+    const unused = filters.filter((filter) => !offered.has(filter));
     if (unused.length > 0) {
-        throw new Error(`${file}: filter "${unused[0]}" is declared but no card uses {{${unused[0]}}}`);
+        throw new Error(
+            `${file}: filter "${unused[0]}" is declared but no card uses {{${unused[0]}}}`,
+        );
     }
 
     // A filter the dashboard does not show is one nobody can answer, so requiring it would leave
     // every card of the tab refusing to run with nothing on screen to say why.
     const requiredFilters = splitList(header.attributes.get('required'));
-    const unshown = requiredFilters.filter(filter => !filters.includes(filter));
+    const unshown = requiredFilters.filter((filter) => !filters.includes(filter));
     if (unshown.length > 0) {
-        throw new Error(`${file}: filter "${unshown[0]}" is required but not among the filters of the tab`);
+        throw new Error(
+            `${file}: filter "${unshown[0]}" is required but not among the filters of the tab`,
+        );
     }
 
     return {
@@ -410,14 +469,45 @@ export function parseTab(contents: string, file: string, includes: Map<string, s
     };
 }
 
-type Section = { kind: 'tab' | 'card'; key: string; attributes: Map<string, string>; qualified: Set<string>; body: string };
+type Section = {
+    kind: 'tab' | 'card';
+    key: string;
+    attributes: Map<string, string>;
+    qualified: Set<string>;
+    body: string;
+};
 
 /**
  * Every setting a tab or card understands. A line shaped like one below the query is a setting that
  * slipped down rather than a comment, and would otherwise be dropped without a word: writing a
  * comment above `-- size:` is enough to make the whole block below it stop counting.
  */
-const knownAttributes = new Set(['title', 'display', 'size', 'description', 'dimensions', 'metrics', 'columns', 'stacked', 'segments', 'best', 'xlabels', 'height', 'span', 'latitude', 'longitude', 'filters', 'required', 'hidden', 'dashboard', 'except', 'only', 'xscale', 'highlight', 'defaults']);
+const knownAttributes = new Set([
+    'title',
+    'display',
+    'size',
+    'description',
+    'dimensions',
+    'metrics',
+    'columns',
+    'stacked',
+    'segments',
+    'best',
+    'xlabels',
+    'height',
+    'span',
+    'latitude',
+    'longitude',
+    'filters',
+    'required',
+    'hidden',
+    'dashboard',
+    'except',
+    'only',
+    'xscale',
+    'highlight',
+    'defaults',
+]);
 
 function splitSections(contents: string, file: string, env?: string): Section[] {
     const sections: Section[] = [];
@@ -426,7 +516,13 @@ function splitSections(contents: string, file: string, env?: string): Section[] 
     for (const line of contents.split('\n')) {
         const directive = /^--[ \t]*@(tab|card)[ \t]+(\S+)[ \t]*$/.exec(line);
         if (directive) {
-            current = { kind: directive[1] as 'tab' | 'card', key: directive[2], attributes: new Map(), qualified: new Set(), body: '' };
+            current = {
+                kind: directive[1] as 'tab' | 'card',
+                key: directive[2],
+                attributes: new Map(),
+                qualified: new Set(),
+                body: '',
+            };
             sections.push(current);
             continue;
         }
@@ -444,7 +540,9 @@ function splitSections(contents: string, file: string, env?: string): Section[] 
                 continue;
             }
             if (knownAttributes.has(attribute[1])) {
-                throw new Error(`${file}: "${current.key}" has "${attribute[1]}:" below the query, where it is read as a comment instead of a setting. Move it above the first comment and @include.`);
+                throw new Error(
+                    `${file}: "${current.key}" has "${attribute[1]}:" below the query, where it is read as a comment instead of a setting. Move it above the first comment and @include.`,
+                );
             }
         }
         current.body += line + '\n';
@@ -458,7 +556,13 @@ function splitSections(contents: string, file: string, env?: string): Section[] 
  * one wherever it does, whichever of the two is written first. It is how a card says a figure that is
  * not counted the same everywhere in the words of the platform reading it, without becoming two cards.
  */
-function setAttribute(section: Section, name: string, qualifier: string | undefined, value: string, env: string | undefined): void {
+function setAttribute(
+    section: Section,
+    name: string,
+    qualifier: string | undefined,
+    value: string,
+    env: string | undefined,
+): void {
     if (qualifier === undefined) {
         if (!section.qualified.has(name)) {
             section.attributes.set(name, value);
@@ -476,35 +580,47 @@ function setAttribute(section: Section, name: string, qualifier: string | undefi
 function parseCard(section: Section, file: string, includes: Map<string, string>): ReportCard {
     const size = section.attributes.get('size') ?? 'half';
     if (!(reportCardSizes as readonly string[]).includes(size)) {
-        throw new Error(`${file}: card "${section.key}" has size "${size}", expected one of ${reportCardSizes.join(', ')}`);
+        throw new Error(
+            `${file}: card "${section.key}" has size "${size}", expected one of ${reportCardSizes.join(', ')}`,
+        );
     }
 
     const stacked = section.attributes.get('stacked');
     if (stacked !== undefined && stacked !== 'stacked' && stacked !== 'normalized') {
-        throw new Error(`${file}: card "${section.key}" has stacked "${stacked}", expected stacked or normalized`);
+        throw new Error(
+            `${file}: card "${section.key}" has stacked "${stacked}", expected stacked or normalized`,
+        );
     }
 
     const xLabels = section.attributes.get('xlabels');
     if (xLabels !== undefined && !(reportCardXLabels as readonly string[]).includes(xLabels)) {
-        throw new Error(`${file}: card "${section.key}" has xlabels "${xLabels}", expected one of ${reportCardXLabels.join(', ')}`);
+        throw new Error(
+            `${file}: card "${section.key}" has xlabels "${xLabels}", expected one of ${reportCardXLabels.join(', ')}`,
+        );
     }
 
     const xScale = section.attributes.get('xscale');
     if (xScale !== undefined && !(reportCardXScales as readonly string[]).includes(xScale)) {
-        throw new Error(`${file}: card "${section.key}" has xscale "${xScale}", expected one of ${reportCardXScales.join(', ')}`);
+        throw new Error(
+            `${file}: card "${section.key}" has xscale "${xScale}", expected one of ${reportCardXScales.join(', ')}`,
+        );
     }
 
     const display = required(section.attributes, 'display', file, section.key);
     const latitude = section.attributes.get('latitude');
     const longitude = section.attributes.get('longitude');
     if (display === 'map' && (latitude === undefined || longitude === undefined)) {
-        throw new Error(`${file}: card "${section.key}" is a map but names no latitude and longitude columns`);
+        throw new Error(
+            `${file}: card "${section.key}" is a map but names no latitude and longitude columns`,
+        );
     }
 
     const { segments, best } = parseRanges(section, file, display);
     const metrics = splitList(section.attributes.get('metrics'));
     if (display === 'table' && segments.length > 0 && metrics.length === 0) {
-        throw new Error(`${file}: card "${section.key}" is a table with segments but names no metrics to color`);
+        throw new Error(
+            `${file}: card "${section.key}" is a table with segments but names no metrics to color`,
+        );
     }
 
     const highlight = section.attributes.get('highlight');
@@ -517,7 +633,9 @@ function parseCard(section: Section, file: string, includes: Map<string, string>
     // A spanning card is as tall as the rows it stands across, so a height of its own would be read
     // by neither: the layout hands it the one it computes.
     if (height !== undefined && span > 1) {
-        throw new Error(`${file}: card "${section.key}" spans ${span} rows and names a height, which the rows it spans decide`);
+        throw new Error(
+            `${file}: card "${section.key}" spans ${span} rows and names a height, which the rows it spans decide`,
+        );
     }
 
     const sql = expandIncludes(section.body, includes, file, section.key).trim();
@@ -561,10 +679,14 @@ function parseDefaults(section: Section, file: string, parameters: string[]): Ma
         const match = /^([a-z_]+)[ \t]*=[ \t]*(\S+)$/.exec(entry);
         const value = Number(match?.[2]);
         if (!match || !Number.isFinite(value)) {
-            throw new Error(`${file}: card "${section.key}" has default "${entry}", expected <parameter> = <number>`);
+            throw new Error(
+                `${file}: card "${section.key}" has default "${entry}", expected <parameter> = <number>`,
+            );
         }
         if (!parameters.includes(match[1])) {
-            throw new Error(`${file}: card "${section.key}" gives "${match[1]}" a default, but its query takes no {{${match[1]}}}`);
+            throw new Error(
+                `${file}: card "${section.key}" gives "${match[1]}" a default, but its query takes no {{${match[1]}}}`,
+            );
         }
         defaults.set(match[1], value);
     }
@@ -581,7 +703,9 @@ function parseCount(section: Section, file: string, name: string): number | unde
 
     const count = Number(written);
     if (!Number.isInteger(count) || count < 1) {
-        throw new Error(`${file}: card "${section.key}" has ${name} "${written}", expected a whole number of rows`);
+        throw new Error(
+            `${file}: card "${section.key}" has ${name} "${written}", expected a whole number of rows`,
+        );
     }
     return count;
 }
@@ -595,34 +719,53 @@ const rangedDisplays = ['gauge', 'scalar', 'table'];
  * nowhere on the arc, and there are at least three of them so the ranges say something the figure
  * does not say on its own.
  */
-function parseRanges(section: Section, file: string, display: string): { segments: number[]; best: ReportCardBest } {
+function parseRanges(
+    section: Section,
+    file: string,
+    display: string,
+): { segments: number[]; best: ReportCardBest } {
     const written = section.attributes.get('segments');
     const best = section.attributes.get('best') ?? 'high';
 
     for (const name of ['segments', 'best']) {
         if (section.attributes.has(name) && !rangedDisplays.includes(display)) {
-            throw new Error(`${file}: card "${section.key}" names ${name}, which only a gauge, a number or a table reads`);
+            throw new Error(
+                `${file}: card "${section.key}" names ${name}, which only a gauge, a number or a table reads`,
+            );
         }
     }
     if (!(reportCardBest as readonly string[]).includes(best)) {
-        throw new Error(`${file}: card "${section.key}" has best "${best}", expected one of ${reportCardBest.join(', ')}`);
+        throw new Error(
+            `${file}: card "${section.key}" has best "${best}", expected one of ${reportCardBest.join(', ')}`,
+        );
     }
     // Which end is the good one only decides how the ranges are colored, so on its own it colors
     // nothing: a number without ranges keeps its own color, and the ones a gauge falls back to are
     // drawn in Metabase's.
     if (section.attributes.has('best') && written === undefined) {
-        throw new Error(`${file}: card "${section.key}" says its best is "${best}" but names no segments to color`);
+        throw new Error(
+            `${file}: card "${section.key}" says its best is "${best}" but names no segments to color`,
+        );
     }
     if (written === undefined) {
         return { segments: [], best: best as ReportCardBest };
     }
 
-    const segments = splitList(written).map(entry => Number(entry));
+    const segments = splitList(written).map((entry) => Number(entry));
     if (segments.length < 3) {
-        throw new Error(`${file}: card "${section.key}" has segments "${written}", expected at least three boundaries`);
+        throw new Error(
+            `${file}: card "${section.key}" has segments "${written}", expected at least three boundaries`,
+        );
     }
-    if (segments.some((boundary, index) => !Number.isFinite(boundary) || (index > 0 && boundary <= segments[index - 1]))) {
-        throw new Error(`${file}: card "${section.key}" has segments "${written}", expected rising numbers`);
+    if (
+        segments.some(
+            (boundary, index) =>
+                !Number.isFinite(boundary) || (index > 0 && boundary <= segments[index - 1]),
+        )
+    ) {
+        throw new Error(
+            `${file}: card "${section.key}" has segments "${written}", expected rising numbers`,
+        );
     }
 
     return { segments, best: best as ReportCardBest };
@@ -635,24 +778,41 @@ const fragmentDirective = /^([ \t]*)--[ \t]*@(include|inline)[ \t]+(\S+)[ \t]*$/
 const holdsFragment = /^[ \t]*--[ \t]*@(?:include|inline)[ \t]+\S+[ \t]*$/m;
 
 /** A fragment may include another, which is how the two registration grains share their filters. */
-function expandIncludes(body: string, includes: Map<string, string>, file: string, card: string, chain: string[] = []): string {
-    return body.replaceAll(fragmentDirective, (_match, indent: string, kind: string, name: string) => {
-        const include = includes.get(name);
-        if (include === undefined) {
-            throw new Error(`${file}: card "${card}" ${kind}s "${name}", which has no report/includes/${name}.sql`);
-        }
-        if (chain.includes(name)) {
-            throw new Error(`${file}: card "${card}" includes "${name}" from within itself: ${[...chain, name].join(' -> ')}`);
-        }
-        // An inlined fragment is written out rather than referred to, so a fragment it read would
-        // reach Metabase as a snippet nothing declared a tag for, and the question would not run.
-        if (kind === 'inline' && holdsFragment.test(include)) {
-            throw new Error(`${file}: card "${card}" inlines "${name}", which reads a fragment of its own. An inlined fragment stands on its own.`);
-        }
+function expandIncludes(
+    body: string,
+    includes: Map<string, string>,
+    file: string,
+    card: string,
+    chain: string[] = [],
+): string {
+    return body.replaceAll(
+        fragmentDirective,
+        (_match, indent: string, kind: string, name: string) => {
+            const include = includes.get(name);
+            if (include === undefined) {
+                throw new Error(
+                    `${file}: card "${card}" ${kind}s "${name}", which has no report/includes/${name}.sql`,
+                );
+            }
+            if (chain.includes(name)) {
+                throw new Error(
+                    `${file}: card "${card}" includes "${name}" from within itself: ${[...chain, name].join(' -> ')}`,
+                );
+            }
+            // An inlined fragment is written out rather than referred to, so a fragment it read would
+            // reach Metabase as a snippet nothing declared a tag for, and the question would not run.
+            if (kind === 'inline' && holdsFragment.test(include)) {
+                throw new Error(
+                    `${file}: card "${card}" inlines "${name}", which reads a fragment of its own. An inlined fragment stands on its own.`,
+                );
+            }
 
-        return expandIncludes(include, includes, file, card, [...chain, name])
-            .split('\n').map(line => indent + line).join('\n');
-    });
+            return expandIncludes(include, includes, file, card, [...chain, name])
+                .split('\n')
+                .map((line) => indent + line)
+                .join('\n');
+        },
+    );
 }
 
 /**
@@ -661,12 +821,18 @@ function expandIncludes(body: string, includes: Map<string, string>, file: strin
  * has already refused a fragment that is not there and one that includes itself.
  */
 function referenceIncludes(body: string, includes: Map<string, string>): string {
-    return body.replaceAll(fragmentDirective, (_match, indent: string, kind: string, name: string) => {
-        if (kind === 'include') {
-            return `${indent}{{snippet: ${name}}}`;
-        }
-        return (includes.get(name) ?? '').split('\n').map(line => indent + line).join('\n');
-    });
+    return body.replaceAll(
+        fragmentDirective,
+        (_match, indent: string, kind: string, name: string) => {
+            if (kind === 'include') {
+                return `${indent}{{snippet: ${name}}}`;
+            }
+            return (includes.get(name) ?? '')
+                .split('\n')
+                .map((line) => indent + line)
+                .join('\n');
+        },
+    );
 }
 
 /**
@@ -675,7 +841,11 @@ function referenceIncludes(body: string, includes: Map<string, string>): string 
  * `{{snippet: all-registrations}}` up among the tags of the question rather than among those of the
  * fragment that refers to it. An inlined fragment is no snippet and needs no tag.
  */
-function collectIncludes(body: string, includes: Map<string, string>, found: string[] = []): string[] {
+function collectIncludes(
+    body: string,
+    includes: Map<string, string>,
+    found: string[] = [],
+): string[] {
     for (const [, , kind, name] of body.matchAll(fragmentDirective)) {
         if (kind === 'inline' || found.includes(name)) {
             continue;
@@ -689,14 +859,24 @@ function collectIncludes(body: string, includes: Map<string, string>, found: str
 
 /** The `{{name}}` parameters a query uses, in the order they first appear. */
 export function parameterNames(sql: string): string[] {
-    return [...new Set([...sql.matchAll(/\{\{\s*([a-z_]+)\s*\}\}/g)].map(match => match[1]))];
+    return [...new Set([...sql.matchAll(/\{\{\s*([a-z_]+)\s*\}\}/g)].map((match) => match[1]))];
 }
 
 function splitList(value: string | undefined): string[] {
-    return value === undefined ? [] : value.split(',').map(entry => entry.trim()).filter(entry => entry.length > 0);
+    return value === undefined
+        ? []
+        : value
+              .split(',')
+              .map((entry) => entry.trim())
+              .filter((entry) => entry.length > 0);
 }
 
-function required(attributes: Map<string, string>, name: string, file: string, key: string): string {
+function required(
+    attributes: Map<string, string>,
+    name: string,
+    file: string,
+    key: string,
+): string {
     const value = attributes.get(name);
     if (value === undefined || value.length === 0) {
         throw new Error(`${file}: "${key}" has no ${name}`);
@@ -710,9 +890,16 @@ function required(attributes: Map<string, string>, name: string, file: string, k
  * only thing that understands this syntax.
  * Values are literal parameter names; null and missing values drop optional clauses.
  */
-export function resolveSql(sql: string, values: ReadonlyMap<string, string | null> = new Map()): string {
+export function resolveSql(
+    sql: string,
+    values: ReadonlyMap<string, string | null> = new Map(),
+): string {
     const optional = sql.replaceAll(/\[\[([\s\S]*?)\]\]/g, (_match, clause: string) => {
-        return parameterNames(clause).every(name => values.get(name) !== undefined && values.get(name) !== null) ? clause : '';
+        return parameterNames(clause).every(
+            (name) => values.get(name) !== undefined && values.get(name) !== null,
+        )
+            ? clause
+            : '';
     });
 
     return optional.replaceAll(/\{\{\s*([a-z_]+)\s*\}\}/g, (_match, name: string) => {

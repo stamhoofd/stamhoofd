@@ -1,4 +1,11 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Payment } from '../members/Payment.js';

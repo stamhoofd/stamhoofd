@@ -19,17 +19,27 @@ export type TerminalRendererOptions = {
     groupBy?: string[];
     /** Force basic colors or disable them. NO_COLOR always disables renderer styling. */
     color?: boolean;
-} & ({
-    /** Shared application-owned coordinator. Shutdown disposes only this renderer's region. */
-    terminal: Terminal;
-    stream?: never;
-} | {
-    terminal?: never;
-    /** Destination for an owned coordinator; defaults to process.stderr. */
-    stream?: NodeJS.WriteStream;
-});
+} & (
+    | {
+          /** Shared application-owned coordinator. Shutdown disposes only this renderer's region. */
+          terminal: Terminal;
+          stream?: never;
+      }
+    | {
+          terminal?: never;
+          /** Destination for an owned coordinator; defaults to process.stderr. */
+          stream?: NodeJS.WriteStream;
+      }
+);
 
-type Operation = { label: string; progress?: string; command: boolean; group: string; depth: number; started: number };
+type Operation = {
+    label: string;
+    progress?: string;
+    command: boolean;
+    group: string;
+    depth: number;
+    started: number;
+};
 
 /**
  * Renders labelled span lifetimes and scoped logs through a coordinated terminal.
@@ -51,21 +61,33 @@ export class TerminalRenderer implements SpanProcessor {
 
     /** Creates a renderer using either a shared terminal or an owned stream coordinator. */
     constructor(private readonly options: TerminalRendererOptions = {}) {
-        this.output = options.terminal ?? new Terminal({ stdout: options.stream ?? process.stderr, stderr: process.stdout });
+        this.output =
+            options.terminal ??
+            new Terminal({ stdout: options.stream ?? process.stderr, stderr: process.stdout });
         const stream = this.output.stream;
         this.region = this.output.createRegion();
-        this.colors = new Chalk({ level: options.color === false || process.env.NO_COLOR !== undefined
-            ? 0
-            : options.color === true
-                ? 1
-                : stream === process.stderr
-                    ? chalkStderr.level
-                    : stream === process.stdout ? chalk.level : stream.isTTY ? 1 : 0 });
+        this.colors = new Chalk({
+            level:
+                options.color === false || process.env.NO_COLOR !== undefined
+                    ? 0
+                    : options.color === true
+                      ? 1
+                      : stream === process.stderr
+                        ? chalkStderr.level
+                        : stream === process.stdout
+                          ? chalk.level
+                          : stream.isTTY
+                            ? 1
+                            : 0,
+        });
     }
 
     private groupFor(fields: Attributes): string {
         // eslint-disable-next-line security/detect-object-injection -- Configured attribute names are read only for presentation.
-        return (this.options.groupBy ?? []).map(key => fields[key]).filter(value => typeof value === 'string').join(' · ');
+        return (this.options.groupBy ?? [])
+            .map((key) => fields[key])
+            .filter((value) => typeof value === 'string')
+            .join(' · ');
     }
 
     private heading(group: string): void {
@@ -84,12 +106,22 @@ export class TerminalRenderer implements SpanProcessor {
         // eslint-disable-next-line security/detect-object-injection -- operationLabel is a fixed library constant.
         const label = span.attributes[operationLabel];
         if (typeof label !== 'string' || this.options.verbosity === 'quiet') return;
-        if (span.attributes['operation.label.kind'] === 'command' && this.options.verbosity !== 'verbose') return;
+        if (
+            span.attributes['operation.label.kind'] === 'command' &&
+            this.options.verbosity !== 'verbose'
+        )
+            return;
         let parent = span.parentSpanContext?.spanId;
         while (parent && !this.operations.has(parent)) parent = this.parents.get(parent);
         const group = this.groupFor(span.attributes);
         const depth = parent ? this.operations.get(parent)!.depth + 1 : group ? 1 : 0;
-        const operation = { label, command: span.attributes['operation.label.kind'] === 'command', group, depth, started: performance.now() };
+        const operation = {
+            label,
+            command: span.attributes['operation.label.kind'] === 'command',
+            group,
+            depth,
+            started: performance.now(),
+        };
         this.operations.set(id, operation);
         this.heading(group);
         if (!this.output.isTTY) {
@@ -112,9 +144,14 @@ export class TerminalRenderer implements SpanProcessor {
         this.region.update('');
         this.heading(operation.group);
         const seconds = span.duration[0] + span.duration[1] / 1e9;
-        const symbol = span.status.code === SpanStatusCode.ERROR ? this.colors.red('✗') : this.colors.green('✓');
+        const symbol =
+            span.status.code === SpanStatusCode.ERROR
+                ? this.colors.red('✗')
+                : this.colors.green('✓');
         const summary = span.attributes['operation.summary'];
-        this.output.write(`${'  '.repeat(operation.depth)}${symbol} ${this.label(operation)}${typeof summary === 'string' ? ` — ${summary}` : ''} ${this.colors.dim(`— ${seconds.toFixed(1)}s`)}\n`);
+        this.output.write(
+            `${'  '.repeat(operation.depth)}${symbol} ${this.label(operation)}${typeof summary === 'string' ? ` — ${summary}` : ''} ${this.colors.dim(`— ${seconds.toFixed(1)}s`)}\n`,
+        );
         this.render();
     }
 
@@ -152,7 +189,10 @@ export class TerminalRenderer implements SpanProcessor {
                 const newline = index < lines.length - 1;
                 if (!line && !newline) continue;
                 if (!this.outputLine && fields['diagnostic.output.style'] !== 'plain') {
-                    const marker = kind === 'stderr' ? this.colors.yellow('│ stderr: ') : this.colors.dim('│ ');
+                    const marker =
+                        kind === 'stderr'
+                            ? this.colors.yellow('│ stderr: ')
+                            : this.colors.dim('│ ');
                     this.output.write(`${indent}${marker}`);
                 }
                 this.output.write(line + (newline ? '\n' : ''));
@@ -163,7 +203,12 @@ export class TerminalRenderer implements SpanProcessor {
         this.finishOutputLine();
         if (kind === 'command') this.output.write(`${indent}${this.colors.dim(`$ ${message}`)}\n`);
         else {
-            const prefix = level === 'warn' ? this.colors.yellow('Warning: ') : level === 'error' ? this.colors.red('Error: ') : '';
+            const prefix =
+                level === 'warn'
+                    ? this.colors.yellow('Warning: ')
+                    : level === 'error'
+                      ? this.colors.red('Error: ')
+                      : '';
             this.output.write(`${prefix}${message}\n`);
         }
         return !this.output.isSuspended;
@@ -201,7 +246,14 @@ export class TerminalRenderer implements SpanProcessor {
             return;
         }
         const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-        this.region.update([...this.operations.values()].map(operation => `${'  '.repeat(operation.depth)}${this.colors.cyan(frames[this.frame % frames.length])} ${this.label(operation)}${operation.progress ? ` — ${operation.progress}` : ''} ${this.colors.dim(`— ${((performance.now() - operation.started) / 1000).toFixed(1)}s`)}`).join('\n'));
+        this.region.update(
+            [...this.operations.values()]
+                .map(
+                    (operation) =>
+                        `${'  '.repeat(operation.depth)}${this.colors.cyan(frames[this.frame % frames.length])} ${this.label(operation)}${operation.progress ? ` — ${operation.progress}` : ''} ${this.colors.dim(`— ${((performance.now() - operation.started) / 1000).toFixed(1)}s`)}`,
+                )
+                .join('\n'),
+        );
         this.frame++;
     }
 
@@ -218,14 +270,20 @@ export class TerminalRenderer implements SpanProcessor {
      * retain output. Quiet mode omits markers. After shutdown the callback still
      * executes, but its writer returns false and no terminal output is produced.
      */
-    async withInteractiveOperation<T>(label: string, callback: (write: (text: string) => boolean) => Promise<T>): Promise<T> {
+    async withInteractiveOperation<T>(
+        label: string,
+        callback: (write: (text: string) => boolean) => Promise<T>,
+    ): Promise<T> {
         if (this.closed) return callback(() => false);
         if (this.options.verbosity === 'quiet') {
             return this.output.withPrompt(callback);
         }
         const text = this.colors.dim(label);
-        return this.output.withTransientOutput(`${this.colors.yellow('?')} ${text}`, callback,
-            success => `${success ? this.colors.green('✓') : this.colors.red('✗')} ${text}`);
+        return this.output.withTransientOutput(
+            `${this.colors.yellow('?')} ${text}`,
+            callback,
+            (success) => `${success ? this.colors.green('✓') : this.colors.red('✗')} ${text}`,
+        );
     }
 
     /** No-op: rendering is synchronous; prompt buffering belongs to the shared terminal. */

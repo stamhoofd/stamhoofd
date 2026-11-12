@@ -1,8 +1,46 @@
 import { Request } from '@node/endpoints';
-import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import type {
+    MemberWithUsersRegistrationsAndGroups,
+    Organization,
+    RegistrationPeriod,
+    Token,
+} from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    GroupFactory,
+    MemberFactory,
+    OrganizationFactory,
+    OrganizationRegistrationPeriod,
+    Platform,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, TranslatedString, Version } from '@stamhoofd/structures';
+import {
+    AdministrationFeeSettings,
+    BalanceItemCartItem,
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    BooleanStatus,
+    DefaultAgeGroup,
+    FreeContributionSettings,
+    GroupOption,
+    GroupOptionMenu,
+    IDRegisterCart,
+    IDRegisterCheckout,
+    IDRegisterItem,
+    PaymentMethod,
+    Permissions,
+    PlatformMembershipType,
+    PlatformMembershipTypeConfig,
+    ReceivableBalanceType,
+    ReduceablePrice,
+    RegisterItemOption,
+    TranslatedString,
+    Version,
+} from '@stamhoofd/structures';
 import { IDDeleteRegisterItem } from '@stamhoofd/structures/members/checkout/DeleteRegisterItem.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,20 +61,38 @@ describe('E2E.Register', () => {
     let period: RegistrationPeriod;
 
     const register = async (body: IDRegisterCheckout, organization: Organization, token: Token) => {
-        const request = Request.buildJson('POST', `/v${Version}/members/register`, organization.getApiHost(), body);
+        const request = Request.buildJson(
+            'POST',
+            `/v${Version}/members/register`,
+            organization.getApiHost(),
+            body,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(registerEndpoint, request);
     };
 
-    const getReceivableBalance = async (type: ReceivableBalanceType, id: string, organization: Organization, token: Token) => {
+    const getReceivableBalance = async (
+        type: ReceivableBalanceType,
+        id: string,
+        organization: Organization,
+        token: Token,
+    ) => {
         await BalanceItemService.flushAll();
-        const request = Request.buildJson('GET', `/v${Version}/receivable-balances/${type}/${id}`, organization.getApiHost());
+        const request = Request.buildJson(
+            'GET',
+            `/v${Version}/receivable-balances/${type}/${id}`,
+            organization.getApiHost(),
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(receivableBalancesEndpoint, request);
     };
 
     const getMemberFamily = async (memberId: string, organization: Organization, token: Token) => {
-        const request = Request.buildJson('GET', `/v${Version}/organization/members/${memberId}/family`, organization.getApiHost());
+        const request = Request.buildJson(
+            'GET',
+            `/v${Version}/organization/members/${memberId}/family`,
+            organization.getApiHost(),
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(getMemberFamilyEndpoint, request);
     };
@@ -65,17 +121,18 @@ describe('E2E.Register', () => {
         await period.save();
     });
 
-    const initData = async ({ otherMemberAmount = 0, permissionLevel = PermissionLevel.Full }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel } = {}) => {
-        const organization = await new OrganizationFactory({ period })
-            .create();
+    const initData = async ({
+        otherMemberAmount = 0,
+        permissionLevel = PermissionLevel.Full,
+    }: { otherMemberAmount?: number; permissionLevel?: PermissionLevel } = {}) => {
+        const organization = await new OrganizationFactory({ period }).create();
 
         const user = await new UserFactory({
             organization,
             permissions: Permissions.create({
                 level: permissionLevel,
             }),
-        })
-            .create();
+        }).create();
 
         const token = await SessionService.createSession(user);
 
@@ -107,8 +164,7 @@ describe('E2E.Register', () => {
         };
     };
 
-    beforeEach(async () => {
-    });
+    beforeEach(async () => {});
 
     describe('Register prices and balances', () => {
         test('Register by member should create balance for member', async () => {
@@ -127,8 +183,7 @@ describe('E2E.Register', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -180,9 +235,7 @@ describe('E2E.Register', () => {
                 options: [option1, option2],
             });
 
-            group.settings.optionMenus = [
-                optionMenu,
-            ];
+            group.settings.optionMenus = [optionMenu];
 
             await group.save();
 
@@ -210,8 +263,7 @@ describe('E2E.Register', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -323,8 +375,7 @@ describe('E2E.Register', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -334,32 +385,45 @@ describe('E2E.Register', () => {
                 customer: null,
             });
 
-            const receivableBalanceBefore = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+            const receivableBalanceBefore = await getReceivableBalance(
+                ReceivableBalanceType.user,
+                user.id,
+                organization,
+                token,
+            );
             expect(receivableBalanceBefore).toBeDefined();
             expect(receivableBalanceBefore.body.balanceItems.length).toBe(0);
             expect(receivableBalanceBefore.body.amountOpen).toBe(0);
 
             await register(body, organization, token);
 
-            const receivableBalanceAfter = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+            const receivableBalanceAfter = await getReceivableBalance(
+                ReceivableBalanceType.user,
+                user.id,
+                organization,
+                token,
+            );
             expect(receivableBalanceAfter).toBeDefined();
             expect(receivableBalanceAfter.body.balanceItems.length).toBe(1);
             expect(receivableBalanceAfter.body.amountOpen).toBe(0);
-            expect(receivableBalanceAfter.body.balanceItems).toEqual(expect.arrayContaining([
-                expect.objectContaining({
-                    price: 2500,
-                    pricePaid: 0,
-                }),
-            ]));
+            expect(receivableBalanceAfter.body.balanceItems).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        price: 2500,
+                        pricePaid: 0,
+                    }),
+                ]),
+            );
         });
 
         test('Should create balance item for free contribution', async () => {
             const { organization, group, groupPrice, token, member, user } = await initData();
 
-            organization.meta.recordsConfiguration.freeContribution = FreeContributionSettings.create({
-                description: 'free contribution settings',
-                amounts: [3000, 2000],
-            });
+            organization.meta.recordsConfiguration.freeContribution =
+                FreeContributionSettings.create({
+                    description: 'free contribution settings',
+                    amounts: [3000, 2000],
+                });
 
             await organization.save();
 
@@ -376,8 +440,7 @@ describe('E2E.Register', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -387,37 +450,50 @@ describe('E2E.Register', () => {
                 customer: null,
             });
 
-            const receivableBalanceBefore = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+            const receivableBalanceBefore = await getReceivableBalance(
+                ReceivableBalanceType.user,
+                user.id,
+                organization,
+                token,
+            );
             expect(receivableBalanceBefore).toBeDefined();
             expect(receivableBalanceBefore.body.balanceItems.length).toBe(0);
             expect(receivableBalanceBefore.body.amountOpen).toBe(0);
 
             await register(body, organization, token);
 
-            const receivableBalanceAfter = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+            const receivableBalanceAfter = await getReceivableBalance(
+                ReceivableBalanceType.user,
+                user.id,
+                organization,
+                token,
+            );
             expect(receivableBalanceAfter).toBeDefined();
             expect(receivableBalanceAfter.body.balanceItems.length).toBe(2);
             expect(receivableBalanceAfter.body.amountPending).toBe(5500);
 
-            expect(receivableBalanceAfter.body.balanceItems).toEqual(expect.arrayContaining([
-                expect.objectContaining({
-                    price: 3000,
-                    pricePaid: 0,
-                    type: BalanceItemType.FreeContribution,
-                }),
-                expect.objectContaining({
-                    price: 2500,
-                    pricePaid: 0,
-                }),
-            ]));
+            expect(receivableBalanceAfter.body.balanceItems).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        price: 3000,
+                        pricePaid: 0,
+                        type: BalanceItemType.FreeContribution,
+                    }),
+                    expect.objectContaining({
+                        price: 2500,
+                        pricePaid: 0,
+                    }),
+                ]),
+            );
         });
 
         test('Should create balance item for free administration fee if register by member', async () => {
             const { organization, group, groupPrice, token, member, user } = await initData();
 
-            organization.meta.registrationPaymentConfiguration.administrationFee = AdministrationFeeSettings.create({
-                fixed: 3300,
-            });
+            organization.meta.registrationPaymentConfiguration.administrationFee =
+                AdministrationFeeSettings.create({
+                    fixed: 3300,
+                });
 
             await organization.save();
 
@@ -434,8 +510,7 @@ describe('E2E.Register', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 3300,
@@ -444,31 +519,42 @@ describe('E2E.Register', () => {
                 totalPrice: 5800,
             });
 
-            const receivableBalanceBefore = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization,
-                token);
+            const receivableBalanceBefore = await getReceivableBalance(
+                ReceivableBalanceType.user,
+                user.id,
+                organization,
+                token,
+            );
             expect(receivableBalanceBefore).toBeDefined();
             expect(receivableBalanceBefore.body.balanceItems.length).toBe(0);
             expect(receivableBalanceBefore.body.amountOpen).toBe(0);
 
             await register(body, organization, token);
 
-            const receivableBalanceAfter = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+            const receivableBalanceAfter = await getReceivableBalance(
+                ReceivableBalanceType.user,
+                user.id,
+                organization,
+                token,
+            );
             expect(receivableBalanceAfter).toBeDefined();
             expect(receivableBalanceAfter.body.balanceItems.length).toBe(2);
             expect(receivableBalanceAfter.body.amountPending).toBe(5800);
 
-            expect(receivableBalanceAfter.body.balanceItems).toEqual(expect.arrayContaining([
-                expect.objectContaining({
-                    price: 2500,
-                    pricePaid: 0,
-                    type: BalanceItemType.Registration,
-                }),
-                expect.objectContaining({
-                    price: 3300,
-                    pricePaid: 0,
-                    type: BalanceItemType.AdministrationFee,
-                }),
-            ]));
+            expect(receivableBalanceAfter.body.balanceItems).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        price: 2500,
+                        pricePaid: 0,
+                        type: BalanceItemType.Registration,
+                    }),
+                    expect.objectContaining({
+                        price: 3300,
+                        pricePaid: 0,
+                        type: BalanceItemType.AdministrationFee,
+                    }),
+                ]),
+            );
         });
 
         test('Should create balance item for cart item', async () => {
@@ -502,9 +588,7 @@ describe('E2E.Register', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                        cartItem,
-                    ],
+                    balanceItems: [cartItem],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -516,20 +600,27 @@ describe('E2E.Register', () => {
             const response = await register(body, organization, token);
             expect(response.body.registrations.length).toBe(1);
 
-            const receivableBalanceAfter = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+            const receivableBalanceAfter = await getReceivableBalance(
+                ReceivableBalanceType.user,
+                user.id,
+                organization,
+                token,
+            );
 
             expect(receivableBalanceAfter.body.balanceItems.length).toBe(2);
             expect(receivableBalanceAfter.body.amountPending).toBe(3500);
             expect(receivableBalanceAfter.body.amountOpen).toBe(1000);
 
-            expect(receivableBalanceAfter.body.balanceItems).toEqual(expect.arrayContaining([
-                expect.objectContaining({
-                    pricePending: 1000,
-                }),
-                expect.objectContaining({
-                    pricePending: 2500,
-                }),
-            ]));
+            expect(receivableBalanceAfter.body.balanceItems).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        pricePending: 1000,
+                    }),
+                    expect.objectContaining({
+                        pricePending: 2500,
+                    }),
+                ]),
+            );
         });
 
         test('Should apply reduced price if member requires financial support', async () => {
@@ -553,8 +644,7 @@ describe('E2E.Register', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -611,9 +701,7 @@ describe('E2E.Register', () => {
                 options: [option1, option2],
             });
 
-            group.settings.optionMenus = [
-                optionMenu,
-            ];
+            group.settings.optionMenus = [optionMenu];
 
             await group.save();
 
@@ -641,8 +729,7 @@ describe('E2E.Register', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -684,7 +771,13 @@ describe('E2E.Register', () => {
 
     describe('Delete registrations', () => {
         test('Should cancel balance item for deleted registration', async () => {
-            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
+            const {
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+                organization,
+                token,
+            } = await initData();
 
             const body1 = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
@@ -743,7 +836,9 @@ describe('E2E.Register', () => {
                             memberId: member.id,
                         }),
                     ],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registrationToDelete.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registrationToDelete.id }),
+                    ],
                 }),
                 totalPrice: 3000 - 2500,
                 asOrganizationId: organization.id,
@@ -772,7 +867,13 @@ describe('E2E.Register', () => {
         });
 
         test('Should cancel all related balance item for deleted registration', async () => {
-            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
+            const {
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+                organization,
+                token,
+            } = await initData();
 
             const option1 = GroupOption.create({
                 name: 'option 1',
@@ -796,9 +897,7 @@ describe('E2E.Register', () => {
                 options: [option1, option2],
             });
 
-            group1.settings.optionMenus = [
-                optionMenu,
-            ];
+            group1.settings.optionMenus = [optionMenu];
 
             await group1.save();
 
@@ -882,7 +981,9 @@ describe('E2E.Register', () => {
                             memberId: member.id,
                         }),
                     ],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registrationToDelete.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registrationToDelete.id }),
+                    ],
                 }),
                 totalPrice: 3000 - 5000,
                 asOrganizationId: organization.id,
@@ -926,7 +1027,13 @@ describe('E2E.Register', () => {
         });
 
         test('Should apply cancelation fee', async () => {
-            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
+            const {
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+                organization,
+                token,
+            } = await initData();
 
             const body1 = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
@@ -983,7 +1090,12 @@ describe('E2E.Register', () => {
                             memberId: member.id,
                         }),
                     ],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registrationToDelete.id, cancellationFeePercentage: 20_00 })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({
+                            registrationId: registrationToDelete.id,
+                            cancellationFeePercentage: 20_00,
+                        }),
+                    ],
                 }),
                 totalPrice: 3000 - 2500 + 500, // 20% of 2500 is 500
                 asOrganizationId: organization.id,
@@ -1023,7 +1135,13 @@ describe('E2E.Register', () => {
         });
 
         test('Should apply a different cancelation fee per deleted registration', async () => {
-            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
+            const {
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+                organization,
+                token,
+            } = await initData();
             const group2 = await new GroupFactory({ organization, price: 3000 }).create();
 
             const body1 = IDRegisterCheckout.create({
@@ -1050,14 +1168,24 @@ describe('E2E.Register', () => {
             });
 
             const response1 = await register(body1, organization, token);
-            const registration1 = response1.body.registrations.find(r => r.groupId === group1.id)!;
-            const registration2 = response1.body.registrations.find(r => r.groupId === group2.id)!;
+            const registration1 = response1.body.registrations.find(
+                (r) => r.groupId === group1.id,
+            )!;
+            const registration2 = response1.body.registrations.find(
+                (r) => r.groupId === group2.id,
+            )!;
 
             const body2 = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
                     deleteRegistrations: [
-                        IDDeleteRegisterItem.create({ registrationId: registration1.id, cancellationFeePercentage: 20_00 }),
-                        IDDeleteRegisterItem.create({ registrationId: registration2.id, cancellationFeePercentage: 100_00 }),
+                        IDDeleteRegisterItem.create({
+                            registrationId: registration1.id,
+                            cancellationFeePercentage: 20_00,
+                        }),
+                        IDDeleteRegisterItem.create({
+                            registrationId: registration2.id,
+                            cancellationFeePercentage: 100_00,
+                        }),
                     ],
                 }),
                 totalPrice: -2500 + 500 - 3000 + 3000,
@@ -1116,7 +1244,9 @@ describe('E2E.Register', () => {
             const legacyVersion = 421;
             const body2 = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registrationToDelete.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registrationToDelete.id }),
+                    ],
                 }),
                 totalPrice: -2500 + 500, // 20% of 2500 is 500
                 asOrganizationId: organization.id,
@@ -1124,7 +1254,12 @@ describe('E2E.Register', () => {
             body2.cancellationFeePercentage = 20_00;
             expect(body2.cart).toMatchObject({ deleteRegistrationIds: [registrationToDelete.id] });
 
-            const request = Request.buildJson('POST', `/v${legacyVersion}/members/register`, organization.getApiHost(), body2);
+            const request = Request.buildJson(
+                'POST',
+                `/v${legacyVersion}/members/register`,
+                organization.getApiHost(),
+                body2,
+            );
             request.headers.authorization = 'Bearer ' + token.accessToken;
             await testServer.test(registerEndpoint, request);
 
@@ -1158,16 +1293,12 @@ describe('E2E.Register', () => {
 
             const platformMembershipType = PlatformMembershipType.create({
                 name: 'werkjaar',
-                periods: new Map([
-                    [period.id, platformMembershipTypeConfig],
-                ]),
+                periods: new Map([[period.id, platformMembershipTypeConfig]]),
             });
 
             const platform = await Platform.getForEditing();
 
-            platform.config.membershipTypes = [
-                platformMembershipType,
-            ];
+            platform.config.membershipTypes = [platformMembershipType];
 
             const defaultAgeGroup = DefaultAgeGroup.create({
                 names: ['test groep'],
@@ -1228,7 +1359,9 @@ describe('E2E.Register', () => {
             expect(familyAfter.body.members.length).toBe(1);
             expect(familyAfter.body.members[0]).toBeDefined();
             expect(familyAfter.body.members[0].platformMemberships.length).toBe(1);
-            expect(familyAfter.body.members[0].platformMemberships[0].membershipTypeId).toBe(platformMembershipType.id);
+            expect(familyAfter.body.members[0].platformMemberships[0].membershipTypeId).toBe(
+                platformMembershipType.id,
+            );
         }, 20_000);
 
         test('Should set trial until on membership if trial', async () => {
@@ -1244,16 +1377,12 @@ describe('E2E.Register', () => {
 
                 const platformMembershipType = PlatformMembershipType.create({
                     name: 'werkjaar',
-                    periods: new Map([
-                        [period.id, platformMembershipTypeConfig],
-                    ]),
+                    periods: new Map([[period.id, platformMembershipTypeConfig]]),
                 });
 
                 const platform = await Platform.getForEditing();
 
-                platform.config.membershipTypes = [
-                    platformMembershipType,
-                ];
+                platform.config.membershipTypes = [platformMembershipType];
 
                 const defaultAgeGroup = DefaultAgeGroup.create({
                     names: ['test groep'],
@@ -1313,7 +1442,9 @@ describe('E2E.Register', () => {
                 expect(familyAfter.body.members.length).toBe(1);
                 expect(familyAfter.body.members[0]).toBeDefined();
                 expect(familyAfter.body.members[0].platformMemberships.length).toBe(1);
-                expect(familyAfter.body.members[0].platformMemberships[0].membershipTypeId).toBe(platformMembershipType.id);
+                expect(familyAfter.body.members[0].platformMemberships[0].membershipTypeId).toBe(
+                    platformMembershipType.id,
+                );
 
                 const trialUntil = familyAfter.body.members[0].platformMemberships[0].trialUntil;
 

@@ -19,7 +19,10 @@ import '../../src/excel-loaders/balance-item-payments.js';
 class ExportSliceEndpoint extends Endpoint<Record<string, never>, undefined, undefined, undefined> {
     result = { count: 0, price: 0 };
 
-    constructor(private readonly sliceFilter: StamhoofdFilter, private readonly search: string | null) {
+    constructor(
+        private readonly sliceFilter: StamhoofdFilter,
+        private readonly search: string | null,
+    ) {
         super();
     }
 
@@ -32,12 +35,14 @@ class ExportSliceEndpoint extends Endpoint<Record<string, never>, undefined, und
         await Context.authenticate();
 
         const loader = ExportToExcelEndpoint.loaders.get(ExcelExportType.BalanceItemPayments)!;
-        const data = await loader.fetch(new LimitedFilteredRequest({
-            filter: this.sliceFilter,
-            search: this.search,
-            limit: 100,
-            sort: [{ key: 'id', order: SortItemDirection.ASC }],
-        }));
+        const data = await loader.fetch(
+            new LimitedFilteredRequest({
+                filter: this.sliceFilter,
+                search: this.search,
+                limit: 100,
+                sort: [{ key: 'id', order: SortItemDirection.ASC }],
+            }),
+        );
 
         // Only the first page is added up, so a fixture that outgrows it would silently assert too little
         expect(data.next).toBeUndefined();
@@ -56,7 +61,17 @@ class ExportSliceEndpoint extends Endpoint<Record<string, never>, undefined, und
 /**
  * How many balance item payments a filter selects, and what they are worth together.
  */
-export async function exportSlice({ organization, user, filter, search = null }: { organization: Organization; user: User; filter: StamhoofdFilter; search?: string | null }) {
+export async function exportSlice({
+    organization,
+    user,
+    filter,
+    search = null,
+}: {
+    organization: Organization;
+    user: User;
+    filter: StamhoofdFilter;
+    search?: string | null;
+}) {
     const token = await SessionService.createSession(user);
 
     const request = Request.get({

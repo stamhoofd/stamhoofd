@@ -1,4 +1,14 @@
-import { DocumentStatus, GroupSettings, MemberDetails, NationalRegisterNumberOptOut, Parent, RecordCategory, RecordSettings, RecordType, TranslatedString } from '@stamhoofd/structures';
+import {
+    DocumentStatus,
+    GroupSettings,
+    MemberDetails,
+    NationalRegisterNumberOptOut,
+    Parent,
+    RecordCategory,
+    RecordSettings,
+    RecordType,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { DocumentTemplateFactory } from '../factories/DocumentTemplateFactory.js';
 import { getTaxDependentDebtors, splitPrice } from './DocumentTemplate.js';
 import { Group } from './Group.js';
@@ -13,12 +23,24 @@ describe('Model.DocumentTemplate', () => {
         group.settings = GroupSettings.create({ name: TranslatedString.create('Camp') });
         const member = new Member();
         member.details = MemberDetails.create({ firstName: 'Jane', lastName: 'Doe' });
-        const registration = Object.assign(new Registration(), { member, group, groupId: group.id });
+        const registration = Object.assign(new Registration(), {
+            member,
+            group,
+            groupId: group.id,
+        });
         const template = await new DocumentTemplateFactory({ groups: [group] }).createWithoutSave();
-        const requiredUnknown = RecordSettings.create({ id: 'unknown', type: RecordType.Text, required: true });
-        template.privateSettings.templateDefinition.documentFieldCategories.push(RecordCategory.create({ records: [requiredUnknown] }));
+        const requiredUnknown = RecordSettings.create({
+            id: 'unknown',
+            type: RecordType.Text,
+            required: true,
+        });
+        template.privateSettings.templateDefinition.documentFieldCategories.push(
+            RecordCategory.create({ records: [requiredUnknown] }),
+        );
 
-        const { fieldAnswers, missingData } = await template.buildAnswers(registration, { balance: { items: [], payments: [], balanceItemPayments: [] } });
+        const { fieldAnswers, missingData } = await template.buildAnswers(registration, {
+            balance: { items: [], payments: [], balanceItemPayments: [] },
+        });
 
         expect(fieldAnswers.get('member.firstName')?.objectValue).toBe('Jane');
         expect(fieldAnswers.get('renamedValue')?.objectValue).toBe('Jane');
@@ -93,7 +115,15 @@ describe('Model.DocumentTemplate', () => {
 });
 
 describe('Model.getTaxDependentDebtors', () => {
-    function parent({ name, isMemberTaxDependent, nationalRegisterNumber }: { name: string; isMemberTaxDependent?: boolean | null; nationalRegisterNumber?: string | typeof NationalRegisterNumberOptOut | null }) {
+    function parent({
+        name,
+        isMemberTaxDependent,
+        nationalRegisterNumber,
+    }: {
+        name: string;
+        isMemberTaxDependent?: boolean | null;
+        nationalRegisterNumber?: string | typeof NationalRegisterNumberOptOut | null;
+    }) {
         return Parent.create({
             firstName: name,
             lastName: 'Doe',
@@ -109,18 +139,30 @@ describe('Model.getTaxDependentDebtors', () => {
     });
 
     test('picks the parent that has the member tax dependent', () => {
-        const linda = parent({ name: 'Linda', isMemberTaxDependent: true, nationalRegisterNumber: '93042012345' });
+        const linda = parent({
+            name: 'Linda',
+            isMemberTaxDependent: true,
+            nationalRegisterNumber: '93042012345',
+        });
         const john = parent({ name: 'John', nationalRegisterNumber: '93042017297' });
 
-        expect(getTaxDependentDebtors([john, linda])).toEqual([{ debtor: linda, missingData: false }]);
+        expect(getTaxDependentDebtors([john, linda])).toEqual([
+            { debtor: linda, missingData: false },
+        ]);
     });
 
     // The certificate has to carry the name the family chose, even though it cannot be completed
     test('keeps a tax dependent parent that opted out, instead of falling back to another parent', () => {
-        const linda = parent({ name: 'Linda', isMemberTaxDependent: true, nationalRegisterNumber: NationalRegisterNumberOptOut });
+        const linda = parent({
+            name: 'Linda',
+            isMemberTaxDependent: true,
+            nationalRegisterNumber: NationalRegisterNumberOptOut,
+        });
         const john = parent({ name: 'John', nationalRegisterNumber: '93042017297' });
 
-        expect(getTaxDependentDebtors([linda, john])).toEqual([{ debtor: linda, missingData: true }]);
+        expect(getTaxDependentDebtors([linda, john])).toEqual([
+            { debtor: linda, missingData: true },
+        ]);
     });
 
     test('reports missing data when the tax dependent parent has no number yet', () => {
@@ -130,17 +172,39 @@ describe('Model.getTaxDependentDebtors', () => {
     });
 
     test('with co-parenting, both parents become a debtor in the order of the parents', () => {
-        const linda = parent({ name: 'Linda', isMemberTaxDependent: true, nationalRegisterNumber: '93042012345' });
-        const john = parent({ name: 'John', isMemberTaxDependent: true, nationalRegisterNumber: '93042017297' });
+        const linda = parent({
+            name: 'Linda',
+            isMemberTaxDependent: true,
+            nationalRegisterNumber: '93042012345',
+        });
+        const john = parent({
+            name: 'John',
+            isMemberTaxDependent: true,
+            nationalRegisterNumber: '93042017297',
+        });
 
-        expect(getTaxDependentDebtors([linda, john])).toEqual([{ debtor: linda, missingData: false }, { debtor: john, missingData: false }]);
+        expect(getTaxDependentDebtors([linda, john])).toEqual([
+            { debtor: linda, missingData: false },
+            { debtor: john, missingData: false },
+        ]);
     });
 
     test('with co-parenting, missing data is tracked per parent', () => {
-        const linda = parent({ name: 'Linda', isMemberTaxDependent: true, nationalRegisterNumber: NationalRegisterNumberOptOut });
-        const john = parent({ name: 'John', isMemberTaxDependent: true, nationalRegisterNumber: '93042017297' });
+        const linda = parent({
+            name: 'Linda',
+            isMemberTaxDependent: true,
+            nationalRegisterNumber: NationalRegisterNumberOptOut,
+        });
+        const john = parent({
+            name: 'John',
+            isMemberTaxDependent: true,
+            nationalRegisterNumber: '93042017297',
+        });
 
-        expect(getTaxDependentDebtors([linda, john])).toEqual([{ debtor: linda, missingData: true }, { debtor: john, missingData: false }]);
+        expect(getTaxDependentDebtors([linda, john])).toEqual([
+            { debtor: linda, missingData: true },
+            { debtor: john, missingData: false },
+        ]);
     });
 });
 

@@ -14,7 +14,11 @@ import type { OneToManyRelation } from '@node/database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
-import { didUitpasReviewChange, updateMemberDetailsUitpasNumber, updateMemberDetailsUitpasNumberForPatch } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
+import {
+    didUitpasReviewChange,
+    updateMemberDetailsUitpasNumber,
+    updateMemberDetailsUitpasNumberForPatch,
+} from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { PatchOrganizationMembersEndpoint } from '../../global/members/PatchOrganizationMembersEndpoint.js';
 import { shouldCheckIfMemberIsDuplicateForPatch } from '../members/shouldCheckIfMemberIsDuplicate.js';
 import { throwIfDrasticMemberDetailsChange } from '../members/throwIfDrasticMemberDetailsChange.js';
@@ -37,7 +41,13 @@ export const securityCodeLimiter = new RateLimiter({
  * Allow to add, patch and delete multiple members simultaneously, which is needed in order to sync relational data that is saved encrypted in multiple members (e.g. parents)
  */
 export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>, MemberWithRegistrationsBlob.patchType() as Decoder<AutoEncoderPatchType<MemberWithRegistrationsBlob>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(
+        MemberWithRegistrationsBlob as Decoder<MemberWithRegistrationsBlob>,
+        MemberWithRegistrationsBlob.patchType() as Decoder<
+            AutoEncoderPatchType<MemberWithRegistrationsBlob>
+        >,
+        StringDecoder,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -65,7 +75,14 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             const struct = put.put;
 
             const member = new Member()
-                .setManyRelation(Member.registrations as any as OneToManyRelation<'registrations', Member, Registration & { group: Group }>, [])
+                .setManyRelation(
+                    Member.registrations as any as OneToManyRelation<
+                        'registrations',
+                        Member,
+                        Registration & { group: Group }
+                    >,
+                    [],
+                )
                 .setManyRelation(Member.users, []);
             member.id = struct.id;
             member.organizationId = organization?.id ?? null;
@@ -79,7 +96,11 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
 
             this.throwIfInvalidDetails(member.details);
 
-            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode, 'put');
+            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(
+                member,
+                securityCode,
+                'put',
+            );
             if (duplicate) {
                 addedMembers.push(duplicate);
                 continue;
@@ -93,7 +114,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         let members = await Member.getMembersWithRegistrationForUser(user);
 
         for (let struct of request.body.getPatches()) {
-            const member = members.find(m => m.id === struct.id);
+            const member = members.find((m) => m.id === struct.id);
             if (!member) {
                 throw Context.auth.memberNotFoundOrNoAccess();
             }
@@ -113,22 +134,34 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                     });
                 }
 
-                shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(struct, member.details);
+                shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(
+                    struct,
+                    member.details,
+                );
 
                 // Only full-permission admins may drastically change the name or birth date of an existing member
-                if (!await Context.auth.canAccessMember(member, PermissionLevel.Full)) {
+                if (!(await Context.auth.canAccessMember(member, PermissionLevel.Full))) {
                     throwIfDrasticMemberDetailsChange(struct.details, member.details);
                 }
 
-                const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
+                const previousUitpasNumber =
+                    member.details.uitpasNumberDetails?.uitpasNumber ?? null;
 
                 const originalReviewTimes = member.details.reviewTimes;
-                const previousTaxDependentCount = PatchOrganizationMembersEndpoint.countTaxDependentParents(member.details);
+                const previousTaxDependentCount =
+                    PatchOrganizationMembersEndpoint.countTaxDependentParents(member.details);
 
                 member.details.patchOrPut(struct.details);
 
-                if (struct.details.uitpasNumberDetails || didUitpasReviewChange(struct.details.reviewTimes, originalReviewTimes)) {
-                    await updateMemberDetailsUitpasNumberForPatch(member.id, member.details, previousUitpasNumber);
+                if (
+                    struct.details.uitpasNumberDetails ||
+                    didUitpasReviewChange(struct.details.reviewTimes, originalReviewTimes)
+                ) {
+                    await updateMemberDetailsUitpasNumberForPatch(
+                        member.id,
+                        member.details,
+                        previousUitpasNumber,
+                    );
                 }
 
                 member.details.cleanData();
@@ -137,11 +170,12 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 // give the parents access to the member they are patching if they would loose access
                 if (
                     // if the parents have no access after the patch
-                    !member.details.calculatedParentsHaveAccess
+                    !member.details.calculatedParentsHaveAccess &&
                     // and the parent access is not yet configured
-                    && member.details.parentsHaveAccess === null
+                    member.details.parentsHaveAccess === null &&
                     // and the user is one of the parents
-                    && member.details.parents.find(p => p.email === user.email)) {
+                    member.details.parents.find((p) => p.email === user.email)
+                ) {
                     // grant parents access
                     member.details.parentsHaveAccess = BooleanStatus.create({
                         value: true,
@@ -159,10 +193,17 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             if (shouldCheckDuplicate) {
-                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode, 'patch');
+                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(
+                    member,
+                    securityCode,
+                    'patch',
+                );
                 if (duplicate) {
-                // Remove the member from the list
-                    members.splice(members.findIndex(m => m.id === member.id), 1);
+                    // Remove the member from the list
+                    members.splice(
+                        members.findIndex((m) => m.id === member.id),
+                        1,
+                    );
 
                     // Add new
                     addedMembers.push(duplicate);
@@ -173,8 +214,15 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             await member.save();
 
             // If parents changed or emergeny contacts: fetch family and merge data
-            if (struct.details && (!isEmptyPatch(struct.details?.parents) || !isEmptyPatch(struct.details?.emergencyContacts))) {
-                await PatchOrganizationMembersEndpoint.mergeDuplicateRelations(member, struct.details);
+            if (
+                struct.details &&
+                (!isEmptyPatch(struct.details?.parents) ||
+                    !isEmptyPatch(struct.details?.emergencyContacts))
+            ) {
+                await PatchOrganizationMembersEndpoint.mergeDuplicateRelations(
+                    member,
+                    struct.details,
+                );
             }
 
             await MemberUserSyncer.onChangeMember(member);
@@ -194,7 +242,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             // Make sure we also give access to other parents
             await MemberUserSyncer.onChangeMember(updatedMember);
 
-            if (!updatedMember.users.find(u => u.id === user.id)) {
+            if (!updatedMember.users.find((u) => u.id === user.id)) {
                 // Also link the user to the member if the email address is missing in the details
                 await MemberUserSyncer.linkUser(user.email, updatedMember, true);
             }
@@ -203,9 +251,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         }
         members = await Member.getMembersWithRegistrationForUser(user);
 
-        return new Response(
-            await AuthenticatedStructures.membersBlob(members),
-        );
+        return new Response(await AuthenticatedStructures.membersBlob(members));
     }
 
     private throwIfInvalidDetails(details: MemberDetails, previousTaxDependentCount = 0) {
@@ -225,6 +271,9 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
             });
         }
 
-        PatchOrganizationMembersEndpoint.throwIfTooManyTaxDependentParents(details, previousTaxDependentCount);
+        PatchOrganizationMembersEndpoint.throwIfTooManyTaxDependentParents(
+            details,
+            previousTaxDependentCount,
+        );
     }
 }

@@ -15,18 +15,30 @@ describe('Cron.platform-statistics-sync', () => {
         it('only runs at boot', () => {
             TestUtils.setEnvironment('environment', 'production');
 
-            expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 5, 13, 30), lastRun: null })).toBe(true);
+            expect(
+                shouldRunStatisticsSync({ now: new Date(2026, 0, 5, 13, 30), lastRun: null }),
+            ).toBe(true);
         });
 
         it('only runs at night', () => {
             TestUtils.setEnvironment('environment', 'production');
 
             for (const hour of [0, 2, 6, 12, 23]) {
-                expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 5, hour, 30), lastRun: new Date(2023, 0, 5, hour, 30) })).toBe(false);
+                expect(
+                    shouldRunStatisticsSync({
+                        now: new Date(2026, 0, 5, hour, 30),
+                        lastRun: new Date(2023, 0, 5, hour, 30),
+                    }),
+                ).toBe(false);
             }
 
             for (const hour of [3, 4, 5]) {
-                expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 5, hour, 30), lastRun: new Date(2023, 0, 5, hour, 30) })).toBe(true);
+                expect(
+                    shouldRunStatisticsSync({
+                        now: new Date(2026, 0, 5, hour, 30),
+                        lastRun: new Date(2023, 0, 5, hour, 30),
+                    }),
+                ).toBe(true);
             }
         });
 
@@ -36,17 +48,30 @@ describe('Cron.platform-statistics-sync', () => {
             const firstRun = new Date(2026, 0, 5, 3, 0);
 
             // A run that never finished leaves lastRun untouched, so the next tick picks it up again.
-            expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 5, 3, 5), lastRun: null })).toBe(true);
+            expect(
+                shouldRunStatisticsSync({ now: new Date(2026, 0, 5, 3, 5), lastRun: null }),
+            ).toBe(true);
 
-            expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 5, 3, 5), lastRun: firstRun })).toBe(false);
-            expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 5, 5, 55), lastRun: firstRun })).toBe(false);
-            expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 6, 3, 0), lastRun: firstRun })).toBe(true);
+            expect(
+                shouldRunStatisticsSync({ now: new Date(2026, 0, 5, 3, 5), lastRun: firstRun }),
+            ).toBe(false);
+            expect(
+                shouldRunStatisticsSync({ now: new Date(2026, 0, 5, 5, 55), lastRun: firstRun }),
+            ).toBe(false);
+            expect(
+                shouldRunStatisticsSync({ now: new Date(2026, 0, 6, 3, 0), lastRun: firstRun }),
+            ).toBe(true);
         });
 
         it('runs on every tick in development, where waiting for the night is not an option', () => {
             TestUtils.setEnvironment('environment', 'development');
 
-            expect(shouldRunStatisticsSync({ now: new Date(2026, 0, 5, 14, 0), lastRun: new Date(2026, 0, 5, 13, 59) })).toBe(true);
+            expect(
+                shouldRunStatisticsSync({
+                    now: new Date(2026, 0, 5, 14, 0),
+                    lastRun: new Date(2026, 0, 5, 13, 59),
+                }),
+            ).toBe(true);
         });
     });
 });

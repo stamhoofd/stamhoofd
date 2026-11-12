@@ -35,7 +35,9 @@ async function cancelTicketSale(access_token: string, ticketSaleId: string) {
  */
 export async function cancelTicketSales(access_token: string, ticketSaleIds: string[]) {
     // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/delete-a-ticket-sale
-    const promises = ticketSaleIds.map(ticketSaleId => cancelTicketSale(access_token, ticketSaleId));
+    const promises = ticketSaleIds.map((ticketSaleId) =>
+        cancelTicketSale(access_token, ticketSaleId),
+    );
     const results = await Promise.allSettled(promises);
-    return results.filter(result => result.status === 'fulfilled').map(result => result.value);
+    return results.filter((result) => result.status === 'fulfilled').map((result) => result.value);
 }

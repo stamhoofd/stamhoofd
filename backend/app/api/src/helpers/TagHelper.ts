@@ -17,7 +17,10 @@ export class TagHelper extends SharedTagHelper {
 
                 for await (const organization of Organization.select().all()) {
                     abort.throwIfAborted();
-                    organization.meta.tags = this.getAllTagsFromHierarchy(organization.meta.tags, sharedPlatform.config.tags);
+                    organization.meta.tags = this.getAllTagsFromHierarchy(
+                        organization.meta.tags,
+                        sharedPlatform.config.tags,
+                    );
 
                     for (const tag of organization.meta.tags) {
                         tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
@@ -42,10 +45,10 @@ export class TagHelper extends SharedTagHelper {
      * @returns
      */
     static getCleanedUpTags(platformTags: OrganizationTag[]): OrganizationTag[] {
-        const existingTags = new Set(platformTags.map(t => t.id));
+        const existingTags = new Set(platformTags.map((t) => t.id));
 
         for (const tag of platformTags) {
-            tag.childTags = tag.childTags.filter(tag => existingTags.has(tag));
+            tag.childTags = tag.childTags.filter((tag) => existingTags.has(tag));
         }
 
         return this.getSortedTags(platformTags);
@@ -53,22 +56,27 @@ export class TagHelper extends SharedTagHelper {
 
     private static getSortedTags(tags: OrganizationTag[]): OrganizationTag[] {
         // keep original order, but add child tags below parent tag
-        const map = new Map(tags.map(tag => [tag.id, tag]));
+        const map = new Map(tags.map((tag) => [tag.id, tag]));
         const rootTags = this.getRootTags(tags);
         const sortedTags = this.sortTagsHelper(rootTags, map);
 
         return Array.from(sortedTags);
     }
 
-    private static sortTagsHelper(tags: OrganizationTag[], allTagsMap: Map<string, OrganizationTag>): Set<OrganizationTag> {
+    private static sortTagsHelper(
+        tags: OrganizationTag[],
+        allTagsMap: Map<string, OrganizationTag>,
+    ): Set<OrganizationTag> {
         // set to prevent duplicates
         const result = new Set<OrganizationTag>();
 
         for (const tag of tags) {
             result.add(tag);
             if (tag.childTags) {
-                const childTags = tag.childTags.map(id => allTagsMap.get(id)).filter(x => x !== undefined);
-                this.sortTagsHelper(childTags, allTagsMap).forEach(tag => result.add(tag));
+                const childTags = tag.childTags
+                    .map((id) => allTagsMap.get(id))
+                    .filter((x) => x !== undefined);
+                this.sortTagsHelper(childTags, allTagsMap).forEach((tag) => result.add(tag));
             }
         }
 
@@ -76,7 +84,7 @@ export class TagHelper extends SharedTagHelper {
     }
 
     static validateTags(platformTags: OrganizationTag[]): boolean {
-        const tagMap = new Map(platformTags.map(tag => [tag.id, tag]));
+        const tagMap = new Map(platformTags.map((tag) => [tag.id, tag]));
 
         for (const tag of platformTags) {
             const tagId = tag.id;
@@ -110,7 +118,9 @@ export class TagHelper extends SharedTagHelper {
                     // infinite loop should not be possible
                     // infinite loop if tag contains other tag in hierarchy
                     if (this.containsDeep(tagId, otherTagId, { tagMap })) {
-                        console.error(`Tag ${tag.name} contains an infinite loop with ${otherTag.name}.`);
+                        console.error(
+                            `Tag ${tag.name} contains an infinite loop with ${otherTag.name}.`,
+                        );
                         return false;
                     }
                 }
@@ -122,22 +132,26 @@ export class TagHelper extends SharedTagHelper {
 
     static getAllTagsFromHierarchy(tagIds: string[], platformTags: OrganizationTag[]) {
         const result = new Set<string>();
-        const tagMap = new Map(platformTags.map(tag => [tag.id, tag]));
+        const tagMap = new Map(platformTags.map((tag) => [tag.id, tag]));
 
         this.recursivelyGetAllTagsFromHierarchy(tagIds, tagMap, result);
         const sorted = Array.from(result);
 
         // Sort tags based on platform config order
         sorted.sort((a, b) => {
-            const aIndex = platformTags.findIndex(t => t.id === a);
-            const bIndex = platformTags.findIndex(t => t.id === b);
+            const aIndex = platformTags.findIndex((t) => t.id === a);
+            const bIndex = platformTags.findIndex((t) => t.id === b);
             return aIndex - bIndex;
         });
 
         return sorted;
     }
 
-    private static recursivelyGetAllTagsFromHierarchy(tagIds: string[], tagMap: Map<string, OrganizationTag>, result: Set<string>): void {
+    private static recursivelyGetAllTagsFromHierarchy(
+        tagIds: string[],
+        tagMap: Map<string, OrganizationTag>,
+        result: Set<string>,
+    ): void {
         for (const tagId of tagIds) {
             const tag = tagMap.get(tagId);
             if (tag) {
@@ -150,7 +164,7 @@ export class TagHelper extends SharedTagHelper {
                         tagMap.delete(tagId);
                         continue;
                     }
-                    if (otherTag.childTags.some(childTagId => childTagId === tagId)) {
+                    if (otherTag.childTags.some((childTagId) => childTagId === tagId)) {
                         if (!result.has(otherId)) {
                             addedChildTags.push(otherId);
                         }

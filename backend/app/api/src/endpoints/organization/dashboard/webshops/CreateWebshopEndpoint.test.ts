@@ -19,9 +19,7 @@ describe('Endpoint.CreateWebshop', () => {
         });
     });
 
-    async function createAdminContext(options?: {
-        isStamhoofd?: boolean;
-    }) {
+    async function createAdminContext(options?: { isStamhoofd?: boolean }) {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({
             organization,
@@ -45,7 +43,12 @@ describe('Endpoint.CreateWebshop', () => {
         return { domain, webshop };
     }
 
-    function buildCreateRequest(organization: { getApiHost(): string }, token: { accessToken: string }, domain: string, domainUri: string | null) {
+    function buildCreateRequest(
+        organization: { getApiHost(): string },
+        token: { accessToken: string },
+        domain: string,
+        domainUri: string | null,
+    ) {
         const body = PrivateWebshop.create({
             meta: WebshopMetaData.create({
                 name: 'Promo',
@@ -74,7 +77,7 @@ describe('Endpoint.CreateWebshop', () => {
             );
 
             const webshops = await Webshop.getByDomainOnly(domain);
-            expect(webshops.map(w => w.organizationId)).toEqual([owner.organization.id]);
+            expect(webshops.map((w) => w.organizationId)).toEqual([owner.organization.id]);
         });
 
         test('cannot use an active domain of another organization with different casing', async () => {
@@ -101,7 +104,10 @@ describe('Endpoint.CreateWebshop', () => {
         });
     });
 
-    function buildRequest(organization: Awaited<ReturnType<typeof createAdminContext>>['organization'], accessToken: string) {
+    function buildRequest(
+        organization: Awaited<ReturnType<typeof createAdminContext>>['organization'],
+        accessToken: string,
+    ) {
         const body = PrivateWebshop.create({
             meta: WebshopMetaData.create({
                 name: 'Test webshop',
@@ -117,7 +123,10 @@ describe('Endpoint.CreateWebshop', () => {
         test('is kept when created by a @stamhoofd.be user', async () => {
             const { organization, token } = await createAdminContext({ isStamhoofd: true });
 
-            const response = await testServer.test(endpoint, buildRequest(organization, token.accessToken));
+            const response = await testServer.test(
+                endpoint,
+                buildRequest(organization, token.accessToken),
+            );
             expect(response.body.meta.noServiceFees).toBe(true);
 
             const reloaded = await Webshop.getByID(response.body.id);
@@ -127,7 +136,10 @@ describe('Endpoint.CreateWebshop', () => {
         test('is reset when created by a non-@stamhoofd.be user', async () => {
             const { organization, token } = await createAdminContext();
 
-            const response = await testServer.test(endpoint, buildRequest(organization, token.accessToken));
+            const response = await testServer.test(
+                endpoint,
+                buildRequest(organization, token.accessToken),
+            );
             expect(response.body.meta.noServiceFees).toBe(false);
 
             const reloaded = await Webshop.getByID(response.body.id);

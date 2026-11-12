@@ -1,4 +1,12 @@
-import { AnyDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    AnyDecoder,
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 import type { Replacement } from '../endpoints/EmailRequest.js';
@@ -222,7 +230,12 @@ export class EmailTemplate extends AutoEncoder {
     }
 
     static getDefaultForRecipient(type: EmailRecipientFilterType): EmailTemplateType | null {
-        if (type === EmailRecipientFilterType.Members || type === EmailRecipientFilterType.MemberParents || type === EmailRecipientFilterType.RegistrationMembers || type === EmailRecipientFilterType.RegistrationParents) {
+        if (
+            type === EmailRecipientFilterType.Members ||
+            type === EmailRecipientFilterType.MemberParents ||
+            type === EmailRecipientFilterType.RegistrationMembers ||
+            type === EmailRecipientFilterType.RegistrationParents
+        ) {
             return EmailTemplateType.DefaultMembersEmail;
         }
 
@@ -238,7 +251,10 @@ export class EmailTemplate extends AutoEncoder {
             return EmailTemplateType.DefaultDocumentsEmail;
         }
 
-        if (type === EmailRecipientFilterType.Payment || type === EmailRecipientFilterType.PaymentOrganization) {
+        if (
+            type === EmailRecipientFilterType.Payment ||
+            type === EmailRecipientFilterType.PaymentOrganization
+        ) {
             return EmailTemplateType.DefaultPaymentsEmail;
         }
 
@@ -250,7 +266,12 @@ export class EmailTemplate extends AutoEncoder {
     }
 
     static getSavedForRecipient(type: EmailRecipientFilterType): EmailTemplateType | null {
-        if (type === EmailRecipientFilterType.Members || type === EmailRecipientFilterType.MemberParents || type === EmailRecipientFilterType.RegistrationMembers || type === EmailRecipientFilterType.RegistrationParents) {
+        if (
+            type === EmailRecipientFilterType.Members ||
+            type === EmailRecipientFilterType.MemberParents ||
+            type === EmailRecipientFilterType.RegistrationMembers ||
+            type === EmailRecipientFilterType.RegistrationParents
+        ) {
             return EmailTemplateType.SavedMembersEmail;
         }
 
@@ -262,7 +283,10 @@ export class EmailTemplate extends AutoEncoder {
             return EmailTemplateType.SavedDocumentsEmail;
         }
 
-        if (type === EmailRecipientFilterType.Payment || type === EmailRecipientFilterType.PaymentOrganization) {
+        if (
+            type === EmailRecipientFilterType.Payment ||
+            type === EmailRecipientFilterType.PaymentOrganization
+        ) {
             return EmailTemplateType.SavedPaymentsEmail;
         }
 
@@ -282,87 +306,154 @@ export class EmailTemplate extends AutoEncoder {
 
     static getTypeTitle(type: EmailTemplateType): string {
         switch (type) {
-            case EmailTemplateType.SavedMembersEmail: return $t('%p9');
-            case EmailTemplateType.SavedReceivableBalancesEmail: return $t('%pA');
-            case EmailTemplateType.SavedDocumentsEmail: return $t('%1KM');
-            case EmailTemplateType.SavedPaymentsEmail: return $t('%1N3');
+            case EmailTemplateType.SavedMembersEmail:
+                return $t('%p9');
+            case EmailTemplateType.SavedReceivableBalancesEmail:
+                return $t('%pA');
+            case EmailTemplateType.SavedDocumentsEmail:
+                return $t('%1KM');
+            case EmailTemplateType.SavedPaymentsEmail:
+                return $t('%1N3');
 
-            case EmailTemplateType.DefaultMembersEmail: return $t('%pB');
-            case EmailTemplateType.DefaultReceivableBalancesEmail: return $t('%pC');
-            case EmailTemplateType.DefaultOrdersEmail: return $t('%pD');
-            case EmailTemplateType.DefaultDocumentsEmail: return $t('%1KN');
-            case EmailTemplateType.DefaultPaymentsEmail: return $t('%1N4');
-            case EmailTemplateType.DefaultWebshopDiscountCodesEmail: return $t('%ZuU');
+            case EmailTemplateType.DefaultMembersEmail:
+                return $t('%pB');
+            case EmailTemplateType.DefaultReceivableBalancesEmail:
+                return $t('%pC');
+            case EmailTemplateType.DefaultOrdersEmail:
+                return $t('%pD');
+            case EmailTemplateType.DefaultDocumentsEmail:
+                return $t('%1KN');
+            case EmailTemplateType.DefaultPaymentsEmail:
+                return $t('%1N4');
+            case EmailTemplateType.DefaultWebshopDiscountCodesEmail:
+                return $t('%ZuU');
 
-            case EmailTemplateType.MembersExpirationReminder: return $t('%pE');
-            case EmailTemplateType.WebshopsExpirationReminder: return $t('%pF');
-            case EmailTemplateType.SingleWebshopExpirationReminder: return $t('%pG');
-            case EmailTemplateType.TrialWebshopsExpirationReminder: return $t('%pH');
-            case EmailTemplateType.TrialMembersExpirationReminder: return $t('%pI');
-            case EmailTemplateType.OrderNotification: return $t('%pJ');
+            case EmailTemplateType.MembersExpirationReminder:
+                return $t('%pE');
+            case EmailTemplateType.WebshopsExpirationReminder:
+                return $t('%pF');
+            case EmailTemplateType.SingleWebshopExpirationReminder:
+                return $t('%pG');
+            case EmailTemplateType.TrialWebshopsExpirationReminder:
+                return $t('%pH');
+            case EmailTemplateType.TrialMembersExpirationReminder:
+                return $t('%pI');
+            case EmailTemplateType.OrderNotification:
+                return $t('%pJ');
 
-            case EmailTemplateType.RegistrationConfirmation: return $t('%pK');
-            case EmailTemplateType.RegistrationTransferDetails: return $t('%pL');
+            case EmailTemplateType.RegistrationConfirmation:
+                return $t('%pK');
+            case EmailTemplateType.RegistrationTransferDetails:
+                return $t('%pL');
 
-            case EmailTemplateType.OrderConfirmationOnline: return $t('%pM');
-            case EmailTemplateType.OrderConfirmationTransfer: return $t('%pN');
-            case EmailTemplateType.OrderConfirmationPOS: return $t('%pO');
-            case EmailTemplateType.OrderReceivedTransfer: return $t('%pP');
-            case EmailTemplateType.OrderOnlinePaymentFailed: return $t('%pQ');
-            case EmailTemplateType.TicketsConfirmation: return $t('%pR');
-            case EmailTemplateType.TicketsConfirmationTransfer: return $t('%pS');
-            case EmailTemplateType.TicketsConfirmationPOS: return $t('%pT');
-            case EmailTemplateType.TicketsReceivedTransfer: return $t('%pU');
+            case EmailTemplateType.OrderConfirmationOnline:
+                return $t('%pM');
+            case EmailTemplateType.OrderConfirmationTransfer:
+                return $t('%pN');
+            case EmailTemplateType.OrderConfirmationPOS:
+                return $t('%pO');
+            case EmailTemplateType.OrderReceivedTransfer:
+                return $t('%pP');
+            case EmailTemplateType.OrderOnlinePaymentFailed:
+                return $t('%pQ');
+            case EmailTemplateType.TicketsConfirmation:
+                return $t('%pR');
+            case EmailTemplateType.TicketsConfirmationTransfer:
+                return $t('%pS');
+            case EmailTemplateType.TicketsConfirmationPOS:
+                return $t('%pT');
+            case EmailTemplateType.TicketsReceivedTransfer:
+                return $t('%pU');
 
-            case EmailTemplateType.OrganizationUnstableDNS: return $t('%pV');
-            case EmailTemplateType.OrganizationInvalidDNS: return $t('%pW');
-            case EmailTemplateType.OrganizationValidDNS: return $t('%pX');
-            case EmailTemplateType.OrganizationStableDNS: return $t('%pY');
-            case EmailTemplateType.OrganizationDNSSetupComplete: return $t('%pZ');
+            case EmailTemplateType.OrganizationUnstableDNS:
+                return $t('%pV');
+            case EmailTemplateType.OrganizationInvalidDNS:
+                return $t('%pW');
+            case EmailTemplateType.OrganizationValidDNS:
+                return $t('%pX');
+            case EmailTemplateType.OrganizationStableDNS:
+                return $t('%pY');
+            case EmailTemplateType.OrganizationDNSSetupComplete:
+                return $t('%pZ');
 
-            case EmailTemplateType.OrganizationDripWelcome: return $t('%pa');
-            case EmailTemplateType.OrganizationDripWebshopTrialCheckin: return $t('%pb');
-            case EmailTemplateType.OrganizationDripMembersTrialCheckin: return $t('%pc');
-            case EmailTemplateType.OrganizationDripWebshopTrialExpired: return $t('%pd');
-            case EmailTemplateType.OrganizationDripMembersTrialExpired: return $t('%pe');
-            case EmailTemplateType.OrganizationDripTrialExpiredReminder: return $t('%pf');
-            case EmailTemplateType.OrganizationDripWebshopNotRenewed: return $t('%pg');
-            case EmailTemplateType.OrganizationDripMembersNotRenewed: return $t('%ph');
+            case EmailTemplateType.OrganizationDripWelcome:
+                return $t('%pa');
+            case EmailTemplateType.OrganizationDripWebshopTrialCheckin:
+                return $t('%pb');
+            case EmailTemplateType.OrganizationDripMembersTrialCheckin:
+                return $t('%pc');
+            case EmailTemplateType.OrganizationDripWebshopTrialExpired:
+                return $t('%pd');
+            case EmailTemplateType.OrganizationDripMembersTrialExpired:
+                return $t('%pe');
+            case EmailTemplateType.OrganizationDripTrialExpiredReminder:
+                return $t('%pf');
+            case EmailTemplateType.OrganizationDripWebshopNotRenewed:
+                return $t('%pg');
+            case EmailTemplateType.OrganizationDripMembersNotRenewed:
+                return $t('%ph');
 
-            case EmailTemplateType.ExcelExportSucceeded: return $t('%pi');
-            case EmailTemplateType.ExcelExportFailed: return $t('%pj');
+            case EmailTemplateType.ExcelExportSucceeded:
+                return $t('%pi');
+            case EmailTemplateType.ExcelExportFailed:
+                return $t('%pj');
 
-            case EmailTemplateType.SignupAlreadyHasAccount: return $t('%pk');
-            case EmailTemplateType.ForgotPasswordButNoAccount: return $t('%pl');
-            case EmailTemplateType.ForgotPassword: return $t('%uz');
-            case EmailTemplateType.DeleteAccountConfirmation: return $t('%pm');
-            case EmailTemplateType.VerifyEmail: return $t('%pn');
-            case EmailTemplateType.VerifyEmailWithoutCode: return $t('%po');
-            case EmailTemplateType.AdminInvitation: return $t('%pp');
-            case EmailTemplateType.AdminInvitationNewUser: return $t('%pq');
-            case EmailTemplateType.MemberSecurityCode: return $t('%ZbB');
+            case EmailTemplateType.SignupAlreadyHasAccount:
+                return $t('%pk');
+            case EmailTemplateType.ForgotPasswordButNoAccount:
+                return $t('%pl');
+            case EmailTemplateType.ForgotPassword:
+                return $t('%uz');
+            case EmailTemplateType.DeleteAccountConfirmation:
+                return $t('%pm');
+            case EmailTemplateType.VerifyEmail:
+                return $t('%pn');
+            case EmailTemplateType.VerifyEmailWithoutCode:
+                return $t('%po');
+            case EmailTemplateType.AdminInvitation:
+                return $t('%pp');
+            case EmailTemplateType.AdminInvitationNewUser:
+                return $t('%pq');
+            case EmailTemplateType.MemberSecurityCode:
+                return $t('%ZbB');
 
-            case EmailTemplateType.UserBalanceIncreaseNotification: return $t('%pr');
-            case EmailTemplateType.UserBalanceReminder: return $t('%ps');
+            case EmailTemplateType.UserBalanceIncreaseNotification:
+                return $t('%pr');
+            case EmailTemplateType.UserBalanceReminder:
+                return $t('%ps');
 
-            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return $t('%pr');
-            case EmailTemplateType.OrganizationBalanceReminder: return $t('%ps');
+            case EmailTemplateType.OrganizationBalanceIncreaseNotification:
+                return $t('%pr');
+            case EmailTemplateType.OrganizationBalanceReminder:
+                return $t('%ps');
 
-            case EmailTemplateType.EventNotificationSubmittedCopy: return $t('%Ai');
-            case EmailTemplateType.EventNotificationSubmittedReviewer: return $t('%Aj');
-            case EmailTemplateType.EventNotificationAccepted: return $t('%Ak');
-            case EmailTemplateType.EventNotificationRejected: return $t('%Al');
-            case EmailTemplateType.EventNotificationPartiallyAccepted: return $t('%Cl');
+            case EmailTemplateType.EventNotificationSubmittedCopy:
+                return $t('%Ai');
+            case EmailTemplateType.EventNotificationSubmittedReviewer:
+                return $t('%Aj');
+            case EmailTemplateType.EventNotificationAccepted:
+                return $t('%Ak');
+            case EmailTemplateType.EventNotificationRejected:
+                return $t('%Al');
+            case EmailTemplateType.EventNotificationPartiallyAccepted:
+                return $t('%Cl');
 
-            case EmailTemplateType.InvoiceGenerationErrors: return $t('%1Sm');
-            case EmailTemplateType.InvoicePaid: return $t('%1Z7');
-            case EmailTemplateType.CreditNotePaid: return $t('%1bz');
+            case EmailTemplateType.InvoiceGenerationErrors:
+                return $t('%1Sm');
+            case EmailTemplateType.InvoicePaid:
+                return $t('%1Z7');
+            case EmailTemplateType.CreditNotePaid:
+                return $t('%1bz');
 
-            case EmailTemplateType.InvoiceUnpaid: return $t('%1Y8');
-            case EmailTemplateType.CreditNoteUnpaid: return $t('%1Uu');
+            case EmailTemplateType.InvoiceUnpaid:
+                return $t('%1Y8');
+            case EmailTemplateType.CreditNoteUnpaid:
+                return $t('%1Uu');
 
-            case EmailTemplateType.ChargebackPayingOrganization: return $t('%1cK');
-            case EmailTemplateType.AutomaticChargeFailedPayingOrganization: return $t('%Je');
+            case EmailTemplateType.ChargebackPayingOrganization:
+                return $t('%1cK');
+            case EmailTemplateType.AutomaticChargeFailedPayingOrganization:
+                return $t('%Je');
         }
     }
 
@@ -487,54 +578,90 @@ export class EmailTemplate extends AutoEncoder {
 
     static allowOrganizationLevelInGeneral(type: EmailTemplateType): boolean {
         switch (type) {
-            case EmailTemplateType.DefaultMembersEmail: return true;
-            case EmailTemplateType.DefaultReceivableBalancesEmail: return true;
-            case EmailTemplateType.DefaultOrdersEmail: return true;
-            case EmailTemplateType.DefaultDocumentsEmail: return true;
-            case EmailTemplateType.DefaultPaymentsEmail: return true;
-            case EmailTemplateType.DefaultWebshopDiscountCodesEmail: return true;
+            case EmailTemplateType.DefaultMembersEmail:
+                return true;
+            case EmailTemplateType.DefaultReceivableBalancesEmail:
+                return true;
+            case EmailTemplateType.DefaultOrdersEmail:
+                return true;
+            case EmailTemplateType.DefaultDocumentsEmail:
+                return true;
+            case EmailTemplateType.DefaultPaymentsEmail:
+                return true;
+            case EmailTemplateType.DefaultWebshopDiscountCodesEmail:
+                return true;
 
-            case EmailTemplateType.SavedMembersEmail: return true;
-            case EmailTemplateType.SavedReceivableBalancesEmail: return true;
-            case EmailTemplateType.SavedDocumentsEmail: return true;
-            case EmailTemplateType.SavedPaymentsEmail: return true;
+            case EmailTemplateType.SavedMembersEmail:
+                return true;
+            case EmailTemplateType.SavedReceivableBalancesEmail:
+                return true;
+            case EmailTemplateType.SavedDocumentsEmail:
+                return true;
+            case EmailTemplateType.SavedPaymentsEmail:
+                return true;
 
-            case EmailTemplateType.RegistrationConfirmation: return true;
-            case EmailTemplateType.RegistrationTransferDetails: return true;
+            case EmailTemplateType.RegistrationConfirmation:
+                return true;
+            case EmailTemplateType.RegistrationTransferDetails:
+                return true;
 
-            case EmailTemplateType.OrderConfirmationOnline: return true;
-            case EmailTemplateType.OrderConfirmationTransfer: return true;
-            case EmailTemplateType.OrderConfirmationPOS: return true;
-            case EmailTemplateType.OrderReceivedTransfer: return true;
-            case EmailTemplateType.TicketsConfirmation: return true;
-            case EmailTemplateType.TicketsConfirmationTransfer: return true;
-            case EmailTemplateType.TicketsConfirmationPOS: return true;
-            case EmailTemplateType.TicketsReceivedTransfer: return true;
+            case EmailTemplateType.OrderConfirmationOnline:
+                return true;
+            case EmailTemplateType.OrderConfirmationTransfer:
+                return true;
+            case EmailTemplateType.OrderConfirmationPOS:
+                return true;
+            case EmailTemplateType.OrderReceivedTransfer:
+                return true;
+            case EmailTemplateType.TicketsConfirmation:
+                return true;
+            case EmailTemplateType.TicketsConfirmationTransfer:
+                return true;
+            case EmailTemplateType.TicketsConfirmationPOS:
+                return true;
+            case EmailTemplateType.TicketsReceivedTransfer:
+                return true;
 
-            case EmailTemplateType.UserBalanceIncreaseNotification: return true;
-            case EmailTemplateType.UserBalanceReminder: return true;
+            case EmailTemplateType.UserBalanceIncreaseNotification:
+                return true;
+            case EmailTemplateType.UserBalanceReminder:
+                return true;
 
-            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return true;
-            case EmailTemplateType.OrganizationBalanceReminder: return true;
+            case EmailTemplateType.OrganizationBalanceIncreaseNotification:
+                return true;
+            case EmailTemplateType.OrganizationBalanceReminder:
+                return true;
         }
 
         return false;
     }
 
-    static allowOrganizationLevel(type: EmailTemplateType, organization: { id: string; privateMeta: OrganizationPrivateMetaData | null | undefined }, platform: { membershipOrganizationId: string | null }): boolean {
+    static allowOrganizationLevel(
+        type: EmailTemplateType,
+        organization: { id: string; privateMeta: OrganizationPrivateMetaData | null | undefined },
+        platform: { membershipOrganizationId: string | null },
+    ): boolean {
         if (!organization) {
             return false;
         }
 
-        if (!organization.privateMeta?.featureFlags.includes('organization-receivable-balances')
-            && [EmailTemplateType.OrganizationBalanceIncreaseNotification, EmailTemplateType.OrganizationBalanceReminder].includes(type)) {
+        if (
+            !organization.privateMeta?.featureFlags.includes('organization-receivable-balances') &&
+            [
+                EmailTemplateType.OrganizationBalanceIncreaseNotification,
+                EmailTemplateType.OrganizationBalanceReminder,
+            ].includes(type)
+        ) {
             return false;
         }
 
         switch (type) {
             case EmailTemplateType.ChargebackPayingOrganization:
             case EmailTemplateType.AutomaticChargeFailedPayingOrganization:
-                return STAMHOOFD.userMode === 'organization' && organization.id === platform.membershipOrganizationId;
+                return (
+                    STAMHOOFD.userMode === 'organization' &&
+                    organization.id === platform.membershipOrganizationId
+                );
         }
 
         return this.allowOrganizationLevelInGeneral(type);
@@ -542,33 +669,55 @@ export class EmailTemplate extends AutoEncoder {
 
     static getPlatformTypeDescription(type: EmailTemplateType): string | null {
         switch (type) {
-            case EmailTemplateType.OrganizationUnstableDNS: return $t('%q0');
-            case EmailTemplateType.OrganizationInvalidDNS: return $t('%q1');
-            case EmailTemplateType.OrganizationValidDNS: return $t('%q2');
-            case EmailTemplateType.OrganizationStableDNS: return $t('%q3');
-            case EmailTemplateType.OrganizationDNSSetupComplete: return $t('%q4');
+            case EmailTemplateType.OrganizationUnstableDNS:
+                return $t('%q0');
+            case EmailTemplateType.OrganizationInvalidDNS:
+                return $t('%q1');
+            case EmailTemplateType.OrganizationValidDNS:
+                return $t('%q2');
+            case EmailTemplateType.OrganizationStableDNS:
+                return $t('%q3');
+            case EmailTemplateType.OrganizationDNSSetupComplete:
+                return $t('%q4');
 
-            case EmailTemplateType.OrderOnlinePaymentFailed: return $t('%q5');
+            case EmailTemplateType.OrderOnlinePaymentFailed:
+                return $t('%q5');
 
-            case EmailTemplateType.ExcelExportSucceeded: return $t('%q6');
-            case EmailTemplateType.ExcelExportFailed: return $t('%q7');
+            case EmailTemplateType.ExcelExportSucceeded:
+                return $t('%q6');
+            case EmailTemplateType.ExcelExportFailed:
+                return $t('%q7');
 
-            case EmailTemplateType.ForgotPasswordButNoAccount: return $t('%q8');
-            case EmailTemplateType.ForgotPassword: return $t('%q9');
-            case EmailTemplateType.DeleteAccountConfirmation: return $t('%qA');
-            case EmailTemplateType.VerifyEmail: return $t('%qB');
-            case EmailTemplateType.VerifyEmailWithoutCode: return $t('%qC');
-            case EmailTemplateType.AdminInvitation: return $t('%qD');
-            case EmailTemplateType.AdminInvitationNewUser: return $t('%qE');
-            case EmailTemplateType.MemberSecurityCode: return $t('%Zb5');
+            case EmailTemplateType.ForgotPasswordButNoAccount:
+                return $t('%q8');
+            case EmailTemplateType.ForgotPassword:
+                return $t('%q9');
+            case EmailTemplateType.DeleteAccountConfirmation:
+                return $t('%qA');
+            case EmailTemplateType.VerifyEmail:
+                return $t('%qB');
+            case EmailTemplateType.VerifyEmailWithoutCode:
+                return $t('%qC');
+            case EmailTemplateType.AdminInvitation:
+                return $t('%qD');
+            case EmailTemplateType.AdminInvitationNewUser:
+                return $t('%qE');
+            case EmailTemplateType.MemberSecurityCode:
+                return $t('%Zb5');
 
-            case EmailTemplateType.SignupAlreadyHasAccount: return $t('%qF');
+            case EmailTemplateType.SignupAlreadyHasAccount:
+                return $t('%qF');
 
-            case EmailTemplateType.EventNotificationSubmittedCopy: return $t('%Am');
-            case EmailTemplateType.EventNotificationSubmittedReviewer: return $t('%An');
-            case EmailTemplateType.EventNotificationAccepted: return $t('%Ao');
-            case EmailTemplateType.EventNotificationRejected: return $t('%Ap');
-            case EmailTemplateType.EventNotificationPartiallyAccepted: return $t('%Cm');
+            case EmailTemplateType.EventNotificationSubmittedCopy:
+                return $t('%Am');
+            case EmailTemplateType.EventNotificationSubmittedReviewer:
+                return $t('%An');
+            case EmailTemplateType.EventNotificationAccepted:
+                return $t('%Ao');
+            case EmailTemplateType.EventNotificationRejected:
+                return $t('%Ap');
+            case EmailTemplateType.EventNotificationPartiallyAccepted:
+                return $t('%Cm');
         }
 
         return null;
@@ -601,47 +750,71 @@ export class EmailTemplate extends AutoEncoder {
 
     static getTypeDescription(type: EmailTemplateType): string {
         switch (type) {
-            case EmailTemplateType.DefaultMembersEmail: return $t('%qG');
-            case EmailTemplateType.DefaultReceivableBalancesEmail: return $t('%qH');
-            case EmailTemplateType.DefaultOrdersEmail: return $t('%qI');
-            case EmailTemplateType.DefaultDocumentsEmail: return $t('%1KO');
-            case EmailTemplateType.DefaultPaymentsEmail: return $t('%1N5');
-            case EmailTemplateType.DefaultWebshopDiscountCodesEmail: return $t('%Zx6');
+            case EmailTemplateType.DefaultMembersEmail:
+                return $t('%qG');
+            case EmailTemplateType.DefaultReceivableBalancesEmail:
+                return $t('%qH');
+            case EmailTemplateType.DefaultOrdersEmail:
+                return $t('%qI');
+            case EmailTemplateType.DefaultDocumentsEmail:
+                return $t('%1KO');
+            case EmailTemplateType.DefaultPaymentsEmail:
+                return $t('%1N5');
+            case EmailTemplateType.DefaultWebshopDiscountCodesEmail:
+                return $t('%Zx6');
 
-            case EmailTemplateType.OrderNotification: return $t('%qJ');
-            case EmailTemplateType.RegistrationConfirmation: return $t('%qK');
+            case EmailTemplateType.OrderNotification:
+                return $t('%qJ');
+            case EmailTemplateType.RegistrationConfirmation:
+                return $t('%qK');
 
-            case EmailTemplateType.OrderConfirmationOnline: return $t('%qL');
-            case EmailTemplateType.OrderConfirmationTransfer: return $t('%qM');
-            case EmailTemplateType.OrderConfirmationPOS: return $t('%qN');
-            case EmailTemplateType.OrderReceivedTransfer: return $t('%qO');
+            case EmailTemplateType.OrderConfirmationOnline:
+                return $t('%qL');
+            case EmailTemplateType.OrderConfirmationTransfer:
+                return $t('%qM');
+            case EmailTemplateType.OrderConfirmationPOS:
+                return $t('%qN');
+            case EmailTemplateType.OrderReceivedTransfer:
+                return $t('%qO');
 
-            case EmailTemplateType.TicketsConfirmation: return $t('%qL');
-            case EmailTemplateType.TicketsConfirmationTransfer: return $t('%qM');
-            case EmailTemplateType.TicketsConfirmationPOS: return $t('%qN');
-            case EmailTemplateType.TicketsReceivedTransfer: return $t('%qO');
+            case EmailTemplateType.TicketsConfirmation:
+                return $t('%qL');
+            case EmailTemplateType.TicketsConfirmationTransfer:
+                return $t('%qM');
+            case EmailTemplateType.TicketsConfirmationPOS:
+                return $t('%qN');
+            case EmailTemplateType.TicketsReceivedTransfer:
+                return $t('%qO');
 
-            case EmailTemplateType.UserBalanceIncreaseNotification: return $t('%1UV');
-            case EmailTemplateType.UserBalanceReminder: return $t('%1bx');
+            case EmailTemplateType.UserBalanceIncreaseNotification:
+                return $t('%1UV');
+            case EmailTemplateType.UserBalanceReminder:
+                return $t('%1bx');
 
-            case EmailTemplateType.OrganizationBalanceIncreaseNotification: return $t('%1cY');
-            case EmailTemplateType.OrganizationBalanceReminder: return $t('%1aM');
+            case EmailTemplateType.OrganizationBalanceIncreaseNotification:
+                return $t('%1cY');
+            case EmailTemplateType.OrganizationBalanceReminder:
+                return $t('%1aM');
 
-            case EmailTemplateType.ChargebackPayingOrganization: return $t('%1VU');
-            case EmailTemplateType.AutomaticChargeFailedPayingOrganization: return $t('%1cN');
+            case EmailTemplateType.ChargebackPayingOrganization:
+                return $t('%1VU');
+            case EmailTemplateType.AutomaticChargeFailedPayingOrganization:
+                return $t('%1cN');
         }
 
         return '';
     }
 
     static getSupportedReplacementsForType(type: EmailTemplateType): Replacement[] {
-        if ([
-            EmailTemplateType.EventNotificationSubmittedCopy,
-            EmailTemplateType.EventNotificationSubmittedReviewer,
-            EmailTemplateType.EventNotificationAccepted,
-            EmailTemplateType.EventNotificationRejected,
-            EmailTemplateType.EventNotificationPartiallyAccepted,
-        ].includes(type)) {
+        if (
+            [
+                EmailTemplateType.EventNotificationSubmittedCopy,
+                EmailTemplateType.EventNotificationSubmittedReviewer,
+                EmailTemplateType.EventNotificationAccepted,
+                EmailTemplateType.EventNotificationRejected,
+                EmailTemplateType.EventNotificationPartiallyAccepted,
+            ].includes(type)
+        ) {
             return [
                 ...ExampleReplacements.default,
                 ExampleReplacements.all.reviewUrl,
@@ -649,16 +822,21 @@ export class EmailTemplate extends AutoEncoder {
                 ExampleReplacements.all.organizationName,
                 ExampleReplacements.all.eventName,
                 ExampleReplacements.all.dateRange,
-                ...(type === EmailTemplateType.EventNotificationRejected || type === EmailTemplateType.EventNotificationPartiallyAccepted ? [ExampleReplacements.all.feedbackText] : []),
+                ...(type === EmailTemplateType.EventNotificationRejected ||
+                type === EmailTemplateType.EventNotificationPartiallyAccepted
+                    ? [ExampleReplacements.all.feedbackText]
+                    : []),
             ];
         }
 
-        if ([
-            EmailTemplateType.InvoicePaid,
-            EmailTemplateType.CreditNotePaid,
-            EmailTemplateType.InvoiceUnpaid,
-            EmailTemplateType.CreditNoteUnpaid,
-        ].includes(type)) {
+        if (
+            [
+                EmailTemplateType.InvoicePaid,
+                EmailTemplateType.CreditNotePaid,
+                EmailTemplateType.InvoiceUnpaid,
+                EmailTemplateType.CreditNoteUnpaid,
+            ].includes(type)
+        ) {
             return [
                 ...ExampleReplacements.default,
                 ExampleReplacements.all.invoiceNumber,
@@ -666,23 +844,20 @@ export class EmailTemplate extends AutoEncoder {
             ];
         }
 
-        if ([
-            EmailTemplateType.InvoiceGenerationErrors,
-        ].includes(type)) {
-            return [
-                ...ExampleReplacements.default,
-                ExampleReplacements.all.errors,
-            ];
+        if ([EmailTemplateType.InvoiceGenerationErrors].includes(type)) {
+            return [...ExampleReplacements.default, ExampleReplacements.all.errors];
         }
 
-        if ([
-            EmailTemplateType.DefaultReceivableBalancesEmail,
-            EmailTemplateType.SavedReceivableBalancesEmail,
-            EmailTemplateType.UserBalanceIncreaseNotification,
-            EmailTemplateType.UserBalanceReminder,
-            EmailTemplateType.OrganizationBalanceIncreaseNotification,
-            EmailTemplateType.OrganizationBalanceReminder,
-        ].includes(type)) {
+        if (
+            [
+                EmailTemplateType.DefaultReceivableBalancesEmail,
+                EmailTemplateType.SavedReceivableBalancesEmail,
+                EmailTemplateType.UserBalanceIncreaseNotification,
+                EmailTemplateType.UserBalanceReminder,
+                EmailTemplateType.OrganizationBalanceIncreaseNotification,
+                EmailTemplateType.OrganizationBalanceReminder,
+            ].includes(type)
+        ) {
             return [
                 ...ExampleReplacements.default,
                 ExampleReplacements.all.paymentUrl,
@@ -692,12 +867,14 @@ export class EmailTemplate extends AutoEncoder {
             ];
         }
 
-        if ([
-            EmailTemplateType.SavedMembersEmail,
-            EmailTemplateType.DefaultMembersEmail,
-            EmailTemplateType.DefaultDocumentsEmail,
-            EmailTemplateType.SavedDocumentsEmail,
-        ].includes(type)) {
+        if (
+            [
+                EmailTemplateType.SavedMembersEmail,
+                EmailTemplateType.DefaultMembersEmail,
+                EmailTemplateType.DefaultDocumentsEmail,
+                EmailTemplateType.SavedDocumentsEmail,
+            ].includes(type)
+        ) {
             return [
                 ...ExampleReplacements.default,
                 ExampleReplacements.all.firstNameMember,
@@ -709,10 +886,7 @@ export class EmailTemplate extends AutoEncoder {
         }
 
         if (type === EmailTemplateType.SignupAlreadyHasAccount) {
-            return [
-                ...ExampleReplacements.default,
-                ExampleReplacements.all.resetUrl,
-            ];
+            return [...ExampleReplacements.default, ExampleReplacements.all.resetUrl];
         }
 
         if (type === EmailTemplateType.ForgotPasswordButNoAccount) {
@@ -728,10 +902,7 @@ export class EmailTemplate extends AutoEncoder {
         }
 
         if (type === EmailTemplateType.ForgotPassword) {
-            return [
-                ...ExampleReplacements.default,
-                ExampleReplacements.all.resetUrl,
-            ];
+            return [...ExampleReplacements.default, ExampleReplacements.all.resetUrl];
         }
 
         if (type === EmailTemplateType.VerifyEmail) {
@@ -743,10 +914,7 @@ export class EmailTemplate extends AutoEncoder {
         }
 
         if (type === EmailTemplateType.VerifyEmailWithoutCode) {
-            return [
-                ...ExampleReplacements.default,
-                ExampleReplacements.all.confirmEmailUrl,
-            ];
+            return [...ExampleReplacements.default, ExampleReplacements.all.confirmEmailUrl];
         }
 
         if (type === EmailTemplateType.MemberSecurityCode) {
@@ -781,16 +949,11 @@ export class EmailTemplate extends AutoEncoder {
         }
 
         if (type === EmailTemplateType.ExcelExportSucceeded) {
-            return [
-                ...ExampleReplacements.default,
-                ExampleReplacements.all.downloadUrl,
-            ];
+            return [...ExampleReplacements.default, ExampleReplacements.all.downloadUrl];
         }
 
         if (type === EmailTemplateType.ExcelExportFailed) {
-            return [
-                ...ExampleReplacements.default,
-            ];
+            return [...ExampleReplacements.default];
         }
 
         if (type === EmailTemplateType.RegistrationConfirmation) {
@@ -806,17 +969,16 @@ export class EmailTemplate extends AutoEncoder {
             ];
         }
 
-        if ([
-            EmailTemplateType.OrganizationDNSSetupComplete,
-            EmailTemplateType.OrganizationInvalidDNS,
-            EmailTemplateType.OrganizationStableDNS,
-            EmailTemplateType.OrganizationUnstableDNS,
-            EmailTemplateType.OrganizationValidDNS,
-        ].includes(type)) {
-            return [
-                ...ExampleReplacements.default,
-                ExampleReplacements.all.mailDomain,
-            ];
+        if (
+            [
+                EmailTemplateType.OrganizationDNSSetupComplete,
+                EmailTemplateType.OrganizationInvalidDNS,
+                EmailTemplateType.OrganizationStableDNS,
+                EmailTemplateType.OrganizationUnstableDNS,
+                EmailTemplateType.OrganizationValidDNS,
+            ].includes(type)
+        ) {
+            return [...ExampleReplacements.default, ExampleReplacements.all.mailDomain];
         }
 
         if (type === EmailTemplateType.RegistrationTransferDetails) {
@@ -838,13 +1000,15 @@ export class EmailTemplate extends AutoEncoder {
             ];
         }
 
-        if ([
-            EmailTemplateType.MembersExpirationReminder,
-            EmailTemplateType.WebshopsExpirationReminder,
-            EmailTemplateType.TrialMembersExpirationReminder,
-            EmailTemplateType.TrialWebshopsExpirationReminder,
-            EmailTemplateType.SingleWebshopExpirationReminder,
-        ].includes(type)) {
+        if (
+            [
+                EmailTemplateType.MembersExpirationReminder,
+                EmailTemplateType.WebshopsExpirationReminder,
+                EmailTemplateType.TrialMembersExpirationReminder,
+                EmailTemplateType.TrialWebshopsExpirationReminder,
+                EmailTemplateType.SingleWebshopExpirationReminder,
+            ].includes(type)
+        ) {
             return [
                 ...ExampleReplacements.default,
                 ExampleReplacements.all.packageName,
@@ -855,8 +1019,9 @@ export class EmailTemplate extends AutoEncoder {
             ];
         }
 
-        if (type === EmailTemplateType.ChargebackPayingOrganization
-            || type === EmailTemplateType.AutomaticChargeFailedPayingOrganization
+        if (
+            type === EmailTemplateType.ChargebackPayingOrganization ||
+            type === EmailTemplateType.AutomaticChargeFailedPayingOrganization
         ) {
             return [
                 ...ExampleReplacements.default,
@@ -866,8 +1031,9 @@ export class EmailTemplate extends AutoEncoder {
             ];
         }
 
-        if (type === EmailTemplateType.DefaultPaymentsEmail
-            || type === EmailTemplateType.SavedPaymentsEmail
+        if (
+            type === EmailTemplateType.DefaultPaymentsEmail ||
+            type === EmailTemplateType.SavedPaymentsEmail
         ) {
             return [
                 ...ExampleReplacements.default,
@@ -915,12 +1081,13 @@ export class EmailTemplate extends AutoEncoder {
         ];
 
         if (type !== EmailTemplateType.OrderOnlinePaymentFailed) {
-            sharedReplacements.push(
-                ExampleReplacements.all.nr,
-            );
+            sharedReplacements.push(ExampleReplacements.all.nr);
         }
 
-        if (type === EmailTemplateType.OrderConfirmationTransfer || type === EmailTemplateType.TicketsConfirmationTransfer) {
+        if (
+            type === EmailTemplateType.OrderConfirmationTransfer ||
+            type === EmailTemplateType.TicketsConfirmationTransfer
+        ) {
             return [
                 ...sharedReplacements,
                 ExampleReplacements.all.transferDescription,

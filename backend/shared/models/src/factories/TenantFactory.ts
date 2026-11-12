@@ -39,7 +39,7 @@ export class TenantFactory extends Factory<Options, Platform> {
         tenant.parentTenantId = this.options.parentTenant?.id ?? null;
         tenant.feesTenantId = this.options.feesTenant?.id ?? tenant.id;
 
-        const period = this.options.period ?? await new RegistrationPeriodFactory({}).create();
+        const period = this.options.period ?? (await new RegistrationPeriodFactory({}).create());
         tenant.periodId = period.id;
 
         tenant.config = this.options.config ?? PlatformConfig.create({});

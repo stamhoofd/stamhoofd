@@ -10,7 +10,15 @@ import { RequestChallengeGrantStruct } from './RequestChallengeGrantStruct.js';
 
 /// Only used as input
 export class CreateTokenStruct {
-    static decode(data: Data): ChallengeGrantStruct | RefreshTokenGrantStruct | RequestChallengeGrantStruct | PasswordTokenGrantStruct | PasswordGrantStruct | MFAGrantStruct {
+    static decode(
+        data: Data,
+    ):
+        | ChallengeGrantStruct
+        | RefreshTokenGrantStruct
+        | RequestChallengeGrantStruct
+        | PasswordTokenGrantStruct
+        | PasswordGrantStruct
+        | MFAGrantStruct {
         const grantType = data.field('grant_type').string;
         if (grantType === 'challenge') {
             return ChallengeGrantStruct.decode(data);

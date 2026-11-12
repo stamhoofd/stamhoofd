@@ -24,18 +24,26 @@ export async function load(settings?: { path?: string; service?: BackendApp }) {
     let env: any;
 
     if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {
-    // Force load the cjs version of test-utils because the esm version gives issues with the json environment
+        // Force load the cjs version of test-utils because the esm version gives issues with the json environment
         const builder = await import('@stamhoofd/test-utils');
         builder.TestUtils.loadEnvironment();
         env = STAMHOOFD;
-    } else if (!settings?.path && (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') && process.env.STAMHOOFD_ENV) {
+    } else if (
+        !settings?.path &&
+        (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') &&
+        process.env.STAMHOOFD_ENV
+    ) {
         const builder = await import('@stamhoofd/cli');
         env = await builder.buildDevelopmentEnvironment(process.env.STAMHOOFD_ENV ?? '', {
             backend: settings?.service ?? BackendApp.Api,
         });
 
         if (await fileExists(settings?.path ?? '.env.json')) {
-            console.warn(chalk.red('Warning: please delete your local .env.json file, as it is not used in development any longer.'));
+            console.warn(
+                chalk.red(
+                    'Warning: please delete your local .env.json file, as it is not used in development any longer.',
+                ),
+            );
         }
     } else {
         env = JSON.parse(fs.readFileSync(settings?.path ?? '.env.json', 'utf-8'));
@@ -113,7 +121,10 @@ export async function load(settings?: { path?: string; service?: BackendApp }) {
 }
 
 function signWithKey(key: string, ...content: string[]) {
-    return crypto.createHmac('sha256', Buffer.from(key, 'base64')).update(content.join(';')).digest('base64');
+    return crypto
+        .createHmac('sha256', Buffer.from(key, 'base64'))
+        .update(content.join(';'))
+        .digest('base64');
 }
 
 export function signInternal(...content: string[]) {
@@ -126,7 +137,10 @@ export function verifyInternalSignature(signature: string, ...content: string[])
 
     return keys.some((key) => {
         const expectedBuffer = Buffer.from(signWithKey(key, ...content), 'base64');
-        return signatureBuffer.length === expectedBuffer.length && crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
+        return (
+            signatureBuffer.length === expectedBuffer.length &&
+            crypto.timingSafeEqual(signatureBuffer, expectedBuffer)
+        );
     });
 }
 

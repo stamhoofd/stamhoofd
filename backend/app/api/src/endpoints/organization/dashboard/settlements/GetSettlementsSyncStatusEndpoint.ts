@@ -27,8 +27,10 @@ export class GetSettlementsSyncStatusEndpoint extends Endpoint<Params, Query, Bo
     async handle(_: DecodedRequest<Params, Query, Body>) {
         await SettlementsSyncEndpoint.authenticate();
 
-        return new Response(SettlementsSyncEndpoint.queue.map((item) => {
-            return SettlementsSyncStatus.create(item);
-        }));
+        return new Response(
+            SettlementsSyncEndpoint.queue.map((item) => {
+                return SettlementsSyncStatus.create(item);
+            }),
+        );
     }
 }

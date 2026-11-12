@@ -3,7 +3,14 @@ import http from 'http';
 import { Readable } from 'node:stream';
 
 /** Structures (including arrays), raw text/bytes/streams, or undefined for an empty body. */
-export type SupportedResponseBodyTypes = Encodeable | Encodeable[] | string | Buffer | Uint8Array | Readable | undefined;
+export type SupportedResponseBodyTypes =
+    | Encodeable
+    | Encodeable[]
+    | string
+    | Buffer
+    | Uint8Array
+    | Readable
+    | undefined;
 
 export class Response<Body extends SupportedResponseBodyTypes = SupportedResponseBodyTypes> {
     status = 200;

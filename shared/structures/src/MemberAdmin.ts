@@ -15,7 +15,7 @@ export class MemberAdmin {
     }
 
     get name() {
-        const withName = this.users.find(u => !!u.name);
+        const withName = this.users.find((u) => !!u.name);
         return withName ? withName.name : this.users[0].email;
     }
 
@@ -23,7 +23,9 @@ export class MemberAdmin {
         const responsibilities = new Map<string, MemberResponsibilityRecordBase>();
 
         for (const user of this.users) {
-            const permission = organization ? user.permissions?.organizationPermissions.get(organization.id) : user.permissions?.globalPermissions;
+            const permission = organization
+                ? user.permissions?.organizationPermissions.get(organization.id)
+                : user.permissions?.globalPermissions;
             if (permission) {
                 for (const responsibility of permission.responsibilities) {
                     responsibilities.set(responsibility.responsibilityId, responsibility);
@@ -34,13 +36,17 @@ export class MemberAdmin {
         return [...responsibilities.values()].flatMap((r) => {
             // Find name of this responsibility
             if (r.organizationId && r.organizationId === organization?.id) {
-                const name = organization?.privateMeta?.responsibilities.find(res => res.id === r.responsibilityId)?.name;
+                const name = organization?.privateMeta?.responsibilities.find(
+                    (res) => res.id === r.responsibilityId,
+                )?.name;
                 if (name) {
                     return [name];
                 }
             }
 
-            const name = platform.config.responsibilities.find(res => res.id === r.responsibilityId)?.name;
+            const name = platform.config.responsibilities.find(
+                (res) => res.id === r.responsibilityId,
+            )?.name;
             if (name) {
                 return [name];
             }

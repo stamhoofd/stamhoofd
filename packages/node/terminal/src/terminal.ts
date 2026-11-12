@@ -20,10 +20,16 @@ export class Terminal {
         this.output = new StdSync(options);
     }
 
-    get isTTY(): boolean { return this.output.isTTY; }
+    get isTTY(): boolean {
+        return this.output.isTTY;
+    }
     /** Actual destination for live regions and default writes; use for capability detection. */
-    get stream(): NodeJS.WriteStream { return this.output.stream; }
-    get isSuspended(): boolean { return this.suspended > 0 || this.disposed; }
+    get stream(): NodeJS.WriteStream {
+        return this.output.stream;
+    }
+    get isSuspended(): boolean {
+        return this.suspended > 0 || this.disposed;
+    }
 
     createRegion(): TerminalRegion {
         const id = Symbol();
@@ -69,7 +75,8 @@ export class Terminal {
         } finally {
             if (--this.suspended === 0) {
                 for (const { text, stream } of this.buffered) this.output.write(text, stream);
-                if (this.dropped) this.output.write('\n[output omitted while terminal was suspended]\n');
+                if (this.dropped)
+                    this.output.write('\n[output omitted while terminal was suspended]\n');
                 this.buffered = [];
                 this.bufferedSize = 0;
                 this.dropped = false;
@@ -79,7 +86,11 @@ export class Terminal {
     }
 
     /** Short, line-oriented interactions: replace successful output; retain failures and complex terminal output. */
-    async withTransientOutput<T>(pending: string, callback: (write: (text: string) => boolean) => Promise<T>, completed: (success: boolean) => string): Promise<T> {
+    async withTransientOutput<T>(
+        pending: string,
+        callback: (write: (text: string) => boolean) => Promise<T>,
+        completed: (success: boolean) => string,
+    ): Promise<T> {
         return this.withPrompt(async () => {
             const columns = this.output.columns;
             const rows = this.output.rows;
@@ -90,7 +101,8 @@ export class Terminal {
                 // eslint-disable-next-line no-control-regex -- Only SGR styling is safe to ignore when counting terminal rows.
                 const plain = text.replace(/\x1b\[[0-9;]*m/g, '');
                 // Cursor controls, wide characters and scrolling require keeping the original output.
-                if (/[^\x20-\x7e\n]/.test(plain) || visible.length + plain.length > columns * rows) replaceable = false;
+                if (/[^\x20-\x7e\n]/.test(plain) || visible.length + plain.length > columns * rows)
+                    replaceable = false;
                 if (replaceable) visible += plain;
                 if (text) newline = text.endsWith('\n');
                 this.output.write(text);
@@ -100,9 +112,18 @@ export class Terminal {
             const finish = (success: boolean) => {
                 const lines = visible.split('\n');
                 const last = lines.pop()!;
-                const height = lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / columns)), 0)
-                    + Math.floor(Math.max(0, last.length - 1) / columns);
-                if (success && replaceable && height < rows && columns === this.output.columns && rows === this.output.rows) {
+                const height =
+                    lines.reduce(
+                        (total, line) => total + Math.max(1, Math.ceil(line.length / columns)),
+                        0,
+                    ) + Math.floor(Math.max(0, last.length - 1) / columns);
+                if (
+                    success &&
+                    replaceable &&
+                    height < rows &&
+                    columns === this.output.columns &&
+                    rows === this.output.rows
+                ) {
                     this.output.write(`\r${height ? `\x1b[${height}A` : ''}\x1b[0J`);
                 } else if (!newline) this.output.write('\n');
                 this.output.write(`${completed(success)}\n`);

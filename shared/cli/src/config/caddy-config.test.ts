@@ -52,7 +52,9 @@ describe('Caddy config', () => {
         const caddyConfig = JSON.parse(await fs.readFile(config, 'utf8'));
 
         expect(routeHosts(caddyConfig)).toContain('metabase.stamhoofd');
-        expect(caddyConfig.apps.tls.automation.policies[0].subjects).toContain('metabase.stamhoofd');
+        expect(caddyConfig.apps.tls.automation.policies[0].subjects).toContain(
+            'metabase.stamhoofd',
+        );
     });
 
     it('keeps WebSockets alive across reloads by setting stream_close_delay on every reverse_proxy', async () => {
@@ -73,28 +75,42 @@ describe('Caddy config', () => {
         const { routes } = buildCaddyRouteOptions(context(rootDir));
 
         // The CSP is applied by a subroute (based on the request path), before the reverse_proxy.
-        const cspRoute = routes.find(route => route.handle.some(handle => handle.handler === 'subroute'));
+        const cspRoute = routes.find((route) =>
+            route.handle.some((handle) => handle.handler === 'subroute'),
+        );
         expect(cspRoute).toBeDefined();
         expect(cspRoute!.terminal).toBe(true);
 
-        const nonceSubroute = cspRoute!.handle.find(handle => handle.handler === 'subroute') as { routes: any[] };
-        const documentRoute = nonceSubroute.routes.find(route => route.match?.[0].not !== undefined);
+        const nonceSubroute = cspRoute!.handle.find((handle) => handle.handler === 'subroute') as {
+            routes: any[];
+        };
+        const documentRoute = nonceSubroute.routes.find(
+            (route) => route.match?.[0].not !== undefined,
+        );
         const headers = documentRoute.handle.find((handle: any) => handle.handler === 'headers');
-        expect(headers.response.set['Content-Security-Policy'][0])
-            .toBe(`script-src 'nonce-{http.request.uuid}' 'strict-dynamic'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'`);
+        expect(headers.response.set['Content-Security-Policy'][0]).toBe(
+            `script-src 'nonce-{http.request.uuid}' 'strict-dynamic'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'`,
+        );
 
-        const replace = documentRoute.handle.find((handle: any) => handle.handler === 'replace_response');
-        expect(replace.replacements[0]).toEqual({ search: 'STAMHOOFD_CSP_NONCE', replace: '{http.request.uuid}' });
+        const replace = documentRoute.handle.find(
+            (handle: any) => handle.handler === 'replace_response',
+        );
+        expect(replace.replacements[0]).toEqual({
+            search: 'STAMHOOFD_CSP_NONCE',
+            replace: '{http.request.uuid}',
+        });
 
         // The reverse_proxy still keeps WebSockets alive across reloads.
-        const proxy = cspRoute!.handle.find(handle => handle.handler === 'reverse_proxy');
+        const proxy = cspRoute!.handle.find((handle) => handle.handler === 'reverse_proxy');
         expect((proxy as { stream_close_delay: string }).stream_close_delay).toBe('24h');
     });
 
     it('applies the CSP to the dashboard, registration and webshop routes but not to api/renderer', () => {
         const { routes } = buildCaddyRouteOptions(context(rootDir));
 
-        const cspRoutes = routes.filter(route => route.handle.some(handle => handle.handler === 'subroute'));
+        const cspRoutes = routes.filter((route) =>
+            route.handle.some((handle) => handle.handler === 'subroute'),
+        );
 
         // dashboard + registration + webshop each contribute exactly one CSP route, plus one each for
         // the registration and webshop custom-domain catch-alls; the api and renderer proxies (and the
@@ -104,9 +120,10 @@ describe('Caddy config', () => {
             expect(route.terminal).toBe(true);
         }
 
-        const plainProxyRoutes = routes.filter(route =>
-            route.handle.some(handle => handle.handler === 'reverse_proxy')
-            && !route.handle.some(handle => handle.handler === 'subroute'),
+        const plainProxyRoutes = routes.filter(
+            (route) =>
+                route.handle.some((handle) => handle.handler === 'reverse_proxy') &&
+                !route.handle.some((handle) => handle.handler === 'subroute'),
         );
         expect(plainProxyRoutes.length).toBeGreaterThan(0);
     });
@@ -116,12 +133,14 @@ describe('Caddy config', () => {
 
         // Every frontend matcher has a websocket bypass route (matched on the upgrade headers) that
         // proxies plainly, registered before its CSP route and terminal.
-        const websocketRoutes = routes.filter(route => route.match[0].header?.Upgrade?.includes('websocket'));
+        const websocketRoutes = routes.filter((route) =>
+            route.match[0].header?.Upgrade?.includes('websocket'),
+        );
         expect(websocketRoutes.length).toBeGreaterThan(0);
         for (const route of websocketRoutes) {
             expect(route.match[0].header?.Connection).toEqual(['*Upgrade*']);
-            expect(route.handle.some(handle => handle.handler === 'subroute')).toBe(false);
-            expect(route.handle.some(handle => handle.handler === 'reverse_proxy')).toBe(true);
+            expect(route.handle.some((handle) => handle.handler === 'subroute')).toBe(false);
+            expect(route.handle.some((handle) => handle.handler === 'reverse_proxy')).toBe(true);
             expect(route.terminal).toBe(true);
         }
     });
@@ -129,11 +148,18 @@ describe('Caddy config', () => {
     it('routes custom domains: registration for inschrijven.*, webshops for anything else on the shared suffix', () => {
         const { routes } = buildCaddyRouteOptions(context(rootDir));
 
-        const hostPattern = (route: any) => route.match[0].header_regexp?.Host?.pattern as string | undefined;
-        const proxyDial = (route: any) => route.handle.find((handle: any) => handle.handler === 'reverse_proxy').upstreams[0].dial as string;
+        const hostPattern = (route: any) =>
+            route.match[0].header_regexp?.Host?.pattern as string | undefined;
+        const proxyDial = (route: any) =>
+            route.handle.find((handle: any) => handle.handler === 'reverse_proxy').upstreams[0]
+                .dial as string;
 
-        const registrationRoutes = routes.filter(route => hostPattern(route) === '^inschrijven\\..+\\.custom\\.stamhoofd$');
-        const webshopRoutes = routes.filter(route => hostPattern(route) === '^.+\\.custom\\.stamhoofd$');
+        const registrationRoutes = routes.filter(
+            (route) => hostPattern(route) === '^inschrijven\\..+\\.custom\\.stamhoofd$',
+        );
+        const webshopRoutes = routes.filter(
+            (route) => hostPattern(route) === '^.+\\.custom\\.stamhoofd$',
+        );
 
         // Each custom-domain matcher contributes a websocket bypass route + a CSP route.
         expect(registrationRoutes).toHaveLength(2);
@@ -141,16 +167,25 @@ describe('Caddy config', () => {
 
         // RE2 has no negative lookahead, so the registration catch-all must precede the webshop
         // catch-all and both must be terminal for inschrijven.* to win over the webshop match.
-        expect(routes.indexOf(registrationRoutes[0])).toBeLessThan(routes.indexOf(webshopRoutes[0]));
+        expect(routes.indexOf(registrationRoutes[0])).toBeLessThan(
+            routes.indexOf(webshopRoutes[0]),
+        );
         for (const route of [...registrationRoutes, ...webshopRoutes]) {
             expect(route.terminal).toBe(true);
         }
 
         // Registration custom domains proxy to the same dev server as the exact registration host;
         // webshop custom domains proxy to the same dev server as the exact webshop host.
-        const registrationHostDial = proxyDial(routes.find(route => route.match[0].host?.includes('registration.stamhoofd')));
-        const webshopHostDial = proxyDial(routes.find(route => route.match[0].host?.includes('shop.stamhoofd')));
-        expect(registrationRoutes.map(proxyDial)).toEqual([registrationHostDial, registrationHostDial]);
+        const registrationHostDial = proxyDial(
+            routes.find((route) => route.match[0].host?.includes('registration.stamhoofd')),
+        );
+        const webshopHostDial = proxyDial(
+            routes.find((route) => route.match[0].host?.includes('shop.stamhoofd')),
+        );
+        expect(registrationRoutes.map(proxyDial)).toEqual([
+            registrationHostDial,
+            registrationHostDial,
+        ]);
         expect(webshopRoutes.map(proxyDial)).toEqual([webshopHostDial, webshopHostDial]);
         expect(registrationHostDial).not.toBe(webshopHostDial);
     });
@@ -158,12 +193,18 @@ describe('Caddy config', () => {
     it('routes the docs domain to the Nuxt docs server with TLS coverage', () => {
         const ctx = context(rootDir);
         const options = buildCaddyRouteOptions(ctx);
-        const hosts = options.routes.flatMap(route => route.match.flatMap((match: any) => match.host));
-        const docsRoute = options.routes.find(route => route.match.some((match: any) => match.host?.includes('docs.stamhoofd')));
+        const hosts = options.routes.flatMap((route) =>
+            route.match.flatMap((match: any) => match.host),
+        );
+        const docsRoute = options.routes.find((route) =>
+            route.match.some((match: any) => match.host?.includes('docs.stamhoofd')),
+        );
 
         expect(hosts).toContain('docs.stamhoofd');
         expect(options.tlsSubjects).toContain('docs.stamhoofd');
-        expect((docsRoute?.handle[0] as any).upstreams[0].dial).toContain(`:${buildPorts(ctx).docs}`);
+        expect((docsRoute?.handle[0] as any).upstreams[0].dial).toContain(
+            `:${buildPorts(ctx).docs}`,
+        );
     });
 
     it('can bind the admin API to the container interface', async () => {
@@ -186,7 +227,14 @@ describe('Caddy config', () => {
             workspace: 'playwright',
             reservedPorts: [6100],
             caddy: {
-                routes: [{ match: [{ host: ['playwright-dashboard-0.stamhoofd'] }], handle: [{ handler: 'reverse_proxy', upstreams: [{ dial: '127.0.0.1:6100' }] }] }],
+                routes: [
+                    {
+                        match: [{ host: ['playwright-dashboard-0.stamhoofd'] }],
+                        handle: [
+                            { handler: 'reverse_proxy', upstreams: [{ dial: '127.0.0.1:6100' }] },
+                        ],
+                    },
+                ],
                 tlsSubjects: ['playwright-dashboard-0.stamhoofd'],
             },
         });
@@ -204,7 +252,10 @@ describe('Caddy config', () => {
 
     it('includes all frontend app routes from active instance manifests', async () => {
         const ctx = context(rootDir);
-        const otherInstance = { ...ctx, instance: { name: 'feature', prefix: 'feature', primary: false, portOffset: 100 } };
+        const otherInstance = {
+            ...ctx,
+            instance: { name: 'feature', prefix: 'feature', primary: false, portOffset: 100 },
+        };
         await writeInstanceManifest(otherInstance, {
             domains: buildDomains(otherInstance),
             caddy: buildCaddyRouteOptions(otherInstance),
@@ -238,15 +289,19 @@ describe('cspFrontendSubroutes', () => {
 
     function cspHeaderValues(handle: any[], mode: 'set' | 'add'): string[] {
         return handle
-            .filter(h => h.handler === 'headers' && h.response?.[mode]?.['Content-Security-Policy'] !== undefined)
-            .flatMap(h => h.response[mode]['Content-Security-Policy']);
+            .filter(
+                (h) =>
+                    h.handler === 'headers' &&
+                    h.response?.[mode]?.['Content-Security-Policy'] !== undefined,
+            )
+            .flatMap((h) => h.response[mode]['Content-Security-Policy']);
     }
 
     it('applies the strict-dynamic nonce policy to documents and sandboxes resources by file extension', () => {
         const [nonceRoutes] = subroutes(cspFrontendSubroutes({ customDomain: true }));
 
         // Documents (everything that is NOT a resource path) get the strict-dynamic nonce policy...
-        const documentRoute = nonceRoutes.find(route => route.match?.[0].not !== undefined);
+        const documentRoute = nonceRoutes.find((route) => route.match?.[0].not !== undefined);
         expect(documentRoute).toBeDefined();
         expect(documentRoute!.match![0].not![0].path).toContain('*.js');
         expect(cspHeaderValues(documentRoute!.handle, 'set')).toEqual([
@@ -254,38 +309,45 @@ describe('cspFrontendSubroutes', () => {
         ]);
 
         // ...and the build-time placeholder is rewritten to the per-request nonce.
-        const replace = documentRoute!.handle.find(h => h.handler === 'replace_response');
-        expect((replace as { replacements: { search: string; replace: string }[] }).replacements[0])
-            .toEqual({ search: 'STAMHOOFD_CSP_NONCE', replace: '{http.request.uuid}' });
+        const replace = documentRoute!.handle.find((h) => h.handler === 'replace_response');
+        expect(
+            (replace as { replacements: { search: string; replace: string }[] }).replacements[0],
+        ).toEqual({ search: 'STAMHOOFD_CSP_NONCE', replace: '{http.request.uuid}' });
 
         // HTML is never revalidated or cached, so a cached body can never carry a stale nonce. Other
         // document paths (Vite dev source modules) keep their conditional requests.
-        const cachingRoutes = (documentRoute!.handle.find(h => h.handler === 'subroute') as { routes: any[] }).routes;
+        const cachingRoutes = (
+            documentRoute!.handle.find((h) => h.handler === 'subroute') as { routes: any[] }
+        ).routes;
         expect(cachingRoutes).toContainEqual({
             match: [{ header: { Accept: ['*text/html*'] } }],
-            handle: [{ handler: 'headers', request: { delete: ['If-None-Match', 'If-Modified-Since'] } }],
+            handle: [
+                { handler: 'headers', request: { delete: ['If-None-Match', 'If-Modified-Since'] } },
+            ],
             terminal: false,
         });
         expect(cachingRoutes).toContainEqual({
-            handle: [{
-                handler: 'headers',
-                response: {
-                    require: { headers: { 'Content-Type': ['text/html*'] } },
-                    set: { 'Cache-Control': ['no-store'] },
-                    delete: ['ETag', 'Last-Modified'],
+            handle: [
+                {
+                    handler: 'headers',
+                    response: {
+                        require: { headers: { 'Content-Type': ['text/html*'] } },
+                        set: { 'Cache-Control': ['no-store'] },
+                        delete: ['ETag', 'Last-Modified'],
+                    },
                 },
-            }],
+            ],
             terminal: false,
         });
 
         // Resources (matched by file extension) get the fully sandboxed CSP and are never rewritten.
-        const resourceRoute = nonceRoutes.find(route => route.match?.[0].path !== undefined);
+        const resourceRoute = nonceRoutes.find((route) => route.match?.[0].path !== undefined);
         expect(resourceRoute).toBeDefined();
         expect(resourceRoute!.match![0].path).toContain('*.css');
         expect(cspHeaderValues(resourceRoute!.handle, 'set')).toEqual([
             `sandbox; default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`,
         ]);
-        expect(resourceRoute!.handle.some(h => h.handler === 'replace_response')).toBe(false);
+        expect(resourceRoute!.handle.some((h) => h.handler === 'replace_response')).toBe(false);
     });
 
     it('adds the no-external-scripts CSP on our own domains but not on custom (webshop) domains', () => {
@@ -297,7 +359,9 @@ describe('cspFrontendSubroutes', () => {
         expect(ownDomain).toHaveLength(2);
 
         const [, noExternalScriptsRoutes] = subroutes(ownDomain);
-        const documentRoute = noExternalScriptsRoutes.find(route => route.match?.[0].not !== undefined);
+        const documentRoute = noExternalScriptsRoutes.find(
+            (route) => route.match?.[0].not !== undefined,
+        );
         expect(documentRoute).toBeDefined();
         expect(documentRoute!.match![0].not![0].path).toContain('*.js');
         expect(cspHeaderValues(documentRoute!.handle, 'add')).toEqual([
@@ -307,7 +371,9 @@ describe('cspFrontendSubroutes', () => {
 });
 
 function routeHosts(caddyConfig: any): string[] {
-    return caddyConfig.apps.http.servers.stamhoofd.routes.flatMap((route: any) => route.match.flatMap((match: any) => match.host));
+    return caddyConfig.apps.http.servers.stamhoofd.routes.flatMap((route: any) =>
+        route.match.flatMap((match: any) => match.host),
+    );
 }
 
 function context(rootDir: string): CliContext {

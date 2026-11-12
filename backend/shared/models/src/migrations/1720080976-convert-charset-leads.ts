@@ -9,7 +9,10 @@ import { Database, Migration } from '@node/database';
 export default new Migration(async () => {
     process.stdout.write('\n');
 
-    if (STAMHOOFD.userMode === 'platform' && (STAMHOOFD.environment === 'production' || STAMHOOFD.environment === 'staging')) {
+    if (
+        STAMHOOFD.userMode === 'platform' &&
+        (STAMHOOFD.environment === 'production' || STAMHOOFD.environment === 'staging')
+    ) {
         console.log('Skipped update leads charset for userMode platform in production.');
         return Promise.resolve();
     }
@@ -49,7 +52,11 @@ async function convertTable(name: string): Promise<void> {
         await Database.statement('set foreign_key_checks=0;');
 
         console.log('Start converting charset of table: ' + name);
-        await Database.statement('ALTER TABLE `' + name + '` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;');
+        await Database.statement(
+            'ALTER TABLE `' +
+                name +
+                '` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;',
+        );
 
         await Database.statement('set foreign_key_checks=1;');
     });

@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { AppliedRegistrationDiscount } from '../AppliedRegistrationDiscount.js';
 import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
@@ -37,7 +46,10 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
      * This method returns the most up to date group price we can still find.
      */
     get updatedGroupPrice() {
-        return this.group.settings.prices.find(price => price.id === this.groupPrice.id) ?? this.groupPrice;
+        return (
+            this.group.settings.prices.find((price) => price.id === this.groupPrice.id) ??
+            this.groupPrice
+        );
     }
 
     @field({ decoder: new ArrayDecoder(RegisterItemOption), version: 305 })
@@ -148,7 +160,10 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
      * Note: only returns balances that are due now. For trials this can be 0 until the trial becomes payable (± 1 week before the trial ends).
      */
     get calculatedPrice() {
-        return this.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0);
+        return this.balances.reduce(
+            (sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending),
+            0,
+        );
     }
 
     /**
@@ -163,19 +178,27 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
      */
     get calculatedPriceWithoutDiscounts() {
         // Discounts have been substracted from the calculated price already, so we have to add them back to get the price without discounts
-        return this.calculatedPrice + Array.from(this.discounts.values()).reduce((sum, r) => sum + r.amount, 0);
+        return (
+            this.calculatedPrice +
+            Array.from(this.discounts.values()).reduce((sum, r) => sum + r.amount, 0)
+        );
     }
 
     get isTrial() {
-        return this.trialUntil !== null && (this.deactivatedAt ? (this.trialUntil >= this.deactivatedAt) : (this.trialUntil > new Date()));
+        return (
+            this.trialUntil !== null &&
+            (this.deactivatedAt
+                ? this.trialUntil >= this.deactivatedAt
+                : this.trialUntil > new Date())
+        );
     }
 
     /**
-    * Simple description of the registration as a string.
-    *
-    * Used for simple preview or diffing, but not ideal for user previews as
-    * links of files and images are included directly which is unreadable.
-    */
+     * Simple description of the registration as a string.
+     *
+     * Used for simple preview or diffing, but not ideal for user previews as
+     * links of files and images are included directly which is unreadable.
+     */
     get description() {
         const descriptions: string[] = [];
 
@@ -184,19 +207,27 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
         }
 
         for (const option of this.options) {
-            descriptions.push(option.optionMenu.name + ': ' + option.option.name + (option.option.allowAmount ? ` x ${option.amount}` : ''));
+            descriptions.push(
+                option.optionMenu.name +
+                    ': ' +
+                    option.option.name +
+                    (option.option.allowAmount ? ` x ${option.amount}` : ''),
+            );
         }
 
         for (const answer of this.recordAnswers.values()) {
             descriptions.push(answer.descriptionValue);
         }
 
-        return descriptions.filter(d => !!d).join('\n');
+        return descriptions.filter((d) => !!d).join('\n');
     }
 
     doesMatchFilter(filter: StamhoofdFilter) {
         try {
-            const compiledFilter = compileToInMemoryFilter(filter, registrationInMemoryFilterCompilers);
+            const compiledFilter = compileToInMemoryFilter(
+                filter,
+                registrationInMemoryFilterCompilers,
+            );
             return compiledFilter(this);
         } catch (e) {
             console.error('Error while compiling filter', e, filter);

@@ -10,7 +10,10 @@ import { SeedTools } from '../helpers/SeedTools.js';
  * the document logic already picked. More than one is a choice the family has to make.
  */
 export function markSingleTaxDependentParent(member: Member): boolean {
-    const withNationalRegisterNumber = member.details.parents.filter(p => p.nationalRegisterNumber && p.nationalRegisterNumber !== NationalRegisterNumberOptOut);
+    const withNationalRegisterNumber = member.details.parents.filter(
+        (p) =>
+            p.nationalRegisterNumber && p.nationalRegisterNumber !== NationalRegisterNumberOptOut,
+    );
 
     if (withNationalRegisterNumber.length !== 1) {
         return false;
@@ -52,5 +55,7 @@ export default new Migration(async () => {
         });
     });
 
-    console.log('Marked a tax dependent parent for ' + updated + ' of ' + result.total + ' members');
+    console.log(
+        'Marked a tax dependent parent for ' + updated + ' of ' + result.total + ' members',
+    );
 });

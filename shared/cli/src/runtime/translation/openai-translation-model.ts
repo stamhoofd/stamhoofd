@@ -21,7 +21,10 @@ export class OpenAITranslationModel implements TranslationModel {
     }
 
     async translate(request: TranslationRequest): Promise<string> {
-        const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [COMMIT_DIFF_TOOL, GREP_TOOL].map(tool => ({
+        const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
+            COMMIT_DIFF_TOOL,
+            GREP_TOOL,
+        ].map((tool) => ({
             type: 'function',
             function: {
                 name: tool.name,
@@ -86,7 +89,9 @@ export class OpenAITranslationModel implements TranslationModel {
 function parseArguments(rawArguments: string): Record<string, unknown> {
     try {
         const parsed = JSON.parse(rawArguments) as unknown;
-        return typeof parsed === 'object' && parsed !== null ? parsed as Record<string, unknown> : {};
+        return typeof parsed === 'object' && parsed !== null
+            ? (parsed as Record<string, unknown>)
+            : {};
     } catch {
         return {};
     }

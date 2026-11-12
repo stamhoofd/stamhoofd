@@ -12,7 +12,13 @@ import { balanceItemPaymentRootFilterCompilers } from '../sql-filters/balance-it
 import { getPaymentSearchFilter } from '../sql-filters/payments.js';
 import { balanceItemPaymentSorters } from '../sql-sorters/balance-item-payments.js';
 import type { PaymentWithItem } from './payments.js';
-import { createExportBalanceItemPayment, getBalanceItemPaymentColumns, getExportOrder, loadPaymentExportOrders, PaymentGeneralWithStripeAccount } from './payments.js';
+import {
+    createExportBalanceItemPayment,
+    getBalanceItemPaymentColumns,
+    getExportOrder,
+    loadPaymentExportOrders,
+    PaymentGeneralWithStripeAccount,
+} from './payments.js';
 
 const sorters = balanceItemPaymentSorters;
 const filterCompilers = balanceItemPaymentRootFilterCompilers;
@@ -57,7 +63,7 @@ async function fetchPage(requestQuery: LimitedFilteredRequest): Promise<BalanceI
         throw Context.auth.error();
     }
 
-    if (!await Context.auth.canManagePayments(organization.id)) {
+    if (!(await Context.auth.canManagePayments(organization.id))) {
         throw Context.auth.error();
     }
 
@@ -85,7 +91,12 @@ async function fetchPage(requestQuery: LimitedFilteredRequest): Promise<BalanceI
     if (requestQuery.search) {
         // Searching selects the same payments as the list this export started from, but a row here is
         // one balance item payment, so the filter has to reach the payment it belongs to
-        query.where(await compileToSQLFilter({ payment: getPaymentSearchFilter(requestQuery.search) }, filterCompilers));
+        query.where(
+            await compileToSQLFilter(
+                { payment: getPaymentSearchFilter(requestQuery.search) },
+                filterCompilers,
+            ),
+        );
     }
 
     if (requestQuery.pageFilter) {
@@ -119,17 +130,20 @@ async function toRows(balanceItemPayments: BalanceItemPayment[]): Promise<Paymen
         return [];
     }
 
-    const paymentIds = Formatter.uniqueArray(balanceItemPayments.map(p => p.paymentId));
-    const payments = await AuthenticatedStructures.paymentsGeneral(await Payment.getByIDs(...paymentIds), true);
+    const paymentIds = Formatter.uniqueArray(balanceItemPayments.map((p) => p.paymentId));
+    const payments = await AuthenticatedStructures.paymentsGeneral(
+        await Payment.getByIDs(...paymentIds),
+        true,
+    );
 
     // One payment can pay for many rows, so it is only built once even though every row repeats it
     const paymentsById = new Map<string, PaymentGeneralWithStripeAccount>(
-        payments.map(payment => [payment.id, PaymentGeneralWithStripeAccount.create(payment)]),
+        payments.map((payment) => [payment.id, PaymentGeneralWithStripeAccount.create(payment)]),
     );
 
     const rows = balanceItemPayments.flatMap((balanceItemPayment) => {
         const payment = paymentsById.get(balanceItemPayment.paymentId);
-        const detailed = payment?.balanceItemPayments.find(p => p.id === balanceItemPayment.id);
+        const detailed = payment?.balanceItemPayments.find((p) => p.id === balanceItemPayment.id);
 
         if (!payment || !detailed) {
             // The payment was removed while the file was being written
@@ -140,10 +154,14 @@ async function toRows(balanceItemPayments: BalanceItemPayment[]): Promise<Paymen
     });
 
     // The balance item only holds the id of the order it paid for
-    const orderMap = await loadPaymentExportOrders(rows.map(row => row.detailed.balanceItem));
+    const orderMap = await loadPaymentExportOrders(rows.map((row) => row.detailed.balanceItem));
 
     return rows.map(({ payment, detailed }) => ({
         payment,
-        balanceItemPayment: createExportBalanceItemPayment(detailed, null, getExportOrder(detailed, orderMap)),
+        balanceItemPayment: createExportBalanceItemPayment(
+            detailed,
+            null,
+            getExportOrder(detailed, orderMap),
+        ),
     }));
 }

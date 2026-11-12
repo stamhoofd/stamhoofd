@@ -26,7 +26,12 @@ const lightweightTests = [
 ];
 
 const testPath = expect.getState().testPath;
-const relativePath = testPath ? path.relative(path.resolve(import.meta.dirname, '..'), testPath).split(path.sep).join('/') : '';
+const relativePath = testPath
+    ? path
+          .relative(path.resolve(import.meta.dirname, '..'), testPath)
+          .split(path.sep)
+          .join('/')
+    : '';
 if (lightweightTests.includes(relativePath)) {
     await import('./vitest.lightweight.setup.js');
 } else {

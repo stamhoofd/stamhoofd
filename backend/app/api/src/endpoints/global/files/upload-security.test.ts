@@ -26,14 +26,23 @@ import { limiter, UploadImage } from './UploadImage.js';
 /**
  * A real (1x1 pixel) png, so sharp can generate resolutions from it
  */
-const pngContent = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+const pngContent = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+    'base64',
+);
 
-const svgContent = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><script>alert(1)</script><rect width="10" height="10" fill="red"/></svg>');
+const svgContent = Buffer.from(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><script>alert(1)</script><rect width="10" height="10" fill="red"/></svg>',
+);
 
-const htmlContent = Buffer.from('<!DOCTYPE html><html><body><script>alert(document.domain)</script></body></html>');
+const htmlContent = Buffer.from(
+    '<!DOCTYPE html><html><body><script>alert(document.domain)</script></body></html>',
+);
 
-// eslint-disable-next-line secure-coding/no-xxe-injection -- Deliberate attack fixture verifying unsafe uploads are rejected or served as downloads.
-const xxeContent = Buffer.from('<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><foo>&xxe;</foo>');
+const xxeContent = Buffer.from(
+    // eslint-disable-next-line secure-coding/no-xxe-injection -- Deliberate attack fixture verifying unsafe uploads are rejected or served as downloads.
+    '<?xml version="1.0"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><foo>&xxe;</foo>',
+);
 
 /**
  * The only content types a browser may render inline: a pdf is opened in the pdf viewer, which has no access
@@ -78,7 +87,12 @@ type RawPart = {
 /**
  * Builds the part a browser sends for <input type="file">. Pass null to leave a header out completely.
  */
-const filePart = (data: { filename?: string | null; contentType?: string | null; content?: Buffer | string; name?: string }): RawPart => {
+const filePart = (data: {
+    filename?: string | null;
+    contentType?: string | null;
+    content?: Buffer | string;
+    name?: string;
+}): RawPart => {
     let headers = `Content-Disposition: form-data; name="${data.name ?? 'file'}"`;
 
     if (data.filename !== null && data.filename !== undefined) {
@@ -151,7 +165,11 @@ describe('Upload security', () => {
         Image.s3Client = null;
     });
 
-    const buildRequest = (url: string, parts: RawPart[], options: { isPrivate?: boolean; contentLength?: string; token?: string } = {}) => {
+    const buildRequest = (
+        url: string,
+        parts: RawPart[],
+        options: { isPrivate?: boolean; contentLength?: string; token?: string } = {},
+    ) => {
         const chunks: Buffer[] = [];
 
         for (const part of parts) {
@@ -176,15 +194,41 @@ describe('Upload security', () => {
         return r;
     };
 
-    const uploadFile = async (data: { filename?: string | null; contentType?: string | null; content?: Buffer | string }, options: { isPrivate?: boolean; token?: string } = {}) => {
-        return await testServer.test(uploadFileEndpoint, buildRequest('/v1/upload-file', [filePart(data)], options));
+    const uploadFile = async (
+        data: { filename?: string | null; contentType?: string | null; content?: Buffer | string },
+        options: { isPrivate?: boolean; token?: string } = {},
+    ) => {
+        return await testServer.test(
+            uploadFileEndpoint,
+            buildRequest('/v1/upload-file', [filePart(data)], options),
+        );
     };
 
-    const uploadImage = async (data: { filename?: string | null; contentType?: string | null; content?: Buffer | string; resolutions?: object[] }, options: { isPrivate?: boolean; token?: string } = {}) => {
-        return await testServer.test(uploadImageEndpoint, buildRequest('/v1/upload-image', [
-            fieldPart('resolutions', JSON.stringify(data.resolutions ?? [{ width: 50, height: 50, fit: 'inside' }])),
-            filePart(data),
-        ], options));
+    const uploadImage = async (
+        data: {
+            filename?: string | null;
+            contentType?: string | null;
+            content?: Buffer | string;
+            resolutions?: object[];
+        },
+        options: { isPrivate?: boolean; token?: string } = {},
+    ) => {
+        return await testServer.test(
+            uploadImageEndpoint,
+            buildRequest(
+                '/v1/upload-image',
+                [
+                    fieldPart(
+                        'resolutions',
+                        JSON.stringify(
+                            data.resolutions ?? [{ width: 50, height: 50, fit: 'inside' }],
+                        ),
+                    ),
+                    filePart(data),
+                ],
+                options,
+            ),
+        );
     };
 
     /**
@@ -202,12 +246,20 @@ describe('Upload security', () => {
 
             // Exactly one extension, and only in the last segment of the key
             const segments = key!.split('/');
-            expect(segments.filter(segment => segment.includes('.')), 'More than one extension in ' + key).toHaveLength(1);
-            expect(segments[segments.length - 1].split('.'), 'Double extension in ' + key).toHaveLength(2);
+            expect(
+                segments.filter((segment) => segment.includes('.')),
+                'More than one extension in ' + key,
+            ).toHaveLength(1);
+            expect(
+                segments[segments.length - 1].split('.'),
+                'Double extension in ' + key,
+            ).toHaveLength(2);
 
             // A browser only ever renders a file type it cannot execute
             if (upload.ContentDisposition === 'inline') {
-                expect(inlineSafeContentTypes, 'Rendered inline: ' + upload.ContentType).toContain(upload.ContentType);
+                expect(inlineSafeContentTypes, 'Rendered inline: ' + upload.ContentType).toContain(
+                    upload.ContentType,
+                );
             }
 
             expect(['private', 'public-read'], 'Unexpected ACL').toContain(upload.ACL);
@@ -215,8 +267,13 @@ describe('Upload security', () => {
             // The only object we store with an executable content type is the private source of an image
             // upload, which is never served: it is private and stored as an attachment.
             if (executableContentTypes.includes(upload.ContentType!)) {
-                expect(upload.ACL, 'Executable content type: ' + upload.ContentType).toBe('private');
-                expect(upload.ContentDisposition, 'Executable content type: ' + upload.ContentType).toBe('attachment');
+                expect(upload.ACL, 'Executable content type: ' + upload.ContentType).toBe(
+                    'private',
+                );
+                expect(
+                    upload.ContentDisposition,
+                    'Executable content type: ' + upload.ContentType,
+                ).toBe('attachment');
             }
         }
     };
@@ -225,7 +282,9 @@ describe('Upload security', () => {
      * A malformed or abusive request may be refused, but it may never result in an upload we didn't validate
      */
     const expectRejectedOrSafe = async (promise: Promise<unknown>) => {
-        await promise.catch(() => { /* refusing the request is a valid outcome */ });
+        await promise.catch(() => {
+            /* refusing the request is a valid outcome */
+        });
         expectSafeUploads();
     };
 
@@ -244,7 +303,7 @@ describe('Upload security', () => {
             'evil\u0000.pdf',
             'evil .pdf',
             'evil;rm -rf /.pdf',
-            'evil\'`$().pdf',
+            "evil'`$().pdf",
             '\u202Efdp.evil.pdf',
             'a'.repeat(300) + '.pdf',
             '%2e%2e%2f%2e%2e%2fevil.pdf',
@@ -264,27 +323,41 @@ describe('Upload security', () => {
                 const key = uploads[0].Key!;
 
                 // Inside the prefix of public uploads, and named after the id of the file
-                expect(key, filename).toMatch(new RegExp('^test/p/' + response.body.id + '/[a-z0-9-]+\\.pdf$'));
+                expect(key, filename).toMatch(
+                    new RegExp('^test/p/' + response.body.id + '/[a-z0-9-]+\\.pdf$'),
+                );
                 expect(key, filename).toBe(response.body.path);
                 expect(uploads[0].ContentType, filename).toBe('application/pdf');
             }
         });
 
         test('A private upload always stays inside the prefix of its own user', async () => {
-            for (const filename of ['../../p/public.pdf', '../' + memberUserId + '/stolen.pdf', 'evil.pdf']) {
+            for (const filename of [
+                '../../p/public.pdf',
+                '../' + memberUserId + '/stolen.pdf',
+                'evil.pdf',
+            ]) {
                 uploads = [];
 
                 await uploadFile({ filename, contentType: 'application/pdf' }, { isPrivate: true });
 
                 expectSafeUploads();
-                expect(uploads[0].Key, filename).toMatch(new RegExp('^test/users/' + adminUserId + '/'));
+                expect(uploads[0].Key, filename).toMatch(
+                    new RegExp('^test/users/' + adminUserId + '/'),
+                );
                 expect(uploads[0].ACL, filename).toBe('private');
             }
         });
 
         test('Two uploads with the same name never write to the same key', async () => {
-            const first = await uploadFile({ filename: 'invoice.pdf', contentType: 'application/pdf' });
-            const second = await uploadFile({ filename: 'invoice.pdf', contentType: 'application/pdf' });
+            const first = await uploadFile({
+                filename: 'invoice.pdf',
+                contentType: 'application/pdf',
+            });
+            const second = await uploadFile({
+                filename: 'invoice.pdf',
+                contentType: 'application/pdf',
+            });
 
             expect(first.body.path).not.toBe(second.body.path);
             expect(uploads[0].Key).not.toBe(uploads[1].Key);
@@ -301,8 +374,13 @@ describe('Upload security', () => {
             ] as const) {
                 const response = await uploadFile({ filename, contentType });
 
-                expect(response.body.name, filename).toMatch(new RegExp(expected.replace('.', '\\.') + '$'));
-                expect(File.resolveUploadType({ filename: response.body.name }), filename).not.toBeNull();
+                expect(response.body.name, filename).toMatch(
+                    new RegExp(expected.replace('.', '\\.') + '$'),
+                );
+                expect(
+                    File.resolveUploadType({ filename: response.body.name }),
+                    filename,
+                ).not.toBeNull();
             }
         });
     });
@@ -315,15 +393,43 @@ describe('Upload security', () => {
                 { filename: 'evil.svg', contentType: 'image/svg', content: svgContent },
                 { filename: 'evil.xml', contentType: 'text/xml', content: xxeContent },
                 { filename: 'evil.xml', contentType: 'application/xml', content: xxeContent },
-                { filename: 'evil.xhtml', contentType: 'application/xhtml+xml', content: htmlContent },
-                { filename: 'evil.js', contentType: 'text/javascript', content: Buffer.from('alert(1)') },
-                { filename: 'evil.wasm', contentType: 'application/wasm', content: Buffer.from('\0asm') },
-                { filename: 'evil.php', contentType: 'application/x-httpd-php', content: Buffer.from('<?php system($_GET[0]); ?>') },
-                { filename: 'evil.jsp', contentType: 'application/octet-stream', content: Buffer.from('<% out.print(1); %>') },
-                { filename: 'evil.html', contentType: 'application/octet-stream', content: htmlContent },
+                {
+                    filename: 'evil.xhtml',
+                    contentType: 'application/xhtml+xml',
+                    content: htmlContent,
+                },
+                {
+                    filename: 'evil.js',
+                    contentType: 'text/javascript',
+                    content: Buffer.from('alert(1)'),
+                },
+                {
+                    filename: 'evil.wasm',
+                    contentType: 'application/wasm',
+                    content: Buffer.from('\0asm'),
+                },
+                {
+                    filename: 'evil.php',
+                    contentType: 'application/x-httpd-php',
+                    content: Buffer.from('<?php system($_GET[0]); ?>'),
+                },
+                {
+                    filename: 'evil.jsp',
+                    contentType: 'application/octet-stream',
+                    content: Buffer.from('<% out.print(1); %>'),
+                },
+                {
+                    filename: 'evil.html',
+                    contentType: 'application/octet-stream',
+                    content: htmlContent,
+                },
                 { filename: 'evil.html', contentType: '*/*', content: htmlContent },
                 { filename: 'evil.html', contentType: '', content: htmlContent },
-                { filename: 'evil.html', contentType: 'text/html; charset=utf-8', content: htmlContent },
+                {
+                    filename: 'evil.html',
+                    contentType: 'text/html; charset=utf-8',
+                    content: htmlContent,
+                },
                 { filename: 'evil.html', contentType: 'TEXT/HTML', content: htmlContent },
             ];
 
@@ -360,7 +466,11 @@ describe('Upload security', () => {
 
         test('A polyglot is served as the safe type it claims to be, never as what is inside it', async () => {
             // The bytes are html, but the browser is told it is a pdf and opens it in the pdf viewer
-            const pdf = await uploadFile({ filename: 'polyglot.pdf', contentType: 'application/pdf', content: htmlContent });
+            const pdf = await uploadFile({
+                filename: 'polyglot.pdf',
+                contentType: 'application/pdf',
+                content: htmlContent,
+            });
             expect(uploads[0]).toMatchObject({
                 ContentType: 'application/pdf',
                 ContentDisposition: 'inline',
@@ -370,13 +480,21 @@ describe('Upload security', () => {
             uploads = [];
 
             // A browser never sniffs an image/png response into html
-            await uploadFile({ filename: 'polyglot.png', contentType: 'image/png', content: htmlContent });
+            await uploadFile({
+                filename: 'polyglot.png',
+                contentType: 'image/png',
+                content: htmlContent,
+            });
             expect(uploads[0]).toMatchObject({ ContentType: 'image/png' });
 
             uploads = [];
 
             // An svg that claims to be a png is stored, and served, as a png
-            await uploadFile({ filename: 'evil.svg', contentType: 'image/png', content: svgContent });
+            await uploadFile({
+                filename: 'evil.svg',
+                contentType: 'image/png',
+                content: svgContent,
+            });
             expect(uploads[0]).toMatchObject({ ContentType: 'image/png' });
             expect(uploads[0].Key).toMatch(/\.png$/);
 
@@ -400,7 +518,9 @@ describe('Upload security', () => {
 
                 for (const upload of uploads) {
                     // Only our own literals are ever stored: never a value taken from the request
-                    expect([...inlineSafeContentTypes, 'text/plain'], contentType).toContain(upload.ContentType);
+                    expect([...inlineSafeContentTypes, 'text/plain'], contentType).toContain(
+                        upload.ContentType,
+                    );
                     expect(upload.ContentType, contentType).not.toContain('\r');
                     expect(upload.ContentType, contentType).not.toContain(';');
                 }
@@ -408,10 +528,14 @@ describe('Upload security', () => {
         });
 
         test('An upload without a filename or a content type is refused instead of guessed', async () => {
-            await expectRejectedOrSafe(uploadFile({ filename: 'backup', contentType: 'application/octet-stream' }));
+            await expectRejectedOrSafe(
+                uploadFile({ filename: 'backup', contentType: 'application/octet-stream' }),
+            );
             expect(uploads).toHaveLength(0);
 
-            await expectRejectedOrSafe(uploadFile({ filename: '', contentType: 'application/octet-stream' }));
+            await expectRejectedOrSafe(
+                uploadFile({ filename: '', contentType: 'application/octet-stream' }),
+            );
             expect(uploads).toHaveLength(0);
 
             await expectRejectedOrSafe(uploadFile({ filename: 'backup' }));
@@ -448,13 +572,18 @@ describe('Upload security', () => {
             expect(uploads).toHaveLength(0);
 
             // An allowed content type without a filename is stored under a key we generated ourselves
-            const response = await testServer.test(uploadFileEndpoint, buildRequest('/v1/upload-file', [
-                filePart({ filename: null, contentType: 'application/pdf' }),
-            ]));
+            const response = await testServer.test(
+                uploadFileEndpoint,
+                buildRequest('/v1/upload-file', [
+                    filePart({ filename: null, contentType: 'application/pdf' }),
+                ]),
+            );
 
             expectSafeUploads();
             expect(response.body.name).toBeNull();
-            expect(uploads[0].Key).toBe('test/p/' + response.body.id + '/' + response.body.id + '.pdf');
+            expect(uploads[0].Key).toBe(
+                'test/p/' + response.body.id + '/' + response.body.id + '.pdf',
+            );
             expect(uploads[0].ContentType).toBe('application/pdf');
         });
 
@@ -462,12 +591,20 @@ describe('Upload security', () => {
             for (const contentType of ['application/pdf', 'text/plain']) {
                 uploads = [];
 
-                const response = await testServer.test(uploadFileEndpoint, buildRequest('/v1/upload-file', [
-                    filePart({ filename: '', contentType }),
-                ]));
+                const response = await testServer.test(
+                    uploadFileEndpoint,
+                    buildRequest('/v1/upload-file', [filePart({ filename: '', contentType })]),
+                );
 
                 expectSafeUploads();
-                expect(uploads[0].Key, contentType).toBe('test/p/' + response.body.id + '/' + response.body.id + '.' + (contentType === 'text/plain' ? 'txt' : 'pdf'));
+                expect(uploads[0].Key, contentType).toBe(
+                    'test/p/' +
+                        response.body.id +
+                        '/' +
+                        response.body.id +
+                        '.' +
+                        (contentType === 'text/plain' ? 'txt' : 'pdf'),
+                );
             }
         });
 
@@ -498,9 +635,14 @@ describe('Upload security', () => {
             for (const filename of attacks) {
                 uploads = [];
 
-                await expectRejectedOrSafe(testServer.test(uploadFileEndpoint, buildRequest('/v1/upload-file', [
-                    filePart({ filename, contentType: 'text/html', content: htmlContent }),
-                ])));
+                await expectRejectedOrSafe(
+                    testServer.test(
+                        uploadFileEndpoint,
+                        buildRequest('/v1/upload-file', [
+                            filePart({ filename, contentType: 'text/html', content: htmlContent }),
+                        ]),
+                    ),
+                );
 
                 // The header parser may end up with any of the two filenames, but never with something that
                 // makes us store an executable file
@@ -513,7 +655,11 @@ describe('Upload security', () => {
 
         test('A filename with a line break never breaks the part headers open', async () => {
             const request = buildRequest('/v1/upload-file', [
-                { headers: 'Content-Disposition: form-data; name="file"; filename="evil\r\nContent-Type: text/html\r\n.pdf"', body: htmlContent },
+                {
+                    headers:
+                        'Content-Disposition: form-data; name="file"; filename="evil\r\nContent-Type: text/html\r\n.pdf"',
+                    body: htmlContent,
+                },
             ]);
 
             await expectRejectedOrSafe(testServer.test(uploadFileEndpoint, request));
@@ -524,16 +670,32 @@ describe('Upload security', () => {
         });
 
         test('A declared content length that does not match the body never bypasses validation', async () => {
-            const oversized = buildRequest('/v1/upload-file', [
-                filePart({ filename: 'evil.html', contentType: 'text/html', content: htmlContent }),
-            ], { contentLength: (100 * 1024 * 1024).toString() });
+            const oversized = buildRequest(
+                '/v1/upload-file',
+                [
+                    filePart({
+                        filename: 'evil.html',
+                        contentType: 'text/html',
+                        content: htmlContent,
+                    }),
+                ],
+                { contentLength: (100 * 1024 * 1024).toString() },
+            );
 
             await expectRejectedOrSafe(testServer.test(uploadFileEndpoint, oversized));
             expect(uploads).toHaveLength(0);
 
-            const undersized = buildRequest('/v1/upload-file', [
-                filePart({ filename: 'evil.svg', contentType: 'image/svg+xml', content: svgContent }),
-            ], { contentLength: '1' });
+            const undersized = buildRequest(
+                '/v1/upload-file',
+                [
+                    filePart({
+                        filename: 'evil.svg',
+                        contentType: 'image/svg+xml',
+                        content: svgContent,
+                    }),
+                ],
+                { contentLength: '1' },
+            );
 
             await expectRejectedOrSafe(testServer.test(uploadFileEndpoint, undersized));
             expect(uploads).toHaveLength(0);
@@ -552,9 +714,19 @@ describe('Upload security', () => {
 
         test('It refuses an image upload with a duplicated resolutions field', async () => {
             const request = buildRequest('/v1/upload-image', [
-                fieldPart('resolutions', JSON.stringify([{ width: 50, height: 50, fit: 'inside' }])),
-                fieldPart('resolutions', JSON.stringify([{ width: 50, height: 50, fit: 'inside' }])),
-                filePart({ filename: 'evil.svg', contentType: 'image/svg+xml', content: svgContent }),
+                fieldPart(
+                    'resolutions',
+                    JSON.stringify([{ width: 50, height: 50, fit: 'inside' }]),
+                ),
+                fieldPart(
+                    'resolutions',
+                    JSON.stringify([{ width: 50, height: 50, fit: 'inside' }]),
+                ),
+                filePart({
+                    filename: 'evil.svg',
+                    contentType: 'image/svg+xml',
+                    content: svgContent,
+                }),
             ]);
 
             await expectRejectedOrSafe(testServer.test(uploadImageEndpoint, request));
@@ -563,9 +735,16 @@ describe('Upload security', () => {
 
         test('It refuses an image upload with more than one file', async () => {
             const request = buildRequest('/v1/upload-image', [
-                fieldPart('resolutions', JSON.stringify([{ width: 50, height: 50, fit: 'inside' }])),
+                fieldPart(
+                    'resolutions',
+                    JSON.stringify([{ width: 50, height: 50, fit: 'inside' }]),
+                ),
                 filePart({ filename: 'logo.png', contentType: 'image/png', content: pngContent }),
-                filePart({ filename: 'evil.svg', contentType: 'image/svg+xml', content: svgContent }),
+                filePart({
+                    filename: 'evil.svg',
+                    contentType: 'image/svg+xml',
+                    content: svgContent,
+                }),
             ]);
 
             await expectRejectedOrSafe(testServer.test(uploadImageEndpoint, request));
@@ -575,10 +754,18 @@ describe('Upload security', () => {
 
     describe('Private and public uploads', () => {
         test('A user without permissions can only upload private files', async () => {
-            await expect(uploadFile({ filename: 'invoice.pdf', contentType: 'application/pdf' }, { token: memberToken })).rejects.toThrow();
+            await expect(
+                uploadFile(
+                    { filename: 'invoice.pdf', contentType: 'application/pdf' },
+                    { token: memberToken },
+                ),
+            ).rejects.toThrow();
             expect(uploads).toHaveLength(0);
 
-            const response = await uploadFile({ filename: 'invoice.pdf', contentType: 'application/pdf' }, { token: memberToken, isPrivate: true });
+            const response = await uploadFile(
+                { filename: 'invoice.pdf', contentType: 'application/pdf' },
+                { token: memberToken, isPrivate: true },
+            );
 
             expect(response.body.isPrivate).toBe(true);
             expect(uploads[0].ACL).toBe('private');
@@ -586,7 +773,10 @@ describe('Upload security', () => {
         });
 
         test('A private upload is never readable without a signature', async () => {
-            const response = await uploadFile({ filename: 'contract.pdf', contentType: 'application/pdf' }, { isPrivate: true });
+            const response = await uploadFile(
+                { filename: 'contract.pdf', contentType: 'application/pdf' },
+                { isPrivate: true },
+            );
 
             expect(uploads[0].ACL).toBe('private');
             expect(uploads[0].ACL).not.toBe('public-read');
@@ -602,7 +792,12 @@ describe('Upload security', () => {
             for (const contentType of ['application/pdf', 'text/plain', 'image/png']) {
                 uploads = [];
 
-                const response = await uploadFile({ filename: 'file.' + (contentType === 'text/plain' ? 'txt' : contentType.split('/')[1]), contentType });
+                const response = await uploadFile({
+                    filename:
+                        'file.' +
+                        (contentType === 'text/plain' ? 'txt' : contentType.split('/')[1]),
+                    contentType,
+                });
 
                 expect(response.body.isPrivate, contentType).toBe(false);
                 expect(response.body.signature, contentType).toBeNull();
@@ -614,7 +809,12 @@ describe('Upload security', () => {
             for (const isPrivate of [false, true]) {
                 uploads = [];
 
-                await expect(uploadFile({ filename: 'evil.html', contentType: 'text/html', content: htmlContent }, { isPrivate })).rejects.toThrow(/unsupported file type/i);
+                await expect(
+                    uploadFile(
+                        { filename: 'evil.html', contentType: 'text/html', content: htmlContent },
+                        { isPrivate },
+                    ),
+                ).rejects.toThrow(/unsupported file type/i);
                 expect(uploads).toHaveLength(0);
             }
         });
@@ -627,7 +827,9 @@ describe('Upload security', () => {
         const expectNoPublicSvg = () => {
             for (const upload of uploads) {
                 if (upload.ACL === 'public-read') {
-                    expect(['image/png', 'image/jpeg'], 'Public image').toContain(upload.ContentType);
+                    expect(['image/png', 'image/jpeg'], 'Public image').toContain(
+                        upload.ContentType,
+                    );
                     expect(upload.Key, 'Public image').not.toMatch(/\.svg$/);
                 } else {
                     expect(upload.ACL).toBe('private');
@@ -637,7 +839,11 @@ describe('Upload security', () => {
         };
 
         test('An svg that claims to be a png is still rasterized, and never served as an svg', async () => {
-            await uploadImage({ filename: 'logo.png', contentType: 'image/png', content: svgContent });
+            await uploadImage({
+                filename: 'logo.png',
+                contentType: 'image/png',
+                content: svgContent,
+            });
 
             expectNoPublicSvg();
             expect(uploads[0]).toMatchObject({ ContentType: 'image/png', ACL: 'public-read' });
@@ -647,15 +853,29 @@ describe('Upload security', () => {
         });
 
         test('A png that claims to be an svg is stored as the private source it is', async () => {
-            await uploadImage({ filename: 'logo.svg', contentType: 'image/svg+xml', content: pngContent });
+            await uploadImage({
+                filename: 'logo.svg',
+                contentType: 'image/svg+xml',
+                content: pngContent,
+            });
 
             expectNoPublicSvg();
             expect(uploads[0]).toMatchObject({ ContentType: 'image/png', ACL: 'public-read' });
-            expect(uploads[1]).toMatchObject({ ContentType: 'image/svg+xml', ContentDisposition: 'attachment', ACL: 'private' });
+            expect(uploads[1]).toMatchObject({
+                ContentType: 'image/svg+xml',
+                ContentDisposition: 'attachment',
+                ACL: 'private',
+            });
         });
 
         test('An upload that is not an image at all never reaches the file server publicly', async () => {
-            await expectRejectedOrSafe(uploadImage({ filename: 'evil.png', contentType: 'image/png', content: htmlContent }));
+            await expectRejectedOrSafe(
+                uploadImage({
+                    filename: 'evil.png',
+                    contentType: 'image/png',
+                    content: htmlContent,
+                }),
+            );
             expectNoPublicSvg();
 
             for (const upload of uploads) {
@@ -687,7 +907,14 @@ describe('Upload security', () => {
             ]) {
                 uploads = [];
 
-                await expectRejectedOrSafe(uploadImage({ filename: 'logo.png', contentType: 'image/png', content: pngContent, resolutions: [resolution] }));
+                await expectRejectedOrSafe(
+                    uploadImage({
+                        filename: 'logo.png',
+                        contentType: 'image/png',
+                        content: pngContent,
+                        resolutions: [resolution],
+                    }),
+                );
                 expectNoPublicSvg();
 
                 // A resolution we can't generate never leaves a half finished image behind
@@ -696,7 +923,11 @@ describe('Upload security', () => {
         });
 
         test('An image endpoint upload never gets an inline disposition it did not earn', async () => {
-            await uploadImage({ filename: 'logo.svg', contentType: 'image/svg+xml', content: svgContent });
+            await uploadImage({
+                filename: 'logo.svg',
+                contentType: 'image/svg+xml',
+                content: svgContent,
+            });
 
             expect(uploads).toHaveLength(2);
 
@@ -773,22 +1004,49 @@ describe('Upload security', () => {
 
         test('A dangerous content type is downloaded, whatever the path claims', async () => {
             for (const contentType of executableContentTypes) {
-                expect(await getDisposition({ path: 'test/users/1/a/invoice.pdf', contentType }), contentType).toBe('attachment');
-                expect(await getDisposition({ path: 'test/users/1/a/photo.png', contentType }), contentType).toBe('attachment');
+                expect(
+                    await getDisposition({ path: 'test/users/1/a/invoice.pdf', contentType }),
+                    contentType,
+                ).toBe('attachment');
+                expect(
+                    await getDisposition({ path: 'test/users/1/a/photo.png', contentType }),
+                    contentType,
+                ).toBe('attachment');
             }
         });
 
         test('Only a real pdf or raster image is rendered', async () => {
-            expect(await getDisposition({ path: 'test/users/1/a/invoice.pdf', contentType: 'application/pdf' })).toBe('inline');
-            expect(await getDisposition({ path: 'test/users/1/a/photo.jpg', contentType: 'image/jpeg' })).toBe('inline');
+            expect(
+                await getDisposition({
+                    path: 'test/users/1/a/invoice.pdf',
+                    contentType: 'application/pdf',
+                }),
+            ).toBe('inline');
+            expect(
+                await getDisposition({
+                    path: 'test/users/1/a/photo.jpg',
+                    contentType: 'image/jpeg',
+                }),
+            ).toBe('inline');
 
             // Files we generate ourselves don't carry a content type
             expect(await getDisposition({ path: 'test/p/1/a.png' })).toBe('inline');
             expect(await getDisposition({ path: 'test/p/1/A.PDF' })).toBe('inline');
 
             // An office document is never rendered, even though we accept the upload
-            expect(await getDisposition({ path: 'test/users/1/a/report.docx', contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })).toBe('attachment');
-            expect(await getDisposition({ path: 'test/users/1/a/notes.txt', contentType: 'text/plain' })).toBe('attachment');
+            expect(
+                await getDisposition({
+                    path: 'test/users/1/a/report.docx',
+                    contentType:
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                }),
+            ).toBe('attachment');
+            expect(
+                await getDisposition({
+                    path: 'test/users/1/a/notes.txt',
+                    contentType: 'text/plain',
+                }),
+            ).toBe('attachment');
         });
 
         test('The disposition is signed, so a client cannot change or strip it', async () => {
@@ -798,7 +1056,8 @@ describe('Upload security', () => {
                 path: 'test/users/1/a/report.docx',
                 size: 100,
                 isPrivate: true,
-                contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                contentType:
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             });
 
             // Sign the same file twice, once with the disposition we would refuse, until both urls carry the
@@ -810,12 +1069,18 @@ describe('Upload security', () => {
             do {
                 attachment = new URL((await FileSignService.withSignedUrl(file))!.signedUrl!);
 
-                const spy = vi.spyOn(FileSignService, 'getContentDisposition').mockReturnValue('inline');
+                const spy = vi
+                    .spyOn(FileSignService, 'getContentDisposition')
+                    .mockReturnValue('inline');
                 inline = new URL((await FileSignService.withSignedUrl(file))!.signedUrl!);
                 spy.mockRestore();
 
                 attempts++;
-            } while (attachment.searchParams.get('X-Amz-Date') !== inline.searchParams.get('X-Amz-Date') && attempts < 5);
+            } while (
+                attachment.searchParams.get('X-Amz-Date') !==
+                    inline.searchParams.get('X-Amz-Date') &&
+                attempts < 5
+            );
 
             expect(attachment.searchParams.get('response-content-disposition')).toBe('attachment');
             expect(inline.searchParams.get('response-content-disposition')).toBe('inline');
@@ -823,18 +1088,28 @@ describe('Upload security', () => {
             // The disposition is part of what is signed, so a client can't turn a download into a render by
             // editing the url: the signature no longer matches
             expect(attachment.searchParams.get('X-Amz-Signature')).toBeTruthy();
-            expect(inline.searchParams.get('X-Amz-Signature')).not.toBe(attachment.searchParams.get('X-Amz-Signature'));
+            expect(inline.searchParams.get('X-Amz-Signature')).not.toBe(
+                attachment.searchParams.get('X-Amz-Signature'),
+            );
         });
 
         test('The keys we generate can never contain something the extension check would misread', async () => {
             // getContentDisposition() reads the extension of the path, so our keys may never contain a
             // query string, a fragment or a second extension
-            const response = await uploadFile({ filename: 'evil.svg?x=.pdf#.pdf', contentType: 'application/pdf' });
+            const response = await uploadFile({
+                filename: 'evil.svg?x=.pdf#.pdf',
+                contentType: 'application/pdf',
+            });
 
             expect(response.body.path).not.toContain('?');
             expect(response.body.path).not.toContain('#');
             expect(response.body.path).toMatch(/^test\/p\/[a-z0-9-]+\/[a-z0-9-]+\.pdf$/);
-            expect(await getDisposition({ path: response.body.path, contentType: response.body.contentType })).toBe('inline');
+            expect(
+                await getDisposition({
+                    path: response.body.path,
+                    contentType: response.body.contentType,
+                }),
+            ).toBe('inline');
         });
     });
 });

@@ -1,13 +1,38 @@
 import { ObjectData } from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
-import { Platform, PlatformConfig, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from './Platform.js';
+import {
+    Platform,
+    PlatformConfig,
+    PlatformMembershipTypeBehaviour,
+    PlatformMembershipTypeConfig,
+} from './Platform.js';
 import { Version } from './Version.js';
 
 describe('PlatformMembershipTypeConfig', () => {
     describe('getMaximumEndDate', () => {
         test('returns the configured end date for period memberships', () => {
-            const endDate = Formatter.luxon().set({ year: 2026, month: 5, day: 31, hour: 23, minute: 59, second: 59, millisecond: 0 }).toJSDate();
-            const startDate = Formatter.luxon().set({ year: 2026, month: 5, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }).toJSDate();
+            const endDate = Formatter.luxon()
+                .set({
+                    year: 2026,
+                    month: 5,
+                    day: 31,
+                    hour: 23,
+                    minute: 59,
+                    second: 59,
+                    millisecond: 0,
+                })
+                .toJSDate();
+            const startDate = Formatter.luxon()
+                .set({
+                    year: 2026,
+                    month: 5,
+                    day: 1,
+                    hour: 0,
+                    minute: 0,
+                    second: 0,
+                    millisecond: 0,
+                })
+                .toJSDate();
             const config = PlatformMembershipTypeConfig.create({
                 endDate,
                 maximumDays: 1,
@@ -27,13 +52,36 @@ describe('PlatformMembershipTypeConfig', () => {
         });
 
         test('returns the configured end date for days memberships without maximum days', () => {
-            const endDate = Formatter.luxon().set({ year: 2026, month: 5, day: 31, hour: 23, minute: 59, second: 59, millisecond: 0 }).toJSDate();
-            const startDate = Formatter.luxon().set({ year: 2026, month: 5, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }).toJSDate();
+            const endDate = Formatter.luxon()
+                .set({
+                    year: 2026,
+                    month: 5,
+                    day: 31,
+                    hour: 23,
+                    minute: 59,
+                    second: 59,
+                    millisecond: 0,
+                })
+                .toJSDate();
+            const startDate = Formatter.luxon()
+                .set({
+                    year: 2026,
+                    month: 5,
+                    day: 1,
+                    hour: 0,
+                    minute: 0,
+                    second: 0,
+                    millisecond: 0,
+                })
+                .toJSDate();
             const config = PlatformMembershipTypeConfig.create({
                 endDate,
                 maximumDays: null,
             });
-            const maximumEndDate = config.getMaximumEndDate(startDate, PlatformMembershipTypeBehaviour.Days);
+            const maximumEndDate = config.getMaximumEndDate(
+                startDate,
+                PlatformMembershipTypeBehaviour.Days,
+            );
             const maximumEndDateBrussels = Formatter.luxon(maximumEndDate);
 
             expect(maximumEndDateBrussels.year).toBe(2026);
@@ -45,14 +93,37 @@ describe('PlatformMembershipTypeConfig', () => {
         });
 
         test('calculates inclusive maximum days for days memberships', () => {
-            const endDate = Formatter.luxon().set({ year: 2026, month: 5, day: 31, hour: 23, minute: 59, second: 59, millisecond: 0 }).toJSDate();
-            const startDate = Formatter.luxon().set({ year: 2026, month: 5, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }).toJSDate();
+            const endDate = Formatter.luxon()
+                .set({
+                    year: 2026,
+                    month: 5,
+                    day: 31,
+                    hour: 23,
+                    minute: 59,
+                    second: 59,
+                    millisecond: 0,
+                })
+                .toJSDate();
+            const startDate = Formatter.luxon()
+                .set({
+                    year: 2026,
+                    month: 5,
+                    day: 1,
+                    hour: 0,
+                    minute: 0,
+                    second: 0,
+                    millisecond: 0,
+                })
+                .toJSDate();
             const config = PlatformMembershipTypeConfig.create({
                 endDate,
                 maximumDays: 2,
             });
 
-            const maximumEndDate = config.getMaximumEndDate(startDate, PlatformMembershipTypeBehaviour.Days);
+            const maximumEndDate = config.getMaximumEndDate(
+                startDate,
+                PlatformMembershipTypeBehaviour.Days,
+            );
             const maximumEndDateBrussels = Formatter.luxon(maximumEndDate);
 
             expect(maximumEndDateBrussels.year).toBe(2026);
@@ -119,15 +190,21 @@ describe('PlatformConfig.canInheritPlatformResponsibilityPermissions', () => {
         expect(config.canInheritPlatformResponsibilityPermissions('John@KSA.BE')).toBe(true);
         expect(config.canInheritPlatformResponsibilityPermissions('john@gent.ksa.be')).toBe(false);
         expect(config.canInheritPlatformResponsibilityPermissions('john@notksa.be')).toBe(false);
-        expect(config.canInheritPlatformResponsibilityPermissions('john@ksa.be.evil.com')).toBe(false);
+        expect(config.canInheritPlatformResponsibilityPermissions('john@ksa.be.evil.com')).toBe(
+            false,
+        );
         expect(config.canInheritPlatformResponsibilityPermissions('john@gmail.com')).toBe(false);
         expect(config.canInheritPlatformResponsibilityPermissions('ksa.be')).toBe(false);
     });
 
     test('subdomains need to be added separately', () => {
-        const config = PlatformConfig.create({ responsibilityEmailDomains: ['@ksa.be', 'gent.ksa.be'] });
+        const config = PlatformConfig.create({
+            responsibilityEmailDomains: ['@ksa.be', 'gent.ksa.be'],
+        });
         expect(config.canInheritPlatformResponsibilityPermissions('john@ksa.be')).toBe(true);
         expect(config.canInheritPlatformResponsibilityPermissions('john@gent.ksa.be')).toBe(true);
-        expect(config.canInheritPlatformResponsibilityPermissions('john@brugge.ksa.be')).toBe(false);
+        expect(config.canInheritPlatformResponsibilityPermissions('john@brugge.ksa.be')).toBe(
+            false,
+        );
     });
 });

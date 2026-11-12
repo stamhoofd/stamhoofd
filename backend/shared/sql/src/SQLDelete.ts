@@ -1,5 +1,10 @@
 import { Database } from '@node/database';
-import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
+import type {
+    SQLExpression,
+    SQLExpressionOptions,
+    SQLNamedExpression,
+    SQLQuery,
+} from './SQLExpression.js';
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
 import type { SQLJoin } from './SQLJoin.js';
 import { SQLLogger } from './SQLLogger.js';
@@ -8,7 +13,7 @@ import { Whereable } from './SQLWhere.js';
 class EmptyClass {}
 export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
     _from: SQLNamedExpression;
-    _joins: (InstanceType<typeof SQLJoin>)[] = [];
+    _joins: InstanceType<typeof SQLJoin>[] = [];
 
     clone(): this {
         const c = new SQLDelete();
@@ -27,9 +32,7 @@ export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        const query: SQLQuery[] = [
-            'DELETE',
-        ];
+        const query: SQLQuery[] = ['DELETE'];
 
         options = options ?? {};
         options.defaultNamespace = this._from.getName();
@@ -40,13 +43,11 @@ export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
             query.push(Database.escapeId(this._from.getName()));
         }
 
-        query.push(
-            'FROM',
-        );
+        query.push('FROM');
 
         query.push(this._from.getSQL(options));
 
-        query.push(...this._joins.map(j => j.getSQL(options)));
+        query.push(...this._joins.map((j) => j.getSQL(options)));
 
         // Where
         if (this._where) {
@@ -73,7 +74,10 @@ export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
         return rows;
     }
 
-    async then(onFulfilled: (value: { affectedRows: number }) => any, onRejected: (reason: any) => any): Promise<any> {
+    async then(
+        onFulfilled: (value: { affectedRows: number }) => any,
+        onRejected: (reason: any) => any,
+    ): Promise<any> {
         return this.delete().then(onFulfilled, onRejected);
     }
 }

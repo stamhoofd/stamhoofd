@@ -6,7 +6,10 @@ import { SQLValueType } from '../SQLFilterTypes.js';
  *
  * E.g. if you pass in true - and we are comparing against a mysql boolean column, convert it to 1.
  */
-export function normalizeCompareValue(val: StamhoofdCompareValue, againstType: SQLValueType): string | number | Date | null | boolean {
+export function normalizeCompareValue(
+    val: StamhoofdCompareValue,
+    againstType: SQLValueType,
+): string | number | Date | null | boolean {
     if (againstType === SQLValueType.Table) {
         throw new Error('Cannot compare at root level');
     }

@@ -3,7 +3,12 @@ import { XlsxColumnFilterer } from './XlsxColumnFilterer.js';
 import { XlsxTransformer } from './XlsxTransformer.js';
 import { sleep } from '@stamhoofd/utility';
 
-export async function exportToExcel<T>({ definitions, writer, dataGenerator, filter }: {
+export async function exportToExcel<T>({
+    definitions,
+    writer,
+    dataGenerator,
+    filter,
+}: {
     filter: XlsxWorkbookFilter;
     definitions: XlsxTransformerSheet<T, unknown>[];
     writer: XlsxWriterAdapter;

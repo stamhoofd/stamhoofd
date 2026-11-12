@@ -7,7 +7,9 @@ describe('nextWatermark', () => {
     it('advances to the highest updatedAt it saw', () => {
         const seen = [new Date(2026, 7, 1), new Date(2026, 7, 5), new Date(2026, 7, 3)];
 
-        expect(nextWatermark(new Date(2026, 6, 1), seen, runStartedAt)).toEqual(new Date(2026, 7, 5));
+        expect(nextWatermark(new Date(2026, 6, 1), seen, runStartedAt)).toEqual(
+            new Date(2026, 7, 5),
+        );
     });
 
     it('keeps the previous watermark when nothing changed', () => {

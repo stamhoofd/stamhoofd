@@ -6,7 +6,15 @@ import { BalanceItem, Member, MemberPlatformMembership, Organization } from '@st
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PlatformMembershipMemberDetails, PlatformMembership, PlatformMembershipOrganizationDetails } from '@stamhoofd/structures';
+import {
+    assertSort,
+    getSortFilter,
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    PlatformMembershipMemberDetails,
+    PlatformMembership,
+    PlatformMembershipOrganizationDetails,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { Context } from '../../../helpers/Context.js';
 import { getMemberScopeFilter } from '../members/helpers/getMemberScopeFilter.js';
@@ -52,7 +60,9 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
             const memberScopeFilter = await getMemberScopeFilter(PermissionLevel.Read);
 
             if (memberScopeFilter) {
-                query.where(await compileToSQLFilter({ member: memberScopeFilter }, filterCompilers));
+                query.where(
+                    await compileToSQLFilter({ member: memberScopeFilter }, filterCompilers),
+                );
             }
         }
 
@@ -74,7 +84,10 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
 
             // The price is hidden without financial access, but the sort order would still reveal it
-            if (q.sort.some(s => s.key === 'price') && !await Context.auth.hasFinancialScopeAccess()) {
+            if (
+                q.sort.some((s) => s.key === 'price') &&
+                !(await Context.auth.hasFinancialScopeAccess())
+            ) {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'No permissions to sort on the price of a platform membership',
@@ -102,7 +115,6 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
                     memberNumber: {
                         $eq: search,
                     },
-
                 },
             };
         }
@@ -134,9 +146,9 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
             throw error;
         }
 
-        const memberIds = Formatter.uniqueArray(data.map(d => d.memberId));
-        const organizationIds = Formatter.uniqueArray(data.map(d => d.organizationId));
-        const balanceItemIds = Formatter.uniqueArray(data.map(d => d.balanceItemId));
+        const memberIds = Formatter.uniqueArray(data.map((d) => d.memberId));
+        const organizationIds = Formatter.uniqueArray(data.map((d) => d.organizationId));
+        const balanceItemIds = Formatter.uniqueArray(data.map((d) => d.balanceItemId));
         const members = await Member.getByIDs(...memberIds);
         const organizations = await Organization.getByIDs(...organizationIds);
         const balanceItems = await BalanceItem.getByIDs(...balanceItemIds);
@@ -146,7 +158,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
         const results: PlatformMembership[] = [];
 
         for (const model of data) {
-            const member = members.find(m => m.id === model.memberId);
+            const member = members.find((m) => m.id === model.memberId);
             if (!member) {
                 throw new SimpleError({
                     code: 'not_found',
@@ -156,7 +168,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
                 });
             }
 
-            const organization = organizations.find(o => o.id === model.organizationId);
+            const organization = organizations.find((o) => o.id === model.organizationId);
             if (!organization) {
                 throw new SimpleError({
                     code: 'not_found',
@@ -166,16 +178,20 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
                 });
             }
 
-            const balanceItem = model.balanceItemId ? balanceItemStructures.find(o => o.id === model.balanceItemId) : null;
-            results.push(PlatformMembership.create({
-                ...model,
-                price: financialAccess ? model.price : null,
-                priceWithoutDiscount: financialAccess ? model.priceWithoutDiscount : null,
-                // A balance item is financial data itself: it carries the open, paid and pending price
-                balanceItem: financialAccess ? balanceItem : null,
-                member: member.getPlatformMembershipDetails(),
-                organization: PlatformMembershipOrganizationDetails.create(organization),
-            }));
+            const balanceItem = model.balanceItemId
+                ? balanceItemStructures.find((o) => o.id === model.balanceItemId)
+                : null;
+            results.push(
+                PlatformMembership.create({
+                    ...model,
+                    price: financialAccess ? model.price : null,
+                    priceWithoutDiscount: financialAccess ? model.priceWithoutDiscount : null,
+                    // A balance item is financial data itself: it carries the open, paid and pending price
+                    balanceItem: financialAccess ? balanceItem : null,
+                    member: member.getPlatformMembershipDetails(),
+                    organization: PlatformMembershipOrganizationDetails.create(organization),
+                }),
+            );
         }
 
         let next: LimitedFilteredRequest | undefined;
@@ -226,8 +242,6 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
             });
         }
 
-        return new Response(
-            await GetPlatformMembershipsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetPlatformMembershipsEndpoint.buildData(request.query));
     }
 }

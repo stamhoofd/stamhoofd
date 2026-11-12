@@ -1,12 +1,19 @@
 import { Email, Member } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import type { EmailRecipient, LimitedFilteredRequest, RegistrationsBlob } from '@stamhoofd/structures';
+import type {
+    EmailRecipient,
+    LimitedFilteredRequest,
+    RegistrationsBlob,
+} from '@stamhoofd/structures';
 import { PaginatedResponse, mergeFilters } from '@stamhoofd/structures';
 import { GetRegistrationsEndpoint } from '../endpoints/global/registration/GetRegistrationsEndpoint.js';
 import { memberJoin } from '../sql-filters/registrations.js';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
-async function getRecipients(result: PaginatedResponse<RegistrationsBlob, LimitedFilteredRequest>, type: 'member' | 'parents' | 'unverified') {
+async function getRecipients(
+    result: PaginatedResponse<RegistrationsBlob, LimitedFilteredRequest>,
+    type: 'member' | 'parents' | 'unverified',
+) {
     const recipients: EmailRecipient[] = [];
 
     for (const registration of result.results.registrations) {
@@ -27,24 +34,27 @@ Email.recipientLoaders.set(EmailRecipientFilterType.RegistrationMembers, {
     },
 
     count: async (query: LimitedFilteredRequest) => {
-        query.filter = mergeFilters([query.filter, {
-            member: {
-                $elemMatch: {
-                    $and: [
-                        {
-                            email: {
-                                $neq: null,
+        query.filter = mergeFilters([
+            query.filter,
+            {
+                member: {
+                    $elemMatch: {
+                        $and: [
+                            {
+                                email: {
+                                    $neq: null,
+                                },
                             },
-                        },
-                        {
-                            email: {
-                                $neq: '',
+                            {
+                                email: {
+                                    $neq: '',
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
                 },
             },
-        }]);
+        ]);
         const q = await GetRegistrationsEndpoint.buildQuery(query);
         return await q.count();
     },

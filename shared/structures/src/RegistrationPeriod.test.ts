@@ -55,18 +55,19 @@ describe('OrganizationRegistrationPeriod.duplicate', () => {
         const group = Group.create({
             periodId: period.id,
             settings: GroupSettings.create({
-                prices: [
-                    GroupPrice.create({}),
-                ],
+                prices: [GroupPrice.create({})],
             }),
         });
 
         organizationPeriod.groups = [group];
         organizationPeriod.settings.categories[0].groupIds = [group.id];
         organizationPeriod.settings.bundleDiscounts = [bundleDiscount];
-        group.settings.prices[0].bundleDiscounts.set(bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
-            name: bundleDiscount.name,
-        }));
+        group.settings.prices[0].bundleDiscounts.set(
+            bundleDiscount.id,
+            BundleDiscountGroupPriceSettings.create({
+                name: bundleDiscount.name,
+            }),
+        );
 
         const duplicate = organizationPeriod.duplicate(newPeriod);
         const duplicatedGroup = duplicate.groups[0];
@@ -77,7 +78,11 @@ describe('OrganizationRegistrationPeriod.duplicate', () => {
         expect(duplicatedBundleDiscount.id).not.toBe(bundleDiscount.id);
         expect(duplicatedBundleDiscount.name.toString()).toBe(bundleDiscount.name.toString());
         // The group price link must be remapped to the new discount id
-        expect(duplicatedGroup.settings.prices[0].bundleDiscounts.has(bundleDiscount.id)).toBe(false);
-        expect(duplicatedGroup.settings.prices[0].bundleDiscounts.has(duplicatedBundleDiscount.id)).toBe(true);
+        expect(duplicatedGroup.settings.prices[0].bundleDiscounts.has(bundleDiscount.id)).toBe(
+            false,
+        );
+        expect(
+            duplicatedGroup.settings.prices[0].bundleDiscounts.has(duplicatedBundleDiscount.id),
+        ).toBe(true);
     });
 });

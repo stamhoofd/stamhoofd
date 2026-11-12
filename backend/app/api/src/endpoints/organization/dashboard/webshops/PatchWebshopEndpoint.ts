@@ -43,33 +43,48 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
         // Halt all order placement and validation + pause stock updates
         return await QueueHandler.schedule('webshop-stock/' + request.params.id, async () => {
             const webshop = await Webshop.getByID(request.params.id);
-            if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+            if (!webshop || !(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full))) {
                 throw Context.auth.notFoundOrNoAccess();
             }
 
             // Do all updates
             if (request.body.meta) {
                 request.body.meta.domainActive = undefined;
-                if (request.body.meta.customCode !== undefined && !await Context.auth.hasFullAccess(organization.id)) {
+                if (
+                    request.body.meta.customCode !== undefined &&
+                    !(await Context.auth.hasFullAccess(organization.id))
+                ) {
                     throw Context.auth.error($t('%15n'));
                 }
 
-                if (request.body.meta.noServiceFees && !(Context.user?.email.endsWith('@stamhoofd.be') || Context.user?.email.endsWith('@stamhoofd.nl'))) {
+                if (
+                    request.body.meta.noServiceFees &&
+                    !(
+                        Context.user?.email.endsWith('@stamhoofd.be') ||
+                        Context.user?.email.endsWith('@stamhoofd.nl')
+                    )
+                ) {
                     throw Context.auth.error($t('%ZrG'));
                 }
 
                 if (request.body.meta.recordCategories) {
-                    RecordAnswerHelper.throwIfPatchOrPutIsInvalid(webshop.meta.recordCategories, request.body.meta.recordCategories);
+                    RecordAnswerHelper.throwIfPatchOrPutIsInvalid(
+                        webshop.meta.recordCategories,
+                        request.body.meta.recordCategories,
+                    );
                 }
 
-                throwIfCustomerCategoryChangeIsInvalid(webshop.meta.customerSettings.recordCategory, request.body.meta.customerSettings?.recordCategory);
+                throwIfCustomerCategoryChangeIsInvalid(
+                    webshop.meta.customerSettings.recordCategory,
+                    request.body.meta.customerSettings?.recordCategory,
+                );
 
                 webshop.meta.patchOrPut(request.body.meta);
             }
@@ -82,10 +97,16 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
 
             if (request.body.products) {
                 // Saved questions per participant can't change to an incompatible type
-                const changedProducts = [...request.body.products.getPatches(), ...request.body.products.getPuts().map(p => p.put)];
+                const changedProducts = [
+                    ...request.body.products.getPatches(),
+                    ...request.body.products.getPuts().map((p) => p.put),
+                ];
                 for (const changed of changedProducts) {
-                    const original = webshop.products.find(p => p.id === changed.id);
-                    throwIfCustomerCategoryChangeIsInvalid(original?.customerSettings?.recordCategory ?? null, changed.customerSettings?.recordCategory);
+                    const original = webshop.products.find((p) => p.id === changed.id);
+                    throwIfCustomerCategoryChangeIsInvalid(
+                        original?.customerSettings?.recordCategory ?? null,
+                        changed.customerSettings?.recordCategory,
+                    );
                 }
 
                 webshop.products = request.body.products.applyTo(webshop.products);
@@ -102,21 +123,27 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                     if (cleaned !== webshop.domain) {
                         webshop.domain = cleaned;
                         webshop.meta.domainActive = false;
-                        webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(cleaned);
+                        webshop.privateMeta.dnsRecords =
+                            WebshopPrivateMetaData.buildDNSRecords(cleaned);
 
                         // Check if this is a known domain
                         const knownWebshops = await Webshop.getByDomainOnly(cleaned);
 
                         if (knownWebshops.length > 0) {
-                            const active = !!knownWebshops.find(k => k.meta.domainActive);
+                            const active = !!knownWebshops.find((k) => k.meta.domainActive);
 
                             if (active) {
-                                const sameOrg = knownWebshops.find(w => w.organizationId === organization.id);
-                                const otherOrg = knownWebshops.find(w => w.organizationId !== organization.id);
+                                const sameOrg = knownWebshops.find(
+                                    (w) => w.organizationId === organization.id,
+                                );
+                                const otherOrg = knownWebshops.find(
+                                    (w) => w.organizationId !== organization.id,
+                                );
                                 if (otherOrg && !sameOrg) {
                                     throw new SimpleError({
                                         code: 'domain_already_used',
-                                        message: 'This domain is already used by another organization',
+                                        message:
+                                            'This domain is already used by another organization',
                                         human: $t('%FM'),
                                         statusCode: 400,
                                     });
@@ -124,7 +151,11 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
 
                                 // Automatically update the dns records already.
                                 // This domain was already used, so no risk of making DNS-caches dirty
-                                console.log('Automatically updating dns records for', cleaned, 'during patch');
+                                console.log(
+                                    'Automatically updating dns records for',
+                                    cleaned,
+                                    'during patch',
+                                );
                                 await webshop.updateDNSRecords();
                             }
                         }
@@ -219,7 +250,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
             }
 
             // Verify if we still have full access
-            if (!await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+            if (!(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full))) {
                 throw new SimpleError({
                     code: 'missing_permissions',
                     message: 'You cannot restrict your own permissions',
@@ -255,7 +286,10 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
 /**
  * The questions per person are stored in a single category: compare it like a list of one category.
  */
-function throwIfCustomerCategoryChangeIsInvalid(original: RecordCategory | null, change: RecordCategory | AutoEncoderPatchType<RecordCategory> | null | undefined) {
+function throwIfCustomerCategoryChangeIsInvalid(
+    original: RecordCategory | null,
+    change: RecordCategory | AutoEncoderPatchType<RecordCategory> | null | undefined,
+) {
     if (!original || !change) {
         return;
     }

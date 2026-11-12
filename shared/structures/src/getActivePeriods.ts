@@ -6,12 +6,19 @@ type NamedPeriod = {
     id: string;
 };
 
-type PeriodDetails = Pick<RegistrationPeriodBase, 'id' | 'name' | 'startDate' | 'endDate' | 'nextPeriodId' | 'previousPeriodId'>;
+type PeriodDetails = Pick<
+    RegistrationPeriodBase,
+    'id' | 'name' | 'startDate' | 'endDate' | 'nextPeriodId' | 'previousPeriodId'
+>;
 
 type OrganizationPeriodSource = { period: { period: PeriodDetails } };
 type PlatformPeriodSource = { period: PeriodDetails };
 
-export function getActivePeriods(period: NamedPeriod | null, organization: OrganizationPeriodSource | null, platform: PlatformPeriodSource | null = null): NamedPeriod[] {
+export function getActivePeriods(
+    period: NamedPeriod | null,
+    organization: OrganizationPeriodSource | null,
+    platform: PlatformPeriodSource | null = null,
+): NamedPeriod[] {
     const periods = new Map<string, NamedPeriod>();
 
     if (period) {
@@ -23,7 +30,10 @@ export function getActivePeriods(period: NamedPeriod | null, organization: Organ
 
         // If the organization period is ending within 2 months, also check the next period id
         const twoMonthsFromNow = Formatter.luxon().plus({ months: 2 }).toJSDate();
-        if (organization.period.period.endDate <= twoMonthsFromNow && organization.period.period.nextPeriodId) {
+        if (
+            organization.period.period.endDate <= twoMonthsFromNow &&
+            organization.period.period.nextPeriodId
+        ) {
             periods.set(organization.period.period.nextPeriodId, {
                 id: organization.period.period.nextPeriodId,
                 name: $t('%ZbX'),
@@ -31,7 +41,10 @@ export function getActivePeriods(period: NamedPeriod | null, organization: Organ
         }
         // If the organization period has only been active for less than 2 months, also check the previous period id
         const twoMonthsAgo = Formatter.luxon().minus({ months: 2 }).toJSDate();
-        if (organization.period.period.startDate >= twoMonthsAgo && organization.period.period.previousPeriodId) {
+        if (
+            organization.period.period.startDate >= twoMonthsAgo &&
+            organization.period.period.previousPeriodId
+        ) {
             periods.set(organization.period.period.previousPeriodId, {
                 id: organization.period.period.previousPeriodId,
                 name: $t('%Zbb'),
@@ -62,6 +75,14 @@ export function getActivePeriods(period: NamedPeriod | null, organization: Organ
     return [...periods.values()];
 }
 
-export function getActivePeriodIds(periodId: string | null, organization: OrganizationPeriodSource | null, platform: PlatformPeriodSource | null = null): string[] {
-    return getActivePeriods(periodId ? { id: periodId, name: '' } : null, organization, platform).map(p => p.id);
+export function getActivePeriodIds(
+    periodId: string | null,
+    organization: OrganizationPeriodSource | null,
+    platform: PlatformPeriodSource | null = null,
+): string[] {
+    return getActivePeriods(
+        periodId ? { id: periodId, name: '' } : null,
+        organization,
+        platform,
+    ).map((p) => p.id);
 }

@@ -1,5 +1,18 @@
 import type { Data, Decoder, EncodeContext } from '@common/encoding';
-import { addPropertyField, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EncodeMedium, field, IntegerDecoder, MapDecoder, NullableDecoder, PatchMapDecoder, StringDecoder } from '@common/encoding';
+import {
+    addPropertyField,
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EncodeMedium,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    NullableDecoder,
+    PatchMapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { isSimpleError, SimpleError } from '@common/errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,7 +25,13 @@ import { File } from '../../files/File.js';
 import { Image } from '../../files/Image.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';
-import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
+import {
+    RecordChoice,
+    RecordSettings,
+    RecordType,
+    RecordWarning,
+    RecordWarningType,
+} from './RecordSettings.js';
 
 export class RecordAnswer extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
@@ -71,16 +90,18 @@ export class RecordAnswer extends AutoEncoder {
     }
 
     get excelValues(): CellValue[] {
-        return [{
-            value: this.stringValue,
-            style: this.stringValue.includes('\n')
-                ? {
-                        alignment: {
-                            wrapText: true,
-                        },
-                    }
-                : undefined,
-        }];
+        return [
+            {
+                value: this.stringValue,
+                style: this.stringValue.includes('\n')
+                    ? {
+                          alignment: {
+                              wrapText: true,
+                          },
+                      }
+                    : undefined,
+            },
+        ];
     }
 
     getWarnings(): RecordWarning[] {
@@ -160,20 +181,29 @@ export class RecordAnswerDecoderStatic implements Decoder<RecordAnswer> {
 
     getClassForType(type: RecordType): typeof RecordAnswer {
         switch (type) {
-            case RecordType.Checkbox: return RecordCheckboxAnswer;
+            case RecordType.Checkbox:
+                return RecordCheckboxAnswer;
             case RecordType.Text:
             case RecordType.Phone:
             case RecordType.Email:
             case RecordType.Textarea:
                 return RecordTextAnswer;
-            case RecordType.MultipleChoice: return RecordMultipleChoiceAnswer;
-            case RecordType.ChooseOne: return RecordChooseOneAnswer;
-            case RecordType.Address: return RecordAddressAnswer;
-            case RecordType.Date: return RecordDateAnswer;
-            case RecordType.Price: return RecordPriceAnswer;
-            case RecordType.Image: return RecordImageAnswer;
-            case RecordType.Integer: return RecordIntegerAnswer;
-            case RecordType.File: return RecordFileAnswer;
+            case RecordType.MultipleChoice:
+                return RecordMultipleChoiceAnswer;
+            case RecordType.ChooseOne:
+                return RecordChooseOneAnswer;
+            case RecordType.Address:
+                return RecordAddressAnswer;
+            case RecordType.Date:
+                return RecordDateAnswer;
+            case RecordType.Price:
+                return RecordPriceAnswer;
+            case RecordType.Image:
+                return RecordImageAnswer;
+            case RecordType.Integer:
+                return RecordIntegerAnswer;
+            case RecordType.File:
+                return RecordFileAnswer;
         }
     }
 }
@@ -225,7 +255,11 @@ class RecordAnswerMapDecoderStatic extends MapDecoder<string, RecordAnswer> {
         return PatchRecordAnswerMapDecoder;
     }
 
-    override decodeField(value: unknown, context: EncodeContext, currentField?: string): Map<string, RecordAnswer> {
+    override decodeField(
+        value: unknown,
+        context: EncodeContext,
+        currentField?: string,
+    ): Map<string, RecordAnswer> {
         const response = super.decodeField(value, context, currentField);
 
         for (const [key, value] of response) {
@@ -268,9 +302,13 @@ export class RecordTextAnswer extends RecordAnswer {
             return base;
         }
         if (this.settings.warning.inverted) {
-            return this.value === null || this.value.length === 0 ? [this.settings.warning, ...base] : base;
+            return this.value === null || this.value.length === 0
+                ? [this.settings.warning, ...base]
+                : base;
         }
-        return this.value !== null && this.value.length > 0 ? [this.settings.warning, ...base] : base;
+        return this.value !== null && this.value.length > 0
+            ? [this.settings.warning, ...base]
+            : base;
     }
 
     override validate() {
@@ -297,7 +335,7 @@ export class RecordTextAnswer extends RecordAnswer {
     }
 
     get isEmpty() {
-        return (this.value === null || this.value.length === 0);
+        return this.value === null || this.value.length === 0;
     }
 }
 
@@ -328,10 +366,12 @@ export class RecordCheckboxAnswer extends RecordAnswer {
     }
 
     get excelValues() {
-        return [{
-            value: this.selected ? (this.comments ? this.comments : $t('%wo')) : $t('%18s'),
-            format: null,
-        }];
+        return [
+            {
+                value: this.selected ? (this.comments ? this.comments : $t('%wo')) : $t('%18s'),
+                format: null,
+            },
+        ];
     }
 
     override validate() {
@@ -354,11 +394,11 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
     selectedChoices: RecordChoice[] = [];
 
     get stringValue() {
-        return this.selectedChoices.map(c => c.name).join(', ');
+        return this.selectedChoices.map((c) => c.name).join(', ');
     }
 
     get objectValue() {
-        return this.selectedChoices.map(c => c.id);
+        return this.selectedChoices.map((c) => c.id);
     }
 
     getWarnings(): RecordWarning[] {
@@ -377,7 +417,7 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
 
         for (const choice of this.settings.choices) {
             if (choice.warning && choice.warning.inverted) {
-                if (!this.selectedChoices.find(s => s.id === choice.id)) {
+                if (!this.selectedChoices.find((s) => s.id === choice.id)) {
                     warnings.push(choice.warning);
                 }
             }
@@ -556,13 +596,15 @@ export class RecordIntegerAnswer extends RecordAnswer {
             return base;
         }
         if (this.settings.warning.inverted) {
-            return this.value === null || this.value === 0 ? [this.settings.warning, ...base] : base;
+            return this.value === null || this.value === 0
+                ? [this.settings.warning, ...base]
+                : base;
         }
         return this.value !== null && this.value !== 0 ? [this.settings.warning, ...base] : base;
     }
 
     override validate() {
-        if (this.settings.required && (this.value === null)) {
+        if (this.settings.required && this.value === null) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: $t('%qt'),
@@ -572,7 +614,7 @@ export class RecordIntegerAnswer extends RecordAnswer {
     }
 
     get isEmpty() {
-        return (this.value === null);
+        return this.value === null;
     }
 }
 
@@ -595,13 +637,15 @@ export class RecordPriceAnswer extends RecordAnswer {
             return base;
         }
         if (this.settings.warning.inverted) {
-            return this.value === null || this.value === 0 ? [this.settings.warning, ...base] : base;
+            return this.value === null || this.value === 0
+                ? [this.settings.warning, ...base]
+                : base;
         }
         return this.value !== null && this.value !== 0 ? [this.settings.warning, ...base] : base;
     }
 
     override validate() {
-        if (this.settings.required && (this.value === null)) {
+        if (this.settings.required && this.value === null) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: $t('%qt'),
@@ -611,7 +655,7 @@ export class RecordPriceAnswer extends RecordAnswer {
     }
 
     get isEmpty() {
-        return (this.value === null);
+        return this.value === null;
     }
 }
 

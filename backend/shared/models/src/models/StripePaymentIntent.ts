@@ -6,7 +6,9 @@ export class StripePaymentIntent extends QueryableModel {
     static table = 'stripe_payment_intents';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })

@@ -29,9 +29,7 @@ export function $equalsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilter
                     new SQLJsonSearch(
                         new SQLLower(column.expression),
                         'one',
-                        scalarToSQLExpression(
-                            SQLWhereLike.escape(value),
-                        ),
+                        scalarToSQLExpression(SQLWhereLike.escape(value)),
                     ),
                     SQLWhereSign.NotEqual,
                     new SQLNull(),
@@ -47,11 +45,7 @@ export function $equalsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilter
             if (value === null) {
                 where = new SQLWhereOr([
                     where,
-                    new SQLWhereEqual(
-                        column.expression,
-                        SQLWhereSign.Equal,
-                        new SQLNull(),
-                    ),
+                    new SQLWhereEqual(column.expression, SQLWhereSign.Equal, new SQLNull()),
                 ]);
             }
 

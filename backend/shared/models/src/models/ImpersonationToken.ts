@@ -53,7 +53,8 @@ export class ImpersonationToken extends QueryableModel {
     expiresAt: Date;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -65,7 +66,8 @@ export class ImpersonationToken extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -74,7 +76,12 @@ export class ImpersonationToken extends QueryableModel {
     })
     updatedAt: Date;
 
-    static async createFor(data: { userId: string; impersonatedUserId: string; organizationId: string | null; ip: string }): Promise<ImpersonationToken> {
+    static async createFor(data: {
+        userId: string;
+        impersonatedUserId: string;
+        organizationId: string | null;
+        ip: string;
+    }): Promise<ImpersonationToken> {
         // Only one outstanding ticket per administrator: asking for a new link invalidates
         // the previous one, so an abandoned link cannot be picked up later.
         await this.delete().where('userId', data.userId).delete();
@@ -99,7 +106,9 @@ export class ImpersonationToken extends QueryableModel {
      * hand out one session, even when two requests arrive at the same time.
      */
     async consume(): Promise<boolean> {
-        const { affectedRows } = await ImpersonationToken.delete().where('token', this.token).delete();
+        const { affectedRows } = await ImpersonationToken.delete()
+            .where('token', this.token)
+            .delete();
         return affectedRows === 1;
     }
 
@@ -127,7 +136,9 @@ export class ImpersonationToken extends QueryableModel {
      * expiring, but one that is never opened would stay behind forever.
      */
     static async deleteExpired(): Promise<number> {
-        const { affectedRows } = await this.delete().where('expiresAt', SQLWhereSign.Less, new Date()).delete();
+        const { affectedRows } = await this.delete()
+            .where('expiresAt', SQLWhereSign.Less, new Date())
+            .delete();
         return affectedRows;
     }
 }

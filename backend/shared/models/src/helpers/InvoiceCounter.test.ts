@@ -5,7 +5,9 @@ import { Invoice } from '../models/Invoice.js';
 import { OrganizationFactory } from '../factories/OrganizationFactory.js';
 
 // Minimal settings factory
-function makeSettings(overrides: Partial<OrganizationInvoiceSettings> = {}): OrganizationInvoiceSettings {
+function makeSettings(
+    overrides: Partial<OrganizationInvoiceSettings> = {},
+): OrganizationInvoiceSettings {
     return OrganizationInvoiceSettings.create({
         resetMonth: null,
         prefixYear: false,
@@ -233,7 +235,9 @@ describe('InvoiceCounter.assignNextNumber', () => {
 
     it('formats receipt numbers with the year but without the organization prefix', async () => {
         const settings = makeSettings({ fixedPrefix: 'STA', prefixYear: true });
-        const number = InvoiceCounter.formatNumber(settings, 7, new Date('2025-06-15T12:00:00Z'), { isReceipt: true });
+        const number = InvoiceCounter.formatNumber(settings, 7, new Date('2025-06-15T12:00:00Z'), {
+            isReceipt: true,
+        });
         expect(number).toBe('BON-2025000007');
         expect(InvoiceCounter.parseNumber(settings, number)).toBe(7);
     });

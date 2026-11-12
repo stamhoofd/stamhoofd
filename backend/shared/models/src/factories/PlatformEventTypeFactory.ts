@@ -11,7 +11,9 @@ class Options {
 export class PlatformEventTypeFactory extends Factory<Options, PlatformEventType> {
     async create(): Promise<PlatformEventType> {
         const eventType = PlatformEventType.create({
-            name: this.options.name ?? ('Responsibility ' + (new Date().getTime() + Math.floor(Math.random() * 999999))),
+            name:
+                this.options.name ??
+                'Responsibility ' + (new Date().getTime() + Math.floor(Math.random() * 999999)),
         });
 
         if (this.options.maximum !== undefined) {

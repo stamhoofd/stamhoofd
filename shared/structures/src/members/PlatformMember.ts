@@ -1,4 +1,8 @@
-import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@common/encoding';
+import type {
+    AutoEncoderPatchType,
+    PartialWithoutMethods,
+    PatchableArrayAutoEncoder,
+} from '@common/encoding';
 import { deepSetArray, PatchableArray } from '@common/encoding';
 
 import { AccessRight } from '@stamhoofd/types/AccessRight';
@@ -76,12 +80,14 @@ export class PlatformFamily {
         }
 
         // Sort by createdAt, so the oldest member is first
-        const sorted = this.members.sort((a, b) => a.member.createdAt.getTime() - b.member.createdAt.getTime());
+        const sorted = this.members.sort(
+            (a, b) => a.member.createdAt.getTime() - b.member.createdAt.getTime(),
+        );
         return sorted[0].id;
     }
 
     insertOrganization(organization: Organization) {
-        const existing = this.organizations.find(o => o.id === organization.id);
+        const existing = this.organizations.find((o) => o.id === organization.id);
         if (existing) {
             // Deep set, because this might be the context organization
             if (existing !== organization) {
@@ -93,11 +99,11 @@ export class PlatformFamily {
     }
 
     getOrganization(id: string) {
-        const b = this.organizations.find(o => o.id === id);
+        const b = this.organizations.find((o) => o.id === id);
         if (b) {
             return b;
         }
-        const q = this.pendingRegisterItems.find(i => i.organization.id === id);
+        const q = this.pendingRegisterItems.find((i) => i.organization.id === id);
         if (q) {
             return q.organization;
         }
@@ -108,7 +114,10 @@ export class PlatformFamily {
         }
     }
 
-    static create(blob: MembersBlob, context: { contextOrganization?: Organization | null; platform: Platform }): PlatformFamily {
+    static create(
+        blob: MembersBlob,
+        context: { contextOrganization?: Organization | null; platform: Platform },
+    ): PlatformFamily {
         const family = new PlatformFamily(context);
         family.insertFromBlob(blob);
         return family;
@@ -120,7 +129,7 @@ export class PlatformFamily {
         }
 
         for (const member of blob.members) {
-            const existing = this.members.find(m => m.id === member.id);
+            const existing = this.members.find((m) => m.id === member.id);
             if (existing) {
                 existing.member.deepSet(member);
                 continue;
@@ -135,7 +144,10 @@ export class PlatformFamily {
 
         if (removeMissing) {
             // Keep same array reference
-            deepSetArray(this.members, this.members.filter(m => blob.members.find(b => b.id === m.id)));
+            deepSetArray(
+                this.members,
+                this.members.filter((m) => blob.members.find((b) => b.id === m.id)),
+            );
         }
     }
 
@@ -162,7 +174,7 @@ export class PlatformFamily {
         }
 
         for (const member of blob.members) {
-            const existing = this.members.find(m => m.id === member.id);
+            const existing = this.members.find((m) => m.id === member.id);
             if (existing) {
                 existing.member.deepSet(member);
                 existing.cacheMap = {};
@@ -184,7 +196,10 @@ export class PlatformFamily {
         return member;
     }
 
-    static createSingles(blob: MembersBlob, context: { contextOrganization?: Organization | null; platform: Platform }): PlatformMember[] {
+    static createSingles(
+        blob: MembersBlob,
+        context: { contextOrganization?: Organization | null; platform: Platform },
+    ): PlatformMember[] {
         const memberList: PlatformMember[] = [];
 
         for (const member of blob.members) {
@@ -192,7 +207,7 @@ export class PlatformFamily {
             family._isSingle = true;
 
             if (member.organizationId) {
-                const organization = blob.organizations.find(o => o.id === member.organizationId);
+                const organization = blob.organizations.find((o) => o.id === member.organizationId);
                 if (organization) {
                     family.insertOrganization(organization);
                 } else {
@@ -200,8 +215,14 @@ export class PlatformFamily {
                 }
             } else {
                 for (const organization of blob.organizations) {
-                // Check if this organization is relevant to this member
-                    if (member.registrations.find(r => r.organizationId === organization.id) || member.platformMemberships.find(m => m.organizationId === organization.id) || member.responsibilities.find(r => r.organizationId === organization.id)) {
+                    // Check if this organization is relevant to this member
+                    if (
+                        member.registrations.find((r) => r.organizationId === organization.id) ||
+                        member.platformMemberships.find(
+                            (m) => m.organizationId === organization.id,
+                        ) ||
+                        member.responsibilities.find((r) => r.organizationId === organization.id)
+                    ) {
                         family.insertOrganization(organization);
                     }
                 }
@@ -228,14 +249,19 @@ export class PlatformFamily {
         family.organizations = this.organizations;
         family.checkout = this.checkout;
         family.pendingRegisterItems = this.pendingRegisterItems;
-        family.members = this.members.map(m => m._cloneWithFamily(family));
+        family.members = this.members.map((m) => m._cloneWithFamily(family));
         return family;
     }
 
     copyFromClone(clone: PlatformFamily) {
         for (const member of this.members) {
-            const cloneMember = clone.members.find(m => m.id === member.id)
-                ?? clone.members.find(m => m.member.details.oldIds.includes(member.id) || member.member.details.oldIds.includes(m.id));
+            const cloneMember =
+                clone.members.find((m) => m.id === member.id) ??
+                clone.members.find(
+                    (m) =>
+                        m.member.details.oldIds.includes(member.id) ||
+                        member.member.details.oldIds.includes(m.id),
+                );
 
             if (cloneMember) {
                 member.member.deepSet(cloneMember.member);
@@ -253,21 +279,24 @@ export class PlatformFamily {
         }
 
         for (const c of clone.members) {
-            const member = this.members.find(m => m.id === c.id);
+            const member = this.members.find((m) => m.id === c.id);
             if (!member) {
                 this.members.push(c._cloneWithFamily(this));
             }
         }
 
         // Delete members that are not in the clone
-        this.members = this.members.filter(m => clone.members.find(c => c.id === m.id));
+        this.members = this.members.filter((m) => clone.members.find((c) => c.id === m.id));
 
         for (const o of clone.organizations) {
             this.insertOrganization(o);
         }
     }
 
-    getAddressOccurrences(address: Address, skip?: { memberId?: string; parentId?: string }): string[] {
+    getAddressOccurrences(
+        address: Address,
+        skip?: { memberId?: string; parentId?: string },
+    ): string[] {
         const occurrences = new Set<string>();
 
         const searchString = address.toString();
@@ -299,12 +328,18 @@ export class PlatformFamily {
         const addresses = new Map<string, Address>();
         for (const member of this.members) {
             if (member.member.details.address) {
-                addresses.set(member.member.details.address.toString(), member.member.details.address);
+                addresses.set(
+                    member.member.details.address.toString(),
+                    member.member.details.address,
+                );
             }
 
             if (!skip.memberId || member.id !== skip.memberId) {
                 if (member.patchedMember.details.address) {
-                    addresses.set(member.patchedMember.details.address.toString(), member.patchedMember.details.address);
+                    addresses.set(
+                        member.patchedMember.details.address.toString(),
+                        member.patchedMember.details.address,
+                    );
                 }
             }
 
@@ -334,11 +369,17 @@ export class PlatformFamily {
         const addresses = new Map<string, Address>();
         for (const member of this.members) {
             if (member.member.details.address) {
-                addresses.set(member.member.details.address.toString(), member.member.details.address);
+                addresses.set(
+                    member.member.details.address.toString(),
+                    member.member.details.address,
+                );
             }
 
             if (member.patchedMember.details.address) {
-                addresses.set(member.patchedMember.details.address.toString(), member.patchedMember.details.address);
+                addresses.set(
+                    member.patchedMember.details.address.toString(),
+                    member.patchedMember.details.address,
+                );
             }
 
             for (const parent of member.member.details.parents) {
@@ -390,19 +431,25 @@ export class PlatformFamily {
     /// Update all references to this parent (with same id)
     patchParent(parent: AutoEncoderPatchType<Parent>) {
         for (const member of this.members) {
-            if (member.patchedMember.details.parents.find(p => p.id === parent.id)) {
+            if (member.patchedMember.details.parents.find((p) => p.id === parent.id)) {
                 member.patchParent(parent);
             }
         }
     }
 
     getMembersForParent(parent: Parent) {
-        return this.members.filter(m => m.patchedMember.details.parents.find(p => p.id === parent.id));
+        return this.members.filter((m) =>
+            m.patchedMember.details.parents.find((p) => p.id === parent.id),
+        );
     }
 
     patchEmergencyContact(emergencyContact: AutoEncoderPatchType<EmergencyContact>) {
         for (const member of this.members) {
-            if (member.patchedMember.details.emergencyContacts.find(p => p.id === emergencyContact.id)) {
+            if (
+                member.patchedMember.details.emergencyContacts.find(
+                    (p) => p.id === emergencyContact.id,
+                )
+            ) {
                 member.patchEmergencyContact(emergencyContact);
             }
         }
@@ -427,7 +474,11 @@ export class PlatformFamily {
         const periodIdsArray = [...periodIds];
 
         for (const member of this.members) {
-            for (const group of member.filterGroups({ types: [GroupType.Membership], periodIds: periodIdsArray, includePending: true })) {
+            for (const group of member.filterGroups({
+                types: [GroupType.Membership],
+                periodIds: periodIdsArray,
+                includePending: true,
+            })) {
                 if (!groupIds.has(group.id)) {
                     groupIds.add(group.id);
                     groups.push(group);
@@ -446,12 +497,16 @@ export class PlatformFamily {
                 }
 
                 if (member.patchedMember.details.age) {
-                    const d = member.patchedMember.details.trackedAgeForYear(new Date().getFullYear());
+                    const d = member.patchedMember.details.trackedAgeForYear(
+                        new Date().getFullYear(),
+                    );
                     if (d !== null) {
                         ages.add(d);
                     }
 
-                    const d2 = member.patchedMember.details.trackedAgeForYear(new Date(Date.now() + 1000 * 60 * 60 * 24 * 31 * 6).getFullYear());
+                    const d2 = member.patchedMember.details.trackedAgeForYear(
+                        new Date(Date.now() + 1000 * 60 * 60 * 24 * 31 * 6).getFullYear(),
+                    );
                     if (d2 !== null) {
                         ages.add(d2);
                     }
@@ -484,7 +539,8 @@ export class PlatformFamily {
                                 name: g.settings.name.toString(),
                                 value: g.id,
                             };
-                        })],
+                        }),
+                    ],
                 },
             });
         }
@@ -515,18 +571,13 @@ export class PlatformFamily {
 
         if (ages.size) {
             filter.push({
-                $or: [...ages].sort().map(age => ({
+                $or: [...ages].sort().map((age) => ({
                     $and: [
                         {
-                            $or: [
-                                { minAge: { $lte: age } },
-                            ],
+                            $or: [{ minAge: { $lte: age } }],
                         },
                         {
-                            $or: [
-                                { maxAge: null },
-                                { maxAge: { $gte: age } },
-                            ],
+                            $or: [{ maxAge: null }, { maxAge: { $gte: age } }],
                         },
                     ],
                 })),
@@ -537,7 +588,7 @@ export class PlatformFamily {
     }
 
     deleteMember(id: string) {
-        this.members = this.members.filter(m => m.id !== id);
+        this.members = this.members.filter((m) => m.id !== id);
     }
 
     setDocuments(documents: DocumentStruct[]) {
@@ -545,7 +596,7 @@ export class PlatformFamily {
     }
 
     belongsToFamily(member: MemberWithRegistrationsBlob): boolean {
-        const allUserIds = new Set(this.members.flatMap(m => m.member.users.map(u => u.id)));
+        const allUserIds = new Set(this.members.flatMap((m) => m.member.users.map((u) => u.id)));
 
         for (const user of member.users) {
             if (allUserIds.has(user.id)) {
@@ -557,7 +608,7 @@ export class PlatformFamily {
     }
 
     add(platformMember: PlatformMember) {
-        const existing = this.members.find(m => m.id === platformMember.id);
+        const existing = this.members.find((m) => m.id === platformMember.id);
         if (!existing) {
             this.members.push(platformMember);
         }
@@ -577,7 +628,10 @@ export class PlatformRegistration extends Registration {
         this.member.family.copyFromClone(object.member.family);
     }
 
-    static createSingles(blob: RegistrationsBlob, context: { contextOrganization?: Organization | null; platform: Platform }): PlatformRegistration[] {
+    static createSingles(
+        blob: RegistrationsBlob,
+        context: { contextOrganization?: Organization | null; platform: Platform },
+    ): PlatformRegistration[] {
         const results: PlatformRegistration[] = [];
 
         for (const registration of blob.registrations) {
@@ -586,7 +640,11 @@ export class PlatformRegistration extends Registration {
 
             for (const organization of blob.organizations) {
                 // Check if this organization is relevant to this member
-                if (member.registrations.find(r => r.organizationId === organization.id) || member.platformMemberships.find(m => m.organizationId === organization.id) || member.responsibilities.find(r => r.organizationId === organization.id)) {
+                if (
+                    member.registrations.find((r) => r.organizationId === organization.id) ||
+                    member.platformMemberships.find((m) => m.organizationId === organization.id) ||
+                    member.responsibilities.find((r) => r.organizationId === organization.id)
+                ) {
                     family.insertOrganization(organization);
                 }
             }
@@ -611,7 +669,9 @@ export class PlatformRegistration extends Registration {
         return results;
     }
 
-    getMissingData(options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel } }) {
+    getMissingData(options?: {
+        checkPermissions?: { user: UserWithMembers; level: PermissionLevel };
+    }) {
         if (this.member.cacheMap.missingData) {
             return this.member.cacheMap.missingData;
         }
@@ -643,10 +703,17 @@ export class PlatformRegistration extends Registration {
             base.push($t('%za'));
         }
 
-        if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
+        if (
+            !details.nationalRegisterNumber &&
+            member.isPropertyRequired('nationalRegisterNumber', scope)
+        ) {
             base.push($t('%19Q'));
         } else {
-            if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('parents.nationalRegisterNumber', scope) && !member.hasRequiredParentNationalRegisterNumbers) {
+            if (
+                member.isPropertyRequired('parents', scope) &&
+                member.isPropertyRequired('parents.nationalRegisterNumber', scope) &&
+                !member.hasRequiredParentNationalRegisterNumbers
+            ) {
                 base.push($t('%zb'));
             }
         }
@@ -657,20 +724,25 @@ export class PlatformRegistration extends Registration {
             }
         }
 
-        if (details.emergencyContacts.length === 0 && member.isPropertyRequired('emergencyContacts', scope)) {
+        if (
+            details.emergencyContacts.length === 0 &&
+            member.isPropertyRequired('emergencyContacts', scope)
+        ) {
             base.push($t('%zd'));
         }
 
         const { categories: enabledCategories } = member.getEnabledRecordCategories(scope);
 
-        const incomplete = enabledCategories.filter(c => !c.isComplete(member));
-        const result = [...base, ...incomplete.map(c => c.name.toString())];
+        const incomplete = enabledCategories.filter((c) => !c.isComplete(member));
+        const result = [...base, ...incomplete.map((c) => c.name.toString())];
         this.member.cacheMap.missingData = result;
         return result;
     }
 
     isRecordEnabled(record: RecordSettings): boolean {
-        throw new Error('Never filter data with PlatformRegistration. You are doing something wrong. Use PlatformMember or Registration instead, to make it clear what you are filtering on.');
+        throw new Error(
+            'Never filter data with PlatformRegistration. You are doing something wrong. Use PlatformMember or Registration instead, to make it clear what you are filtering on.',
+        );
     }
 }
 
@@ -722,7 +794,7 @@ export class PlatformMember implements ObjectWithRecords {
 
     clone() {
         const family = this.family.clone();
-        return family.members.find(m => m.id === this.id)!;
+        return family.members.find((m) => m.id === this.id)!;
     }
 
     _cloneWithFamily(family: PlatformFamily) {
@@ -746,7 +818,7 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     get allGroups() {
-        return this.organizations.flatMap(o => o.groups);
+        return this.organizations.flatMap((o) => o.groups);
     }
 
     get isSaving() {
@@ -754,7 +826,9 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     get filteredMemberships() {
-        return this.patchedMember.platformMemberships.filter(t => !!this.organizations.find(o => o.id === t.organizationId));
+        return this.patchedMember.platformMemberships.filter(
+            (t) => !!this.organizations.find((o) => o.id === t.organizationId),
+        );
     }
 
     get membershipStatus() {
@@ -769,7 +843,13 @@ export class PlatformMember implements ObjectWithRecords {
         return this.patchedMember.details.shouldApplyReducedPrice;
     }
 
-    getContinuousMembershipStatus({ start, end }: { start: Date; end: Date }): ContinuousMembershipStatus {
+    getContinuousMembershipStatus({
+        start,
+        end,
+    }: {
+        start: Date;
+        end: Date;
+    }): ContinuousMembershipStatus {
         return MemberPlatformMembershipHelper.getContinuousMembershipStatus({
             memberships: this.filteredMemberships,
             start,
@@ -820,7 +900,10 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     get platformRecordsConfiguration() {
-        return this.patchedMember.organizationId ? this.family.getOrganization(this.patchedMember.organizationId)?.meta.recordsConfiguration : this.platform.config.recordsConfiguration;
+        return this.patchedMember.organizationId
+            ? this.family.getOrganization(this.patchedMember.organizationId)?.meta
+                  .recordsConfiguration
+            : this.platform.config.recordsConfiguration;
     }
 
     /**
@@ -828,7 +911,7 @@ export class PlatformMember implements ObjectWithRecords {
      * Certificates are created a year after the fact, so registrations of the last two years still matter.
      */
     get taxDependentParents(): Parent[] {
-        return this.patchedMember.details.parents.filter(p => p.isMemberTaxDependent === true);
+        return this.patchedMember.details.parents.filter((p) => p.isMemberTaxDependent === true);
     }
 
     /**
@@ -840,7 +923,7 @@ export class PlatformMember implements ObjectWithRecords {
             return true;
         }
         const parents = this.taxDependentParents;
-        return parents.length > 0 && parents.every(p => !!p.nationalRegisterNumber);
+        return parents.length > 0 && parents.every((p) => !!p.nationalRegisterNumber);
     }
 
     /**
@@ -862,7 +945,10 @@ export class PlatformMember implements ObjectWithRecords {
             dates.push(registration.startDate ?? registration.group.settings.startDate);
         }
 
-        for (const item of [...this.family.checkout.cart.items, ...this.family.pendingRegisterItems]) {
+        for (const item of [
+            ...this.family.checkout.cart.items,
+            ...this.family.pendingRegisterItems,
+        ]) {
             if (item.member.id !== this.id) {
                 continue;
             }
@@ -907,8 +993,10 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     isPropertyEnabledForPlatform(property: MemberProperty) {
-        if ((property === 'financialSupport' || property === 'uitpasNumber')
-            && this.patchedMember.details.dataPermissions?.value === false) {
+        if (
+            (property === 'financialSupport' || property === 'uitpasNumber') &&
+            this.patchedMember.details.dataPermissions?.value === false
+        ) {
             return false;
         }
 
@@ -917,7 +1005,11 @@ export class PlatformMember implements ObjectWithRecords {
             return this.isPropertyEnabledForPlatform('parents.nationalRegisterNumber');
         }
 
-        if (property === 'dataPermission' || property === 'financialSupport' || property === 'taxCertificates') {
+        if (
+            property === 'dataPermission' ||
+            property === 'financialSupport' ||
+            property === 'taxCertificates'
+        ) {
             if (this.platformRecordsConfiguration?.[property]) {
                 return true;
             }
@@ -925,12 +1017,16 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         // Note: the raw 'taxCertificates' property, asking 'parents.isMemberTaxDependent' here would loop
-        const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
-            && this.isPropertyEnabledForPlatform('taxCertificates')
-            && this.needsTaxCertificate;
+        const forTaxCertificate =
+            (property === 'nationalRegisterNumber' ||
+                property === 'parents.nationalRegisterNumber') &&
+            this.isPropertyEnabledForPlatform('taxCertificates') &&
+            this.needsTaxCertificate;
 
         if (property === 'parents.nationalRegisterNumber') {
-            if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
+            if (
+                this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut
+            ) {
                 return false;
             }
             return forTaxCertificate;
@@ -957,14 +1053,22 @@ export class PlatformMember implements ObjectWithRecords {
      *
      * Returns false if checkPermissions is passed and the current user does not have access to the requested field.
      */
-    isPropertyEnabled(property: MemberProperty, options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel }; scopeGroups?: Group[] | null }) {
+    isPropertyEnabled(
+        property: MemberProperty,
+        options?: {
+            checkPermissions?: { user: UserWithMembers; level: PermissionLevel };
+            scopeGroups?: Group[] | null;
+        },
+    ) {
         if (property === 'parents.isMemberTaxDependent') {
             // Asked together with, and only for, the parent that supplies a national register number
             return this.isPropertyEnabled('parents.nationalRegisterNumber', options);
         }
 
         if (property === 'parents.nationalRegisterNumber') {
-            if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
+            if (
+                this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut
+            ) {
                 return false;
             }
             if (!this.isPropertyEnabled('taxCertificates', options)) {
@@ -974,18 +1078,40 @@ export class PlatformMember implements ObjectWithRecords {
             property = 'nationalRegisterNumber';
             // Continue for permission checking only
         }
-        if ((property === 'financialSupport' || property === 'uitpasNumber')
-            && this.patchedMember.details.dataPermissions?.value === false) {
+        if (
+            (property === 'financialSupport' || property === 'uitpasNumber') &&
+            this.patchedMember.details.dataPermissions?.value === false
+        ) {
             return false;
         }
 
-        if (options?.checkPermissions && (property === 'financialSupport' || property === 'uitpasNumber')) {
-            const isUserManager = options.checkPermissions.user.members.members.some(m => m.id === this.id);
+        if (
+            options?.checkPermissions &&
+            (property === 'financialSupport' || property === 'uitpasNumber')
+        ) {
+            const isUserManager = options.checkPermissions.user.members.members.some(
+                (m) => m.id === this.id,
+            );
             if (!isUserManager) {
                 // Need permission to view financial support
                 let foundPermissions = false;
-                for (const organization of this.filterOrganizations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups })) {
-                    if (options.checkPermissions.user.permissions?.forOrganization(organization, this.platform, options.checkPermissions.user.email)?.hasAccessRight(options.checkPermissions.level === PermissionLevel.Read ? AccessRight.MemberReadFinancialData : AccessRight.MemberWriteFinancialData)) {
+                for (const organization of this.filterOrganizations({
+                    currentPeriod: options?.scopeGroups ? undefined : true,
+                    groups: options?.scopeGroups,
+                })) {
+                    if (
+                        options.checkPermissions.user.permissions
+                            ?.forOrganization(
+                                organization,
+                                this.platform,
+                                options.checkPermissions.user.email,
+                            )
+                            ?.hasAccessRight(
+                                options.checkPermissions.level === PermissionLevel.Read
+                                    ? AccessRight.MemberReadFinancialData
+                                    : AccessRight.MemberWriteFinancialData,
+                            )
+                    ) {
                         foundPermissions = true;
                         break;
                     }
@@ -996,13 +1122,26 @@ export class PlatformMember implements ObjectWithRecords {
             }
         }
 
-        if (options?.checkPermissions && (property === 'nationalRegisterNumber')) {
-            const isUserManager = options.checkPermissions.user.members.members.some(m => m.id === this.id);
+        if (options?.checkPermissions && property === 'nationalRegisterNumber') {
+            const isUserManager = options.checkPermissions.user.members.members.some(
+                (m) => m.id === this.id,
+            );
             if (!isUserManager) {
                 // Need permission to view financial support
                 let foundPermissions = false;
-                for (const organization of this.filterOrganizations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups })) {
-                    if (options.checkPermissions.user.permissions?.forOrganization(organization, this.platform, options.checkPermissions.user.email)?.hasAccessRight(AccessRight.MemberManageNRN)) {
+                for (const organization of this.filterOrganizations({
+                    currentPeriod: options?.scopeGroups ? undefined : true,
+                    groups: options?.scopeGroups,
+                })) {
+                    if (
+                        options.checkPermissions.user.permissions
+                            ?.forOrganization(
+                                organization,
+                                this.platform,
+                                options.checkPermissions.user.email,
+                            )
+                            ?.hasAccessRight(AccessRight.MemberManageNRN)
+                    ) {
                         foundPermissions = true;
                         break;
                     }
@@ -1018,8 +1157,19 @@ export class PlatformMember implements ObjectWithRecords {
                 // Allow admins to enable severe disability if that would matter for tax certificates
                 if (options?.checkPermissions && this.needsTaxCertificateIfSevereDisability) {
                     let foundPermissions = false;
-                    for (const organization of this.filterOrganizations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups })) {
-                        if (options.checkPermissions.user.permissions?.forOrganization(organization, this.platform, options.checkPermissions.user.email)?.hasFullAccess()) {
+                    for (const organization of this.filterOrganizations({
+                        currentPeriod: options?.scopeGroups ? undefined : true,
+                        groups: options?.scopeGroups,
+                    })) {
+                        if (
+                            options.checkPermissions.user.permissions
+                                ?.forOrganization(
+                                    organization,
+                                    this.platform,
+                                    options.checkPermissions.user.email,
+                                )
+                                ?.hasFullAccess()
+                        ) {
                             foundPermissions = true;
                             break;
                         }
@@ -1034,7 +1184,10 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         // Collecting certificate data asks for the number regardless of the nationalRegisterNumber filter
-        if (property === 'nationalRegisterNumber' && this.isPropertyEnabled('taxCertificates', options)) {
+        if (
+            property === 'nationalRegisterNumber' &&
+            this.isPropertyEnabled('taxCertificates', options)
+        ) {
             return true;
         }
 
@@ -1051,7 +1204,11 @@ export class PlatformMember implements ObjectWithRecords {
         });
 
         for (const recordsConfiguration of recordsConfigurations) {
-            if (property === 'dataPermission' || property === 'financialSupport' || property === 'taxCertificates') {
+            if (
+                property === 'dataPermission' ||
+                property === 'financialSupport' ||
+                property === 'taxCertificates'
+            ) {
                 if (recordsConfiguration[property]) {
                     return true;
                 }
@@ -1082,12 +1239,16 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
-            && this.isPropertyEnabledForPlatform('taxCertificates')
-            && this.needsTaxCertificate;
+        const forTaxCertificate =
+            (property === 'nationalRegisterNumber' ||
+                property === 'parents.nationalRegisterNumber') &&
+            this.isPropertyEnabledForPlatform('taxCertificates') &&
+            this.needsTaxCertificate;
 
         if (property === 'parents.nationalRegisterNumber') {
-            if (this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
+            if (
+                this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut
+            ) {
                 return false;
             }
             property = 'nationalRegisterNumber';
@@ -1110,7 +1271,13 @@ export class PlatformMember implements ObjectWithRecords {
         return def.isRequired(this);
     }
 
-    isPropertyRequired(property: MemberProperty, options?: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel }; scopeGroups?: Group[] | null }) {
+    isPropertyRequired(
+        property: MemberProperty,
+        options?: {
+            checkPermissions?: { user: UserWithMembers; level: PermissionLevel };
+            scopeGroups?: Group[] | null;
+        },
+    ) {
         if (!this.isPropertyEnabled(property, options)) {
             return false;
         }
@@ -1120,15 +1287,20 @@ export class PlatformMember implements ObjectWithRecords {
             return false;
         }
 
-        const forTaxCertificate = (property === 'nationalRegisterNumber' || property === 'parents.nationalRegisterNumber')
-            && this.isPropertyEnabled('taxCertificates', options)
-            && this.needsTaxCertificate;
+        const forTaxCertificate =
+            (property === 'nationalRegisterNumber' ||
+                property === 'parents.nationalRegisterNumber') &&
+            this.isPropertyEnabled('taxCertificates', options) &&
+            this.needsTaxCertificate;
 
         if (property === 'parents.nationalRegisterNumber') {
             property = 'nationalRegisterNumber';
         }
 
-        if (property === 'nationalRegisterNumber' && this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut) {
+        if (
+            property === 'nationalRegisterNumber' &&
+            this.patchedMember.details.nationalRegisterNumber === NationalRegisterNumberOptOut
+        ) {
             // Not required for parents or member itself
             return false;
         }
@@ -1138,7 +1310,10 @@ export class PlatformMember implements ObjectWithRecords {
             return true;
         }
 
-        const recordsConfigurations = this.filterRecordsConfigurations({ currentPeriod: options?.scopeGroups ? undefined : true, groups: options?.scopeGroups });
+        const recordsConfigurations = this.filterRecordsConfigurations({
+            currentPeriod: options?.scopeGroups ? undefined : true,
+            groups: options?.scopeGroups,
+        });
 
         for (const recordsConfiguration of recordsConfigurations) {
             const def = recordsConfiguration[property];
@@ -1229,7 +1404,7 @@ export class PlatformMember implements ObjectWithRecords {
                 }
             }
 
-            if (filters.groups && !filters.groups.find(g => g.id === r.groupId)) {
+            if (filters.groups && !filters.groups.find((g) => g.id === r.groupId)) {
                 return false;
             }
 
@@ -1237,19 +1412,26 @@ export class PlatformMember implements ObjectWithRecords {
                 return false;
             }
 
-            if (filters.defaultAgeGroupIds && (!r.group.defaultAgeGroupId || !filters.defaultAgeGroupIds.includes(r.group.defaultAgeGroupId))) {
+            if (
+                filters.defaultAgeGroupIds &&
+                (!r.group.defaultAgeGroupId ||
+                    !filters.defaultAgeGroupIds.includes(r.group.defaultAgeGroupId))
+            ) {
                 return false;
             }
 
             if (filters.currentPeriod !== undefined) {
                 const organization = this.family.getOrganization(r.organizationId);
-                const isCurrentPeriod = !!organization && r.group.periodId === organization.period.period.id;
+                const isCurrentPeriod =
+                    !!organization && r.group.periodId === organization.period.period.id;
 
                 if (isCurrentPeriod !== filters.currentPeriod) {
                     if (!(filters.includeFuture ?? true) || r.group.settings.endDate < new Date()) {
                         if (filters.previousPeriod) {
                             // Previous period is also fine
-                            const isPreviousPeriod = !!organization && r.group.periodId === organization.period.period.previousPeriodId;
+                            const isPreviousPeriod =
+                                !!organization &&
+                                r.group.periodId === organization.period.period.previousPeriodId;
                             if (!isPreviousPeriod) {
                                 return false;
                             }
@@ -1262,7 +1444,9 @@ export class PlatformMember implements ObjectWithRecords {
                 const organization = this.family.getOrganization(r.organizationId);
 
                 // Previous period is also fine
-                const isPreviousPeriod = !!organization && r.group.periodId === organization.period.period.previousPeriodId;
+                const isPreviousPeriod =
+                    !!organization &&
+                    r.group.periodId === organization.period.period.previousPeriodId;
                 if (!isPreviousPeriod) {
                     return false;
                 }
@@ -1300,7 +1484,7 @@ export class PlatformMember implements ObjectWithRecords {
         const base: Group[] = [];
 
         for (const registration of registrations) {
-            if (base.find(g => g.id === registration.groupId)) {
+            if (base.find((g) => g.id === registration.groupId)) {
                 continue;
             }
 
@@ -1309,7 +1493,10 @@ export class PlatformMember implements ObjectWithRecords {
 
         // Loop checkout
         if (filters.includePending) {
-            for (const item of [...this.family.checkout.cart.items, ...this.family.pendingRegisterItems]) {
+            for (const item of [
+                ...this.family.checkout.cart.items,
+                ...this.family.pendingRegisterItems,
+            ]) {
                 if (item.member.id === this.id) {
                     if (filters.currentPeriod === false) {
                         continue;
@@ -1333,7 +1520,7 @@ export class PlatformMember implements ObjectWithRecords {
                         }
                     }
 
-                    if (!base.find(g => g.id === item.group.id)) {
+                    if (!base.find((g) => g.id === item.group.id)) {
                         base.push(item.group);
                     }
                 }
@@ -1378,9 +1565,7 @@ export class PlatformMember implements ObjectWithRecords {
                 includeGroup: true,
             });
 
-            configurations.push(
-                c,
-            );
+            configurations.push(c);
         }
 
         if (configurations.length === 0) {
@@ -1407,36 +1592,65 @@ export class PlatformMember implements ObjectWithRecords {
 
         const platformOrganizationId = this.platform.membershipOrganizationId;
         const cutoff = this.getPeriodStartDate(periodId);
-        const getPeriodTime = (registration: Registration) => registration.group.periodId === periodId ? Infinity : registration.group.settings.period!.startDate.getTime();
+        const getPeriodTime = (registration: Registration) =>
+            registration.group.periodId === periodId
+                ? Infinity
+                : registration.group.settings.period!.startDate.getTime();
 
-        const registrations = this.filterRegistrations({ types: [GroupType.Membership] }).filter((registration) => {
-            if (!this.family.getOrganization(registration.organizationId)) {
-                return false;
-            }
-            if (registration.group.periodId === periodId) {
-                return true;
-            }
-            // Unknown start date: only search the requested period, never a later one
-            return !!cutoff && !!registration.group.settings.period && registration.group.settings.period.startDate < cutoff;
-        });
+        const registrations = this.filterRegistrations({ types: [GroupType.Membership] }).filter(
+            (registration) => {
+                if (!this.family.getOrganization(registration.organizationId)) {
+                    return false;
+                }
+                if (registration.group.periodId === periodId) {
+                    return true;
+                }
+                // Unknown start date: only search the requested period, never a later one
+                return (
+                    !!cutoff &&
+                    !!registration.group.settings.period &&
+                    registration.group.settings.period.startDate < cutoff
+                );
+            },
+        );
 
         const local = registrations
-            .filter(r => r.organizationId !== platformOrganizationId)
-            .map(registration => ({ registration, membership: this.getMembershipPriority(registration.organizationId, registration.group.periodId) }));
+            .filter((r) => r.organizationId !== platformOrganizationId)
+            .map((registration) => ({
+                registration,
+                membership: this.getMembershipPriority(
+                    registration.organizationId,
+                    registration.group.periodId,
+                ),
+            }));
 
-        local.sort(({ registration: a, membership: membershipA }, { registration: b, membership: membershipB }) => {
-            if (a.group.periodId !== b.group.periodId) {
-                return getPeriodTime(b) - getPeriodTime(a) || a.group.periodId.localeCompare(b.group.periodId);
-            }
+        local.sort(
+            (
+                { registration: a, membership: membershipA },
+                { registration: b, membership: membershipB },
+            ) => {
+                if (a.group.periodId !== b.group.periodId) {
+                    return (
+                        getPeriodTime(b) - getPeriodTime(a) ||
+                        a.group.periodId.localeCompare(b.group.periodId)
+                    );
+                }
 
-            return (membershipB.rank - membershipA.rank)
-                || (membershipB.temporaryStartTime - membershipA.temporaryStartTime)
-                || (Number(!!b.group.defaultAgeGroupId) - Number(!!a.group.defaultAgeGroupId))
-                || ((b.registeredAt?.getTime() ?? 0) - (a.registeredAt?.getTime() ?? 0));
-        });
+                return (
+                    membershipB.rank - membershipA.rank ||
+                    membershipB.temporaryStartTime - membershipA.temporaryStartTime ||
+                    Number(!!b.group.defaultAgeGroupId) - Number(!!a.group.defaultAgeGroupId) ||
+                    (b.registeredAt?.getTime() ?? 0) - (a.registeredAt?.getTime() ?? 0)
+                );
+            },
+        );
 
-        const registration = local[0]?.registration ?? registrations.find(r => r.organizationId === platformOrganizationId);
-        return registration ? (this.family.getOrganization(registration.organizationId) ?? null) : null;
+        const registration =
+            local[0]?.registration ??
+            registrations.find((r) => r.organizationId === platformOrganizationId);
+        return registration
+            ? (this.family.getOrganization(registration.organizationId) ?? null)
+            : null;
     }
 
     private getPeriodStartDate(periodId: string): Date | null {
@@ -1469,7 +1683,9 @@ export class PlatformMember implements ObjectWithRecords {
             if (membership.organizationId !== organizationId || membership.periodId !== periodId) {
                 continue;
             }
-            const type = this.platform.config.membershipTypes.find(t => t.id === membership.membershipTypeId);
+            const type = this.platform.config.membershipTypes.find(
+                (t) => t.id === membership.membershipTypeId,
+            );
             if (type?.behaviour === PlatformMembershipTypeBehaviour.Days) {
                 rank = Math.max(rank, 1);
                 temporaryStartTime = Math.max(temporaryStartTime, membership.startDate.getTime());
@@ -1502,7 +1718,7 @@ export class PlatformMember implements ObjectWithRecords {
         const base: Organization[] = [];
 
         for (const registration of registrations) {
-            if (base.find(g => g.id === registration.organizationId)) {
+            if (base.find((g) => g.id === registration.organizationId)) {
                 continue;
             }
 
@@ -1513,7 +1729,10 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         // Loop checkout
-        for (const item of [...this.family.checkout.cart.items, ...this.family.pendingRegisterItems]) {
+        for (const item of [
+            ...this.family.checkout.cart.items,
+            ...this.family.pendingRegisterItems,
+        ]) {
             if (item.member.id === this.id) {
                 if (filters.currentPeriod === false) {
                     continue;
@@ -1537,7 +1756,7 @@ export class PlatformMember implements ObjectWithRecords {
                     }
                 }
 
-                if (!base.find(g => g.id === item.organization.id)) {
+                if (!base.find((g) => g.id === item.organization.id)) {
                     base.push(item.organization);
                 }
             }
@@ -1554,7 +1773,7 @@ export class PlatformMember implements ObjectWithRecords {
                     continue;
                 }
 
-                if (base.find(g => g.id === responsibility.organizationId)) {
+                if (base.find((g) => g.id === responsibility.organizationId)) {
                     continue;
                 }
 
@@ -1569,7 +1788,12 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     get groups() {
-        return this.filterGroups({ currentPeriod: true, includeFuture: false, includePending: false, types: [GroupType.Membership, GroupType.WaitingList] });
+        return this.filterGroups({
+            currentPeriod: true,
+            includeFuture: false,
+            includePending: false,
+            types: [GroupType.Membership, GroupType.WaitingList],
+        });
     }
 
     get registrationDescription() {
@@ -1577,7 +1801,7 @@ export class PlatformMember implements ObjectWithRecords {
         if (groups.length === 0) {
             return $t('%5D');
         }
-        return groups.map(g => g.settings.name).join(', ');
+        return groups.map((g) => g.settings.name).join(', ');
     }
 
     insertOrganization(organization: Organization) {
@@ -1617,13 +1841,17 @@ export class PlatformMember implements ObjectWithRecords {
         return this.patchedMember.doesMatchFilter(filter);
     }
 
-    getAllRecordCategories(options?: { scopeOrganization?: Organization | null }): RecordCategory[] {
+    getAllRecordCategories(options?: {
+        scopeOrganization?: Organization | null;
+    }): RecordCategory[] {
         // From organization
         const categories: RecordCategory[] = [];
-        categories.push(...this.platformRecordsConfiguration?.recordCategories ?? []);
+        categories.push(...(this.platformRecordsConfiguration?.recordCategories ?? []));
 
         if (options?.scopeOrganization) {
-            categories.push(...options.scopeOrganization.meta.recordsConfiguration.recordCategories);
+            categories.push(
+                ...options.scopeOrganization.meta.recordsConfiguration.recordCategories,
+            );
         } else {
             for (const organization of this.filterOrganizations({ currentPeriod: true })) {
                 categories.push(...organization.meta.recordsConfiguration.recordCategories);
@@ -1631,10 +1859,11 @@ export class PlatformMember implements ObjectWithRecords {
         }
 
         // Deduplicate by id
-        return [...new Map(categories.map(c => [c.id, c])).values()];
+        return [...new Map(categories.map((c) => [c.id, c])).values()];
     }
 
-    getEnabledRecordCategories(options: { checkPermissions?: { user: UserWithMembers; level: PermissionLevel } | null;
+    getEnabledRecordCategories(options: {
+        checkPermissions?: { user: UserWithMembers; level: PermissionLevel } | null;
         scopeOrganization?: Organization | null;
         scopeGroup?: Group | null;
         scopeGroups?: Group[] | null;
@@ -1643,22 +1872,29 @@ export class PlatformMember implements ObjectWithRecords {
         const adminPermissionsMap = new Map<string, boolean>();
 
         const checkPermissions = options.checkPermissions;
-        const isUserManager = options.checkPermissions?.user.members.members.some(m => m.id === this.id) ?? false;
-        if (!isUserManager && (checkPermissions && !checkPermissions.user.permissions)) {
+        const isUserManager =
+            options.checkPermissions?.user.members.members.some((m) => m.id === this.id) ?? false;
+        if (!isUserManager && checkPermissions && !checkPermissions.user.permissions) {
             return { categories, adminPermissionsMap };
         }
 
         // From organization
-        const scopedOrganizations = options.scopeOrganization ? [options.scopeOrganization] : this.filterOrganizations({ currentPeriod: true });
+        const scopedOrganizations = options.scopeOrganization
+            ? [options.scopeOrganization]
+            : this.filterOrganizations({ currentPeriod: true });
         const recordsConfigurations = this.filterRecordsConfigurations({
-            currentPeriod: (options.scopeGroups || options.scopeGroup) ? undefined : true,
-            groups: options.scopeGroups ? options.scopeGroups : (options.scopeGroup ? [options.scopeGroup] : null),
+            currentPeriod: options.scopeGroups || options.scopeGroup ? undefined : true,
+            groups: options.scopeGroups
+                ? options.scopeGroups
+                : options.scopeGroup
+                  ? [options.scopeGroup]
+                  : null,
             organizationId: options.scopeOrganization?.id ?? undefined,
         });
 
         for (const recordsConfiguration of recordsConfigurations) {
             for (const recordCategory of recordsConfiguration.recordCategories) {
-                if (categories.find(c => c.id === recordCategory.id)) {
+                if (categories.find((c) => c.id === recordCategory.id)) {
                     // Already added
                     continue;
                 }
@@ -1668,19 +1904,33 @@ export class PlatformMember implements ObjectWithRecords {
                         let hasUserManagerPermissions = false;
                         let hasAdminPermissions = false;
                         if (isUserManager) {
-                            hasUserManagerPermissions = recordCategory.checkPermissionForUserManager(checkPermissions.level);
+                            hasUserManagerPermissions =
+                                recordCategory.checkPermissionForUserManager(
+                                    checkPermissions.level,
+                                );
                         }
                         if (!hasUserManagerPermissions && checkPermissions.user.permissions) {
                             // Check permissions
                             // we need at least permission in one organization where this member is registered
                             for (const organization of scopedOrganizations) {
-                                const organizationPermissions = checkPermissions.user.permissions.forOrganization(organization, this.platform, checkPermissions.user.email);
+                                const organizationPermissions =
+                                    checkPermissions.user.permissions.forOrganization(
+                                        organization,
+                                        this.platform,
+                                        checkPermissions.user.email,
+                                    );
 
                                 if (!organizationPermissions) {
                                     continue;
                                 }
 
-                                if (organizationPermissions.hasResourceAccess(PermissionsResourceType.RecordCategories, recordCategory.id, checkPermissions.level)) {
+                                if (
+                                    organizationPermissions.hasResourceAccess(
+                                        PermissionsResourceType.RecordCategories,
+                                        recordCategory.id,
+                                        checkPermissions.level,
+                                    )
+                                ) {
                                     hasAdminPermissions = true;
                                     break;
                                 }
@@ -1716,10 +1966,18 @@ export class PlatformMember implements ObjectWithRecords {
             if (registration.organizationId !== organization.id) {
                 continue;
             }
-            if (registration.group.periodId !== organization.period.period.id && registration.group.periodId !== organization.period.period.previousPeriodId && registration.group.periodId !== organization.period.period.nextPeriodId) {
+            if (
+                registration.group.periodId !== organization.period.period.id &&
+                registration.group.periodId !== organization.period.period.previousPeriodId &&
+                registration.group.periodId !== organization.period.period.nextPeriodId
+            ) {
                 continue;
             }
-            if (registration.group.type === GroupType.Membership && registration.registeredAt !== null && registration.deactivatedAt === null) {
+            if (
+                registration.group.type === GroupType.Membership &&
+                registration.registeredAt !== null &&
+                registration.deactivatedAt === null
+            ) {
                 return true;
             }
         }
@@ -1749,8 +2007,14 @@ export class PlatformMember implements ObjectWithRecords {
     }
 
     getResponsibilities(filter?: { organization?: Organization | null | undefined }) {
-        return this.patchedMember.responsibilities
-            .filter(r => r.isActive && (filter?.organization === undefined || (filter.organization ? r.organizationId === filter.organization.id : r.organizationId === null)));
+        return this.patchedMember.responsibilities.filter(
+            (r) =>
+                r.isActive &&
+                (filter?.organization === undefined ||
+                    (filter.organization
+                        ? r.organizationId === filter.organization.id
+                        : r.organizationId === null)),
+        );
     }
 
     static sorterByName(sortDirection = 'ASC') {

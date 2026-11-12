@@ -1,5 +1,15 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLCast, SQLConcat, SQLJsonUnquote, SQLScalar, SQLValueType } from '@stamhoofd/sql';
+import {
+    baseSQLFilterCompilers,
+    createColumnFilter,
+    createExistsFilter,
+    SQL,
+    SQLCast,
+    SQLConcat,
+    SQLJsonUnquote,
+    SQLScalar,
+    SQLValueType,
+} from '@stamhoofd/sql';
 import { invoicedBalanceItemCompilers } from './invoiced-balance-items.js';
 
 /**
@@ -7,123 +17,198 @@ import { invoicedBalanceItemCompilers } from './invoiced-balance-items.js';
  */
 export const invoiceFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    ['id', createColumnFilter({
-        expression: SQL.column('id'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['number', createColumnFilter({
-        expression: SQL.column('number'),
-        type: SQLValueType.String,
-        nullable: true,
-    })],
-
-    ['organizationId', createColumnFilter({
-        expression: SQL.column('organizationId'),
-        type: SQLValueType.String,
-        nullable: true,
-    })],
-
-    ['isReceipt', createColumnFilter({
-        expression: SQL.column('isReceipt'),
-        type: SQLValueType.Boolean,
-        nullable: false,
-    })],
-
-    ['totalWithVAT', createColumnFilter({
-        expression: SQL.column('totalWithVAT'),
-        type: SQLValueType.Number,
-        nullable: false,
-    })],
-
-    ['totalWithoutVAT', createColumnFilter({
-        expression: SQL.column('totalWithoutVAT'),
-        type: SQLValueType.Number,
-        nullable: false,
-    })],
-
-    ['VATTotalAmount', createColumnFilter({
-        expression: SQL.column('VATTotalAmount'),
-        type: SQLValueType.Number,
-        nullable: false,
-    })],
-
-    ['createdAt', createColumnFilter({
-        expression: SQL.column('createdAt'),
-        type: SQLValueType.Datetime,
-        nullable: false,
-    })],
-    ['updatedAt', createColumnFilter({
-        expression: SQL.column('updatedAt'),
-        type: SQLValueType.Datetime,
-        nullable: false,
-    })],
-    ['invoicedAt', createColumnFilter({
-        expression: SQL.column('invoicedAt'),
-        type: SQLValueType.Datetime,
-        nullable: true,
-    })],
-    ['customer', new Map([
-        ...baseSQLFilterCompilers,
-        ['email', createColumnFilter({
-            expression: SQL.jsonExtract(SQL.column('customer'), '$.value.email'),
-            type: SQLValueType.JSONString,
-            nullable: true,
-        })],
-        ['firstName', createColumnFilter({
-            expression: SQL.jsonExtract(SQL.column('customer'), '$.value.firstName'),
-            type: SQLValueType.JSONString,
-            nullable: true,
-        })],
-        ['lastName', createColumnFilter({
-            expression: SQL.jsonExtract(SQL.column('customer'), '$.value.lastName'),
-            type: SQLValueType.JSONString,
-            nullable: true,
-        })],
-        ['name', createColumnFilter({
-            expression: new SQLCast(
-                new SQLConcat(
-                    new SQLJsonUnquote(SQL.jsonExtract(SQL.column('customer'), '$.value.firstName')),
-                    new SQLScalar(' '),
-                    new SQLJsonUnquote(SQL.jsonExtract(SQL.column('customer'), '$.value.lastName')),
-                ),
-                'CHAR',
-            ),
+    [
+        'id',
+        createColumnFilter({
+            expression: SQL.column('id'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'number',
+        createColumnFilter({
+            expression: SQL.column('number'),
             type: SQLValueType.String,
             nullable: true,
-        })],
-        ['company', new Map([
+        }),
+    ],
+
+    [
+        'organizationId',
+        createColumnFilter({
+            expression: SQL.column('organizationId'),
+            type: SQLValueType.String,
+            nullable: true,
+        }),
+    ],
+
+    [
+        'isReceipt',
+        createColumnFilter({
+            expression: SQL.column('isReceipt'),
+            type: SQLValueType.Boolean,
+            nullable: false,
+        }),
+    ],
+
+    [
+        'totalWithVAT',
+        createColumnFilter({
+            expression: SQL.column('totalWithVAT'),
+            type: SQLValueType.Number,
+            nullable: false,
+        }),
+    ],
+
+    [
+        'totalWithoutVAT',
+        createColumnFilter({
+            expression: SQL.column('totalWithoutVAT'),
+            type: SQLValueType.Number,
+            nullable: false,
+        }),
+    ],
+
+    [
+        'VATTotalAmount',
+        createColumnFilter({
+            expression: SQL.column('VATTotalAmount'),
+            type: SQLValueType.Number,
+            nullable: false,
+        }),
+    ],
+
+    [
+        'createdAt',
+        createColumnFilter({
+            expression: SQL.column('createdAt'),
+            type: SQLValueType.Datetime,
+            nullable: false,
+        }),
+    ],
+    [
+        'updatedAt',
+        createColumnFilter({
+            expression: SQL.column('updatedAt'),
+            type: SQLValueType.Datetime,
+            nullable: false,
+        }),
+    ],
+    [
+        'invoicedAt',
+        createColumnFilter({
+            expression: SQL.column('invoicedAt'),
+            type: SQLValueType.Datetime,
+            nullable: true,
+        }),
+    ],
+    [
+        'customer',
+        new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({
-                expression: SQL.jsonExtract(SQL.column('customer'), '$.value.company.name'),
-                type: SQLValueType.JSONString,
-                nullable: true,
-            })],
-            ['VATNumber', createColumnFilter({
-                expression: SQL.jsonExtract(SQL.column('customer'), '$.value.company.VATNumber'),
-                type: SQLValueType.JSONString,
-                nullable: true,
-            })],
-            ['companyNumber', createColumnFilter({
-                expression: SQL.jsonExtract(SQL.column('customer'), '$.value.company.companyNumber'),
-                type: SQLValueType.JSONString,
-                nullable: true,
-            })],
-            ['administrationEmail', createColumnFilter({
-                expression: SQL.jsonExtract(SQL.column('customer'), '$.value.company.administrationEmail'),
-                type: SQLValueType.JSONString,
-                nullable: true,
-            })],
-        ])],
-    ])],
-    ['items', createExistsFilter(
-        SQL.select()
-            .from(
-                SQL.table('invoiced_balance_items'),
-            ).where(
-                SQL.column('invoiceId'),
-                SQL.parentColumn('id'),
-            ),
-        invoicedBalanceItemCompilers,
-    )],
+            [
+                'email',
+                createColumnFilter({
+                    expression: SQL.jsonExtract(SQL.column('customer'), '$.value.email'),
+                    type: SQLValueType.JSONString,
+                    nullable: true,
+                }),
+            ],
+            [
+                'firstName',
+                createColumnFilter({
+                    expression: SQL.jsonExtract(SQL.column('customer'), '$.value.firstName'),
+                    type: SQLValueType.JSONString,
+                    nullable: true,
+                }),
+            ],
+            [
+                'lastName',
+                createColumnFilter({
+                    expression: SQL.jsonExtract(SQL.column('customer'), '$.value.lastName'),
+                    type: SQLValueType.JSONString,
+                    nullable: true,
+                }),
+            ],
+            [
+                'name',
+                createColumnFilter({
+                    expression: new SQLCast(
+                        new SQLConcat(
+                            new SQLJsonUnquote(
+                                SQL.jsonExtract(SQL.column('customer'), '$.value.firstName'),
+                            ),
+                            new SQLScalar(' '),
+                            new SQLJsonUnquote(
+                                SQL.jsonExtract(SQL.column('customer'), '$.value.lastName'),
+                            ),
+                        ),
+                        'CHAR',
+                    ),
+                    type: SQLValueType.String,
+                    nullable: true,
+                }),
+            ],
+            [
+                'company',
+                new Map([
+                    ...baseSQLFilterCompilers,
+                    [
+                        'name',
+                        createColumnFilter({
+                            expression: SQL.jsonExtract(
+                                SQL.column('customer'),
+                                '$.value.company.name',
+                            ),
+                            type: SQLValueType.JSONString,
+                            nullable: true,
+                        }),
+                    ],
+                    [
+                        'VATNumber',
+                        createColumnFilter({
+                            expression: SQL.jsonExtract(
+                                SQL.column('customer'),
+                                '$.value.company.VATNumber',
+                            ),
+                            type: SQLValueType.JSONString,
+                            nullable: true,
+                        }),
+                    ],
+                    [
+                        'companyNumber',
+                        createColumnFilter({
+                            expression: SQL.jsonExtract(
+                                SQL.column('customer'),
+                                '$.value.company.companyNumber',
+                            ),
+                            type: SQLValueType.JSONString,
+                            nullable: true,
+                        }),
+                    ],
+                    [
+                        'administrationEmail',
+                        createColumnFilter({
+                            expression: SQL.jsonExtract(
+                                SQL.column('customer'),
+                                '$.value.company.administrationEmail',
+                            ),
+                            type: SQLValueType.JSONString,
+                            nullable: true,
+                        }),
+                    ],
+                ]),
+            ],
+        ]),
+    ],
+    [
+        'items',
+        createExistsFilter(
+            SQL.select()
+                .from(SQL.table('invoiced_balance_items'))
+                .where(SQL.column('invoiceId'), SQL.parentColumn('id')),
+            invoicedBalanceItemCompilers,
+        ),
+    ],
 ]);

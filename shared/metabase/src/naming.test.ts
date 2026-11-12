@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { isLegacyReportCollectionName, metabaseDataSourceName, metabaseReportCollectionName } from './naming.js';
+import {
+    isLegacyReportCollectionName,
+    metabaseDataSourceName,
+    metabaseReportCollectionName,
+} from './naming.js';
 
 describe('metabaseDataSourceName', () => {
     it('names the data source after the environment so one Metabase can serve several', () => {

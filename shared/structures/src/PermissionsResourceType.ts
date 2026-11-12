@@ -8,7 +8,8 @@ export const PermissionsResourceKey = {
     CurrentPeriod: '$currentPeriod',
 } as const;
 
-export type PermissionsResourceKey = typeof PermissionsResourceKey[keyof typeof PermissionsResourceKey];
+export type PermissionsResourceKey =
+    (typeof PermissionsResourceKey)[keyof typeof PermissionsResourceKey];
 
 export function isPeriodScopedResourceType(type: PermissionsResourceType): boolean {
     switch (type) {
@@ -31,7 +32,10 @@ export function isPeriodScopedResourceType(type: PermissionsResourceType): boole
 /**
  * Wildcard keys whose grants also apply to the resource with the given id (the id itself excluded).
  */
-export function getWildcardResourceKeys(type: PermissionsResourceType, id: string): PermissionsResourceKey[] {
+export function getWildcardResourceKeys(
+    type: PermissionsResourceType,
+    id: string,
+): PermissionsResourceKey[] {
     if (id === PermissionsResourceKey.All) {
         return [];
     }
@@ -46,20 +50,31 @@ export function getWildcardResourceKeys(type: PermissionsResourceType, id: strin
  *  - '$currentPeriod' for period scoped resource types and
  *  - '$all' for non-period scoped resource types.
  */
-export function upgradeResourceKeys<T>(resources: Map<PermissionsResourceType, Map<string, T> | null>): Map<PermissionsResourceType, Map<string, T> | null> {
+export function upgradeResourceKeys<T>(
+    resources: Map<PermissionsResourceType, Map<string, T> | null>,
+): Map<PermissionsResourceType, Map<string, T> | null> {
     // Both map levels can independently be replacements or patches.
-    const upgraded = isPatchMap(resources) ? new PatchMap<PermissionsResourceType, Map<string, T> | null>() : new Map<PermissionsResourceType, Map<string, T> | null>();
+    const upgraded = isPatchMap(resources)
+        ? new PatchMap<PermissionsResourceType, Map<string, T> | null>()
+        : new Map<PermissionsResourceType, Map<string, T> | null>();
 
     for (const [type, values] of resources) {
         if (values === null) {
             upgraded.set(type, null);
             continue;
         }
-        const upgradedValues = isPatchMap(values) ? new PatchMap<string, T>() : new Map<string, T>();
+        const upgradedValues = isPatchMap(values)
+            ? new PatchMap<string, T>()
+            : new Map<string, T>();
 
         for (const [id, value] of values) {
             if (id === '') {
-                upgradedValues.set(isPeriodScopedResourceType(type) ? PermissionsResourceKey.CurrentPeriod : PermissionsResourceKey.All, value);
+                upgradedValues.set(
+                    isPeriodScopedResourceType(type)
+                        ? PermissionsResourceKey.CurrentPeriod
+                        : PermissionsResourceKey.All,
+                    value,
+                );
                 continue;
             }
             upgradedValues.set(id, value);
@@ -74,15 +89,21 @@ export function upgradeResourceKeys<T>(resources: Map<PermissionsResourceType, M
 /**
  * Clients before version 418 only know one wildcard: '' (meaning all resources).
  */
-export function downgradeResourceKeys<T>(resources: Map<PermissionsResourceType, Map<string, T> | null>): Map<PermissionsResourceType, Map<string, T> | null> {
-    const downgraded = isPatchMap(resources) ? new PatchMap<PermissionsResourceType, Map<string, T> | null>() : new Map<PermissionsResourceType, Map<string, T> | null>();
+export function downgradeResourceKeys<T>(
+    resources: Map<PermissionsResourceType, Map<string, T> | null>,
+): Map<PermissionsResourceType, Map<string, T> | null> {
+    const downgraded = isPatchMap(resources)
+        ? new PatchMap<PermissionsResourceType, Map<string, T> | null>()
+        : new Map<PermissionsResourceType, Map<string, T> | null>();
 
     for (const [type, values] of resources) {
         if (values === null) {
             downgraded.set(type, null);
             continue;
         }
-        const downgradedValues = isPatchMap(values) ? new PatchMap<string, T>() : new Map<string, T>();
+        const downgradedValues = isPatchMap(values)
+            ? new PatchMap<string, T>()
+            : new Map<string, T>();
 
         for (const [id, value] of values) {
             if (id === PermissionsResourceKey.All) {
@@ -107,19 +128,31 @@ export function downgradeResourceKeys<T>(resources: Map<PermissionsResourceType,
     return downgraded;
 }
 
-export function getPermissionResourceTypeName(type: PermissionsResourceType, plural = true): string {
+export function getPermissionResourceTypeName(
+    type: PermissionsResourceType,
+    plural = true,
+): string {
     switch (type) {
-        case PermissionsResourceType.Webshops: return plural ? 'webshops' : 'webshop';
-        case PermissionsResourceType.Events: return plural ? $t('%Zsr') : $t('%Zt1');
-        case PermissionsResourceType.Groups: return plural ? $t('%n1') : $t('%14Z');
-        case PermissionsResourceType.GroupCategories: return plural ? $t('%15H') : $t('%n2');
-        case PermissionsResourceType.OrganizationTags: return plural ? $t('%2C') : $t('%2T');
-        case PermissionsResourceType.RecordCategories: return plural ? $t('%n3') : $t('%n4');
-        case PermissionsResourceType.Senders: return plural ? $t('%1DI') : $t('%1DJ');
+        case PermissionsResourceType.Webshops:
+            return plural ? 'webshops' : 'webshop';
+        case PermissionsResourceType.Events:
+            return plural ? $t('%Zsr') : $t('%Zt1');
+        case PermissionsResourceType.Groups:
+            return plural ? $t('%n1') : $t('%14Z');
+        case PermissionsResourceType.GroupCategories:
+            return plural ? $t('%15H') : $t('%n2');
+        case PermissionsResourceType.OrganizationTags:
+            return plural ? $t('%2C') : $t('%2T');
+        case PermissionsResourceType.RecordCategories:
+            return plural ? $t('%n3') : $t('%n4');
+        case PermissionsResourceType.Senders:
+            return plural ? $t('%1DI') : $t('%1DJ');
     }
 }
 
-export function getConfigurableAccessRightsForResourceType(type: PermissionsResourceType): AccessRight[] {
+export function getConfigurableAccessRightsForResourceType(
+    type: PermissionsResourceType,
+): AccessRight[] {
     switch (type) {
         case PermissionsResourceType.Senders:
             return [AccessRight.SendMessages];
@@ -128,15 +161,24 @@ export function getConfigurableAccessRightsForResourceType(type: PermissionsReso
     return [];
 }
 
-export function getConfigurablePermissionLevelsForResourceType(type: PermissionsResourceType): PermissionLevel[] {
+export function getConfigurablePermissionLevelsForResourceType(
+    type: PermissionsResourceType,
+): PermissionLevel[] {
     switch (type) {
         case PermissionsResourceType.Senders:
             return [PermissionLevel.None, PermissionLevel.Read, PermissionLevel.Write];
     }
-    return [PermissionLevel.None, PermissionLevel.Read, PermissionLevel.Write, PermissionLevel.Full];
+    return [
+        PermissionLevel.None,
+        PermissionLevel.Read,
+        PermissionLevel.Write,
+        PermissionLevel.Full,
+    ];
 }
 
-export function getDefaultAccessRightsForResourceType(type: PermissionsResourceType): AccessRight[] {
+export function getDefaultAccessRightsForResourceType(
+    type: PermissionsResourceType,
+): AccessRight[] {
     switch (type) {
         case PermissionsResourceType.Senders:
             return [AccessRight.SendMessages];
@@ -145,7 +187,9 @@ export function getDefaultAccessRightsForResourceType(type: PermissionsResourceT
     return [];
 }
 
-export function getDefaultPermissionLevelForResourceType(type: PermissionsResourceType): PermissionLevel {
+export function getDefaultPermissionLevelForResourceType(
+    type: PermissionsResourceType,
+): PermissionLevel {
     switch (type) {
         case PermissionsResourceType.Senders:
             return PermissionLevel.None;

@@ -1,15 +1,17 @@
 import { Flags } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
-import { backupExists, resolveBackupOption, restoreBackup } from '../../runtime/db-backup-helpers.js';
+import {
+    backupExists,
+    resolveBackupOption,
+    restoreBackup,
+} from '../../runtime/db-backup-helpers.js';
 import { confirm, warning } from '../../runtime/ux.js';
 
 export default class DbRestore extends BaseCommand {
     static summary = 'Restore the local MySQL data volume from a backup';
-    static description = 'Restores a backup created with `stam db backup` by replacing the local MySQL Docker volume with the backed up data. This overwrites the current local MySQL data and restarts MySQL.';
-    static examples = [
-        'stam db restore',
-        'stam db restore --name before-migration',
-    ];
+    static description =
+        'Restores a backup created with `stam db backup` by replacing the local MySQL Docker volume with the backed up data. This overwrites the current local MySQL data and restarts MySQL.';
+    static examples = ['stam db restore', 'stam db restore --name before-migration'];
 
     static flags = {
         ...BaseCommand.instanceFlags,
@@ -18,13 +20,21 @@ export default class DbRestore extends BaseCommand {
 
     async run(): Promise<void> {
         const { flags, context } = await this.parseWithContext(DbRestore);
-        const name = await resolveBackupOption({ context, flag: flags.name, message: 'Select the backup to restore' });
+        const name = await resolveBackupOption({
+            context,
+            flag: flags.name,
+            message: 'Select the backup to restore',
+        });
 
-        if (!await backupExists(context, name)) {
+        if (!(await backupExists(context, name))) {
             this.error(`No backup named "${name}" found.`);
         }
 
-        if (!await confirm(`Restore "${name}"? This overwrites the current local MySQL data and restarts MySQL.`)) {
+        if (
+            !(await confirm(
+                `Restore "${name}"? This overwrites the current local MySQL data and restarts MySQL.`,
+            ))
+        ) {
             warning('Restore skipped.');
             return;
         }

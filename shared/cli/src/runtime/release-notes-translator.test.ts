@@ -15,8 +15,8 @@ import type { ReleaseNotes } from './release-notes.js';
 import { resolveTranslationModel } from './translation/create-translation-model.js';
 import type { TranslationModel, TranslationRequest } from './translation/translation-model.js';
 
-vi.mock('./command-runner.js', async importOriginal => ({
-    ...await importOriginal<typeof import('./command-runner.js')>(),
+vi.mock('./command-runner.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('./command-runner.js')>()),
     run: vi.fn(),
 }));
 
@@ -40,7 +40,10 @@ const notes: ReleaseNotes = {
 };
 
 /** Records the request it receives and returns a canned Dutch translation. */
-function fakeModel(translation = '## Wat is er veranderd?\n- Iets nieuws', capture?: (req: TranslationRequest) => void): TranslationModel {
+function fakeModel(
+    translation = '## Wat is er veranderd?\n- Iets nieuws',
+    capture?: (req: TranslationRequest) => void,
+): TranslationModel {
     return {
         name: 'fake:test',
         translate: async (request) => {
@@ -52,12 +55,18 @@ function fakeModel(translation = '## Wat is er veranderd?\n- Iets nieuws', captu
 
 describe('getCommitDiff', () => {
     it('rejects hashes that are not hex', async () => {
-        expect(await getCommitDiff('/repo', 'not a hash; rm -rf')).toBe('Invalid commit hash: not a hash; rm -rf');
+        expect(await getCommitDiff('/repo', 'not a hash; rm -rf')).toBe(
+            'Invalid commit hash: not a hash; rm -rf',
+        );
         expect(run).not.toHaveBeenCalled();
     });
 
     it('returns the git diff for a valid hash', async () => {
-        vi.mocked(run).mockResolvedValue({ stdout: 'diff --git a/x b/x', stderr: '', status: 0 } as never);
+        vi.mocked(run).mockResolvedValue({
+            stdout: 'diff --git a/x b/x',
+            stderr: '',
+            status: 0,
+        } as never);
         const diff = await getCommitDiff('/repo', '4f1c7e9');
         expect(diff).toBe('diff --git a/x b/x');
         const [, args] = vi.mocked(run).mock.calls[0];
@@ -65,8 +74,14 @@ describe('getCommitDiff', () => {
     });
 
     it('reports a friendly message when git fails', async () => {
-        vi.mocked(run).mockResolvedValue({ stdout: '', stderr: 'bad object', status: 128 } as never);
-        expect(await getCommitDiff('/repo', 'deadbeef')).toContain('Could not load the diff for deadbeef');
+        vi.mocked(run).mockResolvedValue({
+            stdout: '',
+            stderr: 'bad object',
+            status: 128,
+        } as never);
+        expect(await getCommitDiff('/repo', 'deadbeef')).toContain(
+            'Could not load the diff for deadbeef',
+        );
     });
 });
 
@@ -104,12 +119,20 @@ describe('getCommitDiff translation resolution', () => {
     });
 
     it('does not append a translations block when the diff references no keys', async () => {
-        vi.mocked(run).mockResolvedValue({ stdout: 'diff --git a/x b/x', stderr: '', status: 0 } as never);
+        vi.mocked(run).mockResolvedValue({
+            stdout: 'diff --git a/x b/x',
+            stderr: '',
+            status: 0,
+        } as never);
         expect(await getCommitDiff(repo, '4f1c7e9')).toBe('diff --git a/x b/x');
     });
 
     it('reuses parsed locale strings across diff requests for the same repository', async () => {
-        vi.mocked(run).mockResolvedValue({ stdout: "+ label: $t('%W')", stderr: '', status: 0 } as never);
+        vi.mocked(run).mockResolvedValue({
+            stdout: "+ label: $t('%W')",
+            stderr: '',
+            status: 0,
+        } as never);
         expect(await getCommitDiff(repo, '4f1c7e9')).toContain('%W: "Opslaan"');
 
         await writeFile(join(repo, 'shared', 'locales', 'src', 'nl.json'), '{}', 'utf8');
@@ -120,17 +143,25 @@ describe('getCommitDiff translation resolution', () => {
 
 describe('grepCodebase', () => {
     it('rejects an empty pattern without calling git', async () => {
-        expect(await grepCodebase('/repo', { pattern: '', commit: 'abc1234' })).toContain('non-empty "pattern"');
+        expect(await grepCodebase('/repo', { pattern: '', commit: 'abc1234' })).toContain(
+            'non-empty "pattern"',
+        );
         expect(run).not.toHaveBeenCalled();
     });
 
     it('rejects a commit that is not a hash', async () => {
-        expect(await grepCodebase('/repo', { pattern: 'foo', commit: 'HEAD; rm -rf' })).toBe('Invalid commit hash: HEAD; rm -rf');
+        expect(await grepCodebase('/repo', { pattern: 'foo', commit: 'HEAD; rm -rf' })).toBe(
+            'Invalid commit hash: HEAD; rm -rf',
+        );
         expect(run).not.toHaveBeenCalled();
     });
 
     it('passes the pattern via -e, applies options, scopes a pathspec and strips the commit prefix', async () => {
-        vi.mocked(run).mockResolvedValue({ stdout: 'abc1234:src/App.vue:3:Opslaan', stderr: '', status: 0 } as never);
+        vi.mocked(run).mockResolvedValue({
+            stdout: 'abc1234:src/App.vue:3:Opslaan',
+            stderr: '',
+            status: 0,
+        } as never);
 
         const output = await grepCodebase('/repo', {
             pattern: '-Opslaan',
@@ -144,17 +175,36 @@ describe('grepCodebase', () => {
         expect(output).toBe('src/App.vue:3:Opslaan');
         const [cmd, args] = vi.mocked(run).mock.calls[0];
         expect(cmd).toBe('git');
-        expect(args).toEqual(['grep', '--no-color', '-n', '-I', '-i', '-F', '-w', '-e', '-Opslaan', 'abc1234', '--', '*.vue']);
+        expect(args).toEqual([
+            'grep',
+            '--no-color',
+            '-n',
+            '-I',
+            '-i',
+            '-F',
+            '-w',
+            '-e',
+            '-Opslaan',
+            'abc1234',
+            '--',
+            '*.vue',
+        ]);
     });
 
     it('reports a friendly message when there are no matches', async () => {
         vi.mocked(run).mockResolvedValue({ stdout: '', stderr: '', status: 1 } as never);
-        expect(await grepCodebase('/repo', { pattern: 'nope', commit: 'abc1234' })).toBe('No matches for "nope" at abc1234.');
+        expect(await grepCodebase('/repo', { pattern: 'nope', commit: 'abc1234' })).toBe(
+            'No matches for "nope" at abc1234.',
+        );
     });
 
     it('truncates to 50 lines and notes the total', async () => {
         const lines = Array.from({ length: 60 }, (_, i) => `abc1234:src/File.ts:${i + 1}:match`);
-        vi.mocked(run).mockResolvedValue({ stdout: lines.join('\n'), stderr: '', status: 0 } as never);
+        vi.mocked(run).mockResolvedValue({
+            stdout: lines.join('\n'),
+            stderr: '',
+            status: 0,
+        } as never);
 
         const output = await grepCodebase('/repo', { pattern: 'match', commit: 'abc1234' });
         const outputLines = output.split('\n');
@@ -186,7 +236,12 @@ describe('translateReleaseNotes', () => {
             received = req;
         });
 
-        const result = await translateReleaseNotes('/repo', notes, '### Bug fixes\n- Fixed it (abc123)', model);
+        const result = await translateReleaseNotes(
+            '/repo',
+            notes,
+            '### Bug fixes\n- Fixed it (abc123)',
+            model,
+        );
 
         expect(result).toBe('## Wat is er veranderd?\n- Iets');
         expect(received?.systemPrompt).toContain('Dutch');
@@ -206,7 +261,7 @@ describe('translateReleaseNotes', () => {
         };
 
         const result = await translateReleaseNotes('/repo', notes, 'notes', model, {
-            onToolCall: call => calls.push(call),
+            onToolCall: (call) => calls.push(call),
         });
 
         expect(result).toBe('diff was: the diff');
@@ -216,16 +271,20 @@ describe('translateReleaseNotes', () => {
 
 describe('composeReleaseNotesBody', () => {
     it('returns English only when translation is skipped', async () => {
-        const body = await composeReleaseNotesBody('/repo', notes, 'ENGLISH', { skipTranslation: true });
+        const body = await composeReleaseNotesBody('/repo', notes, 'ENGLISH', {
+            skipTranslation: true,
+        });
         expect(body).toBe('ENGLISH');
     });
 
     it('warns and returns English only when the provider is unavailable', async () => {
-        vi.mocked(resolveTranslationModel).mockResolvedValue({ unavailable: 'ANTHROPIC_API_KEY is not set' });
+        vi.mocked(resolveTranslationModel).mockResolvedValue({
+            unavailable: 'ANTHROPIC_API_KEY is not set',
+        });
         const warnings: string[] = [];
         const body = await composeReleaseNotesBody('/repo', notes, 'ENGLISH', {
             provider: 'claude',
-            onWarn: msg => warnings.push(msg),
+            onWarn: (msg) => warnings.push(msg),
         });
         expect(body).toBe('ENGLISH');
         expect(warnings[0]).toContain('ANTHROPIC_API_KEY is not set');
@@ -247,12 +306,16 @@ describe('composeReleaseNotesBody', () => {
 
         const infos: string[] = [];
         const body = await composeReleaseNotesBody('/repo', notes, 'ENGLISH', {
-            onInfo: msg => infos.push(msg),
+            onInfo: (msg) => infos.push(msg),
         });
 
         expect(body).toContain('## Wat is er veranderd?');
-        expect(infos.some(line => line.includes('Translating release notes to Dutch with fake:logging'))).toBe(true);
-        expect(infos.some(line => line.includes('Inspecting commit abc1234'))).toBe(true);
-        expect(infos.some(line => line.includes('inspected 1 commit diff'))).toBe(true);
+        expect(
+            infos.some((line) =>
+                line.includes('Translating release notes to Dutch with fake:logging'),
+            ),
+        ).toBe(true);
+        expect(infos.some((line) => line.includes('Inspecting commit abc1234'))).toBe(true);
+        expect(infos.some((line) => line.includes('inspected 1 commit diff'))).toBe(true);
     });
 });

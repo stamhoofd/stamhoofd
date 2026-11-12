@@ -62,7 +62,7 @@ export class Member extends AutoEncoder {
     }
 
     get isMinor() {
-        return (this.details.age !== null && this.details.age < 18);
+        return this.details.age !== null && this.details.age < 18;
     }
 
     get lastName() {

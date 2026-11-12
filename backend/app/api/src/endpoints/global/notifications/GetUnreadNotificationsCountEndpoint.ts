@@ -16,7 +16,12 @@ type ResponseBody = CountResponse;
 /**
  * Number of unread, not dismissed notifications of the authenticated user.
  */
-export class GetUnreadNotificationsCountEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetUnreadNotificationsCountEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     queryDecoder = CountFilteredRequest as Decoder<CountFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {

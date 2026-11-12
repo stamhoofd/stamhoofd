@@ -21,7 +21,9 @@ export class RetryEmailRecipientEndpoint extends Endpoint<Params, Query, Body, R
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/email-recipients/@id/retry', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/email-recipients/@id/retry', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -33,7 +35,7 @@ export class RetryEmailRecipientEndpoint extends Endpoint<Params, Query, Body, R
         const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canReadEmails(organization)) {
+        if (!(await Context.auth.canReadEmails(organization))) {
             // Fast fail before query
             throw Context.auth.error();
         }
@@ -48,7 +50,7 @@ export class RetryEmailRecipientEndpoint extends Endpoint<Params, Query, Body, R
         }
 
         const model = await Email.getByID(emailRecipient.emailId);
-        if (!model || (model.organizationId !== (organization?.id ?? null))) {
+        if (!model || model.organizationId !== (organization?.id ?? null)) {
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Email not found',
@@ -57,7 +59,7 @@ export class RetryEmailRecipientEndpoint extends Endpoint<Params, Query, Body, R
             });
         }
 
-        if (!await Context.auth.canAccessEmail(model, PermissionLevel.Write)) {
+        if (!(await Context.auth.canAccessEmail(model, PermissionLevel.Write))) {
             throw Context.auth.error();
         }
 

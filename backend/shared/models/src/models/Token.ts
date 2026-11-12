@@ -49,7 +49,8 @@ export class Token extends QueryableModel {
     authenticatedAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -61,7 +62,8 @@ export class Token extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -82,7 +84,10 @@ export class Token extends QueryableModel {
      * the FRESH_WINDOW. Sensitive endpoints require a fresh token.
      */
     isFresh(): boolean {
-        return this.authenticatedAt !== null && this.authenticatedAt.getTime() > Date.now() - Token.FRESH_WINDOW;
+        return (
+            this.authenticatedAt !== null &&
+            this.authenticatedAt.getTime() > Date.now() - Token.FRESH_WINDOW
+        );
     }
 
     static async getAPIUserWithToken(user: User) {
@@ -90,9 +95,12 @@ export class Token extends QueryableModel {
             throw new Error('Unexpected user type');
         }
 
-        const [lastToken] = await this.where({
-            userId: user.id,
-        }, { limit: 1 });
+        const [lastToken] = await this.where(
+            {
+                userId: user.id,
+            },
+            { limit: 1 },
+        );
 
         return ApiUser.create({
             id: user.id,
@@ -108,7 +116,10 @@ export class Token extends QueryableModel {
     /**
      * Get the token and user for a given accessToken IF it is still valid
      */
-    static async getByAccessToken(accessToken: string, ignoreExpireDate = false): Promise<TokenWithSession | undefined> {
+    static async getByAccessToken(
+        accessToken: string,
+        ignoreExpireDate = false,
+    ): Promise<TokenWithSession | undefined> {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()}, ${User.getDefaultSelect('user')}, ${UserSession.getDefaultSelect('session')} FROM ${
                 this.table
@@ -127,7 +138,10 @@ export class Token extends QueryableModel {
             return undefined;
         }
 
-        if (!ignoreExpireDate && (token.accessTokenValidUntil < new Date() || token.refreshTokenValidUntil < new Date())) {
+        if (
+            !ignoreExpireDate &&
+            (token.accessTokenValidUntil < new Date() || token.refreshTokenValidUntil < new Date())
+        ) {
             // Also if the refresh token is invalid, the access token will always be invalid
             return undefined;
         }

@@ -43,7 +43,11 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
 
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id);
 
-        if (!editUser || !await Context.auth.canAccessUser(editUser, PermissionLevel.Write) || !editUser.isApiUser) {
+        if (
+            !editUser ||
+            !(await Context.auth.canAccessUser(editUser, PermissionLevel.Write)) ||
+            !editUser.isApiUser
+        ) {
             throw Context.auth.notFoundOrNoAccess($t('%FG'));
         }
 
@@ -51,7 +55,7 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
         editUser.lastName = null;
 
         if (request.body.permissions !== undefined && editUser.permissions) {
-            if (!await Context.auth.canAccessUser(editUser, PermissionLevel.Full)) {
+            if (!(await Context.auth.canAccessUser(editUser, PermissionLevel.Full))) {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Je hebt geen rechten om de rechten van deze API-user te wijzigen',
@@ -62,9 +66,21 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
                 const platform = await Platform.getSharedStruct();
 
                 if (organization) {
-                    editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, request.body.permissions, organization.id);
+                    editUser.permissions = UserPermissions.limitedPatch(
+                        editUser.permissions,
+                        request.body.permissions,
+                        organization.id,
+                    );
 
-                    if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization, platform, editUser.email, { inheritFromPlatform: false })?.hasFullAccess())) {
+                    if (
+                        editUser.id === user.id &&
+                        (!editUser.permissions ||
+                            !editUser.permissions
+                                .forOrganization(organization, platform, editUser.email, {
+                                    inheritFromPlatform: false,
+                                })
+                                ?.hasFullAccess())
+                    ) {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: 'Je kan jezelf niet verwijderen als hoofdbeheerder',
@@ -74,10 +90,17 @@ export class PatchApiUserEndpoint extends Endpoint<Params, Query, Body, Response
                     if (editUser.permissions) {
                         editUser.permissions.patchOrPut(request.body.permissions);
                     } else {
-                        editUser.permissions = request.body.permissions.isPut() ? request.body.permissions : null;
+                        editUser.permissions = request.body.permissions.isPut()
+                            ? request.body.permissions
+                            : null;
                     }
 
-                    if (editUser.id === user.id && !editUser.permissions?.forPlatform(platform, editUser.email)?.hasFullAccess()) {
+                    if (
+                        editUser.id === user.id &&
+                        !editUser.permissions
+                            ?.forPlatform(platform, editUser.email)
+                            ?.hasFullAccess()
+                    ) {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: 'Je kan jezelf niet verwijderen als hoofdbeheerder',

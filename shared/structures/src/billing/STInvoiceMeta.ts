@@ -1,4 +1,12 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 
 import { Address } from '../addresses/Address.js';
 import { File } from '../files/File.js';
@@ -93,12 +101,12 @@ export class STInvoiceMeta extends AutoEncoder {
     }
 
     getVATOnIncludingVATAmount(price: number) {
-        return Math.round(price * this.VATPercentage / (100 + this.VATPercentage));
+        return Math.round((price * this.VATPercentage) / (100 + this.VATPercentage));
     }
 
     getVATOnExcludingVATAmount(price: number) {
         // Make sure price result doesn't depend on the sign of the price
-        return Math.round(Math.abs(price) * this.VATPercentage / 100) * Math.sign(price);
+        return Math.round((Math.abs(price) * this.VATPercentage) / 100) * Math.sign(price);
     }
 
     get useLegacyRounding() {
@@ -122,7 +130,10 @@ export class STInvoiceMeta extends AutoEncoder {
         if (this.areItemsIncludingVAT) {
             // We round at individual item level
             // because PEPPOL requires prices with max 2 decimals on every line level, meaning we need to round.
-            return this.items.reduce((price, item) => price + this.includingVATToExcludingVAT(item.price), 0);
+            return this.items.reduce(
+                (price, item) => price + this.includingVATToExcludingVAT(item.price),
+                0,
+            );
         }
         return this.items.reduce((price, item) => price + item.price, 0);
     }

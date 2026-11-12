@@ -4,7 +4,11 @@ import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { EmailVerificationCode, User } from '@stamhoofd/models';
 import { UserService } from '@stamhoofd/models/services/UserService.js';
-import { SessionLoginMethod, Token as TokenStruct, VerifyEmailRequest } from '@stamhoofd/structures';
+import {
+    SessionLoginMethod,
+    Token as TokenStruct,
+    VerifyEmailRequest,
+} from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
 import { TwoFactorHelper } from '../../helpers/TwoFactorHelper.js';
@@ -33,7 +37,9 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOptionalOrganizationScope({ willAuthenticate: false });
+        const organization = await Context.setOptionalOrganizationScope({
+            willAuthenticate: false,
+        });
 
         if (!request.body.token) {
             throw new SimpleError({
@@ -58,7 +64,11 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // settings, and already passed their second factor for that session.
         const authenticatedUser = await Context.optionalAuthenticatedUser();
 
-        const code = await EmailVerificationCode.verify(organization?.id ?? null, request.body.token, request.body.code);
+        const code = await EmailVerificationCode.verify(
+            organization?.id ?? null,
+            request.body.token,
+            request.body.code,
+        );
 
         if (!code) {
             throw new SimpleError({
@@ -71,7 +81,10 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         const user = code.userId ? await User.getByID(code.userId) : undefined;
 
-        if (!user || (user.organizationId !== null && user.organizationId !== (organization?.id ?? null))) {
+        if (
+            !user ||
+            (user.organizationId !== null && user.organizationId !== (organization?.id ?? null))
+        ) {
             throw new SimpleError({
                 code: 'invalid_code',
                 message: 'This code is invalid',
@@ -81,7 +94,9 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         if (user.email !== code.email) {
-            const other = await User.getForAuthentication(user.organizationId, code.email, { allowWithoutAccount: true });
+            const other = await User.getForAuthentication(user.organizationId, code.email, {
+                allowWithoutAccount: true,
+            });
 
             if (other) {
                 // Opening the link only proves control over the mailbox, which may belong to someone
@@ -129,10 +144,17 @@ export class VerifyEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // the request already comes from a session of that same user (changing your email
         // address while signed in): the second factor was checked when it was created.
         if (authenticatedUser?.id !== user.id) {
-            await TwoFactorHelper.assertSecondFactorOrThrow(user, organization, request.request.getVersion(), { loginMethod: SessionLoginMethod.Email, i18n: request.i18n });
+            await TwoFactorHelper.assertSecondFactorOrThrow(
+                user,
+                organization,
+                request.request.getVersion(),
+                { loginMethod: SessionLoginMethod.Email, i18n: request.i18n },
+            );
         }
 
-        const token = await SessionService.createSession(user, { loginMethod: SessionLoginMethod.Email });
+        const token = await SessionService.createSession(user, {
+            loginMethod: SessionLoginMethod.Email,
+        });
         await user.markActive();
 
         const st = new TokenStruct(token);

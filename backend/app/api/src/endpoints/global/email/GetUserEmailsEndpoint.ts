@@ -1,7 +1,18 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
-import type { CountFilteredRequest, EmailWithRecipients, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, EmailStatus, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    EmailWithRecipients,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
+import {
+    assertSort,
+    EmailStatus,
+    getSortFilter,
+    LimitedFilteredRequest,
+    mergeFilters,
+    PaginatedResponse,
+} from '@stamhoofd/structures';
 
 import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
@@ -49,20 +60,26 @@ export class GetUserEmailsEndpoint extends Endpoint<Params, Query, Body, Respons
         let scopeFilter: StamhoofdFilter | null = null;
 
         if (organization) {
-            scopeFilter = mergeFilters([scopeFilter, {
-                organizationId: organization.id,
-            }]);
+            scopeFilter = mergeFilters([
+                scopeFilter,
+                {
+                    organizationId: organization.id,
+                },
+            ]);
         }
 
-        scopeFilter = mergeFilters([scopeFilter, {
-            recipients: {
-                $elemMatch: {
-                    memberId: {
-                        $in: memberIds,
+        scopeFilter = mergeFilters([
+            scopeFilter,
+            {
+                recipients: {
+                    $elemMatch: {
+                        memberId: {
+                            $in: memberIds,
+                        },
                     },
                 },
             },
-        }]);
+        ]);
 
         const query = Email.select()
             .where('deletedAt', null)
@@ -106,7 +123,10 @@ export class GetUserEmailsEndpoint extends Endpoint<Params, Query, Body, Respons
         return query;
     }
 
-    static async buildData(requestQuery: LimitedFilteredRequest, options: { language?: Language | null } = {}) {
+    static async buildData(
+        requestQuery: LimitedFilteredRequest,
+        options: { language?: Language | null } = {},
+    ) {
         const user = Context.impersonatedUserOrUser;
         if (!user) {
             throw new Error('Not authenticated');
@@ -136,7 +156,11 @@ export class GetUserEmailsEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         return new PaginatedResponse<EmailWithRecipients[], LimitedFilteredRequest>({
-            results: await Promise.all(emails.map(email => EmailPreviewService.getStructureForUser(email, user, memberIds, options))),
+            results: await Promise.all(
+                emails.map((email) =>
+                    EmailPreviewService.getStructureForUser(email, user, memberIds, options),
+                ),
+            ),
             next,
         });
     }

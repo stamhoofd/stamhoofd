@@ -11,13 +11,30 @@ import type { PaymentGeneral } from '../members/PaymentGeneral.js';
 import type { PaymentAccount } from '../PaymentAccount.js';
 import { getPaymentAccount } from '../PaymentAccount.js';
 import type { BreakdownPathItem } from '../PaymentBreakdown.js';
-import { BreakdownGroup, BreakdownObjectType, BreakdownSelection, BreakdownTab, PaymentBreakdown } from '../PaymentBreakdown.js';
+import {
+    BreakdownGroup,
+    BreakdownObjectType,
+    BreakdownSelection,
+    BreakdownTab,
+    PaymentBreakdown,
+} from '../PaymentBreakdown.js';
 import type { PaymentSettlementGroup } from '../PaymentSettlement.js';
 import { getPaymentSettlement } from '../PaymentSettlement.js';
 import { PaymentStatus } from '../PaymentStatus.js';
 import type { OrderData } from '../webshops/Order.js';
 import type { BreakdownPageContext } from './BreakdownPageContext.js';
-import { canOpenPartialRow, createBalanceItemSelection, createCategoryGroup, createNamedGroup, createRoundingGroup, createUnallocatedGroup, NOTHING, onlyIfSplit, ROUNDING_ID, UNALLOCATED_ID } from './breakdownGroups.js';
+import {
+    canOpenPartialRow,
+    createBalanceItemSelection,
+    createCategoryGroup,
+    createNamedGroup,
+    createRoundingGroup,
+    createUnallocatedGroup,
+    NOTHING,
+    onlyIfSplit,
+    ROUNDING_ID,
+    UNALLOCATED_ID,
+} from './breakdownGroups.js';
 import { BreakdownRows, PaymentBreakdownItem } from './BreakdownRows.js';
 import { BreakdownTimeline } from './BreakdownTimeline.js';
 import { createOrderArticleGroup, getOrderArticles } from './orderArticles.js';
@@ -35,7 +52,10 @@ export class PaymentBreakdownBuilder {
      * The filter of each opened group, remembered the first time an object matches it. That object
      * knows what the group was, so we don't have to look it up again to export it.
      */
-    private readonly pathFilters: ({ filter: StamhoofdFilter; isBalanceItemFilter: boolean } | null)[];
+    private readonly pathFilters: ({
+        filter: StamhoofdFilter;
+        isBalanceItemFilter: boolean;
+    } | null)[];
 
     private readonly byAccount = new BreakdownRows('payments');
     private readonly byCategory = new BreakdownRows('payments');
@@ -95,7 +115,10 @@ export class PaymentBreakdownBuilder {
                 continue;
             }
 
-            if (!isShown && (payment.roundingAmount !== 0 || payment.balanceItemPayments.length === 0)) {
+            if (
+                !isShown &&
+                (payment.roundingAmount !== 0 || payment.balanceItemPayments.length === 0)
+            ) {
                 this.addPayment(payment);
             }
 
@@ -137,9 +160,13 @@ export class PaymentBreakdownBuilder {
         const isListPartial = this.paymentPrice !== this.price;
 
         return BreakdownSelection.create({
-            objectType: isListPartial ? BreakdownObjectType.BalanceItemPayments : BreakdownObjectType.Payments,
+            objectType: isListPartial
+                ? BreakdownObjectType.BalanceItemPayments
+                : BreakdownObjectType.Payments,
             listObjectType: BreakdownObjectType.Payments,
-            filter: isListPartial ? this.getSliceFilter(baseFilter) : this.getExportFilter(baseFilter),
+            filter: isListPartial
+                ? this.getSliceFilter(baseFilter)
+                : this.getExportFilter(baseFilter),
             listFilter: this.getExportFilter(baseFilter),
             isListPartial,
         });
@@ -160,7 +187,8 @@ export class PaymentBreakdownBuilder {
                 // the balance items, what the payment itself is directly
                 const extra = {
                     filter: group.selection.filter,
-                    isBalanceItemFilter: group.selection.objectType === BreakdownObjectType.BalanceItems,
+                    isBalanceItemFilter:
+                        group.selection.objectType === BreakdownObjectType.BalanceItems,
                 };
 
                 // A payment is listed as a whole, because that is what a payment is
@@ -202,7 +230,11 @@ export class PaymentBreakdownBuilder {
      * instead of to one of the things it paid for, which is why it gets a row of its own: without it the
      * rows would not add up to the payment.
      */
-    private addRounding(payment: PaymentGeneral, account: PaymentAccount, settlement: PaymentSettlementGroup) {
+    private addRounding(
+        payment: PaymentGeneral,
+        account: PaymentAccount,
+        settlement: PaymentSettlementGroup,
+    ) {
         const price = payment.roundingAmount;
 
         this.price += price;
@@ -251,7 +283,12 @@ export class PaymentBreakdownBuilder {
      * Like the rounding above it belongs to the payment as a whole, so it is added next to it: in the
      * same account and payout, but in a row that says it is not known what it was for.
      */
-    private addUnallocated(payment: PaymentGeneral, price: number, account: PaymentAccount, settlement: PaymentSettlementGroup) {
+    private addUnallocated(
+        payment: PaymentGeneral,
+        price: number,
+        account: PaymentAccount,
+        settlement: PaymentSettlementGroup,
+    ) {
         this.price += price;
         this.addStatusPrice(payment, price);
         this.timeline.add(payment.paidAt ?? payment.createdAt, price);
@@ -292,7 +329,12 @@ export class PaymentBreakdownBuilder {
         }
     }
 
-    private addItem(item: PaymentBreakdownItem, account: PaymentAccount, settlement: PaymentSettlementGroup, orders: Map<string, OrderData>) {
+    private addItem(
+        item: PaymentBreakdownItem,
+        account: PaymentAccount,
+        settlement: PaymentSettlementGroup,
+        orders: Map<string, OrderData>,
+    ) {
         this.price += item.price;
         this.addStatusPrice(item.payment, item.price);
 
@@ -330,10 +372,12 @@ export class PaymentBreakdownBuilder {
 
         const code = item.balanceItem.articleCode;
         this.byArticle
-            .row(code, () => BreakdownGroup.create({
-                id: code,
-                selection: createBalanceItemSelection(item.balanceItem.articleFilter),
-            }))
+            .row(code, () =>
+                BreakdownGroup.create({
+                    id: code,
+                    selection: createBalanceItemSelection(item.balanceItem.articleFilter),
+                }),
+            )
             .addPrice(item.price)
             .countPayment(item.payment.id, item.payment.price)
             .countBalanceItem(item.balanceItem)
@@ -349,7 +393,11 @@ export class PaymentBreakdownBuilder {
      * @param item Null for the part of a payment that is not for one thing in particular (see
      * addRounding): that part only survives narrowing down to where the money arrived.
      */
-    private consumePath(item: PaymentBreakdownItem | null, account: PaymentAccount, settlement: PaymentSettlementGroup): boolean {
+    private consumePath(
+        item: PaymentBreakdownItem | null,
+        account: PaymentAccount,
+        settlement: PaymentSettlementGroup,
+    ): boolean {
         for (const [index, step] of this.path.entries()) {
             switch (step.tab) {
                 case BreakdownTab.Account: {
@@ -357,7 +405,10 @@ export class PaymentBreakdownBuilder {
                         return false;
                     }
 
-                    this.pathFilters[index] ??= { filter: account.filter, isBalanceItemFilter: false };
+                    this.pathFilters[index] ??= {
+                        filter: account.filter,
+                        isBalanceItemFilter: false,
+                    };
                     break;
                 }
                 case BreakdownTab.Settlement: {
@@ -365,7 +416,10 @@ export class PaymentBreakdownBuilder {
                         return false;
                     }
 
-                    this.pathFilters[index] ??= { filter: settlement.filter, isBalanceItemFilter: false };
+                    this.pathFilters[index] ??= {
+                        filter: settlement.filter,
+                        isBalanceItemFilter: false,
+                    };
                     break;
                 }
                 case BreakdownTab.Category: {
@@ -373,7 +427,10 @@ export class PaymentBreakdownBuilder {
                         return false;
                     }
 
-                    this.pathFilters[index] ??= { filter: item.balanceItem.categoryFilter, isBalanceItemFilter: true };
+                    this.pathFilters[index] ??= {
+                        filter: item.balanceItem.categoryFilter,
+                        isBalanceItemFilter: true,
+                    };
                     break;
                 }
                 case BreakdownTab.Article: {
@@ -381,7 +438,10 @@ export class PaymentBreakdownBuilder {
                         return false;
                     }
 
-                    this.pathFilters[index] ??= { filter: item.balanceItem.articleFilter, isBalanceItemFilter: true };
+                    this.pathFilters[index] ??= {
+                        filter: item.balanceItem.articleFilter,
+                        isBalanceItemFilter: true,
+                    };
                     break;
                 }
             }
@@ -397,7 +457,10 @@ export class PaymentBreakdownBuilder {
      * Null when a group that was opened held nothing: leaving it out would select everything that was
      * not narrowed down yet.
      */
-    private getFilterParts(baseFilter: StamhoofdFilter, ...extra: { filter: StamhoofdFilter; isBalanceItemFilter: boolean }[]): { payment: StamhoofdFilter[]; balanceItem: StamhoofdFilter[] } | null {
+    private getFilterParts(
+        baseFilter: StamhoofdFilter,
+        ...extra: { filter: StamhoofdFilter; isBalanceItemFilter: boolean }[]
+    ): { payment: StamhoofdFilter[]; balanceItem: StamhoofdFilter[] } | null {
         const payment: StamhoofdFilter[] = baseFilter ? [baseFilter] : [];
         const balanceItem: StamhoofdFilter[] = [];
 
@@ -421,7 +484,10 @@ export class PaymentBreakdownBuilder {
      * Payments don't carry the metadata of a balance item themselves, so a category is selected through
      * the balance items they paid for.
      */
-    private getExportFilter(baseFilter: StamhoofdFilter, ...extra: { filter: StamhoofdFilter; isBalanceItemFilter: boolean }[]): StamhoofdFilter {
+    private getExportFilter(
+        baseFilter: StamhoofdFilter,
+        ...extra: { filter: StamhoofdFilter; isBalanceItemFilter: boolean }[]
+    ): StamhoofdFilter {
         const parts = this.getFilterParts(baseFilter, ...extra);
 
         if (!parts) {
@@ -449,7 +515,10 @@ export class PaymentBreakdownBuilder {
      * A payment that also paid for something else is only partly this row, and that part is one balance
      * item payment: the level where it can be selected on its own.
      */
-    private getSliceFilter(baseFilter: StamhoofdFilter, ...extra: { filter: StamhoofdFilter; isBalanceItemFilter: boolean }[]): StamhoofdFilter {
+    private getSliceFilter(
+        baseFilter: StamhoofdFilter,
+        ...extra: { filter: StamhoofdFilter; isBalanceItemFilter: boolean }[]
+    ): StamhoofdFilter {
         const parts = this.getFilterParts(baseFilter, ...extra);
 
         if (!parts) {

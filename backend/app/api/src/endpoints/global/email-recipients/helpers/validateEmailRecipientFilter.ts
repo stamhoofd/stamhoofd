@@ -5,7 +5,13 @@ import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { FilterWrapperMarker, unwrapFilter, unwrapFilterRecursively } from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 
-export async function validateEmailRecipientFilter({ filter, permissionLevel }: { filter: StamhoofdFilter; permissionLevel: PermissionLevel }) {
+export async function validateEmailRecipientFilter({
+    filter,
+    permissionLevel,
+}: {
+    filter: StamhoofdFilter;
+    permissionLevel: PermissionLevel;
+}) {
     // Require presence of a filter
     const requiredFilter: WrapperFilter = {
         emailId: FilterWrapperMarker,
@@ -16,17 +22,19 @@ export async function validateEmailRecipientFilter({ filter, permissionLevel }: 
         return false;
     }
 
-    const emailIds = typeof unwrapped.markerValue === 'string'
-        ? [unwrapped.markerValue]
-        : unwrapFilter(unwrapped.markerValue as StamhoofdFilter, {
-            $in: FilterWrapperMarker,
-        })?.markerValue;
+    const emailIds =
+        typeof unwrapped.markerValue === 'string'
+            ? [unwrapped.markerValue]
+            : unwrapFilter(unwrapped.markerValue as StamhoofdFilter, {
+                  $in: FilterWrapperMarker,
+              })?.markerValue;
 
     if (!Array.isArray(emailIds)) {
         throw new SimpleError({
             code: 'invalid_field',
             field: 'filter',
-            message: 'You must filter on an email id of the email recipients you are trying to access',
+            message:
+                'You must filter on an email id of the email recipients you are trying to access',
             human: $t('%1E1'),
         });
     }
@@ -49,12 +57,15 @@ export async function validateEmailRecipientFilter({ filter, permissionLevel }: 
         }
     }
 
-    const emails = await Email.getByIDs(...emailIds as string[]);
+    const emails = await Email.getByIDs(...(emailIds as string[]));
 
-    console.log('Fetching recipients for emails', emails.map(g => g.subject));
+    console.log(
+        'Fetching recipients for emails',
+        emails.map((g) => g.subject),
+    );
 
     for (const email of emails) {
-        if (!await Context.auth.canAccessEmail(email, permissionLevel)) {
+        if (!(await Context.auth.canAccessEmail(email, permissionLevel))) {
             throw Context.auth.error({
                 message: 'You do not have access to this email',
                 human: $t('%1E2'),

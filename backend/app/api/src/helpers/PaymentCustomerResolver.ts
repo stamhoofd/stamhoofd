@@ -32,12 +32,15 @@ export type PaymentCustomerRelations = {
  *
  * Returns null when we could not find any usable information.
  */
-export function determinePaymentCustomer(payment: Payment, relations: PaymentCustomerRelations): PaymentCustomer | null {
+export function determinePaymentCustomer(
+    payment: Payment,
+    relations: PaymentCustomerRelations,
+): PaymentCustomer | null {
     const { balanceItems, members, users, orders, payingOrganizations } = relations;
 
     // 1. Paid by an organization
     if (payment.payingOrganizationId) {
-        const organization = payingOrganizations.find(o => o.id === payment.payingOrganizationId);
+        const organization = payingOrganizations.find((o) => o.id === payment.payingOrganizationId);
         if (organization) {
             return PaymentCustomer.create({
                 company: organization.defaultCompanies[0] ?? null,
@@ -47,7 +50,7 @@ export function determinePaymentCustomer(payment: Payment, relations: PaymentCus
 
     // 2. Paid by a known user
     if (payment.payingUserId) {
-        const user = users.find(u => u.id === payment.payingUserId);
+        const user = users.find((u) => u.id === payment.payingUserId);
         const customer = user ? customerFromUser(user) : null;
         if (customer) {
             return customer;
@@ -55,14 +58,22 @@ export function determinePaymentCustomer(payment: Payment, relations: PaymentCus
     }
 
     // The balance items linked to this payment, used to find members/users/orders.
-    const linkedMemberIds = Formatter.uniqueArray(balanceItems.map(b => b.memberId).filter((id): id is string => id !== null));
-    const linkedUserIds = Formatter.uniqueArray(balanceItems.map(b => b.userId).filter((id): id is string => id !== null));
-    const linkedOrderIds = Formatter.uniqueArray(balanceItems.map(b => b.orderId).filter((id): id is string => id !== null));
-    const linkedPayingOrganizationIds = Formatter.uniqueArray(balanceItems.map(b => b.payingOrganizationId).filter((id): id is string => id !== null));
+    const linkedMemberIds = Formatter.uniqueArray(
+        balanceItems.map((b) => b.memberId).filter((id): id is string => id !== null),
+    );
+    const linkedUserIds = Formatter.uniqueArray(
+        balanceItems.map((b) => b.userId).filter((id): id is string => id !== null),
+    );
+    const linkedOrderIds = Formatter.uniqueArray(
+        balanceItems.map((b) => b.orderId).filter((id): id is string => id !== null),
+    );
+    const linkedPayingOrganizationIds = Formatter.uniqueArray(
+        balanceItems.map((b) => b.payingOrganizationId).filter((id): id is string => id !== null),
+    );
 
     // 3. A member linked to the balance items
     for (const memberId of linkedMemberIds) {
-        const member = members.find(m => m.id === memberId);
+        const member = members.find((m) => m.id === memberId);
         if (member) {
             const customer = customerFromMember(member);
             if (customer) {
@@ -73,7 +84,7 @@ export function determinePaymentCustomer(payment: Payment, relations: PaymentCus
 
     // 4. A user linked to the balance items
     for (const userId of linkedUserIds) {
-        const user = users.find(u => u.id === userId);
+        const user = users.find((u) => u.id === userId);
         if (user) {
             const customer = customerFromUser(user);
             if (customer) {
@@ -84,7 +95,7 @@ export function determinePaymentCustomer(payment: Payment, relations: PaymentCus
 
     // 5. The customer data of an order linked to the balance items
     for (const orderId of linkedOrderIds) {
-        const order = orders.find(o => o.id === orderId);
+        const order = orders.find((o) => o.id === orderId);
         if (order && (order.data.customer.email || order.data.customer.name)) {
             return order.data.customer.toPaymentCustomer();
         }
@@ -92,7 +103,7 @@ export function determinePaymentCustomer(payment: Payment, relations: PaymentCus
 
     // 6. A paying organization referenced by a balance item (fallback)
     for (const organizationId of linkedPayingOrganizationIds) {
-        const organization = payingOrganizations.find(o => o.id === organizationId);
+        const organization = payingOrganizations.find((o) => o.id === organizationId);
         if (organization) {
             return PaymentCustomer.create({
                 company: organization.defaultCompanies[0] ?? null,
@@ -119,7 +130,9 @@ function customerFromMember(member: Member): PaymentCustomer | null {
 
     // For young members the parents are the ones who pay, mirroring the logic used elsewhere
     // (e.g. ReceivableBalance customers).
-    const useParents = (details.calculatedParentsHaveAccess || details.getMemberEmails().length === 0) && details.parents.length > 0;
+    const useParents =
+        (details.calculatedParentsHaveAccess || details.getMemberEmails().length === 0) &&
+        details.parents.length > 0;
 
     if (useParents) {
         const parent = details.parents[0];

@@ -1,7 +1,5 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
-import {
-    getSignedUrl,
-} from '@aws-sdk/s3-request-presigner';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { DecodedRequest, Request, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { File, supportedFileTypes } from '@stamhoofd/structures';
@@ -24,7 +22,11 @@ export class FileSignService {
         }
 
         try {
-            return new URL(file.server).origin === new URL('https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT).origin;
+            return (
+                new URL(file.server).origin ===
+                new URL('https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT)
+                    .origin
+            );
         } catch {
             return false;
         }
@@ -48,10 +50,16 @@ export class FileSignService {
 
         if (!STAMHOOFD.FILE_SIGNING_PUBLIC_KEY || !STAMHOOFD.FILE_SIGNING_PRIVATE_KEY) {
             if (STAMHOOFD.environment !== 'development' && STAMHOOFD.environment !== 'test') {
-                throw new Error('Missing environment variables for file signing. Please make sure FILE_SIGNING_PUBLIC_KEY, FILE_SIGNING_PRIVATE_KEY and FILE_SIGNING_ALG are set.');
+                throw new Error(
+                    'Missing environment variables for file signing. Please make sure FILE_SIGNING_PUBLIC_KEY, FILE_SIGNING_PRIVATE_KEY and FILE_SIGNING_ALG are set.',
+                );
             }
 
-            console.warn(chalk.yellow('File signing is disabled because the environment variables are not set. Please make sure FILE_SIGNING_PUBLIC_KEY, FILE_SIGNING_PRIVATE_KEY and FILE_SIGNING_ALG are set.'));
+            console.warn(
+                chalk.yellow(
+                    'File signing is disabled because the environment variables are not set. Please make sure FILE_SIGNING_PUBLIC_KEY, FILE_SIGNING_PRIVATE_KEY and FILE_SIGNING_ALG are set.',
+                ),
+            );
 
             const { publicKey, privateKey } = await jose.generateKeyPair(alg);
 
@@ -69,9 +77,7 @@ export class FileSignService {
 
         // Support for multiple public keys (in case we need to rotate keys)
         const jwks = jose.createLocalJWKSet({
-            keys: [
-                STAMHOOFD.FILE_SIGNING_PUBLIC_KEY!,
-            ],
+            keys: [STAMHOOFD.FILE_SIGNING_PUBLIC_KEY!],
         });
 
         File.verifyFile = async (file) => {
@@ -83,7 +89,7 @@ export class FileSignService {
                 const { payload, protectedHeader } = await jose.compactVerify(file.signature, jwks);
 
                 // Check if payload matches the file
-                const decoded = (new TextDecoder().decode(payload));
+                const decoded = new TextDecoder().decode(payload);
                 if (decoded !== file.signPayload) {
                     console.error('Invalid payload:', decoded);
                     return false;
@@ -105,9 +111,7 @@ export class FileSignService {
             if (!STAMHOOFD.FILE_SIGNING_PRIVATE_KEY) {
                 return;
             }
-            const jws = await new jose.CompactSign(
-                new TextEncoder().encode(file.signPayload),
-            )
+            const jws = await new jose.CompactSign(new TextEncoder().encode(file.signPayload))
                 .setProtectedHeader({ alg })
                 .sign(privateKey);
 
@@ -133,7 +137,10 @@ export class FileSignService {
         }
 
         // When a file also carries a content type, both have to be safe
-        if (file.contentType && !supportedFileTypes.resolveUpload({ contentType: file.contentType })?.canRenderInline) {
+        if (
+            file.contentType &&
+            !supportedFileTypes.resolveUpload({ contentType: file.contentType })?.canRenderInline
+        ) {
             return 'attachment';
         }
 
@@ -221,7 +228,7 @@ export class FileSignService {
             // Clear all incoming signed urls
             data.signedUrl = null;
 
-            if (!await data.verify()) {
+            if (!(await data.verify())) {
                 // This is the first level of defence - it prevents the server from storing untrusted files
                 // but in the case this check is bypassed, we still need to check the signature when creating signed urls
                 throw new SimpleError({
@@ -263,7 +270,10 @@ export class FileSignService {
         }
     }
 
-    static async handleDecodedRequest(decodedRequest: DecodedRequest<unknown, unknown, unknown>, _endpoint) {
+    static async handleDecodedRequest(
+        decodedRequest: DecodedRequest<unknown, unknown, unknown>,
+        _endpoint,
+    ) {
         await this.verifyFilesInStruct(decodedRequest.body);
     }
 }

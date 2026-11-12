@@ -31,7 +31,7 @@ export class GetMollieDashboardEndpoint extends Endpoint<Params, Query, Body, Re
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full)) {
+        if (!(await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full))) {
             throw Context.auth.error();
         }
 
@@ -39,16 +39,19 @@ export class GetMollieDashboardEndpoint extends Endpoint<Params, Query, Body, Re
         if (!mollie) {
             throw new SimpleError({
                 code: 'not_yet_linked',
-                message: 'Mollie is nog niet gekoppeld. Koppel Mollie eerst voor je de gegevens aanvult',
+                message:
+                    'Mollie is nog niet gekoppeld. Koppel Mollie eerst voor je de gegevens aanvult',
             });
         }
 
         try {
-            const url = await mollie.getOnboardingLink() as string;
+            const url = (await mollie.getOnboardingLink()) as string;
 
-            const response = new Response(GetMollieDashboardResponse.create({
-                url,
-            }));
+            const response = new Response(
+                GetMollieDashboardResponse.create({
+                    url,
+                }),
+            );
             return response;
         } catch (e) {
             if (isSimpleErrors(e) || isSimpleError(e)) {
@@ -57,7 +60,8 @@ export class GetMollieDashboardEndpoint extends Endpoint<Params, Query, Body, Re
             await mollie.delete();
             throw new SimpleError({
                 code: 'not_yet_linked',
-                message: 'Mollie is nog niet gekoppeld. Koppel Mollie eerst voor je de gegevens aanvult',
+                message:
+                    'Mollie is nog niet gekoppeld. Koppel Mollie eerst voor je de gegevens aanvult',
             });
         }
     }

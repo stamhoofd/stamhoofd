@@ -3,7 +3,11 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { Organization, Platform, STPackage } from '@stamhoofd/models';
-import { BalanceItemStatus, OrganizationPackagesStatus, STPackage as STPackageStruct } from '@stamhoofd/structures';
+import {
+    BalanceItemStatus,
+    OrganizationPackagesStatus,
+    STPackage as STPackageStruct,
+} from '@stamhoofd/structures';
 import { Context } from '../../../helpers/Context.js';
 import { STPackageService } from '../../../services/STPackageService.js';
 
@@ -13,7 +17,9 @@ type ResponseBody = OrganizationPackagesStatus;
 type Body = AutoEncoderPatchType<OrganizationPackagesStatus>;
 
 export class PatchPackagesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = OrganizationPackagesStatus.patchType() as Decoder<AutoEncoderPatchType<OrganizationPackagesStatus>>;
+    bodyDecoder = OrganizationPackagesStatus.patchType() as Decoder<
+        AutoEncoderPatchType<OrganizationPackagesStatus>
+    >;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -47,7 +53,7 @@ export class PatchPackagesEndpoint extends Endpoint<Params, Query, Body, Respons
         // Do patches
         if (request.body.packages) {
             for (const patch of request.body.packages.getPatches()) {
-                const pack = packages.find(p => p.id === patch.id);
+                const pack = packages.find((p) => p.id === patch.id);
                 if (!pack) {
                     throw new SimpleError({
                         code: 'not_found',
@@ -70,7 +76,11 @@ export class PatchPackagesEndpoint extends Endpoint<Params, Query, Body, Respons
                 await pack.save();
                 updatePackages = true;
 
-                const item = await STPackageService.chargePackage(pack, membershipOrganization, organization.defaultCompanies[0]);
+                const item = await STPackageService.chargePackage(
+                    pack,
+                    membershipOrganization,
+                    organization.defaultCompanies[0],
+                );
                 if (item) {
                     item.status = BalanceItemStatus.Due;
                     await item.save();
@@ -92,7 +102,11 @@ export class PatchPackagesEndpoint extends Endpoint<Params, Query, Body, Respons
                 updatePackages = true;
 
                 packages.push(pack);
-                const item = await STPackageService.chargePackage(pack, membershipOrganization, organization.defaultCompanies[0]);
+                const item = await STPackageService.chargePackage(
+                    pack,
+                    membershipOrganization,
+                    organization.defaultCompanies[0],
+                );
                 if (item) {
                     item.status = BalanceItemStatus.Due;
                     await item.save();
@@ -105,8 +119,10 @@ export class PatchPackagesEndpoint extends Endpoint<Params, Query, Body, Respons
             await STPackageService.updateOrganizationPackages(organization.id);
         }
 
-        return new Response(OrganizationPackagesStatus.create({
-            packages: packages.map(p => STPackageStruct.create(p)),
-        }));
+        return new Response(
+            OrganizationPackagesStatus.create({
+                packages: packages.map((p) => STPackageStruct.create(p)),
+            }),
+        );
     }
 }

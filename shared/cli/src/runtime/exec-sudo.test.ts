@@ -7,10 +7,12 @@ const write = vi.hoisted(() => vi.fn(() => true));
 vi.mock('./telemetry.js', () => ({
     getCliTelemetry: () => undefined,
     withCliPrompt: vi.fn((callback: () => Promise<unknown>) => callback()),
-    withCliInteractiveOperation: vi.fn((_label: string, callback: (writer: typeof write) => Promise<unknown>) => callback(write)),
+    withCliInteractiveOperation: vi.fn(
+        (_label: string, callback: (writer: typeof write) => Promise<unknown>) => callback(write),
+    ),
 }));
-vi.mock('@node/opentelemetry-process', async importOriginal => ({
-    ...await importOriginal<typeof import('@node/opentelemetry-process')>(),
+vi.mock('@node/opentelemetry-process', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@node/opentelemetry-process')>()),
     runProcess: vi.fn(),
 }));
 
@@ -27,9 +29,24 @@ afterEach(() => {
 
 it('shows the redacted command before execution and lets sudo read terminal stdin', async () => {
     await execSudo(['install', 'private value'], { redact: ['private value'] });
-    expect(withCliInteractiveOperation).toHaveBeenCalledWith('sudo install "[redacted]"', expect.any(Function));
-    expect(runProcess).toHaveBeenCalledWith('sudo', ['-S', 'install', 'private value'], expect.objectContaining({ inheritStdin: true, processGroup: false, label: false, output: 'always', redact: ['private value'] }));
-    expect(vi.mocked(withCliInteractiveOperation).mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(runProcess).mock.invocationCallOrder[0]);
+    expect(withCliInteractiveOperation).toHaveBeenCalledWith(
+        'sudo install "[redacted]"',
+        expect.any(Function),
+    );
+    expect(runProcess).toHaveBeenCalledWith(
+        'sudo',
+        ['-S', 'install', 'private value'],
+        expect.objectContaining({
+            inheritStdin: true,
+            processGroup: false,
+            label: false,
+            output: 'always',
+            redact: ['private value'],
+        }),
+    );
+    expect(vi.mocked(withCliInteractiveOperation).mock.invocationCallOrder[0]).toBeLessThan(
+        vi.mocked(runProcess).mock.invocationCallOrder[0],
+    );
     const options = vi.mocked(runProcess).mock.calls[0][2]!;
     expect(options.input).toBeUndefined();
     expect(options.capture).toBeUndefined();
@@ -39,15 +56,27 @@ it('shows the redacted command before execution and lets sudo read terminal stdi
     expect(write).toHaveBeenCalledOnce();
 });
 
-it.each([1, 130])('propagates exit code %s so failure or cancellation retains diagnostics', async (code) => {
-    vi.mocked(runProcess).mockResolvedValueOnce({ code, stdout: '', stderr: 'denied', signal: null });
-    await expect(execSudo(['install'])).rejects.toThrow('denied');
-});
+it.each([1, 130])(
+    'propagates exit code %s so failure or cancellation retains diagnostics',
+    async (code) => {
+        vi.mocked(runProcess).mockResolvedValueOnce({
+            code,
+            stdout: '',
+            stderr: 'denied',
+            signal: null,
+        });
+        await expect(execSudo(['install'])).rejects.toThrow('denied');
+    },
+);
 
 it('retains native sudo behavior without terminal stdin', async () => {
     Object.defineProperty(process.stdin, 'isTTY', { configurable: true, value: false });
     await execSudo(['install']);
-    expect(runProcess).toHaveBeenCalledWith('sudo', ['install'], expect.objectContaining({ inheritStdio: true }));
+    expect(runProcess).toHaveBeenCalledWith(
+        'sudo',
+        ['install'],
+        expect.objectContaining({ inheritStdio: true }),
+    );
     expect(withCliInteractiveOperation).not.toHaveBeenCalled();
 });
 
@@ -55,10 +84,21 @@ it('hands the terminal to sudo without redrawing commands already previewed by t
     await execSudo(['iptables', '-A'], { label: false });
     expect(withCliInteractiveOperation).not.toHaveBeenCalled();
     expect(withCliPrompt).toHaveBeenCalledOnce();
-    expect(runProcess).toHaveBeenCalledWith('sudo', ['iptables', '-A'], expect.objectContaining({ inheritStdio: true, processGroup: false, label: false }));
+    expect(runProcess).toHaveBeenCalledWith(
+        'sudo',
+        ['iptables', '-A'],
+        expect.objectContaining({ inheritStdio: true, processGroup: false, label: false }),
+    );
 });
 
 it('identifies the failed command when per-command progress is disabled', async () => {
-    vi.mocked(runProcess).mockResolvedValueOnce({ code: 1, stdout: '', stderr: 'denied', signal: null });
-    await expect(execSudo(['install', 'private value'], { label: false, redact: ['private value'] })).rejects.toThrow('Failed: sudo install "[redacted]"');
+    vi.mocked(runProcess).mockResolvedValueOnce({
+        code: 1,
+        stdout: '',
+        stderr: 'denied',
+        signal: null,
+    });
+    await expect(
+        execSudo(['install', 'private value'], { label: false, redact: ['private value'] }),
+    ).rejects.toThrow('Failed: sudo install "[redacted]"');
 });

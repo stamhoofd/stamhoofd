@@ -1,10 +1,80 @@
 import { SimpleError } from '@common/errors';
-import type { AuditLog, Document, EventNotification, MemberWithUsersRegistrationsAndGroups, Order, Ticket } from '@stamhoofd/models';
-import { BalanceItem, CachedBalance, EmailRecipient, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Platform as PlatformModel, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
+import type {
+    AuditLog,
+    Document,
+    EventNotification,
+    MemberWithUsersRegistrationsAndGroups,
+    Order,
+    Ticket,
+} from '@stamhoofd/models';
+import {
+    BalanceItem,
+    CachedBalance,
+    EmailRecipient,
+    Event,
+    Group,
+    Invoice,
+    Member,
+    MemberPlatformMembership,
+    MemberResponsibilityRecord,
+    Organization,
+    OrganizationRegistrationPeriod,
+    Payment,
+    Platform as PlatformModel,
+    Registration,
+    RegistrationInvitation,
+    RegistrationPeriod,
+    User,
+    Webshop,
+} from '@stamhoofd/models';
 import type { EmailRecipient as EmailRecipientStruct, PaymentGeneral } from '@stamhoofd/structures';
-import { BaseOrganization, getAppHost, ImpersonatedBy, OrganizationPrivateMetaData } from '@stamhoofd/structures';
+import {
+    BaseOrganization,
+    getAppHost,
+    ImpersonatedBy,
+    OrganizationPrivateMetaData,
+} from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Payment as PaymentStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, WebshopPrivateMetaData, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import {
+    Payment as PaymentStruct,
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    AuditLog as AuditLogStruct,
+    BalanceItem as BalanceItemStruct,
+    DetailedReceivableBalance,
+    Document as DocumentStruct,
+    EventNotification as EventNotificationStruct,
+    Event as EventStruct,
+    GenericBalance,
+    Group as GroupStruct,
+    GroupType,
+    InvitationGroupData,
+    InvitationMemberData,
+    InvoicedBalanceItem,
+    InvoiceStruct,
+    MemberPlatformMembership as MemberPlatformMembershipStruct,
+    MemberRegistrationInvitation,
+    MembersBlob,
+    MemberWithRegistrationsBlob,
+    NamedObject,
+    OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct,
+    Organization as OrganizationStruct,
+    PaymentCustomer,
+    PrivateOrder,
+    PrivateWebshop,
+    ReceivableBalanceObject,
+    ReceivableBalanceObjectContact,
+    ReceivableBalance as ReceivableBalanceStruct,
+    ReceivableBalanceType,
+    RegistrationInvitation as RegistrationInvitationStruct,
+    RegistrationsBlob,
+    RegistrationWithMemberBlob,
+    TicketPrivate,
+    UserWithMembers,
+    WebshopPreview,
+    WebshopPrivateMetaData,
+    Webshop as WebshopStruct,
+} from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 import { SQL } from '@stamhoofd/sql';
@@ -17,7 +87,10 @@ import { TwoFactorHelper } from './TwoFactorHelper.js';
  * Builds authenticated structures for the current user
  */
 export class AuthenticatedStructures {
-    static async paymentGeneral(payment: Payment, checkPermissions = true): Promise<PaymentGeneral> {
+    static async paymentGeneral(
+        payment: Payment,
+        checkPermissions = true,
+    ): Promise<PaymentGeneral> {
         return (await this.paymentsGeneral([payment], checkPermissions))[0];
     }
 
@@ -27,7 +100,10 @@ export class AuthenticatedStructures {
      * @param checkPermissions Only set to undefined when not returned in the API + not for public use
      * @returns
      */
-    static async paymentsGeneral(payments: Payment[], checkPermissions = true): Promise<PaymentGeneral[]> {
+    static async paymentsGeneral(
+        payments: Payment[],
+        checkPermissions = true,
+    ): Promise<PaymentGeneral[]> {
         if (payments.length === 0) {
             return [];
         }
@@ -36,7 +112,12 @@ export class AuthenticatedStructures {
 
         if (checkPermissions) {
             // Note: permission checking is moved here for performacne to avoid loading the data multiple times
-            if (!(await Context.optionalAuth?.canAccessBalanceItems(balanceItems, PermissionLevel.Read))) {
+            if (
+                !(await Context.optionalAuth?.canAccessBalanceItems(
+                    balanceItems,
+                    PermissionLevel.Read,
+                ))
+            ) {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Permission denied',
@@ -48,26 +129,36 @@ export class AuthenticatedStructures {
         // A payout tells an organization's whole story: its total, the bank reference and our sync
         // diagnostics. Being able to read a payment (e.g. as the manager of the member who made it)
         // is not enough — only someone who may manage the organization's payments sees them
-        const includeSettlements = checkPermissions
-            && !!Context.user
-            && !!Context.user.permissions
-            && (await Promise.all(
-                Formatter.uniqueArray(payments.map(p => p.organizationId)).map(async organizationId =>
-                    !!Context.optionalAuth?.checkScope(organizationId) && !!(await Context.optionalAuth?.canManagePayments(organizationId)),
-                ),
-            )).every(allowed => allowed);
+        const includeSettlements =
+            checkPermissions &&
+            !!Context.user &&
+            !!Context.user.permissions &&
+            (
+                await Promise.all(
+                    Formatter.uniqueArray(payments.map((p) => p.organizationId)).map(
+                        async (organizationId) =>
+                            !!Context.optionalAuth?.checkScope(organizationId) &&
+                            !!(await Context.optionalAuth?.canManagePayments(organizationId)),
+                    ),
+                )
+            ).every((allowed) => allowed);
 
         const { payingOrganizations } = await Payment.loadPayingOrganizations(payments);
-        const { paymentSettlements, settlements } = includeSettlements ? await Payment.loadSettlements(payments) : { paymentSettlements: [], settlements: [] };
+        const { paymentSettlements, settlements } = includeSettlements
+            ? await Payment.loadSettlements(payments)
+            : { paymentSettlements: [], settlements: [] };
 
-        return Payment.getGeneralStructureFromRelations({
-            payments,
-            balanceItemPayments,
-            balanceItems,
-            payingOrganizations,
-            paymentSettlements,
-            settlements,
-        }, includeSettlements);
+        return Payment.getGeneralStructureFromRelations(
+            {
+                payments,
+                balanceItemPayments,
+                balanceItems,
+                payingOrganizations,
+                paymentSettlements,
+                settlements,
+            },
+            includeSettlements,
+        );
     }
 
     /**
@@ -86,24 +177,32 @@ export class AuthenticatedStructures {
         });
     }
 
-    static async invoices(invoices: Invoice[], incldueSettlements = false): Promise<InvoiceStruct[]> {
+    static async invoices(
+        invoices: Invoice[],
+        incldueSettlements = false,
+    ): Promise<InvoiceStruct[]> {
         if (invoices.length === 0) {
             return [];
         }
 
         const { invoicedBalanceItems } = await Invoice.loadBalanceItems(invoices);
 
-        const paymentModels = await Payment.select().where('invoiceId', invoices.map(i => i.id)).fetch();
+        const paymentModels = await Payment.select()
+            .where(
+                'invoiceId',
+                invoices.map((i) => i.id),
+            )
+            .fetch();
         const payments = await this.paymentsGeneral(paymentModels, incldueSettlements);
 
         return invoices.map((invoice) => {
-            const items = invoicedBalanceItems.filter(i => i.invoiceId === invoice.id);
+            const items = invoicedBalanceItems.filter((i) => i.invoiceId === invoice.id);
             return InvoiceStruct.create({
                 ...invoice,
                 items: items.map((item) => {
                     return InvoicedBalanceItem.create(item);
                 }),
-                payments: payments.filter(p => p.invoiceId === invoice.id),
+                payments: payments.filter((p) => p.invoiceId === invoice.id),
             });
         });
     }
@@ -113,13 +212,15 @@ export class AuthenticatedStructures {
     }
 
     static async groups(groups: Group[]) {
-        const waitingListIds = Formatter.uniqueArray(groups.map(g => g.waitingListId).filter(id => id !== null));
+        const waitingListIds = Formatter.uniqueArray(
+            groups.map((g) => g.waitingListId).filter((id) => id !== null),
+        );
 
         const waitingLists: Group[] = [];
         const waitingListsToFetch: string[] = [];
 
         for (const waitingListId of waitingListIds) {
-            const existingGroup = groups.find(g => g.id === waitingListId);
+            const existingGroup = groups.find((g) => g.id === waitingListId);
 
             if (existingGroup) {
                 waitingLists.push(existingGroup);
@@ -135,9 +236,13 @@ export class AuthenticatedStructures {
 
         const structs: GroupStruct[] = [];
         for (const group of groups) {
-            const waitingList = waitingLists.find(g => g.id === group.waitingListId) ?? null;
+            const waitingList = waitingLists.find((g) => g.id === group.waitingListId) ?? null;
             let waitingListStruct = waitingList ? GroupStruct.create(waitingList) : null;
-            if (waitingList && waitingListStruct && !await Context.optionalAuth?.canAccessGroup(waitingList)) {
+            if (
+                waitingList &&
+                waitingListStruct &&
+                !(await Context.optionalAuth?.canAccessGroup(waitingList))
+            ) {
                 waitingListStruct.privateSettings = null;
             }
 
@@ -150,7 +255,7 @@ export class AuthenticatedStructures {
                 waitingList: waitingListStruct,
             });
 
-            if (!await Context.optionalAuth?.canAccessGroup(group)) {
+            if (!(await Context.optionalAuth?.canAccessGroup(group))) {
                 struct.privateSettings = null;
             }
 
@@ -160,21 +265,31 @@ export class AuthenticatedStructures {
         return structs;
     }
 
-    static async organizationRegistrationPeriods(organizationRegistrationPeriods: OrganizationRegistrationPeriod[], periods?: RegistrationPeriod[], options?: { forceGroupIds?: string[] }) {
+    static async organizationRegistrationPeriods(
+        organizationRegistrationPeriods: OrganizationRegistrationPeriod[],
+        periods?: RegistrationPeriod[],
+        options?: { forceGroupIds?: string[] },
+    ) {
         if (organizationRegistrationPeriods.length === 0) {
             return [];
         }
 
-        const periodIds = periods ? Formatter.uniqueArray(periods.map(p => p.id)) : Formatter.uniqueArray(organizationRegistrationPeriods.map(p => p.periodId));
+        const periodIds = periods
+            ? Formatter.uniqueArray(periods.map((p) => p.id))
+            : Formatter.uniqueArray(organizationRegistrationPeriods.map((p) => p.periodId));
 
         if (!periods) {
             periods = await RegistrationPeriod.getByIDs(...periodIds);
         }
 
-        const organizationIds = Formatter.uniqueArray(organizationRegistrationPeriods.map(r => r.organizationId));
+        const organizationIds = Formatter.uniqueArray(
+            organizationRegistrationPeriods.map((r) => r.organizationId),
+        );
 
         const groupIds = Formatter.uniqueArray([
-            ...organizationRegistrationPeriods.flatMap(p => p.settings.categories.flatMap(c => c.groupIds)),
+            ...organizationRegistrationPeriods.flatMap((p) =>
+                p.settings.categories.flatMap((c) => c.groupIds),
+            ),
             ...(options?.forceGroupIds ?? []),
         ]);
 
@@ -195,20 +310,17 @@ export class AuthenticatedStructures {
                     .orWhere(whereWaitingList)
                     .fetch();
             } else {
-                groups = await Group.select()
-                    .where(whereGroupIds).fetch();
+                groups = await Group.select().where(whereGroupIds).fetch();
             }
         } else if (organizationIds.length && periodIds.length) {
-            groups = await Group.select()
-                .where(whereWaitingList)
-                .fetch();
+            groups = await Group.select().where(whereWaitingList).fetch();
         }
 
         const groupStructs = await this.groups(groups);
 
         const structs: OrganizationRegistrationPeriodStruct[] = [];
         for (const organizationPeriod of organizationRegistrationPeriods) {
-            const period = periods.find(p => p.id === organizationPeriod.periodId) ?? null;
+            const period = periods.find((p) => p.id === organizationPeriod.periodId) ?? null;
             if (!period) {
                 continue;
             }
@@ -216,17 +328,18 @@ export class AuthenticatedStructures {
             const struct = OrganizationRegistrationPeriodStruct.create({
                 ...organizationPeriod,
                 period: period.getStructure(),
-                groups: groupStructs.filter((gg) => {
-                    if (gg.organizationId !== organizationPeriod.organizationId) {
-                        return false;
-                    }
+                groups: groupStructs
+                    .filter((gg) => {
+                        if (gg.organizationId !== organizationPeriod.organizationId) {
+                            return false;
+                        }
 
-                    if (gg.periodId !== organizationPeriod.periodId) {
-                        return false;
-                    }
+                        if (gg.periodId !== organizationPeriod.periodId) {
+                            return false;
+                        }
 
-                    return true;
-                })
+                        return true;
+                    })
                     .sort(GroupStruct.defaultSort),
             });
 
@@ -236,8 +349,13 @@ export class AuthenticatedStructures {
         return structs;
     }
 
-    static async organizationRegistrationPeriod(organizationRegistrationPeriod: OrganizationRegistrationPeriod, periods?: RegistrationPeriod[]) {
-        return (await this.organizationRegistrationPeriods([organizationRegistrationPeriod], periods))[0];
+    static async organizationRegistrationPeriod(
+        organizationRegistrationPeriod: OrganizationRegistrationPeriod,
+        periods?: RegistrationPeriod[],
+    ) {
+        return (
+            await this.organizationRegistrationPeriods([organizationRegistrationPeriod], periods)
+        )[0];
     }
 
     static async webshop(webshop: Webshop) {
@@ -253,7 +371,7 @@ export class AuthenticatedStructures {
 
     static async webshopPreview(webshop: Webshop) {
         const preview = WebshopPreview.create(webshop);
-        if (!await Context.optionalAuth?.canAccessWebshop(webshop)) {
+        if (!(await Context.optionalAuth?.canAccessWebshop(webshop))) {
             preview.privateMeta = WebshopPrivateMetaData.create({});
         }
         return preview;
@@ -288,17 +406,24 @@ export class AuthenticatedStructures {
         }
 
         // Get registration period and whether private data can be accessed for each organization
-        const organizationData: Map<string, { organizationRegistrationPeriod: OrganizationRegistrationPeriodStruct; canAccessPrivateData: boolean; doesFrontendExpectPrivateMeta: boolean }> = new Map();
+        const organizationData: Map<
+            string,
+            {
+                organizationRegistrationPeriod: OrganizationRegistrationPeriodStruct;
+                canAccessPrivateData: boolean;
+                doesFrontendExpectPrivateMeta: boolean;
+            }
+        > = new Map();
         const allPeriodIds = periodIdOrganizationsMap.keys();
         const allPeriods = await RegistrationPeriod.getByIDs(...allPeriodIds);
-        const periodMap = new Map<string, RegistrationPeriod>(allPeriods.map(p => [p.id, p]));
+        const periodMap = new Map<string, RegistrationPeriod>(allPeriods.map((p) => [p.id, p]));
 
         for (const [periodId, organizations] of periodIdOrganizationsMap.entries()) {
             const result = await OrganizationRegistrationPeriod.where({
                 periodId,
                 organizationId: {
                     sign: 'IN',
-                    value: Formatter.uniqueArray(organizations.map(o => o.id)),
+                    value: Formatter.uniqueArray(organizations.map((o) => o.id)),
                 },
             });
             const period = periodMap.get(periodId);
@@ -309,56 +434,86 @@ export class AuthenticatedStructures {
 
             // Automatically create missing organization periods for now
             for (const organization of organizations) {
-                const organizationPeriodModel = result.find(r => r.organizationId === organization.id);
+                const organizationPeriodModel = result.find(
+                    (r) => r.organizationId === organization.id,
+                );
                 if (!organizationPeriodModel) {
                     result.push(await organization.getPeriod());
                 }
             }
 
             // Do this onece per period, because otherwise we can't optimize fetching the groups for each period
-            const organizationRegistrationPeriods = await this.organizationRegistrationPeriods(result, [period]);
+            const organizationRegistrationPeriods = await this.organizationRegistrationPeriods(
+                result,
+                [period],
+            );
 
             for (const organization of organizations) {
                 const organizationId = organization.id;
-                const organizationPeriodModel = result.find(r => r.organizationId === organizationId);
+                const organizationPeriodModel = result.find(
+                    (r) => r.organizationId === organizationId,
+                );
                 if (organizationPeriodModel) {
-                    const organizationRegistrationPeriod = organizationRegistrationPeriods.find(o => o.id === organizationPeriodModel.id);
+                    const organizationRegistrationPeriod = organizationRegistrationPeriods.find(
+                        (o) => o.id === organizationPeriodModel.id,
+                    );
                     if (!organizationRegistrationPeriod) {
-                        throw new Error('Organization registration period not found for id ' + organizationPeriodModel.id);
+                        throw new Error(
+                            'Organization registration period not found for id ' +
+                                organizationPeriodModel.id,
+                        );
                     }
 
                     // check if private data can be accessed
-                    const canAccessPrivateData = await Context.optionalAuth?.canAccessPrivateOrganizationData(organization) ?? false;
-                    const doesFrontendExpectPrivateMeta = canAccessPrivateData || (await Context.optionalAuth?.doesFrontendExpectPrivateMeta(organization) ?? false);
+                    const canAccessPrivateData =
+                        (await Context.optionalAuth?.canAccessPrivateOrganizationData(
+                            organization,
+                        )) ?? false;
+                    const doesFrontendExpectPrivateMeta =
+                        canAccessPrivateData ||
+                        ((await Context.optionalAuth?.doesFrontendExpectPrivateMeta(
+                            organization,
+                        )) ??
+                            false);
 
                     if (canAccessPrivateData) {
                         organizationIdsToGetWebshopsFor.push(organization.id);
                     }
-                    organizationData.set(organizationId, { organizationRegistrationPeriod, canAccessPrivateData, doesFrontendExpectPrivateMeta });
+                    organizationData.set(organizationId, {
+                        organizationRegistrationPeriod,
+                        canAccessPrivateData,
+                        doesFrontendExpectPrivateMeta,
+                    });
                 } else {
                     // Should never happen
-                    throw new Error('Organization registration period model not found for organization id ' + organizationId + ' and period id ' + periodId);
+                    throw new Error(
+                        'Organization registration period model not found for organization id ' +
+                            organizationId +
+                            ' and period id ' +
+                            periodId,
+                    );
                 }
             }
         }
 
         // Get webshop previews
-        const webshops = organizationIdsToGetWebshopsFor.length > 0
-            ? await Webshop.where(
-                    {
-                        organizationId: {
-                            sign: 'IN',
-                            value: organizationIdsToGetWebshopsFor,
-                        },
-                    },
-                    { select: Webshop.selectColumnsWithout(undefined, 'products', 'categories') },
-                )
-            : [];
+        const webshops =
+            organizationIdsToGetWebshopsFor.length > 0
+                ? await Webshop.where(
+                      {
+                          organizationId: {
+                              sign: 'IN',
+                              value: organizationIdsToGetWebshopsFor,
+                          },
+                      },
+                      { select: Webshop.selectColumnsWithout(undefined, 'products', 'categories') },
+                  )
+                : [];
 
         const webshopPreviews = new Map<string, WebshopPreview[]>();
 
         for (const w of webshops) {
-            if (!await Context.auth.canAccessWebshop(w)) {
+            if (!(await Context.auth.canAccessWebshop(w))) {
                 continue;
             }
 
@@ -400,13 +555,17 @@ export class AuthenticatedStructures {
                     ...baseStruct,
                     period,
                     privateMeta: organization.privateMeta.removedPrivateKeys,
-                    webshops: webshopPreviews.get(organization.id)?.sort((a, b) => Sorter.byDateValue(b.createdAt, a.createdAt)),
+                    webshops: webshopPreviews
+                        .get(organization.id)
+                        ?.sort((a, b) => Sorter.byDateValue(b.createdAt, a.createdAt)),
                 });
             } else {
                 result = OrganizationStruct.create({
                     ...baseStruct,
                     period,
-                    privateMeta: data.doesFrontendExpectPrivateMeta ? OrganizationPrivateMetaData.create({}) : undefined,
+                    privateMeta: data.doesFrontendExpectPrivateMeta
+                        ? OrganizationPrivateMetaData.create({})
+                        : undefined,
                 });
             }
 
@@ -427,7 +586,10 @@ export class AuthenticatedStructures {
         return Promise.resolve(structs);
     }
 
-    static async userWithMembers(user: User, options?: { impersonatedBy?: User | null }): Promise<UserWithMembers> {
+    static async userWithMembers(
+        user: User,
+        options?: { impersonatedBy?: User | null },
+    ): Promise<UserWithMembers> {
         const members = await Member.getMembersWithRegistrationForUser(user);
         const filtered: MemberWithUsersRegistrationsAndGroups[] = [];
         for (const member of members) {
@@ -457,11 +619,11 @@ export class AuthenticatedStructures {
 
             impersonatedBy: impersonatedBy
                 ? ImpersonatedBy.create({
-                        id: impersonatedBy.id,
-                        email: impersonatedBy.email,
-                        firstName: impersonatedBy.firstName,
-                        lastName: impersonatedBy.lastName,
-                    })
+                      id: impersonatedBy.id,
+                      email: impersonatedBy.email,
+                      firstName: impersonatedBy.firstName,
+                      lastName: impersonatedBy.lastName,
+                  })
                 : null,
         });
         await TwoFactorHelper.fillTwoFactorStatus([struct]);
@@ -473,17 +635,23 @@ export class AuthenticatedStructures {
      */
     static async usersWithMembers(users: User[]): Promise<UserWithMembers[]> {
         const structs: UserWithMembers[] = [];
-        const memberIds = Formatter.uniqueArray(users.map(u => u.memberId).filter(id => id !== null));
+        const memberIds = Formatter.uniqueArray(
+            users.map((u) => u.memberId).filter((id) => id !== null),
+        );
         const members = memberIds.length > 0 ? await Member.getBlobByIds(...memberIds) : [];
 
         for (const user of users) {
-            const filteredMembers = user.memberId ? members.filter(m => m.id === user.memberId) : [];
-            structs.push(UserWithMembers.create({
-                ...user,
-                hasAccount: user.hasAccount(),
-                hasPassword: user.hasPasswordBasedAccount(),
-                members: await this.membersBlob(filteredMembers, false),
-            }));
+            const filteredMembers = user.memberId
+                ? members.filter((m) => m.id === user.memberId)
+                : [];
+            structs.push(
+                UserWithMembers.create({
+                    ...user,
+                    hasAccount: user.hasAccount(),
+                    hasPassword: user.hasPasswordBasedAccount(),
+                    members: await this.membersBlob(filteredMembers, false),
+                }),
+            );
         }
 
         await TwoFactorHelper.fillTwoFactorStatus(structs);
@@ -491,62 +659,91 @@ export class AuthenticatedStructures {
         return structs;
     }
 
-    static async members(members: MemberWithUsersRegistrationsAndGroups[]): Promise<MemberWithRegistrationsBlob[]> {
+    static async members(
+        members: MemberWithUsersRegistrationsAndGroups[],
+    ): Promise<MemberWithRegistrationsBlob[]> {
         return (await this.membersBlob(members, false)).members;
     }
 
-    static async membersBlob(members: MemberWithUsersRegistrationsAndGroups[], includeContextOrganization = false, includeUser?: User, options?: { forAdminCartCalculation?: boolean }): Promise<MembersBlob> {
+    static async membersBlob(
+        members: MemberWithUsersRegistrationsAndGroups[],
+        includeContextOrganization = false,
+        includeUser?: User,
+        options?: { forAdminCartCalculation?: boolean },
+    ): Promise<MembersBlob> {
         if (members.length === 0 && !includeUser) {
             return MembersBlob.create({ members: [], organizations: [] });
         }
 
         const platform = await PlatformModel.getSharedStruct();
         const organizations = new Map<string, Organization>();
-        const relevantPeriodIds = Formatter.uniqueArray([
-            platform.period.previousPeriodId,
-            platform.period.id,
-            platform.period.nextPeriodId,
-            Context.organization?.periodId ?? null,
-        ].filter(id => id !== null)) as string[];
+        const relevantPeriodIds = Formatter.uniqueArray(
+            [
+                platform.period.previousPeriodId,
+                platform.period.id,
+                platform.period.nextPeriodId,
+                Context.organization?.periodId ?? null,
+            ].filter((id) => id !== null),
+        ) as string[];
 
-        const registrationIds = Formatter.uniqueArray(members.flatMap(m => m.registrations.map(r => r.id)));
+        const registrationIds = Formatter.uniqueArray(
+            members.flatMap((m) => m.registrations.map((r) => r.id)),
+        );
 
         // This code is a bit messy, we need to optimize it a bit. But it is this complex because it tries
         // to load as many relations as possible in advance in one go, to avoid doing queries inside the loops.
         // this is very important as this method is called very often.
 
         // Load responsibilities
-        const responsibilities = members.length > 0
-            ? await MemberResponsibilityRecord.select()
-                    .where('memberId', members.map(m => m.id))
-                    .where(SQL.where('endDate', null).or('endDate', '>', new Date()))
-                    .fetch()
-            : [];
-        const platformMemberships = members.length > 0
-            ? await MemberPlatformMembership.select()
-                    .where('memberId', members.map(m => m.id))
-                    .where('deletedAt', null)
-                    .where('periodId', relevantPeriodIds)
-                    .fetch()
-            : [];
-        const registrationInvitations = members.length > 0
-            ? await RegistrationInvitation.select()
-                    .where('memberId', members.map(m => m.id))
-                    .fetch()
-            : [];
+        const responsibilities =
+            members.length > 0
+                ? await MemberResponsibilityRecord.select()
+                      .where(
+                          'memberId',
+                          members.map((m) => m.id),
+                      )
+                      .where(SQL.where('endDate', null).or('endDate', '>', new Date()))
+                      .fetch()
+                : [];
+        const platformMemberships =
+            members.length > 0
+                ? await MemberPlatformMembership.select()
+                      .where(
+                          'memberId',
+                          members.map((m) => m.id),
+                      )
+                      .where('deletedAt', null)
+                      .where('periodId', relevantPeriodIds)
+                      .fetch()
+                : [];
+        const registrationInvitations =
+            members.length > 0
+                ? await RegistrationInvitation.select()
+                      .where(
+                          'memberId',
+                          members.map((m) => m.id),
+                      )
+                      .fetch()
+                : [];
 
-        const memberRegistrationInvitations: Map<string, MemberRegistrationInvitation[]> = registrationInvitations.length > 0 ? await this.memberRegistrationInvitations(registrationInvitations) : new Map();
+        const memberRegistrationInvitations: Map<string, MemberRegistrationInvitation[]> =
+            registrationInvitations.length > 0
+                ? await this.memberRegistrationInvitations(registrationInvitations)
+                : new Map();
 
         // Load organizations
-        const organizationIds = responsibilities.map(r => r.organizationId)
-            .concat(
-                platformMemberships.map(r => r.organizationId),
-            )
-            .filter(id => id !== null);
+        const organizationIds = responsibilities
+            .map((r) => r.organizationId)
+            .concat(platformMemberships.map((r) => r.organizationId))
+            .filter((id) => id !== null);
 
         if (includeUser) {
-            for (const organizationId of includeUser.permissions?.organizationPermissions.keys() ?? []) {
-                if (includeContextOrganization || organizationId !== Context.auth.organization?.id) {
+            for (const organizationId of includeUser.permissions?.organizationPermissions.keys() ??
+                []) {
+                if (
+                    includeContextOrganization ||
+                    organizationId !== Context.auth.organization?.id
+                ) {
                     organizationIds.push(organizationId);
                 }
             }
@@ -588,18 +785,18 @@ export class AuthenticatedStructures {
         const activeOrganizations: Organization[] = [];
 
         for (const organization of organizations.values()) {
-            if (organization.active || await Context.auth.hasFullAccess(organization.id)) {
+            if (organization.active || (await Context.auth.hasFullAccess(organization.id))) {
                 activeOrganizations.push(organization);
             }
         }
         const organizationStructs = await this.organizations(activeOrganizations);
 
-        let groupIds = Formatter.uniqueArray(
-            [
-                ...members.flatMap(m => m.registrations.map(r => r.groupId)).filter(id => id !== null),
-                ...responsibilities.map(r => r.groupId).filter(id => id !== null),
-            ],
-        );
+        let groupIds = Formatter.uniqueArray([
+            ...members
+                .flatMap((m) => m.registrations.map((r) => r.groupId))
+                .filter((id) => id !== null),
+            ...responsibilities.map((r) => r.groupId).filter((id) => id !== null),
+        ]);
 
         // Set gropus that we already loaded
         const allGroups = new Map<string, GroupStruct>();
@@ -613,15 +810,21 @@ export class AuthenticatedStructures {
 
         for (const member of members) {
             for (const registration of member.registrations) {
-                if (!allGroups.has(registration.groupId) && !preloadedGroupModels.has(registration.groupId)) {
+                if (
+                    !allGroups.has(registration.groupId) &&
+                    !preloadedGroupModels.has(registration.groupId)
+                ) {
                     preloadedGroupModels.set(registration.group.id, registration.group);
                 }
             }
         }
 
         // Remove duplicates and already loaded ones
-        groupIds = groupIds.filter(id => !allGroups.has(id) && !preloadedGroupModels.has(id));
-        const groups = groupIds.length > 0 ? [...preloadedGroupModels.values(), ...await Group.getByIDs(...groupIds)] : [...preloadedGroupModels.values()];
+        groupIds = groupIds.filter((id) => !allGroups.has(id) && !preloadedGroupModels.has(id));
+        const groups =
+            groupIds.length > 0
+                ? [...preloadedGroupModels.values(), ...(await Group.getByIDs(...groupIds))]
+                : [...preloadedGroupModels.values()];
         if (groupIds.length > 0 && STAMHOOFD.environment === 'development') {
             console.log('Doing extra group query for groups', groupIds);
         }
@@ -630,10 +833,18 @@ export class AuthenticatedStructures {
             allGroups.set(group.id, group);
         }
 
-        const balances = await CachedBalance.getForObjects(registrationIds, null, ReceivableBalanceType.registration);
-        const memberIds = members.map(m => m.id);
+        const balances = await CachedBalance.getForObjects(
+            registrationIds,
+            null,
+            ReceivableBalanceType.registration,
+        );
+        const memberIds = members.map((m) => m.id);
         const allMemberBalances = Context.organization
-            ? (await CachedBalance.getForObjects(memberIds, Context.organization.id, ReceivableBalanceType.member))
+            ? await CachedBalance.getForObjects(
+                  memberIds,
+                  Context.organization.id,
+                  ReceivableBalanceType.member,
+              )
             : [];
 
         // Delete organizations that no longer exist in the permissions of the user
@@ -675,12 +886,22 @@ export class AuthenticatedStructures {
             const userManager = Context.auth.isUserManager(member);
 
             for (const registration of member.registrations) {
-                if (organizations.get(registration.organizationId)?.active || (Context.auth.organization && Context.auth.organization.active && registration.organizationId === Context.auth.organization.id) || await Context.auth.hasFullAccess(registration.organizationId)) {
+                if (
+                    organizations.get(registration.organizationId)?.active ||
+                    (Context.auth.organization &&
+                        Context.auth.organization.active &&
+                        registration.organizationId === Context.auth.organization.id) ||
+                    (await Context.auth.hasFullAccess(registration.organizationId))
+                ) {
                     if (
-                        !!options?.forAdminCartCalculation
-                        || registration.group.settings.implicitlyAllowViewRegistrations
-                        || userManager
-                        || await Context.auth.canAccessRegistration(registration, PermissionLevel.Read, member)
+                        !!options?.forAdminCartCalculation ||
+                        registration.group.settings.implicitlyAllowViewRegistrations ||
+                        userManager ||
+                        (await Context.auth.canAccessRegistration(
+                            registration,
+                            PermissionLevel.Read,
+                            member,
+                        ))
                     ) {
                         filtered.push(registration);
                     }
@@ -688,14 +909,24 @@ export class AuthenticatedStructures {
             }
 
             member.registrations = filtered;
-            const balancesPermission = (!!options?.forAdminCartCalculation) || await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, Context.organization?.id);
+            const balancesPermission =
+                !!options?.forAdminCartCalculation ||
+                (await Context.auth.hasFinancialMemberAccess(
+                    member,
+                    PermissionLevel.Read,
+                    Context.organization?.id,
+                ));
 
             let memberBalances: GenericBalance[] = [];
 
             if (balancesPermission && Context.organization) {
                 // Only return balances if in an organization scope and you have permission for the finances of that specific organization AND member
                 memberBalances = allMemberBalances
-                    .filter(b => member.id === b.objectId && b.objectType === ReceivableBalanceType.member)
+                    .filter(
+                        (b) =>
+                            member.id === b.objectId &&
+                            b.objectType === ReceivableBalanceType.member,
+                    )
                     .map((b) => {
                         return GenericBalance.create(b);
                     });
@@ -709,9 +940,15 @@ export class AuthenticatedStructures {
                         const base = r.getStructure();
 
                         base.balances = balancesPermission
-                            ? (balances.filter(b => r.id === b.objectId && b.objectType === ReceivableBalanceType.registration).map((b) => {
-                                    return GenericBalance.create(b);
-                                }))
+                            ? balances
+                                  .filter(
+                                      (b) =>
+                                          r.id === b.objectId &&
+                                          b.objectType === ReceivableBalanceType.registration,
+                                  )
+                                  .map((b) => {
+                                      return GenericBalance.create(b);
+                                  })
                             : [];
                         const g = allGroups.get(r.groupId);
                         if (g) {
@@ -724,26 +961,30 @@ export class AuthenticatedStructures {
                     }),
                 ),
                 details: member.details,
-                users: member.users.map(u => u.getStructure()),
-                platformMemberships: platformMemberships.filter(r => r.memberId === member.id).map(r => MemberPlatformMembershipStruct.create(r)),
+                users: member.users.map((u) => u.getStructure()),
+                platformMemberships: platformMemberships
+                    .filter((r) => r.memberId === member.id)
+                    .map((r) => MemberPlatformMembershipStruct.create(r)),
             });
 
             memberBlobs.push(
                 await Context.auth.filterMemberData(member, blob, {
                     forAdminCartCalculation: options?.forAdminCartCalculation ?? false,
-                    responsibilities: responsibilities.filter(r => r.memberId === member.id),
+                    responsibilities: responsibilities.filter((r) => r.memberId === member.id),
                 }),
             );
         }
 
         // After filterMemberData, so we only query for the users we actually return.
-        await TwoFactorHelper.fillTwoFactorStatus(memberBlobs.flatMap(b => b.users));
+        await TwoFactorHelper.fillTwoFactorStatus(memberBlobs.flatMap((b) => b.users));
 
         for (const blob of memberBlobs) {
-            blob.responsibilities = responsibilities.filter(r => r.memberId == blob.id).map((r) => {
-                const group = allGroups.get(r.groupId ?? '') ?? null;
-                return r.getStructure(group);
-            });
+            blob.responsibilities = responsibilities
+                .filter((r) => r.memberId == blob.id)
+                .map((r) => {
+                    const group = allGroups.get(r.groupId ?? '') ?? null;
+                    return r.getStructure(group);
+                });
             blob.registrationInvitations = memberRegistrationInvitations.get(blob.id) ?? [];
         }
 
@@ -755,14 +996,14 @@ export class AuthenticatedStructures {
 
     static async events(events: Event[]): Promise<EventStruct[]> {
         // Load groups
-        const groupIds = events.map(e => e.groupId).filter(id => id !== null);
+        const groupIds = events.map((e) => e.groupId).filter((id) => id !== null);
         const groups = groupIds.length > 0 ? await Group.getByIDs(...groupIds) : [];
         const groupStructs = await this.groups(groups);
 
         const result: EventStruct[] = [];
 
         for (const event of events) {
-            const group = groupStructs.find(g => g.id == event.groupId) ?? null;
+            const group = groupStructs.find((g) => g.id == event.groupId) ?? null;
 
             const struct = EventStruct.create({
                 ...event,
@@ -775,39 +1016,62 @@ export class AuthenticatedStructures {
         return result;
     }
 
-    static async eventNotification(eventNotification: EventNotification): Promise<EventNotificationStruct> {
+    static async eventNotification(
+        eventNotification: EventNotification,
+    ): Promise<EventNotificationStruct> {
         return (await this.eventNotifications([eventNotification]))[0];
     }
 
-    static async registrationsBlob(registrations: (Registration & { group: Group })[], members: MemberWithUsersRegistrationsAndGroups[], includeContextOrganization = false, includeUser?: User): Promise<RegistrationsBlob> {
-        const membersBlob = await this.membersBlob(members, includeContextOrganization, includeUser);
+    static async registrationsBlob(
+        registrations: (Registration & { group: Group })[],
+        members: MemberWithUsersRegistrationsAndGroups[],
+        includeContextOrganization = false,
+        includeUser?: User,
+    ): Promise<RegistrationsBlob> {
+        const membersBlob = await this.membersBlob(
+            members,
+            includeContextOrganization,
+            includeUser,
+        );
 
         const memberBlobs = membersBlob.members;
 
         const registrationWithMemberBlobs: RegistrationWithMemberBlob[] = [];
         for (const registration of registrations) {
-            const memberBlob = memberBlobs.find(m => m.id === registration.memberId);
+            const memberBlob = memberBlobs.find((m) => m.id === registration.memberId);
             if (!memberBlob) {
                 throw new Error('Member not found');
             }
 
-            let r = memberBlob.registrations.find(r => r.id === registration.id);
+            let r = memberBlob.registrations.find((r) => r.id === registration.id);
 
             if (!r) {
-                const member = members.find(m => m.id === registration.memberId);
-                const balancesPermission = member ? (await Context.auth.hasFinancialMemberAccess(member, PermissionLevel.Read, Context.organization?.id)) : false;
+                const member = members.find((m) => m.id === registration.memberId);
+                const balancesPermission = member
+                    ? await Context.auth.hasFinancialMemberAccess(
+                          member,
+                          PermissionLevel.Read,
+                          Context.organization?.id,
+                      )
+                    : false;
                 r = registration.getStructure();
                 r.balances = balancesPermission
-                    ? ((await CachedBalance.getForObjects([registration.id], null, ReceivableBalanceType.registration)).map((b) => {
-                            return GenericBalance.create(b);
-                        }))
+                    ? (
+                          await CachedBalance.getForObjects(
+                              [registration.id],
+                              null,
+                              ReceivableBalanceType.registration,
+                          )
+                      ).map((b) => {
+                          return GenericBalance.create(b);
+                      })
                     : [];
                 r.group = await this.group(registration.group);
 
                 memberBlob.registrations.push(r);
 
                 // Add organization if missing
-                if (!membersBlob.organizations.find(o => o.id === r!.organizationId)) {
+                if (!membersBlob.organizations.find((o) => o.id === r!.organizationId)) {
                     const organization = await Context.auth.getOrganization(r!.organizationId);
                     membersBlob.organizations.push(organization.getBaseStructure());
                 }
@@ -826,7 +1090,9 @@ export class AuthenticatedStructures {
         });
     }
 
-    static async eventNotifications(eventNotifications: EventNotification[]): Promise<EventNotificationStruct[]> {
+    static async eventNotifications(
+        eventNotifications: EventNotification[],
+    ): Promise<EventNotificationStruct[]> {
         if (eventNotifications.length === 0) {
             return [];
         }
@@ -834,7 +1100,10 @@ export class AuthenticatedStructures {
         // Load events
         const rows = await SQL.select()
             .from('_event_notifications_events')
-            .where('event_notificationsId', eventNotifications.map(n => n.id))
+            .where(
+                'event_notificationsId',
+                eventNotifications.map((n) => n.id),
+            )
             .fetch();
 
         const eventIdsMapping = new Map<string, string[]>();
@@ -866,9 +1135,16 @@ export class AuthenticatedStructures {
 
         const events = allEvents.size > 0 ? await Event.getByIDs(...Array.from(allEvents)) : [];
         const eventStructs = await this.events(events);
-        const organizationIds = Formatter.uniqueArray(eventNotifications.map(n => n.organizationId));
-        const organizationModels = organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
-        const userIds = Formatter.uniqueArray(eventNotifications.flatMap(n => [n.createdBy, n.submittedBy]).filter(id => id !== null));
+        const organizationIds = Formatter.uniqueArray(
+            eventNotifications.map((n) => n.organizationId),
+        );
+        const organizationModels =
+            organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
+        const userIds = Formatter.uniqueArray(
+            eventNotifications
+                .flatMap((n) => [n.createdBy, n.submittedBy])
+                .filter((id) => id !== null),
+        );
         const users = userIds.length > 0 ? await User.getByIDs(...userIds) : [];
         const userStructs = users.map((user) => {
             return NamedObject.create({
@@ -880,8 +1156,14 @@ export class AuthenticatedStructures {
         const result: EventNotificationStruct[] = [];
 
         for (const notification of eventNotifications) {
-            const thisEventStructs = eventIdsMapping.get(notification.id)?.map(id => eventStructs.find(e => e.id === id)).filter(e => !!e) ?? [];
-            const organizationModel = organizationModels.find(o => o.id === notification.organizationId);
+            const thisEventStructs =
+                eventIdsMapping
+                    .get(notification.id)
+                    ?.map((id) => eventStructs.find((e) => e.id === id))
+                    .filter((e) => !!e) ?? [];
+            const organizationModel = organizationModels.find(
+                (o) => o.id === notification.organizationId,
+            );
             if (!organizationModel) {
                 throw new SimpleError({
                     code: 'organization_not_found',
@@ -895,8 +1177,12 @@ export class AuthenticatedStructures {
             const struct = EventNotificationStruct.create({
                 ...notification,
                 organization: organizationStruct,
-                createdBy: notification.createdBy ? userStructs.find(u => u.id === notification.createdBy) : null,
-                submittedBy: notification.submittedBy ? userStructs.find(u => u.id === notification.submittedBy) : null,
+                createdBy: notification.createdBy
+                    ? userStructs.find((u) => u.id === notification.createdBy)
+                    : null,
+                submittedBy: notification.submittedBy
+                    ? userStructs.find((u) => u.id === notification.submittedBy)
+                    : null,
                 events: thisEventStructs,
             });
 
@@ -912,15 +1198,18 @@ export class AuthenticatedStructures {
         }
 
         const result: PrivateOrder[] = [];
-        const webshopIds = new Set(orders.map(o => o.webshopId));
+        const webshopIds = new Set(orders.map((o) => o.webshopId));
 
         for (const webshopId of webshopIds) {
-            const organizationId = orders.find(o => o.webshopId === webshopId)!.organizationId;
+            const organizationId = orders.find((o) => o.webshopId === webshopId)!.organizationId;
 
-            const canAccess = await Context.auth.canAccessOrder({
-                id: webshopId,
-                organizationId,
-            }, PermissionLevel.Read);
+            const canAccess = await Context.auth.canAccessOrder(
+                {
+                    id: webshopId,
+                    organizationId,
+                },
+                PermissionLevel.Read,
+            );
 
             if (!canAccess) {
                 throw new SimpleError({
@@ -930,10 +1219,15 @@ export class AuthenticatedStructures {
                 });
             }
         }
-        const allBalanceItems = await BalanceItem.select().where('orderId', orders.map(o => o.id)).fetch();
+        const allBalanceItems = await BalanceItem.select()
+            .where(
+                'orderId',
+                orders.map((o) => o.id),
+            )
+            .fetch();
 
         for (const order of orders) {
-            const balanceItems = allBalanceItems.filter(b => b.orderId === order.id);
+            const balanceItems = allBalanceItems.filter((b) => b.orderId === order.id);
 
             const struct = PrivateOrder.create({
                 ...order,
@@ -948,14 +1242,19 @@ export class AuthenticatedStructures {
 
     static async documents(documents: Document[]): Promise<DocumentStruct[]> {
         const result: DocumentStruct[] = [];
-        const templateIds = new Set(documents.map(d => d.templateId));
+        const templateIds = new Set(documents.map((d) => d.templateId));
 
         for (const templateId of templateIds) {
-            const organizationId = documents.find(d => d.templateId === templateId)!.organizationId;
+            const organizationId = documents.find(
+                (d) => d.templateId === templateId,
+            )!.organizationId;
 
-            const canAccess = await Context.auth.canAccessDocumentTemplate({
-                organizationId,
-            }, PermissionLevel.Read);
+            const canAccess = await Context.auth.canAccessDocumentTemplate(
+                {
+                    organizationId,
+                },
+                PermissionLevel.Read,
+            );
 
             if (!canAccess) {
                 throw new SimpleError({
@@ -980,15 +1279,18 @@ export class AuthenticatedStructures {
     // todo?
     static async tickets(tickets: Ticket[]): Promise<TicketPrivate[]> {
         const result: TicketPrivate[] = [];
-        const webshopIds = new Set(tickets.map(t => t.webshopId));
+        const webshopIds = new Set(tickets.map((t) => t.webshopId));
 
         for (const webshopId of webshopIds) {
-            const organizationId = tickets.find(t => t.webshopId === webshopId)!.organizationId;
+            const organizationId = tickets.find((t) => t.webshopId === webshopId)!.organizationId;
 
-            const canAccess = await Context.auth.canAccessWebshopTickets({
-                id: webshopId,
-                organizationId,
-            }, PermissionLevel.Read);
+            const canAccess = await Context.auth.canAccessWebshopTickets(
+                {
+                    id: webshopId,
+                    organizationId,
+                },
+                PermissionLevel.Read,
+            );
 
             if (!canAccess) {
                 throw new SimpleError({
@@ -1013,40 +1315,60 @@ export class AuthenticatedStructures {
     }
 
     static async receivableBalances(balances: CachedBalance[]): Promise<ReceivableBalanceStruct[]> {
-        return (await this.receivableBalancesHelper(balances)).map(({ balance, object }) => ReceivableBalanceStruct.create({ ...balance, object }));
+        return (await this.receivableBalancesHelper(balances)).map(({ balance, object }) =>
+            ReceivableBalanceStruct.create({ ...balance, object }),
+        );
     }
 
-    private static async receivableBalancesHelper(balances: CachedBalance[]): Promise<{ balance: CachedBalance; object: ReceivableBalanceObject }[]> {
+    private static async receivableBalancesHelper(
+        balances: CachedBalance[],
+    ): Promise<{ balance: CachedBalance; object: ReceivableBalanceObject }[]> {
         if (balances.length === 0) {
             return [];
         }
 
-        const organizationIds = Formatter.uniqueArray(balances.filter(b => b.objectType === ReceivableBalanceType.organization).map(b => b.objectId));
-        const organizations = organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
+        const organizationIds = Formatter.uniqueArray(
+            balances
+                .filter((b) => b.objectType === ReceivableBalanceType.organization)
+                .map((b) => b.objectId),
+        );
+        const organizations =
+            organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
 
-        const responsibilities = organizationIds.length > 0
-            ? (await MemberResponsibilityRecord.select()
-                    .where('organizationId', organizationIds)
-                    .where('endDate', null)
-                    .fetch())
-            : [];
+        const responsibilities =
+            organizationIds.length > 0
+                ? await MemberResponsibilityRecord.select()
+                      .where('organizationId', organizationIds)
+                      .where('endDate', null)
+                      .fetch()
+                : [];
 
         const organizationStructs = await this.organizations(organizations);
 
         const registrationIds = Formatter.uniqueArray([
-            ...balances.filter(b => b.objectType === ReceivableBalanceType.registration).map(b => b.objectId),
+            ...balances
+                .filter((b) => b.objectType === ReceivableBalanceType.registration)
+                .map((b) => b.objectId),
         ]);
         const registrations = await Registration.getByIDs(...registrationIds);
 
         const memberIds = Formatter.uniqueArray([
-            ...balances.filter(b => b.objectType === ReceivableBalanceType.member).map(b => b.objectId),
-            ...responsibilities.map(r => r.memberId),
-            ...registrations.map(r => r.memberId),
+            ...balances
+                .filter((b) => b.objectType === ReceivableBalanceType.member)
+                .map((b) => b.objectId),
+            ...responsibilities.map((r) => r.memberId),
+            ...registrations.map((r) => r.memberId),
         ]);
         const members = memberIds.length > 0 ? await Member.getByIDs(...memberIds) : [];
 
         const userIds = Formatter.uniqueArray([
-            ...balances.filter(b => b.objectType === ReceivableBalanceType.user || b.objectType === ReceivableBalanceType.userWithoutMembers).map(b => b.objectId),
+            ...balances
+                .filter(
+                    (b) =>
+                        b.objectType === ReceivableBalanceType.user ||
+                        b.objectType === ReceivableBalanceType.userWithoutMembers,
+                )
+                .map((b) => b.objectId),
         ]);
         const users = userIds.length > 0 ? await User.getByIDs(...userIds) : [];
         const platform = await PlatformModel.getSharedStruct();
@@ -1054,58 +1376,71 @@ export class AuthenticatedStructures {
         const result: { balance: CachedBalance; object: ReceivableBalanceObject }[] = [];
 
         function getMemberContacts(member: Member, balance: CachedBalance) {
-            const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + getAppHost('registration', Context.organization, false) : '';
+            const url =
+                Context.organization && Context.organization.id === balance.organizationId
+                    ? 'https://' + getAppHost('registration', Context.organization, false)
+                    : '';
             return [
                 ...(member.details.getMemberEmails().length
                     ? [
-                            ReceivableBalanceObjectContact.create({
-                                firstName: member.details.firstName ?? '',
-                                lastName: member.details.lastName ?? '',
-                                emails: member.details.getMemberEmails(),
-                                meta: {
-                                    type: 'member',
-                                    responsibilityIds: [],
-                                    url,
-                                },
-                            }),
-                        ]
+                          ReceivableBalanceObjectContact.create({
+                              firstName: member.details.firstName ?? '',
+                              lastName: member.details.lastName ?? '',
+                              emails: member.details.getMemberEmails(),
+                              meta: {
+                                  type: 'member',
+                                  responsibilityIds: [],
+                                  url,
+                              },
+                          }),
+                      ]
                     : []),
 
-                ...((member.details.calculatedParentsHaveAccess || member.details.getMemberEmails().length === 0)
-                    ? member.details.parents.filter(p => p.getEmails().length > 0).map(p => ReceivableBalanceObjectContact.create({
-                            firstName: p.firstName ?? '',
-                            lastName: p.lastName ?? '',
-                            emails: p.getEmails(),
-                            meta: {
-                                type: 'parent',
-                                responsibilityIds: [],
-                                url,
-                            },
-                        }))
+                ...(member.details.calculatedParentsHaveAccess ||
+                member.details.getMemberEmails().length === 0
+                    ? member.details.parents
+                          .filter((p) => p.getEmails().length > 0)
+                          .map((p) =>
+                              ReceivableBalanceObjectContact.create({
+                                  firstName: p.firstName ?? '',
+                                  lastName: p.lastName ?? '',
+                                  emails: p.getEmails(),
+                                  meta: {
+                                      type: 'parent',
+                                      responsibilityIds: [],
+                                      url,
+                                  },
+                              }),
+                          )
                     : []),
             ];
         }
 
         function getMemberCustomers(member: Member): PaymentCustomer[] {
             return [
-                ...(member.details.defaultAge >= 14 || member.details.parents.length === 0 || !member.details.calculatedParentsHaveAccess
+                ...(member.details.defaultAge >= 14 ||
+                member.details.parents.length === 0 ||
+                !member.details.calculatedParentsHaveAccess
                     ? [
-                            PaymentCustomer.create({
-                                firstName: member.details.firstName ?? '',
-                                lastName: member.details.lastName ?? '',
-                                email: member.details.getMemberEmails()[0] ?? null,
-                                phone: member.details.phone,
-                            }),
-                        ]
+                          PaymentCustomer.create({
+                              firstName: member.details.firstName ?? '',
+                              lastName: member.details.lastName ?? '',
+                              email: member.details.getMemberEmails()[0] ?? null,
+                              phone: member.details.phone,
+                          }),
+                      ]
                     : []),
 
-                ...((member.details.calculatedParentsHaveAccess || member.details.getMemberEmails().length === 0)
-                    ? member.details.parents.map(parent => PaymentCustomer.create({
-                            firstName: parent.firstName ?? '',
-                            lastName: parent.lastName ?? '',
-                            email: parent.getEmails()[0] ?? null,
-                            phone: parent.phone,
-                        }))
+                ...(member.details.calculatedParentsHaveAccess ||
+                member.details.getMemberEmails().length === 0
+                    ? member.details.parents.map((parent) =>
+                          PaymentCustomer.create({
+                              firstName: parent.firstName ?? '',
+                              lastName: parent.lastName ?? '',
+                              email: parent.getEmails()[0] ?? null,
+                              phone: parent.phone,
+                          }),
+                      )
                     : []),
             ];
         }
@@ -1117,16 +1452,21 @@ export class AuthenticatedStructures {
             });
 
             if (balance.objectType === ReceivableBalanceType.organization) {
-                const organization = organizationStructs.find(o => o.id === balance.objectId) ?? null;
+                const organization =
+                    organizationStructs.find((o) => o.id === balance.objectId) ?? null;
                 if (organization) {
-                    const theseResponsibilities = responsibilities.filter(r => r.organizationId === organization.id);
+                    const theseResponsibilities = responsibilities.filter(
+                        (r) => r.organizationId === organization.id,
+                    );
                     const thisMembers = members.flatMap((m) => {
-                        const resp = theseResponsibilities.filter(r => r.memberId === m.id);
+                        const resp = theseResponsibilities.filter((r) => r.memberId === m.id);
                         return resp.length > 0
-                            ? [{
-                                    member: m,
-                                    responsibilities: resp,
-                                }]
+                            ? [
+                                  {
+                                      member: m,
+                                      responsibilities: resp,
+                                  },
+                              ]
                             : [];
                     });
 
@@ -1134,21 +1474,30 @@ export class AuthenticatedStructures {
                         id: balance.objectId,
                         name: organization.name,
                         uri: organization.uri,
-                        customers: organization.defaultCompanies.map(company => PaymentCustomer.create({ company })),
-                        contacts: thisMembers.map(({ member, responsibilities }) => ReceivableBalanceObjectContact.create({
-                            firstName: member.firstName ?? '',
-                            lastName: member.lastName ?? '',
-                            emails: member.details.getMemberEmails(),
-                            meta: {
-                                type: 'organization',
-                                responsibilityIds: responsibilities.map(r => r.responsibilityId),
-                                url: organization.dashboardUrl + '/boekhouding/openstaand/' + (Context.organization?.uri ?? ''),
-                            },
-                        })),
+                        customers: organization.defaultCompanies.map((company) =>
+                            PaymentCustomer.create({ company }),
+                        ),
+                        contacts: thisMembers.map(({ member, responsibilities }) =>
+                            ReceivableBalanceObjectContact.create({
+                                firstName: member.firstName ?? '',
+                                lastName: member.lastName ?? '',
+                                emails: member.details.getMemberEmails(),
+                                meta: {
+                                    type: 'organization',
+                                    responsibilityIds: responsibilities.map(
+                                        (r) => r.responsibilityId,
+                                    ),
+                                    url:
+                                        organization.dashboardUrl +
+                                        '/boekhouding/openstaand/' +
+                                        (Context.organization?.uri ?? ''),
+                                },
+                            }),
+                        ),
                     });
                 }
             } else if (balance.objectType === ReceivableBalanceType.member) {
-                const member = members.find(m => m.id === balance.objectId) ?? null;
+                const member = members.find((m) => m.id === balance.objectId) ?? null;
                 if (member) {
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
@@ -1158,11 +1507,11 @@ export class AuthenticatedStructures {
                     });
                 }
             } else if (balance.objectType === ReceivableBalanceType.registration) {
-                const registration = registrations.find(r => r.id === balance.objectId) ?? null;
+                const registration = registrations.find((r) => r.id === balance.objectId) ?? null;
                 if (!registration) {
                     continue;
                 }
-                const member = members.find(m => m.id === registration.memberId) ?? null;
+                const member = members.find((m) => m.id === registration.memberId) ?? null;
                 if (member) {
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
@@ -1171,18 +1520,36 @@ export class AuthenticatedStructures {
                         contacts: getMemberContacts(member, balance),
                     });
                 }
-            } else if (balance.objectType === ReceivableBalanceType.user || balance.objectType === ReceivableBalanceType.userWithoutMembers) {
-                const user = users.find(m => m.id === balance.objectId) ?? null;
+            } else if (
+                balance.objectType === ReceivableBalanceType.user ||
+                balance.objectType === ReceivableBalanceType.userWithoutMembers
+            ) {
+                const user = users.find((m) => m.id === balance.objectId) ?? null;
                 if (user) {
-                    const url = Context.organization && Context.organization.id === balance.organizationId ? 'https://' + getAppHost('registration', Context.organization, user.permissions?.forOrganization(Context.organization, platform, user.email, { inheritFromPlatform: false })?.isEmpty === false) : '';
+                    const url =
+                        Context.organization && Context.organization.id === balance.organizationId
+                            ? 'https://' +
+                              getAppHost(
+                                  'registration',
+                                  Context.organization,
+                                  user.permissions?.forOrganization(
+                                      Context.organization,
+                                      platform,
+                                      user.email,
+                                      { inheritFromPlatform: false },
+                                  )?.isEmpty === false,
+                              )
+                            : '';
                     object = ReceivableBalanceObject.create({
                         id: balance.objectId,
                         name: user.name || user.email,
-                        customers: [PaymentCustomer.create({
-                            firstName: user.firstName,
-                            lastName: user.lastName,
-                            email: user.email,
-                        })],
+                        customers: [
+                            PaymentCustomer.create({
+                                firstName: user.firstName,
+                                lastName: user.lastName,
+                                email: user.email,
+                            }),
+                        ],
                         contacts: [
                             ReceivableBalanceObjectContact.create({
                                 firstName: user.firstName ?? '',
@@ -1207,13 +1574,21 @@ export class AuthenticatedStructures {
         return result;
     }
 
-    static async detailedReceivableBalances(organizationId: string, balances: CachedBalance[]): Promise<DetailedReceivableBalance[]> {
+    static async detailedReceivableBalances(
+        organizationId: string,
+        balances: CachedBalance[],
+    ): Promise<DetailedReceivableBalance[]> {
         const items = await this.receivableBalancesHelper(balances);
         const results: DetailedReceivableBalance[] = [];
 
         for (const { balance, object } of items) {
-            const balanceItems = await CachedBalance.balanceForObjects(organizationId, [balance.objectId], balance.objectType);
-            const balanceItemsWithPayments = await BalanceItem.getStructureWithPayments(balanceItems);
+            const balanceItems = await CachedBalance.balanceForObjects(
+                organizationId,
+                [balance.objectId],
+                balance.objectType,
+            );
+            const balanceItemsWithPayments =
+                await BalanceItem.getStructureWithPayments(balanceItems);
 
             const result = DetailedReceivableBalance.create({
                 ...balance,
@@ -1232,18 +1607,22 @@ export class AuthenticatedStructures {
     static async auditLogs(logs: AuditLog[]): Promise<AuditLogStruct[]> {
         const structs: AuditLogStruct[] = [];
 
-        const userIds = Formatter.uniqueArray(logs.map(l => l.userId).filter(id => id !== null));
+        const userIds = Formatter.uniqueArray(
+            logs.map((l) => l.userId).filter((id) => id !== null),
+        );
         const users = await User.getByIDs(...userIds);
-        const organizationsIds = Formatter.uniqueArray(logs.map(l => l.organizationId).filter(id => id !== null));
+        const organizationsIds = Formatter.uniqueArray(
+            logs.map((l) => l.organizationId).filter((id) => id !== null),
+        );
         const organizations = await Organization.getByIDs(...organizationsIds);
         const platform = await PlatformModel.getSharedStruct();
 
         for (const log of logs) {
-            const user = log.userId ? (users.find(u => u.id === log.userId) ?? null) : null;
+            const user = log.userId ? (users.find((u) => u.id === log.userId) ?? null) : null;
             let userStruct: NamedObject | null = null;
 
             if (user) {
-                if (!await Context.auth.canAccessUser(user)) {
+                if (!(await Context.auth.canAccessUser(user))) {
                     if (user.permissions?.forPlatform(platform, user.email)) {
                         userStruct = NamedObject.create({
                             id: '',
@@ -1258,7 +1637,10 @@ export class AuthenticatedStructures {
                 } else {
                     userStruct = NamedObject.create({
                         id: user.id,
-                        name: (user.firstName || user.lastName) ? (user.firstName + ' ' + user.lastName) : user.email,
+                        name:
+                            user.firstName || user.lastName
+                                ? user.firstName + ' ' + user.lastName
+                                : user.email,
                     });
                 }
             }
@@ -1267,12 +1649,15 @@ export class AuthenticatedStructures {
 
             if (log.organizationId && log.organizationId !== Context.organization?.id) {
                 replacements = new Map(log.replacements);
-                const org = organizations.find(o => o.id === log.organizationId);
-                replacements.set('org', AuditLogReplacement.create({
-                    id: log.organizationId,
-                    value: org?.name ?? $t('%wj'),
-                    type: AuditLogReplacementType.Organization,
-                }));
+                const org = organizations.find((o) => o.id === log.organizationId);
+                replacements.set(
+                    'org',
+                    AuditLogReplacement.create({
+                        id: log.organizationId,
+                        value: org?.name ?? $t('%wj'),
+                        type: AuditLogReplacementType.Organization,
+                    }),
+                );
             }
 
             structs.push(
@@ -1291,18 +1676,20 @@ export class AuthenticatedStructures {
      * Stored replacements contain secrets (e.g. unsubscribe tokens), so they are regenerated in preview mode.
      */
     static async emailRecipients(recipients: EmailRecipient[]): Promise<EmailRecipientStruct[]> {
-        return await Promise.all((await EmailRecipient.getStructures(recipients)).map(async (r) => {
-            const rr = r.getRecipient();
-            await fillRecipientReplacements(rr, {
-                organization: Context.organization ?? null,
-                from: null,
-                replyTo: null,
-                forPreview: true,
-                forceRefresh: false,
-            });
-            r.replacements = rr.replacements;
-            return r;
-        }));
+        return await Promise.all(
+            (await EmailRecipient.getStructures(recipients)).map(async (r) => {
+                const rr = r.getRecipient();
+                await fillRecipientReplacements(rr, {
+                    organization: Context.organization ?? null,
+                    from: null,
+                    replyTo: null,
+                    forPreview: true,
+                    forceRefresh: false,
+                });
+                r.replacements = rr.replacements;
+                return r;
+            }),
+        );
     }
 
     static async balanceItems(balanceItems: BalanceItem[]) {
@@ -1317,12 +1704,14 @@ export class AuthenticatedStructures {
         return await BalanceItem.getStructureWithPayments(balanceItems);
     }
 
-    static async memberRegistrationInvitations(invitations: RegistrationInvitation[]): Promise<Map<string, MemberRegistrationInvitation[]>> {
+    static async memberRegistrationInvitations(
+        invitations: RegistrationInvitation[],
+    ): Promise<Map<string, MemberRegistrationInvitation[]>> {
         const results = new Map<string, MemberRegistrationInvitation[]>();
-        const groups = await Group.getByIDs(...invitations.map(i => i.groupId));
+        const groups = await Group.getByIDs(...invitations.map((i) => i.groupId));
 
         for (const invitation of invitations) {
-            const group = groups.find(g => g.id === invitation.groupId);
+            const group = groups.find((g) => g.id === invitation.groupId);
             if (!group) {
                 throw new SimpleError({
                     code: 'group_not_found',
@@ -1355,12 +1744,14 @@ export class AuthenticatedStructures {
         return results;
     }
 
-    static async registrationInvitations(invitations: RegistrationInvitation[]): Promise<RegistrationInvitationStruct[]> {
-        const members = await Member.getByIDs(...invitations.map(i => i.memberId));
-        const groups = await Group.getByIDs(...invitations.map(i => i.groupId));
+    static async registrationInvitations(
+        invitations: RegistrationInvitation[],
+    ): Promise<RegistrationInvitationStruct[]> {
+        const members = await Member.getByIDs(...invitations.map((i) => i.memberId));
+        const groups = await Group.getByIDs(...invitations.map((i) => i.groupId));
 
         return invitations.map((invitation) => {
-            const member = members.find(m => m.id === invitation.memberId);
+            const member = members.find((m) => m.id === invitation.memberId);
             if (!member) {
                 throw new SimpleError({
                     code: 'member_not_found',
@@ -1369,7 +1760,7 @@ export class AuthenticatedStructures {
                 });
             }
 
-            const group = groups.find(g => g.id === invitation.groupId);
+            const group = groups.find((g) => g.id === invitation.groupId);
             if (!group) {
                 throw new SimpleError({
                     code: 'group_not_found',

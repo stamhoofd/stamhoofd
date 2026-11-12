@@ -6,14 +6,20 @@ import { RunVerbosity } from '../runtime/command-runner.js';
 import { createContext } from '../context/create-context.js';
 
 vi.mock('../runtime/monorepo-runner.js', () => ({ buildAll: vi.fn() }));
-vi.mock('../context/create-context.js', () => ({ createContext: vi.fn(async () => ({ rootDir: '/repo' })) }));
+vi.mock('../context/create-context.js', () => ({
+    createContext: vi.fn(async () => ({ rootDir: '/repo' })),
+}));
 
 describe('build command verbosity', () => {
     beforeEach(() => vi.clearAllMocks());
 
     it('offers mutually exclusive quiet and verbose modifiers', async () => {
-        await expect(Parser.parse(['--quiet'], { flags: Build.flags })).resolves.toMatchObject({ flags: { quiet: true } });
-        await expect(Parser.parse(['-v'], { flags: Build.flags })).resolves.toMatchObject({ flags: { verbose: true } });
+        await expect(Parser.parse(['--quiet'], { flags: Build.flags })).resolves.toMatchObject({
+            flags: { quiet: true },
+        });
+        await expect(Parser.parse(['-v'], { flags: Build.flags })).resolves.toMatchObject({
+            flags: { verbose: true },
+        });
         await expect(Parser.parse(['--quiet', '-v'], { flags: Build.flags })).rejects.toThrow();
     });
 
@@ -26,7 +32,11 @@ describe('build command verbosity', () => {
 
         await command.run();
 
-        expect(createContext).toHaveBeenCalledWith({ env: 'stamhoofd', instanceName: undefined, verbose: false });
+        expect(createContext).toHaveBeenCalledWith({
+            env: 'stamhoofd',
+            instanceName: undefined,
+            verbose: false,
+        });
         expect(buildAll).toHaveBeenCalledWith({ rootDir: '/repo', verbosity });
     });
 });

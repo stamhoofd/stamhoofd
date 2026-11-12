@@ -1,4 +1,11 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
@@ -26,16 +33,21 @@ export class STCredit extends AutoEncoder {
     expireAt: Date | null = null;
 
     static getBalance(credits: STCredit[]) {
-        return credits.slice().reverse().reduce((t, c) => {
-            if (c.expireAt !== null && c.expireAt < new Date()) {
-                return t;
-            }
+        return (
+            credits
+                .slice()
+                .reverse()
+                .reduce((t, c) => {
+                    if (c.expireAt !== null && c.expireAt < new Date()) {
+                        return t;
+                    }
 
-            const l = t + c.change;
-            if (l < 0) {
-                return 0;
-            }
-            return l;
-        }, 0) ?? 0;
+                    const l = t + c.change;
+                    if (l < 0) {
+                        return 0;
+                    }
+                    return l;
+                }, 0) ?? 0
+        );
     }
 }

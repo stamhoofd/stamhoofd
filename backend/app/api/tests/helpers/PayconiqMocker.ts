@@ -15,7 +15,14 @@ export type PayconiqMockPayment = {
     /** The url Payconiq redirects back to after an app-to-app payment */
     returnUrl: string | null;
     /** Payconiq status string (see PayconiqPayment.getResponseStatus) */
-    status: 'PENDING' | 'IDENTIFIED' | 'AUTHORIZED' | 'SUCCEEDED' | 'FAILED' | 'EXPIRED' | 'CANCELLED';
+    status:
+        | 'PENDING'
+        | 'IDENTIFIED'
+        | 'AUTHORIZED'
+        | 'SUCCEEDED'
+        | 'FAILED'
+        | 'EXPIRED'
+        | 'CANCELLED';
     /** Amount in euro (2 decimals), as sent to Payconiq */
     amount: number;
 };
@@ -86,42 +93,60 @@ export class PayconiqMocker {
 
             // The checkout href is opened by the frontend (app-to-app / QR). Tests intercept it.
             const checkout = 'https://payconiq-checkout.test/' + payconiqId;
-            return [200, {
-                paymentId: payconiqId,
-                debtor: {
-                    name: 'Test User',
-                    iban: 'BE41878878996410', // random iban
+            return [
+                200,
+                {
+                    paymentId: payconiqId,
+                    debtor: {
+                        name: 'Test User',
+                        iban: 'BE41878878996410', // random iban
+                    },
+                    _links: {
+                        checkout: { href: checkout },
+                        qrcode: { href: checkout },
+                    },
                 },
-                _links: {
-                    checkout: { href: checkout },
-                    qrcode: { href: checkout },
-                },
-            }];
+            ];
         };
 
         const handleGet = (uri: string) => {
             const payconiqId = uri.split('/').pop()!.split('?')[0];
-            const payment = this.payments.find(p => p.payconiqId === payconiqId);
+            const payment = this.payments.find((p) => p.payconiqId === payconiqId);
             if (!payment) {
                 return [404, { message: 'Payment not found' }];
             }
-            return [200, {
-                paymentId: payment.payconiqId,
-                status: payment.status,
-                amount: payment.amount,
-                debtor: {
-                    name: 'Test User',
-                    iban: 'BE41878878996410',
+            return [
+                200,
+                {
+                    paymentId: payment.payconiqId,
+                    status: payment.status,
+                    amount: payment.amount,
+                    debtor: {
+                        name: 'Test User',
+                        iban: 'BE41878878996410',
+                    },
                 },
-            }];
+            ];
         };
 
         // In test mode the backend talks to the Wero/Bancontact host (api.ext.payconiq.com is
         // the legacy host); mock both so the status poll works regardless.
-        for (const host of ['https://api.ext.payconiq.com', 'https://merchant.api.preprod.bancontact.net']) {
-            nock(host).persist().post('/v3/payments').reply((_uri, body) => handlePost(body));
-            nock(host).persist().get(/\/v3\/payments\/.+/).reply(uri => handleGet(uri) as [number, unknown]);
-            nock(host).persist().delete(/\/v3\/payments\/.+/).reply(() => [204, undefined]);
+        for (const host of [
+            'https://api.ext.payconiq.com',
+            'https://merchant.api.preprod.bancontact.net',
+        ]) {
+            nock(host)
+                .persist()
+                .post('/v3/payments')
+                .reply((_uri, body) => handlePost(body));
+            nock(host)
+                .persist()
+                .get(/\/v3\/payments\/.+/)
+                .reply((uri) => handleGet(uri) as [number, unknown]);
+            nock(host)
+                .persist()
+                .delete(/\/v3\/payments\/.+/)
+                .reply(() => [204, undefined]);
         }
     }
 
@@ -154,11 +179,17 @@ export class PayconiqMocker {
 
         // For some reason the tests go crazy when we try to import this at the top even when we preload the environment it
         // despearately imports the file before loading the STAMHOOFD environment...
-        const { ExchangePaymentEndpoint } = await import('../../src/endpoints/organization/shared/ExchangePaymentEndpoint.js');
+        const { ExchangePaymentEndpoint } =
+            await import('../../src/endpoints/organization/shared/ExchangePaymentEndpoint.js');
         const { testServer } = await import('./TestServer.js');
 
         const endpoint = new ExchangePaymentEndpoint();
-        const request = Request.buildJson('POST', `/v${Version}/payments/${encodeURIComponent(payment.internalPaymentId)}?exchange=true`, undefined, undefined);
+        const request = Request.buildJson(
+            'POST',
+            `/v${Version}/payments/${encodeURIComponent(payment.internalPaymentId)}?exchange=true`,
+            undefined,
+            undefined,
+        );
         await testServer.test(endpoint, request);
     }
 

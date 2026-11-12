@@ -11,10 +11,7 @@ export type SGVErrorResponse = {
 };
 
 /** Creates a minimal SGV-compatible error payload for tests and the mock backend. */
-export function createSGVErrorResponse(
-    beschrijving: string,
-    veld?: string,
-): SGVErrorResponse {
+export function createSGVErrorResponse(beschrijving: string, veld?: string): SGVErrorResponse {
     return {
         fouten: [
             {
@@ -52,14 +49,11 @@ export class SGVErrorsDecoder implements Decoder<SimpleErrors> {
 
         const msg = data.optionalField('msg')?.string;
         if (msg) {
-            return new SimpleErrors(
-                new SimpleError({ code: 'SGVError', message: msg }),
-            );
+            return new SimpleErrors(new SimpleError({ code: 'SGVError', message: msg }));
         }
 
-        const title
-            = data.optionalField('titel')?.string
-                ?? data.optionalField('boodschap')?.string;
+        const title =
+            data.optionalField('titel')?.string ?? data.optionalField('boodschap')?.string;
         if (title) {
             const description = data.optionalField('beschrijving')?.string;
             return new SimpleErrors(

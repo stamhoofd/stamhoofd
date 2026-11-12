@@ -25,8 +25,11 @@ import { WebshopDeliveryMethod, WebshopMetaData } from './WebshopMetaData.js';
 const i18n = { t: (key: string) => key } as unknown as I18n;
 const organizationMeta = OrganizationMetaData.create({});
 
-function createWebshop(asked: Partial<Record<'phone' | 'birthDay' | 'address' | 'gender', boolean>>) {
-    const toRequirement = (enabled: boolean | undefined) => enabled ? CustomerFieldRequirement.Required : CustomerFieldRequirement.Disabled;
+function createWebshop(
+    asked: Partial<Record<'phone' | 'birthDay' | 'address' | 'gender', boolean>>,
+) {
+    const toRequirement = (enabled: boolean | undefined) =>
+        enabled ? CustomerFieldRequirement.Required : CustomerFieldRequirement.Disabled;
 
     return Webshop.create({
         meta: WebshopMetaData.create({
@@ -67,17 +70,23 @@ describe('Checkout.validateCustomer', () => {
         const webshop = createWebshop({ birthDay: true });
         const checkout = Checkout.create({ customer: createValidCustomer() });
 
-        expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).toThrow(/birth day/i);
+        expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).toThrow(
+            /birth day/i,
+        );
 
         checkout.customer.birthDay = new Date('2000-01-01');
-        expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).not.toThrow();
+        expect(() =>
+            checkout.validateCustomer(webshop, organizationMeta, i18n, false),
+        ).not.toThrow();
     });
 
     it('does not require a birth day for admins', () => {
         const webshop = createWebshop({ birthDay: true });
         const checkout = Checkout.create({ customer: createValidCustomer() });
 
-        expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, true)).not.toThrow();
+        expect(() =>
+            checkout.validateCustomer(webshop, organizationMeta, i18n, true),
+        ).not.toThrow();
     });
 
     it('clears the birth day when it is not asked', () => {
@@ -94,10 +103,14 @@ describe('Checkout.validateCustomer', () => {
         const webshop = createWebshop({ address: true });
         const checkout = Checkout.create({ customer: createValidCustomer() });
 
-        expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).toThrow(/address/i);
+        expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).toThrow(
+            /address/i,
+        );
 
         checkout.customer.address = createAddress();
-        expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).not.toThrow();
+        expect(() =>
+            checkout.validateCustomer(webshop, organizationMeta, i18n, false),
+        ).not.toThrow();
     });
 
     it('clears the customer address when the address is not asked and there is no delivery address', () => {
@@ -153,19 +166,34 @@ describe('Checkout customer questions', () => {
 
         expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).toThrow();
 
-        checkout.recordAnswers.set(question.id, RecordTextAnswer.create({ settings: question, value: 'M' }));
-        expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).not.toThrow();
+        checkout.recordAnswers.set(
+            question.id,
+            RecordTextAnswer.create({ settings: question, value: 'M' }),
+        );
+        expect(() =>
+            checkout.validateCustomer(webshop, organizationMeta, i18n, false),
+        ).not.toThrow();
     });
 
     it('lets an admin save an order without answers to the current questions', () => {
         const webshop = createWebshopWithQuestion();
-        webshop.meta.recordCategories = [RecordCategory.create({
-            name: TranslatedString.create('Stap'),
-            records: [RecordSettings.create({ name: TranslatedString.create('Opmerking'), type: RecordType.Text, required: true })],
-        })];
+        webshop.meta.recordCategories = [
+            RecordCategory.create({
+                name: TranslatedString.create('Stap'),
+                records: [
+                    RecordSettings.create({
+                        name: TranslatedString.create('Opmerking'),
+                        type: RecordType.Text,
+                        required: true,
+                    }),
+                ],
+            }),
+        ];
         const checkout = Checkout.create({ customer: createValidCustomer() });
 
-        expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, true)).not.toThrow();
+        expect(() =>
+            checkout.validateCustomer(webshop, organizationMeta, i18n, true),
+        ).not.toThrow();
         expect(() => checkout.validateRecordAnswers(webshop, true)).not.toThrow();
         expect(() => checkout.validateRecordAnswers(webshop)).toThrow();
     });
@@ -173,10 +201,19 @@ describe('Checkout customer questions', () => {
     it('keeps the answers to customer questions when cleaning up old answers', () => {
         const webshop = createWebshopWithQuestion();
         const checkout = Checkout.create({ customer: createValidCustomer() });
-        checkout.recordAnswers.set(question.id, RecordTextAnswer.create({ settings: question, value: 'M' }));
+        checkout.recordAnswers.set(
+            question.id,
+            RecordTextAnswer.create({ settings: question, value: 'M' }),
+        );
 
-        const unknown = RecordSettings.create({ name: TranslatedString.create('Oud'), type: RecordType.Text });
-        checkout.recordAnswers.set(unknown.id, RecordTextAnswer.create({ settings: unknown, value: 'x' }));
+        const unknown = RecordSettings.create({
+            name: TranslatedString.create('Oud'),
+            type: RecordType.Text,
+        });
+        checkout.recordAnswers.set(
+            unknown.id,
+            RecordTextAnswer.create({ settings: unknown, value: 'x' }),
+        );
 
         checkout.validateRecordAnswers(webshop);
 
@@ -196,10 +233,16 @@ describe('Checkout contact person from a cart item', () => {
     }
 
     it('copies the collected details and leaves the other fields to be asked', () => {
-        const item = createParticipantItem(Customer.create({ firstName: 'Jane', lastName: 'Doe', phone: '+32 470 00 00 00' }), {
-            phone: CustomerFieldRequirement.Required,
+        const item = createParticipantItem(
+            Customer.create({ firstName: 'Jane', lastName: 'Doe', phone: '+32 470 00 00 00' }),
+            {
+                phone: CustomerFieldRequirement.Required,
+            },
+        );
+        const checkout = Checkout.create({
+            cart: Cart.create({ items: [item] }),
+            customerCartItemId: item.id,
         });
-        const checkout = Checkout.create({ cart: Cart.create({ items: [item] }), customerCartItemId: item.id });
 
         expect(checkout.customerFieldsFromCartItem).toEqual(['name', 'phone']);
 
@@ -211,38 +254,64 @@ describe('Checkout contact person from a cart item', () => {
     });
 
     it('still asks an optional field that was left empty on the cart item', () => {
-        const item = createParticipantItem(Customer.create({ firstName: 'Jane', lastName: 'Doe' }), {
-            email: CustomerFieldRequirement.Optional,
-            phone: CustomerFieldRequirement.Optional,
-        });
+        const item = createParticipantItem(
+            Customer.create({ firstName: 'Jane', lastName: 'Doe' }),
+            {
+                email: CustomerFieldRequirement.Optional,
+                phone: CustomerFieldRequirement.Optional,
+            },
+        );
         item.customer!.phone = '+32 470 00 00 00';
-        const checkout = Checkout.create({ cart: Cart.create({ items: [item] }), customerCartItemId: item.id });
+        const checkout = Checkout.create({
+            cart: Cart.create({ items: [item] }),
+            customerCartItemId: item.id,
+        });
 
         expect(checkout.customerFieldsFromCartItem).toEqual(['name', 'phone']);
     });
 
     it('does not use a participant as contact person for a logged in user', () => {
-        const item = createParticipantItem(Customer.create({ firstName: 'Jane', lastName: 'Doe', phone: '+32 470 00 00 00' }), {
-            phone: CustomerFieldRequirement.Required,
-        });
+        const item = createParticipantItem(
+            Customer.create({ firstName: 'Jane', lastName: 'Doe', phone: '+32 470 00 00 00' }),
+            {
+                phone: CustomerFieldRequirement.Required,
+            },
+        );
         const webshop = createWebshop({});
         // Chosen before logging in, with their details copied to the order
-        const checkout = Checkout.create({ cart: Cart.create({ items: [item] }), customerCartItemId: item.id });
+        const checkout = Checkout.create({
+            cart: Cart.create({ items: [item] }),
+            customerCartItemId: item.id,
+        });
         checkout.syncCustomerFromCartItem();
         expect(checkout.customer.phone).toBe('+32 470 00 00 00');
 
-        checkout.validateCustomer(webshop, organizationMeta, i18n, false, User.create({ firstName: 'Sarah', lastName: 'Janssens', email: 'sarah@example.com' }));
+        checkout.validateCustomer(
+            webshop,
+            organizationMeta,
+            i18n,
+            false,
+            User.create({ firstName: 'Sarah', lastName: 'Janssens', email: 'sarah@example.com' }),
+        );
         expect(checkout.customerCartItemId).toBeNull();
         expect(checkout.customer.name).toBe('Sarah Janssens');
         expect(checkout.customer.phone).toBe('');
     });
 
     it('picks a new default contact person when the chosen cart item was removed', () => {
-        const removed = createParticipantItem(Customer.create({ firstName: 'Jane', lastName: 'Doe', phone: '+32 470 00 00 00' }), {
-            phone: CustomerFieldRequirement.Required,
+        const removed = createParticipantItem(
+            Customer.create({ firstName: 'Jane', lastName: 'Doe', phone: '+32 470 00 00 00' }),
+            {
+                phone: CustomerFieldRequirement.Required,
+            },
+        );
+        const remaining = createParticipantItem(
+            Customer.create({ firstName: 'Ann', lastName: 'Doe' }),
+        );
+        const checkout = Checkout.create({
+            cart: Cart.create({ items: [removed, remaining] }),
+            customerCartItemId: removed.id,
         });
-        const remaining = createParticipantItem(Customer.create({ firstName: 'Ann', lastName: 'Doe' }));
-        const checkout = Checkout.create({ cart: Cart.create({ items: [removed, remaining] }), customerCartItemId: removed.id });
         checkout.syncCustomerFromCartItem();
         checkout.cart.items = [remaining];
 
@@ -255,7 +324,10 @@ describe('Checkout contact person from a cart item', () => {
     it('keeps the order customer in sync with edits to the cart item', () => {
         const item = createParticipantItem(Customer.create({ firstName: 'Jane', lastName: 'Doe' }));
         const webshop = createWebshop({});
-        const checkout = Checkout.create({ cart: Cart.create({ items: [item] }), customerCartItemId: item.id });
+        const checkout = Checkout.create({
+            cart: Cart.create({ items: [item] }),
+            customerCartItemId: item.id,
+        });
         checkout.customer.email = 'jane@example.com';
 
         checkout.validateCustomer(webshop, organizationMeta, i18n, false);
@@ -272,10 +344,27 @@ describe('Checkout contact person from a cart item', () => {
         vi.useFakeTimers({ now: new Date('2026-06-15T21:30:00Z') });
         try {
             // Birth days are stored as midnight Brussels time: 16 today, and 16 tomorrow
-            const adult = createParticipantItem(Customer.create({ firstName: 'Jane', lastName: 'Doe', birthDay: new Date('2010-06-14T22:00:00Z') }));
-            const child = createParticipantItem(Customer.create({ firstName: 'Kid', lastName: 'Doe', birthDay: new Date('2010-06-15T22:00:00Z') }));
-            const unknownAge = createParticipantItem(Customer.create({ firstName: 'Ann', lastName: 'Doe' }));
-            const checkout = Checkout.create({ cart: Cart.create({ items: [adult, child, unknownAge] }), customerCartItemId: child.id });
+            const adult = createParticipantItem(
+                Customer.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    birthDay: new Date('2010-06-14T22:00:00Z'),
+                }),
+            );
+            const child = createParticipantItem(
+                Customer.create({
+                    firstName: 'Kid',
+                    lastName: 'Doe',
+                    birthDay: new Date('2010-06-15T22:00:00Z'),
+                }),
+            );
+            const unknownAge = createParticipantItem(
+                Customer.create({ firstName: 'Ann', lastName: 'Doe' }),
+            );
+            const checkout = Checkout.create({
+                cart: Cart.create({ items: [adult, child, unknownAge] }),
+                customerCartItemId: child.id,
+            });
 
             expect(checkout.contactPersonCandidates).toEqual([adult, unknownAge]);
 
@@ -289,11 +378,22 @@ describe('Checkout contact person from a cart item', () => {
 
     it('keeps the delivery address when the contact person also gave an address', () => {
         const deliveryAddress = createAddress();
-        const participantAddress = ValidatedAddress.create({ ...createAddress(), street: 'Andere straat' });
-        const item = createParticipantItem(Customer.create({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com', address: participantAddress }), {
-            email: CustomerFieldRequirement.Required,
-            address: CustomerFieldRequirement.Required,
+        const participantAddress = ValidatedAddress.create({
+            ...createAddress(),
+            street: 'Andere straat',
         });
+        const item = createParticipantItem(
+            Customer.create({
+                firstName: 'Jane',
+                lastName: 'Doe',
+                email: 'jane@example.com',
+                address: participantAddress,
+            }),
+            {
+                email: CustomerFieldRequirement.Required,
+                address: CustomerFieldRequirement.Required,
+            },
+        );
         const checkout = Checkout.create({
             cart: Cart.create({ items: [item] }),
             customerCartItemId: item.id,
@@ -315,8 +415,20 @@ describe('Checkout contact person from a cart item', () => {
     it('preselects the first adult participant until something was chosen or filled in', () => {
         vi.useFakeTimers({ now: new Date('2026-06-15T10:00:00Z') });
         try {
-            const teen = createParticipantItem(Customer.create({ firstName: 'Teen', lastName: 'Doe', birthDay: new Date('2009-06-14T22:00:00Z') }));
-            const adult = createParticipantItem(Customer.create({ firstName: 'Jane', lastName: 'Doe', birthDay: new Date('2008-06-14T22:00:00Z') }));
+            const teen = createParticipantItem(
+                Customer.create({
+                    firstName: 'Teen',
+                    lastName: 'Doe',
+                    birthDay: new Date('2009-06-14T22:00:00Z'),
+                }),
+            );
+            const adult = createParticipantItem(
+                Customer.create({
+                    firstName: 'Jane',
+                    lastName: 'Doe',
+                    birthDay: new Date('2008-06-14T22:00:00Z'),
+                }),
+            );
 
             const checkout = Checkout.create({ cart: Cart.create({ items: [teen, adult] }) });
             checkout.selectDefaultContactPerson();
@@ -326,7 +438,10 @@ describe('Checkout contact person from a cart item', () => {
             expect(checkout.customer.name).toBe('Jane Doe');
 
             // Someone else was already filled in: keep that
-            const other = Checkout.create({ cart: Cart.create({ items: [adult] }), customer: Customer.create({ firstName: 'John', lastName: 'Smith' }) });
+            const other = Checkout.create({
+                cart: Cart.create({ items: [adult] }),
+                customer: Customer.create({ firstName: 'John', lastName: 'Smith' }),
+            });
             other.selectDefaultContactPerson();
             expect(other.customerCartItemId).toBeNull();
             expect(other.customer.name).toBe('John Smith');
@@ -342,7 +457,10 @@ describe('Checkout contact person from a cart item', () => {
 
     it('forgets the contact person and their details when the cart item was removed', () => {
         const item = createParticipantItem(Customer.create({ firstName: 'Jane', lastName: 'Doe' }));
-        const checkout = Checkout.create({ cart: Cart.create({ items: [item] }), customerCartItemId: item.id });
+        const checkout = Checkout.create({
+            cart: Cart.create({ items: [item] }),
+            customerCartItemId: item.id,
+        });
         checkout.syncCustomerFromCartItem();
         checkout.customer.email = 'jane@example.com';
 
@@ -357,7 +475,9 @@ describe('Checkout contact person from a cart item', () => {
     });
 
     it('switches to the new participant when the cart item was replaced', () => {
-        const simon = createParticipantItem(Customer.create({ firstName: 'Simon', lastName: 'Doe' }));
+        const simon = createParticipantItem(
+            Customer.create({ firstName: 'Simon', lastName: 'Doe' }),
+        );
         const checkout = Checkout.create({ cart: Cart.create({ items: [simon] }) });
         checkout.selectDefaultContactPerson();
         expect(checkout.customer.name).toBe('Simon Doe');
@@ -375,9 +495,12 @@ describe('Checkout contact person from a cart item', () => {
     });
 
     it('clears the details of the previous contact person when another participant is chosen', () => {
-        const jane = createParticipantItem(Customer.create({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com' }), {
-            email: CustomerFieldRequirement.Required,
-        });
+        const jane = createParticipantItem(
+            Customer.create({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com' }),
+            {
+                email: CustomerFieldRequirement.Required,
+            },
+        );
         const john = createParticipantItem(Customer.create({ firstName: 'John', lastName: 'Doe' }));
         const checkout = Checkout.create({ cart: Cart.create({ items: [jane, john] }) });
         checkout.setContactPerson(jane.id);
@@ -433,7 +556,9 @@ describe('Checkout.validateDeliveryAddress', () => {
 
         // Same order as Checkout.validate()
         checkout.validateDeliveryAddress(webshop, organizationMeta);
-        expect(() => checkout.validateCustomer(webshop, organizationMeta, i18n, false)).not.toThrow();
+        expect(() =>
+            checkout.validateCustomer(webshop, organizationMeta, i18n, false),
+        ).not.toThrow();
         expect(checkout.customer.address).toStrictEqual(address);
     });
 });
@@ -443,47 +568,96 @@ describe('Checkout.validateCustomer with an account', () => {
         const webshop = createWebshop({});
 
         const full = Checkout.create({ customer: createValidCustomer() });
-        full.validateCustomer(webshop, organizationMeta, i18n, false, User.create({ firstName: 'Jan', lastName: 'Peeters', email: 'jan@example.com' }));
-        expect([full.customer.firstName, full.customer.lastName, full.customer.email]).toEqual(['Jan', 'Peeters', 'jan@example.com']);
+        full.validateCustomer(
+            webshop,
+            organizationMeta,
+            i18n,
+            false,
+            User.create({ firstName: 'Jan', lastName: 'Peeters', email: 'jan@example.com' }),
+        );
+        expect([full.customer.firstName, full.customer.lastName, full.customer.email]).toEqual([
+            'Jan',
+            'Peeters',
+            'jan@example.com',
+        ]);
 
         // The name filled in during the checkout stays
         const incomplete = Checkout.create({ customer: createValidCustomer() });
-        incomplete.validateCustomer(webshop, organizationMeta, i18n, false, User.create({ firstName: 'Jan', email: 'jan@example.com' }));
-        expect([incomplete.customer.firstName, incomplete.customer.lastName, incomplete.customer.email]).toEqual(['John', 'Doe', 'jan@example.com']);
+        incomplete.validateCustomer(
+            webshop,
+            organizationMeta,
+            i18n,
+            false,
+            User.create({ firstName: 'Jan', email: 'jan@example.com' }),
+        );
+        expect([
+            incomplete.customer.firstName,
+            incomplete.customer.lastName,
+            incomplete.customer.email,
+        ]).toEqual(['John', 'Doe', 'jan@example.com']);
     });
 });
 
 describe('Checkout.withGroupedItems', () => {
-    function unit(product: Product, { seat, uitpasNumber, price }: { seat?: string; uitpasNumber?: string; price?: ProductPrice } = {}) {
+    function unit(
+        product: Product,
+        {
+            seat,
+            uitpasNumber,
+            price,
+        }: { seat?: string; uitpasNumber?: string; price?: ProductPrice } = {},
+    ) {
         return CartItem.create({
             product,
             productPrice: price ?? product.prices[0],
             amount: 1,
             seats: seat ? [CartReservedSeat.create({ section: 'zaal', row: 'A', seat })] : [],
-            uitpasNumbers: uitpasNumber ? [UitpasNumberAndPrice.create({ uitpasNumber, price: 5_0000 })] : [],
+            uitpasNumbers: uitpasNumber
+                ? [UitpasNumberAndPrice.create({ uitpasNumber, price: 5_0000 })]
+                : [],
         });
     }
 
     it('combines the units of a product, keeping their seats and UiTPAS numbers in order', () => {
-        const product = Product.create({ name: 'Voorstelling', prices: [ProductPrice.create({ price: 10_0000 })] });
+        const product = Product.create({
+            name: 'Voorstelling',
+            prices: [ProductPrice.create({ price: 10_0000 })],
+        });
         const webshop = Webshop.create({ products: [product] });
-        const checkout = Checkout.create({ cart: Cart.create({ items: [unit(product, { seat: '1', uitpasNumber: '111' }), unit(product, { seat: '2', uitpasNumber: '222' })] }) });
+        const checkout = Checkout.create({
+            cart: Cart.create({
+                items: [
+                    unit(product, { seat: '1', uitpasNumber: '111' }),
+                    unit(product, { seat: '2', uitpasNumber: '222' }),
+                ],
+            }),
+        });
 
         const grouped = checkout.withGroupedItems(webshop);
 
         expect(grouped.cart.items).toHaveLength(1);
         expect(grouped.cart.items[0].amount).toBe(2);
-        expect(grouped.cart.items[0].seats.map(s => s.seat)).toEqual(['1', '2']);
-        expect(grouped.cart.items[0].uitpasNumbers.map(u => u.uitpasNumber)).toEqual(['111', '222']);
+        expect(grouped.cart.items[0].seats.map((s) => s.seat)).toEqual(['1', '2']);
+        expect(grouped.cart.items[0].uitpasNumbers.map((u) => u.uitpasNumber)).toEqual([
+            '111',
+            '222',
+        ]);
 
         // The cart of the checkout itself keeps a unit per item
         expect(checkout.cart.items).toHaveLength(2);
     });
 
     it('keeps the same total price, also with a discount for buying several', () => {
-        const product = Product.create({ name: 'Spaghetti', prices: [ProductPrice.create({ price: 10_0000, discountPrice: 8_0000, discountAmount: 2 })] });
+        const product = Product.create({
+            name: 'Spaghetti',
+            prices: [
+                ProductPrice.create({ price: 10_0000, discountPrice: 8_0000, discountAmount: 2 }),
+            ],
+        });
         const webshop = Webshop.create({ products: [product] });
-        const checkout = Checkout.create({ cart: Cart.create({ items: [unit(product), unit(product), unit(product)] }) });
+        const checkout = Checkout.create({
+            cart: Cart.create({ items: [unit(product), unit(product), unit(product)] }),
+        });
         checkout.update(webshop);
 
         const grouped = checkout.withGroupedItems(webshop);
@@ -495,11 +669,15 @@ describe('Checkout.withGroupedItems', () => {
         const price = ProductPrice.create({ price: 10_0000, allowCustomPrice: true });
         const product = Product.create({ name: 'Steun', prices: [price] });
         const webshop = Webshop.create({ products: [product] });
-        const checkout = Checkout.create({ cart: Cart.create({ items: [
-            unit(product, { price: price.patch({ price: 10_0000 }) }),
-            unit(product, { price: price.patch({ price: 20_0000 }) }),
-        ] }) });
+        const checkout = Checkout.create({
+            cart: Cart.create({
+                items: [
+                    unit(product, { price: price.patch({ price: 10_0000 }) }),
+                    unit(product, { price: price.patch({ price: 20_0000 }) }),
+                ],
+            }),
+        });
 
-        expect(checkout.withGroupedItems(webshop).cart.items.map(i => i.amount)).toEqual([1, 1]);
+        expect(checkout.withGroupedItems(webshop).cart.items.map((i) => i.amount)).toEqual([1, 1]);
     });
 });

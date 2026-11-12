@@ -1,5 +1,12 @@
 import type { PartialWithoutMethods } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -43,7 +50,7 @@ export class CartItemPrice extends AutoEncoder {
             price,
             Math.max(
                 0,
-                100 * Math.round(price * (10000 - this.percentageDiscount) / 10000_00), // Round up to 1 cent, not smaller
+                100 * Math.round((price * (10000 - this.percentageDiscount)) / 10000_00), // Round up to 1 cent, not smaller
             ),
         ); // Min is required to support negative prices: prices should never increase after applyign discounts
         price = Math.min(price, Math.max(0, price - this.fixedDiscount)); // Min is required to support negative prices: prices should never increase after applyign discounts
@@ -60,11 +67,16 @@ export class CartItemOption extends AutoEncoder {
 }
 
 export class CartItem extends AutoEncoder implements ObjectWithRecords {
-    @field({ decoder: StringDecoder, defaultValue: () => uuidv4(), version: 106, upgrade: function (this: CartItem) {
-        // Warning: this id will always be too long for storage in a normal database record.
-        // But that is not a problem, since only new orders will use tickets that need this field
-        return this.code;
-    } })
+    @field({
+        decoder: StringDecoder,
+        defaultValue: () => uuidv4(),
+        version: 106,
+        upgrade: function (this: CartItem) {
+            // Warning: this id will always be too long for storage in a normal database record.
+            // But that is not a problem, since only new orders will use tickets that need this field
+            return this.code;
+        },
+    })
     id: string;
 
     @field({ decoder: Product })
@@ -128,29 +140,37 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
     /**
      * Detailed list of prices
      */
-    @field({ decoder: new ArrayDecoder(CartItemPrice), version: 236, upgrade: function (this: CartItem) {
-        const prices: CartItemPrice[] = [];
+    @field({
+        decoder: new ArrayDecoder(CartItemPrice),
+        version: 236,
+        upgrade: function (this: CartItem) {
+            const prices: CartItemPrice[] = [];
 
-        const unitPrice = this.unitPrice ?? 0;
-        for (const seat of this.seats) {
-            const seatPrice = unitPrice + seat.price;
+            const unitPrice = this.unitPrice ?? 0;
+            for (const seat of this.seats) {
+                const seatPrice = unitPrice + seat.price;
 
-            prices.push(CartItemPrice.create({
-                price: seatPrice * 100,
-            }));
-        }
-
-        // Others (non seats)
-        const remaining = this.amount - this.seats.length;
-        if (remaining > 0) {
-            for (let index = 0; index < remaining; index++) {
-                prices.push(CartItemPrice.create({
-                    price: unitPrice * 100,
-                }));
+                prices.push(
+                    CartItemPrice.create({
+                        price: seatPrice * 100,
+                    }),
+                );
             }
-        }
-        return prices;
-    } })
+
+            // Others (non seats)
+            const remaining = this.amount - this.seats.length;
+            if (remaining > 0) {
+                for (let index = 0; index < remaining; index++) {
+                    prices.push(
+                        CartItemPrice.create({
+                            price: unitPrice * 100,
+                        }),
+                    );
+                }
+            }
+            return prices;
+        },
+    })
     calculatedPrices: CartItemPrice[] = [];
 
     /**
@@ -205,7 +225,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
      * @deprecated
      */
     get price() {
-        return this.unitPrice ? (this.unitPrice * this.amount) : null;
+        return this.unitPrice ? this.unitPrice * this.amount : null;
     }
 
     getReservedAmountPrice(priceId: string) {
@@ -216,7 +236,12 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         return this.reservedOptions.get(optionId) || 0;
     }
 
-    static createDefault(product: Product, cart: Cart, webshop: Webshop, data: { admin: boolean }): CartItem {
+    static createDefault(
+        product: Product,
+        cart: Cart,
+        webshop: Webshop,
+        data: { admin: boolean },
+    ): CartItem {
         // Return the first that still has stock or the first if none has stock
         const options: CartItemOption[] = [];
 
@@ -233,7 +258,14 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
 
             // Add first option with remaining stock
             for (const option of optionMenu.options) {
-                const stock = CartStockHelper.getOptionStock({ product, option, oldItem: null, cart, webshop, admin: data.admin });
+                const stock = CartStockHelper.getOptionStock({
+                    product,
+                    option,
+                    oldItem: null,
+                    cart,
+                    webshop,
+                    admin: data.admin,
+                });
                 if (!stock || stock.remaining === null || stock.remaining > 0) {
                     cartItemOption = CartItemOption.create({
                         option,
@@ -244,17 +276,27 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             }
 
             // Add (default if no stock for all)
-            options.push(cartItemOption ?? CartItemOption.create({
-                option: optionMenu.options[0],
-                optionMenu,
-            }));
+            options.push(
+                cartItemOption ??
+                    CartItemOption.create({
+                        option: optionMenu.options[0],
+                        optionMenu,
+                    }),
+            );
         }
 
         const prices = product.filteredPrices(data);
         let chosenPrice: ProductPrice | null = null;
 
         for (const productPrice of prices) {
-            const stock = CartStockHelper.getPriceStock({ product, productPrice, oldItem: null, cart, webshop, admin: data.admin });
+            const stock = CartStockHelper.getPriceStock({
+                product,
+                productPrice,
+                oldItem: null,
+                cart,
+                webshop,
+                admin: data.admin,
+            });
 
             if (!stock || stock.remaining === null || stock.remaining > 0) {
                 chosenPrice = productPrice;
@@ -282,7 +324,10 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         return product.patch({ allowMultiple: webshop.allowsMultiple(product) });
     }
 
-    static create<T extends typeof AutoEncoder>(this: T, object: PartialWithoutMethods<CartItem>): InstanceType<T> {
+    static create<T extends typeof AutoEncoder>(
+        this: T,
+        object: PartialWithoutMethods<CartItem>,
+    ): InstanceType<T> {
         const c = super.create(object) as CartItem;
 
         // Fill in all default options here
@@ -295,14 +340,16 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 continue;
             }
 
-            if (c.options.find(o => o.optionMenu.id === optionMenu.id)) {
+            if (c.options.find((o) => o.optionMenu.id === optionMenu.id)) {
                 continue;
             }
 
-            c.options.push(CartItemOption.create({
-                option: optionMenu.options[0],
-                optionMenu: optionMenu,
-            }));
+            c.options.push(
+                CartItemOption.create({
+                    option: optionMenu.options[0],
+                    optionMenu: optionMenu,
+                }),
+            );
         }
 
         return c as InstanceType<T>;
@@ -312,29 +359,42 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
      * Unique identifier to check if two cart items are the same
      */
     get code(): string {
-        return this.codeWithoutFields + '.' + this.fieldAnswers.map(a => a.field.id + '-' + Formatter.slug(a.answer)).join('.');
+        return (
+            this.codeWithoutFields +
+            '.' +
+            this.fieldAnswers.map((a) => a.field.id + '-' + Formatter.slug(a.answer)).join('.')
+        );
     }
 
     get codeWithoutFields(): string {
         // A chosen custom price is part of the identity: only items with the same price may merge in the cart
         const customPrice = this.productPrice.allowCustomPrice ? '.' + this.productPrice.price : '';
-        return this.product.id + '.' + this.productPrice.id + customPrice + '.' + this.options.map(o => o.option.id).join('.');
+        return (
+            this.product.id +
+            '.' +
+            this.productPrice.id +
+            customPrice +
+            '.' +
+            this.options.map((o) => o.option.id).join('.')
+        );
     }
 
     /**
      * Return total amount of same product in the given cart. Always includes the current item, even when it isn't in the cart. Doesn't count it twice
      */
     getTotalAmount(cart: Cart) {
-        return cart.items.reduce((c, item) => {
-            if (item.product.id !== this.product.id) {
-                return c;
-            }
+        return (
+            cart.items.reduce((c, item) => {
+                if (item.product.id !== this.product.id) {
+                    return c;
+                }
 
-            if (item.id === this.id) {
-                return c;
-            }
-            return c + item.amount;
-        }, 0) + this.amount;
+                if (item.id === this.id) {
+                    return c;
+                }
+                return c + item.amount;
+            }, 0) + this.amount
+        );
     }
 
     /**
@@ -355,14 +415,18 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 // Seats
                 const seatPrice = p + this.seats[i].price;
 
-                prices.push(CartItemPrice.create({
-                    price: seatPrice,
-                }));
+                prices.push(
+                    CartItemPrice.create({
+                        price: seatPrice,
+                    }),
+                );
             } else {
                 // Others (non seats)
-                prices.push(CartItemPrice.create({
-                    price: p,
-                }));
+                prices.push(
+                    CartItemPrice.create({
+                        price: p,
+                    }),
+                );
             }
         }
         this.calculatedPrices = prices;
@@ -372,7 +436,10 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         const amount = this.getTotalAmount(cart);
         let price = this.productPrice.price;
 
-        if (this.productPrice.discountPrice !== null && amount >= this.productPrice.discountAmount) {
+        if (
+            this.productPrice.discountPrice !== null &&
+            amount >= this.productPrice.discountAmount
+        ) {
             price = this.productPrice.discountPrice;
         }
         this.unitPrice = this.calculateOptionsPrice(cart, price);
@@ -483,7 +550,9 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
 
     private priceCombinationToString(priceCombinations: Map<number, number>) {
         // Sort by price
-        const sorted = [...priceCombinations.entries()].map(([price, amount]) => ({ price, amount })).sort((a, b) => b.price - a.price);
+        const sorted = [...priceCombinations.entries()]
+            .map(([price, amount]) => ({ price, amount }))
+            .sort((a, b) => b.price - a.price);
 
         // Format
         const parts: string[] = [];
@@ -536,11 +605,17 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             descriptions.push(option.option.name);
         }
 
-        if ((this.product.type === ProductType.Ticket || this.product.type === ProductType.Voucher) && this.product.dateRange) {
-            descriptions.unshift(Formatter.capitalizeFirstLetter(this.product.dateRange.toString()));
+        if (
+            (this.product.type === ProductType.Ticket ||
+                this.product.type === ProductType.Voucher) &&
+            this.product.dateRange
+        ) {
+            descriptions.unshift(
+                Formatter.capitalizeFirstLetter(this.product.dateRange.toString()),
+            );
         }
 
-        return descriptions.filter(d => !!d).join('\n');
+        return descriptions.filter((d) => !!d).join('\n');
     }
 
     get descriptionWithoutDate(): string {
@@ -563,31 +638,52 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             }
             descriptions.push(a.field.name + ': ' + a.answer);
         }
-        return descriptions.filter(d => !!d).join('\n');
+        return descriptions.filter((d) => !!d).join('\n');
     }
 
     get description(): string {
         const descriptions: string[] = [this.descriptionWithoutDate];
 
-        if ((this.product.type === ProductType.Ticket || this.product.type === ProductType.Voucher) && this.product.dateRange) {
-            descriptions.unshift(Formatter.capitalizeFirstLetter(this.product.dateRange.toString()));
+        if (
+            (this.product.type === ProductType.Ticket ||
+                this.product.type === ProductType.Voucher) &&
+            this.product.dateRange
+        ) {
+            descriptions.unshift(
+                Formatter.capitalizeFirstLetter(this.product.dateRange.toString()),
+            );
         }
 
         if (this.seats.length) {
             descriptions.push(
-                (this.seats.length === 1 ? $t('%sA') : $t('%sB')) + ': '
-                + this.seats.slice().sort(ReservedSeat.sort).map(s => s.getShortName(this.product)).join(', '),
+                (this.seats.length === 1 ? $t('%sA') : $t('%sB')) +
+                    ': ' +
+                    this.seats
+                        .slice()
+                        .sort(ReservedSeat.sort)
+                        .map((s) => s.getShortName(this.product))
+                        .join(', '),
             );
         }
 
         if (this.uitpasNumbers.length) {
             if (this.uitpasNumbers.length === 1) {
-                descriptions.push($t('%wF') + ': ' + DataValidator.formatUitpasNumber(this.uitpasNumbers[0].uitpasNumber));
+                descriptions.push(
+                    $t('%wF') +
+                        ': ' +
+                        DataValidator.formatUitpasNumber(this.uitpasNumbers[0].uitpasNumber),
+                );
             } else {
-                descriptions.push($t('%1B4') + ': ' + this.uitpasNumbers.map(item => DataValidator.formatUitpasNumber(item.uitpasNumber)).join(', '));
+                descriptions.push(
+                    $t('%1B4') +
+                        ': ' +
+                        this.uitpasNumbers
+                            .map((item) => DataValidator.formatUitpasNumber(item.uitpasNumber))
+                            .join(', '),
+                );
             }
         }
-        return descriptions.filter(d => !!d).join('\n');
+        return descriptions.filter((d) => !!d).join('\n');
     }
 
     /**
@@ -596,7 +692,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
     validateAnswers(validate = true) {
         const newAnswers: WebshopFieldAnswer[] = [];
         for (const field of this.product.customFields) {
-            const answer = this.fieldAnswers.find(a => a.field.id === field.id);
+            const answer = this.fieldAnswers.find((a) => a.field.id === field.id);
 
             try {
                 if (!answer) {
@@ -628,29 +724,41 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
      */
     refresh(webshop: Webshop, { requireDetails = true }: { requireDetails?: boolean } = {}) {
         const errors = new SimpleErrors();
-        const product = webshop.products.find(p => p.id === this.product.id);
+        const product = webshop.products.find((p) => p.id === this.product.id);
         if (!product) {
-            errors.addError(new SimpleError({
-                code: 'product_unavailable',
-                message: 'Product unavailable',
-                human: $t('%sC', { product: this.product.name }),
-            }));
+            errors.addError(
+                new SimpleError({
+                    code: 'product_unavailable',
+                    message: 'Product unavailable',
+                    human: $t('%sC', { product: this.product.name }),
+                }),
+            );
         } else {
             this.product = CartItem.getProductSnapshot(product, webshop);
-            const productPrice = product.prices.find(p => p.id === this.productPrice.id);
+            const productPrice = product.prices.find((p) => p.id === this.productPrice.id);
             if (!productPrice) {
-                if ((this.productPrice.name.length === 0 || this.product.prices.length <= 1) && product.prices.length > 1) {
-                    errors.addError(new SimpleError({
-                        code: 'product_price_unavailable',
-                        message: 'Product price unavailable',
-                        human: $t('%sD', { product: this.product.name }),
-                    }));
+                if (
+                    (this.productPrice.name.length === 0 || this.product.prices.length <= 1) &&
+                    product.prices.length > 1
+                ) {
+                    errors.addError(
+                        new SimpleError({
+                            code: 'product_price_unavailable',
+                            message: 'Product price unavailable',
+                            human: $t('%sD', { product: this.product.name }),
+                        }),
+                    );
                 } else {
-                    errors.addError(new SimpleError({
-                        code: 'product_price_unavailable',
-                        message: 'Product price unavailable',
-                        human: $t('%sE', { price: this.productPrice.name, product: this.product.name }),
-                    }));
+                    errors.addError(
+                        new SimpleError({
+                            code: 'product_price_unavailable',
+                            message: 'Product price unavailable',
+                            human: $t('%sE', {
+                                price: this.productPrice.name,
+                                product: this.product.name,
+                            }),
+                        }),
+                    );
                 }
             } else {
                 // Only set product if we did find our product price
@@ -660,7 +768,10 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 if (productPrice.allowCustomPrice) {
                     // Keep the price the customer chose: rounded to whole cents and clamped to the allowed bounds
                     const customPrice = Math.round(savedPrice / 100) * 100;
-                    this.productPrice.price = Math.min(Math.max(customPrice, ProductPrice.customPriceMinimum), ProductPrice.customPriceMaximum);
+                    this.productPrice.price = Math.min(
+                        Math.max(customPrice, ProductPrice.customPriceMinimum),
+                        ProductPrice.customPriceMaximum,
+                    );
                 }
             }
 
@@ -668,14 +779,16 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             const remainingMenus = this.product.optionMenus.slice();
 
             for (const o of this.options) {
-                const index = remainingMenus.findIndex(m => m.id === o.optionMenu.id);
+                const index = remainingMenus.findIndex((m) => m.id === o.optionMenu.id);
                 if (index === -1) {
                     // Check if it has a multiple choice one
-                    errors.addError(new SimpleError({
-                        code: 'option_menu_unavailable',
-                        message: 'Option menu unavailable',
-                        human: $t('%sF', { product: this.product.name }),
-                    }));
+                    errors.addError(
+                        new SimpleError({
+                            code: 'option_menu_unavailable',
+                            message: 'Option menu unavailable',
+                            human: $t('%sF', { product: this.product.name }),
+                        }),
+                    );
                     continue;
                 }
 
@@ -685,14 +798,16 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                     remainingMenus.splice(index, 1);
                 }
 
-                const option = menu.options.find(m => m.id === o.option.id);
+                const option = menu.options.find((m) => m.id === o.option.id);
 
                 if (!option) {
-                    errors.addError(new SimpleError({
-                        code: 'option_unavailable',
-                        message: 'Option unavailable',
-                        human: $t('%sF', { product: this.product.name }),
-                    }));
+                    errors.addError(
+                        new SimpleError({
+                            code: 'option_unavailable',
+                            message: 'Option unavailable',
+                            human: $t('%sF', { product: this.product.name }),
+                        }),
+                    );
                     continue;
                 }
 
@@ -701,7 +816,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 o.option = option;
             }
 
-            if (requireDetails && remainingMenus.filter(m => !m.multipleChoice).length > 0) {
+            if (requireDetails && remainingMenus.filter((m) => !m.multipleChoice).length > 0) {
                 for (const remaining of remainingMenus) {
                     errors.addError(
                         new SimpleError({
@@ -729,19 +844,50 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         errors.throwIfNotEmpty();
     }
 
-    getFixedStockDefinitions(oldItem: CartItem | null | undefined, cart: Cart, webshop: Webshop, admin: boolean): StockDefinition[] {
-        return CartStockHelper.getFixedStockDefinitions({ oldItem, cart, product: this.product, webshop, admin, amount: this.amount });
+    getFixedStockDefinitions(
+        oldItem: CartItem | null | undefined,
+        cart: Cart,
+        webshop: Webshop,
+        admin: boolean,
+    ): StockDefinition[] {
+        return CartStockHelper.getFixedStockDefinitions({
+            oldItem,
+            cart,
+            product: this.product,
+            webshop,
+            admin,
+            amount: this.amount,
+        });
     }
 
     /**
      * Return all the stock definitions for this cart item with the currently selected options
      * = calculate how much you can order with these options
      */
-    getAvailableStock(oldItem: CartItem | null | undefined, cart: Cart, webshop: Webshop, admin: boolean): StockDefinition[] {
-        return CartStockHelper.getAvailableStock({ oldItem, cart, product: this.product, webshop, admin, amount: this.amount, productPrice: this.productPrice, options: this.options });
+    getAvailableStock(
+        oldItem: CartItem | null | undefined,
+        cart: Cart,
+        webshop: Webshop,
+        admin: boolean,
+    ): StockDefinition[] {
+        return CartStockHelper.getAvailableStock({
+            oldItem,
+            cart,
+            product: this.product,
+            webshop,
+            admin,
+            amount: this.amount,
+            productPrice: this.productPrice,
+            options: this.options,
+        });
     }
 
-    getMaximumRemaining(oldItem: CartItem | null | undefined, cart: Cart, webshop: Webshop, admin: boolean) {
+    getMaximumRemaining(
+        oldItem: CartItem | null | undefined,
+        cart: Cart,
+        webshop: Webshop,
+        admin: boolean,
+    ) {
         return CartStockHelper.getRemaining(this.getAvailableStock(oldItem, cart, webshop, admin));
     }
 
@@ -757,7 +903,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             }
             return;
         }
-        const uitpasNumbers = this.uitpasNumbers.map(p => p.uitpasNumber);
+        const uitpasNumbers = this.uitpasNumbers.map((p) => p.uitpasNumber);
 
         uitpasNumbers.forEach((num, i) => {
             if (num === '') {
@@ -770,12 +916,17 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             }
         });
 
-        const errors = uitpasNumbers.filter(num => !DataValidator.isUitpasNumberValid(num)).map((value, i) => new SimpleError({
-            code: 'invalid_uitpas_number',
-            message: 'Invalid uitpas number',
-            human: $t('%1DX'),
-            field: 'uitpasNumbers.' + i.toString(),
-        }));
+        const errors = uitpasNumbers
+            .filter((num) => !DataValidator.isUitpasNumberValid(num))
+            .map(
+                (value, i) =>
+                    new SimpleError({
+                        code: 'invalid_uitpas_number',
+                        message: 'Invalid uitpas number',
+                        human: $t('%1DX'),
+                        field: 'uitpasNumbers.' + i.toString(),
+                    }),
+            );
         if (errors.length > 0) {
             throw new SimpleErrors(...errors);
         }
@@ -784,7 +935,8 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         if (uitpasNumbers.length !== this.amount) {
             throw new SimpleError({
                 code: 'amount_of_uitpas_numbers_mismatch',
-                message: 'The number of UiTPAS numbers and items with UiTPAS social tariff does not match',
+                message:
+                    'The number of UiTPAS numbers and items with UiTPAS social tariff does not match',
                 human: $t('%186'),
                 field: 'cart.items.uitpasNumbers',
             });
@@ -810,7 +962,11 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             return [];
         }
         const settings = this.product.resolvedCustomerSettings;
-        return customerFieldKeys.filter(key => settings[key] === CustomerFieldRequirement.Required || (settings[key] === CustomerFieldRequirement.Optional && customer.hasValue(key)));
+        return customerFieldKeys.filter(
+            (key) =>
+                settings[key] === CustomerFieldRequirement.Required ||
+                (settings[key] === CustomerFieldRequirement.Optional && customer.hasValue(key)),
+        );
     }
 
     /**
@@ -848,7 +1004,11 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             if (!admin) {
                 RecordCategory.validate([settings.recordCategory], this);
             }
-            this.recordAnswers = new Map(RecordCategory.sortAnswers(this.recordAnswers, [settings.recordCategory]).map(a => [a.settings.id, a]));
+            this.recordAnswers = new Map(
+                RecordCategory.sortAnswers(this.recordAnswers, [settings.recordCategory]).map(
+                    (a) => [a.settings.id, a],
+                ),
+            );
         } else {
             this.recordAnswers = new Map();
         }
@@ -861,7 +1021,23 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
     /**
      * @param stockCart The items that count against the stock, when that is not the whole cart (see Cart.validate)
      */
-    validate(webshop: Webshop, cart: Cart, { refresh, admin, validateSeats, validateDetails, stockCart }: { refresh?: boolean; admin?: boolean; validateSeats?: boolean; validateDetails?: boolean; stockCart?: Cart } = { refresh: true, admin: false, validateSeats: true, validateDetails: true }) {
+    validate(
+        webshop: Webshop,
+        cart: Cart,
+        {
+            refresh,
+            admin,
+            validateSeats,
+            validateDetails,
+            stockCart,
+        }: {
+            refresh?: boolean;
+            admin?: boolean;
+            validateSeats?: boolean;
+            validateDetails?: boolean;
+            stockCart?: Cart;
+        } = { refresh: true, admin: false, validateSeats: true, validateDetails: true },
+    ) {
         this.cartError = null;
 
         if (admin === undefined) {
@@ -922,11 +1098,16 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             const minimumRemaining = CartStockHelper.getRemaining(remaining);
             if (minimumRemaining !== null && minimumRemaining < this.amount) {
                 // Search for appropriate message in stock definitions
-                const stockDefinition = remaining.find(r => r.remaining === minimumRemaining);
+                const stockDefinition = remaining.find((r) => r.remaining === minimumRemaining);
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: stockDefinition?.text || $t('%sI', { count: minimumRemaining.toString(), product: this.product.name }),
+                    human:
+                        stockDefinition?.text ||
+                        $t('%sI', {
+                            count: minimumRemaining.toString(),
+                            product: this.product.name,
+                        }),
                     meta: { recoverable: minimumRemaining > 0 },
                 });
             }
@@ -943,7 +1124,9 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
         }
 
         if (this.product.seatingPlanId && validateSeats) {
-            const seatingPlan = webshop.meta.seatingPlans.find(s => s.id === this.product.seatingPlanId);
+            const seatingPlan = webshop.meta.seatingPlans.find(
+                (s) => s.id === this.product.seatingPlanId,
+            );
             if (!seatingPlan) {
                 throw new SimpleError({
                     code: 'seating_plan_unavailable',
@@ -973,7 +1156,10 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'seats_unavailable',
                     message: 'Seats unavailable',
-                    human: $t('%sK') + ' ' + invalidSeats.map(s => s.getNameString(webshop, this.product)).join(', '),
+                    human:
+                        $t('%sK') +
+                        ' ' +
+                        invalidSeats.map((s) => s.getNameString(webshop, this.product)).join(', '),
                     meta: { recoverable: true },
                 });
             }
@@ -985,23 +1171,33 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'invalid_seats',
                         message: 'Invalid seats',
-                        human: $t('%sL', { seats: Formatter.pluralText(this.amount, $t('%12Y'), $t('%UL')) }),
+                        human: $t('%sL', {
+                            seats: Formatter.pluralText(this.amount, $t('%12Y'), $t('%UL')),
+                        }),
                         meta: { recoverable: true },
                     });
                 }
                 throw new SimpleError({
                     code: 'invalid_seats',
                     message: 'Invalid seats',
-                    human: $t('%sM', { seats: Formatter.pluralText(this.amount - this.seats.length, $t('%12Y'), $t('%UL')) }),
+                    human: $t('%sM', {
+                        seats: Formatter.pluralText(
+                            this.amount - this.seats.length,
+                            $t('%12Y'),
+                            $t('%UL'),
+                        ),
+                    }),
                     meta: { recoverable: true },
                 });
             }
 
             // Check other cart items have same seats
-            const otherItems = cart.items.filter(i => i.product.id === this.product.id && i.id !== this.id);
+            const otherItems = cart.items.filter(
+                (i) => i.product.id === this.product.id && i.id !== this.id,
+            );
             for (const item of otherItems) {
                 for (const seat of item.seats) {
-                    if (this.seats.find(s => s.equals(seat))) {
+                    if (this.seats.find((s) => s.equals(seat))) {
                         throw new SimpleError({
                             code: 'seats_unavailable',
                             message: 'Seats unavailable',
@@ -1013,14 +1209,24 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
 
             // Adjust seats automatically if enabled
             if (seatingPlan.requireOptimalReservation && !admin) {
-                const otherSeats = cart.items.filter(i => i.product.id === this.product.id && i.id !== this.id).flatMap(i => i.seats);
-                const adjusted = seatingPlan.adjustSeatsForBetterFit(this.seats, [...reservedSeats, ...otherSeats], this.reservedSeats);
+                const otherSeats = cart.items
+                    .filter((i) => i.product.id === this.product.id && i.id !== this.id)
+                    .flatMap((i) => i.seats);
+                const adjusted = seatingPlan.adjustSeatsForBetterFit(
+                    this.seats,
+                    [...reservedSeats, ...otherSeats],
+                    this.reservedSeats,
+                );
                 if (adjusted) {
-                    this.seats = adjusted.map(a => CartReservedSeat.create(a));
+                    this.seats = adjusted.map((a) => CartReservedSeat.create(a));
                 }
 
                 // Edge case: if seats are not optimal across multiple items, we can't fix it
-                const adjusted2 = seatingPlan.adjustSeatsForBetterFit([...this.seats, ...otherSeats], reservedSeats, this.reservedSeats);
+                const adjusted2 = seatingPlan.adjustSeatsForBetterFit(
+                    [...this.seats, ...otherSeats],
+                    reservedSeats,
+                    this.reservedSeats,
+                );
                 if (adjusted2) {
                     // Not able to correct this across multiple items
                     throw new SimpleError({

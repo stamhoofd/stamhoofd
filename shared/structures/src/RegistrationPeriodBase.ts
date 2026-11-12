@@ -32,7 +32,9 @@ export class RegistrationPeriodBase extends AutoEncoder {
      */
     get prefix(): string {
         if (this.customName) {
-            return this.customName.slice(0, this.customName.length - (this.suffix?.length ?? 0)).trim();
+            return this.customName
+                .slice(0, this.customName.length - (this.suffix?.length ?? 0))
+                .trim();
         }
 
         return $t('%7Z');
@@ -47,7 +49,12 @@ export class RegistrationPeriodBase extends AutoEncoder {
      */
     get suffix(): string | null {
         if (this.customName) {
-            return this.customName.trim().match(/(?:(?:\d{4}|\d{2})\s*-\s*(?:\d{4}|\d{2})|\d{4}|\d{2})$/)?.[0].trim() ?? null;
+            return (
+                this.customName
+                    .trim()
+                    .match(/(?:(?:\d{4}|\d{2})\s*-\s*(?:\d{4}|\d{2})|\d{4}|\d{2})$/)?.[0]
+                    .trim() ?? null
+            );
         }
 
         if (Formatter.year(this.endDate) === Formatter.year(this.startDate)) {
@@ -92,7 +99,9 @@ export class RegistrationPeriodBase extends AutoEncoder {
             return null;
         }
 
-        const d = Formatter.luxon(this.startDate).minus({ months: STAMHOOFD.environment === 'development' ? 6 : 2 }).startOf('month');
+        const d = Formatter.luxon(this.startDate)
+            .minus({ months: STAMHOOFD.environment === 'development' ? 6 : 2 })
+            .startOf('month');
         return d.toJSDate();
     }
 }

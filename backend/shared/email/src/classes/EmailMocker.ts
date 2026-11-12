@@ -113,11 +113,17 @@ export class EmailMocker {
     }
 
     static async getSucceededCount() {
-        return await EmailMocker.transactional.getSucceededCount() + await EmailMocker.broadcast.getSucceededCount();
+        return (
+            (await EmailMocker.transactional.getSucceededCount()) +
+            (await EmailMocker.broadcast.getSucceededCount())
+        );
     }
 
     static async getFailedCount() {
-        return await EmailMocker.transactional.getFailedCount() + await EmailMocker.broadcast.getFailedCount();
+        return (
+            (await EmailMocker.transactional.getFailedCount()) +
+            (await EmailMocker.broadcast.getFailedCount())
+        );
     }
 
     getSucceededEmail(index: number) {

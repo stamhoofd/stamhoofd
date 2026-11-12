@@ -13,29 +13,29 @@ type CaddyMatcher = {
     not?: CaddyMatcher[];
 };
 
-export type CaddyHandler
-    = | {
-        handler: 'reverse_proxy';
-        upstreams: Array<{ dial: string }>;
-        stream_close_delay?: string;
-        headers?: {
-            request?: CaddyHeaderOps;
-            response?: CaddyHeaderOps;
-        };
-    }
+export type CaddyHandler =
     | {
-        handler: 'headers';
-        request?: CaddyHeaderOps;
-        response?: CaddyHeaderOps & { require?: { headers?: Record<string, string[]> } };
-    }
+          handler: 'reverse_proxy';
+          upstreams: Array<{ dial: string }>;
+          stream_close_delay?: string;
+          headers?: {
+              request?: CaddyHeaderOps;
+              response?: CaddyHeaderOps;
+          };
+      }
     | {
-        handler: 'replace_response';
-        replacements: Array<{ search?: string; search_regexp?: string; replace: string }>;
-    }
+          handler: 'headers';
+          request?: CaddyHeaderOps;
+          response?: CaddyHeaderOps & { require?: { headers?: Record<string, string[]> } };
+      }
     | {
-        handler: 'subroute';
-        routes: Array<{ match?: CaddyMatcher[]; handle: CaddyHandler[]; terminal?: boolean }>;
-    };
+          handler: 'replace_response';
+          replacements: Array<{ search?: string; search_regexp?: string; replace: string }>;
+      }
+    | {
+          handler: 'subroute';
+          routes: Array<{ match?: CaddyMatcher[]; handle: CaddyHandler[]; terminal?: boolean }>;
+      };
 
 export type CaddyRoute = {
     group?: string;

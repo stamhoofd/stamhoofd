@@ -9,9 +9,13 @@ import { PaymentStatus } from './PaymentStatus.js';
  * The offline methods that actually bring money in. A deduction only moves money between two balances,
  * so it is grouped on its own instead of next to the money that arrived.
  */
-const RECEIVED_OFFLINE_PAYMENT_METHODS = OFFLINE_PAYMENT_METHODS.filter(method => method !== PaymentMethod.AccountDeductions);
+const RECEIVED_OFFLINE_PAYMENT_METHODS = OFFLINE_PAYMENT_METHODS.filter(
+    (method) => method !== PaymentMethod.AccountDeductions,
+);
 
-const ONLINE_PAYMENT_METHODS = Object.values(PaymentMethod).filter(method => !OFFLINE_PAYMENT_METHODS.includes(method));
+const ONLINE_PAYMENT_METHODS = Object.values(PaymentMethod).filter(
+    (method) => !OFFLINE_PAYMENT_METHODS.includes(method),
+);
 
 /**
  * The providers that hold on to the money before paying it out, and that tell us when they did.
@@ -24,7 +28,9 @@ export const SETTLING_PAYMENT_PROVIDERS = [PaymentProvider.Stripe, PaymentProvid
  */
 const UNSETTLED_PAYMENT_PROVIDERS: (PaymentProvider | null)[] = [
     null,
-    ...Object.values(PaymentProvider).filter(provider => !SETTLING_PAYMENT_PROVIDERS.includes(provider)),
+    ...Object.values(PaymentProvider).filter(
+        (provider) => !SETTLING_PAYMENT_PROVIDERS.includes(provider),
+    ),
 ];
 
 /**
@@ -77,7 +83,21 @@ export class PaymentSettlementGroup {
      */
     filter: StamhoofdFilter;
 
-    constructor({ id, name, description, icon, filter, asideIcon }: { id: string; name: string; description?: string; icon: string; asideIcon?: string | null; filter: StamhoofdFilter }) {
+    constructor({
+        id,
+        name,
+        description,
+        icon,
+        filter,
+        asideIcon,
+    }: {
+        id: string;
+        name: string;
+        description?: string;
+        icon: string;
+        asideIcon?: string | null;
+        filter: StamhoofdFilter;
+    }) {
         this.id = id;
         this.name = name;
         this.description = description ?? '';
@@ -100,7 +120,9 @@ export class PaymentSettlementGroup {
 export function getPaymentSettlement(payment: SettleablePayment): PaymentSettlementGroup {
     // Money that never arrived was never paid out, so where it is depends on the payment itself
     if (payment.status !== PaymentStatus.Succeeded) {
-        return payment.status === PaymentStatus.Failed ? getFailedPaymentGroup() : getPendingPaymentGroup();
+        return payment.status === PaymentStatus.Failed
+            ? getFailedPaymentGroup()
+            : getPendingPaymentGroup();
     }
 
     // A deduction moves money between two balances instead of arriving from a provider, so it is
@@ -124,20 +146,20 @@ export function getPaymentSettlement(payment: SettleablePayment): PaymentSettlem
         return payment.settlement
             ? getSettledGroup(payment.provider, payment.settlement)
             : new PaymentSettlementGroup({
-                    id: 'not-settled',
-                    name: $t('%Zjn'),
-                    description: $t('%Zjd'),
-                    icon: 'bank',
-                    asideIcon: 'clock',
-                    filter: {
-                        $and: [
-                            { status: PaymentStatus.Succeeded },
-                            { method: { $neq: PaymentMethod.AccountDeductions } },
-                            { provider: { $in: SETTLING_PAYMENT_PROVIDERS } },
-                            { settlement: { settledAt: null } },
-                        ],
-                    },
-                });
+                  id: 'not-settled',
+                  name: $t('%Zjn'),
+                  description: $t('%Zjd'),
+                  icon: 'bank',
+                  asideIcon: 'clock',
+                  filter: {
+                      $and: [
+                          { status: PaymentStatus.Succeeded },
+                          { method: { $neq: PaymentMethod.AccountDeductions } },
+                          { provider: { $in: SETTLING_PAYMENT_PROVIDERS } },
+                          { settlement: { settledAt: null } },
+                      ],
+                  },
+              });
     }
 
     if (isOnlinePayment(payment)) {
@@ -201,11 +223,20 @@ export function getFailedPaymentGroup(): PaymentSettlementGroup {
     });
 }
 
-function getSettledGroup(provider: PaymentProvider | null, settlement: SettlementReference): PaymentSettlementGroup {
+function getSettledGroup(
+    provider: PaymentProvider | null,
+    settlement: SettlementReference,
+): PaymentSettlementGroup {
     const date = Formatter.date(settlement.settledAt, true);
 
     return new PaymentSettlementGroup({
-        id: 'settlement-' + (provider ?? '') + '-' + settlement.reference + '-' + settlement.settledAt.getTime(),
+        id:
+            'settlement-' +
+            (provider ?? '') +
+            '-' +
+            settlement.reference +
+            '-' +
+            settlement.settledAt.getTime(),
         // Providers don't always fill in a reference, e.g. Stripe only does when a statement descriptor
         // is set on the account
         name: settlement.reference || $t('%MA'),

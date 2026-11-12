@@ -5,9 +5,18 @@ import { SimpleError } from '@common/errors';
 import { EventNotification } from '@stamhoofd/models';
 import type { SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, EventNotification as EventNotificationStruct, StamhoofdFilter } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    EventNotification as EventNotificationStruct,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
-import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
+import {
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    assertSort,
+    getSortFilter,
+} from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@node/database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -52,7 +61,9 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
 
         if (!organization) {
             // Get all tags
-            const tags = Context.auth.getOrganizationTagsWithAccessRight(AccessRight.OrganizationEventNotificationReviewer);
+            const tags = Context.auth.getOrganizationTagsWithAccessRight(
+                AccessRight.OrganizationEventNotificationReviewer,
+            );
 
             if (tags !== 'all') {
                 if (tags.length === 0) {
@@ -71,13 +82,9 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
             }
         }
 
-        const query = SQL
-            .select(
-                SQL.wildcard(EventNotification.table),
-            )
-            .from(
-                SQL.table(EventNotification.table),
-            );
+        const query = SQL.select(SQL.wildcard(EventNotification.table)).from(
+            SQL.table(EventNotification.table),
+        );
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
@@ -145,7 +152,7 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
         }
 
         for (const notification of notifications) {
-            if (!await Context.auth.canAccessEventNotification(notification)) {
+            if (!(await Context.auth.canAccessEventNotification(notification))) {
                 throw Context.auth.error($t('%DT'));
             }
         }
@@ -178,8 +185,6 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
             });
         }
 
-        return new Response(
-            await GetEventNotificationsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetEventNotificationsEndpoint.buildData(request.query));
     }
 }

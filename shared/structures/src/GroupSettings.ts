@@ -1,5 +1,15 @@
 import type { Decoder } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -23,7 +33,12 @@ export class GroupPrice extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder, defaultValue: () => '' })
-    @field(TranslatedString.field({ version: 370, defaultValue: () => new TranslatedString($t('%132')) }))
+    @field(
+        TranslatedString.field({
+            version: 370,
+            defaultValue: () => new TranslatedString($t('%132')),
+        }),
+    )
     name: TranslatedString;
 
     @field({ decoder: ReduceablePrice, defaultValue: () => ReduceablePrice.create({}) })
@@ -53,7 +68,10 @@ export class GroupPrice extends AutoEncoder {
     /**
      * Bundle discounts that are enabled for this group price, and possible custom settings
      */
-    @field({ decoder: new MapDecoder(StringDecoder, BundleDiscountGroupPriceSettings), version: 374 })
+    @field({
+        decoder: new MapDecoder(StringDecoder, BundleDiscountGroupPriceSettings),
+        version: 374,
+    })
     bundleDiscounts: Map<string, BundleDiscountGroupPriceSettings>;
 
     @field({ decoder: DateDecoder, nullable: true, version: 378 })
@@ -113,7 +131,7 @@ export class GroupPrice extends AutoEncoder {
 
     hasBundleDiscounts(period: { settings: OrganizationRegistrationPeriodSettings }): boolean {
         for (const key of this.bundleDiscounts.keys()) {
-            if (period.settings.bundleDiscounts.find(b => b.id === key)) {
+            if (period.settings.bundleDiscounts.find((b) => b.id === key)) {
                 return true;
             }
         }
@@ -234,12 +252,10 @@ export class GroupOptionMenu extends AutoEncoder {
     multipleChoice = false;
 
     @field({ decoder: new ArrayDecoder(GroupOption) })
-    options: GroupOption[] = [
-        GroupOption.create({}),
-    ];
+    options: GroupOption[] = [GroupOption.create({})];
 
     get hidden() {
-        return this.options.length > 0 && this.options.every(o => o.hidden);
+        return this.options.length > 0 && this.options.every((o) => o.hidden);
     }
 
     getFilteredOptions(options?: { admin?: boolean }) {
@@ -256,7 +272,7 @@ export class GroupOptionMenu extends AutoEncoder {
             return this.options[0];
         }
 
-        return this.options.filter(o => !o.hidden)[0];
+        return this.options.filter((o) => !o.hidden)[0];
     }
 }
 
@@ -334,7 +350,13 @@ export class GroupSettings extends AutoEncoder {
     @field({ decoder: RegistrationPeriodBase, nullable: true, version: 329 })
     period: RegistrationPeriodBase | null = null;
 
-    @field({ decoder: new ArrayDecoder(GroupPrice), version: 285, upgrade: () => { return []; } }) // Upgrade uses empty array to prevent generating random ids every time
+    @field({
+        decoder: new ArrayDecoder(GroupPrice),
+        version: 285,
+        upgrade: () => {
+            return [];
+        },
+    }) // Upgrade uses empty array to prevent generating random ids every time
     prices: GroupPrice[] = [GroupPrice.create({})];
 
     @field({ decoder: new ArrayDecoder(GroupOptionMenu), version: 285 })
@@ -357,15 +379,43 @@ export class GroupSettings extends AutoEncoder {
     /**
      * Date when the online registrations open automatically (note: the group should be open for this to work)
      */
-    @field({ decoder: DateDecoder, nullable: false, version: 73, upgrade: function (this: GroupSettings) { return this.startDate; } })
-    @field({ decoder: DateDecoder, nullable: true, version: 192, downgrade: function (this: GroupSettings) { return this.registrationStartDate ?? this.startDate; } })
+    @field({
+        decoder: DateDecoder,
+        nullable: false,
+        version: 73,
+        upgrade: function (this: GroupSettings) {
+            return this.startDate;
+        },
+    })
+    @field({
+        decoder: DateDecoder,
+        nullable: true,
+        version: 192,
+        downgrade: function (this: GroupSettings) {
+            return this.registrationStartDate ?? this.startDate;
+        },
+    })
     registrationStartDate: Date | null = null;
 
     /**
      * Date when the online registrations close automatically
      */
-    @field({ decoder: DateDecoder, nullable: false, version: 73, upgrade: function (this: GroupSettings) { return this.endDate; } })
-    @field({ decoder: DateDecoder, nullable: true, version: 192, downgrade: function (this: GroupSettings) { return this.registrationEndDate ?? this.endDate; } })
+    @field({
+        decoder: DateDecoder,
+        nullable: false,
+        version: 73,
+        upgrade: function (this: GroupSettings) {
+            return this.endDate;
+        },
+    })
+    @field({
+        decoder: DateDecoder,
+        nullable: true,
+        version: 192,
+        downgrade: function (this: GroupSettings) {
+            return this.registrationEndDate ?? this.endDate;
+        },
+    })
     registrationEndDate: Date | null = null;
 
     /**
@@ -384,17 +434,25 @@ export class GroupSettings extends AutoEncoder {
     trialDays = 0;
 
     @field({ decoder: IntegerDecoder, nullable: true, field: 'maxBirthYear' })
-    @field({ decoder: IntegerDecoder, nullable: true, version: 12, upgrade: (year) => {
-        if (year === null) {
-            return null;
-        }
-        return 2020 - year;
-    } })
+    @field({
+        decoder: IntegerDecoder,
+        nullable: true,
+        version: 12,
+        upgrade: (year) => {
+            if (year === null) {
+                return null;
+            }
+            return 2020 - year;
+        },
+    })
     minAge: number | null = null;
 
     @field({ decoder: IntegerDecoder, nullable: true, field: 'minBirthYear' })
     @field({
-        decoder: IntegerDecoder, nullable: true, version: 12, upgrade: (year) => {
+        decoder: IntegerDecoder,
+        nullable: true,
+        version: 12,
+        upgrade: (year) => {
             if (year === null) {
                 return null;
             }
@@ -413,7 +471,9 @@ export class GroupSettings extends AutoEncoder {
     preRegistrationsDate: Date | null = null;
 
     @field({
-        decoder: IntegerDecoder, nullable: true, version: 16,
+        decoder: IntegerDecoder,
+        nullable: true,
+        version: 16,
     })
     @field({
         decoder: IntegerDecoder,
@@ -434,7 +494,8 @@ export class GroupSettings extends AutoEncoder {
      * Use waitinglist instead to determine if a waiting list is enabled
      */
     @field({
-        decoder: BooleanDecoder, version: 79,
+        decoder: BooleanDecoder,
+        version: 79,
     })
     waitingListIfFull = true;
 
@@ -478,15 +539,17 @@ export class GroupSettings extends AutoEncoder {
         }
 
         return Array.from(
-            new Set(this.prices
-                .flatMap((p) => {
+            new Set(
+                this.prices.flatMap((p) => {
                     const standardPrice = p.price.price;
                     const reducedPrice = p.price.reducedPrice;
                     if (reducedPrice) return [standardPrice, reducedPrice];
                     return [standardPrice];
-                })),
-        ).sort((a, b) => a - b)
-            .map(price => Formatter.price(price))
+                }),
+            ),
+        )
+            .sort((a, b) => a - b)
+            .map((price) => Formatter.price(price))
             .join(' / ');
     }
 
@@ -498,7 +561,10 @@ export class GroupSettings extends AutoEncoder {
             // Registration start date is a requirement for pre registrations
             return null;
         }
-        if (this.registrationStartDate < new Date() || this.waitingListType !== WaitingListType.PreRegistrations) {
+        if (
+            this.registrationStartDate < new Date() ||
+            this.waitingListType !== WaitingListType.PreRegistrations
+        ) {
             // Start date is in the past: registrations are open
             return null;
         }
@@ -520,7 +586,10 @@ export class GroupSettings extends AutoEncoder {
         const now = new Date();
         const preRegistrationDate = this.activePreRegistrationDate;
 
-        if (this.registrationStartDate > now && (!preRegistrationDate || preRegistrationDate > now)) {
+        if (
+            this.registrationStartDate > now &&
+            (!preRegistrationDate || preRegistrationDate > now)
+        ) {
             // Start date or pre registration date are in the future
 
             return true;
@@ -539,11 +608,7 @@ export class GroupSettings extends AutoEncoder {
      */
     getPendingStock(item: RegisterItem) {
         const stock = item.getCartPendingStockReservations(); // this is positive if it will be used
-        return StockReservation.getAmount(
-            'Group',
-            item.group.id,
-            stock,
-        );
+        return StockReservation.getAmount('Group', item.group.id, stock);
     }
 
     isSoldOut(item: RegisterItem | Group): boolean {
@@ -563,7 +628,10 @@ export class GroupSettings extends AutoEncoder {
         if (item instanceof Group) {
             return Math.max(0, this.maxMembers - this.getUsedStock(item));
         }
-        return Math.max(0, this.maxMembers - this.getPendingStock(item) - this.getUsedStock(item.group));
+        return Math.max(
+            0,
+            this.maxMembers - this.getPendingStock(item) - this.getUsedStock(item.group),
+        );
     }
 
     /**
@@ -591,8 +659,8 @@ export class GroupSettings extends AutoEncoder {
      * Total amount per menu that can still be registered taking the stock of the individual options into
      * account. Only includes menu if it imposes a limit. Hidden options are ignored since they cannot be selected for new registrations.
      */
-    getTotalRemainingMenuOptionsStock(item: RegisterItem | Group): (number)[] {
-        const results: (number)[] = [];
+    getTotalRemainingMenuOptionsStock(item: RegisterItem | Group): number[] {
+        const results: number[] = [];
 
         for (const menu of this.optionMenus) {
             // no selection is required if multiple choice is true
@@ -638,7 +706,7 @@ export class GroupSettings extends AutoEncoder {
         const pricesStock = this.getTotalRemainingPricesStock(item);
         const optionsStock = this.getTotalRemainingMenuOptionsStock(item);
 
-        const limits = [groupStock, pricesStock, ...optionsStock].filter(limit => limit !== null);
+        const limits = [groupStock, pricesStock, ...optionsStock].filter((limit) => limit !== null);
         if (limits.length === 0) {
             // if no limits
             return null;
@@ -649,7 +717,11 @@ export class GroupSettings extends AutoEncoder {
     }
 
     get isFull() {
-        return this.maxMembers !== null && this.registeredMembers !== null && (this.registeredMembers + (this.reservedMembers ?? 0)) >= this.maxMembers;
+        return (
+            this.maxMembers !== null &&
+            this.registeredMembers !== null &&
+            this.registeredMembers + (this.reservedMembers ?? 0) >= this.maxMembers
+        );
     }
 
     get availableMembers() {
@@ -663,7 +735,7 @@ export class GroupSettings extends AutoEncoder {
     }
 
     hasBundleDiscounts(period: { settings: OrganizationRegistrationPeriodSettings }): boolean {
-        return this.prices.some(price => price.hasBundleDiscounts(period));
+        return this.prices.some((price) => price.hasBundleDiscounts(period));
     }
 
     /**
@@ -682,7 +754,12 @@ export class GroupSettings extends AutoEncoder {
      * @deprecated
      */
     @field({ decoder: new ArrayDecoder(OldGroupPrices), field: 'prices' })
-    @field({ decoder: new ArrayDecoder(OldGroupPrices), field: 'oldPrices', optional: true, version: 284 })
+    @field({
+        decoder: new ArrayDecoder(OldGroupPrices),
+        field: 'oldPrices',
+        optional: true,
+        version: 284,
+    })
     oldPrices: OldGroupPrices[] = [];
 
     /**
@@ -782,26 +859,40 @@ export class GroupSettings extends AutoEncoder {
      * @deprecated
      * Information about previous cycles
      */
-    @field({ decoder: new MapDecoder(IntegerDecoder, CycleInformation), version: 193, optional: true })
+    @field({
+        decoder: new MapDecoder(IntegerDecoder, CycleInformation),
+        version: 193,
+        optional: true,
+    })
     cycleSettings: Map<number, CycleInformation> = new Map();
 
     @field({ decoder: BooleanDecoder, version: 383 })
     hasCustomDates = false;
 
     @field({ decoder: DateDecoder })
-    @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {
-        const d2 = new Date(d);
-        d2.setUTCHours(-2, 0, 0, 0); // brussels time
-        return d2;
-    }, optional: true })
+    @field({
+        decoder: DateDecoder,
+        version: 33,
+        upgrade: (d: Date) => {
+            const d2 = new Date(d);
+            d2.setUTCHours(-2, 0, 0, 0); // brussels time
+            return d2;
+        },
+        optional: true,
+    })
     startDate: Date = new Date();
 
     @field({ decoder: DateDecoder })
-    @field({ decoder: DateDecoder, version: 33, upgrade: (d: Date) => {
-        const d2 = new Date(d);
-        d2.setUTCHours(23 - 2, 59, 0, 0); // brussels time
-        return d2;
-    }, optional: true })
+    @field({
+        decoder: DateDecoder,
+        version: 33,
+        upgrade: (d: Date) => {
+            const d2 = new Date(d);
+            d2.setUTCHours(23 - 2, 59, 0, 0); // brussels time
+            return d2;
+        },
+        optional: true,
+    })
     endDate: Date = new Date();
 
     /**
@@ -830,21 +921,24 @@ export class GroupSettings extends AutoEncoder {
         if (this.minAge === null) {
             return null;
         }
-        return (this.startDate.getFullYear() - this.minAge);
+        return this.startDate.getFullYear() - this.minAge;
     }
 
     get minYear() {
         if (this.maxAge === null) {
             return null;
         }
-        return (this.startDate.getFullYear() - this.maxAge);
+        return this.startDate.getFullYear() - this.maxAge;
     }
 
     get forAdults() {
-        return ((this.minAge && this.minAge >= 18) || (this.maxAge && this.maxAge > 18));
+        return (this.minAge && this.minAge >= 18) || (this.maxAge && this.maxAge > 18);
     }
 
-    getAgeGenderDescription({ includeAge = false, includeGender = false }: { includeAge?: boolean; includeGender?: boolean } = {}) {
+    getAgeGenderDescription({
+        includeAge = false,
+        includeGender = false,
+    }: { includeAge?: boolean; includeGender?: boolean } = {}) {
         let who = '';
 
         if (includeAge && this.minYear && this.maxYear) {
@@ -865,9 +959,9 @@ export class GroupSettings extends AutoEncoder {
             }
 
             if (this.minYear === this.maxYear) {
-                who += ' ' + (this.minYear);
+                who += ' ' + this.minYear;
             } else {
-                who += ' ' + (this.minYear) + ' - ' + (this.maxYear);
+                who += ' ' + this.minYear + ' - ' + this.maxYear;
             }
         } else if (includeAge && this.maxYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
@@ -885,7 +979,7 @@ export class GroupSettings extends AutoEncoder {
             } else {
                 who += $t('%13C');
             }
-            who += ' ' + (this.maxYear);
+            who += ' ' + this.maxYear;
         } else if (includeAge && this.minYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
@@ -902,7 +996,7 @@ export class GroupSettings extends AutoEncoder {
             } else {
                 who += $t('%13H');
             }
-            who += ' ' + (this.minYear);
+            who += ' ' + this.minYear;
         } else if (includeGender) {
             if (this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
@@ -1001,7 +1095,10 @@ export class GroupSettings extends AutoEncoder {
     }
 
     get isFree() {
-        return !this.prices.find(p => p.price.price > 0) && !this.optionMenus.find(o => o.options.find(p => p.price.price > 0));
+        return (
+            !this.prices.find((p) => p.price.price > 0) &&
+            !this.optionMenus.find((o) => o.options.find((p) => p.price.price > 0))
+        );
     }
 
     validateName() {
@@ -1051,7 +1148,7 @@ function coversForever(periods: Period[]): boolean {
             startDate: startDate ? startDate.getTime() : -Infinity,
             endDate: endDate ? endDate.getTime() : Infinity,
         }))
-        .filter(p => p.startDate < p.endDate) // Skip empty periods
+        .filter((p) => p.startDate < p.endDate) // Skip empty periods
         .sort((a, b) => a.startDate - b.startDate);
 
     if (normalized.length === 0) return false;

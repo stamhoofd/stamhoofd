@@ -2,7 +2,11 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { BalanceItemPayment, Payment } from '@stamhoofd/models';
 import { BalanceItem, Member, Organization } from '@stamhoofd/models';
-import { DetailedPayableBalanceCollection, DetailedPayableBalance, PaymentStatus } from '@stamhoofd/structures';
+import {
+    DetailedPayableBalanceCollection,
+    DetailedPayableBalance,
+    PaymentStatus,
+} from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -14,15 +18,21 @@ type Query = undefined;
 type Body = undefined;
 type ResponseBody = DetailedPayableBalanceCollection;
 
-export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = request.getVersion() >= 339
-            ? Endpoint.parseParameters(request.url, '/user/payable-balance/detailed', {})
-            : Endpoint.parseParameters(request.url, '/user/billing/status/detailed', {});
+        const params =
+            request.getVersion() >= 339
+                ? Endpoint.parseParameters(request.url, '/user/payable-balance/detailed', {})
+                : Endpoint.parseParameters(request.url, '/user/billing/status/detailed', {});
 
         if (params) {
             return [true, params as Params];
@@ -36,30 +46,39 @@ export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Quer
 
         const memberIds = await Member.getMemberIdsForUser(Context.impersonatedUserOrUser);
 
-        const balanceItemModels = await BalanceItem.balanceItemsForUsersAndMembers(organization?.id ?? null, [Context.impersonatedUserOrUser.id], memberIds);
+        const balanceItemModels = await BalanceItem.balanceItemsForUsersAndMembers(
+            organization?.id ?? null,
+            [Context.impersonatedUserOrUser.id],
+            memberIds,
+        );
 
         // todo: this is a duplicate query
         const q = Payment.select()
             .where(
-                SQL.where('payingUserId', Context.impersonatedUserOrUser.id)
-                    .or(
-                        new SQLWhereExists(SQL.subQuery(
-                            SQL.select().from('balance_items')
-                                .join(SQL.innerJoin(
-                                    SQL.table(BalanceItemPayment.table))
-                                    .where(
+                SQL.where('payingUserId', Context.impersonatedUserOrUser.id).or(
+                    new SQLWhereExists(
+                        SQL.subQuery(
+                            SQL.select()
+                                .from('balance_items')
+                                .join(
+                                    SQL.innerJoin(SQL.table(BalanceItemPayment.table)).where(
                                         SQL.column(BalanceItemPayment.table, 'balanceItemId'),
                                         SQL.column(BalanceItem.table, 'id'),
                                     ),
                                 )
                                 .where(
-                                    SQL.where('memberId', memberIds)
-                                        .or('userId', Context.impersonatedUserOrUser.id),
+                                    SQL.where('memberId', memberIds).or(
+                                        'userId',
+                                        Context.impersonatedUserOrUser.id,
+                                    ),
                                 )
-                                .where(SQL.column(BalanceItemPayment.table, 'paymentId'), SQL.column(Payment.table, 'id')),
-                        ),
+                                .where(
+                                    SQL.column(BalanceItemPayment.table, 'paymentId'),
+                                    SQL.column(Payment.table, 'id'),
+                                ),
                         ),
                     ),
+                ),
             )
             .whereNot('status', PaymentStatus.Failed);
 
@@ -72,16 +91,25 @@ export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Quer
 
         const payments = await q.fetch();
 
-        return new Response(await GetUserDetailedPayableBalanceEndpoint.getDetailedBillingStatus(balanceItemModels, payments));
+        return new Response(
+            await GetUserDetailedPayableBalanceEndpoint.getDetailedBillingStatus(
+                balanceItemModels,
+                payments,
+            ),
+        );
     }
 
     /**
      * extraOrganizationIds are always included, also when they don't have any balance items or payments.
      */
-    static async getDetailedBillingStatus(balanceItemModels: BalanceItem[], paymentModels: Payment[], extraOrganizationIds: string[] = []) {
+    static async getDetailedBillingStatus(
+        balanceItemModels: BalanceItem[],
+        paymentModels: Payment[],
+        extraOrganizationIds: string[] = [],
+    ) {
         const organizationIds = Formatter.uniqueArray([
-            ...balanceItemModels.map(b => b.organizationId),
-            ...paymentModels.map(p => p.organizationId).filter(p => p !== null),
+            ...balanceItemModels.map((b) => b.organizationId),
+            ...paymentModels.map((p) => p.organizationId).filter((p) => p !== null),
             ...extraOrganizationIds,
         ]);
 
@@ -114,8 +142,8 @@ export class GetUserDetailedPayableBalanceEndpoint extends Endpoint<Params, Quer
             organizations: organizations.map((o) => {
                 return DetailedPayableBalance.create({
                     organization: o,
-                    balanceItems: balanceItems.filter(b => b.organizationId == o.id),
-                    payments: payments.filter(p => p.organizationId === o.id),
+                    balanceItems: balanceItems.filter((b) => b.organizationId == o.id),
+                    payments: payments.filter((p) => p.organizationId === o.id),
                 });
             }),
         });

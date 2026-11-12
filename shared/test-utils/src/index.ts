@@ -14,18 +14,27 @@ class TestInstance {
     beforeAllCallbacks: AfterCallback[] = [];
     afterAllCallbacks: AfterCallback[] = [];
 
-    permanentEnvironmentOverrides = new Map<keyof typeof STAMHOOFD, (typeof STAMHOOFD)[keyof typeof STAMHOOFD]>();
+    permanentEnvironmentOverrides = new Map<
+        keyof typeof STAMHOOFD,
+        (typeof STAMHOOFD)[keyof typeof STAMHOOFD]
+    >();
 
     private hooks: TestHooks = new JestHooks();
 
-    setEnvironment<Key extends keyof typeof STAMHOOFD>(value: Key, newValue: typeof STAMHOOFD[Key]) {
+    setEnvironment<Key extends keyof typeof STAMHOOFD>(
+        value: Key,
+        newValue: (typeof STAMHOOFD)[Key],
+    ) {
         STAMHOOFD[value] = newValue as (typeof STAMHOOFD)[Key];
 
         // Update process.env that might be linked to STAMHOOFD
         updateLinkedEnvs();
     }
 
-    setPermanentEnvironment<Key extends keyof typeof STAMHOOFD>(value: Key, newValue: typeof STAMHOOFD[Key]) {
+    setPermanentEnvironment<Key extends keyof typeof STAMHOOFD>(
+        value: Key,
+        newValue: (typeof STAMHOOFD)[Key],
+    ) {
         this.permanentEnvironmentOverrides.set(value, newValue);
 
         if (getGlobalObject().STAMHOOFD && typeof getGlobalObject().STAMHOOFD === 'object') {
@@ -148,7 +157,8 @@ export * from './TestHooks.js';
 
 export const STExpect = {
     errorWithCode: (code: string) => expect.objectContaining({ code }) /* as jest.Constructable */,
-    errorWithMessage: (message: string) => expect.objectContaining({ message })/* as jest.Constructable */,
+    errorWithMessage: (message: string) =>
+        expect.objectContaining({ message }) /* as jest.Constructable */,
     simpleError: (data: {
         code?: string;
         message?: string | RegExp;
@@ -171,13 +181,15 @@ export const STExpect = {
         }
         return expect.objectContaining(d);
     },
-    simpleErrors: (data: {
-        code?: string;
-        message?: string | RegExp;
-        field?: string;
-    }[]) => {
+    simpleErrors: (
+        data: {
+            code?: string;
+            message?: string | RegExp;
+            field?: string;
+        }[],
+    ) => {
         return expect.objectContaining({
-            errors: data.map(d => STExpect.simpleError(d)),
+            errors: data.map((d) => STExpect.simpleError(d)),
         });
     },
 };

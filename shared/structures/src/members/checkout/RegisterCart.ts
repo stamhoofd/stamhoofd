@@ -19,13 +19,20 @@ export class IDRegisterCart extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(BalanceItemCartItem), optional: true })
     balanceItems: BalanceItemCartItem[] = [];
 
-    @field({ decoder: new ArrayDecoder(StringDecoder), optional: true, field: 'deleteRegistrationIds' })
+    @field({
+        decoder: new ArrayDecoder(StringDecoder),
+        optional: true,
+        field: 'deleteRegistrationIds',
+    })
     @field({
         decoder: new ArrayDecoder(IDDeleteRegisterItem),
         optional: true,
         version: 423,
-        upgrade: (registrationIds: string[] | undefined) => (registrationIds ?? []).map(registrationId => IDDeleteRegisterItem.create({ registrationId })),
-        downgrade: (items: IDDeleteRegisterItem[]) => items.map(i => i.registrationId),
+        upgrade: (registrationIds: string[] | undefined) =>
+            (registrationIds ?? []).map((registrationId) =>
+                IDDeleteRegisterItem.create({ registrationId }),
+            ),
+        downgrade: (items: IDDeleteRegisterItem[]) => items.map((i) => i.registrationId),
     })
     deleteRegistrations: IDDeleteRegisterItem[] = [];
 
@@ -43,9 +50,9 @@ export class IDRegisterCart extends AutoEncoder {
 
     hydrate(context: RegisterContext) {
         const cart = new RegisterCart();
-        cart.items = this.items.map(i => i.hydrate(context));
+        cart.items = this.items.map((i) => i.hydrate(context));
         cart.balanceItems = this.balanceItems;
-        cart.deleteRegistrations = this.deleteRegistrations.map(i => i.hydrate(context));
+        cart.deleteRegistrations = this.deleteRegistrations.map((i) => i.hydrate(context));
         return cart;
     }
 }
@@ -69,7 +76,10 @@ export class RegisterCart {
         this.bundleDiscounts = [];
         if (this.singleOrganization) {
             for (const bundleDiscount of this.singleOrganization.period.settings.bundleDiscounts) {
-                const grouped = bundleDiscount.calculate(this, this.singleOrganization.period.period.id);
+                const grouped = bundleDiscount.calculate(
+                    this,
+                    this.singleOrganization.period.period.id,
+                );
                 for (const [_, calculation] of grouped.calculations) {
                     if (calculation.netTotal !== 0) {
                         this.bundleDiscounts.push(calculation);
@@ -81,17 +91,17 @@ export class RegisterCart {
 
     clone() {
         const cart = new RegisterCart();
-        cart.items = this.items.map(i => i.clone());
-        cart.balanceItems = this.balanceItems.map(i => i.clone());
-        cart.deleteRegistrations = this.deleteRegistrations.map(r => r.clone());
+        cart.items = this.items.map((i) => i.clone());
+        cart.balanceItems = this.balanceItems.map((i) => i.clone());
+        cart.deleteRegistrations = this.deleteRegistrations.map((r) => r.clone());
         return cart;
     }
 
     convert(): IDRegisterCart {
         return IDRegisterCart.create({
-            items: this.items.map(i => i.convert()),
+            items: this.items.map((i) => i.convert()),
             balanceItems: this.balanceItems,
-            deleteRegistrations: this.deleteRegistrations.map(r => r.convert()),
+            deleteRegistrations: this.deleteRegistrations.map((r) => r.convert()),
         });
     }
 
@@ -121,7 +131,10 @@ export class RegisterCart {
 
     contains(item: RegisterItem) {
         for (const [i, otherItem] of this.items.entries()) {
-            if (otherItem.id === item.id || (otherItem.member.id === item.member.id && otherItem.groupId === item.groupId)) {
+            if (
+                otherItem.id === item.id ||
+                (otherItem.member.id === item.member.id && otherItem.groupId === item.groupId)
+            ) {
                 return true;
             }
         }
@@ -143,7 +156,10 @@ export class RegisterCart {
 
     remove(item: RegisterItem, replaceWith?: RegisterItem) {
         for (const [i, otherItem] of this.items.entries()) {
-            if (otherItem.id === item.id || (otherItem.member.id === item.member.id && otherItem.groupId === item.groupId)) {
+            if (
+                otherItem.id === item.id ||
+                (otherItem.member.id === item.member.id && otherItem.groupId === item.groupId)
+            ) {
                 this.items.splice(i, 1, ...(replaceWith ? [replaceWith] : []));
                 break;
             }
@@ -161,18 +177,26 @@ export class RegisterCart {
     }
 
     removeRegistration(registration: RegistrationWithPlatformMember) {
-        const index = this.deleteRegistrations.findIndex(r => r.id === registration.registration.id);
+        const index = this.deleteRegistrations.findIndex(
+            (r) => r.id === registration.registration.id,
+        );
         if (index === -1) {
             const first = this.deleteRegistrations[0];
-            this.deleteRegistrations.push(first
-                ? new DeleteRegisterItem({ registration, cancellationFeePercentage: first.cancellationFeePercentage })
-                : DeleteRegisterItem.defaultFor(registration),
+            this.deleteRegistrations.push(
+                first
+                    ? new DeleteRegisterItem({
+                          registration,
+                          cancellationFeePercentage: first.cancellationFeePercentage,
+                      })
+                    : DeleteRegisterItem.defaultFor(registration),
             );
         }
     }
 
     unremoveRegistration(registration: RegistrationWithPlatformMember) {
-        const index = this.deleteRegistrations.findIndex(r => r.id === registration.registration.id);
+        const index = this.deleteRegistrations.findIndex(
+            (r) => r.id === registration.registration.id,
+        );
         if (index !== -1) {
             this.deleteRegistrations.splice(index, 1);
         }
@@ -220,14 +244,16 @@ export class RegisterCart {
     }
 
     get price() {
-        return this.items.reduce((total, item) => item.calculatedPrice + total, 0)
-            + this.balanceItems.reduce((total, item) => {
+        return (
+            this.items.reduce((total, item) => item.calculatedPrice + total, 0) +
+            this.balanceItems.reduce((total, item) => {
                 return total + item.price;
-            }, 0);
+            }, 0)
+        );
     }
 
     get balanceItemDiscounts() {
-        return this.balanceItems.filter(b => b.price < 0);
+        return this.balanceItems.filter((b) => b.price < 0);
     }
 
     get balanceItemDiscountsPrice() {
@@ -245,7 +271,7 @@ export class RegisterCart {
      * (net, so minus the already applied discounts)
      */
     get bundleDiscount() {
-        return this.bundleDiscounts.map(d => d.netTotalDueNow).reduce((a, b) => a + b, 0);
+        return this.bundleDiscounts.map((d) => d.netTotalDueNow).reduce((a, b) => a + b, 0);
     }
 
     /**
@@ -253,14 +279,16 @@ export class RegisterCart {
      * (net, so minus the already applied discounts)
      */
     get bundleDiscountDueLater() {
-        return this.bundleDiscounts.map(d => d.netTotalDueLater).reduce((a, b) => a + b, 0);
+        return this.bundleDiscounts.map((d) => d.netTotalDueLater).reduce((a, b) => a + b, 0);
     }
 
     get refund() {
-        return this.items.reduce((total, item) => item.calculatedRefund + total, 0)
-            + this.deleteRegistrations.reduce((total, item) => {
+        return (
+            this.items.reduce((total, item) => item.calculatedRefund + total, 0) +
+            this.deleteRegistrations.reduce((total, item) => {
                 return total + item.registration.registration.calculatedPrice;
-            }, 0);
+            }, 0)
+        );
     }
 
     get cancellationFees() {
@@ -270,8 +298,13 @@ export class RegisterCart {
     get singleOrganization() {
         if (this.items.length === 0) {
             if (this.deleteRegistrations.length > 0) {
-                const organizationId = this.deleteRegistrations[0].registration.group.organizationId;
-                return this.deleteRegistrations[0].registration.member.organizations.find(o => o.id === organizationId) ?? null;
+                const organizationId =
+                    this.deleteRegistrations[0].registration.group.organizationId;
+                return (
+                    this.deleteRegistrations[0].registration.member.organizations.find(
+                        (o) => o.id === organizationId,
+                    ) ?? null
+                );
             }
             return null;
         }
@@ -288,14 +321,18 @@ export class RegisterCart {
                 item.cartError = null;
                 newItems.push(item);
 
-                const isDuplicate = !!this.items.find(i => i !== item && i.isSameRegistration(item));
+                const isDuplicate = !!this.items.find(
+                    (i) => i !== item && i.isSameRegistration(item),
+                );
 
                 if (isDuplicate) {
-                    errors.addError(new SimpleError({
-                        code: 'duplicate_register_item',
-                        message: 'duplicate register item',
-                        human: $t('%qo'),
-                    }));
+                    errors.addError(
+                        new SimpleError({
+                            code: 'duplicate_register_item',
+                            message: 'duplicate register item',
+                            human: $t('%qo'),
+                        }),
+                    );
                 }
             } catch (e) {
                 if (isSimpleError(e) || isSimpleErrors(e)) {
@@ -315,13 +352,18 @@ export class RegisterCart {
         const cleanedBalanceItems: BalanceItemCartItem[] = [];
         for (const balanceItem of this.balanceItems) {
             // TODO: validate balance item organization (happens in backend anyway)
-            if (checkout.singleOrganizationId && balanceItem.item.organizationId !== checkout.singleOrganizationId) {
-                errors.addError(new SimpleError({
-                    code: 'invalid_organization',
-                    message: 'Invalid organization in balanceItems',
-                    human: $t('%qp'),
-                    field: 'balanceItems',
-                }));
+            if (
+                checkout.singleOrganizationId &&
+                balanceItem.item.organizationId !== checkout.singleOrganizationId
+            ) {
+                errors.addError(
+                    new SimpleError({
+                        code: 'invalid_organization',
+                        message: 'Invalid organization in balanceItems',
+                        human: $t('%qp'),
+                        field: 'balanceItems',
+                    }),
+                );
                 continue;
             }
 
@@ -344,13 +386,18 @@ export class RegisterCart {
         for (const deleteItem of this.deleteRegistrations) {
             const registration = deleteItem.registration;
 
-            if (checkout.singleOrganizationId && registration.registration.group.organizationId !== checkout.singleOrganizationId) {
-                errors.addError(new SimpleError({
-                    code: 'invalid_organization',
-                    message: 'Invalid organization in deleteRegistrations',
-                    human: $t('%qq'),
-                    field: 'deleteRegistrations',
-                }));
+            if (
+                checkout.singleOrganizationId &&
+                registration.registration.group.organizationId !== checkout.singleOrganizationId
+            ) {
+                errors.addError(
+                    new SimpleError({
+                        code: 'invalid_organization',
+                        message: 'Invalid organization in deleteRegistrations',
+                        human: $t('%qq'),
+                        field: 'deleteRegistrations',
+                    }),
+                );
                 continue;
             }
 
@@ -361,23 +408,35 @@ export class RegisterCart {
             const platform = registration.member.platform;
 
             const periodId = registration.registration.group.periodId;
-            const period = periodId === platform.period.id ? platform.period : (periodId === singleOrganization.period.period.id ? singleOrganization.period.period : registration.registration.group.settings.period);
+            const period =
+                periodId === platform.period.id
+                    ? platform.period
+                    : periodId === singleOrganization.period.period.id
+                      ? singleOrganization.period.period
+                      : registration.registration.group.settings.period;
 
             if (period && period.locked) {
-                errors.addError(new SimpleError({
-                    code: 'locked_period',
-                    message: 'Locked period',
-                    human: $t('%ql', { group: registration.registration.group.settings.name, period: period.nameShort }),
-                }));
+                errors.addError(
+                    new SimpleError({
+                        code: 'locked_period',
+                        message: 'Locked period',
+                        human: $t('%ql', {
+                            group: registration.registration.group.settings.name,
+                            period: period.nameShort,
+                        }),
+                    }),
+                );
                 continue;
             }
 
             if (!period) {
-                errors.addError(new SimpleError({
-                    code: 'locked_period',
-                    message: 'Locked period',
-                    human: $t('%qm', { group: registration.registration.group.settings.name }),
-                }));
+                errors.addError(
+                    new SimpleError({
+                        code: 'locked_period',
+                        message: 'Locked period',
+                        human: $t('%qm', { group: registration.registration.group.settings.name }),
+                    }),
+                );
                 continue;
             }
 

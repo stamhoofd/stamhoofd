@@ -4,10 +4,19 @@ import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { Organization } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, Organization as OrganizationStruct, StamhoofdFilter } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    Organization as OrganizationStruct,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
 import { UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
+import {
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    assertSort,
+    getSortFilter,
+} from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@node/database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -56,14 +65,9 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
             };
         }
 
-        const query = SQL
-            .select(
-                SQL.wildcard('organizations'),
-            )
+        const query = SQL.select(SQL.wildcard('organizations'))
             .setMaxExecutionTime(15 * 1000)
-            .from(
-                SQL.table('organizations'),
-            );
+            .from(SQL.table('organizations'));
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
@@ -132,7 +136,9 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
         return query;
     }
 
-    static async buildModels(requestQuery: LimitedFilteredRequest): Promise<UnencodeablePaginatedResponse<Organization[], LimitedFilteredRequest>> {
+    static async buildModels(
+        requestQuery: LimitedFilteredRequest,
+    ): Promise<UnencodeablePaginatedResponse<Organization[], LimitedFilteredRequest>> {
         const maxLimit = Context.auth.hasSomePlatformAccess() ? 1000 : 100;
 
         if (requestQuery.limit > maxLimit) {
@@ -195,7 +201,9 @@ export class GetOrganizationsEndpoint extends Endpoint<Params, Query, Body, Resp
         });
     }
 
-    static async buildData(requestQuery: LimitedFilteredRequest): Promise<PaginatedResponse<OrganizationStruct[], LimitedFilteredRequest>> {
+    static async buildData(
+        requestQuery: LimitedFilteredRequest,
+    ): Promise<PaginatedResponse<OrganizationStruct[], LimitedFilteredRequest>> {
         const { results, next } = await this.buildModels(requestQuery);
 
         return new PaginatedResponse<OrganizationStruct[], LimitedFilteredRequest>({

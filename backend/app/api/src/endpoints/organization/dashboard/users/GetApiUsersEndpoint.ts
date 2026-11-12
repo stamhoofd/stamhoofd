@@ -29,7 +29,7 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canManageAdmins(organization.id)) {
+        if (!(await Context.auth.canManageAdmins(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -41,8 +41,6 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
             mapped.push(await Token.getAPIUserWithToken(admin));
         }
 
-        return new Response(
-            mapped,
-        );
+        return new Response(mapped);
     }
 }

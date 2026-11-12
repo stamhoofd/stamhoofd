@@ -58,7 +58,10 @@ export type RouteManifest = {
     caddy: CaddyRouteOptions;
 };
 
-export async function writeInstanceManifest(context: CliContext, options: { domains: Domains; caddy?: CaddyRouteOptions }): Promise<void> {
+export async function writeInstanceManifest(
+    context: CliContext,
+    options: { domains: Domains; caddy?: CaddyRouteOptions },
+): Promise<void> {
     const ports = buildPorts(context);
     const manifest: InstanceManifest = {
         version: CurrentManifestVersion,
@@ -76,11 +79,23 @@ export async function writeInstanceManifest(context: CliContext, options: { doma
         ports,
         // Only the ports this instance owns: the shared services (MySQL, MailDev, ...) are used by
         // every instance at once, so claiming them would block anyone else from starting.
-        reservedPorts: [ports.webApp, ports.webshop, ports.api, ports.renderer, ports.sso, ports.apiInspector, ports.statsInspector, ports.rendererInspector],
+        reservedPorts: [
+            ports.webApp,
+            ports.webshop,
+            ports.api,
+            ports.renderer,
+            ports.sso,
+            ports.apiInspector,
+            ports.statsInspector,
+            ports.rendererInspector,
+        ],
         caddy: options?.caddy,
     };
     await fs.mkdir(instanceDir(context), { recursive: true });
-    await fs.writeFile(instancePath(context, context.instance.name), JSON.stringify(manifest, null, 4));
+    await fs.writeFile(
+        instancePath(context, context.instance.name),
+        JSON.stringify(manifest, null, 4),
+    );
 }
 
 export async function removeInstanceManifest(context: CliContext): Promise<void> {
@@ -93,7 +108,10 @@ export async function removeInstanceManifest(context: CliContext): Promise<void>
  */
 export type RouteManifestInput = Omit<RouteManifest, 'version'>;
 
-export async function writeRouteManifest(context: CliContext, manifest: RouteManifestInput): Promise<RouteManifest> {
+export async function writeRouteManifest(
+    context: CliContext,
+    manifest: RouteManifestInput,
+): Promise<RouteManifest> {
     const stored: RouteManifest = { ...manifest, version: CurrentManifestVersion };
     await fs.mkdir(instanceDir(context), { recursive: true });
     await fs.writeFile(instancePath(context, stored.name), JSON.stringify(stored, null, 4));
@@ -109,21 +127,31 @@ export async function removeRouteManifest(context: CliContext, name: string): Pr
  * processes are never touched: they may belong to an e2e run or dev session that is still using
  * those routes and ports.
  */
-export async function removeOwnRouteManifests(context: CliContext, kind: RouteManifestKind): Promise<void> {
+export async function removeOwnRouteManifests(
+    context: CliContext,
+    kind: RouteManifestKind,
+): Promise<void> {
     const manifests = await listRouteManifestEntries(context);
-    await Promise.all(manifests
-        .filter(entry => entry.manifest?.kind === kind && entry.manifest.pid === process.pid)
-        .map(entry => fs.rm(entry.path, { force: true })));
+    await Promise.all(
+        manifests
+            .filter((entry) => entry.manifest?.kind === kind && entry.manifest.pid === process.pid)
+            .map((entry) => fs.rm(entry.path, { force: true })),
+    );
 }
 
 export async function pruneStaleRouteManifests(context: CliContext): Promise<void> {
     const entries = await listRouteManifestEntries(context);
-    await Promise.all(entries
-        .filter(entry => entry.manifest && !isRouteManifestActive(entry.manifest))
-        .map(entry => fs.rm(entry.path, { force: true }).catch(() => undefined)));
+    await Promise.all(
+        entries
+            .filter((entry) => entry.manifest && !isRouteManifestActive(entry.manifest))
+            .map((entry) => fs.rm(entry.path, { force: true }).catch(() => undefined)),
+    );
 }
 
-export async function listActiveRouteManifests(context: CliContext, options: { writeOutputLine?: OutputWriter } = {}): Promise<RouteManifest[]> {
+export async function listActiveRouteManifests(
+    context: CliContext,
+    options: { writeOutputLine?: OutputWriter } = {},
+): Promise<RouteManifest[]> {
     const writeOutputLine = options.writeOutputLine ?? defaultOutputWriter;
     const entries = await listRouteManifestEntries(context, { writeOutputLine });
     const active: RouteManifest[] = [];
@@ -140,16 +168,19 @@ export async function listActiveRouteManifests(context: CliContext, options: { w
         stale.push(entry.path);
     }
 
-    await Promise.all(stale.map(file => fs.rm(file, { force: true }).catch(() => undefined)));
+    await Promise.all(stale.map((file) => fs.rm(file, { force: true }).catch(() => undefined)));
     return active;
 }
 
-export async function listInstanceManifests(context: CliContext, options: { writeOutputLine?: OutputWriter } = {}): Promise<InstanceManifest[]> {
+export async function listInstanceManifests(
+    context: CliContext,
+    options: { writeOutputLine?: OutputWriter } = {},
+): Promise<InstanceManifest[]> {
     const writeOutputLine = options.writeOutputLine ?? defaultOutputWriter;
     let files: string[];
 
     try {
-        files = (await fs.readdir(instanceDir(context))).filter(file => file.endsWith('.json'));
+        files = (await fs.readdir(instanceDir(context))).filter((file) => file.endsWith('.json'));
     } catch (error) {
         if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
             return [];
@@ -157,24 +188,37 @@ export async function listInstanceManifests(context: CliContext, options: { writ
         throw error;
     }
 
-    const manifests = await Promise.all(files.map(async (file) => {
-        try {
-            return JSON.parse(await fs.readFile(path.join(instanceDir(context), file), 'utf-8')) as InstanceManifest;
-        } catch (error) {
-            // One corrupt manifest should not hide the rest of the active instances.
-            writeOutputLine(`${chalk.yellow('!')} Ignoring invalid instance manifest ${file}: ${error instanceof Error ? error.message : String(error)}`);
-            return undefined;
-        }
-    }));
+    const manifests = await Promise.all(
+        files.map(async (file) => {
+            try {
+                return JSON.parse(
+                    await fs.readFile(path.join(instanceDir(context), file), 'utf-8'),
+                ) as InstanceManifest;
+            } catch (error) {
+                // One corrupt manifest should not hide the rest of the active instances.
+                writeOutputLine(
+                    `${chalk.yellow('!')} Ignoring invalid instance manifest ${file}: ${error instanceof Error ? error.message : String(error)}`,
+                );
+                return undefined;
+            }
+        }),
+    );
 
     return manifests.filter((manifest): manifest is InstanceManifest => manifest !== undefined);
 }
 
-export async function listActiveInstanceManifests(context: CliContext, options: { writeOutputLine?: OutputWriter } = {}): Promise<InstanceManifest[]> {
+export async function listActiveInstanceManifests(
+    context: CliContext,
+    options: { writeOutputLine?: OutputWriter } = {},
+): Promise<InstanceManifest[]> {
     const activeRouteManifests = await listActiveRouteManifests(context, options);
-    const activeInstanceNames = new Set(activeRouteManifests.filter(manifest => manifest.kind === 'instance').map(manifest => manifest.name));
+    const activeInstanceNames = new Set(
+        activeRouteManifests
+            .filter((manifest) => manifest.kind === 'instance')
+            .map((manifest) => manifest.name),
+    );
     const instanceManifests = await listInstanceManifests(context, options);
-    return instanceManifests.filter(manifest => activeInstanceNames.has(manifest.name));
+    return instanceManifests.filter((manifest) => activeInstanceNames.has(manifest.name));
 }
 
 export function instanceManifestToRouteManifest(manifest: InstanceManifest): RouteManifest {
@@ -210,12 +254,15 @@ function instancePath(context: CliContext, name: string): string {
     return path.join(instanceDir(context), `${name}.json`);
 }
 
-async function listRouteManifestEntries(context: CliContext, options: { writeOutputLine?: OutputWriter } = {}): Promise<Array<{ path: string; manifest?: RouteManifest }>> {
+async function listRouteManifestEntries(
+    context: CliContext,
+    options: { writeOutputLine?: OutputWriter } = {},
+): Promise<Array<{ path: string; manifest?: RouteManifest }>> {
     const writeOutputLine = options.writeOutputLine ?? defaultOutputWriter;
     let files: string[];
 
     try {
-        files = (await fs.readdir(instanceDir(context))).filter(file => file.endsWith('.json'));
+        files = (await fs.readdir(instanceDir(context))).filter((file) => file.endsWith('.json'));
     } catch (error) {
         if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
             return [];
@@ -223,20 +270,29 @@ async function listRouteManifestEntries(context: CliContext, options: { writeOut
         throw error;
     }
 
-    return await Promise.all(files.map(async (file) => {
-        const filePath = path.join(instanceDir(context), file);
-        try {
-            const raw = JSON.parse(await fs.readFile(filePath, 'utf-8')) as unknown;
-            const manifest = parseRouteManifest(raw, { writeOutputLine: options.writeOutputLine });
-            return manifest ? { path: filePath, manifest } : { path: filePath };
-        } catch (error) {
-            writeOutputLine(`${chalk.yellow('!')} Ignoring invalid route manifest ${file}: ${error instanceof Error ? error.message : String(error)}`);
-            return { path: filePath };
-        }
-    }));
+    return await Promise.all(
+        files.map(async (file) => {
+            const filePath = path.join(instanceDir(context), file);
+            try {
+                const raw = JSON.parse(await fs.readFile(filePath, 'utf-8')) as unknown;
+                const manifest = parseRouteManifest(raw, {
+                    writeOutputLine: options.writeOutputLine,
+                });
+                return manifest ? { path: filePath, manifest } : { path: filePath };
+            } catch (error) {
+                writeOutputLine(
+                    `${chalk.yellow('!')} Ignoring invalid route manifest ${file}: ${error instanceof Error ? error.message : String(error)}`,
+                );
+                return { path: filePath };
+            }
+        }),
+    );
 }
 
-function parseRouteManifest(value: unknown, options: { writeOutputLine?: OutputWriter } = {}): RouteManifest | undefined {
+function parseRouteManifest(
+    value: unknown,
+    options: { writeOutputLine?: OutputWriter } = {},
+): RouteManifest | undefined {
     const writeOutputLine = options.writeOutputLine ?? defaultOutputWriter;
 
     if (!value || typeof value !== 'object') {
@@ -250,7 +306,7 @@ function parseRouteManifest(value: unknown, options: { writeOutputLine?: OutputW
     if (raw.kind === 'playwright-worker') {
         return raw as RouteManifest;
     }
-    if ((raw.kind === 'instance')) {
+    if (raw.kind === 'instance') {
         return instanceManifestToRouteManifest(raw as InstanceManifest);
     }
     return undefined;

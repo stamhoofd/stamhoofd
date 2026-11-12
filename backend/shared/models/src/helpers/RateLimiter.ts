@@ -12,11 +12,9 @@ export class RateLimitWindow {
      */
     duration: number;
 
-    constructor(options: {
-        limit: Map<string, number> | number;
-        duration: number;
-    }) {
-        this.limit = typeof options.limit === 'number' ? new Map([['', options.limit]]) : options.limit;
+    constructor(options: { limit: Map<string, number> | number; duration: number }) {
+        this.limit =
+            typeof options.limit === 'number' ? new Map([['', options.limit]]) : options.limit;
         this.duration = options.duration;
     }
 
@@ -65,14 +63,14 @@ export class RateLimitWindow {
 export class RateLimiter {
     windows: RateLimitWindow[] = [];
 
-    constructor(options: {
-        limits: { duration: number; limit: Map<string, number> | number }[];
-    }) {
+    constructor(options: { limits: { duration: number; limit: Map<string, number> | number }[] }) {
         for (const limit of options.limits) {
-            this.windows.push(new RateLimitWindow({
-                limit: limit.limit,
-                duration: limit.duration,
-            }));
+            this.windows.push(
+                new RateLimitWindow({
+                    limit: limit.limit,
+                    duration: limit.duration,
+                }),
+            );
         }
     }
 

@@ -5,8 +5,18 @@ import { dryRunFlag, yesFlag } from '../../command-flags.js';
 import { getProjectPath } from '../../context/project-path.js';
 import { confirm } from '../../runtime/ux.js';
 import { RunVerbosity } from '../../runtime/command-runner.js';
-import { runSetup, setupCaddy, setupCert, setupDns, setupPrivilegedPortRedirects } from '../../workflows/setup-machine.js';
-import { checkNodeVersion, printNodeVersionStatus, setupNodeVersion } from '../../workflows/setup-node.js';
+import {
+    runSetup,
+    setupCaddy,
+    setupCert,
+    setupDns,
+    setupPrivilegedPortRedirects,
+} from '../../workflows/setup-machine.js';
+import {
+    checkNodeVersion,
+    printNodeVersionStatus,
+    setupNodeVersion,
+} from '../../workflows/setup-node.js';
 import { setupPackageManager } from '../../workflows/setup-package-manager.js';
 import { setupShellShortcut } from '../../workflows/setup-shell.js';
 import { setupVcs } from '../../workflows/setup-vcs.js';
@@ -26,7 +36,8 @@ const setupActions = Object.values(SetupAction);
 
 export default class Setup extends BaseCommand {
     static summary = 'Prepare this machine for local development';
-    static description = 'Use this first on a new machine, or when DNS, certificates, or container runtime access for local development stopped working.';
+    static description =
+        'Use this first on a new machine, or when DNS, certificates, or container runtime access for local development stopped working.';
     static examples = [
         'stam setup',
         'stam setup node',
@@ -47,7 +58,7 @@ export default class Setup extends BaseCommand {
         }),
     };
 
-    static flags = { ...this.verbosityFlags(), 'yes': yesFlag, 'dry-run': dryRunFlag };
+    static flags = { ...this.verbosityFlags(), yes: yesFlag, 'dry-run': dryRunFlag };
 
     async run(): Promise<void> {
         const parsed = await this.parse(Setup);
@@ -55,7 +66,15 @@ export default class Setup extends BaseCommand {
         const rootDir = path.resolve(getProjectPath());
 
         if (args.action === SetupAction.Vcs) {
-            await setupVcs(rootDir, { yes: flags.yes, dryRun: flags['dry-run'], verbosity: flags.quiet ? RunVerbosity.Quiet : flags.verbose ? RunVerbosity.Output : RunVerbosity.Command });
+            await setupVcs(rootDir, {
+                yes: flags.yes,
+                dryRun: flags['dry-run'],
+                verbosity: flags.quiet
+                    ? RunVerbosity.Quiet
+                    : flags.verbose
+                      ? RunVerbosity.Output
+                      : RunVerbosity.Command,
+            });
             return;
         }
 
@@ -73,7 +92,9 @@ export default class Setup extends BaseCommand {
             const nodeCheck = await checkNodeVersion(rootDir);
             if (!nodeCheck.ok) {
                 printNodeVersionStatus(nodeCheck);
-                if (await confirm(`Install Node.js ${nodeCheck.expected} now?`, { default: true })) {
+                if (
+                    await confirm(`Install Node.js ${nodeCheck.expected} now?`, { default: true })
+                ) {
                     await setupNodeVersion(rootDir);
                 }
                 return;

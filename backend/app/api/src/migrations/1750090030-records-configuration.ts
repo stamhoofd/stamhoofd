@@ -26,7 +26,8 @@ class OldOrganizationMetaData extends AutoEncoder {
         version: 53,
         defaultValue: () => OldOrganizationRecordsConfiguration.create({}),
     })
-    recordsConfiguration: OldOrganizationRecordsConfiguration = OldOrganizationRecordsConfiguration.create({});
+    recordsConfiguration: OldOrganizationRecordsConfiguration =
+        OldOrganizationRecordsConfiguration.create({});
 }
 
 // get data like it was in V1
@@ -34,7 +35,9 @@ export class OldOrganization extends QueryableModel {
     static table = 'organizations';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -50,7 +53,11 @@ export class OldOrganization extends QueryableModel {
 export async function startRecordsConfigurationMigration() {
     const result = await SeedTools.loop({
         batchSize: 100,
-        query: OldOrganization.select().where(SQL.jsonValue(SQL.column('meta'), '$.version'), '<', Version),
+        query: OldOrganization.select().where(
+            SQL.jsonValue(SQL.column('meta'), '$.version'),
+            '<',
+            Version,
+        ),
         useTransactionPerBatch: true,
         action: async (oldOrganization: OldOrganization) => {
             const oldFinancialSupport = oldOrganization.meta.recordsConfiguration.financialSupport;
@@ -74,7 +81,11 @@ export async function startRecordsConfigurationMigration() {
         },
     });
 
-    console.log('Succesfully migrated financialSupport and dataPermissions for ' + result.total + ' organizations');
+    console.log(
+        'Succesfully migrated financialSupport and dataPermissions for ' +
+            result.total +
+            ' organizations',
+    );
 }
 
 export default new Migration(async () => {

@@ -1,16 +1,42 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { buildCaddyRouteOptions, writeCaddyConfig } from '../../config/caddy-config.js';
-import { caddyAdminPort, caddyBaseImage, caddyBuilderImage, caddyConfigPath, caddyContainer, caddyDataDir, caddyDataDirInContainer, caddyImage, caddyPlugins, localhostPort, localhostPortMapping } from '../../config/shared-service-config.js';
+import {
+    caddyAdminPort,
+    caddyBaseImage,
+    caddyBuilderImage,
+    caddyConfigPath,
+    caddyContainer,
+    caddyDataDir,
+    caddyDataDirInContainer,
+    caddyImage,
+    caddyPlugins,
+    localhostPort,
+    localhostPortMapping,
+} from '../../config/shared-service-config.js';
 import type { SharedServiceProfile } from '../../config/shared-service-profile.js';
-import { buildCaddyServiceProfile, buildSharedServiceProfile, SharedServiceCaddyRunMode } from '../../config/shared-service-profile.js';
+import {
+    buildCaddyServiceProfile,
+    buildSharedServiceProfile,
+    SharedServiceCaddyRunMode,
+} from '../../config/shared-service-profile.js';
 import type { CliContext } from '../../context/create-context.js';
 import { RunVerbosity } from '../../runtime/command-runner.js';
 import { withFileLock } from '../../runtime/file-lock.js';
-import type { CaddyRouteOptions, RouteManifest, RouteManifestInput } from '../../runtime/manifest-store.js';
+import type {
+    CaddyRouteOptions,
+    RouteManifest,
+    RouteManifestInput,
+} from '../../runtime/manifest-store.js';
 import { sharedDir } from '../../runtime/manifest-store.js';
-import type { ReserveRouteManifestOptions, RouteManifestConflict } from '../../runtime/route-reservation.js';
-import { findRouteManifestConflicts, reserveRouteManifest } from '../../runtime/route-reservation.js';
+import type {
+    ReserveRouteManifestOptions,
+    RouteManifestConflict,
+} from '../../runtime/route-reservation.js';
+import {
+    findRouteManifestConflicts,
+    reserveRouteManifest,
+} from '../../runtime/route-reservation.js';
 import { SharedDockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
 import type { ServiceStatus } from '../service.js';
@@ -71,7 +97,10 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
     async prepare(context: CliContext): Promise<CaddyPrepared> {
         // Rendering the config already applies it: the container watches the file. So this write
         // takes the same lock as a reload, see withConfigLock.
-        const config = await withConfigLock(context, async () => await CaddyService.writeRuntimeConfig(context));
+        const config = await withConfigLock(
+            context,
+            async () => await CaddyService.writeRuntimeConfig(context),
+        );
         const dataDir = CaddyService.dataDir();
         await fs.mkdir(dataDir, { recursive: true });
         await CaddyService.ensureImage(context);
@@ -79,21 +108,32 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
         return { config, dataDir };
     }
 
-    async canReuse(_context: CliContext, _options: void, _prepared: CaddyPrepared, status: ServiceStatus): Promise<boolean> {
+    async canReuse(
+        _context: CliContext,
+        _options: void,
+        _prepared: CaddyPrepared,
+        status: ServiceStatus,
+    ): Promise<boolean> {
         if (!status.running) {
             return false;
         }
         const profile = buildCaddyServiceProfile();
         if (profile.caddyRunMode === SharedServiceCaddyRunMode.Bridge) {
-            return !await CaddyService.runsInHostNetwork();
+            return !(await CaddyService.runsInHostNetwork());
         }
         return await CaddyService.runsInHostNetwork();
     }
 
-    async getDockerArgs(_context: CliContext, _options: void, prepared: CaddyPrepared): Promise<string[]> {
+    async getDockerArgs(
+        _context: CliContext,
+        _options: void,
+        prepared: CaddyPrepared,
+    ): Promise<string[]> {
         const runtime = await docker.getContainerRuntime();
         const profile = buildSharedServiceProfile(runtime);
-        return CaddyService.dockerArgs(prepared.config, prepared.dataDir, profile, { disableLabel: runtime === docker.ContainerRuntime.Podman });
+        return CaddyService.dockerArgs(prepared.config, prepared.dataDir, profile, {
+            disableLabel: runtime === docker.ContainerRuntime.Podman,
+        });
     }
 
     /**
@@ -105,7 +145,25 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
             await CaddyService.ensureImage(context);
             await CaddyService.validateConfig(config, context);
             if (await docker.containerIsRunning(CaddyService.container)) {
-                await docker.run(['exec', CaddyService.container, 'caddy', 'reload', '--config', caddyConfigPath, '--address', localhostPort(caddyAdminPort), '--force'], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
+                await docker.run(
+                    [
+                        'exec',
+                        CaddyService.container,
+                        'caddy',
+                        'reload',
+                        '--config',
+                        caddyConfigPath,
+                        '--address',
+                        localhostPort(caddyAdminPort),
+                        '--force',
+                    ],
+                    {
+                        verbosity:
+                            context.verbosity === RunVerbosity.Output
+                                ? RunVerbosity.Command
+                                : (context.verbosity ?? RunVerbosity.Quiet),
+                    },
+                );
                 return;
             }
             await caddyService.start(context, undefined);
@@ -117,7 +175,10 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
      * adding a manifest of your own: overlapping ports mean the two would fight over the same
      * servers (and, for Playwright workers, over the same domains).
      */
-    static async findRouteManifestConflicts(context: CliContext, manifest: RouteManifestInput): Promise<RouteManifestConflict[]> {
+    static async findRouteManifestConflicts(
+        context: CliContext,
+        manifest: RouteManifestInput,
+    ): Promise<RouteManifestConflict[]> {
         return await findRouteManifestConflicts(context, manifest);
     }
 
@@ -126,7 +187,10 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
      * active manifest or with a port that is already bound. Give the range back with
      * `removeOwnRouteManifests` followed by a reload.
      */
-    static async reserveRouteManifest(context: CliContext, options: ReserveRouteManifestOptions): Promise<RouteManifest> {
+    static async reserveRouteManifest(
+        context: CliContext,
+        options: ReserveRouteManifestOptions,
+    ): Promise<RouteManifest> {
         return await reserveRouteManifest(context, options);
     }
 
@@ -150,16 +214,82 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
         });
     }
 
-    static dockerArgs(config: string, dataDir: string, profile: SharedServiceProfile, options: { disableLabel?: boolean } = {}): string[] {
+    static dockerArgs(
+        config: string,
+        dataDir: string,
+        profile: SharedServiceProfile,
+        options: { disableLabel?: boolean } = {},
+    ): string[] {
         if (profile.caddyRunMode === SharedServiceCaddyRunMode.Bridge) {
-            return ['run', '-d', '--name', CaddyService.container, '-p', localhostPortMapping(profile.caddyHttpHostPort, profile.caddyHttpListenPort), '-p', localhostPortMapping(profile.caddyHttpsHostPort, profile.caddyHttpsListenPort), '-p', localhostPortMapping(caddyAdminPort, caddyAdminPort), '-v', `${config}:${caddyConfigPath}:ro`, '-v', `${dataDir}:${caddyDataDirInContainer}`, caddyImage, 'caddy', 'run', '--config', caddyConfigPath, '--watch'];
+            return [
+                'run',
+                '-d',
+                '--name',
+                CaddyService.container,
+                '-p',
+                localhostPortMapping(profile.caddyHttpHostPort, profile.caddyHttpListenPort),
+                '-p',
+                localhostPortMapping(profile.caddyHttpsHostPort, profile.caddyHttpsListenPort),
+                '-p',
+                localhostPortMapping(caddyAdminPort, caddyAdminPort),
+                '-v',
+                `${config}:${caddyConfigPath}:ro`,
+                '-v',
+                `${dataDir}:${caddyDataDirInContainer}`,
+                caddyImage,
+                'caddy',
+                'run',
+                '--config',
+                caddyConfigPath,
+                '--watch',
+            ];
         }
-        return ['run', '-d', '--name', CaddyService.container, '--network', 'host', ...(options.disableLabel ? ['--security-opt', 'label=disable'] : []), '-v', `${config}:${caddyConfigPath}:ro`, '-v', `${dataDir}:${caddyDataDirInContainer}`, caddyImage, 'caddy', 'run', '--config', caddyConfigPath, '--watch'];
+        return [
+            'run',
+            '-d',
+            '--name',
+            CaddyService.container,
+            '--network',
+            'host',
+            ...(options.disableLabel ? ['--security-opt', 'label=disable'] : []),
+            '-v',
+            `${config}:${caddyConfigPath}:ro`,
+            '-v',
+            `${dataDir}:${caddyDataDirInContainer}`,
+            caddyImage,
+            'caddy',
+            'run',
+            '--config',
+            caddyConfigPath,
+            '--watch',
+        ];
     }
 
     private static async validateConfig(config: string, context: CliContext): Promise<void> {
-        const labelArgs = await docker.getContainerRuntime() === docker.ContainerRuntime.Podman ? ['--security-opt', 'label=disable'] : [];
-        await docker.run(['run', '--rm', ...labelArgs, '-v', `${config}:${caddyConfigPath}:ro`, caddyImage, 'caddy', 'validate', '--config', caddyConfigPath], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
+        const labelArgs =
+            (await docker.getContainerRuntime()) === docker.ContainerRuntime.Podman
+                ? ['--security-opt', 'label=disable']
+                : [];
+        await docker.run(
+            [
+                'run',
+                '--rm',
+                ...labelArgs,
+                '-v',
+                `${config}:${caddyConfigPath}:ro`,
+                caddyImage,
+                'caddy',
+                'validate',
+                '--config',
+                caddyConfigPath,
+            ],
+            {
+                verbosity:
+                    context.verbosity === RunVerbosity.Output
+                        ? RunVerbosity.Command
+                        : (context.verbosity ?? RunVerbosity.Quiet),
+            },
+        );
     }
 
     /**
@@ -180,7 +310,7 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
     }
 
     static dockerfile(): string {
-        const withFlags = caddyPlugins.map(plugin => `--with ${plugin}`).join(' ');
+        const withFlags = caddyPlugins.map((plugin) => `--with ${plugin}`).join(' ');
         return [
             `FROM ${caddyBuilderImage} AS builder`,
             `RUN xcaddy build ${withFlags}`,
@@ -199,7 +329,10 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
         if (!(await docker.containerIsRunning(CaddyService.container))) {
             return false;
         }
-        const result = await docker.run(['inspect', '-f', '{{.HostConfig.NetworkMode}}', CaddyService.container], { capture: true, allowFailure: true });
+        const result = await docker.run(
+            ['inspect', '-f', '{{.HostConfig.NetworkMode}}', CaddyService.container],
+            { capture: true, allowFailure: true },
+        );
         return result.stdout.trim() === 'host';
     }
 }

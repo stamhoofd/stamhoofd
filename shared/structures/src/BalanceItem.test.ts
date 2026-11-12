@@ -2,9 +2,25 @@ import { vi } from 'vitest';
 import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { ObjectData } from '@common/encoding';
 import { TestUtils } from '@stamhoofd/test-utils';
-import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, NAME_TITLED_BALANCE_ITEM_TYPES, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, GroupedBalanceItems, VATExcemptReason } from './BalanceItem.js';
+import {
+    BalanceItem,
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    BalanceItemWithPayments,
+    NAME_TITLED_BALANCE_ITEM_TYPES,
+    getApplicableBalanceItemRelationTypes,
+    getApplicableBalanceItemTypes,
+    GroupedBalanceItems,
+    VATExcemptReason,
+} from './BalanceItem.js';
 import type { InMemoryFilterDefinitions } from './filters/InMemoryFilter.js';
-import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler } from './filters/InMemoryFilter.js';
+import {
+    baseInMemoryFilterCompilers,
+    compileToInMemoryFilter,
+    createInMemoryFilterCompiler,
+} from './filters/InMemoryFilter.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { TranslatedString } from './TranslatedString.js';
 import { DetailedPayableBalance } from './endpoints/PayableBalanceCollection.js';
@@ -16,7 +32,17 @@ import { Version } from './Version.js';
  * Helper to create a payable (Due) balance item with an exclusive VAT rate.
  * unitPrice is in the internal integer format (1 euro = 10000).
  */
-function createItem(overrides: Partial<{ unitPrice: number; amount: number; VATPercentage: number | null; VATIncluded: boolean; VATExcempt: VATExcemptReason | null; type: BalanceItemType; name: string }> = {}) {
+function createItem(
+    overrides: Partial<{
+        unitPrice: number;
+        amount: number;
+        VATPercentage: number | null;
+        VATIncluded: boolean;
+        VATExcempt: VATExcemptReason | null;
+        type: BalanceItemType;
+        name: string;
+    }> = {},
+) {
     return BalanceItemWithPayments.create({
         type: overrides.type ?? BalanceItemType.Other,
         name: overrides.name ?? 'Test item',
@@ -68,7 +94,10 @@ describe('getApplicableBalanceItemTypes / getApplicableBalanceItemRelationTypes'
             expect(types).toContain(BalanceItemType.ReferralDiscount);
             expect(types).not.toContain(BalanceItemType.PlatformMembership);
 
-            const relations = getApplicableBalanceItemRelationTypes(membershipOrganization, platform);
+            const relations = getApplicableBalanceItemRelationTypes(
+                membershipOrganization,
+                platform,
+            );
             expect(relations).toContain(BalanceItemRelationType.STPackage);
             expect(relations).toContain(BalanceItemRelationType.STPricingType);
             expect(relations).toContain(BalanceItemRelationType.PaymentProvider);
@@ -82,7 +111,10 @@ describe('getApplicableBalanceItemTypes / getApplicableBalanceItemRelationTypes'
             const types = getApplicableBalanceItemTypes(membershipOrganization, platform);
             expect(types).not.toContain(BalanceItemType.STPackage);
 
-            const relations = getApplicableBalanceItemRelationTypes(membershipOrganization, platform);
+            const relations = getApplicableBalanceItemRelationTypes(
+                membershipOrganization,
+                platform,
+            );
             expect(relations).not.toContain(BalanceItemRelationType.STPackage);
         });
     });
@@ -97,7 +129,10 @@ describe('getApplicableBalanceItemTypes / getApplicableBalanceItemRelationTypes'
             expect(types).not.toContain(BalanceItemType.STPackage);
             expect(types).not.toContain(BalanceItemType.ServiceFee);
 
-            const relations = getApplicableBalanceItemRelationTypes(membershipOrganization, platform);
+            const relations = getApplicableBalanceItemRelationTypes(
+                membershipOrganization,
+                platform,
+            );
             expect(relations).toContain(BalanceItemRelationType.MembershipType);
             expect(relations).not.toContain(BalanceItemRelationType.STPackage);
         });
@@ -159,15 +194,18 @@ describe('BalanceItem.getPayableVATBreakdown', () => {
 
         // Sorted descending by percentage
         expect(breakdown).toEqual([
-            { VATPercentage: 21, VATExcempt: null, taxablePrice: 41300 + 200000, VAT: 8673 + 42000 },
+            {
+                VATPercentage: 21,
+                VATExcempt: null,
+                taxablePrice: 41300 + 200000,
+                VAT: 8673 + 42000,
+            },
             { VATPercentage: 6, VATExcempt: null, taxablePrice: 50000, VAT: 3000 },
         ]);
     });
 
     test('ignores items without a VAT rate or exemption', () => {
-        const items = [
-            createItem({ unitPrice: 3_00_00, VATPercentage: null }),
-        ];
+        const items = [createItem({ unitPrice: 3_00_00, VATPercentage: null })];
 
         expect(BalanceItem.getPayableVATBreakdown(items)).toEqual([]);
     });
@@ -175,12 +213,27 @@ describe('BalanceItem.getPayableVATBreakdown', () => {
     test('groups exempt items per exemption reason with a 0% rate, like on invoices', () => {
         // Two exempt items with different underlying rates end up in one 0% group
         const items = [
-            createItem({ unitPrice: 5_00_00, amount: 1, VATPercentage: 21, VATExcempt: VATExcemptReason.IntraCommunityServices }),
-            createItem({ unitPrice: 3_00_00, amount: 1, VATPercentage: 6, VATExcempt: VATExcemptReason.IntraCommunityServices }),
+            createItem({
+                unitPrice: 5_00_00,
+                amount: 1,
+                VATPercentage: 21,
+                VATExcempt: VATExcemptReason.IntraCommunityServices,
+            }),
+            createItem({
+                unitPrice: 3_00_00,
+                amount: 1,
+                VATPercentage: 6,
+                VATExcempt: VATExcemptReason.IntraCommunityServices,
+            }),
         ];
 
         expect(BalanceItem.getPayableVATBreakdown(items)).toEqual([
-            { VATPercentage: 0, VATExcempt: VATExcemptReason.IntraCommunityServices, taxablePrice: 80000, VAT: 0 },
+            {
+                VATPercentage: 0,
+                VATExcempt: VATExcemptReason.IntraCommunityServices,
+                taxablePrice: 80000,
+                VAT: 0,
+            },
         ]);
     });
 
@@ -218,7 +271,12 @@ describe('GroupedBalanceItems.payablePriceWithoutVAT', () => {
 
     test('unitPriceWithoutVAT strips the VAT from the unit price of VAT-inclusive items', () => {
         // 12,10 incl. 21% VAT per piece -> 10,00 excl. VAT per piece
-        const item = createItem({ unitPrice: 12_10_00, amount: 2, VATPercentage: 21, VATIncluded: true });
+        const item = createItem({
+            unitPrice: 12_10_00,
+            amount: 2,
+            VATPercentage: 21,
+            VATIncluded: true,
+        });
         expect(item.unitPriceWithoutVAT).toBe(10_00_00);
         expect(item.unitPriceWithVAT).toBe(12_10_00);
 
@@ -229,14 +287,16 @@ describe('GroupedBalanceItems.payablePriceWithoutVAT', () => {
     test('does not count hidden or canceled items, mirroring payablePriceWithVAT', () => {
         const group = new GroupedBalanceItems();
         group.add(createItem({ unitPrice: 4_13_00, amount: 1, VATPercentage: 21 })); // Due
-        group.add(BalanceItemWithPayments.create({
-            type: BalanceItemType.Other,
-            amount: 1,
-            unitPrice: 4_13_00,
-            VATPercentage: 21,
-            VATIncluded: false,
-            status: BalanceItemStatus.Canceled,
-        }));
+        group.add(
+            BalanceItemWithPayments.create({
+                type: BalanceItemType.Other,
+                amount: 1,
+                unitPrice: 4_13_00,
+                VATPercentage: 21,
+                VATIncluded: false,
+                status: BalanceItemStatus.Canceled,
+            }),
+        );
 
         // Only the Due item contributes to both payable prices
         expect(group.payablePriceWithoutVAT).toBe(41300);
@@ -276,14 +336,20 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
         TestUtils.setEnvironment('platformName', 'stamhoofd');
     });
 
-    function createItem(type: BalanceItemType, relations: [BalanceItemRelationType, string][] = [], name = '') {
+    function createItem(
+        type: BalanceItemType,
+        relations: [BalanceItemRelationType, string][] = [],
+        name = '',
+    ) {
         return BalanceItem.create({
             type,
             name,
-            relations: new Map(relations.map(([relationType, id]) => [
-                relationType,
-                BalanceItemRelation.create({ id, name: new TranslatedString(id) }),
-            ])),
+            relations: new Map(
+                relations.map(([relationType, id]) => [
+                    relationType,
+                    BalanceItemRelation.create({ id, name: new TranslatedString(id) }),
+                ]),
+            ),
         });
     }
 
@@ -295,22 +361,38 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
         ...baseInMemoryFilterCompilers,
         ['type', createInMemoryFilterCompiler('type')],
         ['name', createInMemoryFilterCompiler('name')],
-        ['relations', new Map([
-            ...baseInMemoryFilterCompilers,
-            ...Object.values(BalanceItemRelationType).map(relationType => [
-                relationType,
-                new Map([
-                    ...baseInMemoryFilterCompilers,
-                    ['id', (filter) => {
-                        // A plain value has to be wrapped, as compileToInMemoryFilter reads a bare null as 'no filter'
-                        const condition = filter !== null && typeof filter === 'object' ? filter : { $eq: filter };
-                        const runner = compileToInMemoryFilter(condition, baseInMemoryFilterCompilers);
+        [
+            'relations',
+            new Map([
+                ...baseInMemoryFilterCompilers,
+                ...Object.values(BalanceItemRelationType).map(
+                    (relationType) =>
+                        [
+                            relationType,
+                            new Map([
+                                ...baseInMemoryFilterCompilers,
+                                [
+                                    'id',
+                                    (filter) => {
+                                        // A plain value has to be wrapped, as compileToInMemoryFilter reads a bare null as 'no filter'
+                                        const condition =
+                                            filter !== null && typeof filter === 'object'
+                                                ? filter
+                                                : { $eq: filter };
+                                        const runner = compileToInMemoryFilter(
+                                            condition,
+                                            baseInMemoryFilterCompilers,
+                                        );
 
-                        return (item: BalanceItem) => runner(item.relations.get(relationType)?.id ?? null);
-                    }],
-                ]),
-            ] as const),
-        ])],
+                                        return (item: BalanceItem) =>
+                                            runner(item.relations.get(relationType)?.id ?? null);
+                                    },
+                                ],
+                            ]),
+                        ] as const,
+                ),
+            ]),
+        ],
     ]);
 
     function matches(filter: StamhoofdFilter, item: BalanceItem): boolean {
@@ -320,21 +402,34 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
     describe('categoryFilter selects exactly the items with the same categoryId', () => {
         test('a cancellation fee without any relation does not select the ones that have one', () => {
             const bare = createItem(BalanceItemType.CancellationFee);
-            const forGroup = createItem(BalanceItemType.CancellationFee, [[BalanceItemRelationType.Group, 'group-a']]);
-            const forWebshop = createItem(BalanceItemType.CancellationFee, [[BalanceItemRelationType.Webshop, 'shop-a']]);
+            const forGroup = createItem(BalanceItemType.CancellationFee, [
+                [BalanceItemRelationType.Group, 'group-a'],
+            ]);
+            const forWebshop = createItem(BalanceItemType.CancellationFee, [
+                [BalanceItemRelationType.Webshop, 'shop-a'],
+            ]);
 
-            expect(new Set([bare.categoryId, forGroup.categoryId, forWebshop.categoryId]).size).toBe(3);
+            expect(
+                new Set([bare.categoryId, forGroup.categoryId, forWebshop.categoryId]).size,
+            ).toBe(3);
 
             for (const item of [bare, forGroup, forWebshop]) {
                 for (const other of [bare, forGroup, forWebshop]) {
-                    expect(matches(item.categoryFilter, other)).toBe(item.categoryId === other.categoryId);
+                    expect(matches(item.categoryFilter, other)).toBe(
+                        item.categoryId === other.categoryId,
+                    );
                 }
             }
         });
 
         test('a cancellation fee is named after its group, so its webshop is not part of the category', () => {
-            const forGroup = createItem(BalanceItemType.CancellationFee, [[BalanceItemRelationType.Group, 'group-a']]);
-            const forBoth = createItem(BalanceItemType.CancellationFee, [[BalanceItemRelationType.Group, 'group-a'], [BalanceItemRelationType.Webshop, 'shop-a']]);
+            const forGroup = createItem(BalanceItemType.CancellationFee, [
+                [BalanceItemRelationType.Group, 'group-a'],
+            ]);
+            const forBoth = createItem(BalanceItemType.CancellationFee, [
+                [BalanceItemRelationType.Group, 'group-a'],
+                [BalanceItemRelationType.Webshop, 'shop-a'],
+            ]);
 
             expect(forBoth.categoryId).toBe(forGroup.categoryId);
             expect(matches(forGroup.categoryFilter, forBoth)).toBe(true);
@@ -352,8 +447,16 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
         });
 
         test('a registration is not told apart by its name', () => {
-            const first = createItem(BalanceItemType.Registration, [[BalanceItemRelationType.Group, 'group-a']], 'Inschrijving Kapoenen');
-            const second = createItem(BalanceItemType.Registration, [[BalanceItemRelationType.Group, 'group-a']], 'Inschrijving Kapoenen 2026');
+            const first = createItem(
+                BalanceItemType.Registration,
+                [[BalanceItemRelationType.Group, 'group-a']],
+                'Inschrijving Kapoenen',
+            );
+            const second = createItem(
+                BalanceItemType.Registration,
+                [[BalanceItemRelationType.Group, 'group-a']],
+                'Inschrijving Kapoenen 2026',
+            );
 
             expect(first.articleCode).toBe(second.articleCode);
             expect(matches(first.articleFilter, second)).toBe(true);
@@ -364,15 +467,23 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
         const item = BalanceItem.create({ name: 'Kampgeld', description: 'Weekend aan zee' });
         const oldVersion = 415;
 
-        const encoded = JSON.parse(JSON.stringify(item.encode({ version: oldVersion }))) as Record<string, unknown>;
+        const encoded = JSON.parse(JSON.stringify(item.encode({ version: oldVersion }))) as Record<
+            string,
+            unknown
+        >;
         expect(encoded.description).toBe('Kampgeld');
         expect(encoded.name).toBeUndefined();
 
-        const decoded = new ObjectData(encoded, { version: oldVersion }).decode(BalanceItem as Decoder<BalanceItem>);
+        const decoded = new ObjectData(encoded, { version: oldVersion }).decode(
+            BalanceItem as Decoder<BalanceItem>,
+        );
         expect(decoded.name).toBe('Kampgeld');
         expect(decoded.description).toBeNull();
 
-        const patch = new ObjectData({ id: item.id, description: 'Weekendgeld' }, { version: oldVersion }).decode(BalanceItem.patchType() as Decoder<AutoEncoderPatchType<BalanceItem>>);
+        const patch = new ObjectData(
+            { id: item.id, description: 'Weekendgeld' },
+            { version: oldVersion },
+        ).decode(BalanceItem.patchType() as Decoder<AutoEncoderPatchType<BalanceItem>>);
         expect(patch.name).toBe('Weekendgeld');
         expect(patch.description).toBeUndefined();
     });
@@ -404,13 +515,34 @@ describe('BalanceItem.itemTitle', () => {
     test.each([
         [BalanceItemType.ServiceFee, '%1cJ'],
         [BalanceItemType.TransferFee, '%1Yq'],
-    ])('%s item spanning one day in UTC or in the display timezone is titled with that day', (type, key) => {
-        expect(BalanceItem.create({ type, startDate: new Date('2024-07-10T00:00:00.000Z'), endDate: new Date('2024-07-10T23:59:59.000Z') }).itemTitle).toBe(key);
-        expect(t).toHaveBeenLastCalledWith(key, { date: '10 %tU 2024' });
+    ])(
+        '%s item spanning one day in UTC or in the display timezone is titled with that day',
+        (type, key) => {
+            expect(
+                BalanceItem.create({
+                    type,
+                    startDate: new Date('2024-07-10T00:00:00.000Z'),
+                    endDate: new Date('2024-07-10T23:59:59.000Z'),
+                }).itemTitle,
+            ).toBe(key);
+            expect(t).toHaveBeenLastCalledWith(key, { date: '10 %tU 2024' });
 
-        expect(BalanceItem.create({ type, startDate: new Date('2024-07-09T22:00:00.000Z'), endDate: new Date('2024-07-10T21:59:59.000Z') }).itemTitle).toBe(key);
-        expect(t).toHaveBeenLastCalledWith(key, { date: '10 %tU 2024' });
+            expect(
+                BalanceItem.create({
+                    type,
+                    startDate: new Date('2024-07-09T22:00:00.000Z'),
+                    endDate: new Date('2024-07-10T21:59:59.000Z'),
+                }).itemTitle,
+            ).toBe(key);
+            expect(t).toHaveBeenLastCalledWith(key, { date: '10 %tU 2024' });
 
-        expect(BalanceItem.create({ type, startDate: new Date('2024-07-01T00:00:00.000Z'), endDate: new Date('2024-07-31T23:59:59.000Z') }).itemTitle).not.toBe(key);
-    });
+            expect(
+                BalanceItem.create({
+                    type,
+                    startDate: new Date('2024-07-01T00:00:00.000Z'),
+                    endDate: new Date('2024-07-31T23:59:59.000Z'),
+                }).itemTitle,
+            ).not.toBe(key);
+        },
+    );
 });

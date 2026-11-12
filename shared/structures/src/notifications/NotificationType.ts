@@ -36,7 +36,11 @@ export class NotificationTypeHelper {
         return Object.values(NotificationType).includes(type as NotificationType);
     }
 
-    static isRelevantFor(type: NotificationType, user: { email: string; permissions: UserPermissions | null }, platform: Platform): boolean {
+    static isRelevantFor(
+        type: NotificationType,
+        user: { email: string; permissions: UserPermissions | null },
+        platform: Platform,
+    ): boolean {
         const permissions = user.permissions;
 
         switch (this.getAudience(type)) {
@@ -50,7 +54,12 @@ export class NotificationTypeHelper {
         }
     }
 
-    static getRelevantTypes(user: { email: string; permissions: UserPermissions | null }, platform: Platform): NotificationType[] {
-        return Object.values(NotificationType).filter(type => this.isRelevantFor(type, user, platform));
+    static getRelevantTypes(
+        user: { email: string; permissions: UserPermissions | null },
+        platform: Platform,
+    ): NotificationType[] {
+        return Object.values(NotificationType).filter((type) =>
+            this.isRelevantFor(type, user, platform),
+        );
     }
 }

@@ -1,4 +1,14 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Formatter, Sorter, STMath } from '@stamhoofd/utility';
@@ -23,13 +33,13 @@ export enum BalanceItemStatus {
 
     /**
      * This means payment of the amount is a requirement.
-    */
+     */
     Due = 'Due',
 
     /**
      * This means the balance is no longer due. If there is any paid amount, it is refundable.
      * In case you don't want to refund the amount, you should change the status to 'Due' and change the amount to the amount that is not refundable.
-    */
+     */
     Canceled = 'Canceled',
 }
 
@@ -49,15 +59,19 @@ export enum VATExcemptReason {
 
 export function getVATExcemptReasonName(reason: VATExcemptReason): string {
     switch (reason) {
-        case VATExcemptReason.IntraCommunityGoods: return $t('%1X7');
-        case VATExcemptReason.IntraCommunityServices: return $t('%1XO');
+        case VATExcemptReason.IntraCommunityGoods:
+            return $t('%1X7');
+        case VATExcemptReason.IntraCommunityServices:
+            return $t('%1XO');
     }
 }
 
 export function getVATExcemptInvoiceNote(reason: VATExcemptReason): string {
     switch (reason) {
-        case VATExcemptReason.IntraCommunityGoods: return $t('%1Km');
-        case VATExcemptReason.IntraCommunityServices: return $t('%1b3');
+        case VATExcemptReason.IntraCommunityGoods:
+            return $t('%1Km');
+        case VATExcemptReason.IntraCommunityServices:
+            return $t('%1b3');
     }
 }
 
@@ -65,16 +79,20 @@ export function getVATExcemptPeppolTaxCategoryCode(reason: VATExcemptReason): st
     // ref https://docs.peppol.eu/poacc/billing/3.0/codelist/vatex/
     // We follow https://docs.billit.be/docs/ventilation-codes as this isn't super well documented or clear
     switch (reason) {
-        case VATExcemptReason.IntraCommunityGoods: return 'K';
-        case VATExcemptReason.IntraCommunityServices: return 'K';
+        case VATExcemptReason.IntraCommunityGoods:
+            return 'K';
+        case VATExcemptReason.IntraCommunityServices:
+            return 'K';
     }
 }
 
 export function getVATExcemptPeppolExemptionReasonCode(reason: VATExcemptReason): string | null {
     // ref https://docs.peppol.eu/poacc/billing/3.0/codelist/vatex/
     switch (reason) {
-        case VATExcemptReason.IntraCommunityGoods: return 'VATEX-EU-IC';
-        case VATExcemptReason.IntraCommunityServices: return 'VATEX-EU-IC';
+        case VATExcemptReason.IntraCommunityGoods:
+            return 'VATEX-EU-IC';
+        case VATExcemptReason.IntraCommunityServices:
+            return 'VATEX-EU-IC';
     }
 }
 
@@ -102,51 +120,80 @@ export enum BalanceItemType {
 
 export function getBalanceItemTypeVATType(type: BalanceItemType): 'services' | 'goods' | null {
     switch (type) {
-        case BalanceItemType.Order: return null; // unknown
-        case BalanceItemType.Other: return null; // unknown
+        case BalanceItemType.Order:
+            return null; // unknown
+        case BalanceItemType.Other:
+            return null; // unknown
     }
     return 'services';
 }
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
     switch (type) {
-        case BalanceItemStatus.Hidden: return $t('%UC');
-        case BalanceItemStatus.Due: return $t('%lb');
-        case BalanceItemStatus.Canceled: return $t('%gg');
+        case BalanceItemStatus.Hidden:
+            return $t('%UC');
+        case BalanceItemStatus.Due:
+            return $t('%lb');
+        case BalanceItemStatus.Canceled:
+            return $t('%gg');
     }
 }
 
 export function getBalanceItemTypeName(type: BalanceItemType): string {
     switch (type) {
-        case BalanceItemType.Registration: return $t('%lc');
-        case BalanceItemType.AdministrationFee: return $t('%xK');
-        case BalanceItemType.FreeContribution: return $t('%Ot');
-        case BalanceItemType.Order: return $t('%ld');
-        case BalanceItemType.Other: return $t('%1JG');
-        case BalanceItemType.PlatformMembership: return $t('%1Ny');
-        case BalanceItemType.CancellationFee: return $t('%17G');
-        case BalanceItemType.RegistrationBundleDiscount: return $t('%16L');
-        case BalanceItemType.STPackage: return $t('%1Ms');
-        case BalanceItemType.ServiceFee: return $t('%1UX');
-        case BalanceItemType.TransferFee: return $t('%wZ');
-        case BalanceItemType.ReferralDiscount: return $t('%1Uz');
+        case BalanceItemType.Registration:
+            return $t('%lc');
+        case BalanceItemType.AdministrationFee:
+            return $t('%xK');
+        case BalanceItemType.FreeContribution:
+            return $t('%Ot');
+        case BalanceItemType.Order:
+            return $t('%ld');
+        case BalanceItemType.Other:
+            return $t('%1JG');
+        case BalanceItemType.PlatformMembership:
+            return $t('%1Ny');
+        case BalanceItemType.CancellationFee:
+            return $t('%17G');
+        case BalanceItemType.RegistrationBundleDiscount:
+            return $t('%16L');
+        case BalanceItemType.STPackage:
+            return $t('%1Ms');
+        case BalanceItemType.ServiceFee:
+            return $t('%1UX');
+        case BalanceItemType.TransferFee:
+            return $t('%wZ');
+        case BalanceItemType.ReferralDiscount:
+            return $t('%1Uz');
     }
 }
 
 export function getBalanceItemTypeIcon(type: BalanceItemType): string {
     switch (type) {
-        case BalanceItemType.Registration: return 'group';
-        case BalanceItemType.AdministrationFee: return 'calculator';
-        case BalanceItemType.FreeContribution: return 'gift';
-        case BalanceItemType.Order: return 'basket';
-        case BalanceItemType.Other: return 'box';
-        case BalanceItemType.PlatformMembership: return 'membership-filled';
-        case BalanceItemType.CancellationFee: return 'canceled';
-        case BalanceItemType.RegistrationBundleDiscount: return 'label';
-        case BalanceItemType.STPackage: return 'box';
-        case BalanceItemType.ServiceFee: return 'calculator';
-        case BalanceItemType.TransferFee: return 'calculator';
-        case BalanceItemType.ReferralDiscount: return 'label';
+        case BalanceItemType.Registration:
+            return 'group';
+        case BalanceItemType.AdministrationFee:
+            return 'calculator';
+        case BalanceItemType.FreeContribution:
+            return 'gift';
+        case BalanceItemType.Order:
+            return 'basket';
+        case BalanceItemType.Other:
+            return 'box';
+        case BalanceItemType.PlatformMembership:
+            return 'membership-filled';
+        case BalanceItemType.CancellationFee:
+            return 'canceled';
+        case BalanceItemType.RegistrationBundleDiscount:
+            return 'label';
+        case BalanceItemType.STPackage:
+            return 'box';
+        case BalanceItemType.ServiceFee:
+            return 'calculator';
+        case BalanceItemType.TransferFee:
+            return 'calculator';
+        case BalanceItemType.ReferralDiscount:
+            return 'label';
     }
 }
 
@@ -168,48 +215,79 @@ export enum BalanceItemRelationType {
 
 export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): string {
     switch (type) {
-        case BalanceItemRelationType.Webshop: return $t('%2N');
-        case BalanceItemRelationType.Group: return $t('%lc');
-        case BalanceItemRelationType.GroupPrice: return $t('%62');
-        case BalanceItemRelationType.GroupOptionMenu: return $t('%Tb');
-        case BalanceItemRelationType.GroupOption: return $t('%TE');
-        case BalanceItemRelationType.Member: return $t('%1PM');
-        case BalanceItemRelationType.MembershipType: return $t('%Zd6');
-        case BalanceItemRelationType.RegistrationPeriod: return $t('%7Z');
-        case BalanceItemRelationType.Discount: return $t('%176');
-        case BalanceItemRelationType.STPackage: return $t('%1Ms');
-        case BalanceItemRelationType.STPricingType: return $t('%1YH');
-        case BalanceItemRelationType.PaymentProvider: return $t('%wX');
+        case BalanceItemRelationType.Webshop:
+            return $t('%2N');
+        case BalanceItemRelationType.Group:
+            return $t('%lc');
+        case BalanceItemRelationType.GroupPrice:
+            return $t('%62');
+        case BalanceItemRelationType.GroupOptionMenu:
+            return $t('%Tb');
+        case BalanceItemRelationType.GroupOption:
+            return $t('%TE');
+        case BalanceItemRelationType.Member:
+            return $t('%1PM');
+        case BalanceItemRelationType.MembershipType:
+            return $t('%Zd6');
+        case BalanceItemRelationType.RegistrationPeriod:
+            return $t('%7Z');
+        case BalanceItemRelationType.Discount:
+            return $t('%176');
+        case BalanceItemRelationType.STPackage:
+            return $t('%1Ms');
+        case BalanceItemRelationType.STPricingType:
+            return $t('%1YH');
+        case BalanceItemRelationType.PaymentProvider:
+            return $t('%wX');
     }
 }
 
 export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationType): string {
     switch (type) {
-        case BalanceItemRelationType.Webshop: return $t('%le');
-        case BalanceItemRelationType.Group: return $t('%lf');
-        case BalanceItemRelationType.GroupPrice: return $t('%lg');
-        case BalanceItemRelationType.GroupOptionMenu: return $t('%lh');
-        case BalanceItemRelationType.GroupOption: return $t('%li');
-        case BalanceItemRelationType.Member: return $t('%lj');
-        case BalanceItemRelationType.MembershipType: return $t('%Zd5');
-        case BalanceItemRelationType.RegistrationPeriod: return $t('%Zbp');
-        case BalanceItemRelationType.Discount: return $t('%177');
-        case BalanceItemRelationType.STPackage: return $t('%1Mv');
-        case BalanceItemRelationType.STPricingType: return $t('%1Xo');
-        case BalanceItemRelationType.PaymentProvider: return $t('%1bJ');
+        case BalanceItemRelationType.Webshop:
+            return $t('%le');
+        case BalanceItemRelationType.Group:
+            return $t('%lf');
+        case BalanceItemRelationType.GroupPrice:
+            return $t('%lg');
+        case BalanceItemRelationType.GroupOptionMenu:
+            return $t('%lh');
+        case BalanceItemRelationType.GroupOption:
+            return $t('%li');
+        case BalanceItemRelationType.Member:
+            return $t('%lj');
+        case BalanceItemRelationType.MembershipType:
+            return $t('%Zd5');
+        case BalanceItemRelationType.RegistrationPeriod:
+            return $t('%Zbp');
+        case BalanceItemRelationType.Discount:
+            return $t('%177');
+        case BalanceItemRelationType.STPackage:
+            return $t('%1Mv');
+        case BalanceItemRelationType.STPricingType:
+            return $t('%1Xo');
+        case BalanceItemRelationType.PaymentProvider:
+            return $t('%1bJ');
     }
 }
 
 /**
  * Determines which categories of balance items are relevant to list or filter for the given organization and platform.
  */
-function getBalanceItemVisibility(organization: { id: string } | null, platform: { membershipOrganizationId: string | null }): { showStamhoofdBilling: boolean; showMembership: boolean } {
+function getBalanceItemVisibility(
+    organization: { id: string } | null,
+    platform: { membershipOrganizationId: string | null },
+): { showStamhoofdBilling: boolean; showMembership: boolean } {
     // A null organization means we are looking at the platform/membership organization itself (e.g. platform-wide views)
-    const isMembershipOrganization = organization === null || organization.id === platform.membershipOrganizationId;
+    const isMembershipOrganization =
+        organization === null || organization.id === platform.membershipOrganizationId;
 
     return {
         // Packages, referral discounts and transaction/service fees are only billed to the Stamhoofd membership organization itself
-        showStamhoofdBilling: STAMHOOFD.platformName.toLocaleLowerCase() === 'stamhoofd' && STAMHOOFD.userMode === 'organization' && isMembershipOrganization,
+        showStamhoofdBilling:
+            STAMHOOFD.platformName.toLocaleLowerCase() === 'stamhoofd' &&
+            STAMHOOFD.userMode === 'organization' &&
+            isMembershipOrganization,
         // Platform memberships are only relevant for the membership organization of a platform
         showMembership: STAMHOOFD.userMode === 'platform' && isMembershipOrganization,
     };
@@ -219,8 +297,14 @@ function getBalanceItemVisibility(organization: { id: string } | null, platform:
  * Returns the balance item types that are relevant to list or filter for the given organization and platform.
  * Non-applicable types (packages, referral discounts, transaction/service fees and platform memberships) are hidden.
  */
-export function getApplicableBalanceItemTypes(organization: { id: string } | null, platform: { membershipOrganizationId: string | null }): BalanceItemType[] {
-    const { showStamhoofdBilling, showMembership } = getBalanceItemVisibility(organization, platform);
+export function getApplicableBalanceItemTypes(
+    organization: { id: string } | null,
+    platform: { membershipOrganizationId: string | null },
+): BalanceItemType[] {
+    const { showStamhoofdBilling, showMembership } = getBalanceItemVisibility(
+        organization,
+        platform,
+    );
 
     return Object.values(BalanceItemType).filter((type) => {
         switch (type) {
@@ -241,8 +325,14 @@ export function getApplicableBalanceItemTypes(organization: { id: string } | nul
  * Returns the balance item relation types that are relevant to list or filter for the given organization and platform.
  * Non-applicable relations (packages, pricing types, payment providers and membership types) are hidden.
  */
-export function getApplicableBalanceItemRelationTypes(organization: { id: string } | null, platform: { membershipOrganizationId: string | null }): BalanceItemRelationType[] {
-    const { showStamhoofdBilling, showMembership } = getBalanceItemVisibility(organization, platform);
+export function getApplicableBalanceItemRelationTypes(
+    organization: { id: string } | null,
+    platform: { membershipOrganizationId: string | null },
+): BalanceItemRelationType[] {
+    const { showStamhoofdBilling, showMembership } = getBalanceItemVisibility(
+        organization,
+        platform,
+    );
 
     return Object.values(BalanceItemRelationType).filter((type) => {
         switch (type) {
@@ -261,7 +351,10 @@ export function getApplicableBalanceItemRelationTypes(organization: { id: string
 /**
  * Return true if it is allowed to group balance items if they have a different value for this relation type
  */
-export function shouldAggregateOnRelationType(type: BalanceItemRelationType, item: { type: BalanceItemType; relations: Map<BalanceItemRelationType, BalanceItemRelation> }): boolean {
+export function shouldAggregateOnRelationType(
+    type: BalanceItemRelationType,
+    item: { type: BalanceItemType; relations: Map<BalanceItemRelationType, BalanceItemRelation> },
+): boolean {
     switch (type) {
         case BalanceItemRelationType.Group: {
             if (item.type === BalanceItemType.RegistrationBundleDiscount) {
@@ -273,7 +366,8 @@ export function shouldAggregateOnRelationType(type: BalanceItemRelationType, ite
         case BalanceItemRelationType.GroupPrice:
             // Only aggregate on group price if it is not for a specific option (we'll combine all options in one group, regardless of the corresponding groupPrice)
             return !item.relations.has(BalanceItemRelationType.GroupOption);
-        case BalanceItemRelationType.Member: return true;
+        case BalanceItemRelationType.Member:
+            return true;
     }
     return false;
 }
@@ -296,7 +390,10 @@ export class BalanceItemRelation extends AutoEncoder {
  * report over many members has to tell them apart.
  */
 function isArticleRelationType(item: BalanceItem, relationType: BalanceItemRelationType): boolean {
-    return relationType === BalanceItemRelationType.GroupPrice || !shouldAggregateOnRelationType(relationType, item);
+    return (
+        relationType === BalanceItemRelationType.GroupPrice ||
+        !shouldAggregateOnRelationType(relationType, item)
+    );
 }
 
 /**
@@ -316,7 +413,11 @@ function getArticleNameCode(item: BalanceItem): string {
     return NAME_TITLED_BALANCE_ITEM_TYPES.has(item.type) ? '-name-' + item.name : '';
 }
 
-export function doBalanceItemRelationsMatch(a: Map<BalanceItemRelationType, BalanceItemRelation>, b: Map<BalanceItemRelationType, BalanceItemRelation>, allowedDifference = 0) {
+export function doBalanceItemRelationsMatch(
+    a: Map<BalanceItemRelationType, BalanceItemRelation>,
+    b: Map<BalanceItemRelationType, BalanceItemRelation>,
+    allowedDifference = 0,
+) {
     if (allowedDifference === 0 && a.size !== b.size) {
         return false;
     }
@@ -391,7 +492,10 @@ export class BalanceItem extends AutoEncoder {
     @field({ decoder: new EnumDecoder(BalanceItemType), version: 307 })
     type = BalanceItemType.Other;
 
-    @field({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation), version: 307 })
+    @field({
+        decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation),
+        version: 307,
+    })
     relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map();
 
     @field({ decoder: StringDecoder, field: 'description' })
@@ -461,7 +565,10 @@ export class BalanceItem extends AutoEncoder {
      * This is required for correct VAT calculations without intermediate rounding.
      */
     get price() {
-        if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
+        if (
+            this.status === BalanceItemStatus.Hidden ||
+            this.status === BalanceItemStatus.Canceled
+        ) {
             return 0;
         }
         return this.priceWithVAT;
@@ -473,7 +580,10 @@ export class BalanceItem extends AutoEncoder {
      * The difference with priceWithVAT is that it takes into account canceled and hidden balance items
      */
     get payablePriceWithVAT() {
-        if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
+        if (
+            this.status === BalanceItemStatus.Hidden ||
+            this.status === BalanceItemStatus.Canceled
+        ) {
             return 0;
         }
         return this.priceWithVAT;
@@ -485,7 +595,10 @@ export class BalanceItem extends AutoEncoder {
      * The difference with quantity is that it takes into account canceled and hidden balance items
      */
     get payableQuantity() {
-        if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
+        if (
+            this.status === BalanceItemStatus.Hidden ||
+            this.status === BalanceItemStatus.Canceled
+        ) {
             return 0;
         }
         return this.amount;
@@ -497,7 +610,10 @@ export class BalanceItem extends AutoEncoder {
      * The difference with priceWithoutVAT is that it takes into account canceled and hidden balance items
      */
     get payablePriceWithoutVAT() {
-        if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
+        if (
+            this.status === BalanceItemStatus.Hidden ||
+            this.status === BalanceItemStatus.Canceled
+        ) {
             return 0;
         }
         return this.priceWithoutVAT;
@@ -514,12 +630,15 @@ export class BalanceItem extends AutoEncoder {
 
         if (this.VATIncluded) {
             // Calculate VAT on price incl. VAT, which is not 100% correct and causes roudning issues
-            return this.unitPrice * this.amount - STMath.round(this.unitPrice * this.amount * 100 / (100 + this.VATPercentage));
+            return (
+                this.unitPrice * this.amount -
+                STMath.round((this.unitPrice * this.amount * 100) / (100 + this.VATPercentage))
+            );
         }
 
         // Note: the rounding is only to avoid floating point errors in software, this should not cause any actual rounding
         // That is the reason why we store it up to 4 digits after comma
-        return STMath.round(this.VATPercentage * this.unitPrice * this.amount / 100);
+        return STMath.round((this.VATPercentage * this.unitPrice * this.amount) / 100);
     }
 
     /**
@@ -633,18 +752,24 @@ export class BalanceItem extends AutoEncoder {
     endDate: Date | null;
 
     @field({ decoder: new EnumDecoder(BalanceItemStatusV352) })
-    @field({ decoder: new EnumDecoder(BalanceItemStatus), version: 353,
+    @field({
+        decoder: new EnumDecoder(BalanceItemStatus),
+        version: 353,
         upgrade(old) {
             switch (old) {
-                case BalanceItemStatusV352.Pending: return BalanceItemStatus.Due;
-                case BalanceItemStatusV352.Paid: return BalanceItemStatus.Due;
+                case BalanceItemStatusV352.Pending:
+                    return BalanceItemStatus.Due;
+                case BalanceItemStatusV352.Paid:
+                    return BalanceItemStatus.Due;
             }
             return old as BalanceItemStatus;
         },
         downgrade(newer) {
             switch (newer) {
-                case BalanceItemStatus.Due: return BalanceItemStatusV352.Pending;
-                case BalanceItemStatus.Canceled: return BalanceItemStatusV352.Pending;
+                case BalanceItemStatus.Due:
+                    return BalanceItemStatusV352.Pending;
+                case BalanceItemStatus.Canceled:
+                    return BalanceItemStatusV352.Pending;
             }
             return newer as BalanceItemStatusV352;
         },
@@ -656,7 +781,10 @@ export class BalanceItem extends AutoEncoder {
     }
 
     get isDue() {
-        if (this.status === BalanceItemStatus.Hidden || this.status === BalanceItemStatus.Canceled) {
+        if (
+            this.status === BalanceItemStatus.Hidden ||
+            this.status === BalanceItemStatus.Canceled
+        ) {
             if (this.priceOpen !== 0) {
                 // A paid amount remaining
                 return true;
@@ -701,11 +829,13 @@ export class BalanceItem extends AutoEncoder {
 
     static getOutstandingBalance(items: BalanceItem[]) {
         // Get sum of balance payments
-        const totalPending = items.map(p => p.pricePending).reduce((t, total) => total + t, 0);
-        const totalPaid = items.map(p => p.pricePaid).reduce((t, total) => total + t, 0);
-        const totalPrice = items.map(p => p.priceWithVAT).reduce((t, total) => total + t, 0);
-        const payablePriceWithVAT = items.map(p => p.payablePriceWithVAT).reduce((t, total) => total + t, 0);
-        const totalOpen = items.map(p => p.priceOpen).reduce((t, total) => total + t, 0);
+        const totalPending = items.map((p) => p.pricePending).reduce((t, total) => total + t, 0);
+        const totalPaid = items.map((p) => p.pricePaid).reduce((t, total) => total + t, 0);
+        const totalPrice = items.map((p) => p.priceWithVAT).reduce((t, total) => total + t, 0);
+        const payablePriceWithVAT = items
+            .map((p) => p.payablePriceWithVAT)
+            .reduce((t, total) => total + t, 0);
+        const totalOpen = items.map((p) => p.priceOpen).reduce((t, total) => total + t, 0);
 
         return {
             priceWithVAT: totalPrice,
@@ -748,29 +878,41 @@ export class BalanceItem extends AutoEncoder {
         }
 
         return Array.from(map.values())
-            .filter(subtotal => subtotal.taxablePrice !== 0 || subtotal.VAT !== 0)
+            .filter((subtotal) => subtotal.taxablePrice !== 0 || subtotal.VAT !== 0)
             .sort((a, b) => Sorter.byNumberValue(a.VATPercentage, b.VATPercentage));
     }
 
     static filterBalanceItems(items: BalanceItem[]) {
-        return items.filter(i => i.priceOpen !== 0).sort((a, b) => Sorter.stack(
-            Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
-            Sorter.byDateValue(b.createdAt, a.createdAt),
-        ));
+        return items
+            .filter((i) => i.priceOpen !== 0)
+            .sort((a, b) =>
+                Sorter.stack(
+                    Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
+                    Sorter.byDateValue(b.createdAt, a.createdAt),
+                ),
+            );
     }
 
     static filterPayableBalanceItems(items: BalanceItem[]) {
-        return items.filter(i => i.priceOpen > 0).sort((a, b) => Sorter.stack(
-            Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
-            Sorter.byDateValue(b.createdAt, a.createdAt),
-        ));
+        return items
+            .filter((i) => i.priceOpen > 0)
+            .sort((a, b) =>
+                Sorter.stack(
+                    Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
+                    Sorter.byDateValue(b.createdAt, a.createdAt),
+                ),
+            );
     }
 
     static filterDiscountBalanceItems(items: BalanceItem[]) {
-        return items.filter(i => i.priceOpen < 0).sort((a, b) => Sorter.stack(
-            Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
-            Sorter.byDateValue(b.createdAt, a.createdAt),
-        ));
+        return items
+            .filter((i) => i.priceOpen < 0)
+            .sort((a, b) =>
+                Sorter.stack(
+                    Sorter.byDateValue(b.dueAt ?? new Date(0), a.dueAt ?? new Date(0)),
+                    Sorter.byDateValue(b.createdAt, a.createdAt),
+                ),
+            );
     }
 
     get paymentShortDescription(): string {
@@ -778,7 +920,8 @@ export class BalanceItem extends AutoEncoder {
         switch (this.type) {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
-                const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t('%lk');
+                const group =
+                    this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t('%lk');
 
                 if (option) {
                     return $t('%ll') + ' ' + group;
@@ -794,7 +937,10 @@ export class BalanceItem extends AutoEncoder {
 
             case BalanceItemType.RegistrationBundleDiscount: {
                 const discount = this.relations.get(BalanceItemRelationType.Discount);
-                return discount?.name?.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
+                return (
+                    discount?.name?.toString() ||
+                    getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount)
+                );
             }
 
             case BalanceItemType.CancellationFee: {
@@ -810,15 +956,32 @@ export class BalanceItem extends AutoEncoder {
                 }
                 return $t('%lp');
             }
-            case BalanceItemType.AdministrationFee: return $t('%lq');
-            case BalanceItemType.FreeContribution: return $t('%lr');
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t('%ls');
-            case BalanceItemType.Other: return this.name;
-            case BalanceItemType.PlatformMembership: return $t('%lt') + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t('%lu');
-            case BalanceItemType.STPackage: return this.itemTitle;
-            case BalanceItemType.ServiceFee: return $t('%1dA');
-            case BalanceItemType.TransferFee: return $t('%1Wb');
-            case BalanceItemType.ReferralDiscount: return $t('%1VM');
+            case BalanceItemType.AdministrationFee:
+                return $t('%lq');
+            case BalanceItemType.FreeContribution:
+                return $t('%lr');
+            case BalanceItemType.Order:
+                return (
+                    this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ||
+                    $t('%ls')
+                );
+            case BalanceItemType.Other:
+                return this.name;
+            case BalanceItemType.PlatformMembership:
+                return (
+                    $t('%lt') +
+                        ' ' +
+                        this.relations.get(BalanceItemRelationType.MembershipType)?.name ||
+                    $t('%lu')
+                );
+            case BalanceItemType.STPackage:
+                return this.itemTitle;
+            case BalanceItemType.ServiceFee:
+                return $t('%1dA');
+            case BalanceItemType.TransferFee:
+                return $t('%1Wb');
+            case BalanceItemType.ReferralDiscount:
+                return $t('%1VM');
         }
     }
 
@@ -828,22 +991,48 @@ export class BalanceItem extends AutoEncoder {
     get category(): string {
         switch (this.type) {
             case BalanceItemType.Registration: {
-                return this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? $t('%lv');
+                return (
+                    this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? $t('%lv')
+                );
             }
             case BalanceItemType.RegistrationBundleDiscount: {
                 const discount = this.relations.get(BalanceItemRelationType.Discount);
-                return discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
+                return (
+                    discount?.name.toString() ||
+                    getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount)
+                );
             }
-            case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t('%lw');
-            case BalanceItemType.AdministrationFee: return $t('%lq');
-            case BalanceItemType.FreeContribution: return $t('%lr');
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? $t('%ls');
-            case BalanceItemType.Other: return this.name;
-            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t('%BV');
-            case BalanceItemType.STPackage: return $t('%1Mu');
-            case BalanceItemType.ServiceFee: return $t('%1dA');
-            case BalanceItemType.TransferFee: return $t('%1Wb');
-            case BalanceItemType.ReferralDiscount: return $t('%1VM');
+            case BalanceItemType.CancellationFee:
+                return (
+                    this.relations.get(BalanceItemRelationType.Group)?.name.toString() ??
+                    this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ??
+                    this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ??
+                    $t('%lw')
+                );
+            case BalanceItemType.AdministrationFee:
+                return $t('%lq');
+            case BalanceItemType.FreeContribution:
+                return $t('%lr');
+            case BalanceItemType.Order:
+                return (
+                    this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ??
+                    $t('%ls')
+                );
+            case BalanceItemType.Other:
+                return this.name;
+            case BalanceItemType.PlatformMembership:
+                return (
+                    this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ??
+                    $t('%BV')
+                );
+            case BalanceItemType.STPackage:
+                return $t('%1Mu');
+            case BalanceItemType.ServiceFee:
+                return $t('%1dA');
+            case BalanceItemType.TransferFee:
+                return $t('%1Wb');
+            case BalanceItemType.ReferralDiscount:
+                return $t('%1VM');
         }
     }
 
@@ -859,7 +1048,11 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.RegistrationBundleDiscount:
                 return [BalanceItemRelationType.Discount];
             case BalanceItemType.CancellationFee:
-                return [BalanceItemRelationType.Group, BalanceItemRelationType.Webshop, BalanceItemRelationType.MembershipType];
+                return [
+                    BalanceItemRelationType.Group,
+                    BalanceItemRelationType.Webshop,
+                    BalanceItemRelationType.MembershipType,
+                ];
             case BalanceItemType.Order:
                 return [BalanceItemRelationType.Webshop];
             case BalanceItemType.PlatformMembership:
@@ -874,7 +1067,7 @@ export class BalanceItem extends AutoEncoder {
      * relations than this one: a bundle discount is for a group, but it is a discount.
      */
     get categoryRelationType(): BalanceItemRelationType | null {
-        return this.categoryRelationTypes.find(type => this.relations.has(type)) ?? null;
+        return this.categoryRelationTypes.find((type) => this.relations.has(type)) ?? null;
     }
 
     /**
@@ -912,7 +1105,13 @@ export class BalanceItem extends AutoEncoder {
         // The item is named after the first relation that is set, so every relation that is more
         // specific than that one has to be missing here too
         for (const candidate of this.categoryRelationTypes) {
-            filters.push({ relations: { [candidate]: { id: candidate === relationType ? this.relations.get(candidate)!.id : null } } });
+            filters.push({
+                relations: {
+                    [candidate]: {
+                        id: candidate === relationType ? this.relations.get(candidate)!.id : null,
+                    },
+                },
+            });
 
             if (candidate === relationType) {
                 break;
@@ -944,9 +1143,7 @@ export class BalanceItem extends AutoEncoder {
             // The order in which relations were added is not part of the article
             .sort();
 
-        return 'type-' + this.type
-            + getArticleNameCode(this)
-            + '-relations-' + relations.join('-');
+        return 'type-' + this.type + getArticleNameCode(this) + '-relations-' + relations.join('-');
     }
 
     /**
@@ -963,7 +1160,9 @@ export class BalanceItem extends AutoEncoder {
                 continue;
             }
 
-            filters.push({ relations: { [relationType]: { id: this.relations.get(relationType)?.id ?? null } } });
+            filters.push({
+                relations: { [relationType]: { id: this.relations.get(relationType)?.id ?? null } },
+            });
         }
 
         if (NAME_TITLED_BALANCE_ITEM_TYPES.has(this.type)) {
@@ -978,7 +1177,8 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 if (option) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t('%lk');
+                    const group =
+                        this.relations.get(BalanceItemRelationType.Group)?.name || $t('%lk');
                     return $t('%lx') + ' ' + group;
                 }
                 break;
@@ -988,7 +1188,9 @@ export class BalanceItem extends AutoEncoder {
                 // List all relations
                 for (const [key, value] of this.relations.entries()) {
                     if (shouldAggregateOnRelationType(key, this)) {
-                        list.push(getBalanceItemRelationTypeName(key) + ': ' + value.name.toString());
+                        list.push(
+                            getBalanceItemRelationTypeName(key) + ': ' + value.name.toString(),
+                        );
                     }
                 }
                 return list.join('\n');
@@ -1007,21 +1209,24 @@ export class BalanceItem extends AutoEncoder {
                 name: $t('%1OL'),
                 price: this.pricePending,
             },
-        ].filter(a => a.price !== 0);
+        ].filter((a) => a.price !== 0);
 
         if (this.VATPercentage) {
             // Add VAT
-            all.unshift({
-                name: $t('%1I8'),
-                price: this.priceWithoutVAT,
-            }, {
-                name: $t('%1I9'),
-                price: this.VAT,
-            },
-            {
-                name: $t('%1IA'),
-                price: this.priceWithVAT,
-            });
+            all.unshift(
+                {
+                    name: $t('%1I8'),
+                    price: this.priceWithoutVAT,
+                },
+                {
+                    name: $t('%1I9'),
+                    price: this.VAT,
+                },
+                {
+                    name: $t('%1IA'),
+                    price: this.priceWithVAT,
+                },
+            );
         } else if (all.length > 0) {
             all.unshift({
                 name: $t('%lz'),
@@ -1043,27 +1248,47 @@ export class BalanceItem extends AutoEncoder {
      */
     get groupCode() {
         if (this.type === BalanceItemType.Other) {
-            return 'type-' + this.type
-                + '-' + this.status
-                + '-unit-price-' + this.unitPrice
-                + '-vat-percentage-' + this.VATPercentage
-                + '-vat-included-' + this.VATIncluded
-                + '-vat-excempt-' + this.VATExcempt
-                + '-name-' + this.name
-                + '-due-date-' + (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null');
+            return (
+                'type-' +
+                this.type +
+                '-' +
+                this.status +
+                '-unit-price-' +
+                this.unitPrice +
+                '-vat-percentage-' +
+                this.VATPercentage +
+                '-vat-included-' +
+                this.VATIncluded +
+                '-vat-excempt-' +
+                this.VATExcempt +
+                '-name-' +
+                this.name +
+                '-due-date-' +
+                (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null')
+            );
         }
 
-        return 'type-' + this.type
-            + '-' + this.status
-            + '-unit-price-' + this.unitPrice
-            + '-vat-percentage-' + this.VATPercentage
-            + '-vat-included-' + this.VATIncluded
-            + '-vat-excempt-' + this.VATExcempt
-            + '-due-date-' + (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null')
-            + '-relations' + Array.from(this.relations.entries())
-            .filter(([key]) => !shouldAggregateOnRelationType(key, this))
-            .map(([key, value]) => key + '-' + value.id)
-            .join('-');
+        return (
+            'type-' +
+            this.type +
+            '-' +
+            this.status +
+            '-unit-price-' +
+            this.unitPrice +
+            '-vat-percentage-' +
+            this.VATPercentage +
+            '-vat-included-' +
+            this.VATIncluded +
+            '-vat-excempt-' +
+            this.VATExcempt +
+            '-due-date-' +
+            (this.dueAt ? Formatter.dateIso(this.dueAt) : 'null') +
+            '-relations' +
+            Array.from(this.relations.entries())
+                .filter(([key]) => !shouldAggregateOnRelationType(key, this))
+                .map(([key, value]) => key + '-' + value.id)
+                .join('-')
+        );
     }
 
     /**
@@ -1078,26 +1303,56 @@ export class BalanceItem extends AutoEncoder {
                     return (optionMenu?.name ?? $t('%Gr')) + ': ' + option.name;
                 }
                 const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t('%lk');
-                const price = this.relations.get(BalanceItemRelationType.GroupPrice)?.name.toString();
-                return $t('%m1') + ' ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
+                const price = this.relations
+                    .get(BalanceItemRelationType.GroupPrice)
+                    ?.name.toString();
+                return (
+                    $t('%m1') +
+                    ' ' +
+                    group +
+                    (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '')
+                );
             }
             case BalanceItemType.RegistrationBundleDiscount: {
                 const discount = this.relations.get(BalanceItemRelationType.Discount);
 
                 if (this.price > 0) {
                     // Undo the discount
-                    return $t('%175') + ' (' + (discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount)) + ')';
+                    return (
+                        $t('%175') +
+                        ' (' +
+                        (discount?.name.toString() ||
+                            getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount)) +
+                        ')'
+                    );
                 }
-                return discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
+                return (
+                    discount?.name.toString() ||
+                    getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount)
+                );
             }
-            case BalanceItemType.CancellationFee: return $t('%17G');
+            case BalanceItemType.CancellationFee:
+                return $t('%17G');
             case BalanceItemType.AdministrationFee: {
                 return this.name || $t('%xK');
             }
-            case BalanceItemType.FreeContribution: return $t('%Ot');
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t('%m2');
-            case BalanceItemType.Other: return this.name;
-            case BalanceItemType.PlatformMembership: return $t('%m3') + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() || $t('%m4');
+            case BalanceItemType.FreeContribution:
+                return $t('%Ot');
+            case BalanceItemType.Order:
+                return (
+                    this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ||
+                    $t('%m2')
+                );
+            case BalanceItemType.Other:
+                return this.name;
+            case BalanceItemType.PlatformMembership:
+                return (
+                    $t('%m3') +
+                        ' ' +
+                        this.relations
+                            .get(BalanceItemRelationType.MembershipType)
+                            ?.name.toString() || $t('%m4')
+                );
             case BalanceItemType.STPackage: {
                 const pack = this.relations.get(BalanceItemRelationType.STPackage);
                 return pack?.name.toString() || getBalanceItemTypeName(BalanceItemType.STPackage);
@@ -1107,14 +1362,24 @@ export class BalanceItem extends AutoEncoder {
                     return $t('%1UX');
                 }
                 const day = getFeeDay(this.startDate, this.endDate);
-                return day ? $t('%1cJ', { date: day }) : $t('%1Z1', { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) });
+                return day
+                    ? $t('%1cJ', { date: day })
+                    : $t('%1Z1', {
+                          startDate: Formatter.startDate(this.startDate, false, true),
+                          endDate: Formatter.endDate(this.endDate, false, true),
+                      });
             }
             case BalanceItemType.TransferFee: {
                 if (!this.startDate || !this.endDate) {
                     return $t('%wZ');
                 }
                 const day = getFeeDay(this.startDate, this.endDate);
-                return day ? $t('%1Yq', { date: day }) : $t('%1bd', { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) });
+                return day
+                    ? $t('%1Yq', { date: day })
+                    : $t('%1bd', {
+                          startDate: Formatter.startDate(this.startDate, false, true),
+                          endDate: Formatter.endDate(this.endDate, false, true),
+                      });
             }
         }
         return this.name;
@@ -1129,7 +1394,9 @@ export class BalanceItem extends AutoEncoder {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 const descriptions: string[] = [];
                 if (option) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t('%lk');
+                    const group =
+                        this.relations.get(BalanceItemRelationType.Group)?.name.toString() ||
+                        $t('%lk');
                     descriptions.push($t('%lx') + ' ' + group);
                 }
                 const member = this.relations.get(BalanceItemRelationType.Member);
@@ -1183,12 +1450,15 @@ export class BalanceItem extends AutoEncoder {
             }
             case BalanceItemType.STPackage: {
                 const list: string[] = [];
-                const base = this.startDate && this.endDate
-                    ? (
-                            Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate)
-                                ? $t('%1c2', { startDate: Formatter.date(this.startDate), endDate: Formatter.date(this.endDate) })
-                                : $t('%Zg1', { date: Formatter.date(this.startDate) }))
-                    : null;
+                const base =
+                    this.startDate && this.endDate
+                        ? Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate)
+                            ? $t('%1c2', {
+                                  startDate: Formatter.date(this.startDate),
+                                  endDate: Formatter.date(this.endDate),
+                              })
+                            : $t('%Zg1', { date: Formatter.date(this.startDate) })
+                        : null;
 
                 if (base) {
                     list.push(base);
@@ -1220,7 +1490,11 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.STPackage: {
                 const packageType = this.relations.get(BalanceItemRelationType.STPricingType);
                 if (packageType) {
-                    const decoded = Object.values(STPricingType).includes(packageType.id as STPricingType) ? packageType.id as STPricingType : null;
+                    const decoded = Object.values(STPricingType).includes(
+                        packageType.id as STPricingType,
+                    )
+                        ? (packageType.id as STPricingType)
+                        : null;
                     if (decoded) {
                         return getPricingTypeSuffix(decoded);
                     }
@@ -1238,7 +1512,8 @@ export class BalanceItem extends AutoEncoder {
         }
 
         let str = '';
-        str += '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
+        str +=
+            '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
 
         for (const item of grouped) {
             let prefix = '';
@@ -1256,7 +1531,11 @@ export class BalanceItem extends AutoEncoder {
             } else if (item.status === BalanceItemStatus.Canceled) {
                 prefix = $t('%gg');
                 prefixClass = 'error';
-            } else if (item.priceOpen < 0 && item.pricePaid > item.payablePriceWithVAT && item.pricePaid > 0) {
+            } else if (
+                item.priceOpen < 0 &&
+                item.pricePaid > item.payablePriceWithVAT &&
+                item.pricePaid > 0
+            ) {
                 prefix = $t('%gh');
             } else if (item.priceOpen < 0) {
                 prefix = $t('%10a');
@@ -1280,7 +1559,7 @@ export class BalanceItem extends AutoEncoder {
                 description += `<span class="email-style-discount-old-price">${Formatter.escapeHtml(Formatter.float(item.amount))} x ${Formatter.escapeHtml(Formatter.price(item.unitPrice))}</span><span class="email-style-discount-price">${Formatter.escapeHtml(Formatter.price(item.payablePriceWithVAT))}</span>`;
             }
 
-            if (item.pricePaid !== 0 && item.pricePaid !== (item.amount * item.unitPrice)) {
+            if (item.pricePaid !== 0 && item.pricePaid !== item.amount * item.unitPrice) {
                 if (description) {
                     description += '\n';
                 }
@@ -1325,14 +1604,17 @@ export class BalanceItemWithPayments extends BalanceItem {
     payments: BalanceItemPaymentWithPayment[] = [];
 
     updatePricePaid() {
-        this.pricePaid = this.payments.reduce((total, payment) => total + (payment.payment.isSucceeded ? payment.price : 0), 0);
+        this.pricePaid = this.payments.reduce(
+            (total, payment) => total + (payment.payment.isSucceeded ? payment.price : 0),
+            0,
+        );
     }
 
     /**
      * Return whether a payment has been initiated for this balance item
      */
     get hasPendingPayment() {
-        return !!this.payments.find(p => p.payment.isPending);
+        return !!this.payments.find((p) => p.payment.isPending);
     }
 }
 
@@ -1462,7 +1744,7 @@ export class GroupedBalanceItems {
     }
 
     get dueAt() {
-        return this.items[0].dueAt; ;
+        return this.items[0].dueAt;
     }
 
     get isDue() {
@@ -1489,6 +1771,6 @@ export class GroupedBalanceItems {
             map.get(code)!.add(item);
         }
 
-        return Array.from(map.values()).filter(v => v.priceOpen !== 0);
+        return Array.from(map.values()).filter((v) => v.priceOpen !== 0);
     }
 }

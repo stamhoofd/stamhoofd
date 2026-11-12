@@ -50,7 +50,7 @@ async function loadPeriodIds(where: string, params: unknown[]): Promise<Set<stri
         { nestTables: false },
     );
 
-    return new Set((rows as unknown as { id: string }[]).map(row => row.id));
+    return new Set((rows as unknown as { id: string }[]).map((row) => row.id));
 }
 
 const settledWhere = '`cutoffAt` IS NOT NULL AND `cutoffAt` <= ?';
@@ -107,6 +107,9 @@ export async function releaseUnlockedPeriods(): Promise<void> {
  * MySQL cannot be handed an empty IN list, and "belongs to no period" is never frozen: a row without
  * a period is not part of any year's settled numbers.
  */
-export function isFrozen(frozenPeriodIds: Set<string>, periodId: string | null | undefined): boolean {
+export function isFrozen(
+    frozenPeriodIds: Set<string>,
+    periodId: string | null | undefined,
+): boolean {
     return typeof periodId === 'string' && frozenPeriodIds.has(periodId);
 }

@@ -7,10 +7,16 @@ import { RunVerbosity } from './verbosity.js';
 import { Terminal } from '@node/terminal';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
-const invocation = new AsyncLocalStorage<{ terminal: Terminal; renderer?: TerminalRenderer; signal: AbortSignal }>();
+const invocation = new AsyncLocalStorage<{
+    terminal: Terminal;
+    renderer?: TerminalRenderer;
+    signal: AbortSignal;
+}>();
 
 /** Shared by nested commands, workflows, prompts and subprocesses in one invocation. */
-export function getCliTelemetry() { return invocation.getStore(); }
+export function getCliTelemetry() {
+    return invocation.getStore();
+}
 
 /** Cleanup must still run after cancellation; a subsequent interrupt can cancel cleanup itself. */
 export async function withCliCleanup<T>(callback: () => Promise<T>): Promise<T> {
@@ -34,16 +40,28 @@ export async function withCliPrompt<T>(callback: () => Promise<T>): Promise<T> {
     return runtime ? runtime.terminal.withPrompt(callback) : callback();
 }
 
-export async function withCliInteractiveOperation<T>(label: string, callback: (write: (text: string) => boolean) => Promise<T>): Promise<T> {
+export async function withCliInteractiveOperation<T>(
+    label: string,
+    callback: (write: (text: string) => boolean) => Promise<T>,
+): Promise<T> {
     const runtime = invocation.getStore();
     runtime?.signal.throwIfAborted();
     return runtime?.renderer
         ? runtime.renderer.withInteractiveOperation(label, callback)
-        : withCliPrompt(() => callback((text) => { process.stderr.write(text); return true; }));
+        : withCliPrompt(() =>
+              callback((text) => {
+                  process.stderr.write(text);
+                  return true;
+              }),
+          );
 }
 
 /** Own the SDK lifecycle at the command boundary. No remote export unless explicitly configured. */
-export async function withCliTelemetry<T>(name: string, verbosity: RunVerbosity, callback: () => Promise<T>): Promise<T> {
+export async function withCliTelemetry<T>(
+    name: string,
+    verbosity: RunVerbosity,
+    callback: () => Promise<T>,
+): Promise<T> {
     if (invocation.getStore()) return withSpan(name, callback);
     const output = new Terminal({ stdout: process.stderr, stderr: process.stdout });
     const controller = new AbortController();
@@ -56,12 +74,21 @@ export async function withCliTelemetry<T>(name: string, verbosity: RunVerbosity,
     const warn = () => {
         if (warned) return;
         warned = true;
-        try { process.stderr.write('Warning: telemetry unavailable; command result preserved.\n'); } catch { /* The output destination may itself have failed. */ }
+        try {
+            process.stderr.write('Warning: telemetry unavailable; command result preserved.\n');
+        } catch {
+            /* The output destination may itself have failed. */
+        }
     };
     try {
         terminal = new TerminalRenderer({
             terminal: output,
-            verbosity: verbosity === RunVerbosity.Quiet ? 'quiet' : verbosity === RunVerbosity.Output ? 'verbose' : 'normal',
+            verbosity:
+                verbosity === RunVerbosity.Quiet
+                    ? 'quiet'
+                    : verbosity === RunVerbosity.Output
+                      ? 'verbose'
+                      : 'normal',
             groupBy: ['environment', 'vault'],
         });
         sdk = new NodeSDK({
@@ -70,26 +97,56 @@ export async function withCliTelemetry<T>(name: string, verbosity: RunVerbosity,
             sampler: new AlwaysOnSampler(),
             logRecordProcessors: [],
             metricReaders: [],
-            spanProcessors: [terminal, ...(process.env.OTEL_EXPORTER_OTLP_ENDPOINT || process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-                ? [new BatchSpanProcessor({ exporter: new OTLPTraceExporter({ timeoutMillis: 1500 }) })]
-                : [])],
+            spanProcessors: [
+                terminal,
+                ...(process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
+                process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+                    ? [
+                          new BatchSpanProcessor({
+                              exporter: new OTLPTraceExporter({ timeoutMillis: 1500 }),
+                          }),
+                      ]
+                    : []),
+            ],
         });
         sdk.start();
-    } catch { warn(); }
+    } catch {
+        warn();
+    }
     try {
-        return await invocation.run({ terminal: output, renderer: terminal, signal: controller.signal }, () => withLogSink(terminal?.log ?? (() => false), () => withSpan(name, callback)));
+        return await invocation.run(
+            { terminal: output, renderer: terminal, signal: controller.signal },
+            () => withLogSink(terminal?.log ?? (() => false), () => withSpan(name, callback)),
+        );
     } finally {
         process.off('SIGINT', abort);
         process.off('SIGTERM', abort);
         // Restore the terminal before waiting for a potentially unavailable exporter.
-        try { await terminal?.shutdown(); } catch { warn(); }
-        try { output.dispose(); } catch { warn(); }
+        try {
+            await terminal?.shutdown();
+        } catch {
+            warn();
+        }
+        try {
+            output.dispose();
+        } catch {
+            warn();
+        }
         let timeout: ReturnType<typeof setTimeout> | undefined;
         try {
             await Promise.race([
                 Promise.resolve().then(() => sdk?.shutdown()),
-                new Promise<never>((_resolve, reject) => { timeout = setTimeout(() => reject(new Error('Telemetry shutdown deadline')), 2000); }),
+                new Promise<never>((_resolve, reject) => {
+                    timeout = setTimeout(
+                        () => reject(new Error('Telemetry shutdown deadline')),
+                        2000,
+                    );
+                }),
             ]);
-        } catch { warn(); } finally { if (timeout) clearTimeout(timeout); }
+        } catch {
+            warn();
+        } finally {
+            if (timeout) clearTimeout(timeout);
+        }
     }
 }

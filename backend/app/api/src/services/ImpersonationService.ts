@@ -1,7 +1,13 @@
 import { SimpleError } from '@common/errors';
 import type { Token } from '@stamhoofd/models';
 import { AuditLog, ImpersonationToken, Organization, User } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, ImpersonationTicket } from '@stamhoofd/structures';
+import {
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    AuditLogSource,
+    AuditLogType,
+    ImpersonationTicket,
+} from '@stamhoofd/structures';
 
 import { Context } from '../helpers/Context.js';
 import { SessionService } from './SessionService.js';
@@ -31,7 +37,7 @@ export class ImpersonationService {
 
         await this.assertEnabled();
 
-        if (!await Context.auth.canImpersonate(impersonatedUser)) {
+        if (!(await Context.auth.canImpersonate(impersonatedUser))) {
             throw Context.auth.error({
                 message: 'Not allowed to impersonate this user',
                 human: $t('%ZmJ'),
@@ -75,7 +81,11 @@ export class ImpersonationService {
         // somebody else - to sign them into an account that is not theirs - gets nowhere.
         // A client cannot fake this address: Caddy overwrites X-Forwarded-For in production
         if (model.createdIp !== Context.request.getIP()) {
-            console.error('Impersonation ticket used from a different IP address', model.createdIp, Context.request.getIP());
+            console.error(
+                'Impersonation ticket used from a different IP address',
+                model.createdIp,
+                Context.request.getIP(),
+            );
             throw invalid;
         }
 
@@ -104,12 +114,12 @@ export class ImpersonationService {
 
         await Context.insecurelyAuthenticateAs(user);
 
-        if (!await Context.isImpersonationEnabled()) {
+        if (!(await Context.isImpersonationEnabled())) {
             await model.consume();
             throw invalid;
         }
 
-        if (!await Context.auth.canImpersonate(impersonatedUser)) {
+        if (!(await Context.auth.canImpersonate(impersonatedUser))) {
             await model.consume();
             throw Context.auth.error({
                 message: 'Not allowed to impersonate this user',
@@ -119,7 +129,7 @@ export class ImpersonationService {
 
         // A ticket hands out exactly one session, even when two requests redeem it at the
         // same time.
-        if (!await model.consume()) {
+        if (!(await model.consume())) {
             throw invalid;
         }
 
@@ -135,7 +145,7 @@ export class ImpersonationService {
      * request: a session that is already running only depends on the permissions.
      */
     private static async assertEnabled() {
-        if (!await Context.isImpersonationEnabled()) {
+        if (!(await Context.isImpersonationEnabled())) {
             throw new SimpleError({
                 code: 'feature_disabled',
                 message: 'Impersonation is not enabled for this organization',
@@ -150,7 +160,11 @@ export class ImpersonationService {
      * in the data itself: everything the session changes afterwards is already logged under
      * the administrator's own name.
      */
-    private static async logImpersonation(user: User, impersonatedUser: User, organizationId: string | null) {
+    private static async logImpersonation(
+        user: User,
+        impersonatedUser: User,
+        organizationId: string | null,
+    ) {
         const log = new AuditLog();
         log.type = AuditLogType.UserImpersonated;
         log.source = AuditLogSource.User;
@@ -159,16 +173,22 @@ export class ImpersonationService {
         log.organizationId = organizationId ?? impersonatedUser.organizationId;
 
         log.replacements = new Map([
-            ['u', AuditLogReplacement.create({
-                id: impersonatedUser.id,
-                value: impersonatedUser.email,
-                type: AuditLogReplacementType.User,
-            })],
-            ['u2', AuditLogReplacement.create({
-                id: user.id,
-                value: user.email,
-                type: AuditLogReplacementType.User,
-            })],
+            [
+                'u',
+                AuditLogReplacement.create({
+                    id: impersonatedUser.id,
+                    value: impersonatedUser.email,
+                    type: AuditLogReplacementType.User,
+                }),
+            ],
+            [
+                'u2',
+                AuditLogReplacement.create({
+                    id: user.id,
+                    value: user.email,
+                    type: AuditLogReplacementType.User,
+                }),
+            ],
         ]);
 
         await log.save();

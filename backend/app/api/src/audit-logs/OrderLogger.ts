@@ -1,5 +1,10 @@
 import { Order, Webshop } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, OrderStatus } from '@stamhoofd/structures';
+import {
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    AuditLogType,
+    OrderStatus,
+} from '@stamhoofd/structures';
 import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 
 const defaultGenerator = getDefaultGenerator({
@@ -20,7 +25,9 @@ export const OrderLogger = new ModelLogger(Order, {
         // todo: when placing an order / marking an order as paid
         // we should not log any stock changes
 
-        const webshop = Order.webshop.isLoaded(event.model) ? (event.model as (Order & Record<'webshop', Webshop>)).webshop : (await Webshop.getByID(event.model.webshopId));
+        const webshop = Order.webshop.isLoaded(event.model)
+            ? (event.model as Order & Record<'webshop', Webshop>).webshop
+            : await Webshop.getByID(event.model.webshopId);
         if (!webshop) {
             console.log('No webshop found for order', event.model.id);
             return;
@@ -41,17 +48,25 @@ export const OrderLogger = new ModelLogger(Order, {
 
     createReplacements: (model, options) => {
         return new Map([
-            ['w', AuditLogReplacement.create({
-                id: options.data.webshop.id,
-                value: options.data.webshop.meta.name,
-                type: AuditLogReplacementType.Webshop,
-            })],
-            ['o', AuditLogReplacement.create({
-                id: model.id,
-                value: model.number ? `bestelling #${model.number}` : `bestelling van ${model.data.customer.name}`,
-                type: AuditLogReplacementType.Order,
-                description: model.number ? model.data.customer.name : $t('%Cq'),
-            })],
+            [
+                'w',
+                AuditLogReplacement.create({
+                    id: options.data.webshop.id,
+                    value: options.data.webshop.meta.name,
+                    type: AuditLogReplacementType.Webshop,
+                }),
+            ],
+            [
+                'o',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.number
+                        ? `bestelling #${model.number}`
+                        : `bestelling van ${model.data.customer.name}`,
+                    type: AuditLogReplacementType.Order,
+                    description: model.number ? model.data.customer.name : $t('%Cq'),
+                }),
+            ],
         ]);
     },
 });

@@ -9,16 +9,19 @@ import { SeedTools } from '../helpers/SeedTools.js';
  *
  * Only invoiced balance items without relations and without dates are touched, so this is idempotent.
  */
-export async function backfillInvoicedBalanceItemDetails(): Promise<{ total: number; updated: number }> {
+export async function backfillInvoicedBalanceItemDetails(): Promise<{
+    total: number;
+    updated: number;
+}> {
     let updated = 0;
 
     const result = await SeedTools.loopBatched({
         batchSize: 100,
         query: InvoicedBalanceItem.select().where('startDate', null).where('endDate', null),
         batchAction: async (items: InvoicedBalanceItem[]) => {
-            const balanceItemIds = Formatter.uniqueArray(items.map(i => i.balanceItemId));
+            const balanceItemIds = Formatter.uniqueArray(items.map((i) => i.balanceItemId));
             const balanceItems = await BalanceItem.getByIDs(...balanceItemIds);
-            const balanceItemMap = new Map(balanceItems.map(b => [b.id, b]));
+            const balanceItemMap = new Map(balanceItems.map((b) => [b.id, b]));
 
             for (const item of items) {
                 if (item.relations.size > 0) {
@@ -30,7 +33,12 @@ export async function backfillInvoicedBalanceItemDetails(): Promise<{ total: num
                     continue;
                 }
 
-                if (item.type === balanceItem.type && balanceItem.relations.size === 0 && balanceItem.startDate === null && balanceItem.endDate === null) {
+                if (
+                    item.type === balanceItem.type &&
+                    balanceItem.relations.size === 0 &&
+                    balanceItem.startDate === null &&
+                    balanceItem.endDate === null
+                ) {
                     continue;
                 }
 
@@ -55,5 +63,7 @@ export default new Migration(async () => {
     }
 
     const result = await backfillInvoicedBalanceItemDetails();
-    console.log(`Filled in details of ${result.updated} of ${result.total} invoiced balance items.`);
+    console.log(
+        `Filled in details of ${result.updated} of ${result.total} invoiced balance items.`,
+    );
 });

@@ -11,48 +11,60 @@ export const orderSorters: SQLSortDefinitions<Order> = new Map<string, SQLSortDe
     // Why? Because ORDER BY firstName, lastName produces a different order dan ORDER BY CONCAT(firstName, ' ', lastName) if there are multiple people with spaces in the first name
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
-    ['createdAt', {
-        getValue(a) {
-            return Formatter.dateTimeIso(a.createdAt, 'UTC');
+    [
+        'createdAt',
+        {
+            getValue(a) {
+                return Formatter.dateTimeIso(a.createdAt, 'UTC');
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('createdAt'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('createdAt'),
-                direction,
-            });
+    ],
+    [
+        'updatedAt',
+        {
+            getValue(a) {
+                return Formatter.dateTimeIso(a.updatedAt, 'UTC');
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('updatedAt'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['updatedAt', {
-        getValue(a) {
-            return Formatter.dateTimeIso(a.updatedAt, 'UTC');
+    ],
+    [
+        'id',
+        {
+            getValue(a) {
+                return a.id;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('id'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('updatedAt'),
-                direction,
-            });
+    ],
+    [
+        'number',
+        {
+            getValue(a) {
+                return a.number;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('number'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['id', {
-        getValue(a) {
-            return a.id;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction,
-            });
-        },
-    }],
-    ['number', {
-        getValue(a) {
-            return a.number;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('number'),
-                direction,
-            });
-        },
-    }],
+    ],
 ]);

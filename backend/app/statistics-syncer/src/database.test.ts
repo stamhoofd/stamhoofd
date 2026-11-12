@@ -10,20 +10,32 @@ describe('getStatisticsDatabaseConfig', () => {
     });
 
     it('refuses the main database even when it inherits its port instead of naming one', () => {
-        TestUtils.setEnvironment('stamhoofdDatabase', { ...STAMHOOFD.stamhoofdDatabase, DB_PORT: 3307 });
-        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.stamhoofdDatabase, DB_PORT: undefined });
+        TestUtils.setEnvironment('stamhoofdDatabase', {
+            ...STAMHOOFD.stamhoofdDatabase,
+            DB_PORT: 3307,
+        });
+        TestUtils.setEnvironment('statisticsDatabase', {
+            ...STAMHOOFD.stamhoofdDatabase,
+            DB_PORT: undefined,
+        });
 
         expect(() => getStatisticsDatabaseConfig()).toThrow('has to be a separate one');
     });
 
     it('accepts the same database name on another server, which is a database of its own', () => {
-        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.stamhoofdDatabase, DB_HOST: 'statistics.example' });
+        TestUtils.setEnvironment('statisticsDatabase', {
+            ...STAMHOOFD.stamhoofdDatabase,
+            DB_HOST: 'statistics.example',
+        });
 
         expect(getStatisticsDatabaseConfig().DB_HOST).toBe('statistics.example');
     });
 
     it('refuses to run when no statistics database is configured', () => {
-        TestUtils.setEnvironment('statisticsDatabase', undefined as unknown as StatisticsEnvironment['statisticsDatabase']);
+        TestUtils.setEnvironment(
+            'statisticsDatabase',
+            undefined as unknown as StatisticsEnvironment['statisticsDatabase'],
+        );
 
         expect(() => getStatisticsDatabaseConfig()).toThrow('is not set');
     });
@@ -39,25 +51,46 @@ describe('getStatisticsPoolOptions', () => {
     });
 
     it('falls back to the default port on another server, whose ports are its own', () => {
-        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example', ...certs });
+        TestUtils.setEnvironment('statisticsDatabase', {
+            ...STAMHOOFD.statisticsDatabase,
+            DB_HOST: 'statistics.example',
+            ...certs,
+        });
 
         expect(getStatisticsPoolOptions().port).toBe(3306);
     });
 
     it('uses the port it was given', () => {
-        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example', DB_PORT: 3399, ...certs });
+        TestUtils.setEnvironment('statisticsDatabase', {
+            ...STAMHOOFD.statisticsDatabase,
+            DB_HOST: 'statistics.example',
+            DB_PORT: 3399,
+            ...certs,
+        });
 
         expect(getStatisticsPoolOptions().port).toBe(3399);
     });
 
     it('presents the client certificate to another server, whose login is created with REQUIRE X509', () => {
-        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example', ...certs });
+        TestUtils.setEnvironment('statisticsDatabase', {
+            ...STAMHOOFD.statisticsDatabase,
+            DB_HOST: 'statistics.example',
+            ...certs,
+        });
 
-        expect(getStatisticsPoolOptions()).toMatchObject({ useSSL: true, ca: '/certs/ca.pem', cert: '/certs/cert.pem', key: '/certs/key.pem' });
+        expect(getStatisticsPoolOptions()).toMatchObject({
+            useSSL: true,
+            ca: '/certs/ca.pem',
+            cert: '/certs/cert.pem',
+            key: '/certs/key.pem',
+        });
     });
 
     it('refuses to connect to another server without a client certificate', () => {
-        TestUtils.setEnvironment('statisticsDatabase', { ...STAMHOOFD.statisticsDatabase, DB_HOST: 'statistics.example' });
+        TestUtils.setEnvironment('statisticsDatabase', {
+            ...STAMHOOFD.statisticsDatabase,
+            DB_HOST: 'statistics.example',
+        });
 
         expect(() => getStatisticsPoolOptions()).toThrow(/DB_CERT and DB_KEY/);
     });
@@ -65,6 +98,10 @@ describe('getStatisticsPoolOptions', () => {
     it('does not ask for TLS while both databases are on one MySQL', () => {
         expect(STAMHOOFD.statisticsDatabase.DB_HOST).toBe(STAMHOOFD.stamhoofdDatabase.DB_HOST);
 
-        expect(getStatisticsPoolOptions()).toMatchObject({ useSSL: false, cert: undefined, key: undefined });
+        expect(getStatisticsPoolOptions()).toMatchObject({
+            useSSL: false,
+            cert: undefined,
+            key: undefined,
+        });
     });
 });

@@ -1,5 +1,11 @@
 import { column } from '@node/database';
-import { QueryableModel, SQLCalculation, SQLColumnExpression, SQLScalar, SQLWhereSign } from '@stamhoofd/sql';
+import {
+    QueryableModel,
+    SQLCalculation,
+    SQLColumnExpression,
+    SQLScalar,
+    SQLWhereSign,
+} from '@stamhoofd/sql';
 import { SessionLoginMethod } from '@stamhoofd/structures';
 import crypto from 'crypto';
 
@@ -44,7 +50,8 @@ export class MFAToken extends QueryableModel {
     expiresAt: Date;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -56,7 +63,8 @@ export class MFAToken extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -65,7 +73,14 @@ export class MFAToken extends QueryableModel {
     })
     updatedAt: Date;
 
-    static async createFor(userId: string, purpose: MFATokenPurpose, { webauthnChallenge = null, loginMethod = SessionLoginMethod.Password }: { webauthnChallenge?: string | null; loginMethod?: SessionLoginMethod } = {}): Promise<MFAToken> {
+    static async createFor(
+        userId: string,
+        purpose: MFATokenPurpose,
+        {
+            webauthnChallenge = null,
+            loginMethod = SessionLoginMethod.Password,
+        }: { webauthnChallenge?: string | null; loginMethod?: SessionLoginMethod } = {},
+    ): Promise<MFAToken> {
         // A new attempt supersedes the previous one. Without this, every single login
         // attempt of a user with 2FA leaves a row behind (anyone who knows the password
         // can create them at will), and the abandoned tokens stay usable until they
@@ -88,7 +103,9 @@ export class MFAToken extends QueryableModel {
      * expiring, but a token that is never used again would stay behind forever.
      */
     static async deleteExpired(): Promise<number> {
-        const { affectedRows } = await this.delete().where('expiresAt', SQLWhereSign.Less, new Date()).delete();
+        const { affectedRows } = await this.delete()
+            .where('expiresAt', SQLWhereSign.Less, new Date())
+            .delete();
         return affectedRows;
     }
 
@@ -127,7 +144,10 @@ export class MFAToken extends QueryableModel {
      */
     async registerFailedAttempt(): Promise<boolean> {
         await MFAToken.update()
-            .set('tries', new SQLCalculation(new SQLColumnExpression('tries')).add(new SQLScalar(1)))
+            .set(
+                'tries',
+                new SQLCalculation(new SQLColumnExpression('tries')).add(new SQLScalar(1)),
+            )
             .where('token', this.token)
             .update();
 

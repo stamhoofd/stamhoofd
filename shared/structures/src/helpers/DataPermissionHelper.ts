@@ -8,7 +8,10 @@ import type { Platform } from '../Platform.js';
  * @param organization
  * @returns
  */
-export function getDataPermissionSettings(platform: Platform, organization: Organization | null): DataPermissionsSettings | null {
+export function getDataPermissionSettings(
+    platform: Platform,
+    organization: Organization | null,
+): DataPermissionsSettings | null {
     if (STAMHOOFD.userMode === 'platform') {
         return platform.config.dataPermission;
     }
@@ -27,6 +30,9 @@ export function getDataPermissionSettings(platform: Platform, organization: Orga
  * @param organization
  * @returns
  */
-export function getDataPermissionSettingsOrDefault(platform: Platform, organization: Organization | null): DataPermissionsSettings {
+export function getDataPermissionSettingsOrDefault(
+    platform: Platform,
+    organization: Organization | null,
+): DataPermissionsSettings {
     return getDataPermissionSettings(platform, organization) ?? DataPermissionsSettings.create({});
 }

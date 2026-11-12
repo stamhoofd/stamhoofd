@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { MailchimpSyncType } from './MailchimpSyncRequest.js';
 
@@ -103,6 +112,9 @@ export class MailchimpSync extends AutoEncoder {
     finishedAt: Date | null = null;
 
     get isRunning() {
-        return this.status === MailchimpSyncStatus.Pending || this.status === MailchimpSyncStatus.Running;
+        return (
+            this.status === MailchimpSyncStatus.Pending ||
+            this.status === MailchimpSyncStatus.Running
+        );
     }
 }

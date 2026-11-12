@@ -1,4 +1,11 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -81,8 +88,12 @@ export class STInvoiceItem extends AutoEncoder {
         }
 
         if (pack.validUntil && pack.meta.pricingType !== STPricingType.Fixed) {
-            const totalDays = Math.round((pack.validUntil.getTime() - pack.meta.startDate.getTime()) / (1000 * 60 * 60 * 24));
-            let remainingDays = Math.round((pack.validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            const totalDays = Math.round(
+                (pack.validUntil.getTime() - pack.meta.startDate.getTime()) / (1000 * 60 * 60 * 24),
+            );
+            let remainingDays = Math.round(
+                (pack.validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+            );
 
             /// First 3 months are full price
             const paidDays = 30 * 3;
@@ -97,7 +108,12 @@ export class STInvoiceItem extends AutoEncoder {
             }
 
             if (pack.meta.pricingType === STPricingType.PerMember) {
-                unitPrice = Math.round(Math.min(unitPrice, unitPrice * remainingDays / (Math.max(365, totalDays) - paidDays)));
+                unitPrice = Math.round(
+                    Math.min(
+                        unitPrice,
+                        (unitPrice * remainingDays) / (Math.max(365, totalDays) - paidDays),
+                    ),
+                );
             } else {
                 unitPrice = Math.round(unitPrice);
             }
@@ -105,7 +121,12 @@ export class STInvoiceItem extends AutoEncoder {
 
         const item = STInvoiceItem.create({
             name: pack.meta.name,
-            description: pack.validUntil ? ('Van ' + Formatter.date(now, true) + ' tot ' + Formatter.date(pack.validUntil, true)) : ('Vanaf ' + Formatter.date(pack.meta.startDate, true)),
+            description: pack.validUntil
+                ? 'Van ' +
+                  Formatter.date(now, true) +
+                  ' tot ' +
+                  Formatter.date(pack.validUntil, true)
+                : 'Vanaf ' + Formatter.date(pack.meta.startDate, true),
             package: pack,
             date: now,
             unitPrice: unitPrice,
@@ -142,7 +163,10 @@ export class STInvoiceItem extends AutoEncoder {
         if (other.paymentFailedCount > this.paymentFailedCount) {
             this.paymentFailedCount = other.paymentFailedCount;
         }
-        if (other.firstFailedPayment && (!this.firstFailedPayment || other.firstFailedPayment < this.firstFailedPayment)) {
+        if (
+            other.firstFailedPayment &&
+            (!this.firstFailedPayment || other.firstFailedPayment < this.firstFailedPayment)
+        ) {
             this.firstFailedPayment = other.firstFailedPayment;
         }
         if (other.unitPrice !== this.unitPrice) {
@@ -151,7 +175,9 @@ export class STInvoiceItem extends AutoEncoder {
                 this.package = other.package;
                 return;
             }
-            throw new Error('Cannot merge items with different unit prices and amount greater than 1');
+            throw new Error(
+                'Cannot merge items with different unit prices and amount greater than 1',
+            );
         }
         this.amount += other.amount;
     }

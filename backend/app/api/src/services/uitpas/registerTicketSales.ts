@@ -26,21 +26,21 @@ type SuccessResponse = {
 
 function assertisSuccessResponse(json: unknown): asserts json is SuccessResponse {
     if (
-        typeof json !== 'object'
-        || json === null
-        || !('tariff' in json)
-        || typeof json.tariff !== 'object'
-        || json.tariff === null
-        || !('price' in json.tariff)
-        || typeof json.tariff.price !== 'number'
-        || !('id' in json.tariff)
-        || typeof json.tariff.id !== 'string'
-        || !('id' in json)
-        || typeof json.id !== 'string'
-        || !('uitpasNumber' in json)
-        || typeof json.uitpasNumber !== 'string'
-        || !('eventId' in json)
-        || typeof json.eventId !== 'string'
+        typeof json !== 'object' ||
+        json === null ||
+        !('tariff' in json) ||
+        typeof json.tariff !== 'object' ||
+        json.tariff === null ||
+        !('price' in json.tariff) ||
+        typeof json.tariff.price !== 'number' ||
+        !('id' in json.tariff) ||
+        typeof json.tariff.id !== 'string' ||
+        !('id' in json) ||
+        typeof json.id !== 'string' ||
+        !('uitpasNumber' in json) ||
+        typeof json.uitpasNumber !== 'string' ||
+        !('eventId' in json) ||
+        typeof json.eventId !== 'string'
     ) {
         console.error('Invalid register ticket sale response', json);
         throw new SimpleError({
@@ -55,13 +55,16 @@ function assertisSuccessResponse(json: unknown): asserts json is SuccessResponse
  * @returns Map of request (from parameters) -> response
  */
 
-export async function registerTicketSales(access_token: string, registerTicketSaleRequests: RegisterTicketSaleRequest[]): Promise<Map<RegisterTicketSaleRequest, RegisterTicketSaleResponse>> {
+export async function registerTicketSales(
+    access_token: string,
+    registerTicketSaleRequests: RegisterTicketSaleRequest[],
+): Promise<Map<RegisterTicketSaleRequest, RegisterTicketSaleResponse>> {
     // https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/create-a-ticket-sale
 
     console.error('Registering ticket sales', registerTicketSaleRequests);
     if (registerTicketSaleRequests.length === 0) {
         return new Map();
-    };
+    }
     const url = `${STAMHOOFD.UITPAS_API_URL}/ticket-sales`;
     const body = registerTicketSaleRequests.map((ticketSale) => {
         const eventId = ticketSale.uitpasEventUrl.split('/').pop();
@@ -103,7 +106,9 @@ export async function registerTicketSales(access_token: string, registerTicketSa
         });
     });
     if (!response.ok) {
-        const json: unknown = await response.json().catch(() => { /* ignore */ });
+        const json: unknown = await response.json().catch(() => {
+            /* ignore */
+        });
         console.error('Unsuccessful response when registering ticket sales', json);
         throw new SimpleError({
             code: 'unsuccessful_response_registering_ticket_sales',
@@ -124,7 +129,12 @@ export async function registerTicketSales(access_token: string, registerTicketSa
     const results: Map<RegisterTicketSaleRequest, RegisterTicketSaleResponse> = new Map();
     for (const ticketSale of json) {
         assertisSuccessResponse(ticketSale);
-        const request = registerTicketSaleRequests.find(r => r.uitpasNumber === ticketSale.uitpasNumber && r.uitpasEventUrl.endsWith(`/${ticketSale.eventId}`) && r.uitpasTariffId === ticketSale.tariff.id);
+        const request = registerTicketSaleRequests.find(
+            (r) =>
+                r.uitpasNumber === ticketSale.uitpasNumber &&
+                r.uitpasEventUrl.endsWith(`/${ticketSale.eventId}`) &&
+                r.uitpasTariffId === ticketSale.tariff.id,
+        );
         if (!request) {
             console.error('Could not find request for ticket sale', ticketSale);
             continue;

@@ -5,7 +5,10 @@ import { PaginatedResponse, mergeFilters } from '@stamhoofd/structures';
 import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint.js';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
-async function getRecipients(result: PaginatedResponse<MembersBlob, LimitedFilteredRequest>, type: 'member' | 'parents' | 'unverified') {
+async function getRecipients(
+    result: PaginatedResponse<MembersBlob, LimitedFilteredRequest>,
+    type: 'member' | 'parents' | 'unverified',
+) {
     const recipients: EmailRecipient[] = [];
 
     for (const member of result.results.members) {
@@ -26,21 +29,23 @@ Email.recipientLoaders.set(EmailRecipientFilterType.Members, {
     },
 
     count: async (query: LimitedFilteredRequest) => {
-        query.filter = mergeFilters([query.filter, {
-            $and: [
-                {
-                    email: {
-                        $neq: null,
+        query.filter = mergeFilters([
+            query.filter,
+            {
+                $and: [
+                    {
+                        email: {
+                            $neq: null,
+                        },
                     },
-                },
-                {
-                    email: {
-                        $neq: '',
+                    {
+                        email: {
+                            $neq: '',
+                        },
                     },
-                },
-            ],
-
-        }]);
+                ],
+            },
+        ]);
         const q = await GetMembersEndpoint.buildQuery(query);
         return await q.count();
     },
@@ -58,9 +63,7 @@ Email.recipientLoaders.set(EmailRecipientFilterType.MemberParents, {
 
     count: async (query: LimitedFilteredRequest) => {
         const q = await GetMembersEndpoint.buildQuery(query);
-        return await q.sum(
-            SQL.jsonLength(SQL.column('details'), '$.value.parents[*].email'),
-        );
+        return await q.sum(SQL.jsonLength(SQL.column('details'), '$.value.parents[*].email'));
     },
 });
 
@@ -76,8 +79,6 @@ Email.recipientLoaders.set(EmailRecipientFilterType.MemberUnverified, {
 
     count: async (query: LimitedFilteredRequest) => {
         const q = await GetMembersEndpoint.buildQuery(query);
-        return await q.sum(
-            SQL.jsonLength(SQL.column('details'), '$.value.unverifiedEmails'),
-        );
+        return await q.sum(SQL.jsonLength(SQL.column('details'), '$.value.unverifiedEmails'));
     },
 });

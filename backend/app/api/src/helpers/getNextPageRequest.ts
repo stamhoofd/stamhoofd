@@ -8,7 +8,11 @@ import { getSortFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
  * is never skipped or read twice while the list changes underneath. A cursor that doesn't move past the
  * one it came from would read the same page forever, so it ends the list instead.
  */
-export function getNextPageRequest<T>(objects: T[], requestQuery: LimitedFilteredRequest, sorters: SQLSortDefinitions<T>): LimitedFilteredRequest | undefined {
+export function getNextPageRequest<T>(
+    objects: T[],
+    requestQuery: LimitedFilteredRequest,
+    sorters: SQLSortDefinitions<T>,
+): LimitedFilteredRequest | undefined {
     if (objects.length < requestQuery.limit) {
         return undefined;
     }

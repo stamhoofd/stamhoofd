@@ -36,46 +36,79 @@ function request(language = 'nl') {
 
 describe('HumanErrorMessageMiddleware', () => {
     test('adds a human message to an unknown_filter error', async () => {
-        const endpoint = new ThrowingEndpoint(new SimpleError({ code: 'unknown_filter', message: 'Unknown filter secret' }));
+        const endpoint = new ThrowingEndpoint(
+            new SimpleError({ code: 'unknown_filter', message: 'Unknown filter secret' }),
+        );
 
-        await expect(testServer.test(endpoint, request()))
-            .rejects.toThrow(expect.objectContaining({ code: 'unknown_filter', human: 'Deze filter wordt niet ondersteund of er ging iets fout met deze filter' }));
+        await expect(testServer.test(endpoint, request())).rejects.toThrow(
+            expect.objectContaining({
+                code: 'unknown_filter',
+                human: 'Deze filter wordt niet ondersteund of er ging iets fout met deze filter',
+            }),
+        );
     });
 
     test('uses the language of the request', async () => {
-        TestUtils.setEnvironment('locales', { [Country.Belgium]: [Language.Dutch, Language.French] });
-        const endpoint = new ThrowingEndpoint(new SimpleError({ code: 'unknown_filter', message: 'Unknown filter secret' }));
+        TestUtils.setEnvironment('locales', {
+            [Country.Belgium]: [Language.Dutch, Language.French],
+        });
+        const endpoint = new ThrowingEndpoint(
+            new SimpleError({ code: 'unknown_filter', message: 'Unknown filter secret' }),
+        );
 
-        await expect(testServer.test(endpoint, request('fr')))
-            .rejects.toThrow(expect.objectContaining({ code: 'unknown_filter', human: "Ce filtre n'est pas pris en charge ou une erreur s'est produite avec ce filtre" }));
+        await expect(testServer.test(endpoint, request('fr'))).rejects.toThrow(
+            expect.objectContaining({
+                code: 'unknown_filter',
+                human: "Ce filtre n'est pas pris en charge ou une erreur s'est produite avec ce filtre",
+            }),
+        );
     });
 
     test('adds a human message to every unknown_filter error in a SimpleErrors', async () => {
-        const endpoint = new ThrowingEndpoint(new SimpleErrors(
-            new SimpleError({ code: 'unknown_filter', message: 'Unknown filter a' }),
-            new SimpleError({ code: 'unknown_filter', message: 'Unknown filter b' }),
-        ));
+        const endpoint = new ThrowingEndpoint(
+            new SimpleErrors(
+                new SimpleError({ code: 'unknown_filter', message: 'Unknown filter a' }),
+                new SimpleError({ code: 'unknown_filter', message: 'Unknown filter b' }),
+            ),
+        );
 
-        await expect(testServer.test(endpoint, request()))
-            .rejects.toThrow(expect.objectContaining({
+        await expect(testServer.test(endpoint, request())).rejects.toThrow(
+            expect.objectContaining({
                 errors: [
-                    expect.objectContaining({ code: 'unknown_filter', human: 'Deze filter wordt niet ondersteund of er ging iets fout met deze filter' }),
-                    expect.objectContaining({ code: 'unknown_filter', human: 'Deze filter wordt niet ondersteund of er ging iets fout met deze filter' }),
+                    expect.objectContaining({
+                        code: 'unknown_filter',
+                        human: 'Deze filter wordt niet ondersteund of er ging iets fout met deze filter',
+                    }),
+                    expect.objectContaining({
+                        code: 'unknown_filter',
+                        human: 'Deze filter wordt niet ondersteund of er ging iets fout met deze filter',
+                    }),
                 ],
-            }));
+            }),
+        );
     });
 
     test('keeps an existing human message', async () => {
-        const endpoint = new ThrowingEndpoint(new SimpleError({ code: 'unknown_filter', message: 'Unknown filter secret', human: 'Eigen boodschap' }));
+        const endpoint = new ThrowingEndpoint(
+            new SimpleError({
+                code: 'unknown_filter',
+                message: 'Unknown filter secret',
+                human: 'Eigen boodschap',
+            }),
+        );
 
-        await expect(testServer.test(endpoint, request()))
-            .rejects.toThrow(expect.objectContaining({ code: 'unknown_filter', human: 'Eigen boodschap' }));
+        await expect(testServer.test(endpoint, request())).rejects.toThrow(
+            expect.objectContaining({ code: 'unknown_filter', human: 'Eigen boodschap' }),
+        );
     });
 
     test('leaves other errors untouched', async () => {
-        const endpoint = new ThrowingEndpoint(new SimpleError({ code: 'not_found', message: 'Not found' }));
+        const endpoint = new ThrowingEndpoint(
+            new SimpleError({ code: 'not_found', message: 'Not found' }),
+        );
 
-        await expect(testServer.test(endpoint, request()))
-            .rejects.toThrow(expect.objectContaining({ code: 'not_found', human: undefined }));
+        await expect(testServer.test(endpoint, request())).rejects.toThrow(
+            expect.objectContaining({ code: 'not_found', human: undefined }),
+        );
     });
 });

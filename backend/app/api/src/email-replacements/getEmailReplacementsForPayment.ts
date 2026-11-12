@@ -1,6 +1,14 @@
 import { Order, Organization, Webshop } from '@stamhoofd/models';
 import type { BalanceItemPaymentsHtmlTableItem, PaymentGeneral } from '@stamhoofd/structures';
-import { BalanceItemRelationType, BalanceItemType, getBalanceItemPaymentsHtmlTable, PaymentMethod, PaymentMethodHelper, Replacement, Webshop as WebshopStruct } from '@stamhoofd/structures';
+import {
+    BalanceItemRelationType,
+    BalanceItemType,
+    getBalanceItemPaymentsHtmlTable,
+    PaymentMethod,
+    PaymentMethodHelper,
+    Replacement,
+    Webshop as WebshopStruct,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { createOrderDataHTMLTable } from '../helpers/email-html-helpers.js';
 
@@ -22,14 +30,17 @@ export type ReplacementsOptions = {
 /**
  * To reduce the amount of queries, payment options should be generated for the whole aray of payments you want to send emails to.
  */
-export async function buildReplacementOptions(payments: PaymentGeneral[], options?: { doesIncludePaymentWithoutOrders: boolean; areAllPaymentsTransfers: boolean }): Promise<ReplacementsOptions> {
+export async function buildReplacementOptions(
+    payments: PaymentGeneral[],
+    options?: { doesIncludePaymentWithoutOrders: boolean; areAllPaymentsTransfers: boolean },
+): Promise<ReplacementsOptions> {
     // get all orders linked to the payments
     const allOrderIdsSet = new Set<string>();
     const allWebshopIdsSet = new Set<string>();
     const organizationIdsForOrdersSet = new Set<string>();
 
     for (const payment of payments) {
-        payment.webshopIds.forEach(id => allWebshopIdsSet.add(id));
+        payment.webshopIds.forEach((id) => allWebshopIdsSet.add(id));
 
         for (const balanceItemPayment of payment.balanceItemPayments) {
             const balanceItem = balanceItemPayment.balanceItem;
@@ -44,15 +55,19 @@ export async function buildReplacementOptions(payments: PaymentGeneral[], option
 
     // get all orders (for replacements later)
     const orders = await Order.getByIDs(...allOrderIdsSet);
-    const orderMap = new Map<string, Order>(orders.map(o => [o.id, o] as [string, Order]));
+    const orderMap = new Map<string, Order>(orders.map((o) => [o.id, o] as [string, Order]));
 
     // get all webshops (for replacements later)
     const webshops = await Webshop.getByIDs(...allWebshopIdsSet);
-    const webshopMap = new Map<string, Webshop>(webshops.map(w => [w.id, w] as [string, Webshop]));
+    const webshopMap = new Map<string, Webshop>(
+        webshops.map((w) => [w.id, w] as [string, Webshop]),
+    );
 
     // get all organizations (for replacements later)
     const organizations = await Organization.getByIDs(...organizationIdsForOrdersSet);
-    const organizationMap = new Map<string, Organization>(organizations.map(o => [o.id, o] as [string, Organization]));
+    const organizationMap = new Map<string, Organization>(
+        organizations.map((o) => [o.id, o] as [string, Organization]),
+    );
 
     return {
         shouldAddReplacementsForOrder: options ? !options.doesIncludePaymentWithoutOrders : true,
@@ -63,8 +78,17 @@ export async function buildReplacementOptions(payments: PaymentGeneral[], option
     };
 }
 
-export function getEmailReplacementsForPayment(payment: PaymentGeneral, options: ReplacementsOptions): Replacement[] {
-    const { orderMap, webshopMap, organizationMap, shouldAddReplacementsForOrder, shouldAddReplacementsForTransfers } = options;
+export function getEmailReplacementsForPayment(
+    payment: PaymentGeneral,
+    options: ReplacementsOptions,
+): Replacement[] {
+    const {
+        orderMap,
+        webshopMap,
+        organizationMap,
+        shouldAddReplacementsForOrder,
+        shouldAddReplacementsForTransfers,
+    } = options;
     const orderIds = new Set<string>();
 
     for (const balanceItemPayment of payment.balanceItemPayments) {
@@ -102,9 +126,14 @@ export function getEmailReplacementsForPayment(payment: PaymentGeneral, options:
 
                 orderUrlReplacement = Replacement.create({
                     token: 'orderUrl',
-                    value: 'https://' + webshopStruct.getUrl(organization) + '/order/' + (singleOrder.id),
+                    value:
+                        'https://' +
+                        webshopStruct.getUrl(organization) +
+                        '/order/' +
+                        singleOrder.id,
                 });
-                paymentUrl = 'https://' + webshopStruct.getUrl(organization) + '/order/' + (singleOrder.id);
+                paymentUrl =
+                    'https://' + webshopStruct.getUrl(organization) + '/order/' + singleOrder.id;
             }
         } else {
             // Fallback (should not happen, but better than leaving {{orderUrl}} in place)
@@ -128,7 +157,7 @@ export function getEmailReplacementsForPayment(payment: PaymentGeneral, options:
 
     const paymentDataHtml = createPaymentDataHtml();
 
-    return ([
+    return [
         Replacement.create({
             token: 'paymentUrl',
             value: paymentUrl,
@@ -143,33 +172,38 @@ export function getEmailReplacementsForPayment(payment: PaymentGeneral, options:
         }),
         ...((shouldAddReplacementsForTransfers ?? true)
             ? [
-                    Replacement.create({
-                        token: 'transferDescription',
-                        value: (payment.transferDescription ?? ''),
-                    }),
-                    Replacement.create({
-                        token: 'transferBankAccount',
-                        value: payment.transferSettings?.iban ?? '',
-                    }),
-                    Replacement.create({
-                        token: 'transferBankCreditor',
-                        value: payment.transferSettings?.creditor ?? (payment.organizationId ? organizationMap.get(payment.organizationId)?.name : '') ?? '',
-                    }),
-                ]
+                  Replacement.create({
+                      token: 'transferDescription',
+                      value: payment.transferDescription ?? '',
+                  }),
+                  Replacement.create({
+                      token: 'transferBankAccount',
+                      value: payment.transferSettings?.iban ?? '',
+                  }),
+                  Replacement.create({
+                      token: 'transferBankCreditor',
+                      value:
+                          payment.transferSettings?.creditor ??
+                          (payment.organizationId
+                              ? organizationMap.get(payment.organizationId)?.name
+                              : '') ??
+                          '',
+                  }),
+              ]
             : [
-                    Replacement.create({
-                        token: 'transferDescription',
-                        value: '',
-                    }),
-                    Replacement.create({
-                        token: 'transferBankAccount',
-                        value: '',
-                    }),
-                    Replacement.create({
-                        token: 'transferBankCreditor',
-                        value: '',
-                    }),
-                ]),
+                  Replacement.create({
+                      token: 'transferDescription',
+                      value: '',
+                  }),
+                  Replacement.create({
+                      token: 'transferBankAccount',
+                      value: '',
+                  }),
+                  Replacement.create({
+                      token: 'transferBankCreditor',
+                      value: '',
+                  }),
+              ]),
 
         Replacement.create({
             token: 'overviewTable',
@@ -195,7 +229,7 @@ export function getEmailReplacementsForPayment(payment: PaymentGeneral, options:
             value: payment.memberNames,
         }),
         orderUrlReplacement,
-    ]).filter(replacementOrNull => replacementOrNull !== null);
+    ].filter((replacementOrNull) => replacementOrNull !== null);
 }
 
 function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: ReplacementsOptions) {
@@ -216,24 +250,30 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
                         const webshop = webshopMap.get(order.webshopId);
                         if (webshop) {
                             if (order.number) {
-                                overviewContext.add($t('%1Kz', {
-                                    webshop: webshop.meta.name,
-                                    orderNumber: order.number ?? '',
-                                }));
+                                overviewContext.add(
+                                    $t('%1Kz', {
+                                        webshop: webshop.meta.name,
+                                        orderNumber: order.number ?? '',
+                                    }),
+                                );
                             } else {
                                 overviewContext.add(webshop.meta.name);
                             }
                         } else {
-                            overviewContext.add($t('%1L0', {
-                                orderNumber: order.number ?? '',
-                            }));
+                            overviewContext.add(
+                                $t('%1L0', {
+                                    orderNumber: order.number ?? '',
+                                }),
+                            );
                         }
                     }
                 }
                 break;
             }
             case BalanceItemType.Registration: {
-                const memberName = balanceItem.relations.get(BalanceItemRelationType.Member)?.name.toString();
+                const memberName = balanceItem.relations
+                    .get(BalanceItemRelationType.Member)
+                    ?.name.toString();
                 if (memberName) {
                     registrationMemberNames.add(memberName);
                 } else {
@@ -249,7 +289,11 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
     }
 
     if (registrationMemberNames.size > 0) {
-        const memberNames = Formatter.joinLast([...registrationMemberNames], ', ', ' ' + $t('%M1') + ' ');
+        const memberNames = Formatter.joinLast(
+            [...registrationMemberNames],
+            ', ',
+            ' ' + $t('%M1') + ' ',
+        );
         overviewContext.add($t('%x6') + ' ' + memberNames);
     }
 
@@ -263,7 +307,9 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
         if (payment.balanceItemPayments.length > 1) {
             // return title if all balance items have the same title
             const firstTitle = payment.balanceItemPayments[0].balanceItem.itemTitle;
-            const haveAllSameTitle = payment.balanceItemPayments.every(p => p.balanceItem.itemTitle === firstTitle);
+            const haveAllSameTitle = payment.balanceItemPayments.every(
+                (p) => p.balanceItem.itemTitle === firstTitle,
+            );
 
             if (haveAllSameTitle) {
                 return `${firstTitle} (${payment.balanceItemPayments.length}x)`;
@@ -281,7 +327,10 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
     return [...overviewContext].join(', ');
 }
 
-function unboxBalanceItemPayments({ balanceItemPayments }: PaymentGeneral, orderMap: Map<string, Order>): BalanceItemPaymentsHtmlTableItem[] {
+function unboxBalanceItemPayments(
+    { balanceItemPayments }: PaymentGeneral,
+    orderMap: Map<string, Order>,
+): BalanceItemPaymentsHtmlTableItem[] {
     const results: BalanceItemPaymentsHtmlTableItem[] = [];
     for (const item of balanceItemPayments) {
         const orderId = item.balanceItem.orderId;

@@ -3,7 +3,12 @@ import { Model } from '@node/database';
 import { AuditLog } from '@stamhoofd/models';
 import { ObjectDiffer } from '@stamhoofd/object-differ';
 import type { AuditLogType } from '@stamhoofd/structures';
-import { AuditLogPatchItem, AuditLogPatchItemType, AuditLogReplacement, AuditLogSource } from '@stamhoofd/structures';
+import {
+    AuditLogPatchItem,
+    AuditLogPatchItemType,
+    AuditLogReplacement,
+    AuditLogSource,
+} from '@stamhoofd/structures';
 import { ContextInstance } from '../helpers/Context.js';
 import { AuditLogService } from '../services/AuditLogService.js';
 
@@ -21,7 +26,9 @@ type DefaultLogOptionsType = {
     deleted?: AuditLogType;
 };
 
-type EventOptionsGenerator<M extends Model, D> = (event: ModelEvent<M>) => ModelEventLogOptions<D> | Promise<ModelEventLogOptions<D> | undefined> | undefined;
+type EventOptionsGenerator<M extends Model, D> = (
+    event: ModelEvent<M>,
+) => ModelEventLogOptions<D> | Promise<ModelEventLogOptions<D> | undefined> | undefined;
 
 export type ModelLoggerOptions<M extends Model, D = undefined> = {
     optionsGenerator: EventOptionsGenerator<M, D>;
@@ -29,14 +36,26 @@ export type ModelLoggerOptions<M extends Model, D = undefined> = {
     sensitiveKeys?: string[];
     /** Model field names mapped to audit-log keys; unmapped fields keep their original name. */
     renamedKeys?: Map<string, string>;
-    generateDescription?(event: ModelEvent<M>, options: ModelEventLogOptions<D>): string | null | undefined;
-    createReplacements?(model: M, options: ModelEventLogOptions<D>): Map<string, AuditLogReplacement>;
-    postProcess?(event: ModelEvent<M>, options: ModelEventLogOptions<D>, log: AuditLog): Promise<void> | void;
+    generateDescription?(
+        event: ModelEvent<M>,
+        options: ModelEventLogOptions<D>,
+    ): string | null | undefined;
+    createReplacements?(
+        model: M,
+        options: ModelEventLogOptions<D>,
+    ): Map<string, AuditLogReplacement>;
+    postProcess?(
+        event: ModelEvent<M>,
+        options: ModelEventLogOptions<D>,
+        log: AuditLog,
+    ): Promise<void> | void;
 };
 
 const ModelEventsMap = new WeakMap<Model, { events: AuditLog[] }>();
 
-export function getDefaultGenerator<M extends Model = Model>(types: DefaultLogOptionsType): EventOptionsGenerator<M, { model: M }> {
+export function getDefaultGenerator<M extends Model = Model>(
+    types: DefaultLogOptionsType,
+): EventOptionsGenerator<M, { model: M }> {
     return (event: ModelEvent<M>) => {
         if (event.type === 'created') {
             if (types.created) {
@@ -49,7 +68,7 @@ export function getDefaultGenerator<M extends Model = Model>(types: DefaultLogOp
 
         if (event.type === 'updated') {
             // Generate changes list
-            if ('deletedAt' in event.changedFields && ((event.model as any).deletedAt)) {
+            if ('deletedAt' in event.changedFields && (event.model as any).deletedAt) {
                 if (!('deletedAt' in event.originalFields) || !event.originalFields.deletedAt) {
                     event = {
                         ...event,
@@ -63,19 +82,28 @@ export function getDefaultGenerator<M extends Model = Model>(types: DefaultLogOp
             }
 
             if (types.updated) {
-                if ('createdAt' in event.model && event.model.createdAt instanceof Date && event.model.createdAt.getTime() >= Date.now() - 1000) {
+                if (
+                    'createdAt' in event.model &&
+                    event.model.createdAt instanceof Date &&
+                    event.model.createdAt.getTime() >= Date.now() - 1000
+                ) {
                     // Ignore quick model changes after insertion: these are often side effects of code that should not be logged
                     // (the created event normally doesn't contain what has been added - so no need to log what has been changed since creation)
                     if (types.created && types.created !== types.updated) {
                         // Merge into create event
                         const events = ModelEventsMap.get(event.model)?.events;
                         if (events && events.length > 0) {
-                            mergeInto = events.find(e => e.type === types.created);
+                            mergeInto = events.find((e) => e.type === types.created);
                         }
                     }
                 }
 
-                return { type: types.updated, generatePatchList: true, data: { model: event.model }, mergeInto };
+                return {
+                    type: types.updated,
+                    generatePatchList: true,
+                    data: { model: event.model },
+                    mergeInto,
+                };
             }
             return;
         }
@@ -95,9 +123,19 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
     skipKeys: string[] = [];
     sensitiveKeys: string[] = [];
     renamedKeys: Map<string, string> = new Map();
-    generateDescription?: (event: ModelEvent<M>, options: ModelEventLogOptions<D>) => string | null | undefined;
-    createReplacements?: (model: M, options: ModelEventLogOptions<D>) => Map<string, AuditLogReplacement>;
-    postProcess?: (event: ModelEvent<M>, options: ModelEventLogOptions<D>, log: AuditLog) => Promise<void> | void;
+    generateDescription?: (
+        event: ModelEvent<M>,
+        options: ModelEventLogOptions<D>,
+    ) => string | null | undefined;
+    createReplacements?: (
+        model: M,
+        options: ModelEventLogOptions<D>,
+    ) => Map<string, AuditLogReplacement>;
+    postProcess?: (
+        event: ModelEvent<M>,
+        options: ModelEventLogOptions<D>,
+        log: AuditLog,
+    ) => Promise<void> | void;
     static sharedSkipKeys = ['id', 'createdAt', 'updatedAt', 'deletedAt'];
     static sharedSensitiveKeys = ['password'];
 
@@ -121,7 +159,10 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
             // While impersonating, a change is made by the administrator behind the
             // session, never by the account they are looking through.
             const actor = context?.impersonatedUser ? context.user : context?.optionalAuth?.user;
-            let userId = settings?.userId !== undefined ? settings?.userId : (actor?.id ?? settings?.fallbackUserId ?? null);
+            let userId =
+                settings?.userId !== undefined
+                    ? settings?.userId
+                    : (actor?.id ?? settings?.fallbackUserId ?? null);
 
             if (userId === '1') {
                 // System user
@@ -143,9 +184,13 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
             }
             log.userId = userId;
 
-            log.organizationId = context?.organization?.id ?? settings?.fallbackOrganizationId ?? null;
+            log.organizationId =
+                context?.organization?.id ?? settings?.fallbackOrganizationId ?? null;
 
-            if ('organizationId' in event.model && typeof event.model['organizationId'] === 'string') {
+            if (
+                'organizationId' in event.model &&
+                typeof event.model['organizationId'] === 'string'
+            ) {
                 // Always override
                 log.organizationId = event.model.organizationId;
             }
@@ -160,14 +205,19 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
 
             log.type = options.type;
             log.objectId = options.objectId ?? event.model.getPrimaryKey()?.toString() ?? null;
-            log.replacements = this.createReplacements ? this.createReplacements(event.model as M, options) : new Map();
-            log.description = (this.generateDescription ? this.generateDescription(event, options) : '') ?? '';
+            log.replacements = this.createReplacements
+                ? this.createReplacements(event.model as M, options)
+                : new Map();
+            log.description =
+                (this.generateDescription ? this.generateDescription(event, options) : '') ?? '';
 
             if (options.generatePatchList && event.type === 'updated') {
                 const oldModel = event.getOldModel();
 
                 // Generate changes list
-                const changedProperties = Object.keys(event.changedFields).filter(k => !this.skipKeys?.includes(k) && !ModelLogger.sharedSkipKeys.includes(k));
+                const changedProperties = Object.keys(event.changedFields).filter(
+                    (k) => !this.skipKeys?.includes(k) && !ModelLogger.sharedSkipKeys.includes(k),
+                );
 
                 if (changedProperties.length > 0) {
                     for (const key of changedProperties) {
@@ -176,19 +226,26 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
                             continue;
                         }
                         const renamedKey = this.renamedKeys.get(key) ?? key;
-                        if (ModelLogger.sharedSensitiveKeys.includes(key) || (this.skipKeys && this.skipKeys.includes(key))) {
-                            log.patchList.push(AuditLogPatchItem.create({
-                                key: AuditLogReplacement.key(renamedKey),
-                                type: AuditLogPatchItemType.Changed,
-                            }));
+                        if (
+                            ModelLogger.sharedSensitiveKeys.includes(key) ||
+                            (this.skipKeys && this.skipKeys.includes(key))
+                        ) {
+                            log.patchList.push(
+                                AuditLogPatchItem.create({
+                                    key: AuditLogReplacement.key(renamedKey),
+                                    type: AuditLogPatchItemType.Changed,
+                                }),
+                            );
                         } else {
                             const column = event.model.static.columns?.get(key);
-                            log.patchList.push(...ObjectDiffer.diff(
-                                key in oldModel ? oldModel[key] : undefined,
-                                key in event.model ? event.model[key] : undefined,
-                                AuditLogReplacement.key(renamedKey),
-                                column?.decoder,
-                            ));
+                            log.patchList.push(
+                                ...ObjectDiffer.diff(
+                                    key in oldModel ? oldModel[key] : undefined,
+                                    key in event.model ? event.model[key] : undefined,
+                                    AuditLogReplacement.key(renamedKey),
+                                    column?.decoder,
+                                ),
+                            );
                         }
                     }
 
@@ -264,5 +321,5 @@ export class ModelLogger<ModelType extends typeof Model, M extends InstanceType<
             console.error('Failed to save log', e, log);
         }
         return false;
-    };
+    }
 }

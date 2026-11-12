@@ -18,10 +18,20 @@ class Query extends AutoEncoder {
     @field({ decoder: new StringNullableDecoder(StringDecoder), optional: true, nullable: true })
     webshopId: string | null = null;
 
-    @field({ decoder: new StringNullableDecoder(new StringArrayDecoder(StringDecoder)), optional: true, nullable: true })
+    @field({
+        decoder: new StringNullableDecoder(new StringArrayDecoder(StringDecoder)),
+        optional: true,
+        nullable: true,
+    })
     groupIds: string[] | null = null;
 
-    @field({ decoder: new StringNullableDecoder(new StringArrayDecoder(new EnumDecoder(EmailTemplateType))), optional: true, nullable: true })
+    @field({
+        decoder: new StringNullableDecoder(
+            new StringArrayDecoder(new EnumDecoder(EmailTemplateType)),
+        ),
+        optional: true,
+        nullable: true,
+    })
     types: EmailTemplateType[] | null = null;
 }
 
@@ -48,7 +58,7 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
         await Context.authenticate();
 
         if (organization) {
-            if (!await Context.auth.canReadEmailTemplates(organization.id)) {
+            if (!(await Context.auth.canReadEmailTemplates(organization.id))) {
                 throw Context.auth.error();
             }
         }
@@ -62,12 +72,14 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
 
         const platform = await Platform.getShared();
 
-        const types = (request.query.types ?? [...Object.values(EmailTemplateType)]).filter((type) => {
-            if (!organization) {
-                return EmailTemplateStruct.allowPlatformLevel(type);
-            }
-            return EmailTemplateStruct.allowOrganizationLevel(type, organization, platform);
-        });
+        const types = (request.query.types ?? [...Object.values(EmailTemplateType)]).filter(
+            (type) => {
+                if (!organization) {
+                    return EmailTemplateStruct.allowPlatformLevel(type);
+                }
+                return EmailTemplateStruct.allowOrganizationLevel(type, organization, platform);
+            },
+        );
 
         if (types.length === 0) {
             throw new SimpleError({
@@ -77,37 +89,45 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         const templates = organization
-            ? (
-                    await EmailTemplate.where({
-                        organizationId: organization.id,
-                        webshopId: request.query.webshopId ?? null,
-                        groupId: request.query.groupIds ? { sign: 'IN', value: request.query.groupIds } : null,
-                        type: { sign: 'IN', value: types } })
-                )
-            : (
-                // Required for event emails when logged in as the platform admin
-                    (request.query.webshopId || request.query.groupIds)
-                        ? await EmailTemplate.where({
-                                webshopId: request.query.webshopId ?? null,
-                                groupId: request.query.groupIds ? { sign: 'IN', value: request.query.groupIds } : null,
-                                type: { sign: 'IN', value: types },
-                            })
-                        : []
-                );
+            ? await EmailTemplate.where({
+                  organizationId: organization.id,
+                  webshopId: request.query.webshopId ?? null,
+                  groupId: request.query.groupIds
+                      ? { sign: 'IN', value: request.query.groupIds }
+                      : null,
+                  type: { sign: 'IN', value: types },
+              })
+            : // Required for event emails when logged in as the platform admin
+              request.query.webshopId || request.query.groupIds
+              ? await EmailTemplate.where({
+                    webshopId: request.query.webshopId ?? null,
+                    groupId: request.query.groupIds
+                        ? { sign: 'IN', value: request.query.groupIds }
+                        : null,
+                    type: { sign: 'IN', value: types },
+                })
+              : [];
 
-        const defaultTemplateTypes = organization ? types.filter(type => !EmailTemplateStruct.isSavedEmail(type)) : types;
-        const defaultTemplates = defaultTemplateTypes.length === 0
-            ? []
-            : (await EmailTemplate.where({
-                    organizationId: null,
-                    type: {
-                        sign: 'IN',
-                        value: defaultTemplateTypes,
-                    },
-                }));
+        const defaultTemplateTypes = organization
+            ? types.filter((type) => !EmailTemplateStruct.isSavedEmail(type))
+            : types;
+        const defaultTemplates =
+            defaultTemplateTypes.length === 0
+                ? []
+                : await EmailTemplate.where({
+                      organizationId: null,
+                      type: {
+                          sign: 'IN',
+                          value: defaultTemplateTypes,
+                      },
+                  });
 
-        if (organization && defaultTemplateTypes.length > 0 && (request.query.webshopId || request.query.groupIds)) {
-            const orgDefaults = (await EmailTemplate.where({
+        if (
+            organization &&
+            defaultTemplateTypes.length > 0 &&
+            (request.query.webshopId || request.query.groupIds)
+        ) {
+            const orgDefaults = await EmailTemplate.where({
                 organizationId: organization.id,
                 webshopId: null,
                 groupId: null,
@@ -115,7 +135,7 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
                     sign: 'IN',
                     value: defaultTemplateTypes,
                 },
-            }));
+            });
 
             defaultTemplates.unshift(...orgDefaults);
         }
@@ -123,7 +143,9 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
         const allTemplates: EmailTemplate[] = [];
         const allCandidates = templates.concat(defaultTemplates);
 
-        const groupIds = Formatter.uniqueArray(allCandidates.map(t => t.groupId).filter((id): id is string => id !== null));
+        const groupIds = Formatter.uniqueArray(
+            allCandidates.map((t) => t.groupId).filter((id): id is string => id !== null),
+        );
         if (groupIds.length > 0) {
             await Context.auth.getGroups(groupIds);
         }
@@ -134,6 +156,6 @@ export class GetEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, Res
             }
         }
 
-        return new Response(allTemplates.map(template => EmailTemplateStruct.create(template)));
+        return new Response(allTemplates.map((template) => EmailTemplateStruct.create(template)));
     }
 }

@@ -36,7 +36,7 @@ describe('RegisterCheckout', () => {
 
             checkout.updateBalances([a, b, c]);
 
-            expect(checkout.cart.balanceItems.map(i => [i.item.id, i.price])).toEqual([
+            expect(checkout.cart.balanceItems.map((i) => [i.item.id, i.price])).toEqual([
                 [a.id, 30_0000],
                 [b.id, 20_0000],
                 [c.id, -10_0000],
@@ -55,7 +55,7 @@ describe('RegisterCheckout', () => {
 
             checkout.updateBalances([a, c]);
 
-            expect(checkout.cart.balanceItems.map(i => [i.item.id, i.price])).toEqual([
+            expect(checkout.cart.balanceItems.map((i) => [i.item.id, i.price])).toEqual([
                 [a.id, 30_0000],
                 [c.id, -30_0000],
             ]);
@@ -76,7 +76,7 @@ describe('RegisterCheckout', () => {
 
             checkout.updateBalances([a, c1, c2]);
 
-            expect(checkout.cart.balanceItems.map(i => [i.item.id, i.price])).toEqual([
+            expect(checkout.cart.balanceItems.map((i) => [i.item.id, i.price])).toEqual([
                 [a.id, 10_0000],
                 [c1.id, -10_0000],
             ]);
@@ -95,7 +95,7 @@ describe('RegisterCheckout', () => {
 
             checkout.updateBalances([a, b, c]);
 
-            expect(checkout.cart.balanceItems.map(i => [i.item.id, i.price])).toEqual([
+            expect(checkout.cart.balanceItems.map((i) => [i.item.id, i.price])).toEqual([
                 [a.id, 30_0000],
             ]);
             expect(checkout.totalPrice).toBe(30_0000);
@@ -113,7 +113,7 @@ describe('RegisterCheckout', () => {
 
             checkout.updateBalances([a, c1, c2]);
 
-            expect(checkout.cart.balanceItems.map(i => [i.item.id, i.price])).toEqual([
+            expect(checkout.cart.balanceItems.map((i) => [i.item.id, i.price])).toEqual([
                 [a.id, 50_0000],
                 [c1.id, -30_0000],
                 [c2.id, -20_0000],
@@ -132,7 +132,7 @@ describe('RegisterCheckout', () => {
 
             // 20 of a stays open, so only 20 - 20 = 0 remains: no credit applied
             checkout.updateBalances([a, c]);
-            expect(checkout.cart.balanceItems.map(i => [i.item.id, i.price])).toEqual([
+            expect(checkout.cart.balanceItems.map((i) => [i.item.id, i.price])).toEqual([
                 [a.id, 10_0000],
             ]);
 
@@ -141,7 +141,7 @@ describe('RegisterCheckout', () => {
 
             // 15 stays open, so 5 of the credit is applied
             checkout.updateBalances([a, c]);
-            expect(checkout.cart.balanceItems.map(i => [i.item.id, i.price])).toEqual([
+            expect(checkout.cart.balanceItems.map((i) => [i.item.id, i.price])).toEqual([
                 [a.id, 15_0000],
                 [c.id, -5_0000],
             ]);
@@ -191,28 +191,46 @@ describe('IDRegisterCheckout', () => {
     const legacyVersion = 421;
 
     test('applies the checkout cancellation fee percentage of an old client to every deleted registration', () => {
-        const checkout = IDRegisterCheckout.decode(new ObjectData({
-            cart: {
-                deleteRegistrationIds: ['registration-a', 'registration-b'],
-            },
-            cancellationFeePercentage: 20_00,
-        }, { version: legacyVersion }));
+        const checkout = IDRegisterCheckout.decode(
+            new ObjectData(
+                {
+                    cart: {
+                        deleteRegistrationIds: ['registration-a', 'registration-b'],
+                    },
+                    cancellationFeePercentage: 20_00,
+                },
+                { version: legacyVersion },
+            ),
+        );
 
-        expect(checkout.cart.deleteRegistrations.map(i => [i.registrationId, i.cancellationFeePercentage])).toEqual([
+        expect(
+            checkout.cart.deleteRegistrations.map((i) => [
+                i.registrationId,
+                i.cancellationFeePercentage,
+            ]),
+        ).toEqual([
             ['registration-a', 20_00],
             ['registration-b', 20_00],
         ]);
     });
 
     test('charges no cancellation fee when an old client omits the percentage', () => {
-        const checkout = IDRegisterCheckout.decode(new ObjectData({
-            cart: {
-                deleteRegistrationIds: ['registration-a'],
-            },
-        }, { version: legacyVersion }));
+        const checkout = IDRegisterCheckout.decode(
+            new ObjectData(
+                {
+                    cart: {
+                        deleteRegistrationIds: ['registration-a'],
+                    },
+                },
+                { version: legacyVersion },
+            ),
+        );
 
-        expect(checkout.cart.deleteRegistrations.map(i => [i.registrationId, i.cancellationFeePercentage])).toEqual([
-            ['registration-a', 0],
-        ]);
+        expect(
+            checkout.cart.deleteRegistrations.map((i) => [
+                i.registrationId,
+                i.cancellationFeePercentage,
+            ]),
+        ).toEqual([['registration-a', 0]]);
     });
 });

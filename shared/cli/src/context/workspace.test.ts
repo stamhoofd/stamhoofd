@@ -3,10 +3,13 @@ import { run } from '../runtime/command-runner.js';
 import { resolvePrimaryInstance, resolvePrimaryWorkspaceRoot } from './workspace.js';
 import { detectVcs, Vcs } from '../runtime/vcs.js';
 
-vi.mock('../runtime/vcs.js', async original => ({ ...await original<typeof import('../runtime/vcs.js')>(), detectVcs: vi.fn() }));
+vi.mock('../runtime/vcs.js', async (original) => ({
+    ...(await original<typeof import('../runtime/vcs.js')>()),
+    detectVcs: vi.fn(),
+}));
 
-vi.mock('../runtime/command-runner.js', async importOriginal => ({
-    ...await importOriginal<typeof import('../runtime/command-runner.js')>(),
+vi.mock('../runtime/command-runner.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('../runtime/command-runner.js')>()),
     run: vi.fn(),
 }));
 
@@ -51,7 +54,11 @@ describe('resolvePrimaryInstance', () => {
     });
 
     it('uses the default jj workspace for shared services even when another name sorts first', async () => {
-        mockJjWorkspaces(['cleanup', '/repo/cleanup'], ['default', '/repo/main'], ['turborepo', '/repo/turborepo']);
+        mockJjWorkspaces(
+            ['cleanup', '/repo/cleanup'],
+            ['default', '/repo/main'],
+            ['turborepo', '/repo/turborepo'],
+        );
 
         await expect(resolvePrimaryWorkspaceRoot('/repo/turborepo')).resolves.toBe('/repo/main');
     });
@@ -71,7 +78,11 @@ describe('resolvePrimaryInstance', () => {
 
     it('does not switch to Git when an initialized JJ repository cannot be read', async () => {
         vi.mocked(detectVcs).mockResolvedValue(Vcs.Jj);
-        vi.mocked(run).mockResolvedValueOnce({ stdout: '', stderr: 'Invalid configuration', status: 1 });
+        vi.mocked(run).mockResolvedValueOnce({
+            stdout: '',
+            stderr: 'Invalid configuration',
+            status: 1,
+        });
         await expect(resolvePrimaryWorkspaceRoot('/repo')).resolves.toBeNull();
         expect(run).toHaveBeenCalledOnce();
         expect(vi.mocked(run).mock.calls[0][0]).toBe('jj');
@@ -88,12 +99,18 @@ function mockGitFailure() {
 
 function mockJjWorkspaces(...workspaces: Array<[string, string]>) {
     vi.mocked(detectVcs).mockResolvedValue(Vcs.Jj);
-    vi.mocked(run).mockResolvedValueOnce({ stdout: workspaces.map(([name, root]) => `${name}\t${root}`).join('\n'), stderr: '', status: 0 });
+    vi.mocked(run).mockResolvedValueOnce({
+        stdout: workspaces.map(([name, root]) => `${name}\t${root}`).join('\n'),
+        stderr: '',
+        status: 0,
+    });
 }
 
 function mockGitWorktrees(...roots: string[]) {
     vi.mocked(run).mockResolvedValueOnce({
-        stdout: roots.map(root => `worktree ${root}\nHEAD 0000000000000000000000000000000000000000`).join('\n\n'),
+        stdout: roots
+            .map((root) => `worktree ${root}\nHEAD 0000000000000000000000000000000000000000`)
+            .join('\n\n'),
         stderr: '',
         status: 0,
     });

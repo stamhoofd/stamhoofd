@@ -34,7 +34,9 @@ describe('Organization admin recipients', () => {
     test('The finance admin recipients include a financial director without full access', async () => {
         const { organization, fullAdmin, financeAdmin } = await createOrganizationWithAdmins();
 
-        const emails = (await OrganizationAdminService.getFinanceAdminRecipients(organization)).map(r => r.email);
+        const emails = (await OrganizationAdminService.getFinanceAdminRecipients(organization)).map(
+            (r) => r.email,
+        );
 
         expect(emails).toIncludeSameMembers([fullAdmin.email, financeAdmin.email]);
     });
@@ -42,7 +44,9 @@ describe('Organization admin recipients', () => {
     test('The regular admin recipients only include full admins', async () => {
         const { organization, fullAdmin } = await createOrganizationWithAdmins();
 
-        const emails = (await OrganizationAdminService.getAdminRecipients(organization)).map(r => r.email);
+        const emails = (await OrganizationAdminService.getAdminRecipients(organization)).map(
+            (r) => r.email,
+        );
 
         expect(emails).toIncludeSameMembers([fullAdmin.email]);
     });

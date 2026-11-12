@@ -21,14 +21,35 @@ type VcsCommands = {
  * manual repair rather than silently treating the repository as Git-only.
  * Results include ordered repair commands; checks never fetch, push, or initialize JJ.
  */
-export async function checkVcs(rootDir: string, verbosity = RunVerbosity.Quiet): Promise<VcsCheck[]> {
+export async function checkVcs(
+    rootDir: string,
+    verbosity = RunVerbosity.Quiet,
+): Promise<VcsCheck[]> {
     const vcs = await detectVcs(rootDir, verbosity);
-    const selection: VcsCheck = { label: 'Version control', ok: true, details: `Using ${vcs}`, repairs: [] };
+    const selection: VcsCheck = {
+        label: 'Version control',
+        ok: true,
+        details: `Using ${vcs}`,
+        repairs: [],
+    };
     let gitDir: string | undefined;
     if (vcs === Vcs.Jj) {
-        const repository = await run('jj', ['--ignore-working-copy', 'git', 'root'], { cwd: rootDir, capture: true, allowFailure: true, verbosity });
+        const repository = await run('jj', ['--ignore-working-copy', 'git', 'root'], {
+            cwd: rootDir,
+            capture: true,
+            allowFailure: true,
+            verbosity,
+        });
         if (repository.status !== 0) {
-            return [selection, { label: 'JJ repository', ok: false, details: repository.stderr.trim() || 'Cannot access the existing JJ repository', repairs: [] }];
+            return [
+                selection,
+                {
+                    label: 'JJ repository',
+                    ok: false,
+                    details: repository.stderr.trim() || 'Cannot access the existing JJ repository',
+                    repairs: [],
+                },
+            ];
         }
         gitDir = repository.stdout.trim();
     }
@@ -36,7 +57,7 @@ export async function checkVcs(rootDir: string, verbosity = RunVerbosity.Quiet):
     if (vcs === Vcs.Git || gitChecks[0]?.label === 'Repository') {
         return [selection, ...gitChecks];
     }
-    return [selection, ...gitChecks, ...await checkJj(rootDir, verbosity)];
+    return [selection, ...gitChecks, ...(await checkJj(rootDir, verbosity))];
 }
 
 /**
@@ -50,20 +71,32 @@ export async function checkVcs(rootDir: string, verbosity = RunVerbosity.Quiet):
  * remotes are repaired before fetching, and fetching precedes branch creation.
  * gitDir selects the backing repository for JJ workspaces without their own .git.
  */
-async function checkGit(rootDir: string, verbosity: RunVerbosity, gitDir?: string): Promise<VcsCheck[]> {
+async function checkGit(
+    rootDir: string,
+    verbosity: RunVerbosity,
+    gitDir?: string,
+): Promise<VcsCheck[]> {
     const gitArgs = gitDir ? [`--git-dir=${gitDir}`] : [];
     const git: VcsCommands = {
-        read: args => run('git', [...gitArgs, ...args], { cwd: rootDir, capture: true, allowFailure: true, verbosity }),
+        read: (args) =>
+            run('git', [...gitArgs, ...args], {
+                cwd: rootDir,
+                capture: true,
+                allowFailure: true,
+                verbosity,
+            }),
         repair: (...args) => ({ command: 'git', args: [...gitArgs, ...args] }),
     };
     if ((await git.read(['rev-parse', '--git-dir'])).status !== 0) {
-        return [{ label: 'Repository', ok: false, details: 'No Git repository found', repairs: [] }];
+        return [
+            { label: 'Repository', ok: false, details: 'No Git repository found', repairs: [] },
+        ];
     }
     const remotes = await checkGitRemotes(git);
     return [
         ...remotes.checks,
-        ...await checkGitPrivateBranch(git, remotes.privateRemoteOk),
-        ...await checkGitBranchConfig(git),
+        ...(await checkGitPrivateBranch(git, remotes.privateRemoteOk)),
+        ...(await checkGitBranchConfig(git)),
     ];
 }
 
@@ -77,26 +110,75 @@ async function checkGit(rootDir: string, verbosity: RunVerbosity, gitDir?: strin
  * The private URL result also determines whether an existing remote ref can be
  * trusted. A failed URL check requires fetching after remote repairs.
  */
-async function checkGitRemotes(git: VcsCommands): Promise<{ checks: VcsCheck[]; privateRemoteOk: boolean }> {
+async function checkGitRemotes(
+    git: VcsCommands,
+): Promise<{ checks: VcsCheck[]; privateRemoteOk: boolean }> {
     const checks: VcsCheck[] = [];
-    const add = (label: string, ok: boolean, details: string, repairs: Repair[]) => checks.push({ label, ok, details, repairs });
+    const add = (label: string, ok: boolean, details: string, repairs: Repair[]) =>
+        checks.push({ label, ok, details, repairs });
     let privateRemoteOk = false;
-    for (const [remote, repository] of [['origin', 'stamhoofd'], ['private', 'stamhoofd-private']]) {
+    for (const [remote, repository] of [
+        ['origin', 'stamhoofd'],
+        ['private', 'stamhoofd-private'],
+    ]) {
         const url = `git@github.com:stamhoofd/${repository}.git`;
         const fetch = await git.read(['remote', 'get-url', '--all', remote]);
         const push = await git.read(['remote', 'get-url', '--push', '--all', remote]);
-        const valid = (value: string) => value.trim().split('\n').every(u => [url, `https://github.com/stamhoofd/${repository}.git`, `https://github.com/stamhoofd/${repository}`, `ssh://git@github.com/stamhoofd/${repository}.git`].includes(u));
-        const ok = fetch.status === 0 && push.status === 0 && valid(fetch.stdout) && valid(push.stdout);
+        const valid = (value: string) =>
+            value
+                .trim()
+                .split('\n')
+                .every((u) =>
+                    [
+                        url,
+                        `https://github.com/stamhoofd/${repository}.git`,
+                        `https://github.com/stamhoofd/${repository}`,
+                        `ssh://git@github.com/stamhoofd/${repository}.git`,
+                    ].includes(u),
+                );
+        const ok =
+            fetch.status === 0 && push.status === 0 && valid(fetch.stdout) && valid(push.stdout);
         if (remote === 'private') {
             privateRemoteOk = ok;
         }
-        add(`${remote} remote`, ok, ok ? fetch.stdout.trim() : `Expected ${url} for fetch and push`, fetch.status !== 0
-            ? [git.repair('remote', 'add', remote, url)]
-            : [git.repair('config', '--local', '--replace-all', `remote.${remote}.url`, url), git.repair('config', '--local', '--replace-all', `remote.${remote}.pushurl`, url)]);
+        add(
+            `${remote} remote`,
+            ok,
+            ok ? fetch.stdout.trim() : `Expected ${url} for fetch and push`,
+            fetch.status !== 0
+                ? [git.repair('remote', 'add', remote, url)]
+                : [
+                      git.repair('config', '--local', '--replace-all', `remote.${remote}.url`, url),
+                      git.repair(
+                          'config',
+                          '--local',
+                          '--replace-all',
+                          `remote.${remote}.pushurl`,
+                          url,
+                      ),
+                  ],
+        );
         for (const key of [`remote.${remote}.push`, `remote.${remote}.mirror`]) {
             const value = await git.read(['config', '--get-all', key]);
-            const ok = value.status === 1 || value.stdout.trim() === (key.endsWith('.mirror') ? 'false' : 'HEAD');
-            add(key, ok, ok ? 'No unsafe push override' : 'Explicit push refspec or mirror overrides safe defaults', [git.repair('config', '--local', '--replace-all', key, key.endsWith('.mirror') ? 'false' : 'HEAD')]);
+            const ok =
+                value.status === 1 ||
+                value.stdout.trim() === (key.endsWith('.mirror') ? 'false' : 'HEAD');
+            add(
+                key,
+                ok,
+                ok
+                    ? 'No unsafe push override'
+                    : 'Explicit push refspec or mirror overrides safe defaults',
+                [
+                    git.repair(
+                        'config',
+                        '--local',
+                        '--replace-all',
+                        key,
+                        key.endsWith('.mirror') ? 'false' : 'HEAD',
+                    ),
+                ],
+            );
         }
     }
     return { checks, privateRemoteOk };
@@ -110,8 +192,16 @@ async function checkGitRemotes(git: VcsCommands): Promise<{ checks: VcsCheck[]; 
  * Existing local branch tips are preserved; missing branches are created without
  * switching checkout.
  */
-async function checkGitPrivateBranch(git: VcsCommands, privateRemoteOk: boolean): Promise<VcsCheck[]> {
-    const remoteBranch = await git.read(['show-ref', '--verify', '--quiet', 'refs/remotes/private/private']);
+async function checkGitPrivateBranch(
+    git: VcsCommands,
+    privateRemoteOk: boolean,
+): Promise<VcsCheck[]> {
+    const remoteBranch = await git.read([
+        'show-ref',
+        '--verify',
+        '--quiet',
+        'refs/remotes/private/private',
+    ]);
     const remoteBranchOk = remoteBranch.status === 0 && privateRemoteOk;
     const localBranch = await git.read(['show-ref', '--verify', '--quiet', 'refs/heads/private']);
     return [
@@ -119,12 +209,17 @@ async function checkGitPrivateBranch(git: VcsCommands, privateRemoteOk: boolean)
             label: 'private/private fetched',
             ok: remoteBranchOk,
             details: remoteBranchOk ? 'Remote branch available' : 'Fetch private branch',
-            repairs: [git.repair('fetch', 'private', '+refs/heads/private:refs/remotes/private/private')],
+            repairs: [
+                git.repair('fetch', 'private', '+refs/heads/private:refs/remotes/private/private'),
+            ],
         },
         {
             label: 'private branch',
             ok: localBranch.status === 0,
-            details: localBranch.status === 0 ? 'Local branch exists' : 'Create private without switching checkout',
+            details:
+                localBranch.status === 0
+                    ? 'Local branch exists'
+                    : 'Create private without switching checkout',
             repairs: [git.repair('branch', '--track', 'private', 'private/private')],
         },
     ];
@@ -139,8 +234,11 @@ async function checkGitPrivateBranch(git: VcsCommands, privateRemoteOk: boolean)
 async function checkGitBranchConfig(git: VcsCommands): Promise<VcsCheck[]> {
     const checks: VcsCheck[] = [];
     for (const [key, expected] of [
-        ['branch.private.remote', 'private'], ['branch.private.merge', 'refs/heads/private'],
-        ['branch.private.pushRemote', 'private'], ['branch.main.pushRemote', 'origin'], ['push.default', 'current'],
+        ['branch.private.remote', 'private'],
+        ['branch.private.merge', 'refs/heads/private'],
+        ['branch.private.pushRemote', 'private'],
+        ['branch.main.pushRemote', 'origin'],
+        ['push.default', 'current'],
     ]) {
         const value = await git.read(['config', '--get', key]);
         checks.push({
@@ -166,14 +264,20 @@ async function checkGitBranchConfig(git: VcsCommands): Promise<VcsCheck[]> {
  */
 async function checkJj(rootDir: string, verbosity: RunVerbosity): Promise<VcsCheck[]> {
     const jj: VcsCommands = {
-        read: args => run('jj', ['--ignore-working-copy', ...args], { cwd: rootDir, capture: true, allowFailure: true, verbosity }),
+        read: (args) =>
+            run('jj', ['--ignore-working-copy', ...args], {
+                cwd: rootDir,
+                capture: true,
+                allowFailure: true,
+                verbosity,
+            }),
         repair: (...args) => ({ command: 'jj', args: ['--ignore-working-copy', ...args] }),
     };
     return [
-        ...await checkJjRemoteConfig(jj),
-        ...await checkJjAutomaticTracking(jj),
-        ...await checkJjBookmarkTracking(jj),
-        ...await checkJjBookmarkPositions(jj),
+        ...(await checkJjRemoteConfig(jj)),
+        ...(await checkJjAutomaticTracking(jj)),
+        ...(await checkJjBookmarkTracking(jj)),
+        ...(await checkJjBookmarkPositions(jj)),
     ];
 }
 
@@ -185,9 +289,13 @@ async function checkJj(rootDir: string, verbosity: RunVerbosity): Promise<VcsChe
  */
 async function checkJjRemoteConfig(jj: VcsCommands): Promise<VcsCheck[]> {
     const checks: VcsCheck[] = [];
-    for (const [key, expected] of [['git.fetch', '["origin", "private"]'], ['git.push', 'origin']]) {
+    for (const [key, expected] of [
+        ['git.fetch', '["origin", "private"]'],
+        ['git.push', 'origin'],
+    ]) {
         const value = await jj.read(['config', 'get', key]);
-        const actual = key === 'git.fetch' ? value.stdout.trim().replace(/\s/g, '') : value.stdout.trim();
+        const actual =
+            key === 'git.fetch' ? value.stdout.trim().replace(/\s/g, '') : value.stdout.trim();
         checks.push({
             label: `JJ ${key}`,
             ok: value.status === 0 && actual === expected.replace(/\s/g, ''),
@@ -208,7 +316,10 @@ async function checkJjRemoteConfig(jj: VcsCommands): Promise<VcsCheck[]> {
  */
 async function checkJjAutomaticTracking(jj: VcsCommands): Promise<VcsCheck[]> {
     const checks: VcsCheck[] = [];
-    for (const key of ['remotes.private.auto-track-bookmarks', 'remotes.private.auto-track-created-bookmarks']) {
+    for (const key of [
+        'remotes.private.auto-track-bookmarks',
+        'remotes.private.auto-track-created-bookmarks',
+    ]) {
         const expected = 'glob:private*';
         const value = await jj.read(['config', 'get', key]);
         checks.push({
@@ -218,7 +329,10 @@ async function checkJjAutomaticTracking(jj: VcsCommands): Promise<VcsCheck[]> {
             repairs: [jj.repair('config', 'set', '--repo', key, expected)],
         });
     }
-    for (const key of ['remotes.origin.auto-track-bookmarks', 'remotes.origin.auto-track-created-bookmarks']) {
+    for (const key of [
+        'remotes.origin.auto-track-bookmarks',
+        'remotes.origin.auto-track-created-bookmarks',
+    ]) {
         const autoTrack = await jj.read(['config', 'get', key]);
         const pattern = autoTrack.stdout.trim();
         if (pattern && !pattern.endsWith(' & ~glob:private*')) {
@@ -226,7 +340,9 @@ async function checkJjAutomaticTracking(jj: VcsCommands): Promise<VcsCheck[]> {
                 label: `JJ ${key}`,
                 ok: false,
                 details: 'Exclude private* while preserving the existing pattern',
-                repairs: [jj.repair('config', 'set', '--repo', key, `(${pattern}) & ~glob:private*`)],
+                repairs: [
+                    jj.repair('config', 'set', '--repo', key, `(${pattern}) & ~glob:private*`),
+                ],
             });
         }
     }
@@ -241,9 +357,18 @@ async function checkJjAutomaticTracking(jj: VcsCommands): Promise<VcsCheck[]> {
  */
 async function checkJjBookmarkTracking(jj: VcsCommands): Promise<VcsCheck[]> {
     const checks: VcsCheck[] = [];
-    const tracked = await jj.read(['bookmark', 'list', '--tracked', '-T', 'name ++ "@" ++ remote ++ "\n"']);
+    const tracked = await jj.read([
+        'bookmark',
+        'list',
+        '--tracked',
+        '-T',
+        'name ++ "@" ++ remote ++ "\n"',
+    ]);
     const names = tracked.stdout.trim().split('\n');
-    for (const [bookmark, remote, other] of [['private', 'private', 'origin'], ['main', 'origin', 'private']]) {
+    for (const [bookmark, remote, other] of [
+        ['private', 'private', 'origin'],
+        ['main', 'origin', 'private'],
+    ]) {
         checks.push({
             label: `JJ ${bookmark}@${other}`,
             ok: tracked.status === 0 && !names.includes(`${bookmark}@${other}`),
@@ -254,7 +379,10 @@ async function checkJjBookmarkTracking(jj: VcsCommands): Promise<VcsCheck[]> {
             label: `JJ ${bookmark}@${remote}`,
             ok: tracked.status === 0 && names.includes(`${bookmark}@${remote}`),
             details: `Track only ${remote}`,
-            repairs: [jj.repair('git', 'fetch', '--remote', remote), jj.repair('bookmark', 'track', `${bookmark}@${remote}`)],
+            repairs: [
+                jj.repair('git', 'fetch', '--remote', remote),
+                jj.repair('bookmark', 'track', `${bookmark}@${remote}`),
+            ],
         });
     }
     return checks;
@@ -267,14 +395,28 @@ async function checkJjBookmarkTracking(jj: VcsCommands): Promise<VcsCheck[]> {
  * because choosing a target could discard existing bookmark positions.
  */
 async function checkJjBookmarkPositions(jj: VcsCommands): Promise<VcsCheck[]> {
-    const bookmarks = await jj.read(['bookmark', 'list', 'private', 'main', '-T', 'name ++ "\t" ++ if(normal_target, "ok", "conflict") ++ "\n"']);
-    const conflicts = bookmarks.stdout.trim().split('\n').filter(line => line.endsWith('\tconflict'));
-    return [{
-        label: 'JJ bookmark positions',
-        ok: bookmarks.status === 0 && conflicts.length === 0,
-        details: conflicts.length ? `Resolve conflicted or deleted bookmarks manually: ${conflicts.map(line => line.split('\t')[0]).join(', ')}` : 'Existing bookmark positions preserved',
-        repairs: [],
-    }];
+    const bookmarks = await jj.read([
+        'bookmark',
+        'list',
+        'private',
+        'main',
+        '-T',
+        'name ++ "\t" ++ if(normal_target, "ok", "conflict") ++ "\n"',
+    ]);
+    const conflicts = bookmarks.stdout
+        .trim()
+        .split('\n')
+        .filter((line) => line.endsWith('\tconflict'));
+    return [
+        {
+            label: 'JJ bookmark positions',
+            ok: bookmarks.status === 0 && conflicts.length === 0,
+            details: conflicts.length
+                ? `Resolve conflicted or deleted bookmarks manually: ${conflicts.map((line) => line.split('\t')[0]).join(', ')}`
+                : 'Existing bookmark positions preserved',
+            repairs: [],
+        },
+    ];
 }
 
 /**
@@ -288,30 +430,50 @@ async function checkJjBookmarkPositions(jj: VcsCommands): Promise<VcsCheck[]> {
  * Server-side restrictions remain necessary because explicit push arguments can
  * bypass these defaults.
  */
-export async function setupVcs(rootDir: string, options: { yes: boolean; dryRun: boolean; verbosity?: RunVerbosity }): Promise<void> {
+export async function setupVcs(
+    rootDir: string,
+    options: { yes: boolean; dryRun: boolean; verbosity?: RunVerbosity },
+): Promise<void> {
     const checks = await checkVcs(rootDir, options.verbosity);
-    table(['Check', 'Status', 'Details'], checks.map(check => [check.label, check.ok ? 'ready' : 'missing', check.details]), { title: 'Version control setup' });
-    const missing = checks.filter(check => !check.ok);
-    const repairs = missing.flatMap(check => check.repairs);
+    table(
+        ['Check', 'Status', 'Details'],
+        checks.map((check) => [check.label, check.ok ? 'ready' : 'missing', check.details]),
+        { title: 'Version control setup' },
+    );
+    const missing = checks.filter((check) => !check.ok);
+    const repairs = missing.flatMap((check) => check.repairs);
     for (const repair of repairs) {
-        console.log(command([repair.command, ...repair.args].map(arg => JSON.stringify(arg)).join(' ')));
+        console.log(
+            command([repair.command, ...repair.args].map((arg) => JSON.stringify(arg)).join(' ')),
+        );
     }
     if (options.dryRun) {
         warning('Dry run: version control was not changed.');
         return;
     }
-    if (missing.some(check => check.repairs.length === 0)) {
+    if (missing.some((check) => check.repairs.length === 0)) {
         throw new Error('Resolve the repository setup problem above first.');
     }
-    if (repairs.length && !options.yes && !(await confirm('Apply these version control fixes?', { default: true }))) {
+    if (
+        repairs.length &&
+        !options.yes &&
+        !(await confirm('Apply these version control fixes?', { default: true }))
+    ) {
         return;
     }
     for (const repair of repairs) {
-        await run(repair.command, repair.args, { cwd: rootDir, verbosity: options.verbosity ?? RunVerbosity.Output });
+        await run(repair.command, repair.args, {
+            cwd: rootDir,
+            verbosity: options.verbosity ?? RunVerbosity.Output,
+        });
     }
-    const remaining = (await checkVcs(rootDir, options.verbosity)).filter(check => !check.ok);
+    const remaining = (await checkVcs(rootDir, options.verbosity)).filter((check) => !check.ok);
     if (remaining.length) {
-        throw new Error(`Version control checks still failing: ${remaining.map(check => check.label).join(', ')}`);
+        throw new Error(
+            `Version control checks still failing: ${remaining.map((check) => check.label).join(', ')}`,
+        );
     }
-    success('Version control configured. JJ private pushes require: jj git push --remote private --bookmark private');
+    success(
+        'Version control configured. JJ private pushes require: jj git push --remote private --bookmark private',
+    );
 }

@@ -92,8 +92,14 @@ export class RegisterPasskeyEndpoint extends Endpoint<Params, Query, Body, Respo
         credential.providerName = result.providerName;
         await credential.save();
 
-        await TwoFactorAuditLogService.logMethodAdded(user, MFAMethodType.Passkey, credential.name || credential.providerName || '');
+        await TwoFactorAuditLogService.logMethodAdded(
+            user,
+            MFAMethodType.Passkey,
+            credential.name || credential.providerName || '',
+        );
 
-        return new Response(await TwoFactorHelper.completeEnrollment(user, setupToken, wasFirstFactor, token));
+        return new Response(
+            await TwoFactorHelper.completeEnrollment(user, setupToken, wasFirstFactor, token),
+        );
     }
 }

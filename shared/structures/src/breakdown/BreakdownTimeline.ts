@@ -36,7 +36,10 @@ export class BreakdownTimeline {
         }
 
         // A month of days is still readable, longer than that only weeks are
-        const span = Formatter.luxon(days[days.length - 1].date).diff(Formatter.luxon(days[0].date), 'days').days;
+        const span = Formatter.luxon(days[days.length - 1].date).diff(
+            Formatter.luxon(days[0].date),
+            'days',
+        ).days;
         const unit = span > 31 ? BreakdownGraphUnit.Week : BreakdownGraphUnit.Day;
 
         const points = unit === BreakdownGraphUnit.Week ? groupByWeek(days) : days;
@@ -45,7 +48,7 @@ export class BreakdownTimeline {
         // dates don't already say, so they are added again where the graph is drawn
         return BreakdownGraph.create({
             unit,
-            points: points.map(point => BreakdownGraphPoint.create(point)),
+            points: points.map((point) => BreakdownGraphPoint.create(point)),
         });
     }
 }

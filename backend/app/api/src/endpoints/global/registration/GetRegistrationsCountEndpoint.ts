@@ -32,8 +32,7 @@ export class GetRegistrationsCountEndpoint extends Endpoint<Params, Query, Body,
         await Context.authenticate();
         const query = await GetRegistrationsEndpoint.buildQuery(request.query);
 
-        const count = await query
-            .count();
+        const count = await query.count();
 
         return new Response(
             CountResponse.create({

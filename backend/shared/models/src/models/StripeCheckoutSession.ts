@@ -6,7 +6,9 @@ export class StripeCheckoutSession extends QueryableModel {
     static table = 'stripe_checkout_sessions';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })

@@ -24,9 +24,9 @@ export const e2eMysqlPasswordVariable = 'STAMHOOFD_E2E_MYSQL_PASSWORD';
  * - `local`: a MySQL that is already running on this machine, on `127.0.0.1:<port>`. No container
  *   is started or stopped, which saves the startup time and memory of a second MySQL server.
  */
-export type E2eMysqlTarget
-    = | { kind: 'container' }
-        | { kind: 'local'; port: number; user: string; password: string };
+export type E2eMysqlTarget =
+    | { kind: 'container' }
+    | { kind: 'local'; port: number; user: string; password: string };
 
 /**
  * Whether this run uses its own MySQL container or one that is already running.
@@ -99,8 +99,13 @@ const slotSuffixLength = 3;
  * worktree appends its instance name, so a run never migrates the databases of a checkout that is
  * on another branch.
  */
-export function buildPlaywrightDatabasePrefix(instance: { name: string; primary: boolean }): string {
-    const prefix = instance.primary ? playwrightDatabaseBaseName : `${playwrightDatabaseBaseName}-${instance.name}`;
+export function buildPlaywrightDatabasePrefix(instance: {
+    name: string;
+    primary: boolean;
+}): string {
+    const prefix = instance.primary
+        ? playwrightDatabaseBaseName
+        : `${playwrightDatabaseBaseName}-${instance.name}`;
     const maxLength = maxDatabaseNameLength - slotSuffixLength;
 
     if (prefix.length <= maxLength) {
@@ -118,7 +123,11 @@ export function buildPlaywrightDatabasePrefix(instance: { name: string; primary:
  * reserves a block of slots that no other run on this machine uses, so runs started from several
  * worktrees never share a database, even when they all connect to the same MySQL server.
  */
-export function playwrightDatabaseName(slot: number, prefix: string = process.env[playwrightDatabasePrefixVariable]?.trim() || playwrightDatabaseBaseName): string {
+export function playwrightDatabaseName(
+    slot: number,
+    prefix: string = process.env[playwrightDatabasePrefixVariable]?.trim() ||
+        playwrightDatabaseBaseName,
+): string {
     return `${prefix}-${slot}`;
 }
 

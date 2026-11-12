@@ -6,7 +6,9 @@ import { RunVerbosity } from '../../runtime/command-runner.js';
 import { createContext } from '../../context/create-context.js';
 
 vi.mock('../../workflows/start-services.js', () => ({ runServices: vi.fn() }));
-vi.mock('../../context/create-context.js', () => ({ createContext: vi.fn(async () => ({ rootDir: '/repo' })) }));
+vi.mock('../../context/create-context.js', () => ({
+    createContext: vi.fn(async () => ({ rootDir: '/repo' })),
+}));
 
 describe('services up verbosity', () => {
     beforeEach(() => vi.clearAllMocks());
@@ -28,7 +30,11 @@ describe('services up verbosity', () => {
 
         await command.run();
 
-        expect(createContext).toHaveBeenCalledWith({ env: 'stamhoofd', instanceName: undefined, verbose: args.length > 0 });
+        expect(createContext).toHaveBeenCalledWith({
+            env: 'stamhoofd',
+            instanceName: undefined,
+            verbose: args.length > 0,
+        });
         expect(runServices).toHaveBeenCalledWith({ rootDir: '/repo', verbosity });
     });
 });

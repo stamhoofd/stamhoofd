@@ -51,10 +51,12 @@ export class GetUitpasNumberDetailsEndpoint extends Endpoint<Params, Query, Body
                 throwIfInvalidUitpasNumber(uitpasNumber);
                 const result = await UitpasService.getPassByUitpasNumber(uitpasNumber);
                 const socialTariff = uitpasApiResponseToSocialTariff(result);
-                results.push(UitpasNumberDetails.create({
-                    uitpasNumber,
-                    socialTariff,
-                }));
+                results.push(
+                    UitpasNumberDetails.create({
+                        uitpasNumber,
+                        socialTariff,
+                    }),
+                );
             } catch (error) {
                 if (isSimpleError(error) || isSimpleErrors(error)) {
                     error.addNamespace(i.toString());

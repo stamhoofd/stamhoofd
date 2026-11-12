@@ -62,7 +62,10 @@ describe('Endpoint.GetOrganization', () => {
 
     test('The Buckaroo secret is not returned to admins', async () => {
         const organization = await new OrganizationFactory({}).create();
-        organization.privateMeta.buckarooSettings = BuckarooSettings.create({ key: 'website-key', secret: 'buckaroo-secret' });
+        organization.privateMeta.buckarooSettings = BuckarooSettings.create({
+            key: 'website-key',
+            secret: 'buckaroo-secret',
+        });
         await organization.save();
 
         const user = await new UserFactory({
@@ -78,8 +81,12 @@ describe('Endpoint.GetOrganization', () => {
 
         const response = await testServer.test(endpoint, r);
         expect(response.body.privateMeta?.buckarooSettings?.key).toEqual('website-key');
-        expect(response.body.privateMeta?.buckarooSettings?.secret).toEqual(BuckarooSettings.placeholderSecret);
-        expect(JSON.stringify(response.body.encode({ version: Version }))).not.toContain('buckaroo-secret');
+        expect(response.body.privateMeta?.buckarooSettings?.secret).toEqual(
+            BuckarooSettings.placeholderSecret,
+        );
+        expect(JSON.stringify(response.body.encode({ version: Version }))).not.toContain(
+            'buckaroo-secret',
+        );
     });
 
     test('Get organization as admin of a different organization', async () => {

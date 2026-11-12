@@ -10,7 +10,7 @@ import https from 'https';
 import type { Organization } from './Organization.js';
 
 function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export class MollieError extends Error {
@@ -43,7 +43,8 @@ export class MollieToken extends QueryableModel {
     scopes: string[] | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -81,7 +82,7 @@ export class MollieToken extends QueryableModel {
      */
     get missingScopes(): string[] {
         const granted = this.scopes ?? [];
-        return MollieRequiredScopes.filter(scope => !granted.includes(scope));
+        return MollieRequiredScopes.filter((scope) => !granted.includes(scope));
     }
 
     /**
@@ -91,7 +92,7 @@ export class MollieToken extends QueryableModel {
         if (typeof scope !== 'string') {
             return null;
         }
-        return scope.split(' ').filter(s => s.length > 0);
+        return scope.split(' ').filter((s) => s.length > 0);
     }
 
     private static objectToQueryString(obj: Record<string, string>) {
@@ -132,7 +133,13 @@ export class MollieToken extends QueryableModel {
     /**
      * Do a post request on the API.
      */
-    private static request(method: string, path: string, data: PlainObject = {}, type = 'json', auth: string | null = null): Promise<any> {
+    private static request(
+        method: string,
+        path: string,
+        data: PlainObject = {},
+        type = 'json',
+        auth: string | null = null,
+    ): Promise<any> {
         return new Promise((resolve, reject) => {
             let jsonData: string;
             if (type == 'json') {
@@ -149,15 +156,35 @@ export class MollieToken extends QueryableModel {
                     hostname: 'api.mollie.com',
                     path: path,
                     method: method,
-                    headers: method === 'GET'
-                        ? {
-                                Authorization: auth ? 'Bearer ' + auth : 'Basic ' + Buffer.from((STAMHOOFD.MOLLIE_CLIENT_ID ?? '') + ':' + (STAMHOOFD.MOLLIE_SECRET ?? ''), 'ascii').toString('base64'),
-                            }
-                        : {
-                                'Content-Type': type == 'json' ? 'application/json' : 'application/x-www-form-urlencoded',
-                                'Content-Length': Buffer.byteLength(jsonData),
-                                'Authorization': auth ? 'Bearer ' + auth : 'Basic ' + Buffer.from((STAMHOOFD.MOLLIE_CLIENT_ID ?? '') + ':' + (STAMHOOFD.MOLLIE_SECRET ?? ''), 'ascii').toString('base64'),
-                            },
+                    headers:
+                        method === 'GET'
+                            ? {
+                                  Authorization: auth
+                                      ? 'Bearer ' + auth
+                                      : 'Basic ' +
+                                        Buffer.from(
+                                            (STAMHOOFD.MOLLIE_CLIENT_ID ?? '') +
+                                                ':' +
+                                                (STAMHOOFD.MOLLIE_SECRET ?? ''),
+                                            'ascii',
+                                        ).toString('base64'),
+                              }
+                            : {
+                                  'Content-Type':
+                                      type == 'json'
+                                          ? 'application/json'
+                                          : 'application/x-www-form-urlencoded',
+                                  'Content-Length': Buffer.byteLength(jsonData),
+                                  Authorization: auth
+                                      ? 'Bearer ' + auth
+                                      : 'Basic ' +
+                                        Buffer.from(
+                                            (STAMHOOFD.MOLLIE_CLIENT_ID ?? '') +
+                                                ':' +
+                                                (STAMHOOFD.MOLLIE_SECRET ?? ''),
+                                            'ascii',
+                                        ).toString('base64'),
+                              },
                     timeout: 10000,
                 },
                 (response: IncomingMessage) => {
@@ -214,7 +241,9 @@ export class MollieToken extends QueryableModel {
 
                             if (response.statusCode < 200 || response.statusCode >= 300) {
                                 console.error(body);
-                                const e = new MollieError(response.statusCode + ' ' + response.statusMessage);
+                                const e = new MollieError(
+                                    response.statusCode + ' ' + response.statusMessage,
+                                );
                                 e.body = json;
                                 reject(e);
                                 return;
@@ -251,14 +280,19 @@ export class MollieToken extends QueryableModel {
     }
 
     /**
-    * Refresh the token itself, without generating a new token. Everyone who had the token has a new token now
-    */
+     * Refresh the token itself, without generating a new token. Everyone who had the token has a new token now
+     */
     async refresh(): Promise<void> {
         try {
-            const data = await MollieToken.request('POST', '/oauth2/tokens', {
-                grant_type: 'refresh_token',
-                refresh_token: this.refreshToken,
-            }, 'urlencoded');
+            const data = await MollieToken.request(
+                'POST',
+                '/oauth2/tokens',
+                {
+                    grant_type: 'refresh_token',
+                    refresh_token: this.refreshToken,
+                },
+                'urlencoded',
+            );
 
             if (data && data.access_token && data.refresh_token) {
                 // Delete token if exisitng
@@ -275,7 +309,12 @@ export class MollieToken extends QueryableModel {
             throw new SimpleError({ code: '', message: 'Something went wrong in the response' });
         } catch (e) {
             if (e instanceof MollieError) {
-                if (e.body && typeof e.body === 'object' && 'error' in e.body && e.body.error === 'invalid_grant') {
+                if (
+                    e.body &&
+                    typeof e.body === 'object' &&
+                    'error' in e.body &&
+                    e.body.error === 'invalid_grant'
+                ) {
                     // Refresh token not valid.
                     console.error('Deleting Mollie Token because invalid refresh token');
                     await this.delete();
@@ -289,14 +328,19 @@ export class MollieToken extends QueryableModel {
     }
 
     /**
-    * Refresh the token itself, without generating a new token. Everyone who had the token has a new token now
-    */
+     * Refresh the token itself, without generating a new token. Everyone who had the token has a new token now
+     */
     async revoke(): Promise<void> {
         try {
-            await MollieToken.request('DELETE', '/oauth2/tokens', {
-                token_type_hint: 'refresh_token',
-                token: this.refreshToken,
-            }, 'urlencoded');
+            await MollieToken.request(
+                'DELETE',
+                '/oauth2/tokens',
+                {
+                    token_type_hint: 'refresh_token',
+                    token: this.refreshToken,
+                },
+                'urlencoded',
+            );
         } catch (e) {
             console.error('Failed to revoke token', this.organizationId, e);
         }
@@ -304,13 +348,18 @@ export class MollieToken extends QueryableModel {
     }
 
     /**
-    * Refresh the token itself, without generating a new token. Everyone who had the token has a new token now
-    */
+     * Refresh the token itself, without generating a new token. Everyone who had the token has a new token now
+     */
     static async create(organization: Organization, code: string): Promise<MollieToken> {
-        const data = await MollieToken.request('POST', '/oauth2/tokens', {
-            grant_type: 'authorization_code',
-            code: code,
-        }, 'urlencoded');
+        const data = await MollieToken.request(
+            'POST',
+            '/oauth2/tokens',
+            {
+                grant_type: 'authorization_code',
+                code: code,
+            },
+            'urlencoded',
+        );
 
         if (data && data.access_token && data.refresh_token) {
             // Delete token if exisitng

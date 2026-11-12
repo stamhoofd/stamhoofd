@@ -20,7 +20,9 @@ describe('ViesService cache', () => {
     });
 
     function mockVies(response: unknown, statusCode = 200) {
-        return nock(VIES_HOST).post(VIES_PATH).reply(statusCode, response as nock.Body);
+        return nock(VIES_HOST)
+            .post(VIES_PATH)
+            .reply(statusCode, response as nock.Body);
     }
 
     async function cache(result: boolean, checkedAt: Date) {
@@ -31,7 +33,9 @@ describe('ViesService cache', () => {
         await cache(true, new Date('2026-02-18T12:00:00.000Z'));
         const scope = mockVies({ valid: false });
 
-        await expect(ViesService.checkVATNumber(Country.Belgium, VAT_NUMBER)).resolves.toBe(VAT_NUMBER);
+        await expect(ViesService.checkVATNumber(Country.Belgium, VAT_NUMBER)).resolves.toBe(
+            VAT_NUMBER,
+        );
         expect(scope.isDone()).toBe(false);
     });
 
@@ -48,7 +52,9 @@ describe('ViesService cache', () => {
     test('stores a successful valid API result with the cleaned VAT number', async () => {
         mockVies({ valid: true });
 
-        await expect(ViesService.checkVATNumber(Country.Belgium, 'BE 0411.905.847')).resolves.toBe(VAT_NUMBER);
+        await expect(ViesService.checkVATNumber(Country.Belgium, 'BE 0411.905.847')).resolves.toBe(
+            VAT_NUMBER,
+        );
 
         const cached = await ViesCachedResult.getByID(VAT_NUMBER);
         expect(cached).toMatchObject({
@@ -61,9 +67,9 @@ describe('ViesService cache', () => {
     test('stores a successful invalid API result with the cleaned VAT number', async () => {
         mockVies({ valid: false });
 
-        await expect(ViesService.checkVATNumber(Country.Belgium, 'BE 0411.905.847')).rejects.toThrow(
-            STExpect.simpleError({ code: 'invalid_field', field: 'VATNumber' }),
-        );
+        await expect(
+            ViesService.checkVATNumber(Country.Belgium, 'BE 0411.905.847'),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'VATNumber' }));
 
         const cached = await ViesCachedResult.getByID(VAT_NUMBER);
         expect(cached).toMatchObject({
@@ -92,7 +98,9 @@ describe('ViesService cache', () => {
         await cache(true, checkedAt);
         mockVies({ message: 'Internal Server Error' }, 500);
 
-        await expect(ViesService.checkVATNumber(Country.Belgium, VAT_NUMBER)).resolves.toBe(VAT_NUMBER);
+        await expect(ViesService.checkVATNumber(Country.Belgium, VAT_NUMBER)).resolves.toBe(
+            VAT_NUMBER,
+        );
         expect(await ViesCachedResult.getByID(VAT_NUMBER)).toMatchObject({
             result: true,
             checkedAt,
@@ -125,7 +133,9 @@ describe('ViesService cache', () => {
         test('throws when VIES is unavailable and no cached result exists', async () => {
             mockVies({ message: 'Internal Server Error' }, 500);
 
-            await expect(ViesService.checkCompanyNumber(Country.Belgium, '0411905847')).rejects.toThrow(
+            await expect(
+                ViesService.checkCompanyNumber(Country.Belgium, '0411905847'),
+            ).rejects.toThrow(
                 STExpect.simpleError({ code: 'service_unavailable', field: 'VATNumber' }),
             );
         });
@@ -134,7 +144,9 @@ describe('ViesService cache', () => {
             await cache(true, new Date('2026-02-17T12:00:00.000Z'));
             mockVies({ message: 'Internal Server Error' }, 500);
 
-            await expect(ViesService.checkCompanyNumber(Country.Belgium, '0411905847')).resolves.toEqual({
+            await expect(
+                ViesService.checkCompanyNumber(Country.Belgium, '0411905847'),
+            ).resolves.toEqual({
                 companyNumber: '0411905847',
                 VATNumber: VAT_NUMBER,
             });
@@ -144,7 +156,9 @@ describe('ViesService cache', () => {
             await cache(false, new Date('2026-02-17T12:00:00.000Z'));
             mockVies({ message: 'Internal Server Error' }, 500);
 
-            await expect(ViesService.checkCompanyNumber(Country.Belgium, '0411905847')).resolves.toEqual({
+            await expect(
+                ViesService.checkCompanyNumber(Country.Belgium, '0411905847'),
+            ).resolves.toEqual({
                 companyNumber: '0411905847',
                 VATNumber: null,
             });

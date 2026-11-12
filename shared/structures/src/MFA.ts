@@ -1,4 +1,14 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    AnyDecoder,
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 
 import { Token } from './Token.js';
 
@@ -202,11 +212,18 @@ export class PasskeyCredential extends AutoEncoder {
             return 'apple';
         }
 
-        if (this.providerName?.toLocaleLowerCase().includes('google') || this.providerName?.toLocaleLowerCase().includes('chrome')) {
+        if (
+            this.providerName?.toLocaleLowerCase().includes('google') ||
+            this.providerName?.toLocaleLowerCase().includes('chrome')
+        ) {
             return 'google';
         }
 
-        if (this.providerName?.toLocaleLowerCase().includes('yubikey') || ((this.transports.includes('usb') || this.transports.includes('nfc')) && !this.transports.includes('hybrid'))) {
+        if (
+            this.providerName?.toLocaleLowerCase().includes('yubikey') ||
+            ((this.transports.includes('usb') || this.transports.includes('nfc')) &&
+                !this.transports.includes('hybrid'))
+        ) {
             return 'security-key';
         }
         return 'key';

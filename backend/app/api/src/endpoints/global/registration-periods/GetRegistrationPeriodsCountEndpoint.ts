@@ -11,7 +11,12 @@ type Query = CountFilteredRequest;
 type Body = undefined;
 type ResponseBody = CountResponse;
 
-export class GetRegistrationPeriodsCountEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetRegistrationPeriodsCountEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     queryDecoder = CountFilteredRequest as Decoder<CountFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -31,8 +36,7 @@ export class GetRegistrationPeriodsCountEndpoint extends Endpoint<Params, Query,
         await Context.setUserOrganizationScope();
         const query = await GetRegistrationPeriodsEndpoint.buildQuery(request.query);
 
-        const count = await query
-            .count();
+        const count = await query.count();
 
         return new Response(
             CountResponse.create({

@@ -1,6 +1,16 @@
 import type { CliContext } from '../../context/create-context.js';
 import { buildPorts } from '../../context/ports.js';
-import { mysqlContainer, mysqlDataVolume, mysqlImage, mysqlInternalPort, mysqlRootPassword, mysqlRootUser, mysqlServerArgs, localhostPort, localhostPortMapping } from '../../config/shared-service-config.js';
+import {
+    mysqlContainer,
+    mysqlDataVolume,
+    mysqlImage,
+    mysqlInternalPort,
+    mysqlRootPassword,
+    mysqlRootUser,
+    mysqlServerArgs,
+    localhostPort,
+    localhostPortMapping,
+} from '../../config/shared-service-config.js';
 import * as docker from '../docker.js';
 import { SharedDockerService } from '../docker-service.js';
 import type { ServiceStatus } from '../service.js';
@@ -47,7 +57,20 @@ export class MysqlService extends SharedDockerService {
     }
 
     static dockerArgs(port: number): string[] {
-        return ['run', '-d', '--name', MysqlService.container, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMapping(port, mysqlInternalPort), '-v', `${mysqlDataVolume}:/var/lib/mysql`, mysqlImage, ...mysqlServerArgs()];
+        return [
+            'run',
+            '-d',
+            '--name',
+            MysqlService.container,
+            '-e',
+            `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`,
+            '-p',
+            localhostPortMapping(port, mysqlInternalPort),
+            '-v',
+            `${mysqlDataVolume}:/var/lib/mysql`,
+            mysqlImage,
+            ...mysqlServerArgs(),
+        ];
     }
 }
 

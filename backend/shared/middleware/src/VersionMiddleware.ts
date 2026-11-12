@@ -8,7 +8,10 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
     minimumVersion: number | undefined;
     latestVersions: { android: number; ios: number; web: number };
 
-    constructor(options: { latestVersions: { android: number; ios: number; web: number }; minimumVersion?: number }) {
+    constructor(options: {
+        latestVersions: { android: number; ios: number; web: number };
+        minimumVersion?: number;
+    }) {
         this.minimumVersion = options.minimumVersion;
         this.latestVersions = options.latestVersions;
     }
@@ -27,7 +30,11 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
         } catch (e) {
             if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('missing_version')) {
                 // Allow missing version on /openid/ path
-                if (STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'test' || request.url.startsWith('/openid/')) {
+                if (
+                    STAMHOOFD.environment === 'development' ||
+                    STAMHOOFD.environment === 'test' ||
+                    request.url.startsWith('/openid/')
+                ) {
                     request.version = this.latestVersions.web;
                     return;
                 }
@@ -45,7 +52,11 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
         } */
 
         if (version < this.minimumVersion) {
-            if (request.url.startsWith('/payments/') && request.method === 'POST' && platform === undefined) {
+            if (
+                request.url.startsWith('/payments/') &&
+                request.method === 'POST' &&
+                platform === undefined
+            ) {
                 // Allow for exchange notifications
                 return;
             }
@@ -54,14 +65,16 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
                 throw new SimpleError({
                     code: 'client_update_required',
                     statusCode: 400,
-                    message: 'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
+                    message:
+                        'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
                     human: $t('%G8'),
                 });
             } else {
                 throw new SimpleError({
                     code: 'client_update_required',
                     statusCode: 400,
-                    message: 'Er is een noodzakelijke update beschikbaar. Update de app en probeer opnieuw!',
+                    message:
+                        'Er is een noodzakelijke update beschikbaar. Update de app en probeer opnieuw!',
                     human: $t('%G9'),
                 });
             }

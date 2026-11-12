@@ -1,5 +1,14 @@
 import { buildPorts } from '../../context/ports.js';
-import { defaultDomain, maildevContainer, maildevImage, maildevInternalHttpPort, maildevInternalSmtpPort, maildevPassword, maildevUsername, localhostPortMapping } from '../../config/shared-service-config.js';
+import {
+    defaultDomain,
+    maildevContainer,
+    maildevImage,
+    maildevInternalHttpPort,
+    maildevInternalSmtpPort,
+    maildevPassword,
+    maildevUsername,
+    localhostPortMapping,
+} from '../../config/shared-service-config.js';
 import { link } from '../../runtime/ux.js';
 import { SharedDockerService } from '../docker-service.js';
 import type { CliContext } from '../../context/create-context.js';
@@ -29,7 +38,24 @@ export class MaildevService extends SharedDockerService {
     }
 
     static dockerArgs(smtpPort: number, httpPort: number): string[] {
-        return ['run', '-d', '--name', MaildevService.container, '-p', localhostPortMapping(smtpPort, maildevInternalSmtpPort), '-p', localhostPortMapping(httpPort, maildevInternalHttpPort), maildevImage, 'maildev', '--ip', '0.0.0.0', '--incoming-user', maildevUsername, '--incoming-pass', maildevPassword];
+        return [
+            'run',
+            '-d',
+            '--name',
+            MaildevService.container,
+            '-p',
+            localhostPortMapping(smtpPort, maildevInternalSmtpPort),
+            '-p',
+            localhostPortMapping(httpPort, maildevInternalHttpPort),
+            maildevImage,
+            'maildev',
+            '--ip',
+            '0.0.0.0',
+            '--incoming-user',
+            maildevUsername,
+            '--incoming-pass',
+            maildevPassword,
+        ];
     }
 }
 

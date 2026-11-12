@@ -1,5 +1,10 @@
 import { Group } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, GroupType } from '@stamhoofd/structures';
+import {
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    AuditLogType,
+    GroupType,
+} from '@stamhoofd/structures';
 import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 
 const defaultGenerator = getDefaultGenerator({
@@ -9,7 +14,13 @@ const defaultGenerator = getDefaultGenerator({
 });
 
 export const GroupLogger = new ModelLogger(Group, {
-    skipKeys: ['periodId', 'cycle', 'organizationId', 'stockReservations', 'settings.registeredMembers'],
+    skipKeys: [
+        'periodId',
+        'cycle',
+        'organizationId',
+        'stockReservations',
+        'settings.registeredMembers',
+    ],
     async optionsGenerator(event) {
         const result = await defaultGenerator(event);
 
@@ -72,37 +83,49 @@ export const GroupLogger = new ModelLogger(Group, {
         if (model.type === GroupType.EventRegistration) {
             if (model.settings.eventId) {
                 return new Map([
-                    ['e', AuditLogReplacement.create({
-                        id: model.settings.eventId,
-                        value: model.settings.name.toString(),
-                        type: AuditLogReplacementType.Event,
-                    })],
+                    [
+                        'e',
+                        AuditLogReplacement.create({
+                            id: model.settings.eventId,
+                            value: model.settings.name.toString(),
+                            type: AuditLogReplacementType.Event,
+                        }),
+                    ],
                 ]);
             }
             if (model.eventId) {
                 return new Map([
-                    ['e', AuditLogReplacement.create({
-                        id: model.eventId,
-                        value: model.settings.name.toString(),
-                        type: AuditLogReplacementType.Event,
-                    })],
+                    [
+                        'e',
+                        AuditLogReplacement.create({
+                            id: model.eventId,
+                            value: model.settings.name.toString(),
+                            type: AuditLogReplacementType.Event,
+                        }),
+                    ],
                 ]);
             }
             return new Map([
-                ['e', AuditLogReplacement.create({
-                    id: model.id,
-                    value: model.settings.name.toString(),
-                    type: AuditLogReplacementType.Group,
-                })],
+                [
+                    'e',
+                    AuditLogReplacement.create({
+                        id: model.id,
+                        value: model.settings.name.toString(),
+                        type: AuditLogReplacementType.Group,
+                    }),
+                ],
             ]);
         }
 
         return new Map([
-            ['g', AuditLogReplacement.create({
-                id: model.id,
-                value: model.settings.name.toString(),
-                type: AuditLogReplacementType.Group,
-            })],
+            [
+                'g',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.settings.name.toString(),
+                    type: AuditLogReplacementType.Group,
+                }),
+            ],
         ]);
     },
 });

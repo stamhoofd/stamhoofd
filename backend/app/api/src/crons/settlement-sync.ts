@@ -104,28 +104,49 @@ export async function reportProblemSettlements() {
     // payout would be reported forever
     const stalePendingFees = isApplicationFeeInvoicingEnabled()
         ? await Settlement.select()
-                .where('status', SettlementStatus.Paid)
-                .where('pendingFees', '!=', 0)
-                .where('settledAt', '<', new Date(Date.now() - MAXIMUM_PENDING_FEES_AGE_MS))
-                .limit(50)
-                .fetch()
+              .where('status', SettlementStatus.Paid)
+              .where('pendingFees', '!=', 0)
+              .where('settledAt', '<', new Date(Date.now() - MAXIMUM_PENDING_FEES_AGE_MS))
+              .limit(50)
+              .fetch()
         : [];
 
     if (unexplained.length === 0 && unsynced.length === 0 && stalePendingFees.length === 0) {
         return;
     }
 
-    const total = new Set([...unexplained, ...unsynced, ...stalePendingFees].map(s => s.id)).size;
+    const total = new Set([...unexplained, ...unsynced, ...stalePendingFees].map((s) => s.id)).size;
 
     const describe = (settlement: Settlement) => {
-        return settlement.provider + ' ' + settlement.externalId + ' (' + Formatter.dateIso(settlement.settledAt) + ', ' + Formatter.price(settlement.unexplainedAmount) + ' onverklaard, ' + Formatter.price(settlement.pendingFees) + ' niet-gefactureerde kosten, ' + Formatter.price(settlement.uncollectibleFees) + ' niet-aanrekenbare kosten, ' + settlement.syncFailureCount + ' mislukte pogingen)';
+        return (
+            settlement.provider +
+            ' ' +
+            settlement.externalId +
+            ' (' +
+            Formatter.dateIso(settlement.settledAt) +
+            ', ' +
+            Formatter.price(settlement.unexplainedAmount) +
+            ' onverklaard, ' +
+            Formatter.price(settlement.pendingFees) +
+            ' niet-gefactureerde kosten, ' +
+            Formatter.price(settlement.uncollectibleFees) +
+            ' niet-aanrekenbare kosten, ' +
+            settlement.syncFailureCount +
+            ' mislukte pogingen)'
+        );
     };
 
     Email.sendWebmaster({
         subject: 'Uitbetalingen met problemen: ' + total,
-        html: 'Deze uitbetalingen kloppen niet of konden niet gesynchroniseerd worden: <br><br>'
-            + 'Onverklaard verschil:<br>' + (unexplained.map(describe).join('<br>') || 'geen') + '<br><br>'
-            + 'Niet gesynchroniseerd:<br>' + (unsynced.map(describe).join('<br>') || 'geen') + '<br><br>'
-            + 'Kosten te lang niet gefactureerd:<br>' + (stalePendingFees.map(describe).join('<br>') || 'geen'),
+        html:
+            'Deze uitbetalingen kloppen niet of konden niet gesynchroniseerd worden: <br><br>' +
+            'Onverklaard verschil:<br>' +
+            (unexplained.map(describe).join('<br>') || 'geen') +
+            '<br><br>' +
+            'Niet gesynchroniseerd:<br>' +
+            (unsynced.map(describe).join('<br>') || 'geen') +
+            '<br><br>' +
+            'Kosten te lang niet gefactureerd:<br>' +
+            (stalePendingFees.map(describe).join('<br>') || 'geen'),
     });
 }

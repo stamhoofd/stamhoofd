@@ -131,10 +131,7 @@ describe('clearExcelCacheHelper', () => {
             dir.isDirectory = () => true;
         });
 
-        fsMock.readdir.mockReturnValue(
-
-            Promise.resolve([...directories, file1]) as any,
-        );
+        fsMock.readdir.mockReturnValue(Promise.resolve([...directories, file1]) as any);
         // #endregion
 
         // act
@@ -147,7 +144,13 @@ describe('clearExcelCacheHelper', () => {
 
         // assert
         expect(fsMock.rm).toHaveBeenCalledTimes(2);
-        expect(fsMock.rm).toHaveBeenCalledWith('/Users/user/project/backend/app/api/.cache/2024-01-01', { recursive: true, force: true });
-        expect(fsMock.rm).toHaveBeenCalledWith('/Users/user/project/backend/app/api/.cache/2024-01-02', { recursive: true, force: true });
+        expect(fsMock.rm).toHaveBeenCalledWith(
+            '/Users/user/project/backend/app/api/.cache/2024-01-01',
+            { recursive: true, force: true },
+        );
+        expect(fsMock.rm).toHaveBeenCalledWith(
+            '/Users/user/project/backend/app/api/.cache/2024-01-02',
+            { recursive: true, force: true },
+        );
     });
 });

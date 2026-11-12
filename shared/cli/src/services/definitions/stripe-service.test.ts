@@ -9,12 +9,19 @@ afterEach(() => vi.restoreAllMocks());
 
 it('keeps Stripe API key commands quiet', async () => {
     const context = { verbosity: RunVerbosity.Output } as CliContext;
-    const start = vi.spyOn(DockerService.prototype, 'start').mockResolvedValue({ message: 'started' });
-    const run = vi.spyOn(docker, 'run').mockResolvedValue({ stdout: 'whsec_test\n', stderr: '', status: 0 });
+    const start = vi
+        .spyOn(DockerService.prototype, 'start')
+        .mockResolvedValue({ message: 'started' });
+    const run = vi
+        .spyOn(docker, 'run')
+        .mockResolvedValue({ stdout: 'whsec_test\n', stderr: '', status: 0 });
 
     await new StripeService().start(context, undefined);
     await StripeService.fetchWebhookSecret(context, 'sk_test');
 
     expect(start).toHaveBeenCalledWith({ verbosity: RunVerbosity.Quiet }, undefined);
-    expect(run).toHaveBeenCalledWith(expect.arrayContaining(['--api-key', 'sk_test']), { capture: true, verbosity: RunVerbosity.Quiet });
+    expect(run).toHaveBeenCalledWith(expect.arrayContaining(['--api-key', 'sk_test']), {
+        capture: true,
+        verbosity: RunVerbosity.Quiet,
+    });
 });

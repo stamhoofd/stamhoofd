@@ -79,7 +79,15 @@ const context = {
 
 describe.skip('runDev', () => {
     let signalHandlers: Partial<Record<NodeJS.Signals, NodeJS.SignalsListener>>;
-    let liveOutput: { setStatus: ReturnType<typeof vi.fn>; setLiveStatus: ReturnType<typeof vi.fn>; stopLiveStatus: ReturnType<typeof vi.fn>; log: ReturnType<typeof vi.fn>; write: ReturnType<typeof vi.fn>; clearStatus: ReturnType<typeof vi.fn>; stop: ReturnType<typeof vi.fn> };
+    let liveOutput: {
+        setStatus: ReturnType<typeof vi.fn>;
+        setLiveStatus: ReturnType<typeof vi.fn>;
+        stopLiveStatus: ReturnType<typeof vi.fn>;
+        log: ReturnType<typeof vi.fn>;
+        write: ReturnType<typeof vi.fn>;
+        clearStatus: ReturnType<typeof vi.fn>;
+        stop: ReturnType<typeof vi.fn>;
+    };
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -144,24 +152,38 @@ describe.skip('runDev', () => {
         const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
         await waitFor(() => signalHandlers.SIGINT !== undefined);
 
-        expect(spawn).toHaveBeenCalledWith('pnpm', [
-            'exec',
-            'concurrently',
-            '-r',
-            expect.stringMatching(/rm -f \.development\/cli\/generated\/shared-build-\d+\.ready.+pnpm run build:shared.+touch \.development\/cli\/generated\/shared-build-\d+\.ready/),
-            expect.stringMatching(/wait-on \.development\/cli\/generated\/shared-build-\d+\.ready shared\/cli\/dist\/index\.js shared\/locales\/dist\/index\.d\.ts && pnpm exec turbo run dev --env-mode=loose --filter=@stamhoofd\/backend --filter=@stamhoofd\/backend-renderer --filter=@stamhoofd\/backend-statistics-syncer --filter=@stamhoofd\/web-app --filter=@stamhoofd\/webshop/),
-        ], expect.objectContaining({
-            cwd: context.rootDir,
-            stdio: ['inherit', 'pipe', 'pipe'],
-            env: expect.objectContaining({
-                FORCE_COLOR: '1',
-                npm_config_color: 'always',
+        expect(spawn).toHaveBeenCalledWith(
+            'pnpm',
+            [
+                'exec',
+                'concurrently',
+                '-r',
+                expect.stringMatching(
+                    /rm -f \.development\/cli\/generated\/shared-build-\d+\.ready.+pnpm run build:shared.+touch \.development\/cli\/generated\/shared-build-\d+\.ready/,
+                ),
+                expect.stringMatching(
+                    /wait-on \.development\/cli\/generated\/shared-build-\d+\.ready shared\/cli\/dist\/index\.js shared\/locales\/dist\/index\.d\.ts && pnpm exec turbo run dev --env-mode=loose --filter=@stamhoofd\/backend --filter=@stamhoofd\/backend-renderer --filter=@stamhoofd\/backend-statistics-syncer --filter=@stamhoofd\/web-app --filter=@stamhoofd\/webshop/,
+                ),
+            ],
+            expect.objectContaining({
+                cwd: context.rootDir,
+                stdio: ['inherit', 'pipe', 'pipe'],
+                env: expect.objectContaining({
+                    FORCE_COLOR: '1',
+                    npm_config_color: 'always',
+                }),
             }),
-        }));
+        );
 
         expect(liveOutput.setStatus).toHaveBeenCalledWith([
-            { label: `${chalk.dim('https://dashboard.')}${chalk.dim('stamhoofd')}`, href: 'https://dashboard.stamhoofd' },
-            { label: `${chalk.dim('https://api.')}${chalk.dim('stamhoofd')}`, href: 'https://api.stamhoofd' },
+            {
+                label: `${chalk.dim('https://dashboard.')}${chalk.dim('stamhoofd')}`,
+                href: 'https://dashboard.stamhoofd',
+            },
+            {
+                label: `${chalk.dim('https://api.')}${chalk.dim('stamhoofd')}`,
+                href: 'https://api.stamhoofd',
+            },
         ]);
 
         child.emit('exit', 0);
@@ -171,20 +193,32 @@ describe.skip('runDev', () => {
     it('shows non-Stamhoofd environment domains without duplicating the environment label', async () => {
         vi.mocked(isSetupReady).mockReturnValue(false);
 
-        await expect(runDev({
-            ...context,
-            env: 'keeo',
-            instance: {
-                name: 'stamhoofd-keeo',
-                prefix: '',
-                primary: true,
-                portOffset: 100,
-            },
-        }, 'instance', { services: true, stripe: false })).resolves.toBeUndefined();
+        await expect(
+            runDev(
+                {
+                    ...context,
+                    env: 'keeo',
+                    instance: {
+                        name: 'stamhoofd-keeo',
+                        prefix: '',
+                        primary: true,
+                        portOffset: 100,
+                    },
+                },
+                'instance',
+                { services: true, stripe: false },
+            ),
+        ).resolves.toBeUndefined();
 
         expect(liveOutput.setStatus).toHaveBeenCalledWith([
-            { label: `${chalk.dim('https://dashboard.')}${chalk.bold.yellow('keeo')}${chalk.dim('.')}${chalk.dim('stamhoofd')}`, href: 'https://dashboard.keeo.stamhoofd' },
-            { label: `${chalk.dim('https://api.')}${chalk.bold.yellow('keeo')}${chalk.dim('.')}${chalk.dim('stamhoofd')}`, href: 'https://api.keeo.stamhoofd' },
+            {
+                label: `${chalk.dim('https://dashboard.')}${chalk.bold.yellow('keeo')}${chalk.dim('.')}${chalk.dim('stamhoofd')}`,
+                href: 'https://dashboard.keeo.stamhoofd',
+            },
+            {
+                label: `${chalk.dim('https://api.')}${chalk.bold.yellow('keeo')}${chalk.dim('.')}${chalk.dim('stamhoofd')}`,
+                href: 'https://api.keeo.stamhoofd',
+            },
             { label: chalk.bold.red('! setup') },
         ]);
     });
@@ -192,21 +226,33 @@ describe.skip('runDev', () => {
     it('shows secondary environment domains with environment before workspace', async () => {
         vi.mocked(isSetupReady).mockReturnValue(false);
 
-        await expect(runDev({
-            ...context,
-            env: 'keeo',
-            workspace: 'feature',
-            instance: {
-                name: 'stamhoofd-feature-keeo',
-                prefix: 'feature',
-                primary: false,
-                portOffset: 1200,
-            },
-        }, 'instance', { services: true, stripe: false })).resolves.toBeUndefined();
+        await expect(
+            runDev(
+                {
+                    ...context,
+                    env: 'keeo',
+                    workspace: 'feature',
+                    instance: {
+                        name: 'stamhoofd-feature-keeo',
+                        prefix: 'feature',
+                        primary: false,
+                        portOffset: 1200,
+                    },
+                },
+                'instance',
+                { services: true, stripe: false },
+            ),
+        ).resolves.toBeUndefined();
 
         expect(liveOutput.setStatus).toHaveBeenCalledWith([
-            { label: `${chalk.dim('https://dashboard.')}${chalk.bold.yellow('keeo')}${chalk.dim('.')}${chalk.bold.cyan('feature')}${chalk.dim('.stamhoofd')}`, href: 'https://dashboard.keeo.feature.stamhoofd' },
-            { label: `${chalk.dim('https://api.')}${chalk.bold.yellow('keeo')}${chalk.dim('.')}${chalk.bold.cyan('feature')}${chalk.dim('.stamhoofd')}`, href: 'https://api.keeo.feature.stamhoofd' },
+            {
+                label: `${chalk.dim('https://dashboard.')}${chalk.bold.yellow('keeo')}${chalk.dim('.')}${chalk.bold.cyan('feature')}${chalk.dim('.stamhoofd')}`,
+                href: 'https://dashboard.keeo.feature.stamhoofd',
+            },
+            {
+                label: `${chalk.dim('https://api.')}${chalk.bold.yellow('keeo')}${chalk.dim('.')}${chalk.bold.cyan('feature')}${chalk.dim('.stamhoofd')}`,
+                href: 'https://api.keeo.feature.stamhoofd',
+            },
             { label: chalk.bold.red('! setup') },
         ]);
     });
@@ -215,7 +261,9 @@ describe.skip('runDev', () => {
         const child = createChild();
         const servicesDeferred = deferred<boolean>();
         vi.mocked(spawn).mockReturnValue(child as any);
-        vi.mocked(sharedServicesRunning).mockImplementation(async () => await servicesDeferred.promise);
+        vi.mocked(sharedServicesRunning).mockImplementation(
+            async () => await servicesDeferred.promise,
+        );
 
         const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false });
 
@@ -231,14 +279,22 @@ describe.skip('runDev', () => {
     it('blocks startup and shows setup warning when setup is not ready', async () => {
         vi.mocked(isSetupReady).mockReturnValue(false);
 
-        await expect(runDev(context, DevTarget.Instance, { services: true, stripe: false })).resolves.toBeUndefined();
+        await expect(
+            runDev(context, DevTarget.Instance, { services: true, stripe: false }),
+        ).resolves.toBeUndefined();
 
         expect(printSetupReport).toHaveBeenCalledTimes(1);
         expect(spawn).not.toHaveBeenCalled();
         expect(liveOutput.clearStatus).toHaveBeenCalledTimes(1);
         expect(liveOutput.setStatus).toHaveBeenCalledWith([
-            { label: `${chalk.dim('https://dashboard.')}${chalk.dim('stamhoofd')}`, href: 'https://dashboard.stamhoofd' },
-            { label: `${chalk.dim('https://api.')}${chalk.dim('stamhoofd')}`, href: 'https://api.stamhoofd' },
+            {
+                label: `${chalk.dim('https://dashboard.')}${chalk.dim('stamhoofd')}`,
+                href: 'https://dashboard.stamhoofd',
+            },
+            {
+                label: `${chalk.dim('https://api.')}${chalk.dim('stamhoofd')}`,
+                href: 'https://api.stamhoofd',
+            },
             { label: chalk.bold.red('! setup') },
         ]);
     });
@@ -246,13 +302,21 @@ describe.skip('runDev', () => {
     it('blocks startup and shows services warning when services remain unavailable', async () => {
         vi.mocked(sharedServicesRunning).mockResolvedValue(false);
 
-        await expect(runDev(context, DevTarget.Instance, { services: true, stripe: false })).resolves.toBeUndefined();
+        await expect(
+            runDev(context, DevTarget.Instance, { services: true, stripe: false }),
+        ).resolves.toBeUndefined();
 
         expect(spawn).not.toHaveBeenCalled();
         expect(startServices).toHaveBeenCalledTimes(1);
         expect(liveOutput.setStatus).toHaveBeenCalledWith([
-            { label: `${chalk.dim('https://dashboard.')}${chalk.dim('stamhoofd')}`, href: 'https://dashboard.stamhoofd' },
-            { label: `${chalk.dim('https://api.')}${chalk.dim('stamhoofd')}`, href: 'https://api.stamhoofd' },
+            {
+                label: `${chalk.dim('https://dashboard.')}${chalk.dim('stamhoofd')}`,
+                href: 'https://dashboard.stamhoofd',
+            },
+            {
+                label: `${chalk.dim('https://api.')}${chalk.dim('stamhoofd')}`,
+                href: 'https://api.stamhoofd',
+            },
             { label: chalk.bold.red('! services') },
         ]);
     });
@@ -319,14 +383,16 @@ describe.skip('runDev', () => {
             .mockResolvedValueOnce(undefined)
             .mockImplementation(async () => await reload.promise);
 
-        const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false }).then(() => {
-            resolved = true;
-        });
+        const promise = runDev(context, DevTarget.Instance, { services: true, stripe: false }).then(
+            () => {
+                resolved = true;
+            },
+        );
         await waitFor(() => signalHandlers.SIGINT !== undefined);
 
         signalHandlers.SIGINT?.('SIGINT');
         child.emit('exit', 1);
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
         expect(resolved).toBe(false);
         expect(signalHandlers.SIGINT).toBeDefined();
@@ -380,7 +446,10 @@ describe.skip('runDev', () => {
         expect(liveOutput.clearStatus).toHaveBeenCalledTimes(1);
 
         reload.resolve(undefined);
-        await expect(promise).rejects.toMatchObject({ exitCode: 130, message: 'Forced shutdown. Cleanup may be incomplete.' });
+        await expect(promise).rejects.toMatchObject({
+            exitCode: 130,
+            message: 'Forced shutdown. Cleanup may be incomplete.',
+        });
     });
 
     it('still rejects when the child exits with a non-zero status without a signal', async () => {
@@ -432,15 +501,29 @@ describe('commandsForTarget', () => {
         const commands = commandsForTarget(context.rootDir, DevTarget.All, ports);
 
         expect(commands).toHaveLength(2);
-        expect(commands[0]).toContain("packages/node/dev-tools/dist/concurrently.js' api,renderer,stats,dashboard,webshop");
+        expect(commands[0]).toContain(
+            "packages/node/dev-tools/dist/concurrently.js' api,renderer,stats,dashboard,webshop",
+        );
         expect(commands[0]).toContain('--kill-others-on-fail');
         expect(commands[0]).not.toContain('run dev');
-        expect(commands.some(command => command.includes(`supervise.js' docs nuxt dev --port ${ports.docs}`))).toBe(true);
+        expect(
+            commands.some((command) =>
+                command.includes(`supervise.js' docs nuxt dev --port ${ports.docs}`),
+            ),
+        ).toBe(true);
     });
 
     it('does not start docs for backend or frontend targets', () => {
-        expect(commandsForTarget(context.rootDir, DevTarget.Backend, ports).some(command => command.includes('nuxt dev'))).toBe(false);
-        expect(commandsForTarget(context.rootDir, DevTarget.Frontend, ports).some(command => command.includes('nuxt dev'))).toBe(false);
+        expect(
+            commandsForTarget(context.rootDir, DevTarget.Backend, ports).some((command) =>
+                command.includes('nuxt dev'),
+            ),
+        ).toBe(false);
+        expect(
+            commandsForTarget(context.rootDir, DevTarget.Frontend, ports).some((command) =>
+                command.includes('nuxt dev'),
+            ),
+        ).toBe(false);
     });
 });
 
@@ -451,37 +534,53 @@ describe('concurrentlyTargets', () => {
         const targets = concurrentlyTargets(context.rootDir, DevTarget.Docs, ports);
 
         expect(targets).toHaveLength(1);
-        expect(targets.some(target => target.includes('nodemon') || target.includes('wait-on'))).toBe(false);
+        expect(
+            targets.some((target) => target.includes('nodemon') || target.includes('wait-on')),
+        ).toBe(false);
     });
 
     it('starts docs immediately in all while gating the app processes on the shared build', () => {
         const targets = concurrentlyTargets(context.rootDir, DevTarget.All, ports);
-        const docsTarget = targets.find(target => target.includes('run prepare:observability'));
-        const appTarget = targets.find(target => target.includes("concurrently.js' api,renderer,stats,dashboard,webshop"));
+        const docsTarget = targets.find((target) => target.includes('run prepare:observability'));
+        const appTarget = targets.find((target) =>
+            target.includes("concurrently.js' api,renderer,stats,dashboard,webshop"),
+        );
 
         // Docs consumes no shared build output, so it must not wait on it...
         expect(docsTarget).toBeDefined();
         expect(docsTarget).not.toContain('wait-on');
         // ...while the app processes still do.
         expect(appTarget).toContain('wait-on');
-        expect(targets.some(target => target.includes('nodemon'))).toBe(true);
+        expect(targets.some((target) => target.includes('nodemon'))).toBe(true);
     });
 
     it('uses the root shared build graph in the watcher', () => {
-        const watcher = concurrentlyTargets(context.rootDir, DevTarget.All, ports).find(target => target.includes('nodemon'));
+        const watcher = concurrentlyTargets(context.rootDir, DevTarget.All, ports).find((target) =>
+            target.includes('nodemon'),
+        );
 
         expect(watcher).toContain("--exec 'node packages/node/dev-tools/dist/shared-build.js ");
         expect(watcher).not.toContain('--verbose');
     });
 
     it('replays all shared build logs only when verbose output is requested', () => {
-        const watcher = concurrentlyTargets(context.rootDir, DevTarget.All, ports, true).find(target => target.includes('nodemon'));
+        const watcher = concurrentlyTargets(context.rootDir, DevTarget.All, ports, true).find(
+            (target) => target.includes('nodemon'),
+        );
         expect(watcher).toContain(" --verbose'");
     });
 });
 
-function createChild(): EventEmitter & { kill: ReturnType<typeof vi.fn>; stdout: EventEmitter; stderr: EventEmitter } {
-    const child = new EventEmitter() as EventEmitter & { kill: ReturnType<typeof vi.fn>; stdout: EventEmitter; stderr: EventEmitter };
+function createChild(): EventEmitter & {
+    kill: ReturnType<typeof vi.fn>;
+    stdout: EventEmitter;
+    stderr: EventEmitter;
+} {
+    const child = new EventEmitter() as EventEmitter & {
+        kill: ReturnType<typeof vi.fn>;
+        stdout: EventEmitter;
+        stderr: EventEmitter;
+    };
     child.kill = vi.fn();
     child.stdout = new EventEmitter();
     child.stderr = new EventEmitter();
@@ -501,7 +600,7 @@ async function waitFor(condition: () => boolean): Promise<void> {
         if (condition()) {
             return;
         }
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
     }
     throw new Error('Condition was not met.');
 }

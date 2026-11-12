@@ -21,10 +21,14 @@ describe('Unit.PermissionEnums', () => {
         const permissions = Permissions.decode(new ObjectData(serialized, { version }));
 
         expect(permissions.level).toBe(PermissionLevel.Full);
-        expect(permissions.resources.get(PermissionsResourceType.RecordCategories)?.get('category')).toEqual(ResourcePermissions.create({
-            level: PermissionLevel.Read,
-            accessRights: [AccessRight.MemberManageNRN],
-        }));
+        expect(
+            permissions.resources.get(PermissionsResourceType.RecordCategories)?.get('category'),
+        ).toEqual(
+            ResourcePermissions.create({
+                level: PermissionLevel.Read,
+                accessRights: [AccessRight.MemberManageNRN],
+            }),
+        );
         expect(permissions.encode({ version })).toEqual(serialized);
     });
 });

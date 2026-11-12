@@ -12,7 +12,8 @@ const createAccount = (options: {
     const meta = new StripeMetaData();
 
     if (options.current_deadline) meta.requirements.current_deadline = options.current_deadline;
-    if (options.future_deadline) meta.future_requirements.current_deadline = options.future_deadline;
+    if (options.future_deadline)
+        meta.future_requirements.current_deadline = options.future_deadline;
     if (options.missingData) meta.requirements.currently_due = ['company.verification.document'];
 
     account.meta = meta;
@@ -59,7 +60,9 @@ describe('Stripe capabilities', () => {
             const context = { version, medium };
 
             test(`preserves historical JSON at version ${version} for ${medium}`, () => {
-                const payload = { capabilities: { card_payments: 'active', ideal_payments: 'pending' } };
+                const payload = {
+                    capabilities: { card_payments: 'active', ideal_payments: 'pending' },
+                };
                 const meta = StripeMetaData.decode(new ObjectData(payload, context));
                 expect(meta.capabilities).toEqual(new Map(Object.entries(payload.capabilities)));
                 expect(JSON.parse(JSON.stringify(meta.encode(context)))).toMatchObject(payload);
@@ -69,17 +72,28 @@ describe('Stripe capabilities', () => {
                 for (const payload of [{}, { capabilities: undefined }, { capabilities: {} }]) {
                     const meta = StripeMetaData.decode(new ObjectData(payload, context));
                     expect(meta.capabilities).toEqual(new Map());
-                    expect(JSON.parse(JSON.stringify(meta.encode(context)))).toMatchObject({ capabilities: {} });
+                    expect(JSON.parse(JSON.stringify(meta.encode(context)))).toMatchObject({
+                        capabilities: {},
+                    });
                 }
             });
 
             test(`preserves replacement patches at version ${version} for ${medium}`, () => {
-                const original = StripeMetaData.create({ capabilities: new Map([['card_payments', 'active'], ['ideal_payments', 'pending']]) });
+                const original = StripeMetaData.create({
+                    capabilities: new Map([
+                        ['card_payments', 'active'],
+                        ['ideal_payments', 'pending'],
+                    ]),
+                });
                 for (const capabilities of [{}, { bancontact_payments: 'active' }]) {
                     const payload = { _isPatch: true, capabilities };
-                    const patch = StripeMetaData.patchType().decode(new ObjectData(payload, context));
+                    const patch = StripeMetaData.patchType().decode(
+                        new ObjectData(payload, context),
+                    );
                     expect(JSON.parse(JSON.stringify(patch.encode(context)))).toEqual(payload);
-                    expect(original.patch(patch).capabilities).toEqual(new Map(Object.entries(capabilities)));
+                    expect(original.patch(patch).capabilities).toEqual(
+                        new Map(Object.entries(capabilities)),
+                    );
                 }
                 const omitted = StripeMetaData.patchType().decode(new ObjectData({}, context));
                 expect(original.patch(omitted).capabilities).toEqual(original.capabilities);
@@ -117,23 +131,33 @@ describe('Stripe capabilities', () => {
     });
 
     test('supports typed full replacement and incremental patches', () => {
-        const original = StripeMetaData.create({ capabilities: new Map([['card_payments', 'pending']]) });
-        const replacement = StripeMetaData.patch({ capabilities: new Map([['ideal_payments', 'active']]) });
+        const original = StripeMetaData.create({
+            capabilities: new Map([['card_payments', 'pending']]),
+        });
+        const replacement = StripeMetaData.patch({
+            capabilities: new Map([['ideal_payments', 'active']]),
+        });
         const replaced = original.patch(replacement);
         expect(replaced.capabilities).toEqual(new Map([['ideal_payments', 'active']]));
         const incremental = StripeMetaData.patch({});
         incremental.capabilities.set('ideal_payments', null);
         incremental.capabilities.set('card_payments', 'active');
         const context = { version: Version };
-        const decoded = StripeMetaData.patchType().decode(new ObjectData(JSON.parse(JSON.stringify(incremental.encode(context))), context));
-        expect(replaced.patch(decoded).capabilities).toEqual(new Map([['card_payments', 'active']]));
+        const decoded = StripeMetaData.patchType().decode(
+            new ObjectData(JSON.parse(JSON.stringify(incremental.encode(context))), context),
+        );
+        expect(replaced.patch(decoded).capabilities).toEqual(
+            new Map([['card_payments', 'active']]),
+        );
     });
 
     test('retains explicit empty capabilities when default omission is enabled', () => {
         const previous = AutoEncoder.skipDefaultValuesVersion;
         try {
             AutoEncoder.skipDefaultValuesVersion = 0;
-            expect(StripeMetaData.create({}).encode({ version: Version })).toMatchObject({ capabilities: {} });
+            expect(StripeMetaData.create({}).encode({ version: Version })).toMatchObject({
+                capabilities: {},
+            });
         } finally {
             AutoEncoder.skipDefaultValuesVersion = previous;
         }

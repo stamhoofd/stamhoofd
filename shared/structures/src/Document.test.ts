@@ -10,9 +10,15 @@ describe('document template field-answer filters', () => {
         });
         const template = DocumentTemplatePrivate.create({
             year: 2026,
-            settings: DocumentSettings.create({ fieldAnswers: new Map([[answer.settings.id, answer]]) }),
+            settings: DocumentSettings.create({
+                fieldAnswers: new Map([[answer.settings.id, answer]]),
+            }),
         });
-        expect(template.doesMatchFilter({ fieldAnswers: { 'member.firstName': { $eq: 'Jane' } } })).toBe(true);
-        expect(template.doesMatchFilter({ fieldAnswers: { 'member.firstName': { $eq: 'Other' } } })).toBe(false);
+        expect(
+            template.doesMatchFilter({ fieldAnswers: { 'member.firstName': { $eq: 'Jane' } } }),
+        ).toBe(true);
+        expect(
+            template.doesMatchFilter({ fieldAnswers: { 'member.firstName': { $eq: 'Other' } } }),
+        ).toBe(false);
     });
 });

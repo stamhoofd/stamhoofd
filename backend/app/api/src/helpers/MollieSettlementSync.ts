@@ -93,9 +93,12 @@ function mollieAmountToUnits(value: string): number {
 
 function getMollieSettlementStatus(status: MollieSettlement['status']): SettlementStatus {
     switch (status) {
-        case 'paidout': return SettlementStatus.Paid;
-        case 'failed': return SettlementStatus.Failed;
-        default: return SettlementStatus.Pending;
+        case 'paidout':
+            return SettlementStatus.Paid;
+        case 'failed':
+            return SettlementStatus.Failed;
+        default:
+            return SettlementStatus.Pending;
     }
 }
 
@@ -122,7 +125,12 @@ export class MollieSettlementSync {
         this.token = token;
     }
 
-    async syncSettlements({ start, end = new Date(), summary, abort }: {
+    async syncSettlements({
+        start,
+        end = new Date(),
+        summary,
+        abort,
+    }: {
         start: Date;
         end?: Date;
         summary?: SettlementSyncSummary;
@@ -140,7 +148,12 @@ export class MollieSettlementSync {
      * Walk the settlements newest first, until they settle before `start`. Returns the payouts
      * that were walked, null when none settled in the window.
      */
-    async #walkSettlements({ start, end, summary, abort }: {
+    async #walkSettlements({
+        start,
+        end,
+        summary,
+        abort,
+    }: {
         start: Date;
         end: Date;
         summary?: SettlementSyncSummary;
@@ -160,7 +173,9 @@ export class MollieSettlementSync {
                 return range;
             }
 
-            const settlements = request.data._embedded?.settlements as MollieSettlement[] | undefined;
+            const settlements = request.data._embedded?.settlements as
+                | MollieSettlement[]
+                | undefined;
             if (!settlements) {
                 console.error('Unreadable settlements');
                 return range;
@@ -177,7 +192,12 @@ export class MollieSettlementSync {
                 const settledAt = new Date(settlement.settledAt);
 
                 if (isNaN(settledAt.getTime())) {
-                    console.error('Received an invalid settledAt from Mollie', settlement, 'for organization', this.token.organizationId);
+                    console.error(
+                        'Received an invalid settledAt from Mollie',
+                        settlement,
+                        'for organization',
+                        this.token.organizationId,
+                    );
                     continue;
                 }
 
@@ -198,7 +218,12 @@ export class MollieSettlementSync {
                 }
 
                 try {
-                    await SettlementService.lock(PaymentProvider.Mollie, settlement.id, signal => this.#syncSettlement(settlement, signal), { abort });
+                    await SettlementService.lock(
+                        PaymentProvider.Mollie,
+                        settlement.id,
+                        (signal) => this.#syncSettlement(settlement, signal),
+                        { abort },
+                    );
                     if (summary) {
                         summary.synced += 1;
                     }
@@ -214,7 +239,7 @@ export class MollieSettlementSync {
             }
 
             const next = request.data._links?.next?.href as string | undefined;
-            url = (settlements.length > 0 && next) ? next : null;
+            url = settlements.length > 0 && next ? next : null;
         }
 
         return range;
@@ -281,14 +306,22 @@ export class MollieSettlementSync {
      * Stores the fee of every settled payment, refund and chargeback, then recounts the
      * settlements that gained charges: their finishSync ran before the fees existed.
      */
-    async #syncTransactionFees({ range, abort }: { range: WalkedSettlementRange; abort?: AbortSignal }): Promise<void> {
+    async #syncTransactionFees({
+        range,
+        abort,
+    }: {
+        range: WalkedSettlementRange;
+        abort?: AbortSignal;
+    }): Promise<void> {
         const touchedSettlementIds = new Set<string>();
 
         try {
             await this.#walkTransactionFees({ range, abort }, touchedSettlementIds);
         } catch (e) {
             // Recount what was stored before the walk broke, without hiding what broke it
-            await SettlementService.refreshTotalsForIds([...touchedSettlementIds]).catch(console.error);
+            await SettlementService.refreshTotalsForIds([...touchedSettlementIds]).catch(
+                console.error,
+            );
             throw e;
         }
 
@@ -300,9 +333,15 @@ export class MollieSettlementSync {
      * (they belong to the open settlement), until they occur before the previous payout minus the
      * lookback. Without a previous payout the walk reaches the end of the list.
      */
-    async #walkTransactionFees({ range, abort }: { range: WalkedSettlementRange; abort?: AbortSignal }, touchedSettlementIds: Set<string>): Promise<void> {
-        const oldest = range.previousSettledAt ? new Date(range.previousSettledAt.getTime() - TRANSACTION_FEE_LOOKBACK_MS) : null;
-        let url: string | null = 'https://api.mollie.com/v2/balances/primary/transactions?limit=250';
+    async #walkTransactionFees(
+        { range, abort }: { range: WalkedSettlementRange; abort?: AbortSignal },
+        touchedSettlementIds: Set<string>,
+    ): Promise<void> {
+        const oldest = range.previousSettledAt
+            ? new Date(range.previousSettledAt.getTime() - TRANSACTION_FEE_LOOKBACK_MS)
+            : null;
+        let url: string | null =
+            'https://api.mollie.com/v2/balances/primary/transactions?limit=250';
 
         while (url) {
             abort?.throwIfAborted();
@@ -310,12 +349,17 @@ export class MollieSettlementSync {
             const request = await this.#get(url);
 
             if (request.status !== 200) {
-                console.error('Failed to fetch balance transactions for organization', this.token.organizationId);
+                console.error(
+                    'Failed to fetch balance transactions for organization',
+                    this.token.organizationId,
+                );
                 console.error(request.data);
                 return;
             }
 
-            const transactions = request.data._embedded?.balance_transactions as MollieBalanceTransaction[] | undefined;
+            const transactions = request.data._embedded?.balance_transactions as
+                | MollieBalanceTransaction[]
+                | undefined;
             if (!transactions) {
                 console.error('Unreadable balance transactions');
                 return;
@@ -327,7 +371,12 @@ export class MollieSettlementSync {
                 const createdAt = new Date(transaction.createdAt);
 
                 if (isNaN(createdAt.getTime())) {
-                    console.error('Received an invalid balance transaction createdAt from Mollie', transaction, 'for organization', this.token.organizationId);
+                    console.error(
+                        'Received an invalid balance transaction createdAt from Mollie',
+                        transaction,
+                        'for organization',
+                        this.token.organizationId,
+                    );
                     continue;
                 }
 
@@ -344,7 +393,7 @@ export class MollieSettlementSync {
             }
 
             const next = request.data._links?.next?.href as string | undefined;
-            url = (transactions.length > 0 && next) ? next : null;
+            url = transactions.length > 0 && next ? next : null;
         }
     }
 
@@ -354,10 +403,14 @@ export class MollieSettlementSync {
      */
     #getTransactionEntryId(transaction: MollieBalanceTransaction): string | null {
         switch (transaction.type) {
-            case 'payment': return transaction.context?.paymentId ?? null;
-            case 'refund': return transaction.context?.refundId ?? null;
-            case 'chargeback': return transaction.context?.chargebackId ?? null;
-            default: return null;
+            case 'payment':
+                return transaction.context?.paymentId ?? null;
+            case 'refund':
+                return transaction.context?.refundId ?? null;
+            case 'chargeback':
+                return transaction.context?.chargebackId ?? null;
+            default:
+                return null;
         }
     }
 
@@ -365,7 +418,11 @@ export class MollieSettlementSync {
      * Store the fee Mollie deducted for one settled entry: a charge on the settlement the entry
      * was paid out in, linked to the local payment.
      */
-    async #storeTransactionFee(transaction: MollieBalanceTransaction, createdAt: Date, touchedSettlementIds: Set<string>) {
+    async #storeTransactionFee(
+        transaction: MollieBalanceTransaction,
+        createdAt: Date,
+        touchedSettlementIds: Set<string>,
+    ) {
         const entryId = this.#getTransactionEntryId(transaction);
         if (!entryId) {
             return;
@@ -373,7 +430,9 @@ export class MollieSettlementSync {
 
         // Reserves, commissions and repayments are not costs of this entry; a transaction without
         // the breakdown carries its whole deduction as fees
-        const amount = mollieAmountToUnits(transaction.deductionDetails?.fees?.value ?? transaction.deductions?.value ?? '0');
+        const amount = mollieAmountToUnits(
+            transaction.deductionDetails?.fees?.value ?? transaction.deductions?.value ?? '0',
+        );
         if (amount === 0) {
             return;
         }
@@ -408,10 +467,23 @@ export class MollieSettlementSync {
      * settlement metadata on the matching local payment. Every resource exposes its entries under
      * `_embedded[resource]` and uses the same pagination, so they share this logic.
      */
-    async #syncResource(settlement: MollieSettlement, resource: 'payments' | 'refunds' | 'chargebacks', state: SettlementSyncState, fromId?: string) {
+    async #syncResource(
+        settlement: MollieSettlement,
+        resource: 'payments' | 'refunds' | 'chargebacks',
+        state: SettlementSyncState,
+        fromId?: string,
+    ) {
         const limit = 250;
 
-        const request = await this.#get('https://api.mollie.com/v2/settlements/' + settlement.id + '/' + resource + '?limit=' + limit + (fromId ? ('&from=' + encodeURIComponent(fromId)) : ''));
+        const request = await this.#get(
+            'https://api.mollie.com/v2/settlements/' +
+                settlement.id +
+                '/' +
+                resource +
+                '?limit=' +
+                limit +
+                (fromId ? '&from=' + encodeURIComponent(fromId) : ''),
+        );
 
         if (request.status === 200) {
             const entries = request.data._embedded[resource] as MollieSettlementEntryJSON[];
@@ -426,7 +498,12 @@ export class MollieSettlementSync {
 
             // Check next page
             if (request.data._links.next && entries.length > 0) {
-                await this.#syncResource(settlement, resource, state, entries[entries.length - 1].id);
+                await this.#syncResource(
+                    settlement,
+                    resource,
+                    state,
+                    entries[entries.length - 1].id,
+                );
             }
         } else {
             console.error(request.data);
@@ -438,7 +515,11 @@ export class MollieSettlementSync {
      * Entries without a local payment belong to a different system on the same Mollie account: they are
      * skipped, and the settlement's unexplainedAmount shows the gap.
      */
-    async #applySettlementToPayment(settlement: MollieSettlement, mollieId: string, state: SettlementSyncState) {
+    async #applySettlementToPayment(
+        settlement: MollieSettlement,
+        mollieId: string,
+        state: SettlementSyncState,
+    ) {
         // Search payment
         state.transactionCount += 1;
         const mps = await MolliePayment.where({ mollieId });
@@ -450,7 +531,12 @@ export class MollieSettlementSync {
                 // platform's own Mollie account can reach payments of other systems on the same
                 // token, and those may not be linked here
                 if (payment.organizationId !== state.settlementRow.organizationId) {
-                    console.log('Skipped payment ' + payment.id + ' of another organization in Mollie settlement ' + settlement.id);
+                    console.log(
+                        'Skipped payment ' +
+                            payment.id +
+                            ' of another organization in Mollie settlement ' +
+                            settlement.id,
+                    );
                     return;
                 }
 

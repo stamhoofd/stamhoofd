@@ -1,9 +1,29 @@
 import { Request } from '@node/endpoints';
 import type { Organization, User, BalanceItem } from '@stamhoofd/models';
-import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, StripeAccount, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    BalanceItemPayment,
+    OrderFactory,
+    OrganizationFactory,
+    Payment,
+    StripeAccount,
+    Token,
+    UserFactory,
+    WebshopFactory,
+} from '@stamhoofd/models';
 import type { PaginatedResponse, PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, LimitedFilteredRequest, PaymentMethod, PaymentProvider, PaymentStatus, Permissions, TranslatedString } from '@stamhoofd/structures';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemType,
+    LimitedFilteredRequest,
+    PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+    Permissions,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { SettlementService } from '../../../../services/SettlementService.js';
@@ -15,7 +35,15 @@ import { SessionService } from '../../../../services/SessionService.js';
 describe('Endpoint.GetPaymentsEndpoint', () => {
     const endpoint = new GetPaymentsEndpoint();
 
-    const getPayments = async ({ filter, organization, user }: { filter: StamhoofdFilter | null; organization: Organization; user: User }) => {
+    const getPayments = async ({
+        filter,
+        organization,
+        user,
+    }: {
+        filter: StamhoofdFilter | null;
+        organization: Organization;
+        user: User;
+    }) => {
         const token = await SessionService.createSession(user);
 
         const request = Request.get({
@@ -30,7 +58,10 @@ describe('Endpoint.GetPaymentsEndpoint', () => {
             },
         });
 
-        return testServer.test<PaginatedResponse<PaymentGeneral[], LimitedFilteredRequest>>(endpoint, request);
+        return testServer.test<PaginatedResponse<PaymentGeneral[], LimitedFilteredRequest>>(
+            endpoint,
+            request,
+        );
     };
 
     const createFinanceUser = async (organization: Organization) => {
@@ -40,7 +71,10 @@ describe('Endpoint.GetPaymentsEndpoint', () => {
         }).create();
     };
 
-    const createPaymentForBalanceItem = async (organization: Organization, balanceItem: BalanceItem) => {
+    const createPaymentForBalanceItem = async (
+        organization: Organization,
+        balanceItem: BalanceItem,
+    ) => {
         const payment = new Payment();
         payment.method = PaymentMethod.Transfer;
         payment.status = PaymentStatus.Succeeded;
@@ -64,7 +98,9 @@ describe('Endpoint.GetPaymentsEndpoint', () => {
             const user = await createFinanceUser(organization);
 
             const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
-            const otherWebshop = await new WebshopFactory({ organizationId: organization.id }).create();
+            const otherWebshop = await new WebshopFactory({
+                organizationId: organization.id,
+            }).create();
 
             const order = await new OrderFactory({ webshop }).create();
             const otherOrder = await new OrderFactory({ webshop: otherWebshop }).create();
@@ -107,7 +143,7 @@ describe('Endpoint.GetPaymentsEndpoint', () => {
             });
 
             expect(response.status).toBe(200);
-            expect(response.body.results.map(r => r.id)).toEqual([matchingPayment.id]);
+            expect(response.body.results.map((r) => r.id)).toEqual([matchingPayment.id]);
         });
 
         test('only returns payments whose balance item matches the given membership type', async () => {
@@ -156,7 +192,7 @@ describe('Endpoint.GetPaymentsEndpoint', () => {
             });
 
             expect(response.status).toBe(200);
-            expect(response.body.results.map(r => r.id)).toEqual([matchingPayment.id]);
+            expect(response.body.results.map((r) => r.id)).toEqual([matchingPayment.id]);
         });
     });
 
@@ -219,7 +255,7 @@ describe('Endpoint.GetPaymentsEndpoint', () => {
             });
 
             expect(response.status).toBe(200);
-            expect(response.body.results.map(r => r.id)).toEqual([payment.id]);
+            expect(response.body.results.map((r) => r.id)).toEqual([payment.id]);
         });
 
         test('an admin of the organization receives the settlements of a payment', async () => {
@@ -279,7 +315,10 @@ describe('Endpoint.GetPaymentsEndpoint', () => {
                 settledAt: new Date(2026, 0, 15),
             });
             await SettlementService.upsertPaymentLine(organizationPayout, {
-                paymentId: payment.id, amount: 50_00_00, externalId: 'txn_org_' + payment.id, occurredAt: new Date(2026, 0, 14),
+                paymentId: payment.id,
+                amount: 50_00_00,
+                externalId: 'txn_org_' + payment.id,
+                occurredAt: new Date(2026, 0, 14),
             });
 
             // The same gross charge also sits in our platform payout, owned by the membership
@@ -294,7 +333,10 @@ describe('Endpoint.GetPaymentsEndpoint', () => {
                 settledAt: new Date(2026, 0, 12),
             });
             await SettlementService.upsertPaymentLine(platformPayout, {
-                paymentId: payment.id, amount: 50_00_00, externalId: 'txn_platform_' + payment.id, occurredAt: new Date(2026, 0, 11),
+                paymentId: payment.id,
+                amount: 50_00_00,
+                externalId: 'txn_platform_' + payment.id,
+                occurredAt: new Date(2026, 0, 11),
             });
 
             const response = await getPayments({ filter: { id: payment.id }, organization, user });

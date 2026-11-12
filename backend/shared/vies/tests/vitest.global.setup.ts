@@ -7,7 +7,7 @@ export async function setup() {
     TestUtils.globalSetup();
 
     const { Database, Migration } = await import('@node/database');
-    if (!await Migration.runAll(path.dirname(modelsPath) + '/migrations')) {
+    if (!(await Migration.runAll(path.dirname(modelsPath) + '/migrations'))) {
         throw new Error('Migrations failed');
     }
 

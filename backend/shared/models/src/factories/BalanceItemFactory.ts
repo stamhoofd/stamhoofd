@@ -1,6 +1,10 @@
 import { Factory } from '@node/database';
 
-import type { BalanceItemRelation, BalanceItemRelationType, BalanceItemType } from '@stamhoofd/structures';
+import type {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemType,
+} from '@stamhoofd/structures';
 import { BalanceItemStatus } from '@stamhoofd/structures';
 import { BalanceItem } from '../models/index.js';
 

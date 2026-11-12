@@ -16,17 +16,16 @@ import type {
     Platform as PlatformStruct,
     SetupSteps,
 } from '@stamhoofd/structures';
-import {
-    AuditLogSource,
-    GroupType,
-    RecordCategory,
-    SetupStepType,
-} from '@stamhoofd/structures';
+import { AuditLogSource, GroupType, RecordCategory, SetupStepType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from '../services/AuditLogService.js';
 import { GroupedThrottledQueue } from './GroupedThrottledQueue.js';
 
-type SetupStepOperation = (setupSteps: SetupSteps, organization: Organization, platform: PlatformStruct) => void | Promise<void>;
+type SetupStepOperation = (
+    setupSteps: SetupSteps,
+    organization: Organization,
+    platform: PlatformStruct,
+) => void | Promise<void>;
 
 /**
  * Helper function to detect whether we should update the setup steps if a group is changed
@@ -51,7 +50,9 @@ async function getGroupMemberCompletion(group: Group) {
         return null;
     }
 
-    const defaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId);
+    const defaultAgeGroup = platform.config.defaultAgeGroups.find(
+        (g) => g.id === defaultAgeGroupId,
+    );
 
     if (!defaultAgeGroup) {
         // Not included = no step
@@ -84,37 +85,69 @@ export class SetupStepUpdater {
                 return;
             }
 
-            const before = (event.type === 'updated' ? await getGroupMemberCompletion(event.getOldModel() as Group) : (event.type === 'deleted' ? await getGroupMemberCompletion(event.model) : null));
-            const after = (event.type === 'updated' ? await getGroupMemberCompletion(event.model) : (event.type === 'created' ? await getGroupMemberCompletion(event.model) : null));
+            const before =
+                event.type === 'updated'
+                    ? await getGroupMemberCompletion(event.getOldModel() as Group)
+                    : event.type === 'deleted'
+                      ? await getGroupMemberCompletion(event.model)
+                      : null;
+            const after =
+                event.type === 'updated'
+                    ? await getGroupMemberCompletion(event.model)
+                    : event.type === 'created'
+                      ? await getGroupMemberCompletion(event.model)
+                      : null;
 
             if (before !== after) {
-                console.log('Updating setups steps for organization', event.model.organizationId, 'because of change in members in group', event.model.id, 'from', before, 'to', after, '(limited)');
+                console.log(
+                    'Updating setups steps for organization',
+                    event.model.organizationId,
+                    'because of change in members in group',
+                    event.model.id,
+                    'from',
+                    before,
+                    'to',
+                    after,
+                    '(limited)',
+                );
                 // We need to do a recalculation
-                SetupStepUpdater.updateForOrganizationId(event.model.organizationId, { types: [SetupStepType.Registrations] })
-                    .catch(console.error);
+                SetupStepUpdater.updateForOrganizationId(event.model.organizationId, {
+                    types: [SetupStepType.Registrations],
+                }).catch(console.error);
             }
         });
 
-        const updateResponsibilitiesQueue = new GroupedThrottledQueue(async (organizationId: string) => {
-            console.log('(delayed) Updating setups steps for organization', organizationId, 'because of change in registrations');
-            SetupStepUpdater.updateForOrganizationId(organizationId, { types: [SetupStepType.Responsibilities] }).catch(console.error);
-        }, { maxDelay: 3_000 });
+        const updateResponsibilitiesQueue = new GroupedThrottledQueue(
+            async (organizationId: string) => {
+                console.log(
+                    '(delayed) Updating setups steps for organization',
+                    organizationId,
+                    'because of change in registrations',
+                );
+                SetupStepUpdater.updateForOrganizationId(organizationId, {
+                    types: [SetupStepType.Responsibilities],
+                }).catch(console.error);
+            },
+            { maxDelay: 3_000 },
+        );
 
         Model.modelEventBus.addListener({}, async (event) => {
             if (!(event.model instanceof Registration)) {
                 return;
             }
 
-            if ((event.type === 'updated' && ('registeredAt' in event.changedFields || 'deactivatedAt' in event.changedFields)) || (event.type === 'created' && event.model.registeredAt)) {
+            if (
+                (event.type === 'updated' &&
+                    ('registeredAt' in event.changedFields ||
+                        'deactivatedAt' in event.changedFields)) ||
+                (event.type === 'created' && event.model.registeredAt)
+            ) {
                 updateResponsibilitiesQueue.addItem(event.model.organizationId, 1);
             }
         });
     }
 
-    private static readonly STEP_TYPE_OPERATIONS: Record<
-        SetupStepType,
-        SetupStepOperation
-    > = {
+    private static readonly STEP_TYPE_OPERATIONS: Record<SetupStepType, SetupStepOperation> = {
         [SetupStepType.Responsibilities]: this.updateStepResponsibilities,
         [SetupStepType.Companies]: this.updateStepCompanies,
         [SetupStepType.Groups]: this.updateStepGroups,
@@ -138,14 +171,13 @@ export class SetupStepUpdater {
             let lastId = '';
 
             while (true) {
-                const organizationRegistrationPeriods
-                    = await OrganizationRegistrationPeriod.where(
-                        {
-                            id: { sign: '>', value: lastId },
-                            periodId: periodId,
-                        },
-                        { limit: batchSize ?? 10, sort: ['id'] },
-                    );
+                const organizationRegistrationPeriods = await OrganizationRegistrationPeriod.where(
+                    {
+                        id: { sign: '>', value: lastId },
+                        periodId: periodId,
+                    },
+                    { limit: batchSize ?? 10, sort: ['id'] },
+                );
 
                 if (organizationRegistrationPeriods.length === 0) {
                     lastId = '';
@@ -158,14 +190,12 @@ export class SetupStepUpdater {
                     }),
                 );
 
-                const organizations = await Organization.getByIDs(
-                    ...organizationPeriodMap.keys(),
-                );
+                const organizations = await Organization.getByIDs(...organizationPeriodMap.keys());
 
                 for (const organization of organizations) {
                     const organizationId = organization.id;
-                    const organizationRegistrationPeriod
-                        = organizationPeriodMap.get(organizationId);
+                    const organizationRegistrationPeriod =
+                        organizationPeriodMap.get(organizationId);
 
                     if (!organizationRegistrationPeriod) {
                         console.error(
@@ -174,10 +204,7 @@ export class SetupStepUpdater {
                         continue;
                     }
 
-                    console.log(
-                        '[FLAG-MOMENT] checking flag moments for '
-                        + organizationId,
-                    );
+                    console.log('[FLAG-MOMENT] checking flag moments for ' + organizationId);
 
                     await SetupStepUpdater.updateFor(
                         organizationRegistrationPeriod,
@@ -186,10 +213,8 @@ export class SetupStepUpdater {
                     );
                 }
 
-                lastId
-                    = organizationRegistrationPeriods[
-                        organizationRegistrationPeriods.length - 1
-                    ].id;
+                lastId =
+                    organizationRegistrationPeriods[organizationRegistrationPeriods.length - 1].id;
             }
         });
     }
@@ -252,12 +277,7 @@ export class SetupStepUpdater {
             }
         }
 
-        await this.updateFor(
-            organizationRegistrationPeriod,
-            platform,
-            organization,
-            types,
-        );
+        await this.updateFor(organizationRegistrationPeriod, platform, organization, types);
     }
 
     private static async updateFor(
@@ -358,12 +378,23 @@ export class SetupStepUpdater {
                     organization.getBaseStructureWithPrivateMeta(), // private data needed for answers
                 );
             } catch (error) {
-                console.error('Error validating record categories for organization', organization.id, error);
+                console.error(
+                    'Error validating record categories for organization',
+                    organization.id,
+                    error,
+                );
                 finishedSteps = 0;
             }
         }
 
-        console.log('Updating companies step for organization', organization.id, 'with total steps', totalSteps, 'and finished steps', finishedSteps);
+        console.log(
+            'Updating companies step for organization',
+            organization.id,
+            'with total steps',
+            totalSteps,
+            'and finished steps',
+            finishedSteps,
+        );
 
         setupSteps.update(SetupStepType.Companies, {
             totalSteps,
@@ -377,62 +408,96 @@ export class SetupStepUpdater {
         platform: PlatformStruct,
     ) {
         const now = new Date();
-        const organizationBasedResponsibilitiesWithRestriction = platform.config.responsibilities
-            .filter(r => r.organizationBased && (r.minimumMembers || r.maximumMembers));
+        const organizationBasedResponsibilitiesWithRestriction =
+            platform.config.responsibilities.filter(
+                (r) => r.organizationBased && (r.minimumMembers || r.maximumMembers),
+            );
 
-        const responsibilityIds = organizationBasedResponsibilitiesWithRestriction.map(r => r.id);
+        const responsibilityIds = organizationBasedResponsibilitiesWithRestriction.map((r) => r.id);
 
-        const allRecords = responsibilityIds.length === 0
-            ? []
-            : await MemberResponsibilityRecord.select()
-                    .where('responsibilityId', responsibilityIds)
-                    .where('organizationId', organization.id)
-                    .where(SQL.where('endDate', SQLWhereSign.Greater, now).or('endDate', null))
-                    .fetch();
+        const allRecords =
+            responsibilityIds.length === 0
+                ? []
+                : await MemberResponsibilityRecord.select()
+                      .where('responsibilityId', responsibilityIds)
+                      .where('organizationId', organization.id)
+                      .where(SQL.where('endDate', SQLWhereSign.Greater, now).or('endDate', null))
+                      .fetch();
 
         // Remove invalid responsibilities: members that are not registered in the current period
-        const memberIds = Formatter.uniqueArray(allRecords.map(r => r.memberId));
+        const memberIds = Formatter.uniqueArray(allRecords.map((r) => r.memberId));
         const _members = await Member.getByIDs(...memberIds);
         const members = await Member.loadRegistrations(_members, true);
-        const validMembers = members.filter(m => m.registrations.some(r => r.organizationId === organization.id && r.periodId === organization.periodId && r.group.defaultAgeGroupId && r.group.type === GroupType.Membership && r.deactivatedAt === null && r.registeredAt !== null));
-        const invalidMembers = members.filter(m => !m.registrations.some(r => r.organizationId === organization.id && r.periodId === organization.periodId && r.group.defaultAgeGroupId && r.group.type === GroupType.Membership && r.deactivatedAt === null && r.registeredAt !== null));
+        const validMembers = members.filter((m) =>
+            m.registrations.some(
+                (r) =>
+                    r.organizationId === organization.id &&
+                    r.periodId === organization.periodId &&
+                    r.group.defaultAgeGroupId &&
+                    r.group.type === GroupType.Membership &&
+                    r.deactivatedAt === null &&
+                    r.registeredAt !== null,
+            ),
+        );
+        const invalidMembers = members.filter(
+            (m) =>
+                !m.registrations.some(
+                    (r) =>
+                        r.organizationId === organization.id &&
+                        r.periodId === organization.periodId &&
+                        r.group.defaultAgeGroupId &&
+                        r.group.type === GroupType.Membership &&
+                        r.deactivatedAt === null &&
+                        r.registeredAt !== null,
+                ),
+        );
 
-        const validMembersIds = validMembers.map(m => m.id);
-        const invalidMembersIds = invalidMembers.map(m => m.id);
+        const validMembersIds = validMembers.map((m) => m.id);
+        const invalidMembersIds = invalidMembers.map((m) => m.id);
 
-        const records = allRecords.filter(r => validMembersIds.includes(r.memberId));
-        const invalidRecords = allRecords.filter(r => invalidMembersIds.includes(r.memberId));
+        const records = allRecords.filter((r) => validMembersIds.includes(r.memberId));
+        const invalidRecords = allRecords.filter((r) => invalidMembersIds.includes(r.memberId));
 
         let totalSteps = 0;
         let finishedSteps = 0;
 
         const groups = await Group.getAll(organization.id, organization.periodId);
 
-        const flatResponsibilities: { responsibility: MemberResponsibility; group: Group | null }[] = organizationBasedResponsibilitiesWithRestriction
-            .flatMap((responsibility) => {
-                const defaultAgeGroupIds = responsibility.defaultAgeGroupIds;
-                if (defaultAgeGroupIds === null) {
-                    const item: { responsibility: MemberResponsibility; group: Group | null } = {
-                        responsibility,
-                        group: null,
-                    };
-                    return [item];
-                }
+        const flatResponsibilities: {
+            responsibility: MemberResponsibility;
+            group: Group | null;
+        }[] = organizationBasedResponsibilitiesWithRestriction.flatMap((responsibility) => {
+            const defaultAgeGroupIds = responsibility.defaultAgeGroupIds;
+            if (defaultAgeGroupIds === null) {
+                const item: { responsibility: MemberResponsibility; group: Group | null } = {
+                    responsibility,
+                    group: null,
+                };
+                return [item];
+            }
 
-                return groups
-                    .filter(g => g.defaultAgeGroupId !== null && defaultAgeGroupIds.includes(g.defaultAgeGroupId))
-                    .map((group) => {
-                        return {
-                            responsibility,
-                            group,
-                        };
-                    });
-            });
+            return groups
+                .filter(
+                    (g) =>
+                        g.defaultAgeGroupId !== null &&
+                        defaultAgeGroupIds.includes(g.defaultAgeGroupId),
+                )
+                .map((group) => {
+                    return {
+                        responsibility,
+                        group,
+                    };
+                });
+        });
 
         for (const { responsibility, group } of flatResponsibilities) {
             const { minimumMembers: min, maximumMembers: max } = responsibility;
 
-            const invalidMembersWithThisResponsibility = !!invalidRecords.find(r => r.responsibilityId === responsibility.id && (group ? r.groupId === group.id : true));
+            const invalidMembersWithThisResponsibility = !!invalidRecords.find(
+                (r) =>
+                    r.responsibilityId === responsibility.id &&
+                    (group ? r.groupId === group.id : true),
+            );
             if (invalidMembersWithThisResponsibility) {
                 totalSteps += Math.max(min ?? 1, 1);
                 // Step not okay: we have an invalid member with this responsibility
@@ -456,7 +521,10 @@ export class SetupStepUpdater {
                 }
             } else {
                 for (const record of records) {
-                    if (record.responsibilityId === responsibilityId && record.groupId === group.id) {
+                    if (
+                        record.responsibilityId === responsibilityId &&
+                        record.groupId === group.id
+                    ) {
                         totalRecordsWithThisResponsibility++;
                     }
                 }
@@ -470,23 +538,32 @@ export class SetupStepUpdater {
             finishedSteps += Math.min(min, totalRecordsWithThisResponsibility);
         }
 
-        console.log('Updating responsibilities step for organization', organization.id, 'with total steps', totalSteps, 'and finished steps', finishedSteps);
+        console.log(
+            'Updating responsibilities step for organization',
+            organization.id,
+            'with total steps',
+            totalSteps,
+            'and finished steps',
+            finishedSteps,
+        );
         setupSteps.update(SetupStepType.Responsibilities, {
             totalSteps,
             finishedSteps,
         });
     }
 
-    private static updateStepEmails(setupSteps: SetupSteps,
+    private static updateStepEmails(
+        setupSteps: SetupSteps,
         organization: Organization,
-        _platform: PlatformStruct) {
+        _platform: PlatformStruct,
+    ) {
         const totalSteps = 1;
         let finishedSteps = 0;
 
         const emails = organization.privateMeta.emails;
 
         // organization should have 1 default email
-        if (emails.some(e => e.default)) {
+        if (emails.some((e) => e.default)) {
             finishedSteps = 1;
         }
 
@@ -496,34 +573,44 @@ export class SetupStepUpdater {
         });
 
         if (finishedSteps >= totalSteps) {
-            setupSteps.markReviewed(SetupStepType.Emails, { userId: 'backend', userName: 'backend' });
+            setupSteps.markReviewed(SetupStepType.Emails, {
+                userId: 'backend',
+                userName: 'backend',
+            });
         } else {
             setupSteps.resetReviewed(SetupStepType.Emails);
         }
     }
 
-    private static updateStepPayment(setupSteps: SetupSteps,
+    private static updateStepPayment(
+        setupSteps: SetupSteps,
         _organization: Organization,
-        _platform: PlatformStruct) {
+        _platform: PlatformStruct,
+    ) {
         setupSteps.update(SetupStepType.Payment, {
             totalSteps: 0,
             finishedSteps: 0,
         });
     }
 
-    private static async updateStepRegistrations(setupSteps: SetupSteps,
+    private static async updateStepRegistrations(
+        setupSteps: SetupSteps,
         organization: Organization,
-        platform: PlatformStruct) {
-        const defaultAgeGroupIds = platform.config.defaultAgeGroups.filter(g => g.minimumRequiredMembers > 0).map(x => x.id);
+        platform: PlatformStruct,
+    ) {
+        const defaultAgeGroupIds = platform.config.defaultAgeGroups
+            .filter((g) => g.minimumRequiredMembers > 0)
+            .map((x) => x.id);
 
-        const groupsWithDefaultAgeGroups = defaultAgeGroupIds.length > 0
-            ? await Group.select()
-                    .where('organizationId', organization.id)
-                    .where('periodId', platform.period.id)
-                    .where('defaultAgeGroupId', defaultAgeGroupIds)
-                    .where('deletedAt', null)
-                    .fetch()
-            : [];
+        const groupsWithDefaultAgeGroups =
+            defaultAgeGroupIds.length > 0
+                ? await Group.select()
+                      .where('organizationId', organization.id)
+                      .where('periodId', platform.period.id)
+                      .where('defaultAgeGroupId', defaultAgeGroupIds)
+                      .where('deletedAt', null)
+                      .fetch()
+                : [];
 
         let totalSteps = 0;
 
@@ -531,24 +618,37 @@ export class SetupStepUpdater {
         const processedDefaultAgeGroupIds: Map<string, number> = new Map();
 
         for (const group of groupsWithDefaultAgeGroups) {
-            const defaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id === group.defaultAgeGroupId);
+            const defaultAgeGroup = platform.config.defaultAgeGroups.find(
+                (g) => g.id === group.defaultAgeGroupId,
+            );
             if (!defaultAgeGroup) {
                 continue;
             }
             if (!processedDefaultAgeGroupIds.has(defaultAgeGroup.id)) {
                 totalSteps += defaultAgeGroup.minimumRequiredMembers;
-                processedDefaultAgeGroupIds.set(defaultAgeGroup.id, Math.min(defaultAgeGroup.minimumRequiredMembers, group.settings.registeredMembers ?? 0));
-            } else {
-                processedDefaultAgeGroupIds.set(defaultAgeGroup.id,
+                processedDefaultAgeGroupIds.set(
+                    defaultAgeGroup.id,
                     Math.min(
                         defaultAgeGroup.minimumRequiredMembers,
-                        processedDefaultAgeGroupIds.get(defaultAgeGroup.id)! + (group.settings.registeredMembers ?? 0),
+                        group.settings.registeredMembers ?? 0,
+                    ),
+                );
+            } else {
+                processedDefaultAgeGroupIds.set(
+                    defaultAgeGroup.id,
+                    Math.min(
+                        defaultAgeGroup.minimumRequiredMembers,
+                        processedDefaultAgeGroupIds.get(defaultAgeGroup.id)! +
+                            (group.settings.registeredMembers ?? 0),
                     ),
                 );
             }
         }
 
-        const finishedSteps = Array.from(processedDefaultAgeGroupIds.values()).reduce((a, b) => a + b, 0);
+        const finishedSteps = Array.from(processedDefaultAgeGroupIds.values()).reduce(
+            (a, b) => a + b,
+            0,
+        );
 
         setupSteps.update(SetupStepType.Registrations, {
             totalSteps,
@@ -556,7 +656,10 @@ export class SetupStepUpdater {
         });
 
         if (finishedSteps >= totalSteps) {
-            setupSteps.markReviewed(SetupStepType.Registrations, { userId: 'backend', userName: 'backend' });
+            setupSteps.markReviewed(SetupStepType.Registrations, {
+                userId: 'backend',
+                userName: 'backend',
+            });
         } else {
             setupSteps.resetReviewed(SetupStepType.Registrations);
         }

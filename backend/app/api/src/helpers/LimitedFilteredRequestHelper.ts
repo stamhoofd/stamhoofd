@@ -3,7 +3,13 @@ import type { SQLSortDefinitions } from '@stamhoofd/sql';
 import { getSortFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 
 export class LimitedFilteredRequestHelper {
-    static throwIfInvalidLimit({ request, maxLimit }: { request: LimitedFilteredRequest; maxLimit: number }) {
+    static throwIfInvalidLimit({
+        request,
+        maxLimit,
+    }: {
+        request: LimitedFilteredRequest;
+        maxLimit: number;
+    }) {
         const requestLimit = request.limit;
 
         if (requestLimit > maxLimit) {
@@ -23,7 +29,15 @@ export class LimitedFilteredRequestHelper {
         }
     }
 
-    static fixInfiniteLoadingLoop<T>({ request, results, sorters }: { request: LimitedFilteredRequest; results: T[]; sorters: SQLSortDefinitions<T> }): LimitedFilteredRequest | undefined {
+    static fixInfiniteLoadingLoop<T>({
+        request,
+        results,
+        sorters,
+    }: {
+        request: LimitedFilteredRequest;
+        results: T[];
+        sorters: SQLSortDefinitions<T>;
+    }): LimitedFilteredRequest | undefined {
         let next: LimitedFilteredRequest | undefined;
 
         if (results.length >= request.limit) {
@@ -47,7 +61,17 @@ export class LimitedFilteredRequestHelper {
         return next;
     }
 
-    static fixInfiniteLoadingLoopWithTransform<R, T>({ request, results, sorters, transformer }: { request: LimitedFilteredRequest; results: R[]; sorters: SQLSortDefinitions<T>; transformer: (r: R) => T }): LimitedFilteredRequest | undefined {
+    static fixInfiniteLoadingLoopWithTransform<R, T>({
+        request,
+        results,
+        sorters,
+        transformer,
+    }: {
+        request: LimitedFilteredRequest;
+        results: R[];
+        sorters: SQLSortDefinitions<T>;
+        transformer: (r: R) => T;
+    }): LimitedFilteredRequest | undefined {
         let next: LimitedFilteredRequest | undefined;
 
         if (results.length >= request.limit) {

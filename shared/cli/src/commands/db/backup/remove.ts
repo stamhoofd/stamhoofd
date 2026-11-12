@@ -18,7 +18,11 @@ export default class DbBackupRemove extends BaseCommand {
 
     async run(): Promise<void> {
         const { flags, context } = await this.parseWithContext(DbBackupRemove);
-        const from = await resolveBackupOption({ context, flag: flags.from, message: 'Select the backup to remove' });
+        const from = await resolveBackupOption({
+            context,
+            flag: flags.from,
+            message: 'Select the backup to remove',
+        });
 
         await removeBackup(context, from);
         this.log(`Removed local MySQL backup ${from}.`);

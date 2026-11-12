@@ -1,6 +1,22 @@
 import type { Organization, Registration, RegistrationPeriod } from '@stamhoofd/models';
-import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { BooleanStatus, DefaultAgeGroup, FinancialSupportSettings, Gender, PlatformMembershipType } from '@stamhoofd/structures';
+import {
+    GroupFactory,
+    Member,
+    MemberFactory,
+    MemberPlatformMembership,
+    OrganizationFactory,
+    OrganizationTagFactory,
+    Platform,
+    RegistrationFactory,
+    RegistrationPeriodFactory,
+} from '@stamhoofd/models';
+import {
+    BooleanStatus,
+    DefaultAgeGroup,
+    FinancialSupportSettings,
+    Gender,
+    PlatformMembershipType,
+} from '@stamhoofd/structures';
 import { getStatisticsConnection } from './database.js';
 import { runStatisticsCycle, syncStatistics, syncStatisticsDeletes } from './sync.js';
 import { readSyncState } from './sync-state.js';
@@ -33,7 +49,10 @@ describe('statistics sync', () => {
         period = await new RegistrationPeriodFactory({}).create();
         organization = await new OrganizationFactory({ period }).create();
         const group = await new GroupFactory({ organization }).create();
-        member = await new MemberFactory({ organization, birthDay: { year: 2011, month: 5, day: 17 } }).create();
+        member = await new MemberFactory({
+            organization,
+            birthDay: { year: 2011, month: 5, day: 17 },
+        }).create();
         registration = await new RegistrationFactory({ member, group }).create();
 
         await syncStatistics();
@@ -44,14 +63,25 @@ describe('statistics sync', () => {
 
         expect(row).toBeDefined();
         expect(row.birthDate).toEqual(new Date(Date.UTC(2011, 4, 17)));
-        expect(Object.keys(row).sort()).toEqual(['birthDate', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'periodId', 'postalCode', 'source', 'updatedAt']);
+        expect(Object.keys(row).sort()).toEqual([
+            'birthDate',
+            'createdAt',
+            'gender',
+            'id',
+            'lastRegisteredAt',
+            'organizationId',
+            'periodId',
+            'postalCode',
+            'source',
+            'updatedAt',
+        ]);
         expect(JSON.stringify(row)).not.toContain(member.details.firstName);
     });
 
     it('writes the member against the period their registration is in', async () => {
         const rows = await statisticsRows('members', member.id);
 
-        expect(rows.map(row => row.periodId)).toContain(registration.periodId);
+        expect(rows.map((row) => row.periodId)).toContain(registration.periodId);
     });
 
     it('writes no member row for a member without a registration, since nothing counts one', async () => {
@@ -117,7 +147,11 @@ describe('statistics sync', () => {
      */
     it('writes a tak with several names as words, not as a translation key', async () => {
         const platform = await Platform.getForEditing();
-        const combined = DefaultAgeGroup.create({ names: ['Kapoenen', 'Welpen'], minAge: 6, maxAge: 10 });
+        const combined = DefaultAgeGroup.create({
+            names: ['Kapoenen', 'Welpen'],
+            minAge: 6,
+            maxAge: 10,
+        });
         platform.config.defaultAgeGroups = [...platform.config.defaultAgeGroups, combined];
         await platform.save();
         await Platform.clearCache();
@@ -138,11 +172,19 @@ describe('statistics sync', () => {
     it('writes the platform configuration against every period that is still open', async () => {
         const now = new Date();
         const periods = await statisticsRows('registration_periods');
-        const open = new Set(periods.filter(row => (row.cutoffAt === null || row.cutoffAt > now) && row.lockedAt === null).map(row => row.id));
-        const written = new Set((await statisticsRows('default_age_groups', ageGroup.id)).map(row => row.periodId));
+        const open = new Set(
+            periods
+                .filter(
+                    (row) => (row.cutoffAt === null || row.cutoffAt > now) && row.lockedAt === null,
+                )
+                .map((row) => row.id),
+        );
+        const written = new Set(
+            (await statisticsRows('default_age_groups', ageGroup.id)).map((row) => row.periodId),
+        );
 
         expect(open.size).toBeGreaterThan(0);
-        expect([...open].filter(periodId => !written.has(periodId))).toEqual([]);
+        expect([...open].filter((periodId) => !written.has(periodId))).toEqual([]);
     });
 
     it('records a watermark it can resume from', async () => {
@@ -158,7 +200,9 @@ describe('statistics sync', () => {
 
         await syncStatistics();
 
-        expect((await statisticsRows('members', member.id))[0].birthDate).toEqual(new Date(Date.UTC(2009, 2, 3)));
+        expect((await statisticsRows('members', member.id))[0].birthDate).toEqual(
+            new Date(Date.UTC(2009, 2, 3)),
+        );
     });
 
     it('writes the same rows again without complaining, so a repeated run is harmless', async () => {
@@ -188,7 +232,10 @@ describe('statistics sync', () => {
 
     it('keeps a member whose source row is gone, because deleting one cascades into settled years', async () => {
         const orphan = await new MemberFactory({ organization }).create();
-        await new RegistrationFactory({ member: orphan, group: await new GroupFactory({ organization }).create() }).create();
+        await new RegistrationFactory({
+            member: orphan,
+            group: await new GroupFactory({ organization }).create(),
+        }).create();
         await syncStatistics();
         await orphan.delete();
 
@@ -230,11 +277,17 @@ describe('statistics sync', () => {
             settledMember.details.gender = Gender.Female;
             await settledMember.save();
             await new RegistrationFactory({ member: settledMember, group }).create();
-            await new RegistrationFactory({ member: settledMember, group: await new GroupFactory({ organization }).create() }).create();
+            await new RegistrationFactory({
+                member: settledMember,
+                group: await new GroupFactory({ organization }).create(),
+            }).create();
 
             await syncStatistics();
             // Settle the period, as an operator would once its numbers are final.
-            await getStatisticsConnection().update('UPDATE `registration_periods` SET `cutoffAt` = ? WHERE `id` = ?', [new Date(Date.now() - 1000), frozenPeriod.id]);
+            await getStatisticsConnection().update(
+                'UPDATE `registration_periods` SET `cutoffAt` = ? WHERE `id` = ?',
+                [new Date(Date.now() - 1000), frozenPeriod.id],
+            );
         });
 
         /**
@@ -242,7 +295,13 @@ describe('statistics sync', () => {
          * a settled year has to keep the ones it was counted with.
          */
         it('keeps the member as they were counted, while the year still running follows the source', async () => {
-            const genderPerPeriod = async () => Object.fromEntries((await statisticsRows('members', settledMember.id)).map(row => [row.periodId, row.gender]));
+            const genderPerPeriod = async () =>
+                Object.fromEntries(
+                    (await statisticsRows('members', settledMember.id)).map((row) => [
+                        row.periodId,
+                        row.gender,
+                    ]),
+                );
             const before = await genderPerPeriod();
 
             settledMember.details.gender = Gender.Male;
@@ -261,22 +320,32 @@ describe('statistics sync', () => {
          */
         it('keeps the unit and the tak named as they were counted, while the year still running follows the source', async () => {
             const nameOf = async (table: string, id: string) =>
-                Object.fromEntries((await statisticsRows(table, id)).map(row => [row.periodId, row.name]));
+                Object.fromEntries(
+                    (await statisticsRows(table, id)).map((row) => [row.periodId, row.name]),
+                );
 
             const ageGroupId = ageGroup.id;
-            const before = { unit: await nameOf('organizations', organization.id), tak: await nameOf('default_age_groups', ageGroupId) };
+            const before = {
+                unit: await nameOf('organizations', organization.id),
+                tak: await nameOf('default_age_groups', ageGroupId),
+            };
 
             organization.name = 'Hernoemde eenheid';
             await organization.save();
 
             const platform = await Platform.getForEditing();
-            platform.config.defaultAgeGroups.find(group => group.id === ageGroupId)!.names = ['Hernoemde tak'];
+            platform.config.defaultAgeGroups.find((group) => group.id === ageGroupId)!.names = [
+                'Hernoemde tak',
+            ];
             await platform.save();
             await Platform.clearCache();
 
             await syncStatistics();
 
-            const after = { unit: await nameOf('organizations', organization.id), tak: await nameOf('default_age_groups', ageGroupId) };
+            const after = {
+                unit: await nameOf('organizations', organization.id),
+                tak: await nameOf('default_age_groups', ageGroupId),
+            };
             expect(after.unit[frozenPeriod.id]).toBe(before.unit[frozenPeriod.id]);
             expect(after.tak[frozenPeriod.id]).toBe(before.tak[frozenPeriod.id]);
             expect(after.unit[organization.periodId]).toBe('Hernoemde eenheid');
@@ -288,7 +357,9 @@ describe('statistics sync', () => {
             await frozenRegistration.save();
             await syncStatistics();
 
-            expect((await statisticsRows('registrations', frozenRegistration.id))[0].deactivatedAt).toBeNull();
+            expect(
+                (await statisticsRows('registrations', frozenRegistration.id))[0].deactivatedAt,
+            ).toBeNull();
         });
 
         it('keeps its rows when the source is deleted, so the settled numbers stay', async () => {
@@ -318,8 +389,13 @@ describe('statistics sync', () => {
          * night it first sees the lock. Ends in a month unless told otherwise, so unlocking it again
          * falls inside the window that reopens a period.
          */
-        async function lockedYear(endDate = new Date(Date.now() + 30 * day)): Promise<{ period: RegistrationPeriod; registration: Registration }> {
-            const period = await new RegistrationPeriodFactory({ startDate: new Date(endDate.getTime() - 365 * day), endDate }).create();
+        async function lockedYear(
+            endDate = new Date(Date.now() + 30 * day),
+        ): Promise<{ period: RegistrationPeriod; registration: Registration }> {
+            const period = await new RegistrationPeriodFactory({
+                startDate: new Date(endDate.getTime() - 365 * day),
+                endDate,
+            }).create();
             const group = await new GroupFactory({ organization }).create();
             group.periodId = period.id;
             await group.save();
@@ -440,7 +516,10 @@ describe('statistics sync', () => {
             await syncStatistics();
 
             const links = await statisticsRows('_organizations_organization_tags');
-            const link = links.find(row => row.organizationsId === organization.id && row.organizationTagsId === tag.id);
+            const link = links.find(
+                (row) =>
+                    row.organizationsId === organization.id && row.organizationTagsId === tag.id,
+            );
             expect(link).toBeDefined();
             expect(link!.periodId).toBe(organization.periodId);
         });
@@ -458,7 +537,10 @@ describe('statistics sync', () => {
                 'INSERT INTO `_organizations_organization_tags` (`organizationsId`, `organizationTagsId`, `periodId`, `source`) VALUES (?, ?, ?, ?)',
                 [organization.id, tag.id, settledPeriod.id, 'sync'],
             );
-            await connection.update('UPDATE `registration_periods` SET `cutoffAt` = ? WHERE `id` = ?', [new Date(Date.now() - 1000), settledPeriod.id]);
+            await connection.update(
+                'UPDATE `registration_periods` SET `cutoffAt` = ? WHERE `id` = ?',
+                [new Date(Date.now() - 1000), settledPeriod.id],
+            );
 
             // The organization moves to another netwerk entirely.
             const moved = await new OrganizationTagFactory({}).create();
@@ -467,8 +549,18 @@ describe('statistics sync', () => {
             await syncStatistics();
 
             const links = await statisticsRows('_organizations_organization_tags');
-            expect(links.some(row => row.periodId === settledPeriod.id && row.organizationTagsId === tag.id)).toBe(true);
-            expect(links.some(row => row.periodId === organization.periodId && row.organizationTagsId === moved.id)).toBe(true);
+            expect(
+                links.some(
+                    (row) => row.periodId === settledPeriod.id && row.organizationTagsId === tag.id,
+                ),
+            ).toBe(true);
+            expect(
+                links.some(
+                    (row) =>
+                        row.periodId === organization.periodId &&
+                        row.organizationTagsId === moved.id,
+                ),
+            ).toBe(true);
         });
     });
 
@@ -479,7 +571,10 @@ describe('statistics sync', () => {
      * same status off the member, so a lidgeld carries the tarief it was made at.
      */
     describe('the tarief of a lidgeld', () => {
-        async function membershipOf(member: Member, type: PlatformMembershipType): Promise<MemberPlatformMembership> {
+        async function membershipOf(
+            member: Member,
+            type: PlatformMembershipType,
+        ): Promise<MemberPlatformMembership> {
             const membership = new MemberPlatformMembership();
             membership.memberId = member.id;
             membership.membershipTypeId = type.id;
@@ -495,7 +590,9 @@ describe('statistics sync', () => {
             const type = PlatformMembershipType.create({ name: 'Volledig scoutsjaar' });
             const platform = await Platform.getForEditing();
             platform.config.membershipTypes = [type];
-            platform.config.financialSupport = FinancialSupportSettings.create({ priceName: 'SOMkort' });
+            platform.config.financialSupport = FinancialSupportSettings.create({
+                priceName: 'SOMkort',
+            });
             await platform.save();
             await Platform.clearCache();
 
@@ -508,8 +605,12 @@ describe('statistics sync', () => {
 
             await syncStatistics();
 
-            expect((await statisticsRows('member_platform_memberships', standard.id))[0].reducedPrice).toBe(0);
-            expect((await statisticsRows('member_platform_memberships', reduced.id))[0].reducedPrice).toBe(1);
+            expect(
+                (await statisticsRows('member_platform_memberships', standard.id))[0].reducedPrice,
+            ).toBe(0);
+            expect(
+                (await statisticsRows('member_platform_memberships', reduced.id))[0].reducedPrice,
+            ).toBe(1);
         });
 
         /**
@@ -518,13 +619,17 @@ describe('statistics sync', () => {
          */
         it('writes what the platform calls its verlaagd tarief', async () => {
             const platform = await Platform.getForEditing();
-            platform.config.financialSupport = FinancialSupportSettings.create({ priceName: 'SOMkort' });
+            platform.config.financialSupport = FinancialSupportSettings.create({
+                priceName: 'SOMkort',
+            });
             await platform.save();
             await Platform.clearCache();
 
             await syncStatistics();
 
-            expect((await statisticsRows('platform', platform.id))[0].reducedPriceName).toBe('SOMkort');
+            expect((await statisticsRows('platform', platform.id))[0].reducedPriceName).toBe(
+                'SOMkort',
+            );
         });
     });
 
@@ -534,7 +639,15 @@ describe('statistics sync', () => {
         await connection.delete('DELETE FROM `members` WHERE `id` = ?', ['imported-member-1']);
         await connection.insert(
             'INSERT INTO `members` (`id`, `periodId`, `birthDate`, `gender`, `createdAt`, `updatedAt`, `source`) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            ['imported-member-1', period.id, new Date(Date.UTC(2004, 0, 15)), 'Female', new Date(), new Date(), 'import'],
+            [
+                'imported-member-1',
+                period.id,
+                new Date(Date.UTC(2004, 0, 15)),
+                'Female',
+                new Date(),
+                new Date(),
+                'import',
+            ],
         );
 
         await syncStatisticsDeletes();

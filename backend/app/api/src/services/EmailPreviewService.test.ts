@@ -1,6 +1,13 @@
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { Member, Organization, RegistrationPeriod, User } from '@stamhoofd/models';
-import { Email, EmailRecipient, MemberFactory, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import {
+    Email,
+    EmailRecipient,
+    MemberFactory,
+    OrganizationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { EmailContent, EmailStatus, Replacement } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
@@ -34,7 +41,9 @@ describe('EmailPreviewService', () => {
     /**
      * A sent email that is visible in the member portal.
      */
-    const createSentEmail = async (data: { html: string; text?: string; subject?: string } & Partial<Email>) => {
+    const createSentEmail = async (
+        data: { html: string; text?: string; subject?: string } & Partial<Email>,
+    ) => {
         const email = new Email();
         email.subject = data.subject ?? 'Test subject';
         email.status = EmailStatus.Sent;
@@ -50,7 +59,10 @@ describe('EmailPreviewService', () => {
         return email;
     };
 
-    const createRecipient = async (email: Email, data: Partial<EmailRecipient> & { memberId: string }) => {
+    const createRecipient = async (
+        email: Email,
+        data: Partial<EmailRecipient> & { memberId: string },
+    ) => {
         const recipient = new EmailRecipient();
         recipient.emailId = email.id;
         recipient.memberId = data.memberId;
@@ -93,7 +105,9 @@ describe('EmailPreviewService', () => {
                 ],
             });
 
-            const structure = await EmailPreviewService.getStructureForUser(email, user, [member.id]);
+            const structure = await EmailPreviewService.getStructureForUser(email, user, [
+                member.id,
+            ]);
 
             expect(structure.recipients).toHaveLength(1);
             const recipient = structure.recipients[0];
@@ -102,7 +116,7 @@ describe('EmailPreviewService', () => {
             expect(JSON.stringify(recipient.replacements)).not.toContain(secret);
 
             // ...and replaced by a sign in url generated for the user that is viewing the email
-            const signInUrl = recipient.replacements.find(r => r.token === 'signInUrl');
+            const signInUrl = recipient.replacements.find((r) => r.token === 'signInUrl');
             expect(signInUrl).toBeDefined();
             expect(signInUrl!.value).toContain(encodeURIComponent(user.email));
         });
@@ -120,11 +134,14 @@ describe('EmailPreviewService', () => {
                 text: '{{greeting}} Nederlandse tekst',
                 language: Language.Dutch,
                 translations: new Map([
-                    [Language.French, EmailContent.create({
-                        subject: 'Sujet français',
-                        html: '<p>{{greeting}} Contenu français</p>',
-                        text: 'Texte français',
-                    })],
+                    [
+                        Language.French,
+                        EmailContent.create({
+                            subject: 'Sujet français',
+                            html: '<p>{{greeting}} Contenu français</p>',
+                            text: 'Texte français',
+                        }),
+                    ],
                 ]),
             });
 
@@ -145,9 +162,13 @@ describe('EmailPreviewService', () => {
             const recipient = structure.recipients[0];
 
             expect(recipient.language).toBe(Language.French);
-            expect(recipient.replacements.find(r => r.token === 'greeting')?.value).toBe(frenchGreeting);
+            expect(recipient.replacements.find((r) => r.token === 'greeting')?.value).toBe(
+                frenchGreeting,
+            );
             expect(structure.getSubjectFor(recipient)).toBe('Sujet français');
-            expect(structure.getHtmlFor(recipient)).toBe(`<p>${frenchGreeting} Contenu français</p>`);
+            expect(structure.getHtmlFor(recipient)).toBe(
+                `<p>${frenchGreeting} Contenu français</p>`,
+            );
         });
 
         test('merges the recipients of different members when their replacements are equal', async () => {
@@ -169,10 +190,16 @@ describe('EmailPreviewService', () => {
                 });
             }
 
-            const structure = await EmailPreviewService.getStructureForUser(email, user, [member.id, secondMember.id]);
+            const structure = await EmailPreviewService.getStructureForUser(email, user, [
+                member.id,
+                secondMember.id,
+            ]);
 
             expect(structure.recipients).toHaveLength(1);
-            expect(structure.recipients[0].replacements.find(r => r.token === 'memberFirstName')?.value).toBe('Same name');
+            expect(
+                structure.recipients[0].replacements.find((r) => r.token === 'memberFirstName')
+                    ?.value,
+            ).toBe('Same name');
         });
 
         test('keeps the recipients of different members separate when their replacements differ', async () => {
@@ -197,10 +224,15 @@ describe('EmailPreviewService', () => {
                 replacements: [Replacement.create({ token: 'memberFirstName', value: 'Bob' })],
             });
 
-            const structure = await EmailPreviewService.getStructureForUser(email, user, [member.id, secondMember.id]);
+            const structure = await EmailPreviewService.getStructureForUser(email, user, [
+                member.id,
+                secondMember.id,
+            ]);
 
             expect(structure.recipients).toHaveLength(2);
-            const names = structure.recipients.map(r => r.replacements.find(rr => rr.token === 'memberFirstName')?.value);
+            const names = structure.recipients.map(
+                (r) => r.replacements.find((rr) => rr.token === 'memberFirstName')?.value,
+            );
             expect(names).toIncludeSameMembers(['Alice', 'Bob']);
         });
     });
@@ -214,24 +246,36 @@ describe('EmailPreviewService', () => {
                 html: '<p>{{greeting}} Nederlandse inhoud</p>',
                 language: Language.Dutch,
                 translations: new Map([
-                    [Language.French, EmailContent.create({
-                        subject: 'Sujet français',
-                        html: '<p>{{greeting}} Contenu français</p>',
-                        text: 'Texte français',
-                    })],
+                    [
+                        Language.French,
+                        EmailContent.create({
+                            subject: 'Sujet français',
+                            html: '<p>{{greeting}} Contenu français</p>',
+                            text: 'Texte français',
+                        }),
+                    ],
                 ]),
             });
 
-            const preview = await EmailPreviewService.getPreviewStructure(email, { allLanguages: true });
+            const preview = await EmailPreviewService.getPreviewStructure(email, {
+                allLanguages: true,
+            });
 
             expect(preview.exampleRecipient).not.toBeNull();
-            expect([...preview.exampleRecipients.keys()]).toIncludeSameMembers([Language.Dutch, Language.French]);
+            expect([...preview.exampleRecipients.keys()]).toIncludeSameMembers([
+                Language.Dutch,
+                Language.French,
+            ]);
             expect(preview.exampleRecipients.get(Language.French)!.language).toBe(Language.French);
             expect(preview.exampleRecipients.get(Language.Dutch)!.language).toBe(Language.Dutch);
 
             // The replacements are regenerated per language, so the greeting differs
-            const dutchGreeting = preview.exampleRecipients.get(Language.Dutch)!.replacements.find(r => r.token === 'greeting')?.value;
-            const frenchGreeting = preview.exampleRecipients.get(Language.French)!.replacements.find(r => r.token === 'greeting')?.value;
+            const dutchGreeting = preview.exampleRecipients
+                .get(Language.Dutch)!
+                .replacements.find((r) => r.token === 'greeting')?.value;
+            const frenchGreeting = preview.exampleRecipients
+                .get(Language.French)!
+                .replacements.find((r) => r.token === 'greeting')?.value;
             expect(typeof dutchGreeting).toBe('string');
             expect(typeof frenchGreeting).toBe('string');
             expect(frenchGreeting).not.toBe(dutchGreeting);
@@ -246,7 +290,9 @@ describe('EmailPreviewService', () => {
                 language: Language.Dutch,
             });
 
-            const preview = await EmailPreviewService.getPreviewStructure(email, { allLanguages: true });
+            const preview = await EmailPreviewService.getPreviewStructure(email, {
+                allLanguages: true,
+            });
 
             expect(preview.exampleRecipient).not.toBeNull();
             expect(preview.exampleRecipients.size).toBe(0);
@@ -260,19 +306,30 @@ describe('EmailPreviewService', () => {
                 html: '<p>{{greeting}} Nederlandse inhoud</p>',
                 language: Language.Dutch,
                 translations: new Map([
-                    [Language.French, EmailContent.create({
-                        subject: 'Sujet français',
-                        html: '<p>{{greeting}} Contenu français</p>',
-                        text: 'Texte français',
-                    })],
+                    [
+                        Language.French,
+                        EmailContent.create({
+                            subject: 'Sujet français',
+                            html: '<p>{{greeting}} Contenu français</p>',
+                            text: 'Texte français',
+                        }),
+                    ],
                 ]),
             });
 
-            const withOption = await EmailPreviewService.getPreviewStructure(email, { allLanguages: true });
+            const withOption = await EmailPreviewService.getPreviewStructure(email, {
+                allLanguages: true,
+            });
             const withoutOption = await EmailPreviewService.getPreviewStructure(email);
 
-            expect([...withOption.exampleRecipients.keys()]).toIncludeSameMembers([Language.Dutch, Language.French]);
-            expect([...withoutOption.exampleRecipients.keys()]).toIncludeSameMembers([Language.Dutch, Language.French]);
+            expect([...withOption.exampleRecipients.keys()]).toIncludeSameMembers([
+                Language.Dutch,
+                Language.French,
+            ]);
+            expect([...withoutOption.exampleRecipients.keys()]).toIncludeSameMembers([
+                Language.Dutch,
+                Language.French,
+            ]);
         });
 
         test('uses a stored recipient as the example recipient when the email has one', async () => {
@@ -290,11 +347,16 @@ describe('EmailPreviewService', () => {
                 replacements: [Replacement.create({ token: 'memberFirstName', value: 'Stored' })],
             });
 
-            const preview = await EmailPreviewService.getPreviewStructure(email, { allLanguages: true });
+            const preview = await EmailPreviewService.getPreviewStructure(email, {
+                allLanguages: true,
+            });
 
             expect(preview.exampleRecipient).not.toBeNull();
             expect(preview.exampleRecipient!.firstName).toBe('Stored');
-            expect(preview.exampleRecipient!.replacements.find(r => r.token === 'memberFirstName')?.value).toBe('Stored');
+            expect(
+                preview.exampleRecipient!.replacements.find((r) => r.token === 'memberFirstName')
+                    ?.value,
+            ).toBe('Stored');
         });
     });
 });

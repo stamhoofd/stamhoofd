@@ -28,7 +28,7 @@ export class GetUitpasClientIdEndpoint extends Endpoint<Params, Query, Body, Res
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.hasFullAccess(organization.id)) {
+        if (!(await Context.auth.hasFullAccess(organization.id))) {
             throw Context.auth.error();
         }
 

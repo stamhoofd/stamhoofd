@@ -1,5 +1,13 @@
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Language } from '@stamhoofd/types/Language';
@@ -8,10 +16,19 @@ import { EmailRecipient } from '../email/Email.js';
 import { Recipient, Replacement } from '../endpoints/EmailRequest.js';
 import type { File } from '../files/File.js';
 import { Payment, PrivatePayment } from '../members/Payment.js';
-import { RecordCheckboxAnswer, RecordFileAnswer, RecordImageAnswer } from '../members/records/RecordAnswer.js';
+import {
+    RecordCheckboxAnswer,
+    RecordFileAnswer,
+    RecordImageAnswer,
+} from '../members/records/RecordAnswer.js';
 import { RecordCategory } from '../members/records/RecordCategory.js';
 import type { Organization } from '../Organization.js';
-import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod.js';
+import {
+    downgradePaymentMethodV150,
+    PaymentMethod,
+    PaymentMethodHelper,
+    PaymentMethodV150,
+} from '../PaymentMethod.js';
 import { PaymentStatus } from '../PaymentStatus.js';
 import { PaymentType } from '../PaymentType.js';
 import { Checkout } from './Checkout.js';
@@ -48,22 +65,33 @@ export enum OrderStatus {
 export class OrderStatusHelper {
     static getName(status: OrderStatus): string {
         switch (status) {
-            case OrderStatus.Created: return $t('%1IY');
-            case OrderStatus.Prepared: return $t('%t7');
-            case OrderStatus.Collect: return $t('%t8');
-            case OrderStatus.Completed: return $t('%Gt');
-            case OrderStatus.Canceled: return $t('%gg');
-            case OrderStatus.Deleted: return $t('%1FX');
+            case OrderStatus.Created:
+                return $t('%1IY');
+            case OrderStatus.Prepared:
+                return $t('%t7');
+            case OrderStatus.Collect:
+                return $t('%t8');
+            case OrderStatus.Completed:
+                return $t('%Gt');
+            case OrderStatus.Canceled:
+                return $t('%gg');
+            case OrderStatus.Deleted:
+                return $t('%1FX');
         }
     }
 
     static getColor(status: OrderStatus): string {
         switch (status) {
-            case OrderStatus.Completed: return 'success';
-            case OrderStatus.Prepared: return 'secundary';
-            case OrderStatus.Collect: return 'tertiary';
-            case OrderStatus.Canceled: return 'error';
-            case OrderStatus.Created: return 'info';
+            case OrderStatus.Completed:
+                return 'success';
+            case OrderStatus.Prepared:
+                return 'secundary';
+            case OrderStatus.Collect:
+                return 'tertiary';
+            case OrderStatus.Canceled:
+                return 'error';
+            case OrderStatus.Created:
+                return 'info';
         }
         return 'error';
     }
@@ -83,7 +111,10 @@ export class OrderData extends Checkout {
     paymentMethod: PaymentMethod = PaymentMethod.Unknown;
 
     get shouldSendPaymentUpdates() {
-        return (!this.timeSlot || (this.timeSlot.date.getTime() + 1000 * 60 * 60 * 24) > new Date().getTime());
+        return (
+            !this.timeSlot ||
+            this.timeSlot.date.getTime() + 1000 * 60 * 60 * 24 > new Date().getTime()
+        );
     }
 
     get locationName() {
@@ -217,16 +248,22 @@ export class Order extends AutoEncoder {
     }
 
     get payments() {
-        return this.balanceItems.flatMap(i => i.payments.map(p => p.payment)).filter(p => p.status !== PaymentStatus.Failed).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        return this.balanceItems
+            .flatMap((i) => i.payments.map((p) => p.payment))
+            .filter((p) => p.status !== PaymentStatus.Failed)
+            .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     }
 
     get paidAt() {
-        const time = Math.min(new Date(2100, 0, 1).getTime(), ...this.payments.map(p => (p.paidAt ?? new Date(2100, 0, 1)).getTime()));
+        const time = Math.min(
+            new Date(2100, 0, 1).getTime(),
+            ...this.payments.map((p) => (p.paidAt ?? new Date(2100, 0, 1)).getTime()),
+        );
         return new Date(time);
     }
 
     getHTMLTable(): string {
-        const allFree = this.data.cart.items.every(i => i.getPriceWithoutDiscounts() === 0);
+        const allFree = this.data.cart.items.every((i) => i.getPriceWithoutDiscounts() === 0);
 
         if (allFree) {
             let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><thead><tr><th>${$t('%Sc')}</th><th>${$t('%M4')}</th></tr></thead><tbody>`;
@@ -246,7 +283,8 @@ export class Order extends AutoEncoder {
     }
 
     getDetailsHTMLTable(webshop: WebshopPreview): string {
-        let str = '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
+        let str =
+            '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
 
         const data: { title: string; value: string; html?: string }[] = [
             {
@@ -277,18 +315,22 @@ export class Order extends AutoEncoder {
                     return order.data.address?.shortString() ?? '';
                 })(this),
             },
-            ...(
-                (this.data.checkoutMethod?.type === CheckoutMethodType.Takeout || this.data.checkoutMethod?.type === CheckoutMethodType.OnSite) && ((this.data.checkoutMethod as any)?.address)
-                    ? [
-                            {
-                                title: $t('%Cn'),
-                                value: ((order) => {
-                                    return (order.data.checkoutMethod as WebshopTakeoutMethod)?.address?.shortString() ?? '';
-                                })(this),
-                            },
-                        ]
-                    : []
-            ),
+            ...((this.data.checkoutMethod?.type === CheckoutMethodType.Takeout ||
+                this.data.checkoutMethod?.type === CheckoutMethodType.OnSite) &&
+            (this.data.checkoutMethod as any)?.address
+                ? [
+                      {
+                          title: $t('%Cn'),
+                          value: ((order) => {
+                              return (
+                                  (
+                                      order.data.checkoutMethod as WebshopTakeoutMethod
+                                  )?.address?.shortString() ?? ''
+                              );
+                          })(this),
+                      },
+                  ]
+                : []),
             {
                 title: $t('%7R'),
                 value: Formatter.capitalizeFirstLetter(this.data.timeSlot?.dateString() ?? ''),
@@ -303,45 +345,49 @@ export class Order extends AutoEncoder {
             },
             ...(this.data.customer.phone
                 ? [
-                        {
-                            title: $t('%18Z'),
-                            value: this.data.customer.phone,
-                        },
-                    ]
+                      {
+                          title: $t('%18Z'),
+                          value: this.data.customer.phone,
+                      },
+                  ]
                 : []),
-            ...this.data.fieldAnswers.filter(a => a.answer).map(a => ({
-                title: a.field.name,
-                value: a.answer,
-            })),
-            ...RecordCategory.sortAnswers(this.data.recordAnswers, webshop.meta.allRecordCategories).filter(a => !a.isEmpty || a instanceof RecordCheckboxAnswer).map((a) => {
-                const title = a.settings.name.toString();
+            ...this.data.fieldAnswers
+                .filter((a) => a.answer)
+                .map((a) => ({
+                    title: a.field.name,
+                    value: a.answer,
+                })),
+            ...RecordCategory.sortAnswers(this.data.recordAnswers, webshop.meta.allRecordCategories)
+                .filter((a) => !a.isEmpty || a instanceof RecordCheckboxAnswer)
+                .map((a) => {
+                    const title = a.settings.name.toString();
 
-                // Files and images are attached to the email instead of showing their (potentially inaccessible) url
-                if (a instanceof RecordFileAnswer) {
-                    return { title, value: a.file?.name ?? $t('%ZnZ') };
-                }
+                    // Files and images are attached to the email instead of showing their (potentially inaccessible) url
+                    if (a instanceof RecordFileAnswer) {
+                        return { title, value: a.file?.name ?? $t('%ZnZ') };
+                    }
 
-                if (a instanceof RecordImageAnswer && a.image) {
-                    const file = a.image.getInlineEmailFile();
-                    return {
-                        title,
-                        value: '',
-                        html: `<img src="${Formatter.escapeHtml(file.inlineEmailSrc)}" alt="${Formatter.escapeHtml(a.image.source.name ?? '')}" style="max-width: 200px; max-height: 64px; width: auto; height: auto;">`,
-                    };
-                }
+                    if (a instanceof RecordImageAnswer && a.image) {
+                        const file = a.image.getInlineEmailFile();
+                        return {
+                            title,
+                            value: '',
+                            html: `<img src="${Formatter.escapeHtml(file.inlineEmailSrc)}" alt="${Formatter.escapeHtml(a.image.source.name ?? '')}" style="max-width: 200px; max-height: 64px; width: auto; height: auto;">`,
+                        };
+                    }
 
-                return { title, value: a.stringValue };
-            }),
-            ...(
-                (this.data.paymentMethod !== PaymentMethod.Unknown)
-                    ? [
-                            {
-                                title: $t('%M7'),
-                                value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.data.paymentMethod)),
-                            },
-                        ]
-                    : []
-            ),
+                    return { title, value: a.stringValue };
+                }),
+            ...(this.data.paymentMethod !== PaymentMethod.Unknown
+                ? [
+                      {
+                          title: $t('%M7'),
+                          value: Formatter.capitalizeFirstLetter(
+                              PaymentMethodHelper.getName(this.data.paymentMethod),
+                          ),
+                      },
+                  ]
+                : []),
             ...this.data.priceBreakown.map((p) => {
                 return {
                     title: p.name,
@@ -351,7 +397,9 @@ export class Order extends AutoEncoder {
         ];
 
         for (const replacement of data) {
-            const cell = replacement.html ?? (replacement.value.length > 0 ? Formatter.escapeHtml(replacement.value) : null);
+            const cell =
+                replacement.html ??
+                (replacement.value.length > 0 ? Formatter.escapeHtml(replacement.value) : null);
             if (cell === null) {
                 continue;
             }
@@ -366,16 +414,18 @@ export class Order extends AutoEncoder {
      * Images use the same file as the inline image in the table, so the email builder can render them inline.
      */
     getRecordAnswerFiles(webshop: WebshopPreview): File[] {
-        return RecordCategory.sortAnswers(this.data.recordAnswers, webshop.meta.allRecordCategories)
-            .flatMap((a) => {
-                if (a instanceof RecordFileAnswer && a.file) {
-                    return [a.file];
-                }
-                if (a instanceof RecordImageAnswer && a.image) {
-                    return [a.image.getInlineEmailFile()];
-                }
-                return [];
-            });
+        return RecordCategory.sortAnswers(
+            this.data.recordAnswers,
+            webshop.meta.allRecordCategories,
+        ).flatMap((a) => {
+            if (a instanceof RecordFileAnswer && a.file) {
+                return [a.file];
+            }
+            if (a instanceof RecordImageAnswer && a.image) {
+                return [a.image.getInlineEmailFile()];
+            }
+            return [];
+        });
     }
 
     getEmailRecipient(organization: Organization, webshop: WebshopPreview): EmailRecipient {
@@ -388,7 +438,8 @@ export class Order extends AutoEncoder {
             lastName: customer.lastName,
             email,
             replacements: this.getRecipientReplacements(organization, webshop),
-            language: this.consumerLanguage ?? webshop.meta.defaultLanguage ?? organization.language,
+            language:
+                this.consumerLanguage ?? webshop.meta.defaultLanguage ?? organization.language,
         });
     }
 
@@ -400,24 +451,38 @@ export class Order extends AutoEncoder {
             firstName: order.data.customer.firstName,
             lastName: order.data.customer.lastName,
             email,
-            replacements: this.getRecipientReplacements(organization, webshop, payment ? [payment] : order.payments),
-            language: this.consumerLanguage ?? webshop.meta.defaultLanguage ?? organization.language,
+            replacements: this.getRecipientReplacements(
+                organization,
+                webshop,
+                payment ? [payment] : order.payments,
+            ),
+            language:
+                this.consumerLanguage ?? webshop.meta.defaultLanguage ?? organization.language,
         });
     }
 
-    private getRecipientReplacements(organization: Organization, webshop: WebshopPreview, payments: Payment[] = this.payments) {
+    private getRecipientReplacements(
+        organization: Organization,
+        webshop: WebshopPreview,
+        payments: Payment[] = this.payments,
+    ) {
         const order = this;
         // Refunds and chargebacks of a transfer keep the transfer method, but never carry payment instructions
-        const transfers = payments.filter(p => p.method === PaymentMethod.Transfer && p.type === PaymentType.Payment && p.status !== PaymentStatus.Failed);
+        const transfers = payments.filter(
+            (p) =>
+                p.method === PaymentMethod.Transfer &&
+                p.type === PaymentType.Payment &&
+                p.status !== PaymentStatus.Failed,
+        );
 
         // The payment instructions of a transfer that still has to be paid are the most relevant ones
-        const openTransfers = transfers.filter(p => p.status !== PaymentStatus.Succeeded);
+        const openTransfers = transfers.filter((p) => p.status !== PaymentStatus.Succeeded);
         const relevantTransfers = openTransfers.length > 0 ? openTransfers : transfers;
 
         return [
             Replacement.create({
                 token: 'orderUrl',
-                value: 'https://' + webshop?.getUrl(organization) + '/order/' + (order.id),
+                value: 'https://' + webshop?.getUrl(organization) + '/order/' + order.id,
             }),
             Replacement.create({
                 token: 'nr',
@@ -437,19 +502,30 @@ export class Order extends AutoEncoder {
             }),
             Replacement.create({
                 token: 'transferDescription',
-                value: relevantTransfers.map(p => p.transferDescription).join(', '),
+                value: relevantTransfers.map((p) => p.transferDescription).join(', '),
             }),
             Replacement.create({
                 token: 'transferBankAccount',
                 value: relevantTransfers
-                    .map(p => p.transferSettings?.iban ?? organization.meta.registrationPaymentConfiguration.transferSettings.iban)
-                    .filter(iban => !!iban)
+                    .map(
+                        (p) =>
+                            p.transferSettings?.iban ??
+                            organization.meta.registrationPaymentConfiguration.transferSettings
+                                .iban,
+                    )
+                    .filter((iban) => !!iban)
                     .join(', '),
             }),
             Replacement.create({
                 token: 'transferBankCreditor',
                 value: relevantTransfers
-                    .map(p => p.transferSettings?.creditor ?? organization.meta.registrationPaymentConfiguration.transferSettings.creditor ?? organization.name)
+                    .map(
+                        (p) =>
+                            p.transferSettings?.creditor ??
+                            organization.meta.registrationPaymentConfiguration.transferSettings
+                                .creditor ??
+                            organization.name,
+                    )
                     .join(', '),
             }),
             Replacement.create({
@@ -486,7 +562,7 @@ export class Order extends AutoEncoder {
             Replacement.create({
                 token: 'paymentTable',
                 value: '',
-                html: order.payments.map(p => p.getHTMLTable()).join(),
+                html: order.payments.map((p) => p.getHTMLTable()).join(),
             }),
             Replacement.create({
                 token: 'organizationName',
@@ -507,11 +583,18 @@ export class PrivateOrder extends Order {
     @field({ decoder: PrivatePayment, nullable: true })
     payment: PrivatePayment | null = null;
 
-    @field({ decoder: new ArrayDecoder(BalanceItemWithPrivatePayments), nullable: true, version: 225 })
+    @field({
+        decoder: new ArrayDecoder(BalanceItemWithPrivatePayments),
+        nullable: true,
+        version: 225,
+    })
     balanceItems: BalanceItemWithPrivatePayments[] = [];
 
     get payments() {
-        return this.balanceItems.flatMap(i => i.payments.map(p => p.payment)).filter(p => p.status !== PaymentStatus.Failed).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        return this.balanceItems
+            .flatMap((i) => i.payments.map((p) => p.payment))
+            .filter((p) => p.status !== PaymentStatus.Failed)
+            .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     }
 }
 
@@ -522,7 +605,7 @@ export class PrivateOrderWithTickets extends PrivateOrder {
     tickets: TicketPrivate[] = [];
 
     get ticketScanStatus(): TicketScanStatus {
-        const scanned = this.tickets.filter(t => t.scannedAt).length;
+        const scanned = this.tickets.filter((t) => t.scannedAt).length;
         const total = this.tickets.length;
 
         if (scanned === 0) {
@@ -556,12 +639,12 @@ export class PrivateOrderWithTickets extends PrivateOrder {
         for (const ticket of tickets) {
             if (ticket.orderId === this.id) {
                 if (ticket.deletedAt) {
-                    const existingIndex = this.tickets.findIndex(t => t.id === ticket.id);
+                    const existingIndex = this.tickets.findIndex((t) => t.id === ticket.id);
                     if (existingIndex !== -1) {
                         this.tickets.splice(existingIndex, 1);
                     }
                 } else {
-                    const existing = this.tickets.find(t => t.id === ticket.id);
+                    const existing = this.tickets.find((t) => t.id === ticket.id);
                     if (existing) {
                         existing.set(ticket);
                     } else {
@@ -576,7 +659,10 @@ export class PrivateOrderWithTickets extends PrivateOrder {
         PrivateOrderWithTickets.addTicketPatches([this], patches);
     }
 
-    static addTicketPatches(orders: PrivateOrderWithTickets[], patches: AutoEncoderPatchType<TicketPrivate>[]) {
+    static addTicketPatches(
+        orders: PrivateOrderWithTickets[],
+        patches: AutoEncoderPatchType<TicketPrivate>[],
+    ) {
         mainLoop: for (const patch of patches) {
             for (const order of orders) {
                 for (const ticket of order.tickets) {

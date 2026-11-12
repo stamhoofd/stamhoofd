@@ -28,25 +28,35 @@ describe('createLiveOutput', () => {
 
         expect(stdout.writes.join('')).toContain('\x1b[1A\x1b[0Jhello\n');
         expect(stdout.writes.join('')).toContain('\x1b[1A\x1b[0Jdirect log\n');
-        expect(stdout.writes.filter(write => write.includes('instance main'))).toHaveLength(4);
+        expect(stdout.writes.filter((write) => write.includes('instance main'))).toHaveLength(4);
         expect(stderr.writes).toEqual(['boom\n']);
     });
 
     it('prints static output once in non-TTY mode', () => {
         const stdout = createStream(false);
-        const output = createLiveOutput({ stdout: stdout.stream, stderr: createStream(false).stream });
+        const output = createLiveOutput({
+            stdout: stdout.stream,
+            stderr: createStream(false).stream,
+        });
 
         output.setStatus([{ label: 'instance main' }]);
         output.setStatus([{ label: 'instance main' }]);
         output.log('Starting app processes...');
         output.write('hello\n');
 
-        expect(stdout.writes).toEqual(['instance main\n', 'Starting app processes...\n', 'hello\n']);
+        expect(stdout.writes).toEqual([
+            'instance main\n',
+            'Starting app processes...\n',
+            'hello\n',
+        ]);
     });
 
     it('persists status when stopped with persistStatus', () => {
         const stdout = createStream(true);
-        const output = createLiveOutput({ stdout: stdout.stream, stderr: createStream(true).stream });
+        const output = createLiveOutput({
+            stdout: stdout.stream,
+            stderr: createStream(true).stream,
+        });
 
         output.setStatus([{ label: 'instance main' }]);
         output.stop({ persistStatus: true });
@@ -57,20 +67,30 @@ describe('createLiveOutput', () => {
     it('animates live status only while active', () => {
         vi.useFakeTimers();
         const stdout = createStream(true);
-        const output = createLiveOutput({ stdout: stdout.stream, stderr: createStream(true).stream });
+        const output = createLiveOutput({
+            stdout: stdout.stream,
+            stderr: createStream(true).stream,
+        });
 
-        output.setLiveStatus(frame => [{ label: `frame ${frame}` }], { intervalMs: 50 });
+        output.setLiveStatus((frame) => [{ label: `frame ${frame}` }], { intervalMs: 50 });
         vi.advanceTimersByTime(120);
         output.stopLiveStatus();
         vi.advanceTimersByTime(120);
         output.stop();
 
-        expect(stdout.writes.filter(write => /frame \d\n/.test(write))).toEqual(['frame 0\n', 'frame 1\n', 'frame 2\n']);
+        expect(stdout.writes.filter((write) => /frame \d\n/.test(write))).toEqual([
+            'frame 0\n',
+            'frame 1\n',
+            'frame 2\n',
+        ]);
     });
 
     it('clears status when stopped without persistence', () => {
         const stdout = createStream(true);
-        const output = createLiveOutput({ stdout: stdout.stream, stderr: createStream(true).stream });
+        const output = createLiveOutput({
+            stdout: stdout.stream,
+            stderr: createStream(true).stream,
+        });
 
         output.setStatus([{ label: 'instance main' }]);
         output.stop();
@@ -81,7 +101,10 @@ describe('createLiveOutput', () => {
     it('clears every terminal line used by a wrapped status', () => {
         const stdout = createStream(true);
         stdout.stream.columns = 20;
-        const output = createLiveOutput({ stdout: stdout.stream, stderr: createStream(true).stream });
+        const output = createLiveOutput({
+            stdout: stdout.stream,
+            stderr: createStream(true).stream,
+        });
 
         output.setStatus([{ label: 'dashboard.stamhoofd  api.stamhoofd' }]);
         output.log('build started');

@@ -28,8 +28,6 @@ export class GetOrganizationEndpoint extends Endpoint<Params, Query, Body, Respo
         const organization = await Context.setOrganizationScope();
         await Context.optionalAuthenticate({ allowWithoutAccount: true });
 
-        return new Response(
-            await AuthenticatedStructures.organization(organization),
-        );
+        return new Response(await AuthenticatedStructures.organization(organization));
     }
 }

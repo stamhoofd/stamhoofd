@@ -1,5 +1,13 @@
 import type { Decoder } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 
 import { PropertyFilter } from '../filters/PropertyFilter.js';
 import type { Group } from '../Group.js';
@@ -25,13 +33,13 @@ export class FreeContributionSettings extends AutoEncoder {
             if (!Array.isArray(oldValue)) {
                 return oldValue;
             }
-            return oldValue.map(o => o * 100);
+            return oldValue.map((o) => o * 100);
         },
         downgrade: (newValue: number[]) => {
             if (!Array.isArray(newValue)) {
                 return newValue;
             }
-            return newValue.map(o => Math.round(o / 100));
+            return newValue.map((o) => Math.round(o / 100));
         },
         version: 389,
     })
@@ -59,7 +67,7 @@ export class FinancialSupportSettings extends AutoEncoder {
 
     /**
      * E.g. 'SOMkort'
-    */
+     */
     @field({ decoder: StringDecoder, version: 289 })
     priceName = FinancialSupportSettings.defaultPriceName;
 
@@ -297,13 +305,22 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
 
         if (options.group && options.group?.defaultAgeGroupId) {
             const defaultAgeGroupId = options.group.defaultAgeGroupId;
-            defaultGroupConfig = options.platform.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId)?.recordsConfiguration.clone() ?? null;
+            defaultGroupConfig =
+                options.platform.config.defaultAgeGroups
+                    .find((g) => g.id === defaultAgeGroupId)
+                    ?.recordsConfiguration.clone() ?? null;
         }
 
-        return this.mergeChildren(...([platformConfig, defaultGroupConfig, organizationConfig, groupConfig].filter(f => f !== null)));
+        return this.mergeChildren(
+            ...[platformConfig, defaultGroupConfig, organizationConfig, groupConfig].filter(
+                (f) => f !== null,
+            ),
+        );
     }
 
-    static mergeChildren(...configs: OrganizationRecordsConfiguration[]): OrganizationRecordsConfiguration {
+    static mergeChildren(
+        ...configs: OrganizationRecordsConfiguration[]
+    ): OrganizationRecordsConfiguration {
         if (configs.length === 0) {
             throw new Error('At least one configuration is required');
         }
@@ -321,7 +338,10 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
     /**
      * Note: best to not use this visually
      */
-    static mergeChild(parent: OrganizationRecordsConfiguration, child: OrganizationRecordsConfiguration): OrganizationRecordsConfiguration {
+    static mergeChild(
+        parent: OrganizationRecordsConfiguration,
+        child: OrganizationRecordsConfiguration,
+    ): OrganizationRecordsConfiguration {
         const clone = child.clone();
 
         if (parent.financialSupport !== false) {
@@ -342,7 +362,9 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
 
         if (parent.nationalRegisterNumber !== null) {
             if (clone.nationalRegisterNumber) {
-                clone.nationalRegisterNumber = clone.nationalRegisterNumber.merge(parent.nationalRegisterNumber);
+                clone.nationalRegisterNumber = clone.nationalRegisterNumber.merge(
+                    parent.nationalRegisterNumber,
+                );
             } else {
                 clone.nationalRegisterNumber = parent.nationalRegisterNumber;
             }
@@ -412,19 +434,22 @@ export class OrganizationRecordsConfiguration extends AutoEncoder {
             clone.freeContribution = parent.freeContribution;
         }
 
-        clone.recordCategories = [...parent.recordCategories.map((r) => {
-            const c = r.clone();
-            if (r.defaultEnabled) {
-                return c;
-            }
-            const inheritedFilter = child.inheritedRecordCategories.get(r.id);
-            if (inheritedFilter !== undefined) {
-                c.filter = inheritedFilter;
-                c.defaultEnabled = true;
-            }
+        clone.recordCategories = [
+            ...parent.recordCategories.map((r) => {
+                const c = r.clone();
+                if (r.defaultEnabled) {
+                    return c;
+                }
+                const inheritedFilter = child.inheritedRecordCategories.get(r.id);
+                if (inheritedFilter !== undefined) {
+                    c.filter = inheritedFilter;
+                    c.defaultEnabled = true;
+                }
 
-            return c;
-        }), ...clone.recordCategories];
+                return c;
+            }),
+            ...clone.recordCategories,
+        ];
 
         // Nothing inherited yet
         clone.inheritedRecordCategories = new Map();

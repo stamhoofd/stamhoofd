@@ -9,7 +9,11 @@ export type SortDefinition<T, B extends PlainObject | Date = PlainObject | Date>
 /** Exact-key registry used for cursor filters; extracted values may be undefined. */
 export type SortDefinitions<T> = Map<string, SortDefinition<T>>;
 
-function sorterGetNextFilter<O>(lastObject: O, sortDefinitions: SortDefinitions<O>, list: SortList) {
+function sorterGetNextFilter<O>(
+    lastObject: O,
+    sortDefinitions: SortDefinitions<O>,
+    list: SortList,
+) {
     if (!lastObject) {
         return null;
     }
@@ -59,7 +63,11 @@ function sorterGetNextFilter<O>(lastObject: O, sortDefinitions: SortDefinitions<
     };
 }
 
-export function getSortFilter<O>(lastObject: O, sortDefinitions: SortDefinitions<O>, list: SortList) {
+export function getSortFilter<O>(
+    lastObject: O,
+    sortDefinitions: SortDefinitions<O>,
+    list: SortList,
+) {
     if (!lastObject) {
         return null;
     }

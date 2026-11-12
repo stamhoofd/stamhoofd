@@ -1,7 +1,19 @@
 import { Migration } from '@node/database';
 import { Group, OrganizationRegistrationPeriod } from '@stamhoofd/models';
 import type { GroupCategory } from '@stamhoofd/structures';
-import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, GroupStatus, GroupType, OldGroupPrice, OldGroupPrices, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
+import {
+    BundleDiscount,
+    BundleDiscountGroupPriceSettings,
+    GroupPrice,
+    GroupPriceDiscount,
+    GroupPriceDiscountType,
+    GroupStatus,
+    GroupType,
+    OldGroupPrice,
+    OldGroupPrices,
+    ReduceablePrice,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 const UNNASSIGNED_KEY = 'unassigned';
@@ -28,7 +40,7 @@ export async function migratePrices() {
             .andWhere('organizationId', period.organizationId)
             .fetch();
 
-        if (allGroups.every(g => g.settings.prices.length > 0)) {
+        if (allGroups.every((g) => g.settings.prices.length > 0)) {
             // already migrated
             console.log('Skipping period (already migrated): ' + period.id);
             continue;
@@ -68,12 +80,18 @@ export async function migratePrices() {
         }
 
         // group by category
-        const categoryMap = createCategoryMap(filteredGroups, archivedGroups, period.settings.categories);
+        const categoryMap = createCategoryMap(
+            filteredGroups,
+            archivedGroups,
+            period.settings.categories,
+        );
         const allBundleDiscounts: BundleDiscount[] = [];
 
         // loop categories
         for (const [categoryId, groups] of categoryMap.entries()) {
-            const category: GroupCategory | undefined = period.settings.categories.find(c => c.id === categoryId)!;
+            const category: GroupCategory | undefined = period.settings.categories.find(
+                (c) => c.id === categoryId,
+            )!;
             const isUnassigned = categoryId === UNNASSIGNED_KEY;
             let categoryDiscountForFamily: BundleDiscount | null = null;
             let categoryDiscountForMember: BundleDiscount | null = null;
@@ -81,7 +99,11 @@ export async function migratePrices() {
             // first find category discounts
             if (!isUnassigned) {
                 for (const group of groups) {
-                    if (group.settings.prices.length > 1 || (group.settings.prices.length === 1 && group.settings.prices[0].bundleDiscounts.size > 0)) {
+                    if (
+                        group.settings.prices.length > 1 ||
+                        (group.settings.prices.length === 1 &&
+                            group.settings.prices[0].bundleDiscounts.size > 0)
+                    ) {
                         // should never happen because prices are reset
                         throw new Error('Prices are not empty: ' + group.id);
                     }
@@ -112,10 +134,18 @@ export async function migratePrices() {
                         if (isCategoryDiscount) {
                             if (countWholeFamily) {
                                 if (!categoryDiscountForFamily) {
-                                    categoryDiscountForFamily = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                                    categoryDiscountForFamily = createBundleDiscount(
+                                        oldPrices,
+                                        category,
+                                        allBundleDiscounts,
+                                    );
                                 }
                             } else if (!categoryDiscountForMember) {
-                                categoryDiscountForMember = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                                categoryDiscountForMember = createBundleDiscount(
+                                    oldPrices,
+                                    category,
+                                    allBundleDiscounts,
+                                );
                             }
                         }
                     }
@@ -140,12 +170,14 @@ export async function migratePrices() {
                 });
 
                 if (oldPricesArray.length === 0) {
-                    oldPricesArray.push(OldGroupPrices.create({
-                        startDate: null,
-                        prices: [],
-                        sameMemberOnlyDiscount: false,
-                        onlySameGroup: true,
-                    }));
+                    oldPricesArray.push(
+                        OldGroupPrices.create({
+                            startDate: null,
+                            prices: [],
+                            sameMemberOnlyDiscount: false,
+                            onlySameGroup: true,
+                        }),
+                    );
                 }
 
                 const prices: GroupPrice[] = [];
@@ -156,15 +188,19 @@ export async function migratePrices() {
                     const isCategoryDiscount = !oldPrices.onlySameGroup;
                     const next: OldGroupPrices | undefined = oldPricesArray[i + 1];
 
-                    const firstPrice = oldPrices.prices[0] ?? OldGroupPrice.create({
-                        price: 0,
-                        reducedPrice: null,
-                    });
+                    const firstPrice =
+                        oldPrices.prices[0] ??
+                        OldGroupPrice.create({
+                            price: 0,
+                            reducedPrice: null,
+                        });
 
                     const groupPrice = GroupPrice.create({
-                        name: new TranslatedString(oldPrices.startDate === null
-                            ? 'Standaardtarief'
-                            : `Vanaf ${formatDate(oldPrices.startDate)}`),
+                        name: new TranslatedString(
+                            oldPrices.startDate === null
+                                ? 'Standaardtarief'
+                                : `Vanaf ${formatDate(oldPrices.startDate)}`,
+                        ),
                         startDate: oldPrices.startDate ? new Date(oldPrices.startDate) : null,
                         endDate: next?.startDate ? new Date(next.startDate.getTime() - 1) : null,
                         price: ReduceablePrice.create({
@@ -185,22 +221,29 @@ export async function migratePrices() {
                         let customDiscounts: GroupPriceDiscount[] | undefined = discounts;
 
                         if (isZeroDiscount) {
-                            customDiscounts = [GroupPriceDiscount.create({
-                                type: GroupPriceDiscountType.Fixed,
-                                value: ReduceablePrice.create({
-                                    price: 0,
-                                    reducedPrice: null,
-                                }) })];
-                        } else if (areDiscountsEqual(categoryDiscountForFamily.discounts, discounts)) {
+                            customDiscounts = [
+                                GroupPriceDiscount.create({
+                                    type: GroupPriceDiscountType.Fixed,
+                                    value: ReduceablePrice.create({
+                                        price: 0,
+                                        reducedPrice: null,
+                                    }),
+                                }),
+                            ];
+                        } else if (
+                            areDiscountsEqual(categoryDiscountForFamily.discounts, discounts)
+                        ) {
                             customDiscounts = undefined;
                         }
 
                         // add discount
                         groupPrice.bundleDiscounts.set(
-                            categoryDiscountForFamily.id, BundleDiscountGroupPriceSettings.create({
+                            categoryDiscountForFamily.id,
+                            BundleDiscountGroupPriceSettings.create({
                                 name: categoryDiscountForFamily.name,
                                 customDiscounts,
-                            }));
+                            }),
+                        );
                     }
 
                     if (categoryDiscountForMember) {
@@ -211,22 +254,29 @@ export async function migratePrices() {
                         let customDiscounts: GroupPriceDiscount[] | undefined = discounts;
 
                         if (isZeroDiscount) {
-                            customDiscounts = [GroupPriceDiscount.create({
-                                type: GroupPriceDiscountType.Fixed,
-                                value: ReduceablePrice.create({
-                                    price: 0,
-                                    reducedPrice: null,
-                                }) })];
-                        } else if (areDiscountsEqual(categoryDiscountForMember.discounts, discounts)) {
+                            customDiscounts = [
+                                GroupPriceDiscount.create({
+                                    type: GroupPriceDiscountType.Fixed,
+                                    value: ReduceablePrice.create({
+                                        price: 0,
+                                        reducedPrice: null,
+                                    }),
+                                }),
+                            ];
+                        } else if (
+                            areDiscountsEqual(categoryDiscountForMember.discounts, discounts)
+                        ) {
                             customDiscounts = undefined;
                         }
 
                         // add discount
                         groupPrice.bundleDiscounts.set(
-                            categoryDiscountForMember.id, BundleDiscountGroupPriceSettings.create({
+                            categoryDiscountForMember.id,
+                            BundleDiscountGroupPriceSettings.create({
                                 name: categoryDiscountForMember.name,
                                 customDiscounts,
-                            }));
+                            }),
+                        );
                     }
 
                     // in other cases the bundle discount will have been added already (as a category discount)
@@ -237,7 +287,10 @@ export async function migratePrices() {
                         // reuse existing bundle discount if only same group
                         if (oldPrices.onlySameGroup) {
                             // search if equal bundle discounts exist
-                            const equalBundleDiscount = allBundleDiscounts.find(bd => bd.countPerGroup && bd.countWholeFamily === countWholeFamily);
+                            const equalBundleDiscount = allBundleDiscounts.find(
+                                (bd) =>
+                                    bd.countPerGroup && bd.countWholeFamily === countWholeFamily,
+                            );
 
                             if (equalBundleDiscount) {
                                 bundleDiscount = equalBundleDiscount;
@@ -250,13 +303,20 @@ export async function migratePrices() {
                         }
 
                         if (!bundleDiscount) {
-                            bundleDiscount = createBundleDiscount(oldPrices, category, allBundleDiscounts);
+                            bundleDiscount = createBundleDiscount(
+                                oldPrices,
+                                category,
+                                allBundleDiscounts,
+                            );
                         }
 
-                        groupPrice.bundleDiscounts.set(bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
-                            name: bundleDiscount.name,
-                            customDiscounts,
-                        }));
+                        groupPrice.bundleDiscounts.set(
+                            bundleDiscount.id,
+                            BundleDiscountGroupPriceSettings.create({
+                                name: bundleDiscount.name,
+                                customDiscounts,
+                            }),
+                        );
                     }
 
                     prices.push(groupPrice);
@@ -286,7 +346,7 @@ function createCategoryMap(groups: Group[], archivedGroups: Group[], categories:
 
     for (const category of categories) {
         for (const groupId of category.groupIds) {
-            const group = groups.find(g => g.id === groupId);
+            const group = groups.find((g) => g.id === groupId);
             if (group) {
                 foundGroups.add(group.id);
                 const otherGroups = categoryMap.get(category.id);
@@ -299,7 +359,7 @@ function createCategoryMap(groups: Group[], archivedGroups: Group[], categories:
         }
     }
 
-    const unassignedGroups = groups.filter(g => !foundGroups.has(g.id));
+    const unassignedGroups = groups.filter((g) => !foundGroups.has(g.id));
     // add archived groups to unassigned groups
     unassignedGroups.push(...archivedGroups);
 
@@ -312,23 +372,28 @@ function createCategoryMap(groups: Group[], archivedGroups: Group[], categories:
 
 function createDiscounts(oldPrices: OldGroupPrices): GroupPriceDiscount[] {
     if (oldPrices.prices.length < 2) {
-        return [GroupPriceDiscount.create({
-            type: GroupPriceDiscountType.Fixed,
-            value: ReduceablePrice.create({
-                price: 0,
-                reducedPrice: null,
-            }) })];
+        return [
+            GroupPriceDiscount.create({
+                type: GroupPriceDiscountType.Fixed,
+                value: ReduceablePrice.create({
+                    price: 0,
+                    reducedPrice: null,
+                }),
+            }),
+        ];
     }
 
     const discounts: GroupPriceDiscount[] = [];
     const firstPrice = oldPrices.prices[0];
-    const baseReducedPrice = firstPrice.reducedPrice === null ? firstPrice.price : firstPrice.reducedPrice;
+    const baseReducedPrice =
+        firstPrice.reducedPrice === null ? firstPrice.price : firstPrice.reducedPrice;
 
     // skip first one
     for (let i = 1; i < oldPrices.prices.length; i++) {
         const oldGroupPrice = oldPrices.prices[i];
 
-        const reducedPrice: number = oldGroupPrice.reducedPrice === null ? oldGroupPrice.price : oldGroupPrice.reducedPrice;
+        const reducedPrice: number =
+            oldGroupPrice.reducedPrice === null ? oldGroupPrice.price : oldGroupPrice.reducedPrice;
 
         const discount = GroupPriceDiscount.create({
             type: GroupPriceDiscountType.Fixed,
@@ -343,7 +408,11 @@ function createDiscounts(oldPrices: OldGroupPrices): GroupPriceDiscount[] {
     return discounts;
 }
 
-function createBundleDiscount(oldPrices: OldGroupPrices, category: GroupCategory | undefined, allBundleDiscounts: BundleDiscount[]): BundleDiscount {
+function createBundleDiscount(
+    oldPrices: OldGroupPrices,
+    category: GroupCategory | undefined,
+    allBundleDiscounts: BundleDiscount[],
+): BundleDiscount {
     if (!oldPrices.onlySameGroup && oldPrices.prices.length < 2) {
         throw new Error('Not enough prices');
     }
@@ -353,8 +422,13 @@ function createBundleDiscount(oldPrices: OldGroupPrices, category: GroupCategory
 
     const discounts = createDiscounts(oldPrices);
 
-    const baseNameText = countWholeFamily ? 'Korting voor extra gezinslid' : 'Korting voor meerdere inschrijvingen';
-    const nameText = oldPrices.onlySameGroup || !category ? baseNameText : `${category.settings.name} - ${baseNameText}`;
+    const baseNameText = countWholeFamily
+        ? 'Korting voor extra gezinslid'
+        : 'Korting voor meerdere inschrijvingen';
+    const nameText =
+        oldPrices.onlySameGroup || !category
+            ? baseNameText
+            : `${category.settings.name} - ${baseNameText}`;
 
     const bundleDiscount = BundleDiscount.create({
         name: new TranslatedString(nameText),

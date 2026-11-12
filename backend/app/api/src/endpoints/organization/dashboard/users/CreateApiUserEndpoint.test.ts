@@ -6,7 +6,13 @@ import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchApiUserEndpoint } from './PatchApiUserEndpoint.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { ApiUser, ApiUserRateLimits, Permissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
+import {
+    ApiUser,
+    ApiUserRateLimits,
+    Permissions,
+    UserMeta,
+    UserPermissions,
+} from '@stamhoofd/structures';
 import { CreateApiUserEndpoint } from './CreateApiUserEndpoint.js';
 
 describe('Endpoint.CreateApiUserEndpoint', () => {
@@ -32,18 +38,25 @@ describe('Endpoint.CreateApiUserEndpoint', () => {
         // A token as produced by a refresh_token rotation (never authenticatedAt).
         const token = await SessionService.createSession(user);
 
-        const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
-            permissions: UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({ level: PermissionLevel.Read })],
-                ]),
+        const createRequest = Request.buildJson(
+            'POST',
+            '/api-keys',
+            organization.getApiHost(),
+            ApiUser.create({
+                permissions: UserPermissions.create({
+                    organizationPermissions: new Map([
+                        [organization.id, Permissions.create({ level: PermissionLevel.Read })],
+                    ]),
+                }),
             }),
-        }));
+        );
         createRequest.headers.authorization = 'Bearer ' + token.accessToken;
 
-        await expect(testServer.test(endpoint, createRequest)).rejects.toThrow(STExpect.simpleError({
-            code: 'require_fresh_auth',
-        }));
+        await expect(testServer.test(endpoint, createRequest)).rejects.toThrow(
+            STExpect.simpleError({
+                code: 'require_fresh_auth',
+            }),
+        );
     });
 
     test('Only a platform admin can set the rate limits of a key', async () => {
@@ -55,16 +68,21 @@ describe('Endpoint.CreateApiUserEndpoint', () => {
         }).create();
         const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
-        const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
-            permissions: UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({ level: PermissionLevel.Read })],
-                ]),
+        const createRequest = Request.buildJson(
+            'POST',
+            '/api-keys',
+            organization.getApiHost(),
+            ApiUser.create({
+                permissions: UserPermissions.create({
+                    organizationPermissions: new Map([
+                        [organization.id, Permissions.create({ level: PermissionLevel.Read })],
+                    ]),
+                }),
+                meta: UserMeta.create({
+                    rateLimits: ApiUserRateLimits.High,
+                }),
             }),
-            meta: UserMeta.create({
-                rateLimits: ApiUserRateLimits.High,
-            }),
-        }));
+        );
         createRequest.headers.authorization = 'Bearer ' + token.accessToken;
         const response = await testServer.test(endpoint, createRequest);
 
@@ -82,21 +100,28 @@ describe('Endpoint.CreateApiUserEndpoint', () => {
         }).create();
         const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
-        const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
-            permissions: UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({ level: PermissionLevel.Read })],
-                ]),
+        const createRequest = Request.buildJson(
+            'POST',
+            '/api-keys',
+            organization.getApiHost(),
+            ApiUser.create({
+                permissions: UserPermissions.create({
+                    organizationPermissions: new Map([
+                        [organization.id, Permissions.create({ level: PermissionLevel.Read })],
+                    ]),
+                }),
+                meta: UserMeta.create({
+                    rateLimits: ApiUserRateLimits.High,
+                }),
             }),
-            meta: UserMeta.create({
-                rateLimits: ApiUserRateLimits.High,
-            }),
-        }));
+        );
         createRequest.headers.authorization = 'Bearer ' + token.accessToken;
 
-        await expect(testServer.test(endpoint, createRequest)).rejects.toThrow(STExpect.simpleError({
-            code: 'permission_denied',
-        }));
+        await expect(testServer.test(endpoint, createRequest)).rejects.toThrow(
+            STExpect.simpleError({
+                code: 'permission_denied',
+            }),
+        );
     });
 
     test('An API-key cannot have permissions outside its organization', async () => {
@@ -109,17 +134,22 @@ describe('Endpoint.CreateApiUserEndpoint', () => {
         }).create();
         const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
-        const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
-            permissions: UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({ level: PermissionLevel.Read })],
-                    ['other', Permissions.create({ level: PermissionLevel.Full })],
-                ]),
-                globalPermissions: Permissions.create({
-                    level: PermissionLevel.Full,
+        const createRequest = Request.buildJson(
+            'POST',
+            '/api-keys',
+            organization.getApiHost(),
+            ApiUser.create({
+                permissions: UserPermissions.create({
+                    organizationPermissions: new Map([
+                        [organization.id, Permissions.create({ level: PermissionLevel.Read })],
+                        ['other', Permissions.create({ level: PermissionLevel.Full })],
+                    ]),
+                    globalPermissions: Permissions.create({
+                        level: PermissionLevel.Full,
+                    }),
                 }),
             }),
-        }));
+        );
         createRequest.headers.authorization = 'Bearer ' + token.accessToken;
 
         const response = await testServer.test(endpoint, createRequest);

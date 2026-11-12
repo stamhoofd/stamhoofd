@@ -3,5 +3,10 @@ export interface UpdatableObject {
 }
 
 export function isUpdatableObject(t: unknown): t is UpdatableObject {
-    return t !== null && typeof t === 'object' && 'updateFrom' in t && typeof t.updateFrom === 'function';
+    return (
+        t !== null &&
+        typeof t === 'object' &&
+        'updateFrom' in t &&
+        typeof t.updateFrom === 'function'
+    );
 }

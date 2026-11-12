@@ -9,7 +9,11 @@ import { Context } from '../helpers/Context.js';
 import { PaymentProvider } from '@stamhoofd/structures';
 
 export class PaymentMandateService {
-    static async getMandates({ sellingOrganization, user, payingOrganization }: {
+    static async getMandates({
+        sellingOrganization,
+        user,
+        payingOrganization,
+    }: {
         sellingOrganization: Organization;
 
         /**
@@ -60,7 +64,9 @@ export class PaymentMandateService {
         }
 
         for (const mandate of mandates) {
-            const blocked = payingOrganization.serverMeta.blockedMandates.find(b => b.id === mandate.id);
+            const blocked = payingOrganization.serverMeta.blockedMandates.find(
+                (b) => b.id === mandate.id,
+            );
             if (blocked) {
                 mandate.blockedAt = blocked.blockedAt;
 
@@ -85,7 +91,12 @@ export class PaymentMandateService {
      * Block a mandate on our side only (it stays valid at the provider), so it can no longer be used for
      * new payments. Other mandates for the same card or bank account are blocked too.
      */
-    static async blockMandate({ mandateId, sellingOrganization, payingOrganizationId, paymentId }: {
+    static async blockMandate({
+        mandateId,
+        sellingOrganization,
+        payingOrganizationId,
+        paymentId,
+    }: {
         mandateId: string;
         sellingOrganization: Organization;
         payingOrganizationId: string;
@@ -98,7 +109,7 @@ export class PaymentMandateService {
             user: null,
             payingOrganization,
         });
-        const match = mandates.find(m => m.id === mandateId);
+        const match = mandates.find((m) => m.id === mandateId);
         const identifier = match?.identifier ?? null;
         const ids = new Set([mandateId]);
 
@@ -112,20 +123,37 @@ export class PaymentMandateService {
 
         let changed = false;
         for (const id of ids) {
-            if (payingOrganization.serverMeta.blockedMandates.find(b => b.id === id)) {
+            if (payingOrganization.serverMeta.blockedMandates.find((b) => b.id === id)) {
                 continue;
             }
-            console.log('Blocking mandate ' + id + ' for organization ' + payingOrganization.id + ' ' + payingOrganization.name);
-            payingOrganization.serverMeta.blockedMandates.push(BlockedPaymentMandate.create({ id, identifier, paymentId }));
+            console.log(
+                'Blocking mandate ' +
+                    id +
+                    ' for organization ' +
+                    payingOrganization.id +
+                    ' ' +
+                    payingOrganization.name,
+            );
+            payingOrganization.serverMeta.blockedMandates.push(
+                BlockedPaymentMandate.create({ id, identifier, paymentId }),
+            );
             changed = true;
         }
 
-        if (payingOrganization.serverMeta.mollieMandateId && ids.has(payingOrganization.serverMeta.mollieMandateId)) {
+        if (
+            payingOrganization.serverMeta.mollieMandateId &&
+            ids.has(payingOrganization.serverMeta.mollieMandateId)
+        ) {
             // Move the default to the first usable mandate
             this.applyBlockedMandates(mandates, payingOrganization);
-            const replacement = this.groupByMandate(mandates).mandates.find(m => !m.isBlocked);
+            const replacement = this.groupByMandate(mandates).mandates.find((m) => !m.isBlocked);
             if (replacement) {
-                console.log('Changing default mandate to ' + replacement.id + ' for organization ' + payingOrganization.id);
+                console.log(
+                    'Changing default mandate to ' +
+                        replacement.id +
+                        ' for organization ' +
+                        payingOrganization.id,
+                );
                 payingOrganization.serverMeta.mollieMandateId = replacement.id;
                 changed = true;
             }
@@ -139,14 +167,21 @@ export class PaymentMandateService {
     /**
      * Keep the most recent chargebacks per mandate (last 12 months, at most 5)
      */
-    static async registerChargeback({ mandateId, sellingOrganization, payingOrganizationId, date }: {
+    static async registerChargeback({
+        mandateId,
+        sellingOrganization,
+        payingOrganizationId,
+        date,
+    }: {
         mandateId: string;
         sellingOrganization: Organization;
         payingOrganizationId: string;
         date: Date;
     }) {
         const payingOrganization = await Organization.getByID(payingOrganizationId, true);
-        let entry = payingOrganization.serverMeta.mandateChargebacks.find(c => c.id === mandateId);
+        let entry = payingOrganization.serverMeta.mandateChargebacks.find(
+            (c) => c.id === mandateId,
+        );
 
         if (!entry) {
             const mandates = await PaymentMandateService.getMandates({
@@ -156,7 +191,7 @@ export class PaymentMandateService {
             });
             entry = PaymentMandateChargebacks.create({
                 id: mandateId,
-                identifier: mandates.find(m => m.id === mandateId)?.identifier ?? null,
+                identifier: mandates.find((m) => m.id === mandateId)?.identifier ?? null,
             });
             payingOrganization.serverMeta.mandateChargebacks.push(entry);
         }
@@ -169,7 +204,11 @@ export class PaymentMandateService {
      * Lift the block of a mandate and of all mandates for the same card or bank account. Used when the
      * card or account is validated again with a new payment, or when a seller unblocks it manually.
      */
-    static async unblockMandate({ mandateId, sellingOrganization, payingOrganizationId }: {
+    static async unblockMandate({
+        mandateId,
+        sellingOrganization,
+        payingOrganizationId,
+    }: {
         mandateId: string;
         sellingOrganization: Organization;
         payingOrganizationId: string;
@@ -184,8 +223,12 @@ export class PaymentMandateService {
             user: null,
             payingOrganization,
         });
-        const match = mandates.find(m => m.id === mandateId);
-        const identifier = match?.identifier ?? payingOrganization.serverMeta.blockedMandates.find(b => b.id === mandateId)?.identifier ?? null;
+        const match = mandates.find((m) => m.id === mandateId);
+        const identifier =
+            match?.identifier ??
+            payingOrganization.serverMeta.blockedMandates.find((b) => b.id === mandateId)
+                ?.identifier ??
+            null;
         const ids = new Set([mandateId]);
 
         if (identifier) {
@@ -196,17 +239,31 @@ export class PaymentMandateService {
             }
         }
 
-        const remaining = payingOrganization.serverMeta.blockedMandates.filter(b => !ids.has(b.id) && !(identifier && b.identifier === identifier));
+        const remaining = payingOrganization.serverMeta.blockedMandates.filter(
+            (b) => !ids.has(b.id) && !(identifier && b.identifier === identifier),
+        );
         if (remaining.length === payingOrganization.serverMeta.blockedMandates.length) {
             return;
         }
 
-        console.log('Unblocking mandate ' + mandateId + ' for organization ' + payingOrganization.id + ' ' + payingOrganization.name);
+        console.log(
+            'Unblocking mandate ' +
+                mandateId +
+                ' for organization ' +
+                payingOrganization.id +
+                ' ' +
+                payingOrganization.name,
+        );
         payingOrganization.serverMeta.blockedMandates = remaining;
         await payingOrganization.save();
     }
 
-    static async deleteMandate({ mandateId, sellingOrganization, user, payingOrganization }: {
+    static async deleteMandate({
+        mandateId,
+        sellingOrganization,
+        user,
+        payingOrganization,
+    }: {
         mandateId: string;
 
         sellingOrganization: Organization;
@@ -228,7 +285,7 @@ export class PaymentMandateService {
             payingOrganization,
         });
         const { grouped } = this.groupByMandate(mandates);
-        const match = mandates.find(m => m.id === mandateId);
+        const match = mandates.find((m) => m.id === mandateId);
 
         if (!match) {
             // Not allowed or does not exist
@@ -249,7 +306,9 @@ export class PaymentMandateService {
             }
         }
 
-        const usableGroups = [...grouped.values()].filter(group => group.some(m => m.status === PaymentMandateStatus.Valid && !m.isBlocked));
+        const usableGroups = [...grouped.values()].filter((group) =>
+            group.some((m) => m.status === PaymentMandateStatus.Valid && !m.isBlocked),
+        );
         if (!match.isBlocked && usableGroups.length <= 1) {
             if (!Context.optionalAuth?.hasPlatformFullAccess()) {
                 throw new SimpleError({
@@ -285,7 +344,12 @@ export class PaymentMandateService {
         }
     }
 
-    static async setDefaultMandate({ mandateId, sellingOrganizationId, payingUserId, payingOrganizationId }: {
+    static async setDefaultMandate({
+        mandateId,
+        sellingOrganizationId,
+        payingUserId,
+        payingOrganizationId,
+    }: {
         mandateId: string;
 
         sellingOrganizationId: string;
@@ -314,15 +378,33 @@ export class PaymentMandateService {
 
             // Set as default
             if (payingOrganizationId) {
-                const payingOrganization = typeof payingOrganizationId === 'string' ? await Organization.getByID(payingOrganizationId) : payingOrganizationId;
+                const payingOrganization =
+                    typeof payingOrganizationId === 'string'
+                        ? await Organization.getByID(payingOrganizationId)
+                        : payingOrganizationId;
                 if (payingOrganization) {
-                    console.log('Saving ' + mandateId + ' as default mandate for organization ' + payingOrganization.id + ' ' + payingOrganization.name);
+                    console.log(
+                        'Saving ' +
+                            mandateId +
+                            ' as default mandate for organization ' +
+                            payingOrganization.id +
+                            ' ' +
+                            payingOrganization.name,
+                    );
                     payingOrganization.serverMeta.mollieMandateId = mandateId;
                     await payingOrganization.save();
                 }
             }
         } catch (e) {
-            console.error('Failed to save default mandate for mandate ' + mandateId + ' in organization ' + (typeof payingOrganizationId === 'string' ? payingOrganizationId : payingOrganizationId?.id), { cause: e });
+            console.error(
+                'Failed to save default mandate for mandate ' +
+                    mandateId +
+                    ' in organization ' +
+                    (typeof payingOrganizationId === 'string'
+                        ? payingOrganizationId
+                        : payingOrganizationId?.id),
+                { cause: e },
+            );
 
             throw new SimpleError({
                 code: 'failed',
@@ -337,8 +419,10 @@ export class PaymentMandateService {
      */
     static groupByMandate(base: PaymentMandate[]) {
         base.sort((a, b) => {
-            if (a.status === PaymentMandateStatus.Valid && b.status !== PaymentMandateStatus.Valid) return -1;
-            if (a.status !== PaymentMandateStatus.Valid && b.status === PaymentMandateStatus.Valid) return 1;
+            if (a.status === PaymentMandateStatus.Valid && b.status !== PaymentMandateStatus.Valid)
+                return -1;
+            if (a.status !== PaymentMandateStatus.Valid && b.status === PaymentMandateStatus.Valid)
+                return 1;
             if (!a.isBlocked && b.isBlocked) return -1;
             if (a.isBlocked && !b.isBlocked) return 1;
             if (a.isDefault && !b.isDefault) return -1;
@@ -367,8 +451,10 @@ export class PaymentMandateService {
 
         // Restort as isDefault might have changed
         cleaned.sort((a, b) => {
-            if (a.status === PaymentMandateStatus.Valid && b.status !== PaymentMandateStatus.Valid) return -1;
-            if (a.status !== PaymentMandateStatus.Valid && b.status === PaymentMandateStatus.Valid) return 1;
+            if (a.status === PaymentMandateStatus.Valid && b.status !== PaymentMandateStatus.Valid)
+                return -1;
+            if (a.status !== PaymentMandateStatus.Valid && b.status === PaymentMandateStatus.Valid)
+                return 1;
             if (!a.isBlocked && b.isBlocked) return -1;
             if (a.isBlocked && !b.isBlocked) return 1;
             if (a.isDefault && !b.isDefault) return -1;
@@ -377,7 +463,7 @@ export class PaymentMandateService {
         });
 
         return {
-            mandates: cleaned.filter(b => b.status === PaymentMandateStatus.Valid || b.isDefault),
+            mandates: cleaned.filter((b) => b.status === PaymentMandateStatus.Valid || b.isDefault),
             grouped: found,
         };
     }

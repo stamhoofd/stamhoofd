@@ -38,13 +38,18 @@ describe('Token', () => {
     });
 
     test('It accepts a relative refresh token expiry', () => {
-        const decoded = Token.decode(new ObjectData({
-            token_type: 'bearer',
-            access_token: 'access',
-            refresh_token: 'refresh',
-            expires_in: 900,
-            refresh_expires_in: -60,
-        }, { version: Version }));
+        const decoded = Token.decode(
+            new ObjectData(
+                {
+                    token_type: 'bearer',
+                    access_token: 'access',
+                    refresh_token: 'refresh',
+                    expires_in: 900,
+                    refresh_expires_in: -60,
+                },
+                { version: Version },
+            ),
+        );
 
         expect(decoded.isRefreshTokenExpired()).toBe(true);
     });

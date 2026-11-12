@@ -3,7 +3,14 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
-import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationCheckout, OrganizationPackagesStatus, STPackageStruct } from '@stamhoofd/structures';
+import {
+    BalanceItemStatus,
+    BalanceItemType,
+    CheckoutResponse,
+    OrganizationCheckout,
+    OrganizationPackagesStatus,
+    STPackageStruct,
+} from '@stamhoofd/structures';
 import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
@@ -28,7 +35,11 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/checkout', { sellingOrganizationId: String });
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/billing/@sellingOrganizationId/checkout',
+            { sellingOrganizationId: String },
+        );
 
         if (params) {
             return [true, params as Params];
@@ -41,7 +52,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
         const { user } = await Context.authenticate();
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!await Context.auth.canActivatePackages(organization.id)) {
+        if (!(await Context.auth.canActivatePackages(organization.id))) {
             throw Context.auth.error();
         }
         const checkout = request.body;
@@ -79,10 +90,13 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
 
         const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
 
-        if (STAMHOOFD.userMode === 'organization' && sellingOrganization.id === membershipOrganizationId) {
+        if (
+            STAMHOOFD.userMode === 'organization' &&
+            sellingOrganization.id === membershipOrganizationId
+        ) {
             const currentPackages = await STPackageService.getActivePackages(organization.id);
             const packageStatus = OrganizationPackagesStatus.create({
-                packages: currentPackages.map(p => STPackageStruct.create(p)),
+                packages: currentPackages.map((p) => STPackageStruct.create(p)),
             });
 
             packages.push(...checkout.purchases.getPackages(packageStatus));
@@ -106,7 +120,11 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
                 model.disableSave();
             }
 
-            const balanceItem = await STPackageService.chargePackage(model, sellingOrganization, checkout.customer?.company);
+            const balanceItem = await STPackageService.chargePackage(
+                model,
+                sellingOrganization,
+                checkout.customer?.company,
+            );
             if (balanceItem) {
                 balanceItem.VATExcempt = VATService.getVATExcempt({
                     company: checkout.customer?.company,
@@ -132,7 +150,9 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             if (model.meta.requiresMandate) {
                 if (checkout.proForma) {
                     if (!checkout.createMandate) {
-                        checkout.createMandate = CreateMandateSettings.create({ saveAsDefault: true });
+                        checkout.createMandate = CreateMandateSettings.create({
+                            saveAsDefault: true,
+                        });
                     }
                 } else {
                     // setting checkout.mandate is not enough - we also need to set it as default.
@@ -162,7 +182,12 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
         const balanceItemIds = [...request.body.balances.keys()];
 
         if (balanceItemIds.length > 0) {
-            const balanceItemsModels = await BalanceItem.select().where('id', balanceItemIds).andWhere('organizationId', sellingOrganization.id).andWhere('payingOrganizationId', organization.id).limit(balanceItemIds.length).fetch();
+            const balanceItemsModels = await BalanceItem.select()
+                .where('id', balanceItemIds)
+                .andWhere('organizationId', sellingOrganization.id)
+                .andWhere('payingOrganizationId', organization.id)
+                .limit(balanceItemIds.length)
+                .fetch();
 
             if (balanceItemsModels.length !== balanceItemIds.length) {
                 throw new SimpleError({
@@ -176,7 +201,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
                     continue;
                 }
 
-                const item = balanceItemsModels.find(b => b.id === id);
+                const item = balanceItemsModels.find((b) => b.id === id);
                 if (!item) {
                     throw new SimpleError({
                         code: 'balance_changed',
@@ -191,14 +216,14 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
                     });
                 }
 
-                if (item.priceOpen > 0 && amount < 0 || amount > item.priceOpen) {
+                if ((item.priceOpen > 0 && amount < 0) || amount > item.priceOpen) {
                     throw new SimpleError({
                         code: 'balance_changed',
                         message: $t('%vg'),
                     });
                 }
 
-                if (item.priceOpen < 0 && amount > 0 || amount < item.priceOpen) {
+                if ((item.priceOpen < 0 && amount > 0) || amount < item.priceOpen) {
                     throw new SimpleError({
                         code: 'balance_changed',
                         message: $t('%vg'),
@@ -266,10 +291,12 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
                 payingOrganization: organization,
             });
 
-            return new Response(CheckoutResponse.create({
-                payment: result.payment,
-                invoice: result.invoice,
-            }));
+            return new Response(
+                CheckoutResponse.create({
+                    payment: result.payment,
+                    invoice: result.invoice,
+                }),
+            );
         }
 
         const result = await PaymentService.createPayment({
@@ -282,7 +309,8 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             createMandate: checkout.createMandate,
             useMandate: checkout.mandate,
             paymentConfiguration: sellingOrganization.meta.registrationPaymentConfiguration,
-            privatePaymentConfiguration: sellingOrganization.privateMeta.registrationPaymentConfiguration,
+            privatePaymentConfiguration:
+                sellingOrganization.privateMeta.registrationPaymentConfiguration,
         });
 
         if (!result) {
@@ -300,11 +328,13 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
 
         const { payment, paymentUrl, paymentQRCode } = result;
 
-        return new Response(CheckoutResponse.create({
-            payment: payment ? await AuthenticatedStructures.paymentGeneral(payment) : null,
-            paymentUrl,
-            paymentQRCode,
-        }));
+        return new Response(
+            CheckoutResponse.create({
+                payment: payment ? await AuthenticatedStructures.paymentGeneral(payment) : null,
+                paymentUrl,
+                paymentQRCode,
+            }),
+        );
     }
 
     setPayment;

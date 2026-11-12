@@ -1,8 +1,17 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
-import type { CountFilteredRequest, EmailRecipient as EmailRecipientStruct, StamhoofdFilter } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    EmailRecipient as EmailRecipientStruct,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
+import {
+    assertSort,
+    getSortFilter,
+    LimitedFilteredRequest,
+    PaginatedResponse,
+} from '@stamhoofd/structures';
 
 import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
@@ -47,7 +56,9 @@ export class GetEmailRecipientsEndpoint extends Endpoint<Params, Query, Body, Re
             scopeFilter = {
                 organizationId: organization.id,
             };
-        } else if (Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Full) !== 'all') {
+        } else if (
+            Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Full) !== 'all'
+        ) {
             // Same rule as GetAdminEmailsEndpoint: without full access to all organizations, only platform emails are visible
             scopeFilter = {
                 organizationId: null,
@@ -57,7 +68,12 @@ export class GetEmailRecipientsEndpoint extends Endpoint<Params, Query, Body, Re
 
         if (!canReadAllEmails) {
             // Check if scope is correctly limited to a single email, otherwise throw an error.
-            if (!await validateEmailRecipientFilter({ filter: q.filter, permissionLevel: PermissionLevel.Read })) {
+            if (
+                !(await validateEmailRecipientFilter({
+                    filter: q.filter,
+                    permissionLevel: PermissionLevel.Read,
+                }))
+            ) {
                 throw Context.auth.error({
                     message: 'You do not have sufficient permissions to view all email recipients',
                     human: $t('%1E0'),
@@ -145,7 +161,7 @@ export class GetEmailRecipientsEndpoint extends Endpoint<Params, Query, Body, Re
         const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canReadEmails(organization)) {
+        if (!(await Context.auth.canReadEmails(organization))) {
             throw Context.auth.error();
         }
 
@@ -167,8 +183,6 @@ export class GetEmailRecipientsEndpoint extends Endpoint<Params, Query, Body, Re
             });
         }
 
-        return new Response(
-            await GetEmailRecipientsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetEmailRecipientsEndpoint.buildData(request.query));
     }
 }

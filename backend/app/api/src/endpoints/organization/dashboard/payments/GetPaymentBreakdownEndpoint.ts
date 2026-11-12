@@ -28,7 +28,11 @@ class StripeAccountCache {
 
     async load(payments: PaymentGeneral[]): Promise<StripeAccountStruct[]> {
         const missing = Formatter.uniqueArray(
-            payments.flatMap(p => p.stripeAccountId && !this.accounts.has(p.stripeAccountId) ? [p.stripeAccountId] : []),
+            payments.flatMap((p) =>
+                p.stripeAccountId && !this.accounts.has(p.stripeAccountId)
+                    ? [p.stripeAccountId]
+                    : [],
+            ),
         );
 
         if (missing.length > 0) {
@@ -41,7 +45,7 @@ class StripeAccountCache {
             }
         }
 
-        return [...this.accounts.values()].filter(account => account !== null);
+        return [...this.accounts.values()].filter((account) => account !== null);
     }
 }
 
@@ -79,7 +83,7 @@ export class GetPaymentBreakdownEndpoint extends Endpoint<Params, Query, Body, R
             throw Context.auth.error();
         }
 
-        if (!await Context.auth.canManagePayments(organization.id)) {
+        if (!(await Context.auth.canManagePayments(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -100,7 +104,9 @@ export class GetPaymentBreakdownEndpoint extends Endpoint<Params, Query, Body, R
                 builder.add(payments, {
                     stripeAccounts: await stripeAccounts.load(payments),
                     orders: await loadOrdersForBreakdown(
-                        payments.flatMap(p => p.balanceItemPayments.map(bp => bp.balanceItem.orderId)),
+                        payments.flatMap((p) =>
+                            p.balanceItemPayments.map((bp) => bp.balanceItem.orderId),
+                        ),
                     ),
                 });
             },

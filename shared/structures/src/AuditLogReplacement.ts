@@ -1,4 +1,11 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, NumberDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    EnumDecoder,
+    field,
+    NumberDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { DataValidator } from '@stamhoofd/utility';
 import wordDictionary from './data/audit-log-words.js';
 
@@ -26,13 +33,20 @@ export const AuditLogReplacementDependencies = {
     uuidToName: (() => null) as (uuid: string) => string | null,
 };
 
-export function registerAuditLogEnum<T extends string>(type: string, enumObject: AuditLogEnumObject<T>, getName: (key: T) => string, options?: { legacy?: boolean }) {
+export function registerAuditLogEnum<T extends string>(
+    type: string,
+    enumObject: AuditLogEnumObject<T>,
+    getName: (key: T) => string,
+    options?: { legacy?: boolean },
+) {
     if (AuditLogReplacementDependencies.enumHelpersByType.has(type)) {
         throw new Error(`Audit log enum type is already registered: ${type}`);
     }
 
     if (AuditLogReplacementDependencies.enumTypes.has(enumObject)) {
-        throw new Error(`Audit log enum object is already registered: ${AuditLogReplacementDependencies.enumTypes.get(enumObject)}`);
+        throw new Error(
+            `Audit log enum object is already registered: ${AuditLogReplacementDependencies.enumTypes.get(enumObject)}`,
+        );
     }
 
     const stringGetName = (key: string) => {
@@ -52,8 +66,11 @@ export function registerAuditLogEnum<T extends string>(type: string, enumObject:
     }
 }
 
-function isAuditLogEnumValue<T extends string>(enumObject: AuditLogEnumObject<T>, key: string): key is T {
-    return Object.values(enumObject).some(value => value === key);
+function isAuditLogEnumValue<T extends string>(
+    enumObject: AuditLogEnumObject<T>,
+    key: string,
+): key is T {
+    return Object.values(enumObject).some((value) => value === key);
 }
 
 export function getAuditLogEnumType(enumObject: object): string | undefined {
@@ -70,7 +87,9 @@ export function getAuditLogEnumDecoderObject(decoder: EnumDecoder<any>): object 
 }
 
 export function getRegisteredAuditLogEnums(): { type: string; enumObject: object }[] {
-    return Array.from(AuditLogReplacementDependencies.enumTypes.entries()).map(([enumObject, type]) => ({ type, enumObject }));
+    return Array.from(AuditLogReplacementDependencies.enumTypes.entries()).map(
+        ([enumObject, type]) => ({ type, enumObject }),
+    );
 }
 
 /**
@@ -78,7 +97,11 @@ export function getRegisteredAuditLogEnums(): { type: string; enumObject: object
  * It can be removed some time after backend/app/api/src/seeds/1780416000-migrate-audit-log-legacy-enums.ts
  * has been rolled out everywhere.
  */
-export function getLegacyAuditLogEnumRegistrations(): { type: string; enumObject: AuditLogEnumObject; getName: (key: string) => string }[] {
+export function getLegacyAuditLogEnumRegistrations(): {
+    type: string;
+    enumObject: AuditLogEnumObject;
+    getName: (key: string) => string;
+}[] {
     return AuditLogReplacementDependencies.legacyEnums.slice();
 }
 
@@ -199,7 +222,7 @@ export class AuditLogReplacement extends AutoEncoder {
     flatten() {
         if (this.type === AuditLogReplacementType.Array) {
             const cleanedValues: AuditLogReplacement[] = [];
-            for (const v of this.values.flatMap(v => v.flatten())) {
+            for (const v of this.values.flatMap((v) => v.flatten())) {
                 if (v.type === AuditLogReplacementType.Key) {
                     const last = cleanedValues[cleanedValues.length - 1];
                     if (last && last.type === AuditLogReplacementType.Key) {
@@ -236,7 +259,10 @@ export class AuditLogReplacement extends AutoEncoder {
     }
 
     static array(values: (AuditLogReplacement | undefined | null)[]) {
-        const v = AuditLogReplacement.create({ values: values.flatMap(v => v?.flatten() ?? []), type: AuditLogReplacementType.Array }).flatten();
+        const v = AuditLogReplacement.create({
+            values: values.flatMap((v) => v?.flatten() ?? []),
+            type: AuditLogReplacementType.Array,
+        }).flatten();
         if (v.length === 1) {
             return v[0];
         }
@@ -255,7 +281,11 @@ export class AuditLogReplacement extends AutoEncoder {
             return undefined;
         }
 
-        return AuditLogReplacement.create({ id: type, value: String(value), type: AuditLogReplacementType.Enum });
+        return AuditLogReplacement.create({
+            id: type,
+            value: String(value),
+            type: AuditLogReplacementType.Enum,
+        });
     }
 
     static empty() {
@@ -275,20 +305,33 @@ export class AuditLogReplacement extends AutoEncoder {
     }
 
     static html(str: string, title?: string) {
-        return AuditLogReplacement.create({ value: str, type: AuditLogReplacementType.Html, description: title });
+        return AuditLogReplacement.create({
+            value: str,
+            type: AuditLogReplacementType.Html,
+            description: title,
+        });
     }
 
     static longText(str: string, title?: string) {
-        return AuditLogReplacement.create({ value: str, type: AuditLogReplacementType.LongText, description: title });
+        return AuditLogReplacement.create({
+            value: str,
+            type: AuditLogReplacementType.LongText,
+            description: title,
+        });
     }
 
     toString(): string {
-        if (this.type === AuditLogReplacementType.Key || this.type === AuditLogReplacementType.EmailTemplate) {
+        if (
+            this.type === AuditLogReplacementType.Key ||
+            this.type === AuditLogReplacementType.EmailTemplate
+        ) {
             return getAuditLogPatchKeyName(this.value);
         }
 
         if (this.type === AuditLogReplacementType.Enum) {
-            const helper = this.id ? AuditLogReplacementDependencies.enumHelpersByType.get(this.id) : undefined;
+            const helper = this.id
+                ? AuditLogReplacementDependencies.enumHelpersByType.get(this.id)
+                : undefined;
             if (helper) {
                 const result = helper(this.value);
                 if (result && result !== this.value) {
@@ -299,7 +342,10 @@ export class AuditLogReplacement extends AutoEncoder {
             return getAuditLogPatchKeyName(this.value);
         }
 
-        if (this.type === AuditLogReplacementType.Uuid || (this.id && !this.value && DataValidator.isUuid(this.id))) {
+        if (
+            this.type === AuditLogReplacementType.Uuid ||
+            (this.id && !this.value && DataValidator.isUuid(this.id))
+        ) {
             if (this.id && !this.value) {
                 const name = AuditLogReplacementDependencies.uuidToName(this.id);
                 if (name) {
@@ -310,7 +356,10 @@ export class AuditLogReplacement extends AutoEncoder {
         }
 
         if (this.type === AuditLogReplacementType.Array) {
-            return this.values.map(v => v.toString()).filter(v => !!v).join(' → ');
+            return this.values
+                .map((v) => v.toString())
+                .filter((v) => !!v)
+                .join(' → ');
         }
 
         if (this.type === AuditLogReplacementType.Html) {
@@ -333,7 +382,10 @@ export class AuditLogReplacement extends AutoEncoder {
 
     toKey(): string {
         if (this.type === AuditLogReplacementType.Array) {
-            return this.values.map(v => v.toKey()).filter(v => !!v).join('.');
+            return this.values
+                .map((v) => v.toKey())
+                .filter((v) => !!v)
+                .join('.');
         }
         return this.value;
     }
@@ -351,7 +403,16 @@ export class AuditLogReplacement extends AutoEncoder {
 
 export function getAuditLogPatchKeyName(key: string) {
     // Strip prefixes
-    const stripPrefixes = ['settings.', 'meta.', 'privateMeta.', 'privateConfig.', 'config.', 'privateSettings.', 'details.', 'data.'];
+    const stripPrefixes = [
+        'settings.',
+        'meta.',
+        'privateMeta.',
+        'privateConfig.',
+        'config.',
+        'privateSettings.',
+        'details.',
+        'data.',
+    ];
     for (const prefix of stripPrefixes) {
         if (key.startsWith(prefix)) {
             key = key.substring(prefix.length);

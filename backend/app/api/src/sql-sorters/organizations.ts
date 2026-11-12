@@ -2,7 +2,10 @@ import type { Organization } from '@stamhoofd/models';
 import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 
-export const organizationSorters: SQLSortDefinitions<Organization> = new Map<string, SQLSortDefinition<Organization>>([
+export const organizationSorters: SQLSortDefinitions<Organization> = new Map<
+    string,
+    SQLSortDefinition<Organization>
+>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -11,103 +14,134 @@ export const organizationSorters: SQLSortDefinitions<Organization> = new Map<str
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    ['id', {
-        getValue(a) {
-            return a.id;
+    [
+        'id',
+        {
+            getValue(a) {
+                return a.id;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('id'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction,
-            });
+    ],
+    [
+        'name',
+        {
+            getValue(a) {
+                return a.name;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('name'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['name', {
-        getValue(a) {
-            return a.name;
+    ],
+    [
+        'uri',
+        {
+            getValue(a) {
+                return a.uri;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('uri'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('name'),
-                direction,
-            });
+    ],
+    [
+        'uriPadded',
+        {
+            getValue(a) {
+                return a.uri.padStart(10, '0');
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.lpad(SQL.column('uri'), 10, '0'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['uri', {
-        getValue(a) {
-            return a.uri;
+    ],
+    [
+        'type',
+        {
+            getValue(a) {
+                return a.meta.type;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.jsonValue(SQL.column('meta'), '$.value.type', 'CHAR'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('uri'),
-                direction,
-            });
+    ],
+    [
+        'city',
+        {
+            getValue(a) {
+                return a.address.city;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.jsonValue(SQL.column('address'), '$.value.city', 'CHAR'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['uriPadded', {
-        getValue(a) {
-            return a.uri.padStart(10, '0');
+    ],
+    [
+        'country',
+        {
+            getValue(a) {
+                return a.address.country;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.jsonValue(SQL.column('address'), '$.value.country', 'CHAR'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.lpad(SQL.column('uri'), 10, '0'),
-                direction,
-            });
+    ],
+    [
+        'umbrellaOrganization',
+        {
+            getValue(a) {
+                return a.meta.umbrellaOrganization;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.jsonValue(
+                        SQL.column('meta'),
+                        '$.value.umbrellaOrganization',
+                        'CHAR',
+                    ),
+                    direction,
+                });
+            },
         },
-    }],
-    ['type', {
-        getValue(a) {
-            return a.meta.type;
+    ],
+    [
+        'createdAt',
+        {
+            getValue(a) {
+                return a.createdAt;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('createdAt'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('meta'), '$.value.type', 'CHAR'),
-                direction,
-            });
-        },
-    }],
-    ['city', {
-        getValue(a) {
-            return a.address.city;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('address'), '$.value.city', 'CHAR'),
-                direction,
-            });
-        },
-    }],
-    ['country', {
-        getValue(a) {
-            return a.address.country;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('address'), '$.value.country', 'CHAR'),
-                direction,
-            });
-        },
-    }],
-    ['umbrellaOrganization', {
-        getValue(a) {
-            return a.meta.umbrellaOrganization;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.jsonValue(SQL.column('meta'), '$.value.umbrellaOrganization', 'CHAR'),
-                direction,
-            });
-        },
-    }],
-    ['createdAt', {
-        getValue(a) {
-            return a.createdAt;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('createdAt'),
-                direction,
-            });
-        },
-    }],
+    ],
 ]);

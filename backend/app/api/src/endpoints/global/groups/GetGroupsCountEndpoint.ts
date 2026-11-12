@@ -39,8 +39,7 @@ export class GetGroupsCountEndpoint extends Endpoint<Params, Query, Body, Respon
 
         const query = await GetGroupsEndpoint.buildQuery(request.query);
 
-        const count = await query
-            .count();
+        const count = await query.count();
 
         return new Response(
             CountResponse.create({

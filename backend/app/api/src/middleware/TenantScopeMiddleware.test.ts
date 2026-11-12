@@ -26,7 +26,10 @@ describe('TenantScopeMiddleware', () => {
     test('a request runs in a tenant scope', async () => {
         const endpoint = new TenantProbeEndpoint();
 
-        const response = await testServer.test(endpoint, Request.buildJson('GET', '/tenant-probe', 'localhost'));
+        const response = await testServer.test(
+            endpoint,
+            Request.buildJson('GET', '/tenant-probe', 'localhost'),
+        );
 
         expect(response.body).toBe(ROOT_TENANT_ID);
     });

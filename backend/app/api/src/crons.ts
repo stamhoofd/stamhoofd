@@ -22,10 +22,13 @@ async function checkDNS() {
         return;
     }
 
-    const organizations = await Organization.where({ id: { sign: '>', value: lastDNSId } }, {
-        limit: 50,
-        sort: ['id'],
-    });
+    const organizations = await Organization.where(
+        { id: { sign: '>', value: lastDNSId } },
+        {
+            limit: 50,
+            sort: ['id'],
+        },
+    );
 
     if (organizations.length == 0) {
         // Wait an half hour before starting again
@@ -57,7 +60,10 @@ async function checkExpirationEmails() {
     }
 
     // Wait 1 hour between every complete check
-    if (lastExpirationCheck && lastExpirationCheck > new Date(new Date().getTime() - 1 * 60 * 60 * 1000)) {
+    if (
+        lastExpirationCheck &&
+        lastExpirationCheck > new Date(new Date().getTime() - 1 * 60 * 60 * 1000)
+    ) {
         console.log('[EXPIRATION EMAILS] Skip checkExpirationEmails');
         return;
     }
@@ -69,9 +75,7 @@ async function checkExpirationEmails() {
             { sign: '>', value: new Date() },
             { sign: '<', value: new Date(Date.now() + 1000 * 60 * 60 * 24 * 31) },
         ],
-        validAt: [
-            { sign: '!=', value: null },
-        ],
+        validAt: [{ sign: '!=', value: null }],
         emailCount: 0,
     });
 
@@ -91,18 +95,24 @@ async function checkWebshopDNS() {
     }
 
     // Wait 6 hours between every complete check
-    if (lastWebshopDNSCheck && lastWebshopDNSCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)) {
+    if (
+        lastWebshopDNSCheck &&
+        lastWebshopDNSCheck > new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+    ) {
         console.log('[DNS] Skip webshop DNS check');
         return;
     }
 
-    const webshops = await Webshop.where({
-        id: { sign: '>', value: lastWebshopDNSId },
-        domain: { sign: '!=', value: null },
-    }, {
-        limit: 10,
-        sort: ['id'],
-    });
+    const webshops = await Webshop.where(
+        {
+            id: { sign: '>', value: lastWebshopDNSId },
+            domain: { sign: '!=', value: null },
+        },
+        {
+            limit: 10,
+            sort: ['id'],
+        },
+    );
 
     if (webshops.length == 0) {
         // Wait an half hour before starting again
@@ -114,7 +124,16 @@ async function checkWebshopDNS() {
     console.log('[DNS] Checking webshop DNS...');
 
     for (const webshop of webshops) {
-        console.log('[DNS] Webshop ' + webshop.meta.name + ' (' + webshop.id + ')' + ' (' + webshop.domain + ')');
+        console.log(
+            '[DNS] Webshop ' +
+                webshop.meta.name +
+                ' (' +
+                webshop.id +
+                ')' +
+                ' (' +
+                webshop.domain +
+                ')',
+        );
         await webshop.updateDNSRecords();
     }
 
@@ -125,7 +144,10 @@ async function checkWebshopDNS() {
 async function checkPayments() {
     let timeout = 60 * 1000 * 11;
     const methods = [
-        PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard,
+        PaymentMethod.Bancontact,
+        PaymentMethod.iDEAL,
+        PaymentMethod.Payconiq,
+        PaymentMethod.CreditCard,
     ];
 
     if (STAMHOOFD.environment === 'development') {
@@ -145,9 +167,7 @@ async function checkPayments() {
         )
         // For payconiq payments, we have a shorter timeout of 1 minute if they are still in the 'created' state (not scanned)
         .orWhere(
-            SQL.where('method', [
-                PaymentMethod.Payconiq,
-            ])
+            SQL.where('method', [PaymentMethod.Payconiq])
                 .and('status', [PaymentStatus.Created])
                 .and('createdAt', '<', new Date(new Date().getTime() - 60 * 1000))
                 .and('createdAt', '>', new Date(new Date().getTime() - timeout2)),
@@ -174,7 +194,10 @@ async function checkOldPayments() {
     const payments = await Payment.select()
         .where(
             SQL.where('method', [
-                PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq, PaymentMethod.CreditCard,
+                PaymentMethod.Bancontact,
+                PaymentMethod.iDEAL,
+                PaymentMethod.Payconiq,
+                PaymentMethod.CreditCard,
             ])
                 .and('status', [PaymentStatus.Created, PaymentStatus.Pending])
                 .and('createdAt', '<', new Date(new Date().getTime() - timeout))
@@ -202,9 +225,7 @@ async function checkOldDirectDebitPayments() {
     // TODO: only select the ID + organizationId
     const payments = await Payment.select()
         .where(
-            SQL.where('method', [
-                PaymentMethod.DirectDebit,
-            ])
+            SQL.where('method', [PaymentMethod.DirectDebit])
                 .and('status', [PaymentStatus.Created, PaymentStatus.Pending])
                 .and('createdAt', '<', new Date(new Date().getTime() - timeout)),
         )
@@ -213,7 +234,9 @@ async function checkOldDirectDebitPayments() {
         .fetch();
 
     if (payments.length) {
-        console.log('[DELAYED PAYMENTS] Checking old direct debit pending payments: ' + payments.length);
+        console.log(
+            '[DELAYED PAYMENTS] Checking old direct debit pending payments: ' + payments.length,
+        );
         await doCheckPayments(payments);
     }
 }
@@ -233,7 +256,10 @@ async function doCheckPayments(payments: Payment[]) {
 
             // Check expired
             if (PaymentService.isManualExpired(payment.status, payment)) {
-                console.error('[DELAYED PAYMENTS] Could not resolve handler for expired payment, marking as failed', payment.id);
+                console.error(
+                    '[DELAYED PAYMENTS] Could not resolve handler for expired payment, marking as failed',
+                    payment.id,
+                );
                 payment.status = PaymentStatus.Failed;
                 await payment.save();
             }
@@ -262,31 +288,36 @@ async function checkFailedBuckarooPayments() {
     console.log('Checking failed Buckaroo payments');
 
     // TODO: only select the ID + organizationId
-    const payments = await Payment.where({
-        status: {
-            sign: 'IN',
-            value: [PaymentStatus.Failed],
-        },
-        provider: PaymentProvider.Buckaroo,
+    const payments = await Payment.where(
+        {
+            status: {
+                sign: 'IN',
+                value: [PaymentStatus.Failed],
+            },
+            provider: PaymentProvider.Buckaroo,
 
-        // Only check payments of last 4 weeks
-        createdAt: {
-            sign: '>',
-            value: startBuckarooDate,
+            // Only check payments of last 4 weeks
+            createdAt: {
+                sign: '>',
+                value: startBuckarooDate,
+            },
+            id: {
+                sign: '>',
+                value: lastBuckarooId,
+            },
         },
-        id: {
-            sign: '>',
-            value: lastBuckarooId,
-        },
-    }, {
-        limit: 100,
+        {
+            limit: 100,
 
-        // Sort by ID
-        sort: [{
-            column: 'id',
-            direction: 'ASC',
-        }],
-    });
+            // Sort by ID
+            sort: [
+                {
+                    column: 'id',
+                    direction: 'ASC',
+                },
+            ],
+        },
+    );
 
     console.log('[BUCKAROO PAYMENTS] Checking failed payments: ' + payments.length);
 
@@ -318,14 +349,17 @@ async function checkReservedUntil() {
         console.log('Check reserved until...');
     }
 
-    const registrations = await Registration.where({
-        reservedUntil: {
-            sign: '<',
-            value: new Date(),
+    const registrations = await Registration.where(
+        {
+            reservedUntil: {
+                sign: '<',
+                value: new Date(),
+            },
         },
-    }, {
-        limit: 200,
-    });
+        {
+            limit: 200,
+        },
+    );
 
     if (registrations.length === 0) {
         return;
@@ -333,10 +367,10 @@ async function checkReservedUntil() {
 
     // Clear reservedUntil
     const q = `UPDATE ${Registration.table} SET reservedUntil = NULL where id IN (?) AND reservedUntil < ?`;
-    await Database.update(q, [registrations.map(r => r.id), new Date()]);
+    await Database.update(q, [registrations.map((r) => r.id), new Date()]);
 
     // Get groups
-    const groupIds = registrations.map(r => r.groupId);
+    const groupIds = registrations.map((r) => r.groupId);
     const groups = await Group.where({
         id: {
             sign: 'IN',

@@ -24,7 +24,12 @@ describe('Endpoint.GetNotificationPreferencesEndpoint', () => {
     async function get(user: User | null) {
         const request = Request.get({
             path: '/notifications/preferences',
-            headers: user ? { authorization: 'Bearer ' + (await SessionService.createSession(user)).accessToken } : {},
+            headers: user
+                ? {
+                      authorization:
+                          'Bearer ' + (await SessionService.createSession(user)).accessToken,
+                  }
+                : {},
         });
         return await testServer.test<NotificationPreference[]>(endpoint, request);
     }
@@ -50,13 +55,27 @@ describe('Endpoint.GetNotificationPreferencesEndpoint', () => {
 
         const response = await get(user);
         expect(response.status).toBe(200);
-        expect(response.body.map(p => ({ type: p.type, channel: p.channel, enabled: p.enabled })).sort((a, b) => a.channel.localeCompare(b.channel))).toEqual([
-            { type: NotificationType.RegistrationCreated, channel: NotificationChannel.InApp, enabled: false },
-            { type: NotificationType.RegistrationCreated, channel: NotificationChannel.Push, enabled: true },
+        expect(
+            response.body
+                .map((p) => ({ type: p.type, channel: p.channel, enabled: p.enabled }))
+                .sort((a, b) => a.channel.localeCompare(b.channel)),
+        ).toEqual([
+            {
+                type: NotificationType.RegistrationCreated,
+                channel: NotificationChannel.InApp,
+                enabled: false,
+            },
+            {
+                type: NotificationType.RegistrationCreated,
+                channel: NotificationChannel.Push,
+                enabled: true,
+            },
         ]);
     });
 
     test('requires authentication', async () => {
-        await expect(get(null)).rejects.toThrow(STExpect.simpleError({ code: 'not_authenticated' }));
+        await expect(get(null)).rejects.toThrow(
+            STExpect.simpleError({ code: 'not_authenticated' }),
+        );
     });
 });

@@ -1,6 +1,10 @@
 import { DatabaseInstance, Migration } from '@node/database';
 import path from 'node:path';
-import { getStatisticsConnection, getStatisticsDatabaseConfig, getStatisticsPoolOptions } from './database.js';
+import {
+    getStatisticsConnection,
+    getStatisticsDatabaseConfig,
+    getStatisticsPoolOptions,
+} from './database.js';
 
 export function getStatisticsMigrationsPath(): string {
     return path.join(import.meta.dirname, 'migrations');
@@ -17,12 +21,18 @@ export async function runStatisticsMigrations(): Promise<void> {
     const globalDatabase = new DatabaseInstance({ ...getStatisticsPoolOptions(), database: null });
 
     try {
-        await globalDatabase.statement(`CREATE DATABASE IF NOT EXISTS ${globalDatabase.escapeId(database)} DEFAULT CHARACTER SET = \`utf8mb4\` DEFAULT COLLATE = \`utf8mb4_0900_ai_ci\``);
+        await globalDatabase.statement(
+            `CREATE DATABASE IF NOT EXISTS ${globalDatabase.escapeId(database)} DEFAULT CHARACTER SET = \`utf8mb4\` DEFAULT COLLATE = \`utf8mb4_0900_ai_ci\``,
+        );
     } finally {
         await globalDatabase.end();
     }
 
-    if (!await Migration.runAll(getStatisticsMigrationsPath(), { database: getStatisticsConnection() })) {
+    if (
+        !(await Migration.runAll(getStatisticsMigrationsPath(), {
+            database: getStatisticsConnection(),
+        }))
+    ) {
         throw new Error('Platform statistics migrations failed');
     }
 }

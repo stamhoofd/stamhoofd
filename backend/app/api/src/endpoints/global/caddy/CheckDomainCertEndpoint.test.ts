@@ -13,7 +13,10 @@ describe('Endpoint.CheckDomainCertEndpoint', () => {
     const ask = async (domain: string) => {
         return await testServer.test(
             endpoint,
-            Request.buildJson('GET', `/v${Version}/check-domain-cert?domain=${encodeURIComponent(domain)}`),
+            Request.buildJson(
+                'GET',
+                `/v${Version}/check-domain-cert?domain=${encodeURIComponent(domain)}`,
+            ),
         );
     };
 

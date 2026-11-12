@@ -5,25 +5,57 @@ import { withLogSink } from '@common/opentelemetry-decorators';
 import { RunVerbosity } from './command-runner.js';
 import { getCliTelemetry, withCliCleanup, withCliPrompt, withCliTelemetry } from './telemetry.js';
 
-const mocks = vi.hoisted(() => ({ start: vi.fn(), shutdown: vi.fn(async () => {}), terminalShutdown: vi.fn(async () => {}), log: vi.fn() }));
-vi.mock('@opentelemetry/sdk-node', () => ({ NodeSDK: vi.fn(class {
-    start = mocks.start;
-    shutdown = mocks.shutdown;
-}) }));
-vi.mock('@node/opentelemetry-terminal', () => ({ TerminalRenderer: vi.fn(class { log = mocks.log; shutdown = mocks.terminalShutdown; }) }));
+const mocks = vi.hoisted(() => ({
+    start: vi.fn(),
+    shutdown: vi.fn(async () => {}),
+    terminalShutdown: vi.fn(async () => {}),
+    log: vi.fn(),
+}));
+vi.mock('@opentelemetry/sdk-node', () => ({
+    NodeSDK: vi.fn(
+        class {
+            start = mocks.start;
+            shutdown = mocks.shutdown;
+        },
+    ),
+}));
+vi.mock('@node/opentelemetry-terminal', () => ({
+    TerminalRenderer: vi.fn(
+        class {
+            log = mocks.log;
+            shutdown = mocks.terminalShutdown;
+        },
+    ),
+}));
 vi.mock('@common/opentelemetry-decorators', () => ({
     instrument: (_name: string, callback: (...args: unknown[]) => unknown) => callback,
     withSpan: (_name: string, callback: () => unknown) => callback(),
     withLogSink: vi.fn((_sink: unknown, callback: () => unknown) => callback()),
 }));
-afterEach(() => { vi.clearAllMocks(); vi.unstubAllEnvs(); vi.useRealTimers(); });
+afterEach(() => {
+    vi.clearAllMocks();
+    vi.unstubAllEnvs();
+    vi.useRealTimers();
+});
 
-it.each([[RunVerbosity.Quiet, 'quiet'], [RunVerbosity.Command, 'normal'], [RunVerbosity.Output, 'verbose']] as const)('maps CLI verbosity %s to the terminal renderer', async (verbosity, expected) => {
+it.each([
+    [RunVerbosity.Quiet, 'quiet'],
+    [RunVerbosity.Command, 'normal'],
+    [RunVerbosity.Output, 'verbose'],
+] as const)('maps CLI verbosity %s to the terminal renderer', async (verbosity, expected) => {
     vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', '');
     vi.stubEnv('OTEL_EXPORTER_OTLP_TRACES_ENDPOINT', '');
     await expect(withCliTelemetry('test', verbosity, async () => 42)).resolves.toBe(42);
-    expect(TerminalRenderer).toHaveBeenCalledWith(expect.objectContaining({ verbosity: expected, groupBy: ['environment', 'vault'], terminal: expect.anything() }));
-    expect(NodeSDK).toHaveBeenCalledWith(expect.objectContaining({ serviceName: 'stam', spanProcessors: [expect.anything()] }));
+    expect(TerminalRenderer).toHaveBeenCalledWith(
+        expect.objectContaining({
+            verbosity: expected,
+            groupBy: ['environment', 'vault'],
+            terminal: expect.anything(),
+        }),
+    );
+    expect(NodeSDK).toHaveBeenCalledWith(
+        expect.objectContaining({ serviceName: 'stam', spanProcessors: [expect.anything()] }),
+    );
     expect(withLogSink).toHaveBeenCalledWith(mocks.log, expect.any(Function));
     expect(mocks.start).toHaveBeenCalledOnce();
     expect(mocks.shutdown).toHaveBeenCalledOnce();
@@ -31,7 +63,11 @@ it.each([[RunVerbosity.Quiet, 'quiet'], [RunVerbosity.Command, 'normal'], [RunVe
 
 it('shuts down telemetry when the command fails', async () => {
     const error = new Error('Command failed');
-    await expect(withCliTelemetry('test', RunVerbosity.Command, async () => { throw error; })).rejects.toBe(error);
+    await expect(
+        withCliTelemetry('test', RunVerbosity.Command, async () => {
+            throw error;
+        }),
+    ).rejects.toBe(error);
     expect(mocks.shutdown).toHaveBeenCalledOnce();
 });
 
@@ -50,7 +86,11 @@ it('reuses the SDK, terminal and cancellation scope in nested commands', async (
 it('preserves the command error when shutdown fails', async () => {
     mocks.shutdown.mockRejectedValueOnce(new Error('export failed'));
     const error = new Error('command failed');
-    await expect(withCliTelemetry('test', RunVerbosity.Quiet, async () => { throw error; })).rejects.toBe(error);
+    await expect(
+        withCliTelemetry('test', RunVerbosity.Quiet, async () => {
+            throw error;
+        }),
+    ).rejects.toBe(error);
 });
 
 it('bounds shutdown and still returns a successful command result', async () => {
@@ -62,7 +102,9 @@ it('bounds shutdown and still returns a successful command result', async () => 
 });
 
 it('executes the command once when SDK startup fails', async () => {
-    mocks.start.mockImplementationOnce(() => { throw new Error('SDK unavailable'); });
+    mocks.start.mockImplementationOnce(() => {
+        throw new Error('SDK unavailable');
+    });
     const callback = vi.fn(async () => 42);
     await expect(withCliTelemetry('test', RunVerbosity.Quiet, callback)).resolves.toBe(42);
     expect(callback).toHaveBeenCalledOnce();

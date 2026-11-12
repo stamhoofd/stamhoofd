@@ -9,9 +9,7 @@ const table = 'sql_delete_test';
 describe('SQLDelete', () => {
     describe('query generation', () => {
         it('generates a single-table delete with a where clause', () => {
-            const query = SQL.delete()
-                .from(SQL.table(table))
-                .where(SQL.column('id'), '5');
+            const query = SQL.delete().from(SQL.table(table)).where(SQL.column('id'), '5');
 
             doesQueryMatch(query.getSQL(), {
                 query: 'DELETE FROM `sql_delete_test` WHERE `sql_delete_test`.`id` = ?',
@@ -59,8 +57,10 @@ describe('SQLDelete', () => {
             const query = SQL.delete()
                 .from(SQL.table(table))
                 .join(
-                    SQL.leftJoin(SQL.table('other', 'o'))
-                        .where(SQL.column('o', 'refId'), SQL.column(table, 'id')),
+                    SQL.leftJoin(SQL.table('other', 'o')).where(
+                        SQL.column('o', 'refId'),
+                        SQL.column(table, 'id'),
+                    ),
                 )
                 .where(SQL.column('o', 'id'), null);
 
@@ -74,8 +74,10 @@ describe('SQLDelete', () => {
             const query = SQL.delete()
                 .from(SQL.table(table))
                 .join(
-                    SQL.leftJoin(SQL.table('other', 'o'))
-                        .where(SQL.column('refId'), SQL.parentColumn('id')),
+                    SQL.leftJoin(SQL.table('other', 'o')).where(
+                        SQL.column('refId'),
+                        SQL.parentColumn('id'),
+                    ),
                 )
                 .where(SQL.column('o', 'id'), null);
 
@@ -89,8 +91,10 @@ describe('SQLDelete', () => {
             const query = SQL.delete()
                 .from(SQL.table(table))
                 .join(
-                    SQL.leftJoin(SQL.table('other'))
-                        .where(SQL.column('refId'), SQL.parentColumn('id')),
+                    SQL.leftJoin(SQL.table('other')).where(
+                        SQL.column('refId'),
+                        SQL.parentColumn('id'),
+                    ),
                 )
                 .where(SQL.column('other', 'id'), null);
 
@@ -105,12 +109,14 @@ describe('SQLDelete', () => {
         beforeAll(async () => {
             await Database.statement('DROP TABLE IF EXISTS `' + table + '`');
             await Database.statement(
-                'CREATE TABLE `' + table + '` ('
-                + '`id` bigint unsigned NOT NULL AUTO_INCREMENT,'
-                + '`groupA` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,'
-                + '`groupB` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,'
-                + 'PRIMARY KEY (`id`)'
-                + ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;',
+                'CREATE TABLE `' +
+                    table +
+                    '` (' +
+                    '`id` bigint unsigned NOT NULL AUTO_INCREMENT,' +
+                    '`groupA` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,' +
+                    '`groupB` varchar(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,' +
+                    'PRIMARY KEY (`id`)' +
+                    ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;',
             );
         });
 

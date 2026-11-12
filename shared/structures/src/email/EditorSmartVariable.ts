@@ -32,17 +32,25 @@ export class EditorSmartVariable extends AutoEncoder {
     }
 
     static forReplacements(replacements: Replacement[]) {
-        return this.fillExamples(this.all.map(v => v.clone()), replacements);
+        return this.fillExamples(
+            this.all.map((v) => v.clone()),
+            replacements,
+        );
     }
 
-    static fillExamples<T extends EditorSmartVariable | EditorSmartButton>(list: T[], replacements: Replacement[]) {
+    static fillExamples<T extends EditorSmartVariable | EditorSmartButton>(
+        list: T[],
+        replacements: Replacement[],
+    ) {
         return list.filter((variable) => {
             // Always supported: signInUrl + unsubscribeUrl
             if (variable.id === 'signInUrl' || variable.id === 'unsubscribeUrl') {
                 return true;
             }
 
-            const replacement = replacements.find(r => r.token === variable.id && (r.value || r.html));
+            const replacement = replacements.find(
+                (r) => r.token === variable.id && (r.value || r.html),
+            );
             if (!replacement) {
                 // Not found
                 return false;
@@ -64,14 +72,14 @@ export class EditorSmartVariable extends AutoEncoder {
                 if (variable.id === 'outstandingBalance') {
                     // Hide outstandingBalance in combination with priceToPay - becuase these can be confused very easily.
                     // Although technically supported, we just hide it in the UI
-                    if (replacements.find(r => r.token === 'priceToPay' && (r.value || r.html))) {
+                    if (replacements.find((r) => r.token === 'priceToPay' && (r.value || r.html))) {
                         return false;
                     }
                 }
             }
 
             if (variable.id === 'paymentUrl' && variable instanceof EditorSmartButton) {
-                if (replacements.find(r => r.token === 'paymentTable' && (r.value || r.html))) {
+                if (replacements.find((r) => r.token === 'paymentTable' && (r.value || r.html))) {
                     // Rename default button in the case of mailing to payments
                     variable.text = $t('%1Mw');
                     variable.name = $t('%1Mx');
@@ -190,182 +198,252 @@ export class EditorSmartVariable extends AutoEncoder {
         ];
 
         // if (this.orders.length > 0) {
-        variables.push(EditorSmartVariable.create({
-            id: 'nr',
-            name: $t('%xA'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'nr',
+                name: $t('%xA'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'invoiceNumber',
-            name: $t('%1YZ'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'invoiceNumber',
+                name: $t('%1YZ'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'orderPrice',
-            name: $t('%ot'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'orderPrice',
+                name: $t('%ot'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'orderPrice',
-            name: $t('%ot'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'orderPrice',
+                name: $t('%ot'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'orderStatus',
-            name: $t('%ou'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'orderStatus',
+                name: $t('%ou'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'orderTime',
-            name: $t('%1GD'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'orderTime',
+                name: $t('%1GD'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'orderDate',
-            name: $t('%cC'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'orderDate',
+                name: $t('%cC'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'orderMethod',
-            name: $t('%ov'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'orderMethod',
+                name: $t('%ov'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'orderLocation',
-            name: $t('%ow'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'orderLocation',
+                name: $t('%ow'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'paymentMethod',
-            name: $t('%M7'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'paymentMethod',
+                name: $t('%M7'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'priceToPay',
-            name: $t('%hF'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'priceToPay',
+                name: $t('%hF'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'totalPrice',
-            name: $t('%hF'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'totalPrice',
+                name: $t('%hF'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'pricePaid',
-            name: $t('%Ml'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'pricePaid',
+                name: $t('%Ml'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'transferDescription',
-            name: $t('%ox'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'transferDescription',
+                name: $t('%ox'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'transferBankAccount',
-            name: $t('%oy'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'transferBankAccount',
+                name: $t('%oy'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'transferBankCreditor',
-            name: $t('%oz'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'transferBankCreditor',
+                name: $t('%oz'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'orderTable',
-            name: $t('%p0'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'orderTable',
+                name: $t('%p0'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'overviewTable',
-            name: $t('%1N1'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'overviewTable',
+                name: $t('%1N1'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'balanceTable',
-            name: $t('%p1'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'balanceTable',
+                name: $t('%p1'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'orderDetailsTable',
-            name: $t('%p2'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'orderDetailsTable',
+                name: $t('%p2'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'paymentTable',
-            name: $t('%p3'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'paymentTable',
+                name: $t('%p3'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'paymentData',
-            name: $t('%1N2'),
-            description: $t('%1Mz'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'paymentData',
+                name: $t('%1N2'),
+                description: $t('%1Mz'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'overviewContext',
-            name: $t('%p4'),
-            description: $t('%1N0'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'overviewContext',
+                name: $t('%p4'),
+                description: $t('%1N0'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'memberNames',
-            name: $t('%At'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'memberNames',
+                name: $t('%At'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'organizationName',
-            name: $t('%1PW'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'organizationName',
+                name: $t('%1PW'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'objectName',
-            name: $t('%p5'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'objectName',
+                name: $t('%p5'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'webshopName',
-            name: $t('%p6'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'webshopName',
+                name: $t('%p6'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'discountCode',
-            name: $t('%1MX'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'discountCode',
+                name: $t('%1MX'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'validUntil',
-            name: $t('%K4'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'validUntil',
+                name: $t('%K4'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'validUntilDate',
-            name: $t('%p7'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'validUntilDate',
+                name: $t('%p7'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'packageName',
-            name: $t('%p8'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'packageName',
+                name: $t('%p8'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'submitterName',
-            name: $t('%Ag'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'submitterName',
+                name: $t('%Ag'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'eventName',
-            name: $t('%w9'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'eventName',
+                name: $t('%w9'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'dateRange',
-            name: $t('%Ah'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'dateRange',
+                name: $t('%Ah'),
+            }),
+        );
 
-        variables.push(EditorSmartVariable.create({
-            id: 'errors',
-            name: $t('%1U2'),
-        }));
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'errors',
+                name: $t('%1U2'),
+            }),
+        );
 
         // Fill examples using the example replacements
         this.fillExamples(variables, Object.values(ExampleReplacements.all));

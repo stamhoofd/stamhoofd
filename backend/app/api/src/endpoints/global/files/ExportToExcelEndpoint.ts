@@ -7,8 +7,19 @@ import { ArchiverWriterAdapter, exportToExcel, XlsxWriter } from '@stamhoofd/exc
 import { Platform, RateLimiter } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../../../helpers/EmailBuilder.js';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { ExcelExportType, IPaginatedResponse, LimitedFilteredRequest, Platform as PlatformStruct } from '@stamhoofd/structures';
-import { EmailTemplateType, ExcelExportRequest, ExcelExportResponse, Replacement, Version } from '@stamhoofd/structures';
+import type {
+    ExcelExportType,
+    IPaginatedResponse,
+    LimitedFilteredRequest,
+    Platform as PlatformStruct,
+} from '@stamhoofd/structures';
+import {
+    EmailTemplateType,
+    ExcelExportRequest,
+    ExcelExportResponse,
+    Replacement,
+    Version,
+} from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import { Context } from '../../../helpers/Context.js';
 import { fetchToAsyncIterator } from '../../../helpers/fetchToAsyncIterator.js';
@@ -20,7 +31,9 @@ type Body = ExcelExportRequest;
 type ResponseBody = ExcelExportResponse;
 
 type ExcelExporter<T> = {
-    fetch(request: LimitedFilteredRequest): Promise<IPaginatedResponse<T[], LimitedFilteredRequest>>;
+    fetch(
+        request: LimitedFilteredRequest,
+    ): Promise<IPaginatedResponse<T[], LimitedFilteredRequest>>;
 
     /**
      * The sheet definitions depend on the platform: they are built per export request instead of
@@ -50,7 +63,9 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/export/excel/@type', { type: String });
+        const params = Endpoint.parseParameters(request.url, '/export/excel/@type', {
+            type: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -65,7 +80,8 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
         if (user.isApiUser) {
             throw new SimpleError({
                 code: 'not_allowed',
-                message: 'API users are not allowed to export to Excel. The Excel export endpoint has a side effect of sending e-mails. Please use normal API endpoints to get the data you need.',
+                message:
+                    'API users are not allowed to export to Excel. The Excel export endpoint has a side effect of sending e-mails. Please use normal API endpoints to get the data you need.',
                 statusCode: 403,
             });
         }
@@ -93,84 +109,109 @@ export class ExportToExcelEndpoint extends Endpoint<Params, Query, Body, Respons
         let sendEmail = false;
 
         const result = await Promise.race([
-            this.job(loader, request.body, request.params.type, user.id).then(async (url: string) => {
-                if (sendEmail) {
-                    await sendEmailTemplate(null, {
-                        template: {
-                            type: EmailTemplateType.ExcelExportSucceeded,
-                        },
-                        recipients: [
-                            user.createRecipient(Replacement.create({
-                                token: 'downloadUrl',
-                                value: url,
-                            })),
-                        ],
-                        type: 'transactional',
-                    });
-                }
+            this.job(loader, request.body, request.params.type, user.id)
+                .then(async (url: string) => {
+                    if (sendEmail) {
+                        await sendEmailTemplate(null, {
+                            template: {
+                                type: EmailTemplateType.ExcelExportSucceeded,
+                            },
+                            recipients: [
+                                user.createRecipient(
+                                    Replacement.create({
+                                        token: 'downloadUrl',
+                                        value: url,
+                                    }),
+                                ),
+                            ],
+                            type: 'transactional',
+                        });
+                    }
 
-                return url;
-            }).catch(async (error) => {
-                if (sendEmail) {
-                    await sendEmailTemplate(null, {
-                        template: {
-                            type: EmailTemplateType.ExcelExportFailed,
-                        },
-                        recipients: [
-                            user.createRecipient(),
-                        ],
-                        type: 'transactional',
-                    });
-                }
-                throw error;
-            }),
+                    return url;
+                })
+                .catch(async (error) => {
+                    if (sendEmail) {
+                        await sendEmailTemplate(null, {
+                            template: {
+                                type: EmailTemplateType.ExcelExportFailed,
+                            },
+                            recipients: [user.createRecipient()],
+                            type: 'transactional',
+                        });
+                    }
+                    throw error;
+                }),
             sleep(3000),
         ]);
 
         if (typeof result === 'string') {
-            return new Response(ExcelExportResponse.create({
-                url: result,
-            }));
+            return new Response(
+                ExcelExportResponse.create({
+                    url: result,
+                }),
+            );
         }
 
         // We'll send an e-mail
         // Let the job know to send an e-mail when it is done
         sendEmail = true;
 
-        return new Response(ExcelExportResponse.create({
-            url: null,
-        }));
+        return new Response(
+            ExcelExportResponse.create({
+                url: null,
+            }),
+        );
     }
 
-    async job(loader: ExcelExporter<unknown>, request: ExcelExportRequest, type: string, userId: string): Promise<string> {
+    async job(
+        loader: ExcelExporter<unknown>,
+        request: ExcelExportRequest,
+        type: string,
+        userId: string,
+    ): Promise<string> {
         // Only run 1 export per user at the same time
         return await QueueHandler.schedule('user-export-to-excel-' + userId, async () => {
             // Allow maximum 5 running Excel jobs at the same time for all users; queue the rest.
-            return await QueueHandler.schedule('export-to-excel', async () => {
-                // Estimate how long it will take.
-                // If too long, we'll schedule it and write it to Digitalocean Spaces
-                // Otherwise we'll just return the file directly
-                const platform = await Platform.getSharedStruct();
-                const { file, stream } = await FileCache.getWriteStream('.xlsx');
+            return await QueueHandler.schedule(
+                'export-to-excel',
+                async () => {
+                    // Estimate how long it will take.
+                    // If too long, we'll schedule it and write it to Digitalocean Spaces
+                    // Otherwise we'll just return the file directly
+                    const platform = await Platform.getSharedStruct();
+                    const { file, stream } = await FileCache.getWriteStream('.xlsx');
 
-                const zipWriterAdapter = new ArchiverWriterAdapter(stream);
-                const writer = new XlsxWriter(zipWriterAdapter);
+                    const zipWriterAdapter = new ArchiverWriterAdapter(stream);
+                    const writer = new XlsxWriter(zipWriterAdapter);
 
-                // Limit to pages of 100
-                request.filter.limit = STAMHOOFD.environment === 'development' ? 1000 : 100; // in development, we need to check if total count matches and pagination is working correctly
+                    // Limit to pages of 100
+                    request.filter.limit = STAMHOOFD.environment === 'development' ? 1000 : 100; // in development, we need to check if total count matches and pagination is working correctly
 
-                await exportToExcel({
-                    definitions: loader.getSheets(platform),
-                    writer,
-                    dataGenerator: fetchToAsyncIterator(request.filter, loader, { signFiles: true }),
-                    filter: request.workbookFilter,
-                });
+                    await exportToExcel({
+                        definitions: loader.getSheets(platform),
+                        writer,
+                        dataGenerator: fetchToAsyncIterator(request.filter, loader, {
+                            signFiles: true,
+                        }),
+                        filter: request.workbookFilter,
+                    });
 
-                console.log('Done writing excel file');
+                    console.log('Done writing excel file');
 
-                const url = 'https://' + STAMHOOFD.domains.api + '/v' + Version + '/file-cache?file=' + encodeURIComponent(file) + '&name=' + encodeURIComponent(request.title ?? type);
-                return url;
-            }, 5);
+                    const url =
+                        'https://' +
+                        STAMHOOFD.domains.api +
+                        '/v' +
+                        Version +
+                        '/file-cache?file=' +
+                        encodeURIComponent(file) +
+                        '&name=' +
+                        encodeURIComponent(request.title ?? type);
+                    return url;
+                },
+                5,
+            );
         });
     }
 }

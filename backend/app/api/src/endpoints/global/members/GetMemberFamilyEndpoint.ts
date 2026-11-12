@@ -21,7 +21,9 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/members/@id/family', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/organization/members/@id/family', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -35,7 +37,7 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Fast throw first (more in depth checking for patches later)
         if (organization) {
-            if (!await Context.auth.hasSomeAccess(organization.id)) {
+            if (!(await Context.auth.hasSomeAccess(organization.id))) {
                 throw Context.auth.error();
             }
         } else {
@@ -44,7 +46,7 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        const members = (await Member.getFamilyWithRegistrations(request.params.id));
+        const members = await Member.getFamilyWithRegistrations(request.params.id);
 
         let foundMember = false;
 
@@ -55,7 +57,7 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
                 foundMember = true;
 
                 // Check access to this member (this will automatically give access to the family)
-                if (!await Context.auth.canAccessMember(member)) {
+                if (!(await Context.auth.canAccessMember(member))) {
                     throw Context.auth.error($t('%Dh'));
                 }
                 validatedMembers.push(member);
@@ -71,8 +73,6 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
             throw Context.auth.error($t('%Dh'));
         }
 
-        return new Response(
-            await AuthenticatedStructures.membersBlob(validatedMembers),
-        );
+        return new Response(await AuthenticatedStructures.membersBlob(validatedMembers));
     }
 }

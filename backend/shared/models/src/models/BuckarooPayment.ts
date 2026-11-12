@@ -6,7 +6,9 @@ export class BuckarooPayment extends QueryableModel {
     static table = 'buckaroo_payments';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })

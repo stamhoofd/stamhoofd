@@ -14,7 +14,7 @@ export function calculateHungarianAlgorithm(priceMatrix: number[][]): number[] {
     }
 
     // Convert to cost minimization problem by negating values (since we want to maximize discount)
-    const C = priceMatrix.map(row => row.map(val => -val));
+    const C = priceMatrix.map((row) => row.map((val) => -val));
 
     const J = C.length; // height of the cost matrix
     const W = C[0].length; // width of the cost matrix
@@ -31,7 +31,8 @@ export function calculateHungarianAlgorithm(priceMatrix: number[][]): number[] {
 
     const inf = Number.MAX_SAFE_INTEGER;
 
-    for (let jCur = 0; jCur < J; ++jCur) { // assign jCur-th job
+    for (let jCur = 0; jCur < J; ++jCur) {
+        // assign jCur-th job
         let wCur = W;
         job[wCur] = jCur;
 
@@ -40,7 +41,8 @@ export function calculateHungarianAlgorithm(priceMatrix: number[][]): number[] {
         const prev: number[] = new Array(W + 1).fill(-1); // previous worker on alternating path
         const inZ: boolean[] = new Array(W + 1).fill(false); // whether worker is in Z
 
-        while (job[wCur] !== -1) { // runs at most jCur + 1 times
+        while (job[wCur] !== -1) {
+            // runs at most jCur + 1 times
             inZ[wCur] = true;
             const j = job[wCur];
             let delta = inf;

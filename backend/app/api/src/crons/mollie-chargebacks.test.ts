@@ -1,4 +1,12 @@
-import { BalanceItemFactory, BalanceItemPayment, MolliePayment, Organization, OrganizationFactory, Payment, PaymentMandateChargebacks } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    BalanceItemPayment,
+    MolliePayment,
+    Organization,
+    OrganizationFactory,
+    Payment,
+    PaymentMandateChargebacks,
+} from '@stamhoofd/models';
 import { PaymentMethod, PaymentProvider, PaymentStatus, PaymentType } from '@stamhoofd/structures';
 import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -116,7 +124,8 @@ describe('Cron.mollie-chargebacks', () => {
     };
 
     test('A chargeback blocks the mandate and other mandates of the same card', async () => {
-        const { payingOrganization, payment, mockPayment, mandate, sameCardMandate, otherMandate } = await init();
+        const { payingOrganization, payment, mockPayment, mandate, sameCardMandate, otherMandate } =
+            await init();
 
         mollieMocker.createChargeback(mockPayment);
         await runCron();
@@ -131,7 +140,9 @@ describe('Cron.mollie-chargebacks', () => {
         });
 
         const updated = (await Organization.getByID(payingOrganization.id))!;
-        expect(updated.serverMeta.blockedMandates.map(b => b.id).sort()).toEqual([mandate.id, sameCardMandate.id].sort());
+        expect(updated.serverMeta.blockedMandates.map((b) => b.id).sort()).toEqual(
+            [mandate.id, sameCardMandate.id].sort(),
+        );
         expect(updated.serverMeta.blockedMandates[0].paymentId).toBe(chargebacks[0].id);
 
         // The default moves to the first usable mandate
@@ -139,13 +150,16 @@ describe('Cron.mollie-chargebacks', () => {
 
         // The chargeback is counted on the mandate
         expect(updated.serverMeta.mandateChargebacks).toHaveLength(1);
-        expect(updated.serverMeta.mandateChargebacks[0]).toMatchObject({ id: mandate.id, identifier: '1234/12/2030' });
+        expect(updated.serverMeta.mandateChargebacks[0]).toMatchObject({
+            id: mandate.id,
+            identifier: '1234/12/2030',
+        });
         expect(updated.serverMeta.mandateChargebacks[0].dates).toHaveLength(1);
 
         const mandates = await getMandates(payingOrganization);
-        expect(mandates.find(m => m.id === mandate.id)!.blockedAt).not.toBeNull();
-        expect(mandates.find(m => m.id === sameCardMandate.id)!.blockedAt).not.toBeNull();
-        expect(mandates.find(m => m.id === otherMandate.id)!.blockedAt).toBeNull();
+        expect(mandates.find((m) => m.id === mandate.id)!.blockedAt).not.toBeNull();
+        expect(mandates.find((m) => m.id === sameCardMandate.id)!.blockedAt).not.toBeNull();
+        expect(mandates.find((m) => m.id === otherMandate.id)!.blockedAt).toBeNull();
 
         // Usable mandates are listed before blocked ones
         const grouped = PaymentMandateService.groupByMandate(mandates).mandates;
@@ -155,8 +169,12 @@ describe('Cron.mollie-chargebacks', () => {
 
         // Running the cron again does not register or block anything twice
         await runCron();
-        expect(await Payment.select().where('reversingPaymentId', payment.id).fetch()).toHaveLength(1);
-        expect((await Organization.getByID(payingOrganization.id))!.serverMeta.blockedMandates).toHaveLength(2);
+        expect(await Payment.select().where('reversingPaymentId', payment.id).fetch()).toHaveLength(
+            1,
+        );
+        expect(
+            (await Organization.getByID(payingOrganization.id))!.serverMeta.blockedMandates,
+        ).toHaveLength(2);
     });
 
     test('Chargeback dates per mandate are limited to the last 12 months and at most 5', () => {
@@ -185,41 +203,55 @@ describe('Cron.mollie-chargebacks', () => {
         await runCron();
 
         // The same card is saved again after the block
-        const newSameCardMandate = mollieMocker.addMandate({ customerId: payingOrganization.serverMeta.mollieCustomerId!, cardNumber: '1234' });
-
-        const fresh = (await Organization.getByID(payingOrganization.id))!;
-        expect(fresh.serverMeta.blockedMandates.map(b => b.id)).not.toContain(newSameCardMandate.id);
-
-        const mandates = await getMandates(payingOrganization);
-        expect(mandates.find(m => m.id === newSameCardMandate.id)!.blockedAt).not.toBeNull();
-
-        const validate = (id: string) => PaymentService.validateMandate({
-            method: PaymentMethod.Unknown,
-            paymentConfiguration: sellingOrganization.meta.registrationPaymentConfiguration,
-            mandate: mandates.find(m => m.id === id)!,
-            payingOrganization: fresh,
-            sellingOrganization,
-            user: null,
+        const newSameCardMandate = mollieMocker.addMandate({
+            customerId: payingOrganization.serverMeta.mollieCustomerId!,
+            cardNumber: '1234',
         });
 
+        const fresh = (await Organization.getByID(payingOrganization.id))!;
+        expect(fresh.serverMeta.blockedMandates.map((b) => b.id)).not.toContain(
+            newSameCardMandate.id,
+        );
+
+        const mandates = await getMandates(payingOrganization);
+        expect(mandates.find((m) => m.id === newSameCardMandate.id)!.blockedAt).not.toBeNull();
+
+        const validate = (id: string) =>
+            PaymentService.validateMandate({
+                method: PaymentMethod.Unknown,
+                paymentConfiguration: sellingOrganization.meta.registrationPaymentConfiguration,
+                mandate: mandates.find((m) => m.id === id)!,
+                payingOrganization: fresh,
+                sellingOrganization,
+                user: null,
+            });
+
         await expect(validate(mandate.id)).rejects.toMatchObject({ code: 'mandate_blocked' });
-        await expect(validate(newSameCardMandate.id)).rejects.toMatchObject({ code: 'mandate_blocked' });
+        await expect(validate(newSameCardMandate.id)).rejects.toMatchObject({
+            code: 'mandate_blocked',
+        });
         await expect(validate(otherMandate.id)).resolves.toMatchObject({ id: otherMandate.id });
 
         // The grouped list only offers the other card as usable
         const grouped = PaymentMandateService.groupByMandate(mandates).mandates;
-        expect(grouped.filter(m => !m.isBlocked).map(m => m.id)).toEqual([otherMandate.id]);
+        expect(grouped.filter((m) => !m.isBlocked).map((m) => m.id)).toEqual([otherMandate.id]);
     });
 
     test('Validating the same card again with a new payment unblocks all mandates for that card', async () => {
-        const { payingOrganization, mockPayment, mandate, sameCardMandate, otherMandate } = await init();
+        const { payingOrganization, mockPayment, mandate, sameCardMandate, otherMandate } =
+            await init();
 
         mollieMocker.createChargeback(mockPayment);
         await runCron();
-        expect((await Organization.getByID(payingOrganization.id))!.serverMeta.blockedMandates).toHaveLength(2);
+        expect(
+            (await Organization.getByID(payingOrganization.id))!.serverMeta.blockedMandates,
+        ).toHaveLength(2);
 
         // A new 'first' payment with the same card succeeds and creates a new mandate
-        const newMandate = mollieMocker.addMandate({ customerId: payingOrganization.serverMeta.mollieCustomerId!, cardNumber: '1234' });
+        const newMandate = mollieMocker.addMandate({
+            customerId: payingOrganization.serverMeta.mollieCustomerId!,
+            cardNumber: '1234',
+        });
         const payment = new Payment();
         payment.organizationId = sellingOrganization.id;
         payment.payingOrganizationId = payingOrganization.id;
@@ -232,13 +264,19 @@ describe('Cron.mollie-chargebacks', () => {
         payment.createMandate = CreateMandateSettings.create({ saveAsDefault: false });
         await payment.save();
 
-        await PaymentService.handlePaymentStatusUpdate(payment, sellingOrganization, PaymentStatus.Succeeded);
+        await PaymentService.handlePaymentStatusUpdate(
+            payment,
+            sellingOrganization,
+            PaymentStatus.Succeeded,
+        );
 
-        expect((await Organization.getByID(payingOrganization.id))!.serverMeta.blockedMandates).toHaveLength(0);
+        expect(
+            (await Organization.getByID(payingOrganization.id))!.serverMeta.blockedMandates,
+        ).toHaveLength(0);
 
         const mandates = await getMandates(payingOrganization);
         for (const id of [mandate.id, sameCardMandate.id, otherMandate.id, newMandate.id]) {
-            expect(mandates.find(m => m.id === id)!.blockedAt).toBeNull();
+            expect(mandates.find((m) => m.id === id)!.blockedAt).toBeNull();
         }
     });
 
@@ -248,7 +286,11 @@ describe('Cron.mollie-chargebacks', () => {
         mollieMocker.createChargeback(mockPayment);
         await runCron();
 
-        expect(await Payment.select().where('reversingPaymentId', payment.id).fetch()).toHaveLength(1);
-        expect((await Organization.getByID(payingOrganization.id))!.serverMeta.blockedMandates).toHaveLength(0);
+        expect(await Payment.select().where('reversingPaymentId', payment.id).fetch()).toHaveLength(
+            1,
+        );
+        expect(
+            (await Organization.getByID(payingOrganization.id))!.serverMeta.blockedMandates,
+        ).toHaveLength(0);
     });
 });

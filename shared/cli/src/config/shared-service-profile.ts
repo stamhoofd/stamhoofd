@@ -1,4 +1,13 @@
-import { caddyHttpPort, caddyHttpsPort, caddyUnprivilegedHttpPort, caddyUnprivilegedHttpsPort, corednsPrivilegedHostPort, corednsUnprivilegedHostPort, dockerHostGateway, localIpv4Host } from './shared-service-config.js';
+import {
+    caddyHttpPort,
+    caddyHttpsPort,
+    caddyUnprivilegedHttpPort,
+    caddyUnprivilegedHttpsPort,
+    corednsPrivilegedHostPort,
+    corednsUnprivilegedHostPort,
+    dockerHostGateway,
+    localIpv4Host,
+} from './shared-service-config.js';
 import type { ContainerRuntime } from '../services/docker.js';
 
 export enum SharedServiceCaddyRunMode {
@@ -30,7 +39,9 @@ export type SharedServiceProfile = {
     dnsSetupKind: SharedServiceDnsSetupKind;
 } & CaddyServiceProfile;
 
-export function buildCaddyServiceProfile(platform: NodeJS.Platform = process.platform): CaddyServiceProfile {
+export function buildCaddyServiceProfile(
+    platform: NodeJS.Platform = process.platform,
+): CaddyServiceProfile {
     if (platform === 'darwin') {
         return {
             caddyHttpHostPort: caddyHttpPort,
@@ -56,7 +67,10 @@ export function buildCaddyServiceProfile(platform: NodeJS.Platform = process.pla
     };
 }
 
-export function buildSharedServiceProfile(runtime: ContainerRuntime, platform: NodeJS.Platform = process.platform): SharedServiceProfile {
+export function buildSharedServiceProfile(
+    runtime: ContainerRuntime,
+    platform: NodeJS.Platform = process.platform,
+): SharedServiceProfile {
     if (platform === 'darwin') {
         return {
             platform,

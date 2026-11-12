@@ -1,10 +1,25 @@
 import { Request } from '@node/endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { BalanceItem, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    MemberFactory,
+    OrganizationFactory,
+    RegistrationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { ChargeRequest, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, VATExcemptReason, Version } from '@stamhoofd/structures';
+import {
+    ChargeRequest,
+    PermissionRoleDetailed,
+    Permissions,
+    PermissionsResourceKey,
+    ResourcePermissions,
+    VATExcemptReason,
+    Version,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { ChargeRegistrationsEndpoint } from '../../src/endpoints/admin/registrations/ChargeRegistrationsEndpoint.js';
 import { SessionService } from '../../src/services/SessionService.js';
@@ -17,7 +32,12 @@ describe('E2E.ChargeRegistrations', () => {
     let financialDirectorToken: Token;
 
     const postCharge = async (body: ChargeRequest) => {
-        const request = Request.buildJson('POST', `/v${Version}/admin/charge-registrations`, organization.getApiHost(), body);
+        const request = Request.buildJson(
+            'POST',
+            `/v${Version}/admin/charge-registrations`,
+            organization.getApiHost(),
+            body,
+        );
         request.headers.authorization = 'Bearer ' + financialDirectorToken.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -48,10 +68,17 @@ describe('E2E.ChargeRegistrations', () => {
             permissions: Permissions.create({
                 level: PermissionLevel.None,
                 roles: [role],
-                resources: new Map([[PermissionsResourceType.Groups, new Map([[
-                    PermissionsResourceKey.CurrentPeriod,
-                    ResourcePermissions.create({ level: PermissionLevel.Write }),
-                ]])]]),
+                resources: new Map([
+                    [
+                        PermissionsResourceType.Groups,
+                        new Map([
+                            [
+                                PermissionsResourceKey.CurrentPeriod,
+                                ResourcePermissions.create({ level: PermissionLevel.Write }),
+                            ],
+                        ]),
+                    ],
+                ]),
             }),
         }).create();
         financialDirectorToken = await SessionService.createSession(user);
@@ -62,9 +89,18 @@ describe('E2E.ChargeRegistrations', () => {
         const member2 = await new MemberFactory({}).create();
         const otherMember = await new MemberFactory({}).create();
 
-        const registration1a = await new RegistrationFactory({ member: member1, organization }).create();
-        const registration1b = await new RegistrationFactory({ member: member1, organization }).create();
-        const registration2 = await new RegistrationFactory({ member: member2, organization }).create();
+        const registration1a = await new RegistrationFactory({
+            member: member1,
+            organization,
+        }).create();
+        const registration1b = await new RegistrationFactory({
+            member: member1,
+            organization,
+        }).create();
+        const registration2 = await new RegistrationFactory({
+            member: member2,
+            organization,
+        }).create();
         await new RegistrationFactory({ member: otherMember, organization }).create();
 
         const body = ChargeRequest.create({

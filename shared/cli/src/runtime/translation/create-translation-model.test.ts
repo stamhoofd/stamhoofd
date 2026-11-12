@@ -31,7 +31,10 @@ describe('resolveTranslationModel', () => {
 
     it('selects Claude when requested and the key is present', async () => {
         process.env.ANTHROPIC_API_KEY = 'sk-ant';
-        const result = await resolveTranslationModel({ provider: 'claude', model: 'claude-opus-4-8' });
+        const result = await resolveTranslationModel({
+            provider: 'claude',
+            model: 'claude-opus-4-8',
+        });
         expect('model' in result && result.model.name).toBe('claude:claude-opus-4-8');
     });
 
@@ -50,6 +53,8 @@ describe('resolveTranslationModel', () => {
 
     it('rejects unknown providers', async () => {
         const result = await resolveTranslationModel({ provider: 'mistral' });
-        expect(result).toEqual({ unavailable: 'Unknown translation provider "mistral" (expected "openai" or "claude")' });
+        expect(result).toEqual({
+            unavailable: 'Unknown translation provider "mistral" (expected "openai" or "claude")',
+        });
     });
 });

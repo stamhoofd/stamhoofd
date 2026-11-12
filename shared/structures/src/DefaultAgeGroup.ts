@@ -52,6 +52,6 @@ export class DefaultAgeGroup extends AutoEncoder {
             return true;
         }
 
-        return tags?.find(tagId => organizationTags.includes(tagId)) !== undefined;
+        return tags?.find((tagId) => organizationTags.includes(tagId)) !== undefined;
     }
 }

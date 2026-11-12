@@ -51,14 +51,16 @@ describe('Endpoint.Translate', () => {
     };
 
     test('translates strings and TipTap documents into multiple languages', async () => {
-        const response = await translate(TranslateRequest.create({
-            inputs: new Map<string, any>([
-                ['name', 'Zomerkamp'],
-                ['description', tiptapDoc],
-            ]),
-            sourceLanguage: Language.Dutch,
-            targetLanguages: [Language.French, Language.English],
-        }));
+        const response = await translate(
+            TranslateRequest.create({
+                inputs: new Map<string, any>([
+                    ['name', 'Zomerkamp'],
+                    ['description', tiptapDoc],
+                ]),
+                sourceLanguage: Language.Dutch,
+                targetLanguages: [Language.French, Language.English],
+            }),
+        );
 
         expect(response.body.translations.size).toBe(2);
 
@@ -78,26 +80,34 @@ describe('Endpoint.Translate', () => {
             ],
         });
 
-        expect(response.body.translations.get(Language.English)!.get('name')).toBe('[English] Zomerkamp');
+        expect(response.body.translations.get(Language.English)!.get('name')).toBe(
+            '[English] Zomerkamp',
+        );
 
         // One request per language, all inputs sent together so the model has context
         expect(mocker.requests).toHaveLength(2);
         for (const request of mocker.requests) {
             expect(request.model).toBe(TRANSLATION_MODEL);
-            const userMessage = JSON.parse(request.messages.find(m => m.role === 'user')!.content);
+            const userMessage = JSON.parse(
+                request.messages.find((m) => m.role === 'user')!.content,
+            );
             expect(Object.keys(userMessage.inputs)).toEqual(['name', 'description']);
-            expect(request.messages.find(m => m.role === 'system')!.content).toContain('written in Dutch');
+            expect(request.messages.find((m) => m.role === 'system')!.content).toContain(
+                'written in Dutch',
+            );
         }
     });
 
     test('passes the context prompt to the model', async () => {
-        await translate(TranslateRequest.create({
-            inputs: new Map([['name', 'Zomerkamp']]),
-            targetLanguages: [Language.French],
-            context: 'Use informal language (tutoyer).',
-        }));
+        await translate(
+            TranslateRequest.create({
+                inputs: new Map([['name', 'Zomerkamp']]),
+                targetLanguages: [Language.French],
+                context: 'Use informal language (tutoyer).',
+            }),
+        );
 
-        const system = mocker.lastRequest!.messages.find(m => m.role === 'system')!.content;
+        const system = mocker.lastRequest!.messages.find((m) => m.role === 'system')!.content;
         expect(system).toContain('Use informal language (tutoyer).');
         expect(system).toContain('Detect the source language');
     });
@@ -110,23 +120,36 @@ describe('Endpoint.Translate', () => {
         }).create();
         const token = await SessionService.createSession(user);
 
-        await expect(translate(TranslateRequest.create({
-            inputs: new Map([['name', 'Zomerkamp']]),
-            targetLanguages: [Language.French],
-        }), token)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(
+            translate(
+                TranslateRequest.create({
+                    inputs: new Map([['name', 'Zomerkamp']]),
+                    targetLanguages: [Language.French],
+                }),
+                token,
+            ),
+        ).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
         expect(mocker.requests).toHaveLength(0);
     });
 
     test('rejects empty inputs and missing target languages', async () => {
-        await expect(translate(TranslateRequest.create({
-            inputs: new Map(),
-            targetLanguages: [Language.French],
-        }))).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
+        await expect(
+            translate(
+                TranslateRequest.create({
+                    inputs: new Map(),
+                    targetLanguages: [Language.French],
+                }),
+            ),
+        ).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
 
-        await expect(translate(TranslateRequest.create({
-            inputs: new Map([['name', 'Zomerkamp']]),
-            targetLanguages: [],
-        }))).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
+        await expect(
+            translate(
+                TranslateRequest.create({
+                    inputs: new Map([['name', 'Zomerkamp']]),
+                    targetLanguages: [],
+                }),
+            ),
+        ).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
     });
 
     test('rejects input values that are neither a string nor a TipTap document', async () => {
@@ -138,34 +161,49 @@ describe('Endpoint.Translate', () => {
         });
         request.headers.authorization = 'Bearer ' + adminToken.accessToken;
 
-        await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('invalid_field'),
+        );
     });
 
     test('fails when the model output does not match the inputs', async () => {
         mocker.respondWith(() => ({ translations: { name: { type: 'doc' } } }));
 
-        await expect(translate(TranslateRequest.create({
-            inputs: new Map([['name', 'Zomerkamp']]),
-            targetLanguages: [Language.French],
-        }))).rejects.toThrow(STExpect.errorWithCode('translation_invalid_output'));
+        await expect(
+            translate(
+                TranslateRequest.create({
+                    inputs: new Map([['name', 'Zomerkamp']]),
+                    targetLanguages: [Language.French],
+                }),
+            ),
+        ).rejects.toThrow(STExpect.errorWithCode('translation_invalid_output'));
     });
 
     test('fails when OpenAI is unavailable', async () => {
         mocker.forceFailure();
 
-        await expect(translate(TranslateRequest.create({
-            inputs: new Map([['name', 'Zomerkamp']]),
-            targetLanguages: [Language.French],
-        }))).rejects.toThrow(STExpect.errorWithCode('translation_failed'));
+        await expect(
+            translate(
+                TranslateRequest.create({
+                    inputs: new Map([['name', 'Zomerkamp']]),
+                    targetLanguages: [Language.French],
+                }),
+            ),
+        ).rejects.toThrow(STExpect.errorWithCode('translation_failed'));
     });
 
     test('fails when OPENAI_API_KEY is not configured', async () => {
         TestUtils.setEnvironment('OPENAI_API_KEY', undefined);
         const { adminToken: token } = await initPlatformAdmin();
 
-        await expect(translate(TranslateRequest.create({
-            inputs: new Map([['name', 'Zomerkamp']]),
-            targetLanguages: [Language.French],
-        }), token)).rejects.toThrow(STExpect.errorWithCode('translation_not_configured'));
+        await expect(
+            translate(
+                TranslateRequest.create({
+                    inputs: new Map([['name', 'Zomerkamp']]),
+                    targetLanguages: [Language.French],
+                }),
+                token,
+            ),
+        ).rejects.toThrow(STExpect.errorWithCode('translation_not_configured'));
     });
 });

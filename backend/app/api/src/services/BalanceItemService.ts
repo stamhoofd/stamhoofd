@@ -1,9 +1,25 @@
 import { Model } from '@node/database';
 import type { Organization } from '@stamhoofd/models';
-import { BalanceItem, CachedBalance, MemberUser, Order, Payment, Platform, Webshop } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    CachedBalance,
+    MemberUser,
+    Order,
+    Payment,
+    Platform,
+    Webshop,
+} from '@stamhoofd/models';
 import { DocumentService } from './DocumentService.js';
 import { SQL } from '@stamhoofd/sql';
-import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentStatus, PaymentType, ReceivableBalanceType } from '@stamhoofd/structures';
+import {
+    AuditLogSource,
+    BalanceItemStatus,
+    BalanceItemType,
+    OrderStatus,
+    PaymentStatus,
+    PaymentType,
+    ReceivableBalanceType,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GroupedThrottledQueue } from '../helpers/GroupedThrottledQueue.js';
 import { ThrottledQueue } from '../helpers/ThrottledQueue.js';
@@ -14,56 +30,88 @@ import { RegistrationService } from './RegistrationService.js';
 import { STPackageService } from './STPackageService.js';
 import { WebshopCrowdfundingService } from './WebshopCrowdfundingService.js';
 
-const memberUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, memberIds: string[]) => {
-    await CachedBalance.updateForMembers(organizationId, memberIds);
+const memberUpdateQueue = new GroupedThrottledQueue(
+    async (organizationId: string, memberIds: string[]) => {
+        await CachedBalance.updateForMembers(organizationId, memberIds);
 
-    for (const memberId of memberIds) {
-        await PaymentReallocationService.reallocate(organizationId, memberId, ReceivableBalanceType.member, items => BalanceItemService.updatePaidAndPending(items));
-    }
+        for (const memberId of memberIds) {
+            await PaymentReallocationService.reallocate(
+                organizationId,
+                memberId,
+                ReceivableBalanceType.member,
+                (items) => BalanceItemService.updatePaidAndPending(items),
+            );
+        }
 
-    if (memberIds.length) {
-        // Now also include the userIds of the members
-        const userMemberIds = (await MemberUser.select().where('membersId', memberIds).fetch()).map(m => m.usersId);
-        userUpdateQueue.addItems(organizationId, userMemberIds);
-    }
-}, { maxDelay: 10_000 });
+        if (memberIds.length) {
+            // Now also include the userIds of the members
+            const userMemberIds = (
+                await MemberUser.select().where('membersId', memberIds).fetch()
+            ).map((m) => m.usersId);
+            userUpdateQueue.addItems(organizationId, userMemberIds);
+        }
+    },
+    { maxDelay: 10_000 },
+);
 
-const userUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, userIds: string[]) => {
-    await CachedBalance.updateForUsers(organizationId, userIds);
+const userUpdateQueue = new GroupedThrottledQueue(
+    async (organizationId: string, userIds: string[]) => {
+        await CachedBalance.updateForUsers(organizationId, userIds);
 
-    for (const userId of userIds) {
-        await PaymentReallocationService.reallocate(organizationId, userId, ReceivableBalanceType.user, items => BalanceItemService.updatePaidAndPending(items));
-    }
-}, { maxDelay: 10_000 });
+        for (const userId of userIds) {
+            await PaymentReallocationService.reallocate(
+                organizationId,
+                userId,
+                ReceivableBalanceType.user,
+                (items) => BalanceItemService.updatePaidAndPending(items),
+            );
+        }
+    },
+    { maxDelay: 10_000 },
+);
 
-const organizationUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, organizationIds: string[]) => {
-    const results = await CachedBalance.updateForOrganizations(organizationId, organizationIds);
+const organizationUpdateQueue = new GroupedThrottledQueue(
+    async (organizationId: string, organizationIds: string[]) => {
+        const results = await CachedBalance.updateForOrganizations(organizationId, organizationIds);
 
-    for (const payingOrganizationId of organizationIds) {
-        await PaymentReallocationService.reallocate(organizationId, payingOrganizationId, ReceivableBalanceType.organization, items => BalanceItemService.updatePaidAndPending(items));
-    }
+        for (const payingOrganizationId of organizationIds) {
+            await PaymentReallocationService.reallocate(
+                organizationId,
+                payingOrganizationId,
+                ReceivableBalanceType.organization,
+                (items) => BalanceItemService.updatePaidAndPending(items),
+            );
+        }
 
-    const platform = await Platform.getShared();
-    if (organizationId === platform.membershipOrganizationId) {
-        // Clear failed payments
-        for (const [organizationId, result] of results) {
-            if (result.amountOpen === 0 && result.amountPending === 0) {
-                await STPackageService.markBalanceRestored(organizationId);
+        const platform = await Platform.getShared();
+        if (organizationId === platform.membershipOrganizationId) {
+            // Clear failed payments
+            for (const [organizationId, result] of results) {
+                if (result.amountOpen === 0 && result.amountPending === 0) {
+                    await STPackageService.markBalanceRestored(organizationId);
+                }
             }
         }
-    }
-}, { maxDelay: 60_000 });
+    },
+    { maxDelay: 60_000 },
+);
 
-export const registrationUpdateQueue = new GroupedThrottledQueue(async (organizationId: string, registrationIds: string[]) => {
-    await CachedBalance.updateForRegistrations(organizationId, registrationIds);
-    await DocumentService.updateForRegistrations(registrationIds, organizationId);
-}, { maxDelay: 10_000 });
+export const registrationUpdateQueue = new GroupedThrottledQueue(
+    async (organizationId: string, registrationIds: string[]) => {
+        await CachedBalance.updateForRegistrations(organizationId, registrationIds);
+        await DocumentService.updateForRegistrations(registrationIds, organizationId);
+    },
+    { maxDelay: 10_000 },
+);
 
-const bundleDiscountsUpdateQueue = new ThrottledQueue(async (registrationIds: string[]) => {
-    for (const registrationId of registrationIds) {
-        await RegistrationService.updateDiscounts(registrationId);
-    }
-}, { maxDelay: 10_000 });
+const bundleDiscountsUpdateQueue = new ThrottledQueue(
+    async (registrationIds: string[]) => {
+        for (const registrationId of registrationIds) {
+            await RegistrationService.updateDiscounts(registrationId);
+        }
+    },
+    { maxDelay: 10_000 },
+);
 
 export class BalanceItemService {
     static listening = false;
@@ -86,13 +134,13 @@ export class BalanceItemService {
             // Check changed:
             // status, unitPrice, dueAt, amount
             if (
-                'status' in event.changedFields
-                || 'dueAt' in event.changedFields
-                || 'priceTotal' in event.changedFields
-                || 'memberId' in event.changedFields
-                || 'userId' in event.changedFields
-                || 'payingOrganizationId' in event.changedFields
-                || 'registrationId' in event.changedFields
+                'status' in event.changedFields ||
+                'dueAt' in event.changedFields ||
+                'priceTotal' in event.changedFields ||
+                'memberId' in event.changedFields ||
+                'userId' in event.changedFields ||
+                'payingOrganizationId' in event.changedFields ||
+                'registrationId' in event.changedFields
             ) {
                 this.scheduleUpdate(event.model);
             }
@@ -123,7 +171,7 @@ export class BalanceItemService {
      */
     static async updatePaidAndPending(items: BalanceItem[]) {
         console.log('updatePaidAndPending for', items.length, 'items');
-        await BalanceItem.updatePricePaid(Formatter.uniqueArray(items.map(i => i.id)));
+        await BalanceItem.updatePricePaid(Formatter.uniqueArray(items.map((i) => i.id)));
         this.scheduleUpdates(items);
     }
 
@@ -133,7 +181,9 @@ export class BalanceItemService {
      */
     static async updateInvoiced(items: (BalanceItem | string)[]) {
         console.log('updateInvoiced for', items.length, 'items');
-        await BalanceItem.updateInvoiced(Formatter.uniqueArray(items.map(i => typeof i === 'string' ? i : i.id)));
+        await BalanceItem.updateInvoiced(
+            Formatter.uniqueArray(items.map((i) => (typeof i === 'string' ? i : i.id))),
+        );
     }
 
     /**
@@ -220,9 +270,15 @@ export class BalanceItemService {
         }
     }
 
-    static async markPaid(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
+    static async markPaid(
+        balanceItem: BalanceItem,
+        payment: Payment | null,
+        organization: Organization,
+    ) {
         if (payment && payment.type === PaymentType.Chargeback) {
-            const realPayment = payment.reversingPaymentId ? (await Payment.getByID(payment.reversingPaymentId) ?? null) : null;
+            const realPayment = payment.reversingPaymentId
+                ? ((await Payment.getByID(payment.reversingPaymentId)) ?? null)
+                : null;
             await this.handleChargeback(balanceItem, payment, realPayment, organization);
             return;
         }
@@ -264,7 +320,11 @@ export class BalanceItemService {
             }
 
             if (balanceItem.registrationId) {
-                if (balanceItem.type === BalanceItemType.Registration && !!payment && payment.status === PaymentStatus.Succeeded) {
+                if (
+                    balanceItem.type === BalanceItemType.Registration &&
+                    !!payment &&
+                    payment.status === PaymentStatus.Succeeded
+                ) {
                     await RegistrationService.markRepeatedPaid(balanceItem.registrationId);
                 }
             }
@@ -278,7 +338,9 @@ export class BalanceItemService {
         // If registration
         if (balanceItem.registrationId) {
             if (balanceItem.type === BalanceItemType.Registration) {
-                await RegistrationService.markValid(balanceItem.registrationId, { paid: !!payment && payment.status === PaymentStatus.Succeeded });
+                await RegistrationService.markValid(balanceItem.registrationId, {
+                    paid: !!payment && payment.status === PaymentStatus.Succeeded,
+                });
             }
         }
 
@@ -292,7 +354,11 @@ export class BalanceItemService {
         await balanceItem.save();
     }
 
-    static async markUpdated(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
+    static async markUpdated(
+        balanceItem: BalanceItem,
+        payment: Payment | null,
+        organization: Organization,
+    ) {
         // For orders: mark order as changed (so they are refetched in front ends)
         if (balanceItem.orderId) {
             await AuditLogService.setContext({ source: AuditLogSource.Payment }, async () => {
@@ -312,7 +378,9 @@ export class BalanceItemService {
      * makes sure changes to the balance items of an order (or their payments) reach the clients.
      */
     static async markOrdersUpdated(items: BalanceItem[]) {
-        const orderIds = Formatter.uniqueArray(items.flatMap(item => item.orderId ? [item.orderId] : []));
+        const orderIds = Formatter.uniqueArray(
+            items.flatMap((item) => (item.orderId ? [item.orderId] : [])),
+        );
 
         for (const orderId of orderIds) {
             const order = await Order.getByID(orderId);
@@ -323,7 +391,11 @@ export class BalanceItemService {
         }
     }
 
-    static async undoPaid(balanceItem: BalanceItem, payment: Payment | null, organization: Organization) {
+    static async undoPaid(
+        balanceItem: BalanceItem,
+        payment: Payment | null,
+        organization: Organization,
+    ) {
         // If order
         if (balanceItem.orderId) {
             const order = await Order.getByID(balanceItem.orderId);
@@ -337,7 +409,12 @@ export class BalanceItemService {
     /**
      *
      */
-    static async handleChargeback(balanceItem: BalanceItem, chargeback: Payment | null, payment: Payment | null, organization: Organization) {
+    static async handleChargeback(
+        balanceItem: BalanceItem,
+        chargeback: Payment | null,
+        payment: Payment | null,
+        organization: Organization,
+    ) {
         if (balanceItem.failedAt) {
             // Already ran side effects
             return;
@@ -349,7 +426,11 @@ export class BalanceItemService {
         await balanceItem.save();
     }
 
-    static async markFailed(balanceItem: BalanceItem, payment: Payment, organization: Organization) {
+    static async markFailed(
+        balanceItem: BalanceItem,
+        payment: Payment,
+        organization: Organization,
+    ) {
         // If order
         if (balanceItem.orderId && payment.type === PaymentType.Payment) {
             const order = await Order.getByID(balanceItem.orderId);
@@ -365,7 +446,11 @@ export class BalanceItemService {
         await this.handleChargeback(balanceItem, null, payment, organization);
     }
 
-    static async undoFailed(balanceItem: BalanceItem, payment: Payment, organization: Organization) {
+    static async undoFailed(
+        balanceItem: BalanceItem,
+        payment: Payment,
+        organization: Organization,
+    ) {
         // If order
         if (balanceItem.orderId && payment.type === PaymentType.Payment) {
             const order = await Order.getByID(balanceItem.orderId);
@@ -378,7 +463,14 @@ export class BalanceItemService {
     /**
      * Apply discounts to the balance a user is going to checkout
      */
-    static async applyDiscountsToCheckout({ minimumAmount, totalPrice, balanceItems, sellingOrganizationId, payingOrganizationId, payingUserId }: {
+    static async applyDiscountsToCheckout({
+        minimumAmount,
+        totalPrice,
+        balanceItems,
+        sellingOrganizationId,
+        payingOrganizationId,
+        payingUserId,
+    }: {
         balanceItems: Map<BalanceItem, number>;
         totalPrice: number;
         minimumAmount?: number;
@@ -402,14 +494,11 @@ export class BalanceItemService {
                 .fetch();
         } else if (payingUserId) {
             const memberUsers = await MemberUser.select().where('usersId', payingUserId).fetch();
-            const memberIds = Formatter.uniqueArray(memberUsers.map(mu => mu.membersId));
+            const memberIds = Formatter.uniqueArray(memberUsers.map((mu) => mu.membersId));
 
             items = await BalanceItem.select()
                 .where('organizationId', sellingOrganizationId)
-                .where(
-                    SQL.where('userId', payingUserId)
-                        .or('memberId', memberIds),
-                )
+                .where(SQL.where('userId', payingUserId).or('memberId', memberIds))
                 .whereNot('status', BalanceItemStatus.Hidden)
                 .where('priceOpen', '<', 0)
                 .fetch();
@@ -432,4 +521,4 @@ export class BalanceItemService {
             totalPrice,
         };
     }
-};
+}

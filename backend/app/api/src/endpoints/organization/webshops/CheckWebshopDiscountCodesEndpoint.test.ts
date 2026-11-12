@@ -27,7 +27,15 @@ describe('Endpoint.CheckWebshopDiscountCodes', () => {
         model.discounts = [Discount.create({})];
         await model.save();
 
-        const response = await testServer.test(endpoint, Request.buildJson('POST', `/webshop/${webshop.id}/discount-codes`, organization.getApiHost(), ['SPONSOR', 'UNKNOWN']));
+        const response = await testServer.test(
+            endpoint,
+            Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/discount-codes`,
+                organization.getApiHost(),
+                ['SPONSOR', 'UNKNOWN'],
+            ),
+        );
         expect(response.body).toHaveLength(1);
         expect(response.body[0].code).toBe('SPONSOR');
         expect(JSON.stringify(response.body)).not.toContain('sponsor@example.com');

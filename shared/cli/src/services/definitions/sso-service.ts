@@ -1,6 +1,10 @@
 import { buildDomains } from '../../config/build-config.js';
 import { buildPorts } from '../../context/ports.js';
-import { keycloakImage, localIpv4Host, ssoInternalPort } from '../../config/shared-service-config.js';
+import {
+    keycloakImage,
+    localIpv4Host,
+    ssoInternalPort,
+} from '../../config/shared-service-config.js';
 import type { CliContext } from '../../context/create-context.js';
 import { DockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
@@ -61,7 +65,11 @@ export class SsoService extends DockerService<SsoStartOptions, SsoPrepared> {
     }
 
     async prepare(context: CliContext, options: SsoStartOptions): Promise<SsoPrepared> {
-        return { importDir: await writeKeycloakRealm(context, options.redirectUris, { dirName: this.variant ? `keycloak-${this.variant.name}` : undefined }) };
+        return {
+            importDir: await writeKeycloakRealm(context, options.redirectUris, {
+                dirName: this.variant ? `keycloak-${this.variant.name}` : undefined,
+            }),
+        };
     }
 
     canReuse(): boolean {
@@ -75,7 +83,26 @@ export class SsoService extends DockerService<SsoStartOptions, SsoPrepared> {
         } else {
             args.push('--rm');
         }
-        args.push('--name', this.getContainer(context), '-p', `${localIpv4Host}:${this.getPort(context)}:${ssoInternalPort}`, '-e', `KC_BOOTSTRAP_ADMIN_USERNAME=${ssoAdminUser}`, '-e', `KC_BOOTSTRAP_ADMIN_PASSWORD=${ssoAdminPassword}`, '-e', 'KC_HTTP_RELATIVE_PATH=/dex', '-v', `${prepared.importDir}:/opt/keycloak/data/import:ro,Z`, keycloakImage, 'start-dev', '--import-realm', '--hostname', `https://${this.getHostname(context)}/dex`, '--proxy-headers=xforwarded');
+        args.push(
+            '--name',
+            this.getContainer(context),
+            '-p',
+            `${localIpv4Host}:${this.getPort(context)}:${ssoInternalPort}`,
+            '-e',
+            `KC_BOOTSTRAP_ADMIN_USERNAME=${ssoAdminUser}`,
+            '-e',
+            `KC_BOOTSTRAP_ADMIN_PASSWORD=${ssoAdminPassword}`,
+            '-e',
+            'KC_HTTP_RELATIVE_PATH=/dex',
+            '-v',
+            `${prepared.importDir}:/opt/keycloak/data/import:ro,Z`,
+            keycloakImage,
+            'start-dev',
+            '--import-realm',
+            '--hostname',
+            `https://${this.getHostname(context)}/dex`,
+            '--proxy-headers=xforwarded',
+        );
         return args;
     }
 
@@ -105,17 +132,20 @@ export class SsoService extends DockerService<SsoStartOptions, SsoPrepared> {
                     if (discovered === issuer) {
                         return;
                     }
-                    lastError = discovered === undefined
-                        ? `response is not an OpenID discovery document (${body.length} bytes): is Caddy routing ${new URL(issuer).host}?`
-                        : `discovery document reports issuer ${discovered}`;
+                    lastError =
+                        discovered === undefined
+                            ? `response is not an OpenID discovery document (${body.length} bytes): is Caddy routing ${new URL(issuer).host}?`
+                            : `discovery document reports issuer ${discovered}`;
                 }
             } catch (error) {
                 lastError = error instanceof Error ? error.message : String(error);
             }
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
-        throw new Error(`Timed out waiting for ${this.name} to become ready at ${url} (${lastError})`);
+        throw new Error(
+            `Timed out waiting for ${this.name} to become ready at ${url} (${lastError})`,
+        );
     }
 
     private getHostname(context: CliContext): string {
@@ -139,7 +169,9 @@ export class SsoService extends DockerService<SsoStartOptions, SsoPrepared> {
      */
     async removeOtherVariants(context: CliContext, variantPrefix: string): Promise<void> {
         const own = this.getContainer(context);
-        const containers = await docker.listContainerNames(SsoService.container(context, variantPrefix));
+        const containers = await docker.listContainerNames(
+            SsoService.container(context, variantPrefix),
+        );
 
         for (const container of containers) {
             if (container !== own) {

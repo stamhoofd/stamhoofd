@@ -14,7 +14,10 @@ export const MFATestHelper = {
     /**
      * Enroll a confirmed authenticator app and return its plaintext secret.
      */
-    async addConfirmedTOTP(user: User, name = 'Test authenticator'): Promise<{ id: string; secret: string }> {
+    async addConfirmedTOTP(
+        user: User,
+        name = 'Test authenticator',
+    ): Promise<{ id: string; secret: string }> {
         const totp = new MFATOTP();
         const secret = authenticator.generateSecret();
         totp.userId = user.id;

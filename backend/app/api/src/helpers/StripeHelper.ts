@@ -26,18 +26,26 @@ export class StripeHelper {
             maxNetworkRetries: 0,
             timeout: 10000,
             stripeAccount: accountId ?? undefined,
-            httpClient: STAMHOOFD.environment === 'test'
-                ? Stripe.createFetchHttpClient(passthroughFetch)
-                : undefined,
+            httpClient:
+                STAMHOOFD.environment === 'test'
+                    ? Stripe.createFetchHttpClient(passthroughFetch)
+                    : undefined,
         });
     }
 
-    static async saveChargeInfo(model: StripePaymentIntent | StripeCheckoutSession, charge: Stripe.Charge, payment: Payment) {
+    static async saveChargeInfo(
+        model: StripePaymentIntent | StripeCheckoutSession,
+        charge: Stripe.Charge,
+        payment: Payment,
+    ) {
         try {
             if (model.accountId) {
                 // This is a direct charge
 
-                if (charge.balance_transaction !== null && typeof charge.balance_transaction !== 'string') {
+                if (
+                    charge.balance_transaction !== null &&
+                    typeof charge.balance_transaction !== 'string'
+                ) {
                     // Stripe counts in cents, we count in 1/10000
                     const fees = charge.balance_transaction.fee * 100;
                     payment.transferFee = fees - payment.serviceFeePayout;
@@ -68,7 +76,12 @@ export class StripeHelper {
             if (charge.payment_method_details?.sepa_debit) {
                 if (charge.payment_method_details.sepa_debit.last4) {
                     if (charge.payment_method_details.sepa_debit.country === 'BE') {
-                        payment.iban = charge.payment_method_details.sepa_debit.country + '•• ' + charge.payment_method_details.sepa_debit.bank_code + '• •••• ' + charge.payment_method_details.sepa_debit.last4;
+                        payment.iban =
+                            charge.payment_method_details.sepa_debit.country +
+                            '•• ' +
+                            charge.payment_method_details.sepa_debit.bank_code +
+                            '• •••• ' +
+                            charge.payment_method_details.sepa_debit.last4;
                     } else {
                         payment.iban = '•••• ' + charge.payment_method_details.sepa_debit.last4;
                     }
@@ -101,7 +114,11 @@ export class StripeHelper {
         }
     }
 
-    static async getStatus(payment: Payment, cancel = false, testMode = false): Promise<PaymentStatus> {
+    static async getStatus(
+        payment: Payment,
+        cancel = false,
+        testMode = false,
+    ): Promise<PaymentStatus> {
         if (testMode && !STAMHOOFD.STRIPE_SECRET_KEY?.startsWith('sk_test_')) {
             // Do not query anything
             return payment.status;
@@ -155,7 +172,10 @@ export class StripeHelper {
         return PaymentStatus.Created;
     }
 
-    static async getStatusFromCheckoutSession(payment: Payment, cancel = false): Promise<PaymentStatus> {
+    static async getStatusFromCheckoutSession(
+        payment: Payment,
+        cancel = false,
+    ): Promise<PaymentStatus> {
         const [model] = await StripeCheckoutSession.where({ paymentId: payment.id }, { limit: 1 });
 
         if (!model) {
@@ -208,22 +228,30 @@ export class StripeHelper {
         return PaymentStatus.Created;
     }
 
-    static async createPayment(
-        { payment, stripeAccount, redirectUrl, cancelUrl, customer, statementDescriptor, i18n, metadata, organization }: {
-            payment: Payment;
-            stripeAccount: StripeAccount | null;
-            redirectUrl: string;
-            cancelUrl: string;
-            customer: {
-                name: string;
-                email: string;
-            };
-            statementDescriptor: string;
-            i18n: I18n;
-            metadata: { [key: string]: string | undefined };
-            organization: Organization;
-        },
-    ): Promise<{ paymentUrl: string }> {
+    static async createPayment({
+        payment,
+        stripeAccount,
+        redirectUrl,
+        cancelUrl,
+        customer,
+        statementDescriptor,
+        i18n,
+        metadata,
+        organization,
+    }: {
+        payment: Payment;
+        stripeAccount: StripeAccount | null;
+        redirectUrl: string;
+        cancelUrl: string;
+        customer: {
+            name: string;
+            email: string;
+        };
+        statementDescriptor: string;
+        i18n: I18n;
+        metadata: { [key: string]: string | undefined };
+        organization: Organization;
+    }): Promise<{ paymentUrl: string }> {
         if (!stripeAccount) {
             throw new SimpleError({
                 code: '',
@@ -241,7 +269,7 @@ export class StripeHelper {
             });
         }
 
-        const directCharge = (stripeAccount.meta.type === 'standard');
+        const directCharge = stripeAccount.meta.type === 'standard';
         const fee = directCharge ? 0 : Math.round(payment.transferFee / 100);
         const serviceFee = Math.round(payment.serviceFeePayout / 100);
 
@@ -260,15 +288,20 @@ export class StripeHelper {
             const paymentMethod = await stripe.paymentMethods.create({
                 type: payment.method.toLowerCase() as 'bancontact' | 'ideal',
                 billing_details: {
-                    name: payment.customer?.dynamicName || (customer.name.length > 2 ? customer.name : $t('%Gr')),
+                    name:
+                        payment.customer?.dynamicName ||
+                        (customer.name.length > 2 ? customer.name : $t('%Gr')),
                     email: payment.customer?.dynamicEmail || customer.email,
                     address: payment.customer?.company?.address
                         ? {
-                                city: payment.customer.company.address.city,
-                                country: payment.customer.company.address.country,
-                                line1: payment.customer.company.address.street + ' ' + payment.customer.company.address.number,
-                                postal_code: payment.customer.company.address.postalCode,
-                            }
+                              city: payment.customer.company.address.city,
+                              country: payment.customer.company.address.country,
+                              line1:
+                                  payment.customer.company.address.street +
+                                  ' ' +
+                                  payment.customer.company.address.number,
+                              postal_code: payment.customer.company.address.postalCode,
+                          }
                         : undefined,
                 },
             });
@@ -278,18 +311,26 @@ export class StripeHelper {
                 currency: 'eur',
                 payment_method: paymentMethod.id,
                 payment_method_types: [payment.method.toLowerCase()],
-                statement_descriptor: Formatter.slug(statementDescriptor).substring(0, 22).toUpperCase(),
+                statement_descriptor: Formatter.slug(statementDescriptor)
+                    .substring(0, 22)
+                    .toUpperCase(),
                 application_fee_amount: fee + serviceFee,
                 on_behalf_of: !directCharge ? stripeAccount.accountId : undefined,
                 confirm: true,
                 return_url: redirectUrl,
                 transfer_data: !directCharge
                     ? {
-                            destination: stripeAccount.accountId,
-                        }
+                          destination: stripeAccount.accountId,
+                      }
                     : undefined,
                 metadata: fullMetadata,
-                payment_method_options: { bancontact: { preferred_language: ['nl', 'fr', 'de', 'en'].includes(i18n.language) ? i18n.language as 'en' : 'nl' } },
+                payment_method_options: {
+                    bancontact: {
+                        preferred_language: ['nl', 'fr', 'de', 'en'].includes(i18n.language)
+                            ? (i18n.language as 'en')
+                            : 'nl',
+                    },
+                },
             });
 
             console.log('Stripe payment intent', paymentIntent);
@@ -299,7 +340,12 @@ export class StripeHelper {
                 console.error('Stripe payment intent status is not requires_action', paymentIntent);
                 throw new SimpleError({
                     code: 'invalid_status',
-                    message: $t('%wm') + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t('%wn'),
+                    message:
+                        $t('%wm') +
+                        ' ' +
+                        PaymentMethodHelper.getName(payment.method) +
+                        ' ' +
+                        $t('%wn'),
                 });
             }
 
@@ -321,7 +367,8 @@ export class StripeHelper {
                 mode: 'payment',
                 success_url: redirectUrl,
                 cancel_url: cancelUrl,
-                payment_method_types: payment.method === PaymentMethod.DirectDebit ? ['sepa_debit'] : ['card'],
+                payment_method_types:
+                    payment.method === PaymentMethod.DirectDebit ? ['sepa_debit'] : ['card'],
                 line_items: [
                     {
                         price_data: {
@@ -341,12 +388,13 @@ export class StripeHelper {
                     application_fee_amount: fee + serviceFee,
                     transfer_data: !directCharge
                         ? {
-                                destination: stripeAccount.accountId,
-                            }
+                              destination: stripeAccount.accountId,
+                          }
                         : undefined,
                     metadata: fullMetadata,
-                    statement_descriptor: Formatter.slug(statementDescriptor).substring(0, 22).toUpperCase(),
-
+                    statement_descriptor: Formatter.slug(statementDescriptor)
+                        .substring(0, 22)
+                        .toUpperCase(),
                 },
                 customer_email: payment.customer?.dynamicEmail || customer.email,
                 customer_creation: 'if_required',
@@ -366,7 +414,12 @@ export class StripeHelper {
                 console.error('Stripe session has no url', session);
                 throw new SimpleError({
                     code: 'invalid_status',
-                    message: $t('%wm') + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t('%wn'),
+                    message:
+                        $t('%wm') +
+                        ' ' +
+                        PaymentMethodHelper.getName(payment.method) +
+                        ' ' +
+                        $t('%wn'),
                 });
             }
             paymentUrl = session.url;

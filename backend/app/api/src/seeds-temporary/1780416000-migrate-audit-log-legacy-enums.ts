@@ -1,8 +1,14 @@
 import { Migration } from '@node/database';
 import { AuditLog } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, getLegacyAuditLogEnumReplacement } from '@stamhoofd/structures';
+import {
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    getLegacyAuditLogEnumReplacement,
+} from '@stamhoofd/structures';
 
-export function migrateAuditLogReplacementLegacyEnums(replacement: AuditLogReplacement | undefined): { replacement: AuditLogReplacement | undefined; changed: boolean } {
+export function migrateAuditLogReplacementLegacyEnums(
+    replacement: AuditLogReplacement | undefined,
+): { replacement: AuditLogReplacement | undefined; changed: boolean } {
     if (!replacement) {
         return { replacement, changed: false };
     }
@@ -81,5 +87,7 @@ export default new Migration(async () => {
         count += 1;
     }
 
-    console.log('Finished migrating legacy audit log enum replacements for ' + count + ' audit logs.');
+    console.log(
+        'Finished migrating legacy audit log enum replacements for ' + count + ' audit logs.',
+    );
 });

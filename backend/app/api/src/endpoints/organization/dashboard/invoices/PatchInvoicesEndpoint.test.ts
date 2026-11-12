@@ -2,10 +2,29 @@ import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
 import { Request } from '@node/endpoints';
 import type { Organization, User } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, Invoice, InvoicedBalanceItem, OrganizationFactory, Payment, UserFactory } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemFactory,
+    Invoice,
+    InvoicedBalanceItem,
+    OrganizationFactory,
+    Payment,
+    UserFactory,
+} from '@stamhoofd/models';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Company, InvoicedBalanceItem as InvoicedBalanceItemStruct, InvoiceStruct, InvoiceType, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatus, Permissions } from '@stamhoofd/structures';
+import {
+    Company,
+    InvoicedBalanceItem as InvoicedBalanceItemStruct,
+    InvoiceStruct,
+    InvoiceType,
+    PaymentCustomer,
+    PaymentGeneral,
+    PaymentMethod,
+    PaymentMethodHelper,
+    PaymentStatus,
+    Permissions,
+} from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
@@ -17,7 +36,13 @@ import { SessionService } from '../../../../services/SessionService.js';
 describe('Endpoint.PatchInvoicesEndpoint', () => {
     const endpoint = new PatchInvoicesEndpoint();
 
-    const createBalanceItem = async ({ organization, unitPrice = 10_00 }: { organization: Organization; unitPrice?: number }) => {
+    const createBalanceItem = async ({
+        organization,
+        unitPrice = 10_00,
+    }: {
+        organization: Organization;
+        unitPrice?: number;
+    }) => {
         return await new BalanceItemFactory({
             organizationId: organization.id,
             amount: 1,
@@ -25,7 +50,15 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
         }).create();
     };
 
-    const createInvoice = async ({ organization, balanceItemIds, number = '1' }: { organization: Organization; balanceItemIds: string[]; number?: string | null }) => {
+    const createInvoice = async ({
+        organization,
+        balanceItemIds,
+        number = '1',
+    }: {
+        organization: Organization;
+        balanceItemIds: string[];
+        number?: string | null;
+    }) => {
         const invoice = new Invoice();
         invoice.organizationId = organization.id;
         invoice.number = number;
@@ -49,7 +82,13 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
         return invoice;
     };
 
-    const createPayment = async ({ organization, invoice }: { organization: Organization; invoice: Invoice }) => {
+    const createPayment = async ({
+        organization,
+        invoice,
+    }: {
+        organization: Organization;
+        invoice: Invoice;
+    }) => {
         const payment = new Payment();
         payment.organizationId = organization.id;
         payment.method = PaymentMethod.PointOfSale;
@@ -60,7 +99,15 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
         return payment;
     };
 
-    const patchInvoices = async ({ body, organization, user }: { body: PatchableArrayAutoEncoder<InvoiceStruct>; organization: Organization; user: User }) => {
+    const patchInvoices = async ({
+        body,
+        organization,
+        user,
+    }: {
+        body: PatchableArrayAutoEncoder<InvoiceStruct>;
+        organization: Organization;
+        user: User;
+    }) => {
         const token = await SessionService.createSession(user);
         const request = Request.buildJson('PATCH', '/invoices', organization.getApiHost(), body);
         request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -70,7 +117,17 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
     /**
      * Builds an invoice struct (PUT body) for one new, unlinked payment of 10 euro on a fresh balance item
      */
-    const buildNewInvoice = async ({ organization, customer, isReceipt = false, comments = null }: { organization: Organization; customer: PaymentCustomer; isReceipt?: boolean; comments?: string | null }) => {
+    const buildNewInvoice = async ({
+        organization,
+        customer,
+        isReceipt = false,
+        comments = null,
+    }: {
+        organization: Organization;
+        customer: PaymentCustomer;
+        isReceipt?: boolean;
+        comments?: string | null;
+    }) => {
         const balanceItem = await createBalanceItem({ organization });
         balanceItem.VATPercentage = 0;
         await balanceItem.save();
@@ -88,7 +145,14 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             customer,
             isReceipt,
             comments,
-            payments: [PaymentGeneral.create({ id: payment.id, method: payment.method, status: payment.status, price: payment.price })],
+            payments: [
+                PaymentGeneral.create({
+                    id: payment.id,
+                    method: payment.method,
+                    status: payment.status,
+                    price: payment.price,
+                }),
+            ],
         });
         struct.addItem(InvoicedBalanceItemStruct.createFor(balanceItem.getStructure(), 10_00));
         return struct;
@@ -98,7 +162,17 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
      * Builds an invoice struct (PUT body) for two unlinked payments of 10 and -10 euro that cancel each other out.
      * Both payments get their own balance item, unless `withoutItems` is set: then the balance items cancelled each other out and the struct has no items.
      */
-    const buildZeroInvoice = async ({ organization, customer, isReceipt = false, withoutItems = false }: { organization: Organization; customer: PaymentCustomer; isReceipt?: boolean; withoutItems?: boolean }) => {
+    const buildZeroInvoice = async ({
+        organization,
+        customer,
+        isReceipt = false,
+        withoutItems = false,
+    }: {
+        organization: Organization;
+        customer: PaymentCustomer;
+        isReceipt?: boolean;
+        withoutItems?: boolean;
+    }) => {
         const struct = InvoiceStruct.create({
             organizationId: organization.id,
             seller: Company.create({ name: 'Seller' }),
@@ -113,13 +187,22 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             payment.status = PaymentStatus.Succeeded;
             payment.price = price;
             await payment.save();
-            struct.payments.push(PaymentGeneral.create({ id: payment.id, method: payment.method, status: payment.status, price: payment.price }));
+            struct.payments.push(
+                PaymentGeneral.create({
+                    id: payment.id,
+                    method: payment.method,
+                    status: payment.status,
+                    price: payment.price,
+                }),
+            );
 
             if (!withoutItems) {
                 const balanceItem = await createBalanceItem({ organization, unitPrice: price });
                 balanceItem.VATPercentage = 0;
                 await balanceItem.save();
-                struct.addItem(InvoicedBalanceItemStruct.createFor(balanceItem.getStructure(), price));
+                struct.addItem(
+                    InvoicedBalanceItemStruct.createFor(balanceItem.getStructure(), price),
+                );
             }
         }
         return struct;
@@ -136,10 +219,17 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
                 organization,
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            const company = PaymentCustomer.create({ company: Company.create({ name: 'BTW-plichtig', VATNumber: 'BE0123456749' }) });
+            const company = PaymentCustomer.create({
+                company: Company.create({ name: 'BTW-plichtig', VATNumber: 'BE0123456749' }),
+            });
 
             const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
-            const struct = await buildZeroInvoice({ organization, customer: company, isReceipt: true, withoutItems: true });
+            const struct = await buildZeroInvoice({
+                organization,
+                customer: company,
+                isReceipt: true,
+                withoutItems: true,
+            });
             body.addPut(struct);
             const [receipt] = (await patchInvoices({ body, organization, user })).body;
 
@@ -168,8 +258,16 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             }).create();
 
             const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
-            body.addPut(await buildZeroInvoice({ organization, customer: PaymentCustomer.create({}), isReceipt: true }));
-            await expect(patchInvoices({ body, organization, user })).rejects.toThrow(STExpect.errorWithCode('invalid_invoiced_amount'));
+            body.addPut(
+                await buildZeroInvoice({
+                    organization,
+                    customer: PaymentCustomer.create({}),
+                    isReceipt: true,
+                }),
+            );
+            await expect(patchInvoices({ body, organization, user })).rejects.toThrow(
+                STExpect.errorWithCode('invalid_invoiced_amount'),
+            );
         });
 
         test('a zero receipt without items lists its payments on the PDF', async () => {
@@ -180,7 +278,12 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             }).create();
 
             const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
-            const struct = await buildZeroInvoice({ organization, customer: PaymentCustomer.create({}), isReceipt: true, withoutItems: true });
+            const struct = await buildZeroInvoice({
+                organization,
+                customer: PaymentCustomer.create({}),
+                isReceipt: true,
+                withoutItems: true,
+            });
             expect(struct.items.length).toBe(0);
             body.addPut(struct);
             const [receipt] = (await patchInvoices({ body, organization, user })).body;
@@ -226,7 +329,14 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
                 organizationId: organization.id,
                 seller: Company.create({ name: 'Seller' }),
                 customer: PaymentCustomer.create({}),
-                payments: [PaymentGeneral.create({ id: payment.id, method: payment.method, status: payment.status, price: payment.price })],
+                payments: [
+                    PaymentGeneral.create({
+                        id: payment.id,
+                        method: payment.method,
+                        status: payment.status,
+                        price: payment.price,
+                    }),
+                ],
             });
 
             // Two rows of 10 euro each on a balance item of 10 euro: each row fits on its own, the sum does not
@@ -235,7 +345,9 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
 
             const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
             body.addPut(struct);
-            await expect(patchInvoices({ body, organization, user })).rejects.toThrow(STExpect.errorWithCode('cannot_invoice_balance_item'));
+            await expect(patchInvoices({ body, organization, user })).rejects.toThrow(
+                STExpect.errorWithCode('cannot_invoice_balance_item'),
+            );
         });
 
         test('a zero invoice is still rejected', async () => {
@@ -247,8 +359,16 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
 
             for (const withoutItems of [false, true]) {
                 const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
-                body.addPut(await buildZeroInvoice({ organization, customer: PaymentCustomer.create({}), withoutItems }));
-                await expect(patchInvoices({ body, organization, user })).rejects.toThrow(STExpect.errorWithCode('invalid_invoiced_amount'));
+                body.addPut(
+                    await buildZeroInvoice({
+                        organization,
+                        customer: PaymentCustomer.create({}),
+                        withoutItems,
+                    }),
+                );
+                await expect(patchInvoices({ body, organization, user })).rejects.toThrow(
+                    STExpect.errorWithCode('invalid_invoiced_amount'),
+                );
             }
         });
 
@@ -261,7 +381,9 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
                 isReceipt: true,
             });
 
-            await expect(InvoiceService.createFrom(organization, struct)).rejects.toThrow(STExpect.errorWithCode('missing_payments'));
+            await expect(InvoiceService.createFrom(organization, struct)).rejects.toThrow(
+                STExpect.errorWithCode('missing_payments'),
+            );
         });
     });
 
@@ -285,7 +407,14 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             expect(invoice.type).toBe(InvoiceType.Invoice);
 
             const receiptBody = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
-            receiptBody.addPut(await buildNewInvoice({ organization, customer: anonymous, isReceipt: true, comments: '  Verkoop op de bar  ' }));
+            receiptBody.addPut(
+                await buildNewInvoice({
+                    organization,
+                    customer: anonymous,
+                    isReceipt: true,
+                    comments: '  Verkoop op de bar  ',
+                }),
+            );
             const [receipt] = (await patchInvoices({ body: receiptBody, organization, user })).body;
 
             expect(receipt.number).toBe('BON-000001');
@@ -306,13 +435,20 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             expect(html).not.toContain('Factuur');
 
             // The invoice series continues independently
-            const secondInvoiceBody = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
-            secondInvoiceBody.addPut(await buildNewInvoice({ organization, customer: anonymous, comments: 'Opmerking' }));
-            const [secondInvoice] = (await patchInvoices({ body: secondInvoiceBody, organization, user })).body;
+            const secondInvoiceBody =
+                new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
+            secondInvoiceBody.addPut(
+                await buildNewInvoice({ organization, customer: anonymous, comments: 'Opmerking' }),
+            );
+            const [secondInvoice] = (
+                await patchInvoices({ body: secondInvoiceBody, organization, user })
+            ).body;
             expect(secondInvoice.number).toBe('000002');
             expect(secondInvoice.comments).toBe('Opmerking');
 
-            const invoiceHtml = await InvoicePdfService.generateHtml((await Invoice.getByID(secondInvoice.id))!);
+            const invoiceHtml = await InvoicePdfService.generateHtml(
+                (await Invoice.getByID(secondInvoice.id))!,
+            );
             expect(invoiceHtml).toContain('Factuur');
             expect(invoiceHtml).toContain('Opmerking');
             expect(invoiceHtml).not.toContain('Aankoopbewijs');
@@ -331,14 +467,30 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
                 Company.create({ name: 'VZW', companyNumber: '0123456749' }),
             ]) {
                 const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
-                body.addPut(await buildNewInvoice({ organization, customer: PaymentCustomer.create({ company }), isReceipt: true }));
+                body.addPut(
+                    await buildNewInvoice({
+                        organization,
+                        customer: PaymentCustomer.create({ company }),
+                        isReceipt: true,
+                    }),
+                );
 
-                await expect(patchInvoices({ body, organization, user })).rejects.toThrow(STExpect.errorWithCode('receipt_not_allowed'));
+                await expect(patchInvoices({ body, organization, user })).rejects.toThrow(
+                    STExpect.errorWithCode('receipt_not_allowed'),
+                );
             }
 
             // A company without numbers is fine
             const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
-            body.addPut(await buildNewInvoice({ organization, customer: PaymentCustomer.create({ company: Company.create({ name: 'Feitelijke vereniging' }) }), isReceipt: true }));
+            body.addPut(
+                await buildNewInvoice({
+                    organization,
+                    customer: PaymentCustomer.create({
+                        company: Company.create({ name: 'Feitelijke vereniging' }),
+                    }),
+                    isReceipt: true,
+                }),
+            );
             const [receipt] = (await patchInvoices({ body, organization, user })).body;
             expect(receipt.number).toBe('BON-000001');
         });
@@ -346,13 +498,21 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
         test('a receipt cannot be created for a paying organization with a company or VAT number', async () => {
             const organization = await new OrganizationFactory({}).create();
             const payingOrganization = await new OrganizationFactory({}).create();
-            payingOrganization.meta.companies = [Company.create({ name: 'Paying VZW', companyNumber: '0123456749' })];
+            payingOrganization.meta.companies = [
+                Company.create({ name: 'Paying VZW', companyNumber: '0123456749' }),
+            ];
             await payingOrganization.save();
 
-            const struct = await buildNewInvoice({ organization, customer: PaymentCustomer.create({}), isReceipt: true });
+            const struct = await buildNewInvoice({
+                organization,
+                customer: PaymentCustomer.create({}),
+                isReceipt: true,
+            });
             struct.payingOrganizationId = payingOrganization.id;
 
-            await expect(InvoiceService.createFrom(organization, struct)).rejects.toThrow(STExpect.errorWithCode('receipt_not_allowed'));
+            await expect(InvoiceService.createFrom(organization, struct)).rejects.toThrow(
+                STExpect.errorWithCode('receipt_not_allowed'),
+            );
         });
     });
 
@@ -382,7 +542,9 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             expect(await Invoice.getByID(invoice.id)).toBeUndefined();
 
             // Invoiced balance items are cascade deleted
-            const remainingItems = await InvoicedBalanceItem.select().where('invoiceId', invoice.id).fetch();
+            const remainingItems = await InvoicedBalanceItem.select()
+                .where('invoiceId', invoice.id)
+                .fetch();
             expect(remainingItems).toHaveLength(0);
 
             // Payment is kept but unlinked
@@ -408,7 +570,9 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
             body.addDelete(invoice.id);
 
-            await expect(patchInvoices({ body, organization, user })).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(patchInvoices({ body, organization, user })).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
 
             // Invoice is untouched
             expect(await Invoice.getByID(invoice.id)).toBeDefined();
@@ -423,12 +587,17 @@ describe('Endpoint.PatchInvoicesEndpoint', () => {
             }).create();
 
             const balanceItem = await createBalanceItem({ organization: otherOrganization });
-            const invoice = await createInvoice({ organization: otherOrganization, balanceItemIds: [balanceItem.id] });
+            const invoice = await createInvoice({
+                organization: otherOrganization,
+                balanceItemIds: [balanceItem.id],
+            });
 
             const body = new PatchableArray() as PatchableArrayAutoEncoder<InvoiceStruct>;
             body.addDelete(invoice.id);
 
-            await expect(patchInvoices({ body, organization, user })).rejects.toThrow(STExpect.errorWithCode('not_found'));
+            await expect(patchInvoices({ body, organization, user })).rejects.toThrow(
+                STExpect.errorWithCode('not_found'),
+            );
 
             // Invoice is untouched
             expect(await Invoice.getByID(invoice.id)).toBeDefined();

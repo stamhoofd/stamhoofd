@@ -8,7 +8,9 @@ export class NotificationRecipient extends QueryableModel {
     static table = 'notification_recipients';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv7();
         },
     })
@@ -36,7 +38,8 @@ export class NotificationRecipient extends QueryableModel {
     dismissedAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }

@@ -43,19 +43,30 @@ describe('setup node workflow', () => {
         tmpDir = await createProject('v99.1.2');
         const run = vi.spyOn(commandRunner, 'run').mockResolvedValue(undefined);
         const messages: string[] = [];
-        vi.spyOn(console, 'log').mockImplementation(message => messages.push(String(message)));
+        vi.spyOn(console, 'log').mockImplementation((message) => messages.push(String(message)));
 
         await setupNodeVersion(tmpDir);
 
         expect(run).toHaveBeenCalledWith(
             'bash',
-            ['-c', '. "$1"', 'stam-install-node', path.join(tmpDir, '.development/install-node.sh')],
+            [
+                '-c',
+                '. "$1"',
+                'stam-install-node',
+                path.join(tmpDir, '.development/install-node.sh'),
+            ],
             { cwd: tmpDir, verbosity: RunVerbosity.Output },
         );
         expect(nodeInstallCommand(tmpDir, tmpDir)).toBe('source ".development/install-node.sh"');
-        expect(nodeInstallCommand(tmpDir, path.join(tmpDir, 'frontend/app'))).toBe('source "../../.development/install-node.sh"');
-        expect(messages.join('\n')).toContain('ACTION REQUIRED: this terminal is still using the old Node.js version.');
-        expect(messages.join('\n')).toContain('Restart your terminal before continuing, or activate the new version now:');
+        expect(nodeInstallCommand(tmpDir, path.join(tmpDir, 'frontend/app'))).toBe(
+            'source "../../.development/install-node.sh"',
+        );
+        expect(messages.join('\n')).toContain(
+            'ACTION REQUIRED: this terminal is still using the old Node.js version.',
+        );
+        expect(messages.join('\n')).toContain(
+            'Restart your terminal before continuing, or activate the new version now:',
+        );
     });
 
     it('does not run the installer during a dry run', async () => {

@@ -11,7 +11,8 @@ export class Gemeente extends QueryableModel {
     static table = 'gemeenten';
 
     @column({
-        primary: true, type: 'integer',
+        primary: true,
+        type: 'integer',
     })
     id!: number;
 
@@ -35,7 +36,9 @@ export class Gemeente extends QueryableModel {
 }
 
 function getProvince(name: string, provinces: Province[], provinceRows: string[][]): Province {
-    const p = provinces.find(p => StringCompare.typoCount(p.name, name) < 2 && p.country == Country.Belgium);
+    const p = provinces.find(
+        (p) => StringCompare.typoCount(p.name, name) < 2 && p.country == Country.Belgium,
+    );
     if (p) {
         return p;
     }
@@ -95,7 +98,9 @@ export default new Migration(async () => {
             continue;
         }
 
-        const hoofd = citiesByNameAndProvince.get(cityKey(gemeente.hoofdgemeente, gemeente.city.provinceId));
+        const hoofd = citiesByNameAndProvince.get(
+            cityKey(gemeente.hoofdgemeente, gemeente.city.provinceId),
+        );
         if (!hoofd) {
             // Create the city
             const city = new City();
@@ -134,7 +139,10 @@ async function insertRows(table: string, columns: string[], rows: unknown[][]): 
         if (chunk.length === 0) {
             continue;
         }
-        await Database.insert(`INSERT INTO \`${table}\` (${columns.map(column => `\`${column}\``).join(', ')}) VALUES ?`, [chunk]);
+        await Database.insert(
+            `INSERT INTO \`${table}\` (${columns.map((column) => `\`${column}\``).join(', ')}) VALUES ?`,
+            [chunk],
+        );
     }
 }
 
@@ -144,10 +152,13 @@ async function updateParentCityIds(rows: string[][]): Promise<void> {
             continue;
         }
         const cases = chunk.map(() => 'WHEN ? THEN ?').join(' ');
-        await Database.statement(`UPDATE \`${City.table}\` SET \`parentCityId\` = CASE \`id\` ${cases} END WHERE \`id\` IN (?)`, [
-            ...chunk.flatMap(([cityId, parentCityId]) => [cityId, parentCityId]),
-            chunk.map(([cityId]) => cityId),
-        ]);
+        await Database.statement(
+            `UPDATE \`${City.table}\` SET \`parentCityId\` = CASE \`id\` ${cases} END WHERE \`id\` IN (?)`,
+            [
+                ...chunk.flatMap(([cityId, parentCityId]) => [cityId, parentCityId]),
+                chunk.map(([cityId]) => cityId),
+            ],
+        );
     }
 }
 

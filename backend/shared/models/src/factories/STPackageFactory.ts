@@ -16,7 +16,10 @@ export class STPackageFactory extends Factory<Options, STPackage> {
         const pack = new STPackage();
         pack.organizationId = this.options.organization.id;
 
-        const m = STPackageBundleHelper.getCurrentPackage(this.options.bundle ?? STPackageBundle.Webshops, new Date());
+        const m = STPackageBundleHelper.getCurrentPackage(
+            this.options.bundle ?? STPackageBundle.Webshops,
+            new Date(),
+        );
 
         pack.meta = m.meta;
         pack.validUntil = m.validUntil;

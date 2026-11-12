@@ -21,7 +21,12 @@ export class OneToManyRelation<Key extends keyof any, A extends Model, B extends
     sortKey: keyof B | undefined;
     sortOrder: 'ASC' | 'DESC' = 'ASC';
 
-    constructor(modelA: { new (): A } & typeof Model, modelB: { new (): B } & typeof Model, modelKey: Key, foreignKey: keyof B) {
+    constructor(
+        modelA: { new (): A } & typeof Model,
+        modelB: { new (): B } & typeof Model,
+        modelKey: Key,
+        foreignKey: keyof B,
+    ) {
         this.modelA = modelA;
         this.modelB = modelB;
         this.modelKey = modelKey;

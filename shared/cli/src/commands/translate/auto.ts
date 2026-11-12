@@ -10,27 +10,46 @@ import { detectVcs, Vcs } from '../../runtime/vcs.js';
 
 export default class TranslateAuto extends BaseCommand {
     static summary = 'Prepare translations for release: keys, cleanup, then machine';
-    static description = 'Rewrite Dutch translation strings as keys, merge duplicates, remove unused keys, and translate missing or changed strings. Review and commit the generated changes separately before releasing. Source extraction and interactive review are not part of this flow.';
-    static examples = ['stam translate auto', 'stam translate auto --locale fr --provider openai', 'stam translate auto --no-machine'];
+    static description =
+        'Rewrite Dutch translation strings as keys, merge duplicates, remove unused keys, and translate missing or changed strings. Review and commit the generated changes separately before releasing. Source extraction and interactive review are not part of this flow.';
+    static examples = [
+        'stam translate auto',
+        'stam translate auto --locale fr --provider openai',
+        'stam translate auto --no-machine',
+    ];
     static flags = {
         ...machineFlags,
-        'no-machine': Flags.boolean({ description: 'Only register keys and clean up; do not make AI requests' }),
-        'yes': Flags.boolean({ char: 'y', description: 'Approve the flow without prompting (required in noninteractive terminals)' }),
+        'no-machine': Flags.boolean({
+            description: 'Only register keys and clean up; do not make AI requests',
+        }),
+        yes: Flags.boolean({
+            char: 'y',
+            description:
+                'Approve the flow without prompting (required in noninteractive terminals)',
+        }),
     };
 
     async run(): Promise<void> {
         const { flags } = await this.parse(TranslateAuto);
         if (!flags.yes && !(process.stdin.isTTY && process.stdout.isTTY)) {
-            this.error('Automatic translation needs confirmation. Run interactively or pass --yes. No translation files were changed.');
+            this.error(
+                'Automatic translation needs confirmation. Run interactively or pass --yes. No translation files were changed.',
+            );
         }
         const machine = machineArgs(flags);
         let skipMachine = flags['no-machine'];
         if (!skipMachine) {
             if (!flags.fake) {
-                info('For API keys from 1Password, unlock the "DevOps Development" vault before continuing.');
+                info(
+                    'For API keys from 1Password, unlock the "DevOps Development" vault before continuing.',
+                );
             }
             if (!flags.yes) {
-                skipMachine = !await confirm(flags.fake ? 'Generate fake machine translations as well?' : 'Perform AI machine translation as well?');
+                skipMachine = !(await confirm(
+                    flags.fake
+                        ? 'Generate fake machine translations as well?'
+                        : 'Perform AI machine translation as well?',
+                ));
             }
         }
         const locales = skipMachine ? undefined : await validateMachineTranslation(machine);
@@ -39,12 +58,18 @@ export default class TranslateAuto extends BaseCommand {
         info(`Flow: keys → cleanup${locales ? ' → machine' : ''}`);
         if (locales) {
             info(`Locales: ${locales.join(', ')}. Provider: ${flags.provider}.`);
-            warning(flags.fake ? 'Fake translations will be written; no AI requests will be made.' : 'Machine translation can make paid AI requests.');
+            warning(
+                flags.fake
+                    ? 'Fake translations will be written; no AI requests will be made.'
+                    : 'Machine translation can make paid AI requests.',
+            );
         } else {
             info('Machine translation is disabled. No AI requests will be made.');
         }
-        warning('This rewrites source translation keys and translation files. Existing working-copy changes are preserved, but review the resulting diff before committing.');
-        if (!flags.yes && !await confirm('Prepare translations for release?')) {
+        warning(
+            'This rewrites source translation keys and translation files. Existing working-copy changes are preserved, but review the resulting diff before committing.',
+        );
+        if (!flags.yes && !(await confirm('Prepare translations for release?'))) {
             info('Cancelled. No translation files were changed.');
             return;
         }
@@ -58,14 +83,25 @@ export default class TranslateAuto extends BaseCommand {
                 },
             });
         } catch (error) {
-            warning(`Stopped during ${stage}. Review any partial changes; the flow does not roll them back. Run stam translate manual ${stage} --help to investigate this step.`);
+            warning(
+                `Stopped during ${stage}. Review any partial changes; the flow does not roll them back. Run stam translate manual ${stage} --help to investigate this step.`,
+            );
             throw error;
         }
-        success('Translation preparation complete. Review and commit these changes separately before releasing.');
+        success(
+            'Translation preparation complete. Review and commit these changes separately before releasing.',
+        );
         const vcs = await detectVcs(root);
-        const diff = await run(vcs === Vcs.Jj ? 'jj' : 'git', ['diff', '--stat'], { cwd: root, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+        const diff = await run(vcs === Vcs.Jj ? 'jj' : 'git', ['diff', '--stat'], {
+            cwd: root,
+            capture: true,
+            allowFailure: true,
+            verbosity: RunVerbosity.Quiet,
+        });
         if (diff.stdout.trim()) {
-            info(`Current working-copy changes (including pre-existing edits):\n${diff.stdout.trim()}`);
+            info(
+                `Current working-copy changes (including pre-existing edits):\n${diff.stdout.trim()}`,
+            );
         }
     }
 }

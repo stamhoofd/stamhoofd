@@ -5,9 +5,7 @@ import { renameBackup, resolveBackupOption } from '../../../runtime/db-backup-he
 export default class DbBackupRename extends BaseCommand {
     static summary = 'Rename a local MySQL data volume backup';
     static description = 'Use this to rename a backup created with `stam db backup`.';
-    static examples = [
-        'stam db backup rename --from before-migration --to before-migration-old',
-    ];
+    static examples = ['stam db backup rename --from before-migration --to before-migration-old'];
 
     static flags = {
         ...BaseCommand.instanceFlags,
@@ -17,8 +15,17 @@ export default class DbBackupRename extends BaseCommand {
 
     async run(): Promise<void> {
         const { flags, context } = await this.parseWithContext(DbBackupRename);
-        const from = await resolveBackupOption({ context, flag: flags.from, message: 'Select the backup to rename' });
-        const to = await resolveBackupOption({ context, flag: flags.to, message: 'Enter the new backup name', customInput: true });
+        const from = await resolveBackupOption({
+            context,
+            flag: flags.from,
+            message: 'Select the backup to rename',
+        });
+        const to = await resolveBackupOption({
+            context,
+            flag: flags.to,
+            message: 'Enter the new backup name',
+            customInput: true,
+        });
 
         await renameBackup(context, from, to);
         this.log(`Renamed local MySQL backup ${from} to ${to}.`);

@@ -1,5 +1,12 @@
 import { AuditLog } from '@stamhoofd/models';
-import { AuditLogPatchItem, AuditLogReplacement, AuditLogReplacementType, EventNotificationStatus, getLegacyAuditLogEnumRegistrations, getLegacyAuditLogEnumReplacement } from '@stamhoofd/structures';
+import {
+    AuditLogPatchItem,
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    EventNotificationStatus,
+    getLegacyAuditLogEnumRegistrations,
+    getLegacyAuditLogEnumReplacement,
+} from '@stamhoofd/structures';
 
 import { migrateAuditLogLegacyEnums } from './1780416000-migrate-audit-log-legacy-enums.js';
 
@@ -20,9 +27,7 @@ describe('Seed.migrate-audit-log-legacy-enums', () => {
                 const legacyReplacement = AuditLogReplacement.key(value);
                 const legacyName = legacyReplacement.toString();
                 const log = new AuditLog();
-                log.replacements = new Map([
-                    ['value', legacyReplacement.clone()],
-                ]);
+                log.replacements = new Map([['value', legacyReplacement.clone()]]);
                 log.patchList = [
                     AuditLogPatchItem.create({
                         key: legacyReplacement.clone(),
@@ -51,13 +56,15 @@ describe('Seed.migrate-audit-log-legacy-enums', () => {
     });
 
     test('It does not migrate event notification statuses through the legacy mapping', () => {
-        expect(getLegacyAuditLogEnumRegistrations().some(({ type }) => type === 'EventNotificationStatus')).toBe(false);
+        expect(
+            getLegacyAuditLogEnumRegistrations().some(
+                ({ type }) => type === 'EventNotificationStatus',
+            ),
+        ).toBe(false);
 
         const legacyReplacement = AuditLogReplacement.key(EventNotificationStatus.Accepted);
         const log = new AuditLog();
-        log.replacements = new Map([
-            ['value', legacyReplacement],
-        ]);
+        log.replacements = new Map([['value', legacyReplacement]]);
 
         expect(migrateAuditLogLegacyEnums(log)).toBe(false);
 

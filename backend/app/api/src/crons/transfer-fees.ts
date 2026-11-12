@@ -2,7 +2,16 @@ import { registerRootTenantCron } from './helpers/registerTenantCron.js';
 import { BalanceItem, Organization, Payment, Platform } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, PaymentMethod, PaymentStatus, TranslatedString } from '@stamhoofd/structures';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    getPaymentProviderName,
+    PaymentMethod,
+    PaymentStatus,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItemService } from '../services/BalanceItemService.js';
 import { PaymentService } from '../services/PaymentService.js';
@@ -12,7 +21,10 @@ import { VATService } from '../services/VATService.js';
 registerRootTenantCron('transfer-fees', chargeTransferFees);
 
 async function chargeTransferFees() {
-    if (STAMHOOFD.environment !== 'development' && (new Date().getHours() > 5 || new Date().getHours() < 2)) {
+    if (
+        STAMHOOFD.environment !== 'development' &&
+        (new Date().getHours() > 5 || new Date().getHours() < 2)
+    ) {
         return;
     }
     const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
@@ -27,7 +39,13 @@ async function chargeTransferFees() {
         .where('status', PaymentStatus.Succeeded)
         .where('transferFeeManual', '>', 0)
         .where('transferFeeManualCharged', 0)
-        .where('createdAt', '<', STAMHOOFD.environment !== 'development' ? new Date() : Formatter.dateIso(new Date(Date.now() + 1000 * 60 * 60 * 24)))
+        .where(
+            'createdAt',
+            '<',
+            STAMHOOFD.environment !== 'development'
+                ? new Date()
+                : Formatter.dateIso(new Date(Date.now() + 1000 * 60 * 60 * 24)),
+        )
         .limit(200)
         .orderBy('createdAt', 'ASC')
         .fetch();
@@ -77,7 +95,11 @@ async function chargeTransferFees() {
         }
 
         for (const [_, payments] of groupedPayments) {
-            const totalFees = payments.reduce((sum, payment) => sum + payment.transferFeeManual - payment.transferFeeManualCharged, 0);
+            const totalFees = payments.reduce(
+                (sum, payment) =>
+                    sum + payment.transferFeeManual - payment.transferFeeManualCharged,
+                0,
+            );
             const groupedByDate = new Map<string, Payment[]>();
 
             for (const p of payments) {
@@ -104,7 +126,7 @@ async function chargeTransferFees() {
                 }
 
                 for (const [provider, payments] of groupedByProvider) {
-                    const date = new Date(Math.min(...payments.map(p => p.createdAt.getTime())));
+                    const date = new Date(Math.min(...payments.map((p) => p.createdAt.getTime())));
                     const startOfDay = Formatter.luxon(date).startOf('day').toJSDate();
                     const endOfDay = Formatter.luxon(date).endOf('day').toJSDate();
 
@@ -117,10 +139,13 @@ async function chargeTransferFees() {
                     item.name = $t('%1Yq', { date: day });
 
                     if (provider) {
-                        item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({
-                            id: provider,
-                            name: TranslatedString.create(getPaymentProviderName(provider)),
-                        }));
+                        item.relations.set(
+                            BalanceItemRelationType.PaymentProvider,
+                            BalanceItemRelation.create({
+                                id: provider,
+                                name: TranslatedString.create(getPaymentProviderName(provider)),
+                            }),
+                        );
                     }
 
                     item.payingOrganizationId = organization.id;
@@ -151,7 +176,15 @@ async function chargeTransferFees() {
                         .where('startDate', startOfDay)
                         .where('endDate', endOfDay)
                         .fetch();
-                    const existing = provider ? existingAll.find(e => e.relations.get(BalanceItemRelationType.PaymentProvider)?.id === provider) : existingAll.find(e => !e.relations.has(BalanceItemRelationType.PaymentProvider));
+                    const existing = provider
+                        ? existingAll.find(
+                              (e) =>
+                                  e.relations.get(BalanceItemRelationType.PaymentProvider)?.id ===
+                                  provider,
+                          )
+                        : existingAll.find(
+                              (e) => !e.relations.has(BalanceItemRelationType.PaymentProvider),
+                          );
 
                     if (existing) {
                         existing.unitPrice += totalFees;
@@ -163,11 +196,19 @@ async function chargeTransferFees() {
                     }
 
                     const { changedRows } = await Payment.update()
-                        .where('id', payments.map(p => p.id))
+                        .where(
+                            'id',
+                            payments.map((p) => p.id),
+                        )
                         .set('transferFeeManualCharged', SQL.column('transferFeeManual'))
                         .update();
                     if (changedRows !== payments.length) {
-                        console.error('Unexpected change in transferFeeManualCharged. Expected ' + payments.length + ', updated only ' + changedRows);
+                        console.error(
+                            'Unexpected change in transferFeeManualCharged. Expected ' +
+                                payments.length +
+                                ', updated only ' +
+                                changedRows,
+                        );
                     }
                 }
             }

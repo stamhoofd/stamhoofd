@@ -42,7 +42,10 @@ describe('Endpoint.GetTenantFrom*', () => {
     }
 
     const byDomain = async (domain: string, token?: Token) => {
-        const request = Request.buildJson('GET', `/v${Version}/tenant-from-domain?domain=${encodeURIComponent(domain)}`);
+        const request = Request.buildJson(
+            'GET',
+            `/v${Version}/tenant-from-domain?domain=${encodeURIComponent(domain)}`,
+        );
         if (token) {
             request.headers.authorization = 'Bearer ' + token.accessToken;
         }

@@ -11,15 +11,21 @@ type Query = undefined;
 type ResponseBody = PayableBalanceCollection;
 type Body = undefined;
 
-export class GetOrganizationPayableBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetOrganizationPayableBalanceEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = request.getVersion() >= 339
-            ? Endpoint.parseParameters(request.url, '/organization/payable-balance', {})
-            : Endpoint.parseParameters(request.url, '/organization/billing/status', {});
+        const params =
+            request.getVersion() >= 339
+                ? Endpoint.parseParameters(request.url, '/organization/payable-balance', {})
+                : Endpoint.parseParameters(request.url, '/organization/billing/status', {});
 
         if (params) {
             return [true, params as Params];
@@ -32,10 +38,16 @@ export class GetOrganizationPayableBalanceEndpoint extends Endpoint<Params, Quer
         await Context.authenticate();
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!await Context.auth.canManageFinances(organization.id)) {
+        if (!(await Context.auth.canManageFinances(organization.id))) {
             throw Context.auth.error();
         }
 
-        return new Response(await GetUserPayableBalanceEndpoint.getBillingStatusForObjects([organization.id], null, ReceivableBalanceType.organization));
+        return new Response(
+            await GetUserPayableBalanceEndpoint.getBillingStatusForObjects(
+                [organization.id],
+                null,
+                ReceivableBalanceType.organization,
+            ),
+        );
     }
 }

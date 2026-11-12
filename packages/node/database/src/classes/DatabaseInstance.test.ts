@@ -13,7 +13,9 @@ describe('DatabaseInstance.use', () => {
     });
 
     async function getSelectedDatabase(): Promise<string | null> {
-        const [rows] = await Database.select('SELECT DATABASE() as name', [], { nestTables: false });
+        const [rows] = await Database.select('SELECT DATABASE() as name', [], {
+            nestTables: false,
+        });
         return rows[0].name as string | null;
     }
 

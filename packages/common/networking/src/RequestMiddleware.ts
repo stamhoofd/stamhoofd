@@ -12,9 +12,17 @@ import { Request } from './Request.js';
 export interface RequestMiddleware {
     onBeforeRequest?(request: Request<any>): Promise<void>;
     /** Decoded API errors; enabled by shouldRetry OR allowErrorRetry. */
-    shouldRetryError?(request: Request<any>, response: XMLHttpRequest, error: SimpleErrors): Promise<boolean>;
+    shouldRetryError?(
+        request: Request<any>,
+        response: XMLHttpRequest,
+        error: SimpleErrors,
+    ): Promise<boolean>;
     /** Invalid responses (e.g. malformed JSON); enabled by shouldRetry. */
-    shouldRetryServerError?(request: Request<any>, response: XMLHttpRequest, error: Error): Promise<boolean>; // e.g. invalid json
+    shouldRetryServerError?(
+        request: Request<any>,
+        response: XMLHttpRequest,
+        error: Error,
+    ): Promise<boolean>; // e.g. invalid json
     /** Transport/encoding failures; enabled by shouldRetry. Cancellation stops retrying. */
     shouldRetryNetworkError?(request: Request<any>, error: Error): Promise<boolean>;
 

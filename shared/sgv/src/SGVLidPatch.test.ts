@@ -12,15 +12,27 @@ describe('SGVLidPatch persoonsgegevens', () => {
         expect(decoded.persoonsgegevens).not.toBeInstanceOf(Map);
         expect(decoded.encode(context)).toEqual(payload);
         const patch = SGVLidPatch.patchType().decode(new ObjectData(payload, context));
-        expect(SGVLidPatch.create({ persoonsgegevens: { geslacht: 'M' } }).patch(patch).persoonsgegevens).toEqual(payload.persoonsgegevens);
+        expect(
+            SGVLidPatch.create({ persoonsgegevens: { geslacht: 'M' } }).patch(patch)
+                .persoonsgegevens,
+        ).toEqual(payload.persoonsgegevens);
     });
 
     test('preserves omission, explicit undefined, empty objects and validation', () => {
         expect(SGVLidPatch.decode(new ObjectData({}, context)).persoonsgegevens).toBeUndefined();
-        expect(SGVLidPatch.decode(new ObjectData({ persoonsgegevens: undefined }, context)).persoonsgegevens).toBeUndefined();
-        expect(SGVLidPatch.decode(new ObjectData({ persoonsgegevens: {} }, context)).persoonsgegevens).toEqual({});
-        expect(() => SGVLidPatch.decode(new ObjectData({ persoonsgegevens: 'invalid' }, context))).toThrow();
-        expect(() => SGVLidPatch.decode(new ObjectData({ persoonsgegevens: null }, context))).toThrow();
+        expect(
+            SGVLidPatch.decode(new ObjectData({ persoonsgegevens: undefined }, context))
+                .persoonsgegevens,
+        ).toBeUndefined();
+        expect(
+            SGVLidPatch.decode(new ObjectData({ persoonsgegevens: {} }, context)).persoonsgegevens,
+        ).toEqual({});
+        expect(() =>
+            SGVLidPatch.decode(new ObjectData({ persoonsgegevens: 'invalid' }, context)),
+        ).toThrow();
+        expect(() =>
+            SGVLidPatch.decode(new ObjectData({ persoonsgegevens: null }, context)),
+        ).toThrow();
     });
 });
 
@@ -33,8 +45,12 @@ describe('SGVLidPatch vgagegevens', () => {
         expect(decoded.vgagegevens).not.toBeInstanceOf(Map);
         expect(decoded.encode(context)).toEqual(payload);
         const patch = SGVLidPatch.patchType().decode(new ObjectData(payload, context));
-        expect(SGVLidPatch.create({ vgagegevens: { achternaam: 'Old' } }).patch(patch).vgagegevens).toEqual(payload.vgagegevens);
-        expect(SGVLidPatch.decode(new ObjectData({ vgagegevens: {} }, context)).vgagegevens).toEqual({});
+        expect(
+            SGVLidPatch.create({ vgagegevens: { achternaam: 'Old' } }).patch(patch).vgagegevens,
+        ).toEqual(payload.vgagegevens);
+        expect(
+            SGVLidPatch.decode(new ObjectData({ vgagegevens: {} }, context)).vgagegevens,
+        ).toEqual({});
         expect(SGVLidPatch.decode(new ObjectData({}, context)).vgagegevens).toBeUndefined();
         expect(() => SGVLidPatch.decode(new ObjectData({ vgagegevens: null }, context))).toThrow();
         expect(() => SGVLidPatch.decode(new ObjectData({ vgagegevens: true }, context))).toThrow();
@@ -50,10 +66,19 @@ describe('SGVLidPatch verbondsgegevens', () => {
         expect(decoded.verbondsgegevens).not.toBeInstanceOf(Map);
         expect(decoded.encode(context)).toEqual(payload);
         const patch = SGVLidPatch.patchType().decode(new ObjectData(payload, context));
-        expect(SGVLidPatch.create({ verbondsgegevens: { lidnummer: 'old' } }).patch(patch).verbondsgegevens).toEqual(payload.verbondsgegevens);
-        expect(SGVLidPatch.decode(new ObjectData({ verbondsgegevens: {} }, context)).verbondsgegevens).toEqual({});
+        expect(
+            SGVLidPatch.create({ verbondsgegevens: { lidnummer: 'old' } }).patch(patch)
+                .verbondsgegevens,
+        ).toEqual(payload.verbondsgegevens);
+        expect(
+            SGVLidPatch.decode(new ObjectData({ verbondsgegevens: {} }, context)).verbondsgegevens,
+        ).toEqual({});
         expect(SGVLidPatch.decode(new ObjectData({}, context)).verbondsgegevens).toBeUndefined();
-        expect(() => SGVLidPatch.decode(new ObjectData({ verbondsgegevens: null }, context))).toThrow();
-        expect(() => SGVLidPatch.decode(new ObjectData({ verbondsgegevens: 42 }, context))).toThrow();
+        expect(() =>
+            SGVLidPatch.decode(new ObjectData({ verbondsgegevens: null }, context)),
+        ).toThrow();
+        expect(() =>
+            SGVLidPatch.decode(new ObjectData({ verbondsgegevens: 42 }, context)),
+        ).toThrow();
     });
 });

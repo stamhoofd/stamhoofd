@@ -16,7 +16,10 @@ export class EncodedResponse {
         this.body = body;
     }
 
-    static encode(response: Response<SupportedResponseBodyTypes>, request: Request): EncodedResponse {
+    static encode(
+        response: Response<SupportedResponseBodyTypes>,
+        request: Request,
+    ): EncodedResponse {
         const encoded = new EncodedResponse(response.status, response.headers, undefined);
 
         if (response.body !== undefined) {
@@ -24,29 +27,58 @@ export class EncodedResponse {
                 encoded.headers['content-type'] = 'application/json';
             }
 
-            if (encoded.headers['Content-Type'] == 'application/json' || encoded.headers['content-type'] == 'application/json') {
+            if (
+                encoded.headers['Content-Type'] == 'application/json' ||
+                encoded.headers['content-type'] == 'application/json'
+            ) {
                 // Only require version if we have to encode something
                 const version = request.getVersion();
-                if (typeof response.body === 'string' || response.body instanceof Uint8Array || response.body instanceof Buffer || isReadableStream(response.body)) {
+                if (
+                    typeof response.body === 'string' ||
+                    response.body instanceof Uint8Array ||
+                    response.body instanceof Buffer ||
+                    isReadableStream(response.body)
+                ) {
                     console.warn('We got a string/Buffer value as body for JSON');
                     encoded.body = response.body;
                 } else {
                     if (Array.isArray(response.body)) {
                         if (process.env.NODE_ENV === 'development') {
-                            encoded.body = JSON.stringify(response.body.map(e => e.encode({ version, medium: EncodeMedium.Network })), undefined, 2);
+                            encoded.body = JSON.stringify(
+                                response.body.map((e) =>
+                                    e.encode({ version, medium: EncodeMedium.Network }),
+                                ),
+                                undefined,
+                                2,
+                            );
                         } else {
-                            encoded.body = JSON.stringify(response.body.map(e => e.encode({ version, medium: EncodeMedium.Network })));
+                            encoded.body = JSON.stringify(
+                                response.body.map((e) =>
+                                    e.encode({ version, medium: EncodeMedium.Network }),
+                                ),
+                            );
                         }
                     } else {
                         if (process.env.NODE_ENV === 'development') {
-                            encoded.body = JSON.stringify(response.body.encode({ version, medium: EncodeMedium.Network }), undefined, 2);
+                            encoded.body = JSON.stringify(
+                                response.body.encode({ version, medium: EncodeMedium.Network }),
+                                undefined,
+                                2,
+                            );
                         } else {
-                            encoded.body = JSON.stringify(response.body.encode({ version, medium: EncodeMedium.Network }));
+                            encoded.body = JSON.stringify(
+                                response.body.encode({ version, medium: EncodeMedium.Network }),
+                            );
                         }
                     }
                 }
             } else {
-                if (typeof response.body === 'string' || response.body instanceof Uint8Array || response.body instanceof Buffer || isReadableStream(response.body)) {
+                if (
+                    typeof response.body === 'string' ||
+                    response.body instanceof Uint8Array ||
+                    response.body instanceof Buffer ||
+                    isReadableStream(response.body)
+                ) {
                     encoded.body = response.body;
                 } else {
                     console.error('Unexpected non-string value as body');

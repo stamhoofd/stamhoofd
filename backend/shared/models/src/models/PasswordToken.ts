@@ -34,7 +34,8 @@ export class PasswordToken extends QueryableModel {
     validUntil: Date;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -59,7 +60,10 @@ export class PasswordToken extends QueryableModel {
      * @param token
      * @param ignoreExpireDate: do not return if it is expired
      */
-    static async getToken(token: string, ignoreExpireDate = false): Promise<PasswordTokenWithUser | undefined> {
+    static async getToken(
+        token: string,
+        ignoreExpireDate = false,
+    ): Promise<PasswordTokenWithUser | undefined> {
         const [rows] = await Database.select(
             `SELECT ${this.getDefaultSelect()}, ${User.getDefaultSelect('user')}  FROM ${
                 this.table
@@ -95,7 +99,10 @@ export class PasswordToken extends QueryableModel {
     /***
      * Create a token without saving it
      */
-    static async createToken<U extends User>(user: U, validUntil?: Date): Promise<PasswordTokenWithUser> {
+    static async createToken<U extends User>(
+        user: U,
+        validUntil?: Date,
+    ): Promise<PasswordTokenWithUser> {
         if (user.isSystemUser) {
             throw new SimpleError({
                 code: 'internal_error',

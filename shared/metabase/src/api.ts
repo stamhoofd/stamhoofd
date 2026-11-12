@@ -76,7 +76,10 @@ export type MetabaseDashboardLayout = {
 };
 
 export class MetabaseApiError extends Error {
-    constructor(message: string, readonly status: number) {
+    constructor(
+        message: string,
+        readonly status: number,
+    ) {
         super(message);
         this.name = 'MetabaseApiError';
     }
@@ -105,7 +108,10 @@ export class MetabaseApi {
     private session: string | undefined;
     private readonly apiKey: string | undefined;
 
-    constructor(private readonly baseUrl: string, options: { apiKey?: string } = {}) {
+    constructor(
+        private readonly baseUrl: string,
+        options: { apiKey?: string } = {},
+    ) {
         this.apiKey = options.apiKey;
     }
 
@@ -114,7 +120,10 @@ export class MetabaseApi {
      * create the very first user. Absent means someone already set this instance up.
      */
     async getSetupToken(): Promise<string | undefined> {
-        const properties = await this.request<{ 'setup-token'?: string | null }>('GET', '/api/session/properties');
+        const properties = await this.request<{ 'setup-token'?: string | null }>(
+            'GET',
+            '/api/session/properties',
+        );
         return properties['setup-token'] ?? undefined;
     }
 
@@ -182,26 +191,37 @@ export class MetabaseApi {
         try {
             user = await this.currentUser();
         } catch (error) {
-            if (error instanceof MetabaseApiError && (error.status === 401 || error.status === 403)) {
-                throw new Error(`${this.baseUrl} rejected the api key. Create a new one under Admin > Settings > Authentication > API keys and update it in 1Password.`, { cause: error });
+            if (
+                error instanceof MetabaseApiError &&
+                (error.status === 401 || error.status === 403)
+            ) {
+                throw new Error(
+                    `${this.baseUrl} rejected the api key. Create a new one under Admin > Settings > Authentication > API keys and update it in 1Password.`,
+                    { cause: error },
+                );
             }
             throw error;
         }
 
         if (!user.is_superuser) {
-            throw new Error(`The api key of ${this.baseUrl} belongs to ${user.email}, which is not an admin. Writing questions and dashboards needs a key in the Administrators group.`);
+            throw new Error(
+                `The api key of ${this.baseUrl} belongs to ${user.email}, which is not an admin. Writing questions and dashboards needs a key in the Administrators group.`,
+            );
         }
 
         return user;
     }
 
     async listDatabases(): Promise<MetabaseDatabase[]> {
-        const result = await this.request<{ data: MetabaseDatabase[] } | MetabaseDatabase[]>('GET', '/api/database');
+        const result = await this.request<{ data: MetabaseDatabase[] } | MetabaseDatabase[]>(
+            'GET',
+            '/api/database',
+        );
         return Array.isArray(result) ? result : result.data;
     }
 
     async findDatabaseByName(name: string): Promise<MetabaseDatabase | undefined> {
-        return (await this.listDatabases()).find(database => database.name === name);
+        return (await this.listDatabases()).find((database) => database.name === name);
     }
 
     /**
@@ -213,8 +233,10 @@ export class MetabaseApi {
     async requireDatabaseByName(name: string): Promise<MetabaseDatabase> {
         const match = await this.findDatabaseByName(name);
         if (!match) {
-            const known = (await this.listDatabases()).map(database => database.name);
-            throw new Error(`${this.baseUrl} has no data source named "${name}"${known.length > 0 ? `, only: ${known.join(', ')}` : ''}. Add it under Admin > Databases first.`);
+            const known = (await this.listDatabases()).map((database) => database.name);
+            throw new Error(
+                `${this.baseUrl} has no data source named "${name}"${known.length > 0 ? `, only: ${known.join(', ')}` : ''}. Add it under Admin > Databases first.`,
+            );
         }
         return match;
     }
@@ -261,15 +283,22 @@ export class MetabaseApi {
      * be known yet; this waits a bounded time for it and otherwise leaves it for the next run rather
      * than holding up the command.
      */
-    async hideTables(databaseId: number, names: string[], options: { timeoutMs?: number } = {}): Promise<string[]> {
+    async hideTables(
+        databaseId: number,
+        names: string[],
+        options: { timeoutMs?: number } = {},
+    ): Promise<string[]> {
         const deadline = Date.now() + (options.timeoutMs ?? 30_000);
         const hidden: string[] = [];
 
         for (;;) {
-            const metadata = await this.request<{ tables?: MetabaseTable[] }>('GET', `/api/database/${databaseId}/metadata?include_hidden=true`);
-            const tables = (metadata.tables ?? []).filter(table => names.includes(table.name));
+            const metadata = await this.request<{ tables?: MetabaseTable[] }>(
+                'GET',
+                `/api/database/${databaseId}/metadata?include_hidden=true`,
+            );
+            const tables = (metadata.tables ?? []).filter((table) => names.includes(table.name));
 
-            for (const table of tables.filter(table => table.visibility_type !== 'hidden')) {
+            for (const table of tables.filter((table) => table.visibility_type !== 'hidden')) {
                 await this.request('PUT', `/api/table/${table.id}`, { visibility_type: 'hidden' });
                 hidden.push(table.name);
             }
@@ -277,7 +306,7 @@ export class MetabaseApi {
             if (tables.length === names.length || Date.now() >= deadline) {
                 return hidden;
             }
-            await new Promise(resolve => setTimeout(resolve, 2_000));
+            await new Promise((resolve) => setTimeout(resolve, 2_000));
         }
     }
 
@@ -287,7 +316,7 @@ export class MetabaseApi {
      * than by name, which is the only thing Metabase guarantees about it.
      */
     async removeSampleDatabase(): Promise<{ removed: boolean }> {
-        const sample = (await this.listDatabases()).find(database => database.is_sample === true);
+        const sample = (await this.listDatabases()).find((database) => database.is_sample === true);
         if (!sample) {
             return { removed: false };
         }
@@ -298,7 +327,7 @@ export class MetabaseApi {
 
     async listCollections(): Promise<MetabaseCollection[]> {
         const collections = await this.request<MetabaseCollection[]>('GET', '/api/collection');
-        return collections.filter(collection => collection.archived !== true);
+        return collections.filter((collection) => collection.archived !== true);
     }
 
     /**
@@ -306,12 +335,15 @@ export class MetabaseApi {
      * goes in one collection so it stays apart from whatever the client builds themselves.
      */
     async ensureCollection(name: string): Promise<{ id: number; created: boolean }> {
-        const match = (await this.listCollections()).find(collection => collection.name === name);
+        const match = (await this.listCollections()).find((collection) => collection.name === name);
         if (match) {
             return { id: match.id, created: false };
         }
 
-        const created = await this.request<{ id: number }>('POST', '/api/collection', { name, parent_id: null });
+        const created = await this.request<{ id: number }>('POST', '/api/collection', {
+            name,
+            parent_id: null,
+        });
         return { id: created.id, created: true };
     }
 
@@ -331,7 +363,10 @@ export class MetabaseApi {
      */
     async listSnippets(): Promise<MetabaseSnippet[]> {
         const live = await this.request<MetabaseSnippet[]>('GET', '/api/native-query-snippet');
-        const archived = await this.request<MetabaseSnippet[]>('GET', '/api/native-query-snippet?archived=true');
+        const archived = await this.request<MetabaseSnippet[]>(
+            'GET',
+            '/api/native-query-snippet?archived=true',
+        );
 
         return [...live, ...archived];
     }
@@ -345,23 +380,36 @@ export class MetabaseApi {
      * would otherwise keep showing words the report stopped saying.
      */
     async saveSnippet(input: MetabaseSnippetInput, existingId?: number): Promise<number> {
-        const body = { name: input.name, content: input.content, description: input.description ?? null };
+        const body = {
+            name: input.name,
+            content: input.content,
+            description: input.description ?? null,
+        };
 
         if (existingId !== undefined) {
-            await this.request('PUT', `/api/native-query-snippet/${existingId}`, { ...body, archived: false });
+            await this.request('PUT', `/api/native-query-snippet/${existingId}`, {
+                ...body,
+                archived: false,
+            });
             return existingId;
         }
         return (await this.request<{ id: number }>('POST', '/api/native-query-snippet', body)).id;
     }
 
     async listCards(collectionId: number): Promise<MetabaseCard[]> {
-        const items = await this.request<{ data?: { id: number; name: string; model: string }[] }>('GET', `/api/collection/${collectionId}/items?models=card`);
-        return (items.data ?? []).map(item => ({ id: item.id, name: item.name }));
+        const items = await this.request<{ data?: { id: number; name: string; model: string }[] }>(
+            'GET',
+            `/api/collection/${collectionId}/items?models=card`,
+        );
+        return (items.data ?? []).map((item) => ({ id: item.id, name: item.name }));
     }
 
     async listDashboards(collectionId: number): Promise<MetabaseDashboard[]> {
-        const items = await this.request<{ data?: { id: number; name: string; model: string }[] }>('GET', `/api/collection/${collectionId}/items?models=dashboard`);
-        return (items.data ?? []).map(item => ({ id: item.id, name: item.name }));
+        const items = await this.request<{ data?: { id: number; name: string; model: string }[] }>(
+            'GET',
+            `/api/collection/${collectionId}/items?models=dashboard`,
+        );
+        return (items.data ?? []).map((item) => ({ id: item.id, name: item.name }));
     }
 
     /**
@@ -378,7 +426,7 @@ export class MetabaseApi {
             dataset_query: {
                 type: 'native',
                 database: input.databaseId,
-                native: { 'query': input.query, 'template-tags': input.templateTags },
+                native: { query: input.query, 'template-tags': input.templateTags },
             },
         };
 
@@ -395,13 +443,20 @@ export class MetabaseApi {
      * no database connection of its own.
      */
     async runCardValues(cardId: number): Promise<string[]> {
-        const result = await this.request<{ data?: { rows?: unknown[][] } }>('POST', `/api/card/${cardId}/query`);
+        const result = await this.request<{ data?: { rows?: unknown[][] } }>(
+            'POST',
+            `/api/card/${cardId}/query`,
+        );
         return (result.data?.rows ?? [])
-            .map(row => row[0])
+            .map((row) => row[0])
             .filter((value): value is string => typeof value === 'string' && value.length > 0);
     }
 
-    async createDashboard(name: string, description: string | undefined, collectionId: number): Promise<number> {
+    async createDashboard(
+        name: string,
+        description: string | undefined,
+        collectionId: number,
+    ): Promise<number> {
         const created = await this.request<{ id: number }>('POST', '/api/dashboard', {
             name,
             description: description ?? null,
@@ -419,7 +474,11 @@ export class MetabaseApi {
 
         return {
             tabs: dashboard.tabs ?? [],
-            cards: (dashboard.dashcards ?? []).map(dashcard => ({ id: dashcard.id, cardId: dashcard.card_id, tabId: dashcard.dashboard_tab_id })),
+            cards: (dashboard.dashcards ?? []).map((dashcard) => ({
+                id: dashcard.id,
+                cardId: dashcard.card_id,
+                tabId: dashcard.dashboard_tab_id,
+            })),
         };
     }
 
@@ -428,7 +487,17 @@ export class MetabaseApi {
      * whole set of tabs and cards with what is sent, so this is also what removes a card the report
      * no longer has.
      */
-    async updateDashboard(id: number, body: { name: string; description?: string; parameters: unknown[]; tabs: unknown[]; dashcards: unknown[]; collectionPosition?: number }): Promise<void> {
+    async updateDashboard(
+        id: number,
+        body: {
+            name: string;
+            description?: string;
+            parameters: unknown[];
+            tabs: unknown[];
+            dashcards: unknown[];
+            collectionPosition?: number;
+        },
+    ): Promise<void> {
         await this.request('PUT', `/api/dashboard/${id}`, {
             name: body.name,
             description: body.description ?? null,
@@ -447,8 +516,13 @@ export class MetabaseApi {
      * anyone else who opens Metabase. Bookmarking twice is an error, hence the check first.
      */
     async bookmarkDashboard(id: number): Promise<{ created: boolean }> {
-        const bookmarks = await this.request<{ type?: string; item_id?: number }[]>('GET', '/api/bookmark');
-        if (bookmarks.some(bookmark => bookmark.type === 'dashboard' && bookmark.item_id === id)) {
+        const bookmarks = await this.request<{ type?: string; item_id?: number }[]>(
+            'GET',
+            '/api/bookmark',
+        );
+        if (
+            bookmarks.some((bookmark) => bookmark.type === 'dashboard' && bookmark.item_id === id)
+        ) {
             return { created: false };
         }
 
@@ -480,7 +554,10 @@ export class MetabaseApi {
 
         const text = await response.text();
         if (!response.ok) {
-            throw new MetabaseApiError(`${method} ${path} failed with status ${response.status}: ${text.slice(0, 200)}`, response.status);
+            throw new MetabaseApiError(
+                `${method} ${path} failed with status ${response.status}: ${text.slice(0, 200)}`,
+                response.status,
+            );
         }
 
         return (text.length === 0 ? undefined : JSON.parse(text)) as T;

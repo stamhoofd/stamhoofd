@@ -3,10 +3,38 @@ import type { Endpoint } from '@node/endpoints';
 import { Request } from '@node/endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { User } from '@stamhoofd/models';
-import { AuditLog, EmailTemplateFactory, EventFactory, EventNotification, EventNotificationFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Platform, RecordAnswerFactory, RecordCategoryFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import {
+    AuditLog,
+    EmailTemplateFactory,
+    EventFactory,
+    EventNotification,
+    EventNotificationFactory,
+    EventNotificationTypeFactory,
+    Organization,
+    OrganizationFactory,
+    Platform,
+    RecordAnswerFactory,
+    RecordCategoryFactory,
+    RegistrationPeriod,
+    RegistrationPeriodFactory,
+    Token,
+    UserFactory,
+} from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { AuditLogReplacementType, AuditLogType, BaseOrganization, EmailTemplateType, Event, EventNotification as EventNotificationStruct, EventNotificationStatus, Permissions, PermissionsResourceKey, RecordType, ResourcePermissions } from '@stamhoofd/structures';
+import {
+    AuditLogReplacementType,
+    AuditLogType,
+    BaseOrganization,
+    EmailTemplateType,
+    Event,
+    EventNotification as EventNotificationStruct,
+    EventNotificationStatus,
+    Permissions,
+    PermissionsResourceKey,
+    RecordType,
+    ResourcePermissions,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import '../../../audit-logs/init.js';
@@ -21,21 +49,28 @@ type Body = EndpointType extends Endpoint<any, any, infer B, any> ? B : never;
 
 const minimumUserPermissions = Permissions.create({
     resources: new Map([
-        [PermissionsResourceType.Groups, new Map([
-            [PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
-                accessRights: [AccessRight.EventWrite],
-            })],
-        ])],
+        [
+            PermissionsResourceType.Groups,
+            new Map([
+                [
+                    PermissionsResourceKey.CurrentPeriod,
+                    ResourcePermissions.create({
+                        accessRights: [AccessRight.EventWrite],
+                    }),
+                ],
+            ]),
+        ],
     ]),
 });
 
 const TestRequest = {
-    async patch(options: {
-        body?: any;
-        user?: User;
-        organization?: Organization;
-    }) {
-        const request = Request.buildJson('PATCH', baseUrl, options.organization?.getApiHost(), options.body);
+    async patch(options: { body?: any; user?: User; organization?: Organization }) {
+        const request = Request.buildJson(
+            'PATCH',
+            baseUrl,
+            options.organization?.getApiHost(),
+            options.body,
+        );
         if (options.user) {
             const token = await SessionService.createSession(options.user);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -79,13 +114,19 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             email: 'event-notification-reviewer@example.com',
             globalPermissions: Permissions.create({
                 resources: new Map([
-                    [PermissionsResourceType.OrganizationTags, new Map([
-                        [PermissionsResourceKey.All, ResourcePermissions.create({
-                            accessRights: [
-                                AccessRight.OrganizationEventNotificationReviewer,
+                    [
+                        PermissionsResourceType.OrganizationTags,
+                        new Map([
+                            [
+                                PermissionsResourceKey.All,
+                                ResourcePermissions.create({
+                                    accessRights: [
+                                        AccessRight.OrganizationEventNotificationReviewer,
+                                    ],
+                                }),
                             ],
-                        })],
-                    ])],
+                        ]),
+                    ],
                 ]),
             }),
         }).create();
@@ -94,7 +135,10 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
     test('A normal user can create new event notifications for an event', async () => {
         const startDate = new Date(2024, 8, 1, 0, 0, 0, 0);
         const endDate = new Date(2025, 7, 31, 0, 0, 0, 0);
-        const registrationPeriod = await new RegistrationPeriodFactory({ startDate, endDate }).create();
+        const registrationPeriod = await new RegistrationPeriodFactory({
+            startDate,
+            endDate,
+        }).create();
         const organization = await new OrganizationFactory({}).create();
         registrationPeriod.organizationId = organization.id;
         await registrationPeriod.save();
@@ -115,7 +159,9 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
                 },
             ],
         }).createMultiple(2);
-        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const notificationType = await new EventNotificationTypeFactory({
+            recordCategories,
+        }).create();
 
         const body: Body = new PatchableArray();
         body.addPut(
@@ -187,7 +233,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             organization,
             permissions: minimumUserPermissions,
         }).create();
-        const notificationType = (await new EventNotificationTypeFactory({ }).create());
+        const notificationType = await new EventNotificationTypeFactory({}).create();
 
         const body: Body = new PatchableArray();
         body.addPut(
@@ -228,7 +274,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             startDate: new Date(2050, 10, 1),
             endDate: new Date(2051, 10, 15),
         }).create();
-        const notificationType = (await new EventNotificationTypeFactory({ }).create());
+        const notificationType = await new EventNotificationTypeFactory({}).create();
 
         const body: Body = new PatchableArray();
         body.addPut(
@@ -255,7 +301,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             permissions: minimumUserPermissions,
         }).create();
         const event = await new EventFactory({ organization: otherOrganization }).create();
-        const notificationType = (await new EventNotificationTypeFactory({ }).create());
+        const notificationType = await new EventNotificationTypeFactory({}).create();
 
         const body: Body = new PatchableArray();
         body.addPut(
@@ -281,7 +327,10 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             permissions: minimumUserPermissions,
         }).create();
         const event = await new EventFactory({ organization }).create();
-        const eventNotification = await new EventNotificationFactory({ organization, events: [event] }).create();
+        const eventNotification = await new EventNotificationFactory({
+            organization,
+            events: [event],
+        }).create();
 
         const body: Body = new PatchableArray();
         body.addPatch(
@@ -323,7 +372,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         expect(log.organizationId).toBe(organization.id);
         expect(log.userId).toBe(user.id);
         expect(log.replacements.get('n')?.type).toBe(AuditLogReplacementType.EventNotification);
-        const statusPatch = log.patchList.find(item => item.key.toKey() === 'status');
+        const statusPatch = log.patchList.find((item) => item.key.toKey() === 'status');
         expect(statusPatch?.oldValue).toMatchObject({
             id: 'EventNotificationStatus',
             value: EventNotificationStatus.Draft,
@@ -580,7 +629,9 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
 
         const firstRecord = recordCategories[0].records[0];
 
-        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const notificationType = await new EventNotificationTypeFactory({
+            recordCategories,
+        }).create();
         const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
         const eventNotification = await new EventNotificationFactory({
             organization,
@@ -591,7 +642,9 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             recordAnswers: acceptedRecordAnswers,
         }).create();
 
-        const patchedRecordAnswers = await new RecordAnswerFactory({ records: [firstRecord] }).create();
+        const patchedRecordAnswers = await new RecordAnswerFactory({
+            records: [firstRecord],
+        }).create();
         const patch = new PatchMap([...patchedRecordAnswers.entries()]);
 
         const body: Body = new PatchableArray();
@@ -609,9 +662,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         expect(result.body[0]).toMatchObject({
             status: EventNotificationStatus.PartiallyAccepted,
             acceptedRecordAnswers: expect.toMatchMap(acceptedRecordAnswers),
-            recordAnswers: expect.toMatchMap(
-                patchObject(acceptedRecordAnswers, patch),
-            ),
+            recordAnswers: expect.toMatchMap(patchObject(acceptedRecordAnswers, patch)),
         });
     });
 
@@ -661,7 +712,9 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             ],
         }).createMultiple(2);
 
-        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const notificationType = await new EventNotificationTypeFactory({
+            recordCategories,
+        }).create();
         const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
         const eventNotification = await new EventNotificationFactory({
             organization,
@@ -720,7 +773,9 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             ],
         }).createMultiple(2);
 
-        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const notificationType = await new EventNotificationTypeFactory({
+            recordCategories,
+        }).create();
         const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
         const eventNotification = await new EventNotificationFactory({
             organization,
@@ -782,7 +837,9 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             ],
         }).createMultiple(2);
 
-        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const notificationType = await new EventNotificationTypeFactory({
+            recordCategories,
+        }).create();
         const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
         const eventNotification = await new EventNotificationFactory({
             organization,
@@ -844,7 +901,9 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             ],
         }).createMultiple(2);
 
-        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const notificationType = await new EventNotificationTypeFactory({
+            recordCategories,
+        }).create();
         const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
         const eventNotification = await new EventNotificationFactory({
             organization,
@@ -897,7 +956,9 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             ],
         }).createMultiple(2);
 
-        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const notificationType = await new EventNotificationTypeFactory({
+            recordCategories,
+        }).create();
         const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
         const eventNotification = await new EventNotificationFactory({
             organization,
@@ -909,7 +970,9 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             submittedBy: user,
         }).create();
 
-        const patchedRecordAnswers = await new RecordAnswerFactory({ records: [recordCategories[0].records[0]] }).create();
+        const patchedRecordAnswers = await new RecordAnswerFactory({
+            records: [recordCategories[0].records[0]],
+        }).create();
         const patch = new PatchMap([...patchedRecordAnswers.entries()]);
 
         const body: Body = new PatchableArray();
@@ -928,12 +991,8 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             status: EventNotificationStatus.Accepted,
 
             // Note: the record answers should automatically copy over to the accepted record answers
-            acceptedRecordAnswers: expect.toMatchMap(
-                patchObject(acceptedRecordAnswers, patch),
-            ),
-            recordAnswers: expect.toMatchMap(
-                patchObject(acceptedRecordAnswers, patch),
-            ),
+            acceptedRecordAnswers: expect.toMatchMap(patchObject(acceptedRecordAnswers, patch)),
+            recordAnswers: expect.toMatchMap(patchObject(acceptedRecordAnswers, patch)),
         });
 
         // Check mails
@@ -960,7 +1019,9 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             ],
         }).createMultiple(2);
 
-        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const notificationType = await new EventNotificationTypeFactory({
+            recordCategories,
+        }).create();
         const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
         const eventNotification = await new EventNotificationFactory({
             organization,
@@ -972,9 +1033,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         }).create();
 
         const body: Body = new PatchableArray();
-        body.addDelete(
-            eventNotification.id,
-        );
+        body.addDelete(eventNotification.id);
 
         const result = await TestRequest.patch({ body, user: admin, organization });
         expect(result.status).toBe(200);
@@ -1017,7 +1076,9 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             ],
         }).createMultiple(2);
 
-        const notificationType = (await new EventNotificationTypeFactory({ recordCategories }).create());
+        const notificationType = await new EventNotificationTypeFactory({
+            recordCategories,
+        }).create();
         const acceptedRecordAnswers = await new RecordAnswerFactory({ recordCategories }).create();
         const eventNotification = await new EventNotificationFactory({
             organization,
@@ -1029,9 +1090,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
         }).create();
 
         const body: Body = new PatchableArray();
-        body.addDelete(
-            eventNotification.id,
-        );
+        body.addDelete(eventNotification.id);
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
             STExpect.simpleError({ code: 'permission_denied' }),

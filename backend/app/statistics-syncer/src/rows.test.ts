@@ -1,10 +1,22 @@
 import { describe, expect, it } from 'vitest';
-import { flattenDefaultAgeGroup, flattenGroup, flattenMember, flattenMembership, flattenOrganization, flattenPlatform, flattenRegistration } from './rows.js';
+import {
+    flattenDefaultAgeGroup,
+    flattenGroup,
+    flattenMember,
+    flattenMembership,
+    flattenOrganization,
+    flattenPlatform,
+    flattenRegistration,
+} from './rows.js';
 
 describe('flattenMember', () => {
     const member = {
         id: 'member-1',
-        details: { birthDay: new Date(2011, 4, 17), gender: 'Female', address: { postalCode: '9000' } },
+        details: {
+            birthDay: new Date(2011, 4, 17),
+            gender: 'Female',
+            address: { postalCode: '9000' },
+        },
         organizationId: 'org-1',
         createdAt: new Date(2025, 0, 1),
         updatedAt: new Date(2026, 0, 1),
@@ -22,13 +34,39 @@ describe('flattenMember', () => {
     it('writes the calendar date the application means, not the instant behind it', () => {
         const brusselsMidnight = new Date('2011-05-16T22:00:00.000Z');
 
-        expect(flattenMember({ ...member, details: { ...member.details, birthDay: brusselsMidnight } }, 'period-1').birthDate).toBe('2011-05-17');
+        expect(
+            flattenMember(
+                { ...member, details: { ...member.details, birthDay: brusselsMidnight } },
+                'period-1',
+            ).birthDate,
+        ).toBe('2011-05-17');
     });
 
     it('never carries a name or a way to contact the member', () => {
-        const row = flattenMember({ ...member, details: { ...member.details, firstName: 'Jan', lastName: 'Jansen', email: 'jan@example.com' } as any }, 'period-1');
+        const row = flattenMember(
+            {
+                ...member,
+                details: {
+                    ...member.details,
+                    firstName: 'Jan',
+                    lastName: 'Jansen',
+                    email: 'jan@example.com',
+                } as any,
+            },
+            'period-1',
+        );
 
-        expect(Object.keys(row).sort()).toEqual(['birthDate', 'createdAt', 'gender', 'id', 'lastRegisteredAt', 'organizationId', 'periodId', 'postalCode', 'updatedAt']);
+        expect(Object.keys(row).sort()).toEqual([
+            'birthDate',
+            'createdAt',
+            'gender',
+            'id',
+            'lastRegisteredAt',
+            'organizationId',
+            'periodId',
+            'postalCode',
+            'updatedAt',
+        ]);
         expect(JSON.stringify(row)).not.toContain('Jan');
         expect(JSON.stringify(row)).not.toContain('example.com');
     });
@@ -47,11 +85,25 @@ describe('flattenMember', () => {
     });
 
     it('keeps a member without a birth date', () => {
-        expect(flattenMember({ ...member, details: { birthDay: null, gender: 'Other', address: null } }, 'period-1').birthDate).toBeNull();
+        expect(
+            flattenMember(
+                { ...member, details: { birthDay: null, gender: 'Other', address: null } },
+                'period-1',
+            ).birthDate,
+        ).toBeNull();
     });
 
     it('keeps the postal code the member map needs, and nothing else of the address', () => {
-        const row = flattenMember({ ...member, details: { ...member.details, address: { postalCode: '9000', street: 'Somewhere', city: 'Gent' } as any } }, 'period-1');
+        const row = flattenMember(
+            {
+                ...member,
+                details: {
+                    ...member.details,
+                    address: { postalCode: '9000', street: 'Somewhere', city: 'Gent' } as any,
+                },
+            },
+            'period-1',
+        );
 
         expect(row.postalCode).toBe('9000');
         expect(JSON.stringify(row)).not.toContain('Somewhere');
@@ -59,7 +111,10 @@ describe('flattenMember', () => {
     });
 
     it('has no postal code for a member without an address', () => {
-        expect(flattenMember({ ...member, details: { ...member.details, address: null } }, 'period-1').postalCode).toBeNull();
+        expect(
+            flattenMember({ ...member, details: { ...member.details, address: null } }, 'period-1')
+                .postalCode,
+        ).toBeNull();
     });
 });
 
@@ -85,7 +140,12 @@ describe('flattenOrganization', () => {
     });
 
     it('stores a missing postal code as null rather than an empty string', () => {
-        expect(flattenOrganization({ ...organization, address: { postalCode: '', city: '' } }, 'period-1').postalCode).toBeNull();
+        expect(
+            flattenOrganization(
+                { ...organization, address: { postalCode: '', city: '' } },
+                'period-1',
+            ).postalCode,
+        ).toBeNull();
     });
 
     /**
@@ -119,7 +179,10 @@ describe('flattenPlatform', () => {
     });
 
     it('stores no organization for a platform that runs none', () => {
-        expect(flattenPlatform({ ...platform, membershipOrganizationId: null }).membershipOrganizationId).toBeNull();
+        expect(
+            flattenPlatform({ ...platform, membershipOrganizationId: null })
+                .membershipOrganizationId,
+        ).toBeNull();
     });
 
     /**
@@ -128,7 +191,10 @@ describe('flattenPlatform', () => {
      * the report to word, rather than being given a name here that nobody uses.
      */
     it('keeps what the platform calls its verlaagd lidgeld, and nothing when it names none', () => {
-        expect(flattenPlatform({ ...platform, config: { ...platform.config, financialSupport: null } }).reducedPriceName).toBeNull();
+        expect(
+            flattenPlatform({ ...platform, config: { ...platform.config, financialSupport: null } })
+                .reducedPriceName,
+        ).toBeNull();
     });
 });
 
@@ -156,7 +222,9 @@ describe('flattenMembership', () => {
     it('records the tarief the lidgeld was charged at, and none of its prices', () => {
         expect(flattenMembership(membership, true).reducedPrice).toBe(true);
         expect(flattenMembership(membership, false).reducedPrice).toBe(false);
-        expect(Object.keys(flattenMembership(membership, false)).filter(key => /price/i.test(key))).toEqual(['reducedPrice']);
+        expect(
+            Object.keys(flattenMembership(membership, false)).filter((key) => /price/i.test(key)),
+        ).toEqual(['reducedPrice']);
     });
 });
 
@@ -165,7 +233,7 @@ describe('flattenGroup', () => {
         const row = flattenGroup({
             id: 'group-1',
             type: 'Membership',
-            settings: { name: { get: language => language === 'nl' ? 'Bevers' : 'Beavers' } },
+            settings: { name: { get: (language) => (language === 'nl' ? 'Bevers' : 'Beavers') } },
             organizationId: 'org-1',
             periodId: 'period-1',
             defaultAgeGroupId: 'age-1',
@@ -205,7 +273,12 @@ describe('flattenDefaultAgeGroup', () => {
     });
 
     it('separates all but the last two with a comma', () => {
-        expect(flattenDefaultAgeGroup({ ...group, names: ['Kapoenen', 'Welpen', 'Jonggivers'] }, 'period-1').name).toBe('Kapoenen, Welpen of Jonggivers');
+        expect(
+            flattenDefaultAgeGroup(
+                { ...group, names: ['Kapoenen', 'Welpen', 'Jonggivers'] },
+                'period-1',
+            ).name,
+        ).toBe('Kapoenen, Welpen of Jonggivers');
     });
 });
 
@@ -230,7 +303,14 @@ describe('flattenRegistration', () => {
 
         expect(row.memberId).toBe('member-1');
         expect(row.groupId).toBe('group-1');
-        for (const dropped of ['recordAnswers', 'price', 'pricePaid', 'groupPrice', 'paymentId', 'options']) {
+        for (const dropped of [
+            'recordAnswers',
+            'price',
+            'pricePaid',
+            'groupPrice',
+            'paymentId',
+            'options',
+        ]) {
             expect(Object.keys(row)).not.toContain(dropped);
         }
     });

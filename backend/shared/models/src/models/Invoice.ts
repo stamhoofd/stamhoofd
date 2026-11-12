@@ -1,5 +1,11 @@
 import { column } from '@node/database';
-import { Company, File, InvoicedBalanceItem as InvoicedBalanceItemStruct, PaymentCustomer, VATSubtotal } from '@stamhoofd/structures';
+import {
+    Company,
+    File,
+    InvoicedBalanceItem as InvoicedBalanceItemStruct,
+    PaymentCustomer,
+    VATSubtotal,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@common/encoding';
@@ -11,7 +17,9 @@ export class Invoice extends QueryableModel {
     static table = 'invoices';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -129,7 +137,8 @@ export class Invoice extends QueryableModel {
     dueAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -143,7 +152,8 @@ export class Invoice extends QueryableModel {
     _forceUpdatedAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             if (this._forceUpdatedAt) {
                 return this._forceUpdatedAt;
             }
@@ -160,7 +170,14 @@ export class Invoice extends QueryableModel {
             return { invoicedBalanceItems: [] };
         }
         // Load all the related models from the database so we can build the structures
-        const invoicedBalanceItems = InvoicedBalanceItemStruct.sort(await InvoicedBalanceItem.select().where('invoiceId', invoices.map(i => i.id)).fetch());
+        const invoicedBalanceItems = InvoicedBalanceItemStruct.sort(
+            await InvoicedBalanceItem.select()
+                .where(
+                    'invoiceId',
+                    invoices.map((i) => i.id),
+                )
+                .fetch(),
+        );
         return { invoicedBalanceItems };
     }
 
@@ -169,6 +186,22 @@ export class Invoice extends QueryableModel {
             return this.id + '.' + ext;
         }
         const date = this.invoicedAt;
-        return Formatter.dateIso(date) + ' - ' + (this.isReceipt ? (this.totalWithVAT < 0 ? $t('%ZqP') : $t('%ZqH')) : (this.totalWithVAT < 0 ? $t('%1aE') : $t('%1Zw'))) + ' ' + this.number + ' - ' + Formatter.fileSlug(this.seller.name) + '.' + ext;
+        return (
+            Formatter.dateIso(date) +
+            ' - ' +
+            (this.isReceipt
+                ? this.totalWithVAT < 0
+                    ? $t('%ZqP')
+                    : $t('%ZqH')
+                : this.totalWithVAT < 0
+                  ? $t('%1aE')
+                  : $t('%1Zw')) +
+            ' ' +
+            this.number +
+            ' - ' +
+            Formatter.fileSlug(this.seller.name) +
+            '.' +
+            ext
+        );
     }
 }

@@ -1,7 +1,19 @@
 import { Request } from '@node/endpoints';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
-import { Email, EmailRecipient, MemberFactory, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { EmailContent, EmailStatus, LimitedFilteredRequest, Replacement } from '@stamhoofd/structures';
+import {
+    Email,
+    EmailRecipient,
+    MemberFactory,
+    OrganizationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
+import {
+    EmailContent,
+    EmailStatus,
+    LimitedFilteredRequest,
+    Replacement,
+} from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -27,8 +39,7 @@ describe('Endpoint.GetUserEmails', () => {
             endDate: new Date(2023, 11, 31),
         }).create();
 
-        organization = await new OrganizationFactory({ period })
-            .create();
+        organization = await new OrganizationFactory({ period }).create();
 
         user = await new UserFactory({
             organization,
@@ -48,7 +59,11 @@ describe('Endpoint.GetUserEmails', () => {
         await Email.delete();
     });
 
-    const getUserEmails = async (query: LimitedFilteredRequest = new LimitedFilteredRequest({ limit: 10 }), token: Token = userToken, testOrganization: Organization = organization) => {
+    const getUserEmails = async (
+        query: LimitedFilteredRequest = new LimitedFilteredRequest({ limit: 10 }),
+        token: Token = userToken,
+        testOrganization: Organization = organization,
+    ) => {
         const request = Request.get({
             path: baseUrl,
             host: testOrganization.getApiHost(),
@@ -122,7 +137,7 @@ describe('Endpoint.GetUserEmails', () => {
         const response = await getUserEmails();
 
         // Should not include the draft email
-        expect(response.body.results.find(e => e.id === email.id)).toBeUndefined();
+        expect(response.body.results.find((e) => e.id === email.id)).toBeUndefined();
     });
 
     test('Should not return emails with showInMemberPortal = false', async () => {
@@ -152,7 +167,7 @@ describe('Endpoint.GetUserEmails', () => {
         const response = await getUserEmails();
 
         // Should not include the hidden email
-        expect(response.body.results.find(e => e.id === email.id)).toBeUndefined();
+        expect(response.body.results.find((e) => e.id === email.id)).toBeUndefined();
     });
 
     test('Should not return emails sent to other users', async () => {
@@ -192,7 +207,7 @@ describe('Endpoint.GetUserEmails', () => {
         const response = await getUserEmails();
 
         // Should not include emails sent to other users
-        expect(response.body.results.find(e => e.id === email.id)).toBeUndefined();
+        expect(response.body.results.find((e) => e.id === email.id)).toBeUndefined();
     });
 
     test('Should not return deleted emails', async () => {
@@ -223,7 +238,7 @@ describe('Endpoint.GetUserEmails', () => {
         const response = await getUserEmails();
 
         // Should not include the deleted email
-        expect(response.body.results.find(e => e.id === email.id)).toBeUndefined();
+        expect(response.body.results.find((e) => e.id === email.id)).toBeUndefined();
     });
 
     test('Should filter emails by subject when search is provided', async () => {
@@ -441,8 +456,10 @@ describe('Endpoint.GetUserEmails', () => {
         const email = new Email();
         email.subject = 'Sensitive Data Email';
         email.status = EmailStatus.Sent;
-        email.text = 'Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}';
-        email.html = '<p>Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}</p>{{balanceTable}}';
+        email.text =
+            'Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}';
+        email.html =
+            '<p>Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}</p>{{balanceTable}}';
         email.json = {};
         email.organizationId = organization.id;
         email.showInMemberPortal = true;
@@ -525,8 +542,12 @@ describe('Endpoint.GetUserEmails', () => {
         expect(allReplacementsString).not.toContain('private-signin-token-67890'); // Original sensitive signin token should be gone
 
         // Verify that safe, current-user-appropriate replacements are created
-        const loginDetailsReplacement = recipient.replacements.find(r => r.token === 'loginDetails');
-        const unsubscribeUrlReplacement = recipient.replacements.find(r => r.token === 'unsubscribeUrl');
+        const loginDetailsReplacement = recipient.replacements.find(
+            (r) => r.token === 'loginDetails',
+        );
+        const unsubscribeUrlReplacement = recipient.replacements.find(
+            (r) => r.token === 'unsubscribeUrl',
+        );
 
         // loginDetails should exist and be empty/generic for web display
         expect(loginDetailsReplacement).toBeDefined();
@@ -544,12 +565,16 @@ describe('Endpoint.GetUserEmails', () => {
         // 3. Ensuring web safety of all replacement values
 
         // Check outstandingBalance replacement
-        const balanceReplacement = recipient.replacements.find(r => r.token === 'outstandingBalance');
+        const balanceReplacement = recipient.replacements.find(
+            (r) => r.token === 'outstandingBalance',
+        );
         expect(balanceReplacement).toBeDefined();
         expect(balanceReplacement!.value).toBe(Formatter.price(0)); // Should be corrected to the new user
 
         // Check balanceTable replacement
-        const balanceTableReplacement = recipient.replacements.find(r => r.token === 'balanceTable');
+        const balanceTableReplacement = recipient.replacements.find(
+            (r) => r.token === 'balanceTable',
+        );
         expect(balanceTableReplacement).toBeDefined();
         expect(balanceTableReplacement!.html).toBe('<p class="description">' + $t('%hX') + '</p>');
     });
@@ -616,7 +641,7 @@ describe('Endpoint.GetUserEmails', () => {
 
         // Should include both members as separate recipients
         expect(emailResult.recipients).toHaveLength(2);
-        const firstNames = emailResult.recipients.map(r => r.member?.firstName);
+        const firstNames = emailResult.recipients.map((r) => r.member?.firstName);
         expect(firstNames).toContain(member.details.firstName);
         expect(firstNames).toContain(secondMember.details.firstName);
     });
@@ -724,12 +749,15 @@ describe('Endpoint.GetUserEmails', () => {
         const response = await getUserEmails();
 
         // Should not include emails sent to other members
-        expect(response.body.results.find(e => e.id === email.id)).toBeUndefined();
+        expect(response.body.results.find((e) => e.id === email.id)).toBeUndefined();
 
         // Test that is IS included if we request the same data via the 'otherUser' token
         const otherUserToken = await SessionService.createSession(otherUser);
-        const responseForOtherUser = await getUserEmails(new LimitedFilteredRequest({ limit: 10 }), otherUserToken);
-        expect(responseForOtherUser.body.results.find(e => e.id === email.id)).toBeDefined();
+        const responseForOtherUser = await getUserEmails(
+            new LimitedFilteredRequest({ limit: 10 }),
+            otherUserToken,
+        );
+        expect(responseForOtherUser.body.results.find((e) => e.id === email.id)).toBeDefined();
     });
 
     test('Should throw error when not authenticated', async () => {
@@ -766,7 +794,9 @@ describe('Endpoint.GetUserEmails', () => {
          * A sent email with a Dutch default content and a French translation.
          * The {{greeting}} in the html proves the replacements match the displayed content.
          */
-        const createTranslatedEmail = async (options: { recipientLanguage?: Language | null } = {}) => {
+        const createTranslatedEmail = async (
+            options: { recipientLanguage?: Language | null } = {},
+        ) => {
             const email = new Email();
             email.subject = 'Nederlands onderwerp';
             email.status = EmailStatus.Sent;
@@ -775,11 +805,14 @@ describe('Endpoint.GetUserEmails', () => {
             email.json = {};
             email.language = Language.Dutch;
             email.translations = new Map([
-                [Language.French, EmailContent.create({
-                    subject: 'Sujet français',
-                    html: '<p>{{greeting}} Contenu français</p>',
-                    text: 'Texte français',
-                })],
+                [
+                    Language.French,
+                    EmailContent.create({
+                        subject: 'Sujet français',
+                        html: '<p>{{greeting}} Contenu français</p>',
+                        text: 'Texte français',
+                    }),
+                ],
             ]);
             email.organizationId = organization.id;
             email.showInMemberPortal = true;
@@ -827,7 +860,9 @@ describe('Endpoint.GetUserEmails', () => {
             // The recipient language switches to the viewing language, so subject, html, text
             // and the regenerated replacements all resolve to the French content
             expect(recipient.language).toBe(Language.French);
-            expect(recipient.replacements.find(r => r.token === 'greeting')?.value).toBe(frenchGreeting);
+            expect(recipient.replacements.find((r) => r.token === 'greeting')?.value).toBe(
+                frenchGreeting,
+            );
             expect(result.getSubjectFor(recipient)).toBe('Sujet français');
             expect(result.getHtmlFor(recipient)).toBe(`<p>${frenchGreeting} Contenu français</p>`);
             expect(result.getContentForLanguage(recipient.language).text).toBe('Texte français');
@@ -841,7 +876,9 @@ describe('Endpoint.GetUserEmails', () => {
             const { result, recipient } = await getUserEmailsViewedIn('en');
 
             expect(recipient.language).toBe(Language.French);
-            expect(recipient.replacements.find(r => r.token === 'greeting')?.value).toBe(frenchGreeting);
+            expect(recipient.replacements.find((r) => r.token === 'greeting')?.value).toBe(
+                frenchGreeting,
+            );
             expect(result.getSubjectFor(recipient)).toBe('Sujet français');
             expect(result.getHtmlFor(recipient)).toBe(`<p>${frenchGreeting} Contenu français</p>`);
             expect(result.getContentForLanguage(recipient.language).text).toBe('Texte français');
@@ -854,7 +891,9 @@ describe('Endpoint.GetUserEmails', () => {
             const { result, recipient } = await getUserEmailsViewedIn(null);
 
             expect(recipient.language).toBe(Language.French);
-            expect(recipient.replacements.find(r => r.token === 'greeting')?.value).toBe(frenchGreeting);
+            expect(recipient.replacements.find((r) => r.token === 'greeting')?.value).toBe(
+                frenchGreeting,
+            );
             expect(result.getSubjectFor(recipient)).toBe('Sujet français');
             expect(result.getHtmlFor(recipient)).toBe(`<p>${frenchGreeting} Contenu français</p>`);
         });
@@ -866,7 +905,9 @@ describe('Endpoint.GetUserEmails', () => {
             const { result, recipient } = await getUserEmailsViewedIn('fr');
 
             expect(recipient.language).toBe(Language.French);
-            expect(recipient.replacements.find(r => r.token === 'greeting')?.value).toBe(frenchGreeting);
+            expect(recipient.replacements.find((r) => r.token === 'greeting')?.value).toBe(
+                frenchGreeting,
+            );
             expect(result.getSubjectFor(recipient)).toBe('Sujet français');
             expect(result.getHtmlFor(recipient)).toBe(`<p>${frenchGreeting} Contenu français</p>`);
         });
@@ -878,7 +919,9 @@ describe('Endpoint.GetUserEmails', () => {
             const { result, recipient } = await getUserEmailsViewedIn('en');
 
             expect(recipient.language).toBeNull();
-            expect(recipient.replacements.find(r => r.token === 'greeting')?.value).toBe(dutchGreeting);
+            expect(recipient.replacements.find((r) => r.token === 'greeting')?.value).toBe(
+                dutchGreeting,
+            );
             expect(result.getSubjectFor(recipient)).toBe('Nederlands onderwerp');
             expect(result.getHtmlFor(recipient)).toBe(`<p>${dutchGreeting} Nederlandse inhoud</p>`);
             expect(result.getContentForLanguage(recipient.language).text).toBe('Nederlandse tekst');

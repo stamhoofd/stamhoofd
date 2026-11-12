@@ -3,10 +3,37 @@ import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/en
 import { PatchableArray, PatchMap } from '@common/encoding';
 import type { Endpoint } from '@node/endpoints';
 import { Request } from '@node/endpoints';
-import { GroupFactory, Member, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, RegistrationFactory, UserFactory } from '@stamhoofd/models';
+import {
+    GroupFactory,
+    Member,
+    MemberFactory,
+    MemberResponsibilityRecordFactory,
+    OrganizationFactory,
+    Platform,
+    RegistrationFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Address, BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, RecordCategory, RecordSettings, RecordTextAnswer, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import {
+    Address,
+    BooleanStatus,
+    MemberDetails,
+    MemberWithRegistrationsBlob,
+    OrganizationMetaData,
+    OrganizationRecordsConfiguration,
+    Parent,
+    ParentType,
+    RecordCategory,
+    RecordSettings,
+    RecordTextAnswer,
+    ReviewTime,
+    ReviewTimes,
+    TranslatedString,
+    UitpasNumberDetails,
+    UitpasSocialTariff,
+    UitpasSocialTariffStatus,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
@@ -36,8 +63,8 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
     describe('Duplicate members', () => {
         test('The security code should be a requirement', async () => {
-            const organization = await new OrganizationFactory({ }).create();
-            const user = await new UserFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({}).create();
             const existingMember = await new MemberFactory({
                 firstName,
                 lastName,
@@ -61,13 +88,13 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('known_member_missing_rights'),
+            );
         });
 
-        test('A security code is required when user it\'s email is not listed on an existing member', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+        test("A security code is required when user it's email is not listed on an existing member", async () => {
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ email: 'attacker@example.com' }).create();
             const existingMember = await new MemberFactory({
                 firstName: 'Victim',
@@ -90,13 +117,13 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('known_member_missing_rights'),
+            );
         });
 
-        test('No security code is required when user it\'s email is listed on a member without responsibilities', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+        test("No security code is required when user it's email is listed on a member without responsibilities", async () => {
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ email: 'owner@example.com' }).create();
             const existingMember = await new MemberFactory({
                 firstName: 'Victim',
@@ -126,7 +153,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
         });
 
         test('A security code is always required if the user has a responsibility', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ email: 'responsible-owner@example.com' }).create();
             const existingMember = await new MemberFactory({
                 firstName: 'Victim',
@@ -151,14 +178,16 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('known_member_missing_rights'),
+            );
         });
 
         test('A security code is required when the user email is a parent email but parents have no access', async () => {
-            const organization = await new OrganizationFactory({ }).create();
-            const user = await new UserFactory({ email: 'parent-without-access@example.com' }).create();
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                email: 'parent-without-access@example.com',
+            }).create();
             const existingMember = await new MemberFactory({
                 firstName: 'Victim',
                 lastName: 'Member',
@@ -191,14 +220,16 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('known_member_missing_rights'),
+            );
         });
 
         test('No security code is required when the user email is a parent email and parents have access', async () => {
-            const organization = await new OrganizationFactory({ }).create();
-            const user = await new UserFactory({ email: 'parent-with-access@example.com' }).create();
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                email: 'parent-with-access@example.com',
+            }).create();
             const existingMember = await new MemberFactory({
                 firstName: 'Victim',
                 lastName: 'Member',
@@ -237,7 +268,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
         });
 
         test('A duplicate member with existing registrations returns those registrations after a merge', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization }).create();
             const details = MemberDetails.create({
                 firstName,
@@ -306,11 +337,11 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             expect(member.details.parents[0]).toEqual(existingMember.details.parents[0]);
 
             // Check access
-            expect(member.users.filter(u => u.id === user.id)).toHaveLength(1);
+            expect(member.users.filter((u) => u.id === user.id)).toHaveLength(1);
         });
 
         test('Putting a new member without email address gives you access and links your user', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization }).create();
 
             const token = await SessionService.createSession(user);
@@ -338,11 +369,11 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             const member = response.body.members[0];
 
             // Check access
-            expect(member.users.map(u => u.id)).toEqual([user.id]);
+            expect(member.users.map((u) => u.id)).toEqual([user.id]);
         });
 
         test('[Regression] Putting a new member with same name of existing member you have access to does not create a duplicate link', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization }).create();
             const details = MemberDetails.create({
                 firstName,
@@ -396,7 +427,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             expect(member.details.birthDay).toEqual(newBirthDay);
 
             // Check access
-            expect(member.users.map(u => u.id)).toEqual([user.id]);
+            expect(member.users.map((u) => u.id)).toEqual([user.id]);
         });
     });
 
@@ -404,7 +435,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
         test('A user manager without admin access cannot set the member number in organization mode', async () => {
             TestUtils.setEnvironment('userMode', 'organization');
 
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization }).create();
             const existingMember = await new MemberFactory({
                 organization,
@@ -418,10 +449,12 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: existingMember.id,
-                details: MemberDetails.patch({ memberNumber: 'LID-300' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: existingMember.id,
+                    details: MemberDetails.patch({ memberNumber: 'LID-300' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -440,9 +473,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const recordCategory = RecordCategory.create({
                 name: TranslatedString.create('Medische fiche'),
-                records: [
-                    commentsRecord,
-                ],
+                records: [commentsRecord],
             });
             const organization = await new OrganizationFactory({
                 meta: OrganizationMetaData.create({
@@ -452,7 +483,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 }),
             }).create();
 
-            const user = await new UserFactory({ }).create();
+            const user = await new UserFactory({}).create();
             const existingMember = await new MemberFactory({
                 firstName,
                 lastName,
@@ -466,10 +497,13 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
-            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
-                settings: commentsRecord,
-                value: 'Some comments',
-            }));
+            recordAnswers.set(
+                commentsRecord.id,
+                RecordTextAnswer.create({
+                    settings: commentsRecord,
+                    value: 'Some comments',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -501,9 +535,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const recordCategory = RecordCategory.create({
                 name: TranslatedString.create('Medische fiche'),
-                records: [
-                    commentsRecord,
-                ],
+                records: [commentsRecord],
             });
             const organization = await new OrganizationFactory({
                 meta: OrganizationMetaData.create({
@@ -513,7 +545,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 }),
             }).create();
 
-            const user = await new UserFactory({ }).create();
+            const user = await new UserFactory({}).create();
             const existingMember = await new MemberFactory({
                 firstName,
                 lastName,
@@ -527,10 +559,13 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
-            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
-                settings: commentsRecord,
-                value: 'Some comments',
-            }));
+            recordAnswers.set(
+                commentsRecord.id,
+                RecordTextAnswer.create({
+                    settings: commentsRecord,
+                    value: 'Some comments',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -543,7 +578,9 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         });
 
         test('A user can save answers of records of the platform', async () => {
@@ -553,9 +590,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const recordCategory = RecordCategory.create({
                 name: TranslatedString.create('Medische fiche'),
-                records: [
-                    commentsRecord,
-                ],
+                records: [commentsRecord],
             });
 
             const platform = await Platform.getForEditing();
@@ -564,7 +599,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const organization = await new OrganizationFactory({}).create();
 
-            const user = await new UserFactory({ }).create();
+            const user = await new UserFactory({}).create();
             const existingMember = await new MemberFactory({
                 firstName,
                 lastName,
@@ -578,10 +613,13 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
-            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
-                settings: commentsRecord,
-                value: 'Some comments',
-            }));
+            recordAnswers.set(
+                commentsRecord.id,
+                RecordTextAnswer.create({
+                    settings: commentsRecord,
+                    value: 'Some comments',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -613,9 +651,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const recordCategory = RecordCategory.create({
                 name: TranslatedString.create('Medische fiche'),
-                records: [
-                    commentsRecord,
-                ],
+                records: [commentsRecord],
             });
 
             const platform = await Platform.getForEditing();
@@ -624,7 +660,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const organization = await new OrganizationFactory({}).create();
 
-            const user = await new UserFactory({ }).create();
+            const user = await new UserFactory({}).create();
             const existingMember = await new MemberFactory({
                 firstName,
                 lastName,
@@ -638,10 +674,13 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
-            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
-                settings: commentsRecord,
-                value: 'Some comments',
-            }));
+            recordAnswers.set(
+                commentsRecord.id,
+                RecordTextAnswer.create({
+                    settings: commentsRecord,
+                    value: 'Some comments',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -654,7 +693,9 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         });
 
         test('A user can not save anwers to inexisting records', async () => {
@@ -670,7 +711,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 }),
             }).create();
 
-            const user = await new UserFactory({ }).create();
+            const user = await new UserFactory({}).create();
             const existingMember = await new MemberFactory({
                 firstName,
                 lastName,
@@ -684,10 +725,13 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
-            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
-                settings: commentsRecord,
-                value: 'Some comments',
-            }));
+            recordAnswers.set(
+                commentsRecord.id,
+                RecordTextAnswer.create({
+                    settings: commentsRecord,
+                    value: 'Some comments',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -700,7 +744,9 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         });
     });
 
@@ -709,7 +755,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             test('Should not set socialTariff from request', async () => {
                 initUitpasApi();
 
-                const user = await new UserFactory({ }).create();
+                const user = await new UserFactory({}).create();
 
                 const token = await SessionService.createSession(user);
 
@@ -743,9 +789,15 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 expect(result.status).toBe(200);
                 expect(result.body.members.length).toBe(1);
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toBe(UitpasSocialTariffStatus.Active);
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toBe(new Date(2050, 0, 1).getTime());
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt?.getTime()).not.toBe(new Date(2040, 0, 1).getTime());
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                ).toBe(UitpasSocialTariffStatus.Active);
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime(),
+                ).not.toBe(new Date(2050, 0, 1).getTime());
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt?.getTime(),
+                ).not.toBe(new Date(2040, 0, 1).getTime());
             });
         });
 
@@ -753,9 +805,9 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             test('Should update socialTariff if uitpasNumber changes', async () => {
                 initUitpasApi();
 
-                const organization = await new OrganizationFactory({ }).create();
+                const organization = await new OrganizationFactory({}).create();
 
-                const user = await new UserFactory({ }).create();
+                const user = await new UserFactory({}).create();
 
                 const token = await SessionService.createSession(user);
 
@@ -782,15 +834,17 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 // patch uitpas number
                 const arr: Body = new PatchableArray();
 
-                arr.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    details: MemberDetails.patch({
-                        uitpasNumberDetails: UitpasNumberDetails.patch({
-                            // active
-                            uitpasNumber: '0900011354819',
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            uitpasNumberDetails: UitpasNumberDetails.patch({
+                                // active
+                                uitpasNumber: '0900011354819',
+                            }),
                         }),
                     }),
-                }));
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -799,18 +853,26 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 expect(result.status).toBe(200);
                 expect(result.body.members.length).toBe(1);
-                expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354819');
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2030, 0, 1).getTime());
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate).toBeInstanceOf(Date);
+                expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual(
+                    '0900011354819',
+                );
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                ).toEqual(UitpasSocialTariffStatus.Active);
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                ).not.toEqual(new Date(2030, 0, 1).getTime());
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate,
+                ).toBeInstanceOf(Date);
             });
 
             test('Should throw if invalid uitpas number', async () => {
                 initUitpasApi();
 
-                const organization = await new OrganizationFactory({ }).create();
+                const organization = await new OrganizationFactory({}).create();
 
-                const user = await new UserFactory({ }).create();
+                const user = await new UserFactory({}).create();
 
                 const token = await SessionService.createSession(user);
 
@@ -837,31 +899,33 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 // patch uitpas number
                 const arr: Body = new PatchableArray();
 
-                arr.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    details: MemberDetails.patch({
-                        uitpasNumberDetails: UitpasNumberDetails.patch({
-                            // invalid (too short)
-                            uitpasNumber: '094',
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            uitpasNumberDetails: UitpasNumberDetails.patch({
+                                // invalid (too short)
+                                uitpasNumber: '094',
+                            }),
                         }),
                     }),
-                }));
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
 
-                await expect(testServer.test(endpoint, request))
-                    .rejects
-                    .toThrow(STExpect.errorWithCode('invalid_uitpas_number'));
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    STExpect.errorWithCode('invalid_uitpas_number'),
+                );
             });
 
             describe('unknown uitpas number', () => {
                 test('Should throw if number changed', async () => {
                     initUitpasApi();
 
-                    const organization = await new OrganizationFactory({ }).create();
+                    const organization = await new OrganizationFactory({}).create();
 
-                    const user = await new UserFactory({ }).create();
+                    const user = await new UserFactory({}).create();
 
                     const token = await SessionService.createSession(user);
 
@@ -875,7 +939,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                         user,
                         details: MemberDetails.create({
                             uitpasNumberDetails: UitpasNumberDetails.create({
-                            // expired
+                                // expired
                                 uitpasNumber: '0900000095902',
                                 socialTariff: UitpasSocialTariff.create({
                                     status: UitpasSocialTariffStatus.None,
@@ -888,30 +952,37 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                     // patch uitpas number
                     const arr: Body = new PatchableArray();
 
-                    arr.addPatch(MemberWithRegistrationsBlob.patch({
-                        id: member.id,
-                        details: MemberDetails.patch({
-                            uitpasNumberDetails: UitpasNumberDetails.patch({
-                            // unknown number
-                                uitpasNumber: '0900000095999',
+                    arr.addPatch(
+                        MemberWithRegistrationsBlob.patch({
+                            id: member.id,
+                            details: MemberDetails.patch({
+                                uitpasNumberDetails: UitpasNumberDetails.patch({
+                                    // unknown number
+                                    uitpasNumber: '0900000095999',
+                                }),
                             }),
                         }),
-                    }));
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
 
-                    await expect(testServer.test(endpoint, request))
-                        .rejects
-                        .toThrow(STExpect.errorWithCode('https://api.publiq.be/probs/uitpas/pass-not-found'));
+                    await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                        STExpect.errorWithCode('https://api.publiq.be/probs/uitpas/pass-not-found'),
+                    );
                 });
 
                 test('Should throw and set status to unknown if number did not change', async () => {
                     initUitpasApi();
 
-                    const organization = await new OrganizationFactory({ }).create();
+                    const organization = await new OrganizationFactory({}).create();
 
-                    const user = await new UserFactory({ }).create();
+                    const user = await new UserFactory({}).create();
 
                     const token = await SessionService.createSession(user);
 
@@ -925,7 +996,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                         user,
                         details: MemberDetails.create({
                             uitpasNumberDetails: UitpasNumberDetails.create({
-                            // unknown number
+                                // unknown number
                                 uitpasNumber: '0900000095999',
                                 socialTariff: UitpasSocialTariff.create({
                                     status: UitpasSocialTariffStatus.None,
@@ -938,28 +1009,43 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                     // patch uitpas number
                     const arr: Body = new PatchableArray();
 
-                    arr.addPatch(MemberWithRegistrationsBlob.patch({
-                        id: member.id,
-                        details: MemberDetails.patch({
-                            uitpasNumberDetails: UitpasNumberDetails.patch({
-                            // same unknown number
-                                uitpasNumber: '0900000095999',
+                    arr.addPatch(
+                        MemberWithRegistrationsBlob.patch({
+                            id: member.id,
+                            details: MemberDetails.patch({
+                                uitpasNumberDetails: UitpasNumberDetails.patch({
+                                    // same unknown number
+                                    uitpasNumber: '0900000095999',
+                                }),
                             }),
                         }),
-                    }));
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
 
-                    await expect(testServer.test(endpoint, request))
-                        .rejects
-                        .toThrow(STExpect.errorWithCode('https://api.publiq.be/probs/uitpas/pass-not-found'));
+                    await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                        STExpect.errorWithCode('https://api.publiq.be/probs/uitpas/pass-not-found'),
+                    );
 
                     const updatedMember = await Member.getByID(member.id);
-                    expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000095999');
-                    expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Unknown);
-                    expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2030, 0, 1).getTime());
-                    expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.endDate).toBeNull();
+                    expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual(
+                        '0900000095999',
+                    );
+                    expect(
+                        updatedMember!.details.uitpasNumberDetails?.socialTariff?.status,
+                    ).toEqual(UitpasSocialTariffStatus.Unknown);
+                    expect(
+                        updatedMember!.details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                    ).not.toEqual(new Date(2030, 0, 1).getTime());
+                    expect(
+                        updatedMember!.details.uitpasNumberDetails?.socialTariff?.endDate,
+                    ).toBeNull();
                 });
             });
 
@@ -967,9 +1053,9 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 test('Only patch social tariff', async () => {
                     initUitpasApi();
 
-                    const organization = await new OrganizationFactory({ }).create();
+                    const organization = await new OrganizationFactory({}).create();
 
-                    const user = await new UserFactory({ }).create();
+                    const user = await new UserFactory({}).create();
 
                     const token = await SessionService.createSession(user);
 
@@ -995,37 +1081,50 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                     // patch uitpas number
                     const arr: Body = new PatchableArray();
 
-                    arr.addPatch(MemberWithRegistrationsBlob.patch({
-                        id: member.id,
-                        details: MemberDetails.patch({
-                            uitpasNumberDetails: UitpasNumberDetails.patch({
-                                socialTariff: UitpasSocialTariff.create({
-                                    status: UitpasSocialTariffStatus.Active,
-                                    endDate: new Date(2050, 0, 1),
-                                    updatedAt: new Date(2040, 0, 1),
+                    arr.addPatch(
+                        MemberWithRegistrationsBlob.patch({
+                            id: member.id,
+                            details: MemberDetails.patch({
+                                uitpasNumberDetails: UitpasNumberDetails.patch({
+                                    socialTariff: UitpasSocialTariff.create({
+                                        status: UitpasSocialTariffStatus.Active,
+                                        endDate: new Date(2050, 0, 1),
+                                        updatedAt: new Date(2040, 0, 1),
+                                    }),
                                 }),
                             }),
                         }),
-                    }));
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
 
                     const result = await testServer.test(endpoint, request);
 
                     expect(result.status).toBe(200);
                     expect(result.body.members.length).toBe(1);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.None);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).toEqual(new Date(2000, 0, 1).getTime());
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate).toBeNull();
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                    ).toEqual(UitpasSocialTariffStatus.None);
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                    ).toEqual(new Date(2000, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate,
+                    ).toBeNull();
                 });
 
                 test('New uitpas number', async () => {
                     initUitpasApi();
 
-                    const organization = await new OrganizationFactory({ }).create();
+                    const organization = await new OrganizationFactory({}).create();
 
-                    const user = await new UserFactory({ }).create();
+                    const user = await new UserFactory({}).create();
 
                     const token = await SessionService.createSession(user);
 
@@ -1050,40 +1149,55 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                     // patch uitpas number
                     const arr: Body = new PatchableArray();
 
-                    arr.addPatch(MemberWithRegistrationsBlob.patch({
-                        id: member.id,
-                        details: MemberDetails.patch({
-                            uitpasNumberDetails: UitpasNumberDetails.patch({
-                                // expired
-                                uitpasNumber: '0900000031618',
-                                socialTariff: UitpasSocialTariff.create({
-                                    status: UitpasSocialTariffStatus.Active,
-                                    endDate: new Date(2050, 0, 1),
-                                    updatedAt: new Date(2040, 0, 1),
+                    arr.addPatch(
+                        MemberWithRegistrationsBlob.patch({
+                            id: member.id,
+                            details: MemberDetails.patch({
+                                uitpasNumberDetails: UitpasNumberDetails.patch({
+                                    // expired
+                                    uitpasNumber: '0900000031618',
+                                    socialTariff: UitpasSocialTariff.create({
+                                        status: UitpasSocialTariffStatus.Active,
+                                        endDate: new Date(2050, 0, 1),
+                                        updatedAt: new Date(2040, 0, 1),
+                                    }),
                                 }),
                             }),
                         }),
-                    }));
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
 
                     const result = await testServer.test(endpoint, request);
 
                     expect(result.status).toBe(200);
                     expect(result.body.members.length).toBe(1);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000031618');
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Expired);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2040, 0, 1).getTime());
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toEqual(new Date(2050, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.uitpasNumber,
+                    ).toEqual('0900000031618');
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                    ).toEqual(UitpasSocialTariffStatus.Expired);
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                    ).not.toEqual(new Date(2040, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime(),
+                    ).not.toEqual(new Date(2050, 0, 1).getTime());
                 });
 
                 test('Same uitpas number', async () => {
                     initUitpasApi();
 
-                    const organization = await new OrganizationFactory({ }).create();
+                    const organization = await new OrganizationFactory({}).create();
 
-                    const user = await new UserFactory({ }).create();
+                    const user = await new UserFactory({}).create();
 
                     const token = await SessionService.createSession(user);
 
@@ -1110,33 +1224,50 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                     // patch uitpas number
                     const arr: Body = new PatchableArray();
 
-                    arr.addPatch(MemberWithRegistrationsBlob.patch({
-                        id: member.id,
-                        details: MemberDetails.patch({
-                            uitpasNumberDetails: UitpasNumberDetails.patch({
-                                // expired
-                                uitpasNumber: '0900000031618',
-                                socialTariff: UitpasSocialTariff.create({
-                                    status: UitpasSocialTariffStatus.Active,
-                                    endDate: new Date(2050, 0, 1),
-                                    updatedAt: new Date(2040, 0, 1),
+                    arr.addPatch(
+                        MemberWithRegistrationsBlob.patch({
+                            id: member.id,
+                            details: MemberDetails.patch({
+                                uitpasNumberDetails: UitpasNumberDetails.patch({
+                                    // expired
+                                    uitpasNumber: '0900000031618',
+                                    socialTariff: UitpasSocialTariff.create({
+                                        status: UitpasSocialTariffStatus.Active,
+                                        endDate: new Date(2050, 0, 1),
+                                        updatedAt: new Date(2040, 0, 1),
+                                    }),
                                 }),
                             }),
                         }),
-                    }));
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
 
                     const result = await testServer.test(endpoint, request);
 
                     expect(result.status).toBe(200);
                     expect(result.body.members.length).toBe(1);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000031618');
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Expired);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2000, 0, 1).getTime());
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2040, 0, 1).getTime());
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toEqual(new Date(2050, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.uitpasNumber,
+                    ).toEqual('0900000031618');
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                    ).toEqual(UitpasSocialTariffStatus.Expired);
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                    ).not.toEqual(new Date(2000, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                    ).not.toEqual(new Date(2040, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime(),
+                    ).not.toEqual(new Date(2050, 0, 1).getTime());
                 });
             });
 
@@ -1144,9 +1275,9 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 const mocker = initUitpasApi();
                 mocker.forceFailure();
 
-                const organization = await new OrganizationFactory({ }).create();
+                const organization = await new OrganizationFactory({}).create();
 
-                const user = await new UserFactory({ }).create();
+                const user = await new UserFactory({}).create();
 
                 const token = await SessionService.createSession(user);
 
@@ -1174,15 +1305,17 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 // patch uitpas number
                 const arr: Body = new PatchableArray();
 
-                arr.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    details: MemberDetails.patch({
-                        uitpasNumberDetails: UitpasNumberDetails.patch({
-                            // same number
-                            uitpasNumber: '0900011354819',
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            uitpasNumberDetails: UitpasNumberDetails.patch({
+                                // same number
+                                uitpasNumber: '0900011354819',
+                            }),
                         }),
                     }),
-                }));
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1191,16 +1324,24 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 expect(result.status).toBe(200);
                 expect(result.body.members.length).toBe(1);
-                expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354819');
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).toEqual(new Date(2000, 0, 1).getTime());
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).toEqual(new Date(2050, 0, 1).getTime());
+                expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual(
+                    '0900011354819',
+                );
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                ).toEqual(UitpasSocialTariffStatus.Active);
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                ).toEqual(new Date(2000, 0, 1).getTime());
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime(),
+                ).toEqual(new Date(2050, 0, 1).getTime());
             });
 
             test('Should remove memberDetails if member details null', async () => {
-                const organization = await new OrganizationFactory({ }).create();
+                const organization = await new OrganizationFactory({}).create();
 
-                const user = await new UserFactory({ }).create();
+                const user = await new UserFactory({}).create();
 
                 const token = await SessionService.createSession(user);
 
@@ -1227,12 +1368,14 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 // patch uitpas number
                 const arr: Body = new PatchableArray();
 
-                arr.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    details: MemberDetails.patch({
-                        uitpasNumberDetails: null,
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            uitpasNumberDetails: null,
+                        }),
                     }),
-                }));
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1246,9 +1389,9 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
             test('Should update social tariff if uitpas review changed', async () => {
                 initUitpasApi();
-                const organization = await new OrganizationFactory({ }).create();
+                const organization = await new OrganizationFactory({}).create();
 
-                const user = await new UserFactory({ }).create();
+                const user = await new UserFactory({}).create();
 
                 const token = await SessionService.createSession(user);
 
@@ -1283,12 +1426,14 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 const timesClone = member.details.reviewTimes.clone();
                 timesClone.markReviewed('uitpasNumber', new Date(2020, 0, 2));
 
-                arr.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    details: MemberDetails.patch({
-                        reviewTimes: timesClone,
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            reviewTimes: timesClone,
+                        }),
                     }),
-                }));
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1297,16 +1442,22 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 expect(result.status).toBe(200);
                 expect(result.body.members.length).toBe(1);
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Expired);
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2020, 0, 1).getTime());
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toEqual(new Date(2050, 0, 1).getTime());
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                ).toEqual(UitpasSocialTariffStatus.Expired);
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                ).not.toEqual(new Date(2020, 0, 1).getTime());
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime(),
+                ).not.toEqual(new Date(2050, 0, 1).getTime());
             });
 
             test('Should update social tariff if uitpas review patched with same date', async () => {
                 initUitpasApi();
-                const organization = await new OrganizationFactory({ }).create();
+                const organization = await new OrganizationFactory({}).create();
 
-                const user = await new UserFactory({ }).create();
+                const user = await new UserFactory({}).create();
 
                 const token = await SessionService.createSession(user);
 
@@ -1341,12 +1492,14 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
                 const timesClone = member.details.reviewTimes.clone();
                 timesClone.markReviewed('uitpasNumber', new Date(2020, 0, 1));
 
-                arr.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    details: MemberDetails.patch({
-                        reviewTimes: timesClone,
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            reviewTimes: timesClone,
+                        }),
                     }),
-                }));
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1355,7 +1508,9 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
                 expect(result.status).toBe(200);
                 expect(result.body.members.length).toBe(1);
-                expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
+                expect(
+                    result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                ).toEqual(UitpasSocialTariffStatus.Active);
             });
         });
     });
@@ -1376,12 +1531,19 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             return { organization, user, member, token };
         }
 
-        async function patchMember(organization: Awaited<ReturnType<typeof createOwnedMember>>['organization'], token: Awaited<ReturnType<typeof createOwnedMember>>['token'], memberId: string, details: AutoEncoderPatchType<MemberDetails>) {
+        async function patchMember(
+            organization: Awaited<ReturnType<typeof createOwnedMember>>['organization'],
+            token: Awaited<ReturnType<typeof createOwnedMember>>['token'],
+            memberId: string,
+            details: AutoEncoderPatchType<MemberDetails>,
+        ) {
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: memberId,
-                details,
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: memberId,
+                    details,
+                }),
+            );
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
             return await testServer.test(endpoint, request);
@@ -1389,21 +1551,36 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
         test('A user cannot drastically change the first name of their member', async () => {
             const { organization, member, token } = await createOwnedMember();
-            await expect(patchMember(organization, token, member.id, MemberDetails.patch({ firstName: 'Michael' })))
-                .rejects
-                .toThrow(STExpect.errorWithCode('not_allowed'));
+            await expect(
+                patchMember(
+                    organization,
+                    token,
+                    member.id,
+                    MemberDetails.patch({ firstName: 'Michael' }),
+                ),
+            ).rejects.toThrow(STExpect.errorWithCode('not_allowed'));
         });
 
         test('A user can fix a typo in the first name', async () => {
             const { organization, member, token } = await createOwnedMember();
-            const response = await patchMember(organization, token, member.id, MemberDetails.patch({ firstName: 'Jon' }));
+            const response = await patchMember(
+                organization,
+                token,
+                member.id,
+                MemberDetails.patch({ firstName: 'Jon' }),
+            );
             expect(response.status).toBe(200);
             expect(response.body.members[0].details.firstName).toBe('Jon');
         });
 
         test('A user can change the last name', async () => {
             const { organization, member, token } = await createOwnedMember();
-            const response = await patchMember(organization, token, member.id, MemberDetails.patch({ lastName: 'Smith' }));
+            const response = await patchMember(
+                organization,
+                token,
+                member.id,
+                MemberDetails.patch({ lastName: 'Smith' }),
+            );
             expect(response.status).toBe(200);
             expect(response.body.members[0].details.lastName).toBe('Smith');
         });
@@ -1411,31 +1588,52 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
         test('A user cannot change the day, month and year of the birth date all at once', async () => {
             const { organization, member, token } = await createOwnedMember();
             const base = member.details.birthDay!;
-            const newBirthDay = new Date(base.getFullYear() + 2, base.getMonth() + 3, base.getDate() + 5);
-            await expect(patchMember(organization, token, member.id, MemberDetails.patch({ birthDay: newBirthDay })))
-                .rejects
-                .toThrow(STExpect.errorWithCode('not_allowed'));
+            const newBirthDay = new Date(
+                base.getFullYear() + 2,
+                base.getMonth() + 3,
+                base.getDate() + 5,
+            );
+            await expect(
+                patchMember(
+                    organization,
+                    token,
+                    member.id,
+                    MemberDetails.patch({ birthDay: newBirthDay }),
+                ),
+            ).rejects.toThrow(STExpect.errorWithCode('not_allowed'));
         });
 
         test('A user can correct a single part of the birth date', async () => {
             const { organization, member, token } = await createOwnedMember();
             const base = member.details.birthDay!;
             const newBirthDay = new Date(base.getFullYear() + 1, base.getMonth(), base.getDate());
-            const response = await patchMember(organization, token, member.id, MemberDetails.patch({ birthDay: newBirthDay }));
+            const response = await patchMember(
+                organization,
+                token,
+                member.id,
+                MemberDetails.patch({ birthDay: newBirthDay }),
+            );
             expect(response.status).toBe(200);
-            expect(response.body.members[0].details.birthDay?.getFullYear()).toBe(base.getFullYear() + 1);
+            expect(response.body.members[0].details.birthDay?.getFullYear()).toBe(
+                base.getFullYear() + 1,
+            );
         });
 
         test('A user can still change his own email', async () => {
             const { organization, member, token } = await createOwnedMember();
-            const response = await patchMember(organization, token, member.id, MemberDetails.patch({ email: 'jon@stamhoofd.be' }));
+            const response = await patchMember(
+                organization,
+                token,
+                member.id,
+                MemberDetails.patch({ email: 'jon@stamhoofd.be' }),
+            );
             expect(response.status).toBe(200);
             expect(response.body.members[0].details.email).toBe('jon@stamhoofd.be');
         });
     });
 
     describe('Parents', () => {
-        test('Updating isMemberTaxDependent for one parent doesn\'t change it for the whole family', async () => {
+        test("Updating isMemberTaxDependent for one parent doesn't change it for the whole family", async () => {
             const user = await new UserFactory({}).create();
 
             const parent1 = Parent.create({
@@ -1517,18 +1715,19 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             await member3.refresh();
 
             // Check all parents equal
-            const expectedParent = (isMemberTaxDependent: boolean | null = null) => Parent.create({
-                ...parent1,
-                isMemberTaxDependent,
-                updatedAt: d,
-            });
+            const expectedParent = (isMemberTaxDependent: boolean | null = null) =>
+                Parent.create({
+                    ...parent1,
+                    isMemberTaxDependent,
+                    updatedAt: d,
+                });
 
             expect(member1.details.parents).toEqual([expectedParent(true)]);
             expect(member2.details.parents).toEqual([expectedParent()]);
             expect(member3.details.parents).toEqual([expectedParent()]);
         });
 
-        test('Updating isMemberTaxDependent for another parent doesn\'t change it for the whole family', async () => {
+        test("Updating isMemberTaxDependent for another parent doesn't change it for the whole family", async () => {
             const user = await new UserFactory({}).create();
             const token = await SessionService.createSession(user);
             const d = new Date();
@@ -1615,17 +1814,28 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             await member2.refresh();
 
             // Check all parents equal
-            const expectedParent = (parent: Parent, isMemberTaxDependent: boolean | null = null, updatedAt: Date | null = null) => Parent.create({
-                ...parent,
-                isMemberTaxDependent,
-                updatedAt: updatedAt ? updatedAt : parent.updatedAt,
-            });
+            const expectedParent = (
+                parent: Parent,
+                isMemberTaxDependent: boolean | null = null,
+                updatedAt: Date | null = null,
+            ) =>
+                Parent.create({
+                    ...parent,
+                    isMemberTaxDependent,
+                    updatedAt: updatedAt ? updatedAt : parent.updatedAt,
+                });
 
             expect(member1.details.parents).toHaveLength(2);
-            expect(member1.details.parents).toEqual([expectedParent(parent1, true, d), expectedParent(parent2)]);
+            expect(member1.details.parents).toEqual([
+                expectedParent(parent1, true, d),
+                expectedParent(parent2),
+            ]);
 
             expect(member2.details.parents).toHaveLength(2);
-            expect(member2.details.parents).toEqual([expectedParent(parent1, null, d), expectedParent(parent2)]);
+            expect(member2.details.parents).toEqual([
+                expectedParent(parent1, null, d),
+                expectedParent(parent2),
+            ]);
 
             // Now change isMemberTaxDependent for member2 with parent2
             arr = new PatchableArray();
@@ -1658,10 +1868,16 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             await member2.refresh();
 
             expect(member1.details.parents).toHaveLength(2);
-            expect(member1.details.parents).toEqual([expectedParent(parent1, true, d), expectedParent(parent2, null, d)]);
+            expect(member1.details.parents).toEqual([
+                expectedParent(parent1, true, d),
+                expectedParent(parent2, null, d),
+            ]);
 
             expect(member2.details.parents).toHaveLength(2);
-            expect(member2.details.parents).toEqual([expectedParent(parent1, null, d), expectedParent(parent2, true, d)]);
+            expect(member2.details.parents).toEqual([
+                expectedParent(parent1, null, d),
+                expectedParent(parent2, true, d),
+            ]);
         });
 
         test.each([
@@ -1674,257 +1890,285 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
             [null, true],
             [null, false],
             [null, null],
-        ])('Adding member to family doesn\'t copy isMemberTaxDependent (%s : %s)', async (isOriginalTaxDependent, isNewTaxDependent) => {
-            const user = await new UserFactory({}).create();
-            const token = await SessionService.createSession(user);
+        ])(
+            "Adding member to family doesn't copy isMemberTaxDependent (%s : %s)",
+            async (isOriginalTaxDependent, isNewTaxDependent) => {
+                const user = await new UserFactory({}).create();
+                const token = await SessionService.createSession(user);
 
-            const parent1 = Parent.create({
-                firstName: 'Linda',
-                lastName: 'Doe',
-                email: 'linda@example.com',
-                alternativeEmails: ['linda@work.com'],
-                isMemberTaxDependent: isOriginalTaxDependent,
-                phone: '+32412345678',
-                address: Address.create({
-                    street: 'Main street 1',
-                    postalCode: '1000',
-                    city: 'Brussels',
-                    country: Country.Belgium,
-                }),
-                nationalRegisterNumber: '93042012345',
-                updatedAt: new Date(0),
-                type: ParentType.Mother,
-            });
-
-            const member1 = await new MemberFactory({
-                user,
-                details: MemberDetails.create({
-                    firstName: 'John',
+                const parent1 = Parent.create({
+                    firstName: 'Linda',
                     lastName: 'Doe',
-                    parents: [parent1],
-                }),
-            }).create();
-
-            const member2 = await new MemberFactory({
-                user,
-                details: MemberDetails.create({
-                    firstName: 'Jane',
-                    lastName: 'Doe',
-                }),
-            }).create();
-
-            const arr: Body = new PatchableArray();
-            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-            const createdParent = Parent.create({
-                firstName: 'Linda',
-                lastName: 'Doe',
-                updatedAt: new Date(0),
-                email: 'linda@example.com',
-                phone: '+32412345678',
-                isMemberTaxDependent: isNewTaxDependent,
-            });
-            parentsPatch.addPut(createdParent);
-
-            const patch = MemberWithRegistrationsBlob.patch({
-                id: member2.id,
-                details: MemberDetails.patch({
-                    parents: parentsPatch,
-                }),
-            });
-            arr.addPatch(patch);
-
-            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
-            request.headers.authorization = 'Bearer ' + token.accessToken;
-            const response = await testServer.test(endpoint, request);
-
-            // Check returned
-            expect(response.status).toBe(200);
-            expect(response.body.members.length).toBe(2);
-
-            // Load parents again
-            await member1.refresh();
-            await member2.refresh();
-
-            // Check all parents equal
-            const expectedParent = (parent: Parent, isMemberTaxDependent: boolean | null = null) => Parent.create({
-                ...parent,
-                isMemberTaxDependent,
-            });
-
-            expect(member1.details.parents).toHaveLength(1);
-            expect(member1.details.parents).toEqual([expectedParent(parent1, isOriginalTaxDependent)]);
-
-            expect(member2.details.parents).toHaveLength(1);
-            expect(member2.details.parents).toEqual([expectedParent(parent1, isNewTaxDependent)]);
-        });
-
-        test.each([
-            [true, true],
-            [true, false],
-            [true, null],
-            [false, true],
-            [false, false],
-            [false, null],
-            [null, true],
-            [null, false],
-            [null, null],
-        ])('Merging families keeps original isMemberTaxDependent (%s : %s)', async (parent1TaxDependent, parent2TaxDepentent) => {
-            const user = await new UserFactory({}).create();
-
-            const parent1 = Parent.create({
-                firstName: 'Linda',
-                lastName: 'Doe',
-                email: 'linda@example.com',
-                phone: '+32412345678',
-                isMemberTaxDependent: parent1TaxDependent,
-                createdAt: new Date(0),
-            });
-            const parent2 = Parent.create({
-                firstName: 'Linda',
-                lastName: 'Doe',
-                email: 'peter@example.com',
-                phone: '+32412345678',
-                isMemberTaxDependent: parent2TaxDepentent,
-                createdAt: new Date(1000),
-            });
-
-            const member1 = await new MemberFactory({
-                user,
-                details: MemberDetails.create({
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    parents: [parent1],
-                    reviewTimes: ReviewTimes.create({
-                        times: [
-                            ReviewTime.create({
-                                name: 'parents',
-                                reviewedAt: new Date(0),
-                            }),
-                        ],
-                    }),
-                }),
-            }).create();
-
-            const member2 = await new MemberFactory({
-                user,
-                details: MemberDetails.create({
-                    firstName: 'Jane',
-                    lastName: 'Doe',
-                    parents: [parent2],
-                    reviewTimes: ReviewTimes.create({
-                        times: [
-                            ReviewTime.create({
-                                name: 'parents',
-                                reviewedAt: new Date(1000),
-                            }),
-                        ],
-                    }),
-                }),
-            }).create();
-
-            const token = await SessionService.createSession(user);
-
-            const arr: Body = new PatchableArray();
-            const d = new Date();
-            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-            parentsPatch.addPatch(
-                Parent.patch({
-                    id: parent2.id,
                     email: 'linda@example.com',
-                    updatedAt: d,
-                }),
-            );
+                    alternativeEmails: ['linda@work.com'],
+                    isMemberTaxDependent: isOriginalTaxDependent,
+                    phone: '+32412345678',
+                    address: Address.create({
+                        street: 'Main street 1',
+                        postalCode: '1000',
+                        city: 'Brussels',
+                        country: Country.Belgium,
+                    }),
+                    nationalRegisterNumber: '93042012345',
+                    updatedAt: new Date(0),
+                    type: ParentType.Mother,
+                });
 
-            const patch = MemberWithRegistrationsBlob.patch({
-                id: member2.id,
-                details: MemberDetails.patch({
-                    parents: parentsPatch,
-                }),
-            });
-            arr.addPatch(patch);
+                const member1 = await new MemberFactory({
+                    user,
+                    details: MemberDetails.create({
+                        firstName: 'John',
+                        lastName: 'Doe',
+                        parents: [parent1],
+                    }),
+                }).create();
 
-            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
-            request.headers.authorization = 'Bearer ' + token.accessToken;
-            const response = await testServer.test(endpoint, request);
+                const member2 = await new MemberFactory({
+                    user,
+                    details: MemberDetails.create({
+                        firstName: 'Jane',
+                        lastName: 'Doe',
+                    }),
+                }).create();
 
-            // Check returned
-            expect(response.status).toBe(200);
-            expect(response.body.members.length).toBe(2);
+                const arr: Body = new PatchableArray();
+                const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+                const createdParent = Parent.create({
+                    firstName: 'Linda',
+                    lastName: 'Doe',
+                    updatedAt: new Date(0),
+                    email: 'linda@example.com',
+                    phone: '+32412345678',
+                    isMemberTaxDependent: isNewTaxDependent,
+                });
+                parentsPatch.addPut(createdParent);
 
-            // Load parents again
-            await member1.refresh();
-            await member2.refresh();
+                const patch = MemberWithRegistrationsBlob.patch({
+                    id: member2.id,
+                    details: MemberDetails.patch({
+                        parents: parentsPatch,
+                    }),
+                });
+                arr.addPatch(patch);
 
-            // Check all parents equal
-            const expectedParent = (isMemberTaxDependent: boolean | null = null) => Parent.create({
-                ...parent1,
-                id: parent1.id,
-                isMemberTaxDependent,
-                updatedAt: d,
-            });
+                const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                const response = await testServer.test(endpoint, request);
 
-            expect(member1.details.parents).toEqual([expectedParent(parent1TaxDependent)]);
-            expect(member2.details.parents).toEqual([expectedParent(parent2TaxDepentent)]);
-        });
+                // Check returned
+                expect(response.status).toBe(200);
+                expect(response.body.members.length).toBe(2);
+
+                // Load parents again
+                await member1.refresh();
+                await member2.refresh();
+
+                // Check all parents equal
+                const expectedParent = (
+                    parent: Parent,
+                    isMemberTaxDependent: boolean | null = null,
+                ) =>
+                    Parent.create({
+                        ...parent,
+                        isMemberTaxDependent,
+                    });
+
+                expect(member1.details.parents).toHaveLength(1);
+                expect(member1.details.parents).toEqual([
+                    expectedParent(parent1, isOriginalTaxDependent),
+                ]);
+
+                expect(member2.details.parents).toHaveLength(1);
+                expect(member2.details.parents).toEqual([
+                    expectedParent(parent1, isNewTaxDependent),
+                ]);
+            },
+        );
+
+        test.each([
+            [true, true],
+            [true, false],
+            [true, null],
+            [false, true],
+            [false, false],
+            [false, null],
+            [null, true],
+            [null, false],
+            [null, null],
+        ])(
+            'Merging families keeps original isMemberTaxDependent (%s : %s)',
+            async (parent1TaxDependent, parent2TaxDepentent) => {
+                const user = await new UserFactory({}).create();
+
+                const parent1 = Parent.create({
+                    firstName: 'Linda',
+                    lastName: 'Doe',
+                    email: 'linda@example.com',
+                    phone: '+32412345678',
+                    isMemberTaxDependent: parent1TaxDependent,
+                    createdAt: new Date(0),
+                });
+                const parent2 = Parent.create({
+                    firstName: 'Linda',
+                    lastName: 'Doe',
+                    email: 'peter@example.com',
+                    phone: '+32412345678',
+                    isMemberTaxDependent: parent2TaxDepentent,
+                    createdAt: new Date(1000),
+                });
+
+                const member1 = await new MemberFactory({
+                    user,
+                    details: MemberDetails.create({
+                        firstName: 'John',
+                        lastName: 'Doe',
+                        parents: [parent1],
+                        reviewTimes: ReviewTimes.create({
+                            times: [
+                                ReviewTime.create({
+                                    name: 'parents',
+                                    reviewedAt: new Date(0),
+                                }),
+                            ],
+                        }),
+                    }),
+                }).create();
+
+                const member2 = await new MemberFactory({
+                    user,
+                    details: MemberDetails.create({
+                        firstName: 'Jane',
+                        lastName: 'Doe',
+                        parents: [parent2],
+                        reviewTimes: ReviewTimes.create({
+                            times: [
+                                ReviewTime.create({
+                                    name: 'parents',
+                                    reviewedAt: new Date(1000),
+                                }),
+                            ],
+                        }),
+                    }),
+                }).create();
+
+                const token = await SessionService.createSession(user);
+
+                const arr: Body = new PatchableArray();
+                const d = new Date();
+                const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+                parentsPatch.addPatch(
+                    Parent.patch({
+                        id: parent2.id,
+                        email: 'linda@example.com',
+                        updatedAt: d,
+                    }),
+                );
+
+                const patch = MemberWithRegistrationsBlob.patch({
+                    id: member2.id,
+                    details: MemberDetails.patch({
+                        parents: parentsPatch,
+                    }),
+                });
+                arr.addPatch(patch);
+
+                const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                const response = await testServer.test(endpoint, request);
+
+                // Check returned
+                expect(response.status).toBe(200);
+                expect(response.body.members.length).toBe(2);
+
+                // Load parents again
+                await member1.refresh();
+                await member2.refresh();
+
+                // Check all parents equal
+                const expectedParent = (isMemberTaxDependent: boolean | null = null) =>
+                    Parent.create({
+                        ...parent1,
+                        id: parent1.id,
+                        isMemberTaxDependent,
+                        updatedAt: d,
+                    });
+
+                expect(member1.details.parents).toEqual([expectedParent(parent1TaxDependent)]);
+                expect(member2.details.parents).toEqual([expectedParent(parent2TaxDepentent)]);
+            },
+        );
 
         test.each([
             [2, false],
             [3, true],
-        ])('Marking %s parents as isMemberTaxDependent throws: %s', async (taxDependentCount, shouldThrow) => {
-            const user = await new UserFactory({}).create();
-            const token = await SessionService.createSession(user);
+        ])(
+            'Marking %s parents as isMemberTaxDependent throws: %s',
+            async (taxDependentCount, shouldThrow) => {
+                const user = await new UserFactory({}).create();
+                const token = await SessionService.createSession(user);
 
-            const parents = ['Linda', 'John', 'Ann'].map(firstName => Parent.create({
-                firstName,
-                lastName: 'Doe',
-                email: firstName.toLowerCase() + '@example.com',
-                updatedAt: new Date(0),
-            }));
-
-            const member = await new MemberFactory({
-                user,
-                details: MemberDetails.create({
-                    firstName: 'Child',
-                    lastName: 'Doe',
-                    parents,
-                }),
-            }).create();
-
-            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-            for (const parent of parents.slice(0, taxDependentCount)) {
-                parentsPatch.addPatch(Parent.patch({
-                    id: parent.id,
-                    isMemberTaxDependent: true,
-                }));
-            }
-
-            const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ parents: parentsPatch }),
-            }));
-
-            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
-            request.headers.authorization = 'Bearer ' + token.accessToken;
-
-            if (shouldThrow) {
-                await expect(testServer.test(endpoint, request)).rejects.toThrow(
-                    STExpect.simpleError({
-                        code: 'invalid_field',
-                        field: 'parents',
+                const parents = ['Linda', 'John', 'Ann'].map((firstName) =>
+                    Parent.create({
+                        firstName,
+                        lastName: 'Doe',
+                        email: firstName.toLowerCase() + '@example.com',
+                        updatedAt: new Date(0),
                     }),
                 );
 
+                const member = await new MemberFactory({
+                    user,
+                    details: MemberDetails.create({
+                        firstName: 'Child',
+                        lastName: 'Doe',
+                        parents,
+                    }),
+                }).create();
+
+                const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+                for (const parent of parents.slice(0, taxDependentCount)) {
+                    parentsPatch.addPatch(
+                        Parent.patch({
+                            id: parent.id,
+                            isMemberTaxDependent: true,
+                        }),
+                    );
+                }
+
+                const arr: Body = new PatchableArray();
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({ parents: parentsPatch }),
+                    }),
+                );
+
+                const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                if (shouldThrow) {
+                    await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                        STExpect.simpleError({
+                            code: 'invalid_field',
+                            field: 'parents',
+                        }),
+                    );
+
+                    await member.refresh();
+                    expect(
+                        member.details.parents.filter((p) => p.isMemberTaxDependent === true),
+                    ).toHaveLength(0);
+                    return;
+                }
+
+                const response = await testServer.test(endpoint, request);
+                expect(response.status).toBe(200);
+
                 await member.refresh();
-                expect(member.details.parents.filter(p => p.isMemberTaxDependent === true)).toHaveLength(0);
-                return;
-            }
-
-            const response = await testServer.test(endpoint, request);
-            expect(response.status).toBe(200);
-
-            await member.refresh();
-            expect(member.details.parents.filter(p => p.isMemberTaxDependent === true)).toHaveLength(taxDependentCount);
-        });
+                expect(
+                    member.details.parents.filter((p) => p.isMemberTaxDependent === true),
+                ).toHaveLength(taxDependentCount);
+            },
+        );
     });
 });

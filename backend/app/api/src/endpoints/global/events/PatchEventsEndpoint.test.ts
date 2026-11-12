@@ -3,11 +3,36 @@ import { PatchableArray } from '@common/encoding';
 import type { Endpoint } from '@node/endpoints';
 import { Request } from '@node/endpoints';
 import type { User } from '@stamhoofd/models';
-import { Event as EventModel, EventFactory, Group as GroupModel, GroupFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Platform, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
+import {
+    Event as EventModel,
+    EventFactory,
+    Group as GroupModel,
+    GroupFactory,
+    Organization,
+    OrganizationFactory,
+    OrganizationRegistrationPeriodFactory,
+    Platform,
+    PlatformEventTypeFactory,
+    RegistrationPeriodFactory,
+    Token,
+    UserFactory,
+} from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { Event, EventMeta, Group, GroupSettings, GroupType, NamedObject, OrganizationEventType, Permissions, PermissionsResourceKey, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
+import {
+    Event,
+    EventMeta,
+    Group,
+    GroupSettings,
+    GroupType,
+    NamedObject,
+    OrganizationEventType,
+    Permissions,
+    PermissionsResourceKey,
+    ResourcePermissions,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchEventsEndpoint } from './PatchEventsEndpoint.js';
@@ -20,21 +45,28 @@ type Body = EndpointType extends Endpoint<any, any, infer B, any> ? B : never;
 
 const minimumUserPermissions = Permissions.create({
     resources: new Map([
-        [PermissionsResourceType.Groups, new Map([
-            [PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
-                accessRights: [AccessRight.EventWrite],
-            })],
-        ])],
+        [
+            PermissionsResourceType.Groups,
+            new Map([
+                [
+                    PermissionsResourceKey.CurrentPeriod,
+                    ResourcePermissions.create({
+                        accessRights: [AccessRight.EventWrite],
+                    }),
+                ],
+            ]),
+        ],
     ]),
 });
 
 const TestRequest = {
-    async patch(options: {
-        body?: Body;
-        user?: User;
-        organization?: Organization;
-    }) {
-        const request = Request.buildJson('PATCH', baseUrl, options.organization?.getApiHost(), options.body);
+    async patch(options: { body?: Body; user?: User; organization?: Organization }) {
+        const request = Request.buildJson(
+            'PATCH',
+            baseUrl,
+            options.organization?.getApiHost(),
+            options.body,
+        );
         if (options.user) {
             const token = await SessionService.createSession(options.user);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -52,13 +84,17 @@ describe('Endpoint.PatchEventsEndpoint', () => {
         admin = await new UserFactory({
             globalPermissions: Permissions.create({
                 resources: new Map([
-                    [PermissionsResourceType.OrganizationTags, new Map([
-                        [PermissionsResourceKey.All, ResourcePermissions.create({
-                            accessRights: [
-                                AccessRight.EventWrite,
+                    [
+                        PermissionsResourceType.OrganizationTags,
+                        new Map([
+                            [
+                                PermissionsResourceKey.All,
+                                ResourcePermissions.create({
+                                    accessRights: [AccessRight.EventWrite],
+                                }),
                             ],
-                        })],
-                    ])],
+                        ]),
+                    ],
                 ]),
             }),
         }).create();
@@ -106,11 +142,17 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             organization,
             permissions: Permissions.create({
                 resources: new Map([
-                    [PermissionsResourceType.Events, new Map([
-                        [PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
-                            level: PermissionLevel.Write,
-                        })],
-                    ])],
+                    [
+                        PermissionsResourceType.Events,
+                        new Map([
+                            [
+                                PermissionsResourceKey.CurrentPeriod,
+                                ResourcePermissions.create({
+                                    level: PermissionLevel.Write,
+                                }),
+                            ],
+                        ]),
+                    ],
                 ]),
             }),
         }).create();
@@ -130,7 +172,9 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
             endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             meta: EventMeta.create({
-                groups: [NamedObject.create({ id: group.id, name: group.settings.name.toString() })],
+                groups: [
+                    NamedObject.create({ id: group.id, name: group.settings.name.toString() }),
+                ],
             }),
         });
 
@@ -141,8 +185,10 @@ describe('Endpoint.PatchEventsEndpoint', () => {
         const result = await TestRequest.patch({ body, user, organization });
         expect(result.status).toBe(200);
         expect(result.body).toHaveLength(2);
-        expect(result.body.find(e => e.id === withoutGroups.id)?.meta.groups).toBeNull();
-        expect(result.body.find(e => e.id === withGroups.id)?.meta.groups?.map(g => g.id)).toEqual([group.id]);
+        expect(result.body.find((e) => e.id === withoutGroups.id)?.meta.groups).toBeNull();
+        expect(
+            result.body.find((e) => e.id === withGroups.id)?.meta.groups?.map((g) => g.id),
+        ).toEqual([group.id]);
     });
 
     test('A user with write access to events of the current period cannot create an event outside that period', async () => {
@@ -155,27 +201,35 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             organization,
             permissions: Permissions.create({
                 resources: new Map([
-                    [PermissionsResourceType.Events, new Map([
-                        [PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
-                            level: PermissionLevel.Write,
-                        })],
-                    ])],
+                    [
+                        PermissionsResourceType.Events,
+                        new Map([
+                            [
+                                PermissionsResourceKey.CurrentPeriod,
+                                ResourcePermissions.create({
+                                    level: PermissionLevel.Write,
+                                }),
+                            ],
+                        ]),
+                    ],
                 ]),
             }),
         }).create();
 
         const body: Body = new PatchableArray();
-        body.addPut(Event.create({
-            organizationId: organization.id,
-            typeId: (await new PlatformEventTypeFactory({}).create()).id,
-            name: 'outside period',
-            startDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
-            endDate: new Date(Date.now() + 61 * 24 * 60 * 60 * 1000),
-        }));
+        body.addPut(
+            Event.create({
+                organizationId: organization.id,
+                typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                name: 'outside period',
+                startDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() + 61 * 24 * 60 * 60 * 1000),
+            }),
+        );
 
-        await expect(TestRequest.patch({ body, user, organization }))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     test('Write access to a deleted event does not allow creating a new event with the same id', async () => {
@@ -187,28 +241,36 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             organization,
             permissions: Permissions.create({
                 resources: new Map([
-                    [PermissionsResourceType.Events, new Map([
-                        [deletedEvent.id, ResourcePermissions.create({
-                            level: PermissionLevel.Write,
-                        })],
-                    ])],
+                    [
+                        PermissionsResourceType.Events,
+                        new Map([
+                            [
+                                deletedEvent.id,
+                                ResourcePermissions.create({
+                                    level: PermissionLevel.Write,
+                                }),
+                            ],
+                        ]),
+                    ],
                 ]),
             }),
         }).create();
 
         const body: Body = new PatchableArray();
-        body.addPut(Event.create({
-            id: deletedEvent.id,
-            organizationId: organization.id,
-            typeId: (await new PlatformEventTypeFactory({}).create()).id,
-            name: 'test event',
-            startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-            endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        }));
+        body.addPut(
+            Event.create({
+                id: deletedEvent.id,
+                organizationId: organization.id,
+                typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                name: 'test event',
+                startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            }),
+        );
 
-        await expect(TestRequest.patch({ body, user, organization }))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     test('A user with event write access for one group can only create events for that group', async () => {
@@ -219,11 +281,17 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             organization,
             permissions: Permissions.create({
                 resources: new Map([
-                    [PermissionsResourceType.Groups, new Map([
-                        [group.id, ResourcePermissions.create({
-                            accessRights: [AccessRight.EventWrite],
-                        })],
-                    ])],
+                    [
+                        PermissionsResourceType.Groups,
+                        new Map([
+                            [
+                                group.id,
+                                ResourcePermissions.create({
+                                    accessRights: [AccessRight.EventWrite],
+                                }),
+                            ],
+                        ]),
+                    ],
                 ]),
             }),
         }).create();
@@ -231,34 +299,39 @@ describe('Endpoint.PatchEventsEndpoint', () => {
 
         const createEvent = (groups: GroupModel[] | null) => {
             const body: Body = new PatchableArray();
-            body.addPut(Event.create({
-                organizationId: organization.id,
-                typeId,
-                name: 'test event',
-                startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                meta: EventMeta.create({
-                    groups: groups?.map(g => NamedObject.create({ id: g.id, name: g.settings.name.toString() })) ?? null,
+            body.addPut(
+                Event.create({
+                    organizationId: organization.id,
+                    typeId,
+                    name: 'test event',
+                    startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                    meta: EventMeta.create({
+                        groups:
+                            groups?.map((g) =>
+                                NamedObject.create({ id: g.id, name: g.settings.name.toString() }),
+                            ) ?? null,
+                    }),
                 }),
-            }));
+            );
             return TestRequest.patch({ body, user, organization });
         };
 
         const result = await createEvent([group]);
         expect(result.status).toBe(200);
-        expect(result.body[0].meta.groups?.map(g => g.id)).toEqual([group.id]);
+        expect(result.body[0].meta.groups?.map((g) => g.id)).toEqual([group.id]);
 
-        await expect(createEvent(null))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(createEvent(null)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
 
-        await expect(createEvent([otherGroup]))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(createEvent([otherGroup])).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
 
-        await expect(createEvent([group, otherGroup]))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(createEvent([group, otherGroup])).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     describe('hasFutureEvents recomputation', () => {
@@ -279,13 +352,15 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             }).create();
 
             const body: Body = new PatchableArray();
-            body.addPut(Event.create({
-                organizationId: organization.id,
-                typeId: (await new PlatformEventTypeFactory({}).create()).id,
-                name: 'test event',
-                startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            }));
+            body.addPut(
+                Event.create({
+                    organizationId: organization.id,
+                    typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                    name: 'test event',
+                    startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                }),
+            );
 
             const result = await TestRequest.patch({ body, user, organization });
             expect(result.status).toBe(200);
@@ -306,13 +381,15 @@ describe('Endpoint.PatchEventsEndpoint', () => {
 
             const body: Body = new PatchableArray();
             // Ended well before the future-events cutoff (~2 months ago), so it should not count.
-            body.addPut(Event.create({
-                organizationId: organization.id,
-                typeId: (await new PlatformEventTypeFactory({}).create()).id,
-                name: 'test event',
-                startDate: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000),
-                endDate: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
-            }));
+            body.addPut(
+                Event.create({
+                    organizationId: organization.id,
+                    typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                    name: 'test event',
+                    startDate: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000),
+                    endDate: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+                }),
+            );
 
             const result = await TestRequest.patch({ body, user, organization });
             expect(result.status).toBe(200);
@@ -359,19 +436,22 @@ describe('Endpoint.PatchEventsEndpoint', () => {
 
         const eventToPatch = await new EventFactory({
             organization,
-            typeId: (await new PlatformEventTypeFactory({
-                maximum: 5,
-            }).create()).id,
+            typeId: (
+                await new PlatformEventTypeFactory({
+                    maximum: 5,
+                }).create()
+            ).id,
             name: 'test event',
             startDate,
             endDate,
-
         }).create();
 
-        body.addPatch(Event.patch({
-            id: eventToPatch.id,
-            organizationId: null,
-        }));
+        body.addPatch(
+            Event.patch({
+                id: eventToPatch.id,
+                organizationId: null,
+            }),
+        );
 
         await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
             STExpect.simpleError({ code: 'permission_denied' }),
@@ -415,11 +495,17 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             const user = await new UserFactory({
                 globalPermissions: Permissions.create({
                     resources: new Map([
-                        [PermissionsResourceType.Events, new Map([
-                            [PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
-                                level: PermissionLevel.Write,
-                            })],
-                        ])],
+                        [
+                            PermissionsResourceType.Events,
+                            new Map([
+                                [
+                                    PermissionsResourceKey.CurrentPeriod,
+                                    ResourcePermissions.create({
+                                        level: PermissionLevel.Write,
+                                    }),
+                                ],
+                            ]),
+                        ],
                     ]),
                 }),
             }).create();
@@ -427,13 +513,15 @@ describe('Endpoint.PatchEventsEndpoint', () => {
 
             const createEvent = (startDate: Date) => {
                 const body: Body = new PatchableArray();
-                body.addPut(Event.create({
-                    organizationId: null,
-                    typeId,
-                    name: 'global event',
-                    startDate,
-                    endDate: new Date(startDate.getTime() + 2 * 24 * 60 * 60 * 1000),
-                }));
+                body.addPut(
+                    Event.create({
+                        organizationId: null,
+                        typeId,
+                        name: 'global event',
+                        startDate,
+                        endDate: new Date(startDate.getTime() + 2 * 24 * 60 * 60 * 1000),
+                    }),
+                );
                 return TestRequest.patch({ body, user });
             };
 
@@ -442,9 +530,9 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             expect(result.body[0].organizationId).toBeNull();
             expect(result.body[0].meta.organizationTagIds).toBeNull();
 
-            await expect(createEvent(new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)))
-                .rejects
-                .toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(
+                createEvent(new Date(Date.now() + 60 * 24 * 60 * 60 * 1000)),
+            ).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
         } finally {
             platform.periodId = originalPeriodId;
             await platform.save();
@@ -487,18 +575,22 @@ describe('Endpoint.PatchEventsEndpoint', () => {
         }).create();
 
         const body: Body = new PatchableArray();
-        body.addPatch(Event.patch({
-            id: event.id,
-            group: Group.create({
-                settings: GroupSettings.create({
-                    name: TranslatedString.create('Naam'),
+        body.addPatch(
+            Event.patch({
+                id: event.id,
+                group: Group.create({
+                    settings: GroupSettings.create({
+                        name: TranslatedString.create('Naam'),
+                    }),
                 }),
             }),
-        }));
+        );
 
-        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(STExpect.simpleError({
-            code: 'missing_organization_period',
-        }));
+        await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+            STExpect.simpleError({
+                code: 'missing_organization_period',
+            }),
+        );
 
         const updatedEvent = await EventModel.getByID(event.id);
         expect(updatedEvent!.groupId).toBeNull();
@@ -561,9 +653,11 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             });
             body.addPatch(newEvent);
 
-            await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(STExpect.simpleError({
-                code: 'permission_denied',
-            }));
+            await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'permission_denied',
+                }),
+            );
         });
 
         test('Can create group for event in non-default period as full admin', async () => {
@@ -622,8 +716,12 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             expect(result.status).toBe(200);
             expect(result.body).toHaveLength(1);
             expect(result.body[0].group).toBeDefined();
-            expect(result.body[0].group!.settings.name).toEqual(TranslatedString.create('test event'));
-            expect(result.body[0].group!.settings.description).toEqual(TranslatedString.create('Inschrijvingsgroep'));
+            expect(result.body[0].group!.settings.name).toEqual(
+                TranslatedString.create('test event'),
+            );
+            expect(result.body[0].group!.settings.description).toEqual(
+                TranslatedString.create('Inschrijvingsgroep'),
+            );
             expect(result.body[0].group!.periodId).toEqual(period1.id);
             expect(result.body[0].group!.organizationId).toEqual(organization.id);
             expect(result.body[0].group!.type).toEqual(GroupType.EventRegistration);
@@ -685,8 +783,12 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             expect(result.status).toBe(200);
             expect(result.body).toHaveLength(1);
             expect(result.body[0].group).toBeDefined();
-            expect(result.body[0].group!.settings.name).toEqual(TranslatedString.create('test event'));
-            expect(result.body[0].group!.settings.description).toEqual(TranslatedString.create('Inschrijvingsgroep'));
+            expect(result.body[0].group!.settings.name).toEqual(
+                TranslatedString.create('test event'),
+            );
+            expect(result.body[0].group!.settings.description).toEqual(
+                TranslatedString.create('Inschrijvingsgroep'),
+            );
             expect(result.body[0].group!.periodId).toEqual(period2.id);
             expect(result.body[0].group!.organizationId).toEqual(organization.id);
             expect(result.body[0].group!.type).toEqual(GroupType.EventRegistration);
@@ -748,8 +850,12 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 expect(result.status).toBe(200);
                 expect(result.body).toHaveLength(1);
                 expect(result.body[0].group).toBeDefined();
-                expect(result.body[0].group!.settings.name).toEqual(TranslatedString.create('test event'));
-                expect(result.body[0].group!.settings.description).toEqual(TranslatedString.create('Inschrijvingsgroep'));
+                expect(result.body[0].group!.settings.name).toEqual(
+                    TranslatedString.create('test event'),
+                );
+                expect(result.body[0].group!.settings.description).toEqual(
+                    TranslatedString.create('Inschrijvingsgroep'),
+                );
                 expect(result.body[0].group!.periodId).toEqual(period1.id);
                 expect(result.body[0].group!.organizationId).toEqual(organization.id);
                 expect(result.body[0].group!.type).toEqual(GroupType.EventRegistration);
@@ -813,18 +919,22 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             }).create();
 
             const body: Body = new PatchableArray();
-            body.addPatch(Event.patch({
-                id: event.id,
-                group: Group.create({
-                    settings: GroupSettings.create({
-                        name: TranslatedString.create('Naam'),
+            body.addPatch(
+                Event.patch({
+                    id: event.id,
+                    group: Group.create({
+                        settings: GroupSettings.create({
+                            name: TranslatedString.create('Naam'),
+                        }),
                     }),
                 }),
-            }));
+            );
 
-            await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(STExpect.simpleError({
-                code: 'missing_organization_period',
-            }));
+            await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'missing_organization_period',
+                }),
+            );
 
             const updatedEvent = await EventModel.getByID(event.id);
             expect(updatedEvent!.groupId).toBeNull();
@@ -868,29 +978,35 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             }).create();
 
             const createBody: Body = new PatchableArray();
-            createBody.addPatch(Event.patch({
-                id: event.id,
-                group: Group.create({
-                    settings: GroupSettings.create({
-                        name: TranslatedString.create('Naam'),
+            createBody.addPatch(
+                Event.patch({
+                    id: event.id,
+                    group: Group.create({
+                        settings: GroupSettings.create({
+                            name: TranslatedString.create('Naam'),
+                        }),
                     }),
                 }),
-            }));
+            );
 
             const created = await TestRequest.patch({ body: createBody, user, organization });
             expect(created.body[0].group!.periodId).toEqual(period1.id);
 
             const moveBody: Body = new PatchableArray();
-            moveBody.addPatch(Event.patch({
-                id: event.id,
-                startDate: new Date('2001-02-10'),
-                endDate: new Date('2001-02-12'),
-            }));
+            moveBody.addPatch(
+                Event.patch({
+                    id: event.id,
+                    startDate: new Date('2001-02-10'),
+                    endDate: new Date('2001-02-12'),
+                }),
+            );
 
-            await expect(TestRequest.patch({ body: moveBody, user, organization })).rejects.toThrow(STExpect.simpleError({
-                code: 'missing_organization_period',
-                field: 'startDate',
-            }));
+            await expect(TestRequest.patch({ body: moveBody, user, organization })).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'missing_organization_period',
+                    field: 'startDate',
+                }),
+            );
 
             const group = await GroupModel.getByID(created.body[0].group!.id);
             expect(group!.periodId).toEqual(period1.id);
@@ -930,30 +1046,36 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             }).create();
 
             const createBody: Body = new PatchableArray();
-            createBody.addPatch(Event.patch({
-                id: event.id,
-                group: Group.create({
-                    settings: GroupSettings.create({
-                        name: TranslatedString.create('Naam'),
+            createBody.addPatch(
+                Event.patch({
+                    id: event.id,
+                    group: Group.create({
+                        settings: GroupSettings.create({
+                            name: TranslatedString.create('Naam'),
+                        }),
                     }),
                 }),
-            }));
+            );
 
             const created = await TestRequest.patch({ body: createBody, user, organization });
             expect(created.body[0].group!.periodId).toEqual(period.id);
 
             // No registration period covers 2005
             const moveBody: Body = new PatchableArray();
-            moveBody.addPatch(Event.patch({
-                id: event.id,
-                startDate: new Date('2005-02-10'),
-                endDate: new Date('2005-02-12'),
-            }));
+            moveBody.addPatch(
+                Event.patch({
+                    id: event.id,
+                    startDate: new Date('2005-02-10'),
+                    endDate: new Date('2005-02-12'),
+                }),
+            );
 
-            await expect(TestRequest.patch({ body: moveBody, user, organization })).rejects.toThrow(STExpect.simpleError({
-                code: 'invalid_period',
-                field: 'startDate',
-            }));
+            await expect(TestRequest.patch({ body: moveBody, user, organization })).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'invalid_period',
+                    field: 'startDate',
+                }),
+            );
 
             const group = await GroupModel.getByID(created.body[0].group!.id);
             expect(group!.periodId).toEqual(period.id);
@@ -999,19 +1121,22 @@ describe('Endpoint.PatchEventsEndpoint', () => {
 
             const eventToPatch = await new EventFactory({
                 organization,
-                typeId: (await new PlatformEventTypeFactory({
-                    maximum: 5,
-                }).create()).id,
+                typeId: (
+                    await new PlatformEventTypeFactory({
+                        maximum: 5,
+                    }).create()
+                ).id,
                 name: 'test event',
                 startDate,
                 endDate,
-
             }).create();
 
-            body.addPatch(Event.patch({
-                id: eventToPatch.id,
-                organizationId: null,
-            }));
+            body.addPatch(
+                Event.patch({
+                    id: eventToPatch.id,
+                    organizationId: null,
+                }),
+            );
 
             await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
                 STExpect.simpleError({ code: 'permission_denied' }),

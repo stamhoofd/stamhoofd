@@ -8,8 +8,14 @@ export const RegistrationLogger = new ModelLogger(Registration, {
             // Ignored for now
             return;
         }
-        const wasActive = event.type === 'updated' ? (!event.originalFields.deactivatedAt && !!event.originalFields.registeredAt) : true;
-        const isActive = event.type === 'deleted' ? false : (!event.model.deactivatedAt && !!event.model.registeredAt);
+        const wasActive =
+            event.type === 'updated'
+                ? !event.originalFields.deactivatedAt && !!event.originalFields.registeredAt
+                : true;
+        const isActive =
+            event.type === 'deleted'
+                ? false
+                : !event.model.deactivatedAt && !!event.model.registeredAt;
 
         if (wasActive === isActive) {
             return;
@@ -32,16 +38,22 @@ export const RegistrationLogger = new ModelLogger(Registration, {
 
     createReplacements(_, { data }) {
         return new Map([
-            ['m', AuditLogReplacement.create({
-                id: data.member.id,
-                value: data.member.details.name,
-                type: AuditLogReplacementType.Member,
-            })],
-            ['g', AuditLogReplacement.create({
-                id: data.group.id,
-                value: data.group.settings.name.toString(),
-                type: AuditLogReplacementType.Group,
-            })],
+            [
+                'm',
+                AuditLogReplacement.create({
+                    id: data.member.id,
+                    value: data.member.details.name,
+                    type: AuditLogReplacementType.Member,
+                }),
+            ],
+            [
+                'g',
+                AuditLogReplacement.create({
+                    id: data.group.id,
+                    value: data.group.settings.name.toString(),
+                    type: AuditLogReplacementType.Group,
+                }),
+            ],
         ]);
     },
 
@@ -49,5 +61,4 @@ export const RegistrationLogger = new ModelLogger(Registration, {
         const d = event.model.setRelation(Registration.group, options.data.group).getStructure();
         return d.description;
     },
-
 });

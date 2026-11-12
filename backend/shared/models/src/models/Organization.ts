@@ -6,7 +6,19 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel, SQL, SQLWhereExists } from '@stamhoofd/sql';
 import type { OrganizationEmail, PrivatePaymentConfiguration } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
-import { Address, Company, getAppHost, GroupType, OrganizationMetaData, OrganizationPrivateMetaData, Organization as OrganizationStruct, PaymentMethod, PaymentProvider, Recipient, TransferSettings } from '@stamhoofd/structures';
+import {
+    Address,
+    Company,
+    getAppHost,
+    GroupType,
+    OrganizationMetaData,
+    OrganizationPrivateMetaData,
+    Organization as OrganizationStruct,
+    PaymentMethod,
+    PaymentProvider,
+    Recipient,
+    TransferSettings,
+} from '@stamhoofd/structures';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { Language } from '@stamhoofd/types/Language';
 import { Formatter, Sorter } from '@stamhoofd/utility';
@@ -26,7 +38,9 @@ export class Organization extends QueryableModel {
     // static cache = new ModelCache<Organization>();
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -87,14 +101,16 @@ export class Organization extends QueryableModel {
     address: Address;
 
     @column({
-        type: 'string', beforeSave: function (this: Organization) {
+        type: 'string',
+        beforeSave: function (this: Organization) {
             return this.name + '\n' + this.address.toString();
         },
     })
     searchIndex: string;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -106,7 +122,8 @@ export class Organization extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -129,7 +146,9 @@ export class Organization extends QueryableModel {
      * Makes sure empty name is replaced with organization name
      */
     get mappedTransferSettings(): TransferSettings {
-        return this.meta.transferSettings.fillMissing(TransferSettings.create({ creditor: this.name }));
+        return this.meta.transferSettings.fillMissing(
+            TransferSettings.create({ creditor: this.name }),
+        );
     }
 
     static getFutureEventsCutoffDate(): Date {
@@ -142,7 +161,6 @@ export class Organization extends QueryableModel {
                 STAMHOOFD.userMode === 'platform'
                     ? SQL.where('organizationId', this.id).or('organizationId', null)
                     : SQL.where('organizationId', this.id),
-
             )
             .where('endDate', '>', Organization.getFutureEventsCutoffDate())
             .first(false);
@@ -162,20 +180,22 @@ export class Organization extends QueryableModel {
             return;
         }
 
-        const query = Organization.update()
-            .set(
-                'hasFutureEvents',
-                new SQLWhereExists(
-                    SQL.select(SQL.scalar(1))
-                        .from(Event.table)
-                        .where(
-                            STAMHOOFD.userMode === 'platform'
-                                ? SQL.where('organizationId', SQL.column(Organization.table, 'id')).or('organizationId', null)
-                                : SQL.where('organizationId', SQL.column(Organization.table, 'id')),
-                        )
-                        .where('endDate', '>', Organization.getFutureEventsCutoffDate()),
-                ),
-            );
+        const query = Organization.update().set(
+            'hasFutureEvents',
+            new SQLWhereExists(
+                SQL.select(SQL.scalar(1))
+                    .from(Event.table)
+                    .where(
+                        STAMHOOFD.userMode === 'platform'
+                            ? SQL.where('organizationId', SQL.column(Organization.table, 'id')).or(
+                                  'organizationId',
+                                  null,
+                              )
+                            : SQL.where('organizationId', SQL.column(Organization.table, 'id')),
+                    )
+                    .where('endDate', '>', Organization.getFutureEventsCutoffDate()),
+            ),
+        );
 
         if (organizationIds !== 'all') {
             query.where('id', organizationIds);
@@ -251,7 +271,10 @@ export class Organization extends QueryableModel {
      * Get an Organization by looking at the host of a request
      * Format is 2331c59a-0cbe-4279-871c-ea9d0474cd54.api.stamhoofd.app
      */
-    static async fromApiHost(host: string, options?: { allowInactive?: boolean }): Promise<Organization> {
+    static async fromApiHost(
+        host: string,
+        options?: { allowInactive?: boolean },
+    ): Promise<Organization> {
         if (!host.endsWith('.' + STAMHOOFD.domains.api)) {
             throw new SimpleError({
                 code: 'invalid_host',
@@ -304,26 +327,41 @@ export class Organization extends QueryableModel {
             return this._cachedPeriod;
         }
 
-        const oPeriods = await OrganizationRegistrationPeriod.where({ periodId: this.periodId, organizationId: this.id }, { limit: 1 });
+        const oPeriods = await OrganizationRegistrationPeriod.where(
+            { periodId: this.periodId, organizationId: this.id },
+            { limit: 1 },
+        );
 
         let oPeriod: OrganizationRegistrationPeriod;
         if (oPeriods.length == 0) {
             // Automatically create a period
-            oPeriod = await QueueHandler.schedule('create-missing-organization-period', async () => {
-                // Race condition check
-                const updatedPeriods = await OrganizationRegistrationPeriod.where({ periodId: this.periodId, organizationId: this.id }, { limit: 1 });
+            oPeriod = await QueueHandler.schedule(
+                'create-missing-organization-period',
+                async () => {
+                    // Race condition check
+                    const updatedPeriods = await OrganizationRegistrationPeriod.where(
+                        { periodId: this.periodId, organizationId: this.id },
+                        { limit: 1 },
+                    );
 
-                if (updatedPeriods.length) {
-                    return updatedPeriods[0];
-                }
+                    if (updatedPeriods.length) {
+                        return updatedPeriods[0];
+                    }
 
-                console.log('Automatically creating new organization registration period for organization ' + this.id + ' and period ' + this.periodId + ' - organization period is missing');
-                const created = new OrganizationRegistrationPeriod();
-                created.organizationId = this.id;
-                created.periodId = this.periodId;
-                await created.save();
-                return created;
-            });
+                    console.log(
+                        'Automatically creating new organization registration period for organization ' +
+                            this.id +
+                            ' and period ' +
+                            this.periodId +
+                            ' - organization period is missing',
+                    );
+                    const created = new OrganizationRegistrationPeriod();
+                    created.organizationId = this.id;
+                    created.periodId = this.periodId;
+                    await created.save();
+                    return created;
+                },
+            );
         } else {
             oPeriod = oPeriods[0];
         }
@@ -368,16 +406,26 @@ export class Organization extends QueryableModel {
     /**
      * Return default e-mail address if no email addresses are set.
      */
-    getDefaultFrom(i18n: I18n, type: 'transactional' | 'broadcast' = 'broadcast'): EmailInterfaceRecipient {
-        const domain = type === 'transactional' ? i18n.localizedDomains.defaultTransactionalEmail() : i18n.localizedDomains.defaultBroadcastEmail();
+    getDefaultFrom(
+        i18n: I18n,
+        type: 'transactional' | 'broadcast' = 'broadcast',
+    ): EmailInterfaceRecipient {
+        const domain =
+            type === 'transactional'
+                ? i18n.localizedDomains.defaultTransactionalEmail()
+                : i18n.localizedDomains.defaultBroadcastEmail();
 
         return {
             name: this.name,
-            email: ('noreply-' + this.uri + '@' + domain),
+            email: 'noreply-' + this.uri + '@' + domain,
         };
     }
 
-    async getPaymentProviderFor(method: PaymentMethod, mandate: PaymentMandate | null, config: PrivatePaymentConfiguration): Promise<{
+    async getPaymentProviderFor(
+        method: PaymentMethod,
+        mandate: PaymentMandate | null,
+        config: PrivatePaymentConfiguration,
+    ): Promise<{
         provider: PaymentProvider | null;
         stripeAccount: StripeAccount | null;
     }> {
@@ -388,13 +436,22 @@ export class Organization extends QueryableModel {
             };
         }
 
-        let stripeAccount = (config.stripeAccountId ? (await StripeAccount.getByID(config.stripeAccountId)) : null) ?? null;
+        let stripeAccount =
+            (config.stripeAccountId ? await StripeAccount.getByID(config.stripeAccountId) : null) ??
+            null;
         if (stripeAccount && stripeAccount.organizationId !== this.id) {
-            console.warn('Stripe account ' + stripeAccount.id + ' is not linked to organization ' + this.id);
+            console.warn(
+                'Stripe account ' + stripeAccount.id + ' is not linked to organization ' + this.id,
+            );
             stripeAccount = null;
         }
         const provider = this.privateMeta.getPaymentProviderFor(method, stripeAccount?.meta);
-        if (provider === null && ![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(method)) {
+        if (
+            provider === null &&
+            ![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(
+                method,
+            )
+        ) {
             if (!stripeAccount && config.stripeAccountId) {
                 console.warn('Missing stripe account id ' + config.stripeAccountId);
             }
@@ -418,7 +475,10 @@ export class Organization extends QueryableModel {
         const allPaymentMethods = Object.values(PaymentMethod);
         const providers: PaymentProvider[] = [];
 
-        let stripeAccounts: (StripeAccount | null)[] = await StripeAccount.where({ organizationId: this.id, status: 'active' });
+        let stripeAccounts: (StripeAccount | null)[] = await StripeAccount.where({
+            organizationId: this.id,
+            status: 'active',
+        });
 
         if (stripeAccounts.length === 0) {
             stripeAccounts = [null];
@@ -456,18 +516,13 @@ export class Organization extends QueryableModel {
         }
 
         return await Registration.select()
-            .join(
-                SQL.join(Group.table)
-                    .where(SQL.column('id'), SQL.parentColumn('groupId')),
-            )
+            .join(SQL.join(Group.table).where(SQL.column('id'), SQL.parentColumn('groupId')))
             .where('periodId', organization.periodId)
             .where('deactivatedAt', null)
             .where('registeredAt', '!=', null)
             .where(SQL.column(Group.table, 'deletedAt'), null)
             .where(SQL.column(Group.table, 'type'), '!=', GroupType.WaitingList)
-            .count(
-                SQL.distinct(SQL.column('memberId')),
-            );
+            .count(SQL.distinct(SQL.column('memberId')));
     }
 
     /**
@@ -477,11 +532,11 @@ export class Organization extends QueryableModel {
         const b = this.meta.companies.length
             ? this.meta.companies
             : [
-                    Company.create({
-                        name: this.name,
-                        address: this.address,
-                    }),
-                ];
+                  Company.create({
+                      name: this.name,
+                      address: this.address,
+                  }),
+              ];
 
         // Missing address -> use organization address
         if (!b[0].address) {

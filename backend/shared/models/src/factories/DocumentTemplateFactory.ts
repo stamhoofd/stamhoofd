@@ -1,6 +1,16 @@
 import { Factory } from '@node/database';
 
-import { DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplateDefinition, DocumentTemplateGroup, NamedObject, RecordCategory, RecordSettings, RecordType } from '@stamhoofd/structures';
+import {
+    DocumentPrivateSettings,
+    DocumentSettings,
+    DocumentStatus,
+    DocumentTemplateDefinition,
+    DocumentTemplateGroup,
+    NamedObject,
+    RecordCategory,
+    RecordSettings,
+    RecordType,
+} from '@stamhoofd/structures';
 import type { Group } from '../models/index.js';
 import { DocumentTemplate } from '../models/index.js';
 import { OrganizationFactory } from './OrganizationFactory.js';
@@ -60,12 +70,7 @@ export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> 
             minPricePaid: this.options.minPricePaid ?? null,
             maxAge: this.options.maxAge ?? null,
             fieldAnswers: new Map(),
-            linkedFields: new Map([
-                [
-                    'renamedValue',
-                    ['member.firstName'],
-                ],
-            ]),
+            linkedFields: new Map([['renamedValue', ['member.firstName']]]),
         });
 
         documentTemplate.privateSettings = DocumentPrivateSettings.create({
@@ -139,12 +144,14 @@ export class DocumentTemplateFactory extends Factory<Options, DocumentTemplate> 
         });
 
         for (const group of this.options.groups) {
-            documentTemplate.privateSettings.groups.push(DocumentTemplateGroup.create({
-                group: NamedObject.create({
-                    id: group.id,
-                    name: group.settings.name.toString(),
+            documentTemplate.privateSettings.groups.push(
+                DocumentTemplateGroup.create({
+                    group: NamedObject.create({
+                        id: group.id,
+                        name: group.settings.name.toString(),
+                    }),
                 }),
-            }));
+            );
         }
 
         if (this.options.type) {

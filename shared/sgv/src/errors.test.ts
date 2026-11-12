@@ -31,9 +31,7 @@ describe('@stamhoofd/sgv errors', () => {
         });
 
         expect(errors.errors).toHaveLength(1);
-        expect(errors.errors[0].message).toBe(
-            'Validatiefout: Huisnummer ontbreekt',
-        );
+        expect(errors.errors[0].message).toBe('Validatiefout: Huisnummer ontbreekt');
     });
 
     it('decodes boodschap responses', () => {
@@ -48,9 +46,7 @@ describe('@stamhoofd/sgv errors', () => {
 
         expect(errors.errors).toHaveLength(1);
         expect(errors.errors[0].message).toBe('{"unexpected":true}');
-        expect(errors.errors[0].human).toContain(
-            'Foutmelding van de groepsadministratie',
-        );
+        expect(errors.errors[0].human).toContain('Foutmelding van de groepsadministratie');
     });
 });
 

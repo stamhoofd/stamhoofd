@@ -34,7 +34,7 @@ export class RequestBag {
     }
 
     removeRequest(request: Request<any>) {
-        const index = this.requests.findIndex(r => r === request);
+        const index = this.requests.findIndex((r) => r === request);
         if (index !== -1) {
             this.requests.splice(index, 1);
         }

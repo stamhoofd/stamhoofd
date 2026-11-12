@@ -3,7 +3,12 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { Email, Platform, RateLimiter } from '@stamhoofd/models';
 import type { EmailPreview } from '@stamhoofd/structures';
-import { EmailStatus, Email as EmailStruct, EmailTemplate as EmailTemplateStruct, validateEmailTranslations } from '@stamhoofd/structures';
+import {
+    EmailStatus,
+    Email as EmailStruct,
+    EmailTemplate as EmailTemplateStruct,
+    validateEmailTranslations,
+} from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context.js';
 import { SimpleError } from '@common/errors';
@@ -70,7 +75,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const organization = await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (!await Context.auth.canSendEmails(organization)) {
+        if (!(await Context.auth.canSendEmails(organization))) {
             throw Context.auth.error({
                 message: 'Cannot send emails',
                 human: $t('%1Cv'),
@@ -102,10 +107,12 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             }
         }
 
-        const list = organization ? organization.privateMeta.emails : (await Platform.getShared()).privateConfig.emails;
-        const sender = list.find(e => e.id === request.body.senderId);
+        const list = organization
+            ? organization.privateMeta.emails
+            : (await Platform.getShared()).privateConfig.emails;
+        const sender = list.find((e) => e.id === request.body.senderId);
         if (sender) {
-            if (!await Context.auth.canSendEmailsFrom(organization, sender.id)) {
+            if (!(await Context.auth.canSendEmailsFrom(organization, sender.id))) {
                 throw Context.auth.error({
                     message: 'Cannot send emails from this sender',
                     human: $t('%1Cw'),
@@ -128,11 +135,26 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         model.validateAttachments();
 
         // Check default
-        if (JSON.stringify(model.json).length < 3 && model.recipientFilter.filters[0].type && EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type)) {
-            const type = EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type);
+        if (
+            JSON.stringify(model.json).length < 3 &&
+            model.recipientFilter.filters[0].type &&
+            EmailTemplateStruct.getDefaultForRecipient(model.recipientFilter.filters[0].type)
+        ) {
+            const type = EmailTemplateStruct.getDefaultForRecipient(
+                model.recipientFilter.filters[0].type,
+            );
             if (type) {
                 const tenant = await TenantContext.currentOrRoot.getTenant();
-                await model.setFromTemplate(type, { language: model.language ?? organization?.language ?? tenant.language ?? $getLanguage(), keepTranslations: organization ? organization.language === null : tenant.language === null });
+                await model.setFromTemplate(type, {
+                    language:
+                        model.language ??
+                        organization?.language ??
+                        tenant.language ??
+                        $getLanguage(),
+                    keepTranslations: organization
+                        ? organization.language === null
+                        : tenant.language === null,
+                });
             }
         }
 
@@ -140,8 +162,12 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
         await EmailSendService.buildExampleRecipient(model, true);
         await model.updateCount();
 
-        if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent || request.body.status === EmailStatus.Queued) {
-            if (!await Context.auth.canSendEmail(model)) {
+        if (
+            request.body.status === EmailStatus.Sending ||
+            request.body.status === EmailStatus.Sent ||
+            request.body.status === EmailStatus.Queued
+        ) {
+            if (!(await Context.auth.canSendEmail(model))) {
                 throw Context.auth.error({
                     message: 'Cannot send emails from this sender',
                     human: $t('%1Cw'),
@@ -168,6 +194,8 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
             await duplicate.save();
         }
 
-        return new Response(await EmailPreviewService.getPreviewStructure(model, { allLanguages: true }));
+        return new Response(
+            await EmailPreviewService.getPreviewStructure(model, { allLanguages: true }),
+        );
     }
 }

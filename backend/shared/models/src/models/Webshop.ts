@@ -2,7 +2,14 @@ import type { ManyToOneRelation } from '@node/database';
 import { column, Database } from '@node/database';
 import { ArrayDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
-import { Category, DNSRecordStatus, Product, WebshopMetaData, WebshopPrivateMetaData, WebshopServerMetaData } from '@stamhoofd/structures';
+import {
+    Category,
+    DNSRecordStatus,
+    Product,
+    WebshopMetaData,
+    WebshopPrivateMetaData,
+    WebshopServerMetaData,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { validateDNSRecords } from '../helpers/DNSValidator.js';
 import type { Organization } from './Organization.js';
@@ -12,7 +19,9 @@ export class Webshop extends QueryableModel {
 
     // Columns
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -72,7 +81,8 @@ export class Webshop extends QueryableModel {
     categories: Category[] = [];
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -84,7 +94,8 @@ export class Webshop extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -177,7 +188,9 @@ export class Webshop extends QueryableModel {
             throw new Error('No webshop domains configured');
         }
 
-        const domain = STAMHOOFD.domains.webshop[this.organization.address.country] ?? STAMHOOFD.domains.webshop[''];
+        const domain =
+            STAMHOOFD.domains.webshop[this.organization.address.country] ??
+            STAMHOOFD.domains.webshop[''];
         return domain + '/' + this.uri;
     }
 

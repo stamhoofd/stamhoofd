@@ -1,10 +1,37 @@
 import { Email } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, EmailStatus } from '@stamhoofd/structures';
+import {
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    AuditLogType,
+    EmailStatus,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ModelLogger } from './ModelLogger.js';
 
 export const EmailLogger = new ModelLogger(Email, {
-    skipKeys: ['json', 'text', 'status', 'userId', 'createdAt', 'updatedAt', 'deletedAt', 'recipientFilter', 'emailRecipientsCount', 'otherRecipientsCount', 'succeededCount', 'softFailedCount', 'failedCount', 'membersCount', 'hardBouncesCount', 'softBouncesCount', 'spamComplaintsCount', 'recipientsStatus', 'recipientsErrors', 'emailErrors', 'sentAt'],
+    skipKeys: [
+        'json',
+        'text',
+        'status',
+        'userId',
+        'createdAt',
+        'updatedAt',
+        'deletedAt',
+        'recipientFilter',
+        'emailRecipientsCount',
+        'otherRecipientsCount',
+        'succeededCount',
+        'softFailedCount',
+        'failedCount',
+        'membersCount',
+        'hardBouncesCount',
+        'softBouncesCount',
+        'spamComplaintsCount',
+        'recipientsStatus',
+        'recipientsErrors',
+        'emailErrors',
+        'sentAt',
+    ],
 
     async optionsGenerator(event) {
         let oldStatus = EmailStatus.Draft;
@@ -13,33 +40,38 @@ export const EmailLogger = new ModelLogger(Email, {
             oldStatus = event.originalFields.status as EmailStatus;
         }
 
-        if (event.type === 'deleted' || (event.type === 'updated' && event.model.deletedAt && !event.getOldModel().deletedAt)) {
+        if (
+            event.type === 'deleted' ||
+            (event.type === 'updated' && event.model.deletedAt && !event.getOldModel().deletedAt)
+        ) {
             return {
                 type: AuditLogType.EmailDeleted,
-                data: {
-                },
+                data: {},
                 generatePatchList: false,
             };
         }
 
         const newStatus = event.model.status as EmailStatus;
-        if (newStatus === oldStatus || (newStatus !== EmailStatus.Sent && newStatus !== EmailStatus.Sending)) {
+        if (
+            newStatus === oldStatus ||
+            (newStatus !== EmailStatus.Sent && newStatus !== EmailStatus.Sending)
+        ) {
             if (newStatus === EmailStatus.Draft) {
                 return;
             }
             return {
                 type: AuditLogType.EmailEdited,
-                data: {
-                },
+                data: {},
                 generatePatchList: true,
             };
         }
 
         if (newStatus === EmailStatus.Sent) {
             return {
-                type: event.model.sendAsEmail ? AuditLogType.EmailSent : AuditLogType.EmailPublished,
-                data: {
-                },
+                type: event.model.sendAsEmail
+                    ? AuditLogType.EmailSent
+                    : AuditLogType.EmailPublished,
+                data: {},
                 generatePatchList: false,
             };
         }
@@ -51,28 +83,32 @@ export const EmailLogger = new ModelLogger(Email, {
 
         return {
             type: AuditLogType.EmailSending,
-            data: {
-            },
+            data: {},
             generatePatchList: false,
         };
     },
 
     createReplacements(model, options) {
         const map = new Map([
-            ['e', AuditLogReplacement.create({
-                id: model.id,
-                value: model.subject ?? '',
-                type: AuditLogReplacementType.Email,
-            })],
-            ['c', AuditLogReplacement.create({
-                value: Formatter.integer(model.emailRecipientsCount ?? 0),
-                count: model.emailRecipientsCount ?? 0,
-            })],
+            [
+                'e',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.subject ?? '',
+                    type: AuditLogReplacementType.Email,
+                }),
+            ],
+            [
+                'c',
+                AuditLogReplacement.create({
+                    value: Formatter.integer(model.emailRecipientsCount ?? 0),
+                    count: model.emailRecipientsCount ?? 0,
+                }),
+            ],
         ]);
         if (model.html) {
             map.set('html', AuditLogReplacement.html(model.html));
         }
         return map;
     },
-
 });

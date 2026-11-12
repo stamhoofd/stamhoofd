@@ -52,7 +52,9 @@ export class XlsxWriter implements XlsxWriterAdapter {
         this.sharedStrings.writeStream = await this.zipWriter.addFile('xl/sharedStrings.xml');
         this.globalRelations.writeStream = await this.zipWriter.addFile('_rels/.rels');
         this.workbook.writeStream = await this.zipWriter.addFile('xl/workbook.xml');
-        this.workbookRelations.writeStream = await this.zipWriter.addFile('xl/_rels/workbook.xml.rels');
+        this.workbookRelations.writeStream = await this.zipWriter.addFile(
+            'xl/_rels/workbook.xml.rels',
+        );
         this.theme.writeStream = await this.zipWriter.addFile('xl/theme/theme1.xml');
 
         this.coreProps.writeStream = await this.zipWriter.addFile('docProps/core.xml');
@@ -86,7 +88,8 @@ export class XlsxWriter implements XlsxWriterAdapter {
 
         await this.contentTypes.addOverride({
             partName: '/xl/workbook.xml',
-            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml',
+            contentType:
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml',
         });
 
         // Wire up styles relation
@@ -122,7 +125,8 @@ export class XlsxWriter implements XlsxWriterAdapter {
         // Add shared strings to content types: todo
         await this.contentTypes.addOverride({
             partName: '/xl/sharedStrings.xml',
-            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml',
+            contentType:
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml',
         });
     }
 
@@ -143,7 +147,8 @@ export class XlsxWriter implements XlsxWriterAdapter {
         // Add sheet to content types
         await this.contentTypes.addOverride({
             partName: `/xl/${path}`,
-            contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml',
+            contentType:
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml',
         });
 
         sheet.writeStream = await this.zipWriter.addFile(`xl/${path}`);

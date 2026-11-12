@@ -1,7 +1,16 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
-import type { CountFilteredRequest, Group as GroupStruct, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    Group as GroupStruct,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
+import {
+    assertSort,
+    getSortFilter,
+    LimitedFilteredRequest,
+    PaginatedResponse,
+} from '@stamhoofd/structures';
 
 import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
@@ -119,7 +128,8 @@ export class GetGroupsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             throw new SimpleError({
                 code: 'client_update_required',
                 statusCode: 400,
-                message: 'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
+                message:
+                    'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
                 human: $t('%G8'),
             });
         }
@@ -151,8 +161,6 @@ export class GetGroupsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             });
         }
 
-        return new Response(
-            await GetGroupsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetGroupsEndpoint.buildData(request.query));
     }
 }

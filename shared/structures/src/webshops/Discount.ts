@@ -1,5 +1,15 @@
 import type { Data, EncodeContext, PlainObject } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, MapDecoder, ObjectData, StringDecoder, field } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    EnumDecoder,
+    IntegerDecoder,
+    MapDecoder,
+    ObjectData,
+    StringDecoder,
+    field,
+} from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
@@ -17,9 +27,12 @@ export enum OptionSelectionRequirement {
 export class OptionSelectionRequirementHelper {
     static getName(requirement: OptionSelectionRequirement): string {
         switch (requirement) {
-            case OptionSelectionRequirement.Required: return $t('%sp');
-            case OptionSelectionRequirement.Optional: return $t('%sq');
-            case OptionSelectionRequirement.Excluded: return $t('%sr');
+            case OptionSelectionRequirement.Required:
+                return $t('%sp');
+            case OptionSelectionRequirement.Optional:
+                return $t('%sq');
+            case OptionSelectionRequirement.Excluded:
+                return $t('%sr');
         }
     }
 }
@@ -55,7 +68,10 @@ export class ProductSelector extends AutoEncoder {
                 return OptionSelectionRequirement.Optional;
             } else {
                 for (const o of optionMenu.options) {
-                    if ((this.optionIds.get(o.id) ?? OptionSelectionRequirement.Optional) !== OptionSelectionRequirement.Optional) {
+                    if (
+                        (this.optionIds.get(o.id) ?? OptionSelectionRequirement.Optional) !==
+                        OptionSelectionRequirement.Optional
+                    ) {
                         return OptionSelectionRequirement.Excluded;
                     }
                 }
@@ -70,7 +86,10 @@ export class ProductSelector extends AutoEncoder {
             return false;
         }
 
-        if (this.productPriceIds.length > 0 && !this.productPriceIds.includes(cartItem.productPrice.id)) {
+        if (
+            this.productPriceIds.length > 0 &&
+            !this.productPriceIds.includes(cartItem.productPrice.id)
+        ) {
             return false;
         }
 
@@ -84,7 +103,7 @@ export class ProductSelector extends AutoEncoder {
 
         for (const [id, requirement] of this.optionIds) {
             if (requirement === OptionSelectionRequirement.Required) {
-                const found = cartItem.options.find(o => o.option.id === id);
+                const found = cartItem.options.find((o) => o.option.id === id);
                 if (!found) {
                     return false;
                 }
@@ -95,7 +114,7 @@ export class ProductSelector extends AutoEncoder {
     }
 
     getName(webshop: Webshop, isAdmin = false): { name: string; footnote: string } {
-        const product = webshop.products.find(p => p.id === this.productId);
+        const product = webshop.products.find((p) => p.id === this.productId);
         if (!product) {
             return {
                 name: $t('%Sb'),
@@ -104,32 +123,69 @@ export class ProductSelector extends AutoEncoder {
         }
 
         const allPrices = product.filteredPrices({ admin: isAdmin });
-        const productPrices = allPrices.filter (p => this.productPriceIds.includes(p.id));
+        const productPrices = allPrices.filter((p) => this.productPriceIds.includes(p.id));
         let suffix = '';
-        if (allPrices.length > 1 && this.productPriceIds.length && productPrices.length < allPrices.length) {
-            suffix = productPrices.map(p => p.name).join(', ');
+        if (
+            allPrices.length > 1 &&
+            this.productPriceIds.length &&
+            productPrices.length < allPrices.length
+        ) {
+            suffix = productPrices.map((p) => p.name).join(', ');
         }
 
         let footnote = '';
 
         const excludedOptions = product.optionMenus.flatMap((menu) => {
-            return menu.options.filter(o => this.getOptionRequirement(menu, o) === OptionSelectionRequirement.Excluded);
+            return menu.options.filter(
+                (o) => this.getOptionRequirement(menu, o) === OptionSelectionRequirement.Excluded,
+            );
         });
 
         const requiredOptions = product.optionMenus.flatMap((menu) => {
-            return menu.options.filter(o => this.getOptionRequirement(menu, o) === OptionSelectionRequirement.Required);
+            return menu.options.filter(
+                (o) => this.getOptionRequirement(menu, o) === OptionSelectionRequirement.Required,
+            );
         });
 
         if (excludedOptions.length && requiredOptions.length === 0) {
-            footnote = $t('%ss') + ' ' + Formatter.joinLast(excludedOptions.map(o => o.name), ', ', ' ' + $t('%GT') + ' ');
+            footnote =
+                $t('%ss') +
+                ' ' +
+                Formatter.joinLast(
+                    excludedOptions.map((o) => o.name),
+                    ', ',
+                    ' ' + $t('%GT') + ' ',
+                );
         } else if (excludedOptions.length === 0 && requiredOptions.length) {
-            footnote = $t('%st') + ' ' + Formatter.joinLast(requiredOptions.map(o => o.name), ', ', ' ' + $t('%M1') + ' ');
+            footnote =
+                $t('%st') +
+                ' ' +
+                Formatter.joinLast(
+                    requiredOptions.map((o) => o.name),
+                    ', ',
+                    ' ' + $t('%M1') + ' ',
+                );
         } else if (excludedOptions.length && requiredOptions.length) {
-            footnote = $t('%st') + ' ' + Formatter.joinLast(requiredOptions.map(o => o.name), ', ', ' ' + $t('%M1') + ' ') + ' ' + $t('%su') + ' ' + Formatter.joinLast(excludedOptions.map(o => o.name), ', ', ' ' + $t('%GT') + ' ');
+            footnote =
+                $t('%st') +
+                ' ' +
+                Formatter.joinLast(
+                    requiredOptions.map((o) => o.name),
+                    ', ',
+                    ' ' + $t('%M1') + ' ',
+                ) +
+                ' ' +
+                $t('%su') +
+                ' ' +
+                Formatter.joinLast(
+                    excludedOptions.map((o) => o.name),
+                    ', ',
+                    ' ' + $t('%GT') + ' ',
+                );
         }
 
         return {
-            name: product.name + (suffix ? (' (' + suffix + ')') : ''),
+            name: product.name + (suffix ? ' (' + suffix + ')' : ''),
             footnote,
         };
     }
@@ -181,7 +237,11 @@ export class ProductsSelector extends AutoEncoder {
         return decoded;
     }
 
-    static override decodeField<T extends typeof AutoEncoder>(value: unknown, context: EncodeContext, currentField?: string): InstanceType<T> {
+    static override decodeField<T extends typeof AutoEncoder>(
+        value: unknown,
+        context: EncodeContext,
+        currentField?: string,
+    ): InstanceType<T> {
         return this.decode(new ObjectData(value, context, currentField)) as InstanceType<T>;
     }
 
@@ -270,14 +330,20 @@ export class ProductDiscount extends AutoEncoder {
     percentageDiscount = 0;
 
     calculate(price: number): number {
-        price = Math.min(price, Math.max(0, 100 * Math.round(price * (10000 - this.percentageDiscount) / 10000_00))); // Min is required to support negative prices: prices should never increase after applyign discounts
+        price = Math.min(
+            price,
+            Math.max(0, 100 * Math.round((price * (10000 - this.percentageDiscount)) / 10000_00)),
+        ); // Min is required to support negative prices: prices should never increase after applyign discounts
         price = Math.min(price, Math.max(0, price - this.discountPerPiece)); // Min is required to support negative prices: prices should never increase after applyign discounts
         return price;
     }
 
     applyTo(item: CartItemPrice) {
         // Percentage discounts are always applied to the original price without other discounts
-        item.percentageDiscount = Math.min(10000, item.percentageDiscount + this.percentageDiscount);
+        item.percentageDiscount = Math.min(
+            10000,
+            item.percentageDiscount + this.percentageDiscount,
+        );
         item.fixedDiscount = item.fixedDiscount + this.discountPerPiece;
     }
 
@@ -330,7 +396,10 @@ export class ProductDiscountSettings extends AutoEncoder {
         return d.slice(offset, offset + amount);
     }
 
-    getTitle(webshop: Webshop, isAdmin = false): { title: string; description: string; footnote: string } {
+    getTitle(
+        webshop: Webshop,
+        isAdmin = false,
+    ): { title: string; description: string; footnote: string } {
         const n = this.product.getName(webshop, isAdmin);
 
         const titles: string[] = [n.name];
@@ -357,10 +426,16 @@ export class ProductDiscountSettings extends AutoEncoder {
                     }
                 } else {
                     if (this.repeatBehaviour !== ProductDiscountRepeatBehaviour.Once) {
-                        descriptions.push(Formatter.percentage(discount.percentageDiscount) + ' ' + $t('%sT'));
+                        descriptions.push(
+                            Formatter.percentage(discount.percentageDiscount) + ' ' + $t('%sT'),
+                        );
                     } else {
                         descriptions.push(
-                            $t('%sw') + ' ' + Formatter.percentage(discount.percentageDiscount) + ' ' + $t('%sT'),
+                            $t('%sw') +
+                                ' ' +
+                                Formatter.percentage(discount.percentageDiscount) +
+                                ' ' +
+                                $t('%sT'),
                         );
                     }
                 }
@@ -371,13 +446,20 @@ export class ProductDiscountSettings extends AutoEncoder {
                     descriptions.push(Formatter.price(discount.discountPerPiece) + ' ' + $t('%sx'));
                 } else {
                     descriptions.push(
-                        $t('%sw') + ' ' + Formatter.price(discount.discountPerPiece) + ' ' + $t('%sT'),
+                        $t('%sw') +
+                            ' ' +
+                            Formatter.price(discount.discountPerPiece) +
+                            ' ' +
+                            $t('%sT'),
                     );
                 }
             }
         } else {
             let index = 0;
-            for (const discount of this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern ? [...this.discounts, ...this.discounts, ...this.discounts] : this.discounts) {
+            for (const discount of this.repeatBehaviour ===
+            ProductDiscountRepeatBehaviour.RepeatPattern
+                ? [...this.discounts, ...this.discounts, ...this.discounts]
+                : this.discounts) {
                 index += 1;
                 let s = Formatter.ordinalNumber(index) + ' ' + $t('%12Q');
 
@@ -395,18 +477,29 @@ export class ProductDiscountSettings extends AutoEncoder {
                     if (discount.percentageDiscount >= 100 * 100) {
                         descriptions.push(s + ' ' + $t('%s8'));
                     } else {
-                        descriptions.push(Formatter.percentage(discount.percentageDiscount) + ' ' + $t('%t0') + ' ' + s);
+                        descriptions.push(
+                            Formatter.percentage(discount.percentageDiscount) +
+                                ' ' +
+                                $t('%t0') +
+                                ' ' +
+                                s,
+                        );
                     }
                 }
 
                 if (discount.discountPerPiece) {
-                    descriptions.push(Formatter.price(discount.discountPerPiece) + ' ' + $t('%t0') + ' ' + s);
+                    descriptions.push(
+                        Formatter.price(discount.discountPerPiece) + ' ' + $t('%t0') + ' ' + s,
+                    );
                 }
             }
 
             if (this.repeatBehaviour === ProductDiscountRepeatBehaviour.RepeatPattern) {
-                if (descriptions.length === 3 && this.discounts[this.discounts.length - 1].percentageDiscount === 100 * 100) {
-                    descriptions = [(this.discounts.length - 1) + ' ' + $t('%t1')];
+                if (
+                    descriptions.length === 3 &&
+                    this.discounts[this.discounts.length - 1].percentageDiscount === 100 * 100
+                ) {
+                    descriptions = [this.discounts.length - 1 + ' ' + $t('%t1')];
                 } else {
                     descriptions.push('...');
                 }
@@ -419,7 +512,9 @@ export class ProductDiscountSettings extends AutoEncoder {
 
         return {
             title: titles.join(' '),
-            description: Formatter.capitalizeFirstLetter(Formatter.joinLast(descriptions, ', ', ' ' + $t('%M1') + ' ')),
+            description: Formatter.capitalizeFirstLetter(
+                Formatter.joinLast(descriptions, ', ', ' ' + $t('%M1') + ' '),
+            ),
             footnote: footnotes.join('\n'),
         };
     }
@@ -453,7 +548,9 @@ export class ProductDiscountTracker {
         if (this.discount.allowMultipleDiscountsToSameItem) {
             return this.cartItemQueue;
         }
-        return this.cartItemQueue.filter(i => i.price.fixedDiscount === 0 && i.price.percentageDiscount === 0);
+        return this.cartItemQueue.filter(
+            (i) => i.price.fixedDiscount === 0 && i.price.percentageDiscount === 0,
+        );
     }
 
     apply() {
@@ -467,7 +564,7 @@ export class ProductDiscountTracker {
                 const potential = discount.calculatePotential(item.price);
                 this.usageCount += 1;
                 discount.applyTo(item.price);
-                if (potential > 0 && !item.item.discounts.find(d => d.id === this.discount.id)) {
+                if (potential > 0 && !item.item.discounts.find((d) => d.id === this.discount.id)) {
                     item.item.discounts.push(this.discount);
                 }
             }
@@ -475,9 +572,11 @@ export class ProductDiscountTracker {
     }
 
     addItemToQueue(cartItem: CartItem) {
-        this.cartItemQueue.push(...cartItem.calculatedPrices.map((price) => {
-            return { price, item: cartItem };
-        }));
+        this.cartItemQueue.push(
+            ...cartItem.calculatedPrices.map((price) => {
+                return { price, item: cartItem };
+            }),
+        );
     }
 
     getPotentialDiscount() {
@@ -520,7 +619,10 @@ export class Discount extends AutoEncoder {
     @field({ decoder: new ArrayDecoder(ProductDiscountSettings) })
     productDiscounts: ProductDiscountSettings[] = [];
 
-    getTitle(webshop: Webshop, isAdmin = false): { title: string; description: string; footnote: string } {
+    getTitle(
+        webshop: Webshop,
+        isAdmin = false,
+    ): { title: string; description: string; footnote: string } {
         const titles: string[] = [];
         const footnotes: string[] = [];
         const descriptions: string[] = [];
@@ -531,17 +633,13 @@ export class Discount extends AutoEncoder {
             );
         }
         if (this.orderDiscount.fixedDiscount) {
-            titles.push(
-                Formatter.price(this.orderDiscount.fixedDiscount) + ' ' + $t('%sT'),
-            );
+            titles.push(Formatter.price(this.orderDiscount.fixedDiscount) + ' ' + $t('%sT'));
         }
 
         for (const productDiscount of this.productDiscounts) {
             const t = productDiscount.getTitle(webshop, isAdmin);
 
-            titles.push(
-                t.description + ' ' + $t('%t3') + ' ' + t.title,
-            );
+            titles.push(t.description + ' ' + $t('%t3') + ' ' + t.title);
 
             if (t.footnote) {
                 footnotes.push(t.footnote);
@@ -575,7 +673,8 @@ export class Discount extends AutoEncoder {
 
                 if (n.footnote) {
                     const index = '*'.repeat(footnotes.length + 1);
-                    subdescriptions[subdescriptions.length - 1] = subdescriptions[subdescriptions.length - 1] + index;
+                    subdescriptions[subdescriptions.length - 1] =
+                        subdescriptions[subdescriptions.length - 1] + index;
                     footnotes.push(index + ' ' + n.footnote);
                 }
             }
@@ -616,7 +715,10 @@ export class Discount extends AutoEncoder {
         // Fixed part to the whole order
         const multipliedOrderDiscount = this.orderDiscount.multiply(matchCount ?? 1);
         checkout.fixedDiscount += multipliedOrderDiscount.fixedDiscount;
-        checkout.percentageDiscount = Math.min(10000, checkout.percentageDiscount + multipliedOrderDiscount.percentageDiscount);
+        checkout.percentageDiscount = Math.min(
+            10000,
+            checkout.percentageDiscount + multipliedOrderDiscount.percentageDiscount,
+        );
 
         const trackers: ProductDiscountTracker[] = [];
 

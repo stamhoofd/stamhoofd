@@ -6,11 +6,14 @@ export type SQLExpressionOptions = {
 export type NormalizedSQLQuery = { query: string; params: any[] };
 export type SQLQuery = NormalizedSQLQuery | string;
 
-export function joinSQLQuery(queries: (SQLQuery | undefined | null)[], seperator?: string): NormalizedSQLQuery {
-    queries = queries.filter(q => q !== undefined && q !== null);
+export function joinSQLQuery(
+    queries: (SQLQuery | undefined | null)[],
+    seperator?: string,
+): NormalizedSQLQuery {
+    queries = queries.filter((q) => q !== undefined && q !== null);
     return {
-        query: queries.map(q => typeof q === 'string' ? q : q!.query).join(seperator ?? ''),
-        params: queries.flatMap(q => typeof q === 'string' ? [] : q!.params),
+        query: queries.map((q) => (typeof q === 'string' ? q : q!.query)).join(seperator ?? ''),
+        params: queries.flatMap((q) => (typeof q === 'string' ? [] : q!.params)),
     };
 }
 
@@ -30,5 +33,10 @@ export interface SQLNamedExpression extends SQLExpression {
 }
 
 export function isSQLExpression(obj: unknown): obj is SQLExpression {
-    return typeof obj === 'object' && obj !== null && !!(obj as any).getSQL && typeof (obj as any).getSQL === 'function';
+    return (
+        typeof obj === 'object' &&
+        obj !== null &&
+        !!(obj as any).getSQL &&
+        typeof (obj as any).getSQL === 'function'
+    );
 }

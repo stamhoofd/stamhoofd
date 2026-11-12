@@ -28,7 +28,10 @@ export class DeleteTOTPEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
-        const { user, token } = await Context.authenticateFresh({ allowWithoutAccount: true, allowUnscoped: true });
+        const { user, token } = await Context.authenticateFresh({
+            allowWithoutAccount: true,
+            allowUnscoped: true,
+        });
         Context.assertNotImpersonating();
 
         const totp = await MFATOTP.getByID(request.params.id);
@@ -44,8 +47,14 @@ export class DeleteTOTPEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         // Prevent removing the last factor when 2FA is required.
         const confirmedTotp = await MFATOTP.getConfirmedForUser(user.id);
         const passkeys = await WebauthnCredential.getForUser(user.id);
-        const remaining = confirmedTotp.filter(t => t.id !== totp.id).length + passkeys.length;
-        if (remaining === 0 && await TwoFactorHelper.isTwoFactorRequired(user, organization ?? Context.organization ?? null)) {
+        const remaining = confirmedTotp.filter((t) => t.id !== totp.id).length + passkeys.length;
+        if (
+            remaining === 0 &&
+            (await TwoFactorHelper.isTwoFactorRequired(
+                user,
+                organization ?? Context.organization ?? null,
+            ))
+        ) {
             throw new SimpleError({
                 code: 'cannot_remove_last_factor',
                 message: 'Cannot remove the last two-factor method',

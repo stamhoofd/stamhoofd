@@ -40,7 +40,11 @@ export async function read1PasswordCli(key: string, options: ReadOptions): Promi
     return await cached;
 }
 
-async function read1PasswordCliCached(key: string, account: string, options: ReadOptions): Promise<string> {
+async function read1PasswordCliCached(
+    key: string,
+    account: string,
+    options: ReadOptions,
+): Promise<string> {
     let file: string | undefined;
     if (options.cacheDir) {
         file = cacheFile(options.cacheDir, account, key);
@@ -53,20 +57,38 @@ async function read1PasswordCliCached(key: string, account: string, options: Rea
     const value = await read1PasswordCliUncached(key, account, options);
     if (value) {
         if (file) {
-            await writeFileCache(file, { version: cacheVersion, key, account, value, createdAt: new Date().toISOString() });
+            await writeFileCache(file, {
+                version: cacheVersion,
+                key,
+                account,
+                value,
+                createdAt: new Date().toISOString(),
+            });
         }
     }
     return value;
 }
 
-async function read1PasswordCliUncached(key: string, account: string, options: ReadOptions): Promise<string> {
-    const scoped = await run('op', ['read', '--account', account, key], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+async function read1PasswordCliUncached(
+    key: string,
+    account: string,
+    options: ReadOptions,
+): Promise<string> {
+    const scoped = await run('op', ['read', '--account', account, key], {
+        capture: true,
+        allowFailure: true,
+        verbosity: RunVerbosity.Quiet,
+    });
     if (scoped.status === 0) {
         return parseValue(scoped.stdout, key, options);
     }
 
     if (scoped.stderr.includes('found no accounts for filter')) {
-        const unscoped = await run('op', ['read', key], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+        const unscoped = await run('op', ['read', key], {
+            capture: true,
+            allowFailure: true,
+            verbosity: RunVerbosity.Quiet,
+        });
         if (unscoped.status === 0) {
             return parseValue(unscoped.stdout, key, options);
         }
@@ -88,13 +110,20 @@ function handleFailure(key: string, options: ReadOptions, stderr: string): strin
     if (options.optional) {
         return '';
     }
-    throw new Error(`Failed to read 1Password key ${key}${stderr.trim() ? `: ${stderr.trim()}` : ''}`);
+    throw new Error(
+        `Failed to read 1Password key ${key}${stderr.trim() ? `: ${stderr.trim()}` : ''}`,
+    );
 }
 
 async function readFileCache(file: string, key: string, account: string): Promise<string> {
     try {
         const entry = JSON.parse(await fs.readFile(file, 'utf-8')) as CacheEntry;
-        if (entry.version === cacheVersion && entry.key === key && entry.account === account && entry.value) {
+        if (
+            entry.version === cacheVersion &&
+            entry.key === key &&
+            entry.account === account &&
+            entry.value
+        ) {
             return entry.value;
         }
     } catch {
@@ -115,6 +144,9 @@ async function writeFileCache(file: string, entry: CacheEntry): Promise<void> {
 }
 
 function cacheFile(cacheDir: string, account: string, key: string): string {
-    const hash = crypto.createHash('sha256').update(`${cacheVersion}:${account}:${key}`).digest('hex');
+    const hash = crypto
+        .createHash('sha256')
+        .update(`${cacheVersion}:${account}:${key}`)
+        .digest('hex');
     return path.join(cacheDir, `${hash}.json`);
 }

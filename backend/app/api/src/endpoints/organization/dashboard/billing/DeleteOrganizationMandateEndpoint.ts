@@ -16,7 +16,11 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/mandates/@id', { sellingOrganizationId: String, id: String });
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/billing/@sellingOrganizationId/mandates/@id',
+            { sellingOrganizationId: String, id: String },
+        );
 
         if (params) {
             return [true, params as Params];
@@ -48,7 +52,7 @@ export class DeleteOrganizationMandateEndpoint extends Endpoint<Params, Query, B
             });
         }
 
-        if (!await Context.auth.canManageFinances(payingOrganization.id)) {
+        if (!(await Context.auth.canManageFinances(payingOrganization.id))) {
             throw Context.auth.error();
         }
 

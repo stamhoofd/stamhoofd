@@ -1,14 +1,24 @@
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
-import type { EventNotification, LimitedFilteredRequest, Platform as PlatformStruct } from '@stamhoofd/structures';
-import { EventNotificationStatus, EventNotificationStatusHelper, ExcelExportType } from '@stamhoofd/structures';
+import type {
+    EventNotification,
+    LimitedFilteredRequest,
+    Platform as PlatformStruct,
+} from '@stamhoofd/structures';
+import {
+    EventNotificationStatus,
+    EventNotificationStatusHelper,
+    ExcelExportType,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetEventNotificationsEndpoint } from '../endpoints/global/events/GetEventNotificationsEndpoint.js';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
 
 // Assign to a typed variable to assure we have correct type checking in place
-const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotification, EventNotification> => ({
+const getSheet = (
+    platform: PlatformStruct,
+): XlsxTransformerSheet<EventNotification, EventNotification> => ({
     id: 'event-notifications',
     name: $t('%1FR'),
     columns: [
@@ -25,7 +35,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
             name: $t('%w9'),
             width: 40,
             getValue: (notification: EventNotification) => ({
-                value: notification.events.map(e => e.name).join(', '),
+                value: notification.events.map((e) => e.name).join(', '),
             }),
         },
         {
@@ -49,7 +59,9 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
             name: $t('%1A'),
             width: 30,
             getValue: (notification: EventNotification) => ({
-                value: Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)),
+                value: Formatter.capitalizeFirstLetter(
+                    EventNotificationStatusHelper.getName(notification.status),
+                ),
             }),
         },
         {
@@ -57,7 +69,10 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
             name: $t('%YT'),
             width: 80,
             getValue: (notification: EventNotification) => ({
-                value: notification.status !== EventNotificationStatus.Accepted ? notification.feedbackText : null,
+                value:
+                    notification.status !== EventNotificationStatus.Accepted
+                        ? notification.feedbackText
+                        : null,
                 style: {
                     alignment: {
                         wrapText: true,
@@ -118,7 +133,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
             matchId: 'recordAnswers',
             getRecordAnswers: (notification: EventNotification) => notification.recordAnswers,
             getRecordCategories: () => {
-                return platform.config.eventNotificationTypes.flatMap(r => r.recordCategories);
+                return platform.config.eventNotificationTypes.flatMap((r) => r.recordCategories);
             },
         }),
     ],
@@ -128,7 +143,5 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.EventNotifications, {
     fetch: async (query: LimitedFilteredRequest) => {
         return await GetEventNotificationsEndpoint.buildData(query);
     },
-    getSheets: platform => [
-        getSheet(platform),
-    ],
+    getSheets: (platform) => [getSheet(platform)],
 });

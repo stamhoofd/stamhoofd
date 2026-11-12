@@ -21,9 +21,14 @@ import { UploadImage } from './UploadImage.js';
 /**
  * A real (1x1 pixel) png, so sharp can generate resolutions from it
  */
-const pngContent = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+const pngContent = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+    'base64',
+);
 
-const svgContent = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><script>alert(1)</script><rect width="10" height="10" fill="red"/></svg>');
+const svgContent = Buffer.from(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><script>alert(1)</script><rect width="10" height="10" fill="red"/></svg>',
+);
 
 describe('Endpoint.UploadImage', () => {
     const endpoint = new UploadImage();
@@ -75,7 +80,15 @@ describe('Endpoint.UploadImage', () => {
      * field renames the required file part, and extraFile appends a second image
      * to exercise parser rejection after temporary files may have been written.
      */
-    const buildUploadRequest = async (data: { filename: string; contentType: string; content: Buffer; resolutions?: object[]; metadata?: string; field?: string; extraFile?: boolean }) => {
+    const buildUploadRequest = async (data: {
+        filename: string;
+        contentType: string;
+        content: Buffer;
+        resolutions?: object[];
+        metadata?: string;
+        field?: string;
+        extraFile?: boolean;
+    }) => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({
             organization,
@@ -85,10 +98,21 @@ describe('Endpoint.UploadImage', () => {
 
         const boundary = '--------------------------StamhoofdTest';
         const body = Buffer.concat([
-            Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="resolutions"\r\n\r\n${data.metadata ?? JSON.stringify(data.resolutions ?? [{ width: 50, height: 50, fit: 'inside' }])}\r\n`),
-            Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${data.field ?? 'file'}"; filename="${data.filename}"\r\nContent-Type: ${data.contentType}\r\n\r\n`),
+            Buffer.from(
+                `--${boundary}\r\nContent-Disposition: form-data; name="resolutions"\r\n\r\n${data.metadata ?? JSON.stringify(data.resolutions ?? [{ width: 50, height: 50, fit: 'inside' }])}\r\n`,
+            ),
+            Buffer.from(
+                `--${boundary}\r\nContent-Disposition: form-data; name="${data.field ?? 'file'}"; filename="${data.filename}"\r\nContent-Type: ${data.contentType}\r\n\r\n`,
+            ),
             data.content,
-            ...(data.extraFile ? [Buffer.from(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="extra"; filename="extra.png"\r\nContent-Type: image/png\r\n\r\n`), pngContent] : []),
+            ...(data.extraFile
+                ? [
+                      Buffer.from(
+                          `\r\n--${boundary}\r\nContent-Disposition: form-data; name="extra"; filename="extra.png"\r\nContent-Type: image/png\r\n\r\n`,
+                      ),
+                      pngContent,
+                  ]
+                : []),
             Buffer.from(`\r\n--${boundary}--\r\n`),
         ]);
 
@@ -118,7 +142,12 @@ describe('Endpoint.UploadImage', () => {
         { field: 'wrong' },
         { extraFile: true },
     ])('It removes temporary resources after rejecting %j', async (options) => {
-        const r = await buildUploadRequest({ filename: 'logo.png', contentType: 'image/png', content: pngContent, ...options });
+        const r = await buildUploadRequest({
+            filename: 'logo.png',
+            contentType: 'image/png',
+            content: pngContent,
+            ...options,
+        });
         await expect(testServer.test(endpoint, r)).rejects.toThrow();
         expect(await fs.readdir(uploadDirectory)).toEqual([]);
         expect(uploads).toHaveLength(0);
@@ -135,14 +164,26 @@ describe('Endpoint.UploadImage', () => {
         ['an oversized dimension', [{ width: 8193 }]],
         ['missing dimensions', [{}]],
         ['too many output pixels', [{ width: 8192, height: 8192, fit: 'fill' }]],
-        ['too much total work', Array.from({ length: 8 }, () => ({ width: 3000, height: 3000, fit: 'fill' }))],
+        [
+            'too much total work',
+            Array.from({ length: 8 }, () => ({ width: 3000, height: 3000, fit: 'fill' })),
+        ],
     ])('It rejects %s before rendering or storage', async (_name, resolutions) => {
-        const render = vi.spyOn(sharp.prototype, 'toBuffer').mockRejectedValue(new Error('Rendering was reached'));
-        const r = await buildUploadRequest({ filename: 'logo.svg', contentType: 'image/svg+xml', content: svgContent, resolutions });
+        const render = vi
+            .spyOn(sharp.prototype, 'toBuffer')
+            .mockRejectedValue(new Error('Rendering was reached'));
+        const r = await buildUploadRequest({
+            filename: 'logo.svg',
+            contentType: 'image/svg+xml',
+            content: svgContent,
+            resolutions,
+        });
         delete r.headers.authorization;
         vi.spyOn(r, 'getIP').mockReturnValue('127.0.0.1');
 
-        await expect(testServer.test(endpoint, r)).rejects.toMatchObject({ code: 'invalid_resolutions' });
+        await expect(testServer.test(endpoint, r)).rejects.toMatchObject({
+            code: 'invalid_resolutions',
+        });
         expect(render).not.toHaveBeenCalled();
         expect(uploads).toHaveLength(0);
     });
@@ -153,10 +194,15 @@ describe('Endpoint.UploadImage', () => {
      * a rendered buffer or uploading either a variant or the source.
      */
     test('It rejects excessive SVG input pixels before rendering or storage', async () => {
-        const render = vi.spyOn(sharp.prototype, 'toBuffer').mockRejectedValue(new Error('Rendering was reached'));
+        const render = vi
+            .spyOn(sharp.prototype, 'toBuffer')
+            .mockRejectedValue(new Error('Rendering was reached'));
         const r = await buildUploadRequest({
-            filename: 'large.svg', contentType: 'image/svg+xml',
-            content: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="10000" height="10000"/>'),
+            filename: 'large.svg',
+            contentType: 'image/svg+xml',
+            content: Buffer.from(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="10000" height="10000"/>',
+            ),
         });
         await expect(testServer.test(endpoint, r)).rejects.toThrow(/pixel limit/i);
         expect(render).not.toHaveBeenCalled();
@@ -169,19 +215,27 @@ describe('Endpoint.UploadImage', () => {
      * Validate the derived dimensions, not just the requested axes, before any
      * buffer rendering or storage can occur.
      */
-    test.each([
-        [{ width: 1000 }],
-        [{ width: 1000, height: 1000, fit: 'outside' }],
-    ])('It bounds aspect-ratio-derived output dimensions (%j)', async (resolution) => {
-        const render = vi.spyOn(sharp.prototype, 'toBuffer').mockRejectedValue(new Error('Rendering was reached'));
-        const r = await buildUploadRequest({
-            filename: 'tall.svg', contentType: 'image/svg+xml', resolutions: [resolution],
-            content: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="100"/>'),
-        });
-        await expect(testServer.test(endpoint, r)).rejects.toMatchObject({ code: 'invalid_resolutions' });
-        expect(render).not.toHaveBeenCalled();
-        expect(uploads).toHaveLength(0);
-    });
+    test.each([[{ width: 1000 }], [{ width: 1000, height: 1000, fit: 'outside' }]])(
+        'It bounds aspect-ratio-derived output dimensions (%j)',
+        async (resolution) => {
+            const render = vi
+                .spyOn(sharp.prototype, 'toBuffer')
+                .mockRejectedValue(new Error('Rendering was reached'));
+            const r = await buildUploadRequest({
+                filename: 'tall.svg',
+                contentType: 'image/svg+xml',
+                resolutions: [resolution],
+                content: Buffer.from(
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="100"/>',
+                ),
+            });
+            await expect(testServer.test(endpoint, r)).rejects.toMatchObject({
+                code: 'invalid_resolutions',
+            });
+            expect(render).not.toHaveBeenCalled();
+            expect(uploads).toHaveLength(0);
+        },
+    );
 
     /**
      * Positive controls for the UI's seven cover variants and invoice background.
@@ -189,16 +243,25 @@ describe('Endpoint.UploadImage', () => {
      * request verifies that valid presets are accepted without dropping variants.
      */
     test.each([
-        [[1920, 1280, 960, 700, 600, 300, 100].map(width => ({ width }))],
+        [[1920, 1280, 960, 700, 600, 300, 100].map((width) => ({ width }))],
         [[{ width: 2480, height: 3508, fit: 'outside' }]],
     ])('It accepts existing cover and invoice requests (%j)', async (resolutions) => {
-        const r = await buildUploadRequest({ filename: 'logo.png', contentType: 'image/png', content: pngContent, resolutions });
+        const r = await buildUploadRequest({
+            filename: 'logo.png',
+            contentType: 'image/png',
+            content: pngContent,
+            resolutions,
+        });
         const response = await testServer.test(endpoint, r);
         expect(response.body.resolutions).toHaveLength(resolutions.length);
     });
 
     test('It stores a png, and never stores the original with a content type of the uploader', async () => {
-        const r = await buildUploadRequest({ filename: 'logo.png', contentType: 'image/png', content: pngContent });
+        const r = await buildUploadRequest({
+            filename: 'logo.png',
+            contentType: 'image/png',
+            content: pngContent,
+        });
         const response = await testServer.test(endpoint, r);
 
         expect(response.body.resolutions).toHaveLength(1);
@@ -225,7 +288,9 @@ describe('Endpoint.UploadImage', () => {
      * attachment, whatever else the upload results in.
      */
     const expectNoRenderableSvg = () => {
-        const svgUploads = uploads.filter(upload => upload.ContentType === 'image/svg+xml' || upload.Key?.endsWith('.svg'));
+        const svgUploads = uploads.filter(
+            (upload) => upload.ContentType === 'image/svg+xml' || upload.Key?.endsWith('.svg'),
+        );
 
         for (const upload of svgUploads) {
             expect(upload.ContentDisposition).toBe('attachment');
@@ -236,7 +301,11 @@ describe('Endpoint.UploadImage', () => {
     };
 
     test('It rasterizes an svg, so the uploaded svg itself is never served', async () => {
-        const r = await buildUploadRequest({ filename: 'logo.svg', contentType: 'image/svg+xml', content: svgContent });
+        const r = await buildUploadRequest({
+            filename: 'logo.svg',
+            contentType: 'image/svg+xml',
+            content: svgContent,
+        });
         const response = await testServer.test(endpoint, r);
 
         expect(response.body.resolutions).toHaveLength(1);
@@ -258,7 +327,12 @@ describe('Endpoint.UploadImage', () => {
     test('It never publishes the svg itself, even when no resolutions are requested', async () => {
         // Without resolutions there is nothing to rasterize, so the uploaded svg is the only stored file - and
         // Image.getPublicPath() falls back to it
-        const r = await buildUploadRequest({ filename: 'logo.svg', contentType: 'image/svg+xml', content: svgContent, resolutions: [] });
+        const r = await buildUploadRequest({
+            filename: 'logo.svg',
+            contentType: 'image/svg+xml',
+            content: svgContent,
+            resolutions: [],
+        });
         const response = await testServer.test(endpoint, r);
 
         expect(response.body.resolutions).toHaveLength(0);
@@ -279,14 +353,22 @@ describe('Endpoint.UploadImage', () => {
     });
 
     test('It refuses an image with a content type we cannot generate resolutions from', async () => {
-        const r = await buildUploadRequest({ filename: 'photo.tiff', contentType: 'image/tiff', content: pngContent });
+        const r = await buildUploadRequest({
+            filename: 'photo.tiff',
+            contentType: 'image/tiff',
+            content: pngContent,
+        });
 
         await expect(testServer.test(endpoint, r)).rejects.toThrow(/unsupported image type/i);
         expect(uploads).toHaveLength(0);
     });
 
     test('It uses the extension when the uploader does not report a usable content type', async () => {
-        const r = await buildUploadRequest({ filename: 'logo.png', contentType: 'application/octet-stream', content: pngContent });
+        const r = await buildUploadRequest({
+            filename: 'logo.png',
+            contentType: 'application/octet-stream',
+            content: pngContent,
+        });
         const response = await testServer.test(endpoint, r);
 
         expect(response.body.resolutions).toHaveLength(1);

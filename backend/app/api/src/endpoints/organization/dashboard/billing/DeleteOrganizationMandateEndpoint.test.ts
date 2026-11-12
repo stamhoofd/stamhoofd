@@ -33,7 +33,11 @@ describe('Endpoint.DeleteOrganizationMandateEndpoint', () => {
     });
 
     const remove = async (mandateId: string, organization: Organization, token: Token) => {
-        const request = Request.buildJson('DELETE', `/billing/${sellingOrganization.id}/mandates/${mandateId}`, organization.getApiHost());
+        const request = Request.buildJson(
+            'DELETE',
+            `/billing/${sellingOrganization.id}/mandates/${mandateId}`,
+            organization.getApiHost(),
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -41,7 +45,10 @@ describe('Endpoint.DeleteOrganizationMandateEndpoint', () => {
     /**
      * A paying organization with one usable default mandate and, optionally, blocked mandates
      */
-    const init = async ({ usable = 1, blocked = 1 }: { usable?: number; blocked?: number } = {}) => {
+    const init = async ({
+        usable = 1,
+        blocked = 1,
+    }: { usable?: number; blocked?: number } = {}) => {
         const organization = await new OrganizationFactory({}).create();
         const { adminToken } = await initAdmin({ organization });
 
@@ -49,12 +56,18 @@ describe('Endpoint.DeleteOrganizationMandateEndpoint', () => {
         mollieMocker.customers.push({ id: customerId });
         organization.serverMeta.mollieCustomerId = customerId;
 
-        const usableMandates = Array.from({ length: usable }, (_, i) => mollieMocker.addMandate({ customerId, cardNumber: '100' + i }));
-        const blockedMandates = Array.from({ length: blocked }, (_, i) => mollieMocker.addMandate({ customerId, cardNumber: '900' + i }));
+        const usableMandates = Array.from({ length: usable }, (_, i) =>
+            mollieMocker.addMandate({ customerId, cardNumber: '100' + i }),
+        );
+        const blockedMandates = Array.from({ length: blocked }, (_, i) =>
+            mollieMocker.addMandate({ customerId, cardNumber: '900' + i }),
+        );
 
         organization.serverMeta.mollieMandateId = usableMandates[0]?.id ?? null;
         for (const mandate of blockedMandates) {
-            organization.serverMeta.blockedMandates.push(BlockedPaymentMandate.create({ id: mandate.id }));
+            organization.serverMeta.blockedMandates.push(
+                BlockedPaymentMandate.create({ id: mandate.id }),
+            );
         }
         await organization.save();
 
@@ -63,20 +76,29 @@ describe('Endpoint.DeleteOrganizationMandateEndpoint', () => {
 
     test('A finance director can delete a mandate, but not the default or the last usable one', async () => {
         const { organization, usableMandates } = await init({ usable: 2, blocked: 0 });
-        const { adminToken } = await initAdmin({ organization, accessRights: [AccessRight.OrganizationFinanceDirector] });
+        const { adminToken } = await initAdmin({
+            organization,
+            accessRights: [AccessRight.OrganizationFinanceDirector],
+        });
 
-        await expect(remove(usableMandates[0].id, organization, adminToken)).rejects.toMatchObject({ code: 'not_allowed', message: 'You cannot delete the default mandate' });
+        await expect(remove(usableMandates[0].id, organization, adminToken)).rejects.toMatchObject({
+            code: 'not_allowed',
+            message: 'You cannot delete the default mandate',
+        });
 
         const response = await remove(usableMandates[1].id, organization, adminToken);
         expect(response.status).toBe(201);
-        expect(mollieMocker.mandates.map(m => m.id)).toEqual([usableMandates[0].id]);
+        expect(mollieMocker.mandates.map((m) => m.id)).toEqual([usableMandates[0].id]);
 
         const fresh = (await Organization.getByID(organization.id))!;
         fresh.serverMeta.mollieMandateId = null;
         await fresh.save();
 
-        await expect(remove(usableMandates[0].id, organization, adminToken)).rejects.toMatchObject({ code: 'not_allowed', message: 'You cannot delete the last usable mandate' });
-        expect(mollieMocker.mandates.map(m => m.id)).toEqual([usableMandates[0].id]);
+        await expect(remove(usableMandates[0].id, organization, adminToken)).rejects.toMatchObject({
+            code: 'not_allowed',
+            message: 'You cannot delete the last usable mandate',
+        });
+        expect(mollieMocker.mandates.map((m) => m.id)).toEqual([usableMandates[0].id]);
     });
 
     test('A platform admin can delete the last usable mandate', async () => {
@@ -90,19 +112,29 @@ describe('Endpoint.DeleteOrganizationMandateEndpoint', () => {
 
     test('An admin without finance access cannot delete a mandate', async () => {
         const { organization, usableMandates } = await init({ usable: 2, blocked: 0 });
-        const { adminToken } = await initAdmin({ organization, accessRights: [AccessRight.OrganizationManagePayments] });
+        const { adminToken } = await initAdmin({
+            organization,
+            accessRights: [AccessRight.OrganizationManagePayments],
+        });
 
-        await expect(remove(usableMandates[1].id, organization, adminToken)).rejects.toMatchObject({ code: 'permission_denied' });
-        expect(mollieMocker.mandates.map(m => m.id)).toContain(usableMandates[1].id);
+        await expect(remove(usableMandates[1].id, organization, adminToken)).rejects.toMatchObject({
+            code: 'permission_denied',
+        });
+        expect(mollieMocker.mandates.map((m) => m.id)).toContain(usableMandates[1].id);
     });
 
     test('A seller admin cannot delete a mandate of the paying organization', async () => {
         TestUtils.setEnvironment('userMode', 'platform');
         const { organization, usableMandates } = await init({ usable: 2, blocked: 0 });
-        const { adminToken: sellerToken } = await initAdmin({ organization: sellingOrganization, accessRights: [AccessRight.OrganizationManagePayments] });
+        const { adminToken: sellerToken } = await initAdmin({
+            organization: sellingOrganization,
+            accessRights: [AccessRight.OrganizationManagePayments],
+        });
 
-        await expect(remove(usableMandates[1].id, organization, sellerToken)).rejects.toMatchObject({ code: 'permission_denied' });
-        expect(mollieMocker.mandates.map(m => m.id)).toContain(usableMandates[1].id);
+        await expect(remove(usableMandates[1].id, organization, sellerToken)).rejects.toMatchObject(
+            { code: 'permission_denied' },
+        );
+        expect(mollieMocker.mandates.map((m) => m.id)).toContain(usableMandates[1].id);
     });
 
     test('A blocked mandate can be deleted even when it is the last one', async () => {
@@ -110,7 +142,7 @@ describe('Endpoint.DeleteOrganizationMandateEndpoint', () => {
 
         const response = await remove(blockedMandates[0].id, organization, token);
         expect(response.status).toBe(201);
-        expect(mollieMocker.mandates.map(m => m.id)).toEqual([blockedMandates[1].id]);
+        expect(mollieMocker.mandates.map((m) => m.id)).toEqual([blockedMandates[1].id]);
 
         const last = await remove(blockedMandates[1].id, organization, token);
         expect(last.status).toBe(201);
@@ -130,7 +162,9 @@ describe('Endpoint.DeleteOrganizationMandateEndpoint', () => {
         fresh.serverMeta.mollieMandateId = null;
         await fresh.save();
 
-        await expect(remove(usableMandates[0].id, organization, token)).rejects.toMatchObject({ code: 'not_allowed' });
-        expect(mollieMocker.mandates.map(m => m.id)).toContain(usableMandates[0].id);
+        await expect(remove(usableMandates[0].id, organization, token)).rejects.toMatchObject({
+            code: 'not_allowed',
+        });
+        expect(mollieMocker.mandates.map((m) => m.id)).toContain(usableMandates[0].id);
     });
 });

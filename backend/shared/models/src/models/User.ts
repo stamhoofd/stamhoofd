@@ -2,7 +2,14 @@ import { column, Database } from '@node/database';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { QueryableModel, SQL, SQLJSONNull } from '@stamhoofd/sql';
 import type { LoginProviderType, NewUser } from '@stamhoofd/structures';
-import { Permissions, Recipient, Replacement, UserMeta, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
+import {
+    Permissions,
+    Recipient,
+    Replacement,
+    UserMeta,
+    UserPermissions,
+    User as UserStruct,
+} from '@stamhoofd/structures';
 import argon2 from 'argon2';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,7 +23,9 @@ export class User extends QueryableModel {
 
     // Columns
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -67,7 +76,8 @@ export class User extends QueryableModel {
     meta: UserMeta | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -79,7 +89,8 @@ export class User extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -155,7 +166,7 @@ export class User extends QueryableModel {
         let global = await q.fetch();
 
         // Hide api accounts
-        global = global.filter(a => !a.isApiUser);
+        global = global.filter((a) => !a.isApiUser);
 
         return global;
     }
@@ -168,13 +179,26 @@ export class User extends QueryableModel {
                 .where('permissions', '!=', null)
                 .where(
                     SQL.jsonOverlaps(
-                        SQL.jsonKeys(SQL.jsonExtract(SQL.column('permissions'), '$.value.organizationPermissions')),
-                        SQL.cast(SQL.scalar(JSON.stringify(Array.isArray(organizationId) ? organizationId : [organizationId])), 'JSON'),
+                        SQL.jsonKeys(
+                            SQL.jsonExtract(
+                                SQL.column('permissions'),
+                                '$.value.organizationPermissions',
+                            ),
+                        ),
+                        SQL.cast(
+                            SQL.scalar(
+                                JSON.stringify(
+                                    Array.isArray(organizationId)
+                                        ? organizationId
+                                        : [organizationId],
+                                ),
+                            ),
+                            'JSON',
+                        ),
                     ),
                     '=',
                     1,
-                )
-            ;
+                );
 
             if (options?.verified !== undefined) {
                 q.where('verified', options.verified);
@@ -183,15 +207,14 @@ export class User extends QueryableModel {
             let global = await q.fetch();
 
             // Hide api accounts
-            global = global.filter(a => !a.isApiUser);
+            global = global.filter((a) => !a.isApiUser);
 
             return global;
         }
 
         const q = User.select()
             .where('organizationId', organizationId)
-            .where('permissions', '!=', null)
-        ;
+            .where('permissions', '!=', null);
 
         if (options?.verified !== undefined) {
             q.where('verified', options.verified);
@@ -200,7 +223,7 @@ export class User extends QueryableModel {
         let global = await q.fetch();
 
         // Hide api accounts
-        global = global.filter(a => !a.isApiUser);
+        global = global.filter((a) => !a.isApiUser);
 
         {
             // Also load global admins with explicit permissions set
@@ -209,13 +232,26 @@ export class User extends QueryableModel {
                 .where('permissions', '!=', null)
                 .where(
                     SQL.jsonOverlaps(
-                        SQL.jsonKeys(SQL.jsonExtract(SQL.column('permissions'), '$.value.organizationPermissions')),
-                        SQL.cast(SQL.scalar(JSON.stringify(Array.isArray(organizationId) ? organizationId : [organizationId])), 'JSON'),
+                        SQL.jsonKeys(
+                            SQL.jsonExtract(
+                                SQL.column('permissions'),
+                                '$.value.organizationPermissions',
+                            ),
+                        ),
+                        SQL.cast(
+                            SQL.scalar(
+                                JSON.stringify(
+                                    Array.isArray(organizationId)
+                                        ? organizationId
+                                        : [organizationId],
+                                ),
+                            ),
+                            'JSON',
+                        ),
                     ),
                     '=',
                     1,
-                )
-            ;
+                );
 
             if (options?.verified !== undefined) {
                 q.where('verified', options.verified);
@@ -223,7 +259,7 @@ export class User extends QueryableModel {
 
             let xtra = await q.fetch();
             // Hide api accounts
-            xtra = xtra.filter(a => !a.isApiUser);
+            xtra = xtra.filter((a) => !a.isApiUser);
 
             global.push(...xtra);
         }
@@ -232,10 +268,21 @@ export class User extends QueryableModel {
     }
 
     static async getApiUsers(organizationIds: string[]) {
-        return organizationIds.length > 0 ? (await User.where({ permissions: { sign: '!=', value: null }, organizationId: { sign: 'IN', value: organizationIds } })).filter(a => a.isApiUser) : [];
+        return organizationIds.length > 0
+            ? (
+                  await User.where({
+                      permissions: { sign: '!=', value: null },
+                      organizationId: { sign: 'IN', value: organizationIds },
+                  })
+              ).filter((a) => a.isApiUser)
+            : [];
     }
 
-    static async login(organizationId: string | null, email: string, password: string): Promise<User | undefined> {
+    static async login(
+        organizationId: string | null,
+        email: string,
+        password: string,
+    ): Promise<User | undefined> {
         const user = await User.getForAuthentication(organizationId, email);
         if (!user || !user.hasKeys() || user.isApiUser) {
             return undefined;
@@ -264,7 +311,10 @@ export class User extends QueryableModel {
 
     /// Delete users when we delete a member
     static async deleteForDeletedMember(memberId: string) {
-        const [rows] = await Database.delete(`DELETE ${this.table} FROM ${this.table} JOIN _members_users a ON a.usersId = ${this.table}.id LEFT JOIN _members_users b ON b.usersId = ${this.table}.id AND b.membersId != a.membersId WHERE a.membersId = ? and b.membersId is null and users.permissions is null`, [memberId]);
+        const [rows] = await Database.delete(
+            `DELETE ${this.table} FROM ${this.table} JOIN _members_users a ON a.usersId = ${this.table}.id LEFT JOIN _members_users b ON b.usersId = ${this.table}.id AND b.membersId != a.membersId WHERE a.membersId = ? and b.membersId is null and users.permissions is null`,
+            [memberId],
+        );
         return rows;
     }
 
@@ -319,17 +369,28 @@ export class User extends QueryableModel {
         return false;
     }
 
-    static async getForRegister(organizationId: string | null, email: string): Promise<User | undefined> {
-        return await this.getForAuthentication(organizationId, email, { allowWithoutAccount: true });
+    static async getForRegister(
+        organizationId: string | null,
+        email: string,
+    ): Promise<User | undefined> {
+        return await this.getForAuthentication(organizationId, email, {
+            allowWithoutAccount: true,
+        });
     }
 
-    static async getOrganizationLevelUser(organizationId: string, email: string): Promise<User | undefined> {
-        const users = await User.where({
-            email,
-            organizationId: organizationId,
-        }, {
-            limit: 1,
-        });
+    static async getOrganizationLevelUser(
+        organizationId: string,
+        email: string,
+    ): Promise<User | undefined> {
+        const users = await User.where(
+            {
+                email,
+                organizationId: organizationId,
+            },
+            {
+                limit: 1,
+            },
+        );
 
         if (users.length == 0) {
             return undefined;
@@ -343,13 +404,20 @@ export class User extends QueryableModel {
         return user;
     }
 
-    static async getForAuthentication(organizationId: string | null, email: string, { allowWithoutAccount = false }: { allowWithoutAccount?: boolean } = {}): Promise<User | undefined> {
-        const users = await User.where({
-            email,
-            organizationId: STAMHOOFD.userMode === 'platform' ? null : organizationId,
-        }, {
-            limit: 1,
-        });
+    static async getForAuthentication(
+        organizationId: string | null,
+        email: string,
+        { allowWithoutAccount = false }: { allowWithoutAccount?: boolean } = {},
+    ): Promise<User | undefined> {
+        const users = await User.where(
+            {
+                email,
+                organizationId: STAMHOOFD.userMode === 'platform' ? null : organizationId,
+            },
+            {
+                limit: 1,
+            },
+        );
 
         if (users.length == 0) {
             if (organizationId && STAMHOOFD.userMode === 'organization') {
@@ -377,13 +445,15 @@ export class User extends QueryableModel {
 
     static async createInvited(
         organization: { id: string } | null,
-        data: { firstName: string | null; lastName: string | null; email: string; language?: Language | null; allowPlatform?: boolean },
+        data: {
+            firstName: string | null;
+            lastName: string | null;
+            email: string;
+            language?: Language | null;
+            allowPlatform?: boolean;
+        },
     ): Promise<User | undefined> {
-        const {
-            email,
-            firstName,
-            lastName,
-        } = data;
+        const { email, firstName, lastName } = data;
 
         if (!organization && STAMHOOFD.userMode !== 'platform' && !data.allowPlatform) {
             throw new Error('Missing organization');
@@ -416,13 +486,7 @@ export class User extends QueryableModel {
         data: NewUser,
         options?: { allowPlatform?: boolean },
     ): Promise<User | undefined> {
-        const {
-            email,
-            password,
-            id,
-            firstName,
-            lastName,
-        } = data;
+        const { email, password, id, firstName, lastName } = data;
 
         if (!password) {
             throw new Error('A password is required for new users');
@@ -432,7 +496,11 @@ export class User extends QueryableModel {
             throw new Error('Missing organization');
         }
 
-        if (await User.getForAuthentication(organization?.id ?? null, email, { allowWithoutAccount: true })) {
+        if (
+            await User.getForAuthentication(organization?.id ?? null, email, {
+                allowWithoutAccount: true,
+            })
+        ) {
             // Already exists
             return;
         }
@@ -479,7 +547,8 @@ export class User extends QueryableModel {
                 // Do not allow this (security reasons - might need to work out a secure flow for this edge case)
                 throw new SimpleError({
                     code: 'password_based_account',
-                    message: 'This user uses a password to login. Log in with the password and link the external account through the settings.',
+                    message:
+                        'This user uses a password to login. Log in with the password and link the external account through the settings.',
                     human: $t('%GR'),
                     statusCode: 400,
                 });
@@ -493,12 +562,7 @@ export class User extends QueryableModel {
         organization: { id: string } | null,
         data: { email; id; firstName; lastName; type: LoginProviderType; sub: string },
     ): Promise<User | undefined> {
-        const {
-            email,
-            id,
-            firstName,
-            lastName,
-        } = data;
+        const { email, id, firstName, lastName } = data;
 
         if (STAMHOOFD.userMode === 'platform') {
             if (organization) {

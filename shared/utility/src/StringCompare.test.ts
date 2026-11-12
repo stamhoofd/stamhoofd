@@ -36,6 +36,8 @@ describe('StringCompare', () => {
         expect(StringCompare.normalize('José MÜLLER')).toEqual('jose muller');
         expect(StringCompare.normalize('Øystein Łukasz Đorđe')).toEqual('oystein lukasz dorde');
         expect(StringCompare.normalize('Strauß Æsa')).toEqual('strauß æsa');
-        expect(StringCompare.normalizeForEquality('Strauß Æsa Œuvre')).toEqual('strauss aesa oeuvre');
+        expect(StringCompare.normalizeForEquality('Strauß Æsa Œuvre')).toEqual(
+            'strauss aesa oeuvre',
+        );
     });
 });

@@ -25,7 +25,10 @@ describe('Endpoint.GetWebshopFromDomain', () => {
             await webshop.save();
         }
 
-        const r = Request.buildJson('GET', `/v${Version}/webshop-from-domain?domain=${encodeURIComponent(domain)}`);
+        const r = Request.buildJson(
+            'GET',
+            `/v${Version}/webshop-from-domain?domain=${encodeURIComponent(domain)}`,
+        );
         const response = await testServer.test(endpoint, r);
 
         expect(response.body.webshop).toBeNull();

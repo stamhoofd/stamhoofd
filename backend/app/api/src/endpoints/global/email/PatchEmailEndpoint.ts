@@ -3,7 +3,12 @@ import { Endpoint, Response } from '@node/endpoints';
 import { Email, Platform } from '@stamhoofd/models';
 import type { EmailPreview } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { EmailRecipientsStatus, EmailStatus, Email as EmailStruct, validateEmailTranslations } from '@stamhoofd/structures';
+import {
+    EmailRecipientsStatus,
+    EmailStatus,
+    Email as EmailStruct,
+    validateEmailTranslations,
+} from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { patchObject } from '@common/encoding';
@@ -37,13 +42,13 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canReadEmails(organization)) {
+        if (!(await Context.auth.canReadEmails(organization))) {
             // Fast fail before query
             throw Context.auth.error();
         }
 
         const model = await Email.getByID(request.params.id);
-        if (!model || (model.organizationId !== (organization?.id ?? null))) {
+        if (!model || model.organizationId !== (organization?.id ?? null)) {
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Email not found',
@@ -52,7 +57,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             });
         }
 
-        if (!await Context.auth.canAccessEmail(model, PermissionLevel.Write)) {
+        if (!(await Context.auth.canAccessEmail(model, PermissionLevel.Write))) {
             throw Context.auth.error();
         }
 
@@ -63,10 +68,12 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (request.body.senderId !== undefined) {
-            const list = organization ? organization.privateMeta.emails : (await Platform.getShared()).privateConfig.emails;
-            const sender = list.find(e => e.id === request.body.senderId);
+            const list = organization
+                ? organization.privateMeta.emails
+                : (await Platform.getShared()).privateConfig.emails;
+            const sender = list.find((e) => e.id === request.body.senderId);
             if (sender) {
-                if (!await Context.auth.canSendEmailsFrom(organization, sender.id)) {
+                if (!(await Context.auth.canSendEmailsFrom(organization, sender.id))) {
                     throw Context.auth.error({
                         message: 'Cannot send emails from this sender',
                         human: $t('%1Cw'),
@@ -77,7 +84,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 model.fromName = sender.name;
 
                 // Check if we still have write access to the email
-                if (!await Context.auth.canAccessEmail(model, PermissionLevel.Write)) {
+                if (!(await Context.auth.canAccessEmail(model, PermissionLevel.Write))) {
                     throw Context.auth.error();
                 }
             } else {
@@ -90,8 +97,10 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
         } else if (model.senderId) {
             // Update data, to avoid sending from an old address
-            const list = organization ? organization.privateMeta.emails : (await Platform.getShared()).privateConfig.emails;
-            const sender = list.find(e => e.id === model.senderId);
+            const list = organization
+                ? organization.privateMeta.emails
+                : (await Platform.getShared()).privateConfig.emails;
+            const sender = list.find((e) => e.id === model.senderId);
             if (sender) {
                 model.fromAddress = sender.email;
                 model.fromName = sender.name;
@@ -155,7 +164,10 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 });
             }
 
-            model.recipientFilter = patchObject(model.recipientFilter, request.body.recipientFilter);
+            model.recipientFilter = patchObject(
+                model.recipientFilter,
+                request.body.recipientFilter,
+            );
             rebuild = true;
         }
 
@@ -189,7 +201,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (request.body.deletedAt !== undefined) {
-            if (!await Context.auth.canAccessEmail(model, PermissionLevel.Full)) {
+            if (!(await Context.auth.canAccessEmail(model, PermissionLevel.Full))) {
                 throw Context.auth.error();
             }
             model.deletedAt = request.body.deletedAt;
@@ -202,8 +214,12 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             await model.updateCount();
         }
 
-        if (request.body.status === EmailStatus.Sending || request.body.status === EmailStatus.Sent || request.body.status === EmailStatus.Queued) {
-            if (!await Context.auth.canSendEmail(model)) {
+        if (
+            request.body.status === EmailStatus.Sending ||
+            request.body.status === EmailStatus.Sent ||
+            request.body.status === EmailStatus.Queued
+        ) {
+            if (!(await Context.auth.canSendEmail(model))) {
                 throw Context.auth.error({
                     message: 'Cannot send emails from this sender',
                     human: $t('%1Cw'),
@@ -214,6 +230,8 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             await EmailSendService.queueForSending(model);
         }
 
-        return new Response(await EmailPreviewService.getPreviewStructure(model, { allLanguages: true }));
+        return new Response(
+            await EmailPreviewService.getPreviewStructure(model, { allLanguages: true }),
+        );
     }
 }

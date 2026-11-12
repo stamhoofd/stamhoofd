@@ -14,9 +14,13 @@ export const ssoAdminUser = 'admin';
 // eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Deliberate admin account in the CLI-managed local SSO realm.
 export const ssoAdminPassword = 'admin';
 
-export function buildSsoConfigOutput(domains: ReturnType<typeof buildDomains>, redirectUri?: string): string {
+export function buildSsoConfigOutput(
+    domains: ReturnType<typeof buildDomains>,
+    redirectUri?: string,
+): string {
     const issuer = `https://${domains.sso}/dex/realms/${ssoRealm}`;
-    const resolvedRedirectUri = redirectUri ?? `https://<organization-id>.${domains.api}/openid/callback`;
+    const resolvedRedirectUri =
+        redirectUri ?? `https://<organization-id>.${domains.api}/openid/callback`;
 
     return `Local SSO settings:
 
@@ -107,8 +111,17 @@ export function buildKeycloakRealm(redirectUris: string | string[]): Record<stri
  * apart: the Playwright server allows other redirect URIs than the one `stam sso start`
  * configures, and both may exist for the same instance.
  */
-export async function writeKeycloakRealm(context: CliContext, redirectUris: string | string[], options: { dirName?: string } = {}): Promise<string> {
-    const importDir = path.join(context.generatedDir, 'instances', context.instance.name, options.dirName ?? 'keycloak');
+export async function writeKeycloakRealm(
+    context: CliContext,
+    redirectUris: string | string[],
+    options: { dirName?: string } = {},
+): Promise<string> {
+    const importDir = path.join(
+        context.generatedDir,
+        'instances',
+        context.instance.name,
+        options.dirName ?? 'keycloak',
+    );
     const file = path.join(importDir, 'stamhoofd-realm.json');
     await fs.mkdir(importDir, { recursive: true });
     await fs.writeFile(file, JSON.stringify(buildKeycloakRealm(redirectUris), null, 4));

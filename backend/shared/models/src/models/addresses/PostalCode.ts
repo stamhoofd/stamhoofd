@@ -12,7 +12,9 @@ export class PostalCode extends QueryableModel {
     static table = 'postal_codes';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -33,7 +35,11 @@ export class PostalCode extends QueryableModel {
     /**
      * Search for a given city via it's postal code and country, collecting information about the city (id), parentCity (id) and province (id)
      */
-    static async getCity(postalCode: string, cityName: string, country: Country): Promise<City | null> {
+    static async getCity(
+        postalCode: string,
+        cityName: string,
+        country: Country,
+    ): Promise<City | null> {
         let query = `SELECT ${City.getDefaultSelect()}from \`${PostalCode.table}\`\n`;
         query += `JOIN \`${City.table}\` ON \`${PostalCode.table}\`.\`${PostalCode.city.foreignKey}\` = \`${City.table}\`.\`${City.primary.name}\`\n`;
 
@@ -64,7 +70,12 @@ export class PostalCode extends QueryableModel {
             }
         }
 
-        if (bestCity && (bestScore < 3 || StringCompare.contains(cityName, bestCity.name) || StringCompare.contains(bestCity.name, cityName))) {
+        if (
+            bestCity &&
+            (bestScore < 3 ||
+                StringCompare.contains(cityName, bestCity.name) ||
+                StringCompare.contains(bestCity.name, cityName))
+        ) {
             return bestCity;
         }
 
@@ -80,11 +91,18 @@ export class PostalCode extends QueryableModel {
             }
         }
 
-        if (bestCity && (bestScore > cityName.length / 2 || StringCompare.contains(cityName, bestCity.name))) {
+        if (
+            bestCity &&
+            (bestScore > cityName.length / 2 || StringCompare.contains(cityName, bestCity.name))
+        ) {
             return bestCity;
         }
 
-        if (cities.length >= 1 && cities[0].parentCityId !== null && cities.every(c => c.parentCityId === cities[0].parentCityId)) {
+        if (
+            cities.length >= 1 &&
+            cities[0].parentCityId !== null &&
+            cities.every((c) => c.parentCityId === cities[0].parentCityId)
+        ) {
             // Might have put a postal code of the parent city
             const parent = await City.getByID(cities[0].parentCityId);
             if (parent) {
@@ -93,8 +111,23 @@ export class PostalCode extends QueryableModel {
                     if (cities.length > 1) {
                         throw new SimpleError({
                             code: 'invalid_field',
-                            message: 'Invalid city. Suggestions: ' + Formatter.joinLast(cities.map(c => c.name), ', ', ' of ') + '?',
-                            human: $t('%GS') + ' ' + Formatter.joinLast(cities.map(c => c.name), ', ', ' ' + $t('%GT') + ' ') + '?',
+                            message:
+                                'Invalid city. Suggestions: ' +
+                                Formatter.joinLast(
+                                    cities.map((c) => c.name),
+                                    ', ',
+                                    ' of ',
+                                ) +
+                                '?',
+                            human:
+                                $t('%GS') +
+                                ' ' +
+                                Formatter.joinLast(
+                                    cities.map((c) => c.name),
+                                    ', ',
+                                    ' ' + $t('%GT') + ' ',
+                                ) +
+                                '?',
                             field: 'city',
                         });
                     }
@@ -114,7 +147,11 @@ export class PostalCode extends QueryableModel {
     /**
      * Search for a given city via it's postal code and country, collecting information about the city (id), parentCity (id) and province (id)
      */
-    static async getCityByParent(postalCode: string, cityName: string, country: Country): Promise<City | null> {
+    static async getCityByParent(
+        postalCode: string,
+        cityName: string,
+        country: Country,
+    ): Promise<City | null> {
         let query = `SELECT ${City.getDefaultSelect()}from \`${PostalCode.table}\`\n`;
         query += `JOIN \`${City.table}\` as parent ON \`${PostalCode.table}\`.\`${PostalCode.city.foreignKey}\` = \`parent\`.\`${City.primary.name}\`\n`;
         query += `JOIN \`${City.table}\` ON \`parent\`.\`${City.primary.name}\` = \`${City.table}\`.\`${City.parentCity.foreignKey}\`\n`;
@@ -142,7 +179,12 @@ export class PostalCode extends QueryableModel {
             }
         }
 
-        if (bestCity && (bestScore < 3 || StringCompare.contains(cityName, bestCity.name) || StringCompare.contains(bestCity.name, cityName))) {
+        if (
+            bestCity &&
+            (bestScore < 3 ||
+                StringCompare.contains(cityName, bestCity.name) ||
+                StringCompare.contains(bestCity.name, cityName))
+        ) {
             return bestCity;
         }
 
@@ -158,7 +200,10 @@ export class PostalCode extends QueryableModel {
             }
         }
 
-        if (bestCity && (bestScore > cityName.length / 2 || StringCompare.contains(cityName, bestCity.name))) {
+        if (
+            bestCity &&
+            (bestScore > cityName.length / 2 || StringCompare.contains(cityName, bestCity.name))
+        ) {
             return bestCity;
         }
 

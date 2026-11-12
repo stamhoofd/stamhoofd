@@ -26,9 +26,10 @@ export class Migration extends Model {
     static async isExecuted(file: string): Promise<boolean> {
         file = this.cleanFileName(file);
 
-        const [rows] = await Database.select(`SELECT count(*) as c FROM ${this.table} WHERE \`file\` = ? LIMIT 1`, [
-            file,
-        ]);
+        const [rows] = await Database.select(
+            `SELECT count(*) as c FROM ${this.table} WHERE \`file\` = ? LIMIT 1`,
+            [file],
+        );
 
         if (rows.length === 0) {
             return false;

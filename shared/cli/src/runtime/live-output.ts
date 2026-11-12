@@ -18,7 +18,10 @@ export type StatusItem = {
 
 export type LiveOutput = {
     setStatus(items: StatusItem[]): void;
-    setLiveStatus(getItems: (frame: number) => StatusItem[], options?: { intervalMs?: number }): void;
+    setLiveStatus(
+        getItems: (frame: number) => StatusItem[],
+        options?: { intervalMs?: number },
+    ): void;
     stopLiveStatus(): void;
     log(message: string): void;
     write(chunk: string | Buffer, stream?: OutputStream): void;
@@ -26,11 +29,13 @@ export type LiveOutput = {
     stop(options?: { persistStatus?: boolean }): void;
 };
 
-export function createLiveOutput(options: {
-    enabled?: boolean;
-    stdout?: NodeJS.WriteStream;
-    stderr?: NodeJS.WriteStream;
-} = {}): LiveOutput {
+export function createLiveOutput(
+    options: {
+        enabled?: boolean;
+        stdout?: NodeJS.WriteStream;
+        stderr?: NodeJS.WriteStream;
+    } = {},
+): LiveOutput {
     const output = createTerminalOutput(options);
     const interactive = (options.enabled ?? true) && output.isTTY;
     let renderedStatus = '';
@@ -65,7 +70,7 @@ export function createLiveOutput(options: {
 
     const applyStatus = (items: StatusItem[]) => {
         const nextStatus = items
-            .map(item => formatStatusItem(item))
+            .map((item) => formatStatusItem(item))
             .filter(Boolean)
             .join('  ');
         if (nextStatus === renderedStatus) return;

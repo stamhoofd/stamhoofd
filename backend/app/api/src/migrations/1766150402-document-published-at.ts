@@ -9,7 +9,7 @@ export async function initPublishedAtForPublishedDocuments() {
         .where('publishedAt', null)
         .where('status', DocumentStatus.Published)
         .update();
-};
+}
 
 export default new Migration(async () => {
     process.stdout.write('\n');

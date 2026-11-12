@@ -17,7 +17,9 @@ describe('markdownToSlack', () => {
     });
 
     it('rewrites markdown links to Slack link syntax', () => {
-        expect(markdownToSlack('See [the docs](https://example.com/x)')).toBe('See <https://example.com/x|the docs>');
+        expect(markdownToSlack('See [the docs](https://example.com/x)')).toBe(
+            'See <https://example.com/x|the docs>',
+        );
     });
 
     it('converts unordered list markers to bullets and keeps indentation', () => {
@@ -28,7 +30,9 @@ describe('markdownToSlack', () => {
     });
 
     it('applies inline transforms inside list items', () => {
-        expect(markdownToSlack('- **Foo** added by [a](https://u)')).toBe('• *Foo* added by <https://u|a>');
+        expect(markdownToSlack('- **Foo** added by [a](https://u)')).toBe(
+            '• *Foo* added by <https://u|a>',
+        );
     });
 
     it('replaces horizontal rules with a visible divider', () => {
@@ -40,7 +44,9 @@ describe('markdownToSlack', () => {
 
     it('leaves italic and bare URLs untouched (already valid Slack mrkdwn)', () => {
         expect(markdownToSlack('_Released on June 26, 2026_')).toBe('_Released on June 26, 2026_');
-        expect(markdownToSlack('https://github.com/x/y/compare/v1...v2')).toBe('https://github.com/x/y/compare/v1...v2');
+        expect(markdownToSlack('https://github.com/x/y/compare/v1...v2')).toBe(
+            'https://github.com/x/y/compare/v1...v2',
+        );
     });
 
     it('does not rewrite markdown inside inline code spans', () => {

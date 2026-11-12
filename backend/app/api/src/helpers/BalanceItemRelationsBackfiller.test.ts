@@ -1,6 +1,24 @@
 import type { Organization, RegistrationPeriod, Webshop } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Order, RegistrationFactory, RegistrationPeriodFactory, WebshopFactory } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, OrderData, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
+import {
+    BalanceItem,
+    BalanceItemFactory,
+    GroupFactory,
+    MemberFactory,
+    OrganizationFactory,
+    OrganizationRegistrationPeriodFactory,
+    Order,
+    RegistrationFactory,
+    RegistrationPeriodFactory,
+    WebshopFactory,
+} from '@stamhoofd/models';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemType,
+    OrderData,
+    ReduceablePrice,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { backfillBalanceItemRelations } from './BalanceItemRelationsBackfiller.js';
@@ -32,7 +50,11 @@ describe('helper.BalanceItemRelationsBackfiller', () => {
         const organization = await new OrganizationFactory({ period }).create();
         await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
 
-        const member = await new MemberFactory({ organization, firstName: 'John', lastName: 'Doe' }).create();
+        const member = await new MemberFactory({
+            organization,
+            firstName: 'John',
+            lastName: 'Doe',
+        }).create();
         const group = await new GroupFactory({ organization, period }).create();
         const registration = await new RegistrationFactory({ member, group }).create();
 
@@ -50,9 +72,15 @@ describe('helper.BalanceItemRelationsBackfiller', () => {
         await backfillBalanceItemRelations();
 
         const updated = await BalanceItem.getByID(balanceItem.id);
-        expect(updated?.relations.get(BalanceItemRelationType.Member)).toMatchObject({ id: member.id });
-        expect(updated?.relations.get(BalanceItemRelationType.Member)?.name.toString()).toBe('John Doe');
-        expect(updated?.relations.get(BalanceItemRelationType.Group)).toMatchObject({ id: group.id });
+        expect(updated?.relations.get(BalanceItemRelationType.Member)).toMatchObject({
+            id: member.id,
+        });
+        expect(updated?.relations.get(BalanceItemRelationType.Member)?.name.toString()).toBe(
+            'John Doe',
+        );
+        expect(updated?.relations.get(BalanceItemRelationType.Group)).toMatchObject({
+            id: group.id,
+        });
         // Only one price configured, so no group price relation
         expect(updated?.relations.has(BalanceItemRelationType.GroupPrice)).toBe(false);
     });
@@ -71,7 +99,11 @@ describe('helper.BalanceItemRelationsBackfiller', () => {
         group.settings.prices[1].price = ReduceablePrice.create({ price: 30_00 });
         await group.save();
 
-        const registration = await new RegistrationFactory({ member, group, groupPrice: group.settings.prices[1] }).create();
+        const registration = await new RegistrationFactory({
+            member,
+            group,
+            groupPrice: group.settings.prices[1],
+        }).create();
 
         const balanceItem = await new BalanceItemFactory({
             organizationId: organization.id,
@@ -85,7 +117,9 @@ describe('helper.BalanceItemRelationsBackfiller', () => {
         await backfillBalanceItemRelations();
 
         const updated = await BalanceItem.getByID(balanceItem.id);
-        expect(updated?.relations.get(BalanceItemRelationType.GroupPrice)).toMatchObject({ id: group.settings.prices[1].id });
+        expect(updated?.relations.get(BalanceItemRelationType.GroupPrice)).toMatchObject({
+            id: group.settings.prices[1].id,
+        });
     });
 
     it('copies the registration period dates onto the balance item', async () => {
@@ -120,7 +154,10 @@ describe('helper.BalanceItemRelationsBackfiller', () => {
 
     it('fills the webshop relation for order balance items', async () => {
         const organization = await new OrganizationFactory({ period }).create();
-        const webshop = await new WebshopFactory({ organizationId: organization.id, name: 'My webshop' }).create();
+        const webshop = await new WebshopFactory({
+            organizationId: organization.id,
+            name: 'My webshop',
+        }).create();
         const order = await createOrder(organization, webshop);
 
         const balanceItem = await new BalanceItemFactory({
@@ -136,8 +173,12 @@ describe('helper.BalanceItemRelationsBackfiller', () => {
         await backfillBalanceItemRelations();
 
         const updated = await BalanceItem.getByID(balanceItem.id);
-        expect(updated?.relations.get(BalanceItemRelationType.Webshop)).toMatchObject({ id: webshop.id });
-        expect(updated?.relations.get(BalanceItemRelationType.Webshop)?.name.toString()).toBe('My webshop');
+        expect(updated?.relations.get(BalanceItemRelationType.Webshop)).toMatchObject({
+            id: webshop.id,
+        });
+        expect(updated?.relations.get(BalanceItemRelationType.Webshop)?.name.toString()).toBe(
+            'My webshop',
+        );
     });
 
     it('does not overwrite existing relations', async () => {
@@ -151,7 +192,10 @@ describe('helper.BalanceItemRelationsBackfiller', () => {
         const existingRelations = new Map([
             [
                 BalanceItemRelationType.Member,
-                BalanceItemRelation.create({ id: member.id, name: new TranslatedString('Custom name') }),
+                BalanceItemRelation.create({
+                    id: member.id,
+                    name: new TranslatedString('Custom name'),
+                }),
             ],
         ]);
 
@@ -169,6 +213,8 @@ describe('helper.BalanceItemRelationsBackfiller', () => {
 
         const updated = await BalanceItem.getByID(balanceItem.id);
         expect(updated?.relations.size).toBe(1);
-        expect(updated?.relations.get(BalanceItemRelationType.Member)?.name.toString()).toBe('Custom name');
+        expect(updated?.relations.get(BalanceItemRelationType.Member)?.name.toString()).toBe(
+            'Custom name',
+        );
     });
 });

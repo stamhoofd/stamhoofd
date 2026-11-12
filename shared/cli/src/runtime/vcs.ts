@@ -27,9 +27,12 @@ export async function detectVcs(rootDir: string, verbosity = RunVerbosity.Quiet)
     if (repository.status === 0) {
         return Vcs.Jj;
     }
-    const hasJj = await fs.stat(path.join(rootDir, '.jj')).then(() => true, (error: NodeJS.ErrnoException) => {
-        if (error.code === 'ENOENT') return false;
-        throw error;
-    });
+    const hasJj = await fs.stat(path.join(rootDir, '.jj')).then(
+        () => true,
+        (error: NodeJS.ErrnoException) => {
+            if (error.code === 'ENOENT') return false;
+            throw error;
+        },
+    );
     return hasJj ? Vcs.Jj : Vcs.Git;
 }

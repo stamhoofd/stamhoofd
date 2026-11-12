@@ -30,7 +30,12 @@ describe('getPaymentIdForStripeCharge', () => {
     });
 
     const asCharge = (data: Record<string, unknown>): Stripe.Charge => {
-        return { id: stripeMocker.createId('ch'), object: 'charge', metadata: {}, ...data } as unknown as Stripe.Charge;
+        return {
+            id: stripeMocker.createId('ch'),
+            object: 'charge',
+            metadata: {},
+            ...data,
+        } as unknown as Stripe.Charge;
     };
 
     test('the payment metadata on the charge wins', async () => {

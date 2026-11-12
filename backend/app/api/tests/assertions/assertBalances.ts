@@ -3,11 +3,12 @@ import { BalanceItemService } from '../../src/services/BalanceItemService.js';
 
 export async function assertBalances(
     selector:
-        { user: { id: string | null } }
+        | { user: { id: string | null } }
         | { member: { id: string | null } }
         | { organization: { id: string | null } }
         | { payingOrganization: { id: string | null } },
-    balances: Partial<BalanceItem>[]) {
+    balances: Partial<BalanceItem>[],
+) {
     await BalanceItemService.flushAll();
 
     // Fetch all user balances
@@ -27,11 +28,16 @@ export async function assertBalances(
     const userBalances = await q.fetch();
 
     try {
-        expect(userBalances).toIncludeAllMembers(balances.map(b => expect.objectContaining(b)));
+        expect(userBalances).toIncludeAllMembers(balances.map((b) => expect.objectContaining(b)));
     } catch (e) {
         // List all the balances that were found and the ones that were missing
         if (userBalances.length !== balances.length) {
-            console.error('Difference in number of balances found:', userBalances.length, 'expected:', balances.length);
+            console.error(
+                'Difference in number of balances found:',
+                userBalances.length,
+                'expected:',
+                balances.length,
+            );
         }
 
         for (const expectedBalance of balances) {

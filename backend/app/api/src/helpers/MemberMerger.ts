@@ -60,7 +60,11 @@ export async function findEqualMembers({
     });
 }
 
-export async function mergeTwoMembers(base: Member, other: Member, options?: { updateDocuments?: boolean }): Promise<void> {
+export async function mergeTwoMembers(
+    base: Member,
+    other: Member,
+    options?: { updateDocuments?: boolean },
+): Promise<void> {
     console.log('Merging two member', base.id, other.id, base.details.name, other.details.name);
 
     if (base.id === other.id) {
@@ -73,7 +77,10 @@ export async function mergeTwoMembers(base: Member, other: Member, options?: { u
 
     mergeMemberDetails(base, other);
 
-    if (other.lastRegisteredAt && (base.lastRegisteredAt === null || base.lastRegisteredAt < other.lastRegisteredAt)) {
+    if (
+        other.lastRegisteredAt &&
+        (base.lastRegisteredAt === null || base.lastRegisteredAt < other.lastRegisteredAt)
+    ) {
         base.lastRegisteredAt = new Date(other.lastRegisteredAt.getTime());
     }
 
@@ -91,7 +98,11 @@ export async function mergeTwoMembers(base: Member, other: Member, options?: { u
     base.details.reviewTimes.clearAll();
     base.details.cleanData();
 
-    if (other.existsInDatabase && other.details.memberNumber && other.details.memberNumber === base.details.memberNumber) {
+    if (
+        other.existsInDatabase &&
+        other.details.memberNumber &&
+        other.details.memberNumber === base.details.memberNumber
+    ) {
         // Clear member number first, because that will cause duplicate member number mysql errors
         other.details.memberNumber = null;
         await other.save();
@@ -146,10 +157,7 @@ async function mergeResponsibilities(base: Member, other: Member) {
             .where(SQL.column('memberId'), memberId)
             .fetch();
 
-        return MemberResponsibilityRecord.fromRows(
-            rows,
-            MemberResponsibilityRecord.table,
-        );
+        return MemberResponsibilityRecord.fromRows(rows, MemberResponsibilityRecord.table);
     }
 
     const otherResponsibilities = await getResponsibilities(other.id);
@@ -158,52 +166,36 @@ async function mergeResponsibilities(base: Member, other: Member) {
     // Delete duplicate responsibilities where endDate is null -> keep responsibility with oldest start date
     for (const otherResponsibility of otherResponsibilities) {
         // check if equal responsibilities exist
-        const otherResponsibilitiesWithoutCurrent
-            = otherResponsibilities.filter(
-                o => o.id !== otherResponsibility.id,
-            );
+        const otherResponsibilitiesWithoutCurrent = otherResponsibilities.filter(
+            (o) => o.id !== otherResponsibility.id,
+        );
         const equalResponsibilities = baseResponsibilities
             .concat(otherResponsibilitiesWithoutCurrent)
             .filter((baseResponsibility) => {
                 return (
-                    baseResponsibility.responsibilityId
-                    === otherResponsibility.responsibilityId
-                    && baseResponsibility.organizationId
-                    === otherResponsibility.organizationId
-                    && baseResponsibility.groupId
-                    === otherResponsibility.groupId
-                    && baseResponsibility.endDate === null
-                    && otherResponsibility.endDate === null
+                    baseResponsibility.responsibilityId === otherResponsibility.responsibilityId &&
+                    baseResponsibility.organizationId === otherResponsibility.organizationId &&
+                    baseResponsibility.groupId === otherResponsibility.groupId &&
+                    baseResponsibility.endDate === null &&
+                    otherResponsibility.endDate === null
                 );
             });
 
         if (equalResponsibilities.length > 0) {
-            const allEqualResponsibilities = [
-                ...equalResponsibilities,
-                otherResponsibility,
-            ]
+            const allEqualResponsibilities = [...equalResponsibilities, otherResponsibility]
                 // sort on startDate
                 .sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
 
-            const responsibilityWithOldestStartDate
-                = allEqualResponsibilities[0];
+            const responsibilityWithOldestStartDate = allEqualResponsibilities[0];
 
-            const responsibilitiesToDelete = allEqualResponsibilities.slice(
-                1,
-                undefined,
-            );
+            const responsibilitiesToDelete = allEqualResponsibilities.slice(1, undefined);
 
             for (const responsibilityToDelete of responsibilitiesToDelete) {
-                const baseIndex = baseResponsibilities.indexOf(
-                    responsibilityToDelete,
-                );
+                const baseIndex = baseResponsibilities.indexOf(responsibilityToDelete);
                 if (baseIndex !== -1) baseResponsibilities.splice(baseIndex, 1);
                 else {
-                    const otherIndex = otherResponsibilities.indexOf(
-                        responsibilityToDelete,
-                    );
-                    if (otherIndex !== -1)
-                        otherResponsibilities.splice(otherIndex, 1);
+                    const otherIndex = otherResponsibilities.indexOf(responsibilityToDelete);
+                    if (otherIndex !== -1) otherResponsibilities.splice(otherIndex, 1);
                 }
 
                 if (responsibilityToDelete.existsInDatabase) {
@@ -223,9 +215,7 @@ async function mergeResponsibilities(base: Member, other: Member) {
 }
 
 async function mergeBalanceItems(base: Member, other: Member) {
-    const otherModels = await BalanceItem.select()
-        .where('memberId', other.id)
-        .fetch();
+    const otherModels = await BalanceItem.select().where('memberId', other.id).fetch();
 
     // Keep track of every organization that had balance items for the removed member,
     // so we can reset its cached balance afterwards.
@@ -237,7 +227,10 @@ async function mergeBalanceItems(base: Member, other: Member) {
         otherModel.memberId = base.id;
 
         // The Member relation stores the member id + name. Update it so it points to the base member.
-        if (otherModel.relations.has(BalanceItemRelationType.Member) && otherModel.relations.get(BalanceItemRelationType.Member)?.id === other.id) {
+        if (
+            otherModel.relations.has(BalanceItemRelationType.Member) &&
+            otherModel.relations.get(BalanceItemRelationType.Member)?.id === other.id
+        ) {
             otherModel.relations.set(
                 BalanceItemRelationType.Member,
                 BalanceItemRelation.create({
@@ -341,23 +334,11 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     merge(baseDetails, otherDetails, 'birthDay');
 
     // boolean status
-    mergeBooleanStatusIfBaseNotSet(
-        baseDetails,
-        otherDetails,
-        'requiresFinancialSupport',
-    );
+    mergeBooleanStatusIfBaseNotSet(baseDetails, otherDetails, 'requiresFinancialSupport');
 
-    mergeBooleanStatusIfBaseNotSet(
-        baseDetails,
-        otherDetails,
-        'dataPermissions',
-    );
+    mergeBooleanStatusIfBaseNotSet(baseDetails, otherDetails, 'dataPermissions');
 
-    mergeBooleanStatusIfBaseNotSet(
-        baseDetails,
-        otherDetails,
-        'parentsHaveAccess',
-    );
+    mergeBooleanStatusIfBaseNotSet(baseDetails, otherDetails, 'parentsHaveAccess');
 
     // address
     mergeAddress(baseDetails, otherDetails, baseDetails);
@@ -369,8 +350,8 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     baseDetails.emergencyContacts = baseDetails.emergencyContacts.concat(
         // add contacts that are not yet in the list
         otherDetails.emergencyContacts.filter(
-            otherContact =>
-                !baseDetails.emergencyContacts.some(baseContact =>
+            (otherContact) =>
+                !baseDetails.emergencyContacts.some((baseContact) =>
                     baseContact.isEqual(otherContact),
                 ),
         ),
@@ -386,28 +367,27 @@ export function mergeMemberDetails(base: Member, other: Member): void {
     // unverified data
     baseDetails.unverifiedEmails = Formatter.uniqueArray(
         baseDetails.unverifiedEmails.concat(
-            otherDetails.unverifiedEmails.filter(
-                email => !isNullOrEmpty(email),
-            ),
+            otherDetails.unverifiedEmails.filter((email) => !isNullOrEmpty(email)),
         ),
     );
     baseDetails.unverifiedPhones = Formatter.uniqueArray(
         baseDetails.unverifiedPhones.concat(
-            otherDetails.unverifiedPhones.filter(
-                phone => !isNullOrEmpty(phone),
-            ),
+            otherDetails.unverifiedPhones.filter((phone) => !isNullOrEmpty(phone)),
         ),
     );
 
     // unverified addresses
     for (const address of otherDetails.unverifiedAddresses) {
-        if (!baseDetails.unverifiedAddresses.some(a => a.id === address.id)) {
+        if (!baseDetails.unverifiedAddresses.some((a) => a.id === address.id)) {
             baseDetails.unverifiedAddresses.push(address);
         }
     }
 
     // Ids
-    baseDetails.oldIds = Formatter.uniqueArray([...baseDetails.oldIds, ...otherDetails.oldIds]).filter(b => b !== base.id);
+    baseDetails.oldIds = Formatter.uniqueArray([
+        ...baseDetails.oldIds,
+        ...otherDetails.oldIds,
+    ]).filter((b) => b !== base.id);
 
     if (other.id) {
         baseDetails.oldIds = Formatter.uniqueArray([...baseDetails.oldIds, other.id]);
@@ -422,7 +402,9 @@ export function selectBaseMember(members: Member[]): {
         throw Error('Members array length is less than 2.');
     }
     const sorted = members.sort(
-        (m1, m2) => (m2.existsInDatabase ? 0 : m2.createdAt.getTime()) - (m1.existsInDatabase ? 0 : m1.createdAt.getTime()),
+        (m1, m2) =>
+            (m2.existsInDatabase ? 0 : m2.createdAt.getTime()) -
+            (m1.existsInDatabase ? 0 : m1.createdAt.getTime()),
     );
 
     return { base: sorted[0], others: sorted.slice(1, undefined) };
@@ -462,9 +444,9 @@ function mergeParents(base: MemberDetails, other: MemberDetails) {
     for (const otherParent of otherParents) {
         // equal if same first and last name
         const equalBaseParent = baseParents.find(
-            baseParent =>
-                hasEqualStringValue(baseParent, otherParent, 'firstName')
-                && hasEqualStringValue(baseParent, otherParent, 'lastName'),
+            (baseParent) =>
+                hasEqualStringValue(baseParent, otherParent, 'firstName') &&
+                hasEqualStringValue(baseParent, otherParent, 'lastName'),
         );
 
         if (!equalBaseParent) {
@@ -496,8 +478,8 @@ function mergeEmail(
 ) {
     const allEmails = Formatter.uniqueArray(
         [other.email, ...other.alternativeEmails, base.email, ...base.alternativeEmails]
-            .filter(f => f !== null)
-            .filter(f => !isNullOrEmpty(f)),
+            .filter((f) => f !== null)
+            .filter((f) => !isNullOrEmpty(f)),
     );
     base.email = allEmails.shift() ?? null;
     base.alternativeEmails = allEmails;
@@ -511,9 +493,7 @@ function mergePhone(
     const originalPhone = base.phone;
     const isPhoneMerged = mergeString(base, other, 'phone');
     if (isPhoneMerged && !isNullOrEmpty(originalPhone)) {
-        if (
-            !baseDetails.unverifiedPhones.some(phone => phone === originalPhone)
-        ) {
+        if (!baseDetails.unverifiedPhones.some((phone) => phone === originalPhone)) {
             baseDetails.unverifiedPhones.push(originalPhone!);
         }
     }
@@ -535,17 +515,17 @@ function mergeAddress(
 
     if (baseAddress && baseAddress.id !== otherAddress.id) {
         // add base address to unverified addresses
-        if (
-            !baseDetails.unverifiedAddresses.some(
-                address => address.id === baseAddress.id,
-            )
-        ) {
+        if (!baseDetails.unverifiedAddresses.some((address) => address.id === baseAddress.id)) {
             baseDetails.unverifiedAddresses.push(baseAddress);
         }
     }
 }
 
-function mergeUitpasNumberDetails(base: { uitpasNumberDetails: UitpasNumberDetails | null }, other: { uitpasNumberDetails: UitpasNumberDetails | null }, baseDetails: MemberDetails) {
+function mergeUitpasNumberDetails(
+    base: { uitpasNumberDetails: UitpasNumberDetails | null },
+    other: { uitpasNumberDetails: UitpasNumberDetails | null },
+    baseDetails: MemberDetails,
+) {
     const baseUitpasNumberDetails = base.uitpasNumberDetails;
     const otherUitpasNumberDetails = other.uitpasNumberDetails;
 
@@ -553,7 +533,10 @@ function mergeUitpasNumberDetails(base: { uitpasNumberDetails: UitpasNumberDetai
         return;
     }
 
-    if ((baseUitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0) >= (otherUitpasNumberDetails.socialTariff?.updatedAt.getTime() ?? 0)) {
+    if (
+        (baseUitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0) >=
+        (otherUitpasNumberDetails.socialTariff?.updatedAt.getTime() ?? 0)
+    ) {
         return;
     }
 
@@ -597,8 +580,7 @@ function mergeStringIfBaseNotSet<T, K extends keyof T>(
 function merge<T, K extends keyof T>(
     base: T,
     other: T,
-    key: K
-        & (T[K] extends number | Date | boolean | null | undefined ? K : never),
+    key: K & (T[K] extends number | Date | boolean | null | undefined ? K : never),
 ): boolean {
     const otherValue = other[key] as number | Date | boolean | null | undefined;
     if (otherValue === null || otherValue === undefined) return false;
@@ -648,10 +630,7 @@ function hasEqualStringValue<T, K extends keyof T>(
     );
 }
 
-function hasValueAndIsEqual(
-    a: string | null | undefined,
-    b: string | null | undefined,
-): boolean {
+function hasValueAndIsEqual(a: string | null | undefined, b: string | null | undefined): boolean {
     if (isNullOrEmpty(a) || isNullOrEmpty(b)) return false;
     return isStringEqual(a as string, b as string);
 }

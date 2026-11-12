@@ -11,8 +11,12 @@ export async function removeStoredLoginDetails() {
     let count = 0;
 
     await SeedTools.loopBatched({
-        query: EmailRecipient.select()
-            .where(new SQLWhereLike(SQL.column(EmailRecipient.table, 'replacements'), scalarToSQLExpression('%"loginDetails"%'))),
+        query: EmailRecipient.select().where(
+            new SQLWhereLike(
+                SQL.column(EmailRecipient.table, 'replacements'),
+                scalarToSQLExpression('%"loginDetails"%'),
+            ),
+        ),
         batchSize: 100,
         batchAction: async (recipients: EmailRecipient[]) => {
             for (const recipient of recipients) {

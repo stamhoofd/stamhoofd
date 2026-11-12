@@ -2,13 +2,43 @@ import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/en
 import { PatchableArray } from '@common/encoding';
 import type { Endpoint } from '@node/endpoints';
 import { Request } from '@node/endpoints';
-import type { DocumentTemplate, Group, Member, Organization, Registration } from '@stamhoofd/models';
-import { BalanceItemFactory, Document, DocumentTemplateFactory, GroupFactory, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, UserFactory } from '@stamhoofd/models';
+import type {
+    DocumentTemplate,
+    Group,
+    Member,
+    Organization,
+    Registration,
+} from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    Document,
+    DocumentTemplateFactory,
+    GroupFactory,
+    MemberFactory,
+    OrganizationFactory,
+    Platform,
+    RegistrationFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { render } from '@stamhoofd/models/helpers/Handlebars.js';
 import { splitPrice } from '@stamhoofd/models/models/DocumentTemplate.js';
 import type { RecordAnswer } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BooleanStatus, DocumentData, DocumentStatus, Document as DocumentStruct, MemberDetails, MemberWithRegistrationsBlob, Parent, Permissions, RecordCategory, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import {
+    BooleanStatus,
+    DocumentData,
+    DocumentStatus,
+    Document as DocumentStruct,
+    MemberDetails,
+    MemberWithRegistrationsBlob,
+    Parent,
+    Permissions,
+    RecordCategory,
+    RecordPriceAnswer,
+    RecordSettings,
+    RecordTextAnswer,
+    RecordType,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -51,7 +81,14 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         accessToken = (await SessionService.createSession(admin)).accessToken;
     });
 
-    async function createFiscalTemplate(group: Group, { withDebtor = true, maxAge = null as number | null, maxAgeSevereDisability = null as number | null } = {}) {
+    async function createFiscalTemplate(
+        group: Group,
+        {
+            withDebtor = true,
+            maxAge = null as number | null,
+            maxAgeSevereDisability = null as number | null,
+        } = {},
+    ) {
         const template = await new DocumentTemplateFactory({
             groups: [group],
             status: DocumentStatus.Published,
@@ -61,19 +98,39 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         template.settings.maxAgeSevereDisability = maxAgeSevereDisability;
 
         if (withDebtor) {
-            template.privateSettings.templateDefinition.documentFieldCategories.push(RecordCategory.create({
-                records: [
-                    RecordSettings.create({ id: 'debtor.firstName', required: true, type: RecordType.Text }),
-                    RecordSettings.create({ id: 'debtor.lastName', required: true, type: RecordType.Text }),
-                    RecordSettings.create({ id: 'debtor.nationalRegisterNumber', required: false, type: RecordType.Text }),
-                ],
-            }));
+            template.privateSettings.templateDefinition.documentFieldCategories.push(
+                RecordCategory.create({
+                    records: [
+                        RecordSettings.create({
+                            id: 'debtor.firstName',
+                            required: true,
+                            type: RecordType.Text,
+                        }),
+                        RecordSettings.create({
+                            id: 'debtor.lastName',
+                            required: true,
+                            type: RecordType.Text,
+                        }),
+                        RecordSettings.create({
+                            id: 'debtor.nationalRegisterNumber',
+                            required: false,
+                            type: RecordType.Text,
+                        }),
+                    ],
+                }),
+            );
         }
         await template.save();
         return template;
     }
 
-    function parent(firstName: string, { nationalRegisterNumber = null, isMemberTaxDependent = null }: { nationalRegisterNumber?: string | null; isMemberTaxDependent?: boolean | null } = {}) {
+    function parent(
+        firstName: string,
+        {
+            nationalRegisterNumber = null,
+            isMemberTaxDependent = null,
+        }: { nationalRegisterNumber?: string | null; isMemberTaxDependent?: boolean | null } = {},
+    ) {
         return Parent.create({
             firstName,
             lastName: 'Doe',
@@ -84,11 +141,20 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         });
     }
 
-    async function createFamily(parents: Parent[], { template: familyTemplate = template, group: familyGroup = group, birthDay = new Date(2015, 0, 1), price = total, severeDisability = false } = {}): Promise<{ member: Member; registration: Registration }> {
+    async function createFamily(
+        parents: Parent[],
+        {
+            template: familyTemplate = template,
+            group: familyGroup = group,
+            birthDay = new Date(2015, 0, 1),
+            price = total,
+            severeDisability = false,
+        } = {},
+    ): Promise<{ member: Member; registration: Registration }> {
         const member = await new MemberFactory({
             organization,
             details: MemberDetails.create({
-                firstName: 'Jane' + (++familyCounter),
+                firstName: 'Jane' + ++familyCounter,
                 lastName: 'Doe',
                 birthDay,
                 parents,
@@ -112,7 +178,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         const arr: Body = new PatchableArray();
         arr.addPatch(MemberWithRegistrationsBlob.patch({ id: member.id, details }));
 
-        const request = Request.buildJson('PATCH', '/organization/members', organization.getApiHost(), arr);
+        const request = Request.buildJson(
+            'PATCH',
+            '/organization/members',
+            organization.getApiHost(),
+            arr,
+        );
         request.headers.authorization = 'Bearer ' + accessToken;
         const response = await testServer.test(endpoint, request);
         expect(response.status).toBe(200);
@@ -143,7 +214,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
      * Split documents carry their share, everything else the full amount; the originals always hold the total
      */
     function expectDocumentPrices(documents: Document[], total: number) {
-        const active = documents.filter(d => d.status !== DocumentStatus.Deleted);
+        const active = documents.filter((d) => d.status !== DocumentStatus.Deleted);
         expect(active.length).toBeGreaterThan(0);
 
         for (const document of active) {
@@ -151,19 +222,22 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
             expect(answer(document, 'registration.pricePaidOriginal')).toBe(total);
         }
 
-        const split = active.filter(d => d.parentId !== null);
+        const split = active.filter((d) => d.parentId !== null);
         const shares = split.map((_, index) => splitPrice(total, split.length, index)).sort();
-        expect(split.map(d => answer(d, 'registration.price')).sort()).toEqual(shares);
-        expect(split.map(d => answer(d, 'registration.pricePaid')).sort()).toEqual(shares);
+        expect(split.map((d) => answer(d, 'registration.price')).sort()).toEqual(shares);
+        expect(split.map((d) => answer(d, 'registration.pricePaid')).sort()).toEqual(shares);
 
-        for (const document of active.filter(d => d.parentId === null)) {
+        for (const document of active.filter((d) => d.parentId === null)) {
             expect(answer(document, 'registration.price')).toBe(total);
             expect(answer(document, 'registration.pricePaid')).toBe(total);
         }
     }
 
     test('marking a second parent as tax dependent splits the existing document', async () => {
-        const linda = parent('Linda', { nationalRegisterNumber: '93042012345', isMemberTaxDependent: true });
+        const linda = parent('Linda', {
+            nationalRegisterNumber: '93042012345',
+            isMemberTaxDependent: true,
+        });
         const john = parent('John', { nationalRegisterNumber: '93042017297' });
         const { member, registration } = await createFamily([linda, john]);
 
@@ -177,27 +251,33 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         const documents = await loadDocuments(registration);
         expect(documents.length).toBe(2);
 
-        const lindaDocument = documents.find(d => d.parentId === linda.id)!;
-        const johnDocument = documents.find(d => d.parentId === john.id)!;
+        const lindaDocument = documents.find((d) => d.parentId === linda.id)!;
+        const johnDocument = documents.find((d) => d.parentId === john.id)!;
         expect(lindaDocument.id).toBe(original.id);
         expect(answer(lindaDocument, 'debtor.firstName')).toBe('Linda');
         expect(lindaDocument.data.description).toContain('(Linda Doe)');
         expect(answer(johnDocument, 'debtor.firstName')).toBe('John');
         expect(answer(johnDocument, 'debtor.nationalRegisterNumber')).toBe('93042017297');
         expect(johnDocument.data.description).toContain('(John Doe)');
-        expect(documents.every(d => d.status === DocumentStatus.Published)).toBe(true);
+        expect(documents.every((d) => d.status === DocumentStatus.Published)).toBe(true);
         expectDocumentPrices(documents, total);
     });
 
     test('unmarking a parent merges the split documents back into one', async () => {
-        const linda = parent('Linda', { nationalRegisterNumber: '93042012345', isMemberTaxDependent: true });
-        const john = parent('John', { nationalRegisterNumber: '93042017297', isMemberTaxDependent: true });
+        const linda = parent('Linda', {
+            nationalRegisterNumber: '93042012345',
+            isMemberTaxDependent: true,
+        });
+        const john = parent('John', {
+            nationalRegisterNumber: '93042017297',
+            isMemberTaxDependent: true,
+        });
         const { member, registration } = await createFamily([linda, john]);
 
         const splitDocuments = await loadDocuments(registration);
         expect(splitDocuments.length).toBe(2);
         expectDocumentPrices(splitDocuments, total);
-        const lindaDocument = splitDocuments.find(d => d.parentId === linda.id)!;
+        const lindaDocument = splitDocuments.find((d) => d.parentId === linda.id)!;
 
         await patchParents(member, taxDependent(john, false));
 
@@ -211,12 +291,18 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
     });
 
     test('unmarking a parent keeps a numbered document as deleted', async () => {
-        const linda = parent('Linda', { nationalRegisterNumber: '93042012345', isMemberTaxDependent: true });
-        const john = parent('John', { nationalRegisterNumber: '93042017297', isMemberTaxDependent: true });
+        const linda = parent('Linda', {
+            nationalRegisterNumber: '93042012345',
+            isMemberTaxDependent: true,
+        });
+        const john = parent('John', {
+            nationalRegisterNumber: '93042017297',
+            isMemberTaxDependent: true,
+        });
         const { member, registration } = await createFamily([linda, john]);
 
         const splitDocuments = await loadDocuments(registration);
-        const johnDocument = splitDocuments.find(d => d.parentId === john.id)!;
+        const johnDocument = splitDocuments.find((d) => d.parentId === john.id)!;
         johnDocument.number = 1;
         await johnDocument.save();
 
@@ -224,15 +310,20 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
 
         const documents = await loadDocuments(registration);
         expect(documents.length).toBe(2);
-        const deleted = documents.find(d => d.id === johnDocument.id)!;
+        const deleted = documents.find((d) => d.id === johnDocument.id)!;
         expect(deleted.status).toBe(DocumentStatus.Deleted);
         expect(deleted.number).toBe(1);
-        expect(documents.find(d => d.parentId === null && d.status === DocumentStatus.Published)?.id).toBe(splitDocuments.find(d => d.parentId === linda.id)!.id);
+        expect(
+            documents.find((d) => d.parentId === null && d.status === DocumentStatus.Published)?.id,
+        ).toBe(splitDocuments.find((d) => d.parentId === linda.id)!.id);
         expectDocumentPrices(documents, total);
     });
 
     test('moving the tax dependency to the other parent moves the document', async () => {
-        const linda = parent('Linda', { nationalRegisterNumber: '93042012345', isMemberTaxDependent: true });
+        const linda = parent('Linda', {
+            nationalRegisterNumber: '93042012345',
+            isMemberTaxDependent: true,
+        });
         const john = parent('John', { nationalRegisterNumber: '93042017297' });
         const { member, registration } = await createFamily([linda, john]);
         const [original] = await loadDocuments(registration);
@@ -257,7 +348,14 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         expect(original.status).toBe(DocumentStatus.MissingData);
         expect(answer(original, 'debtor.nationalRegisterNumber')).toBeNull();
 
-        await patchParents(member, Parent.patch({ id: linda.id, nationalRegisterNumber: '93042012345', updatedAt: new Date() }));
+        await patchParents(
+            member,
+            Parent.patch({
+                id: linda.id,
+                nationalRegisterNumber: '93042012345',
+                updatedAt: new Date(),
+            }),
+        );
 
         const documents = await loadDocuments(registration);
         expect(documents.length).toBe(1);
@@ -268,33 +366,61 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
     });
 
     test('changing the national register number of one of two debtors only completes that document', async () => {
-        const linda = parent('Linda', { nationalRegisterNumber: '93042012345', isMemberTaxDependent: true });
+        const linda = parent('Linda', {
+            nationalRegisterNumber: '93042012345',
+            isMemberTaxDependent: true,
+        });
         const john = parent('John', { isMemberTaxDependent: true });
         const { member, registration } = await createFamily([linda, john]);
 
         const before = await loadDocuments(registration);
-        expect(before.find(d => d.parentId === linda.id)!.status).toBe(DocumentStatus.Published);
-        expect(before.find(d => d.parentId === john.id)!.status).toBe(DocumentStatus.MissingData);
+        expect(before.find((d) => d.parentId === linda.id)!.status).toBe(DocumentStatus.Published);
+        expect(before.find((d) => d.parentId === john.id)!.status).toBe(DocumentStatus.MissingData);
 
-        await patchParents(member, Parent.patch({ id: john.id, nationalRegisterNumber: '93042017297', updatedAt: new Date() }));
+        await patchParents(
+            member,
+            Parent.patch({
+                id: john.id,
+                nationalRegisterNumber: '93042017297',
+                updatedAt: new Date(),
+            }),
+        );
 
         const documents = await loadDocuments(registration);
-        expect(documents.map(d => d.id).sort()).toEqual(before.map(d => d.id).sort());
-        const johnDocument = documents.find(d => d.parentId === john.id)!;
+        expect(documents.map((d) => d.id).sort()).toEqual(before.map((d) => d.id).sort());
+        const johnDocument = documents.find((d) => d.parentId === john.id)!;
         expect(johnDocument.status).toBe(DocumentStatus.Published);
         expect(answer(johnDocument, 'debtor.nationalRegisterNumber')).toBe('93042017297');
         expectDocumentPrices(documents, total);
     });
 
     test('a document from before the split is claimed by the first debtor', async () => {
-        const linda = parent('Linda', { nationalRegisterNumber: '93042012345', isMemberTaxDependent: true });
-        const john = parent('John', { nationalRegisterNumber: '93042017297', isMemberTaxDependent: true });
+        const linda = parent('Linda', {
+            nationalRegisterNumber: '93042012345',
+            isMemberTaxDependent: true,
+        });
+        const john = parent('John', {
+            nationalRegisterNumber: '93042017297',
+            isMemberTaxDependent: true,
+        });
         const member = await new MemberFactory({
             organization,
-            details: MemberDetails.create({ firstName: 'Jane', lastName: 'Doe', birthDay: new Date(2015, 0, 1), parents: [linda, john] }),
+            details: MemberDetails.create({
+                firstName: 'Jane',
+                lastName: 'Doe',
+                birthDay: new Date(2015, 0, 1),
+                parents: [linda, john],
+            }),
         }).create();
         const registration = await new RegistrationFactory({ member, group }).create();
-        await new BalanceItemFactory({ organizationId: organization.id, memberId: member.id, registrationId: registration.id, amount: 1, unitPrice: total, pricePaid: total }).create();
+        await new BalanceItemFactory({
+            organizationId: organization.id,
+            memberId: member.id,
+            registrationId: registration.id,
+            amount: 1,
+            unitPrice: total,
+            pricePaid: total,
+        }).create();
 
         // The state before certificates could be split: one document without a parent, already numbered
         const legacy = new Document();
@@ -307,7 +433,16 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         legacy.data = DocumentData.create({
             name: template.settings.name,
             fieldAnswers: new Map<string, RecordAnswer>([
-                ['registration.price', RecordPriceAnswer.create({ settings: RecordSettings.create({ id: 'registration.price', type: RecordType.Price }), value: total })],
+                [
+                    'registration.price',
+                    RecordPriceAnswer.create({
+                        settings: RecordSettings.create({
+                            id: 'registration.price',
+                            type: RecordType.Price,
+                        }),
+                        value: total,
+                    }),
+                ],
             ]),
         });
         await legacy.save();
@@ -316,18 +451,21 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
 
         const documents = await loadDocuments(registration);
         expect(documents.length).toBe(2);
-        const claimed = documents.find(d => d.id === legacy.id)!;
+        const claimed = documents.find((d) => d.id === legacy.id)!;
         expect(claimed.parentId).toBe(linda.id);
         expect(claimed.number).toBe(7);
         expect(answer(claimed, 'debtor.firstName')).toBe('Linda');
-        const created = documents.find(d => d.id !== legacy.id)!;
+        const created = documents.find((d) => d.id !== legacy.id)!;
         expect(created.parentId).toBe(john.id);
         expect(answer(created, 'debtor.firstName')).toBe('John');
         expectDocumentPrices(documents, total);
     });
 
     test('a certificate that was split by hand is left alone', async () => {
-        const linda = parent('Linda', { nationalRegisterNumber: '93042012345', isMemberTaxDependent: true });
+        const linda = parent('Linda', {
+            nationalRegisterNumber: '93042012345',
+            isMemberTaxDependent: true,
+        });
         const john = parent('John', { nationalRegisterNumber: '93042017297' });
         const { member, registration } = await createFamily([linda, john]);
         const [original] = await loadDocuments(registration);
@@ -346,15 +484,53 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
                 name: template.settings.name,
                 description: original.data.description + ' (2)',
                 fieldAnswers: new Map<string, RecordAnswer>([
-                    ['debtor.firstName', reviewed(RecordTextAnswer.create({ settings: RecordSettings.create({ id: 'debtor.firstName', type: RecordType.Text }), value: 'John' }))],
-                    ['debtor.nationalRegisterNumber', reviewed(RecordTextAnswer.create({ settings: RecordSettings.create({ id: 'debtor.nationalRegisterNumber', type: RecordType.Text }), value: '93042017297' }))],
-                    ['registration.price', reviewed(RecordPriceAnswer.create({ settings: RecordSettings.create({ id: 'registration.price', type: RecordType.Price }), value: 6000 }))],
+                    [
+                        'debtor.firstName',
+                        reviewed(
+                            RecordTextAnswer.create({
+                                settings: RecordSettings.create({
+                                    id: 'debtor.firstName',
+                                    type: RecordType.Text,
+                                }),
+                                value: 'John',
+                            }),
+                        ),
+                    ],
+                    [
+                        'debtor.nationalRegisterNumber',
+                        reviewed(
+                            RecordTextAnswer.create({
+                                settings: RecordSettings.create({
+                                    id: 'debtor.nationalRegisterNumber',
+                                    type: RecordType.Text,
+                                }),
+                                value: '93042017297',
+                            }),
+                        ),
+                    ],
+                    [
+                        'registration.price',
+                        reviewed(
+                            RecordPriceAnswer.create({
+                                settings: RecordSettings.create({
+                                    id: 'registration.price',
+                                    type: RecordType.Price,
+                                }),
+                                value: 6000,
+                            }),
+                        ),
+                    ],
                 ]),
             }),
         });
         const put = new PatchableArray() as PatchableArrayAutoEncoder<DocumentStruct>;
         put.addPut(duplicate);
-        const request = Request.buildJson('PATCH', '/organization/documents', organization.getApiHost(), put);
+        const request = Request.buildJson(
+            'PATCH',
+            '/organization/documents',
+            organization.getApiHost(),
+            put,
+        );
         request.headers.authorization = 'Bearer ' + accessToken;
         const response = await testServer.test(new PatchDocumentEndpoint(), request);
         expect(response.status).toBe(200);
@@ -363,15 +539,15 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         await patchParents(member, taxDependent(john, true));
 
         const documents = await loadDocuments(registration);
-        expect(documents.map(d => d.id).sort()).toEqual([original.id, duplicateId].sort());
-        expect(documents.every(d => d.parentId === null)).toBe(true);
+        expect(documents.map((d) => d.id).sort()).toEqual([original.id, duplicateId].sort());
+        expect(documents.every((d) => d.parentId === null)).toBe(true);
 
-        const originalAfter = documents.find(d => d.id === original.id)!;
+        const originalAfter = documents.find((d) => d.id === original.id)!;
         expect(originalAfter.data.description).toBe(original.data.description);
         expect(answer(originalAfter, 'debtor.firstName')).toBe('Linda');
         expectDocumentPrices([originalAfter], total);
 
-        const duplicateAfter = documents.find(d => d.id === duplicateId)!;
+        const duplicateAfter = documents.find((d) => d.id === duplicateId)!;
         expect(duplicateAfter.data.description).toBe(original.data.description + ' (2)');
         expect(answer(duplicateAfter, 'debtor.firstName')).toBe('John');
         expect(answer(duplicateAfter, 'debtor.nationalRegisterNumber')).toBe('93042017297');
@@ -382,15 +558,33 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
     test('a template without debtor fields never splits', async () => {
         const otherGroup = await new GroupFactory({ organization }).create();
         const plainTemplate = await createFiscalTemplate(otherGroup, { withDebtor: false });
-        const linda = parent('Linda', { nationalRegisterNumber: '93042012345', isMemberTaxDependent: true });
-        const john = parent('John', { nationalRegisterNumber: '93042017297', isMemberTaxDependent: true });
+        const linda = parent('Linda', {
+            nationalRegisterNumber: '93042012345',
+            isMemberTaxDependent: true,
+        });
+        const john = parent('John', {
+            nationalRegisterNumber: '93042017297',
+            isMemberTaxDependent: true,
+        });
 
         const member = await new MemberFactory({
             organization,
-            details: MemberDetails.create({ firstName: 'Jane', lastName: 'Doe', birthDay: new Date(2015, 0, 1), parents: [linda, john] }),
+            details: MemberDetails.create({
+                firstName: 'Jane',
+                lastName: 'Doe',
+                birthDay: new Date(2015, 0, 1),
+                parents: [linda, john],
+            }),
         }).create();
         const registration = await new RegistrationFactory({ member, group: otherGroup }).create();
-        await new BalanceItemFactory({ organizationId: organization.id, memberId: member.id, registrationId: registration.id, amount: 1, unitPrice: total, pricePaid: total }).create();
+        await new BalanceItemFactory({
+            organizationId: organization.id,
+            memberId: member.id,
+            registrationId: registration.id,
+            amount: 1,
+            unitPrice: total,
+            pricePaid: total,
+        }).create();
         await plainTemplate.buildAll();
 
         await patchMember(member, MemberDetails.patch({ firstName: 'Janet' }));
@@ -424,7 +618,10 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
             activityGroup.settings.startDate = activityStart;
             activityGroup.settings.endDate = activityEnd;
             await activityGroup.save();
-            activityTemplate = await createFiscalTemplate(activityGroup, { maxAge: 13, maxAgeSevereDisability: 20 });
+            activityTemplate = await createFiscalTemplate(activityGroup, {
+                maxAge: 13,
+                maxAgeSevereDisability: 20,
+            });
         });
 
         function dateOf(document: Document, id: string) {
@@ -435,28 +632,56 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         /**
          * The day count and daily tariff exactly as the fiscal XML export computes them from the answers
          */
-        async function renderDaysAndTariff(document: Document): Promise<{ days: number; tariffInCents: number }> {
-            const row = '{{ coalesce registration.days (days registration.startDate registration.endDate) }}|{{ div (div registration.price (coalesce registration.days (days registration.startDate registration.endDate)) round=true) 100 round=true }}';
-            const context = DocumentRenderService.buildDocumentContext(document, organization, await Platform.getSharedStruct());
+        async function renderDaysAndTariff(
+            document: Document,
+        ): Promise<{ days: number; tariffInCents: number }> {
+            const row =
+                '{{ coalesce registration.days (days registration.startDate registration.endDate) }}|{{ div (div registration.price (coalesce registration.days (days registration.startDate registration.endDate)) round=true) 100 round=true }}';
+            const context = DocumentRenderService.buildDocumentContext(
+                document,
+                organization,
+                await Platform.getSharedStruct(),
+            );
             const [days, tariffInCents] = (await render(row, context))!.split('|').map(Number);
             return { days, tariffInCents };
         }
 
-        async function createActivityFamily(birthDay: Date, parents = [parent('Linda', { nationalRegisterNumber: '93042012345', isMemberTaxDependent: true })], { severeDisability = false } = {}) {
-            return await createFamily(parents, { template: activityTemplate, group: activityGroup, birthDay, price: activityPrice, severeDisability });
+        async function createActivityFamily(
+            birthDay: Date,
+            parents = [
+                parent('Linda', {
+                    nationalRegisterNumber: '93042012345',
+                    isMemberTaxDependent: true,
+                }),
+            ],
+            { severeDisability = false } = {},
+        ) {
+            return await createFamily(parents, {
+                template: activityTemplate,
+                group: activityGroup,
+                birthDay,
+                price: activityPrice,
+                severeDisability,
+            });
         }
 
         async function expectFullActivity(document: Document) {
             expect(dateOf(document, 'registration.startDate')).toBe('2025-07-01');
             expect(dateOf(document, 'registration.endDate')).toBe('2025-07-10');
-            expect(await renderDaysAndTariff(document)).toEqual({ days: 10, tariffInCents: dailyTariffInCents });
+            expect(await renderDaysAndTariff(document)).toEqual({
+                days: 10,
+                tariffInCents: dailyTariffInCents,
+            });
             expectDocumentPrices([document], activityPrice);
         }
 
         async function expectTrimmedActivity(document: Document) {
             expect(dateOf(document, 'registration.startDate')).toBe('2025-07-01');
             expect(dateOf(document, 'registration.endDate')).toBe('2025-07-05');
-            expect(await renderDaysAndTariff(document)).toEqual({ days: 5, tariffInCents: dailyTariffInCents });
+            expect(await renderDaysAndTariff(document)).toEqual({
+                days: 5,
+                tariffInCents: dailyTariffInCents,
+            });
             expectDocumentPrices([document], activityPrice / 2);
         }
 
@@ -482,8 +707,11 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
 
             const [document] = await loadDocuments(registration);
             expect(dateOf(document, 'registration.endDate')).toBe('2025-07-09');
-            expect(await renderDaysAndTariff(document)).toEqual({ days: 9, tariffInCents: dailyTariffInCents });
-            expectDocumentPrices([document], activityPrice / 10 * 9);
+            expect(await renderDaysAndTariff(document)).toEqual({
+                days: 9,
+                tariffInCents: dailyTariffInCents,
+            });
+            expectDocumentPrices([document], (activityPrice / 10) * 9);
         });
 
         test('a member that turns 14 on the first day gets no certificate', async () => {
@@ -494,7 +722,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
 
         test('a member with a severe disability that turns 21 during the activity is certified up to the day before the birthday', async () => {
             const birthDay = new Date('2004-07-05T22:00:00Z'); // turns 21 on 6 July 2025
-            const { registration } = await createActivityFamily(birthDay, undefined, { severeDisability: true });
+            const { registration } = await createActivityFamily(birthDay, undefined, {
+                severeDisability: true,
+            });
 
             const documents = await loadDocuments(registration);
             expect(documents.length).toBe(1);
@@ -532,9 +762,18 @@ describe('Endpoint.PatchOrganizationMembersEndpoint.documents', () => {
         });
 
         test('the trimmed amount is what gets split between two debtors', async () => {
-            const linda = parent('Linda', { nationalRegisterNumber: '93042012345', isMemberTaxDependent: true });
-            const john = parent('John', { nationalRegisterNumber: '93042017297', isMemberTaxDependent: true });
-            const { registration } = await createActivityFamily(birthDayInsideActivity, [linda, john]);
+            const linda = parent('Linda', {
+                nationalRegisterNumber: '93042012345',
+                isMemberTaxDependent: true,
+            });
+            const john = parent('John', {
+                nationalRegisterNumber: '93042017297',
+                isMemberTaxDependent: true,
+            });
+            const { registration } = await createActivityFamily(birthDayInsideActivity, [
+                linda,
+                john,
+            ]);
 
             const documents = await loadDocuments(registration);
             expect(documents.length).toBe(2);

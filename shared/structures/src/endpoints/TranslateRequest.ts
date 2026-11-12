@@ -1,5 +1,12 @@
 import type { Data, Decoder } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    EnumDecoder,
+    field,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Language } from '@stamhoofd/types/Language';
 
@@ -14,7 +21,12 @@ export type TipTapDocument = {
 };
 
 export function isTipTapDocument(value: unknown): value is TipTapDocument {
-    return typeof value === 'object' && value !== null && !Array.isArray(value) && typeof (value as { type?: unknown }).type === 'string';
+    return (
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value) &&
+        typeof (value as { type?: unknown }).type === 'string'
+    );
 }
 
 class TranslatableValueDecoder implements Decoder<TranslatableValue> {
@@ -62,6 +74,11 @@ export class TranslateResponse extends AutoEncoder {
     /**
      * Per target language: the translated values, using the same keys as the request inputs.
      */
-    @field({ decoder: new MapDecoder(new EnumDecoder(Language), new MapDecoder(StringDecoder, new TranslatableValueDecoder())) })
+    @field({
+        decoder: new MapDecoder(
+            new EnumDecoder(Language),
+            new MapDecoder(StringDecoder, new TranslatableValueDecoder()),
+        ),
+    })
     translations: Map<Language, Map<string, TranslatableValue>> = new Map();
 }

@@ -9,11 +9,19 @@ export class Sorter {
         return 0;
     }
 
-    static byStringProperty<Field extends keyof any>(a: Record<Field, string>, b: Record<Field, string>, field: Field) {
+    static byStringProperty<Field extends keyof any>(
+        a: Record<Field, string>,
+        b: Record<Field, string>,
+        field: Field,
+    ) {
         return this.byStringValue(a[field], b[field]);
     }
 
-    static byNumberProperty<Field extends keyof any>(a: Record<Field, number>, b: Record<Field, number>, field: Field) {
+    static byNumberProperty<Field extends keyof any>(
+        a: Record<Field, number>,
+        b: Record<Field, number>,
+        field: Field,
+    ) {
         return this.byNumberValue(a[field], b[field]);
     }
 

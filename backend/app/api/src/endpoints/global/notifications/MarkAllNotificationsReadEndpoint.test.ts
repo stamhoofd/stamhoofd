@@ -26,7 +26,12 @@ describe('Endpoint.MarkAllNotificationsReadEndpoint', () => {
     async function post(user: User | null) {
         const request = Request.post({
             path: '/notifications/mark-all-read',
-            headers: user ? { authorization: 'Bearer ' + (await SessionService.createSession(user)).accessToken } : {},
+            headers: user
+                ? {
+                      authorization:
+                          'Bearer ' + (await SessionService.createSession(user)).accessToken,
+                  }
+                : {},
         });
         return await testServer.test<CountResponse>(endpoint, request);
     }
@@ -54,7 +59,9 @@ describe('Endpoint.MarkAllNotificationsReadEndpoint', () => {
         }))!;
 
         const seenAt = new Date(2026, 0, 1);
-        const seenRecipient = await NotificationRecipient.select().where('notificationId', single.id).first(true);
+        const seenRecipient = await NotificationRecipient.select()
+            .where('notificationId', single.id)
+            .first(true);
         seenRecipient.seenAt = seenAt;
         await seenRecipient.save();
 
@@ -63,7 +70,11 @@ describe('Endpoint.MarkAllNotificationsReadEndpoint', () => {
             payload: {},
             to: { users: [user] },
         }))!;
-        await NotificationService.markAsRead(await NotificationRecipient.select().where('notificationId', alreadyRead.id).first(true));
+        await NotificationService.markAsRead(
+            await NotificationRecipient.select()
+                .where('notificationId', alreadyRead.id)
+                .first(true),
+        );
 
         const response = await post(user);
         expect(response.status).toBe(200);
@@ -71,17 +82,21 @@ describe('Endpoint.MarkAllNotificationsReadEndpoint', () => {
 
         const recipients = await NotificationRecipient.select().where('userId', user.id).fetch();
         expect(recipients).toHaveLength(3);
-        expect(recipients.every(r => r.readAt !== null && r.seenAt !== null)).toBe(true);
-        expect(recipients.find(r => r.notificationId === grouped.id)!.readCount).toBe(2);
-        expect(recipients.find(r => r.notificationId === single.id)!.seenAt).toEqual(seenAt);
+        expect(recipients.every((r) => r.readAt !== null && r.seenAt !== null)).toBe(true);
+        expect(recipients.find((r) => r.notificationId === grouped.id)!.readCount).toBe(2);
+        expect(recipients.find((r) => r.notificationId === single.id)!.seenAt).toEqual(seenAt);
 
-        const otherRecipients = await NotificationRecipient.select().where('userId', other.id).fetch();
-        expect(otherRecipients.every(r => r.readAt === null)).toBe(true);
+        const otherRecipients = await NotificationRecipient.select()
+            .where('userId', other.id)
+            .fetch();
+        expect(otherRecipients.every((r) => r.readAt === null)).toBe(true);
 
         expect((await post(user)).body.count).toBe(0);
     });
 
     test('requires authentication', async () => {
-        await expect(post(null)).rejects.toThrow(STExpect.simpleError({ code: 'not_authenticated' }));
+        await expect(post(null)).rejects.toThrow(
+            STExpect.simpleError({ code: 'not_authenticated' }),
+        );
     });
 });

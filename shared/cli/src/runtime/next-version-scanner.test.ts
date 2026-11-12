@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { getProjectPath } from '../context/project-path.js';
-import { readReleasedVersion, replaceNextVersion, writeReleasedVersion } from './next-version-scanner.js';
+import {
+    readReleasedVersion,
+    replaceNextVersion,
+    writeReleasedVersion,
+} from './next-version-scanner.js';
 
 const replaceBy = 'version: 426';
 
@@ -50,7 +54,12 @@ class Example extends AutoEncoder {
 `;
             const result = replaceNextVersion(source, replaceBy);
             expect(result.replaced).toBe(1);
-            expect(result.content).toBe(source.replace('    @field({ decoder: StringDecoder, ...NextVersion })', `    @field({ decoder: StringDecoder, ${replaceBy} })`));
+            expect(result.content).toBe(
+                source.replace(
+                    '    @field({ decoder: StringDecoder, ...NextVersion })',
+                    `    @field({ decoder: StringDecoder, ${replaceBy} })`,
+                ),
+            );
         });
 
         it('rewrites the spread form', () => {
@@ -92,7 +101,12 @@ class Example extends AutoEncoder {
 `;
             const result = replaceNextVersion(source, replaceBy);
             expect(result.replaced).toBe(1);
-            expect(result.content).toBe(source.replace('/* ...NextVersion */ ...NextVersion', `/* ...NextVersion */ ${replaceBy}`));
+            expect(result.content).toBe(
+                source.replace(
+                    '/* ...NextVersion */ ...NextVersion',
+                    `/* ...NextVersion */ ${replaceBy}`,
+                ),
+            );
         });
 
         it('does not close a block comment on the opening /*/', () => {
@@ -102,7 +116,12 @@ class Example extends AutoEncoder {
 `;
             const result = replaceNextVersion(source, replaceBy);
             expect(result.replaced).toBe(1);
-            expect(result.content).toBe(source.replace('\n@field({ decoder: StringDecoder, ...NextVersion })', `\n@field({ decoder: StringDecoder, ${replaceBy} })`));
+            expect(result.content).toBe(
+                source.replace(
+                    '\n@field({ decoder: StringDecoder, ...NextVersion })',
+                    `\n@field({ decoder: StringDecoder, ${replaceBy} })`,
+                ),
+            );
         });
 
         it('ignores comment markers inside string literals', () => {
@@ -148,7 +167,10 @@ class Example extends AutoEncoder {
 
     describe('Version.ts', () => {
         it('reads and bumps ReleasedVersion of the real file', async () => {
-            const content = await readFile(`${getProjectPath()}shared/structures/src/Version.ts`, 'utf8');
+            const content = await readFile(
+                `${getProjectPath()}shared/structures/src/Version.ts`,
+                'utf8',
+            );
             const released = readReleasedVersion(content);
             expect(released).toBeGreaterThan(0);
 
@@ -160,7 +182,9 @@ class Example extends AutoEncoder {
         it('fails when the version cannot be found', () => {
             expect(() => readReleasedVersion('export const Version = 425;')).toThrow();
             expect(() => readReleasedVersion('export const ReleasedVersion = 0;')).toThrow();
-            expect(() => writeReleasedVersion('export const ReleasedVersion = 425;', 424, 425)).toThrow();
+            expect(() =>
+                writeReleasedVersion('export const ReleasedVersion = 425;', 424, 425),
+            ).toThrow();
         });
     });
 });

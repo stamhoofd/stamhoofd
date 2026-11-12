@@ -18,7 +18,15 @@ export type EmailInterfaceBase = {
     subject: string;
     text?: string;
     html?: string;
-    attachments?: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string; cid?: string }[];
+    attachments?: {
+        filename: string;
+        path?: string;
+        href?: string;
+        content?: string | Buffer;
+        contentType?: string;
+        encoding?: string;
+        cid?: string;
+    }[];
     retryCount?: number;
     type?: 'transactional' | 'broadcast';
     /** Header names remain literal keys until conversion to Nodemailer's transport object. */
@@ -41,13 +49,22 @@ export type InternalEmailData = {
     subject: string;
     text?: string;
     html?: string;
-    attachments?: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; cid?: string }[];
+    attachments?: {
+        filename: string;
+        path?: string;
+        href?: string;
+        content?: string | Buffer;
+        contentType?: string;
+        cid?: string;
+    }[];
     headers?: Record<string, string>;
 };
 
 function emailObjectToString(email: null | undefined): undefined;
 function emailObjectToString(email: EmailInterfaceRecipient): string;
-function emailObjectToString(email: EmailInterfaceRecipient | null | undefined): string | undefined {
+function emailObjectToString(
+    email: EmailInterfaceRecipient | null | undefined,
+): string | undefined {
     if (!email) {
         return;
     }
@@ -82,7 +99,9 @@ class EmailStatic {
         }
 
         if (STAMHOOFD.environment === 'test') {
-            throw new Error('When using Email in tests, make sure to use EmailMocker.infect() in jest.setup.ts');
+            throw new Error(
+                'When using Email in tests, make sure to use EmailMocker.infect() in jest.setup.ts',
+            );
         }
 
         if (!STAMHOOFD.SMTP_HOST || !STAMHOOFD.SMTP_PORT) {
@@ -148,25 +167,27 @@ class EmailStatic {
             }
 
             this.sending = true;
-            this.doSend(next).catch((e: unknown) => {
-                console.error(e);
-                if (next.callback) {
-                    next.callback(e);
-                }
-            }).finally(() => {
-                this.sending = false;
-                this.sendNextIfNeeded();
-            });
+            this.doSend(next)
+                .catch((e: unknown) => {
+                    console.error(e);
+                    if (next.callback) {
+                        next.callback(e);
+                    }
+                })
+                .finally(() => {
+                    this.sending = false;
+                    this.sendNextIfNeeded();
+                });
         }
     }
 
     parseTo(to: string | EmailInterfaceRecipient[]): EmailInterfaceRecipient[] {
         if (typeof to === 'string') {
-            return this.parseEmailStr(to).map(email => ({ email }));
+            return this.parseEmailStr(to).map((email) => ({ email }));
         }
 
         // Filter invalid email addresses
-        return to.filter(r => DataValidator.isEmailValid(r.email));
+        return to.filter((r) => DataValidator.isEmailValid(r.email));
     }
 
     /**
@@ -315,7 +336,11 @@ class EmailStatic {
 
         if (recipients.length === 0) {
             // Invalid string
-            console.warn("Filtered all emails due hard bounce or spam '" + data.to.map(t => t.email).join(',') + "'. E-mail skipped");
+            console.warn(
+                "Filtered all emails due hard bounce or spam '" +
+                    data.to.map((t) => t.email).join(',') +
+                    "'. E-mail skipped",
+            );
 
             try {
                 data.callback?.(
@@ -332,7 +357,11 @@ class EmailStatic {
         }
 
         // Filter by environment
-        if (STAMHOOFD.environment !== 'production' || (STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS && STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS.length > 0)) {
+        if (
+            STAMHOOFD.environment !== 'production' ||
+            (STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS &&
+                STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS.length > 0)
+        ) {
             const whitelist = STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS ?? [];
             recipients = this.filterWhitelist(recipients, whitelist);
         }
@@ -359,10 +388,18 @@ class EmailStatic {
         let bccRecipients: EmailInterfaceRecipient[] = [];
         if (data.bcc) {
             // Filter
-            bccRecipients.push(...(await EmailAddress.filterSendTo(data.bcc.filter(({ email }) => DataValidator.isEmailValid(email)))));
+            bccRecipients.push(
+                ...(await EmailAddress.filterSendTo(
+                    data.bcc.filter(({ email }) => DataValidator.isEmailValid(email)),
+                )),
+            );
 
             // Filter by environment
-            if (STAMHOOFD.environment !== 'production' || (STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS && STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS.length > 0)) {
+            if (
+                STAMHOOFD.environment !== 'production' ||
+                (STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS &&
+                    STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS.length > 0)
+            ) {
                 const whitelist = STAMHOOFD.WHITELISTED_EMAIL_DESTINATIONS ?? [];
                 bccRecipients = this.filterWhitelist(bccRecipients, whitelist);
             }
@@ -411,7 +448,8 @@ class EmailStatic {
                 }
             }
 
-            const transporter = (data.type === 'transactional') ? this.transactionalTransporter : this.transporter;
+            const transporter =
+                data.type === 'transactional' ? this.transactionalTransporter : this.transporter;
 
             if (data.type === 'transactional') {
                 mail.headers = {
@@ -470,8 +508,13 @@ class EmailStatic {
                     if (data.from.email !== this.getWebmasterFromEmail().email) {
                         this.sendWebmaster({
                             subject: $t('%G6'),
-                            text: $t('%G7', { email: data.from.email, to: mail.to }) + ': \n\n' + e + '\n\n' + (mail.text ?? ''),
-                            type: (data.type === 'transactional') ? 'broadcast' : 'transactional',
+                            text:
+                                $t('%G7', { email: data.from.email, to: mail.to }) +
+                                ': \n\n' +
+                                e +
+                                '\n\n' +
+                                (mail.text ?? ''),
+                            type: data.type === 'transactional' ? 'broadcast' : 'transactional',
                         });
                     }
                 }
@@ -482,14 +525,21 @@ class EmailStatic {
     getWebmasterFromEmail() {
         return {
             name: Formatter.capitalizeFirstLetter(STAMHOOFD.platformName ?? 'Stamhoofd'),
-            email: 'webmaster@' + (new I18n(Language.Dutch, Country.Belgium).localizedDomains.defaultTransactionalEmail()),
+            email:
+                'webmaster@' +
+                new I18n(
+                    Language.Dutch,
+                    Country.Belgium,
+                ).localizedDomains.defaultTransactionalEmail(),
         };
     }
 
     getQuickFromEmail(country: Country) {
         return {
             name: Formatter.capitalizeFirstLetter(STAMHOOFD.platformName ?? 'Stamhoofd'),
-            email: 'hallo@' + (new I18n(Language.Dutch, country).localizedDomains.defaultTransactionalEmail()),
+            email:
+                'hallo@' +
+                new I18n(Language.Dutch, country).localizedDomains.defaultTransactionalEmail(),
         };
     }
 

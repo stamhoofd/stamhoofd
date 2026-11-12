@@ -1,13 +1,35 @@
 import type { RecipientLoader } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, Email, Member, MemberResponsibilityRecord, Organization, Payment, Platform, User } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemPayment,
+    Email,
+    Member,
+    MemberResponsibilityRecord,
+    Organization,
+    Payment,
+    Platform,
+    User,
+} from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
-import type { LimitedFilteredRequest, PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
-import { CountFilteredRequest, EmailRecipient, PaginatedResponse, PaymentMethod } from '@stamhoofd/structures';
+import type {
+    LimitedFilteredRequest,
+    PaymentGeneral,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
+import {
+    CountFilteredRequest,
+    EmailRecipient,
+    PaginatedResponse,
+    PaymentMethod,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
 import { memberResponsibilityRecordFilterCompilers } from '../sql-filters/member-responsibility-records.js';
 import type { ReplacementsOptions } from '../email-replacements/getEmailReplacementsForPayment.js';
-import { buildReplacementOptions, getEmailReplacementsForPayment } from '../email-replacements/getEmailReplacementsForPayment.js';
+import {
+    buildReplacementOptions,
+    getEmailReplacementsForPayment,
+} from '../email-replacements/getEmailReplacementsForPayment.js';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
 type BeforeFetchAllResult = {
@@ -45,7 +67,11 @@ const paymentRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
 Email.recipientLoaders.set(EmailRecipientFilterType.Payment, paymentRecipientLoader);
 
 const paymentOrganizationRecipientLoader: RecipientLoader<BeforeFetchAllResult> = {
-    fetch: async (query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult) => fetchPaymentOrganizationRecipients(query, subfilter, beforeFetchAllResult),
+    fetch: async (
+        query: LimitedFilteredRequest,
+        subfilter: StamhoofdFilter | null,
+        beforeFetchAllResult,
+    ) => fetchPaymentOrganizationRecipients(query, subfilter, beforeFetchAllResult),
 
     // For now: only count the number of payments - not the amount of emails
     count: async (query: LimitedFilteredRequest, _subfilter) => {
@@ -63,13 +89,25 @@ const paymentOrganizationRecipientLoader: RecipientLoader<BeforeFetchAllResult> 
     },
 };
 
-Email.recipientLoaders.set(EmailRecipientFilterType.PaymentOrganization, paymentOrganizationRecipientLoader);
+Email.recipientLoaders.set(
+    EmailRecipientFilterType.PaymentOrganization,
+    paymentOrganizationRecipientLoader,
+);
 
-async function fetchPaymentRecipients(query: LimitedFilteredRequest, subfilter: StamhoofdFilter, beforeFetchAllResult?: BeforeFetchAllResult) {
+async function fetchPaymentRecipients(
+    query: LimitedFilteredRequest,
+    subfilter: StamhoofdFilter,
+    beforeFetchAllResult?: BeforeFetchAllResult,
+) {
     const result = await GetPaymentsEndpoint.buildData(query);
 
     return new PaginatedResponse({
-        results: await getRecipients(result, EmailRecipientFilterType.Payment, subfilter, beforeFetchAllResult),
+        results: await getRecipients(
+            result,
+            EmailRecipientFilterType.Payment,
+            subfilter,
+            beforeFetchAllResult,
+        ),
         next: result.next,
     });
 }
@@ -83,17 +121,15 @@ async function doesQueryIncludePaymentsWithoutOrder(filterRequest: LimitedFilter
 
     const baseQuery = await GetPaymentsEndpoint.buildQuery(countRequest);
 
-    const balanceItemPaymentsJoin = SQL.innerJoin(BalanceItemPayment.table)
-        .where(
-            SQL.column(BalanceItemPayment.table, 'paymentId'),
-            SQL.column(Payment.table, 'id'),
-        );
+    const balanceItemPaymentsJoin = SQL.innerJoin(BalanceItemPayment.table).where(
+        SQL.column(BalanceItemPayment.table, 'paymentId'),
+        SQL.column(Payment.table, 'id'),
+    );
 
-    const balanceItemJoin = SQL.innerJoin(BalanceItem.table)
-        .where(
-            SQL.column(BalanceItem.table, 'id'),
-            SQL.column(BalanceItemPayment.table, 'balanceItemId'),
-        );
+    const balanceItemJoin = SQL.innerJoin(BalanceItem.table).where(
+        SQL.column(BalanceItem.table, 'id'),
+        SQL.column(BalanceItemPayment.table, 'balanceItemId'),
+    );
 
     // check if 1 payment without order
     const results = await baseQuery
@@ -126,16 +162,30 @@ async function doesQueryIncludePaymentsOtherThanTransfers(filterRequest: Limited
     return results === 0;
 }
 
-async function fetchPaymentOrganizationRecipients(query: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult?: BeforeFetchAllResult) {
+async function fetchPaymentOrganizationRecipients(
+    query: LimitedFilteredRequest,
+    subfilter: StamhoofdFilter | null,
+    beforeFetchAllResult?: BeforeFetchAllResult,
+) {
     const result = await GetPaymentsEndpoint.buildData(query);
 
     return new PaginatedResponse({
-        results: await getRecipients(result, EmailRecipientFilterType.PaymentOrganization, subfilter, beforeFetchAllResult),
+        results: await getRecipients(
+            result,
+            EmailRecipientFilterType.PaymentOrganization,
+            subfilter,
+            beforeFetchAllResult,
+        ),
         next: result.next,
     });
 }
 
-async function getRecipients(result: PaginatedResponse<PaymentGeneral[], LimitedFilteredRequest>, type: EmailRecipientFilterType.Payment | EmailRecipientFilterType.PaymentOrganization, subFilter: StamhoofdFilter | null, beforeFetchAllResult: BeforeFetchAllResult | undefined) {
+async function getRecipients(
+    result: PaginatedResponse<PaymentGeneral[], LimitedFilteredRequest>,
+    type: EmailRecipientFilterType.Payment | EmailRecipientFilterType.PaymentOrganization,
+    subFilter: StamhoofdFilter | null,
+    beforeFetchAllResult: BeforeFetchAllResult | undefined,
+) {
     const recipients: EmailRecipient[] = [];
     const userIds: { userId: string; payment: PaymentGeneral }[] = [];
     const organizationIds: { organizationId: string; payment: PaymentGeneral }[] = [];
@@ -182,78 +232,99 @@ async function getRecipients(result: PaginatedResponse<PaymentGeneral[], Limited
             }
         }
 
-        const totalRecipientsForPayment = balanceItemOrganizationIds.size + balanceItemUserIds.size + balanceItemMemberIds.size + balanceItemOrderIds.size;
+        const totalRecipientsForPayment =
+            balanceItemOrganizationIds.size +
+            balanceItemUserIds.size +
+            balanceItemMemberIds.size +
+            balanceItemOrderIds.size;
         if (totalRecipientsForPayment > 1) {
             console.warn('Multiple recipients found for payment: ', payment.id);
         }
 
         if (balanceItemOrganizationIds.size > 0) {
-            organizationIds.push(...Array.from(balanceItemOrganizationIds).map(organizationId => ({ organizationId, payment })));
+            organizationIds.push(
+                ...Array.from(balanceItemOrganizationIds).map((organizationId) => ({
+                    organizationId,
+                    payment,
+                })),
+            );
         }
         if (balanceItemUserIds.size > 0) {
-            userIds.push(...Array.from(balanceItemUserIds).map(userId => ({ userId, payment })));
+            userIds.push(...Array.from(balanceItemUserIds).map((userId) => ({ userId, payment })));
         }
         if (balanceItemMemberIds.size > 0) {
-            memberIds.push(...Array.from(balanceItemMemberIds).map(memberId => ({ memberId, payment })));
+            memberIds.push(
+                ...Array.from(balanceItemMemberIds).map((memberId) => ({ memberId, payment })),
+            );
         }
         if (balanceItemOrderIds.size > 0) {
-            orderIds.push(...Array.from(balanceItemOrderIds).map(orderId => ({ orderId, payment })));
+            orderIds.push(
+                ...Array.from(balanceItemOrderIds).map((orderId) => ({ orderId, payment })),
+            );
         }
     }
 
     const replacementOptions = await buildReplacementOptions(result.results, beforeFetchAllResult);
 
     if (type === EmailRecipientFilterType.Payment) {
-        recipients.push(...await getUserRecipients(userIds, replacementOptions));
-        recipients.push(...await getMemberRecipients(memberIds, replacementOptions));
-        recipients.push(...await getOrderRecipients(orderIds, replacementOptions));
+        recipients.push(...(await getUserRecipients(userIds, replacementOptions)));
+        recipients.push(...(await getMemberRecipients(memberIds, replacementOptions)));
+        recipients.push(...(await getOrderRecipients(orderIds, replacementOptions)));
     } else {
-        recipients.push(...await getOrganizationRecipients(organizationIds, replacementOptions, subFilter));
+        recipients.push(
+            ...(await getOrganizationRecipients(organizationIds, replacementOptions, subFilter)),
+        );
     }
 
     return recipients;
 }
 
-async function getUserRecipients(ids: { userId: string; payment: PaymentGeneral }[], replacementOptions: ReplacementsOptions): Promise<EmailRecipient[]> {
+async function getUserRecipients(
+    ids: { userId: string; payment: PaymentGeneral }[],
+    replacementOptions: ReplacementsOptions,
+): Promise<EmailRecipient[]> {
     if (ids.length === 0) {
         return [];
     }
 
-    const allUserIds = Formatter.uniqueArray(ids.map(i => i.userId));
+    const allUserIds = Formatter.uniqueArray(ids.map((i) => i.userId));
     const users = await User.getByIDs(...allUserIds);
 
     const results: EmailRecipient[] = [];
 
     for (const { userId, payment } of ids) {
-        const user = users.find(u => u.id === userId);
+        const user = users.find((u) => u.id === userId);
 
         if (user) {
-            results.push(EmailRecipient.create({
-                objectId: payment.id,
-                userId,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                language: user.language,
-                replacements: getEmailReplacementsForPayment(payment, replacementOptions),
-            }));
+            results.push(
+                EmailRecipient.create({
+                    objectId: payment.id,
+                    userId,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    language: user.language,
+                    replacements: getEmailReplacementsForPayment(payment, replacementOptions),
+                }),
+            );
         }
     }
 
     return results;
 }
 
-async function getMembersForOrganizations(organizationIds: string[], filter: StamhoofdFilter | null): Promise<Map<string, Member[]>> {
+async function getMembersForOrganizations(
+    organizationIds: string[],
+    filter: StamhoofdFilter | null,
+): Promise<Map<string, Member[]>> {
     const query = MemberResponsibilityRecord.select()
         .where('organizationId', organizationIds)
         .where('endDate', null)
-        .where(await compileToSQLFilter(filter,
-            memberResponsibilityRecordFilterCompilers));
+        .where(await compileToSQLFilter(filter, memberResponsibilityRecordFilterCompilers));
 
-    const responsibilites = await query
-        .fetch();
+    const responsibilites = await query.fetch();
 
-    const allMemberIds = Formatter.uniqueArray(responsibilites.map(r => r.memberId));
+    const allMemberIds = Formatter.uniqueArray(responsibilites.map((r) => r.memberId));
     const members = await Member.getByIDs(...allMemberIds);
 
     const result = new Map<string, Member[]>();
@@ -265,7 +336,7 @@ async function getMembersForOrganizations(organizationIds: string[], filter: Sta
             continue;
         }
 
-        const member = members.find(m => m.id === responsibility.memberId);
+        const member = members.find((m) => m.id === responsibility.memberId);
 
         if (!member) {
             continue;
@@ -282,16 +353,22 @@ async function getMembersForOrganizations(organizationIds: string[], filter: Sta
     return result;
 }
 
-async function getOrganizationRecipients(ids: { organizationId: string; payment: PaymentGeneral }[], replacementOptions: ReplacementsOptions, subFilter: StamhoofdFilter | null): Promise<EmailRecipient[]> {
+async function getOrganizationRecipients(
+    ids: { organizationId: string; payment: PaymentGeneral }[],
+    replacementOptions: ReplacementsOptions,
+    subFilter: StamhoofdFilter | null,
+): Promise<EmailRecipient[]> {
     if (ids.length === 0) {
         return [];
     }
 
-    const allOrganizationIds = Formatter.uniqueArray(ids.map(i => i.organizationId));
+    const allOrganizationIds = Formatter.uniqueArray(ids.map((i) => i.organizationId));
     const organizationMap = replacementOptions.organizationMap;
 
     // fetch organizations that are not in map yet
-    const fetchedOrganizations = await Organization.getByIDs(...allOrganizationIds.filter(id => !organizationMap.has(id)));
+    const fetchedOrganizations = await Organization.getByIDs(
+        ...allOrganizationIds.filter((id) => !organizationMap.has(id)),
+    );
 
     for (const organization of fetchedOrganizations) {
         organizationMap.set(organization.id, organization);
@@ -308,30 +385,46 @@ async function getOrganizationRecipients(ids: { organizationId: string; payment:
             if (!organization) {
                 continue;
             }
-            const users = admins.filter(a => a.permissions?.forOrganization(organization, platform, a.email, { inheritFromPlatform: false })?.hasFullAccess());
+            const users = admins.filter((a) =>
+                a.permissions
+                    ?.forOrganization(organization, platform, a.email, {
+                        inheritFromPlatform: false,
+                    })
+                    ?.hasFullAccess(),
+            );
 
             if (users.length === 0) {
-                console.warn('No admins found for organization with id ', organizationId, ' while fetching email recipients for payment with id ', payment.id);
+                console.warn(
+                    'No admins found for organization with id ',
+                    organizationId,
+                    ' while fetching email recipients for payment with id ',
+                    payment.id,
+                );
                 continue;
             }
 
             const replacements = getEmailReplacementsForPayment(payment, replacementOptions);
 
             for (const user of users) {
-                results.push(EmailRecipient.create({
-                    objectId: payment.id,
-                    name: organization.name,
-                    userId: user.id,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email,
-                    language: user.language,
-                    replacements,
-                }));
+                results.push(
+                    EmailRecipient.create({
+                        objectId: payment.id,
+                        name: organization.name,
+                        userId: user.id,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        email: user.email,
+                        language: user.language,
+                        replacements,
+                    }),
+                );
             }
         }
     } else {
-        const membersForOrganizations = await getMembersForOrganizations(allOrganizationIds, subFilter);
+        const membersForOrganizations = await getMembersForOrganizations(
+            allOrganizationIds,
+            subFilter,
+        );
 
         for (const { organizationId, payment } of ids) {
             const organization = organizationMap.get(organizationId);
@@ -348,16 +441,18 @@ async function getOrganizationRecipients(ids: { organizationId: string; payment:
 
                 for (const member of members) {
                     for (const email of member.details.getNotificationEmails()) {
-                        results.push(EmailRecipient.create({
-                            objectId: payment.id,
-                            name: organization.name,
-                            memberId: member.id,
-                            firstName: member.details.firstName,
-                            lastName: member.details.lastName,
-                            email,
-                            language: member.details.language,
-                            replacements,
-                        }));
+                        results.push(
+                            EmailRecipient.create({
+                                objectId: payment.id,
+                                name: organization.name,
+                                memberId: member.id,
+                                firstName: member.details.firstName,
+                                lastName: member.details.lastName,
+                                email,
+                                language: member.details.language,
+                                replacements,
+                            }),
+                        );
                     }
                 }
             }
@@ -367,18 +462,21 @@ async function getOrganizationRecipients(ids: { organizationId: string; payment:
     return results;
 }
 
-async function getMemberRecipients(ids: { memberId: string; payment: PaymentGeneral }[], replacementOptions: ReplacementsOptions): Promise<EmailRecipient[]> {
+async function getMemberRecipients(
+    ids: { memberId: string; payment: PaymentGeneral }[],
+    replacementOptions: ReplacementsOptions,
+): Promise<EmailRecipient[]> {
     if (ids.length === 0) {
         return [];
     }
 
-    const allMemberIds = Formatter.uniqueArray(ids.map(i => i.memberId));
+    const allMemberIds = Formatter.uniqueArray(ids.map((i) => i.memberId));
     const members = await Member.getByIdsWithUsers(...allMemberIds);
 
     const results: EmailRecipient[] = [];
 
     for (const { memberId, payment } of ids) {
-        const member = members.find(m => m.id === memberId);
+        const member = members.find((m) => m.id === memberId);
 
         if (member) {
             const emails = member.details.getNotificationEmails();
@@ -405,7 +503,10 @@ async function getMemberRecipients(ids: { memberId: string; payment: PaymentGene
     return results;
 }
 
-async function getOrderRecipients(ids: { orderId: string; payment: PaymentGeneral }[], replacementOptions: ReplacementsOptions): Promise<EmailRecipient[]> {
+async function getOrderRecipients(
+    ids: { orderId: string; payment: PaymentGeneral }[],
+    replacementOptions: ReplacementsOptions,
+): Promise<EmailRecipient[]> {
     if (ids.length === 0) {
         return [];
     }
@@ -419,14 +520,16 @@ async function getOrderRecipients(ids: { orderId: string; payment: PaymentGenera
         if (order) {
             const { firstName, lastName, email } = order.data.customer;
 
-            results.push(EmailRecipient.create({
-                objectId: payment.id,
-                userId: order.userId,
-                firstName,
-                lastName,
-                email,
-                replacements: getEmailReplacementsForPayment(payment, replacementOptions),
-            }));
+            results.push(
+                EmailRecipient.create({
+                    objectId: payment.id,
+                    userId: order.userId,
+                    firstName,
+                    lastName,
+                    email,
+                    replacements: getEmailReplacementsForPayment(payment, replacementOptions),
+                }),
+            );
         }
     }
 

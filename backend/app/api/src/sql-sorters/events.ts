@@ -12,48 +12,60 @@ export const eventSorters: SQLSortDefinitions<Event> = new Map<string, SQLSortDe
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    ['id', {
-        getValue(a) {
-            return a.id;
+    [
+        'id',
+        {
+            getValue(a) {
+                return a.id;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('id'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction,
-            });
+    ],
+    [
+        'name',
+        {
+            getValue(a) {
+                return a.name;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('name'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['name', {
-        getValue(a) {
-            return a.name;
+    ],
+    [
+        'startDate',
+        {
+            getValue(a) {
+                return Formatter.dateTimeIso(a.startDate, 'UTC');
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('startDate'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('name'),
-                direction,
-            });
+    ],
+    [
+        'endDate',
+        {
+            getValue(a) {
+                return Formatter.dateTimeIso(a.endDate, 'UTC');
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('endDate'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['startDate', {
-        getValue(a) {
-            return Formatter.dateTimeIso(a.startDate, 'UTC');
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('startDate'),
-                direction,
-            });
-        },
-    }],
-    ['endDate', {
-        getValue(a) {
-            return Formatter.dateTimeIso(a.endDate, 'UTC');
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('endDate'),
-                direction,
-            });
-        },
-    }],
+    ],
 ]);

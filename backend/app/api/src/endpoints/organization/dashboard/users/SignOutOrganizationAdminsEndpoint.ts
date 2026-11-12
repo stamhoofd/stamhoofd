@@ -33,11 +33,14 @@ export class SignOutOrganizationAdminsEndpoint extends Endpoint<Params, Query, B
         const organization = await Context.setOrganizationScope();
         const { token } = await Context.authenticate();
 
-        if (!await Context.auth.canManageAdmins(organization.id)) {
+        if (!(await Context.auth.canManageAdmins(organization.id))) {
             throw Context.auth.error();
         }
 
-        const count = await AdminSessionService.signOutOrganizationAdmins(organization.id, token.accessToken);
+        const count = await AdminSessionService.signOutOrganizationAdmins(
+            organization.id,
+            token.accessToken,
+        );
 
         return new Response(CountResponse.create({ count }));
     }

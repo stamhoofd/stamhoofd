@@ -43,6 +43,9 @@ export class PermissionsByRole extends AutoEncoder {
     }
 
     roleHasAccess(role: PermissionRole, level: PermissionLevel = PermissionLevel.Read): boolean {
-        return getPermissionLevelNumber(this.getRolePermissionLevel(role)) >= getPermissionLevelNumber(level);
+        return (
+            getPermissionLevelNumber(this.getRolePermissionLevel(role)) >=
+            getPermissionLevelNumber(level)
+        );
     }
 }

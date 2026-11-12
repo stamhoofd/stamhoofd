@@ -12,7 +12,7 @@ export class RecordFactory extends Factory<RecordOptions, RecordSettings> {
             RecordSettings.create({
                 name: TranslatedString.create('Record name ' + Math.floor(Math.random() * 10000)),
                 type: this.options.type,
-                required: this.options.required ?? (this.options.type !== RecordType.Checkbox),
+                required: this.options.required ?? this.options.type !== RecordType.Checkbox,
             }),
         );
     }

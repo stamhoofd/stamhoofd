@@ -16,7 +16,9 @@ describe('ViesService', () => {
      * Returns the nock scope so tests can assert whether it was actually called.
      */
     function mockVies(response: unknown, statusCode = 200) {
-        return nock(VIES_HOST).post(VIES_PATH).reply(statusCode, response as nock.Body);
+        return nock(VIES_HOST)
+            .post(VIES_PATH)
+            .reply(statusCode, response as nock.Body);
     }
 
     describe('checkVATNumber', () => {
@@ -35,7 +37,9 @@ describe('ViesService', () => {
             test('an invalid Dutch VAT number is rejected without a request', async () => {
                 const scope = mockVies({ valid: true });
 
-                await expect(ViesService.checkVATNumber(Country.Netherlands, 'NL123456789B01')).rejects.toThrow(
+                await expect(
+                    ViesService.checkVATNumber(Country.Netherlands, 'NL123456789B01'),
+                ).rejects.toThrow(
                     STExpect.simpleError({ code: 'invalid_field', field: 'VATNumber' }),
                 );
 
@@ -45,7 +49,9 @@ describe('ViesService', () => {
             test('garbage input is rejected without a request', async () => {
                 const scope = mockVies({ valid: true });
 
-                await expect(ViesService.checkVATNumber(Country.Belgium, 'not-a-vat-number')).rejects.toThrow(
+                await expect(
+                    ViesService.checkVATNumber(Country.Belgium, 'not-a-vat-number'),
+                ).rejects.toThrow(
                     STExpect.simpleError({ code: 'invalid_field', field: 'VATNumber' }),
                 );
 
@@ -54,7 +60,11 @@ describe('ViesService', () => {
 
             test('the error message contains the rejected number', async () => {
                 await expect(ViesService.checkVATNumber(Country.Belgium, 'BE0123')).rejects.toThrow(
-                    STExpect.simpleError({ code: 'invalid_field', field: 'VATNumber', message: /Ongeldig BTW-nummer.*BE0123/ }),
+                    STExpect.simpleError({
+                        code: 'invalid_field',
+                        field: 'VATNumber',
+                        message: /Ongeldig BTW-nummer.*BE0123/,
+                    }),
                 );
             });
         });
@@ -63,7 +73,9 @@ describe('ViesService', () => {
             test('returns the formatted number when VIES confirms it is valid', async () => {
                 const scope = mockVies({ valid: true });
 
-                await expect(ViesService.checkVATNumber(Country.Belgium, 'BE0411905847')).resolves.toBe('BE0411905847');
+                await expect(
+                    ViesService.checkVATNumber(Country.Belgium, 'BE0411905847'),
+                ).resolves.toBe('BE0411905847');
 
                 // The number was actually validated against VIES.
                 expect(scope.isDone()).toBe(true);
@@ -72,13 +84,17 @@ describe('ViesService', () => {
             test('validates Dutch numbers against VIES as well', async () => {
                 mockVies({ valid: true });
 
-                await expect(ViesService.checkVATNumber(Country.Netherlands, 'NL301828519B01')).resolves.toBe('NL301828519B01');
+                await expect(
+                    ViesService.checkVATNumber(Country.Netherlands, 'NL301828519B01'),
+                ).resolves.toBe('NL301828519B01');
             });
 
             test('throws an invalid_field error when VIES reports the number as not valid', async () => {
                 mockVies({ valid: false });
 
-                await expect(ViesService.checkVATNumber(Country.Belgium, 'BE0411905847')).rejects.toThrow(
+                await expect(
+                    ViesService.checkVATNumber(Country.Belgium, 'BE0411905847'),
+                ).rejects.toThrow(
                     STExpect.simpleError({
                         code: 'invalid_field',
                         field: 'VATNumber',
@@ -90,7 +106,9 @@ describe('ViesService', () => {
             test('throws service_unavailable when the VIES endpoint errors out', async () => {
                 mockVies({ message: 'Internal Server Error' }, 500);
 
-                await expect(ViesService.checkVATNumber(Country.Belgium, 'BE0411905847')).rejects.toThrow(
+                await expect(
+                    ViesService.checkVATNumber(Country.Belgium, 'BE0411905847'),
+                ).rejects.toThrow(
                     STExpect.simpleError({ code: 'service_unavailable', field: 'VATNumber' }),
                 );
             });
@@ -100,7 +118,9 @@ describe('ViesService', () => {
             TestUtils.setEnvironment('environment', 'development');
             const scope = mockVies({ valid: false });
 
-            await expect(ViesService.checkVATNumber(Country.Netherlands, 'NL301828519B01')).resolves.toBe('NL301828519B01');
+            await expect(
+                ViesService.checkVATNumber(Country.Netherlands, 'NL301828519B01'),
+            ).resolves.toBe('NL301828519B01');
 
             // No request was made, even though VIES would have reported it invalid.
             expect(scope.isDone()).toBe(false);
@@ -121,7 +141,11 @@ describe('ViesService', () => {
             const scope = mockVies({ valid: true });
 
             await expect(ViesService.checkCompanyNumber(Country.Belgium, '123')).rejects.toThrow(
-                STExpect.simpleError({ code: 'invalid_field', field: 'companyNumber', message: /Ongeldig ondernemingsnummer: 123/ }),
+                STExpect.simpleError({
+                    code: 'invalid_field',
+                    field: 'companyNumber',
+                    message: /Ongeldig ondernemingsnummer: 123/,
+                }),
             );
 
             expect(scope.isDone()).toBe(false);
@@ -151,13 +175,14 @@ describe('ViesService', () => {
     });
 
     describe('checkCompany', () => {
-        const belgianAddress = () => Address.create({
-            street: 'Demostraat',
-            number: '12',
-            city: 'Gent',
-            postalCode: '9000',
-            country: Country.Belgium,
-        });
+        const belgianAddress = () =>
+            Address.create({
+                street: 'Demostraat',
+                number: '12',
+                city: 'Gent',
+                postalCode: '9000',
+                country: Country.Belgium,
+            });
 
         test('clears both numbers when the company has no address, without contacting the API', async () => {
             const scope = mockVies({ valid: true });
@@ -296,10 +321,15 @@ describe('ViesService', () => {
                     .query({ participant })
                     .reply(200, {
                         'total-result-count': 1,
-                        'matches': [{
-                            participantID: { scheme: 'iso6523-actorid-upis', value: participant.split('::')[1] },
-                            entities: [{ name: [{ name: entityName }] }],
-                        }],
+                        matches: [
+                            {
+                                participantID: {
+                                    scheme: 'iso6523-actorid-upis',
+                                    value: participant.split('::')[1],
+                                },
+                                entities: [{ name: [{ name: entityName }] }],
+                            },
+                        ],
                     } as nock.Body);
             }
 
@@ -307,22 +337,31 @@ describe('ViesService', () => {
                 return nock(DIRECTORY_HOST)
                     .get(DIRECTORY_PATH)
                     .query({ participant })
-                    .reply(200, { 'total-result-count': 0, 'matches': [] } as nock.Body);
+                    .reply(200, { 'total-result-count': 0, matches: [] } as nock.Body);
             }
 
             // Use a GLN endpoint id for the generic directory/entityName tests: it has no
             // extra constraints, unlike a KBO (0208) id which must match the company number.
-            const companyWithPeppol = () => Company.create({
-                name: 'Demo Company',
-                address: belgianAddress(),
-                customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' }),
-            });
+            const companyWithPeppol = () =>
+                Company.create({
+                    name: 'Demo Company',
+                    address: belgianAddress(),
+                    customPeppolEndpointId: PeppolEndointId.create({
+                        schemeID: '0088',
+                        id: '5412345000013',
+                    }),
+                });
 
             test('validates the id against the directory when it was changed', async () => {
                 const scope = mockDirectoryFound('iso6523-actorid-upis::0088:5412345000013');
 
                 const company = companyWithPeppol();
-                const patch = Company.patch({ customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' }) });
+                const patch = Company.patch({
+                    customPeppolEndpointId: PeppolEndointId.create({
+                        schemeID: '0088',
+                        id: '5412345000013',
+                    }),
+                });
 
                 await expect(ViesService.checkCompany(company, patch)).resolves.toBeUndefined();
                 expect(scope.isDone()).toBe(true);
@@ -334,9 +373,14 @@ describe('ViesService', () => {
                 const scope = mockDirectoryFound('iso6523-actorid-upis::0088:5412345000013');
 
                 const company = companyWithPeppol();
-                company.customPeppolEndpointId = PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' });
+                company.customPeppolEndpointId = PeppolEndointId.create({
+                    schemeID: '0088',
+                    id: '5412345000013',
+                });
 
-                await expect(ViesService.checkCompany(company, null, { forceValidation: true })).resolves.toBeUndefined();
+                await expect(
+                    ViesService.checkCompany(company, null, { forceValidation: true }),
+                ).resolves.toBeUndefined();
                 expect(scope.isDone()).toBe(true);
                 // The registered entity name is stored from the directory.
                 expect(company.customPeppolEndpointId?.entityName).toBe('Directory Name');
@@ -346,7 +390,10 @@ describe('ViesService', () => {
                 const scope = mockDirectoryFound('iso6523-actorid-upis::0088:5412345000013');
 
                 const company = companyWithPeppol();
-                company.customPeppolEndpointId = PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' });
+                company.customPeppolEndpointId = PeppolEndointId.create({
+                    schemeID: '0088',
+                    id: '5412345000013',
+                });
 
                 await expect(ViesService.checkCompany(company)).resolves.toBeUndefined();
                 expect(scope.isDone()).toBe(false);
@@ -359,16 +406,28 @@ describe('ViesService', () => {
                 const company = Company.create({
                     name: 'Demo Company',
                     address: belgianAddress(),
-                    customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013', entityName: 'Client supplied name' }),
+                    customPeppolEndpointId: PeppolEndointId.create({
+                        schemeID: '0088',
+                        id: '5412345000013',
+                        entityName: 'Client supplied name',
+                    }),
                 });
-                const patch = Company.patch({ customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013', entityName: 'Client supplied name' }) });
+                const patch = Company.patch({
+                    customPeppolEndpointId: PeppolEndointId.create({
+                        schemeID: '0088',
+                        id: '5412345000013',
+                        entityName: 'Client supplied name',
+                    }),
+                });
 
                 await ViesService.checkCompany(company, patch);
 
                 // entityName is server-controlled: the client value is discarded.
                 expect(company.customPeppolEndpointId?.entityName).toBe('Directory Name');
                 expect(patch.customPeppolEndpointId).not.toBeNull();
-                expect((patch.customPeppolEndpointId as PeppolEndointId | undefined)?.entityName).toBe('Directory Name');
+                expect(
+                    (patch.customPeppolEndpointId as PeppolEndointId | undefined)?.entityName,
+                ).toBe('Directory Name');
             });
 
             test('does not contact the directory when the id did not change', async () => {
@@ -385,10 +444,18 @@ describe('ViesService', () => {
                 mockDirectoryNotFound('iso6523-actorid-upis::0088:5412345000013');
 
                 const company = companyWithPeppol();
-                const patch = Company.patch({ customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' }) });
+                const patch = Company.patch({
+                    customPeppolEndpointId: PeppolEndointId.create({
+                        schemeID: '0088',
+                        id: '5412345000013',
+                    }),
+                });
 
                 await expect(ViesService.checkCompany(company, patch)).rejects.toThrow(
-                    STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }),
+                    STExpect.simpleError({
+                        code: 'invalid_field',
+                        field: 'customPeppolEndpointId',
+                    }),
                 );
             });
 
@@ -407,13 +474,30 @@ describe('ViesService', () => {
 
                 const company = Company.create({
                     name: 'Demo Company',
-                    address: Address.create({ street: 'Damstraat', number: '1', city: 'Amsterdam', postalCode: '1012', country: Country.Netherlands }),
-                    customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '0411905847' }),
+                    address: Address.create({
+                        street: 'Damstraat',
+                        number: '1',
+                        city: 'Amsterdam',
+                        postalCode: '1012',
+                        country: Country.Netherlands,
+                    }),
+                    customPeppolEndpointId: PeppolEndointId.create({
+                        schemeID: '0208',
+                        id: '0411905847',
+                    }),
                 });
-                const patch = Company.patch({ customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '0411905847' }) });
+                const patch = Company.patch({
+                    customPeppolEndpointId: PeppolEndointId.create({
+                        schemeID: '0208',
+                        id: '0411905847',
+                    }),
+                });
 
                 await expect(ViesService.checkCompany(company, patch)).rejects.toThrow(
-                    STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }),
+                    STExpect.simpleError({
+                        code: 'invalid_field',
+                        field: 'customPeppolEndpointId',
+                    }),
                 );
                 expect(scope.isDone()).toBe(false);
             });
@@ -425,12 +509,23 @@ describe('ViesService', () => {
                     name: 'Demo Company',
                     address: belgianAddress(),
                     companyNumber: '0411905847',
-                    customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '9999999999' }),
+                    customPeppolEndpointId: PeppolEndointId.create({
+                        schemeID: '0208',
+                        id: '9999999999',
+                    }),
                 });
-                const patch = Company.patch({ customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '9999999999' }) });
+                const patch = Company.patch({
+                    customPeppolEndpointId: PeppolEndointId.create({
+                        schemeID: '0208',
+                        id: '9999999999',
+                    }),
+                });
 
                 await expect(ViesService.checkCompany(company, patch)).rejects.toThrow(
-                    STExpect.simpleError({ code: 'invalid_field', field: 'customPeppolEndpointId' }),
+                    STExpect.simpleError({
+                        code: 'invalid_field',
+                        field: 'customPeppolEndpointId',
+                    }),
                 );
                 expect(scope.isDone()).toBe(false);
             });
@@ -443,9 +538,17 @@ describe('ViesService', () => {
                     name: 'Demo Company',
                     address: belgianAddress(),
                     companyNumber: '0411905847',
-                    customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '0411905847' }),
+                    customPeppolEndpointId: PeppolEndointId.create({
+                        schemeID: '0208',
+                        id: '0411905847',
+                    }),
                 });
-                const patch = Company.patch({ customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0208', id: '0411905847' }) });
+                const patch = Company.patch({
+                    customPeppolEndpointId: PeppolEndointId.create({
+                        schemeID: '0208',
+                        id: '0411905847',
+                    }),
+                });
 
                 await expect(ViesService.checkCompany(company, patch)).resolves.toBeUndefined();
                 expect(scope.isDone()).toBe(true);

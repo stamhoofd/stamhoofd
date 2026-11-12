@@ -28,7 +28,10 @@ function slackApiBase(): string {
  * Posts a message with chat.postMessage and returns its `ts` (timestamp id), which can be passed
  * back as `threadTs` to reply in the same thread. Throws when Slack reports a failure.
  */
-export async function postSlackMessage(config: SlackConfig, message: SlackMessage): Promise<string> {
+export async function postSlackMessage(
+    config: SlackConfig,
+    message: SlackMessage,
+): Promise<string> {
     const payload: Record<string, unknown> = { channel: config.channel, text: message.text };
     if (message.threadTs) {
         payload.thread_ts = message.threadTs;
@@ -37,23 +40,23 @@ export async function postSlackMessage(config: SlackConfig, message: SlackMessag
     const response = await fetch(`${slackApiBase()}/chat.postMessage`, {
         method: 'POST',
         headers: {
-            'Authorization': `Bearer ${config.token}`,
+            Authorization: `Bearer ${config.token}`,
             'Content-Type': 'application/json; charset=utf-8',
         },
         body: JSON.stringify(payload),
     });
 
-    const body = await response.json() as { ok?: boolean; ts?: string; error?: string };
+    const body = (await response.json()) as { ok?: boolean; ts?: string; error?: string };
     if (body.ok !== true || !body.ts) {
-        throw new Error(`Slack chat.postMessage failed: ${body.error ?? `HTTP ${response.status}`}`);
+        throw new Error(
+            `Slack chat.postMessage failed: ${body.error ?? `HTTP ${response.status}`}`,
+        );
     }
     return body.ts;
 }
 
 /** Either ready-to-use Slack credentials, or a reason they are unavailable so the caller can skip. */
-export type SlackConfigResolution
-    = | { config: SlackConfig }
-        | { unavailable: string };
+export type SlackConfigResolution = { config: SlackConfig } | { unavailable: string };
 
 /**
  * Resolves the Slack bot token and channel id, preferring environment overrides and falling back to
@@ -61,14 +64,22 @@ export type SlackConfigResolution
  * can still be published without an announcement.
  */
 export async function resolveSlackConfig(): Promise<SlackConfigResolution> {
-    const token = process.env.SLACK_RELEASE_BOT_TOKEN ?? await read1PasswordCli(SLACK_TOKEN_1PASSWORD_REF, { optional: true });
+    const token =
+        process.env.SLACK_RELEASE_BOT_TOKEN ??
+        (await read1PasswordCli(SLACK_TOKEN_1PASSWORD_REF, { optional: true }));
     if (!token) {
-        return { unavailable: `no Slack bot token (set SLACK_RELEASE_BOT_TOKEN or ${SLACK_TOKEN_1PASSWORD_REF})` };
+        return {
+            unavailable: `no Slack bot token (set SLACK_RELEASE_BOT_TOKEN or ${SLACK_TOKEN_1PASSWORD_REF})`,
+        };
     }
 
-    const channel = process.env.SLACK_RELEASE_CHANNEL_ID ?? await read1PasswordCli(SLACK_CHANNEL_1PASSWORD_REF, { optional: true });
+    const channel =
+        process.env.SLACK_RELEASE_CHANNEL_ID ??
+        (await read1PasswordCli(SLACK_CHANNEL_1PASSWORD_REF, { optional: true }));
     if (!channel) {
-        return { unavailable: `no Slack channel id (set SLACK_RELEASE_CHANNEL_ID or ${SLACK_CHANNEL_1PASSWORD_REF})` };
+        return {
+            unavailable: `no Slack channel id (set SLACK_RELEASE_CHANNEL_ID or ${SLACK_CHANNEL_1PASSWORD_REF})`,
+        };
     }
 
     return { config: { token, channel } };

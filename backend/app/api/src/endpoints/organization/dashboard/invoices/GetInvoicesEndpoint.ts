@@ -5,7 +5,12 @@ import { SimpleError } from '@common/errors';
 import { Invoice } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, InvoiceStruct, StamhoofdFilter } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
+import {
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    assertSort,
+    getSortFilter,
+} from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
@@ -46,7 +51,7 @@ export class GetInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw Context.auth.error();
         }
 
-        if (!await Context.auth.canManageFinances(organization.id)) {
+        if (!(await Context.auth.canManageFinances(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -54,9 +59,7 @@ export class GetInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseB
             organizationId: organization.id,
         };
 
-        const query = Invoice
-            .select()
-            .setMaxExecutionTime(10 * 1000);
+        const query = Invoice.select().setMaxExecutionTime(10 * 1000);
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
@@ -215,8 +218,6 @@ export class GetInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
-        return new Response(
-            await GetInvoicesEndpoint.buildData(request.query),
-        );
+        return new Response(await GetInvoicesEndpoint.buildData(request.query));
     }
 }

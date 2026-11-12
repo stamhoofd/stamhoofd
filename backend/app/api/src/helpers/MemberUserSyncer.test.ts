@@ -1,5 +1,12 @@
 import { Database } from '@node/database';
-import { Member, MemberFactory, MemberResponsibilityRecordFactory, MemberUser, User, UserFactory } from '@stamhoofd/models';
+import {
+    Member,
+    MemberFactory,
+    MemberResponsibilityRecordFactory,
+    MemberUser,
+    User,
+    UserFactory,
+} from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { BooleanStatus, MemberDetails, Parent, UserPermissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -31,9 +38,7 @@ describe('Helpers.MemberUserSyncer', () => {
                         firstName: 'Peter',
                         lastName: 'Doe',
                         email: 'peter@example.com',
-                        alternativeEmails: [
-                            'peter@work.com',
-                        ],
+                        alternativeEmails: ['peter@work.com'],
                     }),
                 ],
                 email: 'john@example.com',
@@ -110,9 +115,7 @@ describe('Helpers.MemberUserSyncer', () => {
                         firstName: 'Peter',
                         lastName: 'Doe',
                         email: 'peter@example.com',
-                        alternativeEmails: [
-                            'peter@work.com',
-                        ],
+                        alternativeEmails: ['peter@work.com'],
                     }),
                 ],
                 email: 'john@example.com',
@@ -167,9 +170,7 @@ describe('Helpers.MemberUserSyncer', () => {
                         firstName: 'Peter',
                         lastName: 'Doe',
                         email: 'peter@example.com',
-                        alternativeEmails: [
-                            'peter@work.com',
-                        ],
+                        alternativeEmails: ['peter@work.com'],
                     }),
                 ],
                 email: 'john@example.com',
@@ -253,9 +254,7 @@ describe('Helpers.MemberUserSyncer', () => {
                         firstName: 'Peter',
                         lastName: 'Doe',
                         email: 'peter@example.com',
-                        alternativeEmails: [
-                            'peter@work.com',
-                        ],
+                        alternativeEmails: ['peter@work.com'],
                     }),
                 ],
                 email: 'john@example.com',
@@ -325,7 +324,11 @@ describe('Helpers.MemberUserSyncer', () => {
     });
 
     test('Custom user names are maintained for parents', async () => {
-        const user_p1 = await new UserFactory({ email: 'linda@example.com', firstName: 'Custom', lastName: 'Name' }).create();
+        const user_p1 = await new UserFactory({
+            email: 'linda@example.com',
+            firstName: 'Custom',
+            lastName: 'Name',
+        }).create();
 
         const member = await new MemberFactory({
             details: MemberDetails.create({
@@ -359,7 +362,11 @@ describe('Helpers.MemberUserSyncer', () => {
     });
 
     test('Parent name is cleared if it equals the member name', async () => {
-        const user_p1 = await new UserFactory({ email: 'linda@example.com', firstName: 'John', lastName: 'Doe' }).create();
+        const user_p1 = await new UserFactory({
+            email: 'linda@example.com',
+            firstName: 'John',
+            lastName: 'Doe',
+        }).create();
 
         const member = await new MemberFactory({
             details: MemberDetails.create({
@@ -393,7 +400,11 @@ describe('Helpers.MemberUserSyncer', () => {
     });
 
     test('Parent name is cleared if it equals the member name with caps difference', async () => {
-        const user_p1 = await new UserFactory({ email: 'linda@example.com', firstName: 'john', lastName: 'doe' }).create();
+        const user_p1 = await new UserFactory({
+            email: 'linda@example.com',
+            firstName: 'john',
+            lastName: 'doe',
+        }).create();
 
         const member = await new MemberFactory({
             details: MemberDetails.create({
@@ -427,7 +438,11 @@ describe('Helpers.MemberUserSyncer', () => {
     });
 
     test('Existing parent user can have the same name as the member', async () => {
-        const user_p1 = await new UserFactory({ email: 'linda@example.com', firstName: 'John', lastName: 'Doe' }).create();
+        const user_p1 = await new UserFactory({
+            email: 'linda@example.com',
+            firstName: 'John',
+            lastName: 'Doe',
+        }).create();
 
         const member = await new MemberFactory({
             details: MemberDetails.create({
@@ -508,9 +523,7 @@ describe('Helpers.MemberUserSyncer', () => {
                             firstName: 'Peter',
                             lastName: 'Doe',
                             email: 'peter@example.com',
-                            alternativeEmails: [
-                                'peter@work.com',
-                            ],
+                            alternativeEmails: ['peter@work.com'],
                         }),
                     ],
                     email: 'john@example.com',
@@ -583,7 +596,7 @@ describe('Helpers.MemberUserSyncer', () => {
             member.details.unverifiedEmails = [];
 
             // Save member
-            if (!await member.save()) {
+            if (!(await member.save())) {
                 throw new Error('Failed to save member');
             }
 
@@ -627,9 +640,7 @@ describe('Helpers.MemberUserSyncer', () => {
                             firstName: 'Peter',
                             lastName: 'Doe',
                             email: 'peter@example.com',
-                            alternativeEmails: [
-                                'peter@work.com',
-                            ],
+                            alternativeEmails: ['peter@work.com'],
                         }),
                     ],
                     email: 'john@example.com',
@@ -709,9 +720,7 @@ describe('Helpers.MemberUserSyncer', () => {
                             firstName: 'Peter',
                             lastName: 'Doe',
                             email: 'peter@example.com',
-                            alternativeEmails: [
-                                'peter@work.com',
-                            ],
+                            alternativeEmails: ['peter@work.com'],
                         }),
                     ],
                     email: 'john@example.com',
@@ -781,7 +790,9 @@ describe('Helpers.MemberUserSyncer', () => {
             const user_p1 = await new UserFactory({ email: 'linda@example.com' }).create();
             const user_p2a = await new UserFactory({ email: 'peter@example.com' }).create();
             const user_p2b = await new UserFactory({ email: 'peter@work.com' }).create();
-            const user_unverified = await new UserFactory({ email: 'untitled@example.com' }).create();
+            const user_unverified = await new UserFactory({
+                email: 'untitled@example.com',
+            }).create();
 
             const member = await new MemberFactory({
                 details: MemberDetails.create({
@@ -798,9 +809,7 @@ describe('Helpers.MemberUserSyncer', () => {
                             firstName: 'Peter',
                             lastName: 'Doe',
                             email: 'peter@example.com',
-                            alternativeEmails: [
-                                'peter@work.com',
-                            ],
+                            alternativeEmails: ['peter@work.com'],
                         }),
                     ],
                     email: 'john@example.com',
@@ -961,9 +970,7 @@ describe('Helpers.MemberUserSyncer', () => {
                             firstName: 'Peter',
                             lastName: 'Doe',
                             email: 'peter@example.com',
-                            alternativeEmails: [
-                                'peter@work.com',
-                            ],
+                            alternativeEmails: ['peter@work.com'],
                         }),
                     ],
                     email: 'john@example.com',

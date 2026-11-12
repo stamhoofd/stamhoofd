@@ -10,7 +10,12 @@ type Query = CountFilteredRequest;
 type Body = undefined;
 type ResponseBody = CountResponse;
 
-export class GetPlatformMembershipsCountEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetPlatformMembershipsCountEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     queryDecoder = CountFilteredRequest as Decoder<CountFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -32,8 +37,7 @@ export class GetPlatformMembershipsCountEndpoint extends Endpoint<Params, Query,
 
         const query = await GetPlatformMembershipsEndpoint.buildQuery(request.query);
 
-        const count = await query
-            .count();
+        const count = await query.count();
 
         return new Response(
             CountResponse.create({

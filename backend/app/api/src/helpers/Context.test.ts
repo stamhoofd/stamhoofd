@@ -7,7 +7,9 @@ import { Context, ContextInstance } from './Context.js';
 
 describe('Context', () => {
     beforeEach(() => {
-        TestUtils.setEnvironment('locales', { [Country.Belgium]: [Language.Dutch, Language.French, Language.English] });
+        TestUtils.setEnvironment('locales', {
+            [Country.Belgium]: [Language.Dutch, Language.French, Language.English],
+        });
     });
 
     test('i18n uses the user language when the organization scope is set before the user', async () => {
@@ -43,7 +45,11 @@ describe('Context', () => {
         user.language = Language.French;
         await user.save();
 
-        const request = Request.get({ path: '/', host: organization.getApiHost(), headers: { 'x-locale': 'en-BE' } });
+        const request = Request.get({
+            path: '/',
+            host: organization.getApiHost(),
+            headers: { 'x-locale': 'en-BE' },
+        });
         await ContextInstance.start(request, async () => {
             await Context.setManualOrganizationScope(organization);
             await Context.insecurelyAuthenticateAs(user);

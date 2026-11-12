@@ -18,29 +18,41 @@ export const balanceItemPaymentRootFilterCompilers: SQLFilterDefinitions = new M
     // id, price and the balance item filters
     ...balanceItemPaymentsCompilers,
 
-    ['organizationId', createColumnFilter({
-        expression: SQL.column('balance_item_payments', 'organizationId'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
+    [
+        'organizationId',
+        createColumnFilter({
+            expression: SQL.column('balance_item_payments', 'organizationId'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
 
-    ['paymentId', createColumnFilter({
-        expression: SQL.column('balance_item_payments', 'paymentId'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
+    [
+        'paymentId',
+        createColumnFilter({
+            expression: SQL.column('balance_item_payments', 'paymentId'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
 
-    ['balanceItemId', createColumnFilter({
-        expression: SQL.column('balance_item_payments', 'balanceItemId'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
+    [
+        'balanceItemId',
+        createColumnFilter({
+            expression: SQL.column('balance_item_payments', 'balanceItemId'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
 
-    ['createdAt', createColumnFilter({
-        expression: SQL.column('balance_item_payments', 'createdAt'),
-        type: SQLValueType.Datetime,
-        nullable: false,
-    })],
+    [
+        'createdAt',
+        createColumnFilter({
+            expression: SQL.column('balance_item_payments', 'createdAt'),
+            type: SQLValueType.Datetime,
+            nullable: false,
+        }),
+    ],
 
     // The same compilers the payments use, which are qualified with the payments table so they keep
     // working here: this query joins it instead of selecting from it

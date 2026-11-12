@@ -1,5 +1,12 @@
 /** JSON-compatible metadata carried by an error. */
-export type ErrorValue = string | number | boolean | null | undefined | ErrorValue[] | { [key: string]: ErrorValue };
+export type ErrorValue =
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | ErrorValue[]
+    | { [key: string]: ErrorValue };
 
 /** The decoding operations errors need, independent of the encoding implementation. */
 export interface ErrorData {

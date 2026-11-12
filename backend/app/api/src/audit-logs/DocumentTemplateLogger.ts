@@ -12,11 +12,14 @@ export const DocumentTemplateLogger = new ModelLogger(DocumentTemplate, {
 
     createReplacements(model) {
         return new Map([
-            ['d', AuditLogReplacement.create({
-                id: model.id,
-                value: model.settings.name,
-                type: AuditLogReplacementType.DocumentTemplate,
-            })],
+            [
+                'd',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.settings.name,
+                    type: AuditLogReplacementType.DocumentTemplate,
+                }),
+            ],
         ]);
     },
 });

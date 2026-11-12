@@ -34,9 +34,11 @@ export class GetUserDocumentsEndpoint extends Endpoint<Params, Query, Body, Resp
         const { user } = await Context.authenticate();
 
         const members = await Member.getMembersForUser(Context.impersonatedUserOrUser);
-        let templates = organization ? await DocumentTemplate.where({ status: 'Published', organizationId: organization.id }) : null;
-        const memberIds = members.map(m => m.id);
-        const templateIds = templates ? templates.map(t => t.id) : null;
+        let templates = organization
+            ? await DocumentTemplate.where({ status: 'Published', organizationId: organization.id })
+            : null;
+        const memberIds = members.map((m) => m.id);
+        const templateIds = templates ? templates.map((t) => t.id) : null;
 
         if (memberIds.length == 0 || (templateIds !== null && templateIds.length == 0)) {
             return new Response([]);
@@ -64,12 +66,18 @@ export class GetUserDocumentsEndpoint extends Endpoint<Params, Query, Body, Resp
         const documents = await Document.where(w);
 
         if (!templates) {
-            templates = documents.length > 0 ? await DocumentTemplate.getByIDs(...documents.map(d => d.templateId)) : [];
+            templates =
+                documents.length > 0
+                    ? await DocumentTemplate.getByIDs(...documents.map((d) => d.templateId))
+                    : [];
         }
 
         const filteredDocuments = documents.filter((document) => {
-            const template = templates.find(t => t.id == document.templateId);
-            if (!template || (!template.updatesEnabled && document.status === DocumentStatus.MissingData)) {
+            const template = templates.find((t) => t.id == document.templateId);
+            if (
+                !template ||
+                (!template.updatesEnabled && document.status === DocumentStatus.MissingData)
+            ) {
                 return false;
             }
             return true;
@@ -77,6 +85,6 @@ export class GetUserDocumentsEndpoint extends Endpoint<Params, Query, Body, Resp
 
         filteredDocuments.sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
 
-        return new Response(filteredDocuments.map(d => d.getStructure()));
+        return new Response(filteredDocuments.map((d) => d.getStructure()));
     }
 }

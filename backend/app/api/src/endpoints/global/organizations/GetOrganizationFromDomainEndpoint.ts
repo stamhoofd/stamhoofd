@@ -40,11 +40,16 @@ export class GetOrganizationFromDomainEndpoint extends Endpoint<Params, Query, B
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         // Clean up google translate domains -> make sure we can translate register pages
-        request.query.domain = GoogleTranslateHelper.getDomainFromTranslateDomain(request.query.domain);
+        request.query.domain = GoogleTranslateHelper.getDomainFromTranslateDomain(
+            request.query.domain,
+        );
 
         for (const domain of this.registrationDomains) {
             if (request.query.domain.endsWith('.' + domain)) {
-                const strippped = request.query.domain.substr(0, request.query.domain.length - ('.' + domain).length);
+                const strippped = request.query.domain.substr(
+                    0,
+                    request.query.domain.length - ('.' + domain).length,
+                );
                 if (strippped.includes('.')) {
                     throw new SimpleError({
                         code: 'invalid_domain',

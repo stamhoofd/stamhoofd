@@ -15,7 +15,9 @@ describe('ux helpers', () => {
     });
 
     it('formats bordered tables with a title', () => {
-        const output = formatTable(['Service', 'Status'], [['MySQL', 'ready']], { title: 'Shared services' });
+        const output = formatTable(['Service', 'Status'], [['MySQL', 'ready']], {
+            title: 'Shared services',
+        });
 
         expect(output).toContain('Shared services');
         expect(output).toContain('┌');
@@ -31,7 +33,14 @@ describe('ux helpers', () => {
         try {
             const output = formatTable(
                 ['Service', 'Status', 'Access', 'Login'],
-                [['Caddy', formatStatusLabel(CliStatus.Running), 'https://dashboard.very-long-development-domain.stamhoofd', 'username / password']],
+                [
+                    [
+                        'Caddy',
+                        formatStatusLabel(CliStatus.Running),
+                        'https://dashboard.very-long-development-domain.stamhoofd',
+                        'username / password',
+                    ],
+                ],
                 { title: 'Checking Stamhoofd local development setup with a very long title' },
             );
 
@@ -39,7 +48,10 @@ describe('ux helpers', () => {
                 expect(stripVTControlCharacters(line).length).toBeLessThanOrEqual(47);
             }
         } finally {
-            Object.defineProperty(process.stdout, 'columns', { configurable: true, value: originalColumns });
+            Object.defineProperty(process.stdout, 'columns', {
+                configurable: true,
+                value: originalColumns,
+            });
         }
     });
 
@@ -52,10 +64,14 @@ describe('ux helpers', () => {
             return true;
         });
         try {
-            await step('Scan translation keys', async (update) => {
-                update('Scanning files 25/100');
-                return 4;
-            }, { successMessage: count => `Removed ${count} entries` });
+            await step(
+                'Scan translation keys',
+                async (update) => {
+                    update('Scanning files 25/100');
+                    return 4;
+                },
+                { successMessage: (count) => `Removed ${count} entries` },
+            );
             const output = writes.join('');
             expect(stripVTControlCharacters(output)).toContain('Scan translation keys');
             expect(stripVTControlCharacters(output)).toContain('Removed 4 entries');
@@ -141,12 +157,17 @@ describe('ux helpers', () => {
 
             process.stdout.write('podman rm -f stamhoofd-mysql\n');
 
-            expect(writes.slice(beforeLog).join('')).toContain('\x1b[5A\x1b[0Jpodman rm -f stamhoofd-mysql');
+            expect(writes.slice(beforeLog).join('')).toContain(
+                '\x1b[5A\x1b[0Jpodman rm -f stamhoofd-mysql',
+            );
             row.update(['Service', 'running']);
             await table.wait();
             expect(writes.join('')).toContain('podman rm -f stamhoofd-mysql');
         } finally {
-            Object.defineProperty(process.stdout, 'isTTY', { configurable: true, value: originalIsTTY });
+            Object.defineProperty(process.stdout, 'isTTY', {
+                configurable: true,
+                value: originalIsTTY,
+            });
         }
     });
 });

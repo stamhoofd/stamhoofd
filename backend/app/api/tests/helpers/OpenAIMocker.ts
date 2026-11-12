@@ -37,8 +37,11 @@ export class OpenAIMocker {
     }
 
     static defaultResponder(request: OpenAIChatRequest): unknown {
-        const userMessage = request.messages.find(m => m.role === 'user');
-        const body = JSON.parse(userMessage?.content ?? '{}') as { targetLanguage: string; inputs: Record<string, unknown> };
+        const userMessage = request.messages.find((m) => m.role === 'user');
+        const body = JSON.parse(userMessage?.content ?? '{}') as {
+            targetLanguage: string;
+            inputs: Record<string, unknown>;
+        };
         const translations: Record<string, unknown> = {};
         for (const [key, value] of Object.entries(body.inputs)) {
             translations[key] = OpenAIMocker.translateValue(value, body.targetLanguage);
@@ -51,12 +54,17 @@ export class OpenAIMocker {
             return `[${language}] ${value}`;
         }
         if (Array.isArray(value)) {
-            return value.map(v => this.translateValue(v, language));
+            return value.map((v) => this.translateValue(v, language));
         }
         if (typeof value === 'object' && value !== null) {
             const copy: Record<string, unknown> = {};
             for (const [key, v] of Object.entries(value)) {
-                copy[key] = key === 'text' ? this.translateValue(v, language) : (typeof v === 'object' ? this.translateValue(v, language) : v);
+                copy[key] =
+                    key === 'text'
+                        ? this.translateValue(v, language)
+                        : typeof v === 'object'
+                          ? this.translateValue(v, language)
+                          : v;
             }
             return copy;
         }
@@ -72,21 +80,34 @@ export class OpenAIMocker {
                     return [500, { error: { message: 'Forced failure' } }];
                 }
 
-                const request = (typeof requestBody === 'string' ? JSON.parse(requestBody) : requestBody) as OpenAIChatRequest;
+                const request = (
+                    typeof requestBody === 'string' ? JSON.parse(requestBody) : requestBody
+                ) as OpenAIChatRequest;
                 this.requests.push(request);
 
                 const output = (this.#responder ?? OpenAIMocker.defaultResponder)(request);
-                return [200, {
-                    id: 'chatcmpl-test',
-                    object: 'chat.completion',
-                    created: 0,
-                    model: request.model,
-                    choices: [{
-                        index: 0,
-                        message: { role: 'assistant', content: typeof output === 'string' ? output : JSON.stringify(output) },
-                        finish_reason: 'stop',
-                    }],
-                }];
+                return [
+                    200,
+                    {
+                        id: 'chatcmpl-test',
+                        object: 'chat.completion',
+                        created: 0,
+                        model: request.model,
+                        choices: [
+                            {
+                                index: 0,
+                                message: {
+                                    role: 'assistant',
+                                    content:
+                                        typeof output === 'string'
+                                            ? output
+                                            : JSON.stringify(output),
+                                },
+                                finish_reason: 'stop',
+                            },
+                        ],
+                    },
+                ];
             });
     }
 

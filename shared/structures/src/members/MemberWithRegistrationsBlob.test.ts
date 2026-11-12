@@ -45,18 +45,22 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
             details: MemberDetails.create({
                 lastExternalSync,
             }),
-            registrations: [Registration.create({
-                group,
-                groupPrice: GroupPrice.create({}),
-                registeredAt,
-                deactivatedAt: null,
-            })],
+            registrations: [
+                Registration.create({
+                    group,
+                    groupPrice: GroupPrice.create({}),
+                    registeredAt,
+                    deactivatedAt: null,
+                }),
+            ],
         });
     }
 
     test('returns never without last external sync', () => {
         const member = createMember({ lastExternalSync: null });
-        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Never);
+        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(
+            SGVSyncStatus.Never,
+        );
     });
 
     test('returns outdated when a current registration is newer than the last sync', () => {
@@ -65,7 +69,9 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
             registeredAt: new Date(now.getTime() - 1000 * 60),
         });
 
-        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Outdated);
+        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(
+            SGVSyncStatus.Outdated,
+        );
     });
 
     test('returns outdated when the last sync is older than nine months', () => {
@@ -76,7 +82,9 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
             registeredAt: new Date(lastExternalSync.getTime() - 1000),
         });
 
-        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Outdated);
+        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(
+            SGVSyncStatus.Outdated,
+        );
     });
 
     test('returns ok when the member update time is close to the last sync', () => {
@@ -86,7 +94,9 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
             updatedAt: new Date(lastExternalSync.getTime() + 1000),
         });
 
-        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Ok);
+        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(
+            SGVSyncStatus.Ok,
+        );
     });
 
     test('returns changed when member details changed after the last sync', () => {
@@ -96,7 +106,9 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
             updatedAt: new Date(lastExternalSync.getTime() + 1000 * 60),
         });
 
-        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Changed);
+        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(
+            SGVSyncStatus.Changed,
+        );
     });
 
     test('ignores registrations from periods other than the organization default period', () => {
@@ -106,8 +118,12 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
             group: createGroup(GroupType.Membership, 'other-period'),
         });
 
-        expect(member.getSGVSyncStatus({ now, organization: createOrganization('period-id') })).toBe(SGVSyncStatus.Ok);
-        expect(member.getSGVSyncStatus({ now, organization: createOrganization('other-period') })).toBe(SGVSyncStatus.Outdated);
+        expect(
+            member.getSGVSyncStatus({ now, organization: createOrganization('period-id') }),
+        ).toBe(SGVSyncStatus.Ok);
+        expect(
+            member.getSGVSyncStatus({ now, organization: createOrganization('other-period') }),
+        ).toBe(SGVSyncStatus.Outdated);
     });
 
     test('returns ok when registrations only exist in another period', () => {
@@ -116,7 +132,9 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
             group: createGroup(GroupType.Membership, 'other-period'),
         });
 
-        expect(member.getSGVSyncStatus({ now, organization: createOrganization('period-id') })).toBe(SGVSyncStatus.Ok);
+        expect(
+            member.getSGVSyncStatus({ now, organization: createOrganization('period-id') }),
+        ).toBe(SGVSyncStatus.Ok);
     });
 
     test('returns ok for members that are only on a waiting list or registered for an event', () => {
@@ -126,7 +144,9 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
                 group: createGroup(type),
             });
 
-            expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Ok);
+            expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(
+                SGVSyncStatus.Ok,
+            );
         }
     });
 
@@ -139,7 +159,9 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
         });
         member.registrations[0].deactivatedAt = now;
 
-        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Ok);
+        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(
+            SGVSyncStatus.Ok,
+        );
     });
 
     test('does not mark registrations at the exact sync time as outdated', () => {
@@ -150,21 +172,27 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
             registeredAt: lastExternalSync,
         });
 
-        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Ok);
+        expect(member.getSGVSyncStatus({ now, organization: createOrganization() })).toBe(
+            SGVSyncStatus.Ok,
+        );
     });
 
     test('uses the update tolerance around the last sync time', () => {
         const lastExternalSync = new Date(now.getTime() - 1000 * 60);
 
-        expect(createMember({
-            lastExternalSync,
-            updatedAt: new Date(lastExternalSync.getTime() + 1000 * 5 - 1),
-        }).getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Ok);
+        expect(
+            createMember({
+                lastExternalSync,
+                updatedAt: new Date(lastExternalSync.getTime() + 1000 * 5 - 1),
+            }).getSGVSyncStatus({ now, organization: createOrganization() }),
+        ).toBe(SGVSyncStatus.Ok);
 
-        expect(createMember({
-            lastExternalSync,
-            updatedAt: new Date(lastExternalSync.getTime() + 1000 * 5),
-        }).getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Changed);
+        expect(
+            createMember({
+                lastExternalSync,
+                updatedAt: new Date(lastExternalSync.getTime() + 1000 * 5),
+            }).getSGVSyncStatus({ now, organization: createOrganization() }),
+        ).toBe(SGVSyncStatus.Changed);
     });
 
     test('marks syncs older than nine months as outdated', () => {
@@ -172,17 +200,21 @@ describe('MemberWithRegistrationsBlob SGV sync helpers', () => {
         const justRecentEnough = new Date(now.getTime() - nineMonths);
         const tooOld = new Date(now.getTime() - nineMonths - 1);
 
-        expect(createMember({
-            lastExternalSync: justRecentEnough,
-            updatedAt: justRecentEnough,
-            registeredAt: new Date(justRecentEnough.getTime() - 1000),
-        }).getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Ok);
+        expect(
+            createMember({
+                lastExternalSync: justRecentEnough,
+                updatedAt: justRecentEnough,
+                registeredAt: new Date(justRecentEnough.getTime() - 1000),
+            }).getSGVSyncStatus({ now, organization: createOrganization() }),
+        ).toBe(SGVSyncStatus.Ok);
 
-        expect(createMember({
-            lastExternalSync: tooOld,
-            updatedAt: tooOld,
-            registeredAt: new Date(tooOld.getTime() - 1000),
-        }).getSGVSyncStatus({ now, organization: createOrganization() })).toBe(SGVSyncStatus.Outdated);
+        expect(
+            createMember({
+                lastExternalSync: tooOld,
+                updatedAt: tooOld,
+                registeredAt: new Date(tooOld.getTime() - 1000),
+            }).getSGVSyncStatus({ now, organization: createOrganization() }),
+        ).toBe(SGVSyncStatus.Outdated);
     });
 });
 
@@ -199,32 +231,39 @@ describe('MemberWithRegistrationsBlob.getEmailRecipients', () => {
             ],
             unverifiedEmails: ['unverified@example.com'],
         }),
-        users: [
-            User.create({ email: 'ann@example.com', language: Language.French }),
-        ],
+        users: [User.create({ email: 'ann@example.com', language: Language.French })],
     });
 
     test('uses the language of the matching user, falling back to the member language', () => {
         const memberRecipients = member.getEmailRecipients(['member']);
-        expect(memberRecipients.map(r => [r.email, r.language])).toEqual([
+        expect(memberRecipients.map((r) => [r.email, r.language])).toEqual([
             ['jan@example.com', Language.Dutch],
             [null, Language.Dutch],
         ]);
 
         const parentRecipients = member.getEmailRecipients(['parents']);
-        expect(parentRecipients.map(r => [r.email, r.language])).toEqual([
+        expect(parentRecipients.map((r) => [r.email, r.language])).toEqual([
             ['ann@example.com', Language.French],
             ['bob@example.com', Language.Dutch],
         ]);
 
-        expect(member.getEmailRecipients(['unverified']).map(r => r.language)).toEqual([Language.Dutch]);
+        expect(member.getEmailRecipients(['unverified']).map((r) => r.language)).toEqual([
+            Language.Dutch,
+        ]);
     });
 
     test('leaves the language empty when neither the member nor the user has one', () => {
         const withoutLanguage = MemberWithRegistrationsBlob.create({
-            details: MemberDetails.create({ firstName: 'Jan', lastName: 'Peeters', email: 'jan@example.com' }),
+            details: MemberDetails.create({
+                firstName: 'Jan',
+                lastName: 'Peeters',
+                email: 'jan@example.com',
+            }),
             users: [User.create({ email: 'jan@example.com' })],
         });
-        expect(withoutLanguage.getEmailRecipients(['member']).map(r => r.language)).toEqual([null, null]);
+        expect(withoutLanguage.getEmailRecipients(['member']).map((r) => r.language)).toEqual([
+            null,
+            null,
+        ]);
     });
 });

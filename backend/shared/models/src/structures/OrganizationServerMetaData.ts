@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { OpenIDClientConfiguration } from '@stamhoofd/structures';
 
 export class DripEmail extends AutoEncoder {
@@ -55,7 +64,7 @@ export class PaymentMandateChargebacks extends AutoEncoder {
     add(date: Date) {
         const minimum = new Date(date.getTime() - PaymentMandateChargebacks.maxAge);
         this.dates = [...this.dates, date]
-            .filter(d => d >= minimum)
+            .filter((d) => d >= minimum)
             .sort((a, b) => b.getTime() - a.getTime())
             .slice(0, PaymentMandateChargebacks.maxDates);
     }
@@ -119,18 +128,28 @@ export class OrganizationServerMetaData extends AutoEncoder {
     /**
      * List of specific emails that were send to this organization
      */
-    @field({ decoder: new MapDecoder(StringDecoder, DripEmail), optional: true, version: 230, upgrade: () => {
-        const m = new Map<string, DripEmail>();
-        const identifier = 'OrganizationDripWelcome';
-        m.set(identifier, DripEmail.create({ id: identifier }));
-        return m;
-    } })
-    @field({ decoder: new MapDecoder(StringDecoder, DripEmail), optional: true, version: 232, upgrade: () => {
-        const m = new Map<string, DripEmail>();
-        const identifier = 'OrganizationDripWelcome';
-        m.set(identifier, DripEmail.create({ id: identifier }));
-        return m;
-    } })
+    @field({
+        decoder: new MapDecoder(StringDecoder, DripEmail),
+        optional: true,
+        version: 230,
+        upgrade: () => {
+            const m = new Map<string, DripEmail>();
+            const identifier = 'OrganizationDripWelcome';
+            m.set(identifier, DripEmail.create({ id: identifier }));
+            return m;
+        },
+    })
+    @field({
+        decoder: new MapDecoder(StringDecoder, DripEmail),
+        optional: true,
+        version: 232,
+        upgrade: () => {
+            const m = new Map<string, DripEmail>();
+            const identifier = 'OrganizationDripWelcome';
+            m.set(identifier, DripEmail.create({ id: identifier }));
+            return m;
+        },
+    })
     dripEmailList: Map<string, DripEmail> = new Map();
 
     markDNSValid() {
@@ -150,7 +169,9 @@ export class OrganizationServerMetaData extends AutoEncoder {
         // Remove all dates longer than 14 days ago, or more than 6 events
         const d14 = new Date(Date.now() - 1000 * 60 * 60 * 24 * 14);
         const maxLength = 6;
-        this.lastInvalidDNSDates = [...(this.lastInvalidDNSDates ?? []), new Date()].filter(d => d > d14).slice(0, maxLength);
+        this.lastInvalidDNSDates = [...(this.lastInvalidDNSDates ?? []), new Date()]
+            .filter((d) => d > d14)
+            .slice(0, maxLength);
         this.isDNSUnstable = this.recalculateIsDNSUnstable();
     }
 
@@ -159,7 +180,10 @@ export class OrganizationServerMetaData extends AutoEncoder {
      */
     recalculateIsDNSUnstable() {
         const d14 = new Date(Date.now() - 1000 * 60 * 60 * 24 * 14);
-        return (this.lastInvalidDNSDates ?? []).filter(d => d > d14).length > (this.isDNSUnstable ? 0 : 4);
+        return (
+            (this.lastInvalidDNSDates ?? []).filter((d) => d > d14).length >
+            (this.isDNSUnstable ? 0 : 4)
+        );
     }
 
     addEmail(identifier: string) {

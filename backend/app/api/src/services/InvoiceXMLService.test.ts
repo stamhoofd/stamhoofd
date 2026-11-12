@@ -1,5 +1,17 @@
-import { BalanceItemFactory, Invoice, InvoicedBalanceItem, OrganizationFactory } from '@stamhoofd/models';
-import { Address, Company, File, PaymentCustomer, PeppolEndointId, VATSubtotal } from '@stamhoofd/structures';
+import {
+    BalanceItemFactory,
+    Invoice,
+    InvoicedBalanceItem,
+    OrganizationFactory,
+} from '@stamhoofd/models';
+import {
+    Address,
+    Company,
+    File,
+    PaymentCustomer,
+    PeppolEndointId,
+    VATSubtotal,
+} from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { v4 as uuidv4 } from 'uuid';
 import { vi } from 'vitest';
@@ -16,34 +28,46 @@ describe('InvoiceXMlService', () => {
         vi.restoreAllMocks();
     });
 
-    const belgianAddress = () => Address.create({
-        street: 'Teststraat',
-        number: '1',
-        city: 'Gent',
-        postalCode: '9000',
-        country: Country.Belgium,
-    });
+    const belgianAddress = () =>
+        Address.create({
+            street: 'Teststraat',
+            number: '1',
+            city: 'Gent',
+            postalCode: '9000',
+            country: Country.Belgium,
+        });
 
-    const seller = () => Company.create({
-        name: 'Seller BV',
-        VATNumber: 'BE0411905847',
-        companyNumber: '0411905847',
-        address: belgianAddress(),
-        administrationEmail: 'billing@seller.be',
-    });
+    const seller = () =>
+        Company.create({
+            name: 'Seller BV',
+            VATNumber: 'BE0411905847',
+            companyNumber: '0411905847',
+            address: belgianAddress(),
+            administrationEmail: 'billing@seller.be',
+        });
 
     /**
      * Builds and persists a minimal, valid invoice for the given customer company, with one
      * invoiced line, so that InvoiceXMlService.buildXml can generate the UBL.
      */
-    const buildInvoiceFor = async (company: Company, options?: { comments?: string | null; isReceipt?: boolean }) => {
+    const buildInvoiceFor = async (
+        company: Company,
+        options?: { comments?: string | null; isReceipt?: boolean },
+    ) => {
         const organization = await new OrganizationFactory({}).create();
 
         const invoice = new Invoice();
         invoice.organizationId = organization.id;
         invoice.number = 'F2026-001';
         invoice.invoicedAt = new Date(2026, 0, 15);
-        invoice.pdf = new File({ id: uuidv4(), server: 'https://files.example.com', path: 'test.pdf', size: 100, name: 'invoice', contentType: 'application/pdf' });
+        invoice.pdf = new File({
+            id: uuidv4(),
+            server: 'https://files.example.com',
+            path: 'test.pdf',
+            size: 100,
+            name: 'invoice',
+            contentType: 'application/pdf',
+        });
         invoice.customer = PaymentCustomer.create({ company });
         invoice.seller = seller();
         invoice.comments = options?.comments ?? null;
@@ -52,10 +76,16 @@ describe('InvoiceXMlService', () => {
         invoice.totalWithoutVAT = 10_00;
         invoice.VATTotalAmount = 2_10;
         invoice.payableRoundingAmount = 0;
-        invoice.VATTotal = [VATSubtotal.create({ VATPercentage: 21, taxablePrice: 10_00, VAT: 2_10 })];
+        invoice.VATTotal = [
+            VATSubtotal.create({ VATPercentage: 21, taxablePrice: 10_00, VAT: 2_10 }),
+        ];
         await invoice.save();
 
-        const balanceItem = await new BalanceItemFactory({ organizationId: organization.id, amount: 1, unitPrice: 10_00 }).create();
+        const balanceItem = await new BalanceItemFactory({
+            organizationId: organization.id,
+            amount: 1,
+            unitPrice: 10_00,
+        }).create();
 
         const item = new InvoicedBalanceItem();
         item.organizationId = organization.id;
@@ -116,7 +146,10 @@ describe('InvoiceXMlService', () => {
             VATNumber: 'BE0123456749',
             companyNumber: '0123456749',
             address: belgianAddress(),
-            customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' }),
+            customPeppolEndpointId: PeppolEndointId.create({
+                schemeID: '0088',
+                id: '5412345000013',
+            }),
         });
         const invoice = await buildInvoiceFor(company);
 
@@ -152,13 +185,18 @@ describe('InvoiceXMlService', () => {
             VATNumber: null,
             companyNumber: null,
             address: belgianAddress(),
-            customPeppolEndpointId: PeppolEndointId.create({ schemeID: '0088', id: '5412345000013' }),
+            customPeppolEndpointId: PeppolEndointId.create({
+                schemeID: '0088',
+                id: '5412345000013',
+            }),
         });
         const invoice = await buildInvoiceFor(company);
 
         // The legal entity company id (peppolCompanyId) requires a VAT or company number,
         // so a custom endpoint id alone is not enough.
-        await expect(InvoiceXMlService.buildXml(invoice)).rejects.toThrow('Missing customer peppol id');
+        await expect(InvoiceXMlService.buildXml(invoice)).rejects.toThrow(
+            'Missing customer peppol id',
+        );
     });
 
     test('writes the comments as a note and escapes them', async () => {
@@ -172,7 +210,9 @@ describe('InvoiceXMlService', () => {
 
         const xml = await InvoiceXMlService.buildXml(invoice);
 
-        expect(xml).toContain('<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode><cbc:Note>Correctie &lt;test&gt; &amp; co</cbc:Note>');
+        expect(xml).toContain(
+            '<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode><cbc:Note>Correctie &lt;test&gt; &amp; co</cbc:Note>',
+        );
     });
 
     test('does not write a note without comments', async () => {
@@ -197,7 +237,9 @@ describe('InvoiceXMlService', () => {
         });
         const invoice = await buildInvoiceFor(company, { isReceipt: true });
 
-        await expect(InvoiceXMlService.buildXml(invoice)).rejects.toThrow('Cannot generate UBL for a receipt');
+        await expect(InvoiceXMlService.buildXml(invoice)).rejects.toThrow(
+            'Cannot generate UBL for a receipt',
+        );
 
         await InvoiceXMlService.generateXml(invoice);
         expect(invoice.xml).toBeNull();

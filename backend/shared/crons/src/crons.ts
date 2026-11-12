@@ -26,18 +26,19 @@ export function registerCron(name: string, method: () => Promise<void>) {
 
 async function run(name: string, handler: () => Promise<void>) {
     try {
-        await logger.setContext({
-            prefixes: [
-                new StyledText(`[${name}] `).addClass('crons', 'tag'),
-            ],
-            tags: ['crons'],
-        }, async () => {
-            try {
-                await handler();
-            } catch (e) {
-                console.error(new StyledText(e).addClass('error'));
-            }
-        });
+        await logger.setContext(
+            {
+                prefixes: [new StyledText(`[${name}] `).addClass('crons', 'tag')],
+                tags: ['crons'],
+            },
+            async () => {
+                try {
+                    await handler();
+                } catch (e) {
+                    console.error(new StyledText(e).addClass('error'));
+                }
+            },
+        );
     } catch (e) {
         console.error(new StyledText(e).addClass('error'));
     }
@@ -91,17 +92,28 @@ function areCronsRunning(): string | false {
 
 async function crons(options: { allowReadOnly: boolean; allowBeforeSeeds: boolean }) {
     if (STAMHOOFD.CRONS_DISABLED) {
-        console.error(new StyledText('[CRONS] ').addClass('crons', 'tag'), new StyledText('Crons are disabled. Make sure to enable them in the environment variables.').addClass('error'));
+        console.error(
+            new StyledText('[CRONS] ').addClass('crons', 'tag'),
+            new StyledText(
+                'Crons are disabled. Make sure to enable them in the environment variables.',
+            ).addClass('error'),
+        );
         return;
     }
 
-    if (!options.allowReadOnly && await checkReadOnly()) {
-        console.error(new StyledText('[CRONS] ').addClass('crons', 'tag'), new StyledText('MySQL is in read-only mode: crons are disabled.').addClass('error'));
+    if (!options.allowReadOnly && (await checkReadOnly())) {
+        console.error(
+            new StyledText('[CRONS] ').addClass('crons', 'tag'),
+            new StyledText('MySQL is in read-only mode: crons are disabled.').addClass('error'),
+        );
         return;
     }
 
     if (!options.allowBeforeSeeds && areSeedsNotFinished) {
-        console.error(new StyledText('[CRONS] ').addClass('crons', 'tag'), new StyledText('Not all seeds are finished: crons are disabled.').addClass('error'));
+        console.error(
+            new StyledText('[CRONS] ').addClass('crons', 'tag'),
+            new StyledText('Not all seeds are finished: crons are disabled.').addClass('error'),
+        );
         return;
     }
 
@@ -115,29 +127,41 @@ async function crons(options: { allowReadOnly: boolean; allowBeforeSeeds: boolea
             continue;
         }
         job.running = true;
-        run(job.name, job.method).finally(() => {
-            job.running = false;
-        }).catch((e) => {
-            job.running = false;
-            console.error(e);
-        });
+        run(job.name, job.method)
+            .finally(() => {
+                job.running = false;
+            })
+            .catch((e) => {
+                job.running = false;
+                console.error(e);
+            });
 
         // Prevent starting too many jobs at once
         if (STAMHOOFD.environment !== 'development' && STAMHOOFD.environment !== 'test') {
             await sleep(10 * 1000);
 
-            if (!options.allowReadOnly && await checkReadOnly()) {
-                console.error(new StyledText('[CRONS] ').addClass('crons', 'tag'), new StyledText('MySQL is in read-only mode: crons are interrupted.').addClass('error'));
+            if (!options.allowReadOnly && (await checkReadOnly())) {
+                console.error(
+                    new StyledText('[CRONS] ').addClass('crons', 'tag'),
+                    new StyledText('MySQL is in read-only mode: crons are interrupted.').addClass(
+                        'error',
+                    ),
+                );
                 return;
             }
         }
     }
     schedulingJobs = false;
-};
+}
 
 let cronInterval: NodeJS.Timeout | null = null;
 
-export function startCrons(options: { allowReadOnly: boolean; allowBeforeSeeds: boolean } = { allowReadOnly: false, allowBeforeSeeds: false }) {
+export function startCrons(
+    options: { allowReadOnly: boolean; allowBeforeSeeds: boolean } = {
+        allowReadOnly: false,
+        allowBeforeSeeds: false,
+    },
+) {
     if (registeredCronJobs.length === 0) {
         throw new Error('No crons registered');
     }
@@ -148,9 +172,12 @@ export function startCrons(options: { allowReadOnly: boolean; allowBeforeSeeds: 
         return;
     }
 
-    cronInterval = setInterval(() => {
-        crons(options).catch(console.error);
-    }, STAMHOOFD.environment === 'development' ? 10 * 1000 : 5 * 60 * 1000);
+    cronInterval = setInterval(
+        () => {
+            crons(options).catch(console.error);
+        },
+        STAMHOOFD.environment === 'development' ? 10 * 1000 : 5 * 60 * 1000,
+    );
     crons(options).catch(console.error);
 }
 

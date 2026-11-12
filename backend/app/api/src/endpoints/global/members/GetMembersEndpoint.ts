@@ -6,7 +6,12 @@ import { Member } from '@stamhoofd/models';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, MembersBlob, StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
+import {
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    assertSort,
+    getSortFilter,
+} from '@stamhoofd/structures';
 import type { CountryCode } from '@stamhoofd/types/Country';
 import { Country } from '@stamhoofd/types/Country';
 import { DataValidator } from '@stamhoofd/utility';
@@ -42,23 +47,35 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         return [false];
     }
 
-    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    static async buildQuery(
+        q: CountFilteredRequest | LimitedFilteredRequest,
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+    ) {
         const organization = Context.organization;
         const scopedFilterCompilers = filterCompilers(organization?.id ?? null);
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
-        if (organization && STAMHOOFD.userMode === 'organization' && await Context.auth.hasFullAccess(organization.id)) {
+        if (
+            organization &&
+            STAMHOOFD.userMode === 'organization' &&
+            (await Context.auth.hasFullAccess(organization.id))
+        ) {
             // Don't add any scoping. Organization id filter is added automatically.
-        } else if (!Context.auth.canAccessAllPlatformMembers(permissionLevel) && !await validateGroupFilter({ filter: q.filter, permissionLevel, key: 'registrations' })) {
+        } else if (
+            !Context.auth.canAccessAllPlatformMembers(permissionLevel) &&
+            !(await validateGroupFilter({
+                filter: q.filter,
+                permissionLevel,
+                key: 'registrations',
+            }))
+        ) {
             // First do a quick validation of the groups, so that prevents the backend from having to add a scope filter
             scopeFilter = await getMemberScopeFilter(permissionLevel);
         }
 
         const query = Member.select()
             .setMaxExecutionTime(15 * 1000)
-            .from(
-                SQL.table('members'),
-            );
+            .from(SQL.table('members'));
 
         if (organization && STAMHOOFD.userMode === 'organization') {
             query.where('organizationId', organization.id);
@@ -133,7 +150,10 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         // Is lidnummer?
-        if (!searchFilter && (search.match(/^\d{4}-\d{6}-\d{1,2}$/) || search.match(/^\d{9,10}$/))) {
+        if (
+            !searchFilter &&
+            (search.match(/^\d{4}-\d{6}-\d{1,2}$/) || search.match(/^\d{9,10}$/))
+        ) {
             searchFilter = {
                 memberNumber: {
                     $eq: search,
@@ -153,17 +173,17 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 $or: [
                     {
                         email: {
-                            [(isCompleteAddress ? '$eq' : '$contains')]: search,
+                            [isCompleteAddress ? '$eq' : '$contains']: search,
                         },
                     },
                     {
                         parentEmail: {
-                            [(isCompleteAddress ? '$eq' : '$contains')]: search,
+                            [isCompleteAddress ? '$eq' : '$contains']: search,
                         },
                     },
                     {
                         unverifiedEmail: {
-                            [(isCompleteAddress ? '$eq' : '$contains')]: search,
+                            [isCompleteAddress ? '$eq' : '$contains']: search,
                         },
                     },
                 ],
@@ -181,7 +201,10 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         return searchFilter;
     }
 
-    static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
+    static async buildData(
+        requestQuery: LimitedFilteredRequest,
+        permissionLevel = PermissionLevel.Read,
+    ) {
         const organization = Context.organization;
         const query = await GetMembersEndpoint.buildQuery(requestQuery, permissionLevel);
         let data: Member[];
@@ -202,8 +225,13 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const members = await Member.loadRegistrationsAndUsers(data, true);
 
         for (const member of members) {
-            if (!await Context.auth.canAccessMember(member, permissionLevel)) {
-                console.error('Unexpected member returned', member.id, requestQuery, query.getSQL());
+            if (!(await Context.auth.canAccessMember(member, permissionLevel))) {
+                console.error(
+                    'Unexpected member returned',
+                    member.id,
+                    requestQuery,
+                    query.getSQL(),
+                );
                 throw Context.auth.error();
             }
         }
@@ -212,7 +240,11 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         if (members.length >= requestQuery.limit) {
             const lastObject = members[members.length - 1];
-            const nextFilter = getSortFilter(lastObject, sorters(organization?.id ?? null), requestQuery.sort);
+            const nextFilter = getSortFilter(
+                lastObject,
+                sorters(organization?.id ?? null),
+                requestQuery.sort,
+            );
 
             next = new LimitedFilteredRequest({
                 filter: requestQuery.filter,
@@ -256,8 +288,6 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             });
         }
 
-        return new Response(
-            await GetMembersEndpoint.buildData(request.query),
-        );
+        return new Response(await GetMembersEndpoint.buildData(request.query));
     }
 }

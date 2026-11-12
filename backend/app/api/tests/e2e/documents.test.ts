@@ -1,7 +1,24 @@
 import { Request } from '@node/endpoints';
 import type { Group, Member, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { Document, DocumentTemplateFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { IDRegisterCart, IDRegisterCheckout, IDRegisterItem, MemberDetails, MemberWithRegistrationsBlob, PaymentMethod } from '@stamhoofd/structures';
+import {
+    Document,
+    DocumentTemplateFactory,
+    GroupFactory,
+    MemberFactory,
+    OrganizationFactory,
+    OrganizationRegistrationPeriodFactory,
+    Registration,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
+import {
+    IDRegisterCart,
+    IDRegisterCheckout,
+    IDRegisterItem,
+    MemberDetails,
+    MemberWithRegistrationsBlob,
+    PaymentMethod,
+} from '@stamhoofd/structures';
 import { IDDeleteRegisterItem } from '@stamhoofd/structures/members/checkout/DeleteRegisterItem.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
@@ -59,10 +76,12 @@ describe('E2E.Documents', () => {
     });
 
     const initOrganization = async (registrationPeriod: RegistrationPeriod = period) => {
-        const organization = await new OrganizationFactory({ period: registrationPeriod })
-            .create();
+        const organization = await new OrganizationFactory({ period: registrationPeriod }).create();
 
-        const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: registrationPeriod }).create();
+        const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
+            organization,
+            period: registrationPeriod,
+        }).create();
 
         return { organization, organizationRegistrationPeriod };
     };
@@ -77,8 +96,7 @@ describe('E2E.Documents', () => {
 
         const token = await SessionService.createSession(user);
 
-        const member = await new MemberFactory({ organization, user })
-            .create();
+        const member = await new MemberFactory({ organization, user }).create();
 
         const group = await new GroupFactory({
             organization,
@@ -91,10 +109,7 @@ describe('E2E.Documents', () => {
         }).create();
 
         const documentTemplate = await new DocumentTemplateFactory({
-            groups: [
-                group,
-                group2,
-            ],
+            groups: [group, group2],
             minPricePaid: options?.paidOnly ? 1 : null,
             maxAge: options?.maxAge ?? null,
         }).create();
@@ -113,13 +128,31 @@ describe('E2E.Documents', () => {
 
     async function assertNoDocument(registration: { id: string }) {
         await registrationUpdateQueue.flushAndWait();
-        const document = await Document.select().where('registrationId', registration.id).first(false);
+        const document = await Document.select()
+            .where('registrationId', registration.id)
+            .first(false);
         expect(document).toBeNull();
     }
 
-    async function assertDocument({ registration, organization, member, group, price, pricePaid }: { registration: { id: string }; organization: Organization; member: Member; group: Group; price: number; pricePaid?: number }) {
+    async function assertDocument({
+        registration,
+        organization,
+        member,
+        group,
+        price,
+        pricePaid,
+    }: {
+        registration: { id: string };
+        organization: Organization;
+        member: Member;
+        group: Group;
+        price: number;
+        pricePaid?: number;
+    }) {
         await registrationUpdateQueue.flushAndWait();
-        const document = await Document.select().where('registrationId', registration.id).first(false);
+        const document = await Document.select()
+            .where('registrationId', registration.id)
+            .first(false);
         expect(document).not.toBeNull();
 
         const html = await DocumentRenderService.getRenderedHtml(document!, organization);
@@ -182,7 +215,14 @@ describe('E2E.Documents', () => {
         expect(registrationModel).not.toBeNull();
         expect(registrationModel?.registeredAt).not.toBeNull();
 
-        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 25_0000 });
+        await assertDocument({
+            registration,
+            organization,
+            member,
+            group,
+            price: 25_0000,
+            pricePaid: 25_0000,
+        });
     });
 
     test('Documents are created for non-paid registrations by default', async () => {
@@ -206,15 +246,36 @@ describe('E2E.Documents', () => {
 
         const response = await post(checkout1, organization, token);
         const registration = response.body.registrations[0];
-        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 0 });
+        await assertDocument({
+            registration,
+            organization,
+            member,
+            group,
+            price: 25_0000,
+            pricePaid: 0,
+        });
 
         // Mark paid
         await markPaid({ payment: response.body.payment!, organization });
-        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 25_0000 });
+        await assertDocument({
+            registration,
+            organization,
+            member,
+            group,
+            price: 25_0000,
+            pricePaid: 25_0000,
+        });
 
         // Mark unpaid
         await markNotPaid({ payment: response.body.payment!, organization });
-        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 0 });
+        await assertDocument({
+            registration,
+            organization,
+            member,
+            group,
+            price: 25_0000,
+            pricePaid: 0,
+        });
     });
 
     test('A paid-only document is only created when a payment is marked as paid', async () => {
@@ -241,7 +302,14 @@ describe('E2E.Documents', () => {
         await assertNoDocument(registration);
 
         await markPaid({ payment: response.body.payment!, organization });
-        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 25_0000 });
+        await assertDocument({
+            registration,
+            organization,
+            member,
+            group,
+            price: 25_0000,
+            pricePaid: 25_0000,
+        });
 
         // Should be deleted again
         await markNotPaid({ payment: response.body.payment!, organization });
@@ -286,9 +354,23 @@ describe('E2E.Documents', () => {
             }),
         });
 
-        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 25_0000 });
+        await assertDocument({
+            registration,
+            organization,
+            member,
+            group,
+            price: 25_0000,
+            pricePaid: 25_0000,
+        });
         await markNotPaid({ payment: response.body.payment!, organization });
-        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 0 });
+        await assertDocument({
+            registration,
+            organization,
+            member,
+            group,
+            price: 25_0000,
+            pricePaid: 0,
+        });
 
         // Change age again
         await patchOrganizationMember({
@@ -316,7 +398,14 @@ describe('E2E.Documents', () => {
                 }),
             }),
         });
-        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 0 });
+        await assertDocument({
+            registration,
+            organization,
+            member,
+            group,
+            price: 25_0000,
+            pricePaid: 0,
+        });
     });
 
     test('A document is updated when a registration is moved by an admin', async () => {
@@ -341,7 +430,14 @@ describe('E2E.Documents', () => {
 
         const response = await post(checkout1, organization, token);
         const registration = response.body.registrations[0];
-        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 0 });
+        await assertDocument({
+            registration,
+            organization,
+            member,
+            group,
+            price: 25_0000,
+            pricePaid: 0,
+        });
 
         // Move
         const checkout2 = IDRegisterCheckout.create({
@@ -363,7 +459,14 @@ describe('E2E.Documents', () => {
 
         const response2 = await post(checkout2, organization, adminToken);
         const registration2 = response2.body.registrations[0];
-        await assertDocument({ registration: registration2, organization, member, group: group2, price: 15_0000, pricePaid: 0 });
+        await assertDocument({
+            registration: registration2,
+            organization,
+            member,
+            group: group2,
+            price: 15_0000,
+            pricePaid: 0,
+        });
         await assertNoDocument(registration);
     });
 
@@ -389,12 +492,21 @@ describe('E2E.Documents', () => {
 
         const response = await post(checkout1, organization, token);
         const registration = response.body.registrations[0];
-        await assertDocument({ registration, organization, member, group, price: 25_0000, pricePaid: 0 });
+        await assertDocument({
+            registration,
+            organization,
+            member,
+            group,
+            price: 25_0000,
+            pricePaid: 0,
+        });
 
         // Move
         const checkout2 = IDRegisterCheckout.create({
             cart: IDRegisterCart.create({
-                deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                deleteRegistrations: [
+                    IDDeleteRegisterItem.create({ registrationId: registration.id }),
+                ],
             }),
             paymentMethod: PaymentMethod.PointOfSale,
             asOrganizationId: organization.id,

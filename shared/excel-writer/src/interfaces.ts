@@ -8,11 +8,15 @@ export type XlsxTransformerConcreteColumn<T> = {
     getValue(object: T): CellValue;
 };
 
-export type XlsxTransformerColumn<T> = XlsxTransformerConcreteColumn<T> | {
-    match: (id: string) => (XlsxTransformerConcreteColumn<T>[] | undefined);
-};
+export type XlsxTransformerColumn<T> =
+    | XlsxTransformerConcreteColumn<T>
+    | {
+          match: (id: string) => XlsxTransformerConcreteColumn<T>[] | undefined;
+      };
 
-export function isXlsxTransformerConcreteColumn<T>(column: XlsxTransformerColumn<T>): column is XlsxTransformerConcreteColumn<T> {
+export function isXlsxTransformerConcreteColumn<T>(
+    column: XlsxTransformerColumn<T>,
+): column is XlsxTransformerConcreteColumn<T> {
     return (column as XlsxTransformerConcreteColumn<T>).id !== undefined;
 }
 
@@ -213,7 +217,7 @@ export type NumberFormatOptions = {
      *
      * Overrides:
      * 8: "€"\ #,##0.00;[Red]"€"\ \-#,##0.00
-    */
+     */
 };
 
 export enum CellType {
@@ -232,7 +236,15 @@ export type FontOptions = {
 };
 
 export type CellAlignmentOptions = {
-    horizontal?: 'general' | 'center' | 'centerContinuous' | 'distributed' | 'justify' | 'fill' | 'left' | 'right';
+    horizontal?:
+        | 'general'
+        | 'center'
+        | 'centerContinuous'
+        | 'distributed'
+        | 'justify'
+        | 'fill'
+        | 'left'
+        | 'right';
     vertical?: 'bottom' | 'center' | 'distributed' | 'justify' | 'top';
     wrapText?: boolean;
 };

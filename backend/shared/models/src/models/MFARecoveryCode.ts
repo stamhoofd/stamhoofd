@@ -10,7 +10,9 @@ export class MFARecoveryCode extends QueryableModel {
     static table = 'mfa_recovery_codes';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -26,7 +28,8 @@ export class MFARecoveryCode extends QueryableModel {
     usedAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -43,7 +46,7 @@ export class MFARecoveryCode extends QueryableModel {
 
     static async getUnusedForUser(userId: string): Promise<MFARecoveryCode[]> {
         const all = await this.getForUser(userId);
-        return all.filter(c => c.usedAt === null);
+        return all.filter((c) => c.usedAt === null);
     }
 
     static async deleteForUser(userId: string): Promise<void> {

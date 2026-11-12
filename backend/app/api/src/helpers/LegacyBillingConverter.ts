@@ -1,5 +1,20 @@
 import type { Model } from '@node/database';
-import { BalanceItem, BalanceItemPayment, CachedBalance, Invoice, InvoicedBalanceItem, Organization, Payment, Platform, STCredit, STInvoice, STPendingInvoice, StripeAccount, UsedRegisterCode, User } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemPayment,
+    CachedBalance,
+    Invoice,
+    InvoicedBalanceItem,
+    Organization,
+    Payment,
+    Platform,
+    STCredit,
+    STInvoice,
+    STPendingInvoice,
+    StripeAccount,
+    UsedRegisterCode,
+    User,
+} from '@stamhoofd/models';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { STInvoiceItem, STInvoiceMeta } from '@stamhoofd/structures';
@@ -62,9 +77,15 @@ function roundToCents(value: number): number {
  * VAT number); the new model marks this explicitly with VATExcempt = IntraCommunityServices while
  * keeping the seller's standard rate. The VAT amount stays 0 either way, so totals are unchanged.
  */
-function getVatInfo(meta: STInvoiceMeta): { VATPercentage: number; VATExcempt: VATExcemptReason | null } {
+function getVatInfo(meta: STInvoiceMeta): {
+    VATPercentage: number;
+    VATExcempt: VATExcemptReason | null;
+} {
     if (meta.VATPercentage === 0 && !!meta.companyVATNumber) {
-        return { VATPercentage: STANDARD_VAT_PERCENTAGE, VATExcempt: VATExcemptReason.IntraCommunityServices };
+        return {
+            VATPercentage: STANDARD_VAT_PERCENTAGE,
+            VATExcempt: VATExcemptReason.IntraCommunityServices,
+        };
     }
     return { VATPercentage: meta.VATPercentage, VATExcempt: null };
 }
@@ -81,16 +102,26 @@ function assertEqual(actual: number, expected: number, label: string, invoiceId:
  * Builds (but does not save) the BalanceItem for one legacy invoice/pending-invoice line.
  * Mirrors STPackageService.chargePackage for the package relations/VAT mapping.
  */
-async function buildBalanceItem(item: STInvoiceItem, options: {
-    legacyInvoice: STInvoice | STPendingInvoice;
-    legacyMeta: STInvoiceMeta;
-    payingOrganizationId: string | null;
-    ctx: ConversionContext;
-    status: BalanceItemStatus;
-    createdAt: Date;
-    paidAt: Date | null;
-}): Promise<BalanceItem> {
-    const { legacyMeta: legacyMeta, payingOrganizationId, ctx, status, createdAt, paidAt } = options;
+async function buildBalanceItem(
+    item: STInvoiceItem,
+    options: {
+        legacyInvoice: STInvoice | STPendingInvoice;
+        legacyMeta: STInvoiceMeta;
+        payingOrganizationId: string | null;
+        ctx: ConversionContext;
+        status: BalanceItemStatus;
+        createdAt: Date;
+        paidAt: Date | null;
+    },
+): Promise<BalanceItem> {
+    const {
+        legacyMeta: legacyMeta,
+        payingOrganizationId,
+        ctx,
+        status,
+        createdAt,
+        paidAt,
+    } = options;
 
     const balanceItem = new BalanceItem();
     balanceItem.id = uuidv4(); // we cannot reuse old item ids as multiple invoices could reference the same id
@@ -100,39 +131,74 @@ async function buildBalanceItem(item: STInvoiceItem, options: {
     if (item.package) {
         balanceItem.packageId = item.package.id;
         balanceItem.type = BalanceItemType.STPackage;
-        balanceItem.relations.set(BalanceItemRelationType.STPackage, BalanceItemRelation.create({
-            id: item.package.id,
-            name: TranslatedString.create(item.package.meta.name),
-        }));
-        balanceItem.relations.set(BalanceItemRelationType.STPricingType, BalanceItemRelation.create({
-            id: item.package.meta.pricingType,
-            name: TranslatedString.create(getPricingTypeName(item.package.meta.pricingType)),
-        }));
+        balanceItem.relations.set(
+            BalanceItemRelationType.STPackage,
+            BalanceItemRelation.create({
+                id: item.package.id,
+                name: TranslatedString.create(item.package.meta.name),
+            }),
+        );
+        balanceItem.relations.set(
+            BalanceItemRelationType.STPricingType,
+            BalanceItemRelation.create({
+                id: item.package.meta.pricingType,
+                name: TranslatedString.create(getPricingTypeName(item.package.meta.pricingType)),
+            }),
+        );
         balanceItem.startDate = item.package.meta.startDate ?? null;
         balanceItem.endDate = item.package.endDate ?? null;
     } else {
         balanceItem.type = BalanceItemType.Other;
 
         // If it is credit, try to link to the credit ID instead.
-        if (item.name === 'Gebruikt tegoed' && options.legacyInvoice instanceof STInvoice && payingOrganizationId) {
+        if (
+            item.name === 'Gebruikt tegoed' &&
+            options.legacyInvoice instanceof STInvoice &&
+            payingOrganizationId
+        ) {
             balanceItem.type = BalanceItemType.ReferralDiscount;
             // Stop here, we need to find the existing one.
             const creditId = options.legacyInvoice.creditId;
             if (!creditId) {
                 // This happens sadly because of incorrect data in the v1 database
-                console.error('Missing creditId on invoice ' + options.legacyInvoice.id + ' / ' + options.legacyInvoice.number);
+                console.error(
+                    'Missing creditId on invoice ' +
+                        options.legacyInvoice.id +
+                        ' / ' +
+                        options.legacyInvoice.number,
+                );
             } else {
                 const original = await BalanceItem.getByID(creditId);
                 if (!original) {
-                    console.error('Could not find BalanceItem for creditId ' + creditId + ' at invoice ' + options.legacyInvoice.id);
+                    console.error(
+                        'Could not find BalanceItem for creditId ' +
+                            creditId +
+                            ' at invoice ' +
+                            options.legacyInvoice.id,
+                    );
                 } else {
                     if (original.status !== BalanceItemStatus.Canceled) {
-                        throw new Error('Mismatch in creditId ' + creditId + ' at invoice ' + options.legacyInvoice.id + ' already Due');
+                        throw new Error(
+                            'Mismatch in creditId ' +
+                                creditId +
+                                ' at invoice ' +
+                                options.legacyInvoice.id +
+                                ' already Due',
+                        );
                     }
 
                     // Set unitPrice = 0 of this item
                     if (original.unitPrice !== -item.unitPrice * 100) {
-                        throw new Error('Mismatch in creditId ' + creditId + ' at invoice ' + options.legacyInvoice.id + ' expected ' + (-item.unitPrice * 100) + ' received ' + original.unitPrice);
+                        throw new Error(
+                            'Mismatch in creditId ' +
+                                creditId +
+                                ' at invoice ' +
+                                options.legacyInvoice.id +
+                                ' expected ' +
+                                -item.unitPrice * 100 +
+                                ' received ' +
+                                original.unitPrice,
+                        );
                     }
 
                     // Normally this is svaed as a balance item with a positive value
@@ -193,7 +259,11 @@ function buildCustomer(meta: STInvoiceMeta): PaymentCustomer {
  * organizationId; we set it to the membership organization (the seller) so the new payment flow and
  * cached balances work.
  */
-async function resolvePayment(stInvoice: STInvoice, payment: Payment, ctx: ConversionContext): Promise<Payment | null> {
+async function resolvePayment(
+    stInvoice: STInvoice,
+    payment: Payment,
+    ctx: ConversionContext,
+): Promise<Payment | null> {
     let changed = false;
     if (payment.organizationId === null) {
         payment.organizationId = ctx.membershipOrganization.id;
@@ -209,7 +279,12 @@ async function resolvePayment(stInvoice: STInvoice, payment: Payment, ctx: Conve
         changed = true;
     }
 
-    if (payment.price === 0 && payment.status !== PaymentStatus.Succeeded && payment.status !== PaymentStatus.Failed && payment.method === PaymentMethod.Unknown) {
+    if (
+        payment.price === 0 &&
+        payment.status !== PaymentStatus.Succeeded &&
+        payment.status !== PaymentStatus.Failed &&
+        payment.method === PaymentMethod.Unknown
+    ) {
         payment.status = PaymentStatus.Succeeded;
         changed = true;
     }
@@ -229,7 +304,11 @@ interface ConversionResult {
  * Full reconstruction of a paid/official invoice: Invoice + per-line BalanceItem (marked paid via a
  * BalanceItemPayment linking the existing legacy Payment) + InvoicedBalanceItem.
  */
-export async function convertPaidInvoice(stInvoice: STInvoice, payment: Payment, ctx: ConversionContext): Promise<ConversionResult> {
+export async function convertPaidInvoice(
+    stInvoice: STInvoice,
+    payment: Payment,
+    ctx: ConversionContext,
+): Promise<ConversionResult> {
     const result: ConversionResult = { balanceItemIds: [], payingOrganizationIds: [] };
     const toSaveModels: Model[] = [];
 
@@ -245,17 +324,36 @@ export async function convertPaidInvoice(stInvoice: STInvoice, payment: Payment,
     await resolvePayment(stInvoice, payment, ctx);
 
     // Verify the legacy invoice is internally consistent before we reproduce it.
-    assertEqual(legacyMeta.priceWithoutVAT + legacyMeta.VAT, legacyMeta.priceWithVAT, 'priceWithVAT composition', stInvoice.id);
-    assertEqual(legacyMeta.priceWithVAT + legacyMeta.payableRoundingAmount, legacyMeta.totalPrice, 'totalPrice composition', stInvoice.id);
+    assertEqual(
+        legacyMeta.priceWithoutVAT + legacyMeta.VAT,
+        legacyMeta.priceWithVAT,
+        'priceWithVAT composition',
+        stInvoice.id,
+    );
+    assertEqual(
+        legacyMeta.priceWithVAT + legacyMeta.payableRoundingAmount,
+        legacyMeta.totalPrice,
+        'totalPrice composition',
+        stInvoice.id,
+    );
 
     // The actual money received must match the invoice total.
     if (payment && payment.status === PaymentStatus.Succeeded) {
-        assertEqual(payment.price, legacyMeta.totalPrice * 100, 'payment price vs invoice total', stInvoice.id);
+        assertEqual(
+            payment.price,
+            legacyMeta.totalPrice * 100,
+            'payment price vs invoice total',
+            stInvoice.id,
+        );
     }
 
     // First create the balance items + their invoiced-line data (in memory). The InvoicedBalanceItem
     // rows are only saved after the Invoice exists (foreign key).
-    const lines: { item: STInvoiceItem; balanceItem: BalanceItem; invoicedStruct: InvoicedBalanceItemStruct }[] = [];
+    const lines: {
+        item: STInvoiceItem;
+        balanceItem: BalanceItem;
+        invoicedStruct: InvoicedBalanceItemStruct;
+    }[] = [];
 
     const invoiceStruct = InvoiceStruct.create({
         seller: ctx.seller,
@@ -282,14 +380,18 @@ export async function convertPaidInvoice(stInvoice: STInvoice, payment: Payment,
         toSaveModels.push(balanceItem);
 
         // Build the invoiced line (computes unit price excl. VAT, quantity, PEPPOL rounding, ...)
-        const invoicedStruct = InvoicedBalanceItemStruct.createFor(balanceItem.getStructure(), balanceItem.priceWithVAT);
+        const invoicedStruct = InvoicedBalanceItemStruct.createFor(
+            balanceItem.getStructure(),
+            balanceItem.priceWithVAT,
+        );
         lines.push({ item, balanceItem, invoicedStruct });
 
         if (legacyMeta.areItemsIncludingVAT) {
             if (item.amount === 1) {
                 // There could be very rare differences.
                 // E.g. 10,40495 rounded to 10,4050 in the balance item, and then to 10,41 in the invoiced struct
-                invoicedStruct.unitPrice = stInvoice.meta.includingVATToExcludingVAT(item.price) * 100;
+                invoicedStruct.unitPrice =
+                    stInvoice.meta.includingVATToExcludingVAT(item.price) * 100;
                 invoicedStruct.quantity = 1_00_00;
 
                 if (invoicedStruct.unitPrice < 0) {
@@ -298,10 +400,20 @@ export async function convertPaidInvoice(stInvoice: STInvoice, payment: Payment,
                     invoicedStruct.quantity = -invoicedStruct.quantity;
                 }
             } else {
-                assertEqual(invoicedStruct.totalWithoutVAT, stInvoice.meta.includingVATToExcludingVAT(item.price) * 100, 'item ' + item.id + ' price without vat should match new', stInvoice.id);
+                assertEqual(
+                    invoicedStruct.totalWithoutVAT,
+                    stInvoice.meta.includingVATToExcludingVAT(item.price) * 100,
+                    'item ' + item.id + ' price without vat should match new',
+                    stInvoice.id,
+                );
             }
         } else {
-            assertEqual(invoicedStruct.totalWithoutVAT, item.price * 100, 'item ' + item.id + ' price without vat should match new', stInvoice.id);
+            assertEqual(
+                invoicedStruct.totalWithoutVAT,
+                item.price * 100,
+                'item ' + item.id + ' price without vat should match new',
+                stInvoice.id,
+            );
         }
 
         // Mark the balance item paid by linking the existing legacy payment. We pay each item in full
@@ -324,12 +436,30 @@ export async function convertPaidInvoice(stInvoice: STInvoice, payment: Payment,
         // since these are old invoices, we should accept them as the calculation was not incorrect at the time of generating the invoice
         const diff = invoiceStruct.totalWithVAT - legacyMeta.totalPrice * 100;
         if (Math.abs(diff) > 3_00) {
-            throw new Error('Unexpected large difference between legacy calculation and modern calculation at ' + stInvoice.id);
+            throw new Error(
+                'Unexpected large difference between legacy calculation and modern calculation at ' +
+                    stInvoice.id,
+            );
         }
     } else {
-        assertEqual(invoiceStruct.totalWithVAT, legacyMeta.totalPrice * 100, 'invoice totalWithVAT', stInvoice.id);
-        assertEqual(invoiceStruct.VATTotalAmount, legacyMeta.VAT * 100, 'invoice VAT', stInvoice.id);
-        assertEqual(invoiceStruct.totalWithoutVAT, legacyMeta.priceWithoutVAT * 100, 'invoice totalWithoutVAT', stInvoice.id);
+        assertEqual(
+            invoiceStruct.totalWithVAT,
+            legacyMeta.totalPrice * 100,
+            'invoice totalWithVAT',
+            stInvoice.id,
+        );
+        assertEqual(
+            invoiceStruct.VATTotalAmount,
+            legacyMeta.VAT * 100,
+            'invoice VAT',
+            stInvoice.id,
+        );
+        assertEqual(
+            invoiceStruct.totalWithoutVAT,
+            legacyMeta.priceWithoutVAT * 100,
+            'invoice totalWithoutVAT',
+            stInvoice.id,
+        );
     }
 
     const invoice = new Invoice();
@@ -378,9 +508,19 @@ export async function convertPaidInvoice(stInvoice: STInvoice, payment: Payment,
     }
 
     // The converted invoice must match the original exactly.
-    assertEqual(invoice.totalWithVAT, legacyMeta.totalPrice * 100, 'invoice totalWithVAT', stInvoice.id);
+    assertEqual(
+        invoice.totalWithVAT,
+        legacyMeta.totalPrice * 100,
+        'invoice totalWithVAT',
+        stInvoice.id,
+    );
     assertEqual(invoice.VATTotalAmount, legacyMeta.VAT * 100, 'invoice VAT', stInvoice.id);
-    assertEqual(invoice.payableRoundingAmount, legacyMeta.payableRoundingAmount * 100, 'invoice rounding', stInvoice.id);
+    assertEqual(
+        invoice.payableRoundingAmount,
+        legacyMeta.payableRoundingAmount * 100,
+        'invoice rounding',
+        stInvoice.id,
+    );
 
     // Only save after the last assertions
     await invoice.save();
@@ -426,7 +566,11 @@ export async function convertPaidInvoice(stInvoice: STInvoice, payment: Payment,
  * linked to the still-pending payment, so when it eventually settles the existing payment-success flow
  * activates the package. No Invoice is created (it is not official yet).
  */
-export async function convertInProgressInvoice(stInvoice: STInvoice, payment: Payment, ctx: ConversionContext): Promise<ConversionResult> {
+export async function convertInProgressInvoice(
+    stInvoice: STInvoice,
+    payment: Payment,
+    ctx: ConversionContext,
+): Promise<ConversionResult> {
     const result: ConversionResult = { balanceItemIds: [], payingOrganizationIds: [] };
 
     if (stInvoice.meta.items.length === 0) {
@@ -445,7 +589,10 @@ export async function convertInProgressInvoice(stInvoice: STInvoice, payment: Pa
             legacyMeta: meta,
             payingOrganizationId,
             ctx,
-            status: payment.status === PaymentStatus.Succeeded ? BalanceItemStatus.Due : BalanceItemStatus.Hidden,
+            status:
+                payment.status === PaymentStatus.Succeeded
+                    ? BalanceItemStatus.Due
+                    : BalanceItemStatus.Hidden,
             createdAt,
             paidAt: null,
         });
@@ -472,7 +619,10 @@ export async function convertInProgressInvoice(stInvoice: STInvoice, payment: Pa
  * unpaid Due balance item: counted by getPaidOrPendingQuantity (so it is not re-charged) and shown as
  * an open balance the organization still owes.
  */
-export async function convertPendingInvoice(pendingInvoice: STPendingInvoice, ctx: ConversionContext): Promise<ConversionResult> {
+export async function convertPendingInvoice(
+    pendingInvoice: STPendingInvoice,
+    ctx: ConversionContext,
+): Promise<ConversionResult> {
     const result: ConversionResult = { balanceItemIds: [], payingOrganizationIds: [] };
 
     if (!pendingInvoice.organizationId) {
@@ -508,7 +658,10 @@ export async function convertPendingInvoice(pendingInvoice: STPendingInvoice, ct
  * credit we owe the organization, so it becomes a negative balance (priceOpen < 0). Expired credits are
  * kept as Canceled so they preserve the history without affecting the open balance.
  */
-export async function convertCredit(credit: STCredit, ctx: ConversionContext): Promise<ConversionResult> {
+export async function convertCredit(
+    credit: STCredit,
+    ctx: ConversionContext,
+): Promise<ConversionResult> {
     const result: ConversionResult = { balanceItemIds: [], payingOrganizationIds: [] };
 
     if (await BalanceItem.getByID(credit.id)) {
@@ -561,7 +714,11 @@ export async function convertCredit(credit: STCredit, ctx: ConversionContext): P
  * credit we owe the organization, so it becomes a negative balance (priceOpen < 0). Expired credits are
  * kept as Canceled so they preserve the history without affecting the open balance.
  */
-export async function convertRemainingCredit(organization: Organization, balance: number, ctx: ConversionContext): Promise<ConversionResult> {
+export async function convertRemainingCredit(
+    organization: Organization,
+    balance: number,
+    ctx: ConversionContext,
+): Promise<ConversionResult> {
     const result: ConversionResult = { balanceItemIds: [], payingOrganizationIds: [] };
 
     const balanceItem = new BalanceItem();
@@ -591,8 +748,8 @@ export async function convertRemainingCredit(organization: Organization, balance
 }
 
 async function refreshCaches(membershipOrganizationId: string, results: ConversionResult[]) {
-    const balanceItemIds = [...new Set(results.flatMap(r => r.balanceItemIds))];
-    const payingOrganizationIds = [...new Set(results.flatMap(r => r.payingOrganizationIds))];
+    const balanceItemIds = [...new Set(results.flatMap((r) => r.balanceItemIds))];
+    const payingOrganizationIds = [...new Set(results.flatMap((r) => r.payingOrganizationIds))];
 
     if (balanceItemIds.length === 0) {
         return;
@@ -620,10 +777,15 @@ export async function runConversion(): Promise<void> {
 
     const platform = await Platform.getShared();
     if (!platform.membershipOrganizationId) {
-        throw new Error('[LegacyBillingConverter] No membership organization configured: cannot migrate legacy billing');
+        throw new Error(
+            '[LegacyBillingConverter] No membership organization configured: cannot migrate legacy billing',
+        );
     }
 
-    const membershipOrganization = await Organization.getByID(platform.membershipOrganizationId, true);
+    const membershipOrganization = await Organization.getByID(
+        platform.membershipOrganizationId,
+        true,
+    );
 
     const ctx: ConversionContext = {
         membershipOrganization,
@@ -669,7 +831,9 @@ export async function runConversion(): Promise<void> {
 
     // 1. Invoices: paid (full reconstruction) or in-progress (Hidden + linked pending payment).
     async function processInvoice(stInvoice: STInvoice, results: ConversionResult[]) {
-        let payment = stInvoice.paymentId ? (await Payment.getByID(stInvoice.paymentId) ?? null) : null;
+        let payment = stInvoice.paymentId
+            ? ((await Payment.getByID(stInvoice.paymentId)) ?? null)
+            : null;
         try {
             if (stInvoice.number !== null) {
                 if (!payment) {
@@ -722,7 +886,10 @@ export async function runConversion(): Promise<void> {
                             // We currently don't have an ID stored for these refunds: to complete in the future after migration
                             await payment.save();
                         } else {
-                            throw new Error('Unexpected missing payment for invoice that was not for stripe invoice nor refund ' + stInvoice.id);
+                            throw new Error(
+                                'Unexpected missing payment for invoice that was not for stripe invoice nor refund ' +
+                                    stInvoice.id,
+                            );
                         }
                     }
                 }

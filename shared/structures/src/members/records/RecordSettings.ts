@@ -1,4 +1,11 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    EnumDecoder,
+    field,
+    StringDecoder,
+} from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -9,7 +16,10 @@ import { getPermissionLevelNumber } from '../../PermissionLevel.js';
 import type { Filterable } from '../../filters/Filterable.js';
 import { TranslatedString } from '../../TranslatedString.js';
 
-export type RecordFilterOptions = { level?: PermissionLevel; additionalFilter?: (record: RecordSettings) => boolean };
+export type RecordFilterOptions = {
+    level?: PermissionLevel;
+    additionalFilter?: (record: RecordSettings) => boolean;
+};
 
 export enum RecordType {
     /**
@@ -104,7 +114,7 @@ export function getRecordTypeName(type: RecordType) {
             name: $t('%yU'),
         },
     ];
-    return all.find(t => t.value === type)?.name ?? $t('%Gr');
+    return all.find((t) => t.value === type)?.name ?? $t('%Gr');
 }
 
 export enum RecordWarningType {
@@ -135,13 +145,19 @@ export class RecordWarning extends AutoEncoder {
             const priority1 = warning1.type;
             const priority2 = warning2.type;
 
-            if ((priority1 === RecordWarningType.Error && priority2 === RecordWarningType.Warning)
-                || (priority1 === RecordWarningType.Warning && priority2 === RecordWarningType.Info)
-                || (priority1 === RecordWarningType.Error && priority2 === RecordWarningType.Info)) {
+            if (
+                (priority1 === RecordWarningType.Error &&
+                    priority2 === RecordWarningType.Warning) ||
+                (priority1 === RecordWarningType.Warning && priority2 === RecordWarningType.Info) ||
+                (priority1 === RecordWarningType.Error && priority2 === RecordWarningType.Info)
+            ) {
                 return -1;
-            } else if ((priority1 === RecordWarningType.Info && priority2 === RecordWarningType.Warning)
-                || (priority1 === RecordWarningType.Warning && priority2 === RecordWarningType.Error)
-                || (priority1 === RecordWarningType.Info && priority2 === RecordWarningType.Error)) {
+            } else if (
+                (priority1 === RecordWarningType.Info && priority2 === RecordWarningType.Warning) ||
+                (priority1 === RecordWarningType.Warning &&
+                    priority2 === RecordWarningType.Error) ||
+                (priority1 === RecordWarningType.Info && priority2 === RecordWarningType.Error)
+            ) {
                 return 1;
             } else {
                 return 0;
@@ -151,9 +167,12 @@ export class RecordWarning extends AutoEncoder {
 
     get icon() {
         switch (this.type) {
-            case RecordWarningType.Error: return ' exclamation-two red';
-            case RecordWarningType.Warning: return ' exclamation yellow';
-            case RecordWarningType.Info: return ' info-text';
+            case RecordWarningType.Error:
+                return ' exclamation-two red';
+            case RecordWarningType.Warning:
+                return ' exclamation yellow';
+            case RecordWarningType.Info:
+                return ' info-text';
         }
     }
 }
@@ -226,7 +245,13 @@ export class RecordSettings extends BaseRecordSettings {
      * If empty: name is used
      */
     @field({ decoder: StringDecoder, defaultValue: () => '' })
-    @field(TranslatedString.field({ version: 370, defaultValue: () => TranslatedString.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
+    @field(
+        TranslatedString.field({
+            version: 370,
+            defaultValue: () => TranslatedString.create(),
+            isDefaultValue: (v) => !!v && v.toString().length === 0,
+        }),
+    )
     label: TranslatedString;
 
     /**
@@ -234,17 +259,35 @@ export class RecordSettings extends BaseRecordSettings {
      * For other types: below the input
      */
     @field({ decoder: StringDecoder, defaultValue: () => '' })
-    @field(TranslatedString.field({ version: 370, defaultValue: () => TranslatedString.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
+    @field(
+        TranslatedString.field({
+            version: 370,
+            defaultValue: () => TranslatedString.create(),
+            isDefaultValue: (v) => !!v && v.toString().length === 0,
+        }),
+    )
     description = TranslatedString.create();
 
     /// In case of textboxes or comments for checked checkboxes
     @field({ decoder: StringDecoder, defaultValue: () => '' })
-    @field(TranslatedString.field({ version: 370, defaultValue: () => TranslatedString.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
+    @field(
+        TranslatedString.field({
+            version: 370,
+            defaultValue: () => TranslatedString.create(),
+            isDefaultValue: (v) => !!v && v.toString().length === 0,
+        }),
+    )
     inputPlaceholder = TranslatedString.create();
 
     /// Text below the input field for comments (if any)
     @field({ decoder: StringDecoder, version: 120, defaultValue: () => '' })
-    @field(TranslatedString.field({ version: 370, defaultValue: () => TranslatedString.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
+    @field(
+        TranslatedString.field({
+            version: 370,
+            defaultValue: () => TranslatedString.create(),
+            isDefaultValue: (v) => !!v && v.toString().length === 0,
+        }),
+    )
     commentsDescription = TranslatedString.create();
 
     /**
@@ -261,7 +304,7 @@ export class RecordSettings extends BaseRecordSettings {
 
     /**
      * Only for files
-    */
+     */
     @field({ decoder: new EnumDecoder(FileType), nullable: true, optional: true })
     fileType?: FileType | null;
 
@@ -279,7 +322,13 @@ export class RecordSettings extends BaseRecordSettings {
         return type;
     }
 
-    validate(answers: Map<string, { settings: RecordSettings; readonly isEmpty: boolean; validate(): void }>, requiredCategory = true) {
+    validate(
+        answers: Map<
+            string,
+            { settings: RecordSettings; readonly isEmpty: boolean; validate(): void }
+        >,
+        requiredCategory = true,
+    ) {
         const answer = answers.get(this.id);
 
         if (!requiredCategory && (!answer || answer.isEmpty)) {
@@ -309,7 +358,10 @@ export class RecordSettings extends BaseRecordSettings {
     }
 
     checkPermissionForUserManager(level: PermissionLevel) {
-        return getPermissionLevelNumber(this.externalPermissionLevel) >= getPermissionLevelNumber(level);
+        return (
+            getPermissionLevelNumber(this.externalPermissionLevel) >=
+            getPermissionLevelNumber(level)
+        );
     }
 
     get excelColumns(): { name: string; width?: number; defaultCategory?: string }[] {
@@ -364,13 +416,18 @@ export class RecordSettings extends BaseRecordSettings {
                 break;
         }
 
-        return [{
-            name: this.name.toString(),
-            width,
-        }];
+        return [
+            {
+                name: this.name.toString(),
+                width,
+            },
+        ];
     }
 
-    isEnabled<T extends Filterable & { isRecordEnabled(record: RecordSettings): boolean }>(filterValue: T, options?: RecordFilterOptions): boolean {
+    isEnabled<T extends Filterable & { isRecordEnabled(record: RecordSettings): boolean }>(
+        filterValue: T,
+        options?: RecordFilterOptions,
+    ): boolean {
         if (options?.level) {
             const level = options?.level;
             if (!this.checkPermissionForUserManager(level)) {

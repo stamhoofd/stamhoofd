@@ -10,7 +10,9 @@ describe('TagHelper', () => {
         const allTags = [province, region, town, other];
 
         test('Returns all parents up to the root tag', () => {
-            expect(TagHelper.getAllAncestors(town.id, { allTags }).sort()).toEqual([province.id, region.id].sort());
+            expect(TagHelper.getAllAncestors(town.id, { allTags }).sort()).toEqual(
+                [province.id, region.id].sort(),
+            );
         });
 
         test('Returns nothing for a root tag', () => {

@@ -12,15 +12,20 @@ import {
     renderReleaseNotes,
 } from './release-notes.js';
 
-vi.mock('./command-runner.js', async importOriginal => ({
-    ...await importOriginal<typeof import('./command-runner.js')>(),
+vi.mock('./command-runner.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('./command-runner.js')>()),
     run: vi.fn(),
 }));
 
 const SEP = '\x1f';
 
 /** Builds a git log line in the "%h\x1f%an\x1f%ae\x1f%s" format the collector expects. */
-function logLine(hash: string, subject: string, author = 'Simon Backx', email = 'simon@stamhoofd.be'): string {
+function logLine(
+    hash: string,
+    subject: string,
+    author = 'Simon Backx',
+    email = 'simon@stamhoofd.be',
+): string {
     return [hash, author, email, subject].join(SEP);
 }
 
@@ -29,10 +34,16 @@ function gitLog(lines: string[]): { stdout: string; stderr: string; status: numb
 }
 
 /** Routes mocked git/gh calls by subcommand so date, login and log can be controlled per test. */
-function mockGit(handlers: { log?: string[]; tagDate?: string; logins?: Record<string, string> }): void {
+function mockGit(handlers: {
+    log?: string[];
+    tagDate?: string;
+    logins?: Record<string, string>;
+}): void {
     vi.mocked(run).mockImplementation((async (command: string, args: string[]) => {
         if (command === 'gh') {
-            const tsv = Object.entries(handlers.logins ?? {}).map(([sha, login]) => `${sha}\t${login}`).join('\n');
+            const tsv = Object.entries(handlers.logins ?? {})
+                .map(([sha, login]) => `${sha}\t${login}`)
+                .join('\n');
             return gitLog([tsv]);
         }
         if (args[0] === 'rev-parse') {
@@ -51,15 +62,24 @@ afterEach(() => {
 
 describe('parseEmojiCommit', () => {
     it('extracts a single-codepoint emoji and the remaining text', () => {
-        expect(parseEmojiCommit('🐛 Fixed a crash')).toEqual({ emoji: '🐛', description: 'Fixed a crash' });
+        expect(parseEmojiCommit('🐛 Fixed a crash')).toEqual({
+            emoji: '🐛',
+            description: 'Fixed a crash',
+        });
     });
 
     it('handles ZWJ emoji sequences as a single grapheme', () => {
-        expect(parseEmojiCommit('🧑‍💻 Improved tooling')).toEqual({ emoji: '🧑‍💻', description: 'Improved tooling' });
+        expect(parseEmojiCommit('🧑‍💻 Improved tooling')).toEqual({
+            emoji: '🧑‍💻',
+            description: 'Improved tooling',
+        });
     });
 
     it('tolerates leading whitespace', () => {
-        expect(parseEmojiCommit('   ✨ New thing')).toEqual({ emoji: '✨', description: 'New thing' });
+        expect(parseEmojiCommit('   ✨ New thing')).toEqual({
+            emoji: '✨',
+            description: 'New thing',
+        });
     });
 
     it('returns null when the subject does not start with an emoji', () => {
@@ -80,13 +100,22 @@ describe('groupCommits', () => {
 
         const sections = groupCommits(commits);
 
-        expect(sections.map(section => section.title)).toEqual(['✨ New', '🐛 Bug fixes', '🔖 Other changes']);
-        expect(sections[1].commits.map(commit => commit.description)).toEqual(['Fix one', 'Fix two']);
+        expect(sections.map((section) => section.title)).toEqual([
+            '✨ New',
+            '🐛 Bug fixes',
+            '🔖 Other changes',
+        ]);
+        expect(sections[1].commits.map((commit) => commit.description)).toEqual([
+            'Fix one',
+            'Fix two',
+        ]);
         expect(sections[2].commits[0].emoji).toBe('🦄');
     });
 
     it('treats variation-selector emoji as equal to their base emoji', () => {
-        const sections = groupCommits([{ hash: 'b1', emoji: '♻️', description: 'Refactor', author: 'Dave' }]);
+        const sections = groupCommits([
+            { hash: 'b1', emoji: '♻️', description: 'Refactor', author: 'Dave' },
+        ]);
         expect(sections).toHaveLength(1);
         expect(sections[0].title).toBe('♻️ Refactoring');
     });
@@ -94,37 +123,71 @@ describe('groupCommits', () => {
 
 describe('isDependencyCommit', () => {
     it('matches commits authored by the dependency bots', () => {
-        expect(isDependencyCommit({ author: 'renovate[bot]', email: 'bot@renovateapp.com', subject: 'Update foo' })).toBe(true);
-        expect(isDependencyCommit({ author: 'dependabot[bot]', email: '49699333+dependabot[bot]@users.noreply.github.com', subject: 'whatever' })).toBe(true);
+        expect(
+            isDependencyCommit({
+                author: 'renovate[bot]',
+                email: 'bot@renovateapp.com',
+                subject: 'Update foo',
+            }),
+        ).toBe(true);
+        expect(
+            isDependencyCommit({
+                author: 'dependabot[bot]',
+                email: '49699333+dependabot[bot]@users.noreply.github.com',
+                subject: 'whatever',
+            }),
+        ).toBe(true);
     });
 
     it('matches the conventional subjects those bots use', () => {
-        expect(isDependencyCommit({ subject: 'chore(deps): update dependency vite to v5' })).toBe(true);
-        expect(isDependencyCommit({ subject: 'build(deps-dev): bump eslint from 9.0.0 to 9.1.0' })).toBe(true);
+        expect(isDependencyCommit({ subject: 'chore(deps): update dependency vite to v5' })).toBe(
+            true,
+        );
+        expect(
+            isDependencyCommit({ subject: 'build(deps-dev): bump eslint from 9.0.0 to 9.1.0' }),
+        ).toBe(true);
         expect(isDependencyCommit({ subject: 'Update dependency typescript to v6' })).toBe(true);
         expect(isDependencyCommit({ subject: 'Bump axios from 1.6.0 to 1.7.0' })).toBe(true);
     });
 
     it('does not match regular commits from humans', () => {
-        expect(isDependencyCommit({ author: 'Simon Backx', email: 'simon@stamhoofd.be', subject: 'Replaced translations' })).toBe(false);
+        expect(
+            isDependencyCommit({
+                author: 'Simon Backx',
+                email: 'simon@stamhoofd.be',
+                subject: 'Replaced translations',
+            }),
+        ).toBe(false);
         expect(isDependencyCommit({ subject: 'Update the onboarding copy' })).toBe(false);
     });
 });
 
 describe('collectReleaseCommits', () => {
     it('parses git log output and skips commits without a leading emoji', async () => {
-        vi.mocked(run).mockResolvedValue(gitLog([
-            logLine('7783583', 'v2.124.0'),
-            logLine('4f1c7e9', '✨ Renamed verkopen tab to webshops'),
-            logLine('8d92a1a', '🐛 Fixed permission migration'),
-            logLine('b9783ca', 'Replaced translations'),
-        ]) as never);
+        vi.mocked(run).mockResolvedValue(
+            gitLog([
+                logLine('7783583', 'v2.124.0'),
+                logLine('4f1c7e9', '✨ Renamed verkopen tab to webshops'),
+                logLine('8d92a1a', '🐛 Fixed permission migration'),
+                logLine('b9783ca', 'Replaced translations'),
+            ]) as never,
+        );
 
         const commits = await collectReleaseCommits('/repo', { from: 'v2.123.2', to: 'v2.124.0' });
 
         expect(commits).toEqual([
-            { hash: '4f1c7e9', emoji: '✨', description: 'Renamed verkopen tab to webshops', author: 'Simon Backx' },
-            { hash: '8d92a1a', emoji: '🐛', description: 'Fixed permission migration', author: 'Simon Backx' },
+            {
+                hash: '4f1c7e9',
+                emoji: '✨',
+                description: 'Renamed verkopen tab to webshops',
+                author: 'Simon Backx',
+            },
+            {
+                hash: '8d92a1a',
+                emoji: '🐛',
+                description: 'Fixed permission migration',
+                author: 'Simon Backx',
+            },
         ]);
 
         const [, args] = vi.mocked(run).mock.calls[0];
@@ -132,17 +195,39 @@ describe('collectReleaseCommits', () => {
     });
 
     it('includes dependency-bot commits even without an emoji and groups them under Dependencies', async () => {
-        vi.mocked(run).mockResolvedValue(gitLog([
-            logLine('dep1aaa', 'Update dependency vite to v5', 'renovate[bot]', 'bot@renovateapp.com'),
-            logLine('dep2bbb', 'Bump axios from 1.6.0 to 1.7.0', 'dependabot[bot]', '49699333+dependabot[bot]@users.noreply.github.com'),
-            logLine('reg3ccc', 'Just some refactor without emoji'),
-        ]) as never);
+        vi.mocked(run).mockResolvedValue(
+            gitLog([
+                logLine(
+                    'dep1aaa',
+                    'Update dependency vite to v5',
+                    'renovate[bot]',
+                    'bot@renovateapp.com',
+                ),
+                logLine(
+                    'dep2bbb',
+                    'Bump axios from 1.6.0 to 1.7.0',
+                    'dependabot[bot]',
+                    '49699333+dependabot[bot]@users.noreply.github.com',
+                ),
+                logLine('reg3ccc', 'Just some refactor without emoji'),
+            ]) as never,
+        );
 
         const commits = await collectReleaseCommits('/repo', { from: 'v1.0.0', to: 'HEAD' });
 
         expect(commits).toEqual([
-            { hash: 'dep1aaa', emoji: '⬆', description: 'Update dependency vite to v5', author: 'renovate[bot]' },
-            { hash: 'dep2bbb', emoji: '⬆', description: 'Bump axios from 1.6.0 to 1.7.0', author: 'dependabot[bot]' },
+            {
+                hash: 'dep1aaa',
+                emoji: '⬆',
+                description: 'Update dependency vite to v5',
+                author: 'renovate[bot]',
+            },
+            {
+                hash: 'dep2bbb',
+                emoji: '⬆',
+                description: 'Bump axios from 1.6.0 to 1.7.0',
+                author: 'dependabot[bot]',
+            },
         ]);
         expect(groupCommits(commits)[0].title).toBe('⬆️ Dependencies');
     });
@@ -152,7 +237,7 @@ describe('collectReleaseCommits', () => {
         await collectReleaseCommits('/repo', { to: 'HEAD' });
         const [, args] = vi.mocked(run).mock.calls[0];
         expect(args).toContain('HEAD');
-        expect(args.some(arg => arg.includes('..'))).toBe(false);
+        expect(args.some((arg) => arg.includes('..'))).toBe(false);
     });
 });
 
@@ -211,7 +296,9 @@ describe('renderReleaseNotes', () => {
         expect(markdown).toContain('- Added filters (a1) — Alice');
         expect(markdown).toContain('### 🐛 Bug fixes');
         expect(markdown).toContain('- Fixed crash (a2) — Bob');
-        expect(markdown).toContain('**Full changelog**: https://github.com/stamhoofd/stamhoofd/compare/v2.123.2...v2.124.0');
+        expect(markdown).toContain(
+            '**Full changelog**: https://github.com/stamhoofd/stamhoofd/compare/v2.123.2...v2.124.0',
+        );
     });
 
     it('uses the resolved GitHub @login as a clickable mention', async () => {
@@ -227,7 +314,11 @@ describe('renderReleaseNotes', () => {
             },
         });
 
-        const notes = await buildReleaseNotes('/repo', { from: 'v2.123.2', to: 'v2.124.0', repositorySlug: 'stamhoofd/stamhoofd' });
+        const notes = await buildReleaseNotes('/repo', {
+            from: 'v2.123.2',
+            to: 'v2.124.0',
+            repositorySlug: 'stamhoofd/stamhoofd',
+        });
         const markdown = renderReleaseNotes(notes, { repositorySlug: 'stamhoofd/stamhoofd' });
 
         expect(markdown).toContain('- Added filters (4f1c7e9) — @SimonBackx');
@@ -239,7 +330,9 @@ describe('renderReleaseNotes', () => {
         const markdown = renderReleaseNotes({
             to: 'v1.0.0',
             commits: [],
-            sections: groupCommits([{ hash: 'c1', emoji: '🦄', description: 'Magic', author: 'Carol' }]),
+            sections: groupCommits([
+                { hash: 'c1', emoji: '🦄', description: 'Magic', author: 'Carol' },
+            ]),
         });
         expect(markdown).toContain('- 🦄 Magic (c1) — Carol');
     });

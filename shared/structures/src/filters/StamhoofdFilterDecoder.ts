@@ -2,7 +2,10 @@ import type { Data, EncodeContext, PlainObject } from '@common/encoding';
 import { DateDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 
-import type { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
+import type {
+    StamhoofdCompareValue,
+    StamhoofdFilter,
+} from '@stamhoofd/filters/StamhoofdFilterTypes';
 
 export class StamhoofdFilterJSONDecoder {
     static encode(filter: StamhoofdFilter, context: EncodeContext): string {
@@ -13,7 +16,9 @@ export class StamhoofdFilterJSONDecoder {
         const str = data.string;
         try {
             const decoded = JSON.parse(str);
-            return StamhoofdFilterDecoder.decode(data.clone({ data: decoded, field: data.currentField, context: data.context }));
+            return StamhoofdFilterDecoder.decode(
+                data.clone({ data: decoded, field: data.currentField, context: data.context }),
+            );
         } catch (e) {
             throw new SimpleError({
                 code: 'invalid_field',
@@ -25,7 +30,10 @@ export class StamhoofdFilterJSONDecoder {
 }
 
 export class StamhoofdFilterDecoder {
-    static encode(filter: StamhoofdFilter<StamhoofdCompareValue>, context: EncodeContext): PlainObject {
+    static encode(
+        filter: StamhoofdFilter<StamhoofdCompareValue>,
+        context: EncodeContext,
+    ): PlainObject {
         // We need to convert all Date objects to something recornizable so we can decode them as Dates too
         // We'll use magic objects for this: { $: '$date', value: unixtimeinms }
         if (filter instanceof Date) {
@@ -37,14 +45,19 @@ export class StamhoofdFilterDecoder {
         }
 
         if (Array.isArray(filter)) {
-            return filter.map(f => this.encode(f, context));
+            return filter.map((f) => this.encode(f, context));
         }
 
         if (typeof filter === 'object') {
             // Loop and replace all keys
             const c = {} as Record<string, PlainObject>;
             for (const [key, value] of Object.entries(filter)) {
-                Object.defineProperty(c, key, { value: this.encode(value, context), enumerable: true, configurable: true, writable: true });
+                Object.defineProperty(c, key, {
+                    value: this.encode(value, context),
+                    enumerable: true,
+                    configurable: true,
+                    writable: true,
+                });
             }
             return c;
         }
@@ -60,18 +73,26 @@ export class StamhoofdFilterDecoder {
         }
 
         if (Array.isArray(value)) {
-            return value.map((v, index) => this.decode(
-                data.clone({
-                    data: v,
-                    field: data.addToCurrentField(index),
-                    context: data.context,
-                }),
-            ));
+            return value.map((v, index) =>
+                this.decode(
+                    data.clone({
+                        data: v,
+                        field: data.addToCurrentField(index),
+                        context: data.context,
+                    }),
+                ),
+            );
         }
 
         if (typeof value === 'object') {
             // Check if it's a date
-            if ('$' in value && Object.hasOwn(value, '$') && value.$ === '$date' && 'value' in value && Object.hasOwn(value, 'value')) {
+            if (
+                '$' in value &&
+                Object.hasOwn(value, '$') &&
+                value.$ === '$date' &&
+                'value' in value &&
+                Object.hasOwn(value, 'value')
+            ) {
                 return DateDecoder.decode(
                     data.clone({
                         data: value.value,
@@ -84,11 +105,18 @@ export class StamhoofdFilterDecoder {
             // Loop and replace all keys
             const c = {} as Record<string, StamhoofdFilter>;
             for (const [key, v] of Object.entries(value)) {
-                Object.defineProperty(c, key, { value: this.decode(data.clone({
-                    data: v,
-                    field: data.addToCurrentField(key),
-                    context: data.context,
-                })), enumerable: true, configurable: true, writable: true });
+                Object.defineProperty(c, key, {
+                    value: this.decode(
+                        data.clone({
+                            data: v,
+                            field: data.addToCurrentField(key),
+                            context: data.context,
+                        }),
+                    ),
+                    enumerable: true,
+                    configurable: true,
+                    writable: true,
+                });
             }
             return c;
         }

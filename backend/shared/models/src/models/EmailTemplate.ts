@@ -14,7 +14,9 @@ export class EmailTemplate extends QueryableModel {
     static table = 'email_templates';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -47,7 +49,10 @@ export class EmailTemplate extends QueryableModel {
     text: string;
 
     /** Full content overrides per language. The default content (subject/html/text/json) is used for all languages without an override. Never contains `language` itself */
-    @column({ type: 'json', decoder: new MapDecoder(new EnumDecoder(Language), EmailContent as Decoder<EmailContent>) })
+    @column({
+        type: 'json',
+        decoder: new MapDecoder(new EnumDecoder(Language), EmailContent as Decoder<EmailContent>),
+    })
     translations: Map<Language, EmailContent> = new Map();
 
     /** The language of the default content (subject/html/text/json); null when the content is untranslated */
@@ -55,7 +60,8 @@ export class EmailTemplate extends QueryableModel {
     language: Language | null = null;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -64,7 +70,8 @@ export class EmailTemplate extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;

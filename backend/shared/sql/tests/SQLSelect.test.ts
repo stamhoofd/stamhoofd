@@ -22,12 +22,16 @@ describe('SQLSelect', () => {
 
         beforeAll(async () => {
             await Database.statement('DROP TABLE IF EXISTS `' + table + '`');
-            await Database.statement(createTableDefinition(table, {
-                organizationId: { type: 'varchar' },
-                name: { type: 'varchar' },
-            }));
+            await Database.statement(
+                createTableDefinition(table, {
+                    organizationId: { type: 'varchar' },
+                    name: { type: 'varchar' },
+                }),
+            );
             for (const id of ids) {
-                await Database.insert('INSERT INTO `' + table + '` SET ?', [{ organizationId: id, name: 'name ' + id }]);
+                await Database.insert('INSERT INTO `' + table + '` SET ?', [
+                    { organizationId: id, name: 'name ' + id },
+                ]);
             }
         });
 
@@ -37,7 +41,10 @@ describe('SQLSelect', () => {
         });
 
         function select() {
-            return new SQLSelect(row => row[table] as { organizationId: string; name: string }, SQL.wildcard()).from(table);
+            return new SQLSelect(
+                (row) => row[table] as { organizationId: string; name: string },
+                SQL.wildcard(),
+            ).from(table);
         }
 
         it('loops over all rows using a custom primary key', async () => {
@@ -50,10 +57,13 @@ describe('SQLSelect', () => {
 
         it('loops over all batches using a custom primary key', async () => {
             const batches: string[][] = [];
-            for await (const batch of select().primaryKey('organizationId').limit(10).allBatched()) {
-                batches.push(batch.map(row => row.organizationId));
+            for await (const batch of select()
+                .primaryKey('organizationId')
+                .limit(10)
+                .allBatched()) {
+                batches.push(batch.map((row) => row.organizationId));
             }
-            expect(batches.map(b => b.length)).toEqual([10, 10, 5]);
+            expect(batches.map((b) => b.length)).toEqual([10, 10, 5]);
             expect(batches.flat()).toEqual(ids);
         });
 
@@ -75,7 +85,7 @@ describe('SQLSelect', () => {
 
             const batched: string[] = [];
             for await (const batch of IteratorTestModel.select().limit(10).allBatched()) {
-                batched.push(...batch.map(m => m.organizationId));
+                batched.push(...batch.map((m) => m.organizationId));
             }
             expect(batched).toEqual(ids);
         });

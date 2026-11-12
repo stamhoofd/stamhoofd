@@ -18,8 +18,8 @@ describe('Logging', () => {
         const stdout: string[] = [];
         const stderr: string[] = [];
         const logger = new Logger({
-            stdout: { write: text => stdout.push(text), clearLine: () => {} },
-            stderr: { write: text => stderr.push(text), clearLine: () => {} },
+            stdout: { write: (text) => stdout.push(text), clearLine: () => {} },
+            stderr: { write: (text) => stderr.push(text), clearLine: () => {} },
         });
         logger.debug('default debug');
         logger.debugEnabled = false;
@@ -37,7 +37,13 @@ describe('Logging', () => {
     });
 
     it('routes console.debug through the current debug setting and context', () => {
-        const original = { log: console.log, warn: console.warn, error: console.error, info: console.info, debug: console.debug };
+        const original = {
+            log: console.log,
+            warn: console.warn,
+            error: console.error,
+            info: console.info,
+            debug: console.debug,
+        };
         const logger = new Logger({ stdout: createFakeStream(), stderr: process.stderr });
         try {
             logger.infectConsole();
@@ -46,7 +52,9 @@ describe('Logging', () => {
             console.debug('hidden');
             expect(lastLog).toBe('');
             logger.debugEnabled = true;
-            logger.setContext({ prefixes: [new StyledText('[context] ')] }, () => console.debug('visible'));
+            logger.setContext({ prefixes: [new StyledText('[context] ')] }, () =>
+                console.debug('visible'),
+            );
             expect(lastLog).toBe('[context] visible\n');
         } finally {
             Object.assign(console, original);

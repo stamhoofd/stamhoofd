@@ -20,7 +20,10 @@ export class ApplicationLifecycle {
     private readonly startup: Span;
     private phase: 'starting' | 'ready' | 'failed' | 'stopped' = 'starting';
 
-    constructor(readonly service: string, private readonly flush?: () => Promise<void>) {
+    constructor(
+        readonly service: string,
+        private readonly flush?: () => Promise<void>,
+    ) {
         this.startup = trace.getTracer('@node/observability').startSpan('application.startup');
         this.notify('starting');
     }
@@ -73,7 +76,10 @@ export class ApplicationLifecycle {
         logs.getLogger('@node/observability').emit({
             body,
             severityNumber: this.phase === 'failed' ? SeverityNumber.ERROR : SeverityNumber.INFO,
-            context: this.phase === 'stopped' ? context.active() : trace.setSpan(context.active(), this.startup),
+            context:
+                this.phase === 'stopped'
+                    ? context.active()
+                    : trace.setSpan(context.active(), this.startup),
         });
     }
 

@@ -18,7 +18,12 @@ class StaticSQLLogger {
         return null;
     }
 
-    async logInefficientExplainResult(query: string, params: any[], explainResult: any, elapsedTimeMs?: number) {
+    async logInefficientExplainResult(
+        query: string,
+        params: any[],
+        explainResult: any,
+        elapsedTimeMs?: number,
+    ) {
         if (!explainResult) {
             return;
         }
@@ -43,7 +48,11 @@ class StaticSQLLogger {
         if (this.slowQueryThresholdMs === null) {
             if (this.explainAllAndLogInefficient) {
                 const result = await queryPromise;
-                await this.logInefficientExplainResult(query, params, await this.explain(query, params));
+                await this.logInefficientExplainResult(
+                    query,
+                    params,
+                    await this.explain(query, params),
+                );
                 return result;
             }
             return queryPromise;
@@ -57,7 +66,10 @@ class StaticSQLLogger {
         const elapsedTimeMs = Number(elapsedTime) / 1000 / 1000;
 
         if (elapsedTimeMs > this.slowQueryThresholdMs) {
-            console.trace('Slow SQL query (' + elapsedTimeMs.toFixed(2) + 'ms)\nQuery: ' + query, params);
+            console.trace(
+                'Slow SQL query (' + elapsedTimeMs.toFixed(2) + 'ms)\nQuery: ' + query,
+                params,
+            );
         }
 
         for (const logger of this.customLoggers) {
@@ -69,7 +81,12 @@ class StaticSQLLogger {
         }
 
         if (this.explainAllAndLogInefficient) {
-            await this.logInefficientExplainResult(query, params, await this.explain(query, params), elapsedTimeMs);
+            await this.logInefficientExplainResult(
+                query,
+                params,
+                await this.explain(query, params),
+                elapsedTimeMs,
+            );
             return result;
         }
 

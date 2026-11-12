@@ -1,9 +1,17 @@
 import { SimpleError } from '@common/errors';
 import type { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
-import { FilterWrapperMarker, getMagicRelationValue, isMagicFilter, isMagicRelationFilter, unwrapFilter } from '@stamhoofd/structures';
+import {
+    FilterWrapperMarker,
+    getMagicRelationValue,
+    isMagicFilter,
+    isMagicRelationFilter,
+    unwrapFilter,
+} from '@stamhoofd/structures';
 
 export class StamhoofdFilterAccessHelper {
-    static getGroupIdsFromFilter(filter: StamhoofdFilter): StamhoofdFilter<StamhoofdCompareValue>[] {
+    static getGroupIdsFromFilter(
+        filter: StamhoofdFilter,
+    ): StamhoofdFilter<StamhoofdCompareValue>[] {
         let rawGroupIds: StamhoofdFilter<StamhoofdCompareValue>[] | null = null;
 
         if (typeof filter === 'string' || isMagicFilter(filter)) {
@@ -17,7 +25,8 @@ export class StamhoofdFilterAccessHelper {
                 throw new SimpleError({
                     code: 'invalid_field',
                     field: 'filter',
-                    message: 'You must filter on a group of the organization you are trying to access',
+                    message:
+                        'You must filter on a group of the organization you are trying to access',
                     human: $t('%1HG'),
                 });
             }

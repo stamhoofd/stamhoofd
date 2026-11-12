@@ -31,10 +31,16 @@ export class StdSync {
     }
 
     /** Destination used for live regions and default writes. */
-    get stream(): NodeJS.WriteStream { return this.stdout; }
+    get stream(): NodeJS.WriteStream {
+        return this.stdout;
+    }
 
-    get columns(): number { return this.stdout.columns || 80; }
-    get rows(): number { return this.stdout.rows || 24; }
+    get columns(): number {
+        return this.stdout.columns || 80;
+    }
+    get rows(): number {
+        return this.stdout.rows || 24;
+    }
 
     /** Replace the live block. On non-TTY stdout this is a no-op. */
     setLive(content: string): void {
@@ -43,8 +49,28 @@ export class StdSync {
         }
         if (!this.content) {
             // Intercept writes through these stream objects, including console output.
-            this.stdout.write = ((chunk: string | Uint8Array, encoding?: BufferEncoding | ((error?: Error | null) => void), callback?: (error?: Error | null) => void) => this.write(chunk, OutputStream.Stdout, encoding, callback)) as typeof this.stdout.write;
-            this.stderr.write = ((chunk: string | Uint8Array, encoding?: BufferEncoding | ((error?: Error | null) => void), callback?: (error?: Error | null) => void) => this.write(chunk, OutputStream.Stderr, encoding, callback)) as typeof this.stderr.write;
+            this.stdout.write = ((
+                chunk: string | Uint8Array,
+                encoding?: BufferEncoding | ((error?: Error | null) => void),
+                callback?: (error?: Error | null) => void,
+            ) =>
+                this.write(
+                    chunk,
+                    OutputStream.Stdout,
+                    encoding,
+                    callback,
+                )) as typeof this.stdout.write;
+            this.stderr.write = ((
+                chunk: string | Uint8Array,
+                encoding?: BufferEncoding | ((error?: Error | null) => void),
+                callback?: (error?: Error | null) => void,
+            ) =>
+                this.write(
+                    chunk,
+                    OutputStream.Stderr,
+                    encoding,
+                    callback,
+                )) as typeof this.stderr.write;
         }
         this.clear();
         this.content = content;
@@ -54,13 +80,19 @@ export class StdSync {
     }
 
     /** Write to either stream, temporarily moving the live block out of the way. */
-    write(chunk: string | Uint8Array, stream: OutputStream = OutputStream.Stdout, encoding?: BufferEncoding | ((error?: Error | null) => void), callback?: (error?: Error | null) => void): boolean {
+    write(
+        chunk: string | Uint8Array,
+        stream: OutputStream = OutputStream.Stdout,
+        encoding?: BufferEncoding | ((error?: Error | null) => void),
+        callback?: (error?: Error | null) => void,
+    ): boolean {
         if (this.content && !this.partial) {
             this.clear();
         }
-        const result = stream === OutputStream.Stdout
-            ? this.writeStdout(chunk, encoding as BufferEncoding, callback)
-            : this.writeStderr(chunk, encoding as BufferEncoding, callback);
+        const result =
+            stream === OutputStream.Stdout
+                ? this.writeStdout(chunk, encoding as BufferEncoding, callback)
+                : this.writeStderr(chunk, encoding as BufferEncoding, callback);
         if (this.content) {
             // Wait for a complete line before redrawing, so split writes remain contiguous.
             this.partial = !/[\r\n]$/.test(String(chunk));

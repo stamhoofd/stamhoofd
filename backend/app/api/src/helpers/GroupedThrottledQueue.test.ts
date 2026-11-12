@@ -121,13 +121,13 @@ describe('GroupedThrottledQueue', () => {
         expect(handler.mock.calls.length).toBeGreaterThanOrEqual(1);
 
         // Verify all items were processed
-        const processedItems = handler.mock.calls.flatMap(call => call[1]);
+        const processedItems = handler.mock.calls.flatMap((call) => call[1]);
         expect(processedItems).toHaveLength(items.length);
         expect(new Set(processedItems)).toEqual(new Set(items));
     });
 
     it('should handle errors in handler without failing the queue', async () => {
-        const consoleErrorMock = vitest.spyOn(console, 'error');// .mockImplementation();
+        const consoleErrorMock = vitest.spyOn(console, 'error'); // .mockImplementation();
 
         const handler = vitest.fn().mockImplementation((group, items) => {
             if (group === 'error-group') {

@@ -3,7 +3,12 @@ import { AnyDecoder, AutoEncoder, field, StringDecoder } from '@common/encoding'
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { Organization, StripeAccount, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';
+import {
+    Organization,
+    StripeAccount,
+    StripeCheckoutSession,
+    StripePaymentIntent,
+} from '@stamhoofd/models';
 import { isDebouncedError, QueueHandler } from '@stamhoofd/queues';
 
 import { StripeHelper } from '../../../helpers/StripeHelper.js';
@@ -54,7 +59,9 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         console.log('Received Stripe Webhook', request.body.type);
-        const secret = request.body.account ? STAMHOOFD.STRIPE_CONNECT_ENDPOINT_SECRET : STAMHOOFD.STRIPE_ENDPOINT_SECRET;
+        const secret = request.body.account
+            ? STAMHOOFD.STRIPE_CONNECT_ENDPOINT_SECRET
+            : STAMHOOFD.STRIPE_ENDPOINT_SECRET;
 
         if (!secret) {
             throw StripeHelper.notConfiguredError;
@@ -73,7 +80,11 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                     statusCode: 400,
                 });
             }
-            event = await stripe.webhooks.constructEventAsync(await request.request.bodyPromise!, sig, secret);
+            event = await stripe.webhooks.constructEventAsync(
+                await request.request.bodyPromise!,
+                sig,
+                secret,
+            );
         } catch (err) {
             throw new SimpleError({
                 code: 'invalid_signature',
@@ -91,10 +102,13 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
                     const id = account.id as string;
                     const [model] = await StripeAccount.where({ accountId: id }, { limit: 1 });
                     if (model) {
-                        await AuditLogService.setContext({ userId: null, source: AuditLogSource.System }, async () => {
-                            model.setMetaFromStripeAccount(account);
-                            await model.save();
-                        });
+                        await AuditLogService.setContext(
+                            { userId: null, source: AuditLogSource.System },
+                            async () => {
+                                model.setMetaFromStripeAccount(account);
+                                await model.save();
+                            },
+                        );
                     } else {
                         console.warn('Could not find stripe account with id', id);
                     }
@@ -121,7 +135,10 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
             case 'checkout.session.completed':
             case 'checkout.session.expired': {
                 const checkoutId = request.body.data.object.id;
-                const [model] = await StripeCheckoutSession.where({ stripeSessionId: checkoutId }, { limit: 1 });
+                const [model] = await StripeCheckoutSession.where(
+                    { stripeSessionId: checkoutId },
+                    { limit: 1 },
+                );
                 if (model && model.organizationId) {
                     await this.checkDebounced(model.paymentId, model.organizationId);
                 } else {
@@ -162,14 +179,18 @@ export class StripeWebookEndpoint extends Endpoint<Params, Query, Body, Response
         // Stripe often sends a couple of webhooks for the same payment in short succession.
         // Make sure we only do one check in a certain amount of time to prevent hammering the stripe API + system
         try {
-            await QueueHandler.debounce('stripe-webhook/payment-' + paymentId, async () => {
-                const organization = await Organization.getByID(organizationId);
-                if (organization) {
-                    await PaymentService.pollStatus(paymentId, organization);
-                } else {
-                    console.warn('Could not find organization with id', organizationId);
-                }
-            }, 1000);
+            await QueueHandler.debounce(
+                'stripe-webhook/payment-' + paymentId,
+                async () => {
+                    const organization = await Organization.getByID(organizationId);
+                    if (organization) {
+                        await PaymentService.pollStatus(paymentId, organization);
+                    } else {
+                        console.warn('Could not find organization with id', organizationId);
+                    }
+                },
+                1000,
+            );
         } catch (e) {
             if (isDebouncedError(e)) {
                 // Okay, we are debounced (new request came in)

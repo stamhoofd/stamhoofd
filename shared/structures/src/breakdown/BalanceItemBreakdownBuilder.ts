@@ -8,13 +8,27 @@ import type { BalanceItem, BalanceItemPaymentWithPrivatePayment } from '../Balan
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { mergeFilters } from '@stamhoofd/filters/StamhoofdFilter';
 import type { BreakdownPathItem } from '../PaymentBreakdown.js';
-import { BalanceItemBreakdown, BreakdownAmountType, BreakdownGroup, BreakdownObjectType, BreakdownSelection, BreakdownTab } from '../PaymentBreakdown.js';
+import {
+    BalanceItemBreakdown,
+    BreakdownAmountType,
+    BreakdownGroup,
+    BreakdownObjectType,
+    BreakdownSelection,
+    BreakdownTab,
+} from '../PaymentBreakdown.js';
 import type { OrderData } from '../webshops/Order.js';
 import type { BalanceItemPart } from './balanceItemParts.js';
 import { getBalanceItemParts } from './balanceItemParts.js';
 import { toBalanceItemPaymentFilter } from './breakdownFilters.js';
 import type { BreakdownPageContext } from './BreakdownPageContext.js';
-import { canOpenPartialRow, createBalanceItemSelection, createCategoryGroup, getWholeAmount, NOTHING, onlyIfSplit } from './breakdownGroups.js';
+import {
+    canOpenPartialRow,
+    createBalanceItemSelection,
+    createCategoryGroup,
+    getWholeAmount,
+    NOTHING,
+    onlyIfSplit,
+} from './breakdownGroups.js';
 import { BreakdownRows } from './BreakdownRows.js';
 import { BreakdownTimeline } from './BreakdownTimeline.js';
 import { createOrderArticleGroup, getOrderArticles } from './orderArticles.js';
@@ -80,7 +94,9 @@ export class BalanceItemBreakdownBuilder {
 
     add(items: BalanceItem[], context: BreakdownPageContext = {}) {
         const orders = context.orders ?? new Map<string, OrderData>();
-        const balanceItemPayments = context.balanceItemPayments ?? new Map<string, BalanceItemPaymentWithPrivatePayment[]>();
+        const balanceItemPayments =
+            context.balanceItemPayments ??
+            new Map<string, BalanceItemPaymentWithPrivatePayment[]>();
 
         for (const item of items) {
             const payments = balanceItemPayments.get(item.id) ?? [];
@@ -153,12 +169,17 @@ export class BalanceItemBreakdownBuilder {
         const listFilter = this.getExportFilter(baseFilter);
 
         return BreakdownSelection.create({
-            objectType: this.slicePaymentFilter ? BreakdownObjectType.BalanceItemPayments : BreakdownObjectType.BalanceItems,
+            objectType: this.slicePaymentFilter
+                ? BreakdownObjectType.BalanceItemPayments
+                : BreakdownObjectType.BalanceItems,
             listObjectType: BreakdownObjectType.BalanceItems,
             // Only a part of what these items cost once a row of the payout tab was opened
             amountType: this.sliceAmountType ?? BreakdownAmountType.Total,
             filter: this.slicePaymentFilter
-                ? toBalanceItemPaymentFilter(this.getSliceBalanceItemFilter(baseFilter), this.slicePaymentFilter)
+                ? toBalanceItemPaymentFilter(
+                      this.getSliceBalanceItemFilter(baseFilter),
+                      this.slicePaymentFilter,
+                  )
                 : listFilter,
             listFilter,
             isListPartial: this.wholeItemPrice !== this.price,
@@ -197,7 +218,10 @@ export class BalanceItemBreakdownBuilder {
             if (selection.objectType === BreakdownObjectType.BalanceItemPayments) {
                 // What landed in this payout, out of the balance items that are shown
                 selection.listFilter = this.getExportFilter(baseFilter, selection.listFilter);
-                selection.filter = toBalanceItemPaymentFilter(this.getSliceBalanceItemFilter(baseFilter), selection.filter);
+                selection.filter = toBalanceItemPaymentFilter(
+                    this.getSliceBalanceItemFilter(baseFilter),
+                    selection.filter,
+                );
                 return canOpenPartialRow(group);
             }
 
@@ -207,7 +231,10 @@ export class BalanceItemBreakdownBuilder {
         });
     }
 
-    private getExportFilter(baseFilter: StamhoofdFilter, ...extra: StamhoofdFilter[]): StamhoofdFilter {
+    private getExportFilter(
+        baseFilter: StamhoofdFilter,
+        ...extra: StamhoofdFilter[]
+    ): StamhoofdFilter {
         return this.buildFilter(baseFilter, false, extra);
     }
 
@@ -215,11 +242,18 @@ export class BalanceItemBreakdownBuilder {
      * The same, without the payout that was opened: that one says which payments the money came in
      * with, which is what the payment half of a balance item payment filter already says.
      */
-    private getSliceBalanceItemFilter(baseFilter: StamhoofdFilter, ...extra: StamhoofdFilter[]): StamhoofdFilter {
+    private getSliceBalanceItemFilter(
+        baseFilter: StamhoofdFilter,
+        ...extra: StamhoofdFilter[]
+    ): StamhoofdFilter {
         return this.buildFilter(baseFilter, true, extra);
     }
 
-    private buildFilter(baseFilter: StamhoofdFilter, skipSettlement: boolean, extra: StamhoofdFilter[]): StamhoofdFilter {
+    private buildFilter(
+        baseFilter: StamhoofdFilter,
+        skipSettlement: boolean,
+        extra: StamhoofdFilter[],
+    ): StamhoofdFilter {
         const filters: StamhoofdFilter[] = baseFilter ? [baseFilter] : [];
 
         for (const pathFilter of this.pathFilters) {
@@ -254,10 +288,12 @@ export class BalanceItemBreakdownBuilder {
 
         const code = item.articleCode;
         this.byArticle
-            .row(code, () => BreakdownGroup.create({
-                id: code,
-                selection: createBalanceItemSelection(item.articleFilter, slice.amountType),
-            }))
+            .row(code, () =>
+                BreakdownGroup.create({
+                    id: code,
+                    selection: createBalanceItemSelection(item.articleFilter, slice.amountType),
+                }),
+            )
             .addPrice(slice.price)
             .countBalanceItem(item)
             .countWhole(item.id, getWholeAmount(item, slice.amountType))
@@ -302,7 +338,7 @@ export class BalanceItemBreakdownBuilder {
                     break;
                 }
                 case BreakdownTab.Settlement: {
-                    const part = parts.find(part => part.id === step.id);
+                    const part = parts.find((part) => part.id === step.id);
 
                     if (!part) {
                         return null;
@@ -311,7 +347,10 @@ export class BalanceItemBreakdownBuilder {
                     const selection = part.createGroup().selection;
 
                     // The path narrows down balance items, so it uses the filter that selects those
-                    this.pathFilters[index] ??= { filter: selection?.listFilter ?? selection?.filter ?? null, isSettlement: true };
+                    this.pathFilters[index] ??= {
+                        filter: selection?.listFilter ?? selection?.filter ?? null,
+                        isSettlement: true,
+                    };
                     this.sliceAmountType ??= part.amountType;
 
                     if (selection?.objectType === BreakdownObjectType.BalanceItemPayments) {

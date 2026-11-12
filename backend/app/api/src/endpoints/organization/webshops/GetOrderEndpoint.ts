@@ -17,7 +17,10 @@ export class GetOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBody
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/webshop/@id/order/@orderId', { id: String, orderId: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/order/@orderId', {
+            id: String,
+            orderId: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -29,7 +32,11 @@ export class GetOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBody
         const organization = await Context.setOrganizationScope({ willAuthenticate: false });
         const order = await Order.getByID(request.params.orderId);
 
-        if (!order || order.webshopId !== request.params.id || order.organizationId !== organization.id) {
+        if (
+            !order ||
+            order.webshopId !== request.params.id ||
+            order.organizationId !== organization.id
+        ) {
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Order not found',

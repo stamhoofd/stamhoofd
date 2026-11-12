@@ -4,9 +4,12 @@ import { OrganizationEmailService } from '../services/OrganizationEmailService.j
 import { isOutside } from './helpers/isOutside.js';
 import { useSavedIterator } from './helpers/useSavedIterator.js';
 
-const { iterate, isHoursAgo } = useSavedIterator(() => {
-    return Organization.select();
-}, { limit: 10, maxQueries: 5 });
+const { iterate, isHoursAgo } = useSavedIterator(
+    () => {
+        return Organization.select();
+    },
+    { limit: 10, maxQueries: 5 },
+);
 
 async function checkDrips() {
     if (STAMHOOFD.environment === 'development') {

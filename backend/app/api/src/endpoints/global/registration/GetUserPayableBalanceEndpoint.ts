@@ -1,7 +1,11 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { CachedBalance, Organization } from '@stamhoofd/models';
-import { PayableBalance, PayableBalanceCollection, ReceivableBalanceType } from '@stamhoofd/structures';
+import {
+    PayableBalance,
+    PayableBalanceCollection,
+    ReceivableBalanceType,
+} from '@stamhoofd/structures';
 
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -18,9 +22,10 @@ export class GetUserPayableBalanceEndpoint extends Endpoint<Params, Query, Body,
             return [false];
         }
 
-        const params = request.getVersion() >= 339
-            ? Endpoint.parseParameters(request.url, '/user/payable-balance', {})
-            : Endpoint.parseParameters(request.url, '/user/billing/status', {});
+        const params =
+            request.getVersion() >= 339
+                ? Endpoint.parseParameters(request.url, '/user/payable-balance', {})
+                : Endpoint.parseParameters(request.url, '/user/billing/status', {});
 
         if (params) {
             return [true, params as Params];
@@ -32,14 +37,30 @@ export class GetUserPayableBalanceEndpoint extends Endpoint<Params, Query, Body,
         const organization = await Context.setUserOrganizationScope();
         const { user } = await Context.authenticate();
 
-        return new Response(await GetUserPayableBalanceEndpoint.getBillingStatusForObjects([Context.impersonatedUserOrUser.id], organization, ReceivableBalanceType.user));
+        return new Response(
+            await GetUserPayableBalanceEndpoint.getBillingStatusForObjects(
+                [Context.impersonatedUserOrUser.id],
+                organization,
+                ReceivableBalanceType.user,
+            ),
+        );
     }
 
-    static async getBillingStatusForObjects(objectIds: string[], organization: Organization | null, objectType: ReceivableBalanceType) {
+    static async getBillingStatusForObjects(
+        objectIds: string[],
+        organization: Organization | null,
+        objectType: ReceivableBalanceType,
+    ) {
         // Load cached balances
-        const receivableBalances = await CachedBalance.getForObjects(objectIds, organization?.id, objectType);
+        const receivableBalances = await CachedBalance.getForObjects(
+            objectIds,
+            organization?.id,
+            objectType,
+        );
 
-        const organizationIds = Formatter.uniqueArray(receivableBalances.map(b => b.organizationId));
+        const organizationIds = Formatter.uniqueArray(
+            receivableBalances.map((b) => b.organizationId),
+        );
 
         let addOrganization = false;
         const i = organization ? organizationIds.indexOf(organization.id) : -1;
@@ -54,12 +75,13 @@ export class GetUserPayableBalanceEndpoint extends Endpoint<Params, Query, Body,
             organizations.push(organization);
         }
 
-        const authenticatedOrganizations = await AuthenticatedStructures.organizations(organizations);
+        const authenticatedOrganizations =
+            await AuthenticatedStructures.organizations(organizations);
 
         const billingStatus = PayableBalanceCollection.create({});
 
         for (const organization of authenticatedOrganizations) {
-            const items = receivableBalances.filter(b => b.organizationId === organization.id);
+            const items = receivableBalances.filter((b) => b.organizationId === organization.id);
 
             let amountOpen = 0;
             let amountPending = 0;
@@ -71,12 +93,14 @@ export class GetUserPayableBalanceEndpoint extends Endpoint<Params, Query, Body,
                 amountPaid += item.amountPaid;
             }
 
-            billingStatus.organizations.push(PayableBalance.create({
-                organization,
-                amountOpen,
-                amountPending,
-                amountPaid,
-            }));
+            billingStatus.organizations.push(
+                PayableBalance.create({
+                    organization,
+                    amountOpen,
+                    amountPending,
+                    amountPaid,
+                }),
+            );
         }
 
         return billingStatus;

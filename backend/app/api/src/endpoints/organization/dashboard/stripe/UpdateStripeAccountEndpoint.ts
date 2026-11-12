@@ -19,7 +19,9 @@ export class UpdateStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/stripe/accounts/@id', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/stripe/accounts/@id', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -33,7 +35,7 @@ export class UpdateStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Read)) {
+        if (!(await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Read))) {
             throw Context.auth.error();
         }
 
@@ -47,10 +49,13 @@ export class UpdateStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         const stripe = StripeHelper.getInstance();
         const account = await stripe.accounts.retrieve(model.accountId);
 
-        await AuditLogService.setContext({ userId: null, source: AuditLogSource.System }, async () => {
-            model.setMetaFromStripeAccount(account);
-            await model.save();
-        });
+        await AuditLogService.setContext(
+            { userId: null, source: AuditLogSource.System },
+            async () => {
+                model.setMetaFromStripeAccount(account);
+                await model.save();
+            },
+        );
         return new Response(StripeAccountStruct.create(model));
     }
 }

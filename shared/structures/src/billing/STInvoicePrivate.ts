@@ -21,11 +21,12 @@ export class STInvoicePrivate extends STInvoice {
         }
 
         if (
-            StringCompare.contains(this.meta.companyName, query)
-            || StringCompare.typoCount(this.meta.companyAddress.city, query) < 2
-            || StringCompare.contains(this.meta.companyContact, query)
-            || (this.meta.companyVATNumber && StringCompare.typoCount(this.meta.companyVATNumber, query) < 2)
-            || StringCompare.typoCount(this.meta.companyAddress.street, query) < 2
+            StringCompare.contains(this.meta.companyName, query) ||
+            StringCompare.typoCount(this.meta.companyAddress.city, query) < 2 ||
+            StringCompare.contains(this.meta.companyContact, query) ||
+            (this.meta.companyVATNumber &&
+                StringCompare.typoCount(this.meta.companyVATNumber, query) < 2) ||
+            StringCompare.typoCount(this.meta.companyAddress.street, query) < 2
         ) {
             return true;
         }
@@ -35,11 +36,11 @@ export class STInvoicePrivate extends STInvoice {
         }
 
         if (
-            StringCompare.typoCount(this.organization.name, query) < 2
-            || StringCompare.typoCount(this.organization.address.city, query) < 2
-            || StringCompare.typoCount(this.organization.address.street, query) < 2
-            || StringCompare.typoCount(this.meta.companyName, query) < 2
-            || StringCompare.typoCount(this.meta.companyName, query) < 2
+            StringCompare.typoCount(this.organization.name, query) < 2 ||
+            StringCompare.typoCount(this.organization.address.city, query) < 2 ||
+            StringCompare.typoCount(this.organization.address.street, query) < 2 ||
+            StringCompare.typoCount(this.meta.companyName, query) < 2 ||
+            StringCompare.typoCount(this.meta.companyName, query) < 2
         ) {
             return true;
         }

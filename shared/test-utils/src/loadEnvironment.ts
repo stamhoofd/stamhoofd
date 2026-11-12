@@ -14,7 +14,7 @@ export function getGlobalObject() {
         globalObject = self;
     }
 
-    return (globalObject as any);
+    return globalObject as any;
 }
 
 export function updateLinkedEnvs() {

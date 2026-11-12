@@ -5,9 +5,12 @@ export default [
     // This package must stay usable from both @stamhoofd/structures and @stamhoofd/sql, so it cannot import any internal package.
     {
         rules: {
-            'no-restricted-imports': ['error', {
-                patterns: ['@stamhoofd/*'],
-            }],
+            'no-restricted-imports': [
+                'error',
+                {
+                    patterns: ['@stamhoofd/*'],
+                },
+            ],
         },
     },
 ];

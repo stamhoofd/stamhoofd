@@ -4,7 +4,11 @@ import { Group } from '../Group.js';
 import { GroupSettings } from '../GroupSettings.js';
 import { MemberDetails } from './MemberDetails.js';
 import { Parent } from './Parent.js';
-import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from './UitpasNumberDetails.js';
+import {
+    UitpasNumberDetails,
+    UitpasSocialTariff,
+    UitpasSocialTariffStatus,
+} from './UitpasNumberDetails.js';
 
 describe('Correctly merge multiple details together', () => {
     test('Merge', () => {
@@ -47,7 +51,7 @@ describe('Correctly merge multiple details together', () => {
         // Only keep the heart + food allergies
         original.merge(incoming);
 
-        expect(original.parents.map(r => r.firstName)).toEqual(['Linda', 'Gewijzigd', 'Andere']);
+        expect(original.parents.map((r) => r.firstName)).toEqual(['Linda', 'Gewijzigd', 'Andere']);
     });
 
     describe('mergeParents', () => {
@@ -79,11 +83,7 @@ describe('Correctly merge multiple details together', () => {
             // The user didn't gave permissons for data collection
             const incoming = MemberDetails.create({
                 firstName: 'Robot',
-                parents: [
-                    parent1,
-                    parent2,
-                    parent3,
-                ],
+                parents: [parent1, parent2, parent3],
             });
 
             MemberDetails.mergeParents([incoming]);
@@ -92,10 +92,7 @@ describe('Correctly merge multiple details together', () => {
                     ...parent2,
                     createdAt: new Date(0),
                     id: parent3.id,
-                    alternativeEmails: [
-                        parent1.email!,
-                        parent3.email!,
-                    ],
+                    alternativeEmails: [parent1.email!, parent3.email!],
                 }),
             ]);
         });
@@ -128,21 +125,14 @@ describe('Correctly merge multiple details together', () => {
             // The user didn't gave permissons for data collection
             const incoming = MemberDetails.create({
                 firstName: 'Robot',
-                parents: [
-                    parent1,
-                    parent2,
-                    parent3,
-                ],
+                parents: [parent1, parent2, parent3],
             });
 
             MemberDetails.mergeParents([incoming]);
             expect(incoming.parents).toEqual([
                 Parent.create({
                     ...parent2,
-                    alternativeEmails: [
-                        parent1.email!,
-                        parent3.email!,
-                    ],
+                    alternativeEmails: [parent1.email!, parent3.email!],
                 }),
             ]);
         });
@@ -177,11 +167,7 @@ describe('Correctly merge multiple details together', () => {
             // The user didn't gave permissons for data collection
             const incoming = MemberDetails.create({
                 firstName: 'Robot',
-                parents: [
-                    parent1,
-                    parent2,
-                    parent3,
-                ],
+                parents: [parent1, parent2, parent3],
             });
 
             MemberDetails.mergeParents([incoming]);
@@ -249,37 +235,27 @@ describe('Correctly merge multiple details together', () => {
 
             const member1 = MemberDetails.create({
                 firstName: 'Member 1',
-                parents: [
-                    parent1,
-                ],
+                parents: [parent1],
             });
 
             const member2 = MemberDetails.create({
                 firstName: 'Member 2',
-                parents: [
-                    parent2,
-                ],
+                parents: [parent2],
             });
 
             const member3 = MemberDetails.create({
                 firstName: 'Member 3',
-                parents: [
-                    parent3,
-                ],
+                parents: [parent3],
             });
 
             const member4 = MemberDetails.create({
                 firstName: 'Member 4',
-                parents: [
-                    parent4,
-                ],
+                parents: [parent4],
             });
 
             const member5 = MemberDetails.create({
                 firstName: 'Member 5',
-                parents: [
-                    parent5,
-                ],
+                parents: [parent5],
             });
 
             MemberDetails.mergeParents([member1, member2, member3, member4, member5]);
@@ -331,16 +307,12 @@ describe('Correctly merge multiple details together', () => {
 
             const member1 = MemberDetails.create({
                 firstName: 'Member 1',
-                parents: [
-                    parent1,
-                ],
+                parents: [parent1],
             });
 
             const member2 = MemberDetails.create({
                 firstName: 'Member 2',
-                parents: [
-                    parent2,
-                ],
+                parents: [parent2],
             });
 
             MemberDetails.mergeParents([member1, member2]);
@@ -631,34 +603,37 @@ describe('Correctly merge multiple details together', () => {
             [null, true],
             [null, false],
             [null, null],
-        ] as const)('keeps isMemberTaxDependent %s and %s isolated between family members', (taxDependent1, taxDependent2) => {
-            const parent1 = Parent.create({
-                firstName: 'Shared',
-                lastName: 'Parent',
-                updatedAt: new Date(1000),
-                email: 'old@example.com',
-                isMemberTaxDependent: taxDependent1,
-                createdAt: new Date(500),
-            });
-            const parent2 = Parent.create({
-                id: parent1.id,
-                firstName: 'Shared',
-                lastName: 'Parent',
-                updatedAt: new Date(2000),
-                email: 'new@example.com',
-                isMemberTaxDependent: taxDependent2,
-                createdAt: new Date(500),
-            });
-            const member1 = MemberDetails.create({ firstName: 'Member 1', parents: [parent1] });
-            const member2 = MemberDetails.create({ firstName: 'Member 2', parents: [parent2] });
+        ] as const)(
+            'keeps isMemberTaxDependent %s and %s isolated between family members',
+            (taxDependent1, taxDependent2) => {
+                const parent1 = Parent.create({
+                    firstName: 'Shared',
+                    lastName: 'Parent',
+                    updatedAt: new Date(1000),
+                    email: 'old@example.com',
+                    isMemberTaxDependent: taxDependent1,
+                    createdAt: new Date(500),
+                });
+                const parent2 = Parent.create({
+                    id: parent1.id,
+                    firstName: 'Shared',
+                    lastName: 'Parent',
+                    updatedAt: new Date(2000),
+                    email: 'new@example.com',
+                    isMemberTaxDependent: taxDependent2,
+                    createdAt: new Date(500),
+                });
+                const member1 = MemberDetails.create({ firstName: 'Member 1', parents: [parent1] });
+                const member2 = MemberDetails.create({ firstName: 'Member 2', parents: [parent2] });
 
-            MemberDetails.mergeParents([member1, member2]);
+                MemberDetails.mergeParents([member1, member2]);
 
-            expect(member1.parents[0].email).toBe('new@example.com');
-            expect(member2.parents[0].email).toBe('new@example.com');
-            expect(member1.parents[0].isMemberTaxDependent).toBe(taxDependent1);
-            expect(member2.parents[0].isMemberTaxDependent).toBe(taxDependent2);
-        });
+                expect(member1.parents[0].email).toBe('new@example.com');
+                expect(member2.parents[0].email).toBe('new@example.com');
+                expect(member1.parents[0].isMemberTaxDependent).toBe(taxDependent1);
+                expect(member2.parents[0].isMemberTaxDependent).toBe(taxDependent2);
+            },
+        );
 
         test('does not transfer isMemberTaxDependent to a family member when duplicate parents with different ids merge', () => {
             const duplicate1 = Parent.create({
@@ -799,10 +774,22 @@ describe('Correctly merge multiple details together', () => {
 
             expect(memberWithDuplicates.parents).toHaveLength(2);
             expect(familyMember.parents).toHaveLength(2);
-            expect(memberWithDuplicates.parents.find(parent => parent.firstName === 'Mother')?.isMemberTaxDependent).toBe(false);
-            expect(memberWithDuplicates.parents.find(parent => parent.firstName === 'Father')?.isMemberTaxDependent).toBe(true);
-            expect(familyMember.parents.find(parent => parent.firstName === 'Mother')?.isMemberTaxDependent).toBe(true);
-            expect(familyMember.parents.find(parent => parent.firstName === 'Father')?.isMemberTaxDependent).toBeNull();
+            expect(
+                memberWithDuplicates.parents.find((parent) => parent.firstName === 'Mother')
+                    ?.isMemberTaxDependent,
+            ).toBe(false);
+            expect(
+                memberWithDuplicates.parents.find((parent) => parent.firstName === 'Father')
+                    ?.isMemberTaxDependent,
+            ).toBe(true);
+            expect(
+                familyMember.parents.find((parent) => parent.firstName === 'Mother')
+                    ?.isMemberTaxDependent,
+            ).toBe(true);
+            expect(
+                familyMember.parents.find((parent) => parent.firstName === 'Father')
+                    ?.isMemberTaxDependent,
+            ).toBeNull();
         });
 
         test('keeps merged parents as independent objects between family members', () => {
@@ -862,7 +849,11 @@ describe('Correctly merge multiple details together', () => {
     });
 
     describe('Should correctly merge UitpasNumberDetails', () => {
-        const cases: { details1: MemberDetails; details2: MemberDetails; expectedUitpasNumber: string }[] = [
+        const cases: {
+            details1: MemberDetails;
+            details2: MemberDetails;
+            expectedUitpasNumber: string;
+        }[] = [
             {
                 details1: MemberDetails.create({
                     firstName: 'Member 1',
@@ -916,7 +907,6 @@ describe('Correctly merge multiple details together', () => {
             {
                 details1: MemberDetails.create({
                     firstName: 'Member 1',
-
                 }),
                 details2: MemberDetails.create({
                     firstName: 'Member 2',
@@ -1020,21 +1010,28 @@ describe('Correctly merge multiple details together', () => {
 });
 
 describe('getMatchingError', () => {
-    const createGroup = () => Group.create({
-        organizationId: 'organization',
-        periodId: 'period',
-        settings: GroupSettings.create({
-            startDate: new Date('2026-09-01T10:00:00Z'),
-            endDate: new Date('2027-08-31T10:00:00Z'),
-            minAge: 6,
-            maxAge: 10,
-        }),
-    });
+    const createGroup = () =>
+        Group.create({
+            organizationId: 'organization',
+            periodId: 'period',
+            settings: GroupSettings.create({
+                startDate: new Date('2026-09-01T10:00:00Z'),
+                endDate: new Date('2027-08-31T10:00:00Z'),
+                minAge: 6,
+                maxAge: 10,
+            }),
+        });
 
     test('A member that is too old does not get the too young description', () => {
         const group = createGroup();
-        const tooYoung = MemberDetails.create({ firstName: 'Robot', birthDay: new Date('2022-05-01T10:00:00Z') }).getMatchingError(group);
-        const tooOld = MemberDetails.create({ firstName: 'Robot', birthDay: new Date('2012-05-01T10:00:00Z') }).getMatchingError(group);
+        const tooYoung = MemberDetails.create({
+            firstName: 'Robot',
+            birthDay: new Date('2022-05-01T10:00:00Z'),
+        }).getMatchingError(group);
+        const tooOld = MemberDetails.create({
+            firstName: 'Robot',
+            birthDay: new Date('2012-05-01T10:00:00Z'),
+        }).getMatchingError(group);
 
         expect(tooYoung?.message).toBe($t('%qX'));
         expect(tooOld?.message).toBe($t('%qY'));
@@ -1043,7 +1040,10 @@ describe('getMatchingError', () => {
     });
 
     test('A member within the age range has no error', () => {
-        const details = MemberDetails.create({ firstName: 'Robot', birthDay: new Date('2018-05-01T10:00:00Z') });
+        const details = MemberDetails.create({
+            firstName: 'Robot',
+            birthDay: new Date('2018-05-01T10:00:00Z'),
+        });
         expect(details.getMatchingError(createGroup())).toBeNull();
     });
 });

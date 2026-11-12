@@ -1,9 +1,28 @@
 import { field } from '@common/encoding';
-import type { CellValue, XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
+import type {
+    CellValue,
+    XlsxTransformerColumn,
+    XlsxTransformerConcreteColumn,
+} from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Order, StripeAccount } from '@stamhoofd/models';
 import type { OrderData } from '@stamhoofd/structures';
-import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelationType, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, OrderStatus, PaginatedResponse, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import {
+    BalanceItem,
+    BalanceItemPaymentDetailed,
+    BalanceItemRelationType,
+    BalanceItemType,
+    ExcelExportType,
+    getBalanceItemRelationTypeName,
+    getBalanceItemTypeName,
+    OrderStatus,
+    PaginatedResponse,
+    PaymentGeneral,
+    PaymentMethod,
+    PaymentMethodHelper,
+    PaymentStatusHelper,
+    StripeAccount as StripeAccountStruct,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
@@ -45,15 +64,21 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
         const data = await GetPaymentsEndpoint.buildData(requestQuery);
 
         // Also load Stripe Account Ids
-        const stripeAccountIds = Formatter.uniqueArray(data.results.map(p => p.stripeAccountId).filter(id => id !== null));
+        const stripeAccountIds = Formatter.uniqueArray(
+            data.results.map((p) => p.stripeAccountId).filter((id) => id !== null),
+        );
 
         let accounts: StripeAccountStruct[] = [];
         if (stripeAccountIds.length > 0) {
-            accounts = (await StripeAccount.getByIDs(...stripeAccountIds)).map(s => StripeAccountStruct.create(s));
+            accounts = (await StripeAccount.getByIDs(...stripeAccountIds)).map((s) =>
+                StripeAccountStruct.create(s),
+            );
         }
 
         const orderMap = await loadPaymentExportOrders(
-            data.results.flatMap(payment => payment.balanceItemPayments.map(item => item.balanceItem)),
+            data.results.flatMap((payment) =>
+                payment.balanceItemPayments.map((item) => item.balanceItem),
+            ),
         );
         const addedOrderIds = new Set<string>();
 
@@ -61,9 +86,15 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
             ...data,
             results: data.results.map((p) => {
                 const payment = PaymentGeneralWithStripeAccount.create(p);
-                payment.stripeAccount = p.stripeAccountId ? (accounts.find(a => a.id === p.stripeAccountId) ?? null) : null;
+                payment.stripeAccount = p.stripeAccountId
+                    ? (accounts.find((a) => a.id === p.stripeAccountId) ?? null)
+                    : null;
                 payment.orders = getPaymentOrders(payment, orderMap);
-                payment.expandedBalanceItemPayments = expandPaymentBalanceItemPayments(payment, orderMap, addedOrderIds);
+                payment.expandedBalanceItemPayments = expandPaymentBalanceItemPayments(
+                    payment,
+                    orderMap,
+                    addedOrderIds,
+                );
                 return payment;
             }),
         });
@@ -85,10 +116,11 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Payments, {
         {
             id: 'balanceItemPayments',
             name: $t('%Ly'),
-            transform: (data: PaymentGeneralWithStripeAccount): PaymentWithItem[] => data.expandedBalanceItemPayments.map(p => ({
-                payment: data,
-                balanceItemPayment: p,
-            })),
+            transform: (data: PaymentGeneralWithStripeAccount): PaymentWithItem[] =>
+                data.expandedBalanceItemPayments.map((p) => ({
+                    payment: data,
+                    balanceItemPayment: p,
+                })),
             columns: getBalanceItemPaymentColumns(),
         },
     ],
@@ -103,41 +135,44 @@ export function getBalanceItemPaymentColumns(): XlsxTransformerColumn<PaymentWit
         ...getBalanceItemColumns(),
 
         // Repeating columns need to de-transform again
-        ...[
-            ...getGeneralColumns(),
-            ...getInvoiceColumns(),
-            ...getPayingOrganizationColumns(),
-        ].map((c) => {
-            if ('match' in c) {
+        ...[...getGeneralColumns(), ...getInvoiceColumns(), ...getPayingOrganizationColumns()].map(
+            (c) => {
+                if ('match' in c) {
+                    return {
+                        ...c,
+                        match: (id: string) => {
+                            const result = c.match(id);
+                            if (!result) {
+                                return result;
+                            }
+
+                            return result.map((cc) => ({
+                                ...cc,
+                                getValue: (object: PaymentWithItem) => {
+                                    return cc.getValue(object.payment);
+                                },
+                            }));
+                        },
+                    };
+                }
+
                 return {
                     ...c,
-                    match: (id: string) => {
-                        const result = c.match(id);
-                        if (!result) {
-                            return result;
-                        }
-
-                        return result.map(cc => ({
-                            ...cc,
-                            getValue: (object: PaymentWithItem) => {
-                                return cc.getValue(object.payment);
-                            },
-                        }));
+                    getValue: (object: PaymentWithItem) => {
+                        return c.getValue(object.payment);
                     },
                 };
-            }
-
-            return {
-                ...c,
-                getValue: (object: PaymentWithItem) => {
-                    return c.getValue(object.payment);
-                },
-            };
-        }),
+            },
+        ),
     ];
 }
 
-export function createPaymentExportOrder(order: { id: string; number: number | null; status: OrderStatus; data: OrderData }): PaymentExportOrder {
+export function createPaymentExportOrder(order: {
+    id: string;
+    number: number | null;
+    status: OrderStatus;
+    data: OrderData;
+}): PaymentExportOrder {
     const isDeleted = order.status === OrderStatus.Deleted;
     return {
         id: order.id,
@@ -176,15 +211,19 @@ export function getExportOrder(
 /**
  * Loads the webshop orders the given balance items belong to, with the number they can be exported with.
  */
-export async function loadPaymentExportOrders(balanceItems: { orderId: string | null }[]): Promise<Map<string, PaymentExportOrder>> {
-    const orderIds = Formatter.uniqueArray(balanceItems.flatMap(item => item.orderId ? [item.orderId] : []));
+export async function loadPaymentExportOrders(
+    balanceItems: { orderId: string | null }[],
+): Promise<Map<string, PaymentExportOrder>> {
+    const orderIds = Formatter.uniqueArray(
+        balanceItems.flatMap((item) => (item.orderId ? [item.orderId] : [])),
+    );
 
     if (orderIds.length === 0) {
         return new Map();
     }
 
     const orders = await Order.getByIDs(...orderIds);
-    return new Map(orders.map(order => [order.id, createPaymentExportOrder(order)]));
+    return new Map(orders.map((order) => [order.id, createPaymentExportOrder(order)]));
 }
 
 /**
@@ -192,8 +231,8 @@ export async function loadPaymentExportOrders(balanceItems: { orderId: string | 
  * had a webshop order. A single live order is written as a number, so the column stays sortable.
  */
 export function getOrderNumberCell(orders: PaymentExportOrder[]): CellValue {
-    const numbers = orders.flatMap(order => order.number !== null ? [order.number] : []);
-    const hasDeleted = orders.some(order => order.isDeleted);
+    const numbers = orders.flatMap((order) => (order.number !== null ? [order.number] : []));
+    const hasDeleted = orders.some((order) => order.isDeleted);
 
     if (numbers.length === 1 && !hasDeleted) {
         return {
@@ -206,7 +245,7 @@ export function getOrderNumberCell(orders: PaymentExportOrder[]): CellValue {
         };
     }
 
-    const parts = numbers.map(number => number.toString());
+    const parts = numbers.map((number) => number.toString());
     if (hasDeleted) {
         parts.push($t('%1FX'));
     }
@@ -312,14 +351,21 @@ function addOrderDiscountRows(
 ) {
     let remainingDiscountablePrice = order.data.cart.price;
 
-    const appliedPercentageDiscount = Math.min(order.data.appliedPercentageDiscount, remainingDiscountablePrice);
+    const appliedPercentageDiscount = Math.min(
+        order.data.appliedPercentageDiscount,
+        remainingDiscountablePrice,
+    );
     if (appliedPercentageDiscount > 0) {
         rows.push(
             createSyntheticBalanceItemPayment({
                 source: item,
                 order,
-                customTitle: $t('%1ei', { percentage: Formatter.percentage(order.data.percentageDiscount) }),
-                description: $t('%1ei', { percentage: Formatter.percentage(order.data.percentageDiscount) }),
+                customTitle: $t('%1ei', {
+                    percentage: Formatter.percentage(order.data.percentageDiscount),
+                }),
+                description: $t('%1ei', {
+                    percentage: Formatter.percentage(order.data.percentageDiscount),
+                }),
                 amount: 1,
                 price: -appliedPercentageDiscount,
             }),
@@ -365,18 +411,22 @@ function createSyntheticBalanceItemPayment({
     amount: number;
     price: number;
 }): PaymentExportBalanceItemPayment {
-    return createExportBalanceItemPayment(BalanceItemPaymentDetailed.create({
-        ...source,
-        price,
-        balanceItem: BalanceItem.create({
-            ...source.balanceItem,
-            type: BalanceItemType.Order,
-            relations: new Map(source.balanceItem.relations),
-            name: description,
-            amount,
-            unitPrice: amount === 0 ? 0 : price / amount,
+    return createExportBalanceItemPayment(
+        BalanceItemPaymentDetailed.create({
+            ...source,
+            price,
+            balanceItem: BalanceItem.create({
+                ...source.balanceItem,
+                type: BalanceItemType.Order,
+                relations: new Map(source.balanceItem.relations),
+                name: description,
+                amount,
+                unitPrice: amount === 0 ? 0 : price / amount,
+            }),
         }),
-    }), customTitle, order);
+        customTitle,
+        order,
+    );
 }
 
 export function createExportBalanceItemPayment(
@@ -441,7 +491,9 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
             width: 30,
             getValue: (object: PaymentWithItem) => {
                 return {
-                    value: Formatter.capitalizeFirstLetter(object.balanceItemPayment.balanceItem.category),
+                    value: Formatter.capitalizeFirstLetter(
+                        object.balanceItemPayment.balanceItem.category,
+                    ),
                 };
             },
         },
@@ -450,7 +502,9 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
             name: $t('%vC'),
             width: 40,
             getValue: (object: PaymentWithItem) => ({
-                value: object.balanceItemPayment.customTitle || object.balanceItemPayment.balanceItem.itemTitle,
+                value:
+                    object.balanceItemPayment.customTitle ||
+                    object.balanceItemPayment.balanceItem.itemTitle,
             }),
         },
         {
@@ -458,7 +512,9 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
             name: $t('%6o'),
             width: 50,
             getValue: (object: PaymentWithItem) => ({
-                value: object.balanceItemPayment.balanceItem.itemDescription || object.balanceItemPayment.balanceItem.name,
+                value:
+                    object.balanceItemPayment.balanceItem.itemDescription ||
+                    object.balanceItemPayment.balanceItem.name,
                 style: {
                     alignment: {
                         wrapText: true,
@@ -503,7 +559,10 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
                                 name: getBalanceItemRelationTypeName(type),
                                 width: 35,
                                 getValue: (object: PaymentWithItem) => ({
-                                    value: object.balanceItemPayment.balanceItem.relations.get(type)?.name?.toString() || '',
+                                    value:
+                                        object.balanceItemPayment.balanceItem.relations
+                                            .get(type)
+                                            ?.name?.toString() || '',
                                 }),
                             },
                         ];
@@ -636,7 +695,7 @@ function getGeneralColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>[] {
             name: $t('%X'),
             width: 60,
             getValue: (object: PaymentGeneralWithStripeAccount) => ({
-                value: object.balanceItemPayments.map(p => p.toString()).join('\n'),
+                value: object.balanceItemPayments.map((p) => p.toString()).join('\n'),
                 style: {
                     alignment: {
                         wrapText: true,
@@ -653,7 +712,8 @@ export function getOrderColumns(): XlsxTransformerConcreteColumn<PaymentGeneral>
             id: 'orderNumbers',
             name: $t('%xA'),
             width: 24,
-            getValue: (object: PaymentGeneralWithStripeAccount) => getOrderNumberCell(object.orders),
+            getValue: (object: PaymentGeneralWithStripeAccount) =>
+                getOrderNumberCell(object.orders),
         },
     ];
 }
@@ -691,7 +751,10 @@ function getSettlementColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             width: 18,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
                 return {
-                    value: object.settlement?.amount !== undefined ? (object.settlement?.amount / 1_0000) : null,
+                    value:
+                        object.settlement?.amount !== undefined
+                            ? object.settlement?.amount / 1_0000
+                            : null,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -817,9 +880,19 @@ function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             name: $t('%J5'),
             width: 25,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
-                if (!object.transferSettings && object.stripeAccount && object.stripeAccount?.meta.bank_account_bank_name) {
+                if (
+                    !object.transferSettings &&
+                    object.stripeAccount &&
+                    object.stripeAccount?.meta.bank_account_bank_name
+                ) {
                     return {
-                        value: (object.stripeAccount.meta.bank_account_name || object.stripeAccount.meta.business_profile?.name || object.stripeAccount.meta.company?.name) + ' (' + (object.stripeAccount?.meta.bank_account_bank_name || '') + ')',
+                        value:
+                            (object.stripeAccount.meta.bank_account_name ||
+                                object.stripeAccount.meta.business_profile?.name ||
+                                object.stripeAccount.meta.company?.name) +
+                            ' (' +
+                            (object.stripeAccount?.meta.bank_account_bank_name || '') +
+                            ')',
                     };
                 }
 
@@ -833,7 +906,11 @@ function getTransferColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
             name: $t('%MO'),
             width: 30,
             getValue: (object: PaymentGeneralWithStripeAccount) => {
-                if (!object.transferSettings && object.stripeAccount && object.stripeAccount?.meta.bank_account_last4) {
+                if (
+                    !object.transferSettings &&
+                    object.stripeAccount &&
+                    object.stripeAccount?.meta.bank_account_last4
+                ) {
                     return {
                         value: 'xxxx ' + object.stripeAccount?.meta.bank_account_last4,
                     };
@@ -881,7 +958,7 @@ function getPayingOrganizationColumns(): XlsxTransformerColumn<PaymentGeneral>[]
         },
         XlsxTransformerColumnHelper.createAddressColumns<PaymentGeneralWithStripeAccount>({
             matchId: 'payingOrganization.address',
-            getAddress: object => object.payingOrganization?.address,
+            getAddress: (object) => object.payingOrganization?.address,
         }),
     ];
 }
@@ -940,7 +1017,7 @@ function getInvoiceColumns(): XlsxTransformerColumn<PaymentGeneral>[] {
         },
         XlsxTransformerColumnHelper.createAddressColumns<PaymentGeneralWithStripeAccount>({
             matchId: 'customer.company.address',
-            getAddress: object => object.customer?.company?.address,
+            getAddress: (object) => object.customer?.company?.address,
         }),
         {
             id: 'customer.company.administrationEmail',

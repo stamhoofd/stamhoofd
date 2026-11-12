@@ -3,7 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { Cart } from './Cart.js';
 import { CartItem, CartItemOption } from './CartItem.js';
 import { Checkout } from './Checkout.js';
-import { Discount, OptionSelectionRequirement, ProductDiscount, ProductDiscountSettings, ProductSelector, ProductsSelector } from './Discount.js';
+import {
+    Discount,
+    OptionSelectionRequirement,
+    ProductDiscount,
+    ProductDiscountSettings,
+    ProductSelector,
+    ProductsSelector,
+} from './Discount.js';
 import { Option, OptionMenu, Product, ProductPrice } from './Product.js';
 import { Webshop } from './Webshop.js';
 import { WebshopMetaData } from './WebshopMetaData.js';
@@ -22,10 +29,7 @@ function createProductWithOptions(multipleChoice = true) {
     const optionMenu = OptionMenu.create({
         name: "Kies je extra's",
         multipleChoice,
-        options: [
-            Option.create({ name: 'Opdruk' }),
-            Option.create({ name: 'Naam' }),
-        ],
+        options: [Option.create({ name: 'Opdruk' }), Option.create({ name: 'Naam' })],
     });
 
     const product = Product.create({
@@ -91,8 +95,12 @@ describe('ProductSelector.doesMatch', () => {
         const [smallPrice, largePrice] = product.prices;
         const selector = ProductSelector.create({ productId: product.id });
 
-        expect(selector.doesMatch(CartItem.create({ product, productPrice: smallPrice }))).toBe(true);
-        expect(selector.doesMatch(CartItem.create({ product, productPrice: largePrice }))).toBe(true);
+        expect(selector.doesMatch(CartItem.create({ product, productPrice: smallPrice }))).toBe(
+            true,
+        );
+        expect(selector.doesMatch(CartItem.create({ product, productPrice: largePrice }))).toBe(
+            true,
+        );
     });
 
     it('only matches the selected product prices', () => {
@@ -103,8 +111,12 @@ describe('ProductSelector.doesMatch', () => {
             productPriceIds: [smallPrice.id],
         });
 
-        expect(selector.doesMatch(CartItem.create({ product, productPrice: smallPrice }))).toBe(true);
-        expect(selector.doesMatch(CartItem.create({ product, productPrice: largePrice }))).toBe(false);
+        expect(selector.doesMatch(CartItem.create({ product, productPrice: smallPrice }))).toBe(
+            true,
+        );
+        expect(selector.doesMatch(CartItem.create({ product, productPrice: largePrice }))).toBe(
+            false,
+        );
     });
 
     it('does not match a different product', () => {
@@ -112,7 +124,11 @@ describe('ProductSelector.doesMatch', () => {
         const otherProduct = createProduct();
         const selector = ProductSelector.create({ productId: product.id });
 
-        expect(selector.doesMatch(CartItem.create({ product: otherProduct, productPrice: otherProduct.prices[0] }))).toBe(false);
+        expect(
+            selector.doesMatch(
+                CartItem.create({ product: otherProduct, productPrice: otherProduct.prices[0] }),
+            ),
+        ).toBe(false);
     });
 
     it('does not match a cart item that contains an excluded option', () => {
@@ -170,7 +186,9 @@ describe('ProductSelector.getOptionRequirement', () => {
             optionIds: new Map([[optionA.id, OptionSelectionRequirement.Excluded]]),
         });
 
-        expect(selector.getOptionRequirement(optionMenu, optionB)).toBe(OptionSelectionRequirement.Optional);
+        expect(selector.getOptionRequirement(optionMenu, optionB)).toBe(
+            OptionSelectionRequirement.Optional,
+        );
     });
 
     it('defaults to optional in a choose one menu when all listed options are optional', () => {
@@ -180,7 +198,9 @@ describe('ProductSelector.getOptionRequirement', () => {
             optionIds: new Map([[optionA.id, OptionSelectionRequirement.Optional]]),
         });
 
-        expect(selector.getOptionRequirement(optionMenu, optionB)).toBe(OptionSelectionRequirement.Optional);
+        expect(selector.getOptionRequirement(optionMenu, optionB)).toBe(
+            OptionSelectionRequirement.Optional,
+        );
     });
 
     it('defaults to excluded in a choose one menu when another option is required', () => {
@@ -190,7 +210,9 @@ describe('ProductSelector.getOptionRequirement', () => {
             optionIds: new Map([[optionA.id, OptionSelectionRequirement.Required]]),
         });
 
-        expect(selector.getOptionRequirement(optionMenu, optionB)).toBe(OptionSelectionRequirement.Excluded);
+        expect(selector.getOptionRequirement(optionMenu, optionB)).toBe(
+            OptionSelectionRequirement.Excluded,
+        );
     });
 
     it('matches a cart item with an unlisted option in a choose one menu of optional options', () => {

@@ -1,6 +1,20 @@
 import type { Organization } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, MemberFactory, OrganizationFactory, Payment } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, PaymentMethod, PaymentStatus, ReceivableBalanceType, TranslatedString } from '@stamhoofd/structures';
+import {
+    BalanceItem,
+    BalanceItemPayment,
+    MemberFactory,
+    OrganizationFactory,
+    Payment,
+} from '@stamhoofd/models';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    PaymentMethod,
+    PaymentStatus,
+    ReceivableBalanceType,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { PaymentReallocationService } from './PaymentReallocationService.js';
 import { BalanceItemService } from './BalanceItemService.js';
 
@@ -15,7 +29,7 @@ async function getOrganization() {
 
 async function getMember() {
     return await new MemberFactory({
-        organization: (await getOrganization()),
+        organization: await getOrganization(),
     }).create();
 }
 
@@ -46,10 +60,13 @@ async function createItem(options: {
 
     if (options.relations) {
         for (const [type, id] of Object.entries(options.relations)) {
-            b.relations.set(type as BalanceItemRelationType, BalanceItemRelation.create({
-                id,
-                name: new TranslatedString('Test ' + id),
-            }));
+            b.relations.set(
+                type as BalanceItemRelationType,
+                BalanceItemRelation.create({
+                    id,
+                    name: new TranslatedString('Test ' + id),
+                }),
+            );
         }
     }
     await b.save();
@@ -117,15 +134,52 @@ async function createItem(options: {
     return balance;
 }
 
-async function expectItem(b: BalanceItem, options: { pricePaid?: number; priceOpen?: number; pricePending?: number; paid?: number[]; pending?: number[]; failed?: number[] }) {
+async function expectItem(
+    b: BalanceItem,
+    options: {
+        pricePaid?: number;
+        priceOpen?: number;
+        pricePending?: number;
+        paid?: number[];
+        pending?: number[];
+        failed?: number[];
+    },
+) {
     await BalanceItemService.updatePaidAndPending([b]);
     b = (await BalanceItem.getByID(b.id))!;
 
     const loaded = await BalanceItem.loadPayments([b]);
 
-    const actualPaidList = loaded.balanceItemPayments.filter(bp => bp.balanceItemId === b.id && loaded.payments.find(p => p.status === PaymentStatus.Succeeded && p.id === bp.paymentId)).map(bp => bp.price);
-    const actualPendingList = loaded.balanceItemPayments.filter(bp => bp.balanceItemId === b.id && loaded.payments.find(p => (p.status === PaymentStatus.Pending || p.status === PaymentStatus.Created) && p.id === bp.paymentId)).map(bp => bp.price);
-    const actualFailedList = loaded.balanceItemPayments.filter(bp => bp.balanceItemId === b.id && loaded.payments.find(p => p.status === PaymentStatus.Failed && p.id === bp.paymentId)).map(bp => bp.price);
+    const actualPaidList = loaded.balanceItemPayments
+        .filter(
+            (bp) =>
+                bp.balanceItemId === b.id &&
+                loaded.payments.find(
+                    (p) => p.status === PaymentStatus.Succeeded && p.id === bp.paymentId,
+                ),
+        )
+        .map((bp) => bp.price);
+    const actualPendingList = loaded.balanceItemPayments
+        .filter(
+            (bp) =>
+                bp.balanceItemId === b.id &&
+                loaded.payments.find(
+                    (p) =>
+                        (p.status === PaymentStatus.Pending ||
+                            p.status === PaymentStatus.Created) &&
+                        p.id === bp.paymentId,
+                ),
+        )
+        .map((bp) => bp.price);
+    const actualFailedList = loaded.balanceItemPayments
+        .filter(
+            (bp) =>
+                bp.balanceItemId === b.id &&
+                loaded.payments.find(
+                    (p) => p.status === PaymentStatus.Failed && p.id === bp.paymentId,
+                ),
+        )
+        .map((bp) => bp.price);
 
     if (options.paid !== undefined) {
         expect(actualPaidList).toIncludeSameMembers(options.paid);
@@ -448,7 +502,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
-                items => BalanceItemService.updatePaidAndPending(items),
+                (items) => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -496,7 +550,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
-                items => BalanceItemService.updatePaidAndPending(items),
+                (items) => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -552,7 +606,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
-                items => BalanceItemService.updatePaidAndPending(items),
+                (items) => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -613,7 +667,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
-                items => BalanceItemService.updatePaidAndPending(items),
+                (items) => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -673,7 +727,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
-                items => BalanceItemService.updatePaidAndPending(items),
+                (items) => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -733,7 +787,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
-                items => BalanceItemService.updatePaidAndPending(items),
+                (items) => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -789,7 +843,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
-                items => BalanceItemService.updatePaidAndPending(items),
+                (items) => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -845,7 +899,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
-                items => BalanceItemService.updatePaidAndPending(items),
+                (items) => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal
@@ -913,7 +967,7 @@ describe('PaymentReallocationService', () => {
                 (await getOrganization()).id,
                 memberId,
                 ReceivableBalanceType.member,
-                items => BalanceItemService.updatePaidAndPending(items),
+                (items) => BalanceItemService.updatePaidAndPending(items),
             );
 
             // Check if the balance items are now equal

@@ -54,12 +54,16 @@ describe('Endpoint.CheckMollie', () => {
     });
 
     test('A token connected without the balances scope has to be reconnected', async () => {
-        const body = await check(MollieRequiredScopes.filter(s => s !== 'balances.read'));
-        expect(body.organization.privateMeta?.mollieOnboarding?.missingScopes).toEqual(['balances.read']);
+        const body = await check(MollieRequiredScopes.filter((s) => s !== 'balances.read'));
+        expect(body.organization.privateMeta?.mollieOnboarding?.missingScopes).toEqual([
+            'balances.read',
+        ]);
     });
 
     test('A token with unknown scopes is treated as missing all of them', async () => {
         const body = await check(null);
-        expect(body.organization.privateMeta?.mollieOnboarding?.missingScopes).toEqual(MollieRequiredScopes);
+        expect(body.organization.privateMeta?.mollieOnboarding?.missingScopes).toEqual(
+            MollieRequiredScopes,
+        );
     });
 });

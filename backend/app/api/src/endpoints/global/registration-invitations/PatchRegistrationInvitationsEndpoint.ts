@@ -16,11 +16,19 @@ type Query = undefined;
 type Body = PatchableArrayAutoEncoder<RegistrationInvitationRequest>;
 type ResponseBody = RegistrationInvitationStruct[];
 
-export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class PatchRegistrationInvitationsEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     bodyDecoder = new PatchableArrayDecoder(
         RegistrationInvitationRequest as Decoder<RegistrationInvitationRequest>,
-        RegistrationInvitationRequest.patchType() as Decoder<AutoEncoderPatchType<RegistrationInvitationRequest>>,
-        StringDecoder);
+        RegistrationInvitationRequest.patchType() as Decoder<
+            AutoEncoderPatchType<RegistrationInvitationRequest>
+        >,
+        StringDecoder,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -41,7 +49,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
 
         // Fast throw first (more in depth checking for patches later)
         if (organization) {
-            if (!await Context.auth.hasSomeAccess(organization.id)) {
+            if (!(await Context.auth.hasSomeAccess(organization.id))) {
                 throw Context.auth.error();
             }
         } else if (!Context.auth.hasSomePlatformAccess()) {
@@ -53,7 +61,10 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
 
         const puts = request.body.getPuts();
         for (const { put } of puts) {
-            const group = await this.checkCanCreateRegistrationInvitation(put, organization?.id ?? null);
+            const group = await this.checkCanCreateRegistrationInvitation(
+                put,
+                organization?.id ?? null,
+            );
 
             const invitation = new RegistrationInvitation();
             invitation.id = put.id;
@@ -88,7 +99,8 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
             throw new SimpleError({
                 code: 'patch_not_supported',
                 statusCode: 405,
-                message: 'Patching invitations is not supported. Only puts and deletes are supported.',
+                message:
+                    'Patching invitations is not supported. Only puts and deletes are supported.',
             });
         }
 
@@ -105,7 +117,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
             // Anyone with write access to the group can delete invitations for the group
             const group = await Group.getByID(invitation.groupId);
 
-            if (!group || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+            if (!group || !(await Context.auth.canAccessGroup(group, PermissionLevel.Write))) {
                 throw Context.auth.error($t('%1UN'));
             }
 
@@ -122,9 +134,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
             });
         }
 
-        return new Response(
-            await AuthenticatedStructures.registrationInvitations(invitations),
-        );
+        return new Response(await AuthenticatedStructures.registrationInvitations(invitations));
     }
 
     /**
@@ -133,10 +143,17 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
      * @param organizationId organization scope of the request; when set, the group must belong to it (platform admins can invite without a scope)
      * @returns the group to invite for
      */
-    private async checkCanCreateRegistrationInvitation(invitation: RegistrationInvitationRequest, organizationId: string | null): Promise<Group> {
+    private async checkCanCreateRegistrationInvitation(
+        invitation: RegistrationInvitationRequest,
+        organizationId: string | null,
+    ): Promise<Group> {
         const group = await Group.getByID(invitation.groupId);
 
-        if (!group || (organizationId !== null && group.organizationId !== organizationId) || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
+        if (
+            !group ||
+            (organizationId !== null && group.organizationId !== organizationId) ||
+            !(await Context.auth.canAccessGroup(group, PermissionLevel.Write))
+        ) {
             throw Context.auth.error($t('%1ST'));
         }
 
@@ -151,17 +168,24 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
 
         const member = await Member.getByIdWithUsersAndRegistrations(invitation.memberId);
 
-        if (!member
+        if (
+            !member ||
             // in userMode 'organization' we can only invite members from the same organization
-            || (STAMHOOFD.userMode === 'organization' && member.organizationId !== group.organizationId)
+            (STAMHOOFD.userMode === 'organization' &&
+                member.organizationId !== group.organizationId) ||
             // read access is suficient
-            || !await Context.auth.canAccessMember(member, PermissionLevel.Read)
+            !(await Context.auth.canAccessMember(member, PermissionLevel.Read))
         ) {
             throw Context.auth.error($t('%1Qv'));
         }
 
         // cannot invite if already registered
-        if (member.registrations.some(r => r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null)) {
+        if (
+            member.registrations.some(
+                (r) =>
+                    r.groupId === group.id && r.registeredAt !== null && r.deactivatedAt === null,
+            )
+        ) {
             throw new SimpleError({
                 code: 'bad_group',
                 statusCode: 400,

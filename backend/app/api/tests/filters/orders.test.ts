@@ -1,6 +1,15 @@
 import { Database } from '@node/database';
 import type { Organization, Webshop } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, Order, OrganizationFactory, Payment, Ticket, TicketFactory, WebshopFactory } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemPayment,
+    Order,
+    OrganizationFactory,
+    Payment,
+    Ticket,
+    TicketFactory,
+    WebshopFactory,
+} from '@stamhoofd/models';
 import { compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 import { parsePhoneNumber } from 'libphonenumber-js/max';
@@ -11,16 +20,44 @@ import { Address } from '@stamhoofd/structures/addresses/Address.js';
 import { compileToInMemoryFilter } from '@stamhoofd/structures/filters/InMemoryFilter.js';
 import { privateOrderWithTicketsFilterCompilers } from '@stamhoofd/structures/filters/inMemoryFilterDefinitions.js';
 import { getOrderSearchFilter } from '@stamhoofd/structures/filters/searchFilterFactories.js';
-import { RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordTextAnswer } from '@stamhoofd/structures/members/records/RecordAnswer.js';
-import { RecordChoice, RecordSettings, RecordType } from '@stamhoofd/structures/members/records/RecordSettings.js';
+import {
+    RecordCheckboxAnswer,
+    RecordChooseOneAnswer,
+    RecordDateAnswer,
+    RecordIntegerAnswer,
+    RecordMultipleChoiceAnswer,
+    RecordTextAnswer,
+} from '@stamhoofd/structures/members/records/RecordAnswer.js';
+import {
+    RecordChoice,
+    RecordSettings,
+    RecordType,
+} from '@stamhoofd/structures/members/records/RecordSettings.js';
 import { Cart } from '@stamhoofd/structures/webshops/Cart.js';
-import { CartItem, CartItemOption, CartItemPrice } from '@stamhoofd/structures/webshops/CartItem.js';
+import {
+    CartItem,
+    CartItemOption,
+    CartItemPrice,
+} from '@stamhoofd/structures/webshops/CartItem.js';
 import { Customer } from '@stamhoofd/structures/webshops/Customer.js';
 import { DiscountCode } from '@stamhoofd/structures/webshops/DiscountCode.js';
-import { OrderData, OrderStatus, PrivateOrderWithTickets } from '@stamhoofd/structures/webshops/Order.js';
-import { Option, OptionMenu, Product, ProductPrice } from '@stamhoofd/structures/webshops/Product.js';
+import {
+    OrderData,
+    OrderStatus,
+    PrivateOrderWithTickets,
+} from '@stamhoofd/structures/webshops/Order.js';
+import {
+    Option,
+    OptionMenu,
+    Product,
+    ProductPrice,
+} from '@stamhoofd/structures/webshops/Product.js';
 import { TicketPrivate } from '@stamhoofd/structures/webshops/Ticket.js';
-import { CheckoutMethodType, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures/webshops/WebshopMetaData.js';
+import {
+    CheckoutMethodType,
+    WebshopTakeoutMethod,
+    WebshopTimeSlot,
+} from '@stamhoofd/structures/webshops/WebshopMetaData.js';
 import { WebshopField, WebshopFieldAnswer } from '@stamhoofd/structures/webshops/WebshopField.js';
 import { Country } from '@stamhoofd/types/Country';
 
@@ -61,16 +98,24 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
 
     // --- order creation helpers ------------------------------------------------------------------------
 
-    const address = () => Address.create({
-        street: 'Demostraat',
-        number: '15',
-        postalCode: '9000',
-        city: 'Gent',
-        country: Country.Belgium,
-    });
+    const address = () =>
+        Address.create({
+            street: 'Demostraat',
+            number: '15',
+            postalCode: '9000',
+            city: 'Gent',
+            country: Country.Belgium,
+        });
 
     /** A cart item with a fixed, deterministic price so totalPrice/amount are predictable. */
-    function cartItem(options: { productId?: string; productPriceId?: string; amount?: number; unitPrice?: number } = {}) {
+    function cartItem(
+        options: {
+            productId?: string;
+            productPriceId?: string;
+            amount?: number;
+            unitPrice?: number;
+        } = {},
+    ) {
         const amount = options.amount ?? 1;
         const unitPrice = options.unitPrice ?? 0;
         return CartItem.create({
@@ -81,18 +126,28 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         });
     }
 
-    function orderData(options: {
-        firstName?: string;
-        lastName?: string;
-        email?: string;
-        phone?: string;
-        timeSlot?: WebshopTimeSlot | null;
-        checkoutMethod?: WebshopTakeoutMethod | null;
-        discountCodes?: DiscountCode[];
-        items?: CartItem[];
-        recordAnswers?: Map<string, RecordCheckboxAnswer | RecordTextAnswer | RecordChooseOneAnswer | RecordMultipleChoiceAnswer | RecordDateAnswer | RecordIntegerAnswer>;
-        paymentMethod?: PaymentMethod;
-    } = {}): OrderData {
+    function orderData(
+        options: {
+            firstName?: string;
+            lastName?: string;
+            email?: string;
+            phone?: string;
+            timeSlot?: WebshopTimeSlot | null;
+            checkoutMethod?: WebshopTakeoutMethod | null;
+            discountCodes?: DiscountCode[];
+            items?: CartItem[];
+            recordAnswers?: Map<
+                string,
+                | RecordCheckboxAnswer
+                | RecordTextAnswer
+                | RecordChooseOneAnswer
+                | RecordMultipleChoiceAnswer
+                | RecordDateAnswer
+                | RecordIntegerAnswer
+            >;
+            paymentMethod?: PaymentMethod;
+        } = {},
+    ): OrderData {
         return OrderData.create({
             customer: Customer.create({
                 firstName: options.firstName ?? 'John',
@@ -109,13 +164,15 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         });
     }
 
-    async function createOrder(options: {
-        data?: OrderData;
-        status?: OrderStatus;
-        number?: number | null;
-        validAt?: Date | null;
-        createdAt?: Date;
-    } = {}): Promise<Order> {
+    async function createOrder(
+        options: {
+            data?: OrderData;
+            status?: OrderStatus;
+            number?: number | null;
+            validAt?: Date | null;
+            createdAt?: Date;
+        } = {},
+    ): Promise<Order> {
         const order = new Order();
         order.organizationId = organization.id;
         order.webshopId = webshop.id;
@@ -131,7 +188,10 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
     }
 
     /** Attaches a balance item to an order (needed for amountToPay and to hang payments off). */
-    async function addBalanceItem(order: Order, options: { unitPrice: number; amount?: number; pricePaid?: number }): Promise<BalanceItem> {
+    async function addBalanceItem(
+        order: Order,
+        options: { unitPrice: number; amount?: number; pricePaid?: number },
+    ): Promise<BalanceItem> {
         const balanceItem = new BalanceItem();
         balanceItem.organizationId = organization.id;
         balanceItem.orderId = order.id;
@@ -143,13 +203,16 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         return balanceItem;
     }
 
-    async function addPayment(balanceItem: BalanceItem, options: {
-        method: PaymentMethod;
-        price: number;
-        status?: PaymentStatus;
-        paidAt?: Date | null;
-        transferDescription?: string | null;
-    }): Promise<Payment> {
+    async function addPayment(
+        balanceItem: BalanceItem,
+        options: {
+            method: PaymentMethod;
+            price: number;
+            status?: PaymentStatus;
+            paidAt?: Date | null;
+            transferDescription?: string | null;
+        },
+    ): Promise<Payment> {
         const payment = new Payment();
         payment.method = options.method;
         payment.status = options.status ?? PaymentStatus.Succeeded;
@@ -170,7 +233,11 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
     }
 
     /** Adds one ticket per entry: scanned at that date, or not scanned (null). */
-    async function addTickets(order: Order, scannedAts: (Date | null)[], options: { deleted?: boolean } = {}): Promise<void> {
+    async function addTickets(
+        order: Order,
+        scannedAts: (Date | null)[],
+        options: { deleted?: boolean } = {},
+    ): Promise<void> {
         for (const scannedAt of scannedAts) {
             const ticket = await new TicketFactory({ order }).create();
             ticket.scannedAt = scannedAt;
@@ -188,24 +255,37 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         const structures = await Order.getPrivateStructures(orders);
         // Like the dashboard, which removes deleted tickets from its local orders
         const tickets = await Ticket.where({ organizationId: organization.id, deletedAt: null });
-        const withTickets = structures.map(s => PrivateOrderWithTickets.create({
-            ...s,
-            tickets: tickets.filter(t => t.orderId === s.id).map(t => TicketPrivate.create({ ...t })),
-        }));
+        const withTickets = structures.map((s) =>
+            PrivateOrderWithTickets.create({
+                ...s,
+                tickets: tickets
+                    .filter((t) => t.orderId === s.id)
+                    .map((t) => TicketPrivate.create({ ...t })),
+            }),
+        );
         const runner = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
-        return withTickets.filter(s => s.number !== null && runner(s)).map(s => s.id).sort();
+        return withTickets
+            .filter((s) => s.number !== null && runner(s))
+            .map((s) => s.id)
+            .sort();
     }
 
     async function runSQL(filter: StamhoofdFilter): Promise<string[]> {
-        const query = SQL
-            .select(SQL.wildcard(Order.table))
+        const query = SQL.select(SQL.wildcard(Order.table))
             .from(SQL.table(Order.table))
             // Same base filter as GetWebshopOrdersEndpoint.buildQuery
-            .where(await compileToSQLFilter({ organizationId: organization.id, number: { $neq: null } }, orderFilterCompilers))
+            .where(
+                await compileToSQLFilter(
+                    { organizationId: organization.id, number: { $neq: null } },
+                    orderFilterCompilers,
+                ),
+            )
             .where(await compileToSQLFilter(filter, orderFilterCompilers));
 
         const rows = await query.fetch();
-        return Order.fromRows(rows, Order.table).map(o => o.id).sort();
+        return Order.fromRows(rows, Order.table)
+            .map((o) => o.id)
+            .sort();
     }
 
     /**
@@ -214,7 +294,7 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
      * in the same way, or a filter accidentally matching everything / nothing.
      */
     async function expectFilter(filter: StamhoofdFilter, expected: Order[]) {
-        const expectedIds = [...new Set(expected.map(o => o.id))].sort();
+        const expectedIds = [...new Set(expected.map((o) => o.id))].sort();
         const inMemoryIds = await runInMemory(filter);
         const sqlIds = await runSQL(filter);
 
@@ -262,26 +342,45 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
             const completed = await createOrder({ status: OrderStatus.Completed });
 
             await expectFilter({ status: { $eq: OrderStatus.Created } }, [created]);
-            await expectFilter({ status: { $in: [OrderStatus.Created, OrderStatus.Completed] } }, [created, completed]);
+            await expectFilter({ status: { $in: [OrderStatus.Created, OrderStatus.Completed] } }, [
+                created,
+                completed,
+            ]);
             await expectFilter({ status: { $neq: OrderStatus.Prepared } }, [created, completed]);
         });
     });
 
     describe('paymentMethod', () => {
         it('$eq / $in / $neq on the enum', async () => {
-            const transfer = await createOrder({ data: orderData({ paymentMethod: PaymentMethod.Transfer }) });
-            const bancontact = await createOrder({ data: orderData({ paymentMethod: PaymentMethod.Bancontact }) });
-            const pointOfSale = await createOrder({ data: orderData({ paymentMethod: PaymentMethod.PointOfSale }) });
+            const transfer = await createOrder({
+                data: orderData({ paymentMethod: PaymentMethod.Transfer }),
+            });
+            const bancontact = await createOrder({
+                data: orderData({ paymentMethod: PaymentMethod.Bancontact }),
+            });
+            const pointOfSale = await createOrder({
+                data: orderData({ paymentMethod: PaymentMethod.PointOfSale }),
+            });
 
             await expectFilter({ paymentMethod: { $eq: PaymentMethod.Transfer } }, [transfer]);
             await expectFilter({ paymentMethod: { $eq: PaymentMethod.Bancontact } }, [bancontact]);
-            await expectFilter({ paymentMethod: { $in: [PaymentMethod.Transfer, PaymentMethod.PointOfSale] } }, [transfer, pointOfSale]);
-            await expectFilter({ paymentMethod: { $neq: PaymentMethod.Bancontact } }, [transfer, pointOfSale]);
+            await expectFilter(
+                { paymentMethod: { $in: [PaymentMethod.Transfer, PaymentMethod.PointOfSale] } },
+                [transfer, pointOfSale],
+            );
+            await expectFilter({ paymentMethod: { $neq: PaymentMethod.Bancontact } }, [
+                transfer,
+                pointOfSale,
+            ]);
         });
 
         it('$gt / $lt as used by the pagination filter when sorting', async () => {
-            const bancontact = await createOrder({ data: orderData({ paymentMethod: PaymentMethod.Bancontact }) });
-            const transfer = await createOrder({ data: orderData({ paymentMethod: PaymentMethod.Transfer }) });
+            const bancontact = await createOrder({
+                data: orderData({ paymentMethod: PaymentMethod.Bancontact }),
+            });
+            const transfer = await createOrder({
+                data: orderData({ paymentMethod: PaymentMethod.Transfer }),
+            });
 
             await expectFilter({ paymentMethod: { $gt: PaymentMethod.Bancontact } }, [transfer]);
             await expectFilter({ paymentMethod: { $lt: PaymentMethod.Transfer } }, [bancontact]);
@@ -333,8 +432,12 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
 
     describe('name', () => {
         it('$eq and $contains (case-insensitive)', async () => {
-            const john = await createOrder({ data: orderData({ firstName: 'John', lastName: 'Doe' }) });
-            const jane = await createOrder({ data: orderData({ firstName: 'Jane', lastName: 'Roe' }) });
+            const john = await createOrder({
+                data: orderData({ firstName: 'John', lastName: 'Doe' }),
+            });
+            const jane = await createOrder({
+                data: orderData({ firstName: 'Jane', lastName: 'Roe' }),
+            });
 
             await expectFilter({ name: { $eq: 'John Doe' } }, [john]);
             await expectFilter({ name: { $eq: 'john doe' } }, [john]);
@@ -373,9 +476,27 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
      */
     describe('text comparisons', () => {
         it('ignore casing and accents', async () => {
-            const accents = await createOrder({ data: orderData({ firstName: 'José', lastName: 'Müller', email: 'Jose.Muller@Example.com' }) });
-            const plain = await createOrder({ data: orderData({ firstName: 'Jose', lastName: 'Muller', email: 'jose.muller@example.com' }) });
-            const other = await createOrder({ data: orderData({ firstName: 'Anna', lastName: 'Peeters', email: 'anna@example.com' }) });
+            const accents = await createOrder({
+                data: orderData({
+                    firstName: 'José',
+                    lastName: 'Müller',
+                    email: 'Jose.Muller@Example.com',
+                }),
+            });
+            const plain = await createOrder({
+                data: orderData({
+                    firstName: 'Jose',
+                    lastName: 'Muller',
+                    email: 'jose.muller@example.com',
+                }),
+            });
+            const other = await createOrder({
+                data: orderData({
+                    firstName: 'Anna',
+                    lastName: 'Peeters',
+                    email: 'anna@example.com',
+                }),
+            });
 
             await expectFilter({ name: { $contains: 'MÜLLER' } }, [accents, plain]);
             await expectFilter({ name: { $contains: 'muller' } }, [accents, plain]);
@@ -386,7 +507,9 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         });
 
         it('ignore accents on letters without a separate accent', async () => {
-            const order = await createOrder({ data: orderData({ firstName: 'Øystein', lastName: 'Ørsted' }) });
+            const order = await createOrder({
+                data: orderData({ firstName: 'Øystein', lastName: 'Ørsted' }),
+            });
             await createOrder({ data: orderData({ firstName: 'Anna', lastName: 'Peeters' }) });
 
             await expectFilter({ name: { $contains: 'orsted' } }, [order]);
@@ -395,7 +518,9 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         });
 
         it('compare letters that MySQL writes as two letters only for equality', async () => {
-            const order = await createOrder({ data: orderData({ firstName: 'Æsa', lastName: 'Strauß' }) });
+            const order = await createOrder({
+                data: orderData({ firstName: 'Æsa', lastName: 'Strauß' }),
+            });
             await createOrder({ data: orderData({ firstName: 'Anna', lastName: 'Peeters' }) });
 
             await expectFilter({ name: { $eq: 'aesa strauss' } }, [order]);
@@ -404,8 +529,12 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         });
 
         it('keep spaces inside the value', async () => {
-            const doubleSpace = await createOrder({ data: orderData({ firstName: 'Jean-Claude', lastName: 'Van  Damme' }) });
-            const singleSpace = await createOrder({ data: orderData({ firstName: 'Lisa', lastName: 'Van Damme' }) });
+            const doubleSpace = await createOrder({
+                data: orderData({ firstName: 'Jean-Claude', lastName: 'Van  Damme' }),
+            });
+            const singleSpace = await createOrder({
+                data: orderData({ firstName: 'Lisa', lastName: 'Van Damme' }),
+            });
 
             await expectFilter({ name: { $contains: 'van  damme' } }, [doubleSpace]);
             await expectFilter({ name: { $contains: 'van damme' } }, [singleSpace]);
@@ -414,14 +543,20 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         });
 
         it('treat characters with a meaning in SQL LIKE as text', async () => {
-            const special = await createOrder({ data: orderData({ firstName: '100%', lastName: 'Zeker_' }) });
-            const apostrophe = await createOrder({ data: orderData({ firstName: 'Seán', lastName: 'O\'Brien' }) });
-            const backslash = await createOrder({ data: orderData({ firstName: 'Back\\slash', lastName: 'Test' }) });
+            const special = await createOrder({
+                data: orderData({ firstName: '100%', lastName: 'Zeker_' }),
+            });
+            const apostrophe = await createOrder({
+                data: orderData({ firstName: 'Seán', lastName: "O'Brien" }),
+            });
+            const backslash = await createOrder({
+                data: orderData({ firstName: 'Back\\slash', lastName: 'Test' }),
+            });
             await createOrder({ data: orderData({ firstName: 'Anna', lastName: 'Peeters' }) });
 
             await expectFilter({ name: { $contains: '%' } }, [special]);
             await expectFilter({ name: { $contains: '_' } }, [special]);
-            await expectFilter({ name: { $contains: 'o\'brien' } }, [apostrophe]);
+            await expectFilter({ name: { $contains: "o'brien" } }, [apostrophe]);
             await expectFilter({ name: { $contains: '\\' } }, [backslash]);
         });
     });
@@ -440,8 +575,22 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         }
 
         it('finds names, e-mail addresses and numbers', async () => {
-            const sofie = await createOrder({ number: 10, data: orderData({ firstName: 'Sofie', lastName: 'Peeters', email: 'Sofie.Peeters@Example.com' }) });
-            const jose = await createOrder({ number: 20, data: orderData({ firstName: 'José', lastName: 'Müller', email: 'jose@example.com' }) });
+            const sofie = await createOrder({
+                number: 10,
+                data: orderData({
+                    firstName: 'Sofie',
+                    lastName: 'Peeters',
+                    email: 'Sofie.Peeters@Example.com',
+                }),
+            });
+            const jose = await createOrder({
+                number: 20,
+                data: orderData({
+                    firstName: 'José',
+                    lastName: 'Müller',
+                    email: 'jose@example.com',
+                }),
+            });
 
             await expectSearch('PEETERS', [sofie]);
             await expectSearch('jose muller', [jose]);
@@ -451,10 +600,26 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         });
 
         it('only searches an order number when the search is only digits', async () => {
-            const hundred = await createOrder({ number: 100, data: orderData({ firstName: 'Klant', lastName: 'Honderd' }) });
-            const percent = await createOrder({ number: 7, data: orderData({ firstName: '100%', lastName: 'Zeker' }) });
-            const twelve = await createOrder({ number: 12, data: orderData({ firstName: 'Klant', lastName: '12 34' }) });
-            const phone = await createOrder({ number: 32, data: orderData({ firstName: 'Klant', lastName: 'Telefoon', phone: '+32 478 12 34 56' }) });
+            const hundred = await createOrder({
+                number: 100,
+                data: orderData({ firstName: 'Klant', lastName: 'Honderd' }),
+            });
+            const percent = await createOrder({
+                number: 7,
+                data: orderData({ firstName: '100%', lastName: 'Zeker' }),
+            });
+            const twelve = await createOrder({
+                number: 12,
+                data: orderData({ firstName: 'Klant', lastName: '12 34' }),
+            });
+            const phone = await createOrder({
+                number: 32,
+                data: orderData({
+                    firstName: 'Klant',
+                    lastName: 'Telefoon',
+                    phone: '+32 478 12 34 56',
+                }),
+            });
 
             await expectSearch('100', [hundred]);
             await expectSearch('100%', [percent]);
@@ -478,8 +643,12 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
 
     describe('totalPrice', () => {
         it('numeric comparisons', async () => {
-            const cheap = await createOrder({ data: orderData({ items: [cartItem({ unitPrice: 5_00, amount: 1 })] }) });
-            const expensive = await createOrder({ data: orderData({ items: [cartItem({ unitPrice: 50_00, amount: 1 })] }) });
+            const cheap = await createOrder({
+                data: orderData({ items: [cartItem({ unitPrice: 5_00, amount: 1 })] }),
+            });
+            const expensive = await createOrder({
+                data: orderData({ items: [cartItem({ unitPrice: 50_00, amount: 1 })] }),
+            });
 
             await expectFilter({ totalPrice: { $eq: 5_00 } }, [cheap]);
             await expectFilter({ totalPrice: { $gt: 10_00 } }, [expensive]);
@@ -489,8 +658,12 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
 
     describe('amount', () => {
         it('numeric comparisons', async () => {
-            const few = await createOrder({ data: orderData({ items: [cartItem({ amount: 1, unitPrice: 1_00 })] }) });
-            const many = await createOrder({ data: orderData({ items: [cartItem({ amount: 5, unitPrice: 1_00 })] }) });
+            const few = await createOrder({
+                data: orderData({ items: [cartItem({ amount: 1, unitPrice: 1_00 })] }),
+            });
+            const many = await createOrder({
+                data: orderData({ items: [cartItem({ amount: 5, unitPrice: 1_00 })] }),
+            });
 
             await expectFilter({ amount: { $eq: 1 } }, [few]);
             await expectFilter({ amount: { $gt: 3 } }, [many]);
@@ -501,14 +674,17 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
     // --- time slot -------------------------------------------------------------------------------------
 
     describe('time slot', () => {
-        const slot = (options: { date: Date; startTime?: number; endTime?: number }) => WebshopTimeSlot.create({
-            date: options.date,
-            startTime: options.startTime ?? 12 * 60,
-            endTime: options.endTime ?? 14 * 60,
-        });
+        const slot = (options: { date: Date; startTime?: number; endTime?: number }) =>
+            WebshopTimeSlot.create({
+                date: options.date,
+                startTime: options.startTime ?? 12 * 60,
+                endTime: options.endTime ?? 14 * 60,
+            });
 
         it('timeSlotDate $eq null matches orders without a time slot', async () => {
-            const withSlot = await createOrder({ data: orderData({ timeSlot: slot({ date: new Date('2024-05-10T00:00:00Z') }) }) });
+            const withSlot = await createOrder({
+                data: orderData({ timeSlot: slot({ date: new Date('2024-05-10T00:00:00Z') }) }),
+            });
             const without = await createOrder({ data: orderData({ timeSlot: null }) });
 
             await expectFilter({ timeSlotDate: { $eq: null } }, [without]);
@@ -519,8 +695,24 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         // must work in both engines, and a missing time slot must behave like SQL NULL: matched by $eq null
         // and by $lt (NULL is the smallest), not matched by $gt or $neq null.
         it('timeSlotStartTime / timeSlotEndTime comparisons and null parity', async () => {
-            const morning = await createOrder({ data: orderData({ timeSlot: slot({ date: new Date('2024-05-10T00:00:00Z'), startTime: 9 * 60, endTime: 11 * 60 }) }) });
-            const evening = await createOrder({ data: orderData({ timeSlot: slot({ date: new Date('2024-05-10T00:00:00Z'), startTime: 18 * 60, endTime: 20 * 60 }) }) });
+            const morning = await createOrder({
+                data: orderData({
+                    timeSlot: slot({
+                        date: new Date('2024-05-10T00:00:00Z'),
+                        startTime: 9 * 60,
+                        endTime: 11 * 60,
+                    }),
+                }),
+            });
+            const evening = await createOrder({
+                data: orderData({
+                    timeSlot: slot({
+                        date: new Date('2024-05-10T00:00:00Z'),
+                        startTime: 18 * 60,
+                        endTime: 20 * 60,
+                    }),
+                }),
+            });
             const without = await createOrder({ data: orderData({ timeSlot: null }) });
 
             await expectFilter({ timeSlotStartTime: { $eq: null } }, [without]);
@@ -535,15 +727,20 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
     // --- checkout method -------------------------------------------------------------------------------
 
     describe('checkout method', () => {
-        const takeout = (id: string, name = 'Pickup point') => WebshopTakeoutMethod.create({
-            id,
-            name,
-            address: address(),
-        });
+        const takeout = (id: string, name = 'Pickup point') =>
+            WebshopTakeoutMethod.create({
+                id,
+                name,
+                address: address(),
+            });
 
         it('checkoutMethod (type) and checkoutMethodId, incl null parity', async () => {
-            const a = await createOrder({ data: orderData({ checkoutMethod: takeout('method-a') }) });
-            const b = await createOrder({ data: orderData({ checkoutMethod: takeout('method-b') }) });
+            const a = await createOrder({
+                data: orderData({ checkoutMethod: takeout('method-a') }),
+            });
+            const b = await createOrder({
+                data: orderData({ checkoutMethod: takeout('method-b') }),
+            });
             const without = await createOrder({ data: orderData({ checkoutMethod: null }) });
 
             await expectFilter({ checkoutMethodId: { $eq: 'method-a' } }, [a]);
@@ -559,24 +756,55 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         // Codes are stored with mixed case on purpose: both $eq and $in on a JSON array must be
         // case-insensitive, exactly like the in-memory engine.
         it('$eq and $in match the codes in the array (case-insensitive)', async () => {
-            const summer = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'SUMMER' })] }) });
-            const summerLower = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'summer' })] }) });
-            const summerCombination = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'suMMER' })] }) });
+            const summer = await createOrder({
+                data: orderData({ discountCodes: [DiscountCode.create({ code: 'SUMMER' })] }),
+            });
+            const summerLower = await createOrder({
+                data: orderData({ discountCodes: [DiscountCode.create({ code: 'summer' })] }),
+            });
+            const summerCombination = await createOrder({
+                data: orderData({ discountCodes: [DiscountCode.create({ code: 'suMMER' })] }),
+            });
 
-            const winter = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'WINTER' })] }) });
+            const winter = await createOrder({
+                data: orderData({ discountCodes: [DiscountCode.create({ code: 'WINTER' })] }),
+            });
 
             const none = await createOrder({ data: orderData({ discountCodes: [] }) });
 
-            await expectFilter({ discountCodes: { code: { $eq: 'summer' } } }, [summer, summerLower, summerCombination]);
-            await expectFilter({ discountCodes: { code: { $in: ['summer', 'winter'] } } }, [summer, summerLower, summerCombination, winter]);
-            await expectFilter({ discountCodes: { code: { $in: ['SUMMER', 'WINTER'] } } }, [summer, summerLower, summerCombination, winter]);
-            await expectFilter({ discountCodes: { code: { $in: ['suMmer', 'winTEr'] } } }, [summer, summerLower, summerCombination, winter]);
+            await expectFilter({ discountCodes: { code: { $eq: 'summer' } } }, [
+                summer,
+                summerLower,
+                summerCombination,
+            ]);
+            await expectFilter({ discountCodes: { code: { $in: ['summer', 'winter'] } } }, [
+                summer,
+                summerLower,
+                summerCombination,
+                winter,
+            ]);
+            await expectFilter({ discountCodes: { code: { $in: ['SUMMER', 'WINTER'] } } }, [
+                summer,
+                summerLower,
+                summerCombination,
+                winter,
+            ]);
+            await expectFilter({ discountCodes: { code: { $in: ['suMmer', 'winTEr'] } } }, [
+                summer,
+                summerLower,
+                summerCombination,
+                winter,
+            ]);
             expect(none.id).toBeDefined();
         });
 
         it('only ignore casing, not accents, in the array', async () => {
-            const accents = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'ÉTÉ' })] }) });
-            const plain = await createOrder({ data: orderData({ discountCodes: [DiscountCode.create({ code: 'ETE' })] }) });
+            const accents = await createOrder({
+                data: orderData({ discountCodes: [DiscountCode.create({ code: 'ÉTÉ' })] }),
+            });
+            const plain = await createOrder({
+                data: orderData({ discountCodes: [DiscountCode.create({ code: 'ETE' })] }),
+            });
 
             await expectFilter({ discountCodes: { code: { $eq: 'été' } } }, [accents]);
             await expectFilter({ discountCodes: { code: { $in: ['ete'] } } }, [plain]);
@@ -588,36 +816,61 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
     // --- cart items ($elemMatch) -----------------------------------------------------------------------
 
     describe('items', () => {
-        it.each(['options', 'fieldAnswers'] as const)('%s matches within the selected cart item', async (column) => {
-            const withAnswer = (productId: string) => {
-                const item = cartItem({ productId });
-                item.options = [CartItemOption.create({
-                    option: Option.create({ id: 'option-a' }),
-                    optionMenu: OptionMenu.create({ id: 'menu-a' }),
-                })];
-                item.fieldAnswers = [WebshopFieldAnswer.create({
-                    field: WebshopField.create({ id: 'field-a' }),
-                    answer: 'Answer A',
-                })];
-                return item;
-            };
-            const matching = await createOrder({ data: orderData({ items: [withAnswer('target')] }) });
-            await createOrder({ data: orderData({ items: [cartItem({ productId: 'target' }), withAnswer('other')] }) });
-            await createOrder({ data: orderData({ items: [cartItem({ productId: 'target' })] }) });
-            await createOrder();
+        it.each(['options', 'fieldAnswers'] as const)(
+            '%s matches within the selected cart item',
+            async (column) => {
+                const withAnswer = (productId: string) => {
+                    const item = cartItem({ productId });
+                    item.options = [
+                        CartItemOption.create({
+                            option: Option.create({ id: 'option-a' }),
+                            optionMenu: OptionMenu.create({ id: 'menu-a' }),
+                        }),
+                    ];
+                    item.fieldAnswers = [
+                        WebshopFieldAnswer.create({
+                            field: WebshopField.create({ id: 'field-a' }),
+                            answer: 'Answer A',
+                        }),
+                    ];
+                    return item;
+                };
+                const matching = await createOrder({
+                    data: orderData({ items: [withAnswer('target')] }),
+                });
+                await createOrder({
+                    data: orderData({
+                        items: [cartItem({ productId: 'target' }), withAnswer('other')],
+                    }),
+                });
+                await createOrder({
+                    data: orderData({ items: [cartItem({ productId: 'target' })] }),
+                });
+                await createOrder();
 
-            const nestedFilter: StamhoofdFilter = column === 'options'
-                ? { option: { id: 'option-a' }, optionMenu: { id: 'menu-a' } }
-                : { field: { id: 'field-a' }, answer: 'Answer A' };
-            const filter: StamhoofdFilter = { items: { $elemMatch: { product: { id: 'target' }, [column]: column === 'options' ? { $elemMatch: nestedFilter } : nestedFilter } } };
-            await expectFilter(filter, [matching]);
-        });
+                const nestedFilter: StamhoofdFilter =
+                    column === 'options'
+                        ? { option: { id: 'option-a' }, optionMenu: { id: 'menu-a' } }
+                        : { field: { id: 'field-a' }, answer: 'Answer A' };
+                const filter: StamhoofdFilter = {
+                    items: {
+                        $elemMatch: {
+                            product: { id: 'target' },
+                            [column]:
+                                column === 'options' ? { $elemMatch: nestedFilter } : nestedFilter,
+                        },
+                    },
+                };
+                await expectFilter(filter, [matching]);
+            },
+        );
 
         it('options: option and menu conditions match the same nested entry', async () => {
-            const option = (optionId: string, menuId: string) => CartItemOption.create({
-                option: Option.create({ id: optionId }),
-                optionMenu: OptionMenu.create({ id: menuId }),
-            });
+            const option = (optionId: string, menuId: string) =>
+                CartItemOption.create({
+                    option: Option.create({ id: optionId }),
+                    optionMenu: OptionMenu.create({ id: menuId }),
+                });
             const matchingItem = cartItem();
             matchingItem.options = [option('option-b', 'menu-b'), option('option-a', 'menu-a')];
             const matching = await createOrder({ data: orderData({ items: [matchingItem] }) });
@@ -626,39 +879,135 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
             const split = await createOrder({ data: orderData({ items: [splitItem] }) });
             await createOrder({ data: orderData({ items: [cartItem()] }) });
 
-            await expectFilter({ items: { $elemMatch: { options: { $elemMatch: { option: { id: { $eq: 'option-a' } } } } } } }, [matching, split]);
-            await expectFilter({ items: { $elemMatch: { options: { $elemMatch: { optionMenu: { id: { $in: ['menu-a'] } } } } } } }, [matching, split]);
-            await expectFilter({ items: { $elemMatch: { options: { $elemMatch: { option: { id: { $eq: 'option-a' } }, optionMenu: { id: { $eq: 'menu-a' } } } } } } }, [matching]);
-            await expectFilter({ items: { $elemMatch: { options: { $elemMatch: { option: { id: { $eq: 'missing' } } } } } } }, []);
+            await expectFilter(
+                {
+                    items: {
+                        $elemMatch: {
+                            options: { $elemMatch: { option: { id: { $eq: 'option-a' } } } },
+                        },
+                    },
+                },
+                [matching, split],
+            );
+            await expectFilter(
+                {
+                    items: {
+                        $elemMatch: {
+                            options: { $elemMatch: { optionMenu: { id: { $in: ['menu-a'] } } } },
+                        },
+                    },
+                },
+                [matching, split],
+            );
+            await expectFilter(
+                {
+                    items: {
+                        $elemMatch: {
+                            options: {
+                                $elemMatch: {
+                                    option: { id: { $eq: 'option-a' } },
+                                    optionMenu: { id: { $eq: 'menu-a' } },
+                                },
+                            },
+                        },
+                    },
+                },
+                [matching],
+            );
+            await expectFilter(
+                {
+                    items: {
+                        $elemMatch: {
+                            options: { $elemMatch: { option: { id: { $eq: 'missing' } } } },
+                        },
+                    },
+                },
+                [],
+            );
         });
 
         it('fieldAnswers: field and answer conditions match the same nested entry', async () => {
-            const answer = (fieldId: string, value: string) => WebshopFieldAnswer.create({
-                field: WebshopField.create({ id: fieldId }),
-                answer: value,
-            });
+            const answer = (fieldId: string, value: string) =>
+                WebshopFieldAnswer.create({
+                    field: WebshopField.create({ id: fieldId }),
+                    answer: value,
+                });
             const matchingItem = cartItem();
-            matchingItem.fieldAnswers = [answer('field-b', 'Other'), answer('field-a', 'Hello World')];
+            matchingItem.fieldAnswers = [
+                answer('field-b', 'Other'),
+                answer('field-a', 'Hello World'),
+            ];
             const matching = await createOrder({ data: orderData({ items: [matchingItem] }) });
             const splitItem = cartItem();
             splitItem.fieldAnswers = [answer('field-a', 'Other'), answer('field-b', 'Hello World')];
             const split = await createOrder({ data: orderData({ items: [splitItem] }) });
             await createOrder({ data: orderData({ items: [cartItem()] }) });
 
-            await expectFilter({ items: { $elemMatch: { fieldAnswers: { field: { id: { $eq: 'field-a' } } } } } }, [matching, split]);
-            await expectFilter({ items: { $elemMatch: { fieldAnswers: { answer: { $eq: 'hello world' } } } } }, [matching, split]);
-            await expectFilter({ items: { $elemMatch: { fieldAnswers: { field: { id: { $eq: 'field-a' } }, answer: { $contains: 'WORLD' } } } } }, [matching]);
-            await expectFilter({ items: { $elemMatch: { fieldAnswers: { field: { id: { $eq: 'missing' } } } } } }, []);
+            await expectFilter(
+                { items: { $elemMatch: { fieldAnswers: { field: { id: { $eq: 'field-a' } } } } } },
+                [matching, split],
+            );
+            await expectFilter(
+                { items: { $elemMatch: { fieldAnswers: { answer: { $eq: 'hello world' } } } } },
+                [matching, split],
+            );
+            await expectFilter(
+                {
+                    items: {
+                        $elemMatch: {
+                            fieldAnswers: {
+                                field: { id: { $eq: 'field-a' } },
+                                answer: { $contains: 'WORLD' },
+                            },
+                        },
+                    },
+                },
+                [matching],
+            );
+            await expectFilter(
+                { items: { $elemMatch: { fieldAnswers: { field: { id: { $eq: 'missing' } } } } } },
+                [],
+            );
         });
 
         it('$elemMatch on product / productPrice / amount', async () => {
-            const apple = await createOrder({ data: orderData({ items: [cartItem({ productId: 'apple', productPriceId: 'apple-price', amount: 2, unitPrice: 1_00 })] }) });
-            const pear = await createOrder({ data: orderData({ items: [cartItem({ productId: 'pear', productPriceId: 'pear-price', amount: 5, unitPrice: 1_00 })] }) });
+            const apple = await createOrder({
+                data: orderData({
+                    items: [
+                        cartItem({
+                            productId: 'apple',
+                            productPriceId: 'apple-price',
+                            amount: 2,
+                            unitPrice: 1_00,
+                        }),
+                    ],
+                }),
+            });
+            const pear = await createOrder({
+                data: orderData({
+                    items: [
+                        cartItem({
+                            productId: 'pear',
+                            productPriceId: 'pear-price',
+                            amount: 5,
+                            unitPrice: 1_00,
+                        }),
+                    ],
+                }),
+            });
 
-            await expectFilter({ items: { $elemMatch: { product: { id: { $eq: 'apple' } } } } }, [apple]);
-            await expectFilter({ items: { $elemMatch: { productPrice: { id: { $eq: 'pear-price' } } } } }, [pear]);
+            await expectFilter({ items: { $elemMatch: { product: { id: { $eq: 'apple' } } } } }, [
+                apple,
+            ]);
+            await expectFilter(
+                { items: { $elemMatch: { productPrice: { id: { $eq: 'pear-price' } } } } },
+                [pear],
+            );
             await expectFilter({ items: { $elemMatch: { amount: { $gt: 3 } } } }, [pear]);
-            await expectFilter({ items: { $elemMatch: { product: { id: { $in: ['apple', 'pear'] } } } } }, [apple, pear]);
+            await expectFilter(
+                { items: { $elemMatch: { product: { id: { $in: ['apple', 'pear'] } } } } },
+                [apple, pear],
+            );
         });
     });
 
@@ -667,85 +1016,253 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
     describe('record answers', () => {
         const RID = 'record-id-1';
 
-        const checkbox = (selected: boolean) => new Map([[RID, RecordCheckboxAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Checkbox }), selected })]]);
-        const text = (value: string) => new Map([[RID, RecordTextAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Text }), value })]]);
-        const chooseOne = (choiceId: string | null) => new Map([[RID, RecordChooseOneAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.ChooseOne }), selectedChoice: choiceId === null ? null : RecordChoice.create({ id: choiceId }) })]]);
-        const multipleChoice = (choiceIds: string[]) => new Map([[RID, RecordMultipleChoiceAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.MultipleChoice }), selectedChoices: choiceIds.map(id => RecordChoice.create({ id })) })]]);
-        const date = (dateValue: Date | null) => new Map([[RID, RecordDateAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Date }), dateValue })]]);
-        const integer = (value: number | null) => new Map([[RID, RecordIntegerAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Integer }), value })]]);
+        const checkbox = (selected: boolean) =>
+            new Map([
+                [
+                    RID,
+                    RecordCheckboxAnswer.create({
+                        settings: RecordSettings.create({ id: RID, type: RecordType.Checkbox }),
+                        selected,
+                    }),
+                ],
+            ]);
+        const text = (value: string) =>
+            new Map([
+                [
+                    RID,
+                    RecordTextAnswer.create({
+                        settings: RecordSettings.create({ id: RID, type: RecordType.Text }),
+                        value,
+                    }),
+                ],
+            ]);
+        const chooseOne = (choiceId: string | null) =>
+            new Map([
+                [
+                    RID,
+                    RecordChooseOneAnswer.create({
+                        settings: RecordSettings.create({ id: RID, type: RecordType.ChooseOne }),
+                        selectedChoice:
+                            choiceId === null ? null : RecordChoice.create({ id: choiceId }),
+                    }),
+                ],
+            ]);
+        const multipleChoice = (choiceIds: string[]) =>
+            new Map([
+                [
+                    RID,
+                    RecordMultipleChoiceAnswer.create({
+                        settings: RecordSettings.create({
+                            id: RID,
+                            type: RecordType.MultipleChoice,
+                        }),
+                        selectedChoices: choiceIds.map((id) => RecordChoice.create({ id })),
+                    }),
+                ],
+            ]);
+        const date = (dateValue: Date | null) =>
+            new Map([
+                [
+                    RID,
+                    RecordDateAnswer.create({
+                        settings: RecordSettings.create({ id: RID, type: RecordType.Date }),
+                        dateValue,
+                    }),
+                ],
+            ]);
+        const integer = (value: number | null) =>
+            new Map([
+                [
+                    RID,
+                    RecordIntegerAnswer.create({
+                        settings: RecordSettings.create({ id: RID, type: RecordType.Integer }),
+                        value,
+                    }),
+                ],
+            ]);
 
         it('checkbox: selected', async () => {
-            const checked = await createOrder({ data: orderData({ recordAnswers: checkbox(true) }) });
-            const unchecked = await createOrder({ data: orderData({ recordAnswers: checkbox(false) }) });
+            const checked = await createOrder({
+                data: orderData({ recordAnswers: checkbox(true) }),
+            });
+            const unchecked = await createOrder({
+                data: orderData({ recordAnswers: checkbox(false) }),
+            });
 
-            await expectFilter({ recordAnswers: { [RID]: { selected: { $eq: true } } } }, [checked]);
-            await expectFilter({ recordAnswers: { [RID]: { selected: { $eq: false } } } }, [unchecked]);
+            await expectFilter({ recordAnswers: { [RID]: { selected: { $eq: true } } } }, [
+                checked,
+            ]);
+            await expectFilter({ recordAnswers: { [RID]: { selected: { $eq: false } } } }, [
+                unchecked,
+            ]);
         });
 
         it('text value: $contains and $eq', async () => {
-            const hello = await createOrder({ data: orderData({ recordAnswers: text('say hello world') }) });
+            const hello = await createOrder({
+                data: orderData({ recordAnswers: text('say hello world') }),
+            });
             const bye = await createOrder({ data: orderData({ recordAnswers: text('goodbye') }) });
 
-            await expectFilter({ recordAnswers: { [RID]: { value: { $contains: 'hello' } } } }, [hello]);
+            await expectFilter({ recordAnswers: { [RID]: { value: { $contains: 'hello' } } } }, [
+                hello,
+            ]);
             await expectFilter({ recordAnswers: { [RID]: { value: { $eq: 'goodbye' } } } }, [bye]);
         });
 
         it('single choice: selectedChoice.id', async () => {
-            const a = await createOrder({ data: orderData({ recordAnswers: chooseOne('choice-a') }) });
-            const b = await createOrder({ data: orderData({ recordAnswers: chooseOne('choice-b') }) });
+            const a = await createOrder({
+                data: orderData({ recordAnswers: chooseOne('choice-a') }),
+            });
+            const b = await createOrder({
+                data: orderData({ recordAnswers: chooseOne('choice-b') }),
+            });
 
-            await expectFilter({ recordAnswers: { [RID]: { selectedChoice: { id: { $eq: 'choice-a' } } } } }, [a]);
-            await expectFilter({ recordAnswers: { [RID]: { selectedChoice: { id: { $in: ['choice-a', 'choice-b'] } } } } }, [a, b]);
+            await expectFilter(
+                { recordAnswers: { [RID]: { selectedChoice: { id: { $eq: 'choice-a' } } } } },
+                [a],
+            );
+            await expectFilter(
+                {
+                    recordAnswers: {
+                        [RID]: { selectedChoice: { id: { $in: ['choice-a', 'choice-b'] } } },
+                    },
+                },
+                [a, b],
+            );
         });
 
         it('multiple choice: selectedChoices.id', async () => {
-            const ab = await createOrder({ data: orderData({ recordAnswers: multipleChoice(['choice-a', 'choice-b']) }) });
-            const c = await createOrder({ data: orderData({ recordAnswers: multipleChoice(['choice-c']) }) });
+            const ab = await createOrder({
+                data: orderData({ recordAnswers: multipleChoice(['choice-a', 'choice-b']) }),
+            });
+            const c = await createOrder({
+                data: orderData({ recordAnswers: multipleChoice(['choice-c']) }),
+            });
 
-            await expectFilter({ recordAnswers: { [RID]: { selectedChoices: { id: { $in: ['choice-a'] } } } } }, [ab]);
-            await expectFilter({ recordAnswers: { [RID]: { selectedChoices: { id: { $in: ['choice-c'] } } } } }, [c]);
+            await expectFilter(
+                { recordAnswers: { [RID]: { selectedChoices: { id: { $in: ['choice-a'] } } } } },
+                [ab],
+            );
+            await expectFilter(
+                { recordAnswers: { [RID]: { selectedChoices: { id: { $in: ['choice-c'] } } } } },
+                [c],
+            );
         });
 
         it('date value: comparisons and $eq null', async () => {
-            const stored = await createOrder({ data: orderData({ recordAnswers: date(new Date('2023-06-10T14:30:00Z')) }) });
-            const later = await createOrder({ data: orderData({ recordAnswers: date(new Date('2023-06-25T14:30:00Z')) }) });
+            const stored = await createOrder({
+                data: orderData({ recordAnswers: date(new Date('2023-06-10T14:30:00Z')) }),
+            });
+            const later = await createOrder({
+                data: orderData({ recordAnswers: date(new Date('2023-06-25T14:30:00Z')) }),
+            });
             const nullDate = await createOrder({ data: orderData({ recordAnswers: date(null) }) });
 
-            await expectFilter({ recordAnswers: { [RID]: { dateValue: { $gt: new Date('2023-06-20T00:00:00Z') } } } }, [later]);
-            await expectFilter({ recordAnswers: { [RID]: { dateValue: { $eq: null } } } }, [nullDate]);
+            await expectFilter(
+                {
+                    recordAnswers: {
+                        [RID]: { dateValue: { $gt: new Date('2023-06-20T00:00:00Z') } },
+                    },
+                },
+                [later],
+            );
+            await expectFilter({ recordAnswers: { [RID]: { dateValue: { $eq: null } } } }, [
+                nullDate,
+            ]);
             expect(stored.id).toBeDefined();
         });
 
         //  An unanswered record question (missing map key) or a null answer value must behave in memory exactly like the SQL NULL the JSON extraction yields.
         describe('missing / null answer parity (the SQL NULL behaviour)', () => {
             it('$eq null matches both a null value and an unanswered question', async () => {
-                const nullValue = await createOrder({ data: orderData({ recordAnswers: text('') }) });
+                const nullValue = await createOrder({
+                    data: orderData({ recordAnswers: text('') }),
+                });
                 // Overwrite with an actual null text value
-                const nullAnswer = await createOrder({ data: orderData({ recordAnswers: new Map([[RID, RecordTextAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Text }), value: null })]]) }) });
-                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
-                const answered = await createOrder({ data: orderData({ recordAnswers: text('something') }) });
+                const nullAnswer = await createOrder({
+                    data: orderData({
+                        recordAnswers: new Map([
+                            [
+                                RID,
+                                RecordTextAnswer.create({
+                                    settings: RecordSettings.create({
+                                        id: RID,
+                                        type: RecordType.Text,
+                                    }),
+                                    value: null,
+                                }),
+                            ],
+                        ]),
+                    }),
+                });
+                const unanswered = await createOrder({
+                    data: orderData({ recordAnswers: new Map() }),
+                });
+                const answered = await createOrder({
+                    data: orderData({ recordAnswers: text('something') }),
+                });
 
-                await expectFilter({ recordAnswers: { [RID]: { value: { $eq: null } } } }, [nullAnswer, unanswered]);
+                await expectFilter({ recordAnswers: { [RID]: { value: { $eq: null } } } }, [
+                    nullAnswer,
+                    unanswered,
+                ]);
                 expect(nullValue.id).toBeDefined();
                 expect(answered.id).toBeDefined();
             });
 
             it('$lt matches smaller values, null and unanswered (null is the smallest)', async () => {
-                const small = await createOrder({ data: orderData({ recordAnswers: date(new Date('2023-01-01T00:00:00Z')) }) });
-                const big = await createOrder({ data: orderData({ recordAnswers: date(new Date('2025-01-01T00:00:00Z')) }) });
-                const nullAnswer = await createOrder({ data: orderData({ recordAnswers: date(null) }) });
-                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+                const small = await createOrder({
+                    data: orderData({ recordAnswers: date(new Date('2023-01-01T00:00:00Z')) }),
+                });
+                const big = await createOrder({
+                    data: orderData({ recordAnswers: date(new Date('2025-01-01T00:00:00Z')) }),
+                });
+                const nullAnswer = await createOrder({
+                    data: orderData({ recordAnswers: date(null) }),
+                });
+                const unanswered = await createOrder({
+                    data: orderData({ recordAnswers: new Map() }),
+                });
 
-                await expectFilter({ recordAnswers: { [RID]: { dateValue: { $lt: new Date('2024-01-01T00:00:00Z') } } } }, [small, nullAnswer, unanswered]);
+                await expectFilter(
+                    {
+                        recordAnswers: {
+                            [RID]: { dateValue: { $lt: new Date('2024-01-01T00:00:00Z') } },
+                        },
+                    },
+                    [small, nullAnswer, unanswered],
+                );
                 expect(big.id).toBeDefined();
             });
 
             it('$contains never matches a null value or an unanswered question', async () => {
-                const match = await createOrder({ data: orderData({ recordAnswers: text('hello world') }) });
-                const nullAnswer = await createOrder({ data: orderData({ recordAnswers: new Map([[RID, RecordTextAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Text }), value: null })]]) }) });
-                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+                const match = await createOrder({
+                    data: orderData({ recordAnswers: text('hello world') }),
+                });
+                const nullAnswer = await createOrder({
+                    data: orderData({
+                        recordAnswers: new Map([
+                            [
+                                RID,
+                                RecordTextAnswer.create({
+                                    settings: RecordSettings.create({
+                                        id: RID,
+                                        type: RecordType.Text,
+                                    }),
+                                    value: null,
+                                }),
+                            ],
+                        ]),
+                    }),
+                });
+                const unanswered = await createOrder({
+                    data: orderData({ recordAnswers: new Map() }),
+                });
 
-                await expectFilter({ recordAnswers: { [RID]: { value: { $contains: 'hello' } } } }, [match]);
+                await expectFilter(
+                    { recordAnswers: { [RID]: { value: { $contains: 'hello' } } } },
+                    [match],
+                );
                 expect(nullAnswer.id).toBeDefined();
                 expect(unanswered.id).toBeDefined();
             });
@@ -753,51 +1270,109 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
             it('number value $lt matches smaller values, null and unanswered', async () => {
                 const small = await createOrder({ data: orderData({ recordAnswers: integer(5) }) });
                 const big = await createOrder({ data: orderData({ recordAnswers: integer(15) }) });
-                const nullValue = await createOrder({ data: orderData({ recordAnswers: integer(null) }) });
-                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+                const nullValue = await createOrder({
+                    data: orderData({ recordAnswers: integer(null) }),
+                });
+                const unanswered = await createOrder({
+                    data: orderData({ recordAnswers: new Map() }),
+                });
 
-                await expectFilter({ recordAnswers: { [RID]: { value: { $lt: 10 } } } }, [small, nullValue, unanswered]);
+                await expectFilter({ recordAnswers: { [RID]: { value: { $lt: 10 } } } }, [
+                    small,
+                    nullValue,
+                    unanswered,
+                ]);
                 expect(big.id).toBeDefined();
             });
 
             it('date value $gt matches later values but not null or unanswered', async () => {
-                const later = await createOrder({ data: orderData({ recordAnswers: date(new Date('2023-06-10T00:00:00Z')) }) });
-                const earlier = await createOrder({ data: orderData({ recordAnswers: date(new Date('2023-06-01T00:00:00Z')) }) });
-                const nullValue = await createOrder({ data: orderData({ recordAnswers: date(null) }) });
-                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+                const later = await createOrder({
+                    data: orderData({ recordAnswers: date(new Date('2023-06-10T00:00:00Z')) }),
+                });
+                const earlier = await createOrder({
+                    data: orderData({ recordAnswers: date(new Date('2023-06-01T00:00:00Z')) }),
+                });
+                const nullValue = await createOrder({
+                    data: orderData({ recordAnswers: date(null) }),
+                });
+                const unanswered = await createOrder({
+                    data: orderData({ recordAnswers: new Map() }),
+                });
 
-                await expectFilter({ recordAnswers: { [RID]: { dateValue: { $gt: new Date('2023-06-05T00:00:00Z') } } } }, [later]);
+                await expectFilter(
+                    {
+                        recordAnswers: {
+                            [RID]: { dateValue: { $gt: new Date('2023-06-05T00:00:00Z') } },
+                        },
+                    },
+                    [later],
+                );
                 expect(earlier.id).toBeDefined();
                 expect(nullValue.id).toBeDefined();
                 expect(unanswered.id).toBeDefined();
             });
 
             it('date value $eq null matches null and unanswered', async () => {
-                const stored = await createOrder({ data: orderData({ recordAnswers: date(new Date('2023-06-10T00:00:00Z')) }) });
-                const nullValue = await createOrder({ data: orderData({ recordAnswers: date(null) }) });
-                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+                const stored = await createOrder({
+                    data: orderData({ recordAnswers: date(new Date('2023-06-10T00:00:00Z')) }),
+                });
+                const nullValue = await createOrder({
+                    data: orderData({ recordAnswers: date(null) }),
+                });
+                const unanswered = await createOrder({
+                    data: orderData({ recordAnswers: new Map() }),
+                });
 
-                await expectFilter({ recordAnswers: { [RID]: { dateValue: { $eq: null } } } }, [nullValue, unanswered]);
+                await expectFilter({ recordAnswers: { [RID]: { dateValue: { $eq: null } } } }, [
+                    nullValue,
+                    unanswered,
+                ]);
                 expect(stored.id).toBeDefined();
             });
 
             it('checkbox selected: $in [null, true] matches unanswered, $in [true] does not', async () => {
-                const checked = await createOrder({ data: orderData({ recordAnswers: checkbox(true) }) });
-                const unchecked = await createOrder({ data: orderData({ recordAnswers: checkbox(false) }) });
-                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+                const checked = await createOrder({
+                    data: orderData({ recordAnswers: checkbox(true) }),
+                });
+                const unchecked = await createOrder({
+                    data: orderData({ recordAnswers: checkbox(false) }),
+                });
+                const unanswered = await createOrder({
+                    data: orderData({ recordAnswers: new Map() }),
+                });
 
-                await expectFilter({ recordAnswers: { [RID]: { selected: { $in: [null, true] } } } }, [checked, unanswered]);
-                await expectFilter({ recordAnswers: { [RID]: { selected: { $in: [true] } } } }, [checked]);
+                await expectFilter(
+                    { recordAnswers: { [RID]: { selected: { $in: [null, true] } } } },
+                    [checked, unanswered],
+                );
+                await expectFilter({ recordAnswers: { [RID]: { selected: { $in: [true] } } } }, [
+                    checked,
+                ]);
                 expect(unchecked.id).toBeDefined();
             });
 
             it('single choice: $in [null, choice] matches a null choice and unanswered', async () => {
-                const a = await createOrder({ data: orderData({ recordAnswers: chooseOne('choice-a') }) });
-                const b = await createOrder({ data: orderData({ recordAnswers: chooseOne('choice-b') }) });
-                const nullChoice = await createOrder({ data: orderData({ recordAnswers: chooseOne(null) }) });
-                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+                const a = await createOrder({
+                    data: orderData({ recordAnswers: chooseOne('choice-a') }),
+                });
+                const b = await createOrder({
+                    data: orderData({ recordAnswers: chooseOne('choice-b') }),
+                });
+                const nullChoice = await createOrder({
+                    data: orderData({ recordAnswers: chooseOne(null) }),
+                });
+                const unanswered = await createOrder({
+                    data: orderData({ recordAnswers: new Map() }),
+                });
 
-                await expectFilter({ recordAnswers: { [RID]: { selectedChoice: { id: { $in: [null, 'choice-a'] } } } } }, [a, nullChoice, unanswered]);
+                await expectFilter(
+                    {
+                        recordAnswers: {
+                            [RID]: { selectedChoice: { id: { $in: [null, 'choice-a'] } } },
+                        },
+                    },
+                    [a, nullChoice, unanswered],
+                );
                 expect(b.id).toBeDefined();
             });
         });
@@ -806,25 +1381,52 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         // The dashboard builds "not equal to x" and "does not contain x" as $not { ... }. A missing or null
         // answer is not equal to and does not contain any concrete value, so it must match — in both engines.
         describe('negated filters on missing or null values', () => {
-            const nullText = () => new Map([[RID, RecordTextAnswer.create({ settings: RecordSettings.create({ id: RID, type: RecordType.Text }), value: null })]]);
+            const nullText = () =>
+                new Map([
+                    [
+                        RID,
+                        RecordTextAnswer.create({
+                            settings: RecordSettings.create({ id: RID, type: RecordType.Text }),
+                            value: null,
+                        }),
+                    ],
+                ]);
 
             it('$not { $eq } (NotEquals) matches null and unanswered in both engines', async () => {
                 const x = await createOrder({ data: orderData({ recordAnswers: text('x') }) });
                 const y = await createOrder({ data: orderData({ recordAnswers: text('y') }) });
-                const nullValue = await createOrder({ data: orderData({ recordAnswers: nullText() }) });
-                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+                const nullValue = await createOrder({
+                    data: orderData({ recordAnswers: nullText() }),
+                });
+                const unanswered = await createOrder({
+                    data: orderData({ recordAnswers: new Map() }),
+                });
 
-                await expectFilter({ recordAnswers: { [RID]: { $not: { value: { $eq: 'x' } } } } }, [y, nullValue, unanswered]);
+                await expectFilter(
+                    { recordAnswers: { [RID]: { $not: { value: { $eq: 'x' } } } } },
+                    [y, nullValue, unanswered],
+                );
                 expect(x.id).toBeDefined();
             });
 
             it('$not { $contains } (NotContains) matches null and unanswered in both engines', async () => {
-                const withX = await createOrder({ data: orderData({ recordAnswers: text('fox') }) });
-                const withoutX = await createOrder({ data: orderData({ recordAnswers: text('dog') }) });
-                const nullValue = await createOrder({ data: orderData({ recordAnswers: nullText() }) });
-                const unanswered = await createOrder({ data: orderData({ recordAnswers: new Map() }) });
+                const withX = await createOrder({
+                    data: orderData({ recordAnswers: text('fox') }),
+                });
+                const withoutX = await createOrder({
+                    data: orderData({ recordAnswers: text('dog') }),
+                });
+                const nullValue = await createOrder({
+                    data: orderData({ recordAnswers: nullText() }),
+                });
+                const unanswered = await createOrder({
+                    data: orderData({ recordAnswers: new Map() }),
+                });
 
-                await expectFilter({ recordAnswers: { [RID]: { $not: { value: { $contains: 'x' } } } } }, [withoutX, nullValue, unanswered]);
+                await expectFilter(
+                    { recordAnswers: { [RID]: { $not: { value: { $contains: 'x' } } } } },
+                    [withoutX, nullValue, unanswered],
+                );
                 expect(withX.id).toBeDefined();
             });
         });
@@ -835,21 +1437,43 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
     describe('payments', () => {
         it('$elemMatch on method / price / transferDescription, ignoring failed payments', async () => {
             const transferOrder = await createOrder();
-            const transferItem = await addBalanceItem(transferOrder, { unitPrice: 10_00, pricePaid: 10_00 });
-            await addPayment(transferItem, { method: PaymentMethod.Transfer, price: 10_00, transferDescription: '+++123/456/789+++' });
+            const transferItem = await addBalanceItem(transferOrder, {
+                unitPrice: 10_00,
+                pricePaid: 10_00,
+            });
+            await addPayment(transferItem, {
+                method: PaymentMethod.Transfer,
+                price: 10_00,
+                transferDescription: '+++123/456/789+++',
+            });
 
             const cardOrder = await createOrder();
-            const cardItem = await addBalanceItem(cardOrder, { unitPrice: 25_00, pricePaid: 25_00 });
+            const cardItem = await addBalanceItem(cardOrder, {
+                unitPrice: 25_00,
+                pricePaid: 25_00,
+            });
             await addPayment(cardItem, { method: PaymentMethod.CreditCard, price: 25_00 });
 
             // Order whose only payment failed: both engines must ignore the failed payment.
             const failedOrder = await createOrder();
             const failedItem = await addBalanceItem(failedOrder, { unitPrice: 5_00, pricePaid: 0 });
-            await addPayment(failedItem, { method: PaymentMethod.Transfer, price: 5_00, status: PaymentStatus.Failed });
+            await addPayment(failedItem, {
+                method: PaymentMethod.Transfer,
+                price: 5_00,
+                status: PaymentStatus.Failed,
+            });
 
-            await expectFilter({ payments: { $elemMatch: { method: { $eq: PaymentMethod.Transfer } } } }, [transferOrder]);
-            await expectFilter({ payments: { $elemMatch: { price: { $gt: 20_00 } } } }, [cardOrder]);
-            await expectFilter({ payments: { $elemMatch: { transferDescription: { $contains: '123' } } } }, [transferOrder]);
+            await expectFilter(
+                { payments: { $elemMatch: { method: { $eq: PaymentMethod.Transfer } } } },
+                [transferOrder],
+            );
+            await expectFilter({ payments: { $elemMatch: { price: { $gt: 20_00 } } } }, [
+                cardOrder,
+            ]);
+            await expectFilter(
+                { payments: { $elemMatch: { transferDescription: { $contains: '123' } } } },
+                [transferOrder],
+            );
         });
     });
 
@@ -860,13 +1484,19 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         // SQL SUM is not NULL (an order with no balance items would make amountToPay NULL in SQL but
         // totalPrice in memory, which is a separate, documented divergence).
         it('numeric comparisons', async () => {
-            const fullyPaid = await createOrder({ data: orderData({ items: [cartItem({ unitPrice: 10_00, amount: 1 })] }) });
+            const fullyPaid = await createOrder({
+                data: orderData({ items: [cartItem({ unitPrice: 10_00, amount: 1 })] }),
+            });
             await addBalanceItem(fullyPaid, { unitPrice: 10_00, pricePaid: 10_00 });
 
-            const partlyPaid = await createOrder({ data: orderData({ items: [cartItem({ unitPrice: 10_00, amount: 1 })] }) });
+            const partlyPaid = await createOrder({
+                data: orderData({ items: [cartItem({ unitPrice: 10_00, amount: 1 })] }),
+            });
             await addBalanceItem(partlyPaid, { unitPrice: 10_00, pricePaid: 4_00 });
 
-            const unpaid = await createOrder({ data: orderData({ items: [cartItem({ unitPrice: 10_00, amount: 1 })] }) });
+            const unpaid = await createOrder({
+                data: orderData({ items: [cartItem({ unitPrice: 10_00, amount: 1 })] }),
+            });
             await addBalanceItem(unpaid, { unitPrice: 10_00, pricePaid: 0 });
 
             await expectFilter({ amountToPay: { $eq: 0 } }, [fullyPaid]);
@@ -903,18 +1533,34 @@ describe('Order filters (in-memory vs backend SQL parity)', () => {
         it('ticketScanStatus', async () => {
             const o = await createOrdersWithTickets();
 
-            await expectFilter({ ticketScanStatus: { $in: ['none'] } }, [o.withoutTickets, o.unscanned, o.unscannedWithDeletedScan]);
+            await expectFilter({ ticketScanStatus: { $in: ['none'] } }, [
+                o.withoutTickets,
+                o.unscanned,
+                o.unscannedWithDeletedScan,
+            ]);
             await expectFilter({ ticketScanStatus: { $in: ['partial'] } }, [o.partial]);
             await expectFilter({ ticketScanStatus: { $in: ['all'] } }, [o.all]);
-            await expectFilter({ ticketScanStatus: { $in: ['partial', 'all'] } }, [o.partial, o.all]);
+            await expectFilter({ ticketScanStatus: { $in: ['partial', 'all'] } }, [
+                o.partial,
+                o.all,
+            ]);
         });
 
         it('ticketScannedAt is the first scan, or null without scans', async () => {
             const o = await createOrdersWithTickets();
 
-            await expectFilter({ ticketScannedAt: { $lt: between } }, [o.all, o.withoutTickets, o.unscanned, o.unscannedWithDeletedScan]);
+            await expectFilter({ ticketScannedAt: { $lt: between } }, [
+                o.all,
+                o.withoutTickets,
+                o.unscanned,
+                o.unscannedWithDeletedScan,
+            ]);
             await expectFilter({ ticketScannedAt: { $gt: between } }, [o.partial]);
-            await expectFilter({ ticketScannedAt: { $eq: null } }, [o.withoutTickets, o.unscanned, o.unscannedWithDeletedScan]);
+            await expectFilter({ ticketScannedAt: { $eq: null } }, [
+                o.withoutTickets,
+                o.unscanned,
+                o.unscannedWithDeletedScan,
+            ]);
             await expectFilter({ ticketScannedAt: { $neq: null } }, [o.partial, o.all]);
         });
 

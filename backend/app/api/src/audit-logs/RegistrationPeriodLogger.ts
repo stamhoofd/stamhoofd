@@ -11,11 +11,14 @@ export const RegistrationPeriodLogger = new ModelLogger(RegistrationPeriod, {
 
     createReplacements(model) {
         return new Map([
-            ['p', AuditLogReplacement.create({
-                id: model.id,
-                value: model.getStructure().nameShort,
-                type: AuditLogReplacementType.RegistrationPeriod,
-            })],
+            [
+                'p',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.getStructure().nameShort,
+                    type: AuditLogReplacementType.RegistrationPeriod,
+                }),
+            ],
         ]);
     },
 });

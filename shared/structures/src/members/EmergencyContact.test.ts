@@ -100,7 +100,11 @@ describe('EmergencyContact', () => {
 
         it('round-trips contacts that have a name', () => {
             const contacts = [
-                EmergencyContact.create({ name: 'An Peeters', title: 'Oma', phone: '0470 12 34 56' }),
+                EmergencyContact.create({
+                    name: 'An Peeters',
+                    title: 'Oma',
+                    phone: '0470 12 34 56',
+                }),
                 EmergencyContact.create({ name: 'Jan Janssens', title: 'Buur', phone: null }),
                 EmergencyContact.create({ name: 'Rita Maes', phone: '0470 11 22 33' }),
             ];

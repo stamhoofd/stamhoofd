@@ -1,8 +1,17 @@
-import { CreateBucketCommand, HeadBucketCommand, PutBucketCorsCommand, PutBucketPolicyCommand } from '@aws-sdk/client-s3';
+import {
+    CreateBucketCommand,
+    HeadBucketCommand,
+    PutBucketCorsCommand,
+    PutBucketPolicyCommand,
+} from '@aws-sdk/client-s3';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import { localPrimaryBucket } from '../config/shared-service-config.js';
-import { bucketCorsConfiguration, publicBucketPolicy, setupDevelopmentS3Buckets } from './s3-buckets.js';
+import {
+    bucketCorsConfiguration,
+    publicBucketPolicy,
+    setupDevelopmentS3Buckets,
+} from './s3-buckets.js';
 
 const send = vi.fn();
 
@@ -34,7 +43,9 @@ describe('setupDevelopmentS3Buckets', () => {
     });
 
     it('creates the bucket from the development config when it is missing', async () => {
-        const notFound = new Error('not found') as Error & { $metadata: { httpStatusCode: number } };
+        const notFound = new Error('not found') as Error & {
+            $metadata: { httpStatusCode: number };
+        };
         notFound.$metadata = { httpStatusCode: 404 };
         send.mockRejectedValueOnce(notFound).mockResolvedValue({});
 
@@ -49,24 +60,32 @@ describe('setupDevelopmentS3Buckets', () => {
     });
 
     it('uses the isolated instance bucket from the development config', async () => {
-        await setupDevelopmentS3Buckets(context({
-            instance: {
-                name: 'stamhoofd-feature-keeo',
-                prefix: 'feature',
-                primary: false,
-                portOffset: 1200,
-            },
-        }));
+        await setupDevelopmentS3Buckets(
+            context({
+                instance: {
+                    name: 'stamhoofd-feature-keeo',
+                    prefix: 'feature',
+                    primary: false,
+                    portOffset: 1200,
+                },
+            }),
+        );
 
-        expect(send.mock.calls[0][0].input.Bucket).toBe(`${localPrimaryBucket}-stamhoofd-feature-keeo`);
-        expect(send.mock.calls[1][0].input.Policy).toBe(publicBucketPolicy(`${localPrimaryBucket}-stamhoofd-feature-keeo`));
+        expect(send.mock.calls[0][0].input.Bucket).toBe(
+            `${localPrimaryBucket}-stamhoofd-feature-keeo`,
+        );
+        expect(send.mock.calls[1][0].input.Policy).toBe(
+            publicBucketPolicy(`${localPrimaryBucket}-stamhoofd-feature-keeo`),
+        );
     });
 
     it('allows our apps to read the files of the bucket', async () => {
         await setupDevelopmentS3Buckets(context());
 
         // Without this, downloading a file fails in development but not in production
-        const corsCommand = send.mock.calls.map(call => call[0]).find(command => command instanceof PutBucketCorsCommand);
+        const corsCommand = send.mock.calls
+            .map((call) => call[0])
+            .find((command) => command instanceof PutBucketCorsCommand);
 
         expect(corsCommand).toBeDefined();
         expect(corsCommand.input.Bucket).toBe(localPrimaryBucket);

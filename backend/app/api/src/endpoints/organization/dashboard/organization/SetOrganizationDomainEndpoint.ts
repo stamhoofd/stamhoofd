@@ -40,7 +40,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canManageOrganizationDomain(organization.id)) {
+        if (!(await Context.auth.canManageOrganizationDomain(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -48,14 +48,21 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
 
         // check if changed
         if (
-            (organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain) !== request.body.registerDomain // changed register domain
-            || (organization.privateMeta.pendingMailDomain ?? organization.privateMeta.mailDomain) !== request.body.mailDomain // changed pending domain
+            (organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain) !==
+                request.body.registerDomain || // changed register domain
+            (organization.privateMeta.pendingMailDomain ?? organization.privateMeta.mailDomain) !==
+                request.body.mailDomain // changed pending domain
         ) {
             console.log('Domains changed');
 
             // Validate domains
 
-            if (request.body.registerDomain !== null && !request.body.registerDomain.match(/^(?:[a-z0-9-]+\.)?(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i)) {
+            if (
+                request.body.registerDomain !== null &&
+                !request.body.registerDomain.match(
+                    /^(?:[a-z0-9-]+\.)?(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i,
+                )
+            ) {
                 throw new SimpleError({
                     code: 'invalid_domain',
                     message: 'registerDomain is invalid',
@@ -64,7 +71,10 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 });
             }
 
-            if (request.body.mailDomain !== null && !request.body.mailDomain.match(/^(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i)) {
+            if (
+                request.body.mailDomain !== null &&
+                !request.body.mailDomain.match(/^(?:[a-z0-9-]+\.)?[a-z0-9-]+\.[a-z]+$/i)
+            ) {
                 throw new SimpleError({
                     code: 'invalid_domain',
                     message: 'mailDomain is invalid',
@@ -75,16 +85,24 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
 
             const oldMailDomain = organization.privateMeta.mailDomain;
 
-            organization.privateMeta.pendingRegisterDomain = request.body.registerDomain?.toLowerCase() ?? null;
-            organization.privateMeta.pendingMailDomain = request.body.mailDomain?.toLowerCase() ?? null;
+            organization.privateMeta.pendingRegisterDomain =
+                request.body.registerDomain?.toLowerCase() ?? null;
+            organization.privateMeta.pendingMailDomain =
+                request.body.mailDomain?.toLowerCase() ?? null;
 
             // We don't keep the current register domain because we have no way to validate the old DNS-records
-            if (organization.privateMeta.pendingRegisterDomain === null || organization.registerDomain !== organization.privateMeta.pendingRegisterDomain) {
+            if (
+                organization.privateMeta.pendingRegisterDomain === null ||
+                organization.registerDomain !== organization.privateMeta.pendingRegisterDomain
+            ) {
                 organization.registerDomain = null;
             }
 
             // We don't keep the current mail domain because we have no way to validate the old DNS-records
-            if (organization.privateMeta.pendingMailDomain === null || organization.privateMeta.mailDomain !== organization.privateMeta.pendingMailDomain) {
+            if (
+                organization.privateMeta.pendingMailDomain === null ||
+                organization.privateMeta.mailDomain !== organization.privateMeta.pendingMailDomain
+            ) {
                 organization.privateMeta.mailDomain = null;
             }
 
@@ -100,45 +118,80 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
             organization.privateMeta.dnsRecords = [];
 
             if (organization.privateMeta.pendingMailDomain !== null) {
-                const defaultFromDomain = Formatter.slug(STAMHOOFD.platformName) + '.' + organization.privateMeta.pendingMailDomain;
-                if (organization.privateMeta.pendingRegisterDomain === null || !organization.privateMeta.pendingRegisterDomain.endsWith('.' + organization.privateMeta.pendingMailDomain)) {
+                const defaultFromDomain =
+                    Formatter.slug(STAMHOOFD.platformName) +
+                    '.' +
+                    organization.privateMeta.pendingMailDomain;
+                if (
+                    organization.privateMeta.pendingRegisterDomain === null ||
+                    !organization.privateMeta.pendingRegisterDomain.endsWith(
+                        '.' + organization.privateMeta.pendingMailDomain,
+                    )
+                ) {
                     // We set a custom domainname for webshops already
                     // This is not used at this moment
                     organization.privateMeta.mailFromDomain = defaultFromDomain;
                 } else {
                     // CNAME domain: for SPF + MX + A record
-                    organization.privateMeta.mailFromDomain = organization.privateMeta.pendingRegisterDomain;
+                    organization.privateMeta.mailFromDomain =
+                        organization.privateMeta.pendingRegisterDomain;
                 }
 
-                if (organization.privateMeta.mailFromDomain !== organization.privateMeta.pendingRegisterDomain) {
-                    organization.privateMeta.dnsRecords.push(DNSRecord.create({
-                        type: DNSRecordType.CNAME,
-                        name: organization.privateMeta.mailFromDomain + '.',
-                        // Use shops for mail domain, to allow reuse
-                        value: (STAMHOOFD.domains.webshopCname ?? STAMHOOFD.domains.registrationCname[organization.address.country] ?? STAMHOOFD.domains.registrationCname['']) + '.',
-                    }));
-
-                    if (STAMHOOFD.domains.registration && organization.privateMeta.pendingRegisterDomain) {
-                        organization.privateMeta.dnsRecords.push(DNSRecord.create({
+                if (
+                    organization.privateMeta.mailFromDomain !==
+                    organization.privateMeta.pendingRegisterDomain
+                ) {
+                    organization.privateMeta.dnsRecords.push(
+                        DNSRecord.create({
                             type: DNSRecordType.CNAME,
-                            name: organization.privateMeta.pendingRegisterDomain + '.',
-                            // Use registration domain
-                            value: (STAMHOOFD.domains.registrationCname[organization.address.country] ?? STAMHOOFD.domains.registrationCname['']) + '.',
-                        }));
+                            name: organization.privateMeta.mailFromDomain + '.',
+                            // Use shops for mail domain, to allow reuse
+                            value:
+                                (STAMHOOFD.domains.webshopCname ??
+                                    STAMHOOFD.domains.registrationCname[
+                                        organization.address.country
+                                    ] ??
+                                    STAMHOOFD.domains.registrationCname['']) + '.',
+                        }),
+                    );
+
+                    if (
+                        STAMHOOFD.domains.registration &&
+                        organization.privateMeta.pendingRegisterDomain
+                    ) {
+                        organization.privateMeta.dnsRecords.push(
+                            DNSRecord.create({
+                                type: DNSRecordType.CNAME,
+                                name: organization.privateMeta.pendingRegisterDomain + '.',
+                                // Use registration domain
+                                value:
+                                    (STAMHOOFD.domains.registrationCname[
+                                        organization.address.country
+                                    ] ?? STAMHOOFD.domains.registrationCname['']) + '.',
+                            }),
+                        );
                     }
                 } else {
-                    organization.privateMeta.dnsRecords.push(DNSRecord.create({
-                        type: DNSRecordType.CNAME,
-                        name: organization.privateMeta.mailFromDomain + '.',
-                        // Use registration domain
-                        value: (STAMHOOFD.domains.registrationCname[organization.address.country] ?? STAMHOOFD.domains.registrationCname['']) + '.',
-                    }));
+                    organization.privateMeta.dnsRecords.push(
+                        DNSRecord.create({
+                            type: DNSRecordType.CNAME,
+                            name: organization.privateMeta.mailFromDomain + '.',
+                            // Use registration domain
+                            value:
+                                (STAMHOOFD.domains.registrationCname[
+                                    organization.address.country
+                                ] ?? STAMHOOFD.domains.registrationCname['']) + '.',
+                        }),
+                    );
                 }
 
                 let priv: string;
                 let pub: string;
 
-                if (!organization.serverMeta.privateDKIMKey || !organization.serverMeta.publicDKIMKey) {
+                if (
+                    !organization.serverMeta.privateDKIMKey ||
+                    !organization.serverMeta.publicDKIMKey
+                ) {
                     const key = new NodeRSA({ b: request.body.useDkim1024bit ? 1024 : 2048 });
                     const privArr = (key.exportKey('private') as string).split('\n');
                     priv = privArr.splice(1, privArr.length - 2).join('');
@@ -154,26 +207,40 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 }
 
                 // DKIM records
-                organization.privateMeta.dnsRecords.push(DNSRecord.create({
-                    type: DNSRecordType.TXT,
-                    name: Formatter.slug(STAMHOOFD.platformName) + '._domainkey.' + organization.privateMeta.pendingMailDomain + '.',
-                    value: 'v=DKIM1; k=rsa; p=' + pub + '',
-                }));
+                organization.privateMeta.dnsRecords.push(
+                    DNSRecord.create({
+                        type: DNSRecordType.TXT,
+                        name:
+                            Formatter.slug(STAMHOOFD.platformName) +
+                            '._domainkey.' +
+                            organization.privateMeta.pendingMailDomain +
+                            '.',
+                        value: 'v=DKIM1; k=rsa; p=' + pub + '',
+                    }),
+                );
 
                 // DMARC records
-                organization.privateMeta.dnsRecords.push(DNSRecord.create({
-                    type: DNSRecordType.TXT,
-                    name: '_dmarc.' + organization.privateMeta.pendingMailDomain + '.',
-                    value: 'v=DMARC1; p=quarantine; pct=100; sp=quarantine; aspf=r; adkim=r;',
-                    description: $t('%Ee'),
-                    optional: true,
-                }));
+                organization.privateMeta.dnsRecords.push(
+                    DNSRecord.create({
+                        type: DNSRecordType.TXT,
+                        name: '_dmarc.' + organization.privateMeta.pendingMailDomain + '.',
+                        value: 'v=DMARC1; p=quarantine; pct=100; sp=quarantine; aspf=r; adkim=r;',
+                        description: $t('%Ee'),
+                        optional: true,
+                    }),
+                );
             } else {
                 if (oldMailDomain) {
-                    OrganizationDNSService.deleteAWSMailIdenitity(organization, oldMailDomain).catch(console.error);
+                    OrganizationDNSService.deleteAWSMailIdenitity(
+                        organization,
+                        oldMailDomain,
+                    ).catch(console.error);
                 }
 
-                if (organization.serverMeta.privateDKIMKey && organization.serverMeta.publicDKIMKey) {
+                if (
+                    organization.serverMeta.privateDKIMKey &&
+                    organization.serverMeta.publicDKIMKey
+                ) {
                     // Delete keys if mail domain is deleted -> to allow new keys
                     organization.serverMeta.privateDKIMKey = undefined;
                     organization.serverMeta.publicDKIMKey = undefined;

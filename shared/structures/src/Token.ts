@@ -17,7 +17,12 @@ export class Token implements Encodeable {
      */
     refreshTokenValidUntil: Date | null;
 
-    constructor(token: { accessToken: string; refreshToken: string; accessTokenValidUntil: Date; refreshTokenValidUntil?: Date | null }) {
+    constructor(token: {
+        accessToken: string;
+        refreshToken: string;
+        accessTokenValidUntil: Date;
+        refreshTokenValidUntil?: Date | null;
+    }) {
         this.accessToken = token.accessToken;
         this.refreshToken = token.refreshToken;
         this.accessTokenValidUntil = token.accessTokenValidUntil;
@@ -32,10 +37,16 @@ export class Token implements Encodeable {
         return new Token({
             accessToken: data.field('access_token').string,
             refreshToken: data.field('refresh_token').string,
-            accessTokenValidUntil: new Date(expiresOn ? (expiresOn * 1000) : new Date().getTime() + data.field('expires_in').integer * 1000),
+            accessTokenValidUntil: new Date(
+                expiresOn
+                    ? expiresOn * 1000
+                    : new Date().getTime() + data.field('expires_in').integer * 1000,
+            ),
             refreshTokenValidUntil: refreshExpiresOn
                 ? new Date(refreshExpiresOn * 1000)
-                : (refreshExpiresIn !== undefined ? new Date(new Date().getTime() + refreshExpiresIn * 1000) : null),
+                : refreshExpiresIn !== undefined
+                  ? new Date(new Date().getTime() + refreshExpiresIn * 1000)
+                  : null,
         });
     }
 
@@ -45,13 +56,17 @@ export class Token implements Encodeable {
             token_type: 'bearer',
             access_token: this.accessToken,
             refresh_token: this.refreshToken,
-            expires_in: Math.floor((this.accessTokenValidUntil.getTime() - new Date().getTime()) / 1000),
+            expires_in: Math.floor(
+                (this.accessTokenValidUntil.getTime() - new Date().getTime()) / 1000,
+            ),
             expires_on: Math.floor(this.accessTokenValidUntil.getTime() / 1000),
             ...(this.refreshTokenValidUntil
                 ? {
-                        refresh_expires_in: Math.floor((this.refreshTokenValidUntil.getTime() - new Date().getTime()) / 1000),
-                        refresh_expires_on: Math.floor(this.refreshTokenValidUntil.getTime() / 1000),
-                    }
+                      refresh_expires_in: Math.floor(
+                          (this.refreshTokenValidUntil.getTime() - new Date().getTime()) / 1000,
+                      ),
+                      refresh_expires_on: Math.floor(this.refreshTokenValidUntil.getTime() / 1000),
+                  }
                 : {}),
         };
     }

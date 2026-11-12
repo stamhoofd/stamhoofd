@@ -74,7 +74,7 @@ export class GetSignedFileUrlEndpoint extends Endpoint<Params, Query, Body, Resp
         const organization = await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (organization && !await Context.auth.hasSomeAccess(organization.id)) {
+        if (organization && !(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -97,7 +97,7 @@ export class GetSignedFileUrlEndpoint extends Endpoint<Params, Query, Body, Resp
 
         // The request middleware already refuses files with an invalid signature, but this endpoint hands out
         // access to a file, so it never relies on that check alone
-        if (!await file.verify()) {
+        if (!(await file.verify())) {
             throw new SimpleError({
                 code: 'invalid_signature',
                 message: 'Invalid signature for file',
@@ -119,7 +119,7 @@ export class GetSignedFileUrlEndpoint extends Endpoint<Params, Query, Body, Resp
 
         // The signature of a file ends up with everyone who receives the object it is attached to, so it can
         // never be the only thing that grants access here
-        if (!await this.canAccess(owner, organization, user)) {
+        if (!(await this.canAccess(owner, organization, user))) {
             throw Context.auth.error();
         }
 
@@ -127,7 +127,11 @@ export class GetSignedFileUrlEndpoint extends Endpoint<Params, Query, Body, Resp
         return new Response(file);
     }
 
-    private async canAccess(owner: FileOwner, organization: Organization | null, user: User): Promise<boolean> {
+    private async canAccess(
+        owner: FileOwner,
+        organization: Organization | null,
+        user: User,
+    ): Promise<boolean> {
         if (owner.type === 'anonymous') {
             return !!organization && owner.organizationId === organization.id;
         }

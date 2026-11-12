@@ -1,7 +1,19 @@
 import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
-import type { BalanceItemWithPayments, DetailedReceivableBalance, ReceivableBalance } from '@stamhoofd/structures';
-import { BalanceItemRelationType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getReceivableBalanceTypeName, PaginatedResponse } from '@stamhoofd/structures';
+import type {
+    BalanceItemWithPayments,
+    DetailedReceivableBalance,
+    ReceivableBalance,
+} from '@stamhoofd/structures';
+import {
+    BalanceItemRelationType,
+    ExcelExportType,
+    getBalanceItemRelationTypeName,
+    getBalanceItemStatusName,
+    getBalanceItemTypeName,
+    getReceivableBalanceTypeName,
+    PaginatedResponse,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetReceivableBalancesEndpoint } from '../endpoints/organization/dashboard/receivable-balances/GetReceivableBalancesEndpoint.js';
@@ -28,24 +40,24 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.ReceivableBalances, {
         {
             id: 'balanceItems',
             name: $t('%Mg'),
-            transform: (data: DetailedReceivableBalance): ReceivableBalanceWithItem[] => data.balanceItems.map(balanceItem => ({
-                receivableBalance: data,
-                balanceItem,
-            })),
+            transform: (data: DetailedReceivableBalance): ReceivableBalanceWithItem[] =>
+                data.balanceItems.map((balanceItem) => ({
+                    receivableBalance: data,
+                    balanceItem,
+                })),
             columns: [
                 ...getBalanceItemColumns(),
 
                 // Repeating columns need to de-transform again
-                ...getGeneralColumns()
-                    .map((c) => {
-                        return {
-                            ...c,
-                            id: `receivableBalance.${c.id}`,
-                            getValue: (object: ReceivableBalanceWithItem) => {
-                                return c.getValue(object.receivableBalance);
-                            },
-                        };
-                    }),
+                ...getGeneralColumns().map((c) => {
+                    return {
+                        ...c,
+                        id: `receivableBalance.${c.id}`,
+                        getValue: (object: ReceivableBalanceWithItem) => {
+                            return c.getValue(object.receivableBalance);
+                        },
+                    };
+                }),
             ],
         },
     ],
@@ -216,7 +228,9 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
                                 name: getBalanceItemRelationTypeName(type),
                                 width: 35,
                                 getValue: (object: ReceivableBalanceWithItem) => ({
-                                    value: object.balanceItem.relations.get(type)?.name?.toString() || '',
+                                    value:
+                                        object.balanceItem.relations.get(type)?.name?.toString() ||
+                                        '',
                                 }),
                             },
                         ];

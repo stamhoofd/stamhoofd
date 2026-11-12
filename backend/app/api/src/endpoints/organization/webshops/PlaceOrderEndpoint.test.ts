@@ -3,10 +3,52 @@ import { PatchableArray } from '@common/encoding';
 import type { Response } from '@node/endpoints';
 import { Request } from '@node/endpoints';
 import type { Organization, StripeAccount, User, Token } from '@stamhoofd/models';
-import { MolliePayment, Order, OrganizationFactory, Payment, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import {
+    MolliePayment,
+    Order,
+    OrganizationFactory,
+    Payment,
+    UserFactory,
+    Webshop,
+    WebshopFactory,
+} from '@stamhoofd/models';
 import type { OrderResponse } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Address, Cart, CartItem, CartItemOption, Customer, MollieOnboarding, MollieStatus, Option, OptionMenu, OrderData, PaymentConfiguration, PaymentMethod, PaymentProvider, PaymentStatus, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductPrice, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopAuthType, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopOrderMode, WebshopPrivateMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '@stamhoofd/structures';
+import {
+    Address,
+    Cart,
+    CartItem,
+    CartItemOption,
+    Customer,
+    MollieOnboarding,
+    MollieStatus,
+    Option,
+    OptionMenu,
+    OrderData,
+    PaymentConfiguration,
+    PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+    Permissions,
+    PrivateOrder,
+    PrivatePaymentConfiguration,
+    Product,
+    ProductPrice,
+    ProductType,
+    SeatingPlan,
+    SeatingPlanRow,
+    SeatingPlanSeat,
+    SeatingPlanSection,
+    TransferSettings,
+    WebshopAuthType,
+    WebshopDeliveryMethod,
+    WebshopMetaData,
+    WebshopOnSiteMethod,
+    WebshopOrderMode,
+    WebshopPrivateMetaData,
+    WebshopTakeoutMethod,
+    WebshopTimeSlot,
+} from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { CartReservedSeat, Version } from '@stamhoofd/structures';
@@ -79,28 +121,36 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
 
     async function refreshAll() {
         webshop = (await Webshop.getByID(webshop.id))!;
-        product = webshop.products.find(p => p.id == product.id)!;
-        seatProduct = webshop.products.find(p => p.id == seatProduct.id)!;
-        personProduct = webshop.products.find(p => p.id == personProduct.id)!;
-        takeoutMethod = webshop.meta.checkoutMethods.find(m => m.id == takeoutMethod.id)! as WebshopTakeoutMethod;
-        deliveryMethod = webshop.meta.checkoutMethods.find(m => m.id == deliveryMethod.id)! as WebshopDeliveryMethod;
-        onSiteMethod = webshop.meta.checkoutMethods.find(m => m.id == onSiteMethod.id)! as WebshopOnSiteMethod;
-        slot1 = takeoutMethod.timeSlots.timeSlots.find(s => s.id == slot1.id)!;
-        slot2 = takeoutMethod.timeSlots.timeSlots.find(s => s.id == slot2.id)!;
-        slot3 = deliveryMethod.timeSlots.timeSlots.find(s => s.id == slot3.id)!;
-        slot4 = onSiteMethod.timeSlots.timeSlots.find(s => s.id == slot4.id)!;
-        productPrice1 = product.prices.find(p => p.id == productPrice1.id)!;
-        productPrice2 = product.prices.find(p => p.id == productPrice2.id)!;
-        freeProductPrice = product.prices.find(p => p.id == freeProductPrice.id)!;
-        multipleChoiceOptionMenu = product.optionMenus.find(m => m.id == multipleChoiceOptionMenu.id)!;
-        chooseOneOptionMenu = product.optionMenus.find(m => m.id == chooseOneOptionMenu.id)!;
-        checkboxOption1 = multipleChoiceOptionMenu.options.find(o => o.id == checkboxOption1.id)!;
-        checkboxOption2 = multipleChoiceOptionMenu.options.find(o => o.id == checkboxOption2.id)!;
-        radioOption1 = chooseOneOptionMenu.options.find(o => o.id == radioOption1.id)!;
-        radioOption2 = chooseOneOptionMenu.options.find(o => o.id == radioOption2.id)!;
-        personProductPrice = personProduct.prices.find(p => p.id == personProductPrice.id)!;
-        seatProductPrice = seatProduct.prices.find(p => p.id == seatProductPrice.id)!;
-        seatingPlan = webshop.meta.seatingPlans.find(s => s.id === seatingPlan.id)!;
+        product = webshop.products.find((p) => p.id == product.id)!;
+        seatProduct = webshop.products.find((p) => p.id == seatProduct.id)!;
+        personProduct = webshop.products.find((p) => p.id == personProduct.id)!;
+        takeoutMethod = webshop.meta.checkoutMethods.find(
+            (m) => m.id == takeoutMethod.id,
+        )! as WebshopTakeoutMethod;
+        deliveryMethod = webshop.meta.checkoutMethods.find(
+            (m) => m.id == deliveryMethod.id,
+        )! as WebshopDeliveryMethod;
+        onSiteMethod = webshop.meta.checkoutMethods.find(
+            (m) => m.id == onSiteMethod.id,
+        )! as WebshopOnSiteMethod;
+        slot1 = takeoutMethod.timeSlots.timeSlots.find((s) => s.id == slot1.id)!;
+        slot2 = takeoutMethod.timeSlots.timeSlots.find((s) => s.id == slot2.id)!;
+        slot3 = deliveryMethod.timeSlots.timeSlots.find((s) => s.id == slot3.id)!;
+        slot4 = onSiteMethod.timeSlots.timeSlots.find((s) => s.id == slot4.id)!;
+        productPrice1 = product.prices.find((p) => p.id == productPrice1.id)!;
+        productPrice2 = product.prices.find((p) => p.id == productPrice2.id)!;
+        freeProductPrice = product.prices.find((p) => p.id == freeProductPrice.id)!;
+        multipleChoiceOptionMenu = product.optionMenus.find(
+            (m) => m.id == multipleChoiceOptionMenu.id,
+        )!;
+        chooseOneOptionMenu = product.optionMenus.find((m) => m.id == chooseOneOptionMenu.id)!;
+        checkboxOption1 = multipleChoiceOptionMenu.options.find((o) => o.id == checkboxOption1.id)!;
+        checkboxOption2 = multipleChoiceOptionMenu.options.find((o) => o.id == checkboxOption2.id)!;
+        radioOption1 = chooseOneOptionMenu.options.find((o) => o.id == radioOption1.id)!;
+        radioOption2 = chooseOneOptionMenu.options.find((o) => o.id == radioOption2.id)!;
+        personProductPrice = personProduct.prices.find((p) => p.id == personProductPrice.id)!;
+        seatProductPrice = seatProduct.prices.find((p) => p.id == seatProductPrice.id)!;
+        seatingPlan = webshop.meta.seatingPlans.find((s) => s.id === seatingPlan.id)!;
     }
 
     /** Allows to change the stock */
@@ -365,7 +415,14 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
         const item = CartItem.create({
             product: personProduct,
             productPrice: personProductPrice,
-            seats: [CartReservedSeat.create({ section: seatingPlan.sections[0].id, row: 'A', seat: '1', price: -100_00 })],
+            seats: [
+                CartReservedSeat.create({
+                    section: seatingPlan.sections[0].id,
+                    row: 'A',
+                    seat: '1',
+                    price: -100_00,
+                }),
+            ],
         });
         const orderData = OrderData.create({
             paymentMethod: PaymentMethod.Unknown,
@@ -374,13 +431,26 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             cart: Cart.create({ items: [item] }),
             customer,
         });
-        const before = { products: webshop.products.map(p => p.encode({ version: Version })), meta: webshop.meta.encode({ version: Version }) };
-        const request = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+        const before = {
+            products: webshop.products.map((p) => p.encode({ version: Version })),
+            meta: webshop.meta.encode({ version: Version }),
+        };
+        const request = Request.buildJson(
+            'POST',
+            `/webshop/${webshop.id}/order`,
+            organization.getApiHost(),
+            orderData,
+        );
 
-        await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('invalid_seats'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('invalid_seats'),
+        );
 
         await refreshAll();
-        expect({ products: webshop.products.map(p => p.encode({ version: Version })), meta: webshop.meta.encode({ version: Version }) }).toEqual(before);
+        expect({
+            products: webshop.products.map((p) => p.encode({ version: Version })),
+            meta: webshop.meta.encode({ version: Version }),
+        }).toEqual(before);
     });
 
     describe('User authentication', () => {
@@ -404,13 +474,24 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
 
-            await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.errorWithCode('not_authenticated'));
+            await expect(testServer.test(endpoint, r)).rejects.toThrow(
+                STExpect.errorWithCode('not_authenticated'),
+            );
         });
 
         test('Placing an order with a signed in user overrides the order customer', async () => {
-            const user = await new UserFactory({ organization, firstName: 'User', lastName: 'Tester' }).create();
+            const user = await new UserFactory({
+                organization,
+                firstName: 'User',
+                lastName: 'Tester',
+            }).create();
             const token = await SessionService.createSession(user);
 
             const orderData = OrderData.create({
@@ -439,7 +520,12 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
                 customer,
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             const response = await testServer.test(endpoint, r);
@@ -455,7 +541,11 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             webshop.meta.authType = WebshopAuthType.Required;
             await webshop.save();
 
-            const user = await new UserFactory({ organization, firstName: 'User', lastName: 'Tester' }).create();
+            const user = await new UserFactory({
+                organization,
+                firstName: 'User',
+                lastName: 'Tester',
+            }).create();
             const token = await SessionService.createSession(user);
             const otherUser = await new UserFactory({ organization }).create();
             const otherToken = await SessionService.createSession(otherUser);
@@ -476,19 +566,40 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
                 customer,
             });
 
-            const placeRequest = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const placeRequest = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
             placeRequest.headers.authorization = 'Bearer ' + token.accessToken;
             const placeResponse = await testServer.test(endpoint, placeRequest);
             const order = placeResponse.body.order;
 
-            const anonymousRequest = Request.buildJson('GET', `/webshop/${webshop.id}/order/${order.id}`, organization.getApiHost());
-            await expect(testServer.test(getOrderEndpoint, anonymousRequest)).rejects.toThrow(STExpect.errorWithCode('not_authenticated'));
+            const anonymousRequest = Request.buildJson(
+                'GET',
+                `/webshop/${webshop.id}/order/${order.id}`,
+                organization.getApiHost(),
+            );
+            await expect(testServer.test(getOrderEndpoint, anonymousRequest)).rejects.toThrow(
+                STExpect.errorWithCode('not_authenticated'),
+            );
 
-            const otherUserRequest = Request.buildJson('GET', `/webshop/${webshop.id}/order/${order.id}`, organization.getApiHost());
+            const otherUserRequest = Request.buildJson(
+                'GET',
+                `/webshop/${webshop.id}/order/${order.id}`,
+                organization.getApiHost(),
+            );
             otherUserRequest.headers.authorization = 'Bearer ' + otherToken.accessToken;
-            await expect(testServer.test(getOrderEndpoint, otherUserRequest)).rejects.toThrow(STExpect.errorWithCode('not_found'));
+            await expect(testServer.test(getOrderEndpoint, otherUserRequest)).rejects.toThrow(
+                STExpect.errorWithCode('not_found'),
+            );
 
-            const ownerRequest = Request.buildJson('GET', `/webshop/${webshop.id}/order/${order.id}`, organization.getApiHost());
+            const ownerRequest = Request.buildJson(
+                'GET',
+                `/webshop/${webshop.id}/order/${order.id}`,
+                organization.getApiHost(),
+            );
             ownerRequest.headers.authorization = 'Bearer ' + token.accessToken;
             const ownerResponse = await testServer.test(getOrderEndpoint, ownerRequest);
             expect(ownerResponse.body.id).toEqual(order.id);
@@ -544,12 +655,22 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
                 return stub.wrappedMethod.apply(this, args);
             });
 
-            const pendingResponses: { promise: Promise<Response<OrderResponse>>; user: User }[] = [];
+            const pendingResponses: { promise: Promise<Response<OrderResponse>>; user: User }[] =
+                [];
             for (let i = 0; i < 10; i++) {
-                const user = await new UserFactory({ organization, firstName: 'User', lastName: 'Tester' }).create();
+                const user = await new UserFactory({
+                    organization,
+                    firstName: 'User',
+                    lastName: 'Tester',
+                }).create();
                 const token = await SessionService.createSession(user);
 
-                const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+                const r = Request.buildJson(
+                    'POST',
+                    `/webshop/${webshop.id}/order`,
+                    organization.getApiHost(),
+                    orderData,
+                );
                 r.headers.authorization = 'Bearer ' + token.accessToken;
 
                 pendingResponses.push({
@@ -558,7 +679,7 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
                 });
             }
 
-            const responses = await Promise.all(pendingResponses.map(r => r.promise));
+            const responses = await Promise.all(pendingResponses.map((r) => r.promise));
 
             for (const [index, response] of responses.entries()) {
                 const user = pendingResponses[index].user;
@@ -591,13 +712,20 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             });
 
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
-            patchArray.addPut(PrivateOrder.create({
-                id: uuidv4(),
-                data: orderData,
-                webshopId: webshop.id,
-            }));
+            patchArray.addPut(
+                PrivateOrder.create({
+                    id: uuidv4(),
+                    data: orderData,
+                    webshopId: webshop.id,
+                }),
+            );
 
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             const response = await testServer.test(patchWebshopOrdersEndpoint, r);
@@ -605,23 +733,28 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             return response.body[0];
         }
 
-        test.each([PaymentMethod.Transfer, PaymentMethod.PointOfSale])('Stores the payment customer for a manually added %s order', async (paymentMethod) => {
-            const order = await createManualOrder(paymentMethod);
+        test.each([PaymentMethod.Transfer, PaymentMethod.PointOfSale])(
+            'Stores the payment customer for a manually added %s order',
+            async (paymentMethod) => {
+                const order = await createManualOrder(paymentMethod);
 
-            // The persisted payment should contain the billing details of the customer
-            const orderModel = (await Order.getByID(order.id))!;
-            expect(orderModel.paymentId).not.toBeNull();
+                // The persisted payment should contain the billing details of the customer
+                const orderModel = (await Order.getByID(order.id))!;
+                expect(orderModel.paymentId).not.toBeNull();
 
-            const payment = (await Payment.getByID(orderModel.paymentId!))!;
-            expect(payment.customer).not.toBeNull();
-            expect(payment.customer!.firstName).toEqual(customer.firstName);
-            expect(payment.customer!.lastName).toEqual(customer.lastName);
-            expect(payment.customer!.email).toEqual(customer.email);
-            expect(payment.customer!.phone).toEqual(customer.phone);
+                const payment = (await Payment.getByID(orderModel.paymentId!))!;
+                expect(payment.customer).not.toBeNull();
+                expect(payment.customer!.firstName).toEqual(customer.firstName);
+                expect(payment.customer!.lastName).toEqual(customer.lastName);
+                expect(payment.customer!.email).toEqual(customer.email);
+                expect(payment.customer!.phone).toEqual(customer.phone);
 
-            // The payment customer should match the order's customer billing details
-            expect(payment.customer!.equals(orderModel.data.customer.toPaymentCustomer())).toBe(true);
-        });
+                // The payment customer should match the order's customer billing details
+                expect(payment.customer!.equals(orderModel.data.customer.toPaymentCustomer())).toBe(
+                    true,
+                );
+            },
+        );
     });
 
     describe('Order language', () => {
@@ -644,7 +777,12 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
         }
 
         test('Stores the request language on a placed order', async () => {
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildFreeOrderData());
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                buildFreeOrderData(),
+            );
             r.headers['accept-language'] = 'en';
 
             const response = await testServer.test(endpoint, r);
@@ -660,7 +798,12 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             await webshop.save();
 
             // The struct default is Dutch, so the server-side fallback to the webshop default is observable.
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildFreeOrderData());
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                buildFreeOrderData(),
+            );
 
             const response = await testServer.test(endpoint, r);
             expect(response.body.order.consumerLanguage).toEqual(Language.French);
@@ -671,7 +814,9 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
 
         test('runWithLocale overrides the global language used for $t evaluation', async () => {
             // Allow French to be a valid locale for this test (test env has no locales configured).
-            TestUtils.setEnvironment('locales', { [Country.Belgium]: [Language.Dutch, Language.French] });
+            TestUtils.setEnvironment('locales', {
+                [Country.Belgium]: [Language.Dutch, Language.French],
+            });
 
             const i18n = new I18n(Language.French, Country.Belgium);
 
@@ -723,7 +868,12 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
         }
 
         test('Placing an order via Mollie returns the checkout url and the order is validated once paid', async () => {
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData());
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                buildOrderData(),
+            );
             const response: Response<OrderResponse> = await testServer.test(endpoint, r);
 
             expect(response.body.paymentUrl).toEqual('https://molliecheckout/');
@@ -738,7 +888,9 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             expect(mockPayment.internalPaymentId).toEqual(orderStruct.payment!.id);
 
             // The Mollie payment id is linked, so webhooks and crons can find the payment back
-            const molliePayment = await MolliePayment.select().where('paymentId', orderStruct.payment!.id).first(false);
+            const molliePayment = await MolliePayment.select()
+                .where('paymentId', orderStruct.payment!.id)
+                .first(false);
             expect(molliePayment).not.toBeNull();
             expect(molliePayment!.mollieId).toEqual(mockPayment.id);
 
@@ -754,7 +906,12 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
         });
 
         test('A failed Mollie payment does not validate the order', async () => {
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData());
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                buildOrderData(),
+            );
             const response: Response<OrderResponse> = await testServer.test(endpoint, r);
             const orderStruct = response.body.order;
 
@@ -795,7 +952,12 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             item.reservedAmount = 5;
             item.reservedPrices.set(freeProductPrice.id, 5);
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData(item));
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                buildOrderData(item),
+            );
             await expect(testServer.test(endpoint, r)).rejects.toThrow();
 
             await refreshAll();
@@ -807,7 +969,12 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             item.reservedAmount = 2;
             item.reservedPrices.set(freeProductPrice.id, 2);
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData(item));
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                buildOrderData(item),
+            );
             const response: Response<OrderResponse> = await testServer.test(endpoint, r);
             expect(response.body.order.data.cart.items[0].reservedAmount).toBe(2);
 
@@ -817,13 +984,33 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
         });
 
         test('reservedSeats does not allow taking a seat of another order', async () => {
-            const first = CartItem.create({ product: seatProduct, productPrice: seatProductPrice, amount: 1, seats: [seatA1()] });
-            const r1 = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData(first));
+            const first = CartItem.create({
+                product: seatProduct,
+                productPrice: seatProductPrice,
+                amount: 1,
+                seats: [seatA1()],
+            });
+            const r1 = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                buildOrderData(first),
+            );
             await testServer.test(endpoint, r1);
 
-            const second = CartItem.create({ product: seatProduct, productPrice: seatProductPrice, amount: 1, seats: [seatA1()] });
+            const second = CartItem.create({
+                product: seatProduct,
+                productPrice: seatProductPrice,
+                amount: 1,
+                seats: [seatA1()],
+            });
             second.reservedSeats = [seatA1()];
-            const r2 = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData(second));
+            const r2 = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                buildOrderData(second),
+            );
             await expect(testServer.test(endpoint, r2)).rejects.toThrow();
 
             await refreshAll();
@@ -831,12 +1018,21 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
         });
 
         test('reservedOrder and reservedPersons do not skip the time slot capacity', async () => {
-            const item = CartItem.create({ product: personProduct, productPrice: personProductPrice, amount: 1 });
+            const item = CartItem.create({
+                product: personProduct,
+                productPrice: personProductPrice,
+                amount: 1,
+            });
             const orderData = buildOrderData(item);
             orderData.reservedOrder = true;
             orderData.reservedPersons = 1;
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
             await testServer.test(endpoint, r);
 
             await refreshAll();
@@ -850,13 +1046,20 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
             item.reservedPrices.set(freeProductPrice.id, 5);
 
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
-            patchArray.addPut(PrivateOrder.create({
-                id: uuidv4(),
-                data: buildOrderData(item),
-                webshopId: webshop.id,
-            }));
+            patchArray.addPut(
+                PrivateOrder.create({
+                    id: uuidv4(),
+                    data: buildOrderData(item),
+                    webshopId: webshop.id,
+                }),
+            );
 
-            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
             await testServer.test(patchWebshopOrdersEndpoint, r);
 
@@ -876,9 +1079,7 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
                 product,
                 productPrice: productPrice1,
                 amount,
-                options: [
-                    CartItemOption.create({ optionMenu: chooseOneOptionMenu, option }),
-                ],
+                options: [CartItemOption.create({ optionMenu: chooseOneOptionMenu, option })],
             });
         }
 
@@ -899,16 +1100,30 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
                 buildItem(1, radioOption1),
                 buildItem(1, radioOption1),
                 buildItem(2, radioOption2),
-                CartItem.create({ product: personProduct, productPrice: personProductPrice, amount: 1 }),
+                CartItem.create({
+                    product: personProduct,
+                    productPrice: personProductPrice,
+                    amount: 1,
+                }),
             ]);
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
             const response: Response<OrderResponse> = await testServer.test(endpoint, r);
 
             const order = response.body.order;
             expect(order.data.cart.items).toHaveLength(4);
-            expect(order.data.cart.items.map(i => i.amount)).toEqual([1, 1, 2, 1]);
-            expect(order.data.cart.items.map(i => i.options[0]?.option.id)).toEqual([radioOption1.id, radioOption1.id, radioOption2.id, undefined]);
+            expect(order.data.cart.items.map((i) => i.amount)).toEqual([1, 1, 2, 1]);
+            expect(order.data.cart.items.map((i) => i.options[0]?.option.id)).toEqual([
+                radioOption1.id,
+                radioOption1.id,
+                radioOption2.id,
+                undefined,
+            ]);
         });
 
         test('Single mode only keeps the first item', async () => {
@@ -916,10 +1131,19 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
 
             const orderData = buildOrderData([
                 buildItem(1, radioOption1),
-                CartItem.create({ product: personProduct, productPrice: personProductPrice, amount: 1 }),
+                CartItem.create({
+                    product: personProduct,
+                    productPrice: personProductPrice,
+                    amount: 1,
+                }),
             ]);
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
             const response: Response<OrderResponse> = await testServer.test(endpoint, r);
 
             expect(response.body.order.data.cart.items).toHaveLength(1);
@@ -955,30 +1179,73 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
 
         test('The customer of every item is stored', async () => {
             const orderData = buildOrderData([
-                CartItem.create({ product: customerProduct, productPrice: customerProduct.prices[0], customer: Customer.create({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com', phone: '+32412345678' }) }),
-                CartItem.create({ product: customerProduct, productPrice: customerProduct.prices[0], customer: Customer.create({ firstName: 'Jack', lastName: 'Doe', email: 'jack@example.com' }) }),
+                CartItem.create({
+                    product: customerProduct,
+                    productPrice: customerProduct.prices[0],
+                    customer: Customer.create({
+                        firstName: 'Jane',
+                        lastName: 'Doe',
+                        email: 'jane@example.com',
+                        phone: '+32412345678',
+                    }),
+                }),
+                CartItem.create({
+                    product: customerProduct,
+                    productPrice: customerProduct.prices[0],
+                    customer: Customer.create({
+                        firstName: 'Jack',
+                        lastName: 'Doe',
+                        email: 'jack@example.com',
+                    }),
+                }),
             ]);
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
             const response: Response<OrderResponse> = await testServer.test(endpoint, r);
 
             const items = response.body.order.data.cart.items;
-            expect(items.map(i => i.customer?.name)).toEqual(['Jane Doe', 'Jack Doe']);
+            expect(items.map((i) => i.customer?.name)).toEqual(['Jane Doe', 'Jack Doe']);
             // Phone is disabled in the product settings, so it is not stored
             expect(items[0].customer?.phone).toEqual('');
             expect(items[0].customer?.email).toEqual('jane@example.com');
         });
 
         test('A missing customer or a missing required field is rejected', async () => {
-            const missingCustomer = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData([
-                CartItem.create({ product: customerProduct, productPrice: customerProduct.prices[0] }),
-            ]));
-            await expect(testServer.test(endpoint, missingCustomer)).rejects.toThrow(STExpect.errorWithCode('missing_customer'));
+            const missingCustomer = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                buildOrderData([
+                    CartItem.create({
+                        product: customerProduct,
+                        productPrice: customerProduct.prices[0],
+                    }),
+                ]),
+            );
+            await expect(testServer.test(endpoint, missingCustomer)).rejects.toThrow(
+                STExpect.errorWithCode('missing_customer'),
+            );
 
-            const missingEmail = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData([
-                CartItem.create({ product: customerProduct, productPrice: customerProduct.prices[0], customer: Customer.create({ firstName: 'Jane', lastName: 'Doe' }) }),
-            ]));
-            await expect(testServer.test(endpoint, missingEmail)).rejects.toThrow(STExpect.errorWithCode('invalid_email'));
+            const missingEmail = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                buildOrderData([
+                    CartItem.create({
+                        product: customerProduct,
+                        productPrice: customerProduct.prices[0],
+                        customer: Customer.create({ firstName: 'Jane', lastName: 'Doe' }),
+                    }),
+                ]),
+            );
+            await expect(testServer.test(endpoint, missingEmail)).rejects.toThrow(
+                STExpect.errorWithCode('invalid_email'),
+            );
         });
     });
 });

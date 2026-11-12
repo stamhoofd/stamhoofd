@@ -4,15 +4,33 @@ import { replaceText } from 'i18n-uuid/replace-text';
 
 export default class TranslateSource extends BaseCommand {
     static summary = 'Wrap untranslated source text in $t(...)';
-    static description = 'Optional source migration, not a stage of auto. This rewrites Vue and TypeScript text as translation calls without generating keys or making AI requests. Review and commit the Dutch strings with your source changes.';
-    static examples = ['stam translate manual source --changes --dry-run', 'stam translate manual source --changes --prompt --fix'];
+    static description =
+        'Optional source migration, not a stage of auto. This rewrites Vue and TypeScript text as translation calls without generating keys or making AI requests. Review and commit the Dutch strings with your source changes.';
+    static examples = [
+        'stam translate manual source --changes --dry-run',
+        'stam translate manual source --changes --prompt --fix',
+    ];
     static flags = {
-        'changes': Flags.boolean({ char: 'c', description: 'Only process changed files and lines' }),
-        'commits': Flags.string({ description: 'Git refs to compare; repeat exactly twice (implies --changes)', multiple: true }),
-        'attribute-white-list': Flags.string({ description: 'HTML attribute to process; repeat for multiple attributes', multiple: true }),
-        'dry-run': Flags.boolean({ description: 'Preview without writing source files or the processing cache' }),
-        'prompt': Flags.boolean({ char: 'p', description: 'Ask before each replacement (not used during dry-run)' }),
-        'fix': Flags.boolean({ char: 'f', description: 'Run ESLint on changed files after applying replacements' }),
+        changes: Flags.boolean({ char: 'c', description: 'Only process changed files and lines' }),
+        commits: Flags.string({
+            description: 'Git refs to compare; repeat exactly twice (implies --changes)',
+            multiple: true,
+        }),
+        'attribute-white-list': Flags.string({
+            description: 'HTML attribute to process; repeat for multiple attributes',
+            multiple: true,
+        }),
+        'dry-run': Flags.boolean({
+            description: 'Preview without writing source files or the processing cache',
+        }),
+        prompt: Flags.boolean({
+            char: 'p',
+            description: 'Ask before each replacement (not used during dry-run)',
+        }),
+        fix: Flags.boolean({
+            char: 'f',
+            description: 'Run ESLint on changed files after applying replacements',
+        }),
     };
 
     async run(): Promise<void> {
@@ -21,7 +39,9 @@ export default class TranslateSource extends BaseCommand {
             this.error('Repeat --commits exactly twice to select the two Git refs to compare.');
         }
         if (flags.prompt && !flags['dry-run'] && !(process.stdin.isTTY && process.stdout.isTTY)) {
-            this.error('--prompt requires an interactive terminal. Use --dry-run to preview without prompts.');
+            this.error(
+                '--prompt requires an interactive terminal. Use --dry-run to preview without prompts.',
+            );
         }
         await replaceText({
             changes: flags.changes || Boolean(flags.commits),

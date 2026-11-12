@@ -1,6 +1,20 @@
 import type { Member, Organization, RegistrationPeriod } from '@stamhoofd/models';
-import { BalanceItem, MemberFactory, MemberPlatformMembership, OrganizationFactory, Platform, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { BalanceItemType, PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, PlatformMembershipTypeConfigPrice, ReduceablePrice } from '@stamhoofd/structures';
+import {
+    BalanceItem,
+    MemberFactory,
+    MemberPlatformMembership,
+    OrganizationFactory,
+    Platform,
+    RegistrationPeriodFactory,
+} from '@stamhoofd/models';
+import {
+    BalanceItemType,
+    PlatformMembershipType,
+    PlatformMembershipTypeBehaviour,
+    PlatformMembershipTypeConfig,
+    PlatformMembershipTypeConfigPrice,
+    ReduceablePrice,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { MembershipCharger } from './MembershipCharger.js';
 
@@ -35,7 +49,11 @@ describe('MembershipCharger', () => {
         await platform.save();
     };
 
-    const createMembership = async (period: RegistrationPeriod, organization: Organization, member: Member) => {
+    const createMembership = async (
+        period: RegistrationPeriod,
+        organization: Organization,
+        member: Member,
+    ) => {
         const membership = new MemberPlatformMembership();
         membership.memberId = member.id;
         membership.membershipTypeId = membershipType.id;
@@ -83,7 +101,11 @@ describe('MembershipCharger', () => {
         const currentMember = await new MemberFactory({}).create();
         const nextMember = await new MemberFactory({}).create();
 
-        const currentMembership = await createMembership(currentPeriod, payingOrganization, currentMember);
+        const currentMembership = await createMembership(
+            currentPeriod,
+            payingOrganization,
+            currentMember,
+        );
         const nextMembership = await createMembership(nextPeriod, payingOrganization, nextMember);
 
         await MembershipCharger.charge();

@@ -4,7 +4,8 @@ export function escapeXml(str: string): string {
     // <   &lt;
     // >   &gt;
     // &   &amp;
-    return str.replace(/&/g, '&amp;')
+    return str
+        .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/'/g, '&apos;')

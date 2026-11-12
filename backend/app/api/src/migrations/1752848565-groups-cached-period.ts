@@ -46,6 +46,5 @@ async function start(dryRun: boolean) {
 
             throw new Error(`No period found for group ${group.id} (periodId: ${group.periodId})`);
         },
-
     });
 }

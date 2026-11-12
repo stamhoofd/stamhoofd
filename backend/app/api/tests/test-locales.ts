@@ -10,5 +10,7 @@ declare module 'vitest' {
 }
 
 export function loadTestLocales() {
-    I18n.loadedLocales = new Map(inject('apiLocales').map(([locale, messages]) => [locale, new Map(messages)]));
+    I18n.loadedLocales = new Map(
+        inject('apiLocales').map(([locale, messages]) => [locale, new Map(messages)]),
+    );
 }

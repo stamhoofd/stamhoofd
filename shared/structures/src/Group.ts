@@ -1,4 +1,12 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Formatter } from '@stamhoofd/utility';
@@ -36,7 +44,10 @@ export enum GroupStatus {
     Archived = 'Archived',
 }
 
-export function getGroupStatusName(status: GroupStatus | 'RegistrationStartDate', startDate?: Date | null) {
+export function getGroupStatusName(
+    status: GroupStatus | 'RegistrationStartDate',
+    startDate?: Date | null,
+) {
     switch (status) {
         case GroupStatus.Open:
             return $t('%1EN');
@@ -54,7 +65,10 @@ export function getGroupStatusName(status: GroupStatus | 'RegistrationStartDate'
 }
 
 export class Group extends AutoEncoder {
-    static createDefaultResponsibilityPermissions(group: Group | null, responsibility: MemberResponsibility): PermissionRoleForResponsibility {
+    static createDefaultResponsibilityPermissions(
+        group: Group | null,
+        responsibility: MemberResponsibility,
+    ): PermissionRoleForResponsibility {
         return PermissionRoleForResponsibility.create({
             name: responsibility.name + (group ? ` van ${group.settings.name.toString()}` : ''),
             responsibilityId: responsibility.id,
@@ -234,7 +248,9 @@ export class Group extends AutoEncoder {
     trimmedName(categoryName: string) {
         const name = this.settings.name.toString();
         if (name.toLocaleLowerCase().startsWith(categoryName.toLocaleLowerCase())) {
-            const cname = Formatter.capitalizeFirstLetter(Formatter.unwrapLeadingParentheses(name.slice(categoryName.length).trim()));
+            const cname = Formatter.capitalizeFirstLetter(
+                Formatter.unwrapLeadingParentheses(name.slice(categoryName.length).trim()),
+            );
             if (cname.length) {
                 return cname;
             }
@@ -249,7 +265,7 @@ export class Group extends AutoEncoder {
     getParentCategories(all: GroupCategory[], recursive = true): GroupCategory[] {
         const map = new Map<string, GroupCategory>();
 
-        const parents = all.filter(g => g.groupIds.includes(this.id));
+        const parents = all.filter((g) => g.groupIds.includes(this.id));
         for (const parent of parents) {
             map.set(parent.id, parent);
 
@@ -264,19 +280,31 @@ export class Group extends AutoEncoder {
         return [...map.values()];
     }
 
-    hasAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[], permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    hasAccess(
+        permissions: import('./LoadedPermissions.js').LoadedPermissions | null,
+        allCategories: GroupCategory[],
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+    ) {
         if (!permissions) {
             return false;
         }
 
-        if (permissions.hasResourceAccess(PermissionsResourceType.Groups, this.id, permissionLevel)) {
+        if (
+            permissions.hasResourceAccess(PermissionsResourceType.Groups, this.id, permissionLevel)
+        ) {
             return true;
         }
 
         // Check parent categories
         const parentCategories = this.getParentCategories(allCategories);
         for (const category of parentCategories) {
-            if (permissions.hasResourceAccess(PermissionsResourceType.GroupCategories, category.id, permissionLevel)) {
+            if (
+                permissions.hasResourceAccess(
+                    PermissionsResourceType.GroupCategories,
+                    category.id,
+                    permissionLevel,
+                )
+            ) {
                 return true;
             }
         }
@@ -293,15 +321,24 @@ export class Group extends AutoEncoder {
         return true;
     }
 
-    hasReadAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
+    hasReadAccess(
+        permissions: import('./LoadedPermissions.js').LoadedPermissions | null,
+        allCategories: GroupCategory[],
+    ): boolean {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Read);
     }
 
-    hasWriteAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
+    hasWriteAccess(
+        permissions: import('./LoadedPermissions.js').LoadedPermissions | null,
+        allCategories: GroupCategory[],
+    ): boolean {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Write);
     }
 
-    hasFullAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
+    hasFullAccess(
+        permissions: import('./LoadedPermissions.js').LoadedPermissions | null,
+        allCategories: GroupCategory[],
+    ): boolean {
         return this.hasAccess(permissions, allCategories, PermissionLevel.Full);
     }
 
@@ -309,7 +346,10 @@ export class Group extends AutoEncoder {
      * True when the user has any grant relevant to this group — a level, an access right, or a grant on a parent category.
      * Used for coarse gates like "does this user have any reason to reach this group at all?".
      */
-    hasSomeAccess(permissions: import('./LoadedPermissions.js').LoadedPermissions | null, allCategories: GroupCategory[]): boolean {
+    hasSomeAccess(
+        permissions: import('./LoadedPermissions.js').LoadedPermissions | null,
+        allCategories: GroupCategory[],
+    ): boolean {
         if (!permissions) {
             return false;
         }
@@ -318,13 +358,19 @@ export class Group extends AutoEncoder {
             return true;
         }
 
-        const groupPerm = permissions.getResourcePermissions(PermissionsResourceType.Groups, this.id);
+        const groupPerm = permissions.getResourcePermissions(
+            PermissionsResourceType.Groups,
+            this.id,
+        );
         if (groupPerm && !groupPerm.isEmpty) {
             return true;
         }
 
         for (const category of this.getParentCategories(allCategories)) {
-            const categoryPerm = permissions.getResourcePermissions(PermissionsResourceType.GroupCategories, category.id);
+            const categoryPerm = permissions.getResourcePermissions(
+                PermissionsResourceType.GroupCategories,
+                category.id,
+            );
             if (categoryPerm && !categoryPerm.isEmpty) {
                 return true;
             }
@@ -357,7 +403,10 @@ export class Group extends AutoEncoder {
      * group and organization combination.
      */
     getActivePeriods(organization: GroupOrganization | null) {
-        return getActivePeriods(this.settings.period ?? { id: this.periodId, name: $t('%8X') }, organization);
+        return getActivePeriods(
+            this.settings.period ?? { id: this.periodId, name: $t('%8X') },
+            organization,
+        );
     }
 
     getRecommendedFilter(organization?: GroupOrganization | null): StamhoofdFilter {
@@ -370,7 +419,8 @@ export class Group extends AutoEncoder {
                 name: p.name,
             };
         });
-        const periodIdFilter = periods.length === 1 ? { periodId: periods[0] } : { periodId: { $in: periods } };
+        const periodIdFilter =
+            periods.length === 1 ? { periodId: periods[0] } : { periodId: { $in: periods } };
 
         if (this.settings.minAge !== null) {
             filter.push({
@@ -420,7 +470,6 @@ export class Group extends AutoEncoder {
                             $not: {
                                 $in: this.settings.preventGroupIds,
                             },
-
                         },
                     },
                 },
@@ -461,7 +510,8 @@ export class Group extends AutoEncoder {
                                     },
                                 },
                             },
-                        }, {
+                        },
+                        {
                             platformMemberships: {
                                 $elemMatch: {
                                     startDate: {
@@ -492,7 +542,11 @@ export class Group extends AutoEncoder {
         }
 
         if (STAMHOOFD.userMode === 'platform') {
-            if (organization && (!this.settings.requireOrganizationIds.length || this.settings.requireOrganizationIds.includes(organization.id))) {
+            if (
+                organization &&
+                (!this.settings.requireOrganizationIds.length ||
+                    this.settings.requireOrganizationIds.includes(organization.id))
+            ) {
                 filter.push({
                     registrations: {
                         $elemMatch: {
@@ -551,7 +605,12 @@ export class Group extends AutoEncoder {
         return filter;
     }
 
-    getTags(options: { app: AppType; now?: Date; organization: GroupOrganization | null; blockCreatingNewMembers?: boolean }): GroupTagItem[] {
+    getTags(options: {
+        app: AppType;
+        now?: Date;
+        organization: GroupOrganization | null;
+        blockCreatingNewMembers?: boolean;
+    }): GroupTagItem[] {
         const tags: GroupTagItem[] = [];
         const now = options.now ?? new Date();
         const remainingStock = this.settings.getRemainingStockIncludingPricesAndOptions(this);
@@ -560,7 +619,11 @@ export class Group extends AutoEncoder {
         const allWaitingList = this.settings.waitingListType === WaitingListType.All;
 
         if (remainingStock !== 0 && !allWaitingList) {
-            if (activePreRegistrationDate !== null && (remainingStock === null || remainingStock > 0) && activePreRegistrationDate > now) {
+            if (
+                activePreRegistrationDate !== null &&
+                (remainingStock === null || remainingStock > 0) &&
+                activePreRegistrationDate > now
+            ) {
                 tags.push({
                     icon: 'calendar',
                     title: $t('%1Y7', { date: Formatter.startDate(activePreRegistrationDate) }),
@@ -569,14 +632,20 @@ export class Group extends AutoEncoder {
             } else if (preRegistrations && (remainingStock === null || remainingStock > 0)) {
                 tags.push({
                     icon: 'calendar',
-                    title: $t('%1bt', { date: Formatter.endDate(this.settings.registrationStartDate ?? new Date()) }),
+                    title: $t('%1bt', {
+                        date: Formatter.endDate(this.settings.registrationStartDate ?? new Date()),
+                    }),
                     style: 'warn',
                 });
             }
             if (this.notYetOpen) {
                 tags.push({
                     icon: 'calendar',
-                    title: $t('%1Z9', { date: Formatter.startDate(this.settings.registrationStartDate ?? new Date()) }),
+                    title: $t('%1Z9', {
+                        date: Formatter.startDate(
+                            this.settings.registrationStartDate ?? new Date(),
+                        ),
+                    }),
                     style: 'warn',
                 });
             }
@@ -592,7 +661,9 @@ export class Group extends AutoEncoder {
             } else if (this.settings.registrationEndDate && this.closed && !this.notYetOpen) {
                 tags.push({
                     icon: 'lock',
-                    title: $t('%1Ve', { date: Formatter.endDate(this.settings.registrationEndDate) }),
+                    title: $t('%1Ve', {
+                        date: Formatter.endDate(this.settings.registrationEndDate),
+                    }),
                     style: 'error',
                 });
             } else if (options.organization && options.organization.id === this.organizationId) {
@@ -613,10 +684,19 @@ export class Group extends AutoEncoder {
         }
 
         if (remainingStock !== 0 && !allWaitingList) {
-            if ((!this.closed || (this.status !== GroupStatus.Closed && options.app === 'dashboard')) && this.settings.registrationEndDate && (options.app === 'dashboard' || this.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
+            if (
+                (!this.closed ||
+                    (this.status !== GroupStatus.Closed && options.app === 'dashboard')) &&
+                this.settings.registrationEndDate &&
+                (options.app === 'dashboard' ||
+                    this.settings.registrationEndDate <
+                        new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))
+            ) {
                 tags.push({
                     icon: 'lock',
-                    title: $t('%1d3', { date: Formatter.endDate(this.settings.registrationEndDate) }),
+                    title: $t('%1d3', {
+                        date: Formatter.endDate(this.settings.registrationEndDate),
+                    }),
                     style: 'warn',
                 });
             }
@@ -628,7 +708,12 @@ export class Group extends AutoEncoder {
                     style: 'success',
                 });
             }
-            if (!this.closed && options.app === 'dashboard' && this.type === GroupType.Membership && options.blockCreatingNewMembers) {
+            if (
+                !this.closed &&
+                options.app === 'dashboard' &&
+                this.type === GroupType.Membership &&
+                options.blockCreatingNewMembers
+            ) {
                 tags.push({
                     icon: 'disabled',
                     title: $t('%ZdL'),
@@ -637,20 +722,30 @@ export class Group extends AutoEncoder {
             }
         }
 
-        if ((!this.closed || this.notYetOpen) && (remainingStock !== null && (remainingStock < 50 || options.app === 'dashboard'))) {
+        if (
+            (!this.closed || this.notYetOpen) &&
+            remainingStock !== null &&
+            (remainingStock < 50 || options.app === 'dashboard')
+        ) {
             if (remainingStock > 0) {
                 tags.push({
                     icon: 'user',
-                    title: remainingStock !== 1
-                        ? $t('%1d9', { count: remainingStock })
-                        : $t('%Zfj'),
+                    title:
+                        remainingStock !== 1 ? $t('%1d9', { count: remainingStock }) : $t('%Zfj'),
                     style: 'warn',
                 });
             } else if (this.waitingList !== null && !this.waitingList.closed) {
-                if (this.waitingList.settings.registrationEndDate && (options.app === 'dashboard' || this.waitingList.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
+                if (
+                    this.waitingList.settings.registrationEndDate &&
+                    (options.app === 'dashboard' ||
+                        this.waitingList.settings.registrationEndDate <
+                            new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))
+                ) {
                     tags.push({
                         icon: 'clock',
-                        title: $t('%Zfg', { date: Formatter.endDate(this.waitingList.settings.registrationEndDate) }),
+                        title: $t('%Zfg', {
+                            date: Formatter.endDate(this.waitingList.settings.registrationEndDate),
+                        }),
                         style: 'error',
                     });
                 } else {
@@ -660,20 +755,37 @@ export class Group extends AutoEncoder {
                         style: 'error',
                     });
                 }
-            } else if (this.waitingList !== null && this.waitingList.notYetOpen && this.waitingList.settings.registrationStartDate) {
-                if (this.waitingList.settings.registrationEndDate && (options.app === 'dashboard' || this.waitingList.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
+            } else if (
+                this.waitingList !== null &&
+                this.waitingList.notYetOpen &&
+                this.waitingList.settings.registrationStartDate
+            ) {
+                if (
+                    this.waitingList.settings.registrationEndDate &&
+                    (options.app === 'dashboard' ||
+                        this.waitingList.settings.registrationEndDate <
+                            new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))
+                ) {
                     tags.push({
                         icon: 'clock',
                         title: $t('%Zfs', {
-                            'start-date': Formatter.startDate(this.waitingList.settings.registrationStartDate),
-                            'end-date': Formatter.endDate(this.waitingList.settings.registrationStartDate),
+                            'start-date': Formatter.startDate(
+                                this.waitingList.settings.registrationStartDate,
+                            ),
+                            'end-date': Formatter.endDate(
+                                this.waitingList.settings.registrationStartDate,
+                            ),
                         }),
                         style: 'error',
                     });
                 } else {
                     tags.push({
                         icon: 'clock',
-                        title: $t('%Zfl', { date: Formatter.startDate(this.waitingList.settings.registrationStartDate) }),
+                        title: $t('%Zfl', {
+                            date: Formatter.startDate(
+                                this.waitingList.settings.registrationStartDate,
+                            ),
+                        }),
                         style: 'error',
                     });
                 }
@@ -686,10 +798,17 @@ export class Group extends AutoEncoder {
             }
         } else if ((allWaitingList || this.closed) && this.waitingList !== null) {
             if (!this.waitingList.closed) {
-                if (this.waitingList.settings.registrationEndDate && (options.app === 'dashboard' || this.waitingList.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
+                if (
+                    this.waitingList.settings.registrationEndDate &&
+                    (options.app === 'dashboard' ||
+                        this.waitingList.settings.registrationEndDate <
+                            new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))
+                ) {
                     tags.push({
                         icon: 'clock',
-                        title: $t('%Zfk', { date: Formatter.endDate(this.waitingList.settings.registrationEndDate) }),
+                        title: $t('%Zfk', {
+                            date: Formatter.endDate(this.waitingList.settings.registrationEndDate),
+                        }),
                         style: 'error',
                     });
                 } else {
@@ -699,20 +818,40 @@ export class Group extends AutoEncoder {
                         style: 'error',
                     });
                 }
-            } else if ((!this.notYetOpen || allWaitingList || (options.app === 'dashboard' && this.isMoreRestrictiveOpenThan(this.waitingList))) && this.waitingList.notYetOpen && this.waitingList.settings.registrationStartDate) {
-                if (this.waitingList.settings.registrationEndDate && (options.app === 'dashboard' || this.waitingList.settings.registrationEndDate < new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))) {
+            } else if (
+                (!this.notYetOpen ||
+                    allWaitingList ||
+                    (options.app === 'dashboard' &&
+                        this.isMoreRestrictiveOpenThan(this.waitingList))) &&
+                this.waitingList.notYetOpen &&
+                this.waitingList.settings.registrationStartDate
+            ) {
+                if (
+                    this.waitingList.settings.registrationEndDate &&
+                    (options.app === 'dashboard' ||
+                        this.waitingList.settings.registrationEndDate <
+                            new Date(now.getTime() + 1_000 * 60 * 60 * 24 * 31))
+                ) {
                     tags.push({
                         icon: 'clock',
                         title: $t('%Zff', {
-                            'start-date': Formatter.startDate(this.waitingList.settings.registrationStartDate),
-                            'end-date': Formatter.endDate(this.waitingList.settings.registrationEndDate),
+                            'start-date': Formatter.startDate(
+                                this.waitingList.settings.registrationStartDate,
+                            ),
+                            'end-date': Formatter.endDate(
+                                this.waitingList.settings.registrationEndDate,
+                            ),
                         }),
                         style: 'error',
                     });
                 } else {
                     tags.push({
                         icon: 'clock',
-                        title: $t('%Zfh', { date: Formatter.startDate(this.waitingList.settings.registrationStartDate) }),
+                        title: $t('%Zfh', {
+                            date: Formatter.startDate(
+                                this.waitingList.settings.registrationStartDate,
+                            ),
+                        }),
                         style: 'error',
                     });
                 }

@@ -5,8 +5,17 @@ import { SimpleError } from '@common/errors';
 import { Event } from '@stamhoofd/models';
 import type { SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, Event as EventStruct, StamhoofdFilter } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    Event as EventStruct,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
+import {
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    assertSort,
+    getSortFilter,
+} from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
@@ -54,13 +63,7 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             };
         }
 
-        const query = SQL
-            .select(
-                SQL.wildcard(Event.table),
-            )
-            .from(
-                SQL.table(Event.table),
-            );
+        const query = SQL.select(SQL.wildcard(Event.table)).from(SQL.table(Event.table));
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
@@ -152,8 +155,6 @@ export class GetEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             });
         }
 
-        return new Response(
-            await GetEventsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetEventsEndpoint.buildData(request.query));
     }
 }

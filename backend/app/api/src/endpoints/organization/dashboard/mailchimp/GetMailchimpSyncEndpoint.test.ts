@@ -4,7 +4,10 @@ import type { MailchimpSync as MailchimpSyncStruct } from '@stamhoofd/structures
 import { MailchimpSyncRequest } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { initMailchimpApi } from '../../../../../tests/init/initMailchimpApi.js';
-import { initMailchimpOrganization, mailchimpRequest } from '../../../../../tests/init/initMailchimpOrganization.js';
+import {
+    initMailchimpOrganization,
+    mailchimpRequest,
+} from '../../../../../tests/init/initMailchimpOrganization.js';
 import { GetMailchimpSyncEndpoint } from './GetMailchimpSyncEndpoint.js';
 
 describe('Endpoint.GetMailchimpSync', () => {
@@ -28,7 +31,13 @@ describe('Endpoint.GetMailchimpSync', () => {
         const context = await initMailchimpOrganization();
         const sync = await createSync(context.organization.id, MailchimpSyncStatus.Running);
 
-        const response = await mailchimpRequest<MailchimpSyncStruct>(endpoint, 'GET', `/mailchimp/syncs/${sync.id}`, context.host, context.token);
+        const response = await mailchimpRequest<MailchimpSyncStruct>(
+            endpoint,
+            'GET',
+            `/mailchimp/syncs/${sync.id}`,
+            context.host,
+            context.token,
+        );
         expect(response.body.status).toBe(MailchimpSyncStatus.Failed);
         expect(response.body.errorMessage).toBeTruthy();
     });
@@ -40,8 +49,15 @@ describe('Endpoint.GetMailchimpSync', () => {
         const platformSync = await createSync(null, MailchimpSyncStatus.Done);
 
         for (const sync of [otherSync, platformSync]) {
-            await expect(mailchimpRequest(endpoint, 'GET', `/mailchimp/syncs/${sync.id}`, context.host, context.token))
-                .rejects.toThrow(STExpect.simpleError({ code: 'not_found' }));
+            await expect(
+                mailchimpRequest(
+                    endpoint,
+                    'GET',
+                    `/mailchimp/syncs/${sync.id}`,
+                    context.host,
+                    context.token,
+                ),
+            ).rejects.toThrow(STExpect.simpleError({ code: 'not_found' }));
         }
     });
 });

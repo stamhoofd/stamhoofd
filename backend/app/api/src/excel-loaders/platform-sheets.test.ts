@@ -1,6 +1,22 @@
 import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
-import { EventNotificationType, ExcelExportType, Organization, OrganizationMetaData, OrganizationTag, Platform, PlatformConfig, PlatformMembership, PlatformMembershipMemberDetails, PlatformMembershipOrganizationDetails, PlatformMembershipType, RecordCategory, RecordSettings, RecordType, TranslatedString } from '@stamhoofd/structures';
+import {
+    EventNotificationType,
+    ExcelExportType,
+    Organization,
+    OrganizationMetaData,
+    OrganizationTag,
+    Platform,
+    PlatformConfig,
+    PlatformMembership,
+    PlatformMembershipMemberDetails,
+    PlatformMembershipOrganizationDetails,
+    PlatformMembershipType,
+    RecordCategory,
+    RecordSettings,
+    RecordType,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import './index.js';
 
@@ -9,14 +25,18 @@ import './index.js';
  * with instead of a process wide singleton.
  */
 describe('Excel loaders platform argument', () => {
-    function getColumns(type: ExcelExportType, platform: Platform, sheetId: string): XlsxTransformerColumn<unknown>[] {
+    function getColumns(
+        type: ExcelExportType,
+        platform: Platform,
+        sheetId: string,
+    ): XlsxTransformerColumn<unknown>[] {
         const loader = ExportToExcelEndpoint.loaders.get(type);
 
         if (!loader) {
             throw new Error('Loader ' + type + ' not registered');
         }
 
-        const sheet = loader.getSheets(platform).find(s => s.id === sheetId);
+        const sheet = loader.getSheets(platform).find((s) => s.id === sheetId);
 
         if (!sheet) {
             throw new Error('Sheet ' + sheetId + ' not found');
@@ -25,8 +45,15 @@ describe('Excel loaders platform argument', () => {
         return sheet.columns;
     }
 
-    function getColumn(type: ExcelExportType, platform: Platform, sheetId: string, columnId: string): XlsxTransformerConcreteColumn<unknown> {
-        const column = getColumns(type, platform, sheetId).find(c => isXlsxTransformerConcreteColumn(c) && c.id === columnId);
+    function getColumn(
+        type: ExcelExportType,
+        platform: Platform,
+        sheetId: string,
+        columnId: string,
+    ): XlsxTransformerConcreteColumn<unknown> {
+        const column = getColumns(type, platform, sheetId).find(
+            (c) => isXlsxTransformerConcreteColumn(c) && c.id === columnId,
+        );
 
         if (!column || !isXlsxTransformerConcreteColumn(column)) {
             throw new Error('Column ' + columnId + ' not found');
@@ -38,9 +65,7 @@ describe('Excel loaders platform argument', () => {
     function createPlatformWithTag(tagName: string) {
         return Platform.create({
             config: PlatformConfig.create({
-                tags: [
-                    OrganizationTag.create({ id: 'tag-1', name: tagName }),
-                ],
+                tags: [OrganizationTag.create({ id: 'tag-1', name: tagName })],
             }),
         });
     }
@@ -50,11 +75,21 @@ describe('Excel loaders platform argument', () => {
             meta: OrganizationMetaData.create({ tags: ['tag-1'] }),
         });
 
-        const first = getColumn(ExcelExportType.Organizations, createPlatformWithTag('Gewest Noord'), 'organizations', 'tags');
+        const first = getColumn(
+            ExcelExportType.Organizations,
+            createPlatformWithTag('Gewest Noord'),
+            'organizations',
+            'tags',
+        );
         expect(first.getValue(organization).value).toBe('Gewest Noord');
 
         // Building the sheets again with another platform should not reuse the first platform
-        const second = getColumn(ExcelExportType.Organizations, createPlatformWithTag('Gewest Zuid'), 'organizations', 'tags');
+        const second = getColumn(
+            ExcelExportType.Organizations,
+            createPlatformWithTag('Gewest Zuid'),
+            'organizations',
+            'tags',
+        );
         expect(second.getValue(organization).value).toBe('Gewest Zuid');
     });
 
@@ -72,12 +107,21 @@ describe('Excel loaders platform argument', () => {
             membershipTypeId: 'type-1',
             organizationId: 'organization-1',
             periodId: 'period-1',
-            member: PlatformMembershipMemberDetails.create({ firstName: 'John', lastName: 'Doe', memberNumber: null }),
+            member: PlatformMembershipMemberDetails.create({
+                firstName: 'John',
+                lastName: 'Doe',
+                memberNumber: null,
+            }),
             organization: PlatformMembershipOrganizationDetails.create({}),
             balanceItem: null,
         });
 
-        const column = getColumn(ExcelExportType.PlatformMemberships, platform, 'platform-memberships', 'type');
+        const column = getColumn(
+            ExcelExportType.PlatformMemberships,
+            platform,
+            'platform-memberships',
+            'type',
+        );
         expect(column.getValue(membership).value).toBe('Aansluiting');
     });
 
@@ -103,8 +147,14 @@ describe('Excel loaders platform argument', () => {
             }),
         });
 
-        const columns = getColumns(ExcelExportType.EventNotifications, platform, 'event-notifications');
-        const matched = columns.flatMap(c => isXlsxTransformerConcreteColumn(c) ? [] : (c.match('recordAnswers.record-1') ?? []));
+        const columns = getColumns(
+            ExcelExportType.EventNotifications,
+            platform,
+            'event-notifications',
+        );
+        const matched = columns.flatMap((c) =>
+            isXlsxTransformerConcreteColumn(c) ? [] : (c.match('recordAnswers.record-1') ?? []),
+        );
 
         expect(matched).toHaveLength(1);
         expect(matched[0].name).toBe('Aantal deelnemers');

@@ -1,18 +1,11 @@
 export function toMatchMap(actual, map: Map<any, any>) {
-    if (
-        !(map instanceof Map)
-    ) {
+    if (!(map instanceof Map)) {
         throw new TypeError('You need to pass a Map to toMatchMap');
     }
 
-    if (
-        !(actual instanceof Map)
-    ) {
+    if (!(actual instanceof Map)) {
         return {
-            message: () =>
-                `expected ${this.utils.printReceived(
-                    actual,
-                )} to be a Map`,
+            message: () => `expected ${this.utils.printReceived(actual)} to be a Map`,
             pass: false,
         };
     }
@@ -46,8 +39,7 @@ export function toMatchMap(actual, map: Map<any, any>) {
     for (const key of actual.keys()) {
         if (!map.has(key)) {
             return {
-                message: () =>
-                    `unexpected key ${this.utils.printExpected(key)} in Map`,
+                message: () => `unexpected key ${this.utils.printExpected(key)} in Map`,
                 pass: false,
             };
         }
@@ -57,4 +49,4 @@ export function toMatchMap(actual, map: Map<any, any>) {
         message: () => 'ok',
         pass: true,
     };
-};
+}

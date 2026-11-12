@@ -23,16 +23,30 @@ describe('Endpoint.GetNotificationsEndpoint', () => {
         await Notification.delete();
     });
 
-    async function get(user: User | null, query: Partial<ConstructorParameters<typeof LimitedFilteredRequest>[0]> = {}) {
+    async function get(
+        user: User | null,
+        query: Partial<ConstructorParameters<typeof LimitedFilteredRequest>[0]> = {},
+    ) {
         const request = Request.get({
             path: '/notifications',
             query: new LimitedFilteredRequest({ limit: 10, ...query }),
-            headers: user ? { authorization: 'Bearer ' + (await SessionService.createSession(user)).accessToken } : {},
+            headers: user
+                ? {
+                      authorization:
+                          'Bearer ' + (await SessionService.createSession(user)).accessToken,
+                  }
+                : {},
         });
-        return await testServer.test<PaginatedResponse<UserNotification[], LimitedFilteredRequest>>(endpoint, request);
+        return await testServer.test<PaginatedResponse<UserNotification[], LimitedFilteredRequest>>(
+            endpoint,
+            request,
+        );
     }
 
-    async function send(users: User[], options: { organizationId?: string; type?: NotificationType } = {}) {
+    async function send(
+        users: User[],
+        options: { organizationId?: string; type?: NotificationType } = {},
+    ) {
         return (await NotificationService.send({
             type: options.type ?? NotificationType.RegistrationCreated,
             payload: { n: users.length },
@@ -51,7 +65,7 @@ describe('Endpoint.GetNotificationsEndpoint', () => {
 
         const response = await get(user);
         expect(response.status).toBe(200);
-        expect(response.body.results.map(r => r.notificationId)).toEqual([third.id, first.id]);
+        expect(response.body.results.map((r) => r.notificationId)).toEqual([third.id, first.id]);
         expect(response.body.results[0]).toMatchObject({
             type: NotificationType.RegistrationCreated,
             payload: { n: 1 },
@@ -70,14 +84,14 @@ describe('Endpoint.GetNotificationsEndpoint', () => {
         }
 
         const page1 = await get(user, { limit: 2 });
-        expect(page1.body.results.map(r => r.notificationId)).toEqual([ids[4], ids[3]]);
+        expect(page1.body.results.map((r) => r.notificationId)).toEqual([ids[4], ids[3]]);
         expect(page1.body.next).toBeDefined();
 
         const page2 = await get(user, page1.body.next!);
-        expect(page2.body.results.map(r => r.notificationId)).toEqual([ids[2], ids[1]]);
+        expect(page2.body.results.map((r) => r.notificationId)).toEqual([ids[2], ids[1]]);
 
         const page3 = await get(user, page2.body.next!);
-        expect(page3.body.results.map(r => r.notificationId)).toEqual([ids[0]]);
+        expect(page3.body.results.map((r) => r.notificationId)).toEqual([ids[0]]);
         expect(page3.body.next).toBeUndefined();
     });
 
@@ -89,7 +103,9 @@ describe('Endpoint.GetNotificationsEndpoint', () => {
         await send([user]);
 
         const byOrganization = await get(user, { filter: { organizationId: organization.id } });
-        expect(byOrganization.body.results.map(r => r.notificationId)).toEqual([inOrganization.id]);
+        expect(byOrganization.body.results.map((r) => r.notificationId)).toEqual([
+            inOrganization.id,
+        ]);
 
         const unread = await get(user, { filter: { readAt: null } });
         expect(unread.body.results).toHaveLength(2);
@@ -108,20 +124,32 @@ describe('Endpoint.GetNotificationsEndpoint', () => {
         const explicit = await get(user, { sort: [{ key: 'id', order: SortItemDirection.DESC }] });
         expect(explicit.body.results).toHaveLength(1);
 
-        await expect(get(user, { sort: [{ key: 'id', order: SortItemDirection.ASC }] })).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'sort' }));
-        await expect(get(user, { sort: [{ key: 'createdAt', order: SortItemDirection.DESC }] })).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'sort' }));
+        await expect(
+            get(user, { sort: [{ key: 'id', order: SortItemDirection.ASC }] }),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'sort' }));
+        await expect(
+            get(user, { sort: [{ key: 'createdAt', order: SortItemDirection.DESC }] }),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'sort' }));
     });
 
     test('validates the limit and requires authentication', async () => {
         const user = await new UserFactory({}).create();
 
-        await expect(get(user, { limit: 101 })).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'limit' }));
-        await expect(get(user, { limit: 0 })).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'limit' }));
-        await expect(get(null)).rejects.toThrow(STExpect.simpleError({ code: 'not_authenticated' }));
+        await expect(get(user, { limit: 101 })).rejects.toThrow(
+            STExpect.simpleError({ code: 'invalid_field', field: 'limit' }),
+        );
+        await expect(get(user, { limit: 0 })).rejects.toThrow(
+            STExpect.simpleError({ code: 'invalid_field', field: 'limit' }),
+        );
+        await expect(get(null)).rejects.toThrow(
+            STExpect.simpleError({ code: 'not_authenticated' }),
+        );
     });
 
     test('does not support search', async () => {
         const user = await new UserFactory({}).create();
-        await expect(get(user, { search: 'x' })).rejects.toThrow(STExpect.simpleError({ code: 'not_supported' }));
+        await expect(get(user, { search: 'x' })).rejects.toThrow(
+            STExpect.simpleError({ code: 'not_supported' }),
+        );
     });
 });

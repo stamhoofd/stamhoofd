@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Colors } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,7 +19,11 @@ import { File } from './files/File.js';
 import { Image } from './files/Image.js';
 import { GroupCategory } from './GroupCategory.js';
 import { LoginMethod, LoginMethodConfig } from './LoginMethod.js';
-import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
+import {
+    DataPermissionsSettings,
+    FinancialSupportSettings,
+    OrganizationRecordsConfiguration,
+} from './members/OrganizationRecordsConfiguration.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
 import { OrganizationGenderType } from './OrganizationGenderType.js';
 import type { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.js';
@@ -90,7 +103,11 @@ export class OrganizationPackages extends AutoEncoder {
     }
 
     get useMembers() {
-        return this.isActive(STPackageType.Members) || this.isActive(STPackageType.LegacyMembers) || this.isActive(STPackageType.TrialMembers);
+        return (
+            this.isActive(STPackageType.Members) ||
+            this.isActive(STPackageType.LegacyMembers) ||
+            this.isActive(STPackageType.TrialMembers)
+        );
     }
 
     set useMembers(_: boolean) {
@@ -102,19 +119,35 @@ export class OrganizationPackages extends AutoEncoder {
     }
 
     get isMembersTrial() {
-        return !this.isActive(STPackageType.Members) && !this.isActive(STPackageType.LegacyMembers) && this.isActive(STPackageType.TrialMembers);
+        return (
+            !this.isActive(STPackageType.Members) &&
+            !this.isActive(STPackageType.LegacyMembers) &&
+            this.isActive(STPackageType.TrialMembers)
+        );
     }
 
     get isActivitiesTrial() {
-        return !this.isActive(STPackageType.Members) && this.isActive(STPackageType.LegacyMembers) && this.isActive(STPackageType.TrialMembers);
+        return (
+            !this.isActive(STPackageType.Members) &&
+            this.isActive(STPackageType.LegacyMembers) &&
+            this.isActive(STPackageType.TrialMembers)
+        );
     }
 
     get isWebshopsTrial() {
-        return !this.isActive(STPackageType.Webshops) && !this.isActive(STPackageType.SingleWebshop) && this.isActive(STPackageType.TrialWebshops);
+        return (
+            !this.isActive(STPackageType.Webshops) &&
+            !this.isActive(STPackageType.SingleWebshop) &&
+            this.isActive(STPackageType.TrialWebshops)
+        );
     }
 
     get canStartWebshopsTrial() {
-        return !this.useWebshops && !this.wasActive(STPackageType.Webshops) && !this.wasActive(STPackageType.SingleWebshop);
+        return (
+            !this.useWebshops &&
+            !this.wasActive(STPackageType.Webshops) &&
+            !this.wasActive(STPackageType.SingleWebshop)
+        );
     }
 
     get useWebshops() {
@@ -145,11 +178,21 @@ export class OrganizationPackages extends AutoEncoder {
     }
 
     get isPaid() {
-        return this.isActive(STPackageType.Members) || this.isActive(STPackageType.LegacyMembers) || this.isActive(STPackageType.Webshops) || this.isActive(STPackageType.SingleWebshop);
+        return (
+            this.isActive(STPackageType.Members) ||
+            this.isActive(STPackageType.LegacyMembers) ||
+            this.isActive(STPackageType.Webshops) ||
+            this.isActive(STPackageType.SingleWebshop)
+        );
     }
 
     get wasPaid() {
-        return this.wasActive(STPackageType.Members) || this.wasActive(STPackageType.LegacyMembers) || this.wasActive(STPackageType.Webshops) || this.wasActive(STPackageType.SingleWebshop);
+        return (
+            this.wasActive(STPackageType.Members) ||
+            this.wasActive(STPackageType.LegacyMembers) ||
+            this.wasActive(STPackageType.Webshops) ||
+            this.wasActive(STPackageType.SingleWebshop)
+        );
     }
 }
 
@@ -209,21 +252,29 @@ export class OrganizationMetaData extends AutoEncoder {
     lastSignedTerms: Date | null = null;
 
     get didAcceptLatestTerms() {
-        return this.lastSignedTerms !== null && this.lastSignedTerms >= new Date(2022, 0, 20, 0, 0, 0, 0);
+        return (
+            this.lastSignedTerms !== null &&
+            this.lastSignedTerms >= new Date(2022, 0, 20, 0, 0, 0, 0)
+        );
     }
 
     get didAcceptEndToEndEncryptionRemoval() {
-        return this.lastSignedTerms !== null && this.lastSignedTerms >= new Date(2022, 0, 20, 0, 0, 0, 0);
+        return (
+            this.lastSignedTerms !== null &&
+            this.lastSignedTerms >= new Date(2022, 0, 20, 0, 0, 0, 0)
+        );
     }
 
     @field({ decoder: new EnumDecoder(OrganizationType) })
     type = OrganizationType.Other;
 
-    @field({ decoder: new MapDecoder(new EnumDecoder(LoginMethod), LoginMethodConfig), version: 399 })
-    loginMethods: Map<LoginMethod, LoginMethodConfig> = new Map([[
-        LoginMethod.Password,
-        LoginMethodConfig.create({}),
-    ]]);
+    @field({
+        decoder: new MapDecoder(new EnumDecoder(LoginMethod), LoginMethodConfig),
+        version: 399,
+    })
+    loginMethods: Map<LoginMethod, LoginMethodConfig> = new Map([
+        [LoginMethod.Password, LoginMethodConfig.create({})],
+    ]);
 
     /**
      * Contains the ids of the tags
@@ -240,7 +291,12 @@ export class OrganizationMetaData extends AutoEncoder {
     /**
      * @deprecated Only used for migrations
      */
-    @field({ decoder: OrganizationModules, version: 48, upgrade: () => OrganizationModules.create({ useMembers: true, useWebshops: true }), field: 'modules' })
+    @field({
+        decoder: OrganizationModules,
+        version: 48,
+        upgrade: () => OrganizationModules.create({ useMembers: true, useWebshops: true }),
+        field: 'modules',
+    })
     modulesOld = OrganizationModules.create({});
 
     /**
@@ -380,7 +436,9 @@ export class OrganizationMetaData extends AutoEncoder {
             });
         },
     })
-    registrationPaymentConfiguration = PaymentConfiguration.create({ paymentMethods: [PaymentMethod.PointOfSale] });
+    registrationPaymentConfiguration = PaymentConfiguration.create({
+        paymentMethods: [PaymentMethod.PointOfSale],
+    });
 
     /**
      * @deprecated
@@ -417,40 +475,68 @@ export class OrganizationMetaData extends AutoEncoder {
     /**
      * @deprecated Moved to companies
      */
-    @field({ decoder: StringDecoder, nullable: true, version: 113, field: 'companyName', optional: true })
+    @field({
+        decoder: StringDecoder,
+        nullable: true,
+        version: 113,
+        field: 'companyName',
+        optional: true,
+    })
     companyName: string | null = null;
 
     /**
      * @deprecated Moved to companies
      */
-    @field({ decoder: StringDecoder, nullable: true, version: 113, field: 'VATNumber', optional: true })
+    @field({
+        decoder: StringDecoder,
+        nullable: true,
+        version: 113,
+        field: 'VATNumber',
+        optional: true,
+    })
     VATNumber: string | null = null;
 
     /**
      * @deprecated Moved to companies
      */
-    @field({ decoder: StringDecoder, nullable: true, version: 113, field: 'companyNumber', optional: true })
+    @field({
+        decoder: StringDecoder,
+        nullable: true,
+        version: 113,
+        field: 'companyNumber',
+        optional: true,
+    })
     companyNumber: string | null = null;
 
     /**
      * @deprecated Moved to companies
      */
-    @field({ decoder: Address, nullable: true, version: 113, field: 'companyAddress', optional: true })
+    @field({
+        decoder: Address,
+        nullable: true,
+        version: 113,
+        field: 'companyAddress',
+        optional: true,
+    })
     companyAddress: Address | null = null;
 
-    @field({ decoder: new ArrayDecoder(Company), upgrade: function (this: OrganizationMetaData) {
-        return (this.companyName || this.VATNumber || this.companyNumber || this.companyAddress)
-            ? [
-                    Company.create({
-                        id: 'default', // required we have stable ids in upgrades
-                        name: this.companyName ?? '',
-                        VATNumber: this.VATNumber,
-                        companyNumber: this.companyNumber,
-                        address: this.companyAddress,
-                    }),
-                ]
-            : [];
-    }, version: 322 })
+    @field({
+        decoder: new ArrayDecoder(Company),
+        upgrade: function (this: OrganizationMetaData) {
+            return this.companyName || this.VATNumber || this.companyNumber || this.companyAddress
+                ? [
+                      Company.create({
+                          id: 'default', // required we have stable ids in upgrades
+                          name: this.companyName ?? '',
+                          VATNumber: this.VATNumber,
+                          companyNumber: this.companyNumber,
+                          address: this.companyAddress,
+                      }),
+                  ]
+                : [];
+        },
+        version: 322,
+    })
     companies: Company[] = [];
 
     /**
@@ -483,7 +569,11 @@ export class OrganizationMetaData extends AutoEncoder {
     @field({ decoder: StringDecoder, version: 378, nullable: true })
     uitpasOrganizerName: string | null;
 
-    @field({ decoder: new EnumDecoder(UitpasClientCredentialsStatus), version: 378, defaultValue: () => UitpasClientCredentialsStatus.NotConfigured })
+    @field({
+        decoder: new EnumDecoder(UitpasClientCredentialsStatus),
+        version: 378,
+        defaultValue: () => UitpasClientCredentialsStatus.NotConfigured,
+    })
     uitpasClientCredentialsStatus: UitpasClientCredentialsStatus;
 
     /**
@@ -499,9 +589,8 @@ export class OrganizationMetaData extends AutoEncoder {
     dataPermission: DataPermissionsSettings | null = null;
 
     @field({ decoder: new ArrayDecoder(OrganizationEventType), version: 399 })
-    eventTypes: OrganizationEventType[] = STAMHOOFD.userMode === 'organization'
-        ? [OrganizationEventType.createDefault()]
-        : [];
+    eventTypes: OrganizationEventType[] =
+        STAMHOOFD.userMode === 'organization' ? [OrganizationEventType.createDefault()] : [];
 
     /**
      * @deprecated
@@ -510,19 +599,24 @@ export class OrganizationMetaData extends AutoEncoder {
      * (todo) Contains the fully build hierarchy without the need for ID lookups. Try not to use this tree when modifying it.
      */
     get rootCategory(): GroupCategory | undefined {
-        return this.categories.find(c => c.id === this.rootCategoryId);
+        return this.categories.find((c) => c.id === this.rootCategoryId);
     }
 
-    getEmailReplacements(organization: { name: string; privateMeta: OrganizationPrivateMetaData | null; registerUrl: string }) {
+    getEmailReplacements(organization: {
+        name: string;
+        privateMeta: OrganizationPrivateMetaData | null;
+        registerUrl: string;
+    }) {
         const base: Replacement[] = [
             Replacement.create({
                 token: 'organizationName',
                 value: organization.name,
             }),
-
         ];
 
-        const fromAddress = organization.privateMeta?.emails?.find(e => e.default) || organization.privateMeta?.emails[0];
+        const fromAddress =
+            organization.privateMeta?.emails?.find((e) => e.default) ||
+            organization.privateMeta?.emails[0];
 
         if (fromAddress) {
             base.push(

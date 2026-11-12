@@ -13,16 +13,23 @@ export class MemberNumberService {
         }
 
         if (!STAMHOOFD.MEMBER_NUMBER_ALGORITHM) {
-            console.warn('No member number algorithm set. Please set STAMHOOFD.MEMBER_NUMBER_ALGORITHM in the environment.');
+            console.warn(
+                'No member number algorithm set. Please set STAMHOOFD.MEMBER_NUMBER_ALGORITHM in the environment.',
+            );
             return;
         }
 
         return await QueueHandler.schedule('assignMemberNumber', async function (this: undefined) {
             try {
-                const memberNumber = await MemberNumberService.createMemberNumber(member, membership);
+                const memberNumber = await MemberNumberService.createMemberNumber(
+                    member,
+                    membership,
+                );
 
                 if (memberNumber === undefined) {
-                    console.warn('No valid member number algorithm set. Please set a valid STAMHOOFD.MEMBER_NUMBER_ALGORITHM in the environment.');
+                    console.warn(
+                        'No valid member number algorithm set. Please set a valid STAMHOOFD.MEMBER_NUMBER_ALGORITHM in the environment.',
+                    );
                     return;
                 }
 
@@ -43,7 +50,10 @@ export class MemberNumberService {
         });
     }
 
-    private static async createMemberNumber(member: Member, membership: MemberPlatformMembership): Promise<string | undefined> {
+    private static async createMemberNumber(
+        member: Member,
+        membership: MemberPlatformMembership,
+    ): Promise<string | undefined> {
         if (STAMHOOFD.MEMBER_NUMBER_ALGORITHM === MemberNumberAlgorithm.Incremental) {
             return this.createIncrementalMemberNumber();
         } else if (STAMHOOFD.MEMBER_NUMBER_ALGORITHM === MemberNumberAlgorithm.KSA) {
@@ -51,7 +61,10 @@ export class MemberNumberService {
         }
     }
 
-    private static async createKSAMemberNumber(member: Member, membership: MemberPlatformMembership): Promise<string> {
+    private static async createKSAMemberNumber(
+        member: Member,
+        membership: MemberPlatformMembership,
+    ): Promise<string> {
         // example: 5301-101012-1
 
         // #region get birth date part (ddmmjj)
@@ -108,10 +121,7 @@ export class MemberNumberService {
 
             const result = await SQL.select()
                 .from(SQL.table('members'))
-                .where(
-                    SQL.column('members', 'memberNumber'),
-                    scalarToSQLExpression(memberNumber),
-                )
+                .where(SQL.column('members', 'memberNumber'), scalarToSQLExpression(memberNumber))
                 .first(false);
 
             console.log(`Is ${memberNumber} unique? ${result === null}`);
@@ -142,7 +152,9 @@ export class MemberNumberService {
         const requiredLength = STAMHOOFD.MEMBER_NUMBER_ALGORITHM_LENGTH; // Required for reliable sorting (sorting strings with different length will cause unexpected results)
 
         if (!requiredLength || typeof requiredLength !== 'number') {
-            throw new Error('When using the Incremental member number algorithm, you need to set STAMHOOFD.MEMBER_NUMBER_ALGORITHM_LENGTH in the environment.');
+            throw new Error(
+                'When using the Incremental member number algorithm, you need to set STAMHOOFD.MEMBER_NUMBER_ALGORITHM_LENGTH in the environment.',
+            );
         }
 
         let nextNumber = 1;
@@ -154,10 +166,7 @@ export class MemberNumberService {
             // The required length prevents string-sorting with different lengths, causing an unexpected order
             const query = await SQL.select('memberNumber')
                 .from(SQL.table('members'))
-                .where(
-                    new SQLCharLength(SQL.column('memberNumber')),
-                    requiredLength,
-                )
+                .where(new SQLCharLength(SQL.column('memberNumber')), requiredLength)
                 .limit(1)
                 .orderBy('memberNumber', 'DESC')
                 .fetch();

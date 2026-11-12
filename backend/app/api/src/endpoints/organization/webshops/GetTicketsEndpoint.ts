@@ -36,7 +36,9 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/webshop/@id/tickets', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/tickets', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -56,13 +58,20 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         }
 
         if (request.query.secret) {
-            const [ticket] = await Ticket.where({
-                secret: request.query.secret,
-                webshopId: request.params.id,
-                organizationId: organization.id,
-            }, { limit: 1 });
+            const [ticket] = await Ticket.where(
+                {
+                    secret: request.query.secret,
+                    webshopId: request.params.id,
+                    organizationId: organization.id,
+                },
+                { limit: 1 },
+            );
 
-            if (!ticket || (request.query.orderId && ticket.orderId !== request.query.orderId) || ticket.isDeleted) {
+            if (
+                !ticket ||
+                (request.query.orderId && ticket.orderId !== request.query.orderId) ||
+                ticket.isDeleted
+            ) {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Ticket not found',
@@ -71,8 +80,14 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
 
             const order = await Order.getByID(ticket.orderId);
-            if (!order || order.webshopId !== request.params.id || order.organizationId !== organization.id) {
-                console.error('Error: missing order ' + ticket.orderId + ' for ticket ' + ticket.id);
+            if (
+                !order ||
+                order.webshopId !== request.params.id ||
+                order.organizationId !== organization.id
+            ) {
+                console.error(
+                    'Error: missing order ' + ticket.orderId + ' for ticket ' + ticket.id,
+                );
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Ticket not found',
@@ -86,10 +101,12 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 // Include item data
 
                 if (ticket.itemId) {
-                    const item = order.data.cart.items.find(i => i.id === ticket.itemId);
+                    const item = order.data.cart.items.find((i) => i.id === ticket.itemId);
 
                     if (!item) {
-                        console.error('Error: missing item ' + ticket.itemId + ' for ticket ' + ticket.id);
+                        console.error(
+                            'Error: missing item ' + ticket.itemId + ' for ticket ' + ticket.id,
+                        );
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'Ticket not found',
@@ -112,9 +129,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     ]);
                 }
             }
-            return new Response([
-                TicketOrder.create(ticket),
-            ]);
+            return new Response([TicketOrder.create(ticket)]);
         } else {
             if (!request.query.orderId) {
                 throw new SimpleError({
@@ -131,7 +146,11 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             });
 
             const order = await Order.getByID(request.query.orderId);
-            if (!order || order.webshopId !== request.params.id || order.organizationId !== organization.id) {
+            if (
+                !order ||
+                order.webshopId !== request.params.id ||
+                order.organizationId !== organization.id
+            ) {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Ticket not found',
@@ -140,9 +159,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
 
             await WebshopAuthHelper.checkOrderAccess(webshop, order);
-            return new Response(
-                tickets.map(ticket => TicketOrder.create(ticket)),
-            );
+            return new Response(tickets.map((ticket) => TicketOrder.create(ticket)));
         }
     }
 }

@@ -4,7 +4,29 @@ import { Request } from '@node/endpoints';
 import type { Organization, StripeAccount, Webshop, Token } from '@stamhoofd/models';
 import { OrganizationFactory, Ticket, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Cart, CartItem, CartReservedSeat, Customer, OrderData, OrderStatus, PaymentConfiguration, PaymentMethod, Permissions, PrivateOrder, PrivatePaymentConfiguration, Product, ProductType, SeatingPlan, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, TransferSettings, WebshopMetaData, WebshopPrivateMetaData, WebshopTicketType } from '@stamhoofd/structures';
+import {
+    Cart,
+    CartItem,
+    CartReservedSeat,
+    Customer,
+    OrderData,
+    OrderStatus,
+    PaymentConfiguration,
+    PaymentMethod,
+    Permissions,
+    PrivateOrder,
+    PrivatePaymentConfiguration,
+    Product,
+    ProductType,
+    SeatingPlan,
+    SeatingPlanRow,
+    SeatingPlanSeat,
+    SeatingPlanSection,
+    TransferSettings,
+    WebshopMetaData,
+    WebshopPrivateMetaData,
+    WebshopTicketType,
+} from '@stamhoofd/structures';
 import { SessionService } from '../../src/services/SessionService.js';
 
 import { PatchWebshopOrdersEndpoint } from '../../src/endpoints/organization/dashboard/webshops/PatchWebshopOrdersEndpoint.js';
@@ -187,15 +209,17 @@ describe('E2E.Tickets', () => {
         const orderData = OrderData.create({
             paymentMethod: PaymentMethod.PointOfSale,
             cart: Cart.create({
-                items: [
-                    item1,
-                    item2,
-                ],
+                items: [item1, item2],
             }),
             customer,
         });
 
-        const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+        const r = Request.buildJson(
+            'POST',
+            `/webshop/${webshop.id}/order`,
+            organization.getApiHost(),
+            orderData,
+        );
 
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
@@ -205,19 +229,19 @@ describe('E2E.Tickets', () => {
         const tickets = await Ticket.where({ orderId: order.id });
         expect(tickets).toHaveLength(7);
 
-        const item1Tickets = tickets.filter(t => t.itemId === item1.id);
-        const item2Tickets = tickets.filter(t => t.itemId === item2.id);
+        const item1Tickets = tickets.filter((t) => t.itemId === item1.id);
+        const item2Tickets = tickets.filter((t) => t.itemId === item2.id);
 
         expect(item1Tickets).toHaveLength(5);
         expect(item2Tickets).toHaveLength(2);
 
         // Check indexes present
-        expect(item1Tickets.map(i => i.index).sort()).toEqual([1, 2, 3, 4, 5]);
-        expect(item2Tickets.map(i => i.index).sort()).toEqual([1, 2]);
+        expect(item1Tickets.map((i) => i.index).sort()).toEqual([1, 2, 3, 4, 5]);
+        expect(item2Tickets.map((i) => i.index).sort()).toEqual([1, 2]);
 
         // Check total present
-        expect(item1Tickets.map(i => i.total).sort()).toEqual([5, 5, 5, 5, 5]);
-        expect(item2Tickets.map(i => i.total).sort()).toEqual([2, 2]);
+        expect(item1Tickets.map((i) => i.total).sort()).toEqual([5, 5, 5, 5, 5]);
+        expect(item2Tickets.map((i) => i.total).sort()).toEqual([2, 2]);
 
         expect(tickets.map(mapTicketCreation)).toIncludeSameMembers([
             {
@@ -288,15 +312,17 @@ describe('E2E.Tickets', () => {
         const orderData = OrderData.create({
             paymentMethod: PaymentMethod.PointOfSale,
             cart: Cart.create({
-                items: [
-                    item1,
-                    item2,
-                ],
+                items: [item1, item2],
             }),
             customer,
         });
 
-        const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+        const r = Request.buildJson(
+            'POST',
+            `/webshop/${webshop.id}/order`,
+            organization.getApiHost(),
+            orderData,
+        );
 
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
@@ -311,16 +337,26 @@ describe('E2E.Tickets', () => {
         const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
         const cartPatch = Cart.patch({});
-        cartPatch.items.addPatch(CartItem.patch({
-            id: item1.id,
-            amount: 7,
-        }));
+        cartPatch.items.addPatch(
+            CartItem.patch({
+                id: item1.id,
+                amount: 7,
+            }),
+        );
 
-        const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+        const orderPatch = PrivateOrder.patch({
+            id: order.id,
+            data: OrderData.patch({ cart: cartPatch }),
+        });
         patchArray.addPatch(orderPatch);
 
         // Send a patch
-        const r2 = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+        const r2 = Request.buildJson(
+            'PATCH',
+            `/webshop/${webshop.id}/orders`,
+            organization.getApiHost(),
+            patchArray,
+        );
         r2.headers.authorization = 'Bearer ' + token.accessToken;
 
         await testServer.test(patchWebshopOrdersEndpoint, r2);
@@ -329,10 +365,12 @@ describe('E2E.Tickets', () => {
         expect(ticketsAfter).toHaveLength(9);
 
         // Didn't change old tickets:
-        expect(ticketsAfter.map(mapTicketChangedAmount)).toIncludeAllMembers(tickets.map(mapTicketChangedAmount));
+        expect(ticketsAfter.map(mapTicketChangedAmount)).toIncludeAllMembers(
+            tickets.map(mapTicketChangedAmount),
+        );
 
         // Added 2 new items with index 6 and 7
-        const newTickets = ticketsAfter.filter(t => !tickets.find(tt => tt.id === t.id));
+        const newTickets = ticketsAfter.filter((t) => !tickets.find((tt) => tt.id === t.id));
         expect(newTickets).toHaveLength(2);
 
         expect(newTickets.map(mapTicketCreation)).toIncludeSameMembers([
@@ -435,15 +473,17 @@ describe('E2E.Tickets', () => {
         const orderData = OrderData.create({
             paymentMethod: PaymentMethod.PointOfSale,
             cart: Cart.create({
-                items: [
-                    item1,
-                    item2,
-                ],
+                items: [item1, item2],
             }),
             customer,
         });
 
-        const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+        const r = Request.buildJson(
+            'POST',
+            `/webshop/${webshop.id}/order`,
+            organization.getApiHost(),
+            orderData,
+        );
 
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
@@ -460,25 +500,37 @@ describe('E2E.Tickets', () => {
         const cartPatch = Cart.patch({});
         cartPatch.items.addDelete(item2.id);
 
-        const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+        const orderPatch = PrivateOrder.patch({
+            id: order.id,
+            data: OrderData.patch({ cart: cartPatch }),
+        });
         patchArray.addPatch(orderPatch);
 
         // Send a patch
-        const r2 = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+        const r2 = Request.buildJson(
+            'PATCH',
+            `/webshop/${webshop.id}/orders`,
+            organization.getApiHost(),
+            patchArray,
+        );
         r2.headers.authorization = 'Bearer ' + token.accessToken;
 
         await testServer.test(patchWebshopOrdersEndpoint, r2);
 
         const ticketsAfter = await Ticket.where({ orderId: order.id });
         expect(ticketsAfter).toHaveLength(7);
-        const deletedTickets = ticketsAfter.filter(t => t.isDeleted);
-        const remainingTickets = ticketsAfter.filter(t => !t.isDeleted);
+        const deletedTickets = ticketsAfter.filter((t) => t.isDeleted);
+        const remainingTickets = ticketsAfter.filter((t) => !t.isDeleted);
         expect(deletedTickets).toHaveLength(2);
         expect(remainingTickets).toHaveLength(5);
 
         // Didn't change old tickets:
-        expect(deletedTickets.map(mapTicketChangedAmount)).toIncludeSameMembers(tickets.filter(t => t.itemId === item2.id).map(mapTicketChangedAmount));
-        expect(remainingTickets.map(mapTicketChangedAmount)).toIncludeSameMembers(tickets.filter(t => t.itemId === item1.id).map(mapTicketChangedAmount));
+        expect(deletedTickets.map(mapTicketChangedAmount)).toIncludeSameMembers(
+            tickets.filter((t) => t.itemId === item2.id).map(mapTicketChangedAmount),
+        );
+        expect(remainingTickets.map(mapTicketChangedAmount)).toIncludeSameMembers(
+            tickets.filter((t) => t.itemId === item1.id).map(mapTicketChangedAmount),
+        );
     });
 
     test('Deleting an order deletes tickets', async () => {
@@ -497,15 +549,17 @@ describe('E2E.Tickets', () => {
         const orderData = OrderData.create({
             paymentMethod: PaymentMethod.PointOfSale,
             cart: Cart.create({
-                items: [
-                    item1,
-                    item2,
-                ],
+                items: [item1, item2],
             }),
             customer,
         });
 
-        const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+        const r = Request.buildJson(
+            'POST',
+            `/webshop/${webshop.id}/order`,
+            organization.getApiHost(),
+            orderData,
+        );
 
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
@@ -523,7 +577,12 @@ describe('E2E.Tickets', () => {
         patchArray.addPatch(orderPatch);
 
         // Send a patch
-        const r2 = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+        const r2 = Request.buildJson(
+            'PATCH',
+            `/webshop/${webshop.id}/orders`,
+            organization.getApiHost(),
+            patchArray,
+        );
         r2.headers.authorization = 'Bearer ' + token.accessToken;
 
         await testServer.test(patchWebshopOrdersEndpoint, r2);
@@ -531,8 +590,8 @@ describe('E2E.Tickets', () => {
         const ticketsAfter = await Ticket.where({ orderId: order.id });
         expect(ticketsAfter).toHaveLength(7);
 
-        const deletedTickets = ticketsAfter.filter(t => t.isDeleted);
-        const remainingTickets = ticketsAfter.filter(t => !t.isDeleted);
+        const deletedTickets = ticketsAfter.filter((t) => t.isDeleted);
+        const remainingTickets = ticketsAfter.filter((t) => !t.isDeleted);
         expect(deletedTickets).toHaveLength(7);
         expect(remainingTickets).toHaveLength(0);
     });
@@ -553,15 +612,17 @@ describe('E2E.Tickets', () => {
         const orderData = OrderData.create({
             paymentMethod: PaymentMethod.PointOfSale,
             cart: Cart.create({
-                items: [
-                    item1,
-                    item2,
-                ],
+                items: [item1, item2],
             }),
             customer,
         });
 
-        const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+        const r = Request.buildJson(
+            'POST',
+            `/webshop/${webshop.id}/order`,
+            organization.getApiHost(),
+            orderData,
+        );
 
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
@@ -576,16 +637,26 @@ describe('E2E.Tickets', () => {
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const cartPatch = Cart.patch({});
-            cartPatch.items.addPatch(CartItem.patch({
-                id: item1.id,
-                amount: 1,
-            }));
+            cartPatch.items.addPatch(
+                CartItem.patch({
+                    id: item1.id,
+                    amount: 1,
+                }),
+            );
 
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r2 = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r2 = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r2.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r2);
@@ -594,29 +665,41 @@ describe('E2E.Tickets', () => {
         let ticketsAfter = await Ticket.where({ orderId: order.id });
         expect(ticketsAfter).toHaveLength(7);
 
-        let deletedTickets = ticketsAfter.filter(t => t.isDeleted);
-        let remainingTickets = ticketsAfter.filter(t => !t.isDeleted);
+        let deletedTickets = ticketsAfter.filter((t) => t.isDeleted);
+        let remainingTickets = ticketsAfter.filter((t) => !t.isDeleted);
         expect(deletedTickets).toHaveLength(4);
         expect(remainingTickets).toHaveLength(3);
 
         // Didn't change tickets
-        expect(ticketsAfter.map(mapTicketChangedAmount)).toIncludeSameMembers(tickets.map(mapTicketChangedAmount));
+        expect(ticketsAfter.map(mapTicketChangedAmount)).toIncludeSameMembers(
+            tickets.map(mapTicketChangedAmount),
+        );
 
         // Now add an extra item
 
         {
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
             const cartPatch = Cart.patch({});
-            cartPatch.items.addPatch(CartItem.patch({
-                id: item1.id,
-                amount: 5,
-            }));
+            cartPatch.items.addPatch(
+                CartItem.patch({
+                    id: item1.id,
+                    amount: 5,
+                }),
+            );
 
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r2 = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r2 = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r2.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r2);
@@ -625,13 +708,15 @@ describe('E2E.Tickets', () => {
         ticketsAfter = await Ticket.where({ orderId: order.id });
         expect(ticketsAfter).toHaveLength(7);
 
-        deletedTickets = ticketsAfter.filter(t => t.isDeleted);
-        remainingTickets = ticketsAfter.filter(t => !t.isDeleted);
+        deletedTickets = ticketsAfter.filter((t) => t.isDeleted);
+        remainingTickets = ticketsAfter.filter((t) => !t.isDeleted);
         expect(deletedTickets).toHaveLength(0);
         expect(remainingTickets).toHaveLength(7);
 
         // Didn't change tickets
-        expect(ticketsAfter.map(mapTicketChangedAmount)).toIncludeSameMembers(tickets.map(mapTicketChangedAmount));
+        expect(ticketsAfter.map(mapTicketChangedAmount)).toIncludeSameMembers(
+            tickets.map(mapTicketChangedAmount),
+        );
     });
 
     /**
@@ -667,14 +752,17 @@ describe('E2E.Tickets', () => {
         const orderData = OrderData.create({
             paymentMethod: PaymentMethod.PointOfSale,
             cart: Cart.create({
-                items: [
-                    item1,
-                ],
+                items: [item1],
             }),
             customer,
         });
 
-        const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+        const r = Request.buildJson(
+            'POST',
+            `/webshop/${webshop.id}/order`,
+            organization.getApiHost(),
+            orderData,
+        );
 
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeDefined();
@@ -713,32 +801,42 @@ describe('E2E.Tickets', () => {
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const cartPatch = Cart.patch({});
-            cartPatch.items.addPatch(CartItem.patch({
-                id: item1.id,
-                seats: [
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'A',
-                        seat: '2',
-                    }),
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'A',
-                        seat: '3',
-                    }),
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'A',
-                        seat: '4',
-                    }),
-                ],
-            }));
+            cartPatch.items.addPatch(
+                CartItem.patch({
+                    id: item1.id,
+                    seats: [
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'A',
+                            seat: '2',
+                        }),
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'A',
+                            seat: '3',
+                        }),
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'A',
+                            seat: '4',
+                        }),
+                    ],
+                }),
+            );
 
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r2 = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r2 = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r2.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r2);
@@ -747,14 +845,14 @@ describe('E2E.Tickets', () => {
         let ticketsAfter = await Ticket.where({ orderId: order.id });
         expect(ticketsAfter).toHaveLength(3);
 
-        let deletedTickets = ticketsAfter.filter(t => t.isDeleted);
-        let remainingTickets = ticketsAfter.filter(t => !t.isDeleted);
+        let deletedTickets = ticketsAfter.filter((t) => t.isDeleted);
+        let remainingTickets = ticketsAfter.filter((t) => !t.isDeleted);
         expect(deletedTickets).toHaveLength(0);
         expect(remainingTickets).toHaveLength(3);
 
         expect(ticketsAfter.map(mapTicketChangedAmount)).toIncludeSameMembers([
             {
-                ...mapTicketChangedAmount(tickets.find(t => t.index === 1)!),
+                ...mapTicketChangedAmount(tickets.find((t) => t.index === 1)!),
                 index: 3,
                 seat: CartReservedSeat.create({
                     section: seatingPlan.sections[0].id,
@@ -764,13 +862,13 @@ describe('E2E.Tickets', () => {
                 originalSeat: item1.seats[0],
             },
             {
-                ...mapTicketChangedAmount(tickets.find(t => t.index === 2)!),
+                ...mapTicketChangedAmount(tickets.find((t) => t.index === 2)!),
                 index: 1,
                 seat: item1.seats[1],
                 originalSeat: item1.seats[1],
             },
             {
-                ...mapTicketChangedAmount(tickets.find(t => t.index === 3)!),
+                ...mapTicketChangedAmount(tickets.find((t) => t.index === 3)!),
                 index: 2,
                 seat: item1.seats[2],
                 originalSeat: item1.seats[2],
@@ -782,28 +880,38 @@ describe('E2E.Tickets', () => {
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const cartPatch = Cart.patch({});
-            cartPatch.items.addPatch(CartItem.patch({
-                id: item1.id,
-                amount: 2,
-                seats: [
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'A',
-                        seat: '2',
-                    }),
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'A',
-                        seat: '1',
-                    }),
-                ],
-            }));
+            cartPatch.items.addPatch(
+                CartItem.patch({
+                    id: item1.id,
+                    amount: 2,
+                    seats: [
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'A',
+                            seat: '2',
+                        }),
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'A',
+                            seat: '1',
+                        }),
+                    ],
+                }),
+            );
 
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r2 = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r2 = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r2.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r2);
@@ -812,26 +920,26 @@ describe('E2E.Tickets', () => {
         ticketsAfter = await Ticket.where({ orderId: order.id });
         expect(ticketsAfter).toHaveLength(3);
 
-        deletedTickets = ticketsAfter.filter(t => t.isDeleted);
-        remainingTickets = ticketsAfter.filter(t => !t.isDeleted);
+        deletedTickets = ticketsAfter.filter((t) => t.isDeleted);
+        remainingTickets = ticketsAfter.filter((t) => !t.isDeleted);
         expect(deletedTickets).toHaveLength(1);
         expect(remainingTickets).toHaveLength(2);
 
         // Note we correctly reused the tickets here
         expect(remainingTickets.map(mapTicketChangedAmount)).toIncludeSameMembers([
             {
-                ...mapTicketChangedAmount(tickets.find(t => t.index === 1)!),
+                ...mapTicketChangedAmount(tickets.find((t) => t.index === 1)!),
                 index: 2,
             },
             {
-                ...mapTicketChangedAmount(tickets.find(t => t.index === 2)!),
+                ...mapTicketChangedAmount(tickets.find((t) => t.index === 2)!),
                 index: 1,
             },
         ]);
 
         expect(deletedTickets.map(mapTicketChangedAmount)).toIncludeSameMembers([
             {
-                ...mapTicketChangedAmount(tickets.find(t => t.index === 3)!),
+                ...mapTicketChangedAmount(tickets.find((t) => t.index === 3)!),
                 index: 2,
             },
         ]);
@@ -841,38 +949,48 @@ describe('E2E.Tickets', () => {
             const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
 
             const cartPatch = Cart.patch({});
-            cartPatch.items.addPatch(CartItem.patch({
-                id: item1.id,
-                amount: 4,
-                seats: [
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'A',
-                        seat: '2',
-                    }),
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'A',
-                        seat: '1',
-                    }),
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'B',
-                        seat: '1',
-                    }),
-                    CartReservedSeat.create({
-                        section: seatingPlan.sections[0].id,
-                        row: 'B',
-                        seat: '2',
-                    }),
-                ],
-            }));
+            cartPatch.items.addPatch(
+                CartItem.patch({
+                    id: item1.id,
+                    amount: 4,
+                    seats: [
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'A',
+                            seat: '2',
+                        }),
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'A',
+                            seat: '1',
+                        }),
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'B',
+                            seat: '1',
+                        }),
+                        CartReservedSeat.create({
+                            section: seatingPlan.sections[0].id,
+                            row: 'B',
+                            seat: '2',
+                        }),
+                    ],
+                }),
+            );
 
-            const orderPatch = PrivateOrder.patch({ id: order.id, data: OrderData.patch({ cart: cartPatch }) });
+            const orderPatch = PrivateOrder.patch({
+                id: order.id,
+                data: OrderData.patch({ cart: cartPatch }),
+            });
             patchArray.addPatch(orderPatch);
 
             // Send a patch
-            const r2 = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            const r2 = Request.buildJson(
+                'PATCH',
+                `/webshop/${webshop.id}/orders`,
+                organization.getApiHost(),
+                patchArray,
+            );
             r2.headers.authorization = 'Bearer ' + token.accessToken;
 
             await testServer.test(patchWebshopOrdersEndpoint, r2);
@@ -881,23 +999,23 @@ describe('E2E.Tickets', () => {
         ticketsAfter = await Ticket.where({ orderId: order.id });
         expect(ticketsAfter).toHaveLength(4);
 
-        deletedTickets = ticketsAfter.filter(t => t.isDeleted);
-        remainingTickets = ticketsAfter.filter(t => !t.isDeleted);
+        deletedTickets = ticketsAfter.filter((t) => t.isDeleted);
+        remainingTickets = ticketsAfter.filter((t) => !t.isDeleted);
         expect(deletedTickets).toHaveLength(0);
         expect(remainingTickets).toHaveLength(4);
 
         // Note we correctly reused the tickets here
         expect(remainingTickets.map(mapTicketChangedAmount)).toIncludeAllMembers([
             {
-                ...mapTicketChangedAmount(tickets.find(t => t.index === 1)!),
+                ...mapTicketChangedAmount(tickets.find((t) => t.index === 1)!),
                 index: 2,
             },
             {
-                ...mapTicketChangedAmount(tickets.find(t => t.index === 2)!),
+                ...mapTicketChangedAmount(tickets.find((t) => t.index === 2)!),
                 index: 1,
             },
             {
-                ...mapTicketChangedAmount(tickets.find(t => t.index === 3)!),
+                ...mapTicketChangedAmount(tickets.find((t) => t.index === 3)!),
                 index: 3,
                 seat: CartReservedSeat.create({
                     section: seatingPlan.sections[0].id,

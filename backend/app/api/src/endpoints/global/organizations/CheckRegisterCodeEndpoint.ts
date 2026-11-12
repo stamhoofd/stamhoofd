@@ -14,7 +14,9 @@ export class CheckRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Res
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/register-code/@code', { code: String });
+        const params = Endpoint.parseParameters(request.url, '/register-code/@code', {
+            code: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -25,13 +27,17 @@ export class CheckRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Res
     async handle(request: DecodedRequest<Params, Query, Body>) {
         const code = await RegisterCode.getByID(request.params.code);
         if (code) {
-            return new Response(RegisterCodeStruct.create({
-                code: code.code,
-                description: code.description,
-                customMessage: code.customMessage,
-                organizationName: code.organizationId ? ((await Organization.getByID(code.organizationId))!.name) : null,
-                value: code.value,
-            }));
+            return new Response(
+                RegisterCodeStruct.create({
+                    code: code.code,
+                    description: code.description,
+                    customMessage: code.customMessage,
+                    organizationName: code.organizationId
+                        ? (await Organization.getByID(code.organizationId))!.name
+                        : null,
+                    value: code.value,
+                }),
+            );
         }
 
         throw new SimpleError({

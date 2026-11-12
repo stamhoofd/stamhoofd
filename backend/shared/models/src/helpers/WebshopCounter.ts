@@ -25,14 +25,21 @@ export class WebshopCounter {
                 return nextNumber;
             }
 
-            const [rows] = await Database.select('select max(number) as previousNumber from webshop_orders where webshopId = ? AND number < 100000000', [webshopId]);
+            const [rows] = await Database.select(
+                'select max(number) as previousNumber from webshop_orders where webshopId = ? AND number < 100000000',
+                [webshopId],
+            );
             let nextNumber: number | undefined;
 
             if (rows.length === 0) {
                 nextNumber = Math.min(maxStartNumber, webshop.privateMeta.startNumber ?? 1);
             } else {
-                const previousNumber: number | null = rows[0]['']['previousNumber'] as number | null;
-                nextNumber = (previousNumber ?? (Math.min(maxStartNumber, webshop.privateMeta.startNumber ?? 1) - 1)) + 1;
+                const previousNumber: number | null = rows[0]['']['previousNumber'] as
+                    | number
+                    | null;
+                nextNumber =
+                    (previousNumber ??
+                        Math.min(maxStartNumber, webshop.privateMeta.startNumber ?? 1) - 1) + 1;
             }
 
             this.numberCache.set(webshopId, nextNumber + 1);

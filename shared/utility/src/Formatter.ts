@@ -22,22 +22,28 @@ export class Formatter {
     }
 
     static emailSenderName(name: StringLike): string {
-        return this.removeAccents(name).replace(/[^\w-]+/g, ' ').trim();
+        return this.removeAccents(name)
+            .replace(/[^\w-]+/g, ' ')
+            .trim();
     }
 
     static iban(ibanRaw: string) {
         try {
-            return (friendlyFormatIBAN(ibanRaw) ?? ibanRaw).trim().replaceAll('*', '•').replace(/(?:••••\s)+/, '•••• ');
+            return (friendlyFormatIBAN(ibanRaw) ?? ibanRaw)
+                .trim()
+                .replaceAll('*', '•')
+                .replace(/(?:••••\s)+/, '•••• ');
         } catch (e) {
             console.error('Invalid IBAN', ibanRaw, e);
-            return ibanRaw.trim().replaceAll('*', '•').replace(/(?:••••\s)+/, '•••• ');
+            return ibanRaw
+                .trim()
+                .replaceAll('*', '•')
+                .replace(/(?:••••\s)+/, '•••• ');
         }
     }
 
     static VATNumber(vatNumber: string) {
-        const vat = vatNumber
-            .toUpperCase()
-            .replace(/[\s.-]/g, '');
+        const vat = vatNumber.toUpperCase().replace(/[\s.-]/g, '');
 
         // Belgium: BE + 10 digits
         if (vat.startsWith('BE')) {
@@ -66,20 +72,32 @@ export class Formatter {
     }
 
     static slug(name: StringLike): string {
-        return this.removeAccents(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+        return this.removeAccents(name)
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+/, '')
+            .replace(/-+$/, '');
     }
 
     static slugEmail(name: StringLike): string {
-        return this.removeAccents(name).toLowerCase().replace(/[^a-z0-9_]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+        return this.removeAccents(name)
+            .toLowerCase()
+            .replace(/[^a-z0-9_]+/g, '-')
+            .replace(/^-+/, '')
+            .replace(/-+$/, '');
     }
 
     static fileSlug(name: StringLike): string {
-        return this.removeAccents(name).replace(/[^A-Z0-9-]+/gi, ' ').trim();
+        return this.removeAccents(name)
+            .replace(/[^A-Z0-9-]+/gi, ' ')
+            .trim();
     }
 
     static sepaPaymentSlug(name: string): string {
         // https://www.europeanpaymentscouncil.eu/document-library/guidance-documents/sepa-requirements-extended-character-set-unicode-subset-best
-        return this.removeAccents(name).replace(/[^A-Z0-9-.:'+]+/gi, ' ').trim();
+        return this.removeAccents(name)
+            .replace(/[^A-Z0-9-.:'+]+/gi, ' ')
+            .trim();
     }
 
     static removeDuplicateSpaces(name: StringLike): string {
@@ -117,8 +135,19 @@ export class Formatter {
         }
 
         // todo translation
-        const monthNames = [$t('%tO'), $t('%tP'), $t('%tQ'), $t('%tR'), $t('%tS'), $t('%tT'),
-            $t('%tU'), $t('%tV'), $t('%tW'), $t('%tX'), $t('%tY'), $t('%tZ'),
+        const monthNames = [
+            $t('%tO'),
+            $t('%tP'),
+            $t('%tQ'),
+            $t('%tR'),
+            $t('%tS'),
+            $t('%tT'),
+            $t('%tU'),
+            $t('%tV'),
+            $t('%tW'),
+            $t('%tX'),
+            $t('%tY'),
+            $t('%tZ'),
         ];
         return monthNames[index - 1];
     }
@@ -138,7 +167,15 @@ export class Formatter {
         }
 
         // todo translation
-        const monthNames = [$t('%ta'), $t('%tb'), $t('%tc'), $t('%td'), $t('%te'), $t('%tf'), $t('%tg')];
+        const monthNames = [
+            $t('%ta'),
+            $t('%tb'),
+            $t('%tc'),
+            $t('%td'),
+            $t('%te'),
+            $t('%tf'),
+            $t('%tg'),
+        ];
 
         const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
         return monthNames[datetime.weekday - 1];
@@ -147,7 +184,11 @@ export class Formatter {
     /**
      * 1 januari (2020). Year only in different year and in the future, if withYear is null (default)
      */
-    static date(date: Date, withYear: boolean | null = null, options?: { timezone?: string }): string {
+    static date(
+        date: Date,
+        withYear: boolean | null = null,
+        options?: { timezone?: string },
+    ): string {
         if (!date) {
             // Crash protection in case undefined get passed
             return '?';
@@ -157,7 +198,14 @@ export class Formatter {
 
         const datetime = DateTime.fromJSDate(date).setZone(timezone);
         const year = datetime.year;
-        return datetime.day + ' ' + this.month(datetime.month) + (withYear !== false && (currentYear !== year || withYear === true || date < new Date()) ? (' ' + year) : '');
+        return (
+            datetime.day +
+            ' ' +
+            this.month(datetime.month) +
+            (withYear !== false && (currentYear !== year || withYear === true || date < new Date())
+                ? ' ' + year
+                : '')
+        );
     }
 
     /**
@@ -302,7 +350,12 @@ export class Formatter {
         }
 
         const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
-        return (datetime.day + '').padStart(2, '0') + '/' + (datetime.month + '').padStart(2, '0') + (withYear ? '/' + datetime.year : '');
+        return (
+            (datetime.day + '').padStart(2, '0') +
+            '/' +
+            (datetime.month + '').padStart(2, '0') +
+            (withYear ? '/' + datetime.year : '')
+        );
     }
 
     /**
@@ -316,7 +369,13 @@ export class Formatter {
 
         const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
         const year = datetime.year;
-        return year + '-' + (datetime.month + '').padStart(2, '0') + '-' + (datetime.day + '').padStart(2, '0');
+        return (
+            year +
+            '-' +
+            (datetime.month + '').padStart(2, '0') +
+            '-' +
+            (datetime.day + '').padStart(2, '0')
+        );
     }
 
     /**
@@ -338,10 +397,27 @@ export class Formatter {
 
         const datetime = DateTime.fromJSDate(date).setZone(timezone ?? this.timezone);
         const year = datetime.year;
-        return year + '-' + (datetime.month + '').padStart(2, '0') + '-' + (datetime.day + '').padStart(2, '0') + ' ' + (datetime.hour + '').padStart(2, '0') + ':' + (datetime.minute + '').padStart(2, '0') + ':' + (datetime.second + '').padStart(2, '0');
+        return (
+            year +
+            '-' +
+            (datetime.month + '').padStart(2, '0') +
+            '-' +
+            (datetime.day + '').padStart(2, '0') +
+            ' ' +
+            (datetime.hour + '').padStart(2, '0') +
+            ':' +
+            (datetime.minute + '').padStart(2, '0') +
+            ':' +
+            (datetime.second + '').padStart(2, '0')
+        );
     }
 
-    static startDate(startDate: Date, includeDay = false, withYear: boolean | null = null, includeTime: boolean | null = null): string {
+    static startDate(
+        startDate: Date,
+        includeDay = false,
+        withYear: boolean | null = null,
+        includeTime: boolean | null = null,
+    ): string {
         if (includeTime === false) {
             if (includeDay) {
                 return Formatter.dateWithDay(startDate, withYear);
@@ -355,8 +431,16 @@ export class Formatter {
         return Formatter.dateTime(startDate, includeTime === null, withYear);
     }
 
-    static endDate(endDate: Date, includeDay = false, withYear: boolean | null = null, includeTime: boolean | null = null): string {
-        if ((Formatter.time(endDate) === '23:59' && includeTime === null) || includeTime === false) {
+    static endDate(
+        endDate: Date,
+        includeDay = false,
+        withYear: boolean | null = null,
+        includeTime: boolean | null = null,
+    ): string {
+        if (
+            (Formatter.time(endDate) === '23:59' && includeTime === null) ||
+            includeTime === false
+        ) {
             if (includeDay) {
                 return Formatter.dateWithDay(endDate, withYear);
             }
@@ -369,38 +453,82 @@ export class Formatter {
         return Formatter.dateTime(endDate, false, withYear);
     }
 
-    static dateRange(startDate: Date, endDate: Date, join = ' - ', includeTime: boolean | null = null): string {
+    static dateRange(
+        startDate: Date,
+        endDate: Date,
+        join = ' - ',
+        includeTime: boolean | null = null,
+    ): string {
         if (Formatter.dateIso(startDate) === Formatter.dateIso(endDate)) {
             if (Formatter.time(startDate) === Formatter.time(endDate) || includeTime === false) {
-                return Formatter.dateWithDay(startDate) + (includeTime !== false ? (', ' + Formatter.time(startDate)) : '');
+                return (
+                    Formatter.dateWithDay(startDate) +
+                    (includeTime !== false ? ', ' + Formatter.time(startDate) : '')
+                );
             }
 
             if (Formatter.time(startDate) === '0:00' && Formatter.time(endDate) === '23:59') {
                 return Formatter.dateWithDay(startDate);
             }
 
-            return Formatter.dateWithDay(startDate) + ', ' + Formatter.time(startDate) + join + Formatter.time(endDate);
+            return (
+                Formatter.dateWithDay(startDate) +
+                ', ' +
+                Formatter.time(startDate) +
+                join +
+                Formatter.time(endDate)
+            );
         }
 
         // If start in evening and end on the next morning: only mention date once
-        const differentYear = startDate < new Date() || Formatter.year(startDate) !== Formatter.year(endDate) || Formatter.year(startDate) !== Formatter.year(new Date());
-        if (Formatter.dateIso(startDate) === Formatter.dateIso(new Date(endDate.getTime() - 24 * 60 * 60 * 1000)) && Formatter.timeIso(endDate) <= '07:00' && Formatter.timeIso(startDate) >= '12:00') {
-            return Formatter.dateWithDay(startDate, differentYear) + (includeTime !== false ? (', ' + Formatter.time(startDate) + join + Formatter.time(endDate)) : '');
+        const differentYear =
+            startDate < new Date() ||
+            Formatter.year(startDate) !== Formatter.year(endDate) ||
+            Formatter.year(startDate) !== Formatter.year(new Date());
+        if (
+            Formatter.dateIso(startDate) ===
+                Formatter.dateIso(new Date(endDate.getTime() - 24 * 60 * 60 * 1000)) &&
+            Formatter.timeIso(endDate) <= '07:00' &&
+            Formatter.timeIso(startDate) >= '12:00'
+        ) {
+            return (
+                Formatter.dateWithDay(startDate, differentYear) +
+                (includeTime !== false
+                    ? ', ' + Formatter.time(startDate) + join + Formatter.time(endDate)
+                    : '')
+            );
         }
 
-        if (Formatter.monthNumber(startDate) === Formatter.monthNumber(endDate) && Formatter.year(startDate) === Formatter.year(endDate)) {
+        if (
+            Formatter.monthNumber(startDate) === Formatter.monthNumber(endDate) &&
+            Formatter.year(startDate) === Formatter.year(endDate)
+        ) {
             // Only repeat number
-            if (includeTime === false || (Formatter.time(startDate) === '0:00' && Formatter.time(endDate) === '23:59')) {
+            if (
+                includeTime === false ||
+                (Formatter.time(startDate) === '0:00' && Formatter.time(endDate) === '23:59')
+            ) {
                 const currentYear = DateTime.now().setZone(this.timezone).year;
                 const startDatetime = DateTime.fromJSDate(startDate).setZone(this.timezone);
                 const endDatetime = DateTime.fromJSDate(endDate).setZone(this.timezone);
 
                 const year = startDatetime.year;
-                return startDatetime.day + join + endDatetime.day + ' ' + this.month(startDatetime.month) + (currentYear !== year || startDate < new Date() ? (' ' + year) : '');
+                return (
+                    startDatetime.day +
+                    join +
+                    endDatetime.day +
+                    ' ' +
+                    this.month(startDatetime.month) +
+                    (currentYear !== year || startDate < new Date() ? ' ' + year : '')
+                );
             }
         }
 
-        return Formatter.startDate(startDate, false, differentYear, includeTime) + join + Formatter.endDate(endDate, false, differentYear, includeTime);
+        return (
+            Formatter.startDate(startDate, false, differentYear, includeTime) +
+            join +
+            Formatter.endDate(endDate, false, differentYear, includeTime)
+        );
     }
 
     /**
@@ -428,7 +556,9 @@ export class Formatter {
             return '?';
         }
         const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
-        return (datetime.hour + '').padStart(2, '0') + ':' + (datetime.minute + '').padStart(2, '0');
+        return (
+            (datetime.hour + '').padStart(2, '0') + ':' + (datetime.minute + '').padStart(2, '0')
+        );
     }
 
     static uniqueArray<T>(array: T[], removeNullOrUndefined?: true): NonNullable<T>[];
@@ -472,7 +602,9 @@ export class Formatter {
     }
 
     static float(value: number, options?: { maximumFractionDigits?: number }): string {
-        const formatted = new Intl.NumberFormat('nl-BE', { maximumFractionDigits: options?.maximumFractionDigits ?? 4 }).format(Math.abs(value));
+        const formatted = new Intl.NumberFormat('nl-BE', {
+            maximumFractionDigits: options?.maximumFractionDigits ?? 4,
+        }).format(Math.abs(value));
 
         const v = (value < 0 ? '- ' : '') + formatted;
 
@@ -488,7 +620,13 @@ export class Formatter {
     }
 
     /** Format 1/10,000-euro units as nl-BE EUR; defaults to two decimals, stripping a trailing ,00. */
-    static price(value: number, { removeZeroDecimals = true, maximumFractionDigits = 2 }: { removeZeroDecimals?: boolean; maximumFractionDigits?: number } = {}): string {
+    static price(
+        value: number,
+        {
+            removeZeroDecimals = true,
+            maximumFractionDigits = 2,
+        }: { removeZeroDecimals?: boolean; maximumFractionDigits?: number } = {},
+    ): string {
         // We store prices with up to 4 digits after the decimal point for correct VAT calculations,
         // but we never display more than 2 digits: users confuse 5,012 euro with 5.012 euro.
         // The extra digits are rounded away here.
@@ -519,7 +657,10 @@ export class Formatter {
     }
 
     static capitalizeWords(string: StringLike) {
-        return string.split(' ').map(s => this.capitalizeFirstLetter(s)).join(' ');
+        return string
+            .split(' ')
+            .map((s) => this.capitalizeFirstLetter(s))
+            .join(' ');
     }
 
     static fileSize(bytes: number) {
@@ -572,7 +713,11 @@ export class Formatter {
         return string.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
     }
 
-    static joinLast(array: (string | number)[], separator: string | undefined, lastSeparator: string | undefined): string {
+    static joinLast(
+        array: (string | number)[],
+        separator: string | undefined,
+        lastSeparator: string | undefined,
+    ): string {
         array = array.slice();
         const last = array.pop();
         if (last === undefined) {
@@ -591,7 +736,16 @@ export class Formatter {
      * @param options
      * @returns
      */
-    static joinLastLimited<T extends string | number>(array: T[], options: { separator?: string; lastSeparator?: string; maxCount?: number; maxLength?: number; textIfOverflow?: (notIncludedCount: number) => string }): string {
+    static joinLastLimited<T extends string | number>(
+        array: T[],
+        options: {
+            separator?: string;
+            lastSeparator?: string;
+            maxCount?: number;
+            maxLength?: number;
+            textIfOverflow?: (notIncludedCount: number) => string;
+        },
+    ): string {
         if (!options.maxLength && !options.maxCount) {
             return Formatter.joinLast(array, options.separator, options.lastSeparator);
         }
@@ -601,10 +755,15 @@ export class Formatter {
 
         for (const item of array) {
             totalLength += item.toString().length;
-            if ((options.maxCount && itemsToInclude.length >= options.maxCount) || (options.maxLength && totalLength > options.maxLength)) {
+            if (
+                (options.maxCount && itemsToInclude.length >= options.maxCount) ||
+                (options.maxLength && totalLength > options.maxLength)
+            ) {
                 const notIncludedCount = array.length - itemsToInclude.length;
                 if (notIncludedCount > 1) {
-                    const lastText = options.textIfOverflow ? options.textIfOverflow(notIncludedCount) : $t('%1bw', { count: notIncludedCount });
+                    const lastText = options.textIfOverflow
+                        ? options.textIfOverflow(notIncludedCount)
+                        : $t('%1bw', { count: notIncludedCount });
                     itemsToInclude.push(lastText);
                     break;
                 }
@@ -643,11 +802,21 @@ export class Formatter {
     }
 
     static groupNamesByFamily(names: { firstName: string; lastName: string }[]): string {
-        const n = names.slice().sort((a, b) => Sorter.stack(a.lastName.localeCompare(b.lastName), a.firstName.localeCompare(b.firstName)));
-        const firstNames = this.uniqueArray(n.map(n => n.firstName));
-        const lastNames = this.uniqueArray(n.map(n => n.lastName));
+        const n = names
+            .slice()
+            .sort((a, b) =>
+                Sorter.stack(
+                    a.lastName.localeCompare(b.lastName),
+                    a.firstName.localeCompare(b.firstName),
+                ),
+            );
+        const firstNames = this.uniqueArray(n.map((n) => n.firstName));
+        const lastNames = this.uniqueArray(n.map((n) => n.lastName));
 
-        return this.joinLast(firstNames, ', ', ' ' + $t('%M1') + ' ') + (lastNames.length > 0 ? (' ' + lastNames.join('-')) : '');
+        return (
+            this.joinLast(firstNames, ', ', ' ' + $t('%M1') + ' ') +
+            (lastNames.length > 0 ? ' ' + lastNames.join('-') : '')
+        );
     }
 
     static firstLetters(str: StringLike, maxLength: number) {
@@ -659,7 +828,10 @@ export class Formatter {
         }
 
         const splitted = Formatter.slug(str).split('-');
-        return splitted.slice(0, maxLength).map(s => s.substr(0, 1).toLocaleUpperCase()).join('');
+        return splitted
+            .slice(0, maxLength)
+            .map((s) => s.substr(0, 1).toLocaleUpperCase())
+            .join('');
     }
 
     static injectPattern(value: string, parts: (string | { length: number })[]) {

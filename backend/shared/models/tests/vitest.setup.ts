@@ -22,7 +22,10 @@ afterAll(async () => {
     await Database.delete('DELETE FROM `registrations`');
     await Database.delete('DELETE FROM `payments`');
     await Database.delete('DELETE FROM `members`');
-    await Database.update('UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null', ['delete']);
+    await Database.update(
+        'UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null',
+        ['delete'],
+    );
     await Database.delete('DELETE FROM `organizations`');
     await Database.delete('DELETE FROM `registration_periods` where customName = ?', ['delete']);
     await Database.delete('DELETE FROM `email_recipients`');

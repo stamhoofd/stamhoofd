@@ -34,8 +34,6 @@ export class GetUserEndpoint extends Endpoint<Params, Query, Body, ResponseBody>
             throw Context.auth.error();
         }
 
-        return new Response(
-            await AuthenticatedStructures.userWithMembers(user),
-        );
+        return new Response(await AuthenticatedStructures.userWithMembers(user));
     }
 }

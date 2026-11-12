@@ -20,7 +20,13 @@ export class SettlementSyncRunner {
      */
     callback: ((summary: SettlementSyncSummary) => void) | null = null;
 
-    async run({ start = new Date(2025, 0, 1), end, providers, stripe, abort = new AbortSignal() }: {
+    async run({
+        start = new Date(2025, 0, 1),
+        end,
+        providers,
+        stripe,
+        abort = new AbortSignal(),
+    }: {
         start?: Date;
         end?: Date | null;
         providers?: PaymentProvider[] | null;
@@ -32,7 +38,13 @@ export class SettlementSyncRunner {
          */
         abort?: AbortSignal;
     } = {}): Promise<SettlementSyncSummary> {
-        const summary: SettlementSyncSummary = { feeMonths: 0, failedFeeMonths: 0, synced: 0, skipped: 0, failed: 0 };
+        const summary: SettlementSyncSummary = {
+            feeMonths: 0,
+            failedFeeMonths: 0,
+            synced: 0,
+            skipped: 0,
+            failed: 0,
+        };
         const rangeEnd = end ?? new Date();
         const onProgress = () => this.callback?.(summary);
 
@@ -46,7 +58,10 @@ export class SettlementSyncRunner {
             // reporting): unsynced settlements stay behind with syncedAt null, so the next run picks
             // them up
             if (includeStripe && STAMHOOFD.STRIPE_SECRET_KEY) {
-                const runner = new StripeSettlementSyncRunner({ secretKey: STAMHOOFD.STRIPE_SECRET_KEY, ...stripe });
+                const runner = new StripeSettlementSyncRunner({
+                    secretKey: STAMHOOFD.STRIPE_SECRET_KEY,
+                    ...stripe,
+                });
                 try {
                     await runner.run({ start, end: rangeEnd, summary, onProgress, abort });
                 } catch (e) {

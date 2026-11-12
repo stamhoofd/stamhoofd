@@ -3,7 +3,9 @@ import { Company, MemberDetails, OrderData, Parent, ParentType } from '@stamhoof
 import { determinePaymentCustomer } from './PaymentCustomerResolver.js';
 
 describe('PaymentCustomerResolver', () => {
-    function createPayment(props: Partial<Pick<Payment, 'payingUserId' | 'payingOrganizationId'>> = {}): Payment {
+    function createPayment(
+        props: Partial<Pick<Payment, 'payingUserId' | 'payingOrganizationId'>> = {},
+    ): Payment {
         const payment = new Payment();
         payment.id = 'payment-1';
         payment.payingUserId = props.payingUserId ?? null;
@@ -11,7 +13,11 @@ describe('PaymentCustomerResolver', () => {
         return payment;
     }
 
-    function createBalanceItem(props: Partial<Pick<BalanceItem, 'id' | 'memberId' | 'userId' | 'orderId' | 'payingOrganizationId'>>): BalanceItem {
+    function createBalanceItem(
+        props: Partial<
+            Pick<BalanceItem, 'id' | 'memberId' | 'userId' | 'orderId' | 'payingOrganizationId'>
+        >,
+    ): BalanceItem {
         const balanceItem = new BalanceItem();
         balanceItem.id = props.id ?? 'balance-item-1';
         balanceItem.memberId = props.memberId ?? null;
@@ -21,7 +27,12 @@ describe('PaymentCustomerResolver', () => {
         return balanceItem;
     }
 
-    function createUser(props: { id: string; firstName?: string | null; lastName?: string | null; email: string }): User {
+    function createUser(props: {
+        id: string;
+        firstName?: string | null;
+        lastName?: string | null;
+        email: string;
+    }): User {
         const user = new User();
         user.id = props.id;
         user.firstName = props.firstName ?? null;
@@ -70,7 +81,12 @@ describe('PaymentCustomerResolver', () => {
 
     it('returns the paying user', () => {
         const payment = createPayment({ payingUserId: 'user-1' });
-        const user = createUser({ id: 'user-1', firstName: 'John', lastName: 'Doe', email: 'john@example.com' });
+        const user = createUser({
+            id: 'user-1',
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john@example.com',
+        });
 
         const customer = determinePaymentCustomer(payment, {
             ...emptyRelations,
@@ -137,7 +153,12 @@ describe('PaymentCustomerResolver', () => {
 
     it('falls back to a user linked to a balance item', () => {
         const payment = createPayment();
-        const user = createUser({ id: 'user-2', firstName: 'Linked', lastName: 'User', email: 'linked@example.com' });
+        const user = createUser({
+            id: 'user-2',
+            firstName: 'Linked',
+            lastName: 'User',
+            email: 'linked@example.com',
+        });
         const balanceItem = createBalanceItem({ id: 'b1', userId: 'user-2' });
 
         const customer = determinePaymentCustomer(payment, {
@@ -174,7 +195,12 @@ describe('PaymentCustomerResolver', () => {
         const organization = createOrganization('org-1', 'My Company');
 
         const payment = createPayment({ payingOrganizationId: 'org-1' });
-        const details = MemberDetails.create({ firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', birthDay: new Date(1990, 0, 1) });
+        const details = MemberDetails.create({
+            firstName: 'Jane',
+            lastName: 'Smith',
+            email: 'jane@example.com',
+            birthDay: new Date(1990, 0, 1),
+        });
         const member = createMember('member-1', details);
         const balanceItem = createBalanceItem({ id: 'b1', memberId: 'member-1' });
 

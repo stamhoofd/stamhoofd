@@ -17,7 +17,11 @@ const pollIntervalMs = 50;
  * `timeoutMs` the lock is stolen rather than failing the caller: a stuck lock file must never make
  * `stam dev` or an e2e run unusable.
  */
-export async function withFileLock<T>(lockPath: string, handler: () => Promise<T>, options: { timeoutMs?: number; staleMs?: number } = {}): Promise<T> {
+export async function withFileLock<T>(
+    lockPath: string,
+    handler: () => Promise<T>,
+    options: { timeoutMs?: number; staleMs?: number } = {},
+): Promise<T> {
     const timeoutMs = options.timeoutMs ?? defaultTimeoutMs;
     const staleMs = options.staleMs ?? defaultStaleMs;
     await acquireLock(lockPath, timeoutMs, staleMs);
@@ -41,16 +45,17 @@ async function acquireLock(lockPath: string, timeoutMs: number, staleMs: number)
         const holder = await readLock(lockPath);
         // A lock held by this process itself is taken over right away: the CLI is single threaded,
         // so a nested call can only mean the outer call is waiting on us.
-        const expired = holder === undefined
-            || holder.pid === process.pid
-            || !processIsAlive(holder.pid)
-            || Date.now() - Date.parse(holder.startedAt) > staleMs;
+        const expired =
+            holder === undefined ||
+            holder.pid === process.pid ||
+            !processIsAlive(holder.pid) ||
+            Date.now() - Date.parse(holder.startedAt) > staleMs;
 
         if (expired || Date.now() - start > timeoutMs) {
             await fs.rm(lockPath, { force: true }).catch(() => undefined);
         }
 
-        await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+        await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
     }
 }
 
@@ -70,7 +75,11 @@ async function writeLock(lockPath: string): Promise<boolean> {
 async function readLock(lockPath: string): Promise<LockFile | undefined> {
     try {
         const raw = JSON.parse(await fs.readFile(lockPath, 'utf-8')) as Partial<LockFile>;
-        if (typeof raw.pid !== 'number' || typeof raw.startedAt !== 'string' || Number.isNaN(Date.parse(raw.startedAt))) {
+        if (
+            typeof raw.pid !== 'number' ||
+            typeof raw.startedAt !== 'string' ||
+            Number.isNaN(Date.parse(raw.startedAt))
+        ) {
             return undefined;
         }
         return { pid: raw.pid, startedAt: raw.startedAt };

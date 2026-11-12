@@ -1,7 +1,14 @@
 import { SimpleError } from '@common/errors';
 import { Request } from '@node/endpoints';
 import { Platform } from '@stamhoofd/models';
-import { LoginMethod, LoginMethodConfig, LoginProviderType, OpenIDClientConfiguration, SessionClientType, StartOpenIDFlowStruct } from '@stamhoofd/structures';
+import {
+    LoginMethod,
+    LoginMethodConfig,
+    LoginProviderType,
+    OpenIDClientConfiguration,
+    SessionClientType,
+    StartOpenIDFlowStruct,
+} from '@stamhoofd/structures';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ContextInstance } from '../helpers/Context.js';
@@ -20,7 +27,9 @@ describe('SSOService', () => {
                 loginMethods: new Map(),
             });
 
-            const service = await runWithContext(() => SSOService.fromContext(LoginProviderType.SSO));
+            const service = await runWithContext(() =>
+                SSOService.fromContext(LoginProviderType.SSO),
+            );
 
             expect(service).toBeInstanceOf(SSOService);
         });
@@ -31,7 +40,11 @@ describe('SSOService', () => {
                 loginMethods: new Map(),
             });
 
-            await expect(runWithContext(() => SSOService.fromContext(LoginProviderType.SSO, { validate: true }))).rejects.toThrow('SSO not configured (correctly)');
+            await expect(
+                runWithContext(() =>
+                    SSOService.fromContext(LoginProviderType.SSO, { validate: true }),
+                ),
+            ).rejects.toThrow('SSO not configured (correctly)');
         });
     });
 
@@ -74,32 +87,39 @@ describe('SSOService', () => {
         ['web', SessionClientType.Browser],
         ['ios', SessionClientType.iOS],
         ['android', SessionClientType.Android],
-    ])('keeps the %s client classification in the SSO session', async (clientPlatform, expectedClientType) => {
-        const service = createService({
-            ssoConfiguration: OpenIDClientConfiguration.create({}),
-            loginMethods: new Map([[LoginMethod.SSO, LoginMethodConfig.create({})]]),
-            provider: LoginProviderType.SSO,
-        });
-        vi.spyOn(service, 'getClient').mockResolvedValue({
-            authorizationUrl: vi.fn().mockReturnValue('https://idp.example/authorize'),
-        } as any);
+    ])(
+        'keeps the %s client classification in the SSO session',
+        async (clientPlatform, expectedClientType) => {
+            const service = createService({
+                ssoConfiguration: OpenIDClientConfiguration.create({}),
+                loginMethods: new Map([[LoginMethod.SSO, LoginMethodConfig.create({})]]),
+                provider: LoginProviderType.SSO,
+            });
+            vi.spyOn(service, 'getClient').mockResolvedValue({
+                authorizationUrl: vi.fn().mockReturnValue('https://idp.example/authorize'),
+            } as any);
 
-        await service.validateAndStartAuthCodeFlow(StartOpenIDFlowStruct.create({
-            spaState: 'a-valid-spa-state',
-            clientPlatform,
-        }));
+            await service.validateAndStartAuthCodeFlow(
+                StartOpenIDFlowStruct.create({
+                    spaState: 'a-valid-spa-state',
+                    clientPlatform,
+                }),
+            );
 
-        expect([...SSOService.sessionStorage.values()]).toHaveLength(1);
-        expect([...SSOService.sessionStorage.values()][0].clientType).toBe(expectedClientType);
-    });
+            expect([...SSOService.sessionStorage.values()]).toHaveLength(1);
+            expect([...SSOService.sessionStorage.values()][0].clientType).toBe(expectedClientType);
+        },
+    );
 });
 
 async function runWithContext<T>(handler: () => Promise<T>) {
-    const context = new ContextInstance(new Request({
-        method: 'GET',
-        url: '/',
-        host: '',
-    }));
+    const context = new ContextInstance(
+        new Request({
+            method: 'GET',
+            url: '/',
+            host: '',
+        }),
+    );
 
     return await ContextInstance.asyncLocalStorage.run(context, handler);
 }

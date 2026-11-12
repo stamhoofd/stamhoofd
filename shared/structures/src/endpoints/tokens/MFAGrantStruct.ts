@@ -35,7 +35,9 @@ export class MFAGrantStruct {
         struct.code = data.optionalField('code')?.string ?? null;
 
         const assertionData = data.optionalField('assertion');
-        struct.assertion = assertionData ? WebauthnAuthenticationCredential.decode(assertionData) : null;
+        struct.assertion = assertionData
+            ? WebauthnAuthenticationCredential.decode(assertionData)
+            : null;
 
         return struct;
     }

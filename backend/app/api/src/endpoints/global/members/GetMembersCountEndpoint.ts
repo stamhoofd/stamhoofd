@@ -32,8 +32,7 @@ export class GetMembersCountEndpoint extends Endpoint<Params, Query, Body, Respo
         await Context.authenticate();
         const query = await GetMembersEndpoint.buildQuery(request.query);
 
-        const count = await query
-            .count();
+        const count = await query.count();
 
         return new Response(
             CountResponse.create({

@@ -1,12 +1,62 @@
 import { PatchMap } from '@common/encoding';
 import { Request } from '@node/endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, EventFactory, Group, GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import type {
+    MemberWithUsersRegistrationsAndGroups,
+    Organization,
+    RegistrationPeriod,
+    Token,
+} from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemFactory,
+    EventFactory,
+    Group,
+    GroupFactory,
+    Member,
+    MemberFactory,
+    OrganizationFactory,
+    OrganizationRegistrationPeriodFactory,
+    Registration,
+    RegistrationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { StockReservation, TranslatedString, GroupPrice, BalanceItemCartItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, EventMeta, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, Permissions, ReduceablePrice, RegisterItemOption, ResourcePermissions, GroupType, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
+import {
+    StockReservation,
+    TranslatedString,
+    GroupPrice,
+    BalanceItemCartItem,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    BooleanStatus,
+    Company,
+    EventMeta,
+    GroupOption,
+    GroupOptionMenu,
+    IDRegisterCart,
+    IDRegisterCheckout,
+    IDRegisterItem,
+    OrganizationPackages,
+    PaymentCustomer,
+    PaymentMethod,
+    Permissions,
+    ReduceablePrice,
+    RegisterItemOption,
+    ResourcePermissions,
+    GroupType,
+    STPackageStatus,
+    STPackageType,
+    UitpasNumberDetails,
+    UitpasSocialTariff,
+    UitpasSocialTariffStatus,
+    UserPermissions,
+    Version,
+} from '@stamhoofd/structures';
 import { IDDeleteRegisterItem } from '@stamhoofd/structures/members/checkout/DeleteRegisterItem.js';
 import { QueueHandler } from '@stamhoofd/queues';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -59,49 +109,77 @@ describe('Endpoint.RegisterMembers', () => {
     });
 
     const initOrganization = async (registrationPeriod: RegistrationPeriod = period) => {
-        const organization = await new OrganizationFactory({ period: registrationPeriod })
-            .create();
+        const organization = await new OrganizationFactory({ period: registrationPeriod }).create();
 
-        const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: registrationPeriod }).create();
+        const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
+            organization,
+            period: registrationPeriod,
+        }).create();
         if (registrationPeriod !== previousPeriod) {
-            await new OrganizationRegistrationPeriodFactory({ organization, period: previousPeriod }).create();
+            await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: previousPeriod,
+            }).create();
         }
 
         return { organization, organizationRegistrationPeriod };
     };
 
-    async function initData({ registrationPeriod = period, otherMemberAmount = 0, groupPermissionLevel = PermissionLevel.None, memberPermissionLevel = PermissionLevel.None, permissionLevel = defaultPermissionLevel, linkMembersToUser = defaultLinkMembersToUser }: { registrationPeriod?: RegistrationPeriod; otherMemberAmount?: number; memberPermissionLevel?: PermissionLevel; groupPermissionLevel?: PermissionLevel; permissionLevel?: PermissionLevel; linkMembersToUser?: boolean } = {}) {
-        const { organization, organizationRegistrationPeriod } = await initOrganization(registrationPeriod);
+    async function initData({
+        registrationPeriod = period,
+        otherMemberAmount = 0,
+        groupPermissionLevel = PermissionLevel.None,
+        memberPermissionLevel = PermissionLevel.None,
+        permissionLevel = defaultPermissionLevel,
+        linkMembersToUser = defaultLinkMembersToUser,
+    }: {
+        registrationPeriod?: RegistrationPeriod;
+        otherMemberAmount?: number;
+        memberPermissionLevel?: PermissionLevel;
+        groupPermissionLevel?: PermissionLevel;
+        permissionLevel?: PermissionLevel;
+        linkMembersToUser?: boolean;
+    } = {}) {
+        const { organization, organizationRegistrationPeriod } =
+            await initOrganization(registrationPeriod);
 
         const user = await new UserFactory({
             organization,
-            permissions: permissionLevel !== PermissionLevel.None
-                ? Permissions.create({
-                        level: permissionLevel,
-                    })
-                : null,
-        })
-            .create();
+            permissions:
+                permissionLevel !== PermissionLevel.None
+                    ? Permissions.create({
+                          level: permissionLevel,
+                      })
+                    : null,
+        }).create();
 
         const token = await SessionService.createSession(user);
 
-        const member = await new MemberFactory({ organization, user: linkMembersToUser ? user : undefined })
-            .create();
+        const member = await new MemberFactory({
+            organization,
+            user: linkMembersToUser ? user : undefined,
+        }).create();
 
         const otherMembers: MemberWithUsersRegistrationsAndGroups[] = [];
 
         for (let i = 0; i < otherMemberAmount; i++) {
-            otherMembers.push(await new MemberFactory({ organization, user: linkMembersToUser ? user : undefined })
-                .create());
+            otherMembers.push(
+                await new MemberFactory({
+                    organization,
+                    user: linkMembersToUser ? user : undefined,
+                }).create(),
+            );
         }
 
-        if (!linkMembersToUser && (permissionLevel !== PermissionLevel.None || memberPermissionLevel !== null)) {
+        if (
+            !linkMembersToUser &&
+            (permissionLevel !== PermissionLevel.None || memberPermissionLevel !== null)
+        ) {
             // Give write permission to the member by registering them for another group
             const genericGroup = await new GroupFactory({
                 organization,
                 price: 0,
-            })
-                .create();
+            }).create();
 
             await new RegistrationFactory({
                 member,
@@ -112,13 +190,21 @@ describe('Endpoint.RegisterMembers', () => {
             if (memberPermissionLevel !== PermissionLevel.None) {
                 // Grant permissions to this genericGroup
                 user.permissions = user.permissions ?? UserPermissions.create({});
-                let org = user.permissions.organizationPermissions.get(organization.id) ?? Permissions.create({});
+                let org =
+                    user.permissions.organizationPermissions.get(organization.id) ??
+                    Permissions.create({});
                 const p = Permissions.patch({});
-                p.resources.set(PermissionsResourceType.Groups, new PatchMap([[
-                    genericGroup.id, ResourcePermissions.patch({
-                        level: memberPermissionLevel,
-                    }),
-                ]]));
+                p.resources.set(
+                    PermissionsResourceType.Groups,
+                    new PatchMap([
+                        [
+                            genericGroup.id,
+                            ResourcePermissions.patch({
+                                level: memberPermissionLevel,
+                            }),
+                        ],
+                    ]),
+                );
                 org = org.patch(p);
                 user.permissions.organizationPermissions.set(organization.id, org);
 
@@ -132,19 +218,26 @@ describe('Endpoint.RegisterMembers', () => {
             price: 25_0000,
             reducedPrice: 12_5000,
             stock: 500,
-        })
-            .create();
+        }).create();
 
         if (groupPermissionLevel !== PermissionLevel.None) {
             // Grant permissions to this genericGroup
             user.permissions = user.permissions ?? UserPermissions.create({});
-            let org = user.permissions.organizationPermissions.get(organization.id) ?? Permissions.create({});
+            let org =
+                user.permissions.organizationPermissions.get(organization.id) ??
+                Permissions.create({});
             const p = Permissions.patch({});
-            p.resources.set(PermissionsResourceType.Groups, new PatchMap([[
-                group.id, ResourcePermissions.patch({
-                    level: groupPermissionLevel,
-                }),
-            ]]));
+            p.resources.set(
+                PermissionsResourceType.Groups,
+                new PatchMap([
+                    [
+                        group.id,
+                        ResourcePermissions.patch({
+                            level: groupPermissionLevel,
+                        }),
+                    ],
+                ]),
+            );
             org = org.patch(p);
             user.permissions.organizationPermissions.set(organization.id, org);
 
@@ -175,13 +268,18 @@ describe('Endpoint.RegisterMembers', () => {
         test('Should fail if demo limit reached', async () => {
             TestUtils.setEnvironment('userMode', 'organization');
 
-            const { member, group, groupPrice, organization, token, otherMembers } = await initData({ otherMemberAmount: 10 });
+            const { member, group, groupPrice, organization, token, otherMembers } = await initData(
+                { otherMemberAmount: 10 },
+            );
 
             organization.meta.packages = OrganizationPackages.create({
                 packages: new Map([
-                    [STPackageType.TrialMembers, STPackageStatus.create({
-                        startDate: new Date(),
-                    })],
+                    [
+                        STPackageType.TrialMembers,
+                        STPackageStatus.create({
+                            startDate: new Date(),
+                        }),
+                    ],
                 ]),
             });
 
@@ -234,9 +332,9 @@ describe('Endpoint.RegisterMembers', () => {
                 totalPrice: 25_0000,
                 customer: null,
             });
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(STExpect.simpleError({ code: 'too_many_emails_period' }));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.simpleError({ code: 'too_many_emails_period' }),
+            );
 
             expect(await EmailMocker.transactional.getSucceededEmails()).toEqual([
                 expect.objectContaining({
@@ -315,9 +413,7 @@ describe('Endpoint.RegisterMembers', () => {
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
                     items: [],
-                    balanceItems: [
-                        cartItem,
-                    ],
+                    balanceItems: [cartItem],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -329,9 +425,9 @@ describe('Endpoint.RegisterMembers', () => {
 
             await balanceItem1.delete();
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast');
+            await expect(post(body, organization, token)).rejects.toThrow(
+                'Oeps, één of meerdere openstaande bedragen in jouw winkelmandje zijn aangepast',
+            );
         });
 
         test('Should fail if balance item price difference', async () => {
@@ -355,9 +451,7 @@ describe('Endpoint.RegisterMembers', () => {
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
                     items: [],
-                    balanceItems: [
-                        cartItem,
-                    ],
+                    balanceItems: [cartItem],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -367,9 +461,9 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(STExpect.simpleError({ code: 'changed_price' }));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.simpleError({ code: 'changed_price' }),
+            );
         });
 
         test('Should fail if balance item belongs to another member', async () => {
@@ -418,9 +512,9 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(STExpect.simpleError({ code: 'invalid_data' }));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.simpleError({ code: 'invalid_data' }),
+            );
 
             await otherItem.refresh();
             expect(otherItem.pricePending).toBe(0);
@@ -445,8 +539,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member2.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -458,9 +551,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('Member not found');
+            await expect(post(body, organization, token)).rejects.toThrow('Member not found');
             // #endregion
         });
 
@@ -480,10 +571,8 @@ describe('Endpoint.RegisterMembers', () => {
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    items: [
-                    ],
-                    balanceItems: [
-                    ],
+                    items: [],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -497,9 +586,9 @@ describe('Endpoint.RegisterMembers', () => {
             // #region act and assert
             await balanceItem1.delete();
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('Oeps, jouw mandje is leeg.');
+            await expect(post(body, organization, token)).rejects.toThrow(
+                'Oeps, jouw mandje is leeg.',
+            );
             // #endregion
         });
 
@@ -528,9 +617,9 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(STExpect.simpleError({ code: 'changed_price' }));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.simpleError({ code: 'changed_price' }),
+            );
         });
 
         test('Should fail if member is already registered', async () => {
@@ -549,8 +638,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -564,9 +652,9 @@ describe('Endpoint.RegisterMembers', () => {
             await post(body, organization, token);
 
             // second time should fail
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(STExpect.simpleError({ code: 'already_registered' }));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.simpleError({ code: 'already_registered' }),
+            );
         });
 
         test('Sets the registration period relation on created balance items', async () => {
@@ -603,7 +691,9 @@ describe('Endpoint.RegisterMembers', () => {
             expect(balanceItems.length).toBeGreaterThan(0);
 
             for (const balanceItem of balanceItems) {
-                const relation = balanceItem.relations.get(BalanceItemRelationType.RegistrationPeriod);
+                const relation = balanceItem.relations.get(
+                    BalanceItemRelationType.RegistrationPeriod,
+                );
                 expect(relation).toBeDefined();
                 expect(relation?.id).toBe(period.id);
                 expect(relation?.name.toString()).toBe(period.getBaseStructure().name);
@@ -643,12 +733,12 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(STExpect.simpleErrors([
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.simpleErrors([
                     { code: 'duplicate_register_item' },
                     { code: 'duplicate_register_item' },
-                ]));
+                ]),
+            );
         });
 
         test('Should fail if invalid payment', async () => {
@@ -668,8 +758,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -681,16 +770,18 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('Oeps, je hebt geen geldige betaalmethode geselecteerd');
+            await expect(post(body, organization, token)).rejects.toThrow(
+                'Oeps, je hebt geen geldige betaalmethode geselecteerd',
+            );
             // #endregion
         });
 
         test('Should fail if no redirect url for online payment', async () => {
             // #region arrange
             const { organization, group, groupPrice, token, member } = await initData();
-            organization.meta.registrationPaymentConfiguration.paymentMethods.push(PaymentMethod.Bancontact);
+            organization.meta.registrationPaymentConfiguration.paymentMethods.push(
+                PaymentMethod.Bancontact,
+            );
             await organization.save();
 
             const body = IDRegisterCheckout.create({
@@ -706,8 +797,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -720,15 +810,17 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('redirectUrl or cancelUrl is missing');
+            await expect(post(body, organization, token)).rejects.toThrow(
+                'redirectUrl or cancelUrl is missing',
+            );
             // #endregion
         });
 
         test('Should fail if no cancel url for online payment', async () => {
             const { organization, group, groupPrice, token, member } = await initData();
-            organization.meta.registrationPaymentConfiguration.paymentMethods.push(PaymentMethod.Bancontact);
+            organization.meta.registrationPaymentConfiguration.paymentMethods.push(
+                PaymentMethod.Bancontact,
+            );
             await organization.save();
 
             const body = IDRegisterCheckout.create({
@@ -753,9 +845,9 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('redirectUrl or cancelUrl is missing');
+            await expect(post(body, organization, token)).rejects.toThrow(
+                'redirectUrl or cancelUrl is missing',
+            );
         });
 
         test('Should not reserve for point of sale payment method if group has max members', async () => {
@@ -786,7 +878,9 @@ describe('Endpoint.RegisterMembers', () => {
             const response = await post(body, organization, token);
             expect(response.body.registrations.length).toBe(1);
 
-            const updatedRegistration = (await Registration.getByID(response.body.registrations[0].id))!;
+            const updatedRegistration = (await Registration.getByID(
+                response.body.registrations[0].id,
+            ))!;
             expect(updatedRegistration.registeredAt).not.toBeNull();
             expect(updatedRegistration.reservedUntil).toBeNull();
 
@@ -977,7 +1071,9 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization, token)).rejects.toThrow(STExpect.errorWithCode('locked_period'));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.errorWithCode('locked_period'),
+            );
         });
 
         test('Should set reserved members when using online payments', async () => {
@@ -1075,7 +1171,9 @@ describe('Endpoint.RegisterMembers', () => {
                     registeredAt: expect.any(Date),
                     deactivatedAt: null,
                 });
-                const dbRegistration = await Registration.getByID(response.body.registrations[0].id);
+                const dbRegistration = await Registration.getByID(
+                    response.body.registrations[0].id,
+                );
                 expect(dbRegistration?.registeredAt).not.toBeNull();
                 expect(dbRegistration?.deactivatedAt).toBeNull();
                 const trialUntil = response.body.registrations[0].trialUntil;
@@ -1087,7 +1185,9 @@ describe('Endpoint.RegisterMembers', () => {
 
                 // Nothing is paid during the trial, but the balance item should be due (not hidden)
                 // so it is still billed once the trial ends.
-                const balanceItems = await BalanceItem.where({ registrationId: dbRegistration!.id });
+                const balanceItems = await BalanceItem.where({
+                    registrationId: dbRegistration!.id,
+                });
                 expect(balanceItems.length).toBe(1);
                 expect(balanceItems[0]).toMatchObject({
                     status: BalanceItemStatus.Due,
@@ -1151,7 +1251,9 @@ describe('Endpoint.RegisterMembers', () => {
             expect(response.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
 
             // The trial is free, so it is activated right away and its reservation is released
-            const trialRegistration = response.body.registrations.find(r => r.group.id === group.id)!;
+            const trialRegistration = response.body.registrations.find(
+                (r) => r.group.id === group.id,
+            )!;
             expect(trialRegistration).toMatchObject({
                 registeredAt: expect.any(Date),
                 deactivatedAt: null,
@@ -1159,7 +1261,9 @@ describe('Endpoint.RegisterMembers', () => {
                 trialUntil: expect.any(Date),
             });
 
-            const trialBalanceItems = await BalanceItem.where({ registrationId: trialRegistration.id });
+            const trialBalanceItems = await BalanceItem.where({
+                registrationId: trialRegistration.id,
+            });
             expect(trialBalanceItems.length).toBe(1);
             expect(trialBalanceItems[0]).toMatchObject({
                 status: BalanceItemStatus.Due,
@@ -1167,7 +1271,9 @@ describe('Endpoint.RegisterMembers', () => {
             });
 
             // The paid registration is not activated: it still waits for the online payment
-            const paidRegistration = response.body.registrations.find(r => r.group.id === paidGroup.id)!;
+            const paidRegistration = response.body.registrations.find(
+                (r) => r.group.id === paidGroup.id,
+            )!;
             expect(paidRegistration).toMatchObject({
                 registeredAt: null,
                 deactivatedAt: null,
@@ -1225,8 +1331,12 @@ describe('Endpoint.RegisterMembers', () => {
 
         test('Should fail if group price stock sold out', async () => {
             // #region arrange
-            const { organization, group, groupPrice, token, member, otherMembers } = await initData({
-                permissionLevel: PermissionLevel.Read, otherMemberAmount: 3 });
+            const { organization, group, groupPrice, token, member, otherMembers } = await initData(
+                {
+                    permissionLevel: PermissionLevel.Read,
+                    otherMemberAmount: 3,
+                },
+            );
             groupPrice.stock = 2;
             await group.save();
 
@@ -1242,15 +1352,17 @@ describe('Endpoint.RegisterMembers', () => {
                             groupId: group.id,
                             memberId: member.id,
                         }),
-                        ...otherMembers.map(m => IDRegisterItem.create({
-                            id: uuidv4(),
-                            replaceRegistrationIds: [],
-                            options: [],
-                            groupPrice,
-                            organizationId: organization.id,
-                            groupId: group.id,
-                            memberId: m.id,
-                        })),
+                        ...otherMembers.map((m) =>
+                            IDRegisterItem.create({
+                                id: uuidv4(),
+                                replaceRegistrationIds: [],
+                                options: [],
+                                groupPrice,
+                                organizationId: organization.id,
+                                groupId: group.id,
+                                memberId: m.id,
+                            }),
+                        ),
                     ],
                     balanceItems: [],
                     deleteRegistrations: [],
@@ -1266,9 +1378,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #region act and assert
             expect(group?.stockReservations.length).toBe(0);
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('Maximum reached');
+            await expect(post(body, organization, token)).rejects.toThrow('Maximum reached');
             // #endregion
         });
 
@@ -1300,9 +1410,7 @@ describe('Endpoint.RegisterMembers', () => {
                 options: [option1, option2],
             });
 
-            group.settings.optionMenus = [
-                optionMenu,
-            ];
+            group.settings.optionMenus = [optionMenu];
 
             await group.save();
 
@@ -1330,8 +1438,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -1343,9 +1450,7 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('Stock empty');
+            await expect(post(body, organization, token)).rejects.toThrow('Stock empty');
             // #endregion
         });
 
@@ -1380,9 +1485,7 @@ describe('Endpoint.RegisterMembers', () => {
                 options: [option1, option2],
             });
 
-            group.settings.optionMenus = [
-                optionMenu,
-            ];
+            group.settings.optionMenus = [optionMenu];
 
             await group.save();
 
@@ -1410,8 +1513,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -1421,9 +1523,9 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('Option maximum exceeded');
+            await expect(post(body, organization, token)).rejects.toThrow(
+                'Option maximum exceeded',
+            );
         });
 
         test('Should not fail if max option not exceeded', async () => {
@@ -1457,9 +1559,7 @@ describe('Endpoint.RegisterMembers', () => {
                 options: [option1, option2],
             });
 
-            group.settings.optionMenus = [
-                optionMenu,
-            ];
+            group.settings.optionMenus = [optionMenu];
 
             await group.save();
 
@@ -1487,8 +1587,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -1548,16 +1647,24 @@ describe('Endpoint.RegisterMembers', () => {
                 // act
 
                 // should throw error
-                await expect(post(body, organization, token))
-                    .rejects
-                    .toThrow(STExpect.errorWithCode('changed_price'));
+                await expect(post(body, organization, token)).rejects.toThrow(
+                    STExpect.errorWithCode('changed_price'),
+                );
 
                 // should update status
                 const updatedMember = await Member.getByID(member.id);
-                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000031618');
-                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Expired);
-                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2000, 0, 1).getTime());
-                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toEqual(new Date(2000, 0, 1).getTime());
+                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual(
+                    '0900000031618',
+                );
+                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(
+                    UitpasSocialTariffStatus.Expired,
+                );
+                expect(
+                    updatedMember!.details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                ).not.toEqual(new Date(2000, 0, 1).getTime());
+                expect(
+                    updatedMember!.details.uitpasNumberDetails?.socialTariff?.endDate?.getTime(),
+                ).not.toEqual(new Date(2000, 0, 1).getTime());
             });
 
             test('should not update social tariff status if updated less than 1 week ago', async () => {
@@ -1617,8 +1724,12 @@ describe('Endpoint.RegisterMembers', () => {
 
                 // should not update status
                 const updatedMember = await Member.getByID(member.id);
-                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000031618');
-                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
+                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual(
+                    '0900000031618',
+                );
+                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(
+                    UitpasSocialTariffStatus.Active,
+                );
             });
 
             test('should not apply reduced price if social tariff status is unknown and uitpas api is unavailable', async () => {
@@ -1672,8 +1783,12 @@ describe('Endpoint.RegisterMembers', () => {
 
                 // should not update status
                 const updatedMember = await Member.getByID(member.id);
-                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354829');
-                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Unknown);
+                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual(
+                    '0900011354829',
+                );
+                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(
+                    UitpasSocialTariffStatus.Unknown,
+                );
             });
 
             test('should apply reduced price based on legacy rule if uitpas api is not connected and status is unkown', async () => {
@@ -1726,8 +1841,12 @@ describe('Endpoint.RegisterMembers', () => {
 
                 // should not update status
                 const updatedMember = await Member.getByID(member.id);
-                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354819');
-                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Unknown);
+                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual(
+                    '0900011354819',
+                );
+                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(
+                    UitpasSocialTariffStatus.Unknown,
+                );
             });
 
             test('should not apply reduced price based on legacy rule if uitpas api is not connected and status is unkown', async () => {
@@ -1780,8 +1899,12 @@ describe('Endpoint.RegisterMembers', () => {
 
                 // should not update status
                 const updatedMember = await Member.getByID(member.id);
-                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354829');
-                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Unknown);
+                expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual(
+                    '0900011354829',
+                );
+                expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(
+                    UitpasSocialTariffStatus.Unknown,
+                );
             });
         });
     });
@@ -1794,7 +1917,9 @@ describe('Endpoint.RegisterMembers', () => {
          * The event group lives in period B and requires the default age group.
          */
         async function initEventData({ registerInAgeGroup }: { registerInAgeGroup: boolean }) {
-            vitest.useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] }).setSystemTime(new Date('2025-12-26T10:00:00Z'));
+            vitest
+                .useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] })
+                .setSystemTime(new Date('2025-12-26T10:00:00Z'));
 
             const periodA = await new RegistrationPeriodFactory({
                 startDate: new Date(2025, 0, 1),
@@ -1811,18 +1936,34 @@ describe('Endpoint.RegisterMembers', () => {
             await periodA.save();
 
             const organization = await new OrganizationFactory({ period: periodA }).create();
-            await new OrganizationRegistrationPeriodFactory({ organization, period: periodA }).create();
-            await new OrganizationRegistrationPeriodFactory({ organization, period: periodB }).create();
+            await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: periodA,
+            }).create();
+            await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: periodB,
+            }).create();
 
             const organizationB = await new OrganizationFactory({ period: periodA }).create();
-            await new OrganizationRegistrationPeriodFactory({ organization: organizationB, period: periodA }).create();
-            await new OrganizationRegistrationPeriodFactory({ organization: organizationB, period: periodB }).create();
+            await new OrganizationRegistrationPeriodFactory({
+                organization: organizationB,
+                period: periodA,
+            }).create();
+            await new OrganizationRegistrationPeriodFactory({
+                organization: organizationB,
+                period: periodB,
+            }).create();
 
             const user = await new UserFactory({ organization }).create();
             const token = await SessionService.createSession(user);
             const member = await new MemberFactory({ organization, user }).create();
 
-            const ageGroup = await new GroupFactory({ organization: organizationB, period: periodA, price: 0 }).create();
+            const ageGroup = await new GroupFactory({
+                organization: organizationB,
+                period: periodA,
+                price: 0,
+            }).create();
             ageGroup.defaultAgeGroupId = defaultAgeGroupId;
             await ageGroup.save();
 
@@ -1874,7 +2015,9 @@ describe('Endpoint.RegisterMembers', () => {
         }
 
         test('Can register for event in next period when registered in required default age group in current period', async () => {
-            const { organization, token, member, eventGroup, body } = await initEventData({ registerInAgeGroup: true });
+            const { organization, token, member, eventGroup, body } = await initEventData({
+                registerInAgeGroup: true,
+            });
 
             const response = await post(body, organization, token);
             expect(response.body.registrations.length).toBe(1);
@@ -1885,11 +2028,16 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Cannot register for event in next period without registration in required default age group', async () => {
-            const { organization, token, body } = await initEventData({ registerInAgeGroup: false });
+            const { organization, token, body } = await initEventData({
+                registerInAgeGroup: false,
+            });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(STExpect.simpleError({ code: 'not_matching', message: 'Not matching: requireDefaultAgeGroupIds' }));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'not_matching',
+                    message: 'Not matching: requireDefaultAgeGroupIds',
+                }),
+            );
         });
     });
 
@@ -1934,7 +2082,7 @@ describe('Endpoint.RegisterMembers', () => {
             });
 
             const response = await post(body, organization, token);
-            const returnedIds = response.body.members.members.map(m => m.id);
+            const returnedIds = response.body.members.members.map((m) => m.id);
             expect(returnedIds).toContain(member.id);
             expect(returnedIds).not.toContain(sibling.id);
         });
@@ -1957,7 +2105,7 @@ describe('Endpoint.RegisterMembers', () => {
             organization.meta.companies.push(company);
             await organization.save();
 
-            const otherOrganization = await new OrganizationFactory({ }).create();
+            const otherOrganization = await new OrganizationFactory({}).create();
 
             const balanceItem1 = await new BalanceItemFactory({
                 organizationId: otherOrganization.id,
@@ -1977,9 +2125,7 @@ describe('Endpoint.RegisterMembers', () => {
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
                     items: [],
-                    balanceItems: [
-                        cartItem,
-                    ],
+                    balanceItems: [cartItem],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2015,7 +2161,7 @@ describe('Endpoint.RegisterMembers', () => {
                 permissionLevel: PermissionLevel.Write,
             });
 
-            const otherOrganization = await new OrganizationFactory({ }).create();
+            const otherOrganization = await new OrganizationFactory({}).create();
 
             const company = Company.create({});
             organization.meta.companies.push(company);
@@ -2039,9 +2185,7 @@ describe('Endpoint.RegisterMembers', () => {
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
                     items: [],
-                    balanceItems: [
-                        cartItem,
-                    ],
+                    balanceItems: [cartItem],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2057,12 +2201,13 @@ describe('Endpoint.RegisterMembers', () => {
                 }),
             });
 
-            await expect(post(body, otherOrganization, token))
-                .rejects
-                .toThrow(STExpect.simpleError({
+            await expect(post(body, otherOrganization, token)).rejects.toThrow(
+                STExpect.simpleError({
                     code: 'forbidden',
-                    message: 'No permission to checkout as this organization for a different organization',
-                }));
+                    message:
+                        'No permission to checkout as this organization for a different organization',
+                }),
+            );
         });
 
         test('Should reuse recently deactivated registration', async () => {
@@ -2092,8 +2237,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2129,9 +2273,7 @@ describe('Endpoint.RegisterMembers', () => {
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
                     items: [],
-                    balanceItems: [
-                        cartItem,
-                    ],
+                    balanceItems: [cartItem],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2142,11 +2284,11 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(STExpect.simpleError({
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.simpleError({
                     code: 'cannot_pay_balance_items',
-                }));
+                }),
+            );
         });
 
         /**
@@ -2174,8 +2316,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2210,10 +2351,12 @@ describe('Endpoint.RegisterMembers', () => {
             ]);
 
             // Check member in response doesn't include sensitive data
-            const memberInResponse = response.body.members.members.find(m => m.id === member.id)!;
+            const memberInResponse = response.body.members.members.find((m) => m.id === member.id)!;
             expect(memberInResponse).toBeDefined();
             expect(memberInResponse.details.requiresFinancialSupport).toBe(null);
-            const returnedRegistration = memberInResponse.registrations.find(r => r.id === registration.id)!;
+            const returnedRegistration = memberInResponse.registrations.find(
+                (r) => r.id === registration.id,
+            )!;
             expect(returnedRegistration).toBeDefined();
             expect(returnedRegistration.balances.length).toBe(0);
         });
@@ -2237,8 +2380,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2270,9 +2412,11 @@ describe('Endpoint.RegisterMembers', () => {
             ]);
 
             // Check member in response does include financial data
-            const memberInResponse = response.body.members.members.find(m => m.id === member.id)!;
+            const memberInResponse = response.body.members.members.find((m) => m.id === member.id)!;
             expect(memberInResponse).toBeDefined();
-            const returnedRegistration = memberInResponse.registrations.find(r => r.id === registration.id)!;
+            const returnedRegistration = memberInResponse.registrations.find(
+                (r) => r.id === registration.id,
+            )!;
             expect(returnedRegistration).toBeDefined();
             expect(returnedRegistration.balances.length).not.toBe(0);
         });
@@ -2285,8 +2429,7 @@ describe('Endpoint.RegisterMembers', () => {
                 reducedPrice: 12_5000,
                 stock: 500,
                 period: previousPeriod,
-            })
-                .create();
+            }).create();
             const groupPrice = group.settings.prices[0];
 
             const body = IDRegisterCheckout.create({
@@ -2302,8 +2445,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2313,7 +2455,9 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization.id,
             });
 
-            await expect(post(body, organization, token)).rejects.toThrow(STExpect.errorWithCode('locked_period'));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.errorWithCode('locked_period'),
+            );
         });
 
         test('Can register a member as admin with write permission to new group only', async () => {
@@ -2337,8 +2481,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2393,8 +2536,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2405,7 +2547,9 @@ describe('Endpoint.RegisterMembers', () => {
             });
 
             // send request and check occupancy
-            await expect(post(body, organization, token)).rejects.toThrow('No permission to register in this group');
+            await expect(post(body, organization, token)).rejects.toThrow(
+                'No permission to register in this group',
+            );
         });
 
         test('Cannot register a member with only read permissions even when having full permissions to the specific member', async () => {
@@ -2429,8 +2573,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2441,7 +2584,9 @@ describe('Endpoint.RegisterMembers', () => {
             });
 
             // send request and check occupancy
-            await expect(post(body, organization, token)).rejects.toThrow('No permission to register in this group');
+            await expect(post(body, organization, token)).rejects.toThrow(
+                'No permission to register in this group',
+            );
         });
     });
 
@@ -2461,9 +2606,12 @@ describe('Endpoint.RegisterMembers', () => {
             const { organization: organization2 } = await initOrganization();
             base.user.permissions = UserPermissions.create({
                 organizationPermissions: new Map([
-                    [organization2.id, Permissions.create({
-                        level: options?.permissionLevel ?? defaultPermissionLevel,
-                    })],
+                    [
+                        organization2.id,
+                        Permissions.create({
+                            level: options?.permissionLevel ?? defaultPermissionLevel,
+                        }),
+                    ],
                 ]),
             });
             await base.user.save();
@@ -2487,7 +2635,8 @@ describe('Endpoint.RegisterMembers', () => {
         }
 
         test('Should set paying organization id', async () => {
-            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+            const { organization, group, groupPrice, member, token, organization2 } =
+                await initDualData();
 
             const company = Company.create({
                 name: 'test company',
@@ -2509,8 +2658,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2529,7 +2677,8 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should fail if not sufficient permissions', async () => {
-            const { organization, group, groupPrice, member, token, organization2 } = await initDualData({ permissionLevel: PermissionLevel.Read });
+            const { organization, group, groupPrice, member, token, organization2 } =
+                await initDualData({ permissionLevel: PermissionLevel.Read });
 
             const company = Company.create({
                 name: 'test company',
@@ -2551,8 +2700,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2565,13 +2713,14 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization2.id,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(STExpect.simpleError({ code: 'forbidden' }));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.simpleError({ code: 'forbidden' }),
+            );
         });
 
         test('Should fail if disabled by group', async () => {
-            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+            const { organization, group, groupPrice, member, token, organization2 } =
+                await initDualData();
 
             group.settings.allowRegistrationsByOrganization = false;
             await group.save();
@@ -2589,8 +2738,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2601,13 +2749,14 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization2.id,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(STExpect.simpleError({ code: 'as_organization_disabled' }));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.simpleError({ code: 'as_organization_disabled' }),
+            );
         });
 
         test('Should fail if no customer', async () => {
-            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+            const { organization, group, groupPrice, member, token, organization2 } =
+                await initDualData();
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
@@ -2622,8 +2771,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2634,13 +2782,14 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization2.id,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('customer is required when paying as an organization');
+            await expect(post(body, organization, token)).rejects.toThrow(
+                'customer is required when paying as an organization',
+            );
         });
 
         test('Deleting registrations is not allowed', async () => {
-            const { member, group, groupPrice, organization, token, organization2 } = await initDualData();
+            const { member, group, groupPrice, organization, token, organization2 } =
+                await initDualData();
 
             const registration = await new RegistrationFactory({
                 member,
@@ -2662,7 +2811,9 @@ describe('Endpoint.RegisterMembers', () => {
                         }),
                     ],
                     balanceItems: [],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registration.id }),
+                    ],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -2672,13 +2823,14 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(STExpect.simpleError({ code: 'forbidden' }));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.simpleError({ code: 'forbidden' }),
+            );
         });
 
         test('Should fail if no company on customer', async () => {
-            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+            const { organization, group, groupPrice, member, token, organization2 } =
+                await initDualData();
 
             const body = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
@@ -2693,8 +2845,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2707,13 +2858,14 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization2.id,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('customer.company is required');
+            await expect(post(body, organization, token)).rejects.toThrow(
+                'customer.company is required',
+            );
         });
 
         test('Should fail if company does not exist on organization', async () => {
-            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+            const { organization, group, groupPrice, member, token, organization2 } =
+                await initDualData();
 
             const c = Company.create({
                 name: 'test company A',
@@ -2734,8 +2886,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2743,20 +2894,22 @@ describe('Endpoint.RegisterMembers', () => {
                 paymentMethod: PaymentMethod.PointOfSale,
                 totalPrice: 25_0000,
                 customer: PaymentCustomer.create({
-                    company: Company.create({ // different id (important for the test)
+                    company: Company.create({
+                        // different id (important for the test)
                         name: 'test company',
                     }),
                 }),
                 asOrganizationId: organization2.id,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(/Cannot set company data/);
+            await expect(post(body, organization, token)).rejects.toThrow(
+                /Cannot set company data/,
+            );
         });
 
         test('Should not fail if using default company on organization', async () => {
-            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+            const { organization, group, groupPrice, member, token, organization2 } =
+                await initDualData();
             organization2.meta.companies = [];
             await organization2.save();
 
@@ -2773,8 +2926,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2792,7 +2944,8 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should fail if company exists but is patched on organization', async () => {
-            const { organization, group, groupPrice, member, token, organization2 } = await initDualData();
+            const { organization, group, groupPrice, member, token, organization2 } =
+                await initDualData();
 
             const c = Company.create({
                 name: 'test company A',
@@ -2813,8 +2966,7 @@ describe('Endpoint.RegisterMembers', () => {
                             memberId: member.id,
                         }),
                     ],
-                    balanceItems: [
-                    ],
+                    balanceItems: [],
                     deleteRegistrations: [],
                 }),
                 administrationFee: 0,
@@ -2829,9 +2981,9 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization2.id,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow(/Cannot change company data/);
+            await expect(post(body, organization, token)).rejects.toThrow(
+                /Cannot change company data/,
+            );
         });
     });
 
@@ -2841,14 +2993,19 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should update registered members', async () => {
-            const { organization, group: group1, groupPrice: groupPrice1, token, member } = await initData();
+            const {
+                organization,
+                group: group1,
+                groupPrice: groupPrice1,
+                token,
+                member,
+            } = await initData();
 
             const registration = await new RegistrationFactory({
                 member,
                 group: group1,
                 groupPrice: groupPrice1,
-            })
-                .create();
+            }).create();
 
             const group = await new GroupFactory({
                 organization,
@@ -2910,8 +3067,7 @@ describe('Endpoint.RegisterMembers', () => {
                 reducedPrice: 12_5000,
                 stock: 500,
                 period: previousPeriod,
-            })
-                .create();
+            }).create();
             const groupPrice1 = group1.settings.prices[0];
 
             const registration = await new RegistrationFactory({
@@ -2943,11 +3099,20 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization, token)).rejects.toThrow(STExpect.errorWithCode('locked_period'));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.errorWithCode('locked_period'),
+            );
         });
 
         test('When replacing a registration, we should keep the original paying organization id', async () => {
-            const { organization, group: group1, groupPrice: groupPrice1, token, member, user } = await initData();
+            const {
+                organization,
+                group: group1,
+                groupPrice: groupPrice1,
+                token,
+                member,
+                user,
+            } = await initData();
 
             group1.settings.allowRegistrationsByOrganization = true;
             await group1.save();
@@ -2955,12 +3120,18 @@ describe('Endpoint.RegisterMembers', () => {
 
             user.permissions = UserPermissions.create({
                 organizationPermissions: new Map([
-                    [organization2.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
-                    [organization.id, Permissions.create({
-                        level: PermissionLevel.Full,
-                    })],
+                    [
+                        organization2.id,
+                        Permissions.create({
+                            level: PermissionLevel.Full,
+                        }),
+                    ],
+                    [
+                        organization.id,
+                        Permissions.create({
+                            level: PermissionLevel.Full,
+                        }),
+                    ],
                 ]),
             });
 
@@ -3051,14 +3222,20 @@ describe('Endpoint.RegisterMembers', () => {
 
         test('Replace registration by registration of other member should fail', async () => {
             // #region arrange
-            const { organization, group: group1, groupPrice: groupPrice1, token, member, otherMembers: [member2] } = await initData({ otherMemberAmount: 1 });
+            const {
+                organization,
+                group: group1,
+                groupPrice: groupPrice1,
+                token,
+                member,
+                otherMembers: [member2],
+            } = await initData({ otherMemberAmount: 1 });
 
             const registration = await new RegistrationFactory({
                 member: member2,
                 group: group1,
                 groupPrice: groupPrice1,
-            })
-                .create();
+            }).create();
 
             const group = await new GroupFactory({
                 organization,
@@ -3094,14 +3271,18 @@ describe('Endpoint.RegisterMembers', () => {
             // #endregion
 
             // #region act and assert
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('Registration not found');
+            await expect(post(body, organization, token)).rejects.toThrow('Registration not found');
             // #endregion
         });
 
         test('Move registration should fail via member portal (no asOrganizationId set)', async () => {
-            const { organization, group: group1, groupPrice: groupPrice1, token, member } = await initData({
+            const {
+                organization,
+                group: group1,
+                groupPrice: groupPrice1,
+                token,
+                member,
+            } = await initData({
                 permissionLevel: defaultPermissionLevel,
                 linkMembersToUser: true,
             });
@@ -3110,8 +3291,7 @@ describe('Endpoint.RegisterMembers', () => {
                 member,
                 group: group1,
                 groupPrice: groupPrice1,
-            })
-                .create();
+            }).create();
 
             const group = await new GroupFactory({
                 organization,
@@ -3145,7 +3325,9 @@ describe('Endpoint.RegisterMembers', () => {
             });
 
             // send request and check occupancy
-            await expect(post(body, organization, token)).rejects.toThrow('Not allowed to move registrations');
+            await expect(post(body, organization, token)).rejects.toThrow(
+                'Not allowed to move registrations',
+            );
         });
     });
 
@@ -3156,14 +3338,19 @@ describe('Endpoint.RegisterMembers', () => {
 
         test('Should update registered members', async () => {
             // #region arrange
-            const { member, group: group1, groupPrice: groupPrice1, organization: organization1, token } = await initData();
+            const {
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+                organization: organization1,
+                token,
+            } = await initData();
 
             const registration = await new RegistrationFactory({
                 member,
                 group: group1,
                 groupPrice: groupPrice1,
-            })
-                .create();
+            }).create();
 
             const group = await new GroupFactory({
                 organization: organization1,
@@ -3187,7 +3374,9 @@ describe('Endpoint.RegisterMembers', () => {
                         }),
                     ],
                     balanceItems: [],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registration.id }),
+                    ],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -3222,7 +3411,13 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('Should throw error if deleting registrations as normal member', async () => {
-            const { member, group: group1, groupPrice: groupPrice1, organization: organization1, token } = await initData({
+            const {
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+                organization: organization1,
+                token,
+            } = await initData({
                 permissionLevel: PermissionLevel.Full,
                 linkMembersToUser: true,
             });
@@ -3232,8 +3427,7 @@ describe('Endpoint.RegisterMembers', () => {
                 member,
                 group: group1,
                 groupPrice: groupPrice1,
-            })
-                .create();
+            }).create();
 
             const group = await new GroupFactory({
                 organization: organization1,
@@ -3257,7 +3451,9 @@ describe('Endpoint.RegisterMembers', () => {
                         }),
                     ],
                     balanceItems: [],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registration.id }),
+                    ],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -3268,11 +3464,19 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization1, token)).rejects.toThrow('Permission denied: you are not allowed to delete registrations');
+            await expect(post(body, organization1, token)).rejects.toThrow(
+                'Permission denied: you are not allowed to delete registrations',
+            );
         });
 
         test('Should deactivate registration', async () => {
-            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
+            const {
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+                organization,
+                token,
+            } = await initData();
 
             const registration = await new RegistrationFactory({
                 member,
@@ -3302,7 +3506,9 @@ describe('Endpoint.RegisterMembers', () => {
                         }),
                     ],
                     balanceItems: [],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registration.id }),
+                    ],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -3328,8 +3534,7 @@ describe('Endpoint.RegisterMembers', () => {
                 reducedPrice: 12_5000,
                 stock: 500,
                 period: previousPeriod,
-            })
-                .create();
+            }).create();
             const groupPrice1 = group1.settings.prices[0];
 
             const registration = await new RegistrationFactory({
@@ -3342,7 +3547,9 @@ describe('Endpoint.RegisterMembers', () => {
                 cart: IDRegisterCart.create({
                     items: [],
                     balanceItems: [],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registration.id }),
+                    ],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -3352,12 +3559,20 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization, token)).rejects.toThrow(STExpect.errorWithCode('locked_period'));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.errorWithCode('locked_period'),
+            );
         });
 
         test('Should fail if invalid cancelation fee', async () => {
             for (const cancellationFeePercentage of [10001, -1]) {
-                const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
+                const {
+                    member,
+                    group: group1,
+                    groupPrice: groupPrice1,
+                    organization,
+                    token,
+                } = await initData();
 
                 const body1 = IDRegisterCheckout.create({
                     cart: IDRegisterCart.create({
@@ -3410,27 +3625,39 @@ describe('Endpoint.RegisterMembers', () => {
                             }),
                         ],
                         balanceItems: [],
-                        deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id, cancellationFeePercentage })],
+                        deleteRegistrations: [
+                            IDDeleteRegisterItem.create({
+                                registrationId: registration.id,
+                                cancellationFeePercentage,
+                            }),
+                        ],
                     }),
                     administrationFee: 0,
                     freeContribution: 0,
                     paymentMethod: PaymentMethod.PointOfSale,
-                    totalPrice: 3000 - 2500 + 100 * Math.round(25 * cancellationFeePercentage / 10000),
+                    totalPrice:
+                        3000 - 2500 + 100 * Math.round((25 * cancellationFeePercentage) / 10000),
                     asOrganizationId: organization.id,
                     customer: null,
                 });
 
-                await expect(post(body2, organization, token))
-                    .rejects
-                    .toThrow(STExpect.simpleError({
+                await expect(post(body2, organization, token)).rejects.toThrow(
+                    STExpect.simpleError({
                         field: 'deleteRegistrations.cancellationFeePercentage',
                         code: 'invalid_field',
-                    }));
+                    }),
+                );
             }
         });
 
         test('Cannot delete registrations via the member portal', async () => {
-            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData({
+            const {
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+                organization,
+                token,
+            } = await initData({
                 linkMembersToUser: true,
             });
 
@@ -3462,7 +3689,9 @@ describe('Endpoint.RegisterMembers', () => {
                         }),
                     ],
                     balanceItems: [],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registration.id }),
+                    ],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -3471,13 +3700,19 @@ describe('Endpoint.RegisterMembers', () => {
                 customer: null,
             });
 
-            await expect(post(body, organization, token))
-                .rejects
-                .toThrow('Permission denied: you are not allowed to delete registrations');
+            await expect(post(body, organization, token)).rejects.toThrow(
+                'Permission denied: you are not allowed to delete registrations',
+            );
         });
 
         test('Cannot delete registrations as admin if no write permission to group', async () => {
-            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData({
+            const {
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+                organization,
+                token,
+            } = await initData({
                 permissionLevel: PermissionLevel.None,
                 groupPermissionLevel: PermissionLevel.Read,
                 memberPermissionLevel: PermissionLevel.Full,
@@ -3494,7 +3729,9 @@ describe('Endpoint.RegisterMembers', () => {
                 cart: IDRegisterCart.create({
                     items: [],
                     balanceItems: [],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registration.id }),
+                    ],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -3504,14 +3741,22 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization.id,
             });
 
-            await expect(post(body, organization, token)).rejects.toThrow(/No permission to delete this registration/);
+            await expect(post(body, organization, token)).rejects.toThrow(
+                /No permission to delete this registration/,
+            );
         });
 
         /**
          * userManager does not allow unregistering your own members, even when you have some admin permissions and set asOrganizationId
          */
         test('Cannot delete registrations as admin if no write permission to group but does have userManager permissions', async () => {
-            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData({
+            const {
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+                organization,
+                token,
+            } = await initData({
                 permissionLevel: PermissionLevel.Read,
                 linkMembersToUser: true,
             });
@@ -3526,7 +3771,9 @@ describe('Endpoint.RegisterMembers', () => {
                 cart: IDRegisterCart.create({
                     items: [],
                     balanceItems: [],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registration.id }),
+                    ],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -3536,12 +3783,20 @@ describe('Endpoint.RegisterMembers', () => {
                 asOrganizationId: organization.id,
             });
 
-            await expect(post(body, organization, token)).rejects.toThrow(/No permission to delete this registration/);
+            await expect(post(body, organization, token)).rejects.toThrow(
+                /No permission to delete this registration/,
+            );
         });
 
         test('Should fail if registration does not exist anymore', async () => {
             // #region arrange
-            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
+            const {
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+                organization,
+                token,
+            } = await initData();
 
             const registration = await new RegistrationFactory({
                 member,
@@ -3571,7 +3826,9 @@ describe('Endpoint.RegisterMembers', () => {
                         }),
                     ],
                     balanceItems: [],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registration.id }),
+                    ],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -3590,7 +3847,13 @@ describe('Endpoint.RegisterMembers', () => {
 
         test('Should fail if already deleted', async () => {
             // #region arrange
-            const { member, group: group1, groupPrice: groupPrice1, organization, token } = await initData();
+            const {
+                member,
+                group: group1,
+                groupPrice: groupPrice1,
+                organization,
+                token,
+            } = await initData();
 
             const registration = await new RegistrationFactory({
                 member,
@@ -3628,7 +3891,9 @@ describe('Endpoint.RegisterMembers', () => {
                         }),
                     ],
                     balanceItems: [],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registration.id }),
+                    ],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -3652,7 +3917,9 @@ describe('Endpoint.RegisterMembers', () => {
                         }),
                     ],
                     balanceItems: [],
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration.id })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({ registrationId: registration.id }),
+                    ],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
@@ -3665,7 +3932,9 @@ describe('Endpoint.RegisterMembers', () => {
 
             // #region act and assert
             await post(body1, organization, token);
-            await expect(post(body2, organization, token)).rejects.toThrow(/Cannot delete inactive registration/);
+            await expect(post(body2, organization, token)).rejects.toThrow(
+                /Cannot delete inactive registration/,
+            );
             // #endregion
         });
     });
@@ -3679,7 +3948,13 @@ describe('Endpoint.RegisterMembers', () => {
         /**
          * Each user has their own family with one member, like unrelated users registering at the same time.
          */
-        async function initUsers({ organization, amount }: { organization: Organization; amount: number }) {
+        async function initUsers({
+            organization,
+            amount,
+        }: {
+            organization: Organization;
+            amount: number;
+        }) {
             const users: { member: MemberWithUsersRegistrationsAndGroups; token: Token }[] = [];
             for (let i = 0; i < amount; i++) {
                 const user = await new UserFactory({ organization }).create();
@@ -3689,7 +3964,19 @@ describe('Endpoint.RegisterMembers', () => {
             return users;
         }
 
-        function buildBody({ organization, group, member, paymentMethod, groupPrice = group.settings.prices[0] }: { organization: Organization; group: Group; member: MemberWithUsersRegistrationsAndGroups; paymentMethod: PaymentMethod; groupPrice?: GroupPrice }) {
+        function buildBody({
+            organization,
+            group,
+            member,
+            paymentMethod,
+            groupPrice = group.settings.prices[0],
+        }: {
+            organization: Organization;
+            group: Group;
+            member: MemberWithUsersRegistrationsAndGroups;
+            paymentMethod: PaymentMethod;
+            groupPrice?: GroupPrice;
+        }) {
             return IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
                     items: [
@@ -3712,12 +3999,22 @@ describe('Endpoint.RegisterMembers', () => {
         /**
          * A group without a maximum, but with a limited and an unlimited price: only the limited price can sell out.
          */
-        async function initGroupWithLimitedPrice({ organization, stock, price }: { organization: Organization; stock: number; price: number }) {
+        async function initGroupWithLimitedPrice({
+            organization,
+            stock,
+            price,
+        }: {
+            organization: Organization;
+            stock: number;
+            price: number;
+        }) {
             const group = await new GroupFactory({ organization, price, stock }).create();
-            group.settings.prices.push(GroupPrice.create({
-                name: new TranslatedString('Unlimited'),
-                price: ReduceablePrice.create({ price }),
-            }));
+            group.settings.prices.push(
+                GroupPrice.create({
+                    name: new TranslatedString('Unlimited'),
+                    price: ReduceablePrice.create({ price }),
+                }),
+            );
             await group.save();
             return { group, limitedPrice: group.settings.prices[0] };
         }
@@ -3725,16 +4022,39 @@ describe('Endpoint.RegisterMembers', () => {
         test('A pending online payment reserves the spot for the next registration', async () => {
             const { organization } = await initOrganization();
             await initPayconiq({ organization });
-            const group = await new GroupFactory({ organization, price: 1500, maxMembers: 1 }).create();
+            const group = await new GroupFactory({
+                organization,
+                price: 1500,
+                maxMembers: 1,
+            }).create();
             const [first, second] = await initUsers({ organization, amount: 2 });
 
-            const response = await post(buildBody({ organization, group, member: first.member, paymentMethod: PaymentMethod.Payconiq }), organization, first.token);
+            const response = await post(
+                buildBody({
+                    organization,
+                    group,
+                    member: first.member,
+                    paymentMethod: PaymentMethod.Payconiq,
+                }),
+                organization,
+                first.token,
+            );
             expect(response.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
             expect(response.body.registrations[0].reservedUntil).toEqual(expect.any(Date));
 
             // The first user did not pay yet, but their spot is taken until the reservation expires
-            await expect(post(buildBody({ organization, group, member: second.member, paymentMethod: PaymentMethod.Payconiq }), organization, second.token))
-                .rejects.toThrow(STExpect.errorWithCode('maximum_reached'));
+            await expect(
+                post(
+                    buildBody({
+                        organization,
+                        group,
+                        member: second.member,
+                        paymentMethod: PaymentMethod.Payconiq,
+                    }),
+                    organization,
+                    second.token,
+                ),
+            ).rejects.toThrow(STExpect.errorWithCode('maximum_reached'));
 
             await QueueHandler.awaitAll();
             await group.refresh();
@@ -3745,35 +4065,77 @@ describe('Endpoint.RegisterMembers', () => {
         test('A pending online payment reserves the stock of a limited price', async () => {
             const { organization } = await initOrganization();
             await initPayconiq({ organization });
-            const { group, limitedPrice } = await initGroupWithLimitedPrice({ organization, stock: 1, price: 1500 });
+            const { group, limitedPrice } = await initGroupWithLimitedPrice({
+                organization,
+                stock: 1,
+                price: 1500,
+            });
             const [first, second] = await initUsers({ organization, amount: 2 });
 
-            const response = await post(buildBody({ organization, group, groupPrice: limitedPrice, member: first.member, paymentMethod: PaymentMethod.Payconiq }), organization, first.token);
+            const response = await post(
+                buildBody({
+                    organization,
+                    group,
+                    groupPrice: limitedPrice,
+                    member: first.member,
+                    paymentMethod: PaymentMethod.Payconiq,
+                }),
+                organization,
+                first.token,
+            );
             expect(response.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
             expect(response.body.registrations[0].reservedUntil).toEqual(expect.any(Date));
 
-            await expect(post(buildBody({ organization, group, groupPrice: limitedPrice, member: second.member, paymentMethod: PaymentMethod.Payconiq }), organization, second.token))
-                .rejects.toThrow(STExpect.errorWithCode('stock_empty'));
+            await expect(
+                post(
+                    buildBody({
+                        organization,
+                        group,
+                        groupPrice: limitedPrice,
+                        member: second.member,
+                        paymentMethod: PaymentMethod.Payconiq,
+                    }),
+                    organization,
+                    second.token,
+                ),
+            ).rejects.toThrow(STExpect.errorWithCode('stock_empty'));
 
             await QueueHandler.awaitAll();
             await group.refresh();
             expect(group.settings.reservedMembers).toBe(1);
-            expect(StockReservation.getAmount('GroupPrice', limitedPrice.id, group.stockReservations)).toBe(limitedPrice.stock);
+            expect(
+                StockReservation.getAmount('GroupPrice', limitedPrice.id, group.stockReservations),
+            ).toBe(limitedPrice.stock);
         });
 
         test('A pending online payment reserves the stock of a limited option', async () => {
             const { organization } = await initOrganization();
             await initPayconiq({ organization });
             const group = await new GroupFactory({ organization, price: 1500 }).create();
-            const option = GroupOption.create({ name: 'option 1', stock: 1, price: ReduceablePrice.create({ price: 0 }) });
-            const optionMenu = GroupOptionMenu.create({ name: 'option menu 1', multipleChoice: true, options: [option] });
+            const option = GroupOption.create({
+                name: 'option 1',
+                stock: 1,
+                price: ReduceablePrice.create({ price: 0 }),
+            });
+            const optionMenu = GroupOptionMenu.create({
+                name: 'option menu 1',
+                multipleChoice: true,
+                options: [option],
+            });
             group.settings.optionMenus = [optionMenu];
             await group.save();
             const [first, second] = await initUsers({ organization, amount: 2 });
 
             const withOption = (member: MemberWithUsersRegistrationsAndGroups) => {
-                const body = buildBody({ organization, group, member, paymentMethod: PaymentMethod.Payconiq });
-                body.cart.items[0].options = [RegisterItemOption.create({ option, optionMenu, amount: 1 })];
+                const body = buildBody({
+                    organization,
+                    group,
+                    member,
+                    paymentMethod: PaymentMethod.Payconiq,
+                });
+                body.cart.items[0].options = [
+                    RegisterItemOption.create({ option, optionMenu, amount: 1 }),
+                ];
                 return body;
             };
 
@@ -3781,13 +4143,16 @@ describe('Endpoint.RegisterMembers', () => {
             expect(response.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
             expect(response.body.registrations[0].reservedUntil).toEqual(expect.any(Date));
 
-            await expect(post(withOption(second.member), organization, second.token))
-                .rejects.toThrow(STExpect.errorWithCode('stock_empty'));
+            await expect(
+                post(withOption(second.member), organization, second.token),
+            ).rejects.toThrow(STExpect.errorWithCode('stock_empty'));
 
             await QueueHandler.awaitAll();
             await group.refresh();
             expect(group.settings.reservedMembers).toBe(1);
-            expect(StockReservation.getAmount('GroupOption', option.id, group.stockReservations)).toBe(1);
+            expect(
+                StockReservation.getAmount('GroupOption', option.id, group.stockReservations),
+            ).toBe(1);
         });
 
         test('A pending online payment does not reserve a spot in a group without limits', async () => {
@@ -3796,7 +4161,16 @@ describe('Endpoint.RegisterMembers', () => {
             const group = await new GroupFactory({ organization, price: 1500 }).create();
             const [first] = await initUsers({ organization, amount: 1 });
 
-            const response = await post(buildBody({ organization, group, member: first.member, paymentMethod: PaymentMethod.Payconiq }), organization, first.token);
+            const response = await post(
+                buildBody({
+                    organization,
+                    group,
+                    member: first.member,
+                    paymentMethod: PaymentMethod.Payconiq,
+                }),
+                organization,
+                first.token,
+            );
             expect(response.body.paymentUrl).toMatch(/payconiq-checkout\.test/);
             expect(response.body.registrations[0].reservedUntil).toBeNull();
 
@@ -3807,25 +4181,53 @@ describe('Endpoint.RegisterMembers', () => {
         });
 
         test('One user registering two members for the last spot is rejected as a whole', async () => {
-            const { organization, member, otherMembers, token } = await initData({ otherMemberAmount: 1 });
-            const group = await new GroupFactory({ organization, price: 0, maxMembers: 2 }).create();
+            const { organization, member, otherMembers, token } = await initData({
+                otherMemberAmount: 1,
+            });
+            const group = await new GroupFactory({
+                organization,
+                price: 0,
+                maxMembers: 2,
+            }).create();
             const [taker] = await initUsers({ organization, amount: 1 });
-            await post(buildBody({ organization, group, member: taker.member, paymentMethod: PaymentMethod.PointOfSale }), organization, taker.token);
+            await post(
+                buildBody({
+                    organization,
+                    group,
+                    member: taker.member,
+                    paymentMethod: PaymentMethod.PointOfSale,
+                }),
+                organization,
+                taker.token,
+            );
 
-            const body = buildBody({ organization, group, member, paymentMethod: PaymentMethod.PointOfSale });
-            body.cart.items.push(IDRegisterItem.create({
-                id: uuidv4(),
-                groupPrice: group.settings.prices[0],
-                organizationId: organization.id,
-                groupId: group.id,
-                memberId: otherMembers[0].id,
-            }));
+            const body = buildBody({
+                organization,
+                group,
+                member,
+                paymentMethod: PaymentMethod.PointOfSale,
+            });
+            body.cart.items.push(
+                IDRegisterItem.create({
+                    id: uuidv4(),
+                    groupPrice: group.settings.prices[0],
+                    organizationId: organization.id,
+                    groupId: group.id,
+                    memberId: otherMembers[0].id,
+                }),
+            );
 
-            await expect(post(body, organization, token)).rejects.toThrow(STExpect.errorWithCode('maximum_reached'));
+            await expect(post(body, organization, token)).rejects.toThrow(
+                STExpect.errorWithCode('maximum_reached'),
+            );
 
             await QueueHandler.awaitAll();
-            const registrations = await Registration.where({ groupId: group.id, registeredAt: { sign: '!=', value: null }, deactivatedAt: null });
-            expect(registrations.map(r => r.memberId)).toEqual([taker.member.id]);
+            const registrations = await Registration.where({
+                groupId: group.id,
+                registeredAt: { sign: '!=', value: null },
+                deactivatedAt: null,
+            });
+            expect(registrations.map((r) => r.memberId)).toEqual([taker.member.id]);
 
             await group.refresh();
             expect(group.settings.registeredMembers).toBe(1);
@@ -3833,15 +4235,30 @@ describe('Endpoint.RegisterMembers', () => {
 
         test('Concurrent free registrations never exceed the maximum', async () => {
             const { organization } = await initOrganization();
-            const group = await new GroupFactory({ organization, price: 0, maxMembers: 2 }).create();
+            const group = await new GroupFactory({
+                organization,
+                price: 0,
+                maxMembers: 2,
+            }).create();
             const users = await initUsers({ organization, amount: 6 });
 
             const results = await Promise.allSettled(
-                users.map(({ member, token }) => post(buildBody({ organization, group, member, paymentMethod: PaymentMethod.PointOfSale }), organization, token)),
+                users.map(({ member, token }) =>
+                    post(
+                        buildBody({
+                            organization,
+                            group,
+                            member,
+                            paymentMethod: PaymentMethod.PointOfSale,
+                        }),
+                        organization,
+                        token,
+                    ),
+                ),
             );
 
-            const fulfilled = results.filter(r => r.status === 'fulfilled');
-            const rejected = results.filter(r => r.status === 'rejected');
+            const fulfilled = results.filter((r) => r.status === 'fulfilled');
+            const rejected = results.filter((r) => r.status === 'rejected');
             expect(fulfilled.length).toBe(2);
             expect(rejected.length).toBe(4);
             for (const result of rejected) {
@@ -3852,7 +4269,11 @@ describe('Endpoint.RegisterMembers', () => {
 
             await QueueHandler.awaitAll();
 
-            const registrations = await Registration.where({ groupId: group.id, registeredAt: { sign: '!=', value: null }, deactivatedAt: null });
+            const registrations = await Registration.where({
+                groupId: group.id,
+                registeredAt: { sign: '!=', value: null },
+                deactivatedAt: null,
+            });
             expect(registrations.length).toBe(2);
 
             await group.refresh();
@@ -3863,15 +4284,30 @@ describe('Endpoint.RegisterMembers', () => {
         test('Concurrent online payments never reserve more than the maximum', async () => {
             const { organization } = await initOrganization();
             await initPayconiq({ organization });
-            const group = await new GroupFactory({ organization, price: 1500, maxMembers: 2 }).create();
+            const group = await new GroupFactory({
+                organization,
+                price: 1500,
+                maxMembers: 2,
+            }).create();
             const users = await initUsers({ organization, amount: 6 });
 
             const results = await Promise.allSettled(
-                users.map(({ member, token }) => post(buildBody({ organization, group, member, paymentMethod: PaymentMethod.Payconiq }), organization, token)),
+                users.map(({ member, token }) =>
+                    post(
+                        buildBody({
+                            organization,
+                            group,
+                            member,
+                            paymentMethod: PaymentMethod.Payconiq,
+                        }),
+                        organization,
+                        token,
+                    ),
+                ),
             );
 
-            const fulfilled = results.filter(r => r.status === 'fulfilled');
-            const rejected = results.filter(r => r.status === 'rejected');
+            const fulfilled = results.filter((r) => r.status === 'fulfilled');
+            const rejected = results.filter((r) => r.status === 'rejected');
             expect(fulfilled.length).toBe(2);
             expect(rejected.length).toBe(4);
             for (const result of fulfilled) {
@@ -3885,7 +4321,11 @@ describe('Endpoint.RegisterMembers', () => {
 
             await QueueHandler.awaitAll();
 
-            const reserved = await Registration.where({ groupId: group.id, registeredAt: null, reservedUntil: { sign: '>', value: new Date() } });
+            const reserved = await Registration.where({
+                groupId: group.id,
+                registeredAt: null,
+                reservedUntil: { sign: '>', value: new Date() },
+            });
             expect(reserved.length).toBe(2);
 
             await group.refresh();
@@ -3895,15 +4335,31 @@ describe('Endpoint.RegisterMembers', () => {
 
         test('Concurrent free registrations never exceed the stock of a limited price', async () => {
             const { organization } = await initOrganization();
-            const { group, limitedPrice } = await initGroupWithLimitedPrice({ organization, stock: 2, price: 0 });
+            const { group, limitedPrice } = await initGroupWithLimitedPrice({
+                organization,
+                stock: 2,
+                price: 0,
+            });
             const users = await initUsers({ organization, amount: 6 });
 
             const results = await Promise.allSettled(
-                users.map(({ member, token }) => post(buildBody({ organization, group, groupPrice: limitedPrice, member, paymentMethod: PaymentMethod.PointOfSale }), organization, token)),
+                users.map(({ member, token }) =>
+                    post(
+                        buildBody({
+                            organization,
+                            group,
+                            groupPrice: limitedPrice,
+                            member,
+                            paymentMethod: PaymentMethod.PointOfSale,
+                        }),
+                        organization,
+                        token,
+                    ),
+                ),
             );
 
-            expect(results.filter(r => r.status === 'fulfilled').length).toBe(2);
-            const rejected = results.filter(r => r.status === 'rejected');
+            expect(results.filter((r) => r.status === 'fulfilled').length).toBe(2);
+            const rejected = results.filter((r) => r.status === 'rejected');
             expect(rejected.length).toBe(4);
             for (const result of rejected) {
                 expect(() => {
@@ -3914,21 +4370,39 @@ describe('Endpoint.RegisterMembers', () => {
             await QueueHandler.awaitAll();
             await group.refresh();
             expect(group.settings.registeredMembers).toBe(2);
-            expect(StockReservation.getAmount('GroupPrice', limitedPrice.id, group.stockReservations)).toBe(limitedPrice.stock);
+            expect(
+                StockReservation.getAmount('GroupPrice', limitedPrice.id, group.stockReservations),
+            ).toBe(limitedPrice.stock);
         });
 
         test('Concurrent online payments never reserve more than the stock of a limited price', async () => {
             const { organization } = await initOrganization();
             await initPayconiq({ organization });
-            const { group, limitedPrice } = await initGroupWithLimitedPrice({ organization, stock: 2, price: 1500 });
+            const { group, limitedPrice } = await initGroupWithLimitedPrice({
+                organization,
+                stock: 2,
+                price: 1500,
+            });
             const users = await initUsers({ organization, amount: 6 });
 
             const results = await Promise.allSettled(
-                users.map(({ member, token }) => post(buildBody({ organization, group, groupPrice: limitedPrice, member, paymentMethod: PaymentMethod.Payconiq }), organization, token)),
+                users.map(({ member, token }) =>
+                    post(
+                        buildBody({
+                            organization,
+                            group,
+                            groupPrice: limitedPrice,
+                            member,
+                            paymentMethod: PaymentMethod.Payconiq,
+                        }),
+                        organization,
+                        token,
+                    ),
+                ),
             );
 
-            expect(results.filter(r => r.status === 'fulfilled').length).toBe(2);
-            const rejected = results.filter(r => r.status === 'rejected');
+            expect(results.filter((r) => r.status === 'fulfilled').length).toBe(2);
+            const rejected = results.filter((r) => r.status === 'rejected');
             expect(rejected.length).toBe(4);
             for (const result of rejected) {
                 expect(() => {
@@ -3938,13 +4412,19 @@ describe('Endpoint.RegisterMembers', () => {
 
             await QueueHandler.awaitAll();
 
-            const reserved = await Registration.where({ groupId: group.id, registeredAt: null, reservedUntil: { sign: '>', value: new Date() } });
+            const reserved = await Registration.where({
+                groupId: group.id,
+                registeredAt: null,
+                reservedUntil: { sign: '>', value: new Date() },
+            });
             expect(reserved.length).toBe(2);
 
             await group.refresh();
             expect(group.settings.registeredMembers).toBe(0);
             expect(group.settings.reservedMembers).toBe(2);
-            expect(StockReservation.getAmount('GroupPrice', limitedPrice.id, group.stockReservations)).toBe(limitedPrice.stock);
+            expect(
+                StockReservation.getAmount('GroupPrice', limitedPrice.id, group.stockReservations),
+            ).toBe(limitedPrice.stock);
         });
     });
 });

@@ -20,7 +20,10 @@ export default new Migration(async () => {
     }
 
     if (STAMHOOFD.userMode === 'platform') {
-        console.log('Skipped seed organization-records-add-tax-dependent for platform: ' + STAMHOOFD.platformName);
+        console.log(
+            'Skipped seed organization-records-add-tax-dependent for platform: ' +
+                STAMHOOFD.platformName,
+        );
         return;
     }
 

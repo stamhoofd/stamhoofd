@@ -84,7 +84,12 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                 });
             }
             const email = await EmailAddress.getByID(request.body.id);
-            if (!email || email.token !== request.body.token || request.body.token.length < 10 || request.body.id.length < 10) {
+            if (
+                !email ||
+                email.token !== request.body.token ||
+                request.body.token.length < 10 ||
+                request.body.id.length < 10
+            ) {
                 throw new SimpleError({
                     code: 'invalid_fields',
                     message: 'Invalid token or id',
@@ -93,7 +98,8 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
             }
 
             email.unsubscribedAll = request.body.unsubscribedAll ?? email.unsubscribedAll;
-            email.unsubscribedMarketing = request.body.unsubscribedMarketing ?? email.unsubscribedMarketing;
+            email.unsubscribedMarketing =
+                request.body.unsubscribedMarketing ?? email.unsubscribedMarketing;
 
             await email.save();
             return new Response(undefined);
@@ -110,7 +116,7 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
             const { user } = await Context.authenticate();
 
             if (organization) {
-                if (!await Context.auth.hasFullAccess(organization.id)) {
+                if (!(await Context.auth.hasFullAccess(organization.id))) {
                     throw Context.auth.error();
                 }
             } else {
@@ -119,7 +125,10 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                 }
             }
 
-            const emails = await EmailAddress.getByEmails([request.body.email], organization?.id ?? null);
+            const emails = await EmailAddress.getByEmails(
+                [request.body.email],
+                organization?.id ?? null,
+            );
 
             if (emails.length === 0) {
                 throw new SimpleError({
@@ -132,14 +141,23 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
 
             // Track limits
             for (const email of emails) {
-                const wasBlocked = email.unsubscribedAll || email.unsubscribedMarketing || email.hardBounce || email.markedAsSpam;
+                const wasBlocked =
+                    email.unsubscribedAll ||
+                    email.unsubscribedMarketing ||
+                    email.hardBounce ||
+                    email.markedAsSpam;
 
-                if (email.organizationId === null || (organization && email.organizationId !== organization.id)) {
+                if (
+                    email.organizationId === null ||
+                    (organization && email.organizationId !== organization.id)
+                ) {
                     if (Context.auth.hasPlatformFullAccess()) {
                         // Only allowed as platform admins
                         // This is important, otherwise an individual organization can resubscribe to platform emails
-                        email.unsubscribedAll = request.body.unsubscribedAll ?? email.unsubscribedAll;
-                        email.unsubscribedMarketing = request.body.unsubscribedMarketing ?? email.unsubscribedMarketing;
+                        email.unsubscribedAll =
+                            request.body.unsubscribedAll ?? email.unsubscribedAll;
+                        email.unsubscribedMarketing =
+                            request.body.unsubscribedMarketing ?? email.unsubscribedMarketing;
                     }
                 } else {
                     email.unsubscribedAll = request.body.unsubscribedAll ?? email.unsubscribedAll;
@@ -149,7 +167,11 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                 email.hardBounce = request.body.hardBounce ?? email.hardBounce;
                 email.markedAsSpam = request.body.markedAsSpam ?? email.markedAsSpam;
 
-                const isBlocked = email.unsubscribedAll || email.unsubscribedMarketing || email.hardBounce || email.markedAsSpam;
+                const isBlocked =
+                    email.unsubscribedAll ||
+                    email.unsubscribedMarketing ||
+                    email.hardBounce ||
+                    email.markedAsSpam;
 
                 if (!isBlocked && wasBlocked && !Context.auth.hasPlatformFullAccess()) {
                     try {
@@ -157,7 +179,16 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                     } catch (e) {
                         Email.sendWebmaster({
                             subject: '[Limiet] Limiet bereikt voor aantal unblocks',
-                            text: 'Beste, \nDe limiet werd bereikt voor het aantal email unblocks per week. \nUser: ' + user.email + '\n\nVereniging: ' + (organization ? (organization.id + ' (' + organization.name + ')') : 'platform') + '\n\n' + e.message + '\n\nStamhoofd',
+                            text:
+                                'Beste, \nDe limiet werd bereikt voor het aantal email unblocks per week. \nUser: ' +
+                                user.email +
+                                '\n\nVereniging: ' +
+                                (organization
+                                    ? organization.id + ' (' + organization.name + ')'
+                                    : 'platform') +
+                                '\n\n' +
+                                e.message +
+                                '\n\nStamhoofd',
                         });
 
                         throw new SimpleError({
@@ -183,7 +214,11 @@ export class ManageEmailAddressEndpoint extends Endpoint<Params, Query, Body, Re
                     const response = await client.send(command);
                     console.log('Removed from AWS suppression list', request.body.email, response);
                 } catch (error) {
-                    console.error('Error removing from suppression list', request.body.email, error);
+                    console.error(
+                        'Error removing from suppression list',
+                        request.body.email,
+                        error,
+                    );
                 }
             }
 

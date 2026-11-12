@@ -17,8 +17,13 @@ describe('MailchimpClient', () => {
     });
 
     test('pages through the audience and includes archived contacts', async () => {
-        const members = Array.from({ length: 2500 }, (_, i) => ({ email: `member${i}@example.com` }));
-        const archived = Array.from({ length: 500 }, (_, i) => ({ email: `archived${i}@example.com`, status: 'archived' }));
+        const members = Array.from({ length: 2500 }, (_, i) => ({
+            email: `member${i}@example.com`,
+        }));
+        const archived = Array.from({ length: 500 }, (_, i) => ({
+            email: `archived${i}@example.com`,
+            status: 'archived',
+        }));
         mailchimp.addList('list1', 'Audience', [...members, ...archived]);
 
         const result = await client.getMembers('list1');
@@ -27,23 +32,39 @@ describe('MailchimpClient', () => {
         expect(result.get('member2499@example.com')?.status).toBe('subscribed');
         expect(result.get('archived499@example.com')?.status).toBe('archived');
         // 3 pages of 1000 and 1 page of archived contacts
-        expect(mailchimp.requests.filter(r => r.method === 'GET').length).toBe(4);
+        expect(mailchimp.requests.filter((r) => r.method === 'GET').length).toBe(4);
     });
 
     test('normalizes JSON merge fields without changing empty values', async () => {
-        mailchimp.addList('list1', 'Audience', [{ email: 'member@example.com', mergeFields: { FNAME: 'Jan', LNAME: '' } }]);
+        mailchimp.addList('list1', 'Audience', [
+            { email: 'member@example.com', mergeFields: { FNAME: 'Jan', LNAME: '' } },
+        ]);
         const result = await client.getMembers('list1');
-        expect(result.get('member@example.com')?.mergeFields).toEqual(new Map([['FNAME', 'Jan'], ['LNAME', '']]));
+        expect(result.get('member@example.com')?.mergeFields).toEqual(
+            new Map([
+                ['FNAME', 'Jan'],
+                ['LNAME', ''],
+            ]),
+        );
     });
 
     test('serializes planned merge fields as an object for Mailchimp', async () => {
         mailchimp.addList('list1', 'Audience');
         await client.upsertMember('list1', {
-            email: 'member@example.com', statusIfNew: 'pending',
-            mergeFields: new Map([['FNAME', 'Jan'], ['LNAME', '']]),
+            email: 'member@example.com',
+            statusIfNew: 'pending',
+            mergeFields: new Map([
+                ['FNAME', 'Jan'],
+                ['LNAME', ''],
+            ]),
         });
         const result = await client.getMembers('list1');
-        expect(result.get('member@example.com')?.mergeFields).toEqual(new Map([['FNAME', 'Jan'], ['LNAME', '']]));
+        expect(result.get('member@example.com')?.mergeFields).toEqual(
+            new Map([
+                ['FNAME', 'Jan'],
+                ['LNAME', ''],
+            ]),
+        );
     });
 
     test('retries after a 429 with a capped Retry-After and gives up on persistent errors', async () => {
@@ -52,14 +73,24 @@ describe('MailchimpClient', () => {
         MailchimpClient.maxRetryAfterSeconds = 0.01;
 
         // Would wait an hour without the cap and fail the test timeout
-        mailchimp.forcedResponses.push({ status: 429, body: { title: 'Too Many Requests', detail: 'Slow down' }, headers: { 'Retry-After': '3600' } });
-        mailchimp.forcedResponses.push({ status: 503, body: { title: 'Service Unavailable', detail: 'Try again' } });
+        mailchimp.forcedResponses.push({
+            status: 429,
+            body: { title: 'Too Many Requests', detail: 'Slow down' },
+            headers: { 'Retry-After': '3600' },
+        });
+        mailchimp.forcedResponses.push({
+            status: 503,
+            body: { title: 'Service Unavailable', detail: 'Try again' },
+        });
         const lists = await client.getLists();
-        expect(lists.map(l => l.id)).toEqual(['list1']);
+        expect(lists.map((l) => l.id)).toEqual(['list1']);
         expect(mailchimp.requests.length).toBe(3);
 
         for (let i = 0; i < 6; i++) {
-            mailchimp.forcedResponses.push({ status: 500, body: { title: 'Internal Server Error', detail: 'Boom' } });
+            mailchimp.forcedResponses.push({
+                status: 500,
+                body: { title: 'Internal Server Error', detail: 'Boom' },
+            });
         }
         await expect(client.getLists()).rejects.toThrow(MailchimpApiError);
         expect(mailchimp.forcedResponses.length).toBe(0);

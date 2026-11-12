@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -51,10 +60,14 @@ export enum InvoiceType {
 export class InvoiceTypeHelper {
     static getName(type: InvoiceType): string {
         switch (type) {
-            case InvoiceType.Invoice: return $t('%1KG');
-            case InvoiceType.CreditNote: return $t('%1KH');
-            case InvoiceType.Receipt: return $t('%ZqF');
-            case InvoiceType.RefundReceipt: return $t('%ZqS');
+            case InvoiceType.Invoice:
+                return $t('%1KG');
+            case InvoiceType.CreditNote:
+                return $t('%1KH');
+            case InvoiceType.Receipt:
+                return $t('%ZqF');
+            case InvoiceType.RefundReceipt:
+                return $t('%ZqS');
         }
     }
 }
@@ -230,7 +243,11 @@ export class Invoice extends AutoEncoder {
 
     validateVATRates() {
         let intra = false;
-        if (this.customer.company && this.customer.company.VATNumber && this.customer.company.address) {
+        if (
+            this.customer.company &&
+            this.customer.company.VATNumber &&
+            this.customer.company.address
+        ) {
             if (this.seller.VATNumber && this.seller.address) {
                 // Reverse charged vat applicable?
                 if (this.customer.company.address.country !== this.seller.address.country) {
@@ -241,7 +258,10 @@ export class Invoice extends AutoEncoder {
 
         if (intra) {
             for (const item of this.items) {
-                if (item.VATExcempt !== VATExcemptReason.IntraCommunityServices && item.VATExcempt !== VATExcemptReason.IntraCommunityGoods) {
+                if (
+                    item.VATExcempt !== VATExcemptReason.IntraCommunityServices &&
+                    item.VATExcempt !== VATExcemptReason.IntraCommunityGoods
+                ) {
                     throw new SimpleError({
                         code: 'missing_vat_excemption',
                         message: 'Missing IntraCommunity VAT excemption',
@@ -251,7 +271,10 @@ export class Invoice extends AutoEncoder {
             }
         } else {
             for (const item of this.items) {
-                if (item.VATExcempt === VATExcemptReason.IntraCommunityServices || item.VATExcempt === VATExcemptReason.IntraCommunityGoods) {
+                if (
+                    item.VATExcempt === VATExcemptReason.IntraCommunityServices ||
+                    item.VATExcempt === VATExcemptReason.IntraCommunityGoods
+                ) {
                     throw new SimpleError({
                         code: 'erroneous_vat_excemption',
                         message: 'IntraCommunity VAT excemption should not apply to this item',
@@ -271,7 +294,8 @@ export class Invoice extends AutoEncoder {
             category.taxablePrice = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
 
             if (!category.VATExcempt) {
-                category.VAT = STMath.round(category.taxablePrice * category.VATPercentage / 100_00) * 100;
+                category.VAT =
+                    STMath.round((category.taxablePrice * category.VATPercentage) / 100_00) * 100;
             } else {
                 category.VAT = 0;
             }
@@ -311,18 +335,25 @@ export class Invoice extends AutoEncoder {
                 price: this.totalWithoutVAT,
             },
             {
-                name: $t('%1JE') + (this.VATTotal.length === 1 ? ' (' + Formatter.percentage(this.VATTotal[0].VATPercentage * 100) + ')' : ''),
-                description: this.VATTotal.length === 1 && this.VATTotal[0].VATExcempt ? getVATExcemptInvoiceNote(this.VATTotal[0].VATExcempt) : undefined,
+                name:
+                    $t('%1JE') +
+                    (this.VATTotal.length === 1
+                        ? ' (' + Formatter.percentage(this.VATTotal[0].VATPercentage * 100) + ')'
+                        : ''),
+                description:
+                    this.VATTotal.length === 1 && this.VATTotal[0].VATExcempt
+                        ? getVATExcemptInvoiceNote(this.VATTotal[0].VATExcempt)
+                        : undefined,
                 price: this.VATTotalAmount,
                 action: this.VATTotal.length > 1 ? options?.vatAction : undefined,
             },
             ...(this.payableRoundingAmount !== 0
                 ? [
-                        {
-                            name: $t('%1I6'),
-                            price: this.payableRoundingAmount,
-                        },
-                    ]
+                      {
+                          name: $t('%1I6'),
+                          price: this.payableRoundingAmount,
+                      },
+                  ]
                 : []),
             {
                 name: $t('%1KL'),
@@ -338,8 +369,10 @@ export class Invoice extends AutoEncoder {
         }
 
         // Calculate difference between the invoice price and the payments price
-        const difference = this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
-        if (this.payments.length > 0 && Math.abs(difference) < 3_00) { // Correct maximum 2 cents
+        const difference =
+            this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
+        if (this.payments.length > 0 && Math.abs(difference) < 3_00) {
+            // Correct maximum 2 cents
             this.payableRoundingAmount = difference;
         } else {
             this.payableRoundingAmount = 0;
@@ -347,7 +380,7 @@ export class Invoice extends AutoEncoder {
     }
 
     get didChangeUnitPricesToCorrectRounding() {
-        return !!this.items.find(i => !!i.addedToUnitPriceToCorrectVAT);
+        return !!this.items.find((i) => !!i.addedToUnitPriceToCorrectVAT);
     }
 
     private correctRoundingByUpdatingPrices() {
@@ -361,7 +394,8 @@ export class Invoice extends AutoEncoder {
             return;
         }
 
-        const difference = this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
+        const difference =
+            this.totalPaymentsAmount - (this.totalWithVAT - this.payableRoundingAmount);
         if (difference === 0) {
             // No need to do any magic
             return;
@@ -397,7 +431,7 @@ export class Invoice extends AutoEncoder {
                     return bDiff - aDiff; // Sort descending
                 });
 
-                const next = items.find(i => !incorrectableItems.has(i));
+                const next = items.find((i) => !incorrectableItems.has(i));
                 if (!next) {
                     return;
                 }
@@ -410,24 +444,35 @@ export class Invoice extends AutoEncoder {
                 loops++;
                 const current = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
                 const currentToAddToTaxablePrice = STMath.round((precise - current) / 100) * 100;
-                if (currentToAddToTaxablePrice === 0 || Math.sign(currentToAddToTaxablePrice) !== Math.sign(toAddToTaxablePrice)) {
+                if (
+                    currentToAddToTaxablePrice === 0 ||
+                    Math.sign(currentToAddToTaxablePrice) !== Math.sign(toAddToTaxablePrice)
+                ) {
                     break;
                 }
 
                 // Change prices in steps of 0.005 (total price, so divided by quantity)
-                let step = Math.round(50 * 1_00_00 / Math.abs(next.quantity));
+                let step = Math.round((50 * 1_00_00) / Math.abs(next.quantity));
                 if (step <= 1) {
                     step = 1; // Might jump further than expected / wanted
                 }
-                const addition = Math.sign(currentToAddToTaxablePrice) * Math.sign(next.quantity) * step;
+                const addition =
+                    Math.sign(currentToAddToTaxablePrice) * Math.sign(next.quantity) * step;
                 next.unitPrice += addition;
                 next.addedToUnitPriceToCorrectVAT += addition;
 
                 const afterCurrent = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
-                const afterCurrentToAddToTaxablePrice = STMath.round((precise - afterCurrent) / 100) * 100;
+                const afterCurrentToAddToTaxablePrice =
+                    STMath.round((precise - afterCurrent) / 100) * 100;
 
                 // Math.sign is unreliable when the price is zero, so we need to be careful here and explitly exclude zero as that is the goal value.
-                if (afterCurrentToAddToTaxablePrice !== 0 && (Math.abs(afterCurrentToAddToTaxablePrice) > Math.abs(currentToAddToTaxablePrice) || Math.sign(afterCurrentToAddToTaxablePrice) !== Math.sign(toAddToTaxablePrice))) {
+                if (
+                    afterCurrentToAddToTaxablePrice !== 0 &&
+                    (Math.abs(afterCurrentToAddToTaxablePrice) >
+                        Math.abs(currentToAddToTaxablePrice) ||
+                        Math.sign(afterCurrentToAddToTaxablePrice) !==
+                            Math.sign(toAddToTaxablePrice))
+                ) {
                     // Revert
                     next.unitPrice -= addition;
                     next.addedToUnitPriceToCorrectVAT -= addition;
@@ -440,7 +485,8 @@ export class Invoice extends AutoEncoder {
                 next = getNext();
             }
 
-            { const current = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
+            {
+                const current = items.reduce((a, b) => a + b.totalWithoutVAT, 0);
                 const precise = items.reduce((a, b) => a + b.preciseTotalWithoutVAT, 0);
 
                 const toAddToTaxablePrice = STMath.round((precise - current) / 100) * 100;
@@ -462,7 +508,8 @@ export class Invoice extends AutoEncoder {
                         endDate: items[0].endDate,
                     });
                     this.addItem(add);
-                } }
+                }
+            }
         }
     }
 
@@ -481,7 +528,14 @@ export class Invoice extends AutoEncoder {
         if (this.totalWithVAT !== this.totalPaymentsAmount) {
             throw new SimpleError({
                 code: 'price_difference',
-                message: 'The price of the generated invoice (' + Formatter.price(this.totalWithVAT) + ') (' + Formatter.price(this.totalWithoutVAT) + ') did not match the price of the corresponding payments (' + Formatter.price(this.totalPaymentsAmount) + '). Possibly caused by rounding that could not be corrected automatically.',
+                message:
+                    'The price of the generated invoice (' +
+                    Formatter.price(this.totalWithVAT) +
+                    ') (' +
+                    Formatter.price(this.totalWithoutVAT) +
+                    ') did not match the price of the corresponding payments (' +
+                    Formatter.price(this.totalPaymentsAmount) +
+                    '). Possibly caused by rounding that could not be corrected automatically.',
                 human: $t('%1Kn'),
             });
         }
@@ -499,7 +553,8 @@ export class Invoice extends AutoEncoder {
         }
 
         // Keep the sum of all balance items.
-        const balanceItemsMap: Map<string, { balanceItem: BalanceItem; amount: number }> = new Map();
+        const balanceItemsMap: Map<string, { balanceItem: BalanceItem; amount: number }> =
+            new Map();
 
         for (const payment of this.payments) {
             for (const item of payment.balanceItemPayments) {
@@ -515,7 +570,10 @@ export class Invoice extends AutoEncoder {
             }
 
             if (payment.payingOrganizationId) {
-                if (this.payingOrganizationId && payment.payingOrganizationId !== this.payingOrganizationId) {
+                if (
+                    this.payingOrganizationId &&
+                    payment.payingOrganizationId !== this.payingOrganizationId
+                ) {
                     throw new SimpleError({
                         code: 'multiple_organizations',
                         message: 'Cannot create one invoice for multiple organizations',
@@ -536,7 +594,10 @@ export class Invoice extends AutoEncoder {
             const invoiced = InvoicedBalanceItem.createFor(item.balanceItem, item.amount);
 
             // Remove zero invoicedItems if they were for a package (activation of a free package should not be invoiced)
-            if (invoiced.totalWithoutVAT === 0 && item.balanceItem.type === BalanceItemType.STPackage) {
+            if (
+                invoiced.totalWithoutVAT === 0 &&
+                item.balanceItem.type === BalanceItemType.STPackage
+            ) {
                 continue;
             }
             invoicedItems.push(invoiced);

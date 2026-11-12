@@ -28,7 +28,9 @@ describe('Endpoint.GetOrganizationFromDomain', () => {
     });
 
     test('Get organization from custom domain', async () => {
-        const organization = await new OrganizationFactory({ domain: 'inschrijven.mijnscouts.be' }).create();
+        const organization = await new OrganizationFactory({
+            domain: 'inschrijven.mijnscouts.be',
+        }).create();
 
         const r = Request.buildJson('GET', '/v2/organization-from-domain');
         r.query = {

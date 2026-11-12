@@ -4,7 +4,12 @@ import { Endpoint, Response } from '@node/endpoints';
 import { Ticket, Webshop } from '@stamhoofd/models';
 import type { CountFilteredRequest, TicketPrivate } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
+import {
+    assertSort,
+    getSortFilter,
+    LimitedFilteredRequest,
+    PaginatedResponse,
+} from '@stamhoofd/structures';
 
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/sql';
@@ -39,8 +44,7 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
     }
 
     static async getAccessibleWebshopIds(organizationId: string): Promise<string[]> {
-        const rows = await SQL
-            .select(SQL.column('id'))
+        const rows = await SQL.select(SQL.column('id'))
             .from(SQL.table(Webshop.table))
             .where('organizationId', organizationId)
             .fetch();
@@ -48,7 +52,12 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
         const webshopIds: string[] = [];
         for (const row of rows) {
             const id = row[Webshop.table]['id'] as string;
-            if (await Context.auth.canAccessWebshopTickets({ id, organizationId }, PermissionLevel.Read)) {
+            if (
+                await Context.auth.canAccessWebshopTickets(
+                    { id, organizationId },
+                    PermissionLevel.Read,
+                )
+            ) {
                 webshopIds.push(id);
             }
         }
@@ -60,14 +69,23 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
 
         const ticketsTable: string = Ticket.table;
 
-        const query = SQL
-            .select(SQL.wildcard(ticketsTable))
+        const query = SQL.select(SQL.wildcard(ticketsTable))
             .from(SQL.table(ticketsTable))
-            .where(await Promise.resolve(compileToSQLFilter({
-                organizationId: organization.id,
-            }, filterCompilers)))
+            .where(
+                await Promise.resolve(
+                    compileToSQLFilter(
+                        {
+                            organizationId: organization.id,
+                        },
+                        filterCompilers,
+                    ),
+                ),
+            )
             // Restricted in the query itself so tickets of other webshops cannot influence counts or errors
-            .where('webshopId', await GetWebshopTicketsEndpoint.getAccessibleWebshopIds(organization.id));
+            .where(
+                'webshopId',
+                await GetWebshopTicketsEndpoint.getAccessibleWebshopIds(organization.id),
+            );
 
         if (q.filter) {
             query.where(await compileToSQLFilter(q.filter, filterCompilers));
@@ -127,7 +145,7 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -136,8 +154,6 @@ export class GetWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, Res
             maxLimit: Context.auth.hasSomePlatformAccess() ? 1000 : 100,
         });
 
-        return new Response(
-            await GetWebshopTicketsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetWebshopTicketsEndpoint.buildData(request.query));
     }
 }

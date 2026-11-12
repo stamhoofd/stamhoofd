@@ -4,7 +4,10 @@ import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { organizationJoin } from '../sql-filters/event-notifications.js';
 
-export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRow> = new Map<string, SQLSortDefinition<SQLResultNamespacedRow>>([
+export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRow> = new Map<
+    string,
+    SQLSortDefinition<SQLResultNamespacedRow>
+>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -13,85 +16,108 @@ export const eventNotificationsSorters: SQLSortDefinitions<SQLResultNamespacedRo
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    ['id', {
-        getValue(a) {
-            return a['event_notifications'].id;
+    [
+        'id',
+        {
+            getValue(a) {
+                return a['event_notifications'].id;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('id'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction,
-            });
+    ],
+    [
+        'status',
+        {
+            getValue(a) {
+                return a['event_notifications'].status;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('status'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['status', {
-        getValue(a) {
-            return a['event_notifications'].status;
+    ],
+    [
+        'startDate',
+        {
+            getValue(a) {
+                return Formatter.dateTimeIso(a['event_notifications'].startDate as Date, 'UTC');
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('startDate'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('status'),
-                direction,
-            });
+    ],
+    [
+        'endDate',
+        {
+            getValue(a) {
+                return Formatter.dateTimeIso(a['event_notifications'].endDate as Date, 'UTC');
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('endDate'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['startDate', {
-        getValue(a) {
-            return Formatter.dateTimeIso(a['event_notifications'].startDate as Date, 'UTC');
+    ],
+    [
+        'submittedAt',
+        {
+            getValue(a) {
+                return a['event_notifications'].submittedAt !== null
+                    ? Formatter.dateTimeIso(a['event_notifications'].submittedAt as Date, 'UTC')
+                    : null;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('submittedAt'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('startDate'),
-                direction,
-            });
+    ],
+    [
+        'organization.name',
+        {
+            getValue(a) {
+                return a.organizations.name;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('organizations', 'name'),
+                    direction,
+                });
+            },
+            join: organizationJoin,
+            select: [SQL.column('organizations', 'name')],
         },
-    }],
-    ['endDate', {
-        getValue(a) {
-            return Formatter.dateTimeIso(a['event_notifications'].endDate as Date, 'UTC');
+    ],
+    [
+        'organization.uriPadded',
+        {
+            getValue(a) {
+                return (a.organizations.uri as string).padStart(10, '0');
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.lpad(SQL.column('organizations', 'uri'), 10, '0'),
+                    direction,
+                });
+            },
+            join: organizationJoin,
+            select: [SQL.column('organizations', 'uri')],
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('endDate'),
-                direction,
-            });
-        },
-    }],
-    ['submittedAt', {
-        getValue(a) {
-            return a['event_notifications'].submittedAt !== null ? Formatter.dateTimeIso(a['event_notifications'].submittedAt as Date, 'UTC') : null;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('submittedAt'),
-                direction,
-            });
-        },
-    }],
-    ['organization.name', {
-        getValue(a) {
-            return a.organizations.name;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('organizations', 'name'),
-                direction,
-            });
-        },
-        join: organizationJoin,
-        select: [SQL.column('organizations', 'name')],
-    }],
-    ['organization.uriPadded', {
-        getValue(a) {
-            return (a.organizations.uri as string).padStart(10, '0');
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.lpad(SQL.column('organizations', 'uri'), 10, '0'),
-                direction,
-            });
-        },
-        join: organizationJoin,
-        select: [SQL.column('organizations', 'uri')],
-    }],
+    ],
 ]);

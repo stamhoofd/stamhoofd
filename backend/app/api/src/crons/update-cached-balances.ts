@@ -6,21 +6,21 @@ registerTenantCron('updateCachedBalances', updateCachedBalances);
 
 async function updateCachedBalances() {
     // Check if between 3 - 6 AM
-    if ((new Date().getHours() > 6 || new Date().getHours() < 3)) {
+    if (new Date().getHours() > 6 || new Date().getHours() < 3) {
         return;
     }
 
-    const balances = await CachedBalance.select().where(
-        CachedBalance.whereNeedsUpdate(),
-    )
-    /**
-     * Cached balances of member should be updated before the cached balances of the user
-     * because the cached balances of the user are dependent on the cached balances of the member.
-     */
+    const balances = await CachedBalance.select()
+        .where(CachedBalance.whereNeedsUpdate())
+        /**
+         * Cached balances of member should be updated before the cached balances of the user
+         * because the cached balances of the user are dependent on the cached balances of the member.
+         */
         .orderBy('objectType', 'ASC')
-    // minimize the number of queries when updating
+        // minimize the number of queries when updating
         .orderBy('organizationId', 'ASC')
-        .limit(100).fetch();
+        .limit(100)
+        .fetch();
 
     // Group by object type, next by organization id
     const grouped = new Map<ReceivableBalanceType, Map<string, CachedBalance[]>>();
@@ -56,7 +56,7 @@ async function updateCachedBalances() {
 
     for (const [objectType, organizationMap] of objectTypeMemberFirst) {
         for (const [organizationId, balances] of organizationMap) {
-            const ids = balances.map(b => b.objectId);
+            const ids = balances.map((b) => b.objectId);
             console.log('Updating', ids.length, objectType, 'for', organizationId);
             await CachedBalance.updateForObjects(organizationId, ids, objectType);
         }

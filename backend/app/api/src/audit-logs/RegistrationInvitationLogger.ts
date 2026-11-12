@@ -31,16 +31,22 @@ export const RegistrationInvitationLogger = new ModelLogger(RegistrationInvitati
     },
     createReplacements(_, { data }) {
         return new Map([
-            ['m', AuditLogReplacement.create({
-                id: data.member.id,
-                value: data.member.details.name,
-                type: AuditLogReplacementType.Member,
-            })],
-            ['g', AuditLogReplacement.create({
-                id: data.group.id,
-                value: data.group.settings.name.toString(),
-                type: AuditLogReplacementType.Group,
-            })],
+            [
+                'm',
+                AuditLogReplacement.create({
+                    id: data.member.id,
+                    value: data.member.details.name,
+                    type: AuditLogReplacementType.Member,
+                }),
+            ],
+            [
+                'g',
+                AuditLogReplacement.create({
+                    id: data.group.id,
+                    value: data.group.settings.name.toString(),
+                    type: AuditLogReplacementType.Group,
+                }),
+            ],
         ]);
     },
 });

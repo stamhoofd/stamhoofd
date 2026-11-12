@@ -1,5 +1,16 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, PatchableArray, StringDecoder, SymbolDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    PatchableArray,
+    StringDecoder,
+    SymbolDecoder,
+} from '@common/encoding';
 import { DataValidator, Formatter, Sorter, StringCompare } from '@stamhoofd/utility';
 
 import { Language } from '@stamhoofd/types/Language';
@@ -16,7 +27,11 @@ import { Parent } from './Parent.js';
 import type { RecordAnswer } from './records/RecordAnswer.js';
 import { RecordAnswerDecoder, RecordAnswerMapDecoder } from './records/RecordAnswer.js';
 import { ReviewTimes } from './ReviewTime.js';
-import { UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from './UitpasNumberDetails.js';
+import {
+    UitpasNumberDetails,
+    UitpasSocialTariff,
+    UitpasSocialTariffStatus,
+} from './UitpasNumberDetails.js';
 
 /**
  * Keep track of date nad time of an edited boolean value
@@ -37,12 +52,35 @@ export class BooleanStatus extends AutoEncoder {
     }
 
     getDiffValue() {
-        return this.value ? AuditLogReplacement.key('checked') : AuditLogReplacement.key('unchecked');
+        return this.value
+            ? AuditLogReplacement.key('checked')
+            : AuditLogReplacement.key('unchecked');
     }
 }
 
-export type MemberProperty = 'birthDay' | 'gender' | 'address' | 'parents' | 'emailAddress' | 'phone' | 'emergencyContacts' | 'dataPermission' | 'financialSupport' | 'uitpasNumber' | 'nationalRegisterNumber' | 'parents.nationalRegisterNumber' | 'taxCertificates' | 'parents.isMemberTaxDependent';
-export type MemberPropertyWithFilter = Exclude<MemberProperty, 'dataPermission' | 'financialSupport' | 'taxCertificates' | 'parents.nationalRegisterNumber' | 'parents.isMemberTaxDependent'>;
+export type MemberProperty =
+    | 'birthDay'
+    | 'gender'
+    | 'address'
+    | 'parents'
+    | 'emailAddress'
+    | 'phone'
+    | 'emergencyContacts'
+    | 'dataPermission'
+    | 'financialSupport'
+    | 'uitpasNumber'
+    | 'nationalRegisterNumber'
+    | 'parents.nationalRegisterNumber'
+    | 'taxCertificates'
+    | 'parents.isMemberTaxDependent';
+export type MemberPropertyWithFilter = Exclude<
+    MemberProperty,
+    | 'dataPermission'
+    | 'financialSupport'
+    | 'taxCertificates'
+    | 'parents.nationalRegisterNumber'
+    | 'parents.isMemberTaxDependent'
+>;
 /**
  * This full model is always encrypted before sending it to the server. It is never processed on the server - only in encrypted form.
  * The public key of the member is stored in the member model, the private key is stored in the keychain for the 'owner' users. The organization has a copy that is encrypted with the organization's public key.
@@ -73,7 +111,8 @@ export class MemberDetails extends AutoEncoder {
         decoder: new SymbolDecoder(StringDecoder, NationalRegisterNumberOptOut),
         version: 349,
         nullable: true,
-        downgrade: (n: string | typeof NationalRegisterNumberOptOut | null) => n === NationalRegisterNumberOptOut ? null : n,
+        downgrade: (n: string | typeof NationalRegisterNumberOptOut | null) =>
+            n === NationalRegisterNumberOptOut ? null : n,
     })
     nationalRegisterNumber: string | typeof NationalRegisterNumberOptOut | null;
 
@@ -90,7 +129,11 @@ export class MemberDetails extends AutoEncoder {
     @field({ decoder: DateDecoder, optional: true, nullable: true })
     lastExternalSync?: Date | null;
 
-    @field({ decoder: new EnumDecoder(Gender), defaultValue: () => Gender.Other, isDefaultValue: v => v === Gender.Other })
+    @field({
+        decoder: new EnumDecoder(Gender),
+        defaultValue: () => Gender.Other,
+        isDefaultValue: (v) => v === Gender.Other,
+    })
     gender: Gender;
 
     @field({ decoder: StringDecoder, nullable: true })
@@ -148,7 +191,12 @@ export class MemberDetails extends AutoEncoder {
     uitpasNumberDetails: UitpasNumberDetails | null;
 
     @field({ decoder: DateDecoder })
-    @field({ decoder: DateDecoder, nullable: true, version: 52, downgrade: (old: Date | null) => old ?? new Date('1970-01-01') })
+    @field({
+        decoder: DateDecoder,
+        nullable: true,
+        version: 52,
+        downgrade: (old: Date | null) => old ?? new Date('1970-01-01'),
+    })
     birthDay: Date | null;
 
     @field({ decoder: IntegerDecoder, nullable: true, version: 352 })
@@ -183,7 +231,7 @@ export class MemberDetails extends AutoEncoder {
         version: 258,
         optional: false,
         nullable: true,
-        downgrade: (newValue: BooleanStatus | null) => newValue === null ? undefined : newValue,
+        downgrade: (newValue: BooleanStatus | null) => (newValue === null ? undefined : newValue),
         upgrade: (oldValue: BooleanStatus | undefined) => {
             if (!oldValue) {
                 return null;
@@ -209,7 +257,7 @@ export class MemberDetails extends AutoEncoder {
         decoder: BooleanStatus,
         version: 256,
         nullable: true,
-        downgrade: (newValue: BooleanStatus | null) => newValue === null ? undefined : newValue,
+        downgrade: (newValue: BooleanStatus | null) => (newValue === null ? undefined : newValue),
         upgrade: (oldValue: BooleanStatus | undefined) => {
             if (!oldValue) {
                 return null;
@@ -225,7 +273,7 @@ export class MemberDetails extends AutoEncoder {
     @field({
         decoder: ReviewTimes,
         defaultValue: () => ReviewTimes.create({}),
-        isDefaultValue: v => !!v && ReviewTimes.isDefaultValue(v as AutoEncoder),
+        isDefaultValue: (v) => !!v && ReviewTimes.isDefaultValue(v as AutoEncoder),
     })
     reviewTimes: ReviewTimes;
 
@@ -244,13 +292,19 @@ export class MemberDetails extends AutoEncoder {
      */
     cleanData() {
         if (StringCompare.isFullCaps(this.firstName)) {
-            this.firstName = Formatter.capitalizeWords(Formatter.removeDuplicateSpaces(this.firstName.toLowerCase()));
+            this.firstName = Formatter.capitalizeWords(
+                Formatter.removeDuplicateSpaces(this.firstName.toLowerCase()),
+            );
         }
         if (StringCompare.isFullCaps(this.lastName)) {
-            this.lastName = Formatter.capitalizeWords(Formatter.removeDuplicateSpaces(this.lastName.toLowerCase()));
+            this.lastName = Formatter.capitalizeWords(
+                Formatter.removeDuplicateSpaces(this.lastName.toLowerCase()),
+            );
         }
 
-        this.firstName = Formatter.capitalizeFirstLetter(Formatter.removeDuplicateSpaces(this.firstName.trim()));
+        this.firstName = Formatter.capitalizeFirstLetter(
+            Formatter.removeDuplicateSpaces(this.firstName.trim()),
+        );
         this.lastName = Formatter.removeDuplicateSpaces(this.lastName.trim());
 
         if (this.lastName === this.lastName.toLocaleLowerCase()) {
@@ -287,7 +341,7 @@ export class MemberDetails extends AutoEncoder {
 
         const filterUsedAndInvalidEmails = (emails: string[], checkAlternative = true) =>
             emails
-                .map(e => e.toLowerCase().trim())
+                .map((e) => e.toLowerCase().trim())
                 .filter((email) => {
                     if (checkAlternative) {
                         if (this.hasEmail(email)) {
@@ -329,9 +383,14 @@ export class MemberDetails extends AutoEncoder {
 
         // #region unverified data
         if (this.hasUnverifiedData) {
-            const lastReviewed = this.reviewTimes.getLastReview('parents') && this.reviewTimes.getLastReview('details');
+            const lastReviewed =
+                this.reviewTimes.getLastReview('parents') &&
+                this.reviewTimes.getLastReview('details');
 
-            if (lastReviewed && lastReviewed > new Date((new Date().getTime() - 1000 * 60 * 60 * 24))) {
+            if (
+                lastReviewed &&
+                lastReviewed > new Date(new Date().getTime() - 1000 * 60 * 60 * 24)
+            ) {
                 // clear unverified data only if reviewed today
                 this.unverifiedAddresses = [];
                 this.unverifiedEmails = [];
@@ -341,19 +400,24 @@ export class MemberDetails extends AutoEncoder {
                 const usedAddressIds = new Set<string>();
                 if (this.unverifiedAddresses.length > 0) {
                     const memberAddressId = this.address?.id;
-                    const parentAddressIds = this.parents.filter(parent => parent.address).map(parent => parent.address!.id);
+                    const parentAddressIds = this.parents
+                        .filter((parent) => parent.address)
+                        .map((parent) => parent.address!.id);
 
                     for (const unverifiedAddress of this.unverifiedAddresses) {
                         unverifiedAddress.cleanData();
                         const addressId = unverifiedAddress.id;
-                        const isUsed = addressId === memberAddressId || parentAddressIds.includes(addressId);
+                        const isUsed =
+                            addressId === memberAddressId || parentAddressIds.includes(addressId);
                         if (isUsed) {
                             usedAddressIds.add(addressId);
                         }
                     }
 
                     if (usedAddressIds.size > 0) {
-                        this.unverifiedAddresses = this.unverifiedAddresses.filter(address => !usedAddressIds.has(address.id));
+                        this.unverifiedAddresses = this.unverifiedAddresses.filter(
+                            (address) => !usedAddressIds.has(address.id),
+                        );
                     }
                 }
                 // #endregion
@@ -370,7 +434,7 @@ export class MemberDetails extends AutoEncoder {
                     }
 
                     this.unverifiedPhones = this.unverifiedPhones
-                        .map(phone => Formatter.removeDuplicateSpaces(phone.trim()))
+                        .map((phone) => Formatter.removeDuplicateSpaces(phone.trim()))
                         .filter((unverifiedPhone) => {
                             if (this.phone === unverifiedPhone) return false;
                             if (parentPhones.has(unverifiedPhone)) return false;
@@ -474,7 +538,11 @@ export class MemberDetails extends AutoEncoder {
     }
 
     get hasUnverifiedData() {
-        return this.unverifiedEmails.length > 0 || this.unverifiedAddresses.length > 0 || this.unverifiedPhones.length > 0;
+        return (
+            this.unverifiedEmails.length > 0 ||
+            this.unverifiedAddresses.length > 0 ||
+            this.unverifiedPhones.length > 0
+        );
     }
 
     get didSetManualFinancialSupport(): boolean {
@@ -490,7 +558,7 @@ export class MemberDetails extends AutoEncoder {
     }
 
     get missingData(): (MemberProperty | 'secondParent')[] {
-        const missing: (MemberProperty | 'secondParent') [] = [];
+        const missing: (MemberProperty | 'secondParent')[] = [];
         if (!this.birthDay) {
             missing.push('birthDay');
         }
@@ -530,14 +598,17 @@ export class MemberDetails extends AutoEncoder {
 
     getMatchingError(group: Group): { message: string; description: string } | null {
         if (group.settings.minAge || group.settings.maxAge) {
-            const age = this.trackedAgeForYear(Formatter.luxon(group.settings.startDate ?? new Date()).year);
+            const age = this.trackedAgeForYear(
+                Formatter.luxon(group.settings.startDate ?? new Date()).year,
+            );
             if (age) {
                 if (group.settings.minAge && age < group.settings.minAge) {
                     return {
                         message: $t('%qX'),
                         description: $t('%15K', {
-                            'firstName': this.firstName,
-                            'born-in-after-1995': group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
+                            firstName: this.firstName,
+                            'born-in-after-1995':
+                                group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
                         }),
                     };
                 }
@@ -546,18 +617,28 @@ export class MemberDetails extends AutoEncoder {
                     return {
                         message: $t('%qY'),
                         description: $t('%a0A', {
-                            'firstName': this.firstName,
-                            'born-in-after-1995': group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
+                            firstName: this.firstName,
+                            'born-in-after-1995':
+                                group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
                         }),
                     };
                 }
             }
         }
 
-        if ((this.gender === Gender.Male && group.settings.genderType === GroupGenderType.OnlyFemale) || (this.gender === Gender.Female && group.settings.genderType === GroupGenderType.OnlyMale)) {
+        if (
+            (this.gender === Gender.Male &&
+                group.settings.genderType === GroupGenderType.OnlyFemale) ||
+            (this.gender === Gender.Female &&
+                group.settings.genderType === GroupGenderType.OnlyMale)
+        ) {
             return {
-                message: $t('%15I', { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
-                description: $t('%15J', { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
+                message: $t('%15I', {
+                    gender: group.settings.getAgeGenderDescription({ includeGender: true })!,
+                }),
+                description: $t('%15J', {
+                    gender: group.settings.getAgeGenderDescription({ includeGender: true })!,
+                }),
             };
         }
 
@@ -565,7 +646,7 @@ export class MemberDetails extends AutoEncoder {
     }
 
     getMatchingGroups(groups: Group[]) {
-        return groups.filter(g => this.doesMatchGroup(g));
+        return groups.filter((g) => this.doesMatchGroup(g));
     }
 
     updateAddress(oldValue: Address, newValue: Address) {
@@ -582,7 +663,10 @@ export class MemberDetails extends AutoEncoder {
         }
     }
 
-    updateAddressPatch(oldValue: Address, newValue: Address): AutoEncoderPatchType<MemberDetails> | null {
+    updateAddressPatch(
+        oldValue: Address,
+        newValue: Address,
+    ): AutoEncoderPatchType<MemberDetails> | null {
         if (newValue.toString() === oldValue.toString()) {
             return null;
         }
@@ -724,15 +808,25 @@ export class MemberDetails extends AutoEncoder {
 
         this.reviewTimes.merge(other.reviewTimes);
 
-        if (other.requiresFinancialSupport && (!this.requiresFinancialSupport || this.requiresFinancialSupport.date < other.requiresFinancialSupport.date)) {
+        if (
+            other.requiresFinancialSupport &&
+            (!this.requiresFinancialSupport ||
+                this.requiresFinancialSupport.date < other.requiresFinancialSupport.date)
+        ) {
             this.requiresFinancialSupport = other.requiresFinancialSupport;
         }
 
-        if ((other.uitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0) >= (this.uitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0)) {
+        if (
+            (other.uitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0) >=
+            (this.uitpasNumberDetails?.socialTariff?.updatedAt.getTime() ?? 0)
+        ) {
             this.uitpasNumberDetails = other.uitpasNumberDetails;
         }
 
-        if (other.dataPermissions && (!this.dataPermissions || this.dataPermissions.date < other.dataPermissions.date)) {
+        if (
+            other.dataPermissions &&
+            (!this.dataPermissions || this.dataPermissions.date < other.dataPermissions.date)
+        ) {
             this.dataPermissions = other.dataPermissions;
         }
 
@@ -752,19 +846,23 @@ export class MemberDetails extends AutoEncoder {
         this.recordAnswers = newAnswers;
 
         // Merge unverified data
-        this.unverifiedEmails = Formatter.uniqueArray(this.unverifiedEmails.concat(other.unverifiedEmails));
-        this.unverifiedPhones = Formatter.uniqueArray(this.unverifiedPhones.concat(other.unverifiedPhones));
+        this.unverifiedEmails = Formatter.uniqueArray(
+            this.unverifiedEmails.concat(other.unverifiedEmails),
+        );
+        this.unverifiedPhones = Formatter.uniqueArray(
+            this.unverifiedPhones.concat(other.unverifiedPhones),
+        );
 
         // Merge unverified addresses
         for (const address of other.unverifiedAddresses) {
-            if (!this.unverifiedAddresses.find(a => a.id === address.id)) {
+            if (!this.unverifiedAddresses.find((a) => a.id === address.id)) {
                 this.unverifiedAddresses.push(address);
             }
         }
 
         // Notes
         if (other.notes) {
-            this.notes = (this.notes ? (this.notes + '\n') : '') + other.notes;
+            this.notes = (this.notes ? this.notes + '\n' : '') + other.notes;
         }
     }
 
@@ -792,7 +890,7 @@ export class MemberDetails extends AutoEncoder {
     }
 
     getParentEmails() {
-        return this.parents.flatMap(p => p.getEmails());
+        return this.parents.flatMap((p) => p.getEmails());
     }
 
     getNotificationEmails() {
@@ -840,7 +938,10 @@ export class MemberDetails extends AutoEncoder {
 
     hasEmail(email: string) {
         const cleanedEmail = email.toLowerCase().trim();
-        return this.getMemberEmails().includes(cleanedEmail) || this.getParentEmails().includes(cleanedEmail);
+        return (
+            this.getMemberEmails().includes(cleanedEmail) ||
+            this.getParentEmails().includes(cleanedEmail)
+        );
     }
 
     hasUnverifiedEmail(email: string) {
@@ -856,13 +957,13 @@ export class MemberDetails extends AutoEncoder {
         }
 
         for (const parent of this.parents) {
-            if (parent.address && !addresses.find(a => a.id === parent.address!.id)) {
+            if (parent.address && !addresses.find((a) => a.id === parent.address!.id)) {
                 addresses.push(parent.address);
             }
         }
 
         for (const address of this.unverifiedAddresses) {
-            if (!addresses.find(a => a.id === address.id)) {
+            if (!addresses.find((a) => a.id === address.id)) {
                 addresses.push(address);
             }
         }
@@ -878,9 +979,19 @@ export class MemberDetails extends AutoEncoder {
         return MemberDetails.mergeRelations(members, 'emergencyContacts', allowOverrides);
     }
 
-    private static mergeRelations(members: MemberDetails[], type: 'parents' | 'emergencyContacts', allowOverrides = true) {
+    private static mergeRelations(
+        members: MemberDetails[],
+        type: 'parents' | 'emergencyContacts',
+        allowOverrides = true,
+    ) {
         type T = Parent | EmergencyContact;
-        type RelationGroup = { member: MemberDetails; object: T; reviewDate?: Date; createdAt: Date; setObject: (object: T) => void }[];
+        type RelationGroup = {
+            member: MemberDetails;
+            object: T;
+            reviewDate?: Date;
+            createdAt: Date;
+            setObject: (object: T) => void;
+        }[];
 
         const allGroups: RelationGroup[] = [];
         const parentsGroupByName: Map<string, RelationGroup> = new Map();
@@ -912,14 +1023,19 @@ export class MemberDetails extends AutoEncoder {
                     member,
                     object: object,
                     setObject(mergedObject: T) {
-                        const currentIndex = member[type].findIndex(current => current === object);
+                        const currentIndex = member[type].findIndex(
+                            (current) => current === object,
+                        );
                         if (currentIndex === -1) {
                             return;
                         }
 
                         member[type][currentIndex] = mergedObject.clone();
                     },
-                    reviewDate: object.updatedAt ?? member.reviewTimes.getLastReview(type) ?? object.createdAt,
+                    reviewDate:
+                        object.updatedAt ??
+                        member.reviewTimes.getLastReview(type) ??
+                        object.createdAt,
                     createdAt: object.createdAt,
                 });
             }
@@ -930,19 +1046,21 @@ export class MemberDetails extends AutoEncoder {
             if (parents.length >= 2) {
                 // Fetch parent with oldest createdAt
                 // This is so we can keep the oldest createdAt and oldest id
-                parents.sort((a, b) => Sorter.byDateValue(
-                    b.createdAt,
-                    a.createdAt,
-                ));
+                parents.sort((a, b) => Sorter.byDateValue(b.createdAt, a.createdAt));
                 const oldestParent = parents[0].object;
 
                 // Sort from oldest reviewed to latest reviewed
-                parents.sort((a, b) => Sorter.byDateValue(b.reviewDate ?? new Date(0), a.reviewDate ?? new Date(0)));
+                parents.sort((a, b) =>
+                    Sorter.byDateValue(b.reviewDate ?? new Date(0), a.reviewDate ?? new Date(0)),
+                );
 
                 const latestTaxDependentByMember = new Map<MemberDetails, boolean | null>();
                 if (type === 'parents') {
                     for (const { member, object } of parents) {
-                        latestTaxDependentByMember.set(member, (object as Parent).isMemberTaxDependent);
+                        latestTaxDependentByMember.set(
+                            member,
+                            (object as Parent).isMemberTaxDependent,
+                        );
                     }
                 }
 
@@ -987,12 +1105,12 @@ export class MemberDetails extends AutoEncoder {
 
                 // Remove duplicate parents by id for each member
                 for (const member of members) {
-                    member[type] = member[type].filter((p, i, self) =>
-                        self.findIndex(p2 => p2.id === p.id) === i,
+                    member[type] = member[type].filter(
+                        (p, i, self) => self.findIndex((p2) => p2.id === p.id) === i,
                     ) as any;
 
                     if (type === 'parents' && latestTaxDependentByMember.has(member)) {
-                        const parent = member.parents.find(parent => parent.id === mergeTo.id);
+                        const parent = member.parents.find((parent) => parent.id === mergeTo.id);
                         if (parent) {
                             parent.isMemberTaxDependent = latestTaxDependentByMember.get(member)!;
                         }

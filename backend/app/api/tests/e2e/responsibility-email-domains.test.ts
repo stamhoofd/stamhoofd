@@ -1,8 +1,23 @@
 import { Request } from '@node/endpoints';
 import type { Organization } from '@stamhoofd/models';
-import { MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, User, UserFactory } from '@stamhoofd/models';
+import {
+    MemberFactory,
+    MemberResponsibilityRecordFactory,
+    OrganizationFactory,
+    Platform,
+    User,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { MemberDetails, MemberResponsibility, OrganizationAdmins, PermissionRoleForResponsibility, PlatformConfig, Platform as PlatformStruct, Version } from '@stamhoofd/structures';
+import {
+    MemberDetails,
+    MemberResponsibility,
+    OrganizationAdmins,
+    PermissionRoleForResponsibility,
+    PlatformConfig,
+    Platform as PlatformStruct,
+    Version,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -69,7 +84,9 @@ describe('E2E.ResponsibilityEmailDomains', () => {
     afterEach(async () => {
         // The platform row is shared by every test file
         const platform = await Platform.getForEditing();
-        platform.config.responsibilities = platform.config.responsibilities.filter(r => r.id !== responsibility.id);
+        platform.config.responsibilities = platform.config.responsibilities.filter(
+            (r) => r.id !== responsibility.id,
+        );
         platform.config.responsibilityEmailDomains = [];
         await platform.save();
     });
@@ -80,7 +97,13 @@ describe('E2E.ResponsibilityEmailDomains', () => {
         await platform.save();
     }
 
-    async function request(user: User, method: 'GET' | 'PATCH', path: string, body?: any, host?: string) {
+    async function request(
+        user: User,
+        method: 'GET' | 'PATCH',
+        path: string,
+        body?: any,
+        host?: string,
+    ) {
         const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
         const request = Request.buildJson(method, `/v${Version}${path}`, host, body);
         request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -92,7 +115,10 @@ describe('E2E.ResponsibilityEmailDomains', () => {
     }
 
     async function getPlatformAdmins(user: User) {
-        return await testServer.test(getPlatformAdminsEndpoint, await request(user, 'GET', '/platform/admins'));
+        return await testServer.test(
+            getPlatformAdminsEndpoint,
+            await request(user, 'GET', '/platform/admins'),
+        );
     }
 
     async function patchPlatformDomains(user: User, domains: string[]) {
@@ -101,16 +127,32 @@ describe('E2E.ResponsibilityEmailDomains', () => {
                 responsibilityEmailDomains: domains as any,
             }),
         });
-        return await testServer.test(patchPlatformEndpoint, await request(user, 'PATCH', '/platform', patch));
+        return await testServer.test(
+            patchPlatformEndpoint,
+            await request(user, 'PATCH', '/platform', patch),
+        );
     }
 
     async function getOrganizationAdmins(user: User) {
-        return await testServer.test(getOrganizationAdminsEndpoint, await request(user, 'GET', '/organization/admins', undefined, organization.getApiHost()));
+        return await testServer.test(
+            getOrganizationAdminsEndpoint,
+            await request(
+                user,
+                'GET',
+                '/organization/admins',
+                undefined,
+                organization.getApiHost(),
+            ),
+        );
     }
 
     test('the responsibility is linked to both users', async () => {
         for (const user of [allowed, other]) {
-            expect(user.permissions?.globalPermissions?.responsibilities.map(r => r.responsibilityId)).toEqual([responsibility.id]);
+            expect(
+                user.permissions?.globalPermissions?.responsibilities.map(
+                    (r) => r.responsibilityId,
+                ),
+            ).toEqual([responsibility.id]);
         }
     });
 
@@ -127,14 +169,20 @@ describe('E2E.ResponsibilityEmailDomains', () => {
     test('only the whitelisted user can list the platform admins', async () => {
         const response = await getPlatformAdmins(allowed);
         expect(response.body).toBeInstanceOf(OrganizationAdmins);
-        expect(response.body.users.map(u => u.id)).toEqual(expect.arrayContaining([allowed.id]));
+        expect(response.body.users.map((u) => u.id)).toEqual(expect.arrayContaining([allowed.id]));
 
-        await expect(getPlatformAdmins(other)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(getPlatformAdmins(other)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     test('only the whitelisted user can change the platform settings', async () => {
-        await expect(patchPlatformDomains(other, ['ksa.be', 'fos.be'])).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
-        expect((await Platform.getForEditing()).config.responsibilityEmailDomains).toEqual(['ksa.be']);
+        await expect(patchPlatformDomains(other, ['ksa.be', 'fos.be'])).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
+        expect((await Platform.getForEditing()).config.responsibilityEmailDomains).toEqual([
+            'ksa.be',
+        ]);
 
         const response = await patchPlatformDomains(allowed, ['ksa.be', 'fos.be']);
         expect(response.body.config.responsibilityEmailDomains).toEqual(['ksa.be', 'fos.be']);
@@ -144,11 +192,15 @@ describe('E2E.ResponsibilityEmailDomains', () => {
         const response = await getOrganizationAdmins(allowed);
         expect(response.body).toBeInstanceOf(OrganizationAdmins);
 
-        await expect(getOrganizationAdmins(other)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(getOrganizationAdmins(other)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     test('changing the whitelist applies immediately without resyncing users', async () => {
-        await expect(getPlatformAdmins(other)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(getPlatformAdmins(other)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
 
         await setDomains(['ksa.be', 'gmail.com']);
         expect((await getPlatformAdmins(other)).body).toBeInstanceOf(OrganizationAdmins);
@@ -159,7 +211,11 @@ describe('E2E.ResponsibilityEmailDomains', () => {
 
         // Only a subdomain: the exact domain is required
         await setDomains(['mail.gmail.com']);
-        await expect(getPlatformAdmins(other)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
-        await expect(getPlatformAdmins(allowed)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(getPlatformAdmins(other)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
+        await expect(getPlatformAdmins(allowed)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 });

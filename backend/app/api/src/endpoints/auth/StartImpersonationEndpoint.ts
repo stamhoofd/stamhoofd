@@ -50,8 +50,6 @@ export class StartImpersonationEndpoint extends Endpoint<Params, Query, Body, Re
             });
         }
 
-        return new Response(
-            await ImpersonationService.createTicket(impersonatedUser),
-        );
+        return new Response(await ImpersonationService.createTicket(impersonatedUser));
     }
 }

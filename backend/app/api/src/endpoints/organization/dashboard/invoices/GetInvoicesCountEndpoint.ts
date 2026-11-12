@@ -32,8 +32,7 @@ export class GetInvoicesCountEndpoint extends Endpoint<Params, Query, Body, Resp
         await Context.authenticate();
         const query = await GetInvoicesEndpoint.buildQuery(request.query);
 
-        const count = await query
-            .count();
+        const count = await query.count();
 
         return new Response(
             CountResponse.create({

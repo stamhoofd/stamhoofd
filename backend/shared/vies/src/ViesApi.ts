@@ -28,12 +28,21 @@ export class ViesApiStatic {
     }
 
     async checkVATNumber(country: Country, vatNumber: string): Promise<boolean> {
-        const { data, response } = await this.request('POST', 'https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number', {
-            countryCode: country,
-            vatNumber: vatNumber.substring(2),
-        });
+        const { data, response } = await this.request(
+            'POST',
+            'https://ec.europa.eu/taxation_customs/vies/rest-api/check-vat-number',
+            {
+                countryCode: country,
+                vatNumber: vatNumber.substring(2),
+            },
+        );
 
-        if (typeof data !== 'object' || data === null || !('valid' in data) || typeof data.valid !== 'boolean') {
+        if (
+            typeof data !== 'object' ||
+            data === null ||
+            !('valid' in data) ||
+            typeof data.valid !== 'boolean'
+        ) {
             console.error('VIES error', response.status, response.statusText, data);
             throw new Error('Invalid response from VIES');
         }

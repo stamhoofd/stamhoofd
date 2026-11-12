@@ -7,14 +7,20 @@ import type { SortList } from '@stamhoofd/filters/SortList';
 import { SortItemDirection } from '@stamhoofd/filters/SortList';
 
 export type InMemorySorter<T> = (a: T, b: T) => number;
-export type InMemorySortDefinition<T, B extends PlainObject = PlainObject> = SortDefinition<T, B> & {
+export type InMemorySortDefinition<T, B extends PlainObject = PlainObject> = SortDefinition<
+    T,
+    B
+> & {
     sort: InMemorySorter<T>;
 };
 
 /** Exact-key in-memory sorter registry, shared with cursor pagination. */
 export type InMemorySortDefinitions<T> = Map<string, InMemorySortDefinition<T>>;
 
-export function compileToInMemorySorter<T>(sortBy: SortList, definitions: InMemorySortDefinitions<T>): InMemorySorter<T> {
+export function compileToInMemorySorter<T>(
+    sortBy: SortList,
+    definitions: InMemorySortDefinitions<T>,
+): InMemorySorter<T> {
     const sorters: InMemorySorter<T>[] = [];
     for (const s of sortBy) {
         const d = definitions.get(s.key);
@@ -36,50 +42,68 @@ export function compileToInMemorySorter<T>(sortBy: SortList, definitions: InMemo
     }
 
     return (a, b) => {
-        return Sorter.stack(...sorters.map(s => s(a, b)));
+        return Sorter.stack(...sorters.map((s) => s(a, b)));
     };
 }
 
 // EXAMPLE (should move)
-export const memberInMemorySorters: InMemorySortDefinitions<MemberSummary> = new Map<string, InMemorySortDefinition<MemberSummary>>([
-    ['id', {
-        getValue(a) {
-            return a.id;
+export const memberInMemorySorters: InMemorySortDefinitions<MemberSummary> = new Map<
+    string,
+    InMemorySortDefinition<MemberSummary>
+>([
+    [
+        'id',
+        {
+            getValue(a) {
+                return a.id;
+            },
+            sort: (a, b) => {
+                return Sorter.byStringValue(a.id, b.id);
+            },
         },
-        sort: (a, b) => {
-            return Sorter.byStringValue(a.id, b.id);
+    ],
+    [
+        'name',
+        {
+            getValue(a) {
+                return a.name;
+            },
+            sort: (a, b) => {
+                return Sorter.byStringValue(a.name, b.name);
+            },
         },
-    }],
-    ['name', {
-        getValue(a) {
-            return a.name;
+    ],
+    [
+        'birthDay',
+        {
+            getValue(a) {
+                return a.birthDay?.getTime() ?? 0;
+            },
+            sort: (a, b) => {
+                return Sorter.byNumberValue(b.birthDay?.getTime() ?? 0, a.birthDay?.getTime() ?? 0);
+            },
         },
-        sort: (a, b) => {
-            return Sorter.byStringValue(a.name, b.name);
+    ],
+    [
+        'organizationName',
+        {
+            getValue(a) {
+                return a.organizationName;
+            },
+            sort: (a, b) => {
+                return Sorter.byStringValue(b.organizationName, a.organizationName);
+            },
         },
-    }],
-    ['birthDay', {
-        getValue(a) {
-            return a.birthDay?.getTime() ?? 0;
+    ],
+    [
+        'email',
+        {
+            getValue(a) {
+                return a.email;
+            },
+            sort: (a, b) => {
+                return Sorter.byStringValue(b.email ?? '', a.email ?? '');
+            },
         },
-        sort: (a, b) => {
-            return Sorter.byNumberValue(b.birthDay?.getTime() ?? 0, a.birthDay?.getTime() ?? 0);
-        },
-    }],
-    ['organizationName', {
-        getValue(a) {
-            return a.organizationName;
-        },
-        sort: (a, b) => {
-            return Sorter.byStringValue(b.organizationName, a.organizationName);
-        },
-    }],
-    ['email', {
-        getValue(a) {
-            return a.email;
-        },
-        sort: (a, b) => {
-            return Sorter.byStringValue(b.email ?? '', a.email ?? '');
-        },
-    }],
+    ],
 ]);

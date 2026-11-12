@@ -1,4 +1,13 @@
-import { AuditLogReplacement, AuditLogReplacementDependencies, AuditLogReplacementType, EventNotificationStatus, PaymentStatus, getAuditLogPatchKeyName, getRegisteredAuditLogEnums, registerAuditLogEnum } from '#/index.ts';
+import {
+    AuditLogReplacement,
+    AuditLogReplacementDependencies,
+    AuditLogReplacementType,
+    EventNotificationStatus,
+    PaymentStatus,
+    getAuditLogPatchKeyName,
+    getRegisteredAuditLogEnums,
+    registerAuditLogEnum,
+} from '#/index.ts';
 
 enum TestAuditLogStatus {
     Pending = 'Pending',
@@ -6,7 +15,10 @@ enum TestAuditLogStatus {
 
 describe('AuditLogReplacement', () => {
     test('It renders typed enum replacements without conflicts', () => {
-        const eventNotificationStatus = AuditLogReplacement.enum('EventNotificationStatus', EventNotificationStatus.Pending);
+        const eventNotificationStatus = AuditLogReplacement.enum(
+            'EventNotificationStatus',
+            EventNotificationStatus.Pending,
+        );
         const paymentStatus = AuditLogReplacement.enum('PaymentStatus', PaymentStatus.Pending);
 
         expect(eventNotificationStatus?.toString()).toBe('%B0');
@@ -14,7 +26,11 @@ describe('AuditLogReplacement', () => {
     });
 
     test('It registers typed enum helpers for legacy enum replacements', () => {
-        expect(getRegisteredAuditLogEnums().map(({ type }) => type).sort()).toEqual([
+        expect(
+            getRegisteredAuditLogEnums()
+                .map(({ type }) => type)
+                .sort(),
+        ).toEqual([
             'AccessRight',
             'BalanceItemRelationType',
             'BalanceItemStatus',
@@ -40,23 +56,37 @@ describe('AuditLogReplacement', () => {
         ]);
 
         expect(getAuditLogPatchKeyName(PaymentStatus.Pending)).toBe('%mu');
-        expect(AuditLogReplacement.create({ value: PaymentStatus.Pending, type: AuditLogReplacementType.Key }).toString()).toBe('%mu');
+        expect(
+            AuditLogReplacement.create({
+                value: PaymentStatus.Pending,
+                type: AuditLogReplacementType.Key,
+            }).toString(),
+        ).toBe('%mu');
         // EventNotificationStatus, Language, MFAMethodType and the BalanceItem/VAT enums are not registered as legacy enums
-        expect(AuditLogReplacementDependencies.enumHelpers).toHaveLength(getRegisteredAuditLogEnums().length - 7);
-        expect(AuditLogReplacement.enum('EventNotificationStatus', EventNotificationStatus.Accepted)?.toString()).toBe('%B1');
+        expect(AuditLogReplacementDependencies.enumHelpers).toHaveLength(
+            getRegisteredAuditLogEnums().length - 7,
+        );
+        expect(
+            AuditLogReplacement.enum(
+                'EventNotificationStatus',
+                EventNotificationStatus.Accepted,
+            )?.toString(),
+        ).toBe('%B1');
     });
 
     test('It throws when registering duplicate audit log enums', () => {
         const enumHelpersLength = AuditLogReplacementDependencies.enumHelpers.length;
         const legacyEnumsLength = AuditLogReplacementDependencies.legacyEnums.length;
 
-        registerAuditLogEnum('TestAuditLogStatus', TestAuditLogStatus, key => key);
+        registerAuditLogEnum('TestAuditLogStatus', TestAuditLogStatus, (key) => key);
 
-        expect(() => registerAuditLogEnum('TestAuditLogStatus', { Other: 'Other' }, key => key))
-            .toThrow('Audit log enum type is already registered: TestAuditLogStatus');
+        expect(() =>
+            registerAuditLogEnum('TestAuditLogStatus', { Other: 'Other' }, (key) => key),
+        ).toThrow('Audit log enum type is already registered: TestAuditLogStatus');
 
-        expect(() => registerAuditLogEnum('OtherTestAuditLogStatus', TestAuditLogStatus, key => key))
-            .toThrow('Audit log enum object is already registered: TestAuditLogStatus');
+        expect(() =>
+            registerAuditLogEnum('OtherTestAuditLogStatus', TestAuditLogStatus, (key) => key),
+        ).toThrow('Audit log enum object is already registered: TestAuditLogStatus');
 
         AuditLogReplacementDependencies.enumHelpersByType.delete('TestAuditLogStatus');
         AuditLogReplacementDependencies.enumTypes.delete(TestAuditLogStatus);

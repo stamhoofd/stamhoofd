@@ -29,11 +29,15 @@ export class StockReservation extends AutoEncoder {
     }
 
     static filter(type: string, id: string, list: StockReservation[]): StockReservation[] {
-        return list.filter(r => r.objectType === type && r.objectId === id).flatMap(r => r.children);
+        return list
+            .filter((r) => r.objectType === type && r.objectId === id)
+            .flatMap((r) => r.children);
     }
 
     static add(base: StockReservation[], add: StockReservation) {
-        const existingIndex = base.findIndex(r => r.objectType === add.objectType && r.objectId === add.objectId);
+        const existingIndex = base.findIndex(
+            (r) => r.objectType === add.objectType && r.objectId === add.objectId,
+        );
 
         if (existingIndex !== -1) {
             const existing = base[existingIndex];

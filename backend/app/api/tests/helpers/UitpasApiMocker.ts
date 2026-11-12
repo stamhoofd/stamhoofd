@@ -110,8 +110,8 @@ export class UitpasMocker {
 
     start() {
         if (
-            !STAMHOOFD.UITPAS_API_CLIENT_ID
-            || !STAMHOOFD.UITPAS_API_CLIENT_SECRET?.startsWith('sk_test_')
+            !STAMHOOFD.UITPAS_API_CLIENT_ID ||
+            !STAMHOOFD.UITPAS_API_CLIENT_SECRET?.startsWith('sk_test_')
         ) {
             throw new Error(
                 'Invalid UITPAS_API_CLIENT_SECRET. Even in test mode it should start with sk_test_',

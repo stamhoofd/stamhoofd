@@ -8,7 +8,9 @@ import { Context } from '../../../../helpers/Context.js';
  * Filter that limits members to the ones the current user can access, for endpoints that cannot rely
  * on the caller having access to every member. Returns undefined when no scoping is needed.
  */
-export async function getMemberScopeFilter(permissionLevel: PermissionLevel = PermissionLevel.Read): Promise<StamhoofdFilter | undefined> {
+export async function getMemberScopeFilter(
+    permissionLevel: PermissionLevel = PermissionLevel.Read,
+): Promise<StamhoofdFilter | undefined> {
     const organization = Context.organization;
 
     if (!organization) {
@@ -38,7 +40,9 @@ export async function getMemberScopeFilter(permissionLevel: PermissionLevel = Pe
 
     // Grants that cover a whole period or the whole organization never reach archived
     // groups: canAccessGroup only allows those with full access.
-    const groupStateFilter: StamhoofdKeyFilter = await Context.auth.canAccessArchivedGroups(organization.id)
+    const groupStateFilter: StamhoofdKeyFilter = (await Context.auth.canAccessArchivedGroups(
+        organization.id,
+    ))
         ? {}
         : { group: { status: { $neq: GroupStatus.Archived } } };
 
@@ -54,7 +58,10 @@ export async function getMemberScopeFilter(permissionLevel: PermissionLevel = Pe
     }
 
     const filters: StamhoofdFilter[] = [];
-    const canAccessCurrentPeriod = await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel);
+    const canAccessCurrentPeriod = await Context.auth.canAccessAllMembersInCurrentPeriod(
+        organization.id,
+        permissionLevel,
+    );
 
     if (canAccessCurrentPeriod) {
         filters.push({
@@ -71,7 +78,10 @@ export async function getMemberScopeFilter(permissionLevel: PermissionLevel = Pe
     // Check which normal membership groups we have access to and filter on those.
     // These are added next to the current period filter, not instead of it: a role
     // can hold a grant on a group of a period the organization already left.
-    const groups = await Group.getAll(organization.id, null, true, [GroupType.Membership, GroupType.WaitingList]);
+    const groups = await Group.getAll(organization.id, null, true, [
+        GroupType.Membership,
+        GroupType.WaitingList,
+    ]);
     Context.auth.cacheGroups(groups);
     const groupIds: string[] = [];
 

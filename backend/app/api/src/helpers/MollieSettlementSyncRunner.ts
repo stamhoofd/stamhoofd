@@ -2,7 +2,10 @@ import { MollieToken } from '@stamhoofd/models';
 
 import { SettlementService } from '../services/SettlementService.js';
 import { MollieSettlementSync } from './MollieSettlementSync.js';
-import type { ProviderSettlementSyncRunner, ProviderSyncRunOptions } from './ProviderSettlementSyncRunner.js';
+import type {
+    ProviderSettlementSyncRunner,
+    ProviderSyncRunOptions,
+} from './ProviderSettlementSyncRunner.js';
 
 /**
  * Walks every Mollie account: the platform's own account first, then all organization tokens.
@@ -24,7 +27,12 @@ export class MollieSettlementSyncRunner implements ProviderSettlementSyncRunner 
                 // A plain access token without a refresh flow: the future expiry keeps
                 // refreshIfNeeded from attempting one
                 token.expiresOn = new Date(new Date().getTime() + 24 * 60 * 60 * 1000);
-                await new MollieSettlementSync({ token }).syncSettlements({ start, end, summary, abort });
+                await new MollieSettlementSync({ token }).syncSettlements({
+                    start,
+                    end,
+                    summary,
+                    abort,
+                });
             } catch (e) {
                 // An interrupted account is not a failing account
                 abort.throwIfAborted();
@@ -47,7 +55,12 @@ export class MollieSettlementSyncRunner implements ProviderSettlementSyncRunner 
             }
 
             try {
-                await new MollieSettlementSync({ token }).syncSettlements({ start, end, summary, abort });
+                await new MollieSettlementSync({ token }).syncSettlements({
+                    start,
+                    end,
+                    summary,
+                    abort,
+                });
             } catch (e) {
                 abort.throwIfAborted();
 

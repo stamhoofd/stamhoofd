@@ -1,12 +1,42 @@
-import type { AutoEncoderPatchType, Data, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { ArrayDecoder, PatchableArray, PatchableArrayDecoder, StringDecoder } from '@common/encoding';
+import type {
+    AutoEncoderPatchType,
+    Data,
+    Decoder,
+    PatchableArrayAutoEncoder,
+} from '@common/encoding';
+import {
+    ArrayDecoder,
+    PatchableArray,
+    PatchableArrayDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { BalanceItem, BalanceItemPayment, Order, Payment, Webshop, WebshopCounter } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemPayment,
+    Order,
+    Payment,
+    Webshop,
+    WebshopCounter,
+} from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PrivateOrder, TranslatedString, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
+import {
+    AuditLogSource,
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    OrderStatus,
+    PaymentMethod,
+    PaymentStatus,
+    PrivateOrder,
+    TranslatedString,
+    Webshop as WebshopStruct,
+    WebshopTicketType,
+} from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 import { clearOrderReservations } from '../../../../helpers/clearOrderReservations.js';
@@ -15,7 +45,10 @@ import { AuditLogService } from '../../../../services/AuditLogService.js';
 import { BalanceItemService } from '../../../../services/BalanceItemService.js';
 import { OrderService } from '../../../../services/OrderService.js';
 import { PaymentService } from '../../../../services/PaymentService.js';
-import { shouldReserveUitpasNumbers, UitpasService } from '../../../../services/uitpas/UitpasService.js';
+import {
+    shouldReserveUitpasNumbers,
+    UitpasService,
+} from '../../../../services/uitpas/UitpasService.js';
 import { Formatter } from '@stamhoofd/utility';
 
 type Params = { id: string };
@@ -52,7 +85,11 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         new ArrayDecoder(PrivateOrder.patchType() as Decoder<AutoEncoderPatchType<PrivateOrder>>),
         159,
         // After or at version 159, accept a patchable array
-        new PatchableArrayDecoder(PrivateOrder as Decoder<PrivateOrder>, PrivateOrder.patchType() as Decoder<AutoEncoderPatchType<PrivateOrder>>, StringDecoder),
+        new PatchableArrayDecoder(
+            PrivateOrder as Decoder<PrivateOrder>,
+            PrivateOrder.patchType() as Decoder<AutoEncoderPatchType<PrivateOrder>>,
+            StringDecoder,
+        ),
     );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -73,7 +110,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         const { user } = await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -95,285 +132,338 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
         let clearNumbers = false;
 
         // Need to happen in the queue because we are updating the webshop stock
-        const orders = await QueueHandler.schedule('webshop-stock/' + request.params.id, async () => {
-            const webshop = await Webshop.getByID(request.params.id);
-            if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Write)) {
-                throw Context.auth.notFoundOrNoAccess();
-            }
-
-            const orders = body.getPatches().length > 0
-                ? await Order.where({
-                        webshopId: webshop.id,
-                        id: {
-                            sign: 'IN',
-                            value: body.getPatches().map(o => o.id),
-                        },
-                    })
-                : [];
-
-            // We use a getter because we need to have an up to date webshop struct
-            // otherwise we won't validate orders on the latest webshop with the latest stock information
-            const webshopGetter = {
-                get struct() {
-                    return WebshopStruct.create(webshop);
-                },
-            };
-
-            // TODO: handle order creation here
-            for (const put of body.getPuts()) {
-                const struct = put.put;
-                const model = new Order();
-                model.webshopId = webshop.id;
-                model.organizationId = webshop.organizationId;
-                model.status = struct.status;
-                model.data = struct.data;
-
-                // Manually created orders have no customer request language, so use the webshop's
-                // default language for any future emails to this order.
-                model.consumerLanguage = webshop.meta.defaultLanguage ?? organization.language ?? $getLanguage();
-
-                // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
-                // This allows you to revalidate a ticket without needing to generate a new one (e.g. when accidentally canceling an order)
-                // -> the user doesn't need to download the ticket again
-                // + added benefit: we can inform the user that the ticket was canceled, instead of throwing an 'invalid ticket' error
-
-                if (model.status === OrderStatus.Deleted) {
-                    model.data.removePersonalData();
+        const orders = await QueueHandler.schedule(
+            'webshop-stock/' + request.params.id,
+            async () => {
+                const webshop = await Webshop.getByID(request.params.id);
+                if (
+                    !webshop ||
+                    !(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Write))
+                ) {
+                    throw Context.auth.notFoundOrNoAccess();
                 }
 
-                const order = model.setRelation(Order.webshop, webshop.setRelation(Webshop.organization, organization));
+                const orders =
+                    body.getPatches().length > 0
+                        ? await Order.where({
+                              webshopId: webshop.id,
+                              id: {
+                                  sign: 'IN',
+                                  value: body.getPatches().map((o) => o.id),
+                              },
+                          })
+                        : [];
 
-                clearOrderReservations(order.data);
+                // We use a getter because we need to have an up to date webshop struct
+                // otherwise we won't validate orders on the latest webshop with the latest stock information
+                const webshopGetter = {
+                    get struct() {
+                        return WebshopStruct.create(webshop);
+                    },
+                };
 
-                // TODO: validate before updating stock
-                order.data.validate(webshopGetter.struct, organization.meta, request.i18n, true);
-                order.data.cart = await UitpasService.validateCart(organization.id, webshop.id, order.data.cart);
+                // TODO: handle order creation here
+                for (const put of body.getPuts()) {
+                    const struct = put.put;
+                    const model = new Order();
+                    model.webshopId = webshop.id;
+                    model.organizationId = webshop.organizationId;
+                    model.status = struct.status;
+                    model.data = struct.data;
 
-                try {
-                    await order.updateStock(null, true);
-                    const totalPrice = order.data.totalPrice;
+                    // Manually created orders have no customer request language, so use the webshop's
+                    // default language for any future emails to this order.
+                    model.consumerLanguage =
+                        webshop.meta.defaultLanguage ?? organization.language ?? $getLanguage();
 
-                    if (totalPrice === 0) {
-                        // Force unknown payment method
-                        order.data.paymentMethod = PaymentMethod.Unknown;
+                    // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
+                    // This allows you to revalidate a ticket without needing to generate a new one (e.g. when accidentally canceling an order)
+                    // -> the user doesn't need to download the ticket again
+                    // + added benefit: we can inform the user that the ticket was canceled, instead of throwing an 'invalid ticket' error
 
-                        // Mark this order as paid
-                        await OrderService.markPaid(order, null, organization, webshop);
-                        await order.save();
-                    } else {
-                        Context.assertNotImpersonating();
-                        const payment = new Payment();
-                        payment.organizationId = organization.id;
-                        payment.method = struct.data.paymentMethod;
+                    if (model.status === OrderStatus.Deleted) {
+                        model.data.removePersonalData();
+                    }
 
-                        // quick throw to prevent payment from being saved
-                        if (payment.method === PaymentMethod.Transfer) {
-                            // will throw if iban is missing
-                            order.getTransferSettings({ shouldThrowIfNoIban: true });
-                        }
+                    const order = model.setRelation(
+                        Order.webshop,
+                        webshop.setRelation(Webshop.organization, organization),
+                    );
 
-                        payment.status = PaymentStatus.Created;
-                        payment.price = totalPrice;
-                        PaymentService.roundPayment(payment);
-                        payment.paidAt = null;
-                        payment.adminUserId = user.id;
-                        payment.customer = order.data.customer.toPaymentCustomer();
+                    clearOrderReservations(order.data);
 
-                        // Determine the payment provider (always null because no online payments here)
-                        payment.provider = null;
+                    // TODO: validate before updating stock
+                    order.data.validate(
+                        webshopGetter.struct,
+                        organization.meta,
+                        request.i18n,
+                        true,
+                    );
+                    order.data.cart = await UitpasService.validateCart(
+                        organization.id,
+                        webshop.id,
+                        order.data.cart,
+                    );
 
-                        if (!webshop.meta.noServiceFees) {
-                            await ServiceFeeHelper.setServiceFee(
+                    try {
+                        await order.updateStock(null, true);
+                        const totalPrice = order.data.totalPrice;
+
+                        if (totalPrice === 0) {
+                            // Force unknown payment method
+                            order.data.paymentMethod = PaymentMethod.Unknown;
+
+                            // Mark this order as paid
+                            await OrderService.markPaid(order, null, organization, webshop);
+                            await order.save();
+                        } else {
+                            Context.assertNotImpersonating();
+                            const payment = new Payment();
+                            payment.organizationId = organization.id;
+                            payment.method = struct.data.paymentMethod;
+
+                            // quick throw to prevent payment from being saved
+                            if (payment.method === PaymentMethod.Transfer) {
+                                // will throw if iban is missing
+                                order.getTransferSettings({ shouldThrowIfNoIban: true });
+                            }
+
+                            payment.status = PaymentStatus.Created;
+                            payment.price = totalPrice;
+                            PaymentService.roundPayment(payment);
+                            payment.paidAt = null;
+                            payment.adminUserId = user.id;
+                            payment.customer = order.data.customer.toPaymentCustomer();
+
+                            // Determine the payment provider (always null because no online payments here)
+                            payment.provider = null;
+
+                            if (!webshop.meta.noServiceFees) {
+                                await ServiceFeeHelper.setServiceFee(
+                                    payment,
+                                    organization,
+                                    webshop.meta.ticketType === WebshopTicketType.None
+                                        ? 'webshop'
+                                        : 'tickets',
+                                    order.data.cart.items.flatMap((i) =>
+                                        i.calculatedPrices.map((p) => p.discountedPrice),
+                                    ),
+                                );
+                            }
+                            await ServiceFeeHelper.setTransferFee({
                                 payment,
                                 organization,
-                                webshop.meta.ticketType === WebshopTicketType.None ? 'webshop' : 'tickets',
-                                order.data.cart.items.flatMap(i => i.calculatedPrices.map(p => p.discountedPrice)),
+                                stripeAccount: null,
+                            });
+                            await payment.save();
+
+                            order.paymentId = payment.id;
+                            order.setRelation(Order.payment, payment);
+
+                            // Save order because we need the id
+                            await order.save();
+
+                            // Create balance item
+                            const balanceItem = new BalanceItem();
+                            balanceItem.orderId = order.id;
+                            balanceItem.type = BalanceItemType.Order;
+                            balanceItem.unitPrice = totalPrice;
+                            balanceItem.name = webshop.meta.name;
+                            balanceItem.pricePaid = 0;
+                            balanceItem.organizationId = organization.id;
+                            balanceItem.status = BalanceItemStatus.Due;
+                            balanceItem.relations = new Map([
+                                [
+                                    BalanceItemRelationType.Webshop,
+                                    BalanceItemRelation.create({
+                                        id: webshop.id,
+                                        name: new TranslatedString(webshop.meta.name),
+                                    }),
+                                ],
+                            ]);
+                            await balanceItem.save();
+
+                            // Create one balance item payment to pay it in one payment
+                            const balanceItemPayment = new BalanceItemPayment();
+                            balanceItemPayment.balanceItemId = balanceItem.id;
+                            balanceItemPayment.paymentId = payment.id;
+                            balanceItemPayment.organizationId = payment.organizationId;
+                            balanceItemPayment.price = balanceItem.price;
+                            await balanceItemPayment.save();
+
+                            if (payment.method === PaymentMethod.Transfer) {
+                                await OrderService.markValid(order, payment, []);
+                                await payment.save();
+                                await order.save();
+                            } else if (payment.method === PaymentMethod.PointOfSale) {
+                                // Not really paid, but needed to create the tickets if needed
+                                await OrderService.markPaid(order, payment, organization, webshop);
+                                await payment.save();
+                                await order.save();
+                            } else {
+                                throw new Error('Unsupported payment method');
+                            }
+
+                            balanceItem.name = order.generateBalanceDescription(webshop);
+                            await balanceItem.save();
+
+                            // Update the cached pricePending of the balance item, so the unresolved payment is visible
+                            await BalanceItemService.updatePaidAndPending([balanceItem]);
+                        }
+                    } catch (e) {
+                        await order.deleteOrderBecauseOfCreationError();
+                        throw e;
+                    }
+
+                    orders.push(order);
+                }
+
+                for (const patch of body.getPatches()) {
+                    const model = orders.find((p) => p.id === patch.id);
+                    if (!model) {
+                        throw new SimpleError({
+                            code: 'not_found',
+                            message: 'Order with id ' + patch.id + ' does not exist',
+                        });
+                    }
+                    const previousToPay = model.totalToPay;
+                    const previousStatus = model.status;
+
+                    const shouldReserveBefore = shouldReserveUitpasNumbers(model.status);
+
+                    model.status = patch.status ?? model.status;
+
+                    // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
+                    // This allows you to revalidate a ticket without needing to generate a new one (e.g. when accidentally canceling an order)
+                    // -> the user doesn't need to download the ticket again
+                    // + added benefit: we can inform the user that the ticket was canceled, instead of throwing an 'invalid ticket' error
+
+                    const previousData = model.data.clone();
+                    if (patch.data) {
+                        model.data.patchOrPut(patch.data);
+                        if (model.status !== OrderStatus.Deleted) {
+                            const usedCodes = model.data.discountCodes.map((c) => c.code);
+                            const uniqueCodes = Formatter.uniqueArray(usedCodes);
+                            if (uniqueCodes.length !== usedCodes.length) {
+                                // Duplicate code usage is not allowed
+                                throw new SimpleError({
+                                    code: 'duplicate_codes',
+                                    message: 'Duplicate usage of discount codes',
+                                    human: $t('%w7'),
+                                    field: 'cart.discountCodes',
+                                });
+                            }
+
+                            // Make sure all data is up to date and validated (= possible corrections happen here too)
+                            model.data.validate(
+                                webshopGetter.struct,
+                                organization.meta,
+                                request.i18n,
+                                true,
                             );
                         }
-                        await ServiceFeeHelper.setTransferFee({ payment, organization, stripeAccount: null });
-                        await payment.save();
+                    }
 
-                        order.paymentId = payment.id;
-                        order.setRelation(Order.payment, payment);
+                    if (
+                        (patch.data || !shouldReserveBefore) &&
+                        shouldReserveUitpasNumbers(model.status)
+                    ) {
+                        model.data.cart = await UitpasService.validateCart(
+                            organization.id,
+                            webshop.id,
+                            model.data.cart,
+                            model.id,
+                        );
+                    }
 
-                        // Save order because we need the id
-                        await order.save();
+                    if (model.status === OrderStatus.Deleted) {
+                        model.data.removePersonalData();
 
-                        // Create balance item
-                        const balanceItem = new BalanceItem();
-                        balanceItem.orderId = order.id;
-                        balanceItem.type = BalanceItemType.Order;
-                        balanceItem.unitPrice = totalPrice;
-                        balanceItem.name = webshop.meta.name;
-                        balanceItem.pricePaid = 0;
-                        balanceItem.organizationId = organization.id;
-                        balanceItem.status = BalanceItemStatus.Due;
-                        balanceItem.relations = new Map([
-                            [
-                                BalanceItemRelationType.Webshop,
-                                BalanceItemRelation.create({
-                                    id: webshop.id,
-                                    name: new TranslatedString(webshop.meta.name),
-                                }),
-                            ],
-                        ]);
-                        await balanceItem.save();
-
-                        // Create one balance item payment to pay it in one payment
-                        const balanceItemPayment = new BalanceItemPayment();
-                        balanceItemPayment.balanceItemId = balanceItem.id;
-                        balanceItemPayment.paymentId = payment.id;
-                        balanceItemPayment.organizationId = payment.organizationId;
-                        balanceItemPayment.price = balanceItem.price;
-                        await balanceItemPayment.save();
-
-                        if (payment.method === PaymentMethod.Transfer) {
-                            await OrderService.markValid(order, payment, []);
-                            await payment.save();
-                            await order.save();
-                        } else if (payment.method === PaymentMethod.PointOfSale) {
-                            // Not really paid, but needed to create the tickets if needed
-                            await OrderService.markPaid(order, payment, organization, webshop);
-                            await payment.save();
-                            await order.save();
-                        } else {
-                            throw new Error('Unsupported payment method');
+                        if (model.number !== null) {
+                            model.number =
+                                Math.floor(Math.random() * 1000000000000) + 1000000000000;
                         }
-
-                        balanceItem.name = order.generateBalanceDescription(webshop);
-                        await balanceItem.save();
-
-                        // Update the cached pricePending of the balance item, so the unresolved payment is visible
-                        await BalanceItemService.updatePaidAndPending([balanceItem]);
+                        clearNumbers = true;
                     }
-                } catch (e) {
-                    await order.deleteOrderBecauseOfCreationError();
-                    throw e;
-                }
 
-                orders.push(order);
-            }
-
-            for (const patch of body.getPatches()) {
-                const model = orders.find(p => p.id === patch.id);
-                if (!model) {
-                    throw new SimpleError({
-                        code: 'not_found',
-                        message: 'Order with id ' + patch.id + ' does not exist',
-                    });
-                }
-                const previousToPay = model.totalToPay;
-                const previousStatus = model.status;
-
-                const shouldReserveBefore = shouldReserveUitpasNumbers(model.status);
-
-                model.status = patch.status ?? model.status;
-
-                // For now, we don't invalidate tickets, because they will get invalidated at scan time (the order status is checked)
-                // This allows you to revalidate a ticket without needing to generate a new one (e.g. when accidentally canceling an order)
-                // -> the user doesn't need to download the ticket again
-                // + added benefit: we can inform the user that the ticket was canceled, instead of throwing an 'invalid ticket' error
-
-                const previousData = model.data.clone();
-                if (patch.data) {
-                    model.data.patchOrPut(patch.data);
-                    if (model.status !== OrderStatus.Deleted) {
-                        const usedCodes = model.data.discountCodes.map(c => c.code);
-                        const uniqueCodes = Formatter.uniqueArray(usedCodes);
-                        if (uniqueCodes.length !== usedCodes.length) {
-                            // Duplicate code usage is not allowed
-                            throw new SimpleError({
-                                code: 'duplicate_codes',
-                                message: 'Duplicate usage of discount codes',
-                                human: $t('%w7'),
-                                field: 'cart.discountCodes',
-                            });
+                    if (
+                        model.status === OrderStatus.Deleted ||
+                        model.status === OrderStatus.Canceled
+                    ) {
+                        model.markUpdated();
+                        // Cancel payment if still pending
+                        await BalanceItem.deleteForDeletedOrders([model.id]);
+                    } else {
+                        if (
+                            previousStatus === OrderStatus.Canceled ||
+                            previousStatus === OrderStatus.Deleted
+                        ) {
+                            model.markUpdated();
+                            // Undo deletion
+                            await BalanceItem.undoForDeletedOrders([model.id]);
                         }
-
-                        // Make sure all data is up to date and validated (= possible corrections happen here too)
-                        model.data.validate(webshopGetter.struct, organization.meta, request.i18n, true);
                     }
-                }
 
-                if ((patch.data || !shouldReserveBefore) && shouldReserveUitpasNumbers(model.status)) {
-                    model.data.cart = await UitpasService.validateCart(organization.id, webshop.id, model.data.cart, model.id);
-                }
+                    // Update balance item prices for this order if price has changed
+                    if (previousToPay !== model.totalToPay) {
+                        const items = await BalanceItem.where({ orderId: model.id });
+                        if (items.length >= 1) {
+                            model.markUpdated();
 
-                if (model.status === OrderStatus.Deleted) {
-                    model.data.removePersonalData();
+                            const paidItem =
+                                items.find(
+                                    (i) => i.status === BalanceItemStatus.Due && i.pricePaid !== 0,
+                                ) ?? items[0];
 
-                    if (model.number !== null) {
-                        model.number = Math.floor(Math.random() * 1000000000000) + 1000000000000;
-                    }
-                    clearNumbers = true;
-                }
+                            paidItem.unitPrice = model.data.totalPrice;
+                            paidItem.amount = 1;
 
-                if (model.status === OrderStatus.Deleted || model.status === OrderStatus.Canceled) {
-                    model.markUpdated();
-                    // Cancel payment if still pending
-                    await BalanceItem.deleteForDeletedOrders([model.id]);
-                } else {
-                    if (previousStatus === OrderStatus.Canceled || previousStatus === OrderStatus.Deleted) {
-                        model.markUpdated();
-                        // Undo deletion
-                        await BalanceItem.undoForDeletedOrders([model.id]);
-                    }
-                }
+                            if (model.isDue) {
+                                paidItem.status = BalanceItemStatus.Due;
+                            } else {
+                                paidItem.status = BalanceItemStatus.Canceled;
+                            }
+                            paidItem.name = model.generateBalanceDescription(webshop);
+                            await paidItem.save();
 
-                // Update balance item prices for this order if price has changed
-                if (previousToPay !== model.totalToPay) {
-                    const items = await BalanceItem.where({ orderId: model.id });
-                    if (items.length >= 1) {
-                        model.markUpdated();
-
-                        const paidItem = items.find(i => i.status === BalanceItemStatus.Due && i.pricePaid !== 0) ?? items[0];
-
-                        paidItem.unitPrice = model.data.totalPrice;
-                        paidItem.amount = 1;
-
-                        if (model.isDue) {
-                            paidItem.status = BalanceItemStatus.Due;
-                        } else {
-                            paidItem.status = BalanceItemStatus.Canceled;
+                            // Zero out the other items
+                            const otherItems = items.filter((i) => i.id !== paidItem.id);
+                            await BalanceItem.deleteItems(otherItems);
+                        } else if (items.length === 0 && model.totalToPay > 0) {
+                            model.markUpdated();
+                            const balanceItem = new BalanceItem();
+                            balanceItem.orderId = model.id;
+                            balanceItem.unitPrice = model.data.totalPrice;
+                            balanceItem.amount = 1;
+                            balanceItem.status = BalanceItemStatus.Due;
+                            balanceItem.name = model.generateBalanceDescription(webshop);
+                            balanceItem.pricePaid = 0;
+                            balanceItem.organizationId = organization.id;
+                            await balanceItem.save();
                         }
-                        paidItem.name = model.generateBalanceDescription(webshop);
-                        await paidItem.save();
-
-                        // Zero out the other items
-                        const otherItems = items.filter(i => i.id !== paidItem.id);
-                        await BalanceItem.deleteItems(otherItems);
-                    } else if (items.length === 0
-                        && model.totalToPay > 0) {
-                        model.markUpdated();
-                        const balanceItem = new BalanceItem();
-                        balanceItem.orderId = model.id;
-                        balanceItem.unitPrice = model.data.totalPrice;
-                        balanceItem.amount = 1;
-                        balanceItem.status = BalanceItemStatus.Due;
-                        balanceItem.name = model.generateBalanceDescription(webshop);
-                        balanceItem.pricePaid = 0;
-                        balanceItem.organizationId = organization.id;
-                        await balanceItem.save();
                     }
+
+                    await AuditLogService.setContext(
+                        { source: AuditLogSource.System },
+                        async () => {
+                            await model
+                                .setRelation(Order.webshop, webshop)
+                                .updateStock(previousData, true);
+                            await model.setRelation(Order.webshop, webshop).updateTickets();
+                        },
+                    );
+                    await model.save();
                 }
 
-                await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-                    await model.setRelation(Order.webshop, webshop).updateStock(previousData, true);
-                    await model.setRelation(Order.webshop, webshop).updateTickets();
-                });
-                await model.save();
-            }
-
-            const mapped = orders.map(order => order.setRelation(Order.webshop, webshop));
-            return mapped;
-        });
+                const mapped = orders.map((order) => order.setRelation(Order.webshop, webshop));
+                return mapped;
+            },
+        );
 
         if (clearNumbers) {
             await WebshopCounter.resetNumbers(request.params.id);
         }
 
-        return new Response(
-            await Order.getPrivateStructures(orders),
-        );
+        return new Response(await Order.getPrivateStructures(orders));
     }
 }

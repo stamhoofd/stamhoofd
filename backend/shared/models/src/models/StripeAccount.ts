@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
-import { Requirements, StripeBusinessProfile, StripeCompany, StripeMetaAccountDashboardSettings, StripeMetaAccountSettings, StripeMetaData } from '@stamhoofd/structures';
+import {
+    Requirements,
+    StripeBusinessProfile,
+    StripeCompany,
+    StripeMetaAccountDashboardSettings,
+    StripeMetaAccountSettings,
+    StripeMetaData,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -11,7 +18,9 @@ export class StripeAccount extends QueryableModel {
     static table = 'stripe_accounts';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -30,7 +39,8 @@ export class StripeAccount extends QueryableModel {
     status: 'active' | 'deleted' | 'inaccessible' = 'active';
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -42,7 +52,8 @@ export class StripeAccount extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -55,20 +66,34 @@ export class StripeAccount extends QueryableModel {
         this.meta = StripeMetaData.create({
             type: account.type ?? 'express',
             blob: account,
-            business_profile: StripeBusinessProfile.create(!account.business_profile?.name ? { ...account.business_profile, name: '' } : account.business_profile),
+            business_profile: StripeBusinessProfile.create(
+                !account.business_profile?.name
+                    ? { ...account.business_profile, name: '' }
+                    : account.business_profile,
+            ),
             business_type: account.business_type ?? this.meta.business_type ?? null,
-            company: account.company ? StripeCompany.create(account.company) : (this.meta.company ?? null),
+            company: account.company
+                ? StripeCompany.create(account.company)
+                : (this.meta.company ?? null),
             charges_enabled: account.charges_enabled,
             payouts_enabled: account.payouts_enabled,
             details_submitted: account.details_submitted,
-            capabilities: new Map(Object.entries<'active' | 'pending' | 'inactive'>(account.capabilities ?? {})),
+            capabilities: new Map(
+                Object.entries<'active' | 'pending' | 'inactive'>(account.capabilities ?? {}),
+            ),
             requirements: Requirements.create(account.requirements),
             future_requirements: Requirements.create(account.future_requirements),
             settings: StripeMetaAccountSettings.create({
-                dashboard: account.settings?.dashboard ? StripeMetaAccountDashboardSettings.create(account.settings?.dashboard) : undefined,
+                dashboard: account.settings?.dashboard
+                    ? StripeMetaAccountDashboardSettings.create(account.settings?.dashboard)
+                    : undefined,
             }),
-            bank_account_last4: account.external_accounts?.data[0]?.last4 ?? this.meta.bank_account_last4 ?? '',
-            bank_account_bank_name: account.external_accounts?.data[0]?.bank_name ?? this.meta.bank_account_bank_name ?? '',
+            bank_account_last4:
+                account.external_accounts?.data[0]?.last4 ?? this.meta.bank_account_last4 ?? '',
+            bank_account_bank_name:
+                account.external_accounts?.data[0]?.bank_name ??
+                this.meta.bank_account_bank_name ??
+                '',
         });
     }
 }

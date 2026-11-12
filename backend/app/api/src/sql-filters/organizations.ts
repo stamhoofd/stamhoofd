@@ -1,5 +1,20 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, compileToSQLFilter, createColumnFilter, createExistsFilter, SQL, SQLConcat, SQLNow, SQLNull, SQLScalar, SQLValueType, SQLWhereAnd, SQLWhereEqual, SQLWhereOr, SQLWhereSign } from '@stamhoofd/sql';
+import {
+    baseSQLFilterCompilers,
+    compileToSQLFilter,
+    createColumnFilter,
+    createExistsFilter,
+    SQL,
+    SQLConcat,
+    SQLNow,
+    SQLNull,
+    SQLScalar,
+    SQLValueType,
+    SQLWhereAnd,
+    SQLWhereEqual,
+    SQLWhereOr,
+    SQLWhereSign,
+} from '@stamhoofd/sql';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { SetupStepType } from '@stamhoofd/structures';
 import { Context } from '../helpers/Context.js';
@@ -11,71 +26,116 @@ type SQLFilterCompiler = ReturnType<typeof createExistsFilter>;
  */
 const baseOrganizationFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    ['id', createColumnFilter({
-        expression: SQL.column('organizations', 'id'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['uriPadded', createColumnFilter({
-        expression: SQL.lpad(SQL.column('organizations', 'uri'), 10, '0'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['uri', createColumnFilter({
-        expression: SQL.column('organizations', 'uri'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['name', createColumnFilter({
-        expression: SQL.column('organizations', 'name'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['active', createColumnFilter({
-        expression: SQL.column('organizations', 'active'),
-        type: SQLValueType.Boolean,
-        nullable: false,
-    })],
-    ['createdAt', createColumnFilter({
-        expression: SQL.column('organizations', 'createdAt'),
-        type: SQLValueType.Datetime,
-        nullable: false,
-    })],
-    ['street', createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'address'), '$.value.street'),
-        type: SQLValueType.JSONString,
-        nullable: false,
-    })],
-    ['city', createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'address'), '$.value.city'),
-        type: SQLValueType.JSONString,
-        nullable: false,
-    })],
-    ['postalCode', createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'address'), '$.value.postalCode'),
-        type: SQLValueType.JSONString,
-        nullable: false,
-    })],
-    ['country', createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'address'), '$.value.country'),
-        type: SQLValueType.JSONString,
-        nullable: false,
-    })],
-    ['umbrellaOrganization', createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.umbrellaOrganization'),
-        type: SQLValueType.JSONString,
-        nullable: true,
-    })],
-    ['type', createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.type'),
-        type: SQLValueType.JSONString,
-        nullable: false,
-    })],
-    ['tags', createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.tags'),
-        type: SQLValueType.JSONArray,
-        nullable: false,
-    })],
+    [
+        'id',
+        createColumnFilter({
+            expression: SQL.column('organizations', 'id'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'uriPadded',
+        createColumnFilter({
+            expression: SQL.lpad(SQL.column('organizations', 'uri'), 10, '0'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'uri',
+        createColumnFilter({
+            expression: SQL.column('organizations', 'uri'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'name',
+        createColumnFilter({
+            expression: SQL.column('organizations', 'name'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'active',
+        createColumnFilter({
+            expression: SQL.column('organizations', 'active'),
+            type: SQLValueType.Boolean,
+            nullable: false,
+        }),
+    ],
+    [
+        'createdAt',
+        createColumnFilter({
+            expression: SQL.column('organizations', 'createdAt'),
+            type: SQLValueType.Datetime,
+            nullable: false,
+        }),
+    ],
+    [
+        'street',
+        createColumnFilter({
+            expression: SQL.jsonExtract(SQL.column('organizations', 'address'), '$.value.street'),
+            type: SQLValueType.JSONString,
+            nullable: false,
+        }),
+    ],
+    [
+        'city',
+        createColumnFilter({
+            expression: SQL.jsonExtract(SQL.column('organizations', 'address'), '$.value.city'),
+            type: SQLValueType.JSONString,
+            nullable: false,
+        }),
+    ],
+    [
+        'postalCode',
+        createColumnFilter({
+            expression: SQL.jsonExtract(
+                SQL.column('organizations', 'address'),
+                '$.value.postalCode',
+            ),
+            type: SQLValueType.JSONString,
+            nullable: false,
+        }),
+    ],
+    [
+        'country',
+        createColumnFilter({
+            expression: SQL.jsonExtract(SQL.column('organizations', 'address'), '$.value.country'),
+            type: SQLValueType.JSONString,
+            nullable: false,
+        }),
+    ],
+    [
+        'umbrellaOrganization',
+        createColumnFilter({
+            expression: SQL.jsonExtract(
+                SQL.column('organizations', 'meta'),
+                '$.value.umbrellaOrganization',
+            ),
+            type: SQLValueType.JSONString,
+            nullable: true,
+        }),
+    ],
+    [
+        'type',
+        createColumnFilter({
+            expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.type'),
+            type: SQLValueType.JSONString,
+            nullable: false,
+        }),
+    ],
+    [
+        'tags',
+        createColumnFilter({
+            expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.tags'),
+            type: SQLValueType.JSONArray,
+            nullable: false,
+        }),
+    ],
 ]);
 
 /**
@@ -114,271 +174,382 @@ function platformOnly(compiler: SQLFilterCompiler): SQLFilterCompiler {
 
 export const organizationFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseOrganizationFilterCompilers,
-    ['packages', platformOnly(createExistsFilter(
-        SQL.select()
-            .from(SQL.table('stamhoofd_packages'))
-            .where(
-                SQL.column('organizationId'),
-                SQL.column('organizations', 'id'),
-            )
-            .where(SQL.column('validAt'), SQLWhereSign.NotEqual, new SQLNull())
-            .where(
-                new SQLWhereOr([
-                    new SQLWhereEqual(
-                        SQL.column('validUntil'),
-                        SQLWhereSign.Equal,
-                        new SQLNull(),
-                    ),
-                    new SQLWhereEqual(
-                        SQL.column('validUntil'),
-                        SQLWhereSign.Greater,
-                        new SQLNow(),
-                    ),
-                ]),
-            )
-            .where(
-                new SQLWhereOr([
-                    new SQLWhereEqual(
-                        SQL.column('removeAt'),
-                        SQLWhereSign.Equal,
-                        new SQLNull(),
-                    ),
-                    new SQLWhereEqual(
-                        SQL.column('removeAt'),
-                        SQLWhereSign.Greater,
-                        new SQLNow(),
-                    ),
-                ]),
-            ),
-        new Map([
-            ...baseSQLFilterCompilers,
-            ['type', createColumnFilter({
-                expression: SQL.jsonExtract(SQL.column('meta'), '$.value.type'),
-                type: SQLValueType.JSONString,
-                nullable: false,
-            })],
-        ]),
-    ))],
-    ['members', platformOnly(createExistsFilter(
-        SQL.select()
-            .from(SQL.table('members'))
-            .join(
-                SQL.join(SQL.table('registrations')).where(
-                    SQL.column('members', 'id'),
-                    SQL.column('registrations', 'memberId'),
-                ),
-            )
-            .where(
-                SQL.column('registrations', 'organizationId'),
-                SQL.column('organizations', 'id'),
-            ),
-        new Map([
-            ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({
-                expression: new SQLConcat(
-                    SQL.column('firstName'),
-                    new SQLScalar(' '),
-                    SQL.column('lastName'),
-                ),
-                type: SQLValueType.String,
-                nullable: false,
-            })],
-            ['firstName', createColumnFilter({
-                expression: SQL.column('firstName'),
-                type: SQLValueType.String,
-                nullable: false,
-            })],
-            ['lastName', createColumnFilter({
-                expression: SQL.column('lastName'),
-                type: SQLValueType.String,
-                nullable: false,
-            })],
-            ['email', createColumnFilter({
-                expression: SQL.jsonExtract(SQL.column('details'), '$.value.email'),
-                type: SQLValueType.JSONString,
-                nullable: true,
-            })],
-        ]),
-    ))],
-    ['admins', platformOnly(createExistsFilter(
-        SQL.select()
-            .from(SQL.table('users'))
-            .where(
-                SQL.column('users', 'organizationId'),
-                SQL.column('organizations', 'id'),
-            )
-            .where(SQL.column('users', 'permissions'), SQLWhereSign.NotEqual, new SQLNull()),
-        new Map([
-            ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({
-                expression: new SQLConcat(
-                    SQL.coalesce(SQL.column('users', 'firstName'), new SQLScalar('')),
-                    new SQLScalar(' '),
-                    SQL.coalesce(SQL.column('users', 'lastName'), new SQLScalar('')),
-                ),
-                type: SQLValueType.String,
-                nullable: false,
-            })],
-            ['firstName', createColumnFilter({
-                expression: SQL.column('users', 'firstName'),
-                type: SQLValueType.String,
-                nullable: true,
-            })],
-            ['lastName', createColumnFilter({
-                expression: SQL.column('users', 'lastName'),
-                type: SQLValueType.String,
-                nullable: true,
-            })],
-            ['email', createColumnFilter({
-                expression: SQL.column('users', 'email'),
-                type: SQLValueType.String,
-                nullable: false,
-            })],
-        ]),
-    ))],
-    ['companies', platformOnly(createExistsFilter(
-        /**
-         * There is a bug in MySQL 8 that is fixed in 9.3
-         * where EXISTS (select * from json_table(...)) does not work
-         * To fix this, we do a double select with join inside the select
-         * It is a bit slower, but it works for now.
-         */
-        SQL.select()
-            .from('organizations', 'innerOrganizations')
-            .join(
-                SQL.join(
-                    SQL.jsonTable(
-                        SQL.jsonExtract(SQL.column('innerOrganizations', 'meta'), '$.value.companies'),
-                        'companies',
-                    )
-                        .addColumn(
-                            'companyNumber',
-                            'TEXT',
-                            '$.companyNumber',
-                        )
-                        .addColumn(
-                            'VATNumber',
-                            'TEXT',
-                            '$.VATNumber',
-                        )
-                        .addColumn(
-                            'name',
-                            'TEXT',
-                            '$.name',
-                        ),
-                ),
-            )
-            .where(SQL.column('innerOrganizations', 'id'), SQL.column('organizations', 'id')),
-        new Map([
-            ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({
-                expression: SQL.column('companies', 'name'),
-                type: SQLValueType.String,
-                nullable: true,
-            })],
-            ['companyNumber', createColumnFilter({
-                expression: SQL.column('companies', 'companyNumber'),
-                type: SQLValueType.String,
-                nullable: true,
-            })],
-            ['VATNumber', createColumnFilter({
-                expression: SQL.column('companies', 'VATNumber'),
-                type: SQLValueType.String,
-                nullable: true,
-            })],
-        ]),
-    ))],
-    ['documentTemplates', platformOnly(createExistsFilter(
-        SQL.select()
-            .from(SQL.table('document_templates'))
-            .where(
-                SQL.column('document_templates', 'organizationId'),
-                SQL.column('organizations', 'id'),
-            ),
-        new Map([
-            ...baseSQLFilterCompilers,
-            ['type', createColumnFilter({
-                expression: SQL.jsonExtract(SQL.column('document_templates', 'privateSettings'), '$.value.templateDefinition.type'),
-                type: SQLValueType.JSONString,
-                nullable: true,
-            })],
-            ['year', createColumnFilter({
-                expression: SQL.column('document_templates', 'year'),
-                type: SQLValueType.Number,
-                nullable: false,
-            })],
-            ['status', createColumnFilter({
-                expression: SQL.column('document_templates', 'status'),
-                type: SQLValueType.String,
-                nullable: false,
-            })],
-            ['isLocked', createColumnFilter({
-                expression: SQL.column('document_templates', 'isLocked'),
-                type: SQLValueType.Boolean,
-                nullable: false,
-            })],
-            ['updatesEnabled', createColumnFilter({
-                expression: SQL.column('document_templates', 'updatesEnabled'),
-                type: SQLValueType.Boolean,
-                nullable: false,
-            })],
-        ]),
-    ))],
-    ['setupSteps', platformOnly(createExistsFilter(
-        SQL.select()
-            .from(SQL.table('organization_registration_periods'))
-            .where(
-                SQL.column('organization_registration_periods', 'organizationId'),
-                SQL.column('organizations', 'id'),
-            ),
-        new Map([
-            ...baseSQLFilterCompilers,
-            ['periodId', createColumnFilter({
-                expression: SQL.column('organization_registration_periods', 'periodId'),
-                type: SQLValueType.String,
-                nullable: false,
-            })],
-            ...Object.values(SetupStepType)
-                .map((setupStep) => {
-                    return [
-                        setupStep,
-                        new Map([
-                            ...baseSQLFilterCompilers,
-                            ['reviewedAt', createColumnFilter({
-                                expression: SQL.jsonExtract(
-                                    SQL.column('organization_registration_periods', 'setupSteps'),
-                                    `$.value.steps.${setupStep}.review.date`,
-                                ),
-                                type: SQLValueType.JSONString,
-                                nullable: true,
-                            })],
-                            ['complete', createColumnFilter({
-                                expression: {
-                                    getSQL: () =>
-                                        `case when CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.${setupStep}.finishedSteps")) AS unsigned) >= CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.${setupStep}.totalSteps")) AS unsigned) then 1 else 0 end`,
-                                },
-                                type: SQLValueType.Boolean,
-                                nullable: false,
-                            })],
+    [
+        'packages',
+        platformOnly(
+            createExistsFilter(
+                SQL.select()
+                    .from(SQL.table('stamhoofd_packages'))
+                    .where(SQL.column('organizationId'), SQL.column('organizations', 'id'))
+                    .where(SQL.column('validAt'), SQLWhereSign.NotEqual, new SQLNull())
+                    .where(
+                        new SQLWhereOr([
+                            new SQLWhereEqual(
+                                SQL.column('validUntil'),
+                                SQLWhereSign.Equal,
+                                new SQLNull(),
+                            ),
+                            new SQLWhereEqual(
+                                SQL.column('validUntil'),
+                                SQLWhereSign.Greater,
+                                new SQLNow(),
+                            ),
                         ]),
-                    ] as const;
-                }),
-        ]),
-    ))],
-    ['recordCategoryName', platformOnly(createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.recordsConfiguration.recordCategories[*].name'),
-        type: SQLValueType.JSONArray,
-        nullable: true,
-    }))],
+                    )
+                    .where(
+                        new SQLWhereOr([
+                            new SQLWhereEqual(
+                                SQL.column('removeAt'),
+                                SQLWhereSign.Equal,
+                                new SQLNull(),
+                            ),
+                            new SQLWhereEqual(
+                                SQL.column('removeAt'),
+                                SQLWhereSign.Greater,
+                                new SQLNow(),
+                            ),
+                        ]),
+                    ),
+                new Map([
+                    ...baseSQLFilterCompilers,
+                    [
+                        'type',
+                        createColumnFilter({
+                            expression: SQL.jsonExtract(SQL.column('meta'), '$.value.type'),
+                            type: SQLValueType.JSONString,
+                            nullable: false,
+                        }),
+                    ],
+                ]),
+            ),
+        ),
+    ],
+    [
+        'members',
+        platformOnly(
+            createExistsFilter(
+                SQL.select()
+                    .from(SQL.table('members'))
+                    .join(
+                        SQL.join(SQL.table('registrations')).where(
+                            SQL.column('members', 'id'),
+                            SQL.column('registrations', 'memberId'),
+                        ),
+                    )
+                    .where(
+                        SQL.column('registrations', 'organizationId'),
+                        SQL.column('organizations', 'id'),
+                    ),
+                new Map([
+                    ...baseSQLFilterCompilers,
+                    [
+                        'name',
+                        createColumnFilter({
+                            expression: new SQLConcat(
+                                SQL.column('firstName'),
+                                new SQLScalar(' '),
+                                SQL.column('lastName'),
+                            ),
+                            type: SQLValueType.String,
+                            nullable: false,
+                        }),
+                    ],
+                    [
+                        'firstName',
+                        createColumnFilter({
+                            expression: SQL.column('firstName'),
+                            type: SQLValueType.String,
+                            nullable: false,
+                        }),
+                    ],
+                    [
+                        'lastName',
+                        createColumnFilter({
+                            expression: SQL.column('lastName'),
+                            type: SQLValueType.String,
+                            nullable: false,
+                        }),
+                    ],
+                    [
+                        'email',
+                        createColumnFilter({
+                            expression: SQL.jsonExtract(SQL.column('details'), '$.value.email'),
+                            type: SQLValueType.JSONString,
+                            nullable: true,
+                        }),
+                    ],
+                ]),
+            ),
+        ),
+    ],
+    [
+        'admins',
+        platformOnly(
+            createExistsFilter(
+                SQL.select()
+                    .from(SQL.table('users'))
+                    .where(SQL.column('users', 'organizationId'), SQL.column('organizations', 'id'))
+                    .where(
+                        SQL.column('users', 'permissions'),
+                        SQLWhereSign.NotEqual,
+                        new SQLNull(),
+                    ),
+                new Map([
+                    ...baseSQLFilterCompilers,
+                    [
+                        'name',
+                        createColumnFilter({
+                            expression: new SQLConcat(
+                                SQL.coalesce(SQL.column('users', 'firstName'), new SQLScalar('')),
+                                new SQLScalar(' '),
+                                SQL.coalesce(SQL.column('users', 'lastName'), new SQLScalar('')),
+                            ),
+                            type: SQLValueType.String,
+                            nullable: false,
+                        }),
+                    ],
+                    [
+                        'firstName',
+                        createColumnFilter({
+                            expression: SQL.column('users', 'firstName'),
+                            type: SQLValueType.String,
+                            nullable: true,
+                        }),
+                    ],
+                    [
+                        'lastName',
+                        createColumnFilter({
+                            expression: SQL.column('users', 'lastName'),
+                            type: SQLValueType.String,
+                            nullable: true,
+                        }),
+                    ],
+                    [
+                        'email',
+                        createColumnFilter({
+                            expression: SQL.column('users', 'email'),
+                            type: SQLValueType.String,
+                            nullable: false,
+                        }),
+                    ],
+                ]),
+            ),
+        ),
+    ],
+    [
+        'companies',
+        platformOnly(
+            createExistsFilter(
+                /**
+                 * There is a bug in MySQL 8 that is fixed in 9.3
+                 * where EXISTS (select * from json_table(...)) does not work
+                 * To fix this, we do a double select with join inside the select
+                 * It is a bit slower, but it works for now.
+                 */
+                SQL.select()
+                    .from('organizations', 'innerOrganizations')
+                    .join(
+                        SQL.join(
+                            SQL.jsonTable(
+                                SQL.jsonExtract(
+                                    SQL.column('innerOrganizations', 'meta'),
+                                    '$.value.companies',
+                                ),
+                                'companies',
+                            )
+                                .addColumn('companyNumber', 'TEXT', '$.companyNumber')
+                                .addColumn('VATNumber', 'TEXT', '$.VATNumber')
+                                .addColumn('name', 'TEXT', '$.name'),
+                        ),
+                    )
+                    .where(
+                        SQL.column('innerOrganizations', 'id'),
+                        SQL.column('organizations', 'id'),
+                    ),
+                new Map([
+                    ...baseSQLFilterCompilers,
+                    [
+                        'name',
+                        createColumnFilter({
+                            expression: SQL.column('companies', 'name'),
+                            type: SQLValueType.String,
+                            nullable: true,
+                        }),
+                    ],
+                    [
+                        'companyNumber',
+                        createColumnFilter({
+                            expression: SQL.column('companies', 'companyNumber'),
+                            type: SQLValueType.String,
+                            nullable: true,
+                        }),
+                    ],
+                    [
+                        'VATNumber',
+                        createColumnFilter({
+                            expression: SQL.column('companies', 'VATNumber'),
+                            type: SQLValueType.String,
+                            nullable: true,
+                        }),
+                    ],
+                ]),
+            ),
+        ),
+    ],
+    [
+        'documentTemplates',
+        platformOnly(
+            createExistsFilter(
+                SQL.select()
+                    .from(SQL.table('document_templates'))
+                    .where(
+                        SQL.column('document_templates', 'organizationId'),
+                        SQL.column('organizations', 'id'),
+                    ),
+                new Map([
+                    ...baseSQLFilterCompilers,
+                    [
+                        'type',
+                        createColumnFilter({
+                            expression: SQL.jsonExtract(
+                                SQL.column('document_templates', 'privateSettings'),
+                                '$.value.templateDefinition.type',
+                            ),
+                            type: SQLValueType.JSONString,
+                            nullable: true,
+                        }),
+                    ],
+                    [
+                        'year',
+                        createColumnFilter({
+                            expression: SQL.column('document_templates', 'year'),
+                            type: SQLValueType.Number,
+                            nullable: false,
+                        }),
+                    ],
+                    [
+                        'status',
+                        createColumnFilter({
+                            expression: SQL.column('document_templates', 'status'),
+                            type: SQLValueType.String,
+                            nullable: false,
+                        }),
+                    ],
+                    [
+                        'isLocked',
+                        createColumnFilter({
+                            expression: SQL.column('document_templates', 'isLocked'),
+                            type: SQLValueType.Boolean,
+                            nullable: false,
+                        }),
+                    ],
+                    [
+                        'updatesEnabled',
+                        createColumnFilter({
+                            expression: SQL.column('document_templates', 'updatesEnabled'),
+                            type: SQLValueType.Boolean,
+                            nullable: false,
+                        }),
+                    ],
+                ]),
+            ),
+        ),
+    ],
+    [
+        'setupSteps',
+        platformOnly(
+            createExistsFilter(
+                SQL.select()
+                    .from(SQL.table('organization_registration_periods'))
+                    .where(
+                        SQL.column('organization_registration_periods', 'organizationId'),
+                        SQL.column('organizations', 'id'),
+                    ),
+                new Map([
+                    ...baseSQLFilterCompilers,
+                    [
+                        'periodId',
+                        createColumnFilter({
+                            expression: SQL.column('organization_registration_periods', 'periodId'),
+                            type: SQLValueType.String,
+                            nullable: false,
+                        }),
+                    ],
+                    ...Object.values(SetupStepType).map((setupStep) => {
+                        return [
+                            setupStep,
+                            new Map([
+                                ...baseSQLFilterCompilers,
+                                [
+                                    'reviewedAt',
+                                    createColumnFilter({
+                                        expression: SQL.jsonExtract(
+                                            SQL.column(
+                                                'organization_registration_periods',
+                                                'setupSteps',
+                                            ),
+                                            `$.value.steps.${setupStep}.review.date`,
+                                        ),
+                                        type: SQLValueType.JSONString,
+                                        nullable: true,
+                                    }),
+                                ],
+                                [
+                                    'complete',
+                                    createColumnFilter({
+                                        expression: {
+                                            getSQL: () =>
+                                                `case when CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.${setupStep}.finishedSteps")) AS unsigned) >= CAST(JSON_UNQUOTE(JSON_EXTRACT(\`organization_registration_periods\`.\`setupSteps\`, "$.value.steps.${setupStep}.totalSteps")) AS unsigned) then 1 else 0 end`,
+                                        },
+                                        type: SQLValueType.Boolean,
+                                        nullable: false,
+                                    }),
+                                ],
+                            ]),
+                        ] as const;
+                    }),
+                ]),
+            ),
+        ),
+    ],
+    [
+        'recordCategoryName',
+        platformOnly(
+            createColumnFilter({
+                expression: SQL.jsonExtract(
+                    SQL.column('organizations', 'meta'),
+                    '$.value.recordsConfiguration.recordCategories[*].name',
+                ),
+                type: SQLValueType.JSONArray,
+                nullable: true,
+            }),
+        ),
+    ],
     // Name of a child (sub)category in any record category, at any nesting depth
-    ['recordChildCategoryName', platformOnly(createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.recordsConfiguration.recordCategories**.childCategories[*].name'),
-        type: SQLValueType.JSONArray,
-        nullable: true,
-    }))],
-    ['recordName', platformOnly(createColumnFilter({
-        expression: SQL.jsonExtract(SQL.column('organizations', 'meta'), '$.value.recordsConfiguration.recordCategories**.records[*].name'),
-        type: SQLValueType.JSONArray,
-        nullable: true,
-    }))],
+    [
+        'recordChildCategoryName',
+        platformOnly(
+            createColumnFilter({
+                expression: SQL.jsonExtract(
+                    SQL.column('organizations', 'meta'),
+                    '$.value.recordsConfiguration.recordCategories**.childCategories[*].name',
+                ),
+                type: SQLValueType.JSONArray,
+                nullable: true,
+            }),
+        ),
+    ],
+    [
+        'recordName',
+        platformOnly(
+            createColumnFilter({
+                expression: SQL.jsonExtract(
+                    SQL.column('organizations', 'meta'),
+                    '$.value.recordsConfiguration.recordCategories**.records[*].name',
+                ),
+                type: SQLValueType.JSONArray,
+                nullable: true,
+            }),
+        ),
+    ],
 ]);

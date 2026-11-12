@@ -6,9 +6,27 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildBackendEnv } from '../config/build-config.js';
-import { caddyRootCaPath, localIpv4Host, localhostPort, localhostPortMappingDynamic, mysqlImage, mysqlInternalPort, mysqlRootPassword, mysqlRootUser, mysqlServerArgs } from '../config/shared-service-config.js';
+import {
+    caddyRootCaPath,
+    localIpv4Host,
+    localhostPort,
+    localhostPortMappingDynamic,
+    mysqlImage,
+    mysqlInternalPort,
+    mysqlRootPassword,
+    mysqlRootUser,
+    mysqlServerArgs,
+} from '../config/shared-service-config.js';
 import type { E2eMysqlTarget } from '../config/test-database-config.js';
-import { buildPlaywrightDatabasePrefix, e2eMysqlPortVariable, playwrightClearDatabasesVariable, playwrightDatabasePasswordVariable, playwrightDatabasePrefixVariable, playwrightDatabaseUserVariable, resolveE2eMysqlTarget } from '../config/test-database-config.js';
+import {
+    buildPlaywrightDatabasePrefix,
+    e2eMysqlPortVariable,
+    playwrightClearDatabasesVariable,
+    playwrightDatabasePasswordVariable,
+    playwrightDatabasePrefixVariable,
+    playwrightDatabaseUserVariable,
+    resolveE2eMysqlTarget,
+} from '../config/test-database-config.js';
 import type { CliContext } from '../context/create-context.js';
 import { buildPorts } from '../context/ports.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
@@ -35,7 +53,10 @@ type TestMysqlKind = keyof typeof testMysqlKinds;
 // `stamhoofd-*` names (its instance name is `stamhoofd`). The data volume persists between runs (so
 // initialized data + applied migrations are reused); the container itself is shut down after the run
 // and `--clear` wipes the volume for a fresh start.
-function testMysqlNames(context: CliContext, kind: TestMysqlKind): { container: string; volume: string } {
+function testMysqlNames(
+    context: CliContext,
+    kind: TestMysqlKind,
+): { container: string; volume: string } {
     const container = `${context.instance.name}-${kind}-mysql`;
     return {
         container,
@@ -56,11 +77,23 @@ export type UnitTestPackage = {
 // runs vitest, then add it here with the correct `needsDatabase` (true if its vitest setup/tests
 // query `Database` from @node/database).
 export const unitTestPackages: UnitTestPackage[] = [
-    { name: 'opentelemetry-terminal', path: 'packages/node/opentelemetry-terminal', needsDatabase: false },
+    {
+        name: 'opentelemetry-terminal',
+        path: 'packages/node/opentelemetry-terminal',
+        needsDatabase: false,
+    },
     { name: 'terminal', path: 'packages/node/terminal', needsDatabase: false },
-    { name: 'opentelemetry-process', path: 'packages/node/opentelemetry-process', needsDatabase: false },
+    {
+        name: 'opentelemetry-process',
+        path: 'packages/node/opentelemetry-process',
+        needsDatabase: false,
+    },
     { name: 'observability', path: 'packages/node/observability', needsDatabase: false },
-    { name: 'opentelemetry-decorators', path: 'packages/common/opentelemetry-decorators', needsDatabase: false },
+    {
+        name: 'opentelemetry-decorators',
+        path: 'packages/common/opentelemetry-decorators',
+        needsDatabase: false,
+    },
     { name: 'errors', path: 'packages/common/errors', needsDatabase: false },
     { name: 'encoding', path: 'packages/common/encoding', needsDatabase: false },
     { name: 'common-networking', path: 'packages/common/networking', needsDatabase: false },
@@ -68,7 +101,9 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'node-logging', path: 'packages/node/logging', needsDatabase: false },
     { name: 'navigation', path: 'packages/browser/navigation', needsDatabase: false },
     { name: 'cli', path: 'shared/cli', needsDatabase: false },
-    ...(existsSync(fileURLToPath(new URL('../../../../devops/package.json', import.meta.url))) ? [{ name: 'devops', path: 'devops', needsDatabase: false }] : []),
+    ...(existsSync(fileURLToPath(new URL('../../../../devops/package.json', import.meta.url)))
+        ? [{ name: 'devops', path: 'devops', needsDatabase: false }]
+        : []),
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
     { name: 'metabase', path: 'shared/metabase', needsDatabase: false },
     { name: 'filters', path: 'shared/filters', needsDatabase: false },
@@ -99,34 +134,99 @@ export const unitTestPackages: UnitTestPackage[] = [
 ];
 export const coverageTestPackages: UnitTestPackage[] = [
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
-    ...unitTestPackages.filter(pkg => ['errors', 'encoding', 'common-networking', 'database', 'node-logging', 'navigation', 'metabase', 'filters', 'structures', 'object-differ', 'utility', 'queues', 'models', 'vies', 'sql', 'renderer', 'redirecter', 'statistics-syncer', 'api'].includes(pkg.name)),
+    ...unitTestPackages.filter((pkg) =>
+        [
+            'errors',
+            'encoding',
+            'common-networking',
+            'database',
+            'node-logging',
+            'navigation',
+            'metabase',
+            'filters',
+            'structures',
+            'object-differ',
+            'utility',
+            'queues',
+            'models',
+            'vies',
+            'sql',
+            'renderer',
+            'redirecter',
+            'statistics-syncer',
+            'api',
+        ].includes(pkg.name),
+    ),
 ];
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;
 
 function turboOutputArgs(context: CliContext): string[] {
-    return (context.verbosity ?? (context.verbose ? RunVerbosity.Output : RunVerbosity.Command)) === RunVerbosity.Output ? [] : ['--output-logs=errors-only'];
+    return (context.verbosity ?? (context.verbose ? RunVerbosity.Output : RunVerbosity.Command)) ===
+        RunVerbosity.Output
+        ? []
+        : ['--output-logs=errors-only'];
 }
 
 export async function buildShared(context: CliContext): Promise<void> {
-    await runValidation(context, 'Shared build', ['run', 'build:shared', ...turboOutputArgs(context)]);
+    await runValidation(context, 'Shared build', [
+        'run',
+        'build:shared',
+        ...turboOutputArgs(context),
+    ]);
 }
 
 export async function buildAll(context: CliContext): Promise<void> {
     await buildShared(context);
-    await runValidation(context, 'Application builds', ['exec', 'turbo', 'run', 'build', '--env-mode=loose', '--filter=@stamhoofd/backend', '--filter=@stamhoofd/backend-renderer', '--filter=@stamhoofd/backend-statistics-syncer', '--filter=@stamhoofd/web-app', '--filter=@stamhoofd/webshop', ...turboOutputArgs(context)], { env: { STAMHOOFD_ENV: context.env } });
+    await runValidation(
+        context,
+        'Application builds',
+        [
+            'exec',
+            'turbo',
+            'run',
+            'build',
+            '--env-mode=loose',
+            '--filter=@stamhoofd/backend',
+            '--filter=@stamhoofd/backend-renderer',
+            '--filter=@stamhoofd/backend-statistics-syncer',
+            '--filter=@stamhoofd/web-app',
+            '--filter=@stamhoofd/webshop',
+            ...turboOutputArgs(context),
+        ],
+        { env: { STAMHOOFD_ENV: context.env } },
+    );
 }
 
-export async function lint(context: CliContext, filters: string[] = [], fix = false): Promise<void> {
+export async function lint(
+    context: CliContext,
+    filters: string[] = [],
+    fix = false,
+): Promise<void> {
     // Fixes modify source files, which Turbo's check cache does not restore.
-    await runValidation(context, 'Lint', ['run', 'lint', ...filters.map(filter => `--filter=${filter}`), ...turboOutputArgs(context), ...(fix ? ['--cache=local:,remote:', '--', '--fix'] : [])]);
+    await runValidation(context, 'Lint', [
+        'run',
+        'lint',
+        ...filters.map((filter) => `--filter=${filter}`),
+        ...turboOutputArgs(context),
+        ...(fix ? ['--cache=local:,remote:', '--', '--fix'] : []),
+    ]);
 }
 
 export async function typecheck(context: CliContext, filters: string[] = []): Promise<void> {
-    await runValidation(context, 'Typecheck', ['run', 'typecheck', ...filters.map(filter => `--filter=${filter}`), ...turboOutputArgs(context)]);
+    await runValidation(context, 'Typecheck', [
+        'run',
+        'typecheck',
+        ...filters.map((filter) => `--filter=${filter}`),
+        ...turboOutputArgs(context),
+    ]);
 }
 
 export async function migrate(context: CliContext): Promise<void> {
-    await run('pnpm', ['run', 'migrate'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbosity: context.verbosity ?? RunVerbosity.Output });
+    await run('pnpm', ['run', 'migrate'], {
+        cwd: context.rootDir,
+        env: { ...buildBackendEnv(context) },
+        verbosity: context.verbosity ?? RunVerbosity.Output,
+    });
 }
 
 const statisticsSyncerPackage = 'backend/app/statistics-syncer';
@@ -137,7 +237,11 @@ const statisticsSyncerPackage = 'backend/app/statistics-syncer';
  */
 export async function migratePlatformStatistics(context: CliContext): Promise<void> {
     await buildShared(context);
-    await run('pnpm', ['--dir', statisticsSyncerPackage, 'run', 'migrations'], { cwd: context.rootDir, env: { ...buildBackendEnv(context) }, verbosity: context.verbosity ?? RunVerbosity.Output });
+    await run('pnpm', ['--dir', statisticsSyncerPackage, 'run', 'migrations'], {
+        cwd: context.rootDir,
+        env: { ...buildBackendEnv(context) },
+        verbosity: context.verbosity ?? RunVerbosity.Output,
+    });
 }
 
 /**
@@ -153,7 +257,8 @@ export async function runPlatformStatisticsSync(context: CliContext): Promise<vo
         processGroup: true,
         maxDiagnosticChars: Number.MAX_SAFE_INTEGER,
     });
-    if (result.code !== 0 && result.reason !== 'aborted') throw processError('Statistics syncer failed.', 'pnpm start', result);
+    if (result.code !== 0 && result.reason !== 'aborted')
+        throw processError('Statistics syncer failed.', 'pnpm start', result);
 }
 
 export type UnitTestOptions = {
@@ -175,7 +280,10 @@ export type UnitTestOptions = {
     jsonReport?: string;
 };
 
-export async function runUnitTests(context: CliContext, options: UnitTestOptions = {}): Promise<void> {
+export async function runUnitTests(
+    context: CliContext,
+    options: UnitTestOptions = {},
+): Promise<void> {
     const packages = options.packages ?? unitTestPackages;
     if (packages.length === 0) {
         throw new Error('No test packages selected.');
@@ -188,8 +296,10 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
         await buildShared(context);
     }
 
-    const needsDatabase = packages.some(pkg => pkg.needsDatabase);
-    const dbPort = needsDatabase ? await startTestMysql(context, 'test', options.clear ?? false) : undefined;
+    const needsDatabase = packages.some((pkg) => pkg.needsDatabase);
+    const dbPort = needsDatabase
+        ? await startTestMysql(context, 'test', options.clear ?? false)
+        : undefined;
 
     // With multiple packages a filename/test-name filter will legitimately match nothing in some of
     // them, so don't let an empty package fail the whole run.
@@ -198,14 +308,23 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
     try {
         for (const pkg of packages) {
             const args = ['exec', 'vitest', 'run'];
-            const verbose = (context.verbosity ?? (context.verbose ? RunVerbosity.Output : RunVerbosity.Command)) === RunVerbosity.Output;
+            const verbose =
+                (context.verbosity ??
+                    (context.verbose ? RunVerbosity.Output : RunVerbosity.Command)) ===
+                RunVerbosity.Output;
             if (!verbose) args.push('--silent=passed-only', '--reporter=dot');
-            args.push(`--reporter=${fileURLToPath(new URL('./vitest-progress-reporter.js', import.meta.url))}`);
+            args.push(
+                `--reporter=${fileURLToPath(new URL('./vitest-progress-reporter.js', import.meta.url))}`,
+            );
             if (options.shard !== undefined) {
                 args.push('--shard', options.shard);
             }
             if (options.jsonReport !== undefined) {
-                args.push(...(verbose ? ['--reporter=default'] : []), '--reporter=json', `--outputFile=${options.jsonReport}`);
+                args.push(
+                    ...(verbose ? ['--reporter=default'] : []),
+                    '--reporter=json',
+                    `--outputFile=${options.jsonReport}`,
+                );
             }
             if (options.coverage) {
                 args.push('--coverage');
@@ -218,12 +337,23 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
             }
             args.push(...(options.fileFilters ?? []));
             if (verbose && options.jsonReport === undefined) args.push('--reporter=default');
-            await runValidation(context, `Tests: ${pkg.name}`, args, { cwd: path.join(context.rootDir, pkg.path), env: { CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, tests: true });
+            await runValidation(context, `Tests: ${pkg.name}`, args, {
+                cwd: path.join(context.rootDir, pkg.path),
+                env: { CI: options.ci ? 'true' : undefined, DB_PORT: dbPort },
+                tests: true,
+            });
         }
     } finally {
         // Shut down the container after the run; the data volume is kept for the next run.
         if (needsDatabase) {
-            await withCliCleanup(() => step('Test database cleanup', () => docker.removeContainer(testMysqlNames(context, 'test').container, context.verbose)));
+            await withCliCleanup(() =>
+                step('Test database cleanup', () =>
+                    docker.removeContainer(
+                        testMysqlNames(context, 'test').container,
+                        context.verbose,
+                    ),
+                ),
+            );
         }
     }
 }
@@ -232,7 +362,20 @@ export async function testUnit(context: CliContext, ci: boolean): Promise<void> 
     await runUnitTests(context, { ci });
 }
 
-export async function testE2e(context: CliContext, options: { ci: boolean; clear: boolean; extra?: boolean; ui: boolean; workers?: number; shard?: string; grep?: string; skipBuild?: boolean; localDb?: boolean }): Promise<void> {
+export async function testE2e(
+    context: CliContext,
+    options: {
+        ci: boolean;
+        clear: boolean;
+        extra?: boolean;
+        ui: boolean;
+        workers?: number;
+        shard?: string;
+        grep?: string;
+        skipBuild?: boolean;
+        localDb?: boolean;
+    },
+): Promise<void> {
     const mysql = resolveE2eMysqlTarget({ localDb: options.localDb });
     const databaseEnv = await prepareE2eDatabase(context, mysql, options.clear);
     let shouldRestoreCaddy = false;
@@ -243,9 +386,23 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
         await startSharedServices(context, { skipMysql: mysql.kind === 'local' });
         shouldRestoreCaddy = true;
         if (!options.skipBuild) {
-            await runValidation(context, 'E2E backend preparation', ['--dir', 'backend/app/api', 'run', 'build:playwright:pre'], { env: databaseEnv });
+            await runValidation(
+                context,
+                'E2E backend preparation',
+                ['--dir', 'backend/app/api', 'run', 'build:playwright:pre'],
+                { env: databaseEnv },
+            );
         }
-        const args = ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)]), ...(options.shard === undefined ? [] : ['--shard', options.shard])];
+        const args = [
+            '--dir',
+            'tests/playwright',
+            'run',
+            'test',
+            ...(options.ui ? ['--ui'] : []),
+            ...(options.grep === undefined ? [] : ['--grep', options.grep]),
+            ...(options.workers === undefined ? [] : ['--workers', String(options.workers)]),
+            ...(options.shard === undefined ? [] : ['--shard', options.shard]),
+        ];
         const runOptions = {
             cwd: context.rootDir,
             env: {
@@ -253,7 +410,8 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
                 CI: options.ci ? 'true' : undefined,
                 NODE_EXTRA_CA_CERTS: caddyRootCaPath(),
                 PLAYWRIGHT_INCLUDE_EXTRA: options.extra ? '1' : undefined,
-                PLAYWRIGHT_WORKER_COUNT: options.workers === undefined ? undefined : String(options.workers),
+                PLAYWRIGHT_WORKER_COUNT:
+                    options.workers === undefined ? undefined : String(options.workers),
                 PLAYWRIGHT_VERBOSE: context.verbose ? '1' : undefined,
                 STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined,
             },
@@ -266,22 +424,32 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
     } finally {
         // Shut down the e2e MySQL container after the run; the data volume is kept for the next run.
         // A MySQL that was already running is left alone: it is not ours to stop.
-        await withCliCleanup(() => step('E2E cleanup', async () => {
-            if (mysql.kind === 'container') {
-                await docker.removeContainer(testMysqlNames(context, 'e2e').container, context.verbose);
-            }
-            if (shouldRestoreCaddy) {
-                try {
-                    await CaddyService.reload(context);
-                } catch (error) {
-                    console.warn(`Failed to restore shared Caddy config: ${error instanceof Error ? error.message : String(error)}`);
+        await withCliCleanup(() =>
+            step('E2E cleanup', async () => {
+                if (mysql.kind === 'container') {
+                    await docker.removeContainer(
+                        testMysqlNames(context, 'e2e').container,
+                        context.verbose,
+                    );
                 }
-            }
-        }));
+                if (shouldRestoreCaddy) {
+                    try {
+                        await CaddyService.reload(context);
+                    } catch (error) {
+                        console.warn(
+                            `Failed to restore shared Caddy config: ${error instanceof Error ? error.message : String(error)}`,
+                        );
+                    }
+                }
+            }),
+        );
     }
 }
 
-export async function cleanBuild(context: CliContext, options: { dryRun?: boolean } = {}): Promise<void> {
+export async function cleanBuild(
+    context: CliContext,
+    options: { dryRun?: boolean } = {},
+): Promise<void> {
     const roots = [
         'tests',
         'shared',
@@ -296,8 +464,10 @@ export async function cleanBuild(context: CliContext, options: { dryRun?: boolea
     ];
 
     if (options.dryRun) {
-        console.log('Would remove dist, dist-types, dist-playwright, and TypeScript build metadata from:');
-        roots.forEach(root => console.log(`  ${root}/*`));
+        console.log(
+            'Would remove dist, dist-types, dist-playwright, and TypeScript build metadata from:',
+        );
+        roots.forEach((root) => console.log(`  ${root}/*`));
         return;
     }
 
@@ -331,49 +501,108 @@ async function cleanPackageChildren(root: string): Promise<void> {
         return;
     }
 
-    await Promise.all(entries.map(async (entry) => {
-        const packagePath = path.join(root, entry);
-        const stat = await fs.stat(packagePath).catch(() => undefined);
-        if (!stat?.isDirectory()) {
-            return;
-        }
-        await fs.rm(path.join(packagePath, 'dist'), { recursive: true, force: true });
-        await fs.rm(path.join(packagePath, 'dist-types'), { recursive: true, force: true });
-        await fs.rm(path.join(packagePath, 'dist-playwright'), { recursive: true, force: true });
-        await removeTsBuildInfo(packagePath);
-        await removeTsBuildInfo(path.join(packagePath, '.cache'));
-    }));
+    await Promise.all(
+        entries.map(async (entry) => {
+            const packagePath = path.join(root, entry);
+            const stat = await fs.stat(packagePath).catch(() => undefined);
+            if (!stat?.isDirectory()) {
+                return;
+            }
+            await fs.rm(path.join(packagePath, 'dist'), { recursive: true, force: true });
+            await fs.rm(path.join(packagePath, 'dist-types'), { recursive: true, force: true });
+            await fs.rm(path.join(packagePath, 'dist-playwright'), {
+                recursive: true,
+                force: true,
+            });
+            await removeTsBuildInfo(packagePath);
+            await removeTsBuildInfo(path.join(packagePath, '.cache'));
+        }),
+    );
 }
 
 async function removeTsBuildInfo(packagePath: string): Promise<void> {
     const entries = await fs.readdir(packagePath).catch(() => []);
-    await Promise.all(entries
-        .filter(entry => entry.endsWith('.tsbuildinfo'))
-        .map(entry => fs.rm(path.join(packagePath, entry), { force: true })));
+    await Promise.all(
+        entries
+            .filter((entry) => entry.endsWith('.tsbuildinfo'))
+            .map((entry) => fs.rm(path.join(packagePath, entry), { force: true })),
+    );
 }
 
 // Ensure a MySQL container is running off a persistent named volume (reused across runs so the data
 // dir + migrations don't have to be reinitialized), create the `stamhoofd-tests` database, and
 // return the mapped host port. `clear` first drops the container + volume for a fresh start.
-async function ensureTestMysql(context: CliContext, names: { container: string; volume: string }, clear: boolean): Promise<string> {
+async function ensureTestMysql(
+    context: CliContext,
+    names: { container: string; volume: string },
+    clear: boolean,
+): Promise<string> {
     const { container, volume } = names;
     if (clear) {
         await docker.removeContainer(container, context.verbose);
         await docker.removeVolume(volume, context.verbose);
     }
 
-    if (!await docker.containerIsRunning(container)) {
+    if (!(await docker.containerIsRunning(container))) {
         await docker.removeContainer(container, context.verbose);
         await docker.createVolume(volume, context.verbose);
         // Test data is rebuildable: keep transactions and redo, without per-commit fsync or replication logs.
-        const serverArgs = [...mysqlServerArgs(), '--innodb-flush-log-at-trx-commit=2', '--skip-log-bin'];
-        await docker.run(['run', '-d', '--name', container, '-e', `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`, '-p', localhostPortMappingDynamic(mysqlInternalPort), '-v', `${volume}:/var/lib/mysql`, process.env.CI_MYSQL_IMAGE ?? mysqlImage, ...serverArgs], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
+        const serverArgs = [
+            ...mysqlServerArgs(),
+            '--innodb-flush-log-at-trx-commit=2',
+            '--skip-log-bin',
+        ];
+        await docker.run(
+            [
+                'run',
+                '-d',
+                '--name',
+                container,
+                '-e',
+                `MYSQL_ROOT_PASSWORD=${mysqlRootPassword}`,
+                '-p',
+                localhostPortMappingDynamic(mysqlInternalPort),
+                '-v',
+                `${volume}:/var/lib/mysql`,
+                process.env.CI_MYSQL_IMAGE ?? mysqlImage,
+                ...serverArgs,
+            ],
+            {
+                verbosity:
+                    context.verbosity === RunVerbosity.Output
+                        ? RunVerbosity.Command
+                        : (context.verbosity ?? RunVerbosity.Quiet),
+            },
+        );
     }
 
     await docker.waitForMysql(container);
-    await docker.run(['exec', container, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', 'CREATE DATABASE IF NOT EXISTS `stamhoofd-tests` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
+    await docker.run(
+        [
+            'exec',
+            container,
+            'mysql',
+            `-h${localIpv4Host}`,
+            `-u${mysqlRootUser}`,
+            `-p${mysqlRootPassword}`,
+            '-e',
+            'CREATE DATABASE IF NOT EXISTS `stamhoofd-tests` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;',
+        ],
+        {
+            verbosity:
+                context.verbosity === RunVerbosity.Output
+                    ? RunVerbosity.Command
+                    : (context.verbosity ?? RunVerbosity.Quiet),
+        },
+    );
 
-    const port = await docker.run(['port', container, '3306/tcp'], { capture: true, verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
+    const port = await docker.run(['port', container, '3306/tcp'], {
+        capture: true,
+        verbosity:
+            context.verbosity === RunVerbosity.Output
+                ? RunVerbosity.Command
+                : (context.verbosity ?? RunVerbosity.Quiet),
+    });
     const dbPort = port.stdout.trim().split(':').at(-1);
     if (!dbPort) {
         throw new Error(`Could not determine test MySQL port for ${container}.`);
@@ -384,10 +613,16 @@ async function ensureTestMysql(context: CliContext, names: { container: string; 
 /**
  * Start the MySQL container of a test kind and return the host port it is mapped to.
  */
-async function startTestMysql(context: CliContext, kind: TestMysqlKind, clear: boolean): Promise<string> {
+async function startTestMysql(
+    context: CliContext,
+    kind: TestMysqlKind,
+    clear: boolean,
+): Promise<string> {
     const names = testMysqlNames(context, kind);
     const label = testMysqlKinds[kind];
-    return step(clear ? `Preparing fresh ${label}` : `Preparing ${label}`, () => ensureTestMysql(context, names, clear));
+    return step(clear ? `Preparing fresh ${label}` : `Preparing ${label}`, () =>
+        ensureTestMysql(context, names, clear),
+    );
 }
 
 /**
@@ -395,18 +630,29 @@ async function startTestMysql(context: CliContext, kind: TestMysqlKind, clear: b
  * reach it: where to connect, which databases belong to this worktree, and whether they have to be
  * dropped first.
  */
-async function prepareE2eDatabase(context: CliContext, mysql: E2eMysqlTarget, clear: boolean): Promise<NodeJS.ProcessEnv> {
-    const databasePrefix = { [playwrightDatabasePrefixVariable]: buildPlaywrightDatabasePrefix(context.instance) };
+async function prepareE2eDatabase(
+    context: CliContext,
+    mysql: E2eMysqlTarget,
+    clear: boolean,
+): Promise<NodeJS.ProcessEnv> {
+    const databasePrefix = {
+        [playwrightDatabasePrefixVariable]: buildPlaywrightDatabasePrefix(context.instance),
+    };
 
     if (mysql.kind === 'container') {
         return { ...databasePrefix, DB_PORT: await startTestMysql(context, 'e2e', clear) };
     }
 
-    if (!await isPortListening(mysql.port)) {
+    if (!(await isPortListening(mysql.port))) {
         // The shared MySQL container is not started for a local run, so point at it by name when
         // that is the server this run was configured to use.
-        const sharedHint = mysql.port === buildPorts(context).mysql ? ' That is the port of the shared MySQL container: `stam services up` starts it.' : '';
-        throw new Error(`No MySQL is listening on ${localhostPort(mysql.port)}.${sharedHint} Start it, point ${e2eMysqlPortVariable} at the port it listens on, or pass --no-local-db to run against an e2e MySQL container instead.`);
+        const sharedHint =
+            mysql.port === buildPorts(context).mysql
+                ? ' That is the port of the shared MySQL container: `stam services up` starts it.'
+                : '';
+        throw new Error(
+            `No MySQL is listening on ${localhostPort(mysql.port)}.${sharedHint} Start it, point ${e2eMysqlPortVariable} at the port it listens on, or pass --no-local-db to run against an e2e MySQL container instead.`,
+        );
     }
 
     console.log(`Using the MySQL already running on ${localhostPort(mysql.port)}.`);

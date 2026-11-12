@@ -3,7 +3,10 @@ import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from 
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
-export const emailRecipientSorters: SQLSortDefinitions<EmailRecipient> = new Map<string, SQLSortDefinition<EmailRecipient>>([
+export const emailRecipientSorters: SQLSortDefinitions<EmailRecipient> = new Map<
+    string,
+    SQLSortDefinition<EmailRecipient>
+>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -12,59 +15,74 @@ export const emailRecipientSorters: SQLSortDefinitions<EmailRecipient> = new Map
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    ['id', {
-        getValue(a) {
-            return a.id;
+    [
+        'id',
+        {
+            getValue(a) {
+                return a.id;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('id'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction,
-            });
+    ],
+    [
+        'sentAt',
+        {
+            getValue(a) {
+                return a.sentAt ? Formatter.dateTimeIso(a.sentAt, 'UTC') : null;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('sentAt'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['sentAt', {
-        getValue(a) {
-            return a.sentAt ? Formatter.dateTimeIso(a.sentAt, 'UTC') : null;
+    ],
+    [
+        'email',
+        {
+            getValue(a) {
+                return a.email;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('email'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('sentAt'),
-                direction,
-            });
+    ],
+    [
+        'firstName',
+        {
+            getValue(a) {
+                return a.firstName;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('firstName'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['email', {
-        getValue(a) {
-            return a.email;
+    ],
+    [
+        'lastName',
+        {
+            getValue(a) {
+                return a.lastName;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('lastName'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('email'),
-                direction,
-            });
-        },
-    }],
-    ['firstName', {
-        getValue(a) {
-            return a.firstName;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('firstName'),
-                direction,
-            });
-        },
-    }],
-    ['lastName', {
-        getValue(a) {
-            return a.lastName;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('lastName'),
-                direction,
-            });
-        },
-    }],
+    ],
 ]);

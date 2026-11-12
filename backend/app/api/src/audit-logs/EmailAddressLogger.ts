@@ -8,7 +8,8 @@ export const EmailAddressLogger = new ModelLogger(EmailAddress, {
             return;
         }
 
-        const wasUnsubscribed = event.type === 'updated' ? !!event.originalFields.unsubscribedAll : false;
+        const wasUnsubscribed =
+            event.type === 'updated' ? !!event.originalFields.unsubscribedAll : false;
         const isUnsubscribed = event.model.unsubscribedAll;
 
         if (!wasUnsubscribed && isUnsubscribed) {
@@ -19,7 +20,8 @@ export const EmailAddressLogger = new ModelLogger(EmailAddress, {
             };
         }
 
-        const wasUnsubscribedMarketing = event.type === 'updated' ? !!event.originalFields.unsubscribedMarketing : false;
+        const wasUnsubscribedMarketing =
+            event.type === 'updated' ? !!event.originalFields.unsubscribedMarketing : false;
         const isUnsubscribedMarketing = event.model.unsubscribedMarketing;
 
         if (!wasUnsubscribedMarketing && isUnsubscribedMarketing) {
@@ -33,13 +35,15 @@ export const EmailAddressLogger = new ModelLogger(EmailAddress, {
 
     createReplacements(model, options) {
         const map = new Map([
-            ['e', AuditLogReplacement.create({
-                id: model.id,
-                value: model.email || '',
-                type: AuditLogReplacementType.EmailAddress,
-            })],
+            [
+                'e',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.email || '',
+                    type: AuditLogReplacementType.EmailAddress,
+                }),
+            ],
         ]);
         return map;
     },
-
 });

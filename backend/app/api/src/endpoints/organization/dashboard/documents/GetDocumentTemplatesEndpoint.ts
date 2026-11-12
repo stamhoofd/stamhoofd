@@ -1,8 +1,17 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { DocumentTemplate } from '@stamhoofd/models';
-import type { CountFilteredRequest, DocumentTemplatePrivate, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, LimitedFilteredRequest, PaginatedResponse, SearchFilterFactory } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    DocumentTemplatePrivate,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
+import {
+    assertSort,
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    SearchFilterFactory,
+} from '@stamhoofd/structures';
 
 import type { Decoder } from '@common/encoding';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
@@ -28,7 +37,11 @@ export class GetDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, 
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/document-templates', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/organization/document-templates',
+            {},
+        );
 
         if (params) {
             return [true, params as Params];
@@ -41,8 +54,7 @@ export class GetDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, 
 
         const templatesTable: string = DocumentTemplate.table;
 
-        const query = SQL
-            .select(SQL.wildcard(templatesTable))
+        const query = SQL.select(SQL.wildcard(templatesTable))
             .from(SQL.table(templatesTable))
             .where('organizationId', organization.id);
 
@@ -75,7 +87,10 @@ export class GetDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, 
         const query = await this.buildQuery(requestQuery);
         const data = await query.fetch();
 
-        const templates: DocumentTemplate[] = DocumentTemplate.fromRows(data, DocumentTemplate.table);
+        const templates: DocumentTemplate[] = DocumentTemplate.fromRows(
+            data,
+            DocumentTemplate.table,
+        );
 
         const next = LimitedFilteredRequestHelper.fixInfiniteLoadingLoop({
             request: requestQuery,
@@ -84,7 +99,7 @@ export class GetDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, 
         });
 
         return new PaginatedResponse<DocumentTemplatePrivate[], LimitedFilteredRequest>({
-            results: templates.map(t => t.getPrivateStructure()),
+            results: templates.map((t) => t.getPrivateStructure()),
             next,
         });
     }
@@ -93,7 +108,7 @@ export class GetDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, 
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canManageDocuments(organization.id)) {
+        if (!(await Context.auth.canManageDocuments(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -102,9 +117,7 @@ export class GetDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, 
             maxLimit: Context.auth.hasSomePlatformAccess() ? 1000 : 100,
         });
 
-        return new Response(
-            await GetDocumentTemplatesEndpoint.buildData(request.query),
-        );
+        return new Response(await GetDocumentTemplatesEndpoint.buildData(request.query));
     }
 }
 

@@ -7,7 +7,11 @@ import { QueryableModel } from '@stamhoofd/sql';
 import type { Invoice } from './Invoice.js';
 import type { BalanceItem } from './BalanceItem.js';
 import type { VATExcemptReason } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType } from '@stamhoofd/structures';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemType,
+} from '@stamhoofd/structures';
 
 /**
  * Keeps track of all the created invoices of a balance item, which contains how many balance was invoiced (including VAT)
@@ -17,7 +21,9 @@ export class InvoicedBalanceItem extends QueryableModel {
     static table = 'invoiced_balance_items';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -44,7 +50,10 @@ export class InvoicedBalanceItem extends QueryableModel {
     /**
      * Copied from the balance item at the time of invoicing, so invoices can be ordered and grouped without loading the balance items.
      */
-    @column({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation), type: 'json' })
+    @column({
+        decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation),
+        type: 'json',
+    })
     relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map();
 
     @column({ type: 'datetime', nullable: true })
@@ -111,7 +120,8 @@ export class InvoicedBalanceItem extends QueryableModel {
     totalWithoutVAT = 0;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -123,7 +133,8 @@ export class InvoicedBalanceItem extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;

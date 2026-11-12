@@ -1,14 +1,36 @@
 import type { EmailBuilder, EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email, EmailAddress } from '@stamhoofd/email';
-import type { EmailContent, EmailRecipient as EmailRecipientStruct, EmailTemplateType, OrganizationEmail, Platform as PlatformStruct, Recipient } from '@stamhoofd/structures';
-import { BalanceItem as BalanceItemStruct, getAppHost, getUsedReplacementFiles, ReceivableBalanceType, replaceEmailHtml, replaceEmailText, Replacement } from '@stamhoofd/structures';
+import type {
+    EmailContent,
+    EmailRecipient as EmailRecipientStruct,
+    EmailTemplateType,
+    OrganizationEmail,
+    Platform as PlatformStruct,
+    Recipient,
+} from '@stamhoofd/structures';
+import {
+    BalanceItem as BalanceItemStruct,
+    getAppHost,
+    getUsedReplacementFiles,
+    ReceivableBalanceType,
+    replaceEmailHtml,
+    replaceEmailText,
+    Replacement,
+} from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import { Formatter } from '@stamhoofd/utility';
 
 import { SimpleError } from '@common/errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { Group, Organization, Webshop } from '@stamhoofd/models';
-import { CachedBalance, EmailRecipient, EmailTemplate, Member, Platform, User } from '@stamhoofd/models';
+import {
+    CachedBalance,
+    EmailRecipient,
+    EmailTemplate,
+    Member,
+    Platform,
+    User,
+} from '@stamhoofd/models';
 import { FileSignService } from '../services/FileSignService.js';
 import { TenantContext } from './TenantContext.js';
 
@@ -21,8 +43,7 @@ export type EmailTemplateOptions = {
 
 export async function getEmailTemplate(data: EmailTemplateOptions) {
     // Most specific template: for specific group
-    const q = EmailTemplate.select()
-        .where('type', data.type);
+    const q = EmailTemplate.select().where('type', data.type);
 
     if (data.group) {
         q.where('groupId', data.group.id);
@@ -73,11 +94,17 @@ export async function getEmailTemplate(data: EmailTemplateOptions) {
 
 export async function canSendFromEmail(fromAddress: string, organization: Organization | null) {
     if (organization) {
-        if (organization.privateMeta.mailDomain && organization.privateMeta.mailDomainActive && fromAddress.endsWith('@' + organization.privateMeta.mailDomain)) {
+        if (
+            organization.privateMeta.mailDomain &&
+            organization.privateMeta.mailDomainActive &&
+            fromAddress.endsWith('@' + organization.privateMeta.mailDomain)
+        ) {
             return true;
         }
 
-        if (organization.id === (await Platform.getSharedPrivateStruct()).membershipOrganizationId) {
+        if (
+            organization.id === (await Platform.getSharedPrivateStruct()).membershipOrganizationId
+        ) {
             return canSendFromEmail(fromAddress, null);
         }
 
@@ -96,7 +123,12 @@ export async function canSendFromEmail(fromAddress: string, organization: Organi
     return false;
 }
 
-export async function getDefaultEmailFrom(organization: Organization | null, options: Pick<EmailBuilderOptions, 'type'> & { template: Omit<EmailTemplateOptions, 'organizationId' | 'type'> }) {
+export async function getDefaultEmailFrom(
+    organization: Organization | null,
+    options: Pick<EmailBuilderOptions, 'type'> & {
+        template: Omit<EmailTemplateOptions, 'organizationId' | 'type'>;
+    },
+) {
     // When choosing sending domain, prefer using the one with the highest reputation
     let preferEmailId: string | null = null;
 
@@ -112,7 +144,12 @@ export async function getDefaultEmailFrom(organization: Organization | null, opt
         // Default email address for the chosen email type
         let from = organization.getDefaultFrom(organization.i18n, options.type ?? 'broadcast');
 
-        const sender: OrganizationEmail | undefined = (preferEmailId ? organization.privateMeta.emails.find(e => e.id === preferEmailId) : null) ?? organization.privateMeta.emails.find(e => e.default) ?? organization.privateMeta.emails[0];
+        const sender: OrganizationEmail | undefined =
+            (preferEmailId
+                ? organization.privateMeta.emails.find((e) => e.id === preferEmailId)
+                : null) ??
+            organization.privateMeta.emails.find((e) => e.default) ??
+            organization.privateMeta.emails[0];
         let replyTo: EmailInterfaceRecipient | undefined = undefined;
 
         if (sender) {
@@ -143,7 +180,8 @@ export async function getDefaultEmailFrom(organization: Organization | null, opt
         }
 
         return {
-            from, replyTo,
+            from,
+            replyTo,
         };
     }
     const platform = await Platform.getSharedPrivateStruct();
@@ -153,13 +191,18 @@ export async function getDefaultEmailFrom(organization: Organization | null, opt
     const transactionalDomain = i18n.localizedDomains.defaultTransactionalEmail();
     const broadcastDomain = i18n.localizedDomains.defaultBroadcastEmail();
 
-    const domain = (options.type === 'transactional' ? transactionalDomain : broadcastDomain);
+    const domain = options.type === 'transactional' ? transactionalDomain : broadcastDomain;
     let from: EmailInterfaceRecipient = {
         email: 'hallo@' + domain,
     };
 
     // Platform
-    const sender: OrganizationEmail | undefined = (preferEmailId ? platform.privateConfig.emails.find(e => e.id === preferEmailId) : null) ?? platform.privateConfig.emails.find(e => e.default) ?? platform.privateConfig.emails[0];
+    const sender: OrganizationEmail | undefined =
+        (preferEmailId
+            ? platform.privateConfig.emails.find((e) => e.id === preferEmailId)
+            : null) ??
+        platform.privateConfig.emails.find((e) => e.default) ??
+        platform.privateConfig.emails[0];
     let replyTo: EmailInterfaceRecipient | undefined = undefined;
 
     if (sender) {
@@ -191,13 +234,22 @@ export async function getDefaultEmailFrom(organization: Organization | null, opt
     }
 
     return {
-        from, replyTo,
+        from,
+        replyTo,
     };
 }
 
-export async function sendEmailTemplate(organization: Organization | null, options: Omit<EmailBuilderOptions, 'subject' | 'html' | 'from' | 'replyTo'> & { template: Omit<EmailTemplateOptions, 'organizationId'> }) {
+export async function sendEmailTemplate(
+    organization: Organization | null,
+    options: Omit<EmailBuilderOptions, 'subject' | 'html' | 'from' | 'replyTo'> & {
+        template: Omit<EmailTemplateOptions, 'organizationId'>;
+    },
+) {
     if (options.template.webshop) {
-        options.defaultReplacements = [...(options.defaultReplacements ?? []), ...options.template.webshop.meta.getEmailReplacements()];
+        options.defaultReplacements = [
+            ...(options.defaultReplacements ?? []),
+            ...options.template.webshop.meta.getEmailReplacements(),
+        ];
     }
     const builder = await getEmailBuilderForTemplate(organization, {
         ...options,
@@ -208,7 +260,12 @@ export async function sendEmailTemplate(organization: Organization | null, optio
     }
 }
 
-async function getEmailBuilderForTemplate(organization: Organization | null, options: Omit<EmailBuilderOptions, 'subject' | 'html'> & { template: Omit<EmailTemplateOptions, 'organizationId'> }) {
+async function getEmailBuilderForTemplate(
+    organization: Organization | null,
+    options: Omit<EmailBuilderOptions, 'subject' | 'html'> & {
+        template: Omit<EmailTemplateOptions, 'organizationId'>;
+    },
+) {
     const template = await getEmailTemplate({
         ...options.template,
         organizationId: organization?.id ?? null,
@@ -229,7 +286,15 @@ async function getEmailBuilderForTemplate(organization: Organization | null, opt
     });
 }
 
-export type EmailAttachmentData = { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string; cid?: string };
+export type EmailAttachmentData = {
+    filename: string;
+    path?: string;
+    href?: string;
+    content?: string | Buffer;
+    contentType?: string;
+    encoding?: string;
+    cid?: string;
+};
 
 export type EmailBuilderOptions = {
     defaultReplacements?: Replacement[];
@@ -280,19 +345,29 @@ function getAttachmentBytes(attachment: EmailAttachmentData): number {
  * A file that the replaced html references as `cid:<file.id>` (e.g. `<img src="cid:...">`) becomes
  * an inline attachment with that content id, so the image renders inside the email body.
  */
-async function getReplacementAttachments(html: string, replacements: Replacement[], baseAttachments: EmailAttachmentData[]): Promise<EmailAttachmentData[]> {
+async function getReplacementAttachments(
+    html: string,
+    replacements: Replacement[],
+    baseAttachments: EmailAttachmentData[],
+): Promise<EmailAttachmentData[]> {
     const files = getUsedReplacementFiles(html, replacements);
     if (files.length === 0) {
         return [];
     }
 
     const replacedHtml = replaceEmailHtml(html, replacements);
-    let totalBytes = baseAttachments.reduce((total, attachment) => total + getAttachmentBytes(attachment), 0);
+    let totalBytes = baseAttachments.reduce(
+        (total, attachment) => total + getAttachmentBytes(attachment),
+        0,
+    );
     const attachments: EmailAttachmentData[] = [];
 
     for (const file of files) {
         if (totalBytes + file.size > MAX_EMAIL_ATTACHMENTS_BYTES) {
-            console.warn('Skipping replacement file attachment because the total attachment size would become too large', file.id);
+            console.warn(
+                'Skipping replacement file attachment because the total attachment size would become too large',
+                file.id,
+            );
             continue;
         }
 
@@ -301,21 +376,32 @@ async function getReplacementAttachments(html: string, replacements: Replacement
             // Only files with a valid signature get a signed url
             const signed = await file.withSignedUrl();
             if (!signed?.signedUrl) {
-                console.error('Could not create a signed url for replacement file attachment', file.id);
+                console.error(
+                    'Could not create a signed url for replacement file attachment',
+                    file.id,
+                );
                 continue;
             }
             href = signed.signedUrl;
         } else {
             // The mailer downloads the attachment: a public file is not signed, so its server is only trusted when it is ours
             if (!FileSignService.isStoredOnOwnServer(file)) {
-                console.warn('Skipping replacement file attachment that is not stored on our own server', file.id, file.server);
+                console.warn(
+                    'Skipping replacement file attachment that is not stored on our own server',
+                    file.id,
+                    file.server,
+                );
                 continue;
             }
             href = file.getPublicPath();
         }
 
         attachments.push({
-            filename: (file.name ?? file.path.split('/').pop() ?? 'attachment').toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, ''),
+            filename: (file.name ?? file.path.split('/').pop() ?? 'attachment')
+                .toLowerCase()
+                .replace(/[^a-z0-9.]+/g, '-')
+                .replace(/^-+/, '')
+                .replace(/-+$/, ''),
             href,
             contentType: file.contentType ?? undefined,
             cid: replacedHtml.includes(file.inlineEmailSrc) ? file.id : undefined,
@@ -329,14 +415,17 @@ async function getReplacementAttachments(html: string, replacements: Replacement
 /**
  * @param organization defines replacements and unsubsribe behaviour
  */
-export async function getEmailBuilder(organization: Organization | null, email: EmailBuilderOptions) {
+export async function getEmailBuilder(
+    organization: Organization | null,
+    email: EmailBuilderOptions,
+) {
     const platform = await Platform.getSharedPrivateStruct();
     // Update recipients
     const cleaned: Recipient[] = [];
     for (const recipient of email.recipients) {
         try {
             const unsubscribeGlobal = await EmailAddress.getWhereHardBounceOrSpam(recipient.email);
-            if ((unsubscribeGlobal && (unsubscribeGlobal.hardBounce))) {
+            if (unsubscribeGlobal && unsubscribeGlobal.hardBounce) {
                 // Ignore
                 if (email.callback) {
                     email.callback(
@@ -350,7 +439,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                 continue;
             }
 
-            if (unsubscribeGlobal && (unsubscribeGlobal.markedAsSpam)) {
+            if (unsubscribeGlobal && unsubscribeGlobal.markedAsSpam) {
                 // Ignore
                 if (email.callback) {
                     email.callback(
@@ -364,14 +453,29 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                 continue;
             }
 
-            const unsubscribe = await EmailAddress.getOrCreate(recipient.email, email.fromStamhoofd || !organization ? null : organization.id);
-            if (unsubscribe.unsubscribedAll || unsubscribe.hardBounce || unsubscribe.markedAsSpam || !unsubscribe.token || (unsubscribe.unsubscribedMarketing && email.unsubscribeType === 'marketing')) {
+            const unsubscribe = await EmailAddress.getOrCreate(
+                recipient.email,
+                email.fromStamhoofd || !organization ? null : organization.id,
+            );
+            if (
+                unsubscribe.unsubscribedAll ||
+                unsubscribe.hardBounce ||
+                unsubscribe.markedAsSpam ||
+                !unsubscribe.token ||
+                (unsubscribe.unsubscribedMarketing && email.unsubscribeType === 'marketing')
+            ) {
                 // Ignore
                 if (email.callback) {
                     email.callback(
                         new SimpleError({
                             code: 'email_skipped_unsubscribed',
-                            message: unsubscribe.unsubscribedAll ? 'Recipient has unsubscribed' : (unsubscribe.hardBounce ? 'Recipient has hard bounced' : (unsubscribe.markedAsSpam ? 'Recipient has marked as spam' : 'Recipient has unsubscribed from marketing')),
+                            message: unsubscribe.unsubscribedAll
+                                ? 'Recipient has unsubscribed'
+                                : unsubscribe.hardBounce
+                                  ? 'Recipient has hard bounced'
+                                  : unsubscribe.markedAsSpam
+                                    ? 'Recipient has marked as spam'
+                                    : 'Recipient has unsubscribed from marketing',
                             human: $t('%1E3'),
                         }),
                     );
@@ -380,18 +484,41 @@ export async function getEmailBuilder(organization: Organization | null, email: 
             }
 
             // Localize the unsubscribe page to the recipient's language (Organization.i18n is always Dutch)
-            const unsubscribeLocale = organization ? (await getRecipientI18n(recipient, organization)).locale : null;
-            const unsubscribeUrl = 'https://' + STAMHOOFD.domains.dashboard + '/' + (unsubscribeLocale ? (unsubscribeLocale + '/') : '') + 'unsubscribe?id=' + encodeURIComponent(unsubscribe.id) + '&token=' + encodeURIComponent(unsubscribe.token) + '&type=' + encodeURIComponent(email.unsubscribeType ?? 'all');
-            recipient.replacements.push(Replacement.create({
-                // eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Template placeholder name; the actual URL is generated separately above.
-                token: 'unsubscribeUrl',
-                value: unsubscribeUrl,
-            }));
+            const unsubscribeLocale = organization
+                ? (await getRecipientI18n(recipient, organization)).locale
+                : null;
+            const unsubscribeUrl =
+                'https://' +
+                STAMHOOFD.domains.dashboard +
+                '/' +
+                (unsubscribeLocale ? unsubscribeLocale + '/' : '') +
+                'unsubscribe?id=' +
+                encodeURIComponent(unsubscribe.id) +
+                '&token=' +
+                encodeURIComponent(unsubscribe.token) +
+                '&type=' +
+                encodeURIComponent(email.unsubscribeType ?? 'all');
+            recipient.replacements.push(
+                Replacement.create({
+                    // eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Template placeholder name; the actual URL is generated separately above.
+                    token: 'unsubscribeUrl',
+                    value: unsubscribeUrl,
+                }),
+            );
 
             // Override headers
             recipient.headers = new Map([
                 ...(email.headers ?? []),
-                ['List-Unsubscribe', STAMHOOFD.domains.defaultBroadcastEmail !== undefined ? '<mailto:unsubscribe+' + unsubscribe.id + '@' + STAMHOOFD.domains.defaultBroadcastEmail![''] + `>, <${unsubscribeUrl}>` : `<${unsubscribeUrl}>`],
+                [
+                    'List-Unsubscribe',
+                    STAMHOOFD.domains.defaultBroadcastEmail !== undefined
+                        ? '<mailto:unsubscribe+' +
+                          unsubscribe.id +
+                          '@' +
+                          STAMHOOFD.domains.defaultBroadcastEmail![''] +
+                          `>, <${unsubscribeUrl}>`
+                        : `<${unsubscribeUrl}>`,
+                ],
                 ['List-Unsubscribe-Post', 'List-Unsubscribe=One-Click'],
             ]);
             cleaned.push(recipient);
@@ -416,7 +543,10 @@ export async function getEmailBuilder(organization: Organization | null, email: 
 
         // Strict selection: only use a translation of this email, never fall back to
         // a different template for a missing language (content correctness above language)
-        const translation = language !== null && language !== email.language ? email.translations?.get(language) : undefined;
+        const translation =
+            language !== null && language !== email.language
+                ? email.translations?.get(language)
+                : undefined;
         const subject = translation ? translation.subject : email.subject;
         let html = translation ? translation.html : email.html;
 
@@ -446,7 +576,11 @@ export async function getEmailBuilder(organization: Organization | null, email: 
         });
 
         const content = resolveContent(recipient.language ?? null);
-        const attachments = await getReplacementAttachments(content.html, recipient.replacements, email.attachments ?? []);
+        const attachments = await getReplacementAttachments(
+            content.html,
+            recipient.replacements,
+            email.attachments ?? [],
+        );
         if (attachments.length > 0) {
             replacementAttachments.set(recipient, attachments);
         }
@@ -458,10 +592,12 @@ export async function getEmailBuilder(organization: Organization | null, email: 
 
     if (queue.length === 0) {
         if (email.callback) {
-            email.callback(new SimpleError({
-                code: 'no_recipients',
-                message: 'No recipients left',
-            }));
+            email.callback(
+                new SimpleError({
+                    code: 'no_recipients',
+                    message: 'No recipients left',
+                }),
+            );
         }
     }
 
@@ -477,7 +613,9 @@ export async function getEmailBuilder(organization: Organization | null, email: 
         const replacedSubject = replaceEmailText(content.subject, recipient.replacements);
 
         const extraAttachments = replacementAttachments.get(recipient);
-        const attachments = extraAttachments ? [...(email.attachments ?? []), ...extraAttachments] : email.attachments;
+        const attachments = extraAttachments
+            ? [...(email.attachments ?? []), ...extraAttachments]
+            : email.attachments;
 
         emailIndex += 1;
 
@@ -503,7 +641,10 @@ export async function getEmailBuilder(organization: Organization | null, email: 
     return builder;
 }
 
-export function mergeReplacement(replacementA: Replacement, replacementB: Replacement): Replacement | false {
+export function mergeReplacement(
+    replacementA: Replacement,
+    replacementB: Replacement,
+): Replacement | false {
     if (replacementA.token !== replacementB.token) {
         return false;
     }
@@ -565,7 +706,10 @@ export function removeUnusedReplacements(html: string, replacements: Replacement
     return cleaned;
 }
 
-export function mergeReplacementsIfEqual(replacementsA: Replacement[], replacementsB: Replacement[]): Replacement[] | false {
+export function mergeReplacementsIfEqual(
+    replacementsA: Replacement[],
+    replacementsB: Replacement[],
+): Replacement[] | false {
     replacementsA = cleanReplacements(replacementsA);
     replacementsB = cleanReplacements(replacementsB);
 
@@ -575,14 +719,14 @@ export function mergeReplacementsIfEqual(replacementsA: Replacement[], replaceme
 
     const merged: Replacement[] = [];
     for (const rA of replacementsA) {
-        const rB = replacementsB.find(r => r.token === rA.token);
+        const rB = replacementsB.find((r) => r.token === rA.token);
         if (!rB) {
             return false;
         }
 
         // Replacements with different files can never merge: merging would drop attachments
-        const filesA = rA.files.map(f => f.id).join(',');
-        const filesB = rB.files.map(f => f.id).join(',');
+        const filesA = rA.files.map((f) => f.id).join(',');
+        const filesB = rB.files.map((f) => f.id).join(',');
         if (filesA !== filesB) {
             return false;
         }
@@ -606,34 +750,58 @@ export function mergeReplacementsIfEqual(replacementsA: Replacement[], replaceme
  * Filter replacements for display in the backend.
  * @param options.forPreview if true, it will hide sensitive information in the preview that could leak information to admin users
  */
-export function stripSensitiveRecipientReplacements(recipient: Recipient | EmailRecipientStruct | EmailRecipient, options: {
-    organization: Organization | null;
-    willFill?: boolean;
-}) {
+export function stripSensitiveRecipientReplacements(
+    recipient: Recipient | EmailRecipientStruct | EmailRecipient,
+    options: {
+        organization: Organization | null;
+        willFill?: boolean;
+    },
+) {
     const { organization } = options;
     // Remove unsubscribeUrl and signInUrl if present
-    recipient.replacements = recipient.replacements.filter(r => r.token !== 'unsubscribeUrl' && r.token !== 'signInUrl');
+    recipient.replacements = recipient.replacements.filter(
+        (r) => r.token !== 'unsubscribeUrl' && r.token !== 'signInUrl',
+    );
 
     if (options.willFill) {
         // Also strip loginDetails, balanceTable and outstandingBalance
-        recipient.replacements = recipient.replacements.filter(r => r.token !== 'balanceTable' && r.token !== 'outstandingBalance' && r.token !== 'loginDetails');
+        recipient.replacements = recipient.replacements.filter(
+            (r) =>
+                r.token !== 'balanceTable' &&
+                r.token !== 'outstandingBalance' &&
+                r.token !== 'loginDetails',
+        );
         return;
     }
 
     // Add dummy unsubscribeUrl
-    const dummyUnsubscribeUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/unsubscribe?token=example';
-    recipient.replacements.push(Replacement.create({
-        // eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Template placeholder name, not an authentication token.
-        token: 'unsubscribeUrl',
-        value: dummyUnsubscribeUrl,
-    }));
+    const dummyUnsubscribeUrl =
+        'https://' +
+        (organization && STAMHOOFD.userMode === 'organization'
+            ? getAppHost('registration', organization, false)
+            : STAMHOOFD.domains.dashboard) +
+        '/unsubscribe?token=example';
+    recipient.replacements.push(
+        Replacement.create({
+            // eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Template placeholder name, not an authentication token.
+            token: 'unsubscribeUrl',
+            value: dummyUnsubscribeUrl,
+        }),
+    );
 
     // dummy signInUrl
-    const dummySignInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard) + '/login';
-    recipient.replacements.push(Replacement.create({
-        token: 'signInUrl',
-        value: dummySignInUrl,
-    }));
+    const dummySignInUrl =
+        'https://' +
+        (organization && STAMHOOFD.userMode === 'organization'
+            ? getAppHost('registration', organization, false)
+            : STAMHOOFD.domains.dashboard) +
+        '/login';
+    recipient.replacements.push(
+        Replacement.create({
+            token: 'signInUrl',
+            value: dummySignInUrl,
+        }),
+    );
 
     // Strip security codes (because we list ALL security codes, also from members a viewer might not have access to)
     recipient.replacements = recipient.replacements.map((r) => {
@@ -643,7 +811,12 @@ export function stripSensitiveRecipientReplacements(recipient: Recipient | Email
         return Replacement.create({
             ...r,
             // Strip <span class="style-inline-code">(.*)</span> and replace content with XXXX-XXXX-XXXX-XXXX
-            html: r.html ? r.html.replace(/<span class="style-inline-code">.*?<\/span>/g, '<span class="style-inline-code">••••</span>') : r.html,
+            html: r.html
+                ? r.html.replace(
+                      /<span class="style-inline-code">.*?<\/span>/g,
+                      '<span class="style-inline-code">••••</span>',
+                  )
+                : r.html,
         });
     });
 }
@@ -651,30 +824,45 @@ export function stripSensitiveRecipientReplacements(recipient: Recipient | Email
 /**
  * Fill and hide replacements that don't make sense for web display to the user
  */
-export function stripRecipientReplacementsForWebDisplay(recipient: Recipient | EmailRecipientStruct | EmailRecipient, options: {
-    organization: Organization | null;
-}) {
+export function stripRecipientReplacementsForWebDisplay(
+    recipient: Recipient | EmailRecipientStruct | EmailRecipient,
+    options: {
+        organization: Organization | null;
+    },
+) {
     const { organization } = options;
     // Remove unsubscribeUrl if present
-    recipient.replacements = recipient.replacements.filter(r => r.token !== 'unsubscribeUrl' && r.token !== 'loginDetails' && r.token !== 'greeting');
+    recipient.replacements = recipient.replacements.filter(
+        (r) => r.token !== 'unsubscribeUrl' && r.token !== 'loginDetails' && r.token !== 'greeting',
+    );
 
     // Add dummy unsubscribeUrl
-    const dummyUnsubscribeUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false) : STAMHOOFD.domains.dashboard);
-    recipient.replacements.push(Replacement.create({
-        // eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Template placeholder name, not an authentication token.
-        token: 'unsubscribeUrl',
-        value: dummyUnsubscribeUrl,
-    }));
+    const dummyUnsubscribeUrl =
+        'https://' +
+        (organization && STAMHOOFD.userMode === 'organization'
+            ? getAppHost('registration', organization, false)
+            : STAMHOOFD.domains.dashboard);
+    recipient.replacements.push(
+        Replacement.create({
+            // eslint-disable-next-line secure-coding/no-hardcoded-credentials -- Template placeholder name, not an authentication token.
+            token: 'unsubscribeUrl',
+            value: dummyUnsubscribeUrl,
+        }),
+    );
 
-    recipient.replacements.push(Replacement.create({
-        token: 'loginDetails',
-        value: '',
-    }));
+    recipient.replacements.push(
+        Replacement.create({
+            token: 'loginDetails',
+            value: '',
+        }),
+    );
 
-    recipient.replacements.push(Replacement.create({
-        token: 'greeting',
-        value: $t('%1E9'),
-    }));
+    recipient.replacements.push(
+        Replacement.create({
+            token: 'greeting',
+            value: $t('%1E9'),
+        }),
+    );
 }
 
 /**
@@ -684,7 +872,11 @@ export function stripRecipientReplacementsForWebDisplay(recipient: Recipient | E
  * that already established a locale (order emails wrapped in I18n.runWithLocale, or the request
  * locale) keep working unchanged.
  */
-export async function getRecipientI18n(recipient: { language?: Language | null }, organization: Organization | null, options?: { allowedLanguages?: Language[] | null }): Promise<I18n> {
+export async function getRecipientI18n(
+    recipient: { language?: Language | null },
+    organization: Organization | null,
+    options?: { allowedLanguages?: Language[] | null },
+): Promise<I18n> {
     const tenant = await TenantContext.currentOrRoot.getTenant();
     let lang = recipient.language ?? organization?.language ?? tenant.language ?? $getLanguage();
     if (options?.allowedLanguages && options.allowedLanguages.length) {
@@ -707,7 +899,12 @@ export async function getRecipientI18n(recipient: { language?: Language | null }
  * content. Generate recipient replacements inside this wrapper so new replacements are localized
  * automatically, and pass the provided i18n to helpers that take an explicit locale (e.g. getAppHost).
  */
-export async function runWithRecipientLocale<T>(recipient: { language?: Language | null }, organization: Organization | null, handler: (i18n: I18n) => T, options?: { allowedLanguages?: Language[] | null }): Promise<T> {
+export async function runWithRecipientLocale<T>(
+    recipient: { language?: Language | null },
+    organization: Organization | null,
+    handler: (i18n: I18n) => T,
+    options?: { allowedLanguages?: Language[] | null },
+): Promise<T> {
     const i18n = await getRecipientI18n(recipient, organization, options);
     return I18n.runWithLocale(i18n, () => handler(i18n));
 }
@@ -715,15 +912,18 @@ export async function runWithRecipientLocale<T>(recipient: { language?: Language
 /**
  * @param options.forPreview if true, it will hide sensitive information in the preview that could leak information to admin users
  */
-export async function fillRecipientReplacements(recipient: Recipient | EmailRecipientStruct | EmailRecipient, options: {
-    organization: Organization | null;
-    platform?: PlatformStruct;
-    from: EmailInterfaceRecipient | null;
-    replyTo: EmailInterfaceRecipient | null;
-    forPreview?: boolean;
-    forceRefresh?: boolean;
-    allowedLanguages?: Language[] | null;
-}) {
+export async function fillRecipientReplacements(
+    recipient: Recipient | EmailRecipientStruct | EmailRecipient,
+    options: {
+        organization: Organization | null;
+        platform?: PlatformStruct;
+        from: EmailInterfaceRecipient | null;
+        replyTo: EmailInterfaceRecipient | null;
+        forPreview?: boolean;
+        forceRefresh?: boolean;
+        allowedLanguages?: Language[] | null;
+    },
+) {
     if (!options.platform) {
         options.platform = await Platform.getSharedPrivateStruct();
     }
@@ -732,182 +932,243 @@ export async function fillRecipientReplacements(recipient: Recipient | EmailReci
     // Render every recipient replacement (greeting, loginDetails, balance table, URLs...) in the
     // recipient's own language, so translated emails are consistent end-to-end. Any replacement
     // added below is localized automatically; helpers with an explicit locale get the same i18n.
-    await runWithRecipientLocale(recipient, organization, async (i18n) => {
-        let recipientUser: User | null | undefined = null;
-        recipient.replacements = recipient.replacements.slice();
-        if (options.forPreview) {
-            stripSensitiveRecipientReplacements(recipient, options);
-        }
-
-        if (!recipient.email && !recipient.userId) {
-            const signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false, i18n) : STAMHOOFD.domains.dashboard) + '/login';
-            recipient.replacements.push(Replacement.create({
-                token: 'signInUrl',
-                value: signInUrl,
-            }));
-
-            if (!recipient.replacements.find(r => r.token === 'loginDetails')) {
-                recipient.replacements.push(Replacement.create({
-                    token: 'loginDetails',
-                    value: '',
-                }));
-            }
-        } else {
-        // Default signInUrl
-            recipientUser = recipient.userId ? await User.select().where('id', recipient.userId).first(false) : await User.getForAuthentication(organization?.id ?? null, recipient.email!, { allowWithoutAccount: true });
-            if (STAMHOOFD.userMode !== 'platform' && recipientUser && recipientUser.organizationId && recipientUser.organizationId !== (organization?.id ?? null)) {
-                console.warn('User organization does not match current organization, ignoring userId', recipient.userId, recipientUser.organizationId, organization?.id ?? null);
-                recipientUser = null;
+    await runWithRecipientLocale(
+        recipient,
+        organization,
+        async (i18n) => {
+            let recipientUser: User | null | undefined = null;
+            recipient.replacements = recipient.replacements.slice();
+            if (options.forPreview) {
+                stripSensitiveRecipientReplacements(recipient, options);
             }
 
-            let signInUrl: string;
-            if (!recipientUser || !recipientUser.hasAccount()) {
-            // We can create a special token
-                if (recipientUser) {
-                    signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false, i18n) : STAMHOOFD.domains.dashboard) + '/account-aanmaken?email=' + encodeURIComponent(recipientUser?.email);
-                } else {
-                    signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false, i18n) : STAMHOOFD.domains.dashboard) + '/account-aanmaken';
+            if (!recipient.email && !recipient.userId) {
+                const signInUrl =
+                    'https://' +
+                    (organization && STAMHOOFD.userMode === 'organization'
+                        ? getAppHost('registration', organization, false, i18n)
+                        : STAMHOOFD.domains.dashboard) +
+                    '/login';
+                recipient.replacements.push(
+                    Replacement.create({
+                        token: 'signInUrl',
+                        value: signInUrl,
+                    }),
+                );
+
+                if (!recipient.replacements.find((r) => r.token === 'loginDetails')) {
+                    recipient.replacements.push(
+                        Replacement.create({
+                            token: 'loginDetails',
+                            value: '',
+                        }),
+                    );
                 }
             } else {
-                signInUrl = 'https://' + (organization && STAMHOOFD.userMode === 'organization' ? getAppHost('registration', organization, false, i18n) : STAMHOOFD.domains.dashboard) + '/login?email=' + encodeURIComponent(recipientUser.email);
+                // Default signInUrl
+                recipientUser = recipient.userId
+                    ? await User.select().where('id', recipient.userId).first(false)
+                    : await User.getForAuthentication(organization?.id ?? null, recipient.email!, {
+                          allowWithoutAccount: true,
+                      });
+                if (
+                    STAMHOOFD.userMode !== 'platform' &&
+                    recipientUser &&
+                    recipientUser.organizationId &&
+                    recipientUser.organizationId !== (organization?.id ?? null)
+                ) {
+                    console.warn(
+                        'User organization does not match current organization, ignoring userId',
+                        recipient.userId,
+                        recipientUser.organizationId,
+                        organization?.id ?? null,
+                    );
+                    recipientUser = null;
+                }
+
+                let signInUrl: string;
+                if (!recipientUser || !recipientUser.hasAccount()) {
+                    // We can create a special token
+                    if (recipientUser) {
+                        signInUrl =
+                            'https://' +
+                            (organization && STAMHOOFD.userMode === 'organization'
+                                ? getAppHost('registration', organization, false, i18n)
+                                : STAMHOOFD.domains.dashboard) +
+                            '/account-aanmaken?email=' +
+                            encodeURIComponent(recipientUser?.email);
+                    } else {
+                        signInUrl =
+                            'https://' +
+                            (organization && STAMHOOFD.userMode === 'organization'
+                                ? getAppHost('registration', organization, false, i18n)
+                                : STAMHOOFD.domains.dashboard) +
+                            '/account-aanmaken';
+                    }
+                } else {
+                    signInUrl =
+                        'https://' +
+                        (organization && STAMHOOFD.userMode === 'organization'
+                            ? getAppHost('registration', organization, false, i18n)
+                            : STAMHOOFD.domains.dashboard) +
+                        '/login?email=' +
+                        encodeURIComponent(recipientUser.email);
+                }
+
+                recipient.replacements.push(
+                    Replacement.create({
+                        token: 'signInUrl',
+                        value: signInUrl,
+                    }),
+                );
             }
 
-            recipient.replacements.push(Replacement.create({
-                token: 'signInUrl',
-                value: signInUrl,
-            }));
-        }
+            if (options.forceRefresh) {
+                // Remove loginDetails to force refresh
+                recipient.replacements = recipient.replacements.filter(
+                    (r) => r.token !== 'loginDetails',
+                );
+            }
 
-        if (options.forceRefresh) {
-        // Remove loginDetails to force refresh
-            recipient.replacements = recipient.replacements.filter(r => r.token !== 'loginDetails');
-        }
-
-        if (!recipient.replacements.find(r => r.token === 'loginDetails')) {
-            if (recipientUser) {
-                const emailEscaped = `<strong>${Formatter.escapeHtml(recipientUser.email)}</strong>`;
-                const suffixes: string[] = [];
-                const memberIds = await Member.getMemberIdsForUser(recipientUser);
-                const members = await Member.getByIDs(...memberIds);
-                if (members.length > 0) {
-                    for (const member of members) {
-                        suffixes.push(
-                            $t('%1EC', {
-                                firstName: Formatter.escapeHtml(member.firstName),
-                                securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(options.forPreview ? '••••' : Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
+            if (!recipient.replacements.find((r) => r.token === 'loginDetails')) {
+                if (recipientUser) {
+                    const emailEscaped = `<strong>${Formatter.escapeHtml(recipientUser.email)}</strong>`;
+                    const suffixes: string[] = [];
+                    const memberIds = await Member.getMemberIdsForUser(recipientUser);
+                    const members = await Member.getByIDs(...memberIds);
+                    if (members.length > 0) {
+                        for (const member of members) {
+                            suffixes.push(
+                                $t('%1EC', {
+                                    firstName: Formatter.escapeHtml(member.firstName),
+                                    securityCode: `<span class="style-inline-code">${Formatter.escapeHtml(options.forPreview ? '••••' : Formatter.spaceString(member.details.securityCode ?? '', 4, '-'))}</span>`,
+                                }),
+                            );
+                        }
+                    } else {
+                        console.log('No member found for user', recipientUser.id);
+                    }
+                    const suffix = suffixes.length > 0 ? ' ' + suffixes.join(' ') : '';
+                    recipient.replacements.push(
+                        Replacement.create({
+                            token: 'loginDetails',
+                            value: '',
+                            html: recipientUser.hasAccount()
+                                ? `<p class="description"><em>${$t('%1EA', { email: emailEscaped })}${suffix}</em></p>`
+                                : `<p class="description"><em>${$t('%1EB', { email: emailEscaped })}${suffix}</em></p>`,
+                        }),
+                    );
+                } else {
+                    if (recipient.email) {
+                        const emailEscaped = `<strong>${Formatter.escapeHtml(recipient.email)}</strong>`;
+                        console.log('No user found for email', recipient.email);
+                        recipient.replacements.push(
+                            Replacement.create({
+                                token: 'loginDetails',
+                                value: '',
+                                html: `<p class="description"><em>${$t('%1EB', { email: emailEscaped })}</em></p>`,
+                            }),
+                        );
+                    } else {
+                        recipient.replacements.push(
+                            Replacement.create({
+                                token: 'loginDetails',
+                                value: '',
+                                html: '',
                             }),
                         );
                     }
-                } else {
-                    console.log('No member found for user', recipientUser.id);
                 }
-                const suffix = suffixes.length > 0 ? (' ' + suffixes.join(' ')) : '';
-                recipient.replacements.push(
-                    Replacement.create({
-                        token: 'loginDetails',
-                        value: '',
-                        html: recipientUser.hasAccount()
-                            ? `<p class="description"><em>${$t('%1EA', { email: emailEscaped })}${suffix}</em></p>`
-                            : `<p class="description"><em>${$t('%1EB', { email: emailEscaped })}${suffix}</em></p>`,
-                    }),
+            }
+
+            if (options.forceRefresh) {
+                // Remove loginDetails to force refresh
+                recipient.replacements = recipient.replacements.filter(
+                    (r) => r.token !== 'balanceTable' && r.token !== 'outstandingBalance',
                 );
-            } else {
-                if (recipient.email) {
-                    const emailEscaped = `<strong>${Formatter.escapeHtml(recipient.email)}</strong>`;
-                    console.log('No user found for email', recipient.email);
+            }
+
+            // Load balance of this user
+            // todo: only if detected it is used
+            if (!recipient.replacements.find((r) => r.token === 'balanceTable')) {
+                if (organization && recipientUser) {
+                    const balanceItemModels = await CachedBalance.balanceForObjects(
+                        organization.id,
+                        [recipientUser.id],
+                        ReceivableBalanceType.user,
+                    );
+                    const balanceItems = balanceItemModels.map((i) => i.getStructure());
+
+                    // Get members
                     recipient.replacements.push(
                         Replacement.create({
-                            token: 'loginDetails',
+                            token: 'outstandingBalance',
+                            value: Formatter.price(
+                                balanceItems.reduce((sum, i) => sum + i.priceOpen, 0),
+                            ),
+                        }),
+                        Replacement.create({
+                            token: 'balanceTable',
                             value: '',
-                            html: `<p class="description"><em>${$t('%1EB', { email: emailEscaped })}</em></p>`,
+                            html: BalanceItemStruct.getDetailsHTMLTable(balanceItems),
                         }),
                     );
                 } else {
                     recipient.replacements.push(
                         Replacement.create({
-                            token: 'loginDetails',
+                            token: 'outstandingBalance',
+                            value: Formatter.price(0),
+                        }),
+                        Replacement.create({
+                            token: 'balanceTable',
                             value: '',
-                            html: '',
+                            html: BalanceItemStruct.getDetailsHTMLTable([]),
                         }),
                     );
                 }
             }
-        }
 
-        if (options.forceRefresh) {
-        // Remove loginDetails to force refresh
-            recipient.replacements = recipient.replacements.filter(r => r.token !== 'balanceTable' && r.token !== 'outstandingBalance');
-        }
+            if (from || replyTo) {
+                const fromAddress = replyTo?.email ?? from!.email;
 
-        // Load balance of this user
-        // todo: only if detected it is used
-        if (!recipient.replacements.find(r => r.token === 'balanceTable')) {
-            if (organization && recipientUser) {
-                const balanceItemModels = await CachedBalance.balanceForObjects(organization.id, [recipientUser.id], ReceivableBalanceType.user);
-                const balanceItems = balanceItemModels.map(i => i.getStructure());
+                if (fromAddress) {
+                    recipient.replacements.push(
+                        Replacement.create({
+                            token: 'fromAddress',
+                            value: fromAddress,
+                        }),
+                    );
+                }
 
-                // Get members
-                recipient.replacements.push(
-                    Replacement.create({
-                        token: 'outstandingBalance',
-                        value: Formatter.price(balanceItems.reduce((sum, i) => sum + i.priceOpen, 0)),
-                    }),
-                    Replacement.create({
-                        token: 'balanceTable',
-                        value: '',
-                        html: BalanceItemStruct.getDetailsHTMLTable(balanceItems),
-                    }),
-                );
+                const name = replyTo?.name ?? from?.name;
+                if (name) {
+                    recipient.replacements.push(
+                        Replacement.create({
+                            token: 'fromName',
+                            value: name,
+                        }),
+                    );
+                }
+            }
+
+            if (recipient instanceof EmailRecipient) {
+                recipient.replacements.push(...recipient.getRecipient().getDefaultReplacements());
             } else {
-                recipient.replacements.push(
-                    Replacement.create({
-                        token: 'outstandingBalance',
-                        value: Formatter.price(0),
-                    }),
-                    Replacement.create({
-                        token: 'balanceTable',
-                        value: '',
-                        html: BalanceItemStruct.getDetailsHTMLTable([]),
-                    }),
-                );
-            }
-        }
-
-        if (from || replyTo) {
-            const fromAddress = replyTo?.email ?? from!.email;
-
-            if (fromAddress) {
-                recipient.replacements.push(Replacement.create({
-                    token: 'fromAddress',
-                    value: fromAddress,
-                }));
+                recipient.replacements.push(...recipient.getDefaultReplacements());
             }
 
-            const name = replyTo?.name ?? from?.name;
-            if (name) {
-                recipient.replacements.push(Replacement.create({
-                    token: 'fromName',
-                    value: name,
-                }));
+            if (organization) {
+                const extra = organization.meta.getEmailReplacements(organization);
+                recipient.replacements.push(...extra);
             }
-        }
 
-        if (recipient instanceof EmailRecipient) {
-            recipient.replacements.push(...recipient.getRecipient().getDefaultReplacements());
-        } else {
-            recipient.replacements.push(...recipient.getDefaultReplacements());
-        }
-
-        if (organization) {
-            const extra = organization.meta.getEmailReplacements(organization);
+            // Defaults
+            const extra = platform.config.getEmailReplacements(platform);
             recipient.replacements.push(...extra);
-        }
 
-        // Defaults
-        const extra = platform.config.getEmailReplacements(platform);
-        recipient.replacements.push(...extra);
-
-        // Remove duplicates
-        cleanReplacements(recipient.replacements);
-    }, options);
+            // Remove duplicates
+            cleanReplacements(recipient.replacements);
+        },
+        options,
+    );
 }

@@ -2,14 +2,45 @@ import type { SQLResultNamespacedRow } from '@node/database';
 import { SQLDelete } from './SQLDelete.js';
 import type { SQLExpression } from './SQLExpression.js';
 import { isSQLExpression } from './SQLExpression.js';
-import type { SQLAggregateColumnType, SQLColumnExpressionParams, SQLScalarValue } from './SQLExpressions.js';
-import { SQLAggregateColumnExpression, SQLAssignment, SQLCalculation, SQLCast, SQLCoalesce, SQLColumnExpression, SQLDistinct, SQLIsNull, SQLJSONTableExpression, SQLMax, SQLMin, SQLParentNamespace, SQLSafeValue, SQLScalar, SQLSubQuery, SQLTableExpression, SQLWildcardSelectExpression } from './SQLExpressions.js';
+import type {
+    SQLAggregateColumnType,
+    SQLColumnExpressionParams,
+    SQLScalarValue,
+} from './SQLExpressions.js';
+import {
+    SQLAggregateColumnExpression,
+    SQLAssignment,
+    SQLCalculation,
+    SQLCast,
+    SQLCoalesce,
+    SQLColumnExpression,
+    SQLDistinct,
+    SQLIsNull,
+    SQLJSONTableExpression,
+    SQLMax,
+    SQLMin,
+    SQLParentNamespace,
+    SQLSafeValue,
+    SQLScalar,
+    SQLSubQuery,
+    SQLTableExpression,
+    SQLWildcardSelectExpression,
+} from './SQLExpressions.js';
 import { SQLIf } from './SQLIf.js';
 import { SQLInsert } from './SQLInsert.js';
 import { SQLJoin } from './SQLJoin.js';
 import { SQLJoinType } from './SQLQueryContracts.js';
 import type { SQLJsonValueType } from './SQLJsonExpressions.js';
-import { SQLJsonExtract, SQLJsonKeys, SQLJsonLength, SQLJsonOverlaps, SQLJsonType, SQLJsonUnquote, SQLJsonValue, SQLLpad } from './SQLJsonExpressions.js';
+import {
+    SQLJsonExtract,
+    SQLJsonKeys,
+    SQLJsonLength,
+    SQLJsonOverlaps,
+    SQLJsonType,
+    SQLJsonUnquote,
+    SQLJsonValue,
+    SQLLpad,
+} from './SQLJsonExpressions.js';
 import { parseTable, SQLSelect } from './SQLSelect.js';
 import { SQLUpdate } from './SQLUpdate.js';
 import type { ParseWhereArguments, SQLWhere } from './SQLWhere.js';
@@ -40,8 +71,17 @@ class StaticSQL {
         return new SQLJsonOverlaps(jsonDoc1, jsonDoc2);
     }
 
-    jsonValue(column: SQLExpression, path: string, type?: SQLJsonValueType, asScalar = false): SQLJsonValue {
-        return new SQLJsonValue(column, type, asScalar ? new SQLScalar(path) : new SQLSafeValue(path));
+    jsonValue(
+        column: SQLExpression,
+        path: string,
+        type?: SQLJsonValueType,
+        asScalar = false,
+    ): SQLJsonValue {
+        return new SQLJsonValue(
+            column,
+            type,
+            asScalar ? new SQLScalar(path) : new SQLSafeValue(path),
+        );
     }
 
     jsonKeys(column: SQLExpression): SQLJsonKeys {
@@ -76,7 +116,9 @@ class StaticSQL {
         return new SQLJSONTableExpression(expression, asNamespace);
     }
 
-    select(...columns: (SQLExpression | string)[]): InstanceType<typeof SQLSelect<SQLResultNamespacedRow>> {
+    select(
+        ...columns: (SQLExpression | string)[]
+    ): InstanceType<typeof SQLSelect<SQLResultNamespacedRow>> {
         if (columns.length === 0) {
             return new SQLSelect(this.wildcard());
         }
@@ -92,7 +134,10 @@ class StaticSQL {
     }
 
     assignment(key: SQLExpression | string, value: SQLExpression | SQLScalarValue): SQLAssignment {
-        return new SQLAssignment(typeof key === 'string' ? new SQLColumnExpression(key) : key, isSQLExpression(value) ? value : new SQLScalar(value));
+        return new SQLAssignment(
+            typeof key === 'string' ? new SQLColumnExpression(key) : key,
+            isSQLExpression(value) ? value : new SQLScalar(value),
+        );
     }
 
     where(...args: ParseWhereArguments): SQLWhere {

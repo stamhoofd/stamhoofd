@@ -14,12 +14,21 @@ type Query = undefined;
 type ResponseBody = InvoiceStruct[];
 type Body = undefined;
 
-export class GetOrganizationPayableInvoicesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetOrganizationPayableInvoicesEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/invoices', { sellingOrganizationId: String });
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/billing/@sellingOrganizationId/invoices',
+            { sellingOrganizationId: String },
+        );
 
         if (params) {
             return [true, params as Params];
@@ -32,7 +41,7 @@ export class GetOrganizationPayableInvoicesEndpoint extends Endpoint<Params, Que
         await Context.authenticate();
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!await Context.auth.canManageFinances(organization.id)) {
+        if (!(await Context.auth.canManageFinances(organization.id))) {
             throw Context.auth.error();
         }
 

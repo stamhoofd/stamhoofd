@@ -76,7 +76,9 @@ describe('DockerService', () => {
     });
 
     it('runs the container with hooks in order and returns env', async () => {
-        vi.mocked(docker.containerIsRunning).mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+        vi.mocked(docker.containerIsRunning)
+            .mockResolvedValueOnce(false)
+            .mockResolvedValueOnce(true);
         const service = new TestService();
 
         const result = await service.start(context, undefined);
@@ -87,7 +89,10 @@ describe('DockerService', () => {
         });
         expect(docker.requireDocker).toHaveBeenCalledOnce();
         expect(docker.removeContainer).toHaveBeenCalledWith('test-container', false);
-        expect(docker.run).toHaveBeenCalledWith(['run', '--name', 'test-container', 'image', 'prepared'], { verbosity: RunVerbosity.Quiet });
+        expect(docker.run).toHaveBeenCalledWith(
+            ['run', '--name', 'test-container', 'image', 'prepared'],
+            { verbosity: RunVerbosity.Quiet },
+        );
         expect(service.calls).toEqual(['prepare', 'beforeRun', 'getDockerArgs', 'afterRun']);
     });
 
@@ -95,7 +100,9 @@ describe('DockerService', () => {
         vi.mocked(docker.containerIsRunning).mockResolvedValue(false);
         vi.mocked(docker.getContainerLogs).mockResolvedValue('first line\nlast line');
 
-        await expect(new TestService().start(context, undefined)).rejects.toMatchObject<Partial<ContainerStoppedError>>({
+        await expect(new TestService().start(context, undefined)).rejects.toMatchObject<
+            Partial<ContainerStoppedError>
+        >({
             serviceName: 'Test',
             tableDetail: 'last line',
             logs: 'first line\nlast line',
@@ -104,7 +111,10 @@ describe('DockerService', () => {
 
     it('tails logs by default and no-ops when logs are disabled', async () => {
         await new TestService().logs(context);
-        expect(docker.run).toHaveBeenCalledWith(['logs', '-f', 'test-container'], { allowFailure: true, verbosity: RunVerbosity.Output });
+        expect(docker.run).toHaveBeenCalledWith(['logs', '-f', 'test-container'], {
+            allowFailure: true,
+            verbosity: RunVerbosity.Output,
+        });
 
         vi.clearAllMocks();
         await new NoLogsService().logs(context);

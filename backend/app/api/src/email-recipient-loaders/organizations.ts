@@ -1,8 +1,19 @@
 import type { Organization, User } from '@stamhoofd/models';
 import { Platform } from '@stamhoofd/models';
 import { Email } from '@stamhoofd/models';
-import type { InMemoryFilterDefinitions, LimitedFilteredRequest, StamhoofdFilter, Platform as PlatformStruct } from '@stamhoofd/structures';
-import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler, EmailRecipient, Replacement } from '@stamhoofd/structures';
+import type {
+    InMemoryFilterDefinitions,
+    LimitedFilteredRequest,
+    StamhoofdFilter,
+    Platform as PlatformStruct,
+} from '@stamhoofd/structures';
+import {
+    baseInMemoryFilterCompilers,
+    compileToInMemoryFilter,
+    createInMemoryFilterCompiler,
+    EmailRecipient,
+    Replacement,
+} from '@stamhoofd/structures';
 import { PaginatedResponse } from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { GetOrganizationsEndpoint } from '../endpoints/admin/organizations/GetOrganizationsEndpoint.js';
@@ -16,11 +27,17 @@ function userToFilterableAdmin(user: User, platform: PlatformStruct, organizatio
 }
 const filterableAdminFilterCompilers: InMemoryFilterDefinitions = new Map([
     ...baseInMemoryFilterCompilers,
-    ['permissions', createInMemoryFilterCompiler(['permissions'], new Map([
-        ...baseInMemoryFilterCompilers,
-        ['level', createInMemoryFilterCompiler('level')],
-        ['accessRights', createInMemoryFilterCompiler('accessRights')],
-    ]))],
+    [
+        'permissions',
+        createInMemoryFilterCompiler(
+            ['permissions'],
+            new Map([
+                ...baseInMemoryFilterCompilers,
+                ['level', createInMemoryFilterCompiler('level')],
+                ['accessRights', createInMemoryFilterCompiler('accessRights')],
+            ]),
+        ),
+    ],
 ]);
 
 Email.recipientLoaders.set(EmailRecipientFilterType.Organizations, {

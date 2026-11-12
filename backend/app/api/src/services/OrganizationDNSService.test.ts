@@ -53,7 +53,7 @@ function setupEnvironment() {
     // The notification emails localize the marketing domain, which the shared test environment does not set
     TestUtils.setEnvironment('domains', {
         ...STAMHOOFD.domains,
-        marketing: { '': 'stamhoofd.dev', 'BE': 'be.stamhoofd.dev', 'NL': 'nl.stamhoofd.dev' },
+        marketing: { '': 'stamhoofd.dev', BE: 'be.stamhoofd.dev', NL: 'nl.stamhoofd.dev' },
     });
 }
 
@@ -138,7 +138,12 @@ describe('OrganizationDNSService.updateDNSRecords notifications', () => {
         organization.serverMeta.firstInvalidDNSRecords = undefined;
 
         // 4 earlier failures + the one of this run makes the DNS unstable
-        organization.serverMeta.lastInvalidDNSDates = [daysAgo(1), daysAgo(2), daysAgo(3), daysAgo(4)];
+        organization.serverMeta.lastInvalidDNSDates = [
+            daysAgo(1),
+            daysAgo(2),
+            daysAgo(3),
+            daysAgo(4),
+        ];
         await organization.save();
 
         await OrganizationDNSService.updateDNSRecords(organization);

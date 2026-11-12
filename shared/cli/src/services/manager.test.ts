@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import { ContainerStoppedError } from './docker-service.js';
-import { printServicesStatus, restartServicesInteractive, startServicesInteractive, stopServicesInteractive } from './manager.js';
+import {
+    printServicesStatus,
+    restartServicesInteractive,
+    startServicesInteractive,
+    stopServicesInteractive,
+} from './manager.js';
 import type { ServiceDefinition, ServiceStartResult, ServiceStatus } from './service.js';
 
 const tableMock = vi.hoisted(() => {
@@ -22,7 +27,8 @@ const tableMock = vi.hoisted(() => {
                     update: vi.fn((updatedCells: any[]) => {
                         row.cells = updatedCells;
                     }),
-                    hasIndeterminateCells: () => row.cells.some(cell => typeof cell !== 'string' && cell.indeterminate),
+                    hasIndeterminateCells: () =>
+                        row.cells.some((cell) => typeof cell !== 'string' && cell.indeterminate),
                 };
                 return row;
             }),
@@ -56,7 +62,12 @@ describe('service manager', () => {
                 key: 'maildev',
                 name: 'MailDev',
                 async status(): Promise<ServiceStatus> {
-                    return { name: 'MailDev', running: true, detail: 'https://mail.stamhoofd', login: 'username / password' };
+                    return {
+                        name: 'MailDev',
+                        running: true,
+                        detail: 'https://mail.stamhoofd',
+                        login: 'username / password',
+                    };
                 },
                 async start(): Promise<ServiceStartResult> {
                     return { message: 'started' };
@@ -69,11 +80,13 @@ describe('service manager', () => {
 
         await printServicesStatus(context, services);
 
-        expect(tableMock.Table.create).toHaveBeenCalledWith(expect.objectContaining({
-            title: 'Shared services',
-            headers: ['Service', 'Status', 'Access', 'Login'],
-            live: true,
-        }));
+        expect(tableMock.Table.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+                title: 'Shared services',
+                headers: ['Service', 'Status', 'Access', 'Login'],
+                live: true,
+            }),
+        );
         expect(tableMock.createdTables.at(-1)?.rows[0].cells).toEqual([
             'MailDev',
             expect.stringContaining('running'),
@@ -89,14 +102,24 @@ describe('service manager', () => {
         let maxRunningStarts = 0;
 
         const services = [
-            testService('first', first.promise, () => {
-                runningStarts++;
-                maxRunningStarts = Math.max(maxRunningStarts, runningStarts);
-            }, () => runningStarts--),
-            testService('second', second.promise, () => {
-                runningStarts++;
-                maxRunningStarts = Math.max(maxRunningStarts, runningStarts);
-            }, () => runningStarts--),
+            testService(
+                'first',
+                first.promise,
+                () => {
+                    runningStarts++;
+                    maxRunningStarts = Math.max(maxRunningStarts, runningStarts);
+                },
+                () => runningStarts--,
+            ),
+            testService(
+                'second',
+                second.promise,
+                () => {
+                    runningStarts++;
+                    maxRunningStarts = Math.max(maxRunningStarts, runningStarts);
+                },
+                () => runningStarts--,
+            ),
         ];
 
         const resultPromise = startServicesInteractive(context, services);
@@ -111,22 +134,25 @@ describe('service manager', () => {
         });
     });
 
-    it.each([startServicesInteractive, restartServicesInteractive])('passes options from the service-key map', async (start) => {
-        const options = { reset: true };
-        const service: ServiceDefinition<{ reset: boolean } | undefined> = {
-            key: 'maildev',
-            name: 'MailDev',
-            status: async () => ({ name: 'MailDev', running: false, detail: 'stopped' }),
-            start: vi.fn(async () => ({ message: 'started' })),
-            stop: async () => 'stopped',
-        };
+    it.each([startServicesInteractive, restartServicesInteractive])(
+        'passes options from the service-key map',
+        async (start) => {
+            const options = { reset: true };
+            const service: ServiceDefinition<{ reset: boolean } | undefined> = {
+                key: 'maildev',
+                name: 'MailDev',
+                status: async () => ({ name: 'MailDev', running: false, detail: 'stopped' }),
+                start: vi.fn(async () => ({ message: 'started' })),
+                stop: async () => 'stopped',
+            };
 
-        await start(context, [service], new Map([['maildev', options]]));
-        expect(service.start).toHaveBeenLastCalledWith(context, options);
+            await start(context, [service], new Map([['maildev', options]]));
+            expect(service.start).toHaveBeenLastCalledWith(context, options);
 
-        await start(context, [service], new Map());
-        expect(service.start).toHaveBeenLastCalledWith(context, undefined);
-    });
+            await start(context, [service], new Map());
+            expect(service.start).toHaveBeenLastCalledWith(context, undefined);
+        },
+    );
 
     it('stops services concurrently', async () => {
         const first = deferred<void>();
@@ -135,14 +161,30 @@ describe('service manager', () => {
         let maxRunningStops = 0;
 
         const services = [
-            testService('first', first.promise, () => undefined, () => undefined, first.promise, () => {
-                runningStops++;
-                maxRunningStops = Math.max(maxRunningStops, runningStops);
-            }, () => runningStops--),
-            testService('second', second.promise, () => undefined, () => undefined, second.promise, () => {
-                runningStops++;
-                maxRunningStops = Math.max(maxRunningStops, runningStops);
-            }, () => runningStops--),
+            testService(
+                'first',
+                first.promise,
+                () => undefined,
+                () => undefined,
+                first.promise,
+                () => {
+                    runningStops++;
+                    maxRunningStops = Math.max(maxRunningStops, runningStops);
+                },
+                () => runningStops--,
+            ),
+            testService(
+                'second',
+                second.promise,
+                () => undefined,
+                () => undefined,
+                second.promise,
+                () => {
+                    runningStops++;
+                    maxRunningStops = Math.max(maxRunningStops, runningStops);
+                },
+                () => runningStops--,
+            ),
         ];
 
         const resultPromise = stopServicesInteractive(context, services);
@@ -165,20 +207,36 @@ describe('service manager', () => {
         let maxRunningStarts = 0;
 
         const services = [
-            testService('first', firstStart.promise, () => {
-                runningStarts++;
-                maxRunningStarts = Math.max(maxRunningStarts, runningStarts);
-            }, () => runningStarts--, firstStop.promise, () => {
-                runningStops++;
-                maxRunningStops = Math.max(maxRunningStops, runningStops);
-            }, () => runningStops--),
-            testService('second', secondStart.promise, () => {
-                runningStarts++;
-                maxRunningStarts = Math.max(maxRunningStarts, runningStarts);
-            }, () => runningStarts--, secondStop.promise, () => {
-                runningStops++;
-                maxRunningStops = Math.max(maxRunningStops, runningStops);
-            }, () => runningStops--),
+            testService(
+                'first',
+                firstStart.promise,
+                () => {
+                    runningStarts++;
+                    maxRunningStarts = Math.max(maxRunningStarts, runningStarts);
+                },
+                () => runningStarts--,
+                firstStop.promise,
+                () => {
+                    runningStops++;
+                    maxRunningStops = Math.max(maxRunningStops, runningStops);
+                },
+                () => runningStops--,
+            ),
+            testService(
+                'second',
+                secondStart.promise,
+                () => {
+                    runningStarts++;
+                    maxRunningStarts = Math.max(maxRunningStarts, runningStarts);
+                },
+                () => runningStarts--,
+                secondStop.promise,
+                () => {
+                    runningStops++;
+                    maxRunningStops = Math.max(maxRunningStops, runningStops);
+                },
+                () => runningStops--,
+            ),
         ];
 
         const resultPromise = restartServicesInteractive(context, services);
@@ -203,26 +261,33 @@ describe('service manager', () => {
         const errorMessage = 'x'.repeat(400);
 
         try {
-            await expect(startServicesInteractive(context, [{
-                key: 'coredns',
-                name: 'CoreDNS',
-                async status(): Promise<ServiceStatus> {
-                    return { name: 'CoreDNS', running: false, detail: 'stopped' };
-                },
-                async start(): Promise<ServiceStartResult> {
-                    throw new Error(errorMessage);
-                },
-                async stop(): Promise<string> {
-                    return 'stopped';
-                },
-            }])).rejects.toThrow(errorMessage);
+            await expect(
+                startServicesInteractive(context, [
+                    {
+                        key: 'coredns',
+                        name: 'CoreDNS',
+                        async status(): Promise<ServiceStatus> {
+                            return { name: 'CoreDNS', running: false, detail: 'stopped' };
+                        },
+                        async start(): Promise<ServiceStartResult> {
+                            throw new Error(errorMessage);
+                        },
+                        async stop(): Promise<string> {
+                            return 'stopped';
+                        },
+                    },
+                ]),
+            ).rejects.toThrow(errorMessage);
 
-            const rows = tableMock.createdTables.at(-1)?.rows.map(row => row.cells) ?? [];
+            const rows = tableMock.createdTables.at(-1)?.rows.map((row) => row.cells) ?? [];
 
             expect(rows[0][2]).toHaveLength(49);
             expect(rows[0][2]).toMatch(/…$/);
         } finally {
-            Object.defineProperty(process.stdout, 'columns', { configurable: true, value: originalColumns });
+            Object.defineProperty(process.stdout, 'columns', {
+                configurable: true,
+                value: originalColumns,
+            });
         }
     });
 
@@ -234,21 +299,30 @@ describe('service manager', () => {
         };
 
         try {
-            await expect(startServicesInteractive(context, [{
-                key: 'coredns',
-                name: 'CoreDNS',
-                async status(): Promise<ServiceStatus> {
-                    return { name: 'CoreDNS', running: false, detail: 'stopped' };
-                },
-                async start(): Promise<ServiceStartResult> {
-                    throw new ContainerStoppedError('CoreDNS stopped immediately after start', 'CoreDNS', 'last log line', 'first line\nlast log line');
-                },
-                async stop(): Promise<string> {
-                    return 'stopped';
-                },
-            }])).rejects.toThrow('CoreDNS stopped immediately after start');
+            await expect(
+                startServicesInteractive(context, [
+                    {
+                        key: 'coredns',
+                        name: 'CoreDNS',
+                        async status(): Promise<ServiceStatus> {
+                            return { name: 'CoreDNS', running: false, detail: 'stopped' };
+                        },
+                        async start(): Promise<ServiceStartResult> {
+                            throw new ContainerStoppedError(
+                                'CoreDNS stopped immediately after start',
+                                'CoreDNS',
+                                'last log line',
+                                'first line\nlast log line',
+                            );
+                        },
+                        async stop(): Promise<string> {
+                            return 'stopped';
+                        },
+                    },
+                ]),
+            ).rejects.toThrow('CoreDNS stopped immediately after start');
 
-            const rows = tableMock.createdTables.at(-1)?.rows.map(row => row.cells) ?? [];
+            const rows = tableMock.createdTables.at(-1)?.rows.map((row) => row.cells) ?? [];
             expect(rows[0][2]).toBe('last log line');
             expect(messages.join('\n')).toContain('Logs for CoreDNS:');
             expect(messages.join('\n')).toContain('first line\nlast log line');
@@ -258,7 +332,15 @@ describe('service manager', () => {
     });
 });
 
-function testService(key: string, startWait: Promise<void>, onStart: () => void, onStartDone: () => void, stopWait = Promise.resolve(), onStop: () => void = () => undefined, onStopDone: () => void = () => undefined): ServiceDefinition<void> {
+function testService(
+    key: string,
+    startWait: Promise<void>,
+    onStart: () => void,
+    onStartDone: () => void,
+    stopWait = Promise.resolve(),
+    onStop: () => void = () => undefined,
+    onStopDone: () => void = () => undefined,
+): ServiceDefinition<void> {
     let statusCalls = 0;
 
     return {
@@ -266,7 +348,12 @@ function testService(key: string, startWait: Promise<void>, onStart: () => void,
         name: key,
         async status(): Promise<ServiceStatus> {
             statusCalls++;
-            return { name: key, running: statusCalls > 1, detail: `${key}-detail`, login: `${key}-login` };
+            return {
+                name: key,
+                running: statusCalls > 1,
+                detail: `${key}-detail`,
+                login: `${key}-login`,
+            };
         },
         async start(): Promise<ServiceStartResult> {
             onStart();
@@ -296,7 +383,7 @@ async function waitFor(condition: () => boolean): Promise<void> {
         if (condition()) {
             return;
         }
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
     }
     throw new Error('Condition was not met.');
 }

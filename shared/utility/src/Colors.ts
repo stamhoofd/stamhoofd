@@ -38,8 +38,11 @@ export class Colors {
         r /= 255;
         g /= 255;
         b /= 255;
-        const max = Math.max(r, g, b), min = Math.min(r, g, b);
-        let h, s, l = (max + min) / 2;
+        const max = Math.max(r, g, b),
+            min = Math.min(r, g, b);
+        let h,
+            s,
+            l = (max + min) / 2;
         if (max === min) {
             h = s = 0; // achromatic
         } else {
@@ -77,7 +80,7 @@ export class Colors {
         l /= 100;
 
         const c = (1 - Math.abs(2 * l - 1)) * s,
-            x = c * (1 - Math.abs((h / 60) % 2 - 1)),
+            x = c * (1 - Math.abs(((h / 60) % 2) - 1)),
             m = l - c / 2;
 
         let r = 0,
@@ -114,18 +117,22 @@ export class Colors {
         b = Math.round((b + m) * 255);
 
         return {
-            r, g, b,
+            r,
+            g,
+            b,
         };
     }
 
     static hslToHex(color: HSL): string {
         let { h, s, l } = color;
         l /= 100;
-        const a = s * Math.min(l, 1 - l) / 100;
+        const a = (s * Math.min(l, 1 - l)) / 100;
         const f = (n) => {
             const k = (n + h / 30) % 12;
             const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-            return Math.round(255 * color).toString(16).padStart(2, '0'); // convert to Hex and prefix "0" if needed
+            return Math.round(255 * color)
+                .toString(16)
+                .padStart(2, '0'); // convert to Hex and prefix "0" if needed
         };
         return `#${f(0)}${f(8)}${f(4)}`;
     }
@@ -166,18 +173,9 @@ export class Colors {
         };
 
         // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
-        const R
-            = color.r <= 0.03928
-                ? color.r / 12.92
-                : Math.pow((color.r + 0.055) / 1.055, 2.4);
-        const G
-            = color.g <= 0.03928
-                ? color.g / 12.92
-                : Math.pow((color.g + 0.055) / 1.055, 2.4);
-        const B
-            = color.b <= 0.03928
-                ? color.b / 12.92
-                : Math.pow((color.b + 0.055) / 1.055, 2.4);
+        const R = color.r <= 0.03928 ? color.r / 12.92 : Math.pow((color.r + 0.055) / 1.055, 2.4);
+        const G = color.g <= 0.03928 ? color.g / 12.92 : Math.pow((color.g + 0.055) / 1.055, 2.4);
+        const B = color.b <= 0.03928 ? color.b / 12.92 : Math.pow((color.b + 0.055) / 1.055, 2.4);
 
         const L = 0.2126 * R + 0.7152 * G + 0.0722 * B;
 
@@ -237,10 +235,10 @@ export class Colors {
     }
 
     static getLuminance(color: RGB) {
-        const y
-            = 0.2126729 * this.linearize(color.r)
-                + 0.7151522 * this.linearize(color.g)
-                + 0.072175 * this.linearize(color.b);
+        const y =
+            0.2126729 * this.linearize(color.r) +
+            0.7151522 * this.linearize(color.g) +
+            0.072175 * this.linearize(color.b);
         return this.clampLuminance(y);
     }
 

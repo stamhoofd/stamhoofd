@@ -14,7 +14,9 @@ class PlatformMembershipWithPeriod extends PlatformMembership {
 }
 
 // Assign to a typed variable to assure we have correct type checking in place
-const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMembershipWithPeriod> => ({
+const getSheet = (
+    platform: PlatformStruct,
+): XlsxTransformerSheet<PlatformMembershipWithPeriod> => ({
     id: 'platform-memberships',
     name: $t('%1EI'),
     columns: [
@@ -31,7 +33,9 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
             name: $t('%1LP'),
             width: 40,
             getValue: (membership: PlatformMembership) => {
-                const membershipType = platform.config.membershipTypes.find(m => m.id === membership.membershipTypeId);
+                const membershipType = platform.config.membershipTypes.find(
+                    (m) => m.id === membership.membershipTypeId,
+                );
                 const value = membershipType ? membershipType.name : '';
                 return { value };
             },
@@ -95,7 +99,10 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
-                    value: membership.priceWithoutDiscount === null ? null : membership.priceWithoutDiscount / 1_0000,
+                    value:
+                        membership.priceWithoutDiscount === null
+                            ? null
+                            : membership.priceWithoutDiscount / 1_0000,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -177,7 +184,9 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
-                    value: membership.balanceItem?.priceOpen ? ((membership.balanceItem?.priceOpen ?? 0) / 1_0000) : null,
+                    value: membership.balanceItem?.priceOpen
+                        ? (membership.balanceItem?.priceOpen ?? 0) / 1_0000
+                        : null,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -192,7 +201,9 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
-                    value: membership.balanceItem?.pricePaid ? ((membership.balanceItem?.pricePaid ?? 0) / 1_0000) : null,
+                    value: membership.balanceItem?.pricePaid
+                        ? (membership.balanceItem?.pricePaid ?? 0) / 1_0000
+                        : null,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -207,7 +218,9 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
             width: 10,
             getValue: (membership: PlatformMembership) => {
                 return {
-                    value: membership.balanceItem?.pricePending ? ((membership.balanceItem?.pricePending ?? 0) / 1_0000) : null,
+                    value: membership.balanceItem?.pricePending
+                        ? (membership.balanceItem?.pricePending ?? 0) / 1_0000
+                        : null,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -278,19 +291,23 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
 ExportToExcelEndpoint.loaders.set(ExcelExportType.PlatformMemberships, {
     fetch: async (query: LimitedFilteredRequest) => {
         const data = await GetPlatformMembershipsEndpoint.buildData(query);
-        const periodIds = Formatter.uniqueArray(data.results.map(membership => membership.periodId));
+        const periodIds = Formatter.uniqueArray(
+            data.results.map((membership) => membership.periodId),
+        );
         const periods = await RegistrationPeriod.getByIDs(...periodIds);
-        const periodMap = new Map(periods.map(period => [period.id, period.getBaseStructure().nameShort]));
+        const periodMap = new Map(
+            periods.map((period) => [period.id, period.getBaseStructure().nameShort]),
+        );
 
         return new PaginatedResponse({
-            results: data.results.map(membership => PlatformMembershipWithPeriod.create({
-                ...membership,
-                periodName: periodMap.get(membership.periodId) ?? membership.periodId,
-            })),
+            results: data.results.map((membership) =>
+                PlatformMembershipWithPeriod.create({
+                    ...membership,
+                    periodName: periodMap.get(membership.periodId) ?? membership.periodId,
+                }),
+            ),
             next: data.next,
         });
     },
-    getSheets: platform => [
-        getSheet(platform),
-    ],
+    getSheets: (platform) => [getSheet(platform)],
 });

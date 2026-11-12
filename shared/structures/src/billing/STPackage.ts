@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Formatter } from '@stamhoofd/utility';
@@ -24,7 +33,8 @@ export enum STPackageType {
 export class STPackageTypeHelper {
     static getName(type: STPackageType): string {
         switch (type) {
-            case STPackageType.LegacyMembers: return $t('%oF');
+            case STPackageType.LegacyMembers:
+                return $t('%oF');
             case STPackageType.Members: {
                 return $t('%Om');
             }
@@ -34,8 +44,10 @@ export class STPackageTypeHelper {
             case STPackageType.SingleWebshop: {
                 return $t('%oG');
             }
-            case STPackageType.TrialMembers: return $t('%1Hl');
-            case STPackageType.TrialWebshops: return $t('%1Hm');
+            case STPackageType.TrialMembers:
+                return $t('%1Hl');
+            case STPackageType.TrialWebshops:
+                return $t('%1Hm');
         }
     }
 
@@ -70,16 +82,22 @@ export enum STPricingType {
 
 export function getPricingTypeName(type: STPricingType) {
     switch (type) {
-        case STPricingType.Fixed: return $t('%1Xm');
-        case STPricingType.PerYear: return $t('%1aT');
-        case STPricingType.PerMember: return $t('%1VT');
+        case STPricingType.Fixed:
+            return $t('%1Xm');
+        case STPricingType.PerYear:
+            return $t('%1aT');
+        case STPricingType.PerMember:
+            return $t('%1VT');
     }
 }
 export function getPricingTypeSuffix(type: STPricingType) {
     switch (type) {
-        case STPricingType.Fixed: return $t('%1W3');
-        case STPricingType.PerYear: return $t('%1ae');
-        case STPricingType.PerMember: return $t('%1W1');
+        case STPricingType.Fixed:
+            return $t('%1W3');
+        case STPricingType.PerYear:
+            return $t('%1ae');
+        case STPricingType.PerMember:
+            return $t('%1W1');
     }
 }
 
@@ -93,14 +111,23 @@ export class STPackageMeta extends AutoEncoder {
     }
 
     get isWebshops() {
-        return this.type === STPackageType.Webshops || this.type === STPackageType.SingleWebshop || this.type === STPackageType.TrialWebshops;
+        return (
+            this.type === STPackageType.Webshops ||
+            this.type === STPackageType.SingleWebshop ||
+            this.type === STPackageType.TrialWebshops
+        );
     }
 
     /**
      * When service fees or per member pricing is set, a mandate is required
      */
     get requiresMandate() {
-        return this.serviceFeeFixed !== 0 || this.serviceFeePercentage !== 0 || !!this.serviceFeeMinimum || (!!this.unitPrice && this.pricingType === STPricingType.PerMember);
+        return (
+            this.serviceFeeFixed !== 0 ||
+            this.serviceFeePercentage !== 0 ||
+            !!this.serviceFeeMinimum ||
+            (!!this.unitPrice && this.pricingType === STPricingType.PerMember)
+        );
     }
 
     /**
@@ -217,7 +244,12 @@ export class STPackageMeta extends AutoEncoder {
             } else if (this.pricingType === STPricingType.PerYear) {
                 strs.push($t('%1RJ', { price: Formatter.price(this.unitPrice) }));
             } else if (this.pricingType === STPricingType.Fixed) {
-                strs.push($t('%1RX', { amount: Formatter.integer(this.minimumAmount), price: Formatter.price(this.unitPrice) }));
+                strs.push(
+                    $t('%1RX', {
+                        amount: Formatter.integer(this.minimumAmount),
+                        price: Formatter.price(this.unitPrice),
+                    }),
+                );
             }
 
             if (this.minimumAmount) {
@@ -252,11 +284,29 @@ export class STPackageMeta extends AutoEncoder {
         }
 
         if (this.serviceFeePercentage && this.serviceFeeFixed) {
-            strs.push(Formatter.percentage(this.serviceFeePercentage) + ' + ' + Formatter.price(this.serviceFeeFixed) + ' ' + suffix + (minimumSuffix ? (', ' + minimumSuffix) : '') + (maximumSuffix ? (', ' + maximumSuffix) : ''));
+            strs.push(
+                Formatter.percentage(this.serviceFeePercentage) +
+                    ' + ' +
+                    Formatter.price(this.serviceFeeFixed) +
+                    ' ' +
+                    suffix +
+                    (minimumSuffix ? ', ' + minimumSuffix : '') +
+                    (maximumSuffix ? ', ' + maximumSuffix : ''),
+            );
         } else if (this.serviceFeeFixed) {
-            strs.push((Formatter.price(this.serviceFeeFixed) + ' ' + suffix + (minimumSuffix ? (', ' + minimumSuffix) : '') + (maximumSuffix ? (', ' + maximumSuffix) : '')));
+            strs.push(
+                Formatter.price(this.serviceFeeFixed) +
+                    ' ' +
+                    suffix +
+                    (minimumSuffix ? ', ' + minimumSuffix : '') +
+                    (maximumSuffix ? ', ' + maximumSuffix : ''),
+            );
         } else if (this.serviceFeePercentage) {
-            strs.push(Formatter.percentage(this.serviceFeePercentage) + (minimumSuffix ? (' ' + minimumSuffix) : '') + (maximumSuffix ? ((minimumSuffix ? ', ' : ' ') + maximumSuffix) : ''));
+            strs.push(
+                Formatter.percentage(this.serviceFeePercentage) +
+                    (minimumSuffix ? ' ' + minimumSuffix : '') +
+                    (maximumSuffix ? (minimumSuffix ? ', ' : ' ') + maximumSuffix : ''),
+            );
         }
 
         if (strs.length === 0) {
@@ -398,8 +448,14 @@ export class STPackageStatus extends AutoEncoder {
                 percentage: Math.max(max.percentage, current.percentage),
                 startDate: max.startDate,
                 endDate: max.endDate,
-                minimum: max.minimum !== null ? Math.max(max.minimum, current.minimum ?? 0) : current.minimum,
-                maximum: max.maximum !== null ? Math.max(max.maximum, current.maximum ?? 0) : current.maximum,
+                minimum:
+                    max.minimum !== null
+                        ? Math.max(max.minimum, current.minimum ?? 0)
+                        : current.minimum,
+                maximum:
+                    max.maximum !== null
+                        ? Math.max(max.maximum, current.maximum ?? 0)
+                        : current.maximum,
             });
         });
     }
@@ -447,7 +503,10 @@ export class STPackageStatus extends AutoEncoder {
         const d = new Date();
 
         // If only valid for less than 30 days, still allow to use the trial package - don't count the package as been active
-        if (this.validUntil && this.validUntil.getTime() - this.startDate.getTime() < 60 * 1000 * 60 * 24 * 31) {
+        if (
+            this.validUntil &&
+            this.validUntil.getTime() - this.startDate.getTime() < 60 * 1000 * 60 * 24 * 31
+        ) {
             return false;
         }
 
@@ -493,7 +552,7 @@ export class STPackageStatus extends AutoEncoder {
             return null;
         }
 
-        return new Date(Math.min(...dates.map(d => d.getTime())));
+        return new Date(Math.min(...dates.map((d) => d.getTime())));
     }
 
     merge(status: STPackageStatus) {

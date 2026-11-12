@@ -39,13 +39,13 @@ export class Router {
                 for (folder of folderQueue) {
                     // Read all directories
                     const recursiveFolders = (await fs.readdir(folder, { withFileTypes: true }))
-                        .filter(dirent => dirent.isDirectory())
-                        .map(dirent => folder + '/' + dirent.name);
+                        .filter((dirent) => dirent.isDirectory())
+                        .map((dirent) => folder + '/' + dirent.name);
                     newQueue.push(...recursiveFolders);
                 }
                 folderQueue = newQueue;
             } else {
-                folderQueue = folderQueue.map(folder => folder + '/' + part);
+                folderQueue = folderQueue.map((folder) => folder + '/' + part);
             }
         }
 
@@ -100,7 +100,13 @@ export class Router {
     } */
 
     /** Returns the first matching endpoint and decoded request, or null; does not call handle(). */
-    async decode<Params, Query, Body>(request: Request, response?: http.ServerResponse): Promise<{ request: DecodedRequest<Params, Query, Body>; endpoint: Endpoint<Params, Query, Body, any> } | null> {
+    async decode<Params, Query, Body>(
+        request: Request,
+        response?: http.ServerResponse,
+    ): Promise<{
+        request: DecodedRequest<Params, Query, Body>;
+        endpoint: Endpoint<Params, Query, Body, any>;
+    } | null> {
         for (const endpoint of this.endpoints) {
             const r = await endpoint.decode(request, response);
             if (r !== null) {

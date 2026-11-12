@@ -45,14 +45,15 @@ describe('FileSignService', () => {
     };
 
     describe('isStoredOnOwnServer', () => {
-        const fileOn = (server: string) => new File({
-            id: '1c9ab9e6-1234-4c5e-9f1a-000000000001',
-            server,
-            path: 'p/abc/file.pdf',
-            size: 100,
-            isPrivate: false,
-            contentType: 'application/pdf',
-        });
+        const fileOn = (server: string) =>
+            new File({
+                id: '1c9ab9e6-1234-4c5e-9f1a-000000000001',
+                server,
+                path: 'p/abc/file.pdf',
+                size: 100,
+                isPrivate: false,
+                contentType: 'application/pdf',
+            });
 
         test.each([
             ['https://test-bucket.test.digitaloceanspaces.com', true],
@@ -68,12 +69,22 @@ describe('FileSignService', () => {
 
         test('nothing is trusted when the storage is not configured', () => {
             TestUtils.setEnvironment('SPACES_BUCKET', '');
-            expect(FileSignService.isStoredOnOwnServer(fileOn('https://test-bucket.test.digitaloceanspaces.com'))).toBe(false);
+            expect(
+                FileSignService.isStoredOnOwnServer(
+                    fileOn('https://test-bucket.test.digitaloceanspaces.com'),
+                ),
+            ).toBe(false);
         });
     });
 
     test('A signed url never renders a file type a browser could execute', async () => {
-        const query = await getSignedQuery(buildFile({ path: 'users/1/abc/report.docx', contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }));
+        const query = await getSignedQuery(
+            buildFile({
+                path: 'users/1/abc/report.docx',
+                contentType:
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            }),
+        );
 
         expect(query.get('response-content-disposition')).toBe('attachment');
 
@@ -83,31 +94,45 @@ describe('FileSignService', () => {
     });
 
     test('A signed url renders file types a browser cannot execute', async () => {
-        const pdf = await getSignedQuery(buildFile({ path: 'users/1/abc/invoice.pdf', contentType: 'application/pdf' }));
+        const pdf = await getSignedQuery(
+            buildFile({ path: 'users/1/abc/invoice.pdf', contentType: 'application/pdf' }),
+        );
         expect(pdf.get('response-content-disposition')).toBe('inline');
 
-        const image = await getSignedQuery(buildFile({ path: 'users/1/abc/photo.jpg', contentType: 'image/jpeg' }));
+        const image = await getSignedQuery(
+            buildFile({ path: 'users/1/abc/photo.jpg', contentType: 'image/jpeg' }),
+        );
         expect(image.get('response-content-disposition')).toBe('inline');
     });
 
     test('It downloads files that were uploaded before we validated content types', async () => {
         // These were stored with a content type chosen by the uploader, and with an extension derived from it
-        const svg = await getSignedQuery(buildFile({ path: 'users/1/abc/evil.svg', contentType: 'image/svg+xml' }));
+        const svg = await getSignedQuery(
+            buildFile({ path: 'users/1/abc/evil.svg', contentType: 'image/svg+xml' }),
+        );
         expect(svg.get('response-content-disposition')).toBe('attachment');
 
-        const html = await getSignedQuery(buildFile({ path: 'users/1/abc/evil', contentType: 'text/html' }));
+        const html = await getSignedQuery(
+            buildFile({ path: 'users/1/abc/evil', contentType: 'text/html' }),
+        );
         expect(html.get('response-content-disposition')).toBe('attachment');
 
         // Both the extension and the content type have to be safe
-        const disguised = await getSignedQuery(buildFile({ path: 'users/1/abc/evil.pdf', contentType: 'text/html' }));
+        const disguised = await getSignedQuery(
+            buildFile({ path: 'users/1/abc/evil.pdf', contentType: 'text/html' }),
+        );
         expect(disguised.get('response-content-disposition')).toBe('attachment');
     });
 
     test('It uses the path when a file has no content type, like the images we generate', async () => {
-        const image = await getSignedQuery(buildFile({ path: 'users/1/abc/def.png', contentType: null }));
+        const image = await getSignedQuery(
+            buildFile({ path: 'users/1/abc/def.png', contentType: null }),
+        );
         expect(image.get('response-content-disposition')).toBe('inline');
 
-        const unknown = await getSignedQuery(buildFile({ path: 'users/1/abc/def', contentType: null }));
+        const unknown = await getSignedQuery(
+            buildFile({ path: 'users/1/abc/def', contentType: null }),
+        );
         expect(unknown.get('response-content-disposition')).toBe('attachment');
     });
 });

@@ -1,4 +1,11 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    DateDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -58,7 +65,10 @@ export class TicketPublic extends Ticket {
             if (order) {
                 return order.data.totalPrice;
             }
-            return Math.max(0, this.items.reduce((c, item) => c + (item.price ?? 0), 0));
+            return Math.max(
+                0,
+                this.items.reduce((c, item) => c + (item.price ?? 0), 0),
+            );
         }
 
         const item = this.items[0];
@@ -104,7 +114,7 @@ export class TicketPublic extends Ticket {
             return '';
         }
         const description = this.getIndexDescription(webshop);
-        return description.map(d => d.title + ': ' + d.value).join('\n');
+        return description.map((d) => d.title + ': ' + d.value).join('\n');
     }
 
     getIndexDescription(webshop: Webshop | WebshopPreview): { title: string; value: string }[] {
@@ -147,7 +157,9 @@ export class TicketPublic extends Ticket {
         }
 
         const item = this.items[0];
-        const nameField = item.fieldAnswers.findIndex(a => a.field.name.toLowerCase().includes('naam'));
+        const nameField = item.fieldAnswers.findIndex((a) =>
+            a.field.name.toLowerCase().includes('naam'),
+        );
         if (nameField !== -1) {
             return item.fieldAnswers[nameField].answer;
         }
@@ -190,7 +202,7 @@ export class TicketOrder extends Ticket {
 
     getPublic(order: Order): TicketPublic {
         if (this.itemId) {
-            const item = order.data.cart.items.find(i => i.id === this.itemId);
+            const item = order.data.cart.items.find((i) => i.id === this.itemId);
             return TicketPublic.create({
                 ...this,
                 items: item ? [item] : [],

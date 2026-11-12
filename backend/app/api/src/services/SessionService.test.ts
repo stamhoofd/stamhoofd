@@ -3,9 +3,19 @@ import { Request } from '@node/endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory, UserSession } from '@stamhoofd/models';
 import type { SessionType } from '@stamhoofd/models/constants/sessions.js';
-import { ACCESS_TOKEN_DURATION, SESSION_DURATIONS, SSO_HANDOFF_TOKEN_DURATION } from '@stamhoofd/models/constants/sessions.js';
+import {
+    ACCESS_TOKEN_DURATION,
+    SESSION_DURATIONS,
+    SSO_HANDOFF_TOKEN_DURATION,
+} from '@stamhoofd/models/constants/sessions.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Permissions, SessionClientType, SessionDeviceType, SessionLoginMethod, SessionOS } from '@stamhoofd/structures';
+import {
+    Permissions,
+    SessionClientType,
+    SessionDeviceType,
+    SessionLoginMethod,
+    SessionOS,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
 import { ContextInstance } from '../helpers/Context.js';
@@ -20,7 +30,12 @@ function humanDuration(duration: number): string {
 }
 
 async function onPlatform<T>(platform: string, handler: () => Promise<T>): Promise<T> {
-    const request = new Request({ method: 'POST', url: '/oauth/token', host: 'api.example.com', headers: { 'x-platform': platform } });
+    const request = new Request({
+        method: 'POST',
+        url: '/oauth/token',
+        host: 'api.example.com',
+        headers: { 'x-platform': platform },
+    });
     return await ContextInstance.start(request, handler);
 }
 
@@ -61,15 +76,78 @@ describe('SessionService', () => {
         return session;
     }
 
-    const policy: { name: string; platform: string; clientType: SessionClientType; sessionType: SessionType; loginMethod: SessionLoginMethod; createUser: () => Promise<User> }[] = [
-        { name: 'a member in a browser', platform: 'web', clientType: SessionClientType.Browser, sessionType: 'user', loginMethod: SessionLoginMethod.Password, createUser: () => createMember() },
-        { name: 'a member in the native app', platform: 'ios', clientType: SessionClientType.iOS, sessionType: 'user', loginMethod: SessionLoginMethod.Password, createUser: () => createMember() },
-        { name: 'an administrator in a browser', platform: 'web', clientType: SessionClientType.Browser, sessionType: 'admin', loginMethod: SessionLoginMethod.Password, createUser: () => createAdmin() },
-        { name: 'an administrator in the native app', platform: 'android', clientType: SessionClientType.Android, sessionType: 'admin', loginMethod: SessionLoginMethod.Password, createUser: () => createAdmin() },
-        { name: 'a platform administrator in a browser', platform: 'web', clientType: SessionClientType.Browser, sessionType: 'platformAdmin', loginMethod: SessionLoginMethod.Password, createUser: () => createPlatformAdmin() },
-        { name: 'a platform administrator in the native app', platform: 'ios', clientType: SessionClientType.iOS, sessionType: 'platformAdmin', loginMethod: SessionLoginMethod.Password, createUser: () => createPlatformAdmin() },
-        { name: 'an SSO login in a browser', platform: 'web', clientType: SessionClientType.Browser, sessionType: 'sso', loginMethod: SessionLoginMethod.SSO, createUser: () => createMember() },
-        { name: 'an SSO login in the native app', platform: 'ios', clientType: SessionClientType.iOS, sessionType: 'sso', loginMethod: SessionLoginMethod.SSO, createUser: () => createAdmin() },
+    const policy: {
+        name: string;
+        platform: string;
+        clientType: SessionClientType;
+        sessionType: SessionType;
+        loginMethod: SessionLoginMethod;
+        createUser: () => Promise<User>;
+    }[] = [
+        {
+            name: 'a member in a browser',
+            platform: 'web',
+            clientType: SessionClientType.Browser,
+            sessionType: 'user',
+            loginMethod: SessionLoginMethod.Password,
+            createUser: () => createMember(),
+        },
+        {
+            name: 'a member in the native app',
+            platform: 'ios',
+            clientType: SessionClientType.iOS,
+            sessionType: 'user',
+            loginMethod: SessionLoginMethod.Password,
+            createUser: () => createMember(),
+        },
+        {
+            name: 'an administrator in a browser',
+            platform: 'web',
+            clientType: SessionClientType.Browser,
+            sessionType: 'admin',
+            loginMethod: SessionLoginMethod.Password,
+            createUser: () => createAdmin(),
+        },
+        {
+            name: 'an administrator in the native app',
+            platform: 'android',
+            clientType: SessionClientType.Android,
+            sessionType: 'admin',
+            loginMethod: SessionLoginMethod.Password,
+            createUser: () => createAdmin(),
+        },
+        {
+            name: 'a platform administrator in a browser',
+            platform: 'web',
+            clientType: SessionClientType.Browser,
+            sessionType: 'platformAdmin',
+            loginMethod: SessionLoginMethod.Password,
+            createUser: () => createPlatformAdmin(),
+        },
+        {
+            name: 'a platform administrator in the native app',
+            platform: 'ios',
+            clientType: SessionClientType.iOS,
+            sessionType: 'platformAdmin',
+            loginMethod: SessionLoginMethod.Password,
+            createUser: () => createPlatformAdmin(),
+        },
+        {
+            name: 'an SSO login in a browser',
+            platform: 'web',
+            clientType: SessionClientType.Browser,
+            sessionType: 'sso',
+            loginMethod: SessionLoginMethod.SSO,
+            createUser: () => createMember(),
+        },
+        {
+            name: 'an SSO login in the native app',
+            platform: 'ios',
+            clientType: SessionClientType.iOS,
+            sessionType: 'sso',
+            loginMethod: SessionLoginMethod.SSO,
+            createUser: () => createAdmin(),
+        },
     ];
 
     test('creates and persists a token with its session', async () => {
@@ -103,7 +181,9 @@ describe('SessionService', () => {
 
             test(`${name} may go unused for ${humanDuration(refreshToken)}`, async () => {
                 const user = await createUser();
-                const token = await onPlatform(platform, () => SessionService.createSession(user, { loginMethod }));
+                const token = await onPlatform(platform, () =>
+                    SessionService.createSession(user, { loginMethod }),
+                );
 
                 expectValidFor(token.refreshTokenValidUntil, refreshToken);
             });
@@ -111,7 +191,9 @@ describe('SessionService', () => {
             if (session === null) {
                 test(`${name} has no maximum length`, async () => {
                     const user = await createUser();
-                    const token = await onPlatform(platform, () => SessionService.createSession(user, { loginMethod }));
+                    const token = await onPlatform(platform, () =>
+                        SessionService.createSession(user, { loginMethod }),
+                    );
 
                     const userSession = await getSession(token);
                     userSession.startedAt = new Date(Date.now() - 10 * refreshToken);
@@ -123,7 +205,9 @@ describe('SessionService', () => {
             } else {
                 test(`${name} is signed out after ${humanDuration(session)}`, async () => {
                     const user = await createUser();
-                    const token = await onPlatform(platform, () => SessionService.createSession(user, { loginMethod }));
+                    const token = await onPlatform(platform, () =>
+                        SessionService.createSession(user, { loginMethod }),
+                    );
 
                     const userSession = await getSession(token);
                     userSession.startedAt = new Date(Date.now() - session + HOUR);
@@ -137,14 +221,18 @@ describe('SessionService', () => {
 
         test('the access token uses the configured duration', async () => {
             const admin = await createAdmin();
-            const token = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password });
+            const token = await SessionService.createSession(admin, {
+                loginMethod: SessionLoginMethod.Password,
+            });
 
             expectValidFor(token.accessTokenValidUntil, ACCESS_TOKEN_DURATION);
         });
 
         test('the access token never outlives the session', async () => {
             const admin = await createPlatformAdmin();
-            const token = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.SSO });
+            const token = await SessionService.createSession(admin, {
+                loginMethod: SessionLoginMethod.SSO,
+            });
 
             const sessionDuration = SESSION_DURATIONS.sso[SessionClientType.Browser].session;
             if (sessionDuration === null) {
@@ -162,20 +250,27 @@ describe('SessionService', () => {
     describe('inactivity', () => {
         test('renewing the access token moves the inactivity limit', async () => {
             const admin = await createAdmin();
-            const token = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password });
+            const token = await SessionService.createSession(admin, {
+                loginMethod: SessionLoginMethod.Password,
+            });
 
             token.refreshTokenValidUntil = new Date(Date.now() + 60 * 1000);
             await token.save();
 
             const rotated = await SessionService.rotateSession(token);
-            expectValidFor(rotated.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.Browser].refreshToken);
+            expectValidFor(
+                rotated.refreshTokenValidUntil,
+                SESSION_DURATIONS.admin[SessionClientType.Browser].refreshToken,
+            );
         });
     });
 
     describe('rotation', () => {
         test('the new token continues the same session', async () => {
             const admin = await createAdmin();
-            const token = await onPlatform('android', () => SessionService.createSession(admin, { loginMethod: SessionLoginMethod.SSO }));
+            const token = await onPlatform('android', () =>
+                SessionService.createSession(admin, { loginMethod: SessionLoginMethod.SSO }),
+            );
 
             const rotated = await SessionService.rotateSession(token);
             const session = await getSession(rotated);
@@ -186,17 +281,24 @@ describe('SessionService', () => {
 
         test('the platform of the login is kept, not the one of the rotation', async () => {
             const admin = await createAdmin();
-            const token = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password });
+            const token = await SessionService.createSession(admin, {
+                loginMethod: SessionLoginMethod.Password,
+            });
 
             const rotated = await onPlatform('ios', () => SessionService.rotateSession(token));
 
             expect((await getSession(rotated)).clientType).toBe(SessionClientType.Browser);
-            expectValidFor(rotated.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.Browser].refreshToken);
+            expectValidFor(
+                rotated.refreshTokenValidUntil,
+                SESSION_DURATIONS.admin[SessionClientType.Browser].refreshToken,
+            );
         });
 
         test('a replacement only retires the previous token after it becomes active', async () => {
             const admin = await createAdmin();
-            const original = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password });
+            const original = await SessionService.createSession(admin, {
+                loginMethod: SessionLoginMethod.Password,
+            });
             const replacement = await SessionService.rotateSession(original);
             let session = await getSession(original);
 
@@ -213,7 +315,9 @@ describe('SessionService', () => {
 
         test('the active token can retry a renewal whose response was lost', async () => {
             const admin = await createAdmin();
-            const original = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password });
+            const original = await SessionService.createSession(admin, {
+                loginMethod: SessionLoginMethod.Password,
+            });
             const lostReplacement = await SessionService.rotateSession(original);
             const retryReplacement = await SessionService.rotateSession(original);
 
@@ -231,15 +335,21 @@ describe('SessionService', () => {
              * Pauses the first query of `method` that starts with `prefix`, so another database
              * operation can be interleaved at exactly that point.
              */
-            function pauseQueryOnce(method: 'update' | 'delete', prefix: string): { reached: Promise<void>; resume: () => void } {
+            function pauseQueryOnce(
+                method: 'update' | 'delete',
+                prefix: string,
+            ): { reached: Promise<void>; resume: () => void } {
                 let reached!: () => void;
                 let resume!: () => void;
-                const reachedPromise = new Promise<void>(resolve => reached = resolve);
-                const resumePromise = new Promise<void>(resolve => resume = resolve);
+                const reachedPromise = new Promise<void>((resolve) => (reached = resolve));
+                const resumePromise = new Promise<void>((resolve) => (resume = resolve));
                 const original = DatabaseInstance.prototype[method];
                 let paused = false;
 
-                vi.spyOn(DatabaseInstance.prototype, method).mockImplementation(async function (this: DatabaseInstance, ...args: Parameters<DatabaseInstance['update']>) {
+                vi.spyOn(DatabaseInstance.prototype, method).mockImplementation(async function (
+                    this: DatabaseInstance,
+                    ...args: Parameters<DatabaseInstance['update']>
+                ) {
                     if (!paused && args[0].startsWith(prefix)) {
                         paused = true;
                         reached();
@@ -252,7 +362,9 @@ describe('SessionService', () => {
 
             async function createUsedToken(): Promise<Token & { user: User }> {
                 const admin = await createAdmin();
-                const original = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password });
+                const original = await SessionService.createSession(admin, {
+                    loginMethod: SessionLoginMethod.Password,
+                });
                 return await SessionService.rotateSession(original);
             }
 
@@ -274,7 +386,7 @@ describe('SessionService', () => {
                 await retire.reached;
                 const rotation = SessionService.rotateSession(used);
                 // The rotation either completes now, or has to wait for the activation.
-                await Promise.race([rotation, new Promise(resolve => setTimeout(resolve, 200))]);
+                await Promise.race([rotation, new Promise((resolve) => setTimeout(resolve, 200))]);
                 retire.resume();
 
                 expect(await activation).toBe(true);
@@ -285,7 +397,10 @@ describe('SessionService', () => {
                 const used = await createUsedToken();
 
                 // The renewal is halfway when a parallel request with `used` activates it.
-                const bookkeeping = pauseQueryOnce('update', 'UPDATE `user_sessions` SET `lastUsedTokenId`');
+                const bookkeeping = pauseQueryOnce(
+                    'update',
+                    'UPDATE `user_sessions` SET `lastUsedTokenId`',
+                );
                 const rotation = SessionService.rotateSession(used);
                 await bookkeeping.reached;
                 expect(await SessionService.activateToken(used)).toBe(true);
@@ -302,7 +417,10 @@ describe('SessionService', () => {
                 const rotation = SessionService.rotateSession(used);
                 await retire.reached;
                 const activation = SessionService.activateToken(used);
-                await Promise.race([activation, new Promise(resolve => setTimeout(resolve, 200))]);
+                await Promise.race([
+                    activation,
+                    new Promise((resolve) => setTimeout(resolve, 200)),
+                ]);
                 retire.resume();
 
                 const replacement = await rotation;
@@ -315,27 +433,50 @@ describe('SessionService', () => {
 
         test('renewal updates versions but keeps stable device metadata', async () => {
             const admin = await createAdmin();
-            const initial = encodeURIComponent(JSON.stringify({
-                deviceType: SessionDeviceType.Phone,
-                deviceName: 'iPhone 15 Pro',
-                osName: SessionOS.iOS,
-                osVersion: '18.1',
-                appVersion: '2.0',
-                nativeAppVersion: '1.0',
-                browserName: null,
-            }));
-            const token = await ContextInstance.start(new Request({ method: 'POST', url: '/oauth/token', host: 'api.example.com', headers: { 'x-platform': 'ios', 'x-session-metadata': initial } }), () => SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password }));
+            const initial = encodeURIComponent(
+                JSON.stringify({
+                    deviceType: SessionDeviceType.Phone,
+                    deviceName: 'iPhone 15 Pro',
+                    osName: SessionOS.iOS,
+                    osVersion: '18.1',
+                    appVersion: '2.0',
+                    nativeAppVersion: '1.0',
+                    browserName: null,
+                }),
+            );
+            const token = await ContextInstance.start(
+                new Request({
+                    method: 'POST',
+                    url: '/oauth/token',
+                    host: 'api.example.com',
+                    headers: { 'x-platform': 'ios', 'x-session-metadata': initial },
+                }),
+                () =>
+                    SessionService.createSession(admin, {
+                        loginMethod: SessionLoginMethod.Password,
+                    }),
+            );
 
-            const changed = encodeURIComponent(JSON.stringify({
-                deviceType: SessionDeviceType.Desktop,
-                deviceName: 'Changed',
-                osName: SessionOS.Windows,
-                osVersion: '18.2',
-                appVersion: '2.1',
-                nativeAppVersion: '1.1',
-                browserName: 'Other',
-            }));
-            await ContextInstance.start(new Request({ method: 'POST', url: '/oauth/token', host: 'api.example.com', headers: { 'x-platform': 'web', 'x-session-metadata': changed } }), () => SessionService.rotateSession(token));
+            const changed = encodeURIComponent(
+                JSON.stringify({
+                    deviceType: SessionDeviceType.Desktop,
+                    deviceName: 'Changed',
+                    osName: SessionOS.Windows,
+                    osVersion: '18.2',
+                    appVersion: '2.1',
+                    nativeAppVersion: '1.1',
+                    browserName: 'Other',
+                }),
+            );
+            await ContextInstance.start(
+                new Request({
+                    method: 'POST',
+                    url: '/oauth/token',
+                    host: 'api.example.com',
+                    headers: { 'x-platform': 'web', 'x-session-metadata': changed },
+                }),
+                () => SessionService.rotateSession(token),
+            );
 
             const session = await getSession(token);
             expect(session).toMatchObject({
@@ -352,22 +493,32 @@ describe('SessionService', () => {
 
         test('a member that becomes a platform administrator is limited from that moment on', async () => {
             const user = await createMember();
-            const token = await SessionService.createSession(user, { loginMethod: SessionLoginMethod.Password });
-            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.user[SessionClientType.Browser].refreshToken);
+            const token = await SessionService.createSession(user, {
+                loginMethod: SessionLoginMethod.Password,
+            });
+            expectValidFor(
+                token.refreshTokenValidUntil,
+                SESSION_DURATIONS.user[SessionClientType.Browser].refreshToken,
+            );
 
             const platformAdmin = await createPlatformAdmin();
             token.user.permissions = platformAdmin.permissions;
             await token.user.save();
 
             const rotated = await SessionService.rotateSession(token);
-            expectValidFor(rotated.refreshTokenValidUntil, SESSION_DURATIONS.platformAdmin[SessionClientType.Browser].refreshToken);
+            expectValidFor(
+                rotated.refreshTokenValidUntil,
+                SESSION_DURATIONS.platformAdmin[SessionClientType.Browser].refreshToken,
+            );
         });
     });
 
     describe('expired sessions', () => {
         test('an expired session cannot be renewed', async () => {
             const admin = await createAdmin();
-            const token = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password });
+            const token = await SessionService.createSession(admin, {
+                loginMethod: SessionLoginMethod.Password,
+            });
 
             token.refreshTokenValidUntil = new Date(Date.now() - 1000);
             await token.save();
@@ -377,8 +528,12 @@ describe('SessionService', () => {
 
         test('an expired refresh token ends every session of the user', async () => {
             const admin = await createAdmin();
-            const expired = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password });
-            const other = await SessionService.createSession(admin, { loginMethod: SessionLoginMethod.Password });
+            const expired = await SessionService.createSession(admin, {
+                loginMethod: SessionLoginMethod.Password,
+            });
+            const other = await SessionService.createSession(admin, {
+                loginMethod: SessionLoginMethod.Password,
+            });
 
             expired.refreshTokenValidUntil = new Date(Date.now() - 1000);
             await expired.save();
@@ -405,7 +560,10 @@ describe('SessionService', () => {
             const rotated = await SessionService.rotateSession(token);
             expect((await getSession(rotated)).loginMethod).toBe(SessionLoginMethod.SSO);
             expect(rotated.isAccessTokenExpired()).toBe(false);
-            expectValidFor(rotated.refreshTokenValidUntil, SESSION_DURATIONS.sso[SessionClientType.Browser].refreshToken);
+            expectValidFor(
+                rotated.refreshTokenValidUntil,
+                SESSION_DURATIONS.sso[SessionClientType.Browser].refreshToken,
+            );
             expect(await SessionService.getByRefreshToken(token.refreshToken)).toBeUndefined();
         });
     });

@@ -7,7 +7,9 @@ export class STCredit extends QueryableModel {
 
     // Columns
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -26,7 +28,8 @@ export class STCredit extends QueryableModel {
     allowTransactions = false;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -41,7 +44,8 @@ export class STCredit extends QueryableModel {
     expireAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -51,12 +55,17 @@ export class STCredit extends QueryableModel {
     updatedAt: Date;
 
     static async getForOrganization(organizationId: string) {
-        return await STCredit.where({ organizationId }, {
-            sort: [{
-                column: 'createdAt',
-                direction: 'DESC',
-            }],
-        });
+        return await STCredit.where(
+            { organizationId },
+            {
+                sort: [
+                    {
+                        column: 'createdAt',
+                        direction: 'DESC',
+                    },
+                ],
+            },
+        );
     }
 
     static async getBalance(organizationId: string) {

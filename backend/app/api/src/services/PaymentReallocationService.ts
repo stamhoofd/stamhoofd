@@ -1,7 +1,13 @@
 import { BalanceItem, BalanceItemPayment, CachedBalance, Payment, User } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { ReceivableBalanceType } from '@stamhoofd/structures';
-import { BalanceItemStatus, doBalanceItemRelationsMatch, PaymentMethod, PaymentStatus, PaymentType } from '@stamhoofd/structures';
+import {
+    BalanceItemStatus,
+    doBalanceItemRelationsMatch,
+    PaymentMethod,
+    PaymentStatus,
+    PaymentType,
+} from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 
 type BalanceItemWithRemaining = {
@@ -20,18 +26,28 @@ export const PaymentReallocationService = {
         // Move all balance item payments to the merged item
         await SQL.update(BalanceItemPayment.table)
             .set('balanceItemId', mergeToItem.id)
-            .where('balanceItemId', otherItems.map(bi => bi.id))
+            .where(
+                'balanceItemId',
+                otherItems.map((bi) => bi.id),
+            )
             .update();
     },
 
-    async reallocate(organizationId: string, objectId: string, type: ReceivableBalanceType, updatePaidAndPending: (items: BalanceItem[]) => Promise<void>) {
+    async reallocate(
+        organizationId: string,
+        objectId: string,
+        type: ReceivableBalanceType,
+        updatePaidAndPending: (items: BalanceItem[]) => Promise<void>,
+    ) {
         if (STAMHOOFD.environment === 'production') {
             // Disabled on production for now
             // until this has been tested more
             return;
         }
 
-        let balanceItems = (await CachedBalance.balanceForObjects(organizationId, [objectId], type)).filter(b => b.isAfterDueDate);
+        let balanceItems = (
+            await CachedBalance.balanceForObjects(organizationId, [objectId], type)
+        ).filter((b) => b.isAfterDueDate);
 
         const didMerge: BalanceItem[] = [];
 
@@ -41,13 +57,26 @@ export const PaymentReallocationService = {
                 continue;
             }
 
-            const similarDueItems = balanceItems.filter(b => b.id !== balanceItem.id && b.type === balanceItem.type && b.status === BalanceItemStatus.Due && doBalanceItemRelationsMatch(b.relations, balanceItem.relations, 0));
+            const similarDueItems = balanceItems.filter(
+                (b) =>
+                    b.id !== balanceItem.id &&
+                    b.type === balanceItem.type &&
+                    b.status === BalanceItemStatus.Due &&
+                    doBalanceItemRelationsMatch(b.relations, balanceItem.relations, 0),
+            );
 
             if (similarDueItems.length) {
                 // Not possible to merge into one: there are 2 due items
                 continue;
             }
-            const similarCanceledItems = balanceItems.filter(b => b.id !== balanceItem.id && b.type === balanceItem.type && b.status !== BalanceItemStatus.Due && (b.pricePaid !== 0 || b.pricePending !== 0) && doBalanceItemRelationsMatch(b.relations, balanceItem.relations, 0));
+            const similarCanceledItems = balanceItems.filter(
+                (b) =>
+                    b.id !== balanceItem.id &&
+                    b.type === balanceItem.type &&
+                    b.status !== BalanceItemStatus.Due &&
+                    (b.pricePaid !== 0 || b.pricePending !== 0) &&
+                    doBalanceItemRelationsMatch(b.relations, balanceItem.relations, 0),
+            );
 
             if (similarCanceledItems.length) {
                 await this.mergeBalanceItems(balanceItem, similarCanceledItems);
@@ -60,7 +89,9 @@ export const PaymentReallocationService = {
             await updatePaidAndPending(didMerge);
 
             // Reload balance items
-            balanceItems = (await CachedBalance.balanceForObjects(organizationId, [objectId], type)).filter(b => b.isAfterDueDate);
+            balanceItems = (
+                await CachedBalance.balanceForObjects(organizationId, [objectId], type)
+            ).filter((b) => b.isAfterDueDate);
         }
 
         // The algorithm:
@@ -76,11 +107,17 @@ export const PaymentReallocationService = {
         // This priority must be given for each balance item, so we start with priority 1 for all items, then priority 2 for all items...
         // The result should be a list of postive and negative balance items that is maximized (as much paid items should have been resolved) and equals zero.
 
-        const negativeItems = balanceItems.filter(b => b.priceOpen < 0).map(balanceItem => ({ balanceItem, remaining: balanceItem.priceOpen }));
-        const positiveItems = balanceItems.filter(b => b.priceOpen > 0).map(balanceItem => ({ balanceItem, remaining: balanceItem.priceOpen }));
+        const negativeItems = balanceItems
+            .filter((b) => b.priceOpen < 0)
+            .map((balanceItem) => ({ balanceItem, remaining: balanceItem.priceOpen }));
+        const positiveItems = balanceItems
+            .filter((b) => b.priceOpen > 0)
+            .map((balanceItem) => ({ balanceItem, remaining: balanceItem.priceOpen }));
 
         // If the total remaining is zero, we'll just merge everything together. This removes the restriction that two merged balance items should have the same remaining amount.
-        const canReachZero = (negativeItems.reduce((p, i) => p + i.remaining, 0) === -positiveItems.reduce((p, i) => p + i.remaining, 0));
+        const canReachZero =
+            negativeItems.reduce((p, i) => p + i.remaining, 0) ===
+            -positiveItems.reduce((p, i) => p + i.remaining, 0);
 
         // Rules:
         // Total outstanding amount should be zero to merge all items into one payment reallocation
@@ -93,68 +130,137 @@ export const PaymentReallocationService = {
         // Now we reach the part where we are going to create reallocation payments (we are no longer going to alter existing payments)
         const pendingPayment = new Map<BalanceItem, number>();
 
-        const matchMethods: { alterPayments: boolean; match: (negativeItem: BalanceItemWithRemaining, positive: BalanceItemWithRemaining) => boolean }[] = [
+        const matchMethods: {
+            alterPayments: boolean;
+            match: (
+                negativeItem: BalanceItemWithRemaining,
+                positive: BalanceItemWithRemaining,
+            ) => boolean;
+        }[] = [
             {
                 // Priority 1: same type, same relation ids, same amount
                 alterPayments: true,
                 match: (negativeItem, p) => {
-                    return p.remaining === -negativeItem.remaining && p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 0);
+                    return (
+                        p.remaining === -negativeItem.remaining &&
+                        p.balanceItem.type === negativeItem.balanceItem.type &&
+                        doBalanceItemRelationsMatch(
+                            p.balanceItem.relations,
+                            negativeItem.balanceItem.relations,
+                            0,
+                        )
+                    );
                 },
             },
             {
                 // Priority 1: same type, same relation ids, same amount
                 alterPayments: false,
                 match: (negativeItem, p) => {
-                    return p.remaining === -negativeItem.remaining && p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 0);
+                    return (
+                        p.remaining === -negativeItem.remaining &&
+                        p.balanceItem.type === negativeItem.balanceItem.type &&
+                        doBalanceItemRelationsMatch(
+                            p.balanceItem.relations,
+                            negativeItem.balanceItem.relations,
+                            0,
+                        )
+                    );
                 },
             },
             {
                 // Priority 2: same type, same relation ids, different amount
                 alterPayments: true,
                 match: (negativeItem, p) => {
-                    return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 0);
+                    return (
+                        p.balanceItem.type === negativeItem.balanceItem.type &&
+                        doBalanceItemRelationsMatch(
+                            p.balanceItem.relations,
+                            negativeItem.balanceItem.relations,
+                            0,
+                        )
+                    );
                 },
             },
             {
                 // Priority 2: same type, same relation ids, different amount
                 alterPayments: false,
                 match: (negativeItem, p) => {
-                    return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 0);
+                    return (
+                        p.balanceItem.type === negativeItem.balanceItem.type &&
+                        doBalanceItemRelationsMatch(
+                            p.balanceItem.relations,
+                            negativeItem.balanceItem.relations,
+                            0,
+                        )
+                    );
                 },
             },
             {
                 // Priority 3: same type, one mismatching relation id, same amount
                 alterPayments: false,
                 match: (negativeItem, p) => {
-                    return p.remaining === -negativeItem.remaining && p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 1);
+                    return (
+                        p.remaining === -negativeItem.remaining &&
+                        p.balanceItem.type === negativeItem.balanceItem.type &&
+                        doBalanceItemRelationsMatch(
+                            p.balanceItem.relations,
+                            negativeItem.balanceItem.relations,
+                            1,
+                        )
+                    );
                 },
             },
             {
                 // Priority 3: same type, one mismatching relation id
                 alterPayments: false,
                 match: (negativeItem, p) => {
-                    return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 1);
+                    return (
+                        p.balanceItem.type === negativeItem.balanceItem.type &&
+                        doBalanceItemRelationsMatch(
+                            p.balanceItem.relations,
+                            negativeItem.balanceItem.relations,
+                            1,
+                        )
+                    );
                 },
             },
             {
                 // Priority 4: same type, two mismatching relation ids, same amount
                 alterPayments: false,
                 match: (negativeItem, p) => {
-                    return p.remaining === -negativeItem.remaining && p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 2);
+                    return (
+                        p.remaining === -negativeItem.remaining &&
+                        p.balanceItem.type === negativeItem.balanceItem.type &&
+                        doBalanceItemRelationsMatch(
+                            p.balanceItem.relations,
+                            negativeItem.balanceItem.relations,
+                            2,
+                        )
+                    );
                 },
             },
             {
                 // Priority 4: same type, two mismatching relation ids
                 alterPayments: false,
                 match: (negativeItem, p) => {
-                    return p.balanceItem.type === negativeItem.balanceItem.type && doBalanceItemRelationsMatch(p.balanceItem.relations, negativeItem.balanceItem.relations, 2);
+                    return (
+                        p.balanceItem.type === negativeItem.balanceItem.type &&
+                        doBalanceItemRelationsMatch(
+                            p.balanceItem.relations,
+                            negativeItem.balanceItem.relations,
+                            2,
+                        )
+                    );
                 },
             },
             {
                 // Priority 5: same type, same amount
                 alterPayments: false,
                 match: (negativeItem, p) => {
-                    return p.balanceItem.type === negativeItem.balanceItem.type && p.remaining === -negativeItem.remaining;
+                    return (
+                        p.balanceItem.type === negativeItem.balanceItem.type &&
+                        p.remaining === -negativeItem.remaining
+                    );
                 },
             },
             {
@@ -185,10 +291,15 @@ export const PaymentReallocationService = {
             negativeItems.sort((a, b) => b.remaining - a.remaining);
 
             // Sort positive items on due date, then hight > low
-            positiveItems.sort((a, b) => Sorter.stack(
-                Sorter.byDateValue(b.balanceItem.dueAt ?? new Date(0), a.balanceItem.dueAt ?? new Date(0)),
-                b.remaining - a.remaining,
-            ));
+            positiveItems.sort((a, b) =>
+                Sorter.stack(
+                    Sorter.byDateValue(
+                        b.balanceItem.dueAt ?? new Date(0),
+                        a.balanceItem.dueAt ?? new Date(0),
+                    ),
+                    b.remaining - a.remaining,
+                ),
+            );
 
             for (const negativeItem of negativeItems) {
                 if (negativeItem.remaining >= 0) {
@@ -196,7 +307,13 @@ export const PaymentReallocationService = {
                 }
 
                 const match = positiveItems.find((p) => {
-                    return p.remaining > 0 && matchMethod.match(negativeItem, p) && (matchMethod.alterPayments || canReachZero || p.remaining === -negativeItem.remaining);
+                    return (
+                        p.remaining > 0 &&
+                        matchMethod.match(negativeItem, p) &&
+                        (matchMethod.alterPayments ||
+                            canReachZero ||
+                            p.remaining === -negativeItem.remaining)
+                    );
                 });
 
                 if (!match) {
@@ -218,8 +335,14 @@ export const PaymentReallocationService = {
                     negativeItem.remaining += moveAmount;
                     match.remaining -= moveAmount;
 
-                    pendingPayment.set(negativeItem.balanceItem, (pendingPayment.get(negativeItem.balanceItem) ?? 0) - moveAmount);
-                    pendingPayment.set(match.balanceItem, (pendingPayment.get(match.balanceItem) ?? 0) + moveAmount);
+                    pendingPayment.set(
+                        negativeItem.balanceItem,
+                        (pendingPayment.get(negativeItem.balanceItem) ?? 0) - moveAmount,
+                    );
+                    pendingPayment.set(
+                        match.balanceItem,
+                        (pendingPayment.get(match.balanceItem) ?? 0) + moveAmount,
+                    );
                 }
             }
         }
@@ -256,17 +379,22 @@ export const PaymentReallocationService = {
 
         // Update outstanding
         await updatePaidAndPending([
-            ...negativeItems.filter(n => n.remaining !== n.balanceItem.priceOpen).map(n => n.balanceItem),
-            ...positiveItems.filter(p => p.remaining !== p.balanceItem.priceOpen).map(p => p.balanceItem),
+            ...negativeItems
+                .filter((n) => n.remaining !== n.balanceItem.priceOpen)
+                .map((n) => n.balanceItem),
+            ...positiveItems
+                .filter((p) => p.remaining !== p.balanceItem.priceOpen)
+                .map((p) => p.balanceItem),
         ]);
     },
 
     async swapPayments(negativeItem: BalanceItemWithRemaining, match: BalanceItemWithRemaining) {
-        const { balanceItemPayments: allBalanceItemPayments, payments } = await BalanceItem.loadPayments([negativeItem.balanceItem, match.balanceItem]);
+        const { balanceItemPayments: allBalanceItemPayments, payments } =
+            await BalanceItem.loadPayments([negativeItem.balanceItem, match.balanceItem]);
 
         // Remove balance item payments of failed or deleted payments
         const balanceItemPayments = allBalanceItemPayments.filter((bp) => {
-            const payment = payments.find(p => p.id === bp.paymentId);
+            const payment = payments.find((p) => p.id === bp.paymentId);
             if (!payment || payment.status === PaymentStatus.Failed) {
                 return false;
             }
@@ -278,16 +406,30 @@ export const PaymentReallocationService = {
         }
 
         // First try to find exact matches
-        await this.doSwapPayments(balanceItemPayments, negativeItem, match, { split: false, exactOnly: true });
+        await this.doSwapPayments(balanceItemPayments, negativeItem, match, {
+            split: false,
+            exactOnly: true,
+        });
 
         // Try with not exact matches
-        await this.doSwapPayments(balanceItemPayments, negativeItem, match, { split: false, exactOnly: false });
+        await this.doSwapPayments(balanceItemPayments, negativeItem, match, {
+            split: false,
+            exactOnly: false,
+        });
 
         // Try with matches that are too big
-        await this.doSwapPayments(balanceItemPayments, negativeItem, match, { split: true, exactOnly: false });
+        await this.doSwapPayments(balanceItemPayments, negativeItem, match, {
+            split: true,
+            exactOnly: false,
+        });
     },
 
-    async doSwapPayments(balanceItemPayments: BalanceItemPayment[], negativeItem: BalanceItemWithRemaining, match: BalanceItemWithRemaining, options: { split: boolean; exactOnly: boolean }) {
+    async doSwapPayments(
+        balanceItemPayments: BalanceItemPayment[],
+        negativeItem: BalanceItemWithRemaining,
+        match: BalanceItemWithRemaining,
+        options: { split: boolean; exactOnly: boolean },
+    ) {
         if (negativeItem.remaining >= 0 || match.remaining <= 0) {
             // Stop because one item is zero or switched sign
             return;
@@ -321,7 +463,10 @@ export const PaymentReallocationService = {
                         negativeItem.remaining -= swap;
                         match.remaining += swap;
                     } else {
-                        if (options.exactOnly && !(price === negativeItem.remaining || price === -match.remaining)) {
+                        if (
+                            options.exactOnly &&
+                            !(price === negativeItem.remaining || price === -match.remaining)
+                        ) {
                             continue;
                         }
 
@@ -363,7 +508,10 @@ export const PaymentReallocationService = {
                         negativeItem.remaining += swap;
                         match.remaining -= swap;
                     } else {
-                        if (options.exactOnly && !(price === -negativeItem.remaining || price === match.remaining)) {
+                        if (
+                            options.exactOnly &&
+                            !(price === -negativeItem.remaining || price === match.remaining)
+                        ) {
                             continue;
                         }
 
@@ -383,5 +531,4 @@ export const PaymentReallocationService = {
             }
         }
     },
-
 };

@@ -1,7 +1,17 @@
 import { EmailMocker } from '@stamhoofd/email';
-import { EmailTemplateFactory, OrganizationFactory, STPackage, UserFactory } from '@stamhoofd/models';
+import {
+    EmailTemplateFactory,
+    OrganizationFactory,
+    STPackage,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { EmailTemplateType, Permissions, STPackageMeta, STPackageType } from '@stamhoofd/structures';
+import {
+    EmailTemplateType,
+    Permissions,
+    STPackageMeta,
+    STPackageType,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,11 +27,12 @@ const DAY = 1000 * 60 * 60 * 24;
 async function createExpirationTemplate(type: EmailTemplateType) {
     await new EmailTemplateFactory({
         type,
-        html: '<p>organizationName: {{organizationName}}</p>'
-            + '<p>packageName: {{packageName}}</p>'
-            + '<p>validUntil: {{validUntil}}</p>'
-            + '<p>validUntilDate: {{validUntilDate}}</p>'
-            + '<p>renewUrl: {{renewUrl}}</p>',
+        html:
+            '<p>organizationName: {{organizationName}}</p>' +
+            '<p>packageName: {{packageName}}</p>' +
+            '<p>validUntil: {{validUntil}}</p>' +
+            '<p>validUntilDate: {{validUntilDate}}</p>' +
+            '<p>renewUrl: {{renewUrl}}</p>',
     }).create();
 }
 
@@ -41,8 +52,10 @@ async function createPackage(options: {
         type: options.type,
         startDate: new Date(Date.now() - 365 * DAY),
     });
-    pack.validAt = options.validAt !== undefined ? options.validAt : new Date(Date.now() - 365 * DAY);
-    pack.validUntil = options.validUntil !== undefined ? options.validUntil : new Date(Date.now() + 10 * DAY);
+    pack.validAt =
+        options.validAt !== undefined ? options.validAt : new Date(Date.now() - 365 * DAY);
+    pack.validUntil =
+        options.validUntil !== undefined ? options.validUntil : new Date(Date.now() + 10 * DAY);
     pack.removeAt = options.removeAt ?? null;
     await pack.save();
     return pack;
@@ -75,7 +88,11 @@ describe('STPackageService', () => {
             const member = await new UserFactory({ organization }).create();
 
             const validUntil = new Date(Date.now() + 10 * DAY);
-            const pack = await createPackage({ organizationId: organization.id, type: STPackageType.Members, validUntil });
+            const pack = await createPackage({
+                organizationId: organization.id,
+                type: STPackageType.Members,
+                validUntil,
+            });
 
             await STPackageService.sendExpiryEmail(pack);
 
@@ -88,7 +105,9 @@ describe('STPackageService', () => {
             expect(emails[0].html).toContain('packageName: ' + pack.meta.name);
             expect(emails[0].html).toContain('validUntil: ' + Formatter.dateTime(validUntil));
             expect(emails[0].html).toContain('validUntilDate: ' + Formatter.date(validUntil));
-            expect(emails[0].html).toContain(`renewUrl: https://${STAMHOOFD.domains.dashboard ?? 'stamhoofd.app'}/${organization.i18n.locale}/beheerders/${organization.uri}/instellingen/functionaliteiten`);
+            expect(emails[0].html).toContain(
+                `renewUrl: https://${STAMHOOFD.domains.dashboard ?? 'stamhoofd.app'}/${organization.i18n.locale}/beheerders/${organization.uri}/instellingen/functionaliteiten`,
+            );
 
             expect(pack.lastEmailAt).not.toBeNull();
             expect(pack.emailCount).toBe(1);
@@ -103,7 +122,10 @@ describe('STPackageService', () => {
             const { organization } = await createOrganizationWithAdmin();
 
             // LegacyMembers has no expiration reminder template type
-            const pack = await createPackage({ organizationId: organization.id, type: STPackageType.LegacyMembers });
+            const pack = await createPackage({
+                organizationId: organization.id,
+                type: STPackageType.LegacyMembers,
+            });
 
             await STPackageService.sendExpiryEmail(pack);
 
@@ -122,7 +144,10 @@ describe('STPackageService', () => {
             await createExpirationTemplate(EmailTemplateType.MembersExpirationReminder);
 
             const { organization } = await createOrganizationWithAdmin();
-            const pack = await createPackage({ organizationId: organization.id, type: STPackageType.Members });
+            const pack = await createPackage({
+                organizationId: organization.id,
+                type: STPackageType.Members,
+            });
 
             await STPackageService.sendExpiryEmail(pack);
 
@@ -140,11 +165,16 @@ describe('STPackageService', () => {
             await createExpirationTemplate(EmailTemplateType.MembersExpirationReminder);
             const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-            const pack = await createPackage({ organizationId: uuidv4(), type: STPackageType.Members });
+            const pack = await createPackage({
+                organizationId: uuidv4(),
+                type: STPackageType.Members,
+            });
 
             await STPackageService.sendExpiryEmail(pack);
 
-            expect(consoleError).toHaveBeenCalledWith('Could not find package organization ' + pack.id);
+            expect(consoleError).toHaveBeenCalledWith(
+                'Could not find package organization ' + pack.id,
+            );
             expect(await EmailMocker.getSucceededCount()).toBe(0);
 
             // A missing organization does not stop the bookkeeping
@@ -157,10 +187,18 @@ describe('STPackageService', () => {
 
             const { organization } = await createOrganizationWithAdmin();
 
-            const neverActivated = await createPackage({ organizationId: organization.id, type: STPackageType.Members, validAt: null });
+            const neverActivated = await createPackage({
+                organizationId: organization.id,
+                type: STPackageType.Members,
+                validAt: null,
+            });
 
             // Expires in 100 days, which is outside the 32 day window of a members package
-            const notExpiringSoon = await createPackage({ organizationId: organization.id, type: STPackageType.Members, validUntil: new Date(Date.now() + 100 * DAY) });
+            const notExpiringSoon = await createPackage({
+                organizationId: organization.id,
+                type: STPackageType.Members,
+                validUntil: new Date(Date.now() + 100 * DAY),
+            });
 
             await STPackageService.sendExpiryEmail(neverActivated);
             await STPackageService.sendExpiryEmail(notExpiringSoon);
@@ -177,7 +215,11 @@ describe('STPackageService', () => {
             await createExpirationTemplate(EmailTemplateType.MembersExpirationReminder);
 
             const { organization } = await createOrganizationWithAdmin();
-            const pack = await createPackage({ organizationId: organization.id, type: STPackageType.Members, removeAt: new Date(Date.now() - DAY) });
+            const pack = await createPackage({
+                organizationId: organization.id,
+                type: STPackageType.Members,
+                removeAt: new Date(Date.now() - DAY),
+            });
 
             await STPackageService.sendExpiryEmail(pack);
 

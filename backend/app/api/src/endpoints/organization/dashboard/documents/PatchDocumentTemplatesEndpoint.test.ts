@@ -2,10 +2,22 @@ import { PatchableArray } from '@common/encoding';
 import type { Endpoint } from '@node/endpoints';
 import { Request } from '@node/endpoints';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
-import { DocumentTemplate, DocumentTemplateFactory, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import {
+    DocumentTemplate,
+    DocumentTemplateFactory,
+    OrganizationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { DocumentPrivateSettings, DocumentStatus, DocumentTemplateDefinition, DocumentTemplatePrivate, Permissions } from '@stamhoofd/structures';
+import {
+    DocumentPrivateSettings,
+    DocumentStatus,
+    DocumentTemplateDefinition,
+    DocumentTemplatePrivate,
+    Permissions,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchDocumentTemplatesEndpoint } from './PatchDocumentTemplatesEndpoint.js';
@@ -32,8 +44,7 @@ describe('Endpoint.PatchDocumentTemplatesEndpoint', () => {
             endDate: new Date(2023, 11, 31),
         }).create();
 
-        organization = await new OrganizationFactory({ period })
-            .create();
+        organization = await new OrganizationFactory({ period }).create();
 
         user = await new UserFactory({
             organization,
@@ -57,12 +68,12 @@ describe('Endpoint.PatchDocumentTemplatesEndpoint', () => {
 
             // create new fiscal document in same year
             const arr: Body = new PatchableArray();
-            const newDocumentModel: DocumentTemplate = (await new DocumentTemplateFactory({
+            const newDocumentModel: DocumentTemplate = await new DocumentTemplateFactory({
                 organizationId: organization.id,
                 type: 'fiscal',
                 groups: [],
                 year: 2022,
-            }).createWithoutSave());
+            }).createWithoutSave();
 
             const newDocument = newDocumentModel.getPrivateStructure();
             arr.addPut(newDocument);
@@ -70,22 +81,24 @@ describe('Endpoint.PatchDocumentTemplatesEndpoint', () => {
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
 
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('double_fiscal_document'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('double_fiscal_document'),
+            );
         });
 
         it('should not throw if first fiscal document in year', async () => {
             // delete existing docs from organization
-            await SQL.delete().from(SQL.table(DocumentTemplate.table)).where('organizationId', organization.id);
+            await SQL.delete()
+                .from(SQL.table(DocumentTemplate.table))
+                .where('organizationId', organization.id);
 
             const arr: Body = new PatchableArray();
-            const newDocumentModel: DocumentTemplate = (await new DocumentTemplateFactory({
+            const newDocumentModel: DocumentTemplate = await new DocumentTemplateFactory({
                 organizationId: organization.id,
                 type: 'fiscal',
                 groups: [],
                 year: 2022,
-            }).createWithoutSave());
+            }).createWithoutSave();
 
             const newDocument = newDocumentModel.getPrivateStructure();
             arr.addPut(newDocument);
@@ -115,55 +128,61 @@ describe('Endpoint.PatchDocumentTemplatesEndpoint', () => {
                 const arr: Body = new PatchableArray();
 
                 // create new participation document in same year
-                const newDocumentModel: DocumentTemplate = (await new DocumentTemplateFactory({
+                const newDocumentModel: DocumentTemplate = await new DocumentTemplateFactory({
                     organizationId: organization.id,
                     type: 'participation',
                     groups: [],
                     year: 2022,
-                }).create());
+                }).create();
 
                 // change type to fiscal
-                arr.addPatch(DocumentTemplatePrivate.patch({
-                    id: newDocumentModel.id,
-                    privateSettings: DocumentPrivateSettings.patch({
-                        templateDefinition: DocumentTemplateDefinition.patch({
-                            type: 'fiscal',
+                arr.addPatch(
+                    DocumentTemplatePrivate.patch({
+                        id: newDocumentModel.id,
+                        privateSettings: DocumentPrivateSettings.patch({
+                            templateDefinition: DocumentTemplateDefinition.patch({
+                                type: 'fiscal',
+                            }),
                         }),
                     }),
-                }));
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
 
-                await expect(testServer.test(endpoint, request))
-                    .rejects
-                    .toThrow(STExpect.errorWithCode('double_fiscal_document'));
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    STExpect.errorWithCode('double_fiscal_document'),
+                );
             });
 
             it('should not throw if first fiscal document in year', async () => {
                 // delete existing docs from organization
-                await SQL.delete().from(SQL.table(DocumentTemplate.table)).where('organizationId', organization.id);
+                await SQL.delete()
+                    .from(SQL.table(DocumentTemplate.table))
+                    .where('organizationId', organization.id);
 
                 // create new fiscal document in same year
                 const arr: Body = new PatchableArray();
 
                 // create new participation document in same year
-                const newDocumentModel: DocumentTemplate = (await new DocumentTemplateFactory({
+                const newDocumentModel: DocumentTemplate = await new DocumentTemplateFactory({
                     organizationId: organization.id,
                     type: 'participation',
                     groups: [],
                     year: 2022,
-                }).create());
+                }).create();
 
                 // change type to fiscal
-                arr.addPatch(DocumentTemplatePrivate.patch({
-                    id: newDocumentModel.id,
-                    privateSettings: DocumentPrivateSettings.patch({
-                        templateDefinition: DocumentTemplateDefinition.patch({
-                            type: 'fiscal',
+                arr.addPatch(
+                    DocumentTemplatePrivate.patch({
+                        id: newDocumentModel.id,
+                        privateSettings: DocumentPrivateSettings.patch({
+                            templateDefinition: DocumentTemplateDefinition.patch({
+                                type: 'fiscal',
+                            }),
                         }),
                     }),
-                }));
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -189,47 +208,53 @@ describe('Endpoint.PatchDocumentTemplatesEndpoint', () => {
                 const arr: Body = new PatchableArray();
 
                 // create new participation document in other year
-                const newDocumentModel: DocumentTemplate = (await new DocumentTemplateFactory({
+                const newDocumentModel: DocumentTemplate = await new DocumentTemplateFactory({
                     organizationId: organization.id,
                     type: 'fiscal',
                     groups: [],
                     year: 2021,
-                }).create());
+                }).create();
 
                 // change year to same year as other existing document
-                arr.addPatch(DocumentTemplatePrivate.patch({
-                    id: newDocumentModel.id,
-                    year: 2022,
-                }));
+                arr.addPatch(
+                    DocumentTemplatePrivate.patch({
+                        id: newDocumentModel.id,
+                        year: 2022,
+                    }),
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
 
-                await expect(testServer.test(endpoint, request))
-                    .rejects
-                    .toThrow(STExpect.errorWithCode('double_fiscal_document'));
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    STExpect.errorWithCode('double_fiscal_document'),
+                );
             });
 
             it('should not throw if first fiscal document in year', async () => {
                 // delete existing docs from organization
-                await SQL.delete().from(SQL.table(DocumentTemplate.table)).where('organizationId', organization.id);
+                await SQL.delete()
+                    .from(SQL.table(DocumentTemplate.table))
+                    .where('organizationId', organization.id);
 
                 // create new fiscal document in same year
                 const arr: Body = new PatchableArray();
 
                 // create new participation document in other year
-                const newDocumentModel: DocumentTemplate = (await new DocumentTemplateFactory({
+                const newDocumentModel: DocumentTemplate = await new DocumentTemplateFactory({
                     organizationId: organization.id,
                     type: 'fiscal',
                     groups: [],
                     year: 2021,
-                }).create());
+                }).create();
 
                 // change year to same year as other existing document
-                arr.addPatch(DocumentTemplatePrivate.patch({
-                    id: newDocumentModel.id,
-                    year: 2022,
-                }));
+                arr.addPatch(
+                    DocumentTemplatePrivate.patch({
+                        id: newDocumentModel.id,
+                        year: 2022,
+                    }),
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -244,7 +269,9 @@ describe('Endpoint.PatchDocumentTemplatesEndpoint', () => {
         describe('do not change type or year of existing fiscal document', () => {
             it('should not throw if multiple fiscal documents in year', async () => {
                 // delete existing docs from organization
-                await SQL.delete().from(SQL.table(DocumentTemplate.table)).where('organizationId', organization.id);
+                await SQL.delete()
+                    .from(SQL.table(DocumentTemplate.table))
+                    .where('organizationId', organization.id);
 
                 // create existing fiscal document in same year
                 await new DocumentTemplateFactory({
@@ -258,18 +285,20 @@ describe('Endpoint.PatchDocumentTemplatesEndpoint', () => {
                 const arr: Body = new PatchableArray();
 
                 // create double fiscal document in same year
-                const newDocumentModel: DocumentTemplate = (await new DocumentTemplateFactory({
+                const newDocumentModel: DocumentTemplate = await new DocumentTemplateFactory({
                     organizationId: organization.id,
                     type: 'fiscal',
                     groups: [],
                     year: 2022,
-                }).create());
+                }).create();
 
                 // change status to published (do not change year or type)
-                arr.addPatch(DocumentTemplatePrivate.patch({
-                    id: newDocumentModel.id,
-                    status: DocumentStatus.Published,
-                }));
+                arr.addPatch(
+                    DocumentTemplatePrivate.patch({
+                        id: newDocumentModel.id,
+                        status: DocumentStatus.Published,
+                    }),
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;

@@ -13,7 +13,12 @@ export class PasswordForgotService {
     /**
      * Create a new password token for the user and build the recovery url for it.
      */
-    static async getPasswordRecoveryUrl(user: User, organization: Organization | null, i18n: I18n, validUntil?: Date) {
+    static async getPasswordRecoveryUrl(
+        user: User,
+        organization: Organization | null,
+        i18n: I18n,
+        validUntil?: Date,
+    ) {
         // Send an e-mail to say you already have an account + follow password forgot flow
         const token = await PasswordToken.createToken(user, validUntil);
         return await this.getPasswordRecoveryUrlForToken(token, organization, i18n, user);
@@ -23,7 +28,11 @@ export class PasswordForgotService {
      * Create a new password token and email the recovery link to the user. Always sent to the
      * stored address, never to whatever the request asked for.
      */
-    static async sendPasswordRecoveryEmail(user: User, organization: Organization | null, i18n: I18n) {
+    static async sendPasswordRecoveryEmail(
+        user: User,
+        organization: Organization | null,
+        i18n: I18n,
+    ) {
         const recoveryUrl = await this.getPasswordRecoveryUrl(user, organization, i18n);
 
         await sendEmailTemplate(organization, {
@@ -52,18 +61,39 @@ export class PasswordForgotService {
      * Build the recovery url for an already created password token.
      * Pass the user to avoid an extra query when it is already loaded.
      */
-    static async getPasswordRecoveryUrlForToken(token: PasswordToken, organization: Organization | null, i18n: I18n, user?: User) {
-        const tokenUser = user ?? await User.getByID(token.userId);
+    static async getPasswordRecoveryUrlForToken(
+        token: PasswordToken,
+        organization: Organization | null,
+        i18n: I18n,
+        user?: User,
+    ) {
+        const tokenUser = user ?? (await User.getByID(token.userId));
         if (!tokenUser) {
             throw new Error('PasswordToken without a valid user');
         }
 
-        if (tokenUser.organizationId !== null && ((tokenUser.organizationId ?? null) !== (organization?.id ?? null))) {
+        if (
+            tokenUser.organizationId !== null &&
+            (tokenUser.organizationId ?? null) !== (organization?.id ?? null)
+        ) {
             throw new Error('Unexpected mismatch in organization id for PasswordToken');
         }
 
-        const hasOrganizationPermissions = organization ? tokenUser.permissions?.forOrganization(organization, await Platform.getSharedStruct(), tokenUser.email)?.isEmpty === false : false;
-        const host = 'https://' + getAppHost(hasOrganizationPermissions ? 'dashboard' : 'registration', organization, hasOrganizationPermissions, i18n);
+        const hasOrganizationPermissions = organization
+            ? tokenUser.permissions?.forOrganization(
+                  organization,
+                  await Platform.getSharedStruct(),
+                  tokenUser.email,
+              )?.isEmpty === false
+            : false;
+        const host =
+            'https://' +
+            getAppHost(
+                hasOrganizationPermissions ? 'dashboard' : 'registration',
+                organization,
+                hasOrganizationPermissions,
+                i18n,
+            );
         return host + '/reset-password?token=' + encodeURIComponent(token.token);
     }
 }

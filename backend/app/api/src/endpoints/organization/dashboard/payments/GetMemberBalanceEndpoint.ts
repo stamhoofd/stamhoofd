@@ -17,7 +17,9 @@ export class GetMemberBalanceEndpoint extends Endpoint<Params, Query, Body, Resp
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/members/@id/balance', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/organization/members/@id/balance', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];

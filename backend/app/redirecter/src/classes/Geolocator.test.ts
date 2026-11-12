@@ -4,7 +4,10 @@ import { Geolocator } from './Geolocator.js';
 describe('Geolocator', () => {
     beforeAll(async () => {
         await Geolocator.shared.load(import.meta.dirname + '/../data/belgium.csv', Country.Belgium);
-        await Geolocator.shared.load(import.meta.dirname + '/../data/netherlands.csv', Country.Netherlands);
+        await Geolocator.shared.load(
+            import.meta.dirname + '/../data/netherlands.csv',
+            Country.Netherlands,
+        );
     });
 
     test('Returns right', async () => {

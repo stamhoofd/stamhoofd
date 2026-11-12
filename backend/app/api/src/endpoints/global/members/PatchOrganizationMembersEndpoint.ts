@@ -1,15 +1,51 @@
 import type { OneToManyRelation } from '@node/database';
-import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { isEmptyPatch, isPatchableArray, PatchableArray, PatchableArrayDecoder, StringDecoder } from '@common/encoding';
+import type {
+    AutoEncoderPatchType,
+    ConvertArrayToPatchableArray,
+    Decoder,
+    PatchableArrayAutoEncoder,
+} from '@common/encoding';
+import {
+    isEmptyPatch,
+    isPatchableArray,
+    PatchableArray,
+    PatchableArrayDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import type { MemberWithUsersRegistrationsAndGroups, Registration } from '@stamhoofd/models';
-import { AuditLog, BalanceItem, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, RateLimiter, RegistrationPeriod, User } from '@stamhoofd/models';
+import {
+    AuditLog,
+    BalanceItem,
+    Group,
+    Member,
+    MemberFactory,
+    MemberPlatformMembership,
+    MemberResponsibilityRecord,
+    Organization,
+    Platform,
+    RateLimiter,
+    RegistrationPeriod,
+    User,
+} from '@stamhoofd/models';
 import { DocumentService } from '../../../services/DocumentService.js';
 import type { MemberResponsibility, MembersBlob } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType, EmergencyContact, GroupType, MemberDetails, MemberWithRegistrationsBlob, Parent, PlatformMembershipTypeBehaviour, SetupStepType } from '@stamhoofd/structures';
+import {
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    AuditLogSource,
+    AuditLogType,
+    EmergencyContact,
+    GroupType,
+    MemberDetails,
+    MemberWithRegistrationsBlob,
+    Parent,
+    PlatformMembershipTypeBehaviour,
+    SetupStepType,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Email } from '@stamhoofd/email';
@@ -20,7 +56,11 @@ import { Context } from '../../../helpers/Context.js';
 import { MembershipCharger } from '../../../helpers/MembershipCharger.js';
 import { MemberUserSyncer } from '../../../helpers/MemberUserSyncer.js';
 import { SetupStepUpdater } from '../../../helpers/SetupStepUpdater.js';
-import { didUitpasReviewChange, updateMemberDetailsUitpasNumber, updateMemberDetailsUitpasNumberForPatch } from '../../../helpers/updateMemberDetailsUitpasNumber.js';
+import {
+    didUitpasReviewChange,
+    updateMemberDetailsUitpasNumber,
+    updateMemberDetailsUitpasNumberForPatch,
+} from '../../../helpers/updateMemberDetailsUitpasNumber.js';
 import { MemberNumberService } from '../../../services/MemberNumberService.js';
 import { GroupService } from '../../../services/GroupService.js';
 import { PlatformMembershipService } from '../../../services/PlatformMembershipService.js';
@@ -75,16 +115,25 @@ export const duplicateCheckLimiter = new RateLimiter({
  */
 function membershipDateRangeOverlaps(startDate: Date, endDate: Date) {
     return SQL.where(
-        SQL.where('startDate', SQLWhereSign.LessEqual, startDate)
-            .and('endDate', SQLWhereSign.GreaterEqual, startDate),
+        SQL.where('startDate', SQLWhereSign.LessEqual, startDate).and(
+            'endDate',
+            SQLWhereSign.GreaterEqual,
+            startDate,
+        ),
     )
         .or(
-            SQL.where('startDate', SQLWhereSign.LessEqual, endDate)
-                .and('endDate', SQLWhereSign.GreaterEqual, endDate),
+            SQL.where('startDate', SQLWhereSign.LessEqual, endDate).and(
+                'endDate',
+                SQLWhereSign.GreaterEqual,
+                endDate,
+            ),
         )
         .or(
-            SQL.where('startDate', SQLWhereSign.GreaterEqual, startDate)
-                .and('endDate', SQLWhereSign.LessEqual, endDate),
+            SQL.where('startDate', SQLWhereSign.GreaterEqual, startDate).and(
+                'endDate',
+                SQLWhereSign.LessEqual,
+                endDate,
+            ),
         );
 }
 
@@ -93,8 +142,12 @@ function membershipDateRangeOverlaps(startDate: Date, endDate: Date) {
  */
 
 export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    bodyDecoder = new PatchableArrayDecoder(MemberWithRegistrationsBlob as any, MemberWithRegistrationsBlob.patchType(), StringDecoder) as any as Decoder<ConvertArrayToPatchableArray<MemberWithRegistrationsBlob[]>>;
+    bodyDecoder = new PatchableArrayDecoder(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        MemberWithRegistrationsBlob as any,
+        MemberWithRegistrationsBlob.patchType(),
+        StringDecoder,
+    ) as any as Decoder<ConvertArrayToPatchableArray<MemberWithRegistrationsBlob[]>>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -110,7 +163,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
     }
 
     private static throwDuplicateMemberNumberError(error: unknown): never {
-        if (error && typeof error === 'object' && 'code' in error && error.code === 'ER_DUP_ENTRY' && 'message' in error && typeof error.message === 'string' && error.message.includes('memberNumber')) {
+        if (
+            error &&
+            typeof error === 'object' &&
+            'code' in error &&
+            error.code === 'ER_DUP_ENTRY' &&
+            'message' in error &&
+            typeof error.message === 'string' &&
+            error.message.includes('memberNumber')
+        ) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Member number already in use',
@@ -127,7 +188,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         // Fast throw first (more in depth checking for patches later)
         if (organization) {
-            if (!await Context.auth.hasSomeAccess(organization.id)) {
+            if (!(await Context.auth.hasSomeAccess(organization.id))) {
                 throw Context.auth.error();
             }
         } else {
@@ -147,7 +208,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         for (const put of request.body.getPuts()) {
             const struct = put.put;
             let member = new Member()
-                .setManyRelation(Member.registrations as any as OneToManyRelation<'registrations', Member, Registration & { group: Group }>, [])
+                .setManyRelation(
+                    Member.registrations as any as OneToManyRelation<
+                        'registrations',
+                        Member,
+                        Registration & { group: Group }
+                    >,
+                    [],
+                )
                 .setManyRelation(Member.users, []);
             if (await Member.getByID(struct.id)) {
                 throw new SimpleError({
@@ -172,7 +240,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             PatchOrganizationMembersEndpoint.throwIfTooManyTaxDependentParents(member.details);
 
-            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode, 'put');
+            const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(
+                member,
+                securityCode,
+                'put',
+            );
             if (duplicate) {
                 // Merge data
                 member = duplicate;
@@ -190,8 +262,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             /**
              * In development mode, we allow some secret usernames to create fake data
              */
-            if ((STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'staging') && organization) {
-                if (member.details.firstName.toLocaleLowerCase() === 'create' && parseInt(member.details.lastName) > 0) {
+            if (
+                (STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'staging') &&
+                organization
+            ) {
+                if (
+                    member.details.firstName.toLocaleLowerCase() === 'create' &&
+                    parseInt(member.details.lastName) > 0
+                ) {
                     const count = parseInt(member.details.lastName);
                     await this.createDummyMembers(organization, count);
 
@@ -221,14 +299,20 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         // Loop all members one by one
         for (let patch of request.body.getPatches()) {
-            const member = members.find(m => m.id === patch.id) ?? await Member.getWithRegistrations(patch.id);
+            const member =
+                members.find((m) => m.id === patch.id) ??
+                (await Member.getWithRegistrations(patch.id));
             const securityCode = patch.details?.securityCode; // will get cleared after the filter
 
             if (!member) {
                 throw Context.auth.memberNotFoundOrNoAccess();
             }
 
-            await PatchOrganizationMembersEndpoint.checkCanAccessMember(member, securityCode, 'direct');
+            await PatchOrganizationMembersEndpoint.checkCanAccessMember(
+                member,
+                securityCode,
+                'direct',
+            );
 
             patch = await Context.auth.filterMemberPatch(member, patch);
             const originalDetails = member.details.clone();
@@ -245,26 +329,41 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     });
                 }
 
-                shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(patch, originalDetails);
+                shouldCheckDuplicate = shouldCheckIfMemberIsDuplicateForPatch(
+                    patch,
+                    originalDetails,
+                );
 
                 // Only full-permission admins may drastically change the name or birth date of an existing member
-                if (!await Context.auth.canAccessMember(member, PermissionLevel.Full)) {
+                if (!(await Context.auth.canAccessMember(member, PermissionLevel.Full))) {
                     throwIfDrasticMemberDetailsChange(patch.details, originalDetails);
                 }
 
                 const wasReduced = member.details.shouldApplyReducedPrice;
 
                 const originalReviewTimes = member.details.reviewTimes;
-                const previousUitpasNumber = member.details.uitpasNumberDetails?.uitpasNumber ?? null;
-                const previousTaxDependentCount = PatchOrganizationMembersEndpoint.countTaxDependentParents(member.details);
+                const previousUitpasNumber =
+                    member.details.uitpasNumberDetails?.uitpasNumber ?? null;
+                const previousTaxDependentCount =
+                    PatchOrganizationMembersEndpoint.countTaxDependentParents(member.details);
                 member.details.patchOrPut(patch.details);
 
-                if (patch.details.uitpasNumberDetails || didUitpasReviewChange(patch.details.reviewTimes, originalReviewTimes)) {
-                    await updateMemberDetailsUitpasNumberForPatch(member.id, member.details, previousUitpasNumber);
+                if (
+                    patch.details.uitpasNumberDetails ||
+                    didUitpasReviewChange(patch.details.reviewTimes, originalReviewTimes)
+                ) {
+                    await updateMemberDetailsUitpasNumberForPatch(
+                        member.id,
+                        member.details,
+                        previousUitpasNumber,
+                    );
                 }
 
                 member.details.cleanData();
-                PatchOrganizationMembersEndpoint.throwIfTooManyTaxDependentParents(member.details, previousTaxDependentCount);
+                PatchOrganizationMembersEndpoint.throwIfTooManyTaxDependentParents(
+                    member.details,
+                    previousTaxDependentCount,
+                );
 
                 if (wasReduced !== member.details.shouldApplyReducedPrice) {
                     updateMembershipMemberIds.add(member.id);
@@ -272,11 +371,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             if (shouldCheckDuplicate) {
-                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(member, securityCode, 'patch');
+                const duplicate = await PatchOrganizationMembersEndpoint.checkDuplicate(
+                    member,
+                    securityCode,
+                    'patch',
+                );
 
                 if (duplicate) {
                     // Remove the member from the list
-                    const iii = members.findIndex(m => m.id === member.id);
+                    const iii = members.findIndex((m) => m.id === member.id);
                     if (iii !== -1) {
                         members.splice(iii, 1);
                     }
@@ -297,8 +400,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             // If parents changed or emergeny contacts: fetch family and merge data
-            if (patch.details && (!isEmptyPatch(patch.details?.parents) || !isEmptyPatch(patch.details?.emergencyContacts))) {
-                await PatchOrganizationMembersEndpoint.mergeDuplicateRelations(member, patch.details);
+            if (
+                patch.details &&
+                (!isEmptyPatch(patch.details?.parents) ||
+                    !isEmptyPatch(patch.details?.emergencyContacts))
+            ) {
+                await PatchOrganizationMembersEndpoint.mergeDuplicateRelations(
+                    member,
+                    patch.details,
+                );
             }
 
             // Update documents
@@ -306,12 +416,21 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Update responsibilities
             for (const patchResponsibility of patch.responsibilities.getPatches()) {
-                if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
+                if (
+                    !Context.auth.hasPlatformFullAccess() &&
+                    !(organization && (await Context.auth.hasFullAccess(organization.id)))
+                ) {
                     throw Context.auth.error($t('%Dk'));
                 }
 
-                const responsibilityRecord = await MemberResponsibilityRecord.getByID(patchResponsibility.id);
-                if (!responsibilityRecord || responsibilityRecord.memberId !== member.id || (organization && responsibilityRecord.organizationId !== organization.id)) {
+                const responsibilityRecord = await MemberResponsibilityRecord.getByID(
+                    patchResponsibility.id,
+                );
+                if (
+                    !responsibilityRecord ||
+                    responsibilityRecord.memberId !== member.id ||
+                    (organization && responsibilityRecord.organizationId !== organization.id)
+                ) {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: "You don't have permissions to access this endpoint",
@@ -319,9 +438,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     });
                 }
 
-                const responsibility = platform.config.responsibilities.find(r => r.id === patchResponsibility.responsibilityId);
+                const responsibility = platform.config.responsibilities.find(
+                    (r) => r.id === patchResponsibility.responsibilityId,
+                );
 
-                if (responsibility && !responsibility.organizationBased && !Context.auth.hasPlatformFullAccess()) {
+                if (
+                    responsibility &&
+                    !responsibility.organizationBased &&
+                    !Context.auth.hasPlatformFullAccess()
+                ) {
                     throw Context.auth.error($t('%Dm'));
                 }
 
@@ -343,7 +468,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         patchResponsibility.startDate = new Date(); // force now
                     }
 
-                    const daysDiff = Math.abs((new Date().getTime() - patchResponsibility.startDate.getTime()) / (1000 * 60 * 60 * 24));
+                    const daysDiff = Math.abs(
+                        (new Date().getTime() - patchResponsibility.startDate.getTime()) /
+                            (1000 * 60 * 60 * 24),
+                    );
 
                     if (daysDiff > 60 && !Context.auth.hasPlatformFullAccess()) {
                         throw Context.auth.error($t('%Dp'));
@@ -366,11 +494,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 const { put } = responsibilitiesPuts[i];
 
                 // Filter duplicate responsibilities
-                if (responsibilitiesPuts.findLastIndex(responsibility =>
-                    responsibility.put.responsibilityId === put.responsibilityId
-                    && responsibility.put.groupId === put.groupId
-                    && responsibility.put.organizationId === put.organizationId,
-                ) !== i) {
+                if (
+                    responsibilitiesPuts.findLastIndex(
+                        (responsibility) =>
+                            responsibility.put.responsibilityId === put.responsibilityId &&
+                            responsibility.put.groupId === put.groupId &&
+                            responsibility.put.organizationId === put.organizationId,
+                    ) !== i
+                ) {
                     continue;
                 }
 
@@ -380,20 +511,30 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     .where(SQL.where('endDate', null).or('endDate', '>', new Date()))
                     .fetch();
 
-                if (existingResponsibilities.find(r =>
-                    r.responsibilityId === put.responsibilityId
-                    && r.groupId === put.groupId
-                    && r.organizationId === put.organizationId,
-                )) {
+                if (
+                    existingResponsibilities.find(
+                        (r) =>
+                            r.responsibilityId === put.responsibilityId &&
+                            r.groupId === put.groupId &&
+                            r.organizationId === put.organizationId,
+                    )
+                ) {
                     continue;
                 }
 
-                if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
+                if (
+                    !Context.auth.hasPlatformFullAccess() &&
+                    !(organization && (await Context.auth.hasFullAccess(organization.id)))
+                ) {
                     throw Context.auth.error($t('%Dk'));
                 }
 
-                const platformResponsibility = platform.config.responsibilities.find(r => r.id === put.responsibilityId);
-                const org = organization ?? (put.organizationId ? await Organization.getByID(put.organizationId) : null);
+                const platformResponsibility = platform.config.responsibilities.find(
+                    (r) => r.id === put.responsibilityId,
+                );
+                const org =
+                    organization ??
+                    (put.organizationId ? await Organization.getByID(put.organizationId) : null);
 
                 if (!org && put.organizationId) {
                     throw new SimpleError({
@@ -403,7 +544,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         field: 'organizationId',
                     });
                 }
-                const responsibility = platformResponsibility ?? org?.privateMeta.responsibilities.find(r => r.id === put.responsibilityId);
+                const responsibility =
+                    platformResponsibility ??
+                    org?.privateMeta.responsibilities.find((r) => r.id === put.responsibilityId);
 
                 if (!responsibility) {
                     throw new SimpleError({
@@ -439,7 +582,11 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                             return false;
                         }
                     }
-                    return registration.deactivatedAt === null && registration.registeredAt !== null && registration.group.type === GroupType.Membership;
+                    return (
+                        registration.deactivatedAt === null &&
+                        registration.registeredAt !== null &&
+                        registration.group.type === GroupType.Membership
+                    );
                 });
 
                 if (!hasRegistration) {
@@ -455,7 +602,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 model.responsibilityId = responsibility.id;
                 model.organizationId = org?.id ?? null;
 
-                if (responsibility.organizationTagIds !== null && (!org || !org.meta.matchTags(responsibility.organizationTagIds))) {
+                if (
+                    responsibility.organizationTagIds !== null &&
+                    (!org || !org.meta.matchTags(responsibility.organizationTagIds))
+                ) {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
@@ -484,7 +634,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         });
                     }
 
-                    if (group.defaultAgeGroupId === null || !responsibility.defaultAgeGroupIds.includes(group.defaultAgeGroupId)) {
+                    if (
+                        group.defaultAgeGroupId === null ||
+                        !responsibility.defaultAgeGroupIds.includes(group.defaultAgeGroupId)
+                    ) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid groupId',
@@ -523,7 +676,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Auto link users based on data
             await MemberUserSyncer.onChangeMember(member);
 
-            if (patch.details?.language !== undefined && patch.details.language !== originalDetails.language) {
+            if (
+                patch.details?.language !== undefined &&
+                patch.details.language !== originalDetails.language
+            ) {
                 for (const user of member.users) {
                     if (user.language !== member.details.language) {
                         user.language = member.details.language;
@@ -534,7 +690,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             // Allow to remove access for certain users
             for (const id of patch.users.getDeletes()) {
-                const user = member.users.find(u => u.id === id);
+                const user = member.users.find((u) => u.id === id);
                 if (!user) {
                     // Ignore silently
                     continue;
@@ -570,7 +726,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t('%AA', { period: period?.getBaseStructure().name }),
+                            human: Context.i18n.$t('%AA', {
+                                period: period?.getBaseStructure().name,
+                            }),
                             field: 'periodId',
                         });
                     }
@@ -585,13 +743,15 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     });
                 }
 
-                if (!await Context.auth.hasFullAccess(put.organizationId)) {
+                if (!(await Context.auth.hasFullAccess(put.organizationId))) {
                     throw Context.auth.error($t('%E0'));
                 }
 
                 const putForOrganization = await Context.auth.getOrganization(put.organizationId);
 
-                const membershipType = platform.config.membershipTypes.find(t => t.id === put.membershipTypeId);
+                const membershipType = platform.config.membershipTypes.find(
+                    (t) => t.id === put.membershipTypeId,
+                );
 
                 if (!membershipType) {
                     throw new SimpleError({
@@ -606,14 +766,22 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 const memberDefaultAgeGroupIds: string[] = [];
 
                 for (const r of member.registrations) {
-                    if (r.periodId !== put.periodId || r.deactivatedAt !== null || r.registeredAt === null || r.group.defaultAgeGroupId === null) {
+                    if (
+                        r.periodId !== put.periodId ||
+                        r.deactivatedAt !== null ||
+                        r.registeredAt === null ||
+                        r.group.defaultAgeGroupId === null
+                    ) {
                         continue;
                     }
 
                     memberDefaultAgeGroupIds.push(r.group.defaultAgeGroupId);
                 }
 
-                const isEnabled = membershipType.isEnabled(organizationTags, memberDefaultAgeGroupIds);
+                const isEnabled = membershipType.isEnabled(
+                    organizationTags,
+                    memberDefaultAgeGroupIds,
+                );
 
                 if (!isEnabled) {
                     throw new SimpleError({
@@ -700,7 +868,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     .where(membershipDateRangeOverlaps(put.startDate, put.endDate))
                     .first(false);
 
-                if (existing && (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days || !existing.generated || existing.locked || existing.price < membership.price)) {
+                if (
+                    existing &&
+                    (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days ||
+                        !existing.generated ||
+                        existing.locked ||
+                        existing.price < membership.price)
+                ) {
                     if (membershipType.behaviour === PlatformMembershipTypeBehaviour.Days) {
                         throw new SimpleError({
                             code: 'invalid_field',
@@ -742,7 +916,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     try {
                         await MemberNumberService.assignMemberNumber(member, membership);
                     } catch (error) {
-                        console.error(`Failed to assign member number for id ${member.id}: ${error.message}`);
+                        console.error(
+                            `Failed to assign member number for id ${member.id}: ${error.message}`,
+                        );
                         // If the assignment of the member number fails the membership is not created but the member is registered
                         continue;
                     }
@@ -763,7 +939,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     });
                 }
 
-                if (!await Context.auth.hasFullAccess(membership.organizationId)) {
+                if (!(await Context.auth.hasFullAccess(membership.organizationId))) {
                     throw Context.auth.error($t('%E4'));
                 }
 
@@ -820,7 +996,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     });
                 }
 
-                if (!await Context.auth.hasFullAccess(membership.organizationId)) {
+                if (!(await Context.auth.hasFullAccess(membership.organizationId))) {
                     throw Context.auth.error($t('%E5'));
                 }
 
@@ -840,7 +1016,9 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t('%AC', { period: period?.getBaseStructure().name }),
+                            human: Context.i18n.$t('%AC', {
+                                period: period?.getBaseStructure().name,
+                            }),
                             field: 'periodId',
                         });
                     }
@@ -867,7 +1045,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 updateMembershipMemberIds.add(member.id);
             }
 
-            if (!members.find(m => m.id === member.id)) {
+            if (!members.find((m) => m.id === member.id)) {
                 members.push(member);
             }
         }
@@ -889,16 +1067,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
 
         if (shouldUpdateSetupSteps && organization) {
-            SetupStepUpdater.updateForOrganization(organization, { types: [
-                SetupStepType.Responsibilities,
-            ] }).catch(console.error);
+            SetupStepUpdater.updateForOrganization(organization, {
+                types: [SetupStepType.Responsibilities],
+            }).catch(console.error);
         }
 
         const r = await AuthenticatedStructures.membersBlob(members);
 
-        return new Response(
-            r,
-        );
+        return new Response(r);
     }
 
     static async deleteMembers(ids: string[]) {
@@ -909,7 +1085,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         // Loop all members one by one
         for (const id of ids) {
             const member = await Member.getByIdWithUsersAndRegistrations(id);
-            if (!member || !await Context.auth.canDeleteMember(member)) {
+            if (!member || !(await Context.auth.canDeleteMember(member))) {
                 throw Context.auth.error($t('%E8'));
             }
 
@@ -946,7 +1122,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
     }
 
     static countTaxDependentParents(details: MemberDetails) {
-        return details.parents.filter(p => p.isMemberTaxDependent === true).length;
+        return details.parents.filter((p) => p.isMemberTaxDependent === true).length;
     }
 
     /**
@@ -967,7 +1143,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    static async mergeDuplicateRelations(member: Member, patch: AutoEncoderPatchType<MemberDetails> | MemberDetails) {
+    static async mergeDuplicateRelations(
+        member: Member,
+        patch: AutoEncoderPatchType<MemberDetails> | MemberDetails,
+    ) {
         const __familyMembers = await Member.getFamily(member.id);
         const _familyMembers = await Member.loadRegistrationsAndUsers(__familyMembers);
         const familyMembers: Member[] = [];
@@ -981,22 +1160,25 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             if (await Context.auth.canAccessMember(familyMember, PermissionLevel.Write)) {
                 familyMembers.push(familyMember);
 
-                if (familyMember.id !== member.id && !await Context.auth.canEditMemberEmailAddresses(familyMember)) {
+                if (
+                    familyMember.id !== member.id &&
+                    !(await Context.auth.canEditMemberEmailAddresses(familyMember))
+                ) {
                     protectedDetails.set(familyMember.id, familyMember.details.clone());
                 }
             }
         }
 
         // Replace member with member
-        const memberIndex = familyMembers.findIndex(m => m.id === member.id);
+        const memberIndex = familyMembers.findIndex((m) => m.id === member.id);
         if (memberIndex !== -1 && familyMembers.length >= 2) {
             familyMembers[memberIndex] = member;
             const parentMergeMap = MemberDetails.mergeParents(
-                familyMembers.map(m => m.details),
+                familyMembers.map((m) => m.details),
                 true, // Allow deletes
             );
             const contactsMergeMap = MemberDetails.mergeEmergencyContacts(
-                familyMembers.map(m => m.details),
+                familyMembers.map((m) => m.details),
                 true, // Allow deletes
             );
 
@@ -1007,14 +1189,20 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const parentPatches = isPatchableArray(patch.parents) ? patch.parents.getPatches() : [];
 
             // Add puts
-            const parentPuts = isPatchableArray(patch.parents) ? patch.parents.getPuts().map(p => p.put) : patch.parents;
+            const parentPuts = isPatchableArray(patch.parents)
+                ? patch.parents.getPuts().map((p) => p.put)
+                : patch.parents;
             for (const put of parentPuts) {
                 if (!parentMergeMap.get(put.id)) {
                     // This one has not been merged
                     continue;
                 }
 
-                const alternativeEmailsArr = new PatchableArray() as PatchableArray<string, string, string>;
+                const alternativeEmailsArr = new PatchableArray() as PatchableArray<
+                    string,
+                    string,
+                    string
+                >;
                 for (const alternativeEmail of put.alternativeEmails) {
                     alternativeEmailsArr.addPut(alternativeEmail);
                 }
@@ -1037,10 +1225,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             }
 
             // Same for emergency contacts
-            const contactsPatches = isPatchableArray(patch.emergencyContacts) ? patch.emergencyContacts.getPatches() : [];
+            const contactsPatches = isPatchableArray(patch.emergencyContacts)
+                ? patch.emergencyContacts.getPatches()
+                : [];
 
             // Add puts
-            const contactsPuts = isPatchableArray(patch.emergencyContacts) ? patch.emergencyContacts.getPuts().map(p => p.put) : patch.emergencyContacts;
+            const contactsPuts = isPatchableArray(patch.emergencyContacts)
+                ? patch.emergencyContacts.getPuts().map((p) => p.put)
+                : patch.emergencyContacts;
             for (const put of contactsPuts) {
                 if (!contactsMergeMap.get(put.id)) {
                     // This one has not been merged
@@ -1093,16 +1285,18 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
             for (const m of familyMembers) {
                 const originalDetails = protectedDetails.get(m.id);
-                if (originalDetails && (
-                    originalDetails.getParentEmails().join('\n') !== m.details.getParentEmails().join('\n')
-                    || Context.auth.addsSecurityCodePhoneNumbers(originalDetails, m.details)
-                )) {
+                if (
+                    originalDetails &&
+                    (originalDetails.getParentEmails().join('\n') !==
+                        m.details.getParentEmails().join('\n') ||
+                        Context.auth.addsSecurityCodePhoneNumbers(originalDetails, m.details))
+                ) {
                     m.details.parents = originalDetails.parents;
                 }
 
                 m.details.cleanData();
 
-                if (await m.save() && m.id !== member.id) {
+                if ((await m.save()) && m.id !== member.id) {
                     // Auto link users based on data
                     await MemberUserSyncer.onChangeMember(m);
 
@@ -1117,14 +1311,21 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         if (!member.details.birthDay) {
             return;
         }
-        let existingMembers = await Member.where({ organizationId: member.organizationId, firstName: member.details.firstName, lastName: member.details.lastName, birthDay: Formatter.dateIso(member.details.birthDay) });
+        let existingMembers = await Member.where({
+            organizationId: member.organizationId,
+            firstName: member.details.firstName,
+            lastName: member.details.lastName,
+            birthDay: Formatter.dateIso(member.details.birthDay),
+        });
 
         if (member.existsInDatabase) {
-            existingMembers = existingMembers.filter(e => e.id !== member.id);
+            existingMembers = existingMembers.filter((e) => e.id !== member.id);
         }
 
         if (existingMembers.length > 0) {
-            const withRegistrations = await Member.getBlobByIds(...existingMembers.map(m => m.id));
+            const withRegistrations = await Member.getBlobByIds(
+                ...existingMembers.map((m) => m.id),
+            );
             for (const m of withRegistrations) {
                 if (m.registrations.length > 0) {
                     return m;
@@ -1137,13 +1338,27 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }
     }
 
-    private static async checkSecurityCode(member: MemberWithUsersRegistrationsAndGroups, securityCode: string) {
+    private static async checkSecurityCode(
+        member: MemberWithUsersRegistrationsAndGroups,
+        securityCode: string,
+    ) {
         try {
             securityCodeLimiter.track(member.details.name, 1);
         } catch (e) {
             Email.sendWebmaster({
                 subject: $t('%E9'),
-                text: $t('%EA') + ' ' + member.details.name + ' ' + $t('%1G') + ' ' + member.id + ')' + '\n\n' + e.message + '\n\nStamhoofd',
+                text:
+                    $t('%EA') +
+                    ' ' +
+                    member.details.name +
+                    ' ' +
+                    $t('%1G') +
+                    ' ' +
+                    member.id +
+                    ')' +
+                    '\n\n' +
+                    e.message +
+                    '\n\nStamhoofd',
             });
 
             throw new SimpleError({
@@ -1187,11 +1402,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
         log.objectId = member.id;
         log.replacements = new Map([
-            ['m', AuditLogReplacement.create({
-                value: member.details.name,
-                type: AuditLogReplacementType.Member,
-                id: member.id,
-            })],
+            [
+                'm',
+                AuditLogReplacement.create({
+                    value: member.details.name,
+                    type: AuditLogReplacementType.Member,
+                    id: member.id,
+                }),
+            ],
         ]);
         await log.save();
     }
@@ -1200,16 +1418,32 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
      * A user whose email would get linked to the member by MemberUserSyncer anyway can merge without a code,
      * unless the member has a responsibility. A parent email does not count when parents have no access.
      */
-    private static async canMergeWithoutSecurityCode(member: MemberWithUsersRegistrationsAndGroups, email: string) {
-        if (!MemberUserSyncer.getLinkedEmails(member.details).includes(email.toLowerCase().trim())) {
+    private static async canMergeWithoutSecurityCode(
+        member: MemberWithUsersRegistrationsAndGroups,
+        email: string,
+    ) {
+        if (
+            !MemberUserSyncer.getLinkedEmails(member.details).includes(email.toLowerCase().trim())
+        ) {
             return false;
         }
-        const responsibilities = await MemberResponsibilityRecord.where({ memberId: member.id }, { limit: 1 });
+        const responsibilities = await MemberResponsibilityRecord.where(
+            { memberId: member.id },
+            { limit: 1 },
+        );
         return responsibilities.length === 0;
     }
 
-    static async checkCanAccessMember(member: MemberWithUsersRegistrationsAndGroups, securityCode: string | null | undefined, type: 'put' | 'patch' | 'direct') {
-        if ((type !== 'direct' && await this.canMergeWithoutSecurityCode(member, Context.auth.user.email)) || await Context.auth.canAccessMember(member, PermissionLevel.Write)) {
+    static async checkCanAccessMember(
+        member: MemberWithUsersRegistrationsAndGroups,
+        securityCode: string | null | undefined,
+        type: 'put' | 'patch' | 'direct',
+    ) {
+        if (
+            (type !== 'direct' &&
+                (await this.canMergeWithoutSecurityCode(member, Context.auth.user.email))) ||
+            (await Context.auth.canAccessMember(member, PermissionLevel.Write))
+        ) {
             console.log('checkSecurityCode: without security code: allowed for ' + member.id);
         } else if (securityCode) {
             await this.checkSecurityCode(member, securityCode);
@@ -1264,18 +1498,41 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         return preview.details;
     }
 
-    static async checkDuplicate(member: Member, securityCode: string | null | undefined, type: 'put' | 'patch') {
+    static async checkDuplicate(
+        member: Member,
+        securityCode: string | null | undefined,
+        type: 'put' | 'patch',
+    ) {
         if (!this.shouldCheckIfMemberIsDuplicate(member)) {
             return;
         }
 
-        if ((!member.organizationId && !Context.auth.hasSomePlatformAccess()) || (member.organizationId && !await Context.auth.hasSomeAccess(member.organizationId))) {
+        if (
+            (!member.organizationId && !Context.auth.hasSomePlatformAccess()) ||
+            (member.organizationId && !(await Context.auth.hasSomeAccess(member.organizationId)))
+        ) {
             try {
-                duplicateCheckLimiter.track(member.organizationId + '-' + Formatter.slug(member.details.name), 1);
+                duplicateCheckLimiter.track(
+                    member.organizationId + '-' + Formatter.slug(member.details.name),
+                    1,
+                );
             } catch (e) {
                 Email.sendWebmaster({
                     subject: '[Limiet] Limiet bereikt voor aantal duplicate checks per member name',
-                    text: $t('%EA') + ' ' + member.details.name + ' ' + '(Org: ' + ' ' + member.organizationId + ')' + ' by ' + Context.user?.id + '\n\n' + e.message + '\n\nStamhoofd',
+                    text:
+                        $t('%EA') +
+                        ' ' +
+                        member.details.name +
+                        ' ' +
+                        '(Org: ' +
+                        ' ' +
+                        member.organizationId +
+                        ')' +
+                        ' by ' +
+                        Context.user?.id +
+                        '\n\n' +
+                        e.message +
+                        '\n\nStamhoofd',
                 });
 
                 throw new SimpleError({
@@ -1297,21 +1554,37 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             await this.checkCanAccessMember(duplicate, securityCode, type);
 
             // checkCanAccessMember skips the security code for admins with write access, so it cannot be trusted as proof here
-            const hasValidSecurityCode = !!securityCode && securityCode === duplicate.details.securityCode;
+            const hasValidSecurityCode =
+                !!securityCode && securityCode === duplicate.details.securityCode;
             if (!hasValidSecurityCode) {
                 // Reject emails that are new to the member, and existing emails that would start linking a user (e.g. a parent email without access that becomes the member email)
                 const mergedDetails = this.previewMergedDetails(duplicate, member);
-                const existingEmails = MemberUserSyncer.getMemberAccessEmails(duplicate.details).allEmails;
+                const existingEmails = MemberUserSyncer.getMemberAccessEmails(
+                    duplicate.details,
+                ).allEmails;
                 const existingLinkedEmails = MemberUserSyncer.getLinkedEmails(duplicate.details);
-                const addsEmails = MemberUserSyncer.getMemberAccessEmails(mergedDetails).allEmails.some(email => !existingEmails.includes(email))
-                    || MemberUserSyncer.getLinkedEmails(mergedDetails).some(email => !existingLinkedEmails.includes(email));
+                const addsEmails =
+                    MemberUserSyncer.getMemberAccessEmails(mergedDetails).allEmails.some(
+                        (email) => !existingEmails.includes(email),
+                    ) ||
+                    MemberUserSyncer.getLinkedEmails(mergedDetails).some(
+                        (email) => !existingLinkedEmails.includes(email),
+                    );
 
                 // A new phone number can receive the security code of the existing member
-                const addsPhones = Context.auth.addsSecurityCodePhoneNumbers(duplicate.details, mergedDetails);
+                const addsPhones = Context.auth.addsSecurityCodePhoneNumbers(
+                    duplicate.details,
+                    mergedDetails,
+                );
 
-                if ((addsEmails || addsPhones) && !await Context.auth.canEditMemberEmailAddresses(duplicate)) {
+                if (
+                    (addsEmails || addsPhones) &&
+                    !(await Context.auth.canEditMemberEmailAddresses(duplicate))
+                ) {
                     throw Context.auth.error({
-                        message: addsEmails ? "You don't have access to change the emailaddresses of this user." : "You don't have access to change the phone numbers of this member.",
+                        message: addsEmails
+                            ? "You don't have access to change the emailaddresses of this user."
+                            : "You don't have access to change the phone numbers of this member.",
                         human: addsEmails ? $t('%ZtM') : $t('%Ztk'),
                     });
                 }
@@ -1339,7 +1612,10 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         }).createMultiple(count);
     }
 
-    async checkResponsbilityLimits(model: MemberResponsibilityRecord, responsibility: MemberResponsibility) {
+    async checkResponsbilityLimits(
+        model: MemberResponsibilityRecord,
+        responsibility: MemberResponsibility,
+    ) {
         if (responsibility.maximumMembers !== null) {
             if (!model.getBaseStructure().isActive) {
                 return;
@@ -1358,19 +1634,27 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             const count = (await query.count()) + 1;
 
             // Because it should be possible to move around responsibilities, we allow 1 extra
-            const actualLimit = responsibility.maximumMembers <= 1 ? 2 : responsibility.maximumMembers;
+            const actualLimit =
+                responsibility.maximumMembers <= 1 ? 2 : responsibility.maximumMembers;
 
             if (count > actualLimit) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Maximum members reached',
-                    human: responsibility.maximumMembers === 1
-                        ? (model.groupId
+                    human:
+                        responsibility.maximumMembers === 1
+                            ? model.groupId
                                 ? $t('%C5', { responsibility: responsibility.name })
-                                : $t('%C6', { responsibility: responsibility.name }))
-                        : (model.groupId
-                                ? $t('%C7', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })
-                                : $t('%C8', { count: responsibility.maximumMembers.toFixed(), responsibility: responsibility.name })),
+                                : $t('%C6', { responsibility: responsibility.name })
+                            : model.groupId
+                              ? $t('%C7', {
+                                    count: responsibility.maximumMembers.toFixed(),
+                                    responsibility: responsibility.name,
+                                })
+                              : $t('%C8', {
+                                    count: responsibility.maximumMembers.toFixed(),
+                                    responsibility: responsibility.name,
+                                }),
                 });
             }
         }

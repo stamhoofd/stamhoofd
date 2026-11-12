@@ -41,7 +41,7 @@ export class GetOrganizationSSOEndpoint extends Endpoint<Params, Query, Body, Re
         await Context.authenticate();
         const service = await SSOService.fromContext(request.query.provider);
 
-        if (!await Context.auth.canManageSSOSettings(organization?.id ?? null)) {
+        if (!(await Context.auth.canManageSSOSettings(organization?.id ?? null))) {
             throw Context.auth.error();
         }
 

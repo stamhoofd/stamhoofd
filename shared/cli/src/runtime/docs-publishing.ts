@@ -14,18 +14,27 @@ export type DocsPublishingProvider = {
 };
 
 /** Explicit registry configuration never loads the optional private provider. */
-export async function resolveDocsPublishingConfig(rootDir: string, environment?: string, env = process.env): Promise<DocsPublishingConfig> {
+export async function resolveDocsPublishingConfig(
+    rootDir: string,
+    environment?: string,
+    env = process.env,
+): Promise<DocsPublishingConfig> {
     const username = env.STAM_DOCS_REGISTRY_USERNAME;
     const password = env.STAM_DOCS_REGISTRY_PASSWORD;
     if ((username !== undefined || password !== undefined) && (!username || !password)) {
-        throw new Error('Set both STAM_DOCS_REGISTRY_USERNAME and STAM_DOCS_REGISTRY_PASSWORD to nonempty values.');
+        throw new Error(
+            'Set both STAM_DOCS_REGISTRY_USERNAME and STAM_DOCS_REGISTRY_PASSWORD to nonempty values.',
+        );
     }
     let config: DocsPublishingConfig;
     if (env.STAM_DOCS_REGISTRY !== undefined) {
         config = { registry: env.STAM_DOCS_REGISTRY };
     } else {
         const provider = await getOptionalDocsPublishingProvider(path.join(rootDir, 'devops'));
-        if (!provider) throw new Error('Set STAM_DOCS_REGISTRY to the destination registry host/namespace, or install and build the optional DevOps checkout to use --environment.');
+        if (!provider)
+            throw new Error(
+                'Set STAM_DOCS_REGISTRY to the destination registry host/namespace, or install and build the optional DevOps checkout to use --environment.',
+            );
         config = await provider.resolve(environment);
     }
     docsImageReference('config-validation', config.registry);

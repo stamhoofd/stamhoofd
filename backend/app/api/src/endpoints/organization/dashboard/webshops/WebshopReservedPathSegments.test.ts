@@ -1,5 +1,11 @@
 import { Request } from '@node/endpoints';
-import { OrganizationFactory, Token, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
+import {
+    OrganizationFactory,
+    Token,
+    UserFactory,
+    Webshop,
+    WebshopFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -54,7 +60,12 @@ describe('Endpoint.WebshopReservedPathSegments', () => {
         const { organization, token } = await createAdminContext();
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
         const patch = PrivateWebshop.patch({ uri: 'tickets' });
-        const request = Request.buildJson('PATCH', '/webshop/' + webshop.id, organization.getApiHost(), patch);
+        const request = Request.buildJson(
+            'PATCH',
+            '/webshop/' + webshop.id,
+            organization.getApiHost(),
+            patch,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
 
         await expect(testServer.test(patchEndpoint, request)).rejects.toThrow(
@@ -70,7 +81,12 @@ describe('Endpoint.WebshopReservedPathSegments', () => {
         await webshop.save();
 
         const patch = PrivateWebshop.patch({ domainUri: 'tickets' });
-        const request = Request.buildJson('PATCH', '/webshop/' + webshop.id, organization.getApiHost(), patch);
+        const request = Request.buildJson(
+            'PATCH',
+            '/webshop/' + webshop.id,
+            organization.getApiHost(),
+            patch,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
 
         await expect(testServer.test(patchEndpoint, request)).rejects.toThrow(

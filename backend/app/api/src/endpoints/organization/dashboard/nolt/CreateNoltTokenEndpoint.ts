@@ -37,7 +37,7 @@ export class CreateNoltTokenEndpoint extends Endpoint<Params, Query, Body, Respo
         const { user } = await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -52,7 +52,10 @@ export class CreateNoltTokenEndpoint extends Endpoint<Params, Query, Body, Respo
             name: user.firstName + ' ' + user.lastName,
 
             // Optional: The URL to the user's avatar picture
-            imageUrl: organization.meta.squareLogo?.getPublicPath() ?? organization.meta.horizontalLogo?.getPublicPath() ?? undefined,
+            imageUrl:
+                organization.meta.squareLogo?.getPublicPath() ??
+                organization.meta.horizontalLogo?.getPublicPath() ??
+                undefined,
         };
 
         const str = jwt.sign(payload, STAMHOOFD.NOLT_SSO_SECRET_KEY, { algorithm: 'HS256' });

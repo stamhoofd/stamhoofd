@@ -3,9 +3,12 @@ import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@
 
 export const userFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    ['verified', createColumnFilter({
-        expression: SQL.column('verified'),
-        type: SQLValueType.Boolean,
-        nullable: false,
-    })],
+    [
+        'verified',
+        createColumnFilter({
+            expression: SQL.column('verified'),
+            type: SQLValueType.Boolean,
+            nullable: false,
+        }),
+    ],
 ]);

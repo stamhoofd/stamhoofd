@@ -3,7 +3,12 @@ import { CachedBalance, Email, EmailRecipient, Organization, User } from '@stamh
 import type { IterableSQLSelect } from '@stamhoofd/sql';
 import { readDynamicSQLExpression, SQL } from '@stamhoofd/sql';
 import type { OrganizationEmail, StamhoofdFilter } from '@stamhoofd/structures';
-import { EmailRecipientFilter, EmailRecipientSubfilter, EmailTemplateType, ReceivableBalanceType } from '@stamhoofd/structures';
+import {
+    EmailRecipientFilter,
+    EmailRecipientSubfilter,
+    EmailTemplateType,
+    ReceivableBalanceType,
+} from '@stamhoofd/structures';
 import { ContextInstance } from '../helpers/Context.js';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 import { EmailSendService } from '../services/EmailSendService.js';
@@ -17,7 +22,10 @@ const bootAt = new Date();
 
 async function balanceEmails() {
     // Do not run within 30 minutes after boot to avoid creating multiple email models for emails that failed to send
-    if (bootAt.getTime() > new Date().getTime() - 1000 * 60 * 30 && STAMHOOFD.environment !== 'development') {
+    if (
+        bootAt.getTime() > new Date().getTime() - 1000 * 60 * 30 &&
+        STAMHOOFD.environment !== 'development'
+    ) {
         return;
     }
 
@@ -25,7 +33,10 @@ async function balanceEmails() {
         return;
     }
 
-    if ((new Date().getHours() > 10 || new Date().getHours() < 6) && STAMHOOFD.environment !== 'development') {
+    if (
+        (new Date().getHours() > 10 || new Date().getHours() < 6) &&
+        STAMHOOFD.environment !== 'development'
+    ) {
         return;
     }
 
@@ -38,14 +49,27 @@ async function balanceEmails() {
     const systemUser = await User.getSystem();
 
     for await (const organization of savedIterator.maxQueries(5)) {
-        if (!organization.privateMeta.balanceNotificationSettings.enabled || organization.privateMeta.balanceNotificationSettings.maximumReminderEmails <= 0 || organization.privateMeta.balanceNotificationSettings.minimumDaysBetween <= 0) {
+        if (
+            !organization.privateMeta.balanceNotificationSettings.enabled ||
+            organization.privateMeta.balanceNotificationSettings.maximumReminderEmails <= 0 ||
+            organization.privateMeta.balanceNotificationSettings.minimumDaysBetween <= 0
+        ) {
             continue;
         }
 
-        const enabledForOrganizations = organization.privateMeta.featureFlags.includes('organization-receivable-balances') && Object.keys(organization.privateMeta.balanceNotificationSettings.organizationContactsFilter).includes('meta');
+        const enabledForOrganizations =
+            organization.privateMeta.featureFlags.includes('organization-receivable-balances') &&
+            Object.keys(
+                organization.privateMeta.balanceNotificationSettings.organizationContactsFilter,
+            ).includes('meta');
 
-        const selectedEmailAddress = organization.privateMeta.balanceNotificationSettings.emailId ? organization.privateMeta.emails.find(e => e.id === organization.privateMeta.balanceNotificationSettings.emailId) : null;
-        const emailAddress = selectedEmailAddress ?? organization.privateMeta.emails.find(e => e.default) ?? null;
+        const selectedEmailAddress = organization.privateMeta.balanceNotificationSettings.emailId
+            ? organization.privateMeta.emails.find(
+                  (e) => e.id === organization.privateMeta.balanceNotificationSettings.emailId,
+              )
+            : null;
+        const emailAddress =
+            selectedEmailAddress ?? organization.privateMeta.emails.find((e) => e.default) ?? null;
 
         if (!emailAddress) {
             // No emailadres set
@@ -86,10 +110,12 @@ async function balanceEmails() {
                         { reminderEmailCount: 0 },
                     ],
                 },
-                subfilter: organization.privateMeta.balanceNotificationSettings.organizationContactsFilter,
+                subfilter:
+                    organization.privateMeta.balanceNotificationSettings.organizationContactsFilter,
             });
         }
-        const maximumEmailCount = organization.privateMeta.balanceNotificationSettings.maximumReminderEmails;
+        const maximumEmailCount =
+            organization.privateMeta.balanceNotificationSettings.maximumReminderEmails;
 
         // Reminder emails
         if (maximumEmailCount > 1) {
@@ -103,7 +129,8 @@ async function balanceEmails() {
                     $and: [
                         {
                             reminderEmailCount: { $gt: 0 },
-                        }, {
+                        },
+                        {
                             reminderEmailCount: { $lt: maximumEmailCount },
                         },
                     ],
@@ -121,12 +148,15 @@ async function balanceEmails() {
                         $and: [
                             {
                                 reminderEmailCount: { $gt: 0 },
-                            }, {
+                            },
+                            {
                                 reminderEmailCount: { $lt: maximumEmailCount },
                             },
                         ],
                     },
-                    subfilter: organization.privateMeta.balanceNotificationSettings.organizationContactsFilter,
+                    subfilter:
+                        organization.privateMeta.balanceNotificationSettings
+                            .organizationContactsFilter,
                 });
             }
         }
@@ -157,8 +187,16 @@ async function sendTemplate({
 }) {
     // Do not send to persons that already received a similar email before this date
     const weekAgo = new Date(
-        new Date().getTime() - 1000 * 60 * 60 * 24 * Math.max(1, organization.privateMeta.balanceNotificationSettings.minimumDaysBetween)
-            + 12 * 1000 * 60 * 60, // Add a half day offset so we don't get trapped in small differences in time of sending
+        new Date().getTime() -
+            1000 *
+                60 *
+                60 *
+                24 *
+                Math.max(
+                    1,
+                    organization.privateMeta.balanceNotificationSettings.minimumDaysBetween,
+                ) +
+            12 * 1000 * 60 * 60, // Add a half day offset so we don't get trapped in small differences in time of sending
     ); // 5 instead of 7 so the email received is on another working day
 
     const model = new Email();
@@ -185,14 +223,13 @@ async function sendTemplate({
                         },
                         filter,
                     ],
-
                 },
                 subfilter,
             }),
         ],
     });
 
-    if (!await model.setFromTemplate(templateType, { keepTranslations: true })) {
+    if (!(await model.setFromTemplate(templateType, { keepTranslations: true }))) {
         console.warn('Skipped organization: email template not found', organization.id);
         return;
     }
@@ -212,8 +249,11 @@ async function sendTemplate({
             now.setMilliseconds(0);
 
             // Set last balance amount for all these recipients
-            for await (const batch of EmailRecipient.select().where('emailId', upToDate.id).limit(100).allBatched()) {
-                const balanceItemIds = batch.flatMap(b => b.objectId ? [b.objectId] : []);
+            for await (const batch of EmailRecipient.select()
+                .where('emailId', upToDate.id)
+                .limit(100)
+                .allBatched()) {
+                const balanceItemIds = batch.flatMap((b) => (b.objectId ? [b.objectId] : []));
 
                 console.log('Marking balances as reminded...');
                 await CachedBalance.update()
@@ -221,8 +261,9 @@ async function sendTemplate({
                     .set('lastReminderAmountOpen', SQL.column('amountOpen'))
                     .set(
                         'reminderEmailCount',
-                        SQL.calculation(SQL.column('reminderEmailCount'))
-                            .add(readDynamicSQLExpression(1)),
+                        SQL.calculation(SQL.column('reminderEmailCount')).add(
+                            readDynamicSQLExpression(1),
+                        ),
                     )
                     .where('id', balanceItemIds)
                     .where('organizationId', organization.id)
@@ -232,6 +273,11 @@ async function sendTemplate({
             }
         }
     } catch (e) {
-        console.error('Error sending email for organization', e, organization.name, organization.id);
+        console.error(
+            'Error sending email for organization',
+            e,
+            organization.name,
+            organization.id,
+        );
     }
 }

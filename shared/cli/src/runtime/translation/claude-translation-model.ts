@@ -21,7 +21,7 @@ export class ClaudeTranslationModel implements TranslationModel {
     }
 
     async translate(request: TranslationRequest): Promise<string> {
-        const tools: Anthropic.Tool[] = [COMMIT_DIFF_TOOL, GREP_TOOL].map(tool => ({
+        const tools: Anthropic.Tool[] = [COMMIT_DIFF_TOOL, GREP_TOOL].map((tool) => ({
             name: tool.name,
             description: tool.description,
             input_schema: tool.parameters,
@@ -61,7 +61,11 @@ export class ClaudeTranslationModel implements TranslationModel {
         throw new Error(`Translation did not finish within ${MAX_TOOL_ITERATIONS} tool iterations`);
     }
 
-    private async runToolCall(name: string, input: Record<string, unknown>, request: TranslationRequest): Promise<string> {
+    private async runToolCall(
+        name: string,
+        input: Record<string, unknown>,
+        request: TranslationRequest,
+    ): Promise<string> {
         if (name === COMMIT_DIFF_TOOL.name) {
             const hash = typeof input.hash === 'string' ? input.hash : '';
             return await request.fetchCommitDiff(hash);
@@ -76,6 +80,6 @@ export class ClaudeTranslationModel implements TranslationModel {
 function extractText(content: Anthropic.ContentBlock[]): string {
     return content
         .filter((block): block is Anthropic.TextBlock => block.type === 'text')
-        .map(block => block.text)
+        .map((block) => block.text)
         .join('');
 }

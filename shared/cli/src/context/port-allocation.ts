@@ -17,7 +17,17 @@ enum AppPortName {
     RendererInspector = 'rendererInspector',
 }
 
-const appPortNames: AppPortName[] = [AppPortName.WebApp, AppPortName.Webshop, AppPortName.Api, AppPortName.Renderer, AppPortName.Sso, AppPortName.Docs, AppPortName.ApiInspector, AppPortName.StatsInspector, AppPortName.RendererInspector];
+const appPortNames: AppPortName[] = [
+    AppPortName.WebApp,
+    AppPortName.Webshop,
+    AppPortName.Api,
+    AppPortName.Renderer,
+    AppPortName.Sso,
+    AppPortName.Docs,
+    AppPortName.ApiInspector,
+    AppPortName.StatsInspector,
+    AppPortName.RendererInspector,
+];
 
 export async function resolvePortOffset(context: CliContext): Promise<CliContext> {
     if (process.env.STAMHOOFD_PORT_OFFSET_LOCKED === '1') {
@@ -47,7 +57,9 @@ export async function resolvePortOffset(context: CliContext): Promise<CliContext
         };
     }
 
-    throw new Error(`Could not find a free development port range for instance ${context.instance.name}.`);
+    throw new Error(
+        `Could not find a free development port range for instance ${context.instance.name}.`,
+    );
 }
 
 async function assertPortsAvailable(context: CliContext): Promise<void> {
@@ -58,38 +70,47 @@ async function assertPortsAvailable(context: CliContext): Promise<void> {
     }
 
     const details = occupied.map(({ name, port }) => `${name}:${port}`).join(', ');
-    throw new Error(`Configured port offset ${context.instance.portOffset} is unavailable for instance ${context.instance.name} (${details})`);
+    throw new Error(
+        `Configured port offset ${context.instance.portOffset} is unavailable for instance ${context.instance.name} (${details})`,
+    );
 }
 
 async function appPortsAvailable(context: CliContext): Promise<boolean> {
     return (await occupiedAppPorts(context)).length === 0;
 }
 
-async function occupiedAppPorts(context: CliContext): Promise<Array<{ name: AppPortName; port: number }>> {
+async function occupiedAppPorts(
+    context: CliContext,
+): Promise<Array<{ name: AppPortName; port: number }>> {
     const ports = buildPorts(context);
     let results: Array<{ name: AppPortName; port: number; available: boolean }>;
 
     try {
-        results = await Promise.all(appPortNames.map(async name => ({
-            name,
-            port: ports[name],
-            available: await isPortAvailable(ports[name]),
-        })));
+        results = await Promise.all(
+            appPortNames.map(async (name) => ({
+                name,
+                port: ports[name],
+                available: await isPortAvailable(ports[name]),
+            })),
+        );
     } catch (error) {
         if (isPortPermissionError(error)) {
-            throw new Error(`Could not check development ports for instance ${context.instance.name} because this process does not have permission to open development ports. If you are running inside a sandbox or agent, allow access to open local ports.`, { cause: error });
+            throw new Error(
+                `Could not check development ports for instance ${context.instance.name} because this process does not have permission to open development ports. If you are running inside a sandbox or agent, allow access to open local ports.`,
+                { cause: error },
+            );
         }
 
         throw error;
     }
 
-    return results
-        .filter(result => !result.available)
-        .map(({ name, port }) => ({ name, port }));
+    return results.filter((result) => !result.available).map(({ name, port }) => ({ name, port }));
 }
 
 function isPortPermissionError(error: unknown): error is NodeJS.ErrnoException {
-    return error instanceof Error
-        && 'code' in error
-        && (error.code === 'EACCES' || error.code === 'EPERM');
+    return (
+        error instanceof Error &&
+        'code' in error &&
+        (error.code === 'EACCES' || error.code === 'EPERM')
+    );
 }

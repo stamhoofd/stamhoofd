@@ -1,4 +1,10 @@
-import { Group, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory } from '@stamhoofd/models';
+import {
+    Group,
+    GroupFactory,
+    MemberFactory,
+    OrganizationFactory,
+    RegistrationFactory,
+} from '@stamhoofd/models';
 import { GroupService } from './GroupService.js';
 
 describe('Group occupancy', () => {
@@ -14,32 +20,122 @@ describe('Group occupancy', () => {
     });
 
     test.each([
-        { name: 'active confirmed registration', registeredAt: now, deactivatedAt: null, canRegister: false, reservedUntil: null, registered: 1, reserved: 0 },
-        { name: 'deactivated confirmed registration', registeredAt: now, deactivatedAt: now, canRegister: false, reservedUntil: null, registered: 0, reserved: 0 },
-        { name: 'registration allowed without an expiry', registeredAt: null, deactivatedAt: null, canRegister: true, reservedUntil: null, registered: 0, reserved: 1 },
-        { name: 'future reservation', registeredAt: null, deactivatedAt: null, canRegister: false, reservedUntil: new Date(now.getTime() + 1000), registered: 0, reserved: 1 },
-        { name: 'reservation expiring now', registeredAt: null, deactivatedAt: null, canRegister: false, reservedUntil: now, registered: 0, reserved: 1 },
-        { name: 'expired reservation', registeredAt: null, deactivatedAt: null, canRegister: false, reservedUntil: new Date(now.getTime() - 1000), registered: 0, reserved: 0 },
-        { name: 'expired reservation still allowed to register', registeredAt: null, deactivatedAt: null, canRegister: true, reservedUntil: new Date(now.getTime() - 1000), registered: 0, reserved: 1 },
-        { name: 'deactivated unconfirmed reservation', registeredAt: null, deactivatedAt: now, canRegister: true, reservedUntil: null, registered: 0, reserved: 1 },
-        { name: 'confirmed registration with a reservation', registeredAt: now, deactivatedAt: null, canRegister: true, reservedUntil: now, registered: 1, reserved: 0 },
-        { name: 'unconfirmed registration without a reservation', registeredAt: null, deactivatedAt: null, canRegister: false, reservedUntil: null, registered: 0, reserved: 0 },
-    ])('counts $name', async ({ registeredAt, deactivatedAt, canRegister, reservedUntil, registered, reserved }) => {
-        const organization = await new OrganizationFactory({}).create();
-        const group = await new GroupFactory({ organization }).create();
-        const member = await new MemberFactory({ organization }).create();
-        const registration = await new RegistrationFactory({ group, member }).create();
-        registration.registeredAt = registeredAt;
-        registration.deactivatedAt = deactivatedAt;
-        registration.canRegister = canRegister;
-        registration.reservedUntil = reservedUntil;
-        await registration.save();
+        {
+            name: 'active confirmed registration',
+            registeredAt: now,
+            deactivatedAt: null,
+            canRegister: false,
+            reservedUntil: null,
+            registered: 1,
+            reserved: 0,
+        },
+        {
+            name: 'deactivated confirmed registration',
+            registeredAt: now,
+            deactivatedAt: now,
+            canRegister: false,
+            reservedUntil: null,
+            registered: 0,
+            reserved: 0,
+        },
+        {
+            name: 'registration allowed without an expiry',
+            registeredAt: null,
+            deactivatedAt: null,
+            canRegister: true,
+            reservedUntil: null,
+            registered: 0,
+            reserved: 1,
+        },
+        {
+            name: 'future reservation',
+            registeredAt: null,
+            deactivatedAt: null,
+            canRegister: false,
+            reservedUntil: new Date(now.getTime() + 1000),
+            registered: 0,
+            reserved: 1,
+        },
+        {
+            name: 'reservation expiring now',
+            registeredAt: null,
+            deactivatedAt: null,
+            canRegister: false,
+            reservedUntil: now,
+            registered: 0,
+            reserved: 1,
+        },
+        {
+            name: 'expired reservation',
+            registeredAt: null,
+            deactivatedAt: null,
+            canRegister: false,
+            reservedUntil: new Date(now.getTime() - 1000),
+            registered: 0,
+            reserved: 0,
+        },
+        {
+            name: 'expired reservation still allowed to register',
+            registeredAt: null,
+            deactivatedAt: null,
+            canRegister: true,
+            reservedUntil: new Date(now.getTime() - 1000),
+            registered: 0,
+            reserved: 1,
+        },
+        {
+            name: 'deactivated unconfirmed reservation',
+            registeredAt: null,
+            deactivatedAt: now,
+            canRegister: true,
+            reservedUntil: null,
+            registered: 0,
+            reserved: 1,
+        },
+        {
+            name: 'confirmed registration with a reservation',
+            registeredAt: now,
+            deactivatedAt: null,
+            canRegister: true,
+            reservedUntil: now,
+            registered: 1,
+            reserved: 0,
+        },
+        {
+            name: 'unconfirmed registration without a reservation',
+            registeredAt: null,
+            deactivatedAt: null,
+            canRegister: false,
+            reservedUntil: null,
+            registered: 0,
+            reserved: 0,
+        },
+    ])(
+        'counts $name',
+        async ({
+            registeredAt,
+            deactivatedAt,
+            canRegister,
+            reservedUntil,
+            registered,
+            reserved,
+        }) => {
+            const organization = await new OrganizationFactory({}).create();
+            const group = await new GroupFactory({ organization }).create();
+            const member = await new MemberFactory({ organization }).create();
+            const registration = await new RegistrationFactory({ group, member }).create();
+            registration.registeredAt = registeredAt;
+            registration.deactivatedAt = deactivatedAt;
+            registration.canRegister = canRegister;
+            registration.reservedUntil = reservedUntil;
+            await registration.save();
 
-        await GroupService.refreshOccupancy(group);
+            await GroupService.refreshOccupancy(group);
 
-        expect(group.settings.registeredMembers).toBe(registered);
-        expect(group.settings.reservedMembers).toBe(reserved);
-    });
+            expect(group.settings.registeredMembers).toBe(registered);
+            expect(group.settings.reservedMembers).toBe(reserved);
+        },
+    );
 
     test('only counts registrations in the requested group and resets stale counts', async () => {
         const organization = await new OrganizationFactory({}).create();

@@ -18,7 +18,11 @@ export type SyncState = {
  * be skipped. Capping costs one row that is read again on every run until the clock catches up, and
  * repairs a watermark that a previous run already pushed into the future.
  */
-export function nextWatermark(previous: Date | null, seen: Date[], runStartedAt: Date): Date | null {
+export function nextWatermark(
+    previous: Date | null,
+    seen: Date[],
+    runStartedAt: Date,
+): Date | null {
     let watermark = previous;
 
     for (const date of seen) {
@@ -42,14 +46,19 @@ export async function readSyncState(tableName: string): Promise<SyncState> {
     return row ?? { tableName, watermark: null, lastSucceededAt: null, lastReconciledAt: null };
 }
 
-export async function writeSyncState(tableName: string, state: Partial<Omit<SyncState, 'tableName'>>): Promise<void> {
+export async function writeSyncState(
+    tableName: string,
+    state: Partial<Omit<SyncState, 'tableName'>>,
+): Promise<void> {
     const connection = getStatisticsConnection();
     const columns = ['tableName', 'updatedAt', ...Object.keys(state)];
     const values = [tableName, new Date(), ...Object.values(state)];
-    const assignments = columns.filter(column => column !== 'tableName').map(column => `${connection.escapeId(column)} = new.${connection.escapeId(column)}`);
+    const assignments = columns
+        .filter((column) => column !== 'tableName')
+        .map((column) => `${connection.escapeId(column)} = new.${connection.escapeId(column)}`);
 
     await connection.insert(
-        `INSERT INTO ${connection.escapeId(syncStateTable)} (${columns.map(column => connection.escapeId(column)).join(', ')}) VALUES (?) AS new ON DUPLICATE KEY UPDATE ${assignments.join(', ')}`,
+        `INSERT INTO ${connection.escapeId(syncStateTable)} (${columns.map((column) => connection.escapeId(column)).join(', ')}) VALUES (?) AS new ON DUPLICATE KEY UPDATE ${assignments.join(', ')}`,
         [values],
     );
 }

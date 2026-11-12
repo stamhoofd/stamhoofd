@@ -144,7 +144,8 @@ export class BreakdownRow {
      * @param counts Whether the count of this row is a number of payments or of balance items.
      */
     finish(counts: 'payments' | 'balanceItems'): BreakdownGroup {
-        this.group.count = counts === 'payments' ? this.paymentCount : this.countedBalanceItems.size;
+        this.group.count =
+            counts === 'payments' ? this.paymentCount : this.countedBalanceItems.size;
 
         if (this.group.selection) {
             this.group.selection.isListPartial = this.wholePrice !== this.group.price;
@@ -153,7 +154,9 @@ export class BreakdownRow {
         if (this.article) {
             // Only the title: what the article is for is in the relations, which say what they are
             // instead of ending up in a description that would only be true for the first item
-            this.group.name = new TranslatedString(getBalanceItemTitle(this.article, this.hasMultipleArticles));
+            this.group.name = new TranslatedString(
+                getBalanceItemTitle(this.article, this.hasMultipleArticles),
+            );
         }
 
         return this.group;
@@ -166,8 +169,7 @@ export class BreakdownRow {
 export class BreakdownRows {
     private rows = new Map<string, BreakdownRow>();
 
-    constructor(private readonly counts: 'payments' | 'balanceItems') {
-    }
+    constructor(private readonly counts: 'payments' | 'balanceItems') {}
 
     /**
      * @param create Builds the row the first time something lands in it.
@@ -189,7 +191,7 @@ export class BreakdownRows {
      */
     build(): BreakdownGroup[] {
         const groups = [...this.rows.values()]
-            .map(row => row.finish(this.counts))
+            .map((row) => row.finish(this.counts))
             .sort((a, b) => Sorter.byNumberValue(Math.abs(a.price), Math.abs(b.price)));
 
         if (groups.length <= MAX_TAB_ROWS) {
@@ -199,19 +201,21 @@ export class BreakdownRows {
         const shown = groups.slice(0, MAX_TAB_ROWS - 1);
         const rest = groups.slice(MAX_TAB_ROWS - 1);
 
-        shown.push(BreakdownGroup.create({
-            id: OTHER_GROUPS_ID,
-            name: new TranslatedString($t('%mV')),
-            description: $t('%ZiR', { count: Formatter.integer(rest.length) }),
-            icon: 'box',
-            price: rest.reduce((total, group) => total + group.price, 0),
-            quantity: rest.reduce((total, group) => total + group.quantity, 0),
-            // The same payment can be in more than one of these rows, so adding up their counts would
-            // count it twice. How many rows this holds is in the description instead
-            count: 0,
-            // There is no single filter that selects exactly what this row was added up from
-            selection: null,
-        }));
+        shown.push(
+            BreakdownGroup.create({
+                id: OTHER_GROUPS_ID,
+                name: new TranslatedString($t('%mV')),
+                description: $t('%ZiR', { count: Formatter.integer(rest.length) }),
+                icon: 'box',
+                price: rest.reduce((total, group) => total + group.price, 0),
+                quantity: rest.reduce((total, group) => total + group.quantity, 0),
+                // The same payment can be in more than one of these rows, so adding up their counts would
+                // count it twice. How many rows this holds is in the description instead
+                count: 0,
+                // There is no single filter that selects exactly what this row was added up from
+                selection: null,
+            }),
+        );
 
         return shown;
     }

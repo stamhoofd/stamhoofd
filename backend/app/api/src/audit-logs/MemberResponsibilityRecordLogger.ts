@@ -1,4 +1,10 @@
-import { Group, Member, MemberResponsibilityRecord, Organization, Platform } from '@stamhoofd/models';
+import {
+    Group,
+    Member,
+    MemberResponsibilityRecord,
+    Organization,
+    Platform,
+} from '@stamhoofd/models';
 import { AuditLogReplacement, AuditLogReplacementType, AuditLogType } from '@stamhoofd/structures';
 import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 
@@ -18,14 +24,18 @@ export const MemberResponsibilityRecordLogger = new ModelLogger(MemberResponsibi
         }
 
         const member = await Member.getByID(event.model.memberId);
-        const group = event.model.groupId ? (await Group.getByID(event.model.groupId)) : null;
+        const group = event.model.groupId ? await Group.getByID(event.model.groupId) : null;
 
         if (!member) {
             console.log('No member found for MemberResponsibilityRecord', event.model.id);
             return;
         }
 
-        if (event.type === 'updated' && event.changedFields.endDate && event.originalFields.endDate === null) {
+        if (
+            event.type === 'updated' &&
+            event.changedFields.endDate &&
+            event.originalFields.endDate === null
+        ) {
             result.type = AuditLogType.MemberResponsibilityRecordDeleted;
             result.generatePatchList = false;
         }
@@ -42,26 +52,37 @@ export const MemberResponsibilityRecordLogger = new ModelLogger(MemberResponsibi
     },
 
     createReplacements(model, options) {
-        const name = options.data.platform.config.responsibilities.find(r => r.id === model.responsibilityId)?.name;
+        const name = options.data.platform.config.responsibilities.find(
+            (r) => r.id === model.responsibilityId,
+        )?.name;
         const map = new Map([
-            ['r', AuditLogReplacement.create({
-                id: model.responsibilityId,
-                value: name,
-                type: AuditLogReplacementType.MemberResponsibility,
-            })],
-            ['m', AuditLogReplacement.create({
-                id: options.data.member.id,
-                value: options.data.member.details.name,
-                type: AuditLogReplacementType.Member,
-            })],
+            [
+                'r',
+                AuditLogReplacement.create({
+                    id: model.responsibilityId,
+                    value: name,
+                    type: AuditLogReplacementType.MemberResponsibility,
+                }),
+            ],
+            [
+                'm',
+                AuditLogReplacement.create({
+                    id: options.data.member.id,
+                    value: options.data.member.details.name,
+                    type: AuditLogReplacementType.Member,
+                }),
+            ],
         ]);
 
         if (options.data.group) {
-            map.set('g', AuditLogReplacement.create({
-                id: options.data.group.id,
-                value: options.data.group.settings.name.toString(),
-                type: AuditLogReplacementType.Group,
-            }));
+            map.set(
+                'g',
+                AuditLogReplacement.create({
+                    id: options.data.group.id,
+                    value: options.data.group.settings.name.toString(),
+                    type: AuditLogReplacementType.Group,
+                }),
+            );
         }
 
         return map;

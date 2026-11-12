@@ -9,9 +9,13 @@ import type { Registration } from './Registration.js';
 export class Document extends QueryableModel {
     static table = 'documents';
 
-    @column({ primary: true, type: 'string', beforeSave(value) {
-        return value ?? uuidv4();
-    } })
+    @column({
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
+            return value ?? uuidv4();
+        },
+    })
     id!: string;
 
     @column({ type: 'string' })
@@ -60,7 +64,8 @@ export class Document extends QueryableModel {
     createdAt: Date = new Date();
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -69,7 +74,9 @@ export class Document extends QueryableModel {
     })
     updatedAt: Date;
 
-    override save(options?: Parameters<QueryableModel['save']>[0] & { forceSave?: boolean }): Promise<boolean> {
+    override save(
+        options?: Parameters<QueryableModel['save']>[0] & { forceSave?: boolean },
+    ): Promise<boolean> {
         if (!options?.forceSave && this.isLocked) {
             throw new SimpleError({
                 code: 'locked',
@@ -90,7 +97,9 @@ export class Document extends QueryableModel {
             return [];
         }
 
-        const existingDocuments = await Document.where({ registrationId: { sign: 'IN', value: registrations.map(r => r.id) } });
+        const existingDocuments = await Document.where({
+            registrationId: { sign: 'IN', value: registrations.map((r) => r.id) },
+        });
 
         for (const document of existingDocuments) {
             console.log('Deleting document for registration', document.registrationId);

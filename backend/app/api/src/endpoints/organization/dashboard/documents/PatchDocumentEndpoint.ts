@@ -16,7 +16,11 @@ type Body = PatchableArrayAutoEncoder<DocumentStruct>;
 type ResponseBody = DocumentStruct[];
 
 export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(DocumentStruct as Decoder<DocumentStruct>, DocumentStruct.patchType() as Decoder<AutoEncoderPatchType<DocumentStruct>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(
+        DocumentStruct as Decoder<DocumentStruct>,
+        DocumentStruct.patchType() as Decoder<AutoEncoderPatchType<DocumentStruct>>,
+        StringDecoder,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -35,7 +39,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canManageDocuments(organization.id, PermissionLevel.Write)) {
+        if (!(await Context.auth.canManageDocuments(organization.id, PermissionLevel.Write))) {
             throw Context.auth.error();
         }
 
@@ -43,7 +47,10 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
 
         for (const patch of request.body.getPatches()) {
             const document = await Document.getByID(patch.id);
-            if (!document || !(await Context.auth.canAccessDocument(document, PermissionLevel.Write))) {
+            if (
+                !document ||
+                !(await Context.auth.canAccessDocument(document, PermissionLevel.Write))
+            ) {
                 throw Context.auth.notFoundOrNoAccess($t('%EK'));
             }
 
@@ -59,11 +66,18 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 document.data.patchOrPut(patch.data);
             }
 
-            if (patch.status && (document.status !== DocumentStatus.MissingData || patch.status === DocumentStatus.Deleted)) {
+            if (
+                patch.status &&
+                (document.status !== DocumentStatus.MissingData ||
+                    patch.status === DocumentStatus.Deleted)
+            ) {
                 document.status = patch.status;
             }
 
-            if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+            if (
+                document.status === DocumentStatus.Draft ||
+                document.status === DocumentStatus.Published
+            ) {
                 const template = await DocumentTemplate.getByID(document.templateId);
                 if (!template) {
                     throw new SimpleError({
@@ -86,7 +100,10 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const { put } of request.body.getPuts()) {
             // Create a new document
             const template = await DocumentTemplate.getByID(put.templateId);
-            if (!template || !await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Write)) {
+            if (
+                !template ||
+                !(await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Write))
+            ) {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Document template not found',
@@ -99,7 +116,10 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
             document.status = put.status;
             document.data = put.data;
 
-            if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+            if (
+                document.status === DocumentStatus.Draft ||
+                document.status === DocumentStatus.Published
+            ) {
                 document.status = template.status;
             }
 
@@ -117,7 +137,10 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
             }
             if (put.memberId) {
                 const member = await Member.getByIdWithUsersAndRegistrations(put.memberId);
-                if (!member || !await Context.auth.canAccessMember(member, PermissionLevel.Read)) {
+                if (
+                    !member ||
+                    !(await Context.auth.canAccessMember(member, PermissionLevel.Read))
+                ) {
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Member not found',
@@ -134,8 +157,6 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
             updatedDocuments.push(document.getStructure());
         }
 
-        return new Response(
-            updatedDocuments,
-        );
+        return new Response(updatedDocuments);
     }
 }

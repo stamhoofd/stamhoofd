@@ -10,7 +10,17 @@ import { MaildevService } from './definitions/maildev-service.js';
 import { MysqlService, mysqlService } from './definitions/mysql-service.js';
 import { RustfsService } from './definitions/rustfs-service.js';
 import * as docker from './docker.js';
-import { allRunning, printServicesStatus, removeSharedServicesManifest, restartServicesInteractive, startServices, startServicesInteractive, stopServices, stopServicesInteractive, writeSharedServicesManifest } from './manager.js';
+import {
+    allRunning,
+    printServicesStatus,
+    removeSharedServicesManifest,
+    restartServicesInteractive,
+    startServices,
+    startServicesInteractive,
+    stopServices,
+    stopServicesInteractive,
+    writeSharedServicesManifest,
+} from './manager.js';
 import { sharedServiceDefinitions } from './registry.js';
 import type { SharedServiceDefinition } from './service.js';
 
@@ -29,14 +39,19 @@ export type StartSharedServicesOptions = {
     skipMysql?: boolean;
 };
 
-export function sharedServicesToStart(options: StartSharedServicesOptions = {}): SharedServiceDefinition[] {
+export function sharedServicesToStart(
+    options: StartSharedServicesOptions = {},
+): SharedServiceDefinition[] {
     if (!options.skipMysql) {
         return sharedServiceDefinitions;
     }
-    return sharedServiceDefinitions.filter(service => service.key !== mysqlService.key);
+    return sharedServiceDefinitions.filter((service) => service.key !== mysqlService.key);
 }
 
-export async function startSharedServices(context: CliContext, options: StartSharedServicesOptions = {}): Promise<void> {
+export async function startSharedServices(
+    context: CliContext,
+    options: StartSharedServicesOptions = {},
+): Promise<void> {
     await fs.mkdir(sharedDir(context), { recursive: true });
     await fs.mkdir(path.join(logsDir(context), 'shared'), { recursive: true });
     await startServices(context, sharedServicesToStart(options));
@@ -80,15 +95,19 @@ export async function printSharedServicesStatus(context: CliContext): Promise<vo
 
 export async function tailSharedLogs(verbosity: RunVerbosity = RunVerbosity.Output): Promise<void> {
     const runtime = await docker.getContainerRuntime();
-    await run('pnpm', [
-        'exec',
-        'concurrently',
-        '-n',
-        'MySQL,MailDev,RustFS,CoreDNS,Caddy',
-        `${runtime} logs -f stamhoofd-mysql`,
-        `${runtime} logs -f stamhoofd-maildev`,
-        `${runtime} logs -f stamhoofd-rustfs`,
-        `${runtime} logs -f stamhoofd-coredns`,
-        `${runtime} logs -f stamhoofd-caddy`,
-    ], { allowFailure: true, verbosity });
+    await run(
+        'pnpm',
+        [
+            'exec',
+            'concurrently',
+            '-n',
+            'MySQL,MailDev,RustFS,CoreDNS,Caddy',
+            `${runtime} logs -f stamhoofd-mysql`,
+            `${runtime} logs -f stamhoofd-maildev`,
+            `${runtime} logs -f stamhoofd-rustfs`,
+            `${runtime} logs -f stamhoofd-coredns`,
+            `${runtime} logs -f stamhoofd-caddy`,
+        ],
+        { allowFailure: true, verbosity },
+    );
 }

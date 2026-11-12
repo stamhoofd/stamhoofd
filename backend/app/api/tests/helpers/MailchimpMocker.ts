@@ -60,11 +60,19 @@ export class MailchimpMocker {
 
     addMember(listId: string, member: Partial<MockedMailchimpMember>) {
         const email = member.email!.toLowerCase();
-        this.lists.find(l => l.id === listId)!.members.set(hash(email), { status: 'subscribed', tags: [], mergeFields: {}, ...member, email });
+        this.lists
+            .find((l) => l.id === listId)!
+            .members.set(hash(email), {
+                status: 'subscribed',
+                tags: [],
+                mergeFields: {},
+                ...member,
+                email,
+            });
     }
 
     getMember(listId: string, email: string) {
-        return this.lists.find(l => l.id === listId)?.members.get(hash(email));
+        return this.lists.find((l) => l.id === listId)?.members.get(hash(email));
     }
 
     reset() {
@@ -80,15 +88,17 @@ export class MailchimpMocker {
         const mocker = this;
 
         for (const method of ['get', 'put', 'post', 'delete'] as const) {
-            scope[method](/^\/3\.0\//).query(true).reply(function (uri, body) {
-                const authorization = this.req.headers.authorization as string | undefined;
-                const forced = mocker.forcedResponses.shift();
-                if (forced) {
-                    mocker.requests.push({ method: method.toUpperCase(), path: uri, body });
-                    return [forced.status, forced.body, forced.headers ?? {}];
-                }
-                return mocker.handle(method.toUpperCase(), uri, body, authorization);
-            });
+            scope[method](/^\/3\.0\//)
+                .query(true)
+                .reply(function (uri, body) {
+                    const authorization = this.req.headers.authorization as string | undefined;
+                    const forced = mocker.forcedResponses.shift();
+                    if (forced) {
+                        mocker.requests.push({ method: method.toUpperCase(), path: uri, body });
+                        return [forced.status, forced.body, forced.headers ?? {}];
+                    }
+                    return mocker.handle(method.toUpperCase(), uri, body, authorization);
+                });
         }
     }
 
@@ -97,28 +107,56 @@ export class MailchimpMocker {
         resetNock();
     }
 
-    private handle(method: string, uri: string, rawBody: nock.Body, authorization: string | undefined): [number, unknown] {
+    private handle(
+        method: string,
+        uri: string,
+        rawBody: nock.Body,
+        authorization: string | undefined,
+    ): [number, unknown] {
         const url = new URL(uri, 'https://mailchimp.test');
         const path = url.pathname.replace(/^\/3\.0/, '');
-        const body = (typeof rawBody === 'string' && rawBody ? JSON.parse(rawBody) : rawBody) as Record<string, any>;
+        const body = (
+            typeof rawBody === 'string' && rawBody ? JSON.parse(rawBody) : rawBody
+        ) as Record<string, any>;
         this.requests.push({ method, path, body });
 
         const expected = 'Basic ' + Buffer.from('stamhoofd:' + this.apiKey).toString('base64');
         if (authorization !== expected) {
-            return [401, { title: 'API Key Invalid', detail: 'Your API key may be invalid, or you\'ve attempted to access the wrong datacenter.' }];
+            return [
+                401,
+                {
+                    title: 'API Key Invalid',
+                    detail: "Your API key may be invalid, or you've attempted to access the wrong datacenter.",
+                },
+            ];
         }
 
         if (method === 'GET' && path === '/') {
             return [200, { account_name: this.accountName }];
         }
         if (method === 'GET' && path === '/lists') {
-            return [200, { lists: this.lists.map(l => ({ id: l.id, name: l.name, stats: { member_count: l.members.size } })) }];
+            return [
+                200,
+                {
+                    lists: this.lists.map((l) => ({
+                        id: l.id,
+                        name: l.name,
+                        stats: { member_count: l.members.size },
+                    })),
+                },
+            ];
         }
 
         const match = /^\/lists\/([^/]+)(\/.*)?$/.exec(path);
-        const list = match ? this.lists.find(l => l.id === match[1]) : undefined;
+        const list = match ? this.lists.find((l) => l.id === match[1]) : undefined;
         if (!match || !list) {
-            return [404, { title: 'Resource Not Found', detail: 'The requested resource could not be found.' }];
+            return [
+                404,
+                {
+                    title: 'Resource Not Found',
+                    detail: 'The requested resource could not be found.',
+                },
+            ];
         }
         const rest = match[2] ?? '';
 
@@ -135,16 +173,21 @@ export class MailchimpMocker {
             const offset = parseInt(url.searchParams.get('offset') ?? '0');
             // Like Mailchimp: archived contacts are only listed when asked for explicitly
             const status = url.searchParams.get('status');
-            const all = [...list.members.values()].filter(m => status ? m.status === status : m.status !== 'archived');
-            return [200, {
-                total_items: all.length,
-                members: all.slice(offset, offset + count).map(m => ({
-                    email_address: m.email,
-                    status: m.status,
-                    tags: m.tags.map((name, id) => ({ id, name })),
-                    merge_fields: m.mergeFields,
-                })),
-            }];
+            const all = [...list.members.values()].filter((m) =>
+                status ? m.status === status : m.status !== 'archived',
+            );
+            return [
+                200,
+                {
+                    total_items: all.length,
+                    members: all.slice(offset, offset + count).map((m) => ({
+                        email_address: m.email,
+                        status: m.status,
+                        tags: m.tags.map((name, id) => ({ id, name })),
+                        merge_fields: m.mergeFields,
+                    })),
+                },
+            ];
         }
 
         const memberMatch = /^\/members\/([0-9a-f]+)(\/tags)?$/.exec(rest);
@@ -155,10 +198,16 @@ export class MailchimpMocker {
 
         if (memberMatch[2]) {
             if (!member) {
-                return [404, { title: 'Resource Not Found', detail: 'The requested resource could not be found.' }];
+                return [
+                    404,
+                    {
+                        title: 'Resource Not Found',
+                        detail: 'The requested resource could not be found.',
+                    },
+                ];
             }
             for (const tag of body.tags as { name: string; status: string }[]) {
-                member.tags = member.tags.filter(t => t !== tag.name);
+                member.tags = member.tags.filter((t) => t !== tag.name);
                 if (tag.status === 'active') {
                     member.tags.push(tag.name);
                 }
@@ -168,7 +217,13 @@ export class MailchimpMocker {
 
         if (method === 'DELETE') {
             if (!member) {
-                return [404, { title: 'Resource Not Found', detail: 'The requested resource could not be found.' }];
+                return [
+                    404,
+                    {
+                        title: 'Resource Not Found',
+                        detail: 'The requested resource could not be found.',
+                    },
+                ];
             }
             member.status = 'archived';
             return [204, ''];
@@ -177,10 +232,19 @@ export class MailchimpMocker {
         if (method === 'PUT') {
             const email = (body.email_address as string).toLowerCase();
             if (hash(email) !== memberMatch[1]) {
-                return [400, { title: 'Invalid Resource', detail: 'Hash does not match the email address' }];
+                return [
+                    400,
+                    { title: 'Invalid Resource', detail: 'Hash does not match the email address' },
+                ];
             }
             if (this.forgotten.has(email)) {
-                return [400, { title: 'Forgotten Email Not Subscribed', detail: `${email} was permanently deleted and cannot be re-imported.` }];
+                return [
+                    400,
+                    {
+                        title: 'Forgotten Email Not Subscribed',
+                        detail: `${email} was permanently deleted and cannot be re-imported.`,
+                    },
+                ];
             }
             if (member) {
                 if (body.status) {
@@ -189,7 +253,12 @@ export class MailchimpMocker {
                 Object.assign(member.mergeFields, body.merge_fields ?? {});
                 return [200, member];
             }
-            const created: MockedMailchimpMember = { email, status: body.status ?? body.status_if_new, tags: [], mergeFields: { ...(body.merge_fields ?? {}) } };
+            const created: MockedMailchimpMember = {
+                email,
+                status: body.status ?? body.status_if_new,
+                tags: [],
+                mergeFields: { ...(body.merge_fields ?? {}) },
+            };
             list.members.set(hash(email), created);
             return [200, created];
         }

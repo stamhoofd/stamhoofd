@@ -6,8 +6,14 @@ import { run, RunVerbosity } from './command-runner.js';
 import { increaseStructuresVersion } from './structures-version.js';
 import { detectVcs, Vcs } from './vcs.js';
 
-vi.mock('./command-runner.js', async original => ({ ...await original<typeof import('./command-runner.js')>(), run: vi.fn() }));
-vi.mock('./vcs.js', async original => ({ ...await original<typeof import('./vcs.js')>(), detectVcs: vi.fn() }));
+vi.mock('./command-runner.js', async (original) => ({
+    ...(await original<typeof import('./command-runner.js')>()),
+    run: vi.fn(),
+}));
+vi.mock('./vcs.js', async (original) => ({
+    ...(await original<typeof import('./vcs.js')>()),
+    detectVcs: vi.fn(),
+}));
 vi.mock('./ux.js', () => ({ info: vi.fn(), success: vi.fn(), warning: vi.fn(), command: vi.fn() }));
 
 const versionFile = 'shared/structures/src/Version.ts';
@@ -29,7 +35,10 @@ describe('increaseStructuresVersion', () => {
 
     async function writePendingField(): Promise<string> {
         const filePath = path.join(cwd, 'shared/structures/src/Member.ts');
-        await fs.writeFile(filePath, '@field({ decoder: StringDecoder, ...NextVersion })\nname: string;\n');
+        await fs.writeFile(
+            filePath,
+            '@field({ decoder: StringDecoder, ...NextVersion })\nname: string;\n',
+        );
         return filePath;
     }
 
@@ -39,7 +48,9 @@ describe('increaseStructuresVersion', () => {
         await increaseStructuresVersion({ cwd, force: true });
 
         expect(await fs.readFile(filePath, 'utf8')).toContain('version: 13');
-        expect(await fs.readFile(path.join(cwd, versionFile), 'utf8')).toContain('ReleasedVersion = 13');
+        expect(await fs.readFile(path.join(cwd, versionFile), 'utf8')).toContain(
+            'ReleasedVersion = 13',
+        );
         expect(vi.mocked(run).mock.calls.map(([command, args]) => [command, ...args])).toEqual([
             ['git', 'add', '.'],
             ['git', 'commit', '-m', 'Increased structures to version 13'],
@@ -53,7 +64,11 @@ describe('increaseStructuresVersion', () => {
         await increaseStructuresVersion({ cwd, force: true, verbosity: RunVerbosity.Output });
 
         expect(detectVcs).toHaveBeenCalledWith(cwd, RunVerbosity.Output);
-        expect(run).toHaveBeenCalledExactlyOnceWith('jj', ['commit', '-m', 'Increased structures to version 13'], { cwd, verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenCalledExactlyOnceWith(
+            'jj',
+            ['commit', '-m', 'Increased structures to version 13'],
+            { cwd, verbosity: RunVerbosity.Output },
+        );
     });
 
     it('accepts an empty JJ working copy directly above synchronized main', async () => {
@@ -70,13 +85,19 @@ describe('increaseStructuresVersion', () => {
         await increaseStructuresVersion({ cwd });
 
         expect(await fs.readFile(filePath, 'utf8')).toContain('version: 13');
-        expect(run).toHaveBeenCalledWith('jj', ['commit', '-m', 'Increased structures to version 13'], expect.anything());
+        expect(run).toHaveBeenCalledWith(
+            'jj',
+            ['commit', '-m', 'Increased structures to version 13'],
+            expect.anything(),
+        );
     });
 
     it('does nothing when no pending fields are used', async () => {
         await increaseStructuresVersion({ cwd, force: true });
 
-        expect(await fs.readFile(path.join(cwd, versionFile), 'utf8')).toContain('ReleasedVersion = 12');
+        expect(await fs.readFile(path.join(cwd, versionFile), 'utf8')).toContain(
+            'ReleasedVersion = 12',
+        );
         expect(run).not.toHaveBeenCalled();
         expect(detectVcs).not.toHaveBeenCalled();
     });
@@ -88,7 +109,9 @@ describe('increaseStructuresVersion', () => {
         await increaseStructuresVersion({ cwd, dryRun: true });
 
         expect(await fs.readFile(filePath, 'utf8')).toBe(before);
-        expect(await fs.readFile(path.join(cwd, versionFile), 'utf8')).toContain('ReleasedVersion = 12');
+        expect(await fs.readFile(path.join(cwd, versionFile), 'utf8')).toContain(
+            'ReleasedVersion = 12',
+        );
         expect(run).not.toHaveBeenCalled();
     });
 });

@@ -10,16 +10,30 @@ import type { NormalizedSQLQuery, SQLQuery } from '../../src/SQLExpression.js';
 import type { SQLScalarValue } from '../../src/SQLExpressions.js';
 import { SQLWhereAnd } from '../../src/SQLWhere.js';
 
-export async function testError({ filter, filters, error }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; error: string }) {
-    await expect(
-        compileToSQLFilter(filter, filters),
-    ).rejects.toThrow(error);
+export async function testError({
+    filter,
+    filters,
+    error,
+}: {
+    filter: StamhoofdFilter;
+    filters: SQLFilterDefinitions;
+    error: string;
+}) {
+    await expect(compileToSQLFilter(filter, filters)).rejects.toThrow(error);
 }
 
 /**
  * Only compares the WHERE clause of the query.
  */
-export async function test({ filter, filters, query }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; query: SQLQuery }) {
+export async function test({
+    filter,
+    filters,
+    query,
+}: {
+    filter: StamhoofdFilter;
+    filters: SQLFilterDefinitions;
+    query: SQLQuery;
+}) {
     const where = await compileToSQLFilter(filter, filters);
     if (where.isAlways === false) {
         doesQueryMatch('', query);
@@ -41,7 +55,15 @@ export async function test({ filter, filters, query }: { filter: StamhoofdFilter
 /**
  * Use to also test joins. This will use `test_table` as the table name in your query.
  */
-export async function testSelect({ filter, filters, query }: { filter: StamhoofdFilter; filters: SQLFilterDefinitions; query: SQLQuery }) {
+export async function testSelect({
+    filter,
+    filters,
+    query,
+}: {
+    filter: StamhoofdFilter;
+    filters: SQLFilterDefinitions;
+    query: SQLQuery;
+}) {
     const where = await compileToSQLFilter(filter, filters);
 
     if (where.isAlways === false) {
@@ -56,14 +78,27 @@ export async function testSelect({ filter, filters, query }: { filter: Stamhoofd
         sql = select.getSQL();
     } catch (e) {
         console.error('Error in testSelect:', e);
-        console.error('testSelect', select, where, (where instanceof SQLWhereAnd ? where.children : where));
+        console.error(
+            'testSelect',
+            select,
+            where,
+            where instanceof SQLWhereAnd ? where.children : where,
+        );
 
         throw e;
     }
     doesQueryMatch(sql, query);
 }
 
-export async function testMultiple({ testFilters, filters, query }: { testFilters: StamhoofdFilter[]; filters: SQLFilterDefinitions; query: SQLQuery }) {
+export async function testMultiple({
+    testFilters,
+    filters,
+    query,
+}: {
+    testFilters: StamhoofdFilter[];
+    filters: SQLFilterDefinitions;
+    query: SQLQuery;
+}) {
     for (const filter of testFilters) {
         await test({
             filter,
@@ -73,7 +108,15 @@ export async function testMultiple({ testFilters, filters, query }: { testFilter
     }
 }
 
-export async function testMultipleErrors({ testFilters, filters, error }: { testFilters: StamhoofdFilter[]; filters: SQLFilterDefinitions; error: string }) {
+export async function testMultipleErrors({
+    testFilters,
+    filters,
+    error,
+}: {
+    testFilters: StamhoofdFilter[];
+    filters: SQLFilterDefinitions;
+    error: string;
+}) {
     for (const filter of testFilters) {
         await testError({
             filter,
@@ -94,13 +137,21 @@ export function doesQueryMatch(query: SQLQuery, withQuery: SQLQuery) {
     expect(params1).toEqual(params2);
 }
 
-export type TableDefinition = Record<string, { type: 'varchar' | 'test' | 'json' | 'datetime' | 'int' | 'int unsigned'; nullable?: boolean }>;
+export type TableDefinition = Record<
+    string,
+    { type: 'varchar' | 'test' | 'json' | 'datetime' | 'int' | 'int unsigned'; nullable?: boolean }
+>;
 
 export function createTableDefinition(tableName: string, definition: TableDefinition): string {
-    const columns = Object.entries(definition).map(([name, { type, nullable }]) => {
-        const stringType = type === 'varchar' ? 'VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci' : type;
-        return `\`${name}\` ${stringType}${nullable ? '' : ' NOT NULL'}`;
-    }).join(',\n');
+    const columns = Object.entries(definition)
+        .map(([name, { type, nullable }]) => {
+            const stringType =
+                type === 'varchar'
+                    ? 'VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci'
+                    : type;
+            return `\`${name}\` ${stringType}${nullable ? '' : ' NOT NULL'}`;
+        })
+        .join(',\n');
     return `CREATE TABLE \`${tableName}\` (\n${columns}\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;`;
 }
 
@@ -127,7 +178,19 @@ function closeDatabaseAfterTests() {
  *
  * Snapshots the query.
  */
-export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, filters }: { doMatch?: StamhoofdFilter[]; doNotMatch?: StamhoofdFilter[]; tableDefinition: TableDefinition; rows: Record<string, SQLScalarValue | null | PlainObject>[]; filters: SQLFilterDefinitions }) {
+export async function testMatch({
+    tableDefinition,
+    rows,
+    doMatch,
+    doNotMatch,
+    filters,
+}: {
+    doMatch?: StamhoofdFilter[];
+    doNotMatch?: StamhoofdFilter[];
+    tableDefinition: TableDefinition;
+    rows: Record<string, SQLScalarValue | null | PlainObject>[];
+    filters: SQLFilterDefinitions;
+}) {
     const tableName = 'test_table_' + Math.random().toString(36).substring(2, 15);
     const createTableSQL = createTableDefinition(tableName, tableDefinition);
 
@@ -171,11 +234,27 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
             try {
                 results = await select.fetch();
             } catch (e) {
-                console.error('SQL error for filter:', filter, 'on table:', tableName, 'with where:', select.getSQL(), e);
+                console.error(
+                    'SQL error for filter:',
+                    filter,
+                    'on table:',
+                    tableName,
+                    'with where:',
+                    select.getSQL(),
+                    e,
+                );
                 throw e;
             }
             if (results.length !== rows.length) {
-                console.error('Unexpected results for filter:', filter, 'on table:', tableName, 'with where:', select.getSQL(), results);
+                console.error(
+                    'Unexpected results for filter:',
+                    filter,
+                    'on table:',
+                    tableName,
+                    'with where:',
+                    select.getSQL(),
+                    results,
+                );
             }
             expect(results).toHaveLength(rows.length);
             const query = select.getSQL() as NormalizedSQLQuery;
@@ -193,11 +272,27 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
             try {
                 results = await select.fetch();
             } catch (e) {
-                console.error('SQL error for filter:', filter, 'on table:', tableName, 'with where:', select.getSQL(), e);
+                console.error(
+                    'SQL error for filter:',
+                    filter,
+                    'on table:',
+                    tableName,
+                    'with where:',
+                    select.getSQL(),
+                    e,
+                );
                 throw e;
             }
             if (results.length > 0) {
-                console.error('Unexpected results for filter:', filter, 'on table:', tableName, 'with where:', select.getSQL(), results);
+                console.error(
+                    'Unexpected results for filter:',
+                    filter,
+                    'on table:',
+                    tableName,
+                    'with where:',
+                    select.getSQL(),
+                    results,
+                );
             }
             expect(results).toHaveLength(0);
 
@@ -208,7 +303,9 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
                     params: query.params,
                 }).toMatchSnapshot('SQL Query for not match filter: ' + JSON.stringify(filter));
             } else {
-                expect('always false').toMatchSnapshot('SQL Query for not match filter: ' + JSON.stringify(filter));
+                expect('always false').toMatchSnapshot(
+                    'SQL Query for not match filter: ' + JSON.stringify(filter),
+                );
             }
         }
     } finally {

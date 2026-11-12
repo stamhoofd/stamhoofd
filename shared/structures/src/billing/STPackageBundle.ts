@@ -67,7 +67,9 @@ export class STPackageBundleHelper {
         // Not yet valid / active (ignored until valid)
         pack.validAt = null;
 
-        const start = Formatter.luxon(new Date(Math.max(new Date().getTime(), original.endDate?.getTime() ?? 0) + 1_000)).startOf('day');
+        const start = Formatter.luxon(
+            new Date(Math.max(new Date().getTime(), original.endDate?.getTime() ?? 0) + 1_000),
+        ).startOf('day');
         const validUntil = start.plus({ years: 1 }).endOf('day');
         const removeAt = validUntil.plus({ months: 1 }).endOf('day');
 
@@ -93,32 +95,40 @@ export class STPackageBundleHelper {
 
     static getTitle(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return $t('%Om');
-            case STPackageBundle.Webshops: return $t('%1Hk');
+            case STPackageBundle.Members:
+                return $t('%Om');
+            case STPackageBundle.Webshops:
+                return $t('%1Hk');
         }
         return '?';
     }
 
     static getDescription(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return $t('%1Hn');
-            case STPackageBundle.Webshops: return $t('%1Ho');
+            case STPackageBundle.Members:
+                return $t('%1Hn');
+            case STPackageBundle.Webshops:
+                return $t('%1Ho');
         }
         return '?';
     }
 
     static isPublic(bundle: STPackageBundle): boolean {
         switch (bundle) {
-            case STPackageBundle.Members: return true;
-            case STPackageBundle.Webshops: return true;
+            case STPackageBundle.Members:
+                return true;
+            case STPackageBundle.Webshops:
+                return true;
         }
         return false;
     }
 
     static getTrial(bundle: STPackageBundle): STPackageBundle | null {
         switch (bundle) {
-            case STPackageBundle.Members: return STPackageBundle.TrialMembers;
-            case STPackageBundle.Webshops:return STPackageBundle.TrialWebshops;
+            case STPackageBundle.Members:
+                return STPackageBundle.TrialMembers;
+            case STPackageBundle.Webshops:
+                return STPackageBundle.TrialWebshops;
         }
         return null;
     }
@@ -184,14 +194,21 @@ export class STPackageBundleHelper {
                 return true;
             }
             case STPackageBundle.TrialMembers: {
-                if (pack.meta.type === STPackageType.Members || pack.meta.type === STPackageType.TrialMembers) {
+                if (
+                    pack.meta.type === STPackageType.Members ||
+                    pack.meta.type === STPackageType.TrialMembers
+                ) {
                     // Already bought
                     return false;
                 }
                 return true;
             }
             case STPackageBundle.TrialWebshops: {
-                if (pack.meta.type === STPackageType.SingleWebshop || pack.meta.type === STPackageType.Webshops || pack.meta.type === STPackageType.TrialWebshops) {
+                if (
+                    pack.meta.type === STPackageType.SingleWebshop ||
+                    pack.meta.type === STPackageType.Webshops ||
+                    pack.meta.type === STPackageType.TrialWebshops
+                ) {
                     // Already bought
                     return false;
                 }

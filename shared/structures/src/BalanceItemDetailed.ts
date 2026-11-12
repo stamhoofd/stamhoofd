@@ -63,6 +63,11 @@ export class BalanceItemPaymentDetailed extends BalanceItemPayment {
     }
 
     toString() {
-        return Formatter.float(this.amount) + 'x ' + this.itemTitle + (this.itemDescription ? ' (' + this.itemDescription + ')' : '');
+        return (
+            Formatter.float(this.amount) +
+            'x ' +
+            this.itemTitle +
+            (this.itemDescription ? ' (' + this.itemDescription + ')' : '')
+        );
     }
 }

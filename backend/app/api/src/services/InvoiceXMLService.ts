@@ -2,7 +2,14 @@ import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { SimpleError } from '@common/errors';
 import type { Invoice } from '@stamhoofd/models';
 import { Image, InvoicedBalanceItem, Organization, Payment } from '@stamhoofd/models';
-import { File, getPeppolCategoryCode, getVATExcemptInvoiceNote, InvoicedBalanceItem as InvoicedBalanceItemStruct, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import {
+    File,
+    getPeppolCategoryCode,
+    getVATExcemptInvoiceNote,
+    InvoicedBalanceItem as InvoicedBalanceItemStruct,
+    PaymentMethod,
+    PaymentStatus,
+} from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -56,7 +63,9 @@ export class InvoiceXMlService {
         if (company.address.country !== Country.Belgium) {
             throw new Error('Cannot generate UBL for invoice outside belgium');
         }
-        const companyNumber = (company.VATNumber ? company.VATNumber.substring(2) : companyNumberOrVAT).replace(/\D+/g, '');
+        const companyNumber = (
+            company.VATNumber ? company.VATNumber.substring(2) : companyNumberOrVAT
+        ).replace(/\D+/g, '');
 
         const payments = await Payment.select().where('invoiceId', invoice.id).fetch();
         const payment = payments[0] ?? null;
@@ -69,11 +78,14 @@ export class InvoiceXMlService {
         const type = invoice.totalWithVAT < 0 ? 'CreditNote' : 'Invoice';
         const multiplyAmounts = invoice.totalWithVAT < 0 ? -1 : 1;
 
-        let customerEmail: string | null = company.administrationEmail ?? invoice.customer.email ?? null;
+        let customerEmail: string | null =
+            company.administrationEmail ?? invoice.customer.email ?? null;
         if (!customerEmail && invoice.payingOrganizationId) {
             const payingOrganization = await Organization.getByID(invoice.payingOrganizationId);
             if (payingOrganization) {
-                customerEmail = (await OrganizationAdminService.getInvoicingToEmail(payingOrganization)) ?? null;
+                customerEmail =
+                    (await OrganizationAdminService.getInvoicingToEmail(payingOrganization)) ??
+                    null;
             }
         }
 
@@ -85,9 +97,13 @@ export class InvoiceXMlService {
 
         function price(price: number, options?: { invert?: boolean; round?: boolean }) {
             if (options?.round ?? true) {
-                return esc((STMath.round((options?.invert ? multiplyAmounts : 1) * price / 100) / 100).toFixed(2));
+                return esc(
+                    (
+                        STMath.round(((options?.invert ? multiplyAmounts : 1) * price) / 100) / 100
+                    ).toFixed(2),
+                );
             }
-            return esc(((options?.invert ? multiplyAmounts : 1) * price / 100_00).toString());
+            return esc((((options?.invert ? multiplyAmounts : 1) * price) / 100_00).toString());
         }
 
         // Docs: https://docs.peppol.eu/poacc/billing/3.0/syntax/ubl-invoice/
@@ -301,7 +317,9 @@ export class InvoiceXMlService {
         </cac:LegalMonetaryTotal>`;
 
         // Invoice lines
-        const invoicedItems = InvoicedBalanceItemStruct.sort(await InvoicedBalanceItem.select().where('invoiceId', invoice.id).fetch());
+        const invoicedItems = InvoicedBalanceItemStruct.sort(
+            await InvoicedBalanceItem.select().where('invoiceId', invoice.id).fetch(),
+        );
 
         for (const item of invoicedItems) {
             // We need to show prices exluding VAT and round here if needed
@@ -356,7 +374,7 @@ export class InvoiceXMlService {
     static async uploadXml(invoice: Invoice, fileContent: Buffer) {
         const fileId = uuidv4();
 
-        let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
+        let prefix = STAMHOOFD.SPACES_PREFIX ?? '';
         if (prefix.length > 0) {
             prefix += '/';
         }
@@ -374,7 +392,7 @@ export class InvoiceXMlService {
             server: 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT,
             path: key,
             size: fileContent.byteLength,
-            name: (invoice.number ?? invoice.id),
+            name: invoice.number ?? invoice.id,
             isPrivate: true,
             contentType: 'application/xml',
         });
@@ -389,7 +407,7 @@ export class InvoiceXMlService {
         await Image.getS3Client().send(cmd);
 
         // Sign the structure so it is accessible
-        if (!await fileStruct.sign()) {
+        if (!(await fileStruct.sign())) {
             throw new SimpleError({
                 code: 'failed_to_sign',
                 message: 'Failed to sign file',
@@ -409,13 +427,17 @@ export class InvoiceXMlService {
 
         if (!invoice.customer.company?.customPeppolEndpointId) {
             if (invoice.customer.company?.VATNumber === null) {
-                console.log('Skipping PEPPOL for invoice ' + invoice.id + ', recipient not subject to VAT');
+                console.log(
+                    'Skipping PEPPOL for invoice ' + invoice.id + ', recipient not subject to VAT',
+                );
                 return;
             }
 
             // Check VAT number is belgian
             if (!invoice.customer.company?.VATNumber.startsWith('BE')) {
-                console.log('Skipping PEPPOL for invoice ' + invoice.id + ', recipient outside Belgium');
+                console.log(
+                    'Skipping PEPPOL for invoice ' + invoice.id + ', recipient outside Belgium',
+                );
                 return;
             }
         }

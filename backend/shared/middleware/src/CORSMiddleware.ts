@@ -4,13 +4,29 @@ export const CORSMiddleware: ResponseMiddleware = {
     handleResponse(request: Request, response: Response) {
         response.headers['Access-Control-Allow-Origin'] = request.headers.origin ?? '*';
         response.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS, PATCH, PUT, DELETE';
-        response.headers['Access-Control-Allow-Headers'] = request.headers['access-control-request-headers'] ?? '*';
+        response.headers['Access-Control-Allow-Headers'] =
+            request.headers['access-control-request-headers'] ?? '*';
         response.headers['Access-Control-Max-Age'] = '86400'; // Cache 24h
-        response.headers['Content-Security-Policy'] = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
+        response.headers['Content-Security-Policy'] =
+            "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
 
         if (request.method !== 'OPTIONS') {
             // Expose all headers
-            const exposeHeaders = Object.keys(response.headers).map(h => h.toLowerCase()).filter(h => !['content-length', 'cache-control', 'content-language', 'content-type', 'expires', 'last-modified', 'pragma'].includes(h)).join(', ');
+            const exposeHeaders = Object.keys(response.headers)
+                .map((h) => h.toLowerCase())
+                .filter(
+                    (h) =>
+                        ![
+                            'content-length',
+                            'cache-control',
+                            'content-language',
+                            'content-type',
+                            'expires',
+                            'last-modified',
+                            'pragma',
+                        ].includes(h),
+                )
+                .join(', ');
             if (exposeHeaders) {
                 response.headers['Access-Control-Expose-Headers'] = exposeHeaders;
             }

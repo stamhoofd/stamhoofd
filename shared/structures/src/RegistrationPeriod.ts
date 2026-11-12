@@ -30,7 +30,7 @@ export class OrganizationRegistrationPeriodSettings extends AutoEncoder {
     rootCategoryId = this.categories[0]?.id ?? '';
 
     get rootCategory(): GroupCategory | undefined {
-        return this.categories.find(c => c.id === this.rootCategoryId);
+        return this.categories.find((c) => c.id === this.rootCategoryId);
     }
 
     @field({ decoder: new ArrayDecoder(BundleDiscount), version: 374 })
@@ -80,7 +80,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
             smartCombine: true,
             maxDepth: 2,
             // every group should have at least 1 visible price
-            filterGroups: g => g.settings.prices.some(p => !p.hidden),
+            filterGroups: (g) => g.settings.prices.some((p) => !p.hidden),
         });
     }
 
@@ -89,11 +89,11 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
     }
 
     get waitingLists(): Group[] {
-        return this.groups.filter(g => g.type === GroupType.WaitingList);
+        return this.groups.filter((g) => g.type === GroupType.WaitingList);
     }
 
     get rootCategory() {
-        return this.settings.categories.find(c => c.id === this.settings.rootCategoryId);
+        return this.settings.categories.find((c) => c.id === this.settings.rootCategoryId);
     }
 
     /**
@@ -112,7 +112,9 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
         const root = this.rootCategory;
         if (root) {
             let tree = GroupCategoryTree.build(root, this, {
-                groups: options?.filterGroups ? this.groups.filter(options.filterGroups) : undefined,
+                groups: options?.filterGroups
+                    ? this.groups.filter(options.filterGroups)
+                    : undefined,
                 permissions: options?.permissions,
                 maxDepth: options?.maxDepth,
                 smartCombine: options?.smartCombine,
@@ -134,7 +136,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
             }
 
             const usedGroups = tree.getAllGroups();
-            const unusedGroups = this.groups.filter(g => !usedGroups.includes(g));
+            const unusedGroups = this.groups.filter((g) => !usedGroups.includes(g));
             if (unusedGroups.length > 0) {
                 console.warn('Unused groups found in category tree');
             }
@@ -144,7 +146,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
 
         // Broken setup here
         console.warn('Root category ID is missing in categories. Migration might be needed');
-        return GroupCategoryTree.create({ });
+        return GroupCategoryTree.create({});
     }
 
     duplicate(newPeriod: RegistrationPeriod) {
@@ -158,14 +160,17 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
 
         // Give each duplicated bundle discount a new id and remap the references on group prices
         const discountMap = new Map<string, string>();
-        newOrganizationPeriod.settings.bundleDiscounts = this.settings.bundleDiscounts.map((discount) => {
-            const newDiscount = discount.clone();
-            newDiscount.id = uuidv4();
-            discountMap.set(discount.id, newDiscount.id);
-            return newDiscount;
-        });
+        newOrganizationPeriod.settings.bundleDiscounts = this.settings.bundleDiscounts.map(
+            (discount) => {
+                const newDiscount = discount.clone();
+                newDiscount.id = uuidv4();
+                discountMap.set(discount.id, newDiscount.id);
+                return newDiscount;
+            },
+        );
 
-        const yearDifference = newPeriod.startDate.getFullYear() - this.period.startDate.getFullYear();
+        const yearDifference =
+            newPeriod.startDate.getFullYear() - this.period.startDate.getFullYear();
 
         for (const group of this.groups) {
             const newGroup = Group.create({
@@ -178,11 +183,15 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
             // Increase all dates with exactly one year
 
             if (newGroup.settings.registrationStartDate) {
-                newGroup.settings.registrationStartDate.setFullYear(newGroup.settings.registrationStartDate.getFullYear() + yearDifference);
+                newGroup.settings.registrationStartDate.setFullYear(
+                    newGroup.settings.registrationStartDate.getFullYear() + yearDifference,
+                );
             }
 
             if (newGroup.settings.registrationEndDate) {
-                newGroup.settings.registrationEndDate.setFullYear(newGroup.settings.registrationEndDate.getFullYear() + yearDifference);
+                newGroup.settings.registrationEndDate.setFullYear(
+                    newGroup.settings.registrationEndDate.getFullYear() + yearDifference,
+                );
             }
 
             for (const price of newGroup.settings.prices) {
@@ -196,7 +205,10 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
 
                 // Remap the bundle discount references to the newly generated discount ids
                 price.bundleDiscounts = new Map(
-                    [...price.bundleDiscounts].map(([discountId, settings]) => [discountMap.get(discountId) ?? discountId, settings]),
+                    [...price.bundleDiscounts].map(([discountId, settings]) => [
+                        discountMap.get(discountId) ?? discountId,
+                        settings,
+                    ]),
                 );
             }
 
@@ -214,7 +226,8 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
             if (group.waitingList) {
                 const newId = groupMap.get(group.waitingList.id) ?? null;
                 if (newId) {
-                    group.waitingList = newOrganizationPeriod.groups.find(g => g.id === newId) ?? null;
+                    group.waitingList =
+                        newOrganizationPeriod.groups.find((g) => g.id === newId) ?? null;
                 } else {
                     group.waitingList = null;
                 }
@@ -224,7 +237,9 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
         for (const category of this.settings.categories) {
             const newCategory = category.clone();
             newCategory.id = uuidv4();
-            newCategory.groupIds = category.groupIds.map(groupId => groupMap.get(groupId)!).filter(id => id);
+            newCategory.groupIds = category.groupIds
+                .map((groupId) => groupMap.get(groupId)!)
+                .filter((id) => id);
 
             categoryMap.set(category.id, newCategory.id);
             newOrganizationPeriod.settings.categories.push(newCategory);
@@ -232,11 +247,15 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
 
         // Update category ids
         for (const category of newOrganizationPeriod.settings.categories) {
-            category.categoryIds = category.categoryIds.map(categoryId => categoryMap.get(categoryId)!).filter(id => id);
+            category.categoryIds = category.categoryIds
+                .map((categoryId) => categoryMap.get(categoryId)!)
+                .filter((id) => id);
         }
 
         // Update root category id
-        newOrganizationPeriod.settings.rootCategoryId = categoryMap.get(this.settings.rootCategoryId)!;
+        newOrganizationPeriod.settings.rootCategoryId = categoryMap.get(
+            this.settings.rootCategoryId,
+        )!;
         return newOrganizationPeriod;
     }
 }

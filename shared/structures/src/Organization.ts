@@ -1,4 +1,12 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Language } from '@stamhoofd/types/Language';
@@ -84,7 +92,12 @@ export class BaseOrganization extends AutoEncoder {
             return null;
         }
 
-        return this.uri + '.' + (STAMHOOFD.domains.registration[this.address.country] ?? STAMHOOFD.domains.registration['']);
+        return (
+            this.uri +
+            '.' +
+            (STAMHOOFD.domains.registration[this.address.country] ??
+                STAMHOOFD.domains.registration[''])
+        );
     }
 
     get registerUrl() {
@@ -92,7 +105,9 @@ export class BaseOrganization extends AutoEncoder {
     }
 
     get dashboardUrl() {
-        return 'https://' + STAMHOOFD.domains.dashboard + '/' + appToUri('dashboard') + '/' + this.uri;
+        return (
+            'https://' + STAMHOOFD.domains.dashboard + '/' + appToUri('dashboard') + '/' + this.uri
+        );
     }
 
     get dashboardDomain(): string {
@@ -106,11 +121,11 @@ export class BaseOrganization extends AutoEncoder {
         return this.meta.companies.length
             ? this.meta.companies
             : [
-                    Company.create({
-                        name: this.name,
-                        address: this.address,
-                    }),
-                ];
+                  Company.create({
+                      name: this.name,
+                      address: this.address,
+                  }),
+              ];
     }
 }
 
@@ -125,7 +140,12 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
     @field({ decoder: new ArrayDecoder(Group), version: 2, upgrade: () => [], optional: true })
     groups: Group[] = [];
 
-    @field({ decoder: OrganizationRegistrationPeriod, version: 264, defaultValue: () => OrganizationRegistrationPeriod.create({ period: RegistrationPeriod.create({}) }) })
+    @field({
+        decoder: OrganizationRegistrationPeriod,
+        version: 264,
+        defaultValue: () =>
+            OrganizationRegistrationPeriod.create({ period: RegistrationPeriod.create({}) }),
+    })
     period: OrganizationRegistrationPeriod;
 
     /**
@@ -135,7 +155,9 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
         return this.period.categoryTree.getAllGroups();
     }
 
-    getGroupsForPermissions(permissions?: import('./LoadedPermissions.js').LoadedPermissions | null) {
+    getGroupsForPermissions(
+        permissions?: import('./LoadedPermissions.js').LoadedPermissions | null,
+    ) {
         return this.getCategoryTree({ permissions }).getAllGroups();
     }
 
@@ -191,7 +213,13 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
      * For registration members perspective, try to use options.admin instead of options.permissions.
      * options.permissions is only used if you want to hide groups and empty categories that you don't have permissions for.
      */
-    getCategoryTree(options?: { maxDepth?: number; filterGroups?: (group: Group) => boolean; permissions?: import('./LoadedPermissions.js').LoadedPermissions | null; smartCombine?: boolean; admin?: boolean }): GroupCategoryTree {
+    getCategoryTree(options?: {
+        maxDepth?: number;
+        filterGroups?: (group: Group) => boolean;
+        permissions?: import('./LoadedPermissions.js').LoadedPermissions | null;
+        smartCombine?: boolean;
+        admin?: boolean;
+    }): GroupCategoryTree {
         return this.period.getCategoryTree(options ? { ...options } : {});
     }
 
@@ -226,7 +254,12 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
      * In platform mode this is always the case. In organization mode it only makes sense when the members package is used.
      */
     get showInternalAdmins() {
-        return (this.meta.packages.useMembers && this.privateMeta && (this.privateMeta.responsibilities.length > 0)) || STAMHOOFD.userMode === 'platform';
+        return (
+            (this.meta.packages.useMembers &&
+                this.privateMeta &&
+                this.privateMeta.responsibilities.length > 0) ||
+            STAMHOOFD.userMode === 'platform'
+        );
     }
 
     get canShowInternalAdmins() {
@@ -251,7 +284,10 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
 
     doesMatchFilter(filter: StamhoofdFilter): boolean {
         try {
-            const compiledFilter = compileToInMemoryFilter(filter, organizationItemInMemoryFilterCompilers);
+            const compiledFilter = compileToInMemoryFilter(
+                filter,
+                organizationItemInMemoryFilterCompilers,
+            );
             const value = compiledFilter(this);
             console.log('does match filter', filter, this, value);
             return value;
@@ -264,13 +300,13 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
     updatePeriods(periods: OrganizationRegistrationPeriod[]) {
         // Update in memory
         for (const period of this.periods?.organizationPeriods ?? []) {
-            const updated = periods.find(p => p.id === period.id);
+            const updated = periods.find((p) => p.id === period.id);
             if (updated) {
                 period.deepSet(updated);
             }
         }
 
-        const updated = periods.find(p => p.id === this.period.id);
+        const updated = periods.find((p) => p.id === this.period.id);
         if (updated) {
             this.period.deepSet(updated);
         }
@@ -280,8 +316,10 @@ export class Organization extends BaseOrganization implements ObjectWithRecords 
 
     /** Returns true when the organization is managed by Scouts en Gidsen Vlaanderen. */
     get isSGVSyncOrganization(): boolean {
-        return this.meta.type === OrganizationType.Youth
-            && this.meta.umbrellaOrganization === UmbrellaOrganization.ScoutsEnGidsenVlaanderen;
+        return (
+            this.meta.type === OrganizationType.Youth &&
+            this.meta.umbrellaOrganization === UmbrellaOrganization.ScoutsEnGidsenVlaanderen
+        );
     }
 }
 

@@ -28,19 +28,28 @@ describe('Helper.waitUntilDeadline', () => {
     });
 
     test('gives up on work that never finishes', async () => {
-        await waitUntilDeadline(new Promise(() => {}), { deadline: deadlineIn(20), description: 'work' });
+        await waitUntilDeadline(new Promise(() => {}), {
+            deadline: deadlineIn(20),
+            description: 'work',
+        });
 
         expect(errors).toContain('Gave up waiting for work to finish');
     });
 
     test('a deadline that already passed does not wait', async () => {
-        await waitUntilDeadline(sleep(60_000), { deadline: deadlineIn(-1000), description: 'work' });
+        await waitUntilDeadline(sleep(60_000), {
+            deadline: deadlineIn(-1000),
+            description: 'work',
+        });
 
         expect(errors).toContain('Gave up waiting for work to finish');
     });
 
     test('a failure in the work is logged instead of thrown', async () => {
-        await waitUntilDeadline(Promise.reject(new Error('Broken')), { deadline: deadlineIn(60_000), description: 'work' });
+        await waitUntilDeadline(Promise.reject(new Error('Broken')), {
+            deadline: deadlineIn(60_000),
+            description: 'work',
+        });
 
         expect(errors).toContain('Failed to wait for work:');
         expect(errors).not.toContain('Gave up waiting for work to finish');

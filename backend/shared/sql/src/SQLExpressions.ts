@@ -1,5 +1,10 @@
 import { Database } from '@node/database';
-import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
+import type {
+    SQLExpression,
+    SQLExpressionOptions,
+    SQLNamedExpression,
+    SQLQuery,
+} from './SQLExpression.js';
 import { joinSQLQuery } from './SQLExpression.js';
 
 export type SQLScalarValue = string | number | boolean | Date;
@@ -36,10 +41,7 @@ export class SQLDistinct implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            'DISTINCT ',
-            this.expression.getSQL(options),
-        ]);
+        return joinSQLQuery(['DISTINCT ', this.expression.getSQL(options)]);
     }
 }
 
@@ -51,11 +53,7 @@ export class SQLCharLength implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            'CHAR_LENGTH(',
-            this.expression.getSQL(options),
-            ')',
-        ]);
+        return joinSQLQuery(['CHAR_LENGTH(', this.expression.getSQL(options), ')']);
     }
 }
 
@@ -83,19 +81,14 @@ export class SQLLower implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            'LOWER(',
-            this.expression.getSQL(options),
-            ')',
-        ]);
+        return joinSQLQuery(['LOWER(', this.expression.getSQL(options), ')']);
     }
 }
 
 export type SQLArithmicOperatorType = '+' | '-' | '*' | '/' | '%';
 
 export class SQLArithmicOperator implements SQLExpression {
-    constructor(readonly type: SQLArithmicOperatorType) {
-    }
+    constructor(readonly type: SQLArithmicOperatorType) {}
 
     getSQL(): SQLQuery {
         return this.type;
@@ -112,7 +105,10 @@ export class SQLGreatest implements SQLExpression {
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([
             'GREATEST(',
-            joinSQLQuery(this.expressions.map(e => readDynamicSQLExpression(e).getSQL(options)), ', '),
+            joinSQLQuery(
+                this.expressions.map((e) => readDynamicSQLExpression(e).getSQL(options)),
+                ', ',
+            ),
             ')',
         ]);
     }
@@ -150,13 +146,19 @@ export class SQLCalculation implements SQLExpression {
      * @param type
      * @param expression
      */
-    private pushOperation(type: SQLArithmicOperatorType, expression: SQLExpression): SQLCalculation {
+    private pushOperation(
+        type: SQLArithmicOperatorType,
+        expression: SQLExpression,
+    ): SQLCalculation {
         this.expressions.push(new SQLArithmicOperator(type), expression);
         return this;
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery(this.expressions.map(e => e.getSQL(options)), ' ');
+        return joinSQLQuery(
+            this.expressions.map((e) => e.getSQL(options)),
+            ' ',
+        );
     }
 }
 
@@ -168,11 +170,7 @@ export class SQLSum implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            'SUM(',
-            this.expression.getSQL(options),
-            ')',
-        ]);
+        return joinSQLQuery(['SUM(', this.expression.getSQL(options), ')']);
     }
 }
 
@@ -184,11 +182,7 @@ export class SQLMin implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            'MIN(',
-            this.expression.getSQL(options),
-            ')',
-        ]);
+        return joinSQLQuery(['MIN(', this.expression.getSQL(options), ')']);
     }
 }
 
@@ -200,11 +194,7 @@ export class SQLMax implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            'MAX(',
-            this.expression.getSQL(options),
-            ')',
-        ]);
+        return joinSQLQuery(['MAX(', this.expression.getSQL(options), ')']);
     }
 }
 
@@ -218,11 +208,7 @@ export class SQLSelectAs implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            this.expression.getSQL(options),
-            ' AS ',
-            this.as.getSQL(options),
-        ]);
+        return joinSQLQuery([this.expression.getSQL(options), ' AS ', this.as.getSQL(options)]);
     }
 }
 
@@ -236,11 +222,7 @@ export class SQLAssignment implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            this.key.getSQL(options),
-            ' = ',
-            this.value.getSQL(options),
-        ]);
+        return joinSQLQuery([this.key.getSQL(options), ' = ', this.value.getSQL(options)]);
     }
 }
 
@@ -266,7 +248,10 @@ export class SQLConcat implements SQLExpression {
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([
             'CONCAT(',
-            joinSQLQuery(this.expressions.map(e => e.getSQL(options)), ', '),
+            joinSQLQuery(
+                this.expressions.map((e) => e.getSQL(options)),
+                ', ',
+            ),
             ')',
         ]);
     }
@@ -298,13 +283,7 @@ export class SQLCast implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            'CAST( ',
-            this.value.getSQL(options),
-            ' AS ',
-            this.as,
-            ')',
-        ]);
+        return joinSQLQuery(['CAST( ', this.value.getSQL(options), ' AS ', this.as, ')']);
     }
 }
 
@@ -422,12 +401,9 @@ export const SQLParentNamespace: SQLExpression = {
     },
 };
 
-export type SQLColumnExpressionParams = [
-    namespace: string | SQLExpression,
-    column: string,
-] | [
-    column: string,
-];
+export type SQLColumnExpressionParams =
+    | [namespace: string | SQLExpression, column: string]
+    | [column: string];
 
 export class SQLColumnExpression implements SQLExpression {
     namespace: SQLExpression;
@@ -451,17 +427,15 @@ export class SQLColumnExpression implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            this.namespace.getSQL(options),
-            '.',
-            Database.escapeId(this.column),
-        ]);
+        return joinSQLQuery([this.namespace.getSQL(options), '.', Database.escapeId(this.column)]);
     }
 }
 
 export class SQLIfNull implements SQLExpression {
-    constructor(private readonly columnExpression: SQLColumnExpression, private readonly value: string | number) {
-    }
+    constructor(
+        private readonly columnExpression: SQLColumnExpression,
+        private readonly value: string | number,
+    ) {}
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([
@@ -554,7 +528,10 @@ export class SQLJSONTableExpression implements SQLNamedExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        const columnsSQL = joinSQLQuery(this.columns.map(c => c.getSQL(options)), ', ');
+        const columnsSQL = joinSQLQuery(
+            this.columns.map((c) => c.getSQL(options)),
+            ', ',
+        );
         return joinSQLQuery([
             'JSON_TABLE(',
             this.expression.getSQL(options),
@@ -582,7 +559,10 @@ export class SQLCoalesce implements SQLExpression {
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([
             'COALESCE(',
-            joinSQLQuery(this.expressions.map(e => e.getSQL(options)), ', '),
+            joinSQLQuery(
+                this.expressions.map((e) => e.getSQL(options)),
+                ', ',
+            ),
             ')',
         ]);
     }
@@ -596,10 +576,7 @@ export class SQLIsNull implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            this.expression.getSQL(options),
-            ' IS NULL',
-        ]);
+        return joinSQLQuery([this.expression.getSQL(options), ' IS NULL']);
     }
 }
 
@@ -614,23 +591,17 @@ export class SQLSubQuery implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            '(',
-            this.select.getSQL(options),
-            ')',
-        ]);
+        return joinSQLQuery(['(', this.select.getSQL(options), ')']);
     }
 }
 
 export class SQLAggregateColumnExpression implements SQLExpression {
-    constructor(private readonly type: SQLAggregateColumnType, private readonly expression: SQLExpression) {
-    }
+    constructor(
+        private readonly type: SQLAggregateColumnType,
+        private readonly expression: SQLExpression,
+    ) {}
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            this.type + '(',
-            this.expression.getSQL(options),
-            ')',
-        ]);
+        return joinSQLQuery([this.type + '(', this.expression.getSQL(options), ')']);
     }
 }

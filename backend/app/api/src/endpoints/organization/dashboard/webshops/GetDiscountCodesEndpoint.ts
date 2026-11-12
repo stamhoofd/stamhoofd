@@ -3,7 +3,11 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { Webshop, WebshopDiscountCode } from '@stamhoofd/models';
-import type { CountFilteredRequest, PrivateDiscountCode, StamhoofdFilter } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    PrivateDiscountCode,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { assertSort, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
@@ -31,7 +35,9 @@ export class GetWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Bod
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/webshop/@id/discount-codes', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/discount-codes', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -63,29 +69,46 @@ export class GetWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Bod
         return ids;
     }
 
-    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest, scope: QueryScope = {}) {
+    static async buildQuery(
+        q: CountFilteredRequest | LimitedFilteredRequest,
+        scope: QueryScope = {},
+    ) {
         const organization = Context.organization!;
         const table = WebshopDiscountCode.table;
 
-        const query = SQL
-            .select(SQL.wildcard(table))
+        const query = SQL.select(SQL.wildcard(table))
             .from(SQL.table(table))
-            .where(await compileToSQLFilter({
-                organizationId: organization.id,
-            }, filterCompilers));
+            .where(
+                await compileToSQLFilter(
+                    {
+                        organizationId: organization.id,
+                    },
+                    filterCompilers,
+                ),
+            );
 
         if (scope.webshopId) {
-            query.where(await compileToSQLFilter({
-                webshopId: scope.webshopId,
-            }, filterCompilers));
+            query.where(
+                await compileToSQLFilter(
+                    {
+                        webshopId: scope.webshopId,
+                    },
+                    filterCompilers,
+                ),
+            );
         }
 
         if (scope.webshopIds) {
-            query.where(await compileToSQLFilter({
-                webshopId: {
-                    $in: scope.webshopIds,
-                },
-            }, filterCompilers));
+            query.where(
+                await compileToSQLFilter(
+                    {
+                        webshopId: {
+                            $in: scope.webshopIds,
+                        },
+                    },
+                    filterCompilers,
+                ),
+            );
         }
 
         if (q.filter) {
@@ -120,8 +143,12 @@ export class GetWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Bod
         const discountCodes = WebshopDiscountCode.fromRows(data, WebshopDiscountCode.table);
 
         return new PaginatedResponse<PrivateDiscountCode[], LimitedFilteredRequest>({
-            results: discountCodes.map(d => d.getPrivateStructure()),
-            next: LimitedFilteredRequestHelper.fixInfiniteLoadingLoop({ request: requestQuery, results: discountCodes, sorters }),
+            results: discountCodes.map((d) => d.getPrivateStructure()),
+            next: LimitedFilteredRequestHelper.fixInfiniteLoadingLoop({
+                request: requestQuery,
+                results: discountCodes,
+                sorters,
+            }),
         });
     }
 
@@ -130,12 +157,12 @@ export class GetWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Bod
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
         const webshop = await Webshop.getByID(request.params.id);
-        if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+        if (!webshop || !(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full))) {
             throw Context.auth.notFoundOrNoAccess();
         }
 
@@ -145,7 +172,9 @@ export class GetWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Bod
         });
 
         return new Response(
-            await GetWebshopDiscountCodesEndpoint.buildData(request.query, { webshopId: webshop.id }),
+            await GetWebshopDiscountCodesEndpoint.buildData(request.query, {
+                webshopId: webshop.id,
+            }),
         );
     }
 }

@@ -19,7 +19,11 @@ export class GetDocumentTemplatesCountEndpoint extends Endpoint<Params, Query, B
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/document-templates/count', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/organization/document-templates/count',
+            {},
+        );
 
         if (params) {
             return [true, params as Params];
@@ -31,14 +35,13 @@ export class GetDocumentTemplatesCountEndpoint extends Endpoint<Params, Query, B
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canManageDocuments(organization.id)) {
+        if (!(await Context.auth.canManageDocuments(organization.id))) {
             throw Context.auth.error();
         }
 
         const query = await GetDocumentTemplatesEndpoint.buildQuery(request.query);
 
-        const count = await query
-            .count();
+        const count = await query.count();
 
         return new Response(
             CountResponse.create({

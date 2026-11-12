@@ -1,7 +1,12 @@
 import { BalanceItem, BalanceItemPayment, Invoice, Payment } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { SQL } from '@stamhoofd/sql';
-import { BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import {
+    BalanceItemType,
+    PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+} from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -83,10 +88,11 @@ export class ApplicationFeeService {
      * earlier. balanceItemId is only written through markInvoiced or the inline legacy detection.
      */
     static async upsertFee(data: ApplicationFeeData): Promise<ApplicationFee> {
-        const fee = await ApplicationFee.select()
-            .where('externalId', data.externalId)
-            .where('type', data.type)
-            .first(false) ?? new ApplicationFee();
+        const fee =
+            (await ApplicationFee.select()
+                .where('externalId', data.externalId)
+                .where('type', data.type)
+                .first(false)) ?? new ApplicationFee();
 
         fee.externalId = data.externalId;
         fee.type = data.type;
@@ -128,7 +134,11 @@ export class ApplicationFeeService {
      * already has it, or an explicit null when the balance item is known to have no payment yet
      * (the invoicer stamps before creating the payment): both skip resolving it again.
      */
-    static async markInvoiced(fee: ApplicationFee, balanceItemId: string, { payment }: { payment?: Payment | null } = {}) {
+    static async markInvoiced(
+        fee: ApplicationFee,
+        balanceItemId: string,
+        { payment }: { payment?: Payment | null } = {},
+    ) {
         fee.balanceItemId = balanceItemId;
         await fee.save();
         if (payment === null) {
@@ -141,14 +151,26 @@ export class ApplicationFeeService {
      * The fee payments the legacy invoicer created for a (payer, month), matched on their
      * reference. The OR NULL clause covers legacy payments created without a stripeAccountId.
      */
-    static async findLegacyFeePayments({ organizationId, payingOrganizationId, payingStripeAccountId, periodStart }: {
+    static async findLegacyFeePayments({
+        organizationId,
+        payingOrganizationId,
+        payingStripeAccountId,
+        periodStart,
+    }: {
         organizationId: string;
         payingOrganizationId: string;
         payingStripeAccountId: string;
         periodStart: Date;
     }): Promise<Payment[]> {
         const reference = LEGACY_FEE_PAYMENT_REFERENCE_PREFIX + Formatter.dateIso(periodStart);
-        const key = organizationId + ':' + payingOrganizationId + ':' + payingStripeAccountId + ':' + reference;
+        const key =
+            organizationId +
+            ':' +
+            payingOrganizationId +
+            ':' +
+            payingStripeAccountId +
+            ':' +
+            reference;
 
         const cached = this.legacyFeePayments.get(key);
         if (cached && cached.length > 0) {
@@ -159,9 +181,7 @@ export class ApplicationFeeService {
         let payments = await Payment.select()
             .where('organizationId', organizationId)
             .where('payingOrganizationId', payingOrganizationId)
-            .where(
-                SQL.where('stripeAccountId', payingStripeAccountId),
-            )
+            .where(SQL.where('stripeAccountId', payingStripeAccountId))
             .where('reference', reference)
             .where('method', PaymentMethod.AccountDeductions)
             .where('provider', PaymentProvider.Stripe)
@@ -176,10 +196,7 @@ export class ApplicationFeeService {
         payments = await Payment.select()
             .where('organizationId', organizationId)
             .where('payingOrganizationId', payingOrganizationId)
-            .where(
-                SQL.where('stripeAccountId', payingStripeAccountId)
-                    .or('stripeAccountId', null),
-            )
+            .where(SQL.where('stripeAccountId', payingStripeAccountId).or('stripeAccountId', null))
             .where('reference', reference)
             .where('method', PaymentMethod.AccountDeductions)
             .where('provider', PaymentProvider.Stripe)
@@ -215,14 +232,19 @@ export class ApplicationFeeService {
         }
 
         const problem = (reason: string) => {
-            const key = fee.payingStripeAccountId + ':' + SettlementService.getPeriodKey(periodStart);
+            const key =
+                fee.payingStripeAccountId + ':' + SettlementService.getPeriodKey(periodStart);
             if (this.reportedLegacyProblems.has(key)) {
                 return;
             }
             this.reportedLegacyProblems.add(key);
             console.error('Legacy fee linking failed for ' + key + ': ' + reason);
             WebmasterReport.report(
-                'Applicatiekosten van account ' + fee.payingStripeAccountId + ' voor ' + SettlementService.getPeriodKey(periodStart) + ' koppelen aan oude facturatie mislukt',
+                'Applicatiekosten van account ' +
+                    fee.payingStripeAccountId +
+                    ' voor ' +
+                    SettlementService.getPeriodKey(periodStart) +
+                    ' koppelen aan oude facturatie mislukt',
                 'Ze worden niet opnieuw aangerekend. ' + reason,
             );
         };
@@ -235,14 +257,19 @@ export class ApplicationFeeService {
         const payment = payments[0];
         const balanceItem = await this.findFeeBalanceItem(payment, fee.type);
         if (!balanceItem) {
-            problem('The legacy fee payment ' + payment.id + ' has no ' + fee.type + ' balance item');
+            problem(
+                'The legacy fee payment ' + payment.id + ' has no ' + fee.type + ' balance item',
+            );
             return;
         }
 
         await this.markInvoiced(fee, balanceItem.id, { payment });
     }
 
-    private static async findFeeBalanceItem(payment: Payment, type: ApplicationFeeType): Promise<BalanceItem | null> {
+    private static async findFeeBalanceItem(
+        payment: Payment,
+        type: ApplicationFeeType,
+    ): Promise<BalanceItem | null> {
         const balanceItemPayments = await BalanceItemPayment.select()
             .where('paymentId', payment.id)
             .fetch();
@@ -250,12 +277,24 @@ export class ApplicationFeeService {
             return null;
         }
         const balanceItems = await BalanceItem.select()
-            .where('id', balanceItemPayments.map(b => b.balanceItemId))
+            .where(
+                'id',
+                balanceItemPayments.map((b) => b.balanceItemId),
+            )
             .fetch();
-        const balanceItemType = type === ApplicationFeeType.Service ? BalanceItemType.ServiceFee : BalanceItemType.TransferFee;
+        const balanceItemType =
+            type === ApplicationFeeType.Service
+                ? BalanceItemType.ServiceFee
+                : BalanceItemType.TransferFee;
 
         // In legacy migrations, the type has been set to 'Other' - fallback to that (contains both service fees and transfer fees in one balance item)
-        return balanceItems.find(item => item.type === balanceItemType) ?? (balanceItems.length === 1 ? balanceItems.find(item => item.type === BalanceItemType.Other) : null) ?? null;
+        return (
+            balanceItems.find((item) => item.type === balanceItemType) ??
+            (balanceItems.length === 1
+                ? balanceItems.find((item) => item.type === BalanceItemType.Other)
+                : null) ??
+            null
+        );
     }
 
     /**
@@ -263,7 +302,10 @@ export class ApplicationFeeService {
      * the payer can link the cost in their settlement export to our invoice. No invoice (yet) means
      * no stamp: setProviderInvoiceIdsForSettlementCharges runs when the invoice is created later.
      */
-    private static async setProviderInvoiceIdForSettlementChargeOfApplicationFee(fee: ApplicationFee, { payment }: { payment?: Payment } = {}) {
+    private static async setProviderInvoiceIdForSettlementChargeOfApplicationFee(
+        fee: ApplicationFee,
+        { payment }: { payment?: Payment } = {},
+    ) {
         if (!fee.settlementChargeId) {
             return;
         }
@@ -278,7 +320,7 @@ export class ApplicationFeeService {
             if (!balanceItemPayment) {
                 return;
             }
-            payment = await Payment.getByID(balanceItemPayment.paymentId) ?? undefined;
+            payment = (await Payment.getByID(balanceItemPayment.paymentId)) ?? undefined;
         }
 
         if (!payment?.invoiceId) {
@@ -298,13 +340,19 @@ export class ApplicationFeeService {
      * null): stamps or clears the invoice number on the deduction charges of every application fee
      * the payments billed. A no-op for invoices without fee payments.
      */
-    static async setProviderInvoiceIdsForSettlementCharges(payments: Payment[], invoice: Invoice | null) {
+    static async setProviderInvoiceIdsForSettlementCharges(
+        payments: Payment[],
+        invoice: Invoice | null,
+    ) {
         if (payments.length === 0) {
             return;
         }
 
         const balanceItemPayments = await BalanceItemPayment.select()
-            .where('paymentId', payments.map(p => p.id))
+            .where(
+                'paymentId',
+                payments.map((p) => p.id),
+            )
             .fetch();
         if (balanceItemPayments.length === 0) {
             return;
@@ -314,12 +362,22 @@ export class ApplicationFeeService {
         // batches instead of one query pair per fee
         const settlementChargeIds: string[] = [];
         for await (const fees of ApplicationFee.select()
-            .where('balanceItemId', balanceItemPayments.map(b => b.balanceItemId))
+            .where(
+                'balanceItemId',
+                balanceItemPayments.map((b) => b.balanceItemId),
+            )
             .limit(FEE_BATCH_SIZE)
             .allBatched()) {
-            settlementChargeIds.push(...fees.map(fee => fee.settlementChargeId).filter((id): id is string => id !== null));
+            settlementChargeIds.push(
+                ...fees
+                    .map((fee) => fee.settlementChargeId)
+                    .filter((id): id is string => id !== null),
+            );
         }
 
-        await SettlementService.setChargeProviderInvoiceIds(settlementChargeIds, invoice?.number ?? null);
+        await SettlementService.setChargeProviderInvoiceIds(
+            settlementChargeIds,
+            invoice?.number ?? null,
+        );
     }
 }

@@ -26,7 +26,12 @@ export class Customer extends AutoEncoder {
     @field({ decoder: Address, nullable: true, version: 403 })
     address: Address | null = null;
 
-    @field({ decoder: new EnumDecoder(Gender), defaultValue: () => Gender.Other, isDefaultValue: v => v === Gender.Other, version: 403 })
+    @field({
+        decoder: new EnumDecoder(Gender),
+        defaultValue: () => Gender.Other,
+        isDefaultValue: (v) => v === Gender.Other,
+        version: 403,
+    })
     gender: Gender = Gender.Other;
 
     /**
@@ -71,7 +76,11 @@ export class Customer extends AutoEncoder {
 
         if (settings.phone === CustomerFieldRequirement.Disabled) {
             this.phone = '';
-        } else if (this.phone.length < 6 && !asAdmin && (settings.phone === CustomerFieldRequirement.Required || this.phone.length > 0)) {
+        } else if (
+            this.phone.length < 6 &&
+            !asAdmin &&
+            (settings.phone === CustomerFieldRequirement.Required || this.phone.length > 0)
+        ) {
             throw new SimpleError({
                 code: 'invalid_phone',
                 message: 'Invalid phone',
@@ -82,7 +91,11 @@ export class Customer extends AutoEncoder {
 
         if (settings.birthDay === CustomerFieldRequirement.Disabled) {
             this.birthDay = null;
-        } else if (!this.birthDay && !asAdmin && settings.birthDay === CustomerFieldRequirement.Required) {
+        } else if (
+            !this.birthDay &&
+            !asAdmin &&
+            settings.birthDay === CustomerFieldRequirement.Required
+        ) {
             throw new SimpleError({
                 code: 'invalid_birth_day',
                 message: 'Invalid birth day',
@@ -93,7 +106,11 @@ export class Customer extends AutoEncoder {
 
         if (settings.address === CustomerFieldRequirement.Disabled) {
             this.address = null;
-        } else if (!this.address && !asAdmin && settings.address === CustomerFieldRequirement.Required) {
+        } else if (
+            !this.address &&
+            !asAdmin &&
+            settings.address === CustomerFieldRequirement.Required
+        ) {
             throw new SimpleError({
                 code: 'invalid_address',
                 message: 'Invalid address',
@@ -109,7 +126,8 @@ export class Customer extends AutoEncoder {
         if (settings.email === CustomerFieldRequirement.Disabled) {
             this.email = '';
         } else if (settings.email === CustomerFieldRequirement.Required || this.email.length > 0) {
-            const regex = /^[\w.!#$%&'*+/=?^`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/i;
+            const regex =
+                /^[\w.!#$%&'*+/=?^`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/i;
 
             if (!regex.test(this.email)) {
                 throw new SimpleError({
@@ -127,12 +145,18 @@ export class Customer extends AutoEncoder {
      */
     hasValue(key: CustomerFieldKey): boolean {
         switch (key) {
-            case 'name': return this.firstName !== '' || this.lastName !== '';
-            case 'email': return this.email !== '';
-            case 'phone': return this.phone !== '';
-            case 'birthDay': return this.birthDay !== null;
-            case 'address': return this.address !== null;
-            case 'gender': return true;
+            case 'name':
+                return this.firstName !== '' || this.lastName !== '';
+            case 'email':
+                return this.email !== '';
+            case 'phone':
+                return this.phone !== '';
+            case 'birthDay':
+                return this.birthDay !== null;
+            case 'address':
+                return this.address !== null;
+            case 'gender':
+                return true;
         }
     }
 
@@ -172,7 +196,10 @@ export class Customer extends AutoEncoder {
         const birthDay = Formatter.luxon(this.birthDay);
         const today = Formatter.luxon(new Date());
         let age = today.year - birthDay.year;
-        if (today.month < birthDay.month || (today.month === birthDay.month && today.day < birthDay.day)) {
+        if (
+            today.month < birthDay.month ||
+            (today.month === birthDay.month && today.day < birthDay.day)
+        ) {
             age--;
         }
         return age;

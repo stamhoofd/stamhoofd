@@ -31,20 +31,33 @@ export function failure(message: string): void {
     else writeOutputLine(`${chalk.red('✖')} ${message}`, OutputStream.Stderr);
 }
 
-export async function step<T>(message: string, fn: (update: (message: string) => void) => Promise<T>, options: { successMessage?: (result: T) => string } = {}): Promise<T> {
+export async function step<T>(
+    message: string,
+    fn: (update: (message: string) => void) => Promise<T>,
+    options: { successMessage?: (result: T) => string } = {},
+): Promise<T> {
     if (!hasLogSink()) process.stderr.write(`${message}\n`);
-    return withSpan('cli.step', async () => {
-        const result = await fn((text) => { log('info', text, { 'operation.progress': true }); });
-        const completed = options.successMessage?.(result);
-        if (completed) {
-            if (hasLogSink()) log('info', completed);
-            else process.stderr.write(`${completed}\n`);
-        }
-        return result;
-    }, { label: message });
+    return withSpan(
+        'cli.step',
+        async () => {
+            const result = await fn((text) => {
+                log('info', text, { 'operation.progress': true });
+            });
+            const completed = options.successMessage?.(result);
+            if (completed) {
+                if (hasLogSink()) log('info', completed);
+                else process.stderr.write(`${completed}\n`);
+            }
+            return result;
+        },
+        { label: message },
+    );
 }
 
-export async function confirm(message: string, options: { default?: boolean } = {}): Promise<boolean> {
+export async function confirm(
+    message: string,
+    options: { default?: boolean } = {},
+): Promise<boolean> {
     return await confirmPrompt({ message, default: options.default ?? false });
 }
 
@@ -57,7 +70,8 @@ export function link(label: string, url: string): string {
 }
 
 export function openUrl(url: string): void {
-    const command = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'cmd' : 'xdg-open';
+    const command =
+        process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'cmd' : 'xdg-open';
     const args = process.platform === 'win32' ? ['/c', 'start', '', url] : [url];
     const child = spawn(command, args, { detached: true, stdio: 'ignore' });
     child.on('error', () => {
@@ -90,15 +104,17 @@ class TableRowImpl implements TableRow {
 
     update(cells: TableCellInput[]): void {
         this.cells = cells.map(normalizeCell);
-        this.listeners.forEach(listener => listener());
+        this.listeners.forEach((listener) => listener());
     }
 
     hasIndeterminateCells(): boolean {
-        return this.cells.some(cell => cell.indeterminate === true);
+        return this.cells.some((cell) => cell.indeterminate === true);
     }
 
     formattedCells(frame: number): string[] {
-        return this.cells.map(cell => cell.indeterminate ? spinnerCell(cell.value, frame) : cell.value);
+        return this.cells.map((cell) =>
+            cell.indeterminate ? spinnerCell(cell.value, frame) : cell.value,
+        );
     }
 
     onUpdate(listener: TableRowListener): void {
@@ -118,7 +134,13 @@ export class Table {
     private resolveWait: (() => void) | undefined;
     private waitPromise: Promise<void> | undefined;
 
-    private constructor(options: { title?: string; headers: string[]; rows: TableRow[]; live?: boolean; intervalMs?: number }) {
+    private constructor(options: {
+        title?: string;
+        headers: string[];
+        rows: TableRow[];
+        live?: boolean;
+        intervalMs?: number;
+    }) {
         this.headers = options.headers;
         this.rows = options.rows.map((row) => {
             if (!(row instanceof TableRowImpl)) {
@@ -129,7 +151,7 @@ export class Table {
         this.title = options.title;
         this.live = options.live === true && this.output.isTTY;
 
-        this.rows.forEach(row => row.onUpdate(() => this.handleRowUpdate()));
+        this.rows.forEach((row) => row.onUpdate(() => this.handleRowUpdate()));
 
         if (this.live) {
             this.render();
@@ -137,7 +159,10 @@ export class Table {
         }
     }
 
-    static cell<Value extends string>(value: Value, options: { indeterminate?: boolean } = {}): Cell<Value> {
+    static cell<Value extends string>(
+        value: Value,
+        options: { indeterminate?: boolean } = {},
+    ): Cell<Value> {
         return { value, ...options };
     }
 
@@ -145,7 +170,13 @@ export class Table {
         return new TableRowImpl(cells);
     }
 
-    static create(options: { title?: string; headers: string[]; rows: TableRow[]; live?: boolean; intervalMs?: number }): Table {
+    static create(options: {
+        title?: string;
+        headers: string[];
+        rows: TableRow[];
+        live?: boolean;
+        intervalMs?: number;
+    }): Table {
         return new Table(options);
     }
 
@@ -177,7 +208,7 @@ export class Table {
     }
 
     private hasIndeterminateCells(): boolean {
-        return this.rows.some(row => row.hasIndeterminateCells());
+        return this.rows.some((row) => row.hasIndeterminateCells());
     }
 
     private stop(): void {
@@ -201,7 +232,11 @@ export class Table {
             return;
         }
 
-        const output = formatTable(this.headers, this.rows.map(row => row.formattedCells(this.frame)), { title: this.title });
+        const output = formatTable(
+            this.headers,
+            this.rows.map((row) => row.formattedCells(this.frame)),
+            { title: this.title },
+        );
         if (!this.live) {
             writeOutputLine(output);
             return;
@@ -213,25 +248,47 @@ export class Table {
 }
 
 export function table(headers: string[], rows: string[][], options: { title?: string } = {}): void {
-    const table = Table.create({ headers, rows: rows.map(row => Table.row(row)), title: options.title, live: false });
+    const table = Table.create({
+        headers,
+        rows: rows.map((row) => Table.row(row)),
+        title: options.title,
+        live: false,
+    });
     void table.wait();
 }
 
-export function formatTable(headers: string[], rows: string[][], options: { title?: string } = {}): string {
-    const widths = constrainTableWidths(headers.map((header, index) => Math.max(visibleLength(header), ...rows.map(row => visibleLength(row[index] ?? '')))));
-    const formattedHeaders = headers.map((header, index) => chalk.bold(truncateVisible(header, widths[index])));
+export function formatTable(
+    headers: string[],
+    rows: string[][],
+    options: { title?: string } = {},
+): string {
+    const widths = constrainTableWidths(
+        headers.map((header, index) =>
+            Math.max(visibleLength(header), ...rows.map((row) => visibleLength(row[index] ?? ''))),
+        ),
+    );
+    const formattedHeaders = headers.map((header, index) =>
+        chalk.bold(truncateVisible(header, widths[index])),
+    );
     const lines = [
         formatTableBorder(widths, TableBorderPosition.Top),
         formatTableRow(formattedHeaders, widths),
         formatTableBorder(widths, TableBorderPosition.Middle),
     ];
     for (const row of rows) {
-        lines.push(formatTableRow(row.map((cell, index) => truncateVisible(cell, widths[index])), widths));
+        lines.push(
+            formatTableRow(
+                row.map((cell, index) => truncateVisible(cell, widths[index])),
+                widths,
+            ),
+        );
     }
     lines.push(formatTableBorder(widths, TableBorderPosition.Bottom));
 
     const terminalWidth = maxTerminalLineWidth();
-    return options.title ? `${chalk.bold(truncateVisible(options.title, terminalWidth))}\n${lines.join('\n')}` : lines.join('\n');
+    return options.title
+        ? `${chalk.bold(truncateVisible(options.title, terminalWidth))}\n${lines.join('\n')}`
+        : lines.join('\n');
 }
 
 export function spinnerCell(message: string, frame: number): string {
@@ -256,7 +313,7 @@ function constrainTableWidths(widths: number[]): number[] {
         return widths;
     }
 
-    const constrained = widths.map(width => Math.max(1, width));
+    const constrained = widths.map((width) => Math.max(1, width));
     while (tableVisibleWidth(constrained) > maxWidth) {
         let widestIndex = -1;
         let widest = 1;
@@ -277,7 +334,9 @@ function constrainTableWidths(widths: number[]): number[] {
 }
 
 function maxTerminalLineWidth(): number {
-    return process.stdout.columns ? Math.max(1, process.stdout.columns - 1) : Number.POSITIVE_INFINITY;
+    return process.stdout.columns
+        ? Math.max(1, process.stdout.columns - 1)
+        : Number.POSITIVE_INFINITY;
 }
 
 function tableVisibleWidth(widths: number[]): number {
@@ -301,12 +360,13 @@ enum TableBorderPosition {
 }
 
 function formatTableBorder(widths: number[], position: TableBorderPosition): string {
-    const [left, join, right] = position === TableBorderPosition.Top
-        ? ['┌', '┬', '┐']
-        : position === TableBorderPosition.Middle
-            ? ['├', '┼', '┤']
-            : ['└', '┴', '┘'];
-    return `${left}${widths.map(width => ''.padEnd(width + 2, '─')).join(join)}${right}`;
+    const [left, join, right] =
+        position === TableBorderPosition.Top
+            ? ['┌', '┬', '┐']
+            : position === TableBorderPosition.Middle
+              ? ['├', '┼', '┤']
+              : ['└', '┴', '┘'];
+    return `${left}${widths.map((width) => ''.padEnd(width + 2, '─')).join(join)}${right}`;
 }
 
 function ansiLength(value: string): number {

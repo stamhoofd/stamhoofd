@@ -3,10 +3,14 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 
 export function getPermissionLevelNumber(level: PermissionLevel): number {
     switch (level) {
-        case PermissionLevel.None: return 0;
-        case PermissionLevel.Read: return 1;
-        case PermissionLevel.Write: return 2;
-        case PermissionLevel.Full: return 3;
+        case PermissionLevel.None:
+            return 0;
+        case PermissionLevel.Read:
+            return 1;
+        case PermissionLevel.Write:
+            return 2;
+        case PermissionLevel.Full:
+            return 3;
         default: {
             const l: never = level; // will throw compile error if new levels are added without editing this method
             throw new Error('Unknown permission level ' + l);
@@ -34,26 +38,39 @@ export function minimumPermissionLevel(...levels: PermissionLevel[]): Permission
     return min;
 }
 
-export function getPermissionLevelName(level: PermissionLevel, resourceType: PermissionsResourceType | 'base' = 'base'): string {
+export function getPermissionLevelName(
+    level: PermissionLevel,
+    resourceType: PermissionsResourceType | 'base' = 'base',
+): string {
     if (resourceType === PermissionsResourceType.Senders) {
         switch (level) {
-            case PermissionLevel.Read: return $t('%1DG');
-            case PermissionLevel.Write: return $t('%1DH');
+            case PermissionLevel.Read:
+                return $t('%1DG');
+            case PermissionLevel.Write:
+                return $t('%1DH');
         }
     }
     if (resourceType === 'base') {
         switch (level) {
-            case PermissionLevel.None: return $t('%1FW');
-            case PermissionLevel.Read: return $t('%1eW');
-            case PermissionLevel.Write: return $t('%1eL');
-            case PermissionLevel.Full: return $t('%Z1');
+            case PermissionLevel.None:
+                return $t('%1FW');
+            case PermissionLevel.Read:
+                return $t('%1eW');
+            case PermissionLevel.Write:
+                return $t('%1eL');
+            case PermissionLevel.Full:
+                return $t('%Z1');
         }
     }
     switch (level) {
-        case PermissionLevel.None: return $t('%n0');
-        case PermissionLevel.Read: return $t('%jO');
-        case PermissionLevel.Write: return $t('%f9');
-        case PermissionLevel.Full: return $t('%Z1');
+        case PermissionLevel.None:
+            return $t('%n0');
+        case PermissionLevel.Read:
+            return $t('%jO');
+        case PermissionLevel.Write:
+            return $t('%f9');
+        case PermissionLevel.Full:
+            return $t('%Z1');
         default: {
             const l: never = level; // will throw compile error if new levels are added without editing this method
             throw new Error('Unknown permission level ' + l);

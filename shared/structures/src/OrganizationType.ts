@@ -42,7 +42,7 @@ export enum OrganizationType {
 export class OrganizationTypeHelper {
     static getName(type: OrganizationType) {
         const l = this.getList();
-        return l.find(v => v.value === type)?.name ?? type.toString();
+        return l.find((v) => v.value === type)?.name ?? type.toString();
     }
 
     static getList() {
@@ -244,7 +244,10 @@ export class OrganizationTypeHelper {
      * @param type
      * @param umbrella
      */
-    static getDefaultGroupCategoriesWithoutActivities(type: OrganizationType, umbrella?: UmbrellaOrganization): GroupCategory[] {
+    static getDefaultGroupCategoriesWithoutActivities(
+        type: OrganizationType,
+        umbrella?: UmbrellaOrganization,
+    ): GroupCategory[] {
         if (type === OrganizationType.Youth) {
             if (umbrella === UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
                 return [
@@ -317,7 +320,10 @@ export class OrganizationTypeHelper {
      * @param type
      * @param umbrella
      */
-    static getDefaultGroupCategories(type: OrganizationType, umbrella?: UmbrellaOrganization): GroupCategory[] {
+    static getDefaultGroupCategories(
+        type: OrganizationType,
+        umbrella?: UmbrellaOrganization,
+    ): GroupCategory[] {
         if (type === OrganizationType.Youth) {
             if (umbrella === UmbrellaOrganization.ScoutsEnGidsenVlaanderen) {
                 const activities = [
@@ -344,7 +350,7 @@ export class OrganizationTypeHelper {
                         settings: GroupCategorySettings.create({
                             name: $t('%uB'),
                         }),
-                        categoryIds: activities.map(c => c.id),
+                        categoryIds: activities.map((c) => c.id),
                     }),
                     ...activities,
                 ];
@@ -375,7 +381,7 @@ export class OrganizationTypeHelper {
                         settings: GroupCategorySettings.create({
                             name: $t('%uB'),
                         }),
-                        categoryIds: activities.map(c => c.id),
+                        categoryIds: activities.map((c) => c.id),
                     }),
                     ...activities,
                 ];
@@ -406,7 +412,7 @@ export class OrganizationTypeHelper {
                     settings: GroupCategorySettings.create({
                         name: $t('%uB'),
                     }),
-                    categoryIds: activities.map(c => c.id),
+                    categoryIds: activities.map((c) => c.id),
                 }),
                 ...activities,
             ];

@@ -8,11 +8,17 @@ afterEach(() => vi.unstubAllEnvs());
 
 it('counts retry outcomes once and preserves flaky, expected-failure and interrupted results', async () => {
     const events: TestProgress[] = [];
-    const channel = await openTestEventChannel(event => events.push(event));
+    const channel = await openTestEventChannel((event) => events.push(event));
     vi.stubEnv('STAM_TEST_SOCKET', channel.env.STAM_TEST_SOCKET);
     vi.stubEnv('STAM_TEST_SESSION', channel.env.STAM_TEST_SESSION);
     const reporter = new ProgressReporter();
-    const retry = { id: 'retry', expectedStatus: 'passed', retries: 1, results: [{}], outcome: () => 'flaky' };
+    const retry = {
+        id: 'retry',
+        expectedStatus: 'passed',
+        retries: 1,
+        results: [{}],
+        outcome: () => 'flaky',
+    };
     const tests = [
         retry,
         { id: 'expected failure', results: [{}], outcome: () => 'expected' },
@@ -25,7 +31,15 @@ it('counts retry outcomes once and preserves flaky, expected-failure and interru
         expect(events).toHaveLength(0);
         reporter.onTestEnd(retry as never, { status: 'passed', retry: 1 } as never);
         await reporter.onEnd();
-        expect(events.at(-1)).toMatchObject({ passed: 1, flaky: 1, skipped: 1, pending: 1, completed: 3, total: 4, finished: true });
+        expect(events.at(-1)).toMatchObject({
+            passed: 1,
+            flaky: 1,
+            skipped: 1,
+            pending: 1,
+            completed: 3,
+            total: 4,
+            finished: true,
+        });
     } finally {
         await channel.close();
     }

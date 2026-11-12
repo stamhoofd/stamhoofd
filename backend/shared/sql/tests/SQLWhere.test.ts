@@ -22,7 +22,9 @@ describe('SQLWhere', () => {
         });
 
         it('a select with an empty IN array inside an OR compiles', () => {
-            const select = SQL.select().from('balance_items').where(SQL.where('memberId', []).or('userId', 'abc'));
+            const select = SQL.select()
+                .from('balance_items')
+                .where(SQL.where('memberId', []).or('userId', 'abc'));
             expect(select.getSQL()).toEqual({
                 query: 'SELECT `balance_items`.* FROM `balance_items` WHERE `balance_items`.`userId` = ?',
                 params: ['abc'],

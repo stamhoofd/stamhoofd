@@ -54,15 +54,17 @@ function transformInline(text: string): string {
     // Split on backtick spans; odd indices are code spans and must not be rewritten.
     return text
         .split(/(`[^`]*`)/g)
-        .map((part, index) => index % 2 === 1 ? part : transformInlineOutsideCode(part))
+        .map((part, index) => (index % 2 === 1 ? part : transformInlineOutsideCode(part)))
         .join('');
 }
 
 function transformInlineOutsideCode(text: string): string {
-    return text
-        // [label](url) -> <url|label>
-        .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<$2|$1>')
-        // **bold** / __bold__ -> *bold*
-        .replace(/\*\*([^*]+)\*\*/g, '*$1*')
-        .replace(/__([^_]+)__/g, '*$1*');
+    return (
+        text
+            // [label](url) -> <url|label>
+            .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<$2|$1>')
+            // **bold** / __bold__ -> *bold*
+            .replace(/\*\*([^*]+)\*\*/g, '*$1*')
+            .replace(/__([^_]+)__/g, '*$1*')
+    );
 }

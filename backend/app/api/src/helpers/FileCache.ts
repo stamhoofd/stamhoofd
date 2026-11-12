@@ -55,7 +55,10 @@ export class FileCache {
         };
     }
 
-    static async read(file: string, dayTimeout = 1): Promise<{ stream: Readable; contentLength: number; extension: string }> {
+    static async read(
+        file: string,
+        dayTimeout = 1,
+    ): Promise<{ stream: Readable; contentLength: number; extension: string }> {
         const splitted = file.split('/');
         if (splitted.length !== 2) {
             throw new SimpleError({
@@ -116,11 +119,14 @@ export class FileCache {
             });
         }
 
-        const date = Formatter.luxon().set({
-            day,
-            month,
-            year,
-        }).startOf('day').toJSDate();
+        const date = Formatter.luxon()
+            .set({
+                day,
+                month,
+                year,
+            })
+            .startOf('day')
+            .toJSDate();
 
         const now = Formatter.luxon().startOf('day').toJSDate();
 

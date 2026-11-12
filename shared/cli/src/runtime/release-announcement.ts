@@ -66,8 +66,11 @@ export function chunkReleaseNotes(body: string, maxLength: number = MAX_REPLY_LE
  * Posts a short root announcement for a published release, then the full release notes as threaded
  * replies. Returns the root message `ts` and how many reply messages were posted.
  */
-export async function announceRelease(config: SlackConfig, options: AnnounceReleaseOptions): Promise<{ rootTs: string; replyCount: number }> {
-    const post = options.post ?? (message => postSlackMessage(config, message));
+export async function announceRelease(
+    config: SlackConfig,
+    options: AnnounceReleaseOptions,
+): Promise<{ rootTs: string; replyCount: number }> {
+    const post = options.post ?? ((message) => postSlackMessage(config, message));
 
     const rootTs = await post({ text: buildReleaseRootMessage(options.tag, options.releaseUrl) });
 

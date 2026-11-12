@@ -53,21 +53,34 @@ export class BuckarooHelper {
     async request(method: 'GET' | 'POST', uri: string, content: any) {
         const json = content ? JSON.stringify(content) : '';
         // Finally, if you want to perform live transactions, sent the API requests to https://checkout.buckaroo.nl/json/Transaction
-        const url = (!this.testMode ? 'https://checkout.buckaroo.nl' : 'https://testcheckout.buckaroo.nl') + uri;
+        const url =
+            (!this.testMode ? 'https://checkout.buckaroo.nl' : 'https://testcheckout.buckaroo.nl') +
+            uri;
 
-        console.log('[BUCKAROO REQUEST]', method, url, content ? '\n [BUCKAROO REQUEST] ' : undefined, json);
+        console.log(
+            '[BUCKAROO REQUEST]',
+            method,
+            url,
+            content ? '\n [BUCKAROO REQUEST] ' : undefined,
+            json,
+        );
 
         const response = await axios.request({
             method,
             url,
             headers: {
                 'Content-Type': json.length > 0 ? 'application/json' : 'text/plain',
-                'Authorization': this.calculateHMAC(method, url, json),
+                Authorization: this.calculateHMAC(method, url, json),
             },
             data: json,
-
         });
-        console.log('[BUCKAROO RESPONSE]', method, url, '\n[BUCKAROO RESPONSE]', JSON.stringify(response.data));
+        console.log(
+            '[BUCKAROO RESPONSE]',
+            method,
+            url,
+            '\n[BUCKAROO RESPONSE]',
+            JSON.stringify(response.data),
+        );
         return response.data;
     }
 
@@ -85,16 +98,15 @@ export class BuckarooHelper {
         const data = {
             Currency: 'EUR',
             AmountDebit: '0.01',
-            // eslint-disable-next-line node-security/no-math-random-crypto -- A test invoice label, not a credential or the signed request nonce.
-            Invoice: 'TESTPAYMENT-' + (new Date().getTime()) + '-' + Math.round(Math.random() * 100000),
+            Invoice:
+                // eslint-disable-next-line node-security/no-math-random-crypto -- A test invoice label, not a credential or the signed request nonce.
+                'TESTPAYMENT-' + new Date().getTime() + '-' + Math.round(Math.random() * 100000),
             ClientIP: {
                 Type: 0, // 0 = ipv4, 1 = ipv6
                 Address: '0.0.0.0',
             },
             Services: {
-                ServiceList: [
-                    service,
-                ],
+                ServiceList: [service],
             },
             ContinueOnIncomplete: '1', // iDEAL
             Description: 'Test payment',
@@ -115,14 +127,24 @@ export class BuckarooHelper {
             }
             const status = this.getStatusFromResponse(response);
 
-            return status === PaymentStatus.Pending || status === PaymentStatus.Created || status === PaymentStatus.Succeeded;
+            return (
+                status === PaymentStatus.Pending ||
+                status === PaymentStatus.Created ||
+                status === PaymentStatus.Succeeded
+            );
         } catch (e) {
             console.error(e);
         }
         return false;
     }
 
-    async createPayment(payment: Payment, ip: string, description: string, returnUrl: string, exchangeUrl: string): Promise<string | null> {
+    async createPayment(
+        payment: Payment,
+        ip: string,
+        description: string,
+        returnUrl: string,
+        exchangeUrl: string,
+    ): Promise<string | null> {
         let service: any;
 
         switch (payment.method) {
@@ -174,9 +196,7 @@ export class BuckarooHelper {
                 Address: ip,
             },
             Services: {
-                ServiceList: [
-                    service,
-                ],
+                ServiceList: [service],
             },
             ContinueOnIncomplete: '1', // iDEAL
             Description: description,
@@ -243,24 +263,33 @@ export class BuckarooHelper {
      * Get the status of a payment
      */
     async getStatus(payment: Payment) {
-        const buckarooPayments = await BuckarooPayment.where({ paymentId: payment.id }, { limit: 1 });
+        const buckarooPayments = await BuckarooPayment.where(
+            { paymentId: payment.id },
+            { limit: 1 },
+        );
         if (buckarooPayments.length !== 1) {
             throw new Error('Failed to find Buckaroo payment for payment ' + payment.id);
         }
         const buckarooPayment = buckarooPayments[0];
 
         // Send request
-        const response = await this.request('GET', '/json/transaction/status/' + buckarooPayment.transactionKey, undefined);
+        const response = await this.request(
+            'GET',
+            '/json/transaction/status/' + buckarooPayment.transactionKey,
+            undefined,
+        );
         const parameters = response['Services']?.[0]?.['Parameters'];
 
         if (parameters && Array.isArray(parameters)) {
-            const iban = parameters.find(p => p.Name.toLowerCase() === 'customeriban')?.Value;
+            const iban = parameters.find((p) => p.Name.toLowerCase() === 'customeriban')?.Value;
 
             if (iban) {
                 payment.iban = iban;
             }
 
-            const name = parameters.find(p => p.Name.toLowerCase() === 'customeraccountname')?.Value;
+            const name = parameters.find(
+                (p) => p.Name.toLowerCase() === 'customeraccountname',
+            )?.Value;
 
             if (name) {
                 payment.ibanName = name;

@@ -1,5 +1,11 @@
 import { Webshop, WebshopFactory } from '@stamhoofd/models';
-import { Option, OptionMenu, Product, WebshopMetaData, WebshopOrderMode } from '@stamhoofd/structures';
+import {
+    Option,
+    OptionMenu,
+    Product,
+    WebshopMetaData,
+    WebshopOrderMode,
+} from '@stamhoofd/structures';
 import { upgradeWebshopOrderModes } from './1793027516-webshop-order-modes.js';
 
 // Not unique: a choice keeps a webshop with only this product on a cart
@@ -7,7 +13,12 @@ function productWithChoice(name: string, allowMultiple: boolean | null) {
     return Product.create({
         name,
         allowMultiple,
-        optionMenus: [OptionMenu.create({ name: 'Maaltijd', options: [Option.create({ name: 'Vlees' }), Option.create({ name: 'Vegetarisch' })] })],
+        optionMenus: [
+            OptionMenu.create({
+                name: 'Maaltijd',
+                options: [Option.create({ name: 'Vlees' }), Option.create({ name: 'Vegetarisch' })],
+            }),
+        ],
     });
 }
 
@@ -24,7 +35,9 @@ async function reload(webshop: Webshop) {
 
 describe('Seed.webshop-order-modes', () => {
     test('A cart with a single unique product orders one at a time, like it did automatically', async () => {
-        const webshop = await createWebshop(WebshopOrderMode.Cart, [Product.create({ name: 'Inkom', allowMultiple: true })]);
+        const webshop = await createWebshop(WebshopOrderMode.Cart, [
+            Product.create({ name: 'Inkom', allowMultiple: true }),
+        ]);
 
         await upgradeWebshopOrderModes();
 
@@ -52,12 +65,16 @@ describe('Seed.webshop-order-modes', () => {
 
         await upgradeWebshopOrderModes();
 
-        expect((await reload(single)).products.map(p => p.allowMultiple)).toEqual([true, null, null]);
+        expect((await reload(single)).products.map((p) => p.allowMultiple)).toEqual([
+            true,
+            null,
+            null,
+        ]);
 
         const upgradedCart = await reload(cart);
         expect(upgradedCart.meta.orderMode).toBe(WebshopOrderMode.Cart);
-        expect(upgradedCart.products.map(p => p.allowMultiple)).toEqual([null, false, null]);
+        expect(upgradedCart.products.map((p) => p.allowMultiple)).toEqual([null, false, null]);
 
-        expect((await reload(bulk)).products.map(p => p.allowMultiple)).toEqual([null, false]);
+        expect((await reload(bulk)).products.map((p) => p.allowMultiple)).toEqual([null, false]);
     });
 });

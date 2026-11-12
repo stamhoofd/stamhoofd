@@ -68,7 +68,7 @@ export class SMSService {
             response = await fetch(GATEWAY_API_URL, {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Token ' + token,
+                    Authorization: 'Token ' + token,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -83,7 +83,9 @@ export class SMSService {
         } catch (error) {
             throw new SimpleError({
                 code: 'sms_unreachable',
-                message: 'Network issue when sending SMS: ' + (error instanceof Error ? error.message : String(error)),
+                message:
+                    'Network issue when sending SMS: ' +
+                    (error instanceof Error ? error.message : String(error)),
                 human: $t('%Zb8'),
             });
         }

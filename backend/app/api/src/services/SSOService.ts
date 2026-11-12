@@ -3,7 +3,14 @@ import { Response } from '@node/endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { Organization, Platform, Token, User, Webshop } from '@stamhoofd/models';
 import type { LoginMethod, SessionMetaData, StartOpenIDFlowStruct } from '@stamhoofd/structures';
-import { getAppHost, LoginProviderType, OpenIDClientConfiguration, SessionClientType, SessionLoginMethod, Token as TokenStruct } from '@stamhoofd/structures';
+import {
+    getAppHost,
+    LoginProviderType,
+    OpenIDClientConfiguration,
+    SessionClientType,
+    SessionLoginMethod,
+    Token as TokenStruct,
+} from '@stamhoofd/structures';
 import crypto from 'crypto';
 import { generators, Issuer } from 'openid-client';
 import { Context } from '../helpers/Context.js';
@@ -73,7 +80,11 @@ export class SSOService {
      */
     static authTokens = new Map<string, SSOAuthToken>();
 
-    constructor(data: { provider: LoginProviderType; platform: Platform; organization?: Organization | null }) {
+    constructor(data: {
+        provider: LoginProviderType;
+        platform: Platform;
+        organization?: Organization | null;
+    }) {
         this.provider = data.provider;
         this.platform = data.platform;
         this.organization = data.organization ?? null;
@@ -170,16 +181,22 @@ export class SSOService {
 
         if (this.provider === LoginProviderType.SSO) {
             if (this.organization) {
-                configuration = this.organization.serverMeta.ssoConfiguration ?? OpenIDClientConfiguration.create({});
+                configuration =
+                    this.organization.serverMeta.ssoConfiguration ??
+                    OpenIDClientConfiguration.create({});
             } else {
-                configuration = this.platform.serverConfig.ssoConfiguration ?? OpenIDClientConfiguration.create({});
+                configuration =
+                    this.platform.serverConfig.ssoConfiguration ??
+                    OpenIDClientConfiguration.create({});
             }
         } else if (this.provider === LoginProviderType.Google) {
             if (this.organization) {
                 // Not supported yet
                 configuration = null;
             } else {
-                configuration = this.platform.serverConfig.googleConfiguration ?? OpenIDClientConfiguration.create({});
+                configuration =
+                    this.platform.serverConfig.googleConfiguration ??
+                    OpenIDClientConfiguration.create({});
             }
         }
 
@@ -349,7 +366,8 @@ export class SSOService {
                     statusCode: 400,
                 });
             }
-            redirectUri = 'https://' + webshop.setRelation(Webshop.organization, this.organization).getHost();
+            redirectUri =
+                'https://' + webshop.setRelation(Webshop.organization, this.organization).getHost();
         }
 
         if (data.redirectUri) {
@@ -428,7 +446,15 @@ export class SSOService {
         } else if (data.clientPlatform === 'android') {
             clientType = SessionClientType.Android;
         }
-        return await this.startAuthCodeFlow(redirectUri, data.spaState, data.prompt, user, reauthenticateAccessToken, clientType, SessionService.parseMetaData(data.sessionMetaData));
+        return await this.startAuthCodeFlow(
+            redirectUri,
+            data.spaState,
+            data.prompt,
+            user,
+            reauthenticateAccessToken,
+            clientType,
+            SessionService.parseMetaData(data.sessionMetaData),
+        );
     }
 
     validateRedirectUri(uri: string) {
@@ -463,7 +489,15 @@ export class SSOService {
         }
     }
 
-    async startAuthCodeFlow(redirectUri: string, spaState: string, prompt: string | null = null, user?: User, reauthenticateAccessToken: string | null = null, clientType = SessionClientType.Browser, sessionMetaData = SessionService.parseMetaData(null)): Promise<Response<undefined>> {
+    async startAuthCodeFlow(
+        redirectUri: string,
+        spaState: string,
+        prompt: string | null = null,
+        user?: User,
+        reauthenticateAccessToken: string | null = null,
+        clientType = SessionClientType.Browser,
+        sessionMetaData = SessionService.parseMetaData(null),
+    ): Promise<Response<undefined>> {
         const code_verifier = generators.codeVerifier();
         const state = generators.state(); // this is the internal state backend <-> SSO provider
         const nonce = generators.nonce();
@@ -510,7 +544,10 @@ export class SSOService {
                 login_hint: user?.email ?? undefined,
                 redirect_uri: this.externalRedirectUri,
                 max_age: prompt === 'login' ? 0 : undefined, // required to get auth_time in the response
-                claims: prompt === 'login' ? { id_token: { auth_time: { essential: true } } } : undefined,
+                claims:
+                    prompt === 'login'
+                        ? { id_token: { auth_time: { essential: true } } }
+                        : undefined,
                 // Google has this instead of the offline_access scope
                 access_type: this.provider === LoginProviderType.Google ? 'offline' : undefined,
             });
@@ -520,7 +557,7 @@ export class SSOService {
 
             return response;
         } catch (e) {
-            const message = (isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t('%G0'));
+            const message = isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t('%G0');
             console.error('Error in openID callback', e);
             return SSOServiceWithSession.getErrorRedirectResponse(session, message);
         }
@@ -532,13 +569,19 @@ export class SSOServiceWithSession {
     service: SSOService;
     request: DecodedRequest<any, any, any>;
 
-    constructor(session: SSOSessionContext, service: SSOService, request: DecodedRequest<any, any, any>) {
+    constructor(
+        session: SSOSessionContext,
+        service: SSOService,
+        request: DecodedRequest<any, any, any>,
+    ) {
         this.session = session;
         this.service = service;
         this.request = request;
     }
 
-    static async fromSession(request: DecodedRequest<any, any, any>): Promise<SSOServiceWithSession> {
+    static async fromSession(
+        request: DecodedRequest<any, any, any>,
+    ): Promise<SSOServiceWithSession> {
         const session = SSOService.getSession(request);
 
         if (!session) {
@@ -546,7 +589,9 @@ export class SSOServiceWithSession {
         }
 
         const platform = await Platform.getForEditing();
-        const organization = session.organizationId ? await Organization.getByID(session.organizationId) : null;
+        const organization = session.organizationId
+            ? await Organization.getByID(session.organizationId)
+            : null;
         if (session.organizationId && !organization) {
             throw new Error('Missing organization');
         }
@@ -568,11 +613,15 @@ export class SSOServiceWithSession {
             const response = new Response(undefined);
             const client = await this.service.getClient();
 
-            const tokenSet = await client.callback(this.service.externalRedirectUri, this.request.body as Record<string, unknown>, {
-                code_verifier: session.code_verifier,
-                state: session.state,
-                nonce: session.nonce,
-            });
+            const tokenSet = await client.callback(
+                this.service.externalRedirectUri,
+                this.request.body as Record<string, unknown>,
+                {
+                    code_verifier: session.code_verifier,
+                    state: session.state,
+                    nonce: session.nonce,
+                },
+            );
 
             console.log('received and validated tokens %j', tokenSet);
 
@@ -632,7 +681,10 @@ export class SSOServiceWithSession {
 
             if (this.session.userId) {
                 if (!claims.auth_time || claims.auth_time * 1000 < Date.now() - 1000 * 60 * 5) {
-                    if (STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'test') {
+                    if (
+                        STAMHOOFD.environment === 'development' ||
+                        STAMHOOFD.environment === 'test'
+                    ) {
                         // Dex does not support this (yet)
                     } else {
                         throw new SimpleError({
@@ -646,7 +698,10 @@ export class SSOServiceWithSession {
             }
 
             // Get user from database
-            let user = await User.getForRegister(this.service.organization?.id ?? null, claims.email);
+            let user = await User.getForRegister(
+                this.service.organization?.id ?? null,
+                claims.email,
+            );
             // Password authentication may fall back to a global account. An organization's
             // identity provider only has authority over accounts owned by that organization.
             if (user && user.organizationId !== (this.service.organization?.id ?? null)) {
@@ -661,7 +716,8 @@ export class SSOServiceWithSession {
                 if (this.session.userId) {
                     throw new SimpleError({
                         code: 'invalid_user',
-                        message: 'User not found: please log in with the same email address as the user you are trying to link',
+                        message:
+                            'User not found: please log in with the same email address as the user you are trying to link',
                         human: $t('%G1'),
                         statusCode: 404,
                     });
@@ -717,7 +773,11 @@ export class SSOServiceWithSession {
                 //
                 // This is a redirect, not a request/response pair, so the client gets the
                 // token of the pending step in the URL and picks the flow up from there.
-                const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, this.service.organization, { loginMethod: SessionLoginMethod.SSO });
+                const requirement = await TwoFactorHelper.getSecondFactorRequirement(
+                    user,
+                    this.service.organization,
+                    { loginMethod: SessionLoginMethod.SSO },
+                );
 
                 if (requirement.type === 'challenge') {
                     redirectUri.searchParams.set('oid_mfa', requirement.challenge.token);
@@ -726,10 +786,16 @@ export class SSOServiceWithSession {
                     redirectUri.searchParams.set('oid_mfa_setup', requirement.setupToken.token);
                     // Which methods to offer. Only a hint for the enrollment screen: the
                     // enrollment endpoints check this themselves.
-                    redirectUri.searchParams.set('oid_mfa_passkeys', user.canUsePasskeys() ? '1' : '0');
+                    redirectUri.searchParams.set(
+                        'oid_mfa_passkeys',
+                        user.canUsePasskeys() ? '1' : '0',
+                    );
                     redirectUri.searchParams.set('s', session.spaState);
                 } else if (requirement.type === 'none') {
-                    const token = await SessionService.createSSOHandoff(user, { clientType: session.clientType, metaData: session.sessionMetaData ?? SessionService.parseMetaData(null) });
+                    const token = await SessionService.createSSOHandoff(user, {
+                        clientType: session.clientType,
+                        metaData: session.sessionMetaData ?? SessionService.parseMetaData(null),
+                    });
 
                     if (!token) {
                         throw new SimpleError({
@@ -755,7 +821,9 @@ export class SSOServiceWithSession {
                 } else {
                     // Compile error when a requirement is added without handling it here.
                     const unsupported: never = requirement;
-                    throw new Error('Unsupported second factor requirement: ' + JSON.stringify(unsupported));
+                    throw new Error(
+                        'Unsupported second factor requirement: ' + JSON.stringify(unsupported),
+                    );
                 }
             } else if (this.session.reauthenticateAccessToken) {
                 // The provider confirmed the identity of the user that is already signed in,
@@ -789,7 +857,7 @@ export class SSOServiceWithSession {
 
             return response;
         } catch (e) {
-            const message = (isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t('%G0'));
+            const message = isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t('%G0');
             console.error('Error in openID callback', e);
             return SSOServiceWithSession.getErrorRedirectResponse(session, message);
         }

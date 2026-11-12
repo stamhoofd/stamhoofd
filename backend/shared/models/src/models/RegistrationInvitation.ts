@@ -11,7 +11,9 @@ export class RegistrationInvitation extends QueryableModel {
     static table = 'registration_invitations';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -27,7 +29,8 @@ export class RegistrationInvitation extends QueryableModel {
     organizationId: string;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }

@@ -2,7 +2,10 @@ import { Country } from '@stamhoofd/types/Country';
 import { DataValidator } from '@stamhoofd/utility';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 
-export type ParsePhoneNumber = (search: string, country: Country.Belgium) => { isValid: () => boolean; formatInternational: () => string };
+export type ParsePhoneNumber = (
+    search: string,
+    country: Country.Belgium,
+) => { isValid: () => boolean; formatInternational: () => string };
 
 export class SearchFilterFactory {
     static getIntegerFilter(search: string): StamhoofdFilter | null {
@@ -21,14 +24,17 @@ export class SearchFilterFactory {
         if (search.includes('@')) {
             const isCompleteAddress = DataValidator.isEmailValid(search);
             return {
-                [(isCompleteAddress ? '$eq' : '$contains')]: search,
+                [isCompleteAddress ? '$eq' : '$contains']: search,
             };
         }
 
         return null;
     }
 
-    static getPhoneFilter(search: string, parsePhoneNumber: ParsePhoneNumber): StamhoofdFilter | null {
+    static getPhoneFilter(
+        search: string,
+        parsePhoneNumber: ParsePhoneNumber,
+    ): StamhoofdFilter | null {
         if (search.match(/^\+?[0-9\s-]+$/)) {
             try {
                 // todo: how to determine country?

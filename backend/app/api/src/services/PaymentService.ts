@@ -1,15 +1,49 @@
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import type { Member, User } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, Group, MolliePayment, Organization, PayconiqPayment, Payment, Platform, UsedRegisterCode } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemPayment,
+    Group,
+    MolliePayment,
+    Organization,
+    PayconiqPayment,
+    Payment,
+    Platform,
+    UsedRegisterCode,
+} from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { Checkoutable, PaymentConfiguration, PrivatePaymentConfiguration } from '@stamhoofd/structures';
-import { AuditLogSource, BalanceItemPaymentDetailed, BalanceItemType, EmailTemplateType, Invoice, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, PaymentType, Recipient, Replacement, VATExcemptReason, Version } from '@stamhoofd/structures';
+import type {
+    Checkoutable,
+    PaymentConfiguration,
+    PrivatePaymentConfiguration,
+} from '@stamhoofd/structures';
+import {
+    AuditLogSource,
+    BalanceItemPaymentDetailed,
+    BalanceItemType,
+    EmailTemplateType,
+    Invoice,
+    PaymentCustomer,
+    PaymentGeneral,
+    PaymentMethod,
+    PaymentMethodHelper,
+    PaymentProvider,
+    PaymentStatus,
+    PaymentType,
+    Recipient,
+    Replacement,
+    VATExcemptReason,
+    Version,
+} from '@stamhoofd/structures';
 import type { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { PaymentMandateStatus, PaymentMandateType } from '@stamhoofd/structures/PaymentMandate.js';
 import { Formatter, STMath } from '@stamhoofd/utility';
-import { buildReplacementOptions, getEmailReplacementsForPayment } from '../email-replacements/getEmailReplacementsForPayment.js';
+import {
+    buildReplacementOptions,
+    getEmailReplacementsForPayment,
+} from '../email-replacements/getEmailReplacementsForPayment.js';
 import { BuckarooHelper } from '../helpers/BuckarooHelper.js';
 import { Context } from '../helpers/Context.js';
 import { ServiceFeeHelper } from '../helpers/ServiceFeeHelper.js';
@@ -36,7 +70,12 @@ export class PaymentService {
         }
     }
 
-    static async handlePaymentStatusUpdate(payment: Payment, organization: Organization, status: PaymentStatus, paidAt?: Date) {
+    static async handlePaymentStatusUpdate(
+        payment: Payment,
+        organization: Organization,
+        status: PaymentStatus,
+        paidAt?: Date,
+    ) {
         if (payment.status === status) {
             return;
         }
@@ -44,195 +83,282 @@ export class PaymentService {
         if (status === PaymentStatus.Failed && payment.invoiceId) {
             throw new SimpleError({
                 code: 'cannot_fail',
-                message: 'A payment that has been invoiced cannot be marked as failed. Instead create a separate chargeback payment with a negative amount.',
+                message:
+                    'A payment that has been invoiced cannot be marked as failed. Instead create a separate chargeback payment with a negative amount.',
                 human: $t('%1RI'),
             });
         }
 
         if (organization.id !== payment.organizationId) {
-            throw new Error('Unexpected organization, expected ' + payment.organizationId + ', received ' + organization.id);
+            throw new Error(
+                'Unexpected organization, expected ' +
+                    payment.organizationId +
+                    ', received ' +
+                    organization.id,
+            );
         }
 
-        await AuditLogService.setContext({ fallbackUserId: payment.payingUserId, source: AuditLogSource.Payment, fallbackOrganizationId: payment.organizationId }, async () => {
-            if (status === PaymentStatus.Succeeded) {
-                console.log('Marking as succeeded', payment.id);
-                payment.status = PaymentStatus.Succeeded;
-                payment.paidAt = paidAt ?? new Date();
+        await AuditLogService.setContext(
+            {
+                fallbackUserId: payment.payingUserId,
+                source: AuditLogSource.Payment,
+                fallbackOrganizationId: payment.organizationId,
+            },
+            async () => {
+                if (status === PaymentStatus.Succeeded) {
+                    console.log('Marking as succeeded', payment.id);
+                    payment.status = PaymentStatus.Succeeded;
+                    payment.paidAt = paidAt ?? new Date();
+                    await payment.save();
+
+                    // Prevent concurrency issues
+                    await QueueHandler.schedule(
+                        'balance-item-update/' + organization.id,
+                        async () => {
+                            const unloaded = (
+                                await BalanceItemPayment.where({ paymentId: payment.id })
+                            ).map((r) => r.setRelation(BalanceItemPayment.payment, payment));
+                            const balanceItemPayments =
+                                await BalanceItemPayment.balanceItem.load(unloaded);
+
+                            for (const balanceItemPayment of balanceItemPayments) {
+                                await BalanceItemPaymentService.markPaid(
+                                    balanceItemPayment,
+                                    organization,
+                                );
+                            }
+
+                            await BalanceItemService.updatePaidAndPending(
+                                balanceItemPayments.map((p) => p.balanceItem),
+                            );
+
+                            // Make sure clients refetch the orders these balance items belong to
+                            await BalanceItemService.markOrdersUpdated(
+                                balanceItemPayments.map((p) => p.balanceItem),
+                            );
+
+                            // Flush caches so data is up to date in response
+                            await BalanceItemService.flushCaches(organization.id);
+
+                            await this.updateReversedPaymentsFor(payment);
+                        },
+                    );
+
+                    if (
+                        payment.price >= 100_00 &&
+                        payment.organizationId &&
+                        payment.payingOrganizationId &&
+                        payment.organizationId ===
+                            (await Platform.getShared()).membershipOrganizationId
+                    ) {
+                        // We spend some money
+                        const code = await UsedRegisterCode.getFor(payment.payingOrganizationId);
+                        if (code && !code.balanceItemId) {
+                            console.log('Rewarding code ' + code.id + ' for payment');
+
+                            // Deze code werd nog niet beloond
+                            await ReferralService.reward(code);
+                        }
+                    }
+
+                    await this.unblockMandateIfNeeded({
+                        payment,
+                        sellingOrganization: organization,
+                    });
+
+                    // It is possible the mandate succeeds immediately, in which case we might
+                    // need to save it as the default payment method
+                    await this.saveMandateIfNeeded({
+                        payment,
+                        sellingOrganizationId: organization.id,
+                    });
+
+                    if (payment.type === PaymentType.Chargeback) {
+                        await this.handleChargebackCreated(payment, organization);
+                    }
+                    return;
+                }
+
+                const oldStatus = payment.status;
+
+                // Save before updating balance items
+                payment.status = status;
+                payment.paidAt = null;
                 await payment.save();
 
-                // Prevent concurrency issues
-                await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                    const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment));
-                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                        unloaded,
+                // If OLD status was succeeded, we need to revert the actions
+                if (oldStatus === PaymentStatus.Succeeded) {
+                    // No longer succeeded
+                    await QueueHandler.schedule(
+                        'balance-item-update/' + organization.id,
+                        async () => {
+                            const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                                (await BalanceItemPayment.where({ paymentId: payment.id })).map(
+                                    (r) => r.setRelation(BalanceItemPayment.payment, payment),
+                                ),
+                            );
+
+                            for (const balanceItemPayment of balanceItemPayments) {
+                                await BalanceItemPaymentService.undoPaid(
+                                    balanceItemPayment,
+                                    organization,
+                                );
+                            }
+
+                            await BalanceItemService.updatePaidAndPending(
+                                balanceItemPayments.map((p) => p.balanceItem),
+                            );
+
+                            // Make sure clients refetch the orders these balance items belong to
+                            await BalanceItemService.markOrdersUpdated(
+                                balanceItemPayments.map((p) => p.balanceItem),
+                            );
+
+                            // Flush caches so data is up to date in response
+                            await BalanceItemService.flushCaches(organization.id);
+
+                            await this.updateReversedPaymentsFor(payment);
+                        },
+                    );
+                }
+
+                // Moved to failed
+                if (status === PaymentStatus.Failed) {
+                    console.log('Marking as failed', payment.id);
+                    await QueueHandler.schedule(
+                        'balance-item-update/' + organization.id,
+                        async () => {
+                            const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                                (await BalanceItemPayment.where({ paymentId: payment.id })).map(
+                                    (r) => r.setRelation(BalanceItemPayment.payment, payment),
+                                ),
+                            );
+
+                            for (const balanceItemPayment of balanceItemPayments) {
+                                await BalanceItemPaymentService.markFailed(
+                                    balanceItemPayment,
+                                    organization,
+                                );
+                            }
+
+                            await BalanceItemService.updatePaidAndPending(
+                                balanceItemPayments.map((p) => p.balanceItem),
+                            );
+
+                            // Make sure clients refetch the orders these balance items belong to
+                            await BalanceItemService.markOrdersUpdated(
+                                balanceItemPayments.map((p) => p.balanceItem),
+                            );
+
+                            // Flush caches so data is up to date in response
+                            await BalanceItemService.flushCaches(organization.id);
+
+                            await this.updateReversedPaymentsFor(payment);
+                        },
                     );
 
-                    for (const balanceItemPayment of balanceItemPayments) {
-                        await BalanceItemPaymentService.markPaid(balanceItemPayment, organization);
-                    }
-
-                    await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Make sure clients refetch the orders these balance items belong to
-                    await BalanceItemService.markOrdersUpdated(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Flush caches so data is up to date in response
-                    await BalanceItemService.flushCaches(organization.id);
-
-                    await this.updateReversedPaymentsFor(payment);
-                });
-
-                if (payment.price >= 100_00 && payment.organizationId && payment.payingOrganizationId && payment.organizationId === ((await Platform.getShared()).membershipOrganizationId)) {
-                    // We spend some money
-                    const code = await UsedRegisterCode.getFor(payment.payingOrganizationId);
-                    if (code && !code.balanceItemId) {
-                        console.log('Rewarding code ' + code.id + ' for payment');
-
-                        // Deze code werd nog niet beloond
-                        await ReferralService.reward(code);
+                    if (payment.type === PaymentType.Payment) {
+                        await this.handlePaymentFailed(payment, organization);
                     }
                 }
 
-                await this.unblockMandateIfNeeded({
-                    payment,
-                    sellingOrganization: organization,
-                });
+                // If OLD status was FAILED, we need to revert the actions
+                if (oldStatus === PaymentStatus.Failed) {
+                    // OLD FAILED!! -> NOW PENDING
+                    await QueueHandler.schedule(
+                        'balance-item-update/' + organization.id,
+                        async () => {
+                            const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
+                                (await BalanceItemPayment.where({ paymentId: payment.id })).map(
+                                    (r) => r.setRelation(BalanceItemPayment.payment, payment),
+                                ),
+                            );
 
-                // It is possible the mandate succeeds immediately, in which case we might
-                // need to save it as the default payment method
-                await this.saveMandateIfNeeded({
-                    payment,
-                    sellingOrganizationId: organization.id,
-                });
+                            for (const balanceItemPayment of balanceItemPayments) {
+                                await BalanceItemPaymentService.undoFailed(
+                                    balanceItemPayment,
+                                    organization,
+                                );
+                            }
 
-                if (payment.type === PaymentType.Chargeback) {
-                    await this.handleChargebackCreated(payment, organization);
+                            await BalanceItemService.updatePaidAndPending(
+                                balanceItemPayments.map((p) => p.balanceItem),
+                            );
+
+                            // Make sure clients refetch the orders these balance items belong to
+                            await BalanceItemService.markOrdersUpdated(
+                                balanceItemPayments.map((p) => p.balanceItem),
+                            );
+
+                            // Flush caches so data is up to date in response
+                            await BalanceItemService.flushCaches(organization.id);
+
+                            await this.updateReversedPaymentsFor(payment);
+                        },
+                    );
                 }
-                return;
-            }
-
-            const oldStatus = payment.status;
-
-            // Save before updating balance items
-            payment.status = status;
-            payment.paidAt = null;
-            await payment.save();
-
-            // If OLD status was succeeded, we need to revert the actions
-            if (oldStatus === PaymentStatus.Succeeded) {
-            // No longer succeeded
-                await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                        (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
-                    );
-
-                    for (const balanceItemPayment of balanceItemPayments) {
-                        await BalanceItemPaymentService.undoPaid(balanceItemPayment, organization);
-                    }
-
-                    await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Make sure clients refetch the orders these balance items belong to
-                    await BalanceItemService.markOrdersUpdated(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Flush caches so data is up to date in response
-                    await BalanceItemService.flushCaches(organization.id);
-
-                    await this.updateReversedPaymentsFor(payment);
-                });
-            }
-
-            // Moved to failed
-            if (status === PaymentStatus.Failed) {
-                console.log('Marking as failed', payment.id);
-                await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                        (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
-                    );
-
-                    for (const balanceItemPayment of balanceItemPayments) {
-                        await BalanceItemPaymentService.markFailed(balanceItemPayment, organization);
-                    }
-
-                    await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Make sure clients refetch the orders these balance items belong to
-                    await BalanceItemService.markOrdersUpdated(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Flush caches so data is up to date in response
-                    await BalanceItemService.flushCaches(organization.id);
-
-                    await this.updateReversedPaymentsFor(payment);
-                });
-
-                if (payment.type === PaymentType.Payment) {
-                    await this.handlePaymentFailed(payment, organization);
-                }
-            }
-
-            // If OLD status was FAILED, we need to revert the actions
-            if (oldStatus === PaymentStatus.Failed) { // OLD FAILED!! -> NOW PENDING
-                await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                        (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment)),
-                    );
-
-                    for (const balanceItemPayment of balanceItemPayments) {
-                        await BalanceItemPaymentService.undoFailed(balanceItemPayment, organization);
-                    }
-
-                    await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Make sure clients refetch the orders these balance items belong to
-                    await BalanceItemService.markOrdersUpdated(balanceItemPayments.map(p => p.balanceItem));
-
-                    // Flush caches so data is up to date in response
-                    await BalanceItemService.flushCaches(organization.id);
-
-                    await this.updateReversedPaymentsFor(payment);
-                });
-            }
-        });
+            },
+        );
     }
 
     /**
      * Mainly makes sure a change in a payment is reloaded in the webshop orders client cache
      */
     static async handlePaymentCreated(payment: Payment, organization: Organization) {
-        await AuditLogService.setContext({ fallbackUserId: payment.payingUserId, source: AuditLogSource.Payment, fallbackOrganizationId: payment.organizationId }, async () => {
-            await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment));
-                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                    unloaded,
-                );
-                await BalanceItemService.updatePaidAndPending(balanceItemPayments.map(p => p.balanceItem));
+        await AuditLogService.setContext(
+            {
+                fallbackUserId: payment.payingUserId,
+                source: AuditLogSource.Payment,
+                fallbackOrganizationId: payment.organizationId,
+            },
+            async () => {
+                await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
+                    const unloaded = (
+                        await BalanceItemPayment.where({ paymentId: payment.id })
+                    ).map((r) => r.setRelation(BalanceItemPayment.payment, payment));
+                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(unloaded);
+                    await BalanceItemService.updatePaidAndPending(
+                        balanceItemPayments.map((p) => p.balanceItem),
+                    );
 
-                // Make sure clients refetch the orders these balance items belong to
-                await BalanceItemService.markOrdersUpdated(balanceItemPayments.map(p => p.balanceItem));
+                    // Make sure clients refetch the orders these balance items belong to
+                    await BalanceItemService.markOrdersUpdated(
+                        balanceItemPayments.map((p) => p.balanceItem),
+                    );
 
-                // Flush caches so data is up to date in response
-                await BalanceItemService.flushCaches(organization.id);
+                    // Flush caches so data is up to date in response
+                    await BalanceItemService.flushCaches(organization.id);
 
-                await this.updateReversedPaymentsFor(payment);
-            });
-        });
+                    await this.updateReversedPaymentsFor(payment);
+                });
+            },
+        );
     }
 
     /**
      * Mainly makes sure a change in a payment is reloaded in the webshop orders client cache
      */
     static async handlePaymentUpdated(payment: Payment, organization: Organization) {
-        await AuditLogService.setContext({ fallbackUserId: payment.payingUserId, source: AuditLogSource.Payment, fallbackOrganizationId: payment.organizationId }, async () => {
-            await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
-                const unloaded = (await BalanceItemPayment.where({ paymentId: payment.id })).map(r => r.setRelation(BalanceItemPayment.payment, payment));
-                const balanceItemPayments = await BalanceItemPayment.balanceItem.load(
-                    unloaded,
-                );
+        await AuditLogService.setContext(
+            {
+                fallbackUserId: payment.payingUserId,
+                source: AuditLogSource.Payment,
+                fallbackOrganizationId: payment.organizationId,
+            },
+            async () => {
+                await QueueHandler.schedule('balance-item-update/' + organization.id, async () => {
+                    const unloaded = (
+                        await BalanceItemPayment.where({ paymentId: payment.id })
+                    ).map((r) => r.setRelation(BalanceItemPayment.payment, payment));
+                    const balanceItemPayments = await BalanceItemPayment.balanceItem.load(unloaded);
 
-                // Make sure clients refetch the orders these balance items belong to
-                await BalanceItemService.markOrdersUpdated(balanceItemPayments.map(p => p.balanceItem));
-            });
-        });
+                    // Make sure clients refetch the orders these balance items belong to
+                    await BalanceItemService.markOrdersUpdated(
+                        balanceItemPayments.map((p) => p.balanceItem),
+                    );
+                });
+            },
+        );
     }
 
     private static async handleChargebackCreated(payment: Payment, organization: Organization) {
@@ -250,7 +376,10 @@ export class PaymentService {
                     date: payment.paidAt ?? new Date(),
                 });
             } catch (e) {
-                console.error('Failed to register chargeback count for mandate ' + payment.mandateId, e);
+                console.error(
+                    'Failed to register chargeback count for mandate ' + payment.mandateId,
+                    e,
+                );
             }
 
             // Prevents an endless loop of automatic charges and chargebacks on the same mandate
@@ -262,14 +391,21 @@ export class PaymentService {
                     paymentId: payment.id,
                 });
             } catch (e) {
-                console.error('Failed to block mandate ' + payment.mandateId + ' after chargeback ' + payment.id, e);
+                console.error(
+                    'Failed to block mandate ' +
+                        payment.mandateId +
+                        ' after chargeback ' +
+                        payment.id,
+                    e,
+                );
             }
         }
 
         const payingOrganization = await Organization.getByID(payment.payingOrganizationId, true);
 
         await sendEmailTemplate(organization, {
-            recipients: await OrganizationAdminService.getFinanceAdminRecipients(payingOrganization),
+            recipients:
+                await OrganizationAdminService.getFinanceAdminRecipients(payingOrganization),
             defaultReplacements: [
                 Replacement.create({
                     token: 'payingOrganizationName',
@@ -277,7 +413,11 @@ export class PaymentService {
                 }),
                 Replacement.create({
                     token: 'paymentUrl',
-                    value: 'https://' + payingOrganization.getDashboardHost() + '/boekhouding/openstaand/' + organization.uri,
+                    value:
+                        'https://' +
+                        payingOrganization.getDashboardHost() +
+                        '/boekhouding/openstaand/' +
+                        organization.uri,
                 }),
             ],
             template: {
@@ -306,7 +446,8 @@ export class PaymentService {
         const payingOrganization = await Organization.getByID(payment.payingOrganizationId, true);
 
         await sendEmailTemplate(organization, {
-            recipients: await OrganizationAdminService.getFinanceAdminRecipients(payingOrganization),
+            recipients:
+                await OrganizationAdminService.getFinanceAdminRecipients(payingOrganization),
             defaultReplacements: [
                 Replacement.create({
                     token: 'payingOrganizationName',
@@ -314,7 +455,11 @@ export class PaymentService {
                 }),
                 Replacement.create({
                     token: 'paymentUrl',
-                    value: 'https://' + payingOrganization.getDashboardHost() + '/boekhouding/openstaand/' + organization.uri,
+                    value:
+                        'https://' +
+                        payingOrganization.getDashboardHost() +
+                        '/boekhouding/openstaand/' +
+                        organization.uri,
                 }),
             ],
             template: {
@@ -328,7 +473,11 @@ export class PaymentService {
 
     private static async deactivatePackagesIfNeeded(payment: Payment, organization: Organization) {
         // If admin initiated mandate, then mark packages as failed only
-        if ((payment.adminUserId || payment.type === PaymentType.Chargeback) && payment.mandateId && STAMHOOFD.userMode === 'organization') {
+        if (
+            (payment.adminUserId || payment.type === PaymentType.Chargeback) &&
+            payment.mandateId &&
+            STAMHOOFD.userMode === 'organization'
+        ) {
             const platform = await Platform.getShared();
             const payingOrganizationId = payment.payingOrganizationId;
             if (payingOrganizationId && organization.id === platform.membershipOrganizationId) {
@@ -341,8 +490,19 @@ export class PaymentService {
      * A succeeded payment that created a mandate validated the card or bank account again, so an earlier
      * block (e.g. after a chargeback) is lifted.
      */
-    static async unblockMandateIfNeeded({ payment, sellingOrganization }: { payment: Payment; sellingOrganization: Organization }) {
-        if (!payment.createMandate || !payment.mandateId || !payment.payingOrganizationId || payment.status !== PaymentStatus.Succeeded) {
+    static async unblockMandateIfNeeded({
+        payment,
+        sellingOrganization,
+    }: {
+        payment: Payment;
+        sellingOrganization: Organization;
+    }) {
+        if (
+            !payment.createMandate ||
+            !payment.mandateId ||
+            !payment.payingOrganizationId ||
+            payment.status !== PaymentStatus.Succeeded
+        ) {
             return;
         }
 
@@ -353,11 +513,20 @@ export class PaymentService {
                 payingOrganizationId: payment.payingOrganizationId,
             });
         } catch (e) {
-            console.error('Failed to unblock mandate ' + payment.mandateId + ' after payment ' + payment.id, e);
+            console.error(
+                'Failed to unblock mandate ' + payment.mandateId + ' after payment ' + payment.id,
+                e,
+            );
         }
     }
 
-    static async saveMandateIfNeeded({ payment, sellingOrganizationId }: { payment: Payment; sellingOrganizationId: string }) {
+    static async saveMandateIfNeeded({
+        payment,
+        sellingOrganizationId,
+    }: {
+        payment: Payment;
+        sellingOrganizationId: string;
+    }) {
         // Save as default
         if (payment.createMandate && payment.createMandate.saveAsDefault) {
             if (payment.mandateId && payment.status === PaymentStatus.Succeeded) {
@@ -379,7 +548,11 @@ export class PaymentService {
     /**
      * ID of payment is needed because of race conditions (need to fetch payment in a race condition save queue)
      */
-    static async pollStatus(paymentId: string, org: Organization | null, cancel = false): Promise<Payment | undefined> {
+    static async pollStatus(
+        paymentId: string,
+        org: Organization | null,
+        cancel = false,
+    ): Promise<Payment | undefined> {
         // Prevent polling the same payment multiple times at the same time: create a queue to prevent races
         return await QueueHandler.schedule('payments/' + paymentId, async () => {
             // Get a new copy of the payment (is required to prevent concurreny bugs)
@@ -388,179 +561,319 @@ export class PaymentService {
                 return;
             }
 
-            if (org && payment.organizationId !== org.id && org.id !== payment.payingOrganizationId) {
-                console.error('Non-matching organization found for payment', payment.id, 'org', org.id);
+            if (
+                org &&
+                payment.organizationId !== org.id &&
+                org.id !== payment.payingOrganizationId
+            ) {
+                console.error(
+                    'Non-matching organization found for payment',
+                    payment.id,
+                    'org',
+                    org.id,
+                );
                 return;
             }
 
             // Explicitly set userId to null, because all actions caused by a poll are not caused by the currently signed in user, but the paying user id
-            return await AuditLogService.setContext({ userId: payment.payingUserId ?? null, source: AuditLogSource.Payment }, async () => {
-                if (!payment.organizationId) {
-                    console.error('Payment without organization not supported', payment.id);
-                    return;
-                }
-
-                const organization = org && org.id === payment.organizationId ? org : await Organization.getByID(payment.organizationId);
-                if (!organization) {
-                    console.error('Organization not found for payment', payment.id);
-                    return;
-                }
-                if (org && org.id !== payment.organizationId && org.id !== payment.payingOrganizationId) {
-                    console.error('Non-matching organization found for payment', payment.id, 'org', org.id);
-                    return;
-                }
-
-                const testMode = organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production';
-
-                if (payment.type === PaymentType.Refund) {
-                    // Refunds have their own status flow at the provider: they are never
-                    // cancelable and can stay pending for days (e.g. bank refunds), so they are
-                    // never manually expired either (that would allow refunding twice).
-                    if ((payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created) && payment.provider === PaymentProvider.Mollie) {
-                        try {
-                            const mollieService = await MollieService.create({ sellingOrganization: organization });
-                            if (mollieService) {
-                                const { status } = await mollieService.getRefundStatus(payment);
-                                console.log('Mollie setting refund status to', status);
-                                await this.handlePaymentStatusUpdate(payment, organization, status);
-                            } else {
-                                console.error('Missing Mollie credentials for refund payment', payment.id);
-                            }
-                        } catch (e) {
-                            console.error('Refund check failed Mollie', payment.id, e);
-                        }
+            return await AuditLogService.setContext(
+                { userId: payment.payingUserId ?? null, source: AuditLogSource.Payment },
+                async () => {
+                    if (!payment.organizationId) {
+                        console.error('Payment without organization not supported', payment.id);
+                        return;
                     }
-                } else if (payment.status === PaymentStatus.Pending || payment.status === PaymentStatus.Created || (payment.provider === PaymentProvider.Buckaroo && payment.status === PaymentStatus.Failed)) {
-                    if (payment.provider === PaymentProvider.Stripe) {
-                        try {
-                            let status = await StripeHelper.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment), testMode);
 
-                            if (this.isManualExpired(status, payment)) {
-                                console.error('Manually marking Stripe payment as expired', payment.id);
-                                status = PaymentStatus.Failed;
-                            }
+                    const organization =
+                        org && org.id === payment.organizationId
+                            ? org
+                            : await Organization.getByID(payment.organizationId);
+                    if (!organization) {
+                        console.error('Organization not found for payment', payment.id);
+                        return;
+                    }
+                    if (
+                        org &&
+                        org.id !== payment.organizationId &&
+                        org.id !== payment.payingOrganizationId
+                    ) {
+                        console.error(
+                            'Non-matching organization found for payment',
+                            payment.id,
+                            'org',
+                            org.id,
+                        );
+                        return;
+                    }
 
-                            console.log('Stripe setting status to', status);
-                            await this.handlePaymentStatusUpdate(payment, organization, status);
-                        } catch (e) {
-                            console.error('Payment check failed Stripe', payment.id, e);
-                            if (this.isManualExpired(payment.status, payment)) {
-                                console.error('Manually marking Stripe payment as expired', payment.id);
-                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                    const testMode =
+                        organization.privateMeta.useTestPayments ??
+                        STAMHOOFD.environment !== 'production';
+
+                    if (payment.type === PaymentType.Refund) {
+                        // Refunds have their own status flow at the provider: they are never
+                        // cancelable and can stay pending for days (e.g. bank refunds), so they are
+                        // never manually expired either (that would allow refunding twice).
+                        if (
+                            (payment.status === PaymentStatus.Pending ||
+                                payment.status === PaymentStatus.Created) &&
+                            payment.provider === PaymentProvider.Mollie
+                        ) {
+                            try {
+                                const mollieService = await MollieService.create({
+                                    sellingOrganization: organization,
+                                });
+                                if (mollieService) {
+                                    const { status } = await mollieService.getRefundStatus(payment);
+                                    console.log('Mollie setting refund status to', status);
+                                    await this.handlePaymentStatusUpdate(
+                                        payment,
+                                        organization,
+                                        status,
+                                    );
+                                } else {
+                                    console.error(
+                                        'Missing Mollie credentials for refund payment',
+                                        payment.id,
+                                    );
+                                }
+                            } catch (e) {
+                                console.error('Refund check failed Mollie', payment.id, e);
                             }
                         }
-                    } else if (payment.provider === PaymentProvider.Mollie) {
-                        try {
-                            const mollieClient = await MollieService.create({
-                                sellingOrganization: organization,
-                            });
-                            if (mollieClient) {
-                                let { status } = await mollieClient.getStatus(payment, cancel || this.shouldTryToCancel(payment.status, payment));
+                    } else if (
+                        payment.status === PaymentStatus.Pending ||
+                        payment.status === PaymentStatus.Created ||
+                        (payment.provider === PaymentProvider.Buckaroo &&
+                            payment.status === PaymentStatus.Failed)
+                    ) {
+                        if (payment.provider === PaymentProvider.Stripe) {
+                            try {
+                                let status = await StripeHelper.getStatus(
+                                    payment,
+                                    cancel || this.shouldTryToCancel(payment.status, payment),
+                                    testMode,
+                                );
 
                                 if (this.isManualExpired(status, payment)) {
-                                    console.error('Manually marking Mollie payment as expired', payment.id);
+                                    console.error(
+                                        'Manually marking Stripe payment as expired',
+                                        payment.id,
+                                    );
                                     status = PaymentStatus.Failed;
                                 }
 
-                                console.log('Mollie setting status to', status);
+                                console.log('Stripe setting status to', status);
+                                await this.handlePaymentStatusUpdate(payment, organization, status);
+                            } catch (e) {
+                                console.error('Payment check failed Stripe', payment.id, e);
+                                if (this.isManualExpired(payment.status, payment)) {
+                                    console.error(
+                                        'Manually marking Stripe payment as expired',
+                                        payment.id,
+                                    );
+                                    await this.handlePaymentStatusUpdate(
+                                        payment,
+                                        organization,
+                                        PaymentStatus.Failed,
+                                    );
+                                }
+                            }
+                        } else if (payment.provider === PaymentProvider.Mollie) {
+                            try {
+                                const mollieClient = await MollieService.create({
+                                    sellingOrganization: organization,
+                                });
+                                if (mollieClient) {
+                                    let { status } = await mollieClient.getStatus(
+                                        payment,
+                                        cancel || this.shouldTryToCancel(payment.status, payment),
+                                    );
+
+                                    if (this.isManualExpired(status, payment)) {
+                                        console.error(
+                                            'Manually marking Mollie payment as expired',
+                                            payment.id,
+                                        );
+                                        status = PaymentStatus.Failed;
+                                    }
+
+                                    console.log('Mollie setting status to', status);
+                                    await this.handlePaymentStatusUpdate(
+                                        payment,
+                                        organization,
+                                        status,
+                                    );
+                                } else {
+                                    console.error(
+                                        'Missing Mollie Credentials for payment',
+                                        payment.id,
+                                    );
+                                    if (this.isManualExpired(payment.status, payment)) {
+                                        console.error(
+                                            'Manually marking Mollie payment as expired',
+                                            payment.id,
+                                        );
+                                        await this.handlePaymentStatusUpdate(
+                                            payment,
+                                            organization,
+                                            PaymentStatus.Failed,
+                                        );
+                                    }
+                                }
+                            } catch (e) {
+                                console.error('Payment check failed Mollie', payment.id, e);
+                                if (this.isManualExpired(payment.status, payment)) {
+                                    console.error(
+                                        'Manually marking Mollie payment as expired',
+                                        payment.id,
+                                    );
+                                    await this.handlePaymentStatusUpdate(
+                                        payment,
+                                        organization,
+                                        PaymentStatus.Failed,
+                                    );
+                                }
+                            }
+                        } else if (payment.provider === PaymentProvider.Buckaroo) {
+                            const helper = new BuckarooHelper(
+                                organization.privateMeta.buckarooSettings?.key ?? '',
+                                organization.privateMeta.buckarooSettings?.secret ?? '',
+                                testMode,
+                            );
+                            try {
+                                let status = await helper.getStatus(payment);
+
+                                if (this.isManualExpired(status, payment)) {
+                                    console.error(
+                                        'Manually marking Buckaroo payment as expired',
+                                        payment.id,
+                                    );
+                                    status = PaymentStatus.Failed;
+                                }
+
+                                console.log('Buckaroo setting status to', status);
+                                await this.handlePaymentStatusUpdate(payment, organization, status);
+                            } catch (e) {
+                                console.error('Payment check failed Buckaroo', payment.id, e);
+                                if (this.isManualExpired(payment.status, payment)) {
+                                    console.error(
+                                        'Manually marking Buckaroo payment as expired',
+                                        payment.id,
+                                    );
+                                    await this.handlePaymentStatusUpdate(
+                                        payment,
+                                        organization,
+                                        PaymentStatus.Failed,
+                                    );
+                                }
+                            }
+                        } else if (payment.provider == PaymentProvider.Payconiq) {
+                            // Check status
+
+                            const payconiqPayments = await PayconiqPayment.where(
+                                { paymentId: payment.id },
+                                { limit: 1 },
+                            );
+                            if (payconiqPayments.length == 1) {
+                                const payconiqPayment = payconiqPayments[0];
+
+                                if (cancel) {
+                                    console.error(
+                                        'Cancelling Payconiq payment on request',
+                                        payment.id,
+                                    );
+                                    await payconiqPayment.cancel(organization);
+                                }
+
+                                let status = await payconiqPayment.getStatus(organization, payment);
+
+                                if (!cancel && this.shouldTryToCancel(status, payment)) {
+                                    console.error(
+                                        'Manually cancelling Payconiq payment',
+                                        payment.id,
+                                    );
+                                    if (await payconiqPayment.cancel(organization)) {
+                                        status = PaymentStatus.Failed;
+                                    } else {
+                                        console.error('Failed to manually cancel payment');
+                                    }
+                                }
+
+                                if (this.isManualExpired(status, payment)) {
+                                    console.error(
+                                        'Manually marking Payconiq payment as expired',
+                                        payment.id,
+                                    );
+                                    status = PaymentStatus.Failed;
+                                }
+
                                 await this.handlePaymentStatusUpdate(payment, organization, status);
                             } else {
-                                console.error('Missing Mollie Credentials for payment', payment.id);
+                                console.warn(
+                                    'Payconiq payment is missing for organization ' +
+                                        organization.id +
+                                        ' while checking payment status...',
+                                );
+
                                 if (this.isManualExpired(payment.status, payment)) {
-                                    console.error('Manually marking Mollie payment as expired', payment.id);
-                                    await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                                    console.error(
+                                        'Manually marking Payconiq payment as expired because not found',
+                                        payment.id,
+                                    );
+                                    await this.handlePaymentStatusUpdate(
+                                        payment,
+                                        organization,
+                                        PaymentStatus.Failed,
+                                    );
                                 }
                             }
-                        } catch (e) {
-                            console.error('Payment check failed Mollie', payment.id, e);
-                            if (this.isManualExpired(payment.status, payment)) {
-                                console.error('Manually marking Mollie payment as expired', payment.id);
-                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-                            }
-                        }
-                    } else if (payment.provider === PaymentProvider.Buckaroo) {
-                        const helper = new BuckarooHelper(organization.privateMeta.buckarooSettings?.key ?? '', organization.privateMeta.buckarooSettings?.secret ?? '', testMode);
-                        try {
-                            let status = await helper.getStatus(payment);
-
-                            if (this.isManualExpired(status, payment)) {
-                                console.error('Manually marking Buckaroo payment as expired', payment.id);
-                                status = PaymentStatus.Failed;
-                            }
-
-                            console.log('Buckaroo setting status to', status);
-                            await this.handlePaymentStatusUpdate(payment, organization, status);
-                        } catch (e) {
-                            console.error('Payment check failed Buckaroo', payment.id, e);
-                            if (this.isManualExpired(payment.status, payment)) {
-                                console.error('Manually marking Buckaroo payment as expired', payment.id);
-                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-                            }
-                        }
-                    } else if (payment.provider == PaymentProvider.Payconiq) {
-                        // Check status
-
-                        const payconiqPayments = await PayconiqPayment.where({ paymentId: payment.id }, { limit: 1 });
-                        if (payconiqPayments.length == 1) {
-                            const payconiqPayment = payconiqPayments[0];
-
-                            if (cancel) {
-                                console.error('Cancelling Payconiq payment on request', payment.id);
-                                await payconiqPayment.cancel(organization);
-                            }
-
-                            let status = await payconiqPayment.getStatus(organization, payment);
-
-                            if (!cancel && this.shouldTryToCancel(status, payment)) {
-                                console.error('Manually cancelling Payconiq payment', payment.id);
-                                if (await payconiqPayment.cancel(organization)) {
-                                    status = PaymentStatus.Failed;
-                                } else {
-                                    console.error('Failed to manually cancel payment');
-                                }
-                            }
-
-                            if (this.isManualExpired(status, payment)) {
-                                console.error('Manually marking Payconiq payment as expired', payment.id);
-                                status = PaymentStatus.Failed;
-                            }
-
-                            await this.handlePaymentStatusUpdate(payment, organization, status);
                         } else {
-                            console.warn('Payconiq payment is missing for organization ' + organization.id + ' while checking payment status...');
-
+                            console.error(
+                                'Invalid payment provider',
+                                payment.provider,
+                                'for payment',
+                                payment.id,
+                            );
                             if (this.isManualExpired(payment.status, payment)) {
-                                console.error('Manually marking Payconiq payment as expired because not found', payment.id);
-                                await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+                                console.error(
+                                    'Manually marking unknown payment as expired',
+                                    payment.id,
+                                );
+                                await this.handlePaymentStatusUpdate(
+                                    payment,
+                                    organization,
+                                    PaymentStatus.Failed,
+                                );
                             }
                         }
                     } else {
-                        console.error('Invalid payment provider', payment.provider, 'for payment', payment.id);
-                        if (this.isManualExpired(payment.status, payment)) {
-                            console.error('Manually marking unknown payment as expired', payment.id);
-                            await this.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
-                        }
-                    }
-                } else {
-                    // Do a manual update if needed
-                    if (payment.status === PaymentStatus.Succeeded) {
-                        if ((payment.provider === PaymentProvider.Mollie && STAMHOOFD.environment === 'development')) {
-                            // Update the status
-                            await StripeHelper.getStatus(payment, false, testMode);
-                        }
+                        // Do a manual update if needed
+                        if (payment.status === PaymentStatus.Succeeded) {
+                            if (
+                                payment.provider === PaymentProvider.Mollie &&
+                                STAMHOOFD.environment === 'development'
+                            ) {
+                                // Update the status
+                                await StripeHelper.getStatus(payment, false, testMode);
+                            }
 
-                        // Mollie calls the webhook of the original payment when the status of one
-                        // of its refunds changes: update refunds that are still pending locally
-                        await this.checkPendingRefunds(payment, organization);
+                            // Mollie calls the webhook of the original payment when the status of one
+                            // of its refunds changes: update refunds that are still pending locally
+                            await this.checkPendingRefunds(payment, organization);
+                        }
                     }
-                }
-                return payment;
-            });
+                    return payment;
+                },
+            );
         });
     }
 
     static isManualExpired(status: PaymentStatus, payment: Payment) {
-        if ((status === PaymentStatus.Pending || status === PaymentStatus.Created) && payment.method !== PaymentMethod.DirectDebit) {
+        if (
+            (status === PaymentStatus.Pending || status === PaymentStatus.Created) &&
+            payment.method !== PaymentMethod.DirectDebit
+        ) {
             // If payment is not succeeded after one day, mark as failed
             if (payment.createdAt < new Date(new Date().getTime() - 60 * 1000 * 60 * 24)) {
                 return true;
@@ -568,7 +881,10 @@ export class PaymentService {
         }
 
         // DirectDebit expires after 3 weeks
-        if ((status === PaymentStatus.Pending || status === PaymentStatus.Created) && payment.method === PaymentMethod.DirectDebit) {
+        if (
+            (status === PaymentStatus.Pending || status === PaymentStatus.Created) &&
+            payment.method === PaymentMethod.DirectDebit
+        ) {
             // If payment is not succeeded after one day, mark as failed
             if (payment.createdAt < new Date(new Date().getTime() - 60 * 1000 * 60 * 24 * 7 * 3)) {
                 return true;
@@ -578,7 +894,7 @@ export class PaymentService {
         if (STAMHOOFD.environment === 'development') {
             // In development, we expire all direct debits and other paymetns after 1 hour, because they need manual changes
             // otherwise they will remain stuck in the dev environment, poluting the UI
-            if ((status === PaymentStatus.Pending || status === PaymentStatus.Created)) {
+            if (status === PaymentStatus.Pending || status === PaymentStatus.Created) {
                 // If payment is not succeeded after one day, mark as failed
                 if (payment.createdAt < new Date(new Date().getTime() - 60 * 1000 * 60)) {
                     return true;
@@ -593,7 +909,11 @@ export class PaymentService {
      * Try to cancel a payment that is still pending
      */
     static shouldTryToCancel(status: PaymentStatus, payment: Payment): boolean {
-        if ((status === PaymentStatus.Pending || status === PaymentStatus.Created) && (payment.method !== PaymentMethod.DirectDebit || STAMHOOFD.environment === 'development')) {
+        if (
+            (status === PaymentStatus.Pending || status === PaymentStatus.Created) &&
+            (payment.method !== PaymentMethod.DirectDebit ||
+                STAMHOOFD.environment === 'development')
+        ) {
             let timeout = STAMHOOFD.environment === 'development' ? 60 * 1000 * 2 : 60 * 1000 * 30;
 
             // If payconiq and not yet 'identified' (scanned), cancel after 5 minutes
@@ -639,7 +959,12 @@ export class PaymentService {
         }
 
         if (difference > 100 || difference < -100) {
-            throw new Error('Unexpected rounding difference of ' + difference + ' for price ' + amount.toString());
+            throw new Error(
+                'Unexpected rounding difference of ' +
+                    difference +
+                    ' for price ' +
+                    amount.toString(),
+            );
         }
 
         return {
@@ -648,7 +973,11 @@ export class PaymentService {
         };
     }
 
-    static calculateTotalPrice({ balanceItems, organization, members }: {
+    static calculateTotalPrice({
+        balanceItems,
+        organization,
+        members,
+    }: {
         balanceItems: Map<BalanceItem, number>;
         organization: Organization;
         members?: Member[];
@@ -666,14 +995,22 @@ export class PaymentService {
                 throw new Error('Unexpected balance item from other organization');
             }
 
-            if (price > 0 && price > Math.max(balanceItem.priceOpen, balanceItem.priceDue - balanceItem.pricePaid)) {
+            if (
+                price > 0 &&
+                price >
+                    Math.max(balanceItem.priceOpen, balanceItem.priceDue - balanceItem.pricePaid)
+            ) {
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: $t('%vv'),
                 });
             }
 
-            if (price < 0 && price < Math.min(balanceItem.priceOpen, balanceItem.priceDue - balanceItem.pricePaid)) {
+            if (
+                price < 0 &&
+                price <
+                    Math.min(balanceItem.priceOpen, balanceItem.priceDue - balanceItem.pricePaid)
+            ) {
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: $t('%vw'),
@@ -686,8 +1023,12 @@ export class PaymentService {
 
             totalPrice += price;
 
-            if (price > 0 && balanceItem.memberId && balanceItem.type === BalanceItemType.Registration) {
-                const member = members?.find(m => m.id === balanceItem.memberId);
+            if (
+                price > 0 &&
+                balanceItem.memberId &&
+                balanceItem.type === BalanceItemType.Registration
+            ) {
+                const member = members?.find((m) => m.id === balanceItem.memberId);
                 if (!member) {
                     throw new SimpleError({
                         code: 'invalid_data',
@@ -713,7 +1054,11 @@ export class PaymentService {
         return { hasNegative, price, roundingAmount, names };
     }
 
-    static validateTotalPrice({ price, roundingAmount, checkout }: {
+    static validateTotalPrice({
+        price,
+        roundingAmount,
+        checkout,
+    }: {
         price: number; // already rounded
         roundingAmount: number;
         checkout: Pick<Checkoutable<never>, 'totalPrice'>;
@@ -722,7 +1067,11 @@ export class PaymentService {
         const balanceItemsPrice = price - roundingAmount;
 
         // also accept rounding that might have happend in the frontend and that was correct
-        if (checkout.totalPrice !== null && checkout.totalPrice !== balanceItemsPrice && checkout.totalPrice !== price) {
+        if (
+            checkout.totalPrice !== null &&
+            checkout.totalPrice !== balanceItemsPrice &&
+            checkout.totalPrice !== price
+        ) {
             throw new SimpleError({
                 code: 'changed_price',
                 message: $t('%vk', { total: Formatter.price(price) }),
@@ -730,7 +1079,11 @@ export class PaymentService {
         }
     }
 
-    static async validateCustomer({ user, checkout, payingOrganization }: {
+    static async validateCustomer({
+        user,
+        checkout,
+        payingOrganization,
+    }: {
         user: User | null;
         checkout: Pick<Checkoutable<never>, 'customer'>;
         payingOrganization?: Organization | null;
@@ -766,13 +1119,14 @@ export class PaymentService {
             // Search company id
             // this avoids needing to check the VAT number every time
             const id = checkout.customer.company.id;
-            let foundCompany = payingOrganization.meta.companies.find(c => c.id === id);
+            let foundCompany = payingOrganization.meta.companies.find((c) => c.id === id);
 
             if (!foundCompany) {
                 if (payingOrganization.meta.companies.length > 0) {
                     throw new SimpleError({
                         code: 'invalid_data',
-                        message: 'Cannot set company data. Please save the company data to the paying organization meta data before using it.',
+                        message:
+                            'Cannot set company data. Please save the company data to the paying organization meta data before using it.',
                         human: $t('%w1'),
                     });
                 }
@@ -785,7 +1139,8 @@ export class PaymentService {
             if (!checkout.customer.company.equals(foundCompany)) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: 'Cannot change company data. Please save the company data to the paying organization meta data before using it.',
+                    message:
+                        'Cannot change company data. Please save the company data to the paying organization meta data before using it.',
                     human: $t('%w1'),
                 });
             }
@@ -815,20 +1170,42 @@ export class PaymentService {
         return { customer, prefix };
     }
 
-    static async createProForma({ balanceItems, organization, user, members, checkout, payingOrganization }: {
+    static async createProForma({
+        balanceItems,
+        organization,
+        user,
+        members,
+        checkout,
+        payingOrganization,
+    }: {
         balanceItems: Map<BalanceItem, number>;
         organization: Organization;
         user: User;
         members?: Member[];
-        checkout: Pick<Checkoutable<never>, 'totalPrice' | 'customer' | 'cancelUrl' | 'redirectUrl'>;
+        checkout: Pick<
+            Checkoutable<never>,
+            'totalPrice' | 'customer' | 'cancelUrl' | 'redirectUrl'
+        >;
         payingOrganization?: Organization | null;
     }) {
         // Calculate total price to pay
-        const { price, roundingAmount } = PaymentService.calculateTotalPrice({ balanceItems, organization, members });
+        const { price, roundingAmount } = PaymentService.calculateTotalPrice({
+            balanceItems,
+            organization,
+            members,
+        });
         PaymentService.validateTotalPrice({ price, roundingAmount, checkout });
 
-        const { customer } = await PaymentService.validateCustomer({ user, checkout, payingOrganization });
-        const { seller } = PaymentService.validateVATRates({ customer, sellingOrganization: organization, balanceItems });
+        const { customer } = await PaymentService.validateCustomer({
+            user,
+            checkout,
+            payingOrganization,
+        });
+        const { seller } = PaymentService.validateVATRates({
+            customer,
+            sellingOrganization: organization,
+            balanceItems,
+        });
 
         // Create invoice instead from fictive PaymentGeneral
         const fakePaymentGeneral = PaymentGeneral.create({
@@ -855,7 +1232,10 @@ export class PaymentService {
             });
             invoice.buildFromPayments();
         } catch (e) {
-            if ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('balance_item_without_vat_percentage')) {
+            if (
+                (isSimpleError(e) || isSimpleErrors(e)) &&
+                e.hasCode('balance_item_without_vat_percentage')
+            ) {
                 // ok
                 // Missing VAT that prevents invoice from being created
             } else {
@@ -872,14 +1252,25 @@ export class PaymentService {
     static async registerChargeback(payment: Payment, amount: number, date: Date) {
         if (amount !== payment.price) {
             // Creates issues to know what balance item was paid and what was not.
-            throw new Error('Cannot register chargeback with different amount than the payment for payment ' + payment.id);
+            throw new Error(
+                'Cannot register chargeback with different amount than the payment for payment ' +
+                    payment.id,
+            );
         }
 
-        const chargeback = await this.createReversalPayment({ payment, type: PaymentType.Chargeback });
+        const chargeback = await this.createReversalPayment({
+            payment,
+            type: PaymentType.Chargeback,
+        });
         const organization = await Organization.getByID(chargeback.organizationId!, true);
 
         try {
-            await this.handlePaymentStatusUpdate(chargeback, organization, PaymentStatus.Succeeded, date);
+            await this.handlePaymentStatusUpdate(
+                chargeback,
+                organization,
+                PaymentStatus.Succeeded,
+                date,
+            );
         } catch (e) {
             console.error('Failed to mark chargeback as succeeded', e);
             await this.deleteReversalPayment(chargeback);
@@ -896,8 +1287,17 @@ export class PaymentService {
      * Pass the current status of the refund at the provider: refunds that are still being
      * processed stay pending locally until the provider reports them as executed.
      */
-    static async registerRefund(payment: Payment, amount: number, date: Date, status: PaymentStatus.Pending | PaymentStatus.Succeeded = PaymentStatus.Succeeded) {
-        const refund = await this.createReversalPayment({ payment, type: PaymentType.Refund, amount });
+    static async registerRefund(
+        payment: Payment,
+        amount: number,
+        date: Date,
+        status: PaymentStatus.Pending | PaymentStatus.Succeeded = PaymentStatus.Succeeded,
+    ) {
+        const refund = await this.createReversalPayment({
+            payment,
+            type: PaymentType.Refund,
+            amount,
+        });
         const organization = await Organization.getByID(refund.organizationId!, true);
 
         try {
@@ -922,10 +1322,13 @@ export class PaymentService {
             return;
         }
 
-        const pendingRefunds = (await Payment.select()
-            .where('reversingPaymentId', payment.id)
-            .fetch())
-            .filter(p => p.type === PaymentType.Refund && (p.status === PaymentStatus.Pending || p.status === PaymentStatus.Created));
+        const pendingRefunds = (
+            await Payment.select().where('reversingPaymentId', payment.id).fetch()
+        ).filter(
+            (p) =>
+                p.type === PaymentType.Refund &&
+                (p.status === PaymentStatus.Pending || p.status === PaymentStatus.Created),
+        );
 
         if (pendingRefunds.length === 0) {
             return;
@@ -933,7 +1336,10 @@ export class PaymentService {
 
         const mollieService = await MollieService.create({ sellingOrganization: organization });
         if (!mollieService) {
-            console.error('Missing Mollie credentials while checking pending refunds of payment', payment.id);
+            console.error(
+                'Missing Mollie credentials while checking pending refunds of payment',
+                payment.id,
+            );
             return;
         }
 
@@ -953,7 +1359,13 @@ export class PaymentService {
      *
      * Currently only Mollie is supported. Payconiq and Stripe will follow later.
      */
-    static async createRefund({ organization, sourcePayment, balanceItems, adminUserId, customer }: {
+    static async createRefund({
+        organization,
+        sourcePayment,
+        balanceItems,
+        adminUserId,
+        customer,
+    }: {
         organization: Organization;
         sourcePayment: Payment;
         /**
@@ -964,7 +1376,12 @@ export class PaymentService {
         customer?: PaymentCustomer | null;
     }): Promise<Payment> {
         if (organization.id !== sourcePayment.organizationId) {
-            throw new Error('Unexpected organization for source payment, expected ' + sourcePayment.organizationId + ', received ' + organization.id);
+            throw new Error(
+                'Unexpected organization for source payment, expected ' +
+                    sourcePayment.organizationId +
+                    ', received ' +
+                    organization.id,
+            );
         }
 
         if (sourcePayment.provider !== PaymentProvider.Mollie) {
@@ -1021,7 +1438,12 @@ export class PaymentService {
         // Most refunds are not executed immediately by Mollie (queued/pending/processing): only
         // mark the refund as succeeded once Mollie reports it as refunded. Status changes are
         // picked up via the payment webhook (pollStatus) and the mollie-refunds cron.
-        await this.handlePaymentStatusUpdate(refund, organization, mollieRefund.status, mollieRefund.createdAt);
+        await this.handlePaymentStatusUpdate(
+            refund,
+            organization,
+            mollieRefund.status,
+            mollieRefund.createdAt,
+        );
 
         return refund;
     }
@@ -1031,7 +1453,14 @@ export class PaymentService {
      * When no explicit balance items are provided, the amount is allocated across the balance items
      * of the original payment (taking into account earlier reversals of that payment).
      */
-    static async createReversalPayment({ payment, type, amount, balanceItems, adminUserId, customer }: {
+    static async createReversalPayment({
+        payment,
+        type,
+        amount,
+        balanceItems,
+        adminUserId,
+        customer,
+    }: {
         payment: Payment;
         type: PaymentType.Refund | PaymentType.Chargeback;
 
@@ -1066,10 +1495,9 @@ export class PaymentService {
 
         // Earlier reversals of this payment (refunds and chargebacks) reduce the remaining
         // refundable amount. Pending reversals are included to prevent refunding twice.
-        const previousReversals = (await Payment.select()
-            .where('reversingPaymentId', payment.id)
-            .fetch())
-            .filter(p => p.status !== PaymentStatus.Failed);
+        const previousReversals = (
+            await Payment.select().where('reversingPaymentId', payment.id).fetch()
+        ).filter((p) => p.status !== PaymentStatus.Failed);
 
         // Note: prices of reversals are negative
         const reversedAmount = previousReversals.reduce((total, p) => total + p.price, 0);
@@ -1091,7 +1519,10 @@ export class PaymentService {
                 }
 
                 if (itemPrice !== 0) {
-                    reversalPrices.set(balanceItem.id, (reversalPrices.get(balanceItem.id) ?? 0) + itemPrice);
+                    reversalPrices.set(
+                        balanceItem.id,
+                        (reversalPrices.get(balanceItem.id) ?? 0) + itemPrice,
+                    );
                 }
                 total += itemPrice;
             }
@@ -1107,40 +1538,66 @@ export class PaymentService {
 
             ({ price, roundingAmount } = this.round(total));
             items = [...balanceItems.keys()];
-        } else if (type === PaymentType.Chargeback || (amount === payment.price && previousReversals.length === 0)) {
+        } else if (
+            type === PaymentType.Chargeback ||
+            (amount === payment.price && previousReversals.length === 0)
+        ) {
             // Reverse the original payment exactly: negate all balance item payments
             // (chargebacks always reverse the full amount, validated in registerChargeback)
-            const balanceItemPayments = await BalanceItemPayment.select().where('paymentId', payment.id).fetch();
+            const balanceItemPayments = await BalanceItemPayment.select()
+                .where('paymentId', payment.id)
+                .fetch();
 
             for (const original of balanceItemPayments) {
                 if (original.price !== 0) {
-                    reversalPrices.set(original.balanceItemId, (reversalPrices.get(original.balanceItemId) ?? 0) - original.price);
+                    reversalPrices.set(
+                        original.balanceItemId,
+                        (reversalPrices.get(original.balanceItemId) ?? 0) - original.price,
+                    );
                 }
             }
 
             price = -payment.price;
             roundingAmount = -payment.roundingAmount;
-            items = await BalanceItem.getByIDs(...Formatter.uniqueArray(balanceItemPayments.map(b => b.balanceItemId)));
+            items = await BalanceItem.getByIDs(
+                ...Formatter.uniqueArray(balanceItemPayments.map((b) => b.balanceItemId)),
+            );
         } else {
             if (amount === undefined || amount <= 0) {
-                throw new Error('Amount is required to create a reversal payment without explicit balance items');
+                throw new Error(
+                    'Amount is required to create a reversal payment without explicit balance items',
+                );
             }
 
             // Partial refund: allocate the amount across the balance items of the original payment,
             // reduced by what was already reversed on those items
-            const balanceItemPayments = await BalanceItemPayment.select().where('paymentId', payment.id).fetch();
-            const previousItems = previousReversals.length > 0
-                ? await BalanceItemPayment.select().where('paymentId', previousReversals.map(p => p.id)).fetch()
-                : [];
+            const balanceItemPayments = await BalanceItemPayment.select()
+                .where('paymentId', payment.id)
+                .fetch();
+            const previousItems =
+                previousReversals.length > 0
+                    ? await BalanceItemPayment.select()
+                          .where(
+                              'paymentId',
+                              previousReversals.map((p) => p.id),
+                          )
+                          .fetch()
+                    : [];
 
             const available = new Map<string, number>();
             for (const original of balanceItemPayments) {
-                available.set(original.balanceItemId, (available.get(original.balanceItemId) ?? 0) + original.price);
+                available.set(
+                    original.balanceItemId,
+                    (available.get(original.balanceItemId) ?? 0) + original.price,
+                );
             }
             for (const reversed of previousItems) {
                 if (available.has(reversed.balanceItemId)) {
                     // Prices of reversals are negative
-                    available.set(reversed.balanceItemId, available.get(reversed.balanceItemId)! + reversed.price);
+                    available.set(
+                        reversed.balanceItemId,
+                        available.get(reversed.balanceItemId)! + reversed.price,
+                    );
                 }
             }
 
@@ -1161,20 +1618,25 @@ export class PaymentService {
             if (remainingToAllocate >= 100 || remainingToAllocate <= -100) {
                 throw new SimpleError({
                     code: 'refund_allocation_failed',
-                    message: 'Could not allocate the refund amount across the balance items of payment ' + payment.id,
+                    message:
+                        'Could not allocate the refund amount across the balance items of payment ' +
+                        payment.id,
                     human: $t('%Za5'),
                 });
             }
 
             price = -amount;
             roundingAmount = -remainingToAllocate;
-            items = await BalanceItem.getByIDs(...Formatter.uniqueArray([...reversalPrices.keys()]));
+            items = await BalanceItem.getByIDs(
+                ...Formatter.uniqueArray([...reversalPrices.keys()]),
+            );
         }
 
         if (type === PaymentType.Refund && -price > remaining) {
             throw new SimpleError({
                 code: 'refund_amount_too_high',
-                message: 'The refund amount is higher than the remaining refundable amount of the payment',
+                message:
+                    'The refund amount is higher than the remaining refundable amount of the payment',
                 human: $t('%ZaP', {
                     amount: Formatter.price(-price),
                     remaining: Formatter.price(remaining),
@@ -1236,13 +1698,17 @@ export class PaymentService {
      */
     static async deleteReversalPayment(reversal: Payment) {
         try {
-            const balanceItemPayments = await BalanceItemPayment.select().where('paymentId', reversal.id).fetch();
+            const balanceItemPayments = await BalanceItemPayment.select()
+                .where('paymentId', reversal.id)
+                .fetch();
             for (const balanceItemPayment of balanceItemPayments) {
                 await balanceItemPayment.delete();
             }
             await reversal.delete();
 
-            const items = await BalanceItem.getByIDs(...Formatter.uniqueArray(balanceItemPayments.map(b => b.balanceItemId)));
+            const items = await BalanceItem.getByIDs(
+                ...Formatter.uniqueArray(balanceItemPayments.map((b) => b.balanceItemId)),
+            );
             await BalanceItemService.updatePaidAndPending(items);
 
             // Make sure clients refetch the orders these balance items belong to
@@ -1255,12 +1721,28 @@ export class PaymentService {
         }
     }
 
-    static async createPayment({ balanceItems, organization, user, members, checkout, payingOrganization, serviceFeeType, createMandate, useMandate, paymentConfiguration, privatePaymentConfiguration, adminUserId }: {
+    static async createPayment({
+        balanceItems,
+        organization,
+        user,
+        members,
+        checkout,
+        payingOrganization,
+        serviceFeeType,
+        createMandate,
+        useMandate,
+        paymentConfiguration,
+        privatePaymentConfiguration,
+        adminUserId,
+    }: {
         balanceItems: Map<BalanceItem, number>;
         organization: Organization;
         user: User | null;
         members?: Member[];
-        checkout: Pick<Checkoutable<never>, 'paymentMethod' | 'totalPrice' | 'customer' | 'cancelUrl' | 'redirectUrl'>;
+        checkout: Pick<
+            Checkoutable<never>,
+            'paymentMethod' | 'totalPrice' | 'customer' | 'cancelUrl' | 'redirectUrl'
+        >;
         payingOrganization?: Organization | null;
         serviceFeeType: 'webshop' | 'members' | 'tickets' | 'system';
         createMandate: CreateMandateSettings | null;
@@ -1278,8 +1760,15 @@ export class PaymentService {
         // Items that the caller does pay (a non-zero amount) are always part of the payment, even when
         // they have a dueAt: balance items that are due soon are part of the outstanding balance and
         // can be paid before their due date (and are charged by direct debit).
-        const notDueYetBalanceItems = [...balanceItems.keys()].filter(item => item.dueAt !== null && item.dueAt > new Date() && (balanceItems.get(item) ?? 0) === 0);
-        const payableBalanceItems = new Map([...balanceItems].filter(([item]) => !notDueYetBalanceItems.includes(item)));
+        const notDueYetBalanceItems = [...balanceItems.keys()].filter(
+            (item) =>
+                item.dueAt !== null &&
+                item.dueAt > new Date() &&
+                (balanceItems.get(item) ?? 0) === 0,
+        );
+        const payableBalanceItems = new Map(
+            [...balanceItems].filter(([item]) => !notDueYetBalanceItems.includes(item)),
+        );
 
         // Passing no payment keeps paid: false, so a trial period isn't shortened.
         const markNotDueYetValid = async () => {
@@ -1296,11 +1785,23 @@ export class PaymentService {
         }
 
         // Calculate total price to pay
-        const { price, roundingAmount, hasNegative, names } = this.calculateTotalPrice({ balanceItems: payableBalanceItems, organization, members });
+        const { price, roundingAmount, hasNegative, names } = this.calculateTotalPrice({
+            balanceItems: payableBalanceItems,
+            organization,
+            members,
+        });
         PaymentService.validateTotalPrice({ price, roundingAmount, checkout });
 
-        const { customer, prefix } = await this.validateCustomer({ user, checkout, payingOrganization });
-        this.validateVATRates({ customer, sellingOrganization: organization, balanceItems: payableBalanceItems });
+        const { customer, prefix } = await this.validateCustomer({
+            user,
+            checkout,
+            payingOrganization,
+        });
+        this.validateVATRates({
+            customer,
+            sellingOrganization: organization,
+            balanceItems: payableBalanceItems,
+        });
 
         const { method, type, mandate } = await this.validatePaymentMethod({
             method: checkout.paymentMethod ?? PaymentMethod.Unknown,
@@ -1317,16 +1818,27 @@ export class PaymentService {
         });
 
         // Check URL's set fro online payments
-        if ((method !== PaymentMethod.Transfer && method !== PaymentMethod.PointOfSale && method !== PaymentMethod.Unknown) && (!checkout.redirectUrl || !checkout.cancelUrl) && !mandate) {
+        if (
+            method !== PaymentMethod.Transfer &&
+            method !== PaymentMethod.PointOfSale &&
+            method !== PaymentMethod.Unknown &&
+            (!checkout.redirectUrl || !checkout.cancelUrl) &&
+            !mandate
+        ) {
             throw new SimpleError({
                 code: 'missing_fields',
-                message: 'redirectUrl or cancelUrl is missing and is required for non-zero online payments',
+                message:
+                    'redirectUrl or cancelUrl is missing and is required for non-zero online payments',
                 human: $t('%vq'),
             });
         }
 
         // Determine the payment provider (throws if invalid)
-        const { provider, stripeAccount } = await organization.getPaymentProviderFor(method, mandate, privatePaymentConfiguration);
+        const { provider, stripeAccount } = await organization.getPaymentProviderFor(
+            method,
+            mandate,
+            privatePaymentConfiguration,
+        );
 
         if (createMandate && !mandate) {
             if (provider !== PaymentProvider.Mollie) {
@@ -1366,7 +1878,12 @@ export class PaymentService {
 
         payment.provider = provider;
         payment.stripeAccountId = stripeAccount?.id ?? null;
-        await ServiceFeeHelper.setServiceFee(payment, organization, serviceFeeType, [...payableBalanceItems.entries()].map(([_, p]) => p));
+        await ServiceFeeHelper.setServiceFee(
+            payment,
+            organization,
+            serviceFeeType,
+            [...payableBalanceItems.entries()].map(([_, p]) => p),
+        );
         await ServiceFeeHelper.setTransferFee({ payment, organization, stripeAccount });
 
         // Add transfer description
@@ -1426,24 +1943,44 @@ export class PaymentService {
                     console.error('Failed to send transfer email');
                     console.error(e);
                 }
-            } else if (payment.method !== PaymentMethod.PointOfSale && payment.method !== PaymentMethod.Unknown) {
+            } else if (
+                payment.method !== PaymentMethod.PointOfSale &&
+                payment.method !== PaymentMethod.Unknown
+            ) {
                 if ((!checkout.redirectUrl || !checkout.cancelUrl) && !mandate) {
                     throw new Error('Should have been caught earlier');
                 }
 
-                const _redirectUrl = new URL(checkout.redirectUrl ?? ('https://' + STAMHOOFD.domains.dashboard));
+                const _redirectUrl = new URL(
+                    checkout.redirectUrl ?? 'https://' + STAMHOOFD.domains.dashboard,
+                );
                 _redirectUrl.searchParams.set('paymentId', payment.id);
-                _redirectUrl.searchParams.set('organizationId', payment.payingOrganizationId ?? organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
+                _redirectUrl.searchParams.set(
+                    'organizationId',
+                    payment.payingOrganizationId ?? organization.id,
+                ); // makes sure the client uses the token associated with this organization when fetching payment polling status
 
-                const _cancelUrl = new URL(checkout.cancelUrl ?? ('https://' + STAMHOOFD.domains.dashboard));
+                const _cancelUrl = new URL(
+                    checkout.cancelUrl ?? 'https://' + STAMHOOFD.domains.dashboard,
+                );
                 _cancelUrl.searchParams.set('paymentId', payment.id);
                 _cancelUrl.searchParams.set('cancel', 'true');
-                _cancelUrl.searchParams.set('organizationId', payment.payingOrganizationId ?? organization.id); // makes sure the client uses the token associated with this organization when fetching payment polling status
+                _cancelUrl.searchParams.set(
+                    'organizationId',
+                    payment.payingOrganizationId ?? organization.id,
+                ); // makes sure the client uses the token associated with this organization when fetching payment polling status
 
                 const redirectUrl = _redirectUrl.href;
                 const cancelUrl = _cancelUrl.href;
 
-                const webhookUrl = 'https://' + organization.getApiHost() + '/v' + Version + '/payments/' + encodeURIComponent(payment.id) + '?exchange=true';
+                const webhookUrl =
+                    'https://' +
+                    organization.getApiHost() +
+                    '/v' +
+                    Version +
+                    '/payments/' +
+                    encodeURIComponent(payment.id) +
+                    '?exchange=true';
 
                 if (payment.provider === PaymentProvider.Stripe) {
                     if (createMandate || mandate) {
@@ -1500,7 +2037,13 @@ export class PaymentService {
                         // Already checked, but for security
                         throw new Error('Unsupported');
                     }
-                    ({ paymentUrl, paymentQRCode } = await PayconiqPayment.createPayment(payment, organization, description, redirectUrl, webhookUrl));
+                    ({ paymentUrl, paymentQRCode } = await PayconiqPayment.createPayment(
+                        payment,
+                        organization,
+                        description,
+                        redirectUrl,
+                        webhookUrl,
+                    ));
                 } else if (payment.provider === PaymentProvider.Buckaroo) {
                     if (createMandate || mandate) {
                         // Already checked, but for security
@@ -1509,22 +2052,39 @@ export class PaymentService {
 
                     // Increase request timeout because buckaroo is super slow (in development)
                     Context.request.request?.setTimeout(60 * 1000);
-                    const buckaroo = new BuckarooHelper(organization.privateMeta?.buckarooSettings?.key ?? '', organization.privateMeta?.buckarooSettings?.secret ?? '', organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
+                    const buckaroo = new BuckarooHelper(
+                        organization.privateMeta?.buckarooSettings?.key ?? '',
+                        organization.privateMeta?.buckarooSettings?.secret ?? '',
+                        organization.privateMeta.useTestPayments ??
+                            STAMHOOFD.environment !== 'production',
+                    );
                     const ip = Context.request.getIP();
-                    paymentUrl = await buckaroo.createPayment(payment, ip, description, redirectUrl, webhookUrl);
+                    paymentUrl = await buckaroo.createPayment(
+                        payment,
+                        ip,
+                        description,
+                        redirectUrl,
+                        webhookUrl,
+                    );
                     await payment.save();
 
                     // TypeScript doesn't understand that the status can change and isn't a const....
                     if ((payment.status as any) === PaymentStatus.Failed) {
                         throw new SimpleError({
                             code: 'payment_failed',
-                            message: $t('%w3', { method: PaymentMethodHelper.getName(payment.method) }),
+                            message: $t('%w3', {
+                                method: PaymentMethodHelper.getName(payment.method),
+                            }),
                         });
                     }
                 }
             }
         } catch (e) {
-            await PaymentService.handlePaymentStatusUpdate(payment, organization, PaymentStatus.Failed);
+            await PaymentService.handlePaymentStatusUpdate(
+                payment,
+                organization,
+                PaymentStatus.Failed,
+            );
             throw e;
         }
 
@@ -1532,12 +2092,20 @@ export class PaymentService {
         await markNotDueYetValid();
 
         // TypeScript thinks status cannot change to Failed, but it can.
-        if (payment.status === PaymentStatus.Succeeded || (payment.status as PaymentStatus) === PaymentStatus.Failed) {
+        if (
+            payment.status === PaymentStatus.Succeeded ||
+            (payment.status as PaymentStatus) === PaymentStatus.Failed
+        ) {
             // force update
             const updateTo = payment.status;
             payment.status = PaymentStatus.Created;
             await PaymentService.handlePaymentStatusUpdate(payment, organization, updateTo);
-        } else if (payment.method === PaymentMethod.Transfer || payment.method === PaymentMethod.PointOfSale || payment.method === PaymentMethod.Unknown || (payment.method === PaymentMethod.DirectDebit && mandate)) {
+        } else if (
+            payment.method === PaymentMethod.Transfer ||
+            payment.method === PaymentMethod.PointOfSale ||
+            payment.method === PaymentMethod.Unknown ||
+            (payment.method === PaymentMethod.DirectDebit && mandate)
+        ) {
             // Mark valid (not same as paid) if needed
             let hasBundleDiscount = false;
             for (const [balanceItem] of payableBalanceItems) {
@@ -1564,16 +2132,27 @@ export class PaymentService {
         };
     }
 
-    static async sendTransferEmail(customer: PaymentCustomer, userId: string | null, organization: Organization, payment: Payment) {
+    static async sendTransferEmail(
+        customer: PaymentCustomer,
+        userId: string | null,
+        organization: Organization,
+        payment: Payment,
+    ) {
         const email = customer.dynamicEmail;
         if (!email) {
-            console.warn('Skipped sending transfer email because of missing email address', payment.id);
+            console.warn(
+                'Skipped sending transfer email because of missing email address',
+                payment.id,
+            );
             return;
         }
         const paymentGeneral = await payment.getGeneralStructure();
         const groupIds = paymentGeneral.groupIds;
 
-        const replacements = getEmailReplacementsForPayment(paymentGeneral, await buildReplacementOptions([paymentGeneral]));
+        const replacements = getEmailReplacementsForPayment(
+            paymentGeneral,
+            await buildReplacementOptions([paymentGeneral]),
+        );
 
         const recipients = [
             Recipient.create({
@@ -1594,7 +2173,9 @@ export class PaymentService {
         // Create e-mail builder
         await sendEmailTemplate(organization, {
             template: {
-                type: groupIds.length ? EmailTemplateType.RegistrationTransferDetails : EmailTemplateType.RegistrationTransferDetails,
+                type: groupIds.length
+                    ? EmailTemplateType.RegistrationTransferDetails
+                    : EmailTemplateType.RegistrationTransferDetails,
                 group,
             },
             type: 'transactional',
@@ -1639,7 +2220,9 @@ export class PaymentService {
             user,
         });
 
-        const existingMandate = allMandates.find(m => m.id === mandate.id && m.provider === mandate.provider);
+        const existingMandate = allMandates.find(
+            (m) => m.id === mandate.id && m.provider === mandate.provider,
+        );
         if (!existingMandate) {
             throw new SimpleError({
                 code: 'not_found',
@@ -1705,13 +2288,13 @@ export class PaymentService {
             // - e.g. activating a new package with an existing mandate
             const existingMandate = mandate
                 ? await this.validateMandate({
-                        method,
-                        mandate,
-                        paymentConfiguration,
-                        payingOrganization,
-                        sellingOrganization,
-                        user,
-                    })
+                      method,
+                      mandate,
+                      paymentConfiguration,
+                      payingOrganization,
+                      sellingOrganization,
+                      user,
+                  })
                 : null;
 
             if (createMandate && !existingMandate) {
@@ -1805,7 +2388,15 @@ export class PaymentService {
         };
     }
 
-    static validateVATRates({ customer, sellingOrganization, balanceItems }: { customer: PaymentCustomer; sellingOrganization: Organization; balanceItems: Map<BalanceItem, number> }) {
+    static validateVATRates({
+        customer,
+        sellingOrganization,
+        balanceItems,
+    }: {
+        customer: PaymentCustomer;
+        sellingOrganization: Organization;
+        balanceItems: Map<BalanceItem, number>;
+    }) {
         // Validate VAT rates for this customer
         const seller = VATService.getDefaultCompanyForOrganization(sellingOrganization);
         const excempt = VATService.isVATExcempt({
@@ -1817,10 +2408,14 @@ export class PaymentService {
         if (excempt) {
             // Check VAT Exempt is set on each an every balance item with a non-zero price
             for (const [item] of balanceItems) {
-                if (item.VATExcempt !== VATExcemptReason.IntraCommunityServices && item.VATExcempt !== VATExcemptReason.IntraCommunityGoods) {
+                if (
+                    item.VATExcempt !== VATExcemptReason.IntraCommunityServices &&
+                    item.VATExcempt !== VATExcemptReason.IntraCommunityGoods
+                ) {
                     throw new SimpleError({
                         code: 'VAT_error',
-                        message: 'Intra community VAT reverse charge not supported for this purchase',
+                        message:
+                            'Intra community VAT reverse charge not supported for this purchase',
                         human: $t('%1LI'),
                     });
                 }
@@ -1830,7 +2425,8 @@ export class PaymentService {
                 if (item.VATPercentage === null && item.VATIncluded) {
                     throw new SimpleError({
                         code: 'VAT_error',
-                        message: 'Intra community VAT reverse charge is not supported for this purchase because of missing VAT rates',
+                        message:
+                            'Intra community VAT reverse charge is not supported for this purchase because of missing VAT rates',
                         human: $t('%1LJ'),
                     });
                 }
@@ -1838,7 +2434,10 @@ export class PaymentService {
         } else {
             // Fine to just not have setup VAT rates yet if the price is guaranteed to include VAT
             for (const [item] of balanceItems) {
-                if (item.VATExcempt === VATExcemptReason.IntraCommunityGoods || item.VATExcempt === VATExcemptReason.IntraCommunityServices) {
+                if (
+                    item.VATExcempt === VATExcemptReason.IntraCommunityGoods ||
+                    item.VATExcempt === VATExcemptReason.IntraCommunityServices
+                ) {
                     throw new SimpleError({
                         code: 'VAT_error',
                         message: 'Unexpected reverse charge applied',
@@ -1897,4 +2496,4 @@ export class PaymentService {
 
         return { seller };
     }
-};
+}

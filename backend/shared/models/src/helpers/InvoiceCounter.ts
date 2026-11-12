@@ -13,7 +13,11 @@ export class InvoiceCounter {
         return candidate > last ? candidate : candidate.plus({ years: 1 }).startOf('day');
     }
 
-    static shouldStartNewSeries(settings: OrganizationInvoiceSettings, lastInvoiceDate: Date, invoiceDate: Date) {
+    static shouldStartNewSeries(
+        settings: OrganizationInvoiceSettings,
+        lastInvoiceDate: Date,
+        invoiceDate: Date,
+    ) {
         if (settings.resetMonth === null) {
             return false;
         }
@@ -44,7 +48,11 @@ export class InvoiceCounter {
         if (last.length) {
             if (stripYear) {
                 if (last.length <= 4) {
-                    console.error('Could not parse invoice number from string ' + str + ' (could not trim year prefix)');
+                    console.error(
+                        'Could not parse invoice number from string ' +
+                            str +
+                            ' (could not trim year prefix)',
+                    );
                     return null;
                 }
                 last = last.substring(4);
@@ -63,7 +71,12 @@ export class InvoiceCounter {
     /**
      * Receipts use their own series with a fixed 'BON-' prefix instead of the organization prefix, which keeps them apart from invoice numbers (unique per organization)
      */
-    static formatNumber(settings: OrganizationInvoiceSettings, int: number, invoicedAt: Date, options?: { isReceipt?: boolean }) {
+    static formatNumber(
+        settings: OrganizationInvoiceSettings,
+        int: number,
+        invoicedAt: Date,
+        options?: { isReceipt?: boolean },
+    ) {
         let str = int.toFixed(0).padStart(settings.padZeroLength, '0');
 
         if (settings.prefixYear) {
@@ -87,7 +100,10 @@ export class InvoiceCounter {
         return str;
     }
 
-    static async assignNextNumber(invoice: Invoice, settings: OrganizationInvoiceSettings): Promise<void> {
+    static async assignNextNumber(
+        invoice: Invoice,
+        settings: OrganizationInvoiceSettings,
+    ): Promise<void> {
         const organizationId = invoice.organizationId;
         const isReceipt = invoice.isReceipt;
         const cacheKey = organizationId + (isReceipt ? '-receipt' : '');
@@ -103,7 +119,9 @@ export class InvoiceCounter {
                 if (!this.shouldStartNewSeries(settings, c.date, invoicedAt)) {
                     // Set and save.
                     // we do this here because it assures we'll not increase the next number if the save fails
-                    invoice.number = this.formatNumber(settings, lastNumber + 1, invoicedAt, { isReceipt });
+                    invoice.number = this.formatNumber(settings, lastNumber + 1, invoicedAt, {
+                        isReceipt,
+                    });
                     invoice.invoicedAt = invoicedAt;
                     await invoice.save();
 
@@ -131,7 +149,9 @@ export class InvoiceCounter {
                     const lastNumber = this.parseNumber(settings, lastInvoice.number);
 
                     if (lastNumber) {
-                        invoice.number = this.formatNumber(settings, lastNumber + 1, invoicedAt, { isReceipt });
+                        invoice.number = this.formatNumber(settings, lastNumber + 1, invoicedAt, {
+                            isReceipt,
+                        });
                         invoice.invoicedAt = invoicedAt;
                         await invoice.save();
 

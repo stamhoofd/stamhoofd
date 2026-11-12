@@ -32,13 +32,17 @@ describe('DbMigrate command', () => {
         };
         const command = new DbMigrate([], {} as any);
         (command as any).config = {};
-        (command as any).parse = vi.fn(async () => ({ flags: { env: 'keeo', name: 'feature-payments', verbose: true } }));
+        (command as any).parse = vi.fn(async () => ({
+            flags: { env: 'keeo', name: 'feature-payments', verbose: true },
+        }));
         (command as any).createContext = vi.fn(async () => context);
 
         await command.run();
 
         expect(migrate).toHaveBeenCalledWith(context);
         expect(ensureMysqlRunning).toHaveBeenCalledWith(context);
-        expect(vi.mocked(ensureMysqlRunning).mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(migrate).mock.invocationCallOrder[0]);
+        expect(vi.mocked(ensureMysqlRunning).mock.invocationCallOrder[0]).toBeLessThan(
+            vi.mocked(migrate).mock.invocationCallOrder[0],
+        );
     });
 });

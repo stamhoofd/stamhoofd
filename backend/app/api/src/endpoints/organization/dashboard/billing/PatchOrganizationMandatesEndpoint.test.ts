@@ -35,8 +35,17 @@ describe('Endpoint.PatchOrganizationMandatesEndpoint', () => {
         mollieMocker.reset();
     });
 
-    const patch = async (body: PatchableArrayAutoEncoder<PaymentMandate>, organization: Organization, token: Token) => {
-        const request = Request.buildJson('PATCH', `/billing/${sellingOrganization.id}/mandates`, organization.getApiHost(), body);
+    const patch = async (
+        body: PatchableArrayAutoEncoder<PaymentMandate>,
+        organization: Organization,
+        token: Token,
+    ) => {
+        const request = Request.buildJson(
+            'PATCH',
+            `/billing/${sellingOrganization.id}/mandates`,
+            organization.getApiHost(),
+            body,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -52,7 +61,9 @@ describe('Endpoint.PatchOrganizationMandatesEndpoint', () => {
 
         organization.serverMeta.mollieCustomerId = customerId;
         organization.serverMeta.mollieMandateId = defaultMandate.id;
-        organization.serverMeta.blockedMandates.push(BlockedPaymentMandate.create({ id: blockedMandate.id }));
+        organization.serverMeta.blockedMandates.push(
+            BlockedPaymentMandate.create({ id: blockedMandate.id }),
+        );
         await organization.save();
 
         return { organization, token: adminToken, defaultMandate, blockedMandate };
@@ -66,18 +77,24 @@ describe('Endpoint.PatchOrganizationMandatesEndpoint', () => {
 
     const setBlockedPatch = (mandateId: string, blocked: boolean) => {
         const arr: PatchableArrayAutoEncoder<PaymentMandate> = new PatchableArray();
-        arr.addPatch(PaymentMandate.patch({ id: mandateId, blockedAt: blocked ? new Date() : null }));
+        arr.addPatch(
+            PaymentMandate.patch({ id: mandateId, blockedAt: blocked ? new Date() : null }),
+        );
         return arr;
     };
 
     const getBlockedIds = async (organization: Organization) => {
-        return (await Organization.getByID(organization.id))!.serverMeta.blockedMandates.map(b => b.id).sort();
+        return (await Organization.getByID(organization.id))!.serverMeta.blockedMandates
+            .map((b) => b.id)
+            .sort();
     };
 
     test('A blocked mandate cannot be set as default', async () => {
         const { organization, token, defaultMandate, blockedMandate } = await init();
 
-        await expect(patch(setDefaultPatch(blockedMandate.id), organization, token)).rejects.toMatchObject({ code: 'mandate_blocked' });
+        await expect(
+            patch(setDefaultPatch(blockedMandate.id), organization, token),
+        ).rejects.toMatchObject({ code: 'mandate_blocked' });
 
         const updated = (await Organization.getByID(organization.id))!;
         expect(updated.serverMeta.mollieMandateId).toBe(defaultMandate.id);
@@ -88,57 +105,103 @@ describe('Endpoint.PatchOrganizationMandatesEndpoint', () => {
         const { adminToken: sellerToken } = await initPlatformAdmin();
 
         // Another mandate for the same card as the default one (the response groups these per card)
-        const sameCardMandate = mollieMocker.addMandate({ customerId: organization.serverMeta.mollieCustomerId!, cardNumber: '1234' });
+        const sameCardMandate = mollieMocker.addMandate({
+            customerId: organization.serverMeta.mollieCustomerId!,
+            cardNumber: '1234',
+        });
 
-        const blockResponse = await patch(setBlockedPatch(defaultMandate.id, true), organization, sellerToken);
+        const blockResponse = await patch(
+            setBlockedPatch(defaultMandate.id, true),
+            organization,
+            sellerToken,
+        );
         expect(blockResponse.status).toBe(200);
-        expect(blockResponse.body.find(m => m.id === defaultMandate.id)!.blockedAt).not.toBeNull();
-        expect(await getBlockedIds(organization)).toEqual([defaultMandate.id, sameCardMandate.id, blockedMandate.id].sort());
+        expect(
+            blockResponse.body.find((m) => m.id === defaultMandate.id)!.blockedAt,
+        ).not.toBeNull();
+        expect(await getBlockedIds(organization)).toEqual(
+            [defaultMandate.id, sameCardMandate.id, blockedMandate.id].sort(),
+        );
 
-        const unblockResponse = await patch(setBlockedPatch(defaultMandate.id, false), organization, sellerToken);
+        const unblockResponse = await patch(
+            setBlockedPatch(defaultMandate.id, false),
+            organization,
+            sellerToken,
+        );
         expect(unblockResponse.status).toBe(200);
-        expect(unblockResponse.body.find(m => m.id === defaultMandate.id)!.blockedAt).toBeNull();
-        expect(unblockResponse.body.find(m => m.id === blockedMandate.id)!.blockedAt).not.toBeNull();
+        expect(unblockResponse.body.find((m) => m.id === defaultMandate.id)!.blockedAt).toBeNull();
+        expect(
+            unblockResponse.body.find((m) => m.id === blockedMandate.id)!.blockedAt,
+        ).not.toBeNull();
         expect(await getBlockedIds(organization)).toEqual([blockedMandate.id]);
     });
 
     test('A seller admin with only payment access can block a mandate', async () => {
         TestUtils.setEnvironment('userMode', 'platform');
         const { organization, defaultMandate, blockedMandate } = await init();
-        const { adminToken: sellerToken } = await initAdmin({ organization: sellingOrganization, accessRights: [AccessRight.OrganizationManagePayments] });
+        const { adminToken: sellerToken } = await initAdmin({
+            organization: sellingOrganization,
+            accessRights: [AccessRight.OrganizationManagePayments],
+        });
 
-        const response = await patch(setBlockedPatch(defaultMandate.id, true), organization, sellerToken);
+        const response = await patch(
+            setBlockedPatch(defaultMandate.id, true),
+            organization,
+            sellerToken,
+        );
         expect(response.status).toBe(200);
-        expect(await getBlockedIds(organization)).toEqual([defaultMandate.id, blockedMandate.id].sort());
+        expect(await getBlockedIds(organization)).toEqual(
+            [defaultMandate.id, blockedMandate.id].sort(),
+        );
     });
 
     test('The paying organization cannot block or unblock a mandate', async () => {
         const { organization, token, defaultMandate, blockedMandate } = await init();
 
-        await expect(patch(setBlockedPatch(defaultMandate.id, true), organization, token)).rejects.toMatchObject({ code: 'permission_denied' });
-        await expect(patch(setBlockedPatch(blockedMandate.id, false), organization, token)).rejects.toMatchObject({ code: 'permission_denied' });
+        await expect(
+            patch(setBlockedPatch(defaultMandate.id, true), organization, token),
+        ).rejects.toMatchObject({ code: 'permission_denied' });
+        await expect(
+            patch(setBlockedPatch(blockedMandate.id, false), organization, token),
+        ).rejects.toMatchObject({ code: 'permission_denied' });
         expect(await getBlockedIds(organization)).toEqual([blockedMandate.id]);
     });
 
     test('A finance director can change the default mandate', async () => {
         const { organization } = await init();
-        const { adminToken } = await initAdmin({ organization, accessRights: [AccessRight.OrganizationFinanceDirector] });
+        const { adminToken } = await initAdmin({
+            organization,
+            accessRights: [AccessRight.OrganizationFinanceDirector],
+        });
 
-        const otherMandate = mollieMocker.addMandate({ customerId: organization.serverMeta.mollieCustomerId!, cardNumber: '5678' });
+        const otherMandate = mollieMocker.addMandate({
+            customerId: organization.serverMeta.mollieCustomerId!,
+            cardNumber: '5678',
+        });
 
         const response = await patch(setDefaultPatch(otherMandate.id), organization, adminToken);
         expect(response.status).toBe(200);
-        expect((await Organization.getByID(organization.id))!.serverMeta.mollieMandateId).toBe(otherMandate.id);
+        expect((await Organization.getByID(organization.id))!.serverMeta.mollieMandateId).toBe(
+            otherMandate.id,
+        );
     });
 
     test('A seller admin cannot change the default mandate', async () => {
         TestUtils.setEnvironment('userMode', 'platform');
         const { organization, defaultMandate, blockedMandate } = await init();
-        const { adminToken: sellerToken } = await initAdmin({ organization: sellingOrganization, accessRights: [AccessRight.OrganizationManagePayments] });
+        const { adminToken: sellerToken } = await initAdmin({
+            organization: sellingOrganization,
+            accessRights: [AccessRight.OrganizationManagePayments],
+        });
 
-        const otherMandate = mollieMocker.addMandate({ customerId: organization.serverMeta.mollieCustomerId!, cardNumber: '5678' });
+        const otherMandate = mollieMocker.addMandate({
+            customerId: organization.serverMeta.mollieCustomerId!,
+            cardNumber: '5678',
+        });
 
-        await expect(patch(setDefaultPatch(otherMandate.id), organization, sellerToken)).rejects.toMatchObject({ code: 'permission_denied' });
+        await expect(
+            patch(setDefaultPatch(otherMandate.id), organization, sellerToken),
+        ).rejects.toMatchObject({ code: 'permission_denied' });
 
         const updated = (await Organization.getByID(organization.id))!;
         expect(updated.serverMeta.mollieMandateId).toBe(defaultMandate.id);
@@ -147,13 +210,18 @@ describe('Endpoint.PatchOrganizationMandatesEndpoint', () => {
 
     test('Users without finance access cannot read or patch the mandates', async () => {
         const { organization, defaultMandate } = await init();
-        const { adminToken } = await initAdmin({ organization, accessRights: [AccessRight.OrganizationCreateWebshops] });
+        const { adminToken } = await initAdmin({
+            organization,
+            accessRights: [AccessRight.OrganizationCreateWebshops],
+        });
 
         // A patch without changes only returns the mandates
         const noopPatch: PatchableArrayAutoEncoder<PaymentMandate> = new PatchableArray();
         noopPatch.addPatch(PaymentMandate.patch({ id: defaultMandate.id }));
 
-        await expect(patch(noopPatch, organization, adminToken)).rejects.toMatchObject({ code: 'permission_denied' });
+        await expect(patch(noopPatch, organization, adminToken)).rejects.toMatchObject({
+            code: 'permission_denied',
+        });
     });
 
     test('Blocked mandates are returned as blocked', async () => {
@@ -162,11 +230,11 @@ describe('Endpoint.PatchOrganizationMandatesEndpoint', () => {
         const response = await patch(setDefaultPatch(defaultMandate.id), organization, token);
         expect(response.status).toBe(200);
 
-        const blocked = response.body.find(m => m.id === blockedMandate.id);
+        const blocked = response.body.find((m) => m.id === blockedMandate.id);
         expect(blocked?.blockedAt).not.toBeNull();
         expect(blocked?.isDefault).toBe(false);
 
-        const defaultResponse = response.body.find(m => m.id === defaultMandate.id);
+        const defaultResponse = response.body.find((m) => m.id === defaultMandate.id);
         expect(defaultResponse?.blockedAt).toBeNull();
         expect(defaultResponse?.isDefault).toBe(true);
     });

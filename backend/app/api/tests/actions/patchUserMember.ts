@@ -8,7 +8,15 @@ import { PatchUserMembersEndpoint } from '../../src/endpoints/global/registratio
 import { testServer } from '../helpers/TestServer.js';
 import { SessionService } from '../../src/services/SessionService.js';
 
-export async function patchUserMember({ patch, organization, user }: { patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>; organization: Organization; user: User }) {
+export async function patchUserMember({
+    patch,
+    organization,
+    user,
+}: {
+    patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>;
+    organization: Organization;
+    user: User;
+}) {
     expect(patch.id).toEqual(expect.any(String));
 
     const token = await SessionService.createSession(user);

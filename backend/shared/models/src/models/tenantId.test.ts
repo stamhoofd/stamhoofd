@@ -1,4 +1,9 @@
-import { MemberFactory, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '../factories/index.js';
+import {
+    MemberFactory,
+    OrganizationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '../factories/index.js';
 import { Member } from './Member.js';
 import { Organization } from './Organization.js';
 import { RegistrationPeriod } from './RegistrationPeriod.js';

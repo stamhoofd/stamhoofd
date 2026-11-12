@@ -1,4 +1,9 @@
-import type { BackendEnvironment, FrontendEnvironment, SharedEnvironment, StatisticsEnvironment } from '@stamhoofd/types/Environment';
+import type {
+    BackendEnvironment,
+    FrontendEnvironment,
+    SharedEnvironment,
+    StatisticsEnvironment,
+} from '@stamhoofd/types/Environment';
 import type { StamhoofdDomains } from '@stamhoofd/types/StamhoofdDomains';
 import { MemberNumberAlgorithm } from '@stamhoofd/types/MemberNumberAlgorithm';
 import path from 'node:path';
@@ -6,9 +11,23 @@ import type { CliContext } from '../context/create-context.js';
 import { createContext } from '../context/create-context.js';
 import { buildPorts } from '../context/ports.js';
 import { applyInternalSecrets } from './internal-secrets.js';
-import { defaultDomain, localFilesAccessKey, localFilesSecretKey, localIpv4Host, localPrimaryBucket, maildevPassword, maildevUsername, mysqlInternalPort } from './shared-service-config.js';
+import {
+    defaultDomain,
+    localFilesAccessKey,
+    localFilesSecretKey,
+    localIpv4Host,
+    localPrimaryBucket,
+    maildevPassword,
+    maildevUsername,
+    mysqlInternalPort,
+} from './shared-service-config.js';
 import type { Language } from '@stamhoofd/types/Language';
-import type { AppEnvironment, AppService, BackendAppService, FrontendAppService } from './development-config-types.js';
+import type {
+    AppEnvironment,
+    AppService,
+    BackendAppService,
+    FrontendAppService,
+} from './development-config-types.js';
 import { BackendApp } from '@stamhoofd/types/BackendApp';
 import { FrontendApp } from '@stamhoofd/types/FrontendApp';
 
@@ -37,15 +56,29 @@ type EnvironmentPreset = {
     statisticsImportedUntil?: string;
 };
 
-const fileSigningPublicKey = { kty: 'EC', x: 'LZPou8JKNPoxgc1FXqLW_dqAYrv3_3ZoFHACwCiiunw', y: 'kBSKvtDVpa29J2mh5pICQD12dKO25fU3Bz-JItNAgEE', crv: 'P-256' };
-const fileSigningPrivateKey = { ...fileSigningPublicKey, d: 'C0xuuMOMKeIDP6YPOz2dO1ccMYYrnpDpzz-_oRoq4io' };
+const fileSigningPublicKey = {
+    kty: 'EC',
+    x: 'LZPou8JKNPoxgc1FXqLW_dqAYrv3_3ZoFHACwCiiunw',
+    y: 'kBSKvtDVpa29J2mh5pICQD12dKO25fU3Bz-JItNAgEE',
+    crv: 'P-256',
+};
+const fileSigningPrivateKey = {
+    ...fileSigningPublicKey,
+    d: 'C0xuuMOMKeIDP6YPOz2dO1ccMYYrnpDpzz-_oRoq4io',
+};
 
-export function buildDevelopmentConfig(context: CliContext, service: AppService = { backend: BackendApp.Api }): DevelopmentConfig {
+export function buildDevelopmentConfig(
+    context: CliContext,
+    service: AppService = { backend: BackendApp.Api },
+): DevelopmentConfig {
     const domains = buildDevelopmentDomains(context);
     const databases = buildDevelopmentDatabases(context);
     const ports = buildPorts(context);
     const instanceDatabase = databases.main;
-    const bucket = context.instance.name === 'stamhoofd' ? localPrimaryBucket : `${localPrimaryBucket}-${context.instance.name}`;
+    const bucket =
+        context.instance.name === 'stamhoofd'
+            ? localPrimaryBucket
+            : `${localPrimaryBucket}-${context.instance.name}`;
     const backendEnv = {
         STAMHOOFD_ENV: context.env,
         STAMHOOFD_DEV_NAME: context.instance.name,
@@ -78,7 +111,8 @@ export function buildDevelopmentConfig(context: CliContext, service: AppService 
  * share data, exactly like the main development database.
  */
 function buildDevelopmentDatabases(context: CliContext) {
-    const forInstance = (database: string) => context.instance.primary ? database : `${database}-${context.instance.name}`;
+    const forInstance = (database: string) =>
+        context.instance.primary ? database : `${database}-${context.instance.name}`;
 
     return {
         main: process.env.DB_NAME ?? forInstance(baseDatabase(context.env)),
@@ -86,10 +120,22 @@ function buildDevelopmentDatabases(context: CliContext) {
     };
 }
 
-export async function buildDevelopmentEnvironment(env: string, service: { backend: BackendApp.StatisticsSyncer }): Promise<StatisticsEnvironment>;
-export async function buildDevelopmentEnvironment(env: string, service: BackendAppService): Promise<BackendEnvironment>;
-export async function buildDevelopmentEnvironment(env: string, service: FrontendAppService): Promise<FrontendEnvironment>;
-export async function buildDevelopmentEnvironment(env: string, service: AppService): Promise<AppEnvironment> {
+export async function buildDevelopmentEnvironment(
+    env: string,
+    service: { backend: BackendApp.StatisticsSyncer },
+): Promise<StatisticsEnvironment>;
+export async function buildDevelopmentEnvironment(
+    env: string,
+    service: BackendAppService,
+): Promise<BackendEnvironment>;
+export async function buildDevelopmentEnvironment(
+    env: string,
+    service: FrontendAppService,
+): Promise<FrontendEnvironment>;
+export async function buildDevelopmentEnvironment(
+    env: string,
+    service: AppService,
+): Promise<AppEnvironment> {
     const context = await createContext({ env, verbose: false });
     const appEnv = buildDevelopmentConfig(context, service).appEnv;
     return await applyInternalSecrets(context, service, appEnv);
@@ -98,7 +144,9 @@ export async function buildDevelopmentEnvironment(env: string, service: AppServi
 function buildDevelopmentDomains(context: CliContext) {
     const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
     const prefix = context.instance.prefix;
-    const labels = [context.env === 'stamhoofd' ? '' : context.env, prefix, domain].filter(label => label.length > 0);
+    const labels = [context.env === 'stamhoofd' ? '' : context.env, prefix, domain].filter(
+        (label) => label.length > 0,
+    );
     const appDomain = (service: string) => `${service}.${labels.join('.')}`;
 
     return {
@@ -124,7 +172,14 @@ function buildDevelopmentDomains(context: CliContext) {
     };
 }
 
-function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, databases: DevelopmentDatabases, ports: ReturnType<typeof buildPorts>, backendEnv: NodeJS.ProcessEnv, service: AppService): AppEnvironment {
+function buildAppEnvironment(
+    context: CliContext,
+    domains: DevelopmentDomains,
+    databases: DevelopmentDatabases,
+    ports: ReturnType<typeof buildPorts>,
+    backendEnv: NodeJS.ProcessEnv,
+    service: AppService,
+): AppEnvironment {
     const preset = environmentPreset(context.env);
 
     if ('backend' in service && service.backend === BackendApp.StatisticsSyncer) {
@@ -206,7 +261,12 @@ function buildAppEnvironment(context: CliContext, domains: DevelopmentDomains, d
  * Both databases sit on the one development MySQL, where production keeps the statistics database on
  * the Metabase server: same credentials and port, only the name differs.
  */
-function buildStatisticsEnvironment(databases: DevelopmentDatabases, ports: ReturnType<typeof buildPorts>, backendEnv: NodeJS.ProcessEnv, preset: EnvironmentPreset): StatisticsEnvironment {
+function buildStatisticsEnvironment(
+    databases: DevelopmentDatabases,
+    ports: ReturnType<typeof buildPorts>,
+    backendEnv: NodeJS.ProcessEnv,
+    preset: EnvironmentPreset,
+): StatisticsEnvironment {
     const connection = {
         DB_HOST: backendEnv.DB_HOST!,
         DB_USER: backendEnv.DB_USER!,
@@ -223,7 +283,10 @@ function buildStatisticsEnvironment(databases: DevelopmentDatabases, ports: Retu
     };
 }
 
-function frontendPort(service: FrontendAppService['frontend'], ports: ReturnType<typeof buildPorts>): number | undefined {
+function frontendPort(
+    service: FrontendAppService['frontend'],
+    ports: ReturnType<typeof buildPorts>,
+): number | undefined {
     if (service === FrontendApp.WebApp) {
         return ports.webApp;
     }
@@ -233,23 +296,32 @@ function frontendPort(service: FrontendAppService['frontend'], ports: ReturnType
     return undefined;
 }
 
-function buildStamhoofdDomains(domains: DevelopmentDomains, preset: EnvironmentPreset): StamhoofdDomains {
+function buildStamhoofdDomains(
+    domains: DevelopmentDomains,
+    preset: EnvironmentPreset,
+): StamhoofdDomains {
     return {
         dashboard: domains.dashboard,
-        registration: preset.userMode === 'organization' ? { '': domains.registration, 'BE': domains.registration, 'NL': domains.registration } : undefined,
+        registration:
+            preset.userMode === 'organization'
+                ? { '': domains.registration, BE: domains.registration, NL: domains.registration }
+                : undefined,
         marketing: { '': 'www.stamhoofd.be' },
-        webshop: { '': domains.webshop, 'BE': domains.webshop, 'NL': domains.webshop },
+        webshop: { '': domains.webshop, BE: domains.webshop, NL: domains.webshop },
         api: domains.api,
         rendererApi: domains.renderer,
         webshopCname: domains.webshop,
         registrationCname: { '': domains.registration },
-        defaultTransactionalEmail: { '': 'stamhoofd.be', 'NL': 'stamhoofd.nl' },
+        defaultTransactionalEmail: { '': 'stamhoofd.be', NL: 'stamhoofd.nl' },
         defaultBroadcastEmail: { '': 'stamhoofd.email' },
         documentation: preset.documentation ? { '': preset.documentation } : undefined,
     };
 }
 
-function backendPort(service: BackendAppService['backend'], ports: ReturnType<typeof buildPorts>): number {
+function backendPort(
+    service: BackendAppService['backend'],
+    ports: ReturnType<typeof buildPorts>,
+): number {
     if (service === BackendApp.Renderer) {
         return ports.renderer;
     }

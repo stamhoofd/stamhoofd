@@ -7,7 +7,10 @@ import type { SQLJoin } from '../SQLJoin.js';
 import type { SQLOrderBy, SQLOrderByDirection } from '../SQLOrderBy.js';
 import type { SQLSelect } from '../SQLSelect.js';
 
-export type SQLSortDefinition<T, B extends PlainObject | Date = PlainObject | Date> = SortDefinition<T, B> & {
+export type SQLSortDefinition<
+    T,
+    B extends PlainObject | Date = PlainObject | Date,
+> = SortDefinition<T, B> & {
     toSQL(direction: SQLOrderByDirection): SQLOrderBy;
     join?: SQLJoin;
     select?: (SQLExpression | string)[];
@@ -17,7 +20,11 @@ export type SQLSortDefinition<T, B extends PlainObject | Date = PlainObject | Da
 /** Exact-key SQL sorter registry, shared with cursor pagination. */
 export type SQLSortDefinitions<T = any> = Map<string, SQLSortDefinition<T>>;
 
-export async function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortList, definitions: SQLSortDefinitions) {
+export async function applySQLSorter(
+    selectQuery: SQLSelect<any>,
+    sortBy: SortList,
+    definitions: SQLSortDefinitions,
+) {
     if (sortBy.length === 0) {
         throw new SimpleError({
             code: 'empty_sort',
@@ -44,7 +51,7 @@ export async function applySQLSorter(selectQuery: SQLSelect<any>, sortBy: SortLi
 
         if (d.join) {
             // Check if no overlap in alias/table (otherwise we'll get issues)
-            if (selectQuery._joins.find(j => j === d.join)) {
+            if (selectQuery._joins.find((j) => j === d.join)) {
                 // Already added
             } else {
                 const name = d.join.table.getSQL({ defaultNamespace: 'default' });

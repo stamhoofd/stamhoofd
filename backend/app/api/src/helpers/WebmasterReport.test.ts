@@ -6,7 +6,9 @@ import { WebmasterReport } from './WebmasterReport.js';
 describe('WebmasterReport', () => {
     // Emails of other tests can still be in the queue when this one runs: match on the subject
     const getEmails = async (subjectPrefix = 'Synchroniseren uitbetalingen') => {
-        return (await EmailMocker.transactional.getSucceededEmails()).filter(e => e.subject.startsWith(subjectPrefix));
+        return (await EmailMocker.transactional.getSucceededEmails()).filter((e) =>
+            e.subject.startsWith(subjectPrefix),
+        );
     };
 
     test('problems reported inside a group are sent as one email', async () => {
@@ -33,10 +35,12 @@ describe('WebmasterReport', () => {
     });
 
     test('problems are still reported when the group throws', async () => {
-        await expect(WebmasterReport.group('Synchroniseren uitbetalingen', async () => {
-            WebmasterReport.report('Uitbetaling po_1 mislukt');
-            throw new Error('Boom');
-        })).rejects.toThrow('Boom');
+        await expect(
+            WebmasterReport.group('Synchroniseren uitbetalingen', async () => {
+                WebmasterReport.report('Uitbetaling po_1 mislukt');
+                throw new Error('Boom');
+            }),
+        ).rejects.toThrow('Boom');
 
         const emails = await getEmails();
         expect(emails).toHaveLength(1);
@@ -72,7 +76,10 @@ describe('WebmasterReport', () => {
 
     test('titles and details are escaped', async () => {
         await WebmasterReport.group('Synchroniseren uitbetalingen', async () => {
-            WebmasterReport.report('Uitbetaling van <b>Chiro & Co</b> mislukt', new Error('Regel 1\nRegel 2'));
+            WebmasterReport.report(
+                'Uitbetaling van <b>Chiro & Co</b> mislukt',
+                new Error('Regel 1\nRegel 2'),
+            );
         });
 
         const [email] = await getEmails();

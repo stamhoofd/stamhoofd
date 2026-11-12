@@ -5,15 +5,37 @@ import os from 'node:os';
 import path from 'node:path';
 import chalk from 'chalk';
 import { writeSetupCaddyConfig } from '../config/caddy-config.js';
-import { caddyContainer, caddyDataDir, caddyHttpPort, caddyHttpsPort, caddyRootCaPath, caddySetupAdminPort, defaultDomain, localIpv4Host, localhostPort } from '../config/shared-service-config.js';
-import { buildSharedServiceProfile, SharedServiceDnsSetupKind } from '../config/shared-service-profile.js';
+import {
+    caddyContainer,
+    caddyDataDir,
+    caddyHttpPort,
+    caddyHttpsPort,
+    caddyRootCaPath,
+    caddySetupAdminPort,
+    defaultDomain,
+    localIpv4Host,
+    localhostPort,
+} from '../config/shared-service-config.js';
+import {
+    buildSharedServiceProfile,
+    SharedServiceDnsSetupKind,
+} from '../config/shared-service-profile.js';
 import type { SharedServiceProfile } from '../config/shared-service-profile.js';
 import type { CliContext } from '../context/create-context.js';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { execSudo } from '../runtime/process.js';
 import { sharedDir } from '../runtime/manifest-store.js';
 import { CliStatus } from '../runtime/status.js';
-import { command, confirm, statusCell, step, success, table, Table, warning } from '../runtime/ux.js';
+import {
+    command,
+    confirm,
+    statusCell,
+    step,
+    success,
+    table,
+    Table,
+    warning,
+} from '../runtime/ux.js';
 import type { TableCellInput, TableRow } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import { restartSharedServicesInteractive } from '../services/shared-services.js';
@@ -63,27 +85,86 @@ export type CheckResult = {
 } & ({ ok: true } | { ok: false; remediation: SetupRemediation });
 
 /** Every failed check must explicitly choose a runnable repair or explain why it is manual. */
-type SetupRemediation = { action: SetupAutomaticFixKey; label?: string } | { instructions: string; reason: string };
+type SetupRemediation =
+    | { action: SetupAutomaticFixKey; label?: string }
+    | { instructions: string; reason: string };
 
-const setupActions: Record<SetupAutomaticFixKey, { command: string; label: string; run: (context: CliContext) => Promise<void> }> = {
-    [SetupAutomaticFixKey.Node]: { command: 'stam setup node', label: 'Install required Node.js version', run: context => setupNodeVersion(context.rootDir) },
-    [SetupAutomaticFixKey.Pnpm]: { command: 'stam setup pnpm', label: 'Install required pnpm version with Corepack', run: context => setupPackageManager(context.rootDir) },
-    [SetupAutomaticFixKey.Vcs]: { command: 'stam setup vcs', label: 'Configure Git / JJ push destinations', run: context => setupVcs(context.rootDir, { yes: true, dryRun: false, verbosity: context.verbosity }) },
-    [SetupAutomaticFixKey.Dns]: { command: 'stam setup dns', label: 'Configure local DNS', run: () => setupDns({ yes: true, dryRun: false, confirmOverwrite: true }) },
-    [SetupAutomaticFixKey.PrivilegedPorts]: { command: 'stam setup privileged-ports', label: 'Configure privileged port redirects', run: () => setupPrivilegedPortRedirects({ yes: true, dryRun: false }) },
-    [SetupAutomaticFixKey.Services]: { command: 'stam services up', label: 'Start shared services', run: runServices },
-    [SetupAutomaticFixKey.RestartServices]: { command: 'stam services restart', label: 'Restart shared services', run: restartSharedServicesInteractive },
-    [SetupAutomaticFixKey.Caddy]: { command: 'stam setup caddy', label: 'Install Caddy with Homebrew', run: () => setupCaddy({ yes: true, dryRun: false }) },
-    [SetupAutomaticFixKey.Cert]: { command: 'stam setup cert', label: 'Trust local HTTPS certificates', run: context => setupCert(context, { yes: true, dryRun: false }) },
+const setupActions: Record<
+    SetupAutomaticFixKey,
+    { command: string; label: string; run: (context: CliContext) => Promise<void> }
+> = {
+    [SetupAutomaticFixKey.Node]: {
+        command: 'stam setup node',
+        label: 'Install required Node.js version',
+        run: (context) => setupNodeVersion(context.rootDir),
+    },
+    [SetupAutomaticFixKey.Pnpm]: {
+        command: 'stam setup pnpm',
+        label: 'Install required pnpm version with Corepack',
+        run: (context) => setupPackageManager(context.rootDir),
+    },
+    [SetupAutomaticFixKey.Vcs]: {
+        command: 'stam setup vcs',
+        label: 'Configure Git / JJ push destinations',
+        run: (context) =>
+            setupVcs(context.rootDir, { yes: true, dryRun: false, verbosity: context.verbosity }),
+    },
+    [SetupAutomaticFixKey.Dns]: {
+        command: 'stam setup dns',
+        label: 'Configure local DNS',
+        run: () => setupDns({ yes: true, dryRun: false, confirmOverwrite: true }),
+    },
+    [SetupAutomaticFixKey.PrivilegedPorts]: {
+        command: 'stam setup privileged-ports',
+        label: 'Configure privileged port redirects',
+        run: () => setupPrivilegedPortRedirects({ yes: true, dryRun: false }),
+    },
+    [SetupAutomaticFixKey.Services]: {
+        command: 'stam services up',
+        label: 'Start shared services',
+        run: runServices,
+    },
+    [SetupAutomaticFixKey.RestartServices]: {
+        command: 'stam services restart',
+        label: 'Restart shared services',
+        run: restartSharedServicesInteractive,
+    },
+    [SetupAutomaticFixKey.Caddy]: {
+        command: 'stam setup caddy',
+        label: 'Install Caddy with Homebrew',
+        run: () => setupCaddy({ yes: true, dryRun: false }),
+    },
+    [SetupAutomaticFixKey.Cert]: {
+        command: 'stam setup cert',
+        label: 'Trust local HTTPS certificates',
+        run: (context) => setupCert(context, { yes: true, dryRun: false }),
+    },
 };
 
-function optionalManualCheck(result: { ok: boolean; details: string; manualFix?: string }): CheckResult {
+function optionalManualCheck(result: {
+    ok: boolean;
+    details: string;
+    manualFix?: string;
+}): CheckResult {
     return result.ok
         ? { ok: true, details: result.details, optional: true }
-        : { ok: false, details: result.details, optional: true, remediation: { instructions: result.manualFix ?? result.details, reason: 'Optional setup is managed separately.' } };
+        : {
+              ok: false,
+              details: result.details,
+              optional: true,
+              remediation: {
+                  instructions: result.manualFix ?? result.details,
+                  reason: 'Optional setup is managed separately.',
+              },
+          };
 }
 
-function setupCheckDefinitions(context: CliContext): { key: keyof SetupReport; label: string; optional?: boolean; check: () => Promise<CheckResult> }[] {
+function setupCheckDefinitions(context: CliContext): {
+    key: keyof SetupReport;
+    label: string;
+    optional?: boolean;
+    check: () => Promise<CheckResult>;
+}[] {
     const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
     const profile = currentSharedServiceProfile(context.verbosity);
     return [
@@ -91,59 +172,104 @@ function setupCheckDefinitions(context: CliContext): { key: keyof SetupReport; l
         { key: 'pnpm', label: 'pnpm', check: () => packageManagerCheck(context) },
         { key: 'vcs', label: 'Git / JJ', optional: true, check: () => vcsCheck(context) },
         { key: 'docker', label: 'Podman / Docker', check: () => dockerCheck(context.verbosity) },
-        { key: 'privilegedPorts', label: 'Privileged port redirects', check: async () => privilegedPortRedirectCheck(await profile, context.verbosity) },
+        {
+            key: 'privilegedPorts',
+            label: 'Privileged port redirects',
+            check: async () => privilegedPortRedirectCheck(await profile, context.verbosity),
+        },
         { key: 'caddy', label: 'Caddy', check: () => caddyCheck(context.verbosity) },
-        { key: 'dns', label: `DNS .${domain}`, check: async () => dnsCheck(context, await profile) },
+        {
+            key: 'dns',
+            label: `DNS .${domain}`,
+            check: async () => dnsCheck(context, await profile),
+        },
         { key: 'cert', label: 'Caddy local CA', check: () => certCheck(context.verbosity) },
-        { key: 'shell', label: 'Binary shortcut', optional: true, check: async () => {
-            const result = await checkShellShortcut();
-            return optionalManualCheck({ ...result, manualFix: 'pnpm stam setup shortcut' });
-        } },
+        {
+            key: 'shell',
+            label: 'Binary shortcut',
+            optional: true,
+            check: async () => {
+                const result = await checkShellShortcut();
+                return optionalManualCheck({ ...result, manualFix: 'pnpm stam setup shortcut' });
+            },
+        },
     ];
 }
 
 export async function checkSetup(context: CliContext): Promise<SetupReport> {
-    const results = await Promise.all(setupCheckDefinitions(context).map(async ({ key, optional, check }) => [key, { ...await check(), optional }]));
+    const results = await Promise.all(
+        setupCheckDefinitions(context).map(async ({ key, optional, check }) => [
+            key,
+            { ...(await check()), optional },
+        ]),
+    );
     const devops = await getOptionalDevopsSetupChecks(path.join(context.rootDir, 'devops'));
-    return { ...Object.fromEntries(results), devops: await Promise.all(devops.map(async ({ label, check }) => ({ label, result: optionalManualCheck(await check()) }))) } as SetupReport;
+    return {
+        ...Object.fromEntries(results),
+        devops: await Promise.all(
+            devops.map(async ({ label, check }) => ({
+                label,
+                result: optionalManualCheck(await check()),
+            })),
+        ),
+    } as SetupReport;
 }
 
-export async function checkSetupWithTable(context: CliContext, options: { live: boolean }): Promise<SetupReport> {
-    const checks = setupCheckDefinitions(context).map(definition => ({
+export async function checkSetupWithTable(
+    context: CliContext,
+    options: { live: boolean },
+): Promise<SetupReport> {
+    const checks = setupCheckDefinitions(context).map((definition) => ({
         ...definition,
         row: Table.row([definition.label, Table.cell('checking', { indeterminate: true }), '']),
     }));
-    const optional = checks.filter(check => check.optional);
-    const devops = (await getOptionalDevopsSetupChecks(path.join(context.rootDir, 'devops'))).map(definition => ({
-        ...definition,
-        row: Table.row([definition.label, Table.cell('checking', { indeterminate: true }), '']),
-    }));
+    const optional = checks.filter((check) => check.optional);
+    const devops = (await getOptionalDevopsSetupChecks(path.join(context.rootDir, 'devops'))).map(
+        (definition) => ({
+            ...definition,
+            row: Table.row([definition.label, Table.cell('checking', { indeterminate: true }), '']),
+        }),
+    );
     const liveTable = Table.create({
         title: 'Checking Stamhoofd local development setup',
         headers: ['Check', 'Status', 'Details'],
         rows: [
-            ...checks.filter(check => !check.optional).map(check => check.row),
-            ...(optional.length ? optionalSectionRows().map(cells => Table.row(cells)) : []),
-            ...optional.map(check => check.row),
-            ...(devops.length ? devopsSectionRows().map(cells => Table.row(cells)) : []),
-            ...devops.map(check => check.row),
+            ...checks.filter((check) => !check.optional).map((check) => check.row),
+            ...(optional.length ? optionalSectionRows().map((cells) => Table.row(cells)) : []),
+            ...optional.map((check) => check.row),
+            ...(devops.length ? devopsSectionRows().map((cells) => Table.row(cells)) : []),
+            ...devops.map((check) => check.row),
         ],
         live: options.live,
     });
 
-    const results = await Promise.allSettled([...checks.map(async ({ key, label, optional, check, row }) => [
-        key,
-        { ...await runSetupCheck(row, label, check()), optional },
-    ]), Promise.all(devops.map(async ({ label, check, row }) => ({ label, result: await runSetupCheck(row, label, check().then(optionalManualCheck)) }))).then(results => ['devops', results])]);
+    const results = await Promise.allSettled([
+        ...checks.map(async ({ key, label, optional, check, row }) => [
+            key,
+            { ...(await runSetupCheck(row, label, check())), optional },
+        ]),
+        Promise.all(
+            devops.map(async ({ label, check, row }) => ({
+                label,
+                result: await runSetupCheck(row, label, check().then(optionalManualCheck)),
+            })),
+        ).then((results) => ['devops', results]),
+    ]);
 
     await liveTable.wait();
 
-    const rejected = results.find((result): result is PromiseRejectedResult => result.status === 'rejected');
+    const rejected = results.find(
+        (result): result is PromiseRejectedResult => result.status === 'rejected',
+    );
     if (rejected) {
         throw rejected.reason;
     }
 
-    return Object.fromEntries(results.map(result => result.status === 'fulfilled' ? result.value : neverRejected(result))) as SetupReport;
+    return Object.fromEntries(
+        results.map((result) =>
+            result.status === 'fulfilled' ? result.value : neverRejected(result),
+        ),
+    ) as SetupReport;
 }
 
 export function printSetupReport(report: SetupReport): void {
@@ -159,13 +285,19 @@ export function printSetupReport(report: SetupReport): void {
         ['Binary shortcut', report.shell],
     ];
     const optional = checks.filter(([, result]) => result.optional);
-    table(['Check', 'Status', 'Details'], [
-        ...checks.filter(([, result]) => !result.optional).map(([label, result]) => row(label, result)),
-        ...(optional.length ? optionalSectionRows() : []),
-        ...optional.map(([label, result]) => row(label, result)),
-        ...(report.devops?.length ? devopsSectionRows() : []),
-        ...(report.devops ?? []).map(({ label, result }) => row(label, result)),
-    ], { title: 'Checking Stamhoofd local development setup' });
+    table(
+        ['Check', 'Status', 'Details'],
+        [
+            ...checks
+                .filter(([, result]) => !result.optional)
+                .map(([label, result]) => row(label, result)),
+            ...(optional.length ? optionalSectionRows() : []),
+            ...optional.map(([label, result]) => row(label, result)),
+            ...(report.devops?.length ? devopsSectionRows() : []),
+            ...(report.devops ?? []).map(({ label, result }) => row(label, result)),
+        ],
+        { title: 'Checking Stamhoofd local development setup' },
+    );
 }
 
 export async function runSetup(context: CliContext): Promise<void> {
@@ -175,15 +307,19 @@ export async function runSetup(context: CliContext): Promise<void> {
         const fixes = getRecommendedSetupFixes(report);
         if (fixes.length === 0) {
             if (!isSetupReady(report)) {
-                console.log('\nResolve the missing manual setup items above, then run stam setup again.');
+                console.log(
+                    '\nResolve the missing manual setup items above, then run stam setup again.',
+                );
                 return;
             }
             console.log('\nSetup looks ready. Next: stam dev all');
             return;
         }
 
-        if (fixes.some(fix => attemptedFixes.has(fix.key))) {
-            console.log('\nA recommended fix did not resolve its setup check. Review the missing items above, then run stam setup again.');
+        if (fixes.some((fix) => attemptedFixes.has(fix.key))) {
+            console.log(
+                '\nA recommended fix did not resolve its setup check. Review the missing items above, then run stam setup again.',
+            );
             return;
         }
         console.log('\nRecommended fixes:');
@@ -195,7 +331,9 @@ export async function runSetup(context: CliContext): Promise<void> {
         for (const fix of fixes) {
             await setupActions[fix.key].run(context);
             if (fix.key === SetupAutomaticFixKey.Node) {
-                console.log('\nActivate the new version in this terminal, then run stam setup again.');
+                console.log(
+                    '\nActivate the new version in this terminal, then run stam setup again.',
+                );
                 return;
             }
             attemptedFixes.add(fix.key);
@@ -214,7 +352,7 @@ export function getRecommendedSetupFixes(report: SetupReport): AutomaticFix[] {
             break;
         }
         const key = check.remediation.action;
-        if (!fixes.some(fix => fix.key === key)) {
+        if (!fixes.some((fix) => fix.key === key)) {
             fixes.push({ key, label: check.remediation.label ?? setupActions[key].label });
         }
         if (key === SetupAutomaticFixKey.Node) {
@@ -226,32 +364,53 @@ export function getRecommendedSetupFixes(report: SetupReport): AutomaticFix[] {
 }
 
 export function isSetupReady(report: SetupReport): boolean {
-    return setupChecks(report).every(check => check.ok || check.optional);
+    return setupChecks(report).every((check) => check.ok || check.optional);
 }
 
 function setupChecks(report: SetupReport): CheckResult[] {
-    return [report.node, report.pnpm, report.vcs, report.docker, report.privilegedPorts, report.caddy, report.dns, report.cert, report.shell];
+    return [
+        report.node,
+        report.pnpm,
+        report.vcs,
+        report.docker,
+        report.privilegedPorts,
+        report.caddy,
+        report.dns,
+        report.cert,
+        report.shell,
+    ];
 }
 
 function optionalSectionRows(): string[][] {
-    return [['', '', ''], [chalk.dim('Optional'), '', '']];
+    return [
+        ['', '', ''],
+        [chalk.dim('Optional'), '', ''],
+    ];
 }
 
 function devopsSectionRows(): string[][] {
-    return [['', '', ''], [chalk.dim('DevOps'), '', '']];
+    return [
+        ['', '', ''],
+        [chalk.dim('DevOps'), '', ''],
+    ];
 }
 
 async function vcsCheck(context: CliContext): Promise<CheckResult> {
-    const missing = (await checkVcs(context.rootDir, context.verbosity)).filter(check => !check.ok);
+    const missing = (await checkVcs(context.rootDir, context.verbosity)).filter(
+        (check) => !check.ok,
+    );
     if (missing.length === 0) {
         return { ok: true, details: 'Repository push destinations configured' };
     }
     return {
         ok: false,
-        details: missing.map(check => check.label).join(', '),
-        remediation: missing.every(check => check.repairs.length > 0)
+        details: missing.map((check) => check.label).join(', '),
+        remediation: missing.every((check) => check.repairs.length > 0)
             ? { action: SetupAutomaticFixKey.Vcs }
-            : { instructions: 'stam setup vcs', reason: 'Some repository checks have no automatic repair.' },
+            : {
+                  instructions: 'stam setup vcs',
+                  reason: 'Some repository checks have no automatic repair.',
+              },
     };
 }
 
@@ -306,14 +465,36 @@ type IptablesRedirectRule = {
 
 function privilegedRedirectRules(profile: SharedServiceProfile): IptablesRedirectRule[] {
     return [
-        { chain: IptablesChain.Prerouting, fromPort: caddyHttpPort, toPort: profile.caddyHttpHostPort },
-        { chain: IptablesChain.Prerouting, fromPort: caddyHttpsPort, toPort: profile.caddyHttpsHostPort },
-        { chain: IptablesChain.Output, destination: localIpv4Host, fromPort: caddyHttpPort, toPort: profile.caddyHttpHostPort },
-        { chain: IptablesChain.Output, destination: localIpv4Host, fromPort: caddyHttpsPort, toPort: profile.caddyHttpsHostPort },
+        {
+            chain: IptablesChain.Prerouting,
+            fromPort: caddyHttpPort,
+            toPort: profile.caddyHttpHostPort,
+        },
+        {
+            chain: IptablesChain.Prerouting,
+            fromPort: caddyHttpsPort,
+            toPort: profile.caddyHttpsHostPort,
+        },
+        {
+            chain: IptablesChain.Output,
+            destination: localIpv4Host,
+            fromPort: caddyHttpPort,
+            toPort: profile.caddyHttpHostPort,
+        },
+        {
+            chain: IptablesChain.Output,
+            destination: localIpv4Host,
+            fromPort: caddyHttpsPort,
+            toPort: profile.caddyHttpsHostPort,
+        },
     ];
 }
 
-export async function setupDns(options: { yes: boolean; dryRun: boolean; confirmOverwrite?: boolean }): Promise<void> {
+export async function setupDns(options: {
+    yes: boolean;
+    dryRun: boolean;
+    confirmOverwrite?: boolean;
+}): Promise<void> {
     const profile = await currentSharedServiceProfile();
     if (profile.dnsSetupKind === SharedServiceDnsSetupKind.MacosResolver) {
         await setupMacosDns(options);
@@ -346,13 +527,19 @@ export async function setupDns(options: { yes: boolean; dryRun: boolean; confirm
     await step('Install DNS configuration', async () => {
         await fs.writeFile(tempPath, content);
         await execSudo(['mkdir', '-p', '/run/systemd/resolved.conf.d'], { label: false });
-        await execSudo(['cp', tempPath, '/run/systemd/resolved.conf.d/stamhoofd.conf'], { label: false });
+        await execSudo(['cp', tempPath, '/run/systemd/resolved.conf.d/stamhoofd.conf'], {
+            label: false,
+        });
         await fs.rm(tempPath, { force: true });
         await execSudo(['systemctl', 'restart', 'systemd-resolved'], { label: false });
     });
 }
 
-async function setupMacosDns(options: { yes: boolean; dryRun: boolean; confirmOverwrite?: boolean }): Promise<void> {
+async function setupMacosDns(options: {
+    yes: boolean;
+    dryRun: boolean;
+    confirmOverwrite?: boolean;
+}): Promise<void> {
     const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
     const resolverPath = macosResolverPath(domain);
     const content = macosResolverContent();
@@ -378,11 +565,20 @@ async function setupMacosDns(options: { yes: boolean; dryRun: boolean; confirmOv
         warning('Dry run: DNS configuration was not changed.');
         return;
     }
-    if (existing !== undefined && existing !== content && (!options.yes || options.confirmOverwrite) && !(await confirm(`Overwrite ${resolverPath}?`, { default: false }))) {
+    if (
+        existing !== undefined &&
+        existing !== content &&
+        (!options.yes || options.confirmOverwrite) &&
+        !(await confirm(`Overwrite ${resolverPath}?`, { default: false }))
+    ) {
         warning('DNS setup skipped.');
         return;
     }
-    if (existing === undefined && !options.yes && !(await confirm('Apply this DNS configuration?', { default: true }))) {
+    if (
+        existing === undefined &&
+        !options.yes &&
+        !(await confirm('Apply this DNS configuration?', { default: true }))
+    ) {
         warning('DNS setup skipped.');
         return;
     }
@@ -395,14 +591,21 @@ async function setupMacosDns(options: { yes: boolean; dryRun: boolean; confirmOv
     });
 }
 
-export async function setupPrivilegedPortRedirects(options: { yes: boolean; dryRun: boolean }): Promise<void> {
+export async function setupPrivilegedPortRedirects(options: {
+    yes: boolean;
+    dryRun: boolean;
+}): Promise<void> {
     if (process.platform !== 'linux') {
-        throw new Error('Automatic privileged port redirect setup currently supports Linux with iptables only.');
+        throw new Error(
+            'Automatic privileged port redirect setup currently supports Linux with iptables only.',
+        );
     }
     const profile = await currentSharedServiceProfile();
     const rules = privilegedRedirectRules(profile);
 
-    console.log('This will redirect local HTTP/HTTPS traffic to the unprivileged ports used by local containers.');
+    console.log(
+        'This will redirect local HTTP/HTTPS traffic to the unprivileged ports used by local containers.',
+    );
     console.log('\nCommands requiring sudo:');
     for (const rule of rules) {
         console.log(command(`  ${formatIptablesCommand(IptablesAction.Append, rule)}`));
@@ -412,7 +615,10 @@ export async function setupPrivilegedPortRedirects(options: { yes: boolean; dryR
         warning('Dry run: privileged port redirects were not changed.');
         return;
     }
-    if (!options.yes && !(await confirm('Apply these privileged port redirects?', { default: true }))) {
+    if (
+        !options.yes &&
+        !(await confirm('Apply these privileged port redirects?', { default: true }))
+    ) {
         warning('Privileged port redirect setup skipped.');
         return;
     }
@@ -426,7 +632,9 @@ export async function setupPrivilegedPortRedirects(options: { yes: boolean; dryR
         }
         for (const rule of rules) {
             if (!(await iptablesRuleExists(rule))) {
-                throw new Error(`Port redirect verification failed: ${formatIptablesCommand(IptablesAction.Check, rule)}`);
+                throw new Error(
+                    `Port redirect verification failed: ${formatIptablesCommand(IptablesAction.Check, rule)}`,
+                );
             }
         }
     });
@@ -434,7 +642,9 @@ export async function setupPrivilegedPortRedirects(options: { yes: boolean; dryR
 
 export async function setupCaddy(options: { yes: boolean; dryRun: boolean }): Promise<void> {
     if (process.platform !== 'darwin') {
-        throw new Error('Automatic Caddy installation currently supports macOS with Homebrew only.');
+        throw new Error(
+            'Automatic Caddy installation currently supports macOS with Homebrew only.',
+        );
     }
     console.log('This will install Caddy using Homebrew.');
     console.log('\nCommands:');
@@ -451,13 +661,19 @@ export async function setupCaddy(options: { yes: boolean; dryRun: boolean }): Pr
     success('Caddy installed.');
 }
 
-export async function setupCert(context: CliContext, options: { yes: boolean; dryRun: boolean }): Promise<void> {
+export async function setupCert(
+    context: CliContext,
+    options: { yes: boolean; dryRun: boolean },
+): Promise<void> {
     console.log('This will trust the local development CA using a temporary local Caddy instance.');
     if (options.dryRun) {
         warning('Dry run: certificate trust was not changed.');
         return;
     }
-    if (!options.yes && !(await confirm('Trust the Stamhoofd development CA?', { default: true }))) {
+    if (
+        !options.yes &&
+        !(await confirm('Trust the Stamhoofd development CA?', { default: true }))
+    ) {
         warning('Certificate setup skipped.');
         return;
     }
@@ -465,11 +681,27 @@ export async function setupCert(context: CliContext, options: { yes: boolean; dr
     const configPath = await writeSetupCaddyConfig(context);
     const pidPath = path.join(sharedDir(context), 'caddy-setup.pid');
     console.log('Preparing temporary local Caddy CA...');
-    await run('caddy', ['start', '--config', configPath, '--pidfile', pidPath], { verbosity: RunVerbosity.Output });
+    await run('caddy', ['start', '--config', configPath, '--pidfile', pidPath], {
+        verbosity: RunVerbosity.Output,
+    });
     try {
-        await run('caddy', ['trust', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)], { verbosity: RunVerbosity.Output });
+        await run(
+            'caddy',
+            ['trust', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)],
+            { verbosity: RunVerbosity.Output },
+        );
     } finally {
-        await run('caddy', ['stop', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)], { allowFailure: true, verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
+        await run(
+            'caddy',
+            ['stop', '--config', configPath, '--address', localhostPort(caddySetupAdminPort)],
+            {
+                allowFailure: true,
+                verbosity:
+                    context.verbosity === RunVerbosity.Output
+                        ? RunVerbosity.Command
+                        : (context.verbosity ?? RunVerbosity.Quiet),
+            },
+        );
         await fs.rm(pidPath, { force: true });
     }
     success('Caddy local CA trusted.');
@@ -483,42 +715,74 @@ async function dnsCheck(context: CliContext, profile: SharedServiceProfile): Pro
     }
 
     if (!(await dnsConfigurationCheck(domain, profile, context.verbosity))) {
-        return { ok: false, details: `Local DNS is not configured for .${domain}`, remediation: { action: SetupAutomaticFixKey.Dns } };
+        return {
+            ok: false,
+            details: `Local DNS is not configured for .${domain}`,
+            remediation: { action: SetupAutomaticFixKey.Dns },
+        };
     }
 
-    const result = await run('resolvectl', ['query', `dashboard.${domain}`], { capture: true, allowFailure: true, verbosity: context.verbosity ?? RunVerbosity.Quiet });
+    const result = await run('resolvectl', ['query', `dashboard.${domain}`], {
+        capture: true,
+        allowFailure: true,
+        verbosity: context.verbosity ?? RunVerbosity.Quiet,
+    });
     if (result.stdout.includes(localIpv4Host)) {
         return { ok: true, details: `dashboard.${domain} resolves to ${localIpv4Host}` };
     }
 
     const corednsStatus = await corednsService.status(context);
     if (!corednsStatus.running) {
-        return { ok: false, details: 'Local DNS is configured, but CoreDNS is not running', remediation: { action: SetupAutomaticFixKey.Services } };
+        return {
+            ok: false,
+            details: 'Local DNS is configured, but CoreDNS is not running',
+            remediation: { action: SetupAutomaticFixKey.Services },
+        };
     }
 
-    return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${localIpv4Host}`, remediation: { action: SetupAutomaticFixKey.Dns } };
+    return {
+        ok: false,
+        details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${localIpv4Host}`,
+        remediation: { action: SetupAutomaticFixKey.Dns },
+    };
 }
 
 async function macosDnsCheck(context: CliContext, domain: string): Promise<CheckResult> {
     const resolverPath = macosResolverPath(domain);
     const content = await readFileIfExists(resolverPath);
     if (content === undefined) {
-        return { ok: false, details: `${resolverPath} does not exist`, remediation: { action: SetupAutomaticFixKey.Dns } };
+        return {
+            ok: false,
+            details: `${resolverPath} does not exist`,
+            remediation: { action: SetupAutomaticFixKey.Dns },
+        };
     }
     if (content !== macosResolverContent()) {
-        return { ok: false, details: `${resolverPath} exists with unexpected contents`, remediation: { action: SetupAutomaticFixKey.Dns } };
+        return {
+            ok: false,
+            details: `${resolverPath} exists with unexpected contents`,
+            remediation: { action: SetupAutomaticFixKey.Dns },
+        };
     }
 
     const corednsStatus = await corednsService.status(context);
     if (!corednsStatus.running) {
-        return { ok: false, details: 'Local DNS is configured, but CoreDNS is not running', remediation: { action: SetupAutomaticFixKey.Services } };
+        return {
+            ok: false,
+            details: 'Local DNS is configured, but CoreDNS is not running',
+            remediation: { action: SetupAutomaticFixKey.Services },
+        };
     }
 
     if (await directCorednsCheck(domain)) {
         return { ok: true, details: `dashboard.${domain} resolves to ${localIpv4Host}` };
     }
 
-    return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${process.env.PUBLIC_IP || localIpv4Host}`, remediation: { action: SetupAutomaticFixKey.RestartServices } };
+    return {
+        ok: false,
+        details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${process.env.PUBLIC_IP || localIpv4Host}`,
+        remediation: { action: SetupAutomaticFixKey.RestartServices },
+    };
 }
 
 async function directCorednsCheck(domain: string): Promise<boolean> {
@@ -532,16 +796,22 @@ async function directCorednsCheck(domain: string): Promise<boolean> {
     }
 }
 
-async function dnsConfigurationCheck(domain: string, profile: SharedServiceProfile, verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<boolean> {
+async function dnsConfigurationCheck(
+    domain: string,
+    profile: SharedServiceProfile,
+    verbosity: RunVerbosity = RunVerbosity.Quiet,
+): Promise<boolean> {
     const [dns, domains] = await Promise.all([
         run('resolvectl', ['dns'], { capture: true, allowFailure: true, verbosity }),
         run('resolvectl', ['domain'], { capture: true, allowFailure: true, verbosity }),
     ]);
 
-    return dns.status === 0
-        && domains.status === 0
-        && dns.stdout.includes(`${localIpv4Host}:${profile.corednsHostPort}`)
-        && domains.stdout.includes(`~${domain}`);
+    return (
+        dns.status === 0 &&
+        domains.status === 0 &&
+        dns.stdout.includes(`${localIpv4Host}:${profile.corednsHostPort}`) &&
+        domains.stdout.includes(`~${domain}`)
+    );
 }
 
 async function certCheck(verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<CheckResult> {
@@ -549,24 +819,46 @@ async function certCheck(verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<
     try {
         await fs.access(certPath);
     } catch {
-        return { ok: false, details: 'Caddy local CA not found', remediation: { action: SetupAutomaticFixKey.Cert } };
+        return {
+            ok: false,
+            details: 'Caddy local CA not found',
+            remediation: { action: SetupAutomaticFixKey.Cert },
+        };
     }
     if (process.platform === 'darwin') {
-        const result = await run('security', ['verify-cert', '-c', certPath, '-p', 'ssl', '-l', '-L', '-q'], { capture: true, allowFailure: true, verbosity });
+        const result = await run(
+            'security',
+            ['verify-cert', '-c', certPath, '-p', 'ssl', '-l', '-L', '-q'],
+            { capture: true, allowFailure: true, verbosity },
+        );
         if (result.status !== 0) {
-            return { ok: false, details: 'Caddy local CA is not trusted by macOS', remediation: { action: SetupAutomaticFixKey.Cert } };
+            return {
+                ok: false,
+                details: 'Caddy local CA is not trusted by macOS',
+                remediation: { action: SetupAutomaticFixKey.Cert },
+            };
         }
     }
     return { ok: true, details: certPath };
 }
 
-async function privilegedPortRedirectCheck(profile: SharedServiceProfile, verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<CheckResult> {
+async function privilegedPortRedirectCheck(
+    profile: SharedServiceProfile,
+    verbosity: RunVerbosity = RunVerbosity.Quiet,
+): Promise<CheckResult> {
     if (!profile.needsPrivilegedRedirects) {
         return { ok: true, details: 'not needed for docker' };
     }
 
     if (process.platform !== 'linux') {
-        return { ok: false, details: 'Privileged port redirects require Linux with iptables', remediation: { instructions: 'Configure privileged port redirects', reason: 'Automatic port redirects require Linux with iptables.' } };
+        return {
+            ok: false,
+            details: 'Privileged port redirects require Linux with iptables',
+            remediation: {
+                instructions: 'Configure privileged port redirects',
+                reason: 'Automatic port redirects require Linux with iptables.',
+            },
+        };
     }
 
     let caddyRunning: boolean;
@@ -577,13 +869,25 @@ async function privilegedPortRedirectCheck(profile: SharedServiceProfile, verbos
     }
 
     if (caddyRunning) {
-        const highPortsReady = await portAcceptsConnection(profile.caddyHttpHostPort) && await portAcceptsConnection(profile.caddyHttpsHostPort);
+        const highPortsReady =
+            (await portAcceptsConnection(profile.caddyHttpHostPort)) &&
+            (await portAcceptsConnection(profile.caddyHttpsHostPort));
         if (!highPortsReady) {
-            return { ok: false, details: `Caddy is running, but ${localhostPort(profile.caddyHttpHostPort)} or ${localhostPort(profile.caddyHttpsHostPort)} is not reachable`, remediation: { action: SetupAutomaticFixKey.RestartServices } };
+            return {
+                ok: false,
+                details: `Caddy is running, but ${localhostPort(profile.caddyHttpHostPort)} or ${localhostPort(profile.caddyHttpsHostPort)} is not reachable`,
+                remediation: { action: SetupAutomaticFixKey.RestartServices },
+            };
         }
 
-        if (await portAcceptsConnection(caddyHttpPort) && await portAcceptsConnection(caddyHttpsPort)) {
-            return { ok: true, details: `${localhostPort(caddyHttpPort)} -> ${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(caddyHttpsPort)} -> ${localhostPort(profile.caddyHttpsHostPort)}` };
+        if (
+            (await portAcceptsConnection(caddyHttpPort)) &&
+            (await portAcceptsConnection(caddyHttpsPort))
+        ) {
+            return {
+                ok: true,
+                details: `${localhostPort(caddyHttpPort)} -> ${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(caddyHttpsPort)} -> ${localhostPort(profile.caddyHttpsHostPort)}`,
+            };
         }
     }
 
@@ -595,22 +899,46 @@ async function privilegedPortRedirectCheck(profile: SharedServiceProfile, verbos
     }
 
     return missingRules.length === 0
-        ? { ok: true, details: `${localhostPort(caddyHttpPort)} -> ${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(caddyHttpsPort)} -> ${localhostPort(profile.caddyHttpsHostPort)}` }
-        : { ok: false, details: `${missingRules.length} privileged port redirect${missingRules.length === 1 ? '' : 's'} missing`, remediation: { action: SetupAutomaticFixKey.PrivilegedPorts } };
+        ? {
+              ok: true,
+              details: `${localhostPort(caddyHttpPort)} -> ${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(caddyHttpsPort)} -> ${localhostPort(profile.caddyHttpsHostPort)}`,
+          }
+        : {
+              ok: false,
+              details: `${missingRules.length} privileged port redirect${missingRules.length === 1 ? '' : 's'} missing`,
+              remediation: { action: SetupAutomaticFixKey.PrivilegedPorts },
+          };
 }
 
 async function caddyCheck(verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<CheckResult> {
-    const result = await run('caddy', ['version'], { capture: true, allowFailure: true, verbosity });
+    const result = await run('caddy', ['version'], {
+        capture: true,
+        allowFailure: true,
+        verbosity,
+    });
     if (result.status !== 0) {
         if (process.platform === 'darwin') {
-            return { ok: false, details: 'caddy not found', remediation: { action: SetupAutomaticFixKey.Caddy } };
+            return {
+                ok: false,
+                details: 'caddy not found',
+                remediation: { action: SetupAutomaticFixKey.Caddy },
+            };
         }
-        return { ok: false, details: 'caddy not found', remediation: { instructions: 'Install Caddy, then run stam setup cert', reason: 'Automatic Caddy installation is only supported on macOS.' } };
+        return {
+            ok: false,
+            details: 'caddy not found',
+            remediation: {
+                instructions: 'Install Caddy, then run stam setup cert',
+                reason: 'Automatic Caddy installation is only supported on macOS.',
+            },
+        };
     }
     return { ok: true, details: result.stdout.trim() };
 }
 
-async function currentSharedServiceProfile(verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<SharedServiceProfile> {
+async function currentSharedServiceProfile(
+    verbosity: RunVerbosity = RunVerbosity.Quiet,
+): Promise<SharedServiceProfile> {
     let runtime = docker.ContainerRuntime.Docker;
     try {
         runtime = await docker.getContainerRuntime(verbosity);
@@ -639,8 +967,16 @@ async function readFileIfExists(filePath: string): Promise<string | undefined> {
     }
 }
 
-async function iptablesRuleExists(rule: IptablesRedirectRule, verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<boolean> {
-    const result = await run('sudo', ['-n', ...iptablesArgs(IptablesAction.Check, rule)], { capture: true, verbosity, allowFailure: true, processGroup: false });
+async function iptablesRuleExists(
+    rule: IptablesRedirectRule,
+    verbosity: RunVerbosity = RunVerbosity.Quiet,
+): Promise<boolean> {
+    const result = await run('sudo', ['-n', ...iptablesArgs(IptablesAction.Check, rule)], {
+        capture: true,
+        verbosity,
+        allowFailure: true,
+        processGroup: false,
+    });
     return result.status === 0;
 }
 
@@ -684,13 +1020,30 @@ function formatIptablesCommand(action: IptablesAction, rule: IptablesRedirectRul
 async function dockerCheck(verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<CheckResult> {
     try {
         const runtime = await docker.getContainerRuntime(verbosity);
-        return { ok: true, details: runtime === docker.ContainerRuntime.Podman ? 'podman ready' : 'docker daemon reachable' };
+        return {
+            ok: true,
+            details:
+                runtime === docker.ContainerRuntime.Podman
+                    ? 'podman ready'
+                    : 'docker daemon reachable',
+        };
     } catch (error) {
-        return { ok: false, details: error instanceof Error ? error.message : 'container runtime not reachable', remediation: { instructions: 'Start Podman or Docker, then run stam setup', reason: 'The container runtime must be installed and started externally.' } };
+        return {
+            ok: false,
+            details: error instanceof Error ? error.message : 'container runtime not reachable',
+            remediation: {
+                instructions: 'Start Podman or Docker, then run stam setup',
+                reason: 'The container runtime must be installed and started externally.',
+            },
+        };
     }
 }
 
-async function runSetupCheck(row: TableRow, label: string, check: Promise<CheckResult>): Promise<CheckResult> {
+async function runSetupCheck(
+    row: TableRow,
+    label: string,
+    check: Promise<CheckResult>,
+): Promise<CheckResult> {
     try {
         const result = await check;
         row.update(setupRow(label, result));
@@ -714,6 +1067,14 @@ function row(label: string, result: CheckResult): string[] {
 }
 
 function setupRow(label: string, result: CheckResult): TableCellInput[] {
-    const fix = result.ok ? undefined : 'action' in result.remediation ? setupActions[result.remediation.action].command : result.remediation.instructions;
-    return [label, statusCell(result.ok ? CliStatus.Ready : CliStatus.Missing), fix ? `${result.details} (${fix})` : result.details];
+    const fix = result.ok
+        ? undefined
+        : 'action' in result.remediation
+          ? setupActions[result.remediation.action].command
+          : result.remediation.instructions;
+    return [
+        label,
+        statusCell(result.ok ? CliStatus.Ready : CliStatus.Missing),
+        fix ? `${result.details} (${fix})` : result.details,
+    ];
 }

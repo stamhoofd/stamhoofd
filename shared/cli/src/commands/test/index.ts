@@ -1,14 +1,18 @@
 import { Args, Flags } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { ciFlag } from '../../command-flags.js';
-import { coverageTestPackages, runUnitTests, unitTestPackages } from '../../runtime/monorepo-runner.js';
+import {
+    coverageTestPackages,
+    runUnitTests,
+    unitTestPackages,
+} from '../../runtime/monorepo-runner.js';
 import { showHelp } from '../../runtime/show-help.js';
 
 export default class Test extends BaseCommand {
     static summary = 'Run unit tests';
     static description = [
         'The first argument selects what to run: `unit` for every package, `coverage` for package coverage, or a single package name',
-        `(${unitTestPackages.map(pkg => pkg.name).join(', ')}).`,
+        `(${unitTestPackages.map((pkg) => pkg.name).join(', ')}).`,
         'Any extra arguments are vitest filename filters, and `-t` filters by test name.',
         '`build:shared` runs automatically first (skip with `--skip-build`), and MySQL only starts',
         'when a selected package needs it. Use `stam test e2e` / `stam test all` for Playwright.',
@@ -32,19 +36,42 @@ export default class Test extends BaseCommand {
     static strict = false;
 
     static args = {
-        target: Args.string({ description: '`unit` to run everything, or a package name', required: false }),
-        filter: Args.string({ description: 'Filename filter(s) passed to vitest', required: false }),
+        target: Args.string({
+            description: '`unit` to run everything, or a package name',
+            required: false,
+        }),
+        filter: Args.string({
+            description: 'Filename filter(s) passed to vitest',
+            required: false,
+        }),
     };
 
     static flags = {
         ...this.verbosityFlags(),
-        'ci': ciFlag,
-        'clear': Flags.boolean({ default: false, description: 'Reset the persistent test database (drop its volume) before running' }),
-        'coverage': Flags.boolean({ default: false, description: 'Collect coverage for the selected package' }),
-        'test-name': Flags.string({ char: 't', description: 'Only run tests whose name matches this text (vitest -t)' }),
-        'skip-build': Flags.boolean({ default: false, description: 'Skip the automatic build:shared step' }),
-        'shard': Flags.string({ description: 'Run one shard of the suite on a separate machine (1-based index/total, e.g. 1/2)' }),
-        'json-report': Flags.string({ description: 'Write a Vitest JSON report with per-file timings (single package only)' }),
+        ci: ciFlag,
+        clear: Flags.boolean({
+            default: false,
+            description: 'Reset the persistent test database (drop its volume) before running',
+        }),
+        coverage: Flags.boolean({
+            default: false,
+            description: 'Collect coverage for the selected package',
+        }),
+        'test-name': Flags.string({
+            char: 't',
+            description: 'Only run tests whose name matches this text (vitest -t)',
+        }),
+        'skip-build': Flags.boolean({
+            default: false,
+            description: 'Skip the automatic build:shared step',
+        }),
+        shard: Flags.string({
+            description:
+                'Run one shard of the suite on a separate machine (1-based index/total, e.g. 1/2)',
+        }),
+        'json-report': Flags.string({
+            description: 'Write a Vitest JSON report with per-file timings (single package only)',
+        }),
     };
 
     async run(): Promise<void> {
@@ -60,16 +87,23 @@ export default class Test extends BaseCommand {
         const [target, ...fileFilters] = positionals;
         if (flags.shard !== undefined) {
             const [index, total] = flags.shard.split('/').map(Number);
-            if (!/^[1-9]\d*\/[1-9]\d*$/.test(flags.shard) || !Number.isSafeInteger(index) || !Number.isSafeInteger(total) || index > total) {
+            if (
+                !/^[1-9]\d*\/[1-9]\d*$/.test(flags.shard) ||
+                !Number.isSafeInteger(index) ||
+                !Number.isSafeInteger(total) ||
+                index > total
+            ) {
                 throw new Error('--shard must be index/total with 1 <= index <= total (e.g. 1/2)');
             }
         }
 
         let packages = target === 'coverage' ? coverageTestPackages : unitTestPackages;
         if (target !== 'unit' && target !== 'coverage') {
-            const pkg = unitTestPackages.find(candidate => candidate.name === target);
+            const pkg = unitTestPackages.find((candidate) => candidate.name === target);
             if (!pkg) {
-                throw new Error(`Unknown test target '${target}'. Use 'unit' or one of: ${unitTestPackages.map(candidate => candidate.name).join(', ')}.`);
+                throw new Error(
+                    `Unknown test target '${target}'. Use 'unit' or one of: ${unitTestPackages.map((candidate) => candidate.name).join(', ')}.`,
+                );
             }
             packages = [pkg];
         }

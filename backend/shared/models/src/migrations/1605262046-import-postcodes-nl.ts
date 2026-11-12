@@ -10,7 +10,9 @@ import { PostalCode } from '../models/addresses/PostalCode.js';
 import { Province } from '../models/addresses/Province.js';
 
 function getProvince(name: string, provinces: Province[], provinceRows: string[][]): Province {
-    const p = provinces.find(p => StringCompare.typoCount(p.name, name) == 0 && p.country == Country.Netherlands);
+    const p = provinces.find(
+        (p) => StringCompare.typoCount(p.name, name) == 0 && p.country == Country.Netherlands,
+    );
     if (p) {
         return p;
     }
@@ -24,7 +26,12 @@ function getProvince(name: string, provinces: Province[], provinceRows: string[]
     return province;
 }
 
-function getCity(name: string, provinceId: string, citiesByName: Map<string, City>, cityRows: unknown[][]): City {
+function getCity(
+    name: string,
+    provinceId: string,
+    citiesByName: Map<string, City>,
+    cityRows: unknown[][],
+): City {
     const p = citiesByName.get(normalizeCityName(name));
     if (p) {
         return p;
@@ -49,7 +56,7 @@ export default new Migration(async () => {
     // We start by looping all provinces in the files
     const folder = import.meta.dirname + '/data/postcodes/nl';
     const provinces = (await fs.promises.readdir(folder, { withFileTypes: true }))
-        .filter(dirent => !dirent.isDirectory())
+        .filter((dirent) => !dirent.isDirectory())
         .map((dirent) => {
             return { path: folder + '/' + dirent.name, name: dirent.name };
         });
@@ -102,7 +109,12 @@ export default new Migration(async () => {
     await updateParentCityIds(parentCityUpdates);
 });
 function normalizeCityName(name: string): string {
-    return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/, ' ').trim();
+    return name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/\s+/, ' ')
+        .trim();
 }
 
 async function insertRows(table: string, columns: string[], rows: unknown[][]): Promise<void> {
@@ -110,7 +122,10 @@ async function insertRows(table: string, columns: string[], rows: unknown[][]): 
         if (chunk.length === 0) {
             continue;
         }
-        await Database.insert(`INSERT INTO \`${table}\` (${columns.map(column => `\`${column}\``).join(', ')}) VALUES ?`, [chunk]);
+        await Database.insert(
+            `INSERT INTO \`${table}\` (${columns.map((column) => `\`${column}\``).join(', ')}) VALUES ?`,
+            [chunk],
+        );
     }
 }
 
@@ -120,10 +135,13 @@ async function updateParentCityIds(rows: string[][]): Promise<void> {
             continue;
         }
         const cases = chunk.map(() => 'WHEN ? THEN ?').join(' ');
-        await Database.statement(`UPDATE \`${City.table}\` SET \`parentCityId\` = CASE \`id\` ${cases} END WHERE \`id\` IN (?)`, [
-            ...chunk.flatMap(([cityId, parentCityId]) => [cityId, parentCityId]),
-            chunk.map(([cityId]) => cityId),
-        ]);
+        await Database.statement(
+            `UPDATE \`${City.table}\` SET \`parentCityId\` = CASE \`id\` ${cases} END WHERE \`id\` IN (?)`,
+            [
+                ...chunk.flatMap(([cityId, parentCityId]) => [cityId, parentCityId]),
+                chunk.map(([cityId]) => cityId),
+            ],
+        );
     }
 }
 

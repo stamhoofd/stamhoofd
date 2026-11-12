@@ -1,7 +1,17 @@
 import { Request } from '@node/endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import { EmailTemplateFactory, OrganizationFactory, WebshopFactory } from '@stamhoofd/models';
-import { Cart, CartItem, Customer, EmailContent, EmailTemplateType, OrderData, PaymentMethod, Product, ProductPrice } from '@stamhoofd/structures';
+import {
+    Cart,
+    CartItem,
+    Customer,
+    EmailContent,
+    EmailTemplateType,
+    OrderData,
+    PaymentMethod,
+    Product,
+    ProductPrice,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -14,7 +24,9 @@ describe('Order confirmation email language', () => {
 
     test('renders $t in the language the customer used while ordering', async () => {
         // Make French a valid locale so its real translations (loaded from disk) are actually used.
-        TestUtils.setEnvironment('locales', { [Country.Belgium]: [Language.Dutch, Language.French] });
+        TestUtils.setEnvironment('locales', {
+            [Country.Belgium]: [Language.Dutch, Language.French],
+        });
 
         const organization = await new OrganizationFactory({}).create();
         const freeProductPrice = ProductPrice.create({ name: 'Free', price: 0, stock: 100 });
@@ -43,12 +55,24 @@ describe('Order confirmation email language', () => {
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.Unknown,
                 cart: Cart.create({
-                    items: [CartItem.create({ product, productPrice: freeProductPrice, amount: 1 })],
+                    items: [
+                        CartItem.create({ product, productPrice: freeProductPrice, amount: 1 }),
+                    ],
                 }),
-                customer: Customer.create({ firstName: 'John', lastName: 'Doe', email: 'john@example.com', phone: '+32412345678' }),
+                customer: Customer.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    email: 'john@example.com',
+                    phone: '+32412345678',
+                }),
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
             r.headers['accept-language'] = language;
             await testServer.test(endpoint, r);
 
@@ -69,7 +93,9 @@ describe('Order confirmation email language', () => {
     });
 
     test('selects the translated template that matches the language the customer ordered in', async () => {
-        TestUtils.setEnvironment('locales', { [Country.Belgium]: [Language.Dutch, Language.French] });
+        TestUtils.setEnvironment('locales', {
+            [Country.Belgium]: [Language.Dutch, Language.French],
+        });
 
         const organization = await new OrganizationFactory({}).create();
         const freeProductPrice = ProductPrice.create({ name: 'Free', price: 0, stock: 100 });
@@ -93,15 +119,30 @@ describe('Order confirmation email language', () => {
             text: 'Standaard inhoud',
             language: Language.Dutch,
             translations: new Map([
-                [Language.French, EmailContent.create({ subject: 'Sujet français', html: `<p>Contenu français ${tables}</p>`, text: 'Contenu français' })],
+                [
+                    Language.French,
+                    EmailContent.create({
+                        subject: 'Sujet français',
+                        html: `<p>Contenu français ${tables}</p>`,
+                        text: 'Contenu français',
+                    }),
+                ],
             ]),
         }).create();
 
         // Table headers/titles rendered via $t inside the order tables. Hardcoded on purpose so we
         // don't verify $t with the same $t machinery we're testing.
         // orderTable column headers (%Sc / %M4) and an orderDetailsTable row title (%xA).
-        const dutch = { orderColumn: 'Artikel', amountColumn: 'Aantal', orderNumberTitle: 'Bestelnummer' };
-        const french = { orderColumn: 'Article', amountColumn: 'Nombre', orderNumberTitle: 'Numéro de commande' };
+        const dutch = {
+            orderColumn: 'Artikel',
+            amountColumn: 'Aantal',
+            orderNumberTitle: 'Bestelnummer',
+        };
+        const french = {
+            orderColumn: 'Article',
+            amountColumn: 'Nombre',
+            orderNumberTitle: 'Numéro de commande',
+        };
 
         const placeFreeOrderInLanguage = async (language: string) => {
             EmailMocker.transactional.reset();
@@ -109,12 +150,24 @@ describe('Order confirmation email language', () => {
             const orderData = OrderData.create({
                 paymentMethod: PaymentMethod.Unknown,
                 cart: Cart.create({
-                    items: [CartItem.create({ product, productPrice: freeProductPrice, amount: 1 })],
+                    items: [
+                        CartItem.create({ product, productPrice: freeProductPrice, amount: 1 }),
+                    ],
                 }),
-                customer: Customer.create({ firstName: 'John', lastName: 'Doe', email: 'john@example.com', phone: '+32412345678' }),
+                customer: Customer.create({
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    email: 'john@example.com',
+                    phone: '+32412345678',
+                }),
             });
 
-            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            const r = Request.buildJson(
+                'POST',
+                `/webshop/${webshop.id}/order`,
+                organization.getApiHost(),
+                orderData,
+            );
             r.headers['accept-language'] = language;
             await testServer.test(endpoint, r);
 

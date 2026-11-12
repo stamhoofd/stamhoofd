@@ -5,7 +5,11 @@ import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import type { Organization } from '@stamhoofd/models';
 import { Image, RateLimiter } from '@stamhoofd/models';
-import { Image as ImageStruct, ResolutionRequest, supportedImageTypes } from '@stamhoofd/structures';
+import {
+    Image as ImageStruct,
+    ResolutionRequest,
+    supportedImageTypes,
+} from '@stamhoofd/structures';
 import formidable from 'formidable';
 import { promises as fs } from 'fs';
 import { tmpdir } from 'node:os';
@@ -91,7 +95,12 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             });
         }
 
-        if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
+        if (
+            !STAMHOOFD.SPACES_BUCKET ||
+            !STAMHOOFD.SPACES_ENDPOINT ||
+            !STAMHOOFD.SPACES_KEY ||
+            !STAMHOOFD.SPACES_SECRET
+        ) {
             throw new SimpleError({
                 code: 'not_available',
                 message: 'This endpoint is temporarily not available',
@@ -126,56 +135,77 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
                 maxFieldsSize: 16 * 1024,
             });
 
-            const [file, resolutions] = await new Promise<[FormidableFile, ResolutionRequest[]]>((resolve, reject) => {
-                if (!request.request.request) {
-                    reject(new SimpleError({
-                        code: 'invalid_request',
-                        message: 'Invalid request',
-                        statusCode: 500,
-                    }));
-                    return;
-                }
-
-                form.parse(request.request.request, (err, fields, files) => {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    if (!fields.resolutions || !Array.isArray(fields.resolutions) || fields.resolutions.length !== 1) {
-                        reject(new SimpleError({
-                            code: 'missing_field',
-                            message: 'Field resolutions is required',
-                            field: 'resolutions',
-                        }));
-                        return;
-                    }
-                    if (!files.file || !Array.isArray(files.file) || files.file.length !== 1) {
-                        reject(new SimpleError({
-                            code: 'missing_field',
-                            message: 'Missing file',
-                            field: 'file',
-                        }));
+            const [file, resolutions] = await new Promise<[FormidableFile, ResolutionRequest[]]>(
+                (resolve, reject) => {
+                    if (!request.request.request) {
+                        reject(
+                            new SimpleError({
+                                code: 'invalid_request',
+                                message: 'Invalid request',
+                                statusCode: 500,
+                            }),
+                        );
                         return;
                     }
 
-                    try {
-                        const resolutions = new ObjectData(JSON.parse(fields.resolutions[0]), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>);
-                        Image.validateResolutions(resolutions);
-                        resolve([files.file[0], resolutions]);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-            });
+                    form.parse(request.request.request, (err, fields, files) => {
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+                        if (
+                            !fields.resolutions ||
+                            !Array.isArray(fields.resolutions) ||
+                            fields.resolutions.length !== 1
+                        ) {
+                            reject(
+                                new SimpleError({
+                                    code: 'missing_field',
+                                    message: 'Field resolutions is required',
+                                    field: 'resolutions',
+                                }),
+                            );
+                            return;
+                        }
+                        if (!files.file || !Array.isArray(files.file) || files.file.length !== 1) {
+                            reject(
+                                new SimpleError({
+                                    code: 'missing_field',
+                                    message: 'Missing file',
+                                    field: 'file',
+                                }),
+                            );
+                            return;
+                        }
+
+                        try {
+                            const resolutions = new ObjectData(JSON.parse(fields.resolutions[0]), {
+                                version: request.request.getVersion(),
+                            }).array(ResolutionRequest as Decoder<ResolutionRequest>);
+                            Image.validateResolutions(resolutions);
+                            resolve([files.file[0], resolutions]);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                },
+            );
 
             // Never trust the content type of the uploader: it decides how we store the image, so only accept
             // the image types we know we can generate our resolutions from.
-            const imageType = supportedImageTypes.resolveUpload({ contentType: file.mimetype, filename: file.originalFilename });
+            const imageType = supportedImageTypes.resolveUpload({
+                contentType: file.mimetype,
+                filename: file.originalFilename,
+            });
 
             if (!imageType) {
                 throw new SimpleError({
                     code: 'invalid_file_type',
-                    message: 'Unsupported image type ' + (file.mimetype ?? 'unknown') + ' for file ' + (file.originalFilename ?? 'unknown'),
+                    message:
+                        'Unsupported image type ' +
+                        (file.mimetype ?? 'unknown') +
+                        ' for file ' +
+                        (file.originalFilename ?? 'unknown'),
                     human: $t('%ZhP'),
                     field: 'file',
                     statusCode: 400,
@@ -183,7 +213,14 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             }
 
             const fileContent = await fs.readFile(file.filepath);
-            const image = await Image.create(fileContent, imageType.contentType, resolutions, request.query.isPrivate, user, organization as Organization | null | undefined);
+            const image = await Image.create(
+                fileContent,
+                imageType.contentType,
+                resolutions,
+                request.query.isPrivate,
+                user,
+                organization as Organization | null | undefined,
+            );
             return new Response(ImageStruct.create(image));
         } finally {
             // Enclose parsing, validation, rendering and storage: each exit removes

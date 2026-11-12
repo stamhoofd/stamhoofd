@@ -5,9 +5,7 @@ import { isSimpleError, isSimpleErrors } from '@common/errors';
 /**
  * Human messages for error codes thrown by packages that cannot use $t themselves (e.g. @stamhoofd/filters).
  */
-const humanMessages = new Map<string, () => string>([
-    ['unknown_filter', () => $t('%1IF')],
-]);
+const humanMessages = new Map<string, () => string>([['unknown_filter', () => $t('%1IF')]]);
 
 /**
  * Adds a translated human message to errors that were thrown without one.

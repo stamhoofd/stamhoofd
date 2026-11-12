@@ -2,7 +2,10 @@ import type { RegistrationInvitation } from '@stamhoofd/models';
 import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 
-export const registrationInvitationSorters: SQLSortDefinitions<RegistrationInvitation> = new Map<string, SQLSortDefinition<RegistrationInvitation>>([
+export const registrationInvitationSorters: SQLSortDefinitions<RegistrationInvitation> = new Map<
+    string,
+    SQLSortDefinition<RegistrationInvitation>
+>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -11,26 +14,32 @@ export const registrationInvitationSorters: SQLSortDefinitions<RegistrationInvit
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    ['id', {
-        getValue(invitation) {
-            return invitation.id;
+    [
+        'id',
+        {
+            getValue(invitation) {
+                return invitation.id;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('id'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction,
-            });
+    ],
+    [
+        'createdAt',
+        {
+            getValue(invitation) {
+                return invitation.createdAt;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('createdAt'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['createdAt', {
-        getValue(invitation) {
-            return invitation.createdAt;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('createdAt'),
-                direction,
-            });
-        },
-    }],
+    ],
 ]);

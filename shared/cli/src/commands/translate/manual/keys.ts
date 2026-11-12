@@ -9,6 +9,8 @@ export default class TranslateKeys extends BaseCommand {
     async run(): Promise<void> {
         await this.parse(TranslateKeys);
         await translateKeys();
-        info('Next, run "stam translate manual cleanup" to merge duplicate translations and remove unused keys.');
+        info(
+            'Next, run "stam translate manual cleanup" to merge duplicate translations and remove unused keys.',
+        );
     }
 }

@@ -1,4 +1,11 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    StringDecoder,
+} from '@common/encoding';
 import { PaymentProvider } from './PaymentProvider.js';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -115,7 +122,11 @@ export class PaymentMandate extends AutoEncoder {
         if (!this.details.expiryDate) {
             return null;
         }
-        return Formatter.monthNumber(this.details.expiryDate) + '/' + Formatter.year(this.details.expiryDate);
+        return (
+            Formatter.monthNumber(this.details.expiryDate) +
+            '/' +
+            Formatter.year(this.details.expiryDate)
+        );
     }
 
     get description() {

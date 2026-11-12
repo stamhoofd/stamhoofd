@@ -1,7 +1,11 @@
 import { SimpleError } from '@common/errors';
 import { RateLimiter } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { CountFilteredRequest, IPaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    IPaginatedResponse,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
 import { LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { fetchToAsyncIterator } from './fetchToAsyncIterator.js';
@@ -43,7 +47,9 @@ export async function streamForBreakdown<T>(options: {
     filter: StamhoofdFilter;
     search: string | null;
     count: (request: CountFilteredRequest) => Promise<number>;
-    fetch: (request: LimitedFilteredRequest) => Promise<IPaginatedResponse<T[], LimitedFilteredRequest>>;
+    fetch: (
+        request: LimitedFilteredRequest,
+    ) => Promise<IPaginatedResponse<T[], LimitedFilteredRequest>>;
     handle: (results: T[]) => Promise<void> | void;
 }): Promise<void> {
     // Clicking through the tabs of a breakdown would otherwise stack up requests that each block a
@@ -61,30 +67,34 @@ export async function streamForBreakdown<T>(options: {
 
     // One breakdown per user at a time, and never more than 5 for all users together
     await QueueHandler.schedule('breakdown-' + options.userId, async () => {
-        await QueueHandler.schedule('breakdown', async () => {
-            const request = new LimitedFilteredRequest({
-                filter: options.filter,
-                search: options.search,
-                limit: PAGE_SIZE,
-                sort: [
-                    { key: 'id', order: SortItemDirection.ASC },
-                ],
-            });
+        await QueueHandler.schedule(
+            'breakdown',
+            async () => {
+                const request = new LimitedFilteredRequest({
+                    filter: options.filter,
+                    search: options.search,
+                    limit: PAGE_SIZE,
+                    sort: [{ key: 'id', order: SortItemDirection.ASC }],
+                });
 
-            // Asked up front so a selection that is too big costs one query instead of reading it all
-            assertBreakdownSize(await options.count(request));
+                // Asked up front so a selection that is too big costs one query instead of reading it all
+                assertBreakdownSize(await options.count(request));
 
-            let count = 0;
+                let count = 0;
 
-            for await (const results of fetchToAsyncIterator(request, { fetch: options.fetch })) {
-                count += results.length;
+                for await (const results of fetchToAsyncIterator(request, {
+                    fetch: options.fetch,
+                })) {
+                    count += results.length;
 
-                // The selection can still have grown since it was counted
-                assertBreakdownSize(count);
+                    // The selection can still have grown since it was counted
+                    assertBreakdownSize(count);
 
-                await options.handle(results);
-            }
-        }, 5);
+                    await options.handle(results);
+                }
+            },
+            5,
+        );
     });
 }
 

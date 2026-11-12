@@ -1,4 +1,11 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { Event, NamedObject } from './Event.js';
 import { EventNotificationStatus } from './EventNotificationStatus.js';
@@ -82,7 +89,10 @@ export class EventNotification extends AutoEncoder implements ObjectWithRecords 
 
     doesMatchFilter(filter: StamhoofdFilter): boolean {
         try {
-            const compiledFilter = compileToInMemoryFilter(filter, eventNotificationsInMemoryFilterCompilers);
+            const compiledFilter = compileToInMemoryFilter(
+                filter,
+                eventNotificationsInMemoryFilterCompilers,
+            );
             return compiledFilter(this);
         } catch (e) {
             console.error('Error while compiling filter', e, filter);

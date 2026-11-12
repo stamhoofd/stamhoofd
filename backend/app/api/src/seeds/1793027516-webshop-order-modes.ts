@@ -20,7 +20,11 @@ export async function upgradeWebshopOrderModes() {
         action: async (webshop: Webshop) => {
             let hasChanges = false;
 
-            const struct = WebshopStruct.create({ meta: webshop.meta, products: webshop.products, categories: webshop.categories });
+            const struct = WebshopStruct.create({
+                meta: webshop.meta,
+                products: webshop.products,
+                categories: webshop.categories,
+            });
             if (webshop.meta.orderMode === WebshopOrderMode.Cart && !struct.canEnableCart) {
                 webshop.meta = webshop.meta.patch({ orderMode: WebshopOrderMode.Single });
                 hasChanges = true;
@@ -49,7 +53,13 @@ export async function upgradeWebshopOrderModes() {
             changed += 1;
         },
     });
-    console.log('Upgraded the order mode of ' + changed + ' webshops of ' + result.total + ' looped webshops');
+    console.log(
+        'Upgraded the order mode of ' +
+            changed +
+            ' webshops of ' +
+            result.total +
+            ' looped webshops',
+    );
 }
 
 export default new Migration(async () => {

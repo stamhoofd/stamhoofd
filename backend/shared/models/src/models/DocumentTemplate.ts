@@ -2,7 +2,23 @@ import { column } from '@node/database';
 import { SimpleError } from '@common/errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { MemberDetails, Parent, RecordAnswer } from '@stamhoofd/structures';
-import { BalanceItemStatus, DocumentData, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplatePrivate, GroupType, NationalRegisterNumberOptOut, RecordAddressAnswer, RecordAnswerDecoder, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import {
+    BalanceItemStatus,
+    DocumentData,
+    DocumentPrivateSettings,
+    DocumentSettings,
+    DocumentStatus,
+    DocumentTemplatePrivate,
+    GroupType,
+    NationalRegisterNumberOptOut,
+    RecordAddressAnswer,
+    RecordAnswerDecoder,
+    RecordDateAnswer,
+    RecordPriceAnswer,
+    RecordSettings,
+    RecordTextAnswer,
+    RecordType,
+} from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -54,10 +70,12 @@ function roundToCent(price: number): number {
  */
 export function getTaxDependentDebtors(parents: Parent[]): DocumentDebtor[] {
     return parents
-        .filter(p => p.isMemberTaxDependent === true)
-        .map(debtor => ({
+        .filter((p) => p.isMemberTaxDependent === true)
+        .map((debtor) => ({
             debtor,
-            missingData: !debtor.nationalRegisterNumber || debtor.nationalRegisterNumber === NationalRegisterNumberOptOut,
+            missingData:
+                !debtor.nationalRegisterNumber ||
+                debtor.nationalRegisterNumber === NationalRegisterNumberOptOut,
         }));
 }
 
@@ -77,9 +95,13 @@ export function splitPrice(total: number, count: number, index: number): number 
 export class DocumentTemplate extends QueryableModel {
     static table = 'document_templates';
 
-    @column({ primary: true, type: 'string', beforeSave(value) {
-        return value ?? uuidv4();
-    } })
+    @column({
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
+            return value ?? uuidv4();
+        },
+    })
     id!: string;
 
     /**
@@ -118,27 +140,32 @@ export class DocumentTemplate extends QueryableModel {
     @column({ type: 'datetime' })
     createdAt: Date = new Date();
 
-    @column({ type: 'datetime', nullable: true, beforeSave() {
-        if (this.publishedAt === null) {
-            if ((this.status === DocumentStatus.Published)) {
-                // set published at if published
-                return new Date();
+    @column({
+        type: 'datetime',
+        nullable: true,
+        beforeSave() {
+            if (this.publishedAt === null) {
+                if (this.status === DocumentStatus.Published) {
+                    // set published at if published
+                    return new Date();
+                }
+
+                return null;
             }
 
-            return null;
-        }
+            if (this.status === DocumentStatus.Draft) {
+                // remove published at if draft
+                return null;
+            }
 
-        if (this.status === DocumentStatus.Draft) {
-            // remove published at if draft
-            return null;
-        }
-
-        return this.publishedAt;
-    } })
+            return this.publishedAt;
+        },
+    })
     publishedAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -147,7 +174,9 @@ export class DocumentTemplate extends QueryableModel {
     })
     updatedAt: Date;
 
-    override save(options?: Parameters<QueryableModel['save']>[0] & { forceSave?: boolean }): Promise<boolean> {
+    override save(
+        options?: Parameters<QueryableModel['save']>[0] & { forceSave?: boolean },
+    ): Promise<boolean> {
         if (!options?.forceSave && this.isLocked) {
             throw new SimpleError({
                 code: 'locked',
@@ -176,14 +205,19 @@ export class DocumentTemplate extends QueryableModel {
     }
 
     hasDebtorFields() {
-        return this.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords()).some(s => s.id.startsWith('debtor.'));
+        return this.privateSettings.templateDefinition.documentFieldCategories
+            .flatMap((c) => c.getAllRecords())
+            .some((s) => s.id.startsWith('debtor.'));
     }
 
     /**
      * The parents the certificate has to be issued to. Empty when the template has no debtor fields,
      * multiple when the family marked more than one parent as having the member tax dependent.
      */
-    async getDebtors(registration: RegistrationWithMember, balanceItems: BalanceItem[]): Promise<DocumentDebtor[]> {
+    async getDebtors(
+        registration: RegistrationWithMember,
+        balanceItems: BalanceItem[],
+    ): Promise<DocumentDebtor[]> {
         if (!this.hasDebtorFields()) {
             return [];
         }
@@ -194,14 +228,23 @@ export class DocumentTemplate extends QueryableModel {
             return taxDependentDebtors;
         }
 
-        const parentsWithNRN = parents.filter(p => p.nationalRegisterNumber !== NationalRegisterNumberOptOut && p.nationalRegisterNumber);
+        const parentsWithNRN = parents.filter(
+            (p) =>
+                p.nationalRegisterNumber !== NationalRegisterNumberOptOut &&
+                p.nationalRegisterNumber,
+        );
         let debtor: Parent | undefined = parentsWithNRN[0] ?? parents[0];
         if (parentsWithNRN.length > 1) {
             for (const balanceItem of balanceItems) {
-                if (balanceItem && balanceItem.userId && balanceItem.priceOpen === 0 && balanceItem.status === BalanceItemStatus.Due) {
+                if (
+                    balanceItem &&
+                    balanceItem.userId &&
+                    balanceItem.priceOpen === 0 &&
+                    balanceItem.status === BalanceItemStatus.Due
+                ) {
                     const user = await User.getByID(balanceItem.userId);
                     if (user) {
-                        const parent = parentsWithNRN.find(p => p.hasEmail(user.email));
+                        const parent = parentsWithNRN.find((p) => p.hasEmail(user.email));
 
                         if (parent) {
                             debtor = parent;
@@ -209,7 +252,7 @@ export class DocumentTemplate extends QueryableModel {
                         }
 
                         if (!debtor.nationalRegisterNumber) {
-                            const parent = parents.find(p => p.hasEmail(user.email));
+                            const parent = parents.find((p) => p.hasEmail(user.email));
                             if (parent) {
                                 debtor = parent;
                             }
@@ -236,10 +279,18 @@ export class DocumentTemplate extends QueryableModel {
      * A certificate only covers the days the member is young enough: when the birthday that makes the member
      * too old falls inside the registration, the certified period ends the day before that birthday.
      */
-    getCertifiedPeriod(registration: RegistrationWithMember, group: Group | undefined): CertifiedPeriod {
+    getCertifiedPeriod(
+        registration: RegistrationWithMember,
+        group: Group | undefined,
+    ): CertifiedPeriod {
         const startDate = registration.startDate ?? group?.settings?.startDate ?? null;
         const endDate = registration.endDate ?? group?.settings?.endDate ?? null;
-        const untrimmed: CertifiedPeriod = { startDate, endDate, certifiedDays: null, totalDays: null };
+        const untrimmed: CertifiedPeriod = {
+            startDate,
+            endDate,
+            certifiedDays: null,
+            totalDays: null,
+        };
 
         const maxAge = this.getMaxAgeFor(registration.member.details);
         const birthDay = registration.member.details.birthDay;
@@ -247,13 +298,20 @@ export class DocumentTemplate extends QueryableModel {
             return untrimmed;
         }
 
-        const tooOldFrom = Formatter.luxon(birthDay).plus({ years: maxAge + 1 }).startOf('day');
-        if (tooOldFrom <= Formatter.luxon(startDate).startOf('day') || tooOldFrom > Formatter.luxon(endDate).startOf('day')) {
+        const tooOldFrom = Formatter.luxon(birthDay)
+            .plus({ years: maxAge + 1 })
+            .startOf('day');
+        if (
+            tooOldFrom <= Formatter.luxon(startDate).startOf('day') ||
+            tooOldFrom > Formatter.luxon(endDate).startOf('day')
+        ) {
             return untrimmed;
         }
 
         const lastDay = tooOldFrom.minus({ days: 1 });
-        const certifiedEndDate = Formatter.luxon(endDate).set({ year: lastDay.year, month: lastDay.month, day: lastDay.day }).toJSDate();
+        const certifiedEndDate = Formatter.luxon(endDate)
+            .set({ year: lastDay.year, month: lastDay.month, day: lastDay.day })
+            .toJSDate();
         return {
             startDate,
             endDate: certifiedEndDate,
@@ -266,15 +324,30 @@ export class DocumentTemplate extends QueryableModel {
      * Returns answers keyed by template field ID for a registration. Built-in defaults are looked up by
      * linked-field ID and cloned before applying template settings. With a split, prices are that debtor's share.
      */
-    async buildAnswers(registration: RegistrationWithMember, options: { balance?: RegistrationBalance; debtors?: DocumentDebtor[]; split?: DocumentSplit } = {}): Promise<{ fieldAnswers: Map<string, RecordAnswer>; missingData: boolean }> {
+    async buildAnswers(
+        registration: RegistrationWithMember,
+        options: {
+            balance?: RegistrationBalance;
+            debtors?: DocumentDebtor[];
+            split?: DocumentSplit;
+        } = {},
+    ): Promise<{ fieldAnswers: Map<string, RecordAnswer>; missingData: boolean }> {
         const fieldAnswers = new Map<string, RecordAnswer>();
         let missingData = false;
 
-        const group = 'group' in registration ? registration.group as Group : await Group.getByID(registration.groupId);
-        const { items: balanceItems, payments } = options.balance ?? await BalanceItem.getForRegistration(registration.id, this.organizationId);
+        const group =
+            'group' in registration
+                ? (registration.group as Group)
+                : await Group.getByID(registration.groupId);
+        const { items: balanceItems, payments } =
+            options.balance ??
+            (await BalanceItem.getForRegistration(registration.id, this.organizationId));
 
-        const paidAtDates = payments.flatMap(p => p.paidAt ? [p.paidAt?.getTime()] : []);
-        let totalPrice = balanceItems.reduce((sum, item) => sum + (item.priceOpen + item.pricePaid + item.pricePending), 0);
+        const paidAtDates = payments.flatMap((p) => (p.paidAt ? [p.paidAt?.getTime()] : []));
+        let totalPrice = balanceItems.reduce(
+            (sum, item) => sum + (item.priceOpen + item.pricePaid + item.pricePending),
+            0,
+        );
         let totalPricePaid = balanceItems.reduce((sum, item) => sum + item.pricePaid, 0);
 
         // A trimmed period keeps the daily rate, so the certified amount shrinks with the days
@@ -286,76 +359,99 @@ export class DocumentTemplate extends QueryableModel {
 
         const split = options.split;
         const price = split ? splitPrice(totalPrice, split.count, split.index) : totalPrice;
-        const pricePaid = split ? splitPrice(totalPricePaid, split.count, split.index) : totalPricePaid;
+        const pricePaid = split
+            ? splitPrice(totalPricePaid, split.count, split.index)
+            : totalPricePaid;
 
         // We take the minimum date here, because there is a highter change of later paymetns to be for other things than the registration itself
         const paidAt = paidAtDates.length ? new Date(Math.min(...paidAtDates)) : null;
 
         // Some fields are supported by default in linked fields
         const defaultData = new Map<string, RecordAnswer>([
-            ['group.name', RecordTextAnswer.create({
-                settings: RecordSettings.create({
-                    id: 'group.name',
-                    type: RecordType.Text,
+            [
+                'group.name',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({
+                        id: 'group.name',
+                        type: RecordType.Text,
+                    }),
+                    value: group?.settings?.name?.toString() ?? '',
                 }),
-                value: group?.settings?.name?.toString() ?? '',
-            })],
-            ['group.type', RecordTextAnswer.create({
-                settings: RecordSettings.create({
-                    id: 'group.type',
-                    type: RecordType.Text,
-                }), // settings will be overwritten
-                value: group?.type ?? '',
-            })],
-            ['registration.startDate', RecordDateAnswer.create({
-                settings: RecordSettings.create({
-                    id: 'registration.startDate',
-                    type: RecordType.Date,
-                }), // settings will be overwritten
-                dateValue: period.startDate,
-            })],
-            ['registration.endDate', RecordDateAnswer.create({
-                settings: RecordSettings.create({
-                    id: 'registration.endDate',
-                    type: RecordType.Date,
-                }), // settings will be overwritten
-                dateValue: period.endDate,
-            })],
-            ['registration.price',
+            ],
+            [
+                'group.type',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({
+                        id: 'group.type',
+                        type: RecordType.Text,
+                    }), // settings will be overwritten
+                    value: group?.type ?? '',
+                }),
+            ],
+            [
+                'registration.startDate',
+                RecordDateAnswer.create({
+                    settings: RecordSettings.create({
+                        id: 'registration.startDate',
+                        type: RecordType.Date,
+                    }), // settings will be overwritten
+                    dateValue: period.startDate,
+                }),
+            ],
+            [
+                'registration.endDate',
+                RecordDateAnswer.create({
+                    settings: RecordSettings.create({
+                        id: 'registration.endDate',
+                        type: RecordType.Date,
+                    }), // settings will be overwritten
+                    dateValue: period.endDate,
+                }),
+            ],
+            [
+                'registration.price',
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({
                         id: 'registration.price',
                         type: RecordType.Price,
                     }), // settings will be overwritten
                     value: price,
-                })],
+                }),
+            ],
             // This one is duplicated in case it got disabled (we need to use it to check if document is included), so it is never split
-            ['registration.priceOriginal',
+            [
+                'registration.priceOriginal',
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({
                         id: 'registration.priceOriginal',
                         type: RecordType.Price,
                     }), // settings will be overwritten
                     value: totalPrice,
-                })],
+                }),
+            ],
             // This one is duplicated in case it got disabled (we need to use it to check if document is included), so it is never split
-            ['registration.pricePaidOriginal',
+            [
+                'registration.pricePaidOriginal',
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({
                         id: 'registration.pricePaidOriginal',
                         type: RecordType.Price,
                     }), // settings will be overwritten
                     value: totalPricePaid,
-                })],
-            ['registration.pricePaid',
+                }),
+            ],
+            [
+                'registration.pricePaid',
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({
                         id: 'registration.pricePaid',
                         type: RecordType.Price,
                     }), // settings will be overwritten
                     value: pricePaid,
-                })],
-            ['registration.paidAt',
+                }),
+            ],
+            [
+                'registration.paidAt',
                 RecordDateAnswer.create({
                     settings: RecordSettings.create({
                         id: 'registration.paidAt',
@@ -363,103 +459,191 @@ export class DocumentTemplate extends QueryableModel {
                         required: false,
                     }), // settings will be overwritten
                     dateValue: paidAt,
-                })],
-            ['member.firstName', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.firstName,
-            })],
-            ['member.lastName', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.lastName,
-            })],
-            ['member.nationalRegisterNumber', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.nationalRegisterNumber === NationalRegisterNumberOptOut ? null : registration.member.details.nationalRegisterNumber,
-            })],
-            ['member.address', RecordAddressAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                address: registration.member.details.address ?? registration.member.details.getAllAddresses()[0] ?? null,
-            })],
-            ['member.email', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.getMemberEmails()[0] ?? registration.member.details.getParentEmails()[0],
-            })],
-            ['member.birthDay', RecordDateAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                dateValue: registration.member.details.birthDay,
-            })],
-            ['parents[0].firstName', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.parents[0]?.firstName,
-            })],
-            ['parents[0].lastName', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.parents[0]?.lastName,
-            })],
-            ['parents[0].nationalRegisterNumber', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.parents[0]?.nationalRegisterNumber === NationalRegisterNumberOptOut ? null : registration.member.details.parents[0]?.nationalRegisterNumber,
-            })],
-            ['parents[0].address', RecordAddressAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                address: registration.member.details.parents[0]?.address ?? null,
-            })],
-            ['parents[0].email', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.parents[0]?.email ?? null,
-            })],
-            ['parents[1].firstName', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.parents[1]?.firstName,
-            })],
-            ['parents[1].lastName', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.parents[1]?.lastName,
-            })],
-            ['parents[1].nationalRegisterNumber', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.parents[1]?.nationalRegisterNumber === NationalRegisterNumberOptOut ? null : registration.member.details.parents[1]?.nationalRegisterNumber,
-            })],
-            ['parents[1].address', RecordAddressAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                address: registration.member.details.parents[1]?.address ?? null,
-            })],
-            ['parents[1].email', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: registration.member.details.parents[1]?.email ?? null,
-            })],
+                }),
+            ],
+            [
+                'member.firstName',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: registration.member.details.firstName,
+                }),
+            ],
+            [
+                'member.lastName',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: registration.member.details.lastName,
+                }),
+            ],
+            [
+                'member.nationalRegisterNumber',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value:
+                        registration.member.details.nationalRegisterNumber ===
+                        NationalRegisterNumberOptOut
+                            ? null
+                            : registration.member.details.nationalRegisterNumber,
+                }),
+            ],
+            [
+                'member.address',
+                RecordAddressAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    address:
+                        registration.member.details.address ??
+                        registration.member.details.getAllAddresses()[0] ??
+                        null,
+                }),
+            ],
+            [
+                'member.email',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value:
+                        registration.member.details.getMemberEmails()[0] ??
+                        registration.member.details.getParentEmails()[0],
+                }),
+            ],
+            [
+                'member.birthDay',
+                RecordDateAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    dateValue: registration.member.details.birthDay,
+                }),
+            ],
+            [
+                'parents[0].firstName',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: registration.member.details.parents[0]?.firstName,
+                }),
+            ],
+            [
+                'parents[0].lastName',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: registration.member.details.parents[0]?.lastName,
+                }),
+            ],
+            [
+                'parents[0].nationalRegisterNumber',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value:
+                        registration.member.details.parents[0]?.nationalRegisterNumber ===
+                        NationalRegisterNumberOptOut
+                            ? null
+                            : registration.member.details.parents[0]?.nationalRegisterNumber,
+                }),
+            ],
+            [
+                'parents[0].address',
+                RecordAddressAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    address: registration.member.details.parents[0]?.address ?? null,
+                }),
+            ],
+            [
+                'parents[0].email',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: registration.member.details.parents[0]?.email ?? null,
+                }),
+            ],
+            [
+                'parents[1].firstName',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: registration.member.details.parents[1]?.firstName,
+                }),
+            ],
+            [
+                'parents[1].lastName',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: registration.member.details.parents[1]?.lastName,
+                }),
+            ],
+            [
+                'parents[1].nationalRegisterNumber',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value:
+                        registration.member.details.parents[1]?.nationalRegisterNumber ===
+                        NationalRegisterNumberOptOut
+                            ? null
+                            : registration.member.details.parents[1]?.nationalRegisterNumber,
+                }),
+            ],
+            [
+                'parents[1].address',
+                RecordAddressAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    address: registration.member.details.parents[1]?.address ?? null,
+                }),
+            ],
+            [
+                'parents[1].email',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: registration.member.details.parents[1]?.email ?? null,
+                }),
+            ],
         ]);
 
-        const allRecords = this.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords());
+        const allRecords = this.privateSettings.templateDefinition.documentFieldCategories.flatMap(
+            (c) => c.getAllRecords(),
+        );
 
         if (this.hasDebtorFields()) {
-            const documentDebtor = split ? split.debtor : (options.debtors ?? await this.getDebtors(registration, balanceItems))[0];
+            const documentDebtor = split
+                ? split.debtor
+                : (options.debtors ?? (await this.getDebtors(registration, balanceItems)))[0];
             const debtor = documentDebtor?.debtor;
 
             if (documentDebtor?.missingData) {
                 missingData = true;
             }
 
-            defaultData.set('debtor.firstName', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: debtor?.firstName ?? '',
-            }));
-            defaultData.set('debtor.lastName', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: debtor?.lastName ?? '',
-            }));
-            defaultData.set('debtor.nationalRegisterNumber', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: debtor?.nationalRegisterNumber === NationalRegisterNumberOptOut ? '' : debtor?.nationalRegisterNumber,
-            }));
-            defaultData.set('debtor.address', RecordAddressAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                address: debtor?.address ?? null,
-            }));
-            defaultData.set('debtor.email', RecordTextAnswer.create({
-                settings: RecordSettings.create({}), // settings will be overwritten
-                value: debtor?.email ?? null,
-            }));
+            defaultData.set(
+                'debtor.firstName',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: debtor?.firstName ?? '',
+                }),
+            );
+            defaultData.set(
+                'debtor.lastName',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: debtor?.lastName ?? '',
+                }),
+            );
+            defaultData.set(
+                'debtor.nationalRegisterNumber',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value:
+                        debtor?.nationalRegisterNumber === NationalRegisterNumberOptOut
+                            ? ''
+                            : debtor?.nationalRegisterNumber,
+                }),
+            );
+            defaultData.set(
+                'debtor.address',
+                RecordAddressAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    address: debtor?.address ?? null,
+                }),
+            );
+            defaultData.set(
+                'debtor.email',
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({}), // settings will be overwritten
+                    value: debtor?.email ?? null,
+                }),
+            );
         }
 
         // Add data that is different for each member
@@ -468,7 +652,9 @@ export class DocumentTemplate extends QueryableModel {
             // - Could either return an id of a recordSetting connected to member
             // - or an idea of defaultData that is supported by default
             // The result is always a recordAnswer whose type should match the type of the linkedField
-            let linkedToMemberAnswerSettingsIds = this.settings.linkedFields.get(field.id) ?? [field.id];
+            let linkedToMemberAnswerSettingsIds = this.settings.linkedFields.get(field.id) ?? [
+                field.id,
+            ];
 
             if (linkedToMemberAnswerSettingsIds.length === 0) {
                 linkedToMemberAnswerSettingsIds = [field.id];
@@ -491,7 +677,9 @@ export class DocumentTemplate extends QueryableModel {
             if (linkedToMemberAnswerSettingsIds) {
                 for (const linkedToMemberAnswerSettingsId of linkedToMemberAnswerSettingsIds) {
                     if (linkedToMemberAnswerSettingsId) {
-                        const answer = registration.member.details.recordAnswers.get(linkedToMemberAnswerSettingsId);
+                        const answer = registration.member.details.recordAnswers.get(
+                            linkedToMemberAnswerSettingsId,
+                        );
                         if (answer && !answer.isEmpty && answer.settings.type === field.type) {
                             // We need to link it with the settings in the template
                             const clone = answer.clone();
@@ -506,7 +694,10 @@ export class DocumentTemplate extends QueryableModel {
                         // Check if supported by default
                         const defaultAnswer = defaultData.get(linkedToMemberAnswerSettingsId);
                         if (defaultAnswer && !defaultAnswer.isEmpty) {
-                            if (defaultAnswer instanceof RecordAnswerDecoder.getClassForType(field.type)) {
+                            if (
+                                defaultAnswer instanceof
+                                RecordAnswerDecoder.getClassForType(field.type)
+                            ) {
                                 // We need to clone here, because the same default data can be used in multiple places
                                 const clone = defaultAnswer.clone();
                                 clone.settings = field;
@@ -515,7 +706,12 @@ export class DocumentTemplate extends QueryableModel {
                                 fieldAnswers.set(field.id, clone);
                                 break;
                             } else {
-                                console.warn('Found type mismatch for default data: ' + linkedToMemberAnswerSettingsId + ' - ' + field.id);
+                                console.warn(
+                                    'Found type mismatch for default data: ' +
+                                        linkedToMemberAnswerSettingsId +
+                                        ' - ' +
+                                        field.id,
+                                );
                             }
                         }
                     }
@@ -544,7 +740,9 @@ export class DocumentTemplate extends QueryableModel {
         }
 
         // Add group based answers (same for each group)
-        for (const answer of this.privateSettings.groups.find(g => g.group.id === registration.groupId)?.fieldAnswers?.values() ?? []) {
+        for (const answer of this.privateSettings.groups
+            .find((g) => g.group.id === registration.groupId)
+            ?.fieldAnswers?.values() ?? []) {
             // todo: check duplicate
             answer.reviewedAt = null;
             fieldAnswers.set(answer.settings.id, answer);
@@ -565,7 +763,12 @@ export class DocumentTemplate extends QueryableModel {
                 } catch (e) {
                     missingData = true;
 
-                    console.log('Missing data because of validation error', e, answer, answer.settings);
+                    console.log(
+                        'Missing data because of validation error',
+                        e,
+                        answer,
+                        answer.settings,
+                    );
                     break;
                 }
             }
@@ -581,27 +784,40 @@ export class DocumentTemplate extends QueryableModel {
         if (registrations.length === 0) {
             return [];
         }
-        const existingDocuments = await Document.where({ templateId: this.id, registrationId: { sign: 'IN', value: registrations.map(r => r.id) } });
+        const existingDocuments = await Document.where({
+            templateId: this.id,
+            registrationId: { sign: 'IN', value: registrations.map((r) => r.id) },
+        });
         const documents: Document[] = [];
 
-        const includedRegistrations = registrations.filter(r => this.checkRegistrationIncluded(r));
+        const includedRegistrations = registrations.filter((r) =>
+            this.checkRegistrationIncluded(r),
+        );
 
         // Load groups
-        const groupIds = Formatter.uniqueArray(includedRegistrations.map(r => r.groupId));
+        const groupIds = Formatter.uniqueArray(includedRegistrations.map((r) => r.groupId));
         const groups = await Group.getByIDs(...groupIds);
 
         for (const registration of registrations) {
-            const group = groups.find(g => g.id === registration.groupId);
+            const group = groups.find((g) => g.id === registration.groupId);
             if (group) {
                 registration.setRelation(Registration.group, group);
             }
-            documents.push(...await this.updateForRegistration(registration, existingDocuments.filter(d => d.registrationId === registration.id)));
+            documents.push(
+                ...(await this.updateForRegistration(
+                    registration,
+                    existingDocuments.filter((d) => d.registrationId === registration.id),
+                )),
+            );
         }
 
         return documents;
     }
 
-    async updateForRegistration(registration: RegistrationWithMember, existingDocuments?: Document[]): Promise<Document[]> {
+    async updateForRegistration(
+        registration: RegistrationWithMember,
+        existingDocuments?: Document[],
+    ): Promise<Document[]> {
         if (this.isLocked) {
             throw new SimpleError({
                 code: 'locked',
@@ -610,7 +826,13 @@ export class DocumentTemplate extends QueryableModel {
             });
         }
 
-        existingDocuments = existingDocuments !== undefined ? existingDocuments : await Document.where({ templateId: this.id, registrationId: registration.id }, { limit: 5 });
+        existingDocuments =
+            existingDocuments !== undefined
+                ? existingDocuments
+                : await Document.where(
+                      { templateId: this.id, registrationId: registration.id },
+                      { limit: 5 },
+                  );
 
         if (!this.checkRegistrationIncluded(registration)) {
             // Fast fail without building answers
@@ -622,7 +844,10 @@ export class DocumentTemplate extends QueryableModel {
 
         const balance = await BalanceItem.getForRegistration(registration.id, this.organizationId);
         const debtors = await this.getDebtors(registration, balance.items);
-        const { fieldAnswers, missingData } = await this.buildAnswers(registration, { balance, debtors });
+        const { fieldAnswers, missingData } = await this.buildAnswers(registration, {
+            balance,
+            debtors,
+        });
 
         if (!this.checkAnswersIncluded(registration, fieldAnswers)) {
             for (const document of existingDocuments) {
@@ -631,23 +856,43 @@ export class DocumentTemplate extends QueryableModel {
             return [];
         }
 
-        const group = 'group' in registration ? registration.group as Group : await Group.getByID(registration.groupId);
+        const group =
+            'group' in registration
+                ? (registration.group as Group)
+                : await Group.getByID(registration.groupId);
         const description = `${registration.member.details.name}, ${group ? group.settings.name.toString() : ''}${group && group.settings.period && group.type === GroupType.Membership ? ' ' + group.settings.period?.nameShort : ''}`;
 
-        const activeDocuments = existingDocuments.filter(d => d.status !== DocumentStatus.Deleted);
-        const manualDocuments = activeDocuments.filter(d => d.parentId === null);
-        const splitDocuments = activeDocuments.filter(d => d.parentId !== null);
+        const activeDocuments = existingDocuments.filter(
+            (d) => d.status !== DocumentStatus.Deleted,
+        );
+        const manualDocuments = activeDocuments.filter((d) => d.parentId === null);
+        const splitDocuments = activeDocuments.filter((d) => d.parentId !== null);
 
         // Multiple documents without a parent were split by hand (duplicated in the dashboard): never touch those
         if (debtors.length >= 2 && manualDocuments.length < 2) {
-            return await this.updateSplitDocuments(registration, { balance, debtors, existingDocuments, splitDocuments, manualDocuments, unsplitAnswers: fieldAnswers, description });
+            return await this.updateSplitDocuments(registration, {
+                balance,
+                debtors,
+                existingDocuments,
+                splitDocuments,
+                manualDocuments,
+                unsplitAnswers: fieldAnswers,
+                description,
+            });
         }
 
         // Merge documents that were split before, by keeping the one of the remaining debtor
-        const keep = splitDocuments.length > 0 ? this.pickDocumentToKeep(splitDocuments, debtors[0]?.debtor.id ?? null) : null;
+        const keep =
+            splitDocuments.length > 0
+                ? this.pickDocumentToKeep(splitDocuments, debtors[0]?.debtor.id ?? null)
+                : null;
         const documents: Document[] = [];
         for (const document of existingDocuments) {
-            if (document.parentId !== null && document.status !== DocumentStatus.Deleted && document !== keep) {
+            if (
+                document.parentId !== null &&
+                document.status !== DocumentStatus.Deleted &&
+                document !== keep
+            ) {
                 await this.removeDocument(document);
                 continue;
             }
@@ -662,7 +907,10 @@ export class DocumentTemplate extends QueryableModel {
                 if (documents.length === 1) {
                     document.data.description = description;
                 }
-                if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+                if (
+                    document.status === DocumentStatus.Draft ||
+                    document.status === DocumentStatus.Published
+                ) {
                     document.status = this.status;
                 }
                 await document.save();
@@ -670,27 +918,66 @@ export class DocumentTemplate extends QueryableModel {
             return documents;
         }
 
-        return [await this.createDocument(registration, { fieldAnswers, missingData, description, parentId: null })];
+        return [
+            await this.createDocument(registration, {
+                fieldAnswers,
+                missingData,
+                description,
+                parentId: null,
+            }),
+        ];
     }
 
     /**
      * One document per debtor, each with its share of the price
      */
-    private async updateSplitDocuments(registration: RegistrationWithMember, { balance, debtors, existingDocuments, splitDocuments, manualDocuments, unsplitAnswers, description }: { balance: RegistrationBalance; debtors: DocumentDebtor[]; existingDocuments: Document[]; splitDocuments: Document[]; manualDocuments: Document[]; unsplitAnswers: Map<string, RecordAnswer>; description: string }): Promise<Document[]> {
+    private async updateSplitDocuments(
+        registration: RegistrationWithMember,
+        {
+            balance,
+            debtors,
+            existingDocuments,
+            splitDocuments,
+            manualDocuments,
+            unsplitAnswers,
+            description,
+        }: {
+            balance: RegistrationBalance;
+            debtors: DocumentDebtor[];
+            existingDocuments: Document[];
+            splitDocuments: Document[];
+            manualDocuments: Document[];
+            unsplitAnswers: Map<string, RecordAnswer>;
+            description: string;
+        },
+    ): Promise<Document[]> {
         const documents: Document[] = [];
 
         // The document from before the split is kept for the first debtor, so it keeps its number
-        const claimable = splitDocuments.length === 0 && manualDocuments.length === 1 ? manualDocuments[0] : null;
+        const claimable =
+            splitDocuments.length === 0 && manualDocuments.length === 1 ? manualDocuments[0] : null;
         const unmatched = new Set(splitDocuments);
 
         for (const [index, debtor] of debtors.entries()) {
             const split: DocumentSplit = { debtor, count: debtors.length, index };
-            const { fieldAnswers, missingData } = await this.buildAnswers(registration, { balance, split });
+            const { fieldAnswers, missingData } = await this.buildAnswers(registration, {
+                balance,
+                split,
+            });
             const splitDescription = `${description} (${debtor.debtor.name})`;
 
-            const document = splitDocuments.find(d => d.parentId === debtor.debtor.id) ?? (index === 0 ? claimable : null);
+            const document =
+                splitDocuments.find((d) => d.parentId === debtor.debtor.id) ??
+                (index === 0 ? claimable : null);
             if (!document) {
-                documents.push(await this.createDocument(registration, { fieldAnswers, missingData, description: splitDescription, parentId: debtor.debtor.id }));
+                documents.push(
+                    await this.createDocument(registration, {
+                        fieldAnswers,
+                        missingData,
+                        description: splitDescription,
+                        parentId: debtor.debtor.id,
+                    }),
+                );
                 continue;
             }
 
@@ -699,7 +986,10 @@ export class DocumentTemplate extends QueryableModel {
             await this.updateDocumentWithAnswers(document, fieldAnswers);
             document.data.name = this.settings.name;
             document.data.description = splitDescription;
-            if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+            if (
+                document.status === DocumentStatus.Draft ||
+                document.status === DocumentStatus.Published
+            ) {
                 document.status = this.status;
             }
             await document.save();
@@ -717,7 +1007,10 @@ export class DocumentTemplate extends QueryableModel {
             }
             await this.updateDocumentWithAnswers(document, unsplitAnswers);
             document.data.name = this.settings.name;
-            if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+            if (
+                document.status === DocumentStatus.Draft ||
+                document.status === DocumentStatus.Published
+            ) {
                 document.status = this.status;
             }
             await document.save();
@@ -728,12 +1021,27 @@ export class DocumentTemplate extends QueryableModel {
     }
 
     private pickDocumentToKeep(splitDocuments: Document[], parentId: string | null): Document {
-        return splitDocuments.find(d => d.parentId === parentId)
-            ?? splitDocuments.find(d => d.number !== null)
-            ?? [...splitDocuments].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())[0];
+        return (
+            splitDocuments.find((d) => d.parentId === parentId) ??
+            splitDocuments.find((d) => d.number !== null) ??
+            [...splitDocuments].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())[0]
+        );
     }
 
-    private async createDocument(registration: RegistrationWithMember, { fieldAnswers, missingData, description, parentId }: { fieldAnswers: Map<string, RecordAnswer>; missingData: boolean; description: string; parentId: string | null }): Promise<Document> {
+    private async createDocument(
+        registration: RegistrationWithMember,
+        {
+            fieldAnswers,
+            missingData,
+            description,
+            parentId,
+        }: {
+            fieldAnswers: Map<string, RecordAnswer>;
+            missingData: boolean;
+            description: string;
+            parentId: string | null;
+        },
+    ): Promise<Document> {
         const document = new Document();
         document.organizationId = this.organizationId;
         document.templateId = this.id;
@@ -788,7 +1096,10 @@ export class DocumentTemplate extends QueryableModel {
         return false;
     }
 
-    checkAnswersIncluded(registration: RegistrationWithMember, fieldAnswers: Map<string, RecordAnswer>) {
+    checkAnswersIncluded(
+        registration: RegistrationWithMember,
+        fieldAnswers: Map<string, RecordAnswer>,
+    ) {
         if (this.settings.maxAge !== null) {
             const fieldId = 'registration.startDate';
             let startDate: null | Date = null;
@@ -803,7 +1114,9 @@ export class DocumentTemplate extends QueryableModel {
             if (startDate) {
                 // ageOnDate reads the local calendar day, so hand it the Brussels day the registration starts on
                 const startDay = Formatter.luxon(startDate);
-                const age = registration.member.details.ageOnDate(new Date(startDay.year, startDay.month - 1, startDay.day));
+                const age = registration.member.details.ageOnDate(
+                    new Date(startDay.year, startDay.month - 1, startDay.day),
+                );
 
                 if (age === null) {
                     console.warn('Missing member age checking maxAge');
@@ -831,7 +1144,8 @@ export class DocumentTemplate extends QueryableModel {
             const pricePaidAnswer = fieldAnswers.get('registration.pricePaidOriginal');
             const priceAnswer = fieldAnswers.get('registration.priceOriginal');
             const price = (priceAnswer instanceof RecordPriceAnswer ? priceAnswer.value : 0) ?? 0;
-            const pricePaid = (pricePaidAnswer instanceof RecordPriceAnswer ? pricePaidAnswer.value : 0) ?? 0;
+            const pricePaid =
+                (pricePaidAnswer instanceof RecordPriceAnswer ? pricePaidAnswer.value : 0) ?? 0;
 
             if (pricePaid < this.settings.minPricePaid && price > 0) {
                 return false;
@@ -859,7 +1173,10 @@ export class DocumentTemplate extends QueryableModel {
                     }
 
                     await this.updateAnswers(document); // Only update global data
-                    if (document.status === DocumentStatus.Draft || document.status === DocumentStatus.Published) {
+                    if (
+                        document.status === DocumentStatus.Draft ||
+                        document.status === DocumentStatus.Published
+                    ) {
                         document.status = this.status;
                         await document.save();
                     }
@@ -874,7 +1191,10 @@ export class DocumentTemplate extends QueryableModel {
                             continue;
                         }
 
-                        if (document.number === null && document.status === DocumentStatus.Published) {
+                        if (
+                            document.number === null &&
+                            document.status === DocumentStatus.Published
+                        ) {
                             document.number = this.nextNumberForDocuments(documents);
                             await document.save();
                         }
@@ -890,7 +1210,9 @@ export class DocumentTemplate extends QueryableModel {
                 abort.throwIfAborted();
 
                 // Get the registrations for this group with this cycle
-                const registrations = await Member.getRegistrationWithMembersForGroup(groupDefinition.group.id);
+                const registrations = await Member.getRegistrationWithMembersForGroup(
+                    groupDefinition.group.id,
+                );
                 const documents = await this.updateForRegistrations(registrations);
                 for (const document of documents) {
                     documentSet.set(document.id, document);
@@ -942,7 +1264,9 @@ export class DocumentTemplate extends QueryableModel {
     }
 
     private nextNumberForDocuments(documents: Document[]) {
-        const sorted = documents.filter(d => d.status === DocumentStatus.Published && !!d.number).sort((a, b) => Sorter.byNumberValue(b.number ?? 0, a.number ?? 0));
+        const sorted = documents
+            .filter((d) => d.status === DocumentStatus.Published && !!d.number)
+            .sort((a, b) => Sorter.byNumberValue(b.number ?? 0, a.number ?? 0));
 
         let lastNumber = 0;
         for (const document of sorted) {
@@ -961,7 +1285,9 @@ export class DocumentTemplate extends QueryableModel {
     }
 
     areAnswersComplete(answers: Map<string, RecordAnswer>) {
-        for (const field of this.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords())) {
+        for (const field of this.privateSettings.templateDefinition.documentFieldCategories.flatMap(
+            (c) => c.getAllRecords(),
+        )) {
             const answer = answers.get(field.id);
             if (!answer) {
                 return false;
@@ -1012,8 +1338,14 @@ export class DocumentTemplate extends QueryableModel {
     async updateDocumentFor(document: Document, registration: RegistrationWithMember) {
         const balance = await BalanceItem.getForRegistration(registration.id, this.organizationId);
         const debtors = await this.getDebtors(registration, balance.items);
-        const index = document.parentId === null ? -1 : debtors.findIndex(d => d.debtor.id === document.parentId);
-        const split: DocumentSplit | undefined = debtors.length >= 2 && index !== -1 ? { debtor: debtors[index], count: debtors.length, index } : undefined;
+        const index =
+            document.parentId === null
+                ? -1
+                : debtors.findIndex((d) => d.debtor.id === document.parentId);
+        const split: DocumentSplit | undefined =
+            debtors.length >= 2 && index !== -1
+                ? { debtor: debtors[index], count: debtors.length, index }
+                : undefined;
 
         const { fieldAnswers } = await this.buildAnswers(registration, { balance, debtors, split });
         await this.updateDocumentWithAnswers(document, fieldAnswers);

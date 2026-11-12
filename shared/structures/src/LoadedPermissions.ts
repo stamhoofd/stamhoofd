@@ -90,29 +90,48 @@ export class LoadedPermissions {
         return permissions;
     }
 
-    static fromResponsibilityRecord(responsibilityRecord: MemberResponsibilityRecordBase, inheritedResponsibilityRoles: PermissionRoleForResponsibility[], allResponsibilites: MemberResponsibility[]) {
-        const responsibility = allResponsibilites.find(r => r.id === responsibilityRecord.responsibilityId);
+    static fromResponsibilityRecord(
+        responsibilityRecord: MemberResponsibilityRecordBase,
+        inheritedResponsibilityRoles: PermissionRoleForResponsibility[],
+        allResponsibilites: MemberResponsibility[],
+    ) {
+        const responsibility = allResponsibilites.find(
+            (r) => r.id === responsibilityRecord.responsibilityId,
+        );
         if (!responsibility) {
             return LoadedPermissions.create({});
         }
-        return this.fromResponsibility(responsibility, responsibilityRecord.groupId, inheritedResponsibilityRoles);
+        return this.fromResponsibility(
+            responsibility,
+            responsibilityRecord.groupId,
+            inheritedResponsibilityRoles,
+        );
     }
 
     /**
      * old name: buildRoleForResponsibility
      */
-    static fromResponsibility(responsibility: MemberResponsibility, groupId: string | null, inheritedResponsibilityRoles: PermissionRoleForResponsibility[]) {
+    static fromResponsibility(
+        responsibility: MemberResponsibility,
+        groupId: string | null,
+        inheritedResponsibilityRoles: PermissionRoleForResponsibility[],
+    ) {
         const permissions = responsibility.permissions
             ? this.fromRole(responsibility.permissions)
             : LoadedPermissions.create({});
 
         if (groupId && responsibility.groupPermissionLevel !== PermissionLevel.None) {
             const map: Map<string, LoadedPermissions> = new Map();
-            map.set(groupId, LoadedPermissions.create({ level: responsibility.groupPermissionLevel }));
+            map.set(
+                groupId,
+                LoadedPermissions.create({ level: responsibility.groupPermissionLevel }),
+            );
             permissions.resources.set(PermissionsResourceType.Groups, map);
         }
 
-        const role = inheritedResponsibilityRoles.find(r => r.responsibilityId === responsibility.id && r.responsibilityGroupId === groupId);
+        const role = inheritedResponsibilityRoles.find(
+            (r) => r.responsibilityId === responsibility.id && r.responsibilityGroupId === groupId,
+        );
 
         if (role) {
             permissions.add(LoadedPermissions.fromRole(role));
@@ -121,7 +140,12 @@ export class LoadedPermissions {
         return permissions;
     }
 
-    static from(permissions: Permissions, allRoles: PermissionRoleDetailed[], inheritedResponsibilityRoles: PermissionRoleForResponsibility[], allResponsibilites: MemberResponsibility[]) {
+    static from(
+        permissions: Permissions,
+        allRoles: PermissionRoleDetailed[],
+        inheritedResponsibilityRoles: PermissionRoleForResponsibility[],
+        allResponsibilites: MemberResponsibility[],
+    ) {
         const loaded = LoadedPermissions.create({
             level: permissions.level,
             accessRights: [],
@@ -138,7 +162,7 @@ export class LoadedPermissions {
         }
 
         for (const roleRecord of permissions.roles) {
-            const role = allRoles.find(a => a.id === roleRecord.id);
+            const role = allRoles.find((a) => a.id === roleRecord.id);
 
             if (role) {
                 loaded.add(LoadedPermissions.fromRole(role));
@@ -146,7 +170,10 @@ export class LoadedPermissions {
         }
 
         for (const responsibilityRecord of permissions.responsibilities) {
-            if (responsibilityRecord.endDate !== null && responsibilityRecord.endDate < new Date()) {
+            if (
+                responsibilityRecord.endDate !== null &&
+                responsibilityRecord.endDate < new Date()
+            ) {
                 continue;
             }
 
@@ -154,12 +181,18 @@ export class LoadedPermissions {
                 continue;
             }
 
-            const responsibility = allResponsibilites.find(r => r.id === responsibilityRecord.responsibilityId);
+            const responsibility = allResponsibilites.find(
+                (r) => r.id === responsibilityRecord.responsibilityId,
+            );
             if (!responsibility) {
                 continue;
             }
 
-            const r = this.fromResponsibility(responsibility, responsibilityRecord.groupId, inheritedResponsibilityRoles);
+            const r = this.fromResponsibility(
+                responsibility,
+                responsibilityRecord.groupId,
+                inheritedResponsibilityRoles,
+            );
             loaded.add(r);
         }
 
@@ -179,7 +212,9 @@ export class LoadedPermissions {
                 keys.push(PermissionsResourceKey.CurrentPeriod);
             }
         }
-        const instances = keys.map(key => resource.get(key)).filter(instance => instance !== undefined) as LoadedPermissions[];
+        const instances = keys
+            .map((key) => resource.get(key))
+            .filter((instance) => instance !== undefined) as LoadedPermissions[];
         if (instances.length === 0) {
             return null;
         }
@@ -239,7 +274,10 @@ export class LoadedPermissions {
         return false;
     }
 
-    hasAccessRightForAllResourcesOfType(type: PermissionsResourceType, right: AccessRight): boolean {
+    hasAccessRightForAllResourcesOfType(
+        type: PermissionsResourceType,
+        right: AccessRight,
+    ): boolean {
         return this.hasResourceAccessRight(type, PermissionsResourceKey.All, right);
     }
 
@@ -278,7 +316,10 @@ export class LoadedPermissions {
         return false;
     }
 
-    hasAccessRightForSomeResourceOfType(type: PermissionsResourceType, right: AccessRight): boolean {
+    hasAccessRightForSomeResourceOfType(
+        type: PermissionsResourceType,
+        right: AccessRight,
+    ): boolean {
         if (this.hasAccessRight(right)) {
             return true;
         }
@@ -357,7 +398,7 @@ export class LoadedPermissions {
     }
 
     removeAccessRights(rights: AccessRight[]) {
-        this.accessRights = this.accessRights.filter(r => !rights.includes(r));
+        this.accessRights = this.accessRights.filter((r) => !rights.includes(r));
 
         for (const resource of this.resources.values()) {
             for (const r of resource.values()) {
@@ -391,7 +432,9 @@ export class LoadedPermissions {
         }
         if (this.level === PermissionLevel.Full) {
             stack.push($t('%m9'));
-            return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t('%M1') + ' '));
+            return Formatter.capitalizeFirstLetter(
+                Formatter.joinLast(stack, ', ', ' ' + $t('%M1') + ' '),
+            );
         }
 
         for (const right of this.accessRights) {
@@ -404,6 +447,8 @@ export class LoadedPermissions {
             return $t('%8v');
         }
 
-        return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t('%M1') + ' '));
+        return Formatter.capitalizeFirstLetter(
+            Formatter.joinLast(stack, ', ', ' ' + $t('%M1') + ' '),
+        );
     }
 }

@@ -1,6 +1,14 @@
 import { Request } from '@node/endpoints';
 import type { User } from '@stamhoofd/models';
-import { BalanceItemFactory, Invoice, Organization, OrganizationFactory, Payment, Platform, UserFactory } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    Invoice,
+    Organization,
+    OrganizationFactory,
+    Payment,
+    Platform,
+    UserFactory,
+} from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
 import { PatchableArray } from '@common/encoding';
@@ -8,7 +16,18 @@ import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { Address, Organization as OrganizationStruct, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationTag, PaymentMethod, PaymentStatus, Permissions, PermissionsResourceKey, ResourcePermissions } from '@stamhoofd/structures';
+import {
+    Address,
+    Organization as OrganizationStruct,
+    OrganizationMetaData,
+    OrganizationPrivateMetaData,
+    OrganizationTag,
+    PaymentMethod,
+    PaymentStatus,
+    Permissions,
+    PermissionsResourceKey,
+    ResourcePermissions,
+} from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -53,7 +72,11 @@ describe('Endpoint.PatchOrganizationsEndpoint', () => {
         return await testServer.test(endpoint, request);
     };
 
-    const createPayment = async ({ payingOrganizationId }: { payingOrganizationId: string | null }) => {
+    const createPayment = async ({
+        payingOrganizationId,
+    }: {
+        payingOrganizationId: string | null;
+    }) => {
         const payment = new Payment();
         payment.organizationId = membershipOrganization.id;
         payment.payingOrganizationId = payingOrganizationId;
@@ -64,7 +87,11 @@ describe('Endpoint.PatchOrganizationsEndpoint', () => {
         return payment;
     };
 
-    const createApplicationFee = async ({ payingOrganizationId }: { payingOrganizationId: string }) => {
+    const createApplicationFee = async ({
+        payingOrganizationId,
+    }: {
+        payingOrganizationId: string;
+    }) => {
         const charge = new SettlementCharge();
         charge.type = SettlementChargeType.ApplicationFeeService;
         charge.externalId = uuidv4();
@@ -85,7 +112,11 @@ describe('Endpoint.PatchOrganizationsEndpoint', () => {
         return fee;
     };
 
-    const createInvoice = async ({ payingOrganizationId }: { payingOrganizationId: string | null }) => {
+    const createInvoice = async ({
+        payingOrganizationId,
+    }: {
+        payingOrganizationId: string | null;
+    }) => {
         const invoice = new Invoice();
         invoice.organizationId = membershipOrganization.id;
         invoice.payingOrganizationId = payingOrganizationId;
@@ -138,7 +169,9 @@ describe('Endpoint.PatchOrganizationsEndpoint', () => {
         const organization = await new OrganizationFactory({}).create();
         await create(organization);
 
-        await expect(deleteOrganization(organization)).rejects.toThrow(STExpect.errorWithCode('organization_has_financial_records'));
+        await expect(deleteOrganization(organization)).rejects.toThrow(
+            STExpect.errorWithCode('organization_has_financial_records'),
+        );
         expect(await Organization.getByID(organization.id)).toBeDefined();
     });
 
@@ -191,26 +224,44 @@ describe('Endpoint.PatchOrganizationsEndpoint', () => {
 
         beforeAll(async () => {
             originalTags = (await Platform.getForEditing()).config.tags;
-            await setPlatformTags([provinceTag, managedTag, managedChildTag, otherTag, unrelatedTag]);
+            await setPlatformTags([
+                provinceTag,
+                managedTag,
+                managedChildTag,
+                otherTag,
+                unrelatedTag,
+            ]);
         });
 
         afterAll(async () => {
             await setPlatformTags(originalTags);
         });
 
-        const createAdmin = async ({ accessRights, tagId = managedTag.id, level = PermissionLevel.Write }: { accessRights: AccessRight[]; tagId?: string; level?: PermissionLevel }) => {
+        const createAdmin = async ({
+            accessRights,
+            tagId = managedTag.id,
+            level = PermissionLevel.Write,
+        }: {
+            accessRights: AccessRight[];
+            tagId?: string;
+            level?: PermissionLevel;
+        }) => {
             return await new UserFactory({
                 globalPermissions: Permissions.create({
                     resources: new Map([
-                        [PermissionsResourceType.OrganizationTags, new Map([
-                            [tagId, ResourcePermissions.create({ level, accessRights })],
-                        ])],
+                        [
+                            PermissionsResourceType.OrganizationTags,
+                            new Map([[tagId, ResourcePermissions.create({ level, accessRights })]]),
+                        ],
                     ]),
                 }),
             }).create();
         };
 
-        const sendPatch = async (user: User, patch: PatchableArrayAutoEncoder<OrganizationStruct>) => {
+        const sendPatch = async (
+            user: User,
+            patch: PatchableArrayAutoEncoder<OrganizationStruct>,
+        ) => {
             const token = await SessionService.createSession(user);
             const request = Request.patch({
                 path: baseUrl,
@@ -223,7 +274,11 @@ describe('Endpoint.PatchOrganizationsEndpoint', () => {
             return await testServer.test(endpoint, request);
         };
 
-        const createOrganization = async (user: User, tags: string[], options?: { uri?: string }) => {
+        const createOrganization = async (
+            user: User,
+            tags: string[],
+            options?: { uri?: string },
+        ) => {
             const name = 'New organization ' + uuidv4();
             const organization = OrganizationStruct.create({
                 name,
@@ -241,7 +296,9 @@ describe('Endpoint.PatchOrganizationsEndpoint', () => {
         };
 
         test('An admin with the create right for a tag can create an organization with that tag', async () => {
-            const admin = await createAdmin({ accessRights: [AccessRight.PlatformCreateOrganizations] });
+            const admin = await createAdmin({
+                accessRights: [AccessRight.PlatformCreateOrganizations],
+            });
             const organization = await createOrganization(admin, [managedTag.id]);
 
             expect(organization.meta.tags).toEqual([provinceTag.id, managedTag.id]);
@@ -251,11 +308,15 @@ describe('Endpoint.PatchOrganizationsEndpoint', () => {
             expect(organization.privateMeta.featureFlags).toEqual([]);
 
             const platform = await Platform.getShared();
-            expect(platform.config.tags.find(t => t.id === managedTag.id)?.organizationCount).toBeGreaterThan(0);
+            expect(
+                platform.config.tags.find((t) => t.id === managedTag.id)?.organizationCount,
+            ).toBeGreaterThan(0);
         });
 
         test('The uri is slugified and the id is chosen by the server for admins without full access', async () => {
-            const admin = await createAdmin({ accessRights: [AccessRight.PlatformCreateOrganizations] });
+            const admin = await createAdmin({
+                accessRights: [AccessRight.PlatformCreateOrganizations],
+            });
             const existing = await new OrganizationFactory({}).create();
             const uri = 'My Custom URI ' + uuidv4();
 
@@ -278,19 +339,32 @@ describe('Endpoint.PatchOrganizationsEndpoint', () => {
         });
 
         test('A uri that is too short is rejected', async () => {
-            const admin = await createAdmin({ accessRights: [AccessRight.PlatformCreateOrganizations] });
-            await expect(createOrganization(admin, [managedTag.id], { uri: '#!' })).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
+            const admin = await createAdmin({
+                accessRights: [AccessRight.PlatformCreateOrganizations],
+            });
+            await expect(createOrganization(admin, [managedTag.id], { uri: '#!' })).rejects.toThrow(
+                STExpect.errorWithCode('invalid_field'),
+            );
         });
 
         test('An admin with the create right for a tag can create an organization with a child tag', async () => {
-            const admin = await createAdmin({ accessRights: [AccessRight.PlatformCreateOrganizations] });
+            const admin = await createAdmin({
+                accessRights: [AccessRight.PlatformCreateOrganizations],
+            });
             const organization = await createOrganization(admin, [managedChildTag.id]);
 
-            expect(organization.meta.tags).toEqual([provinceTag.id, managedTag.id, managedChildTag.id]);
+            expect(organization.meta.tags).toEqual([
+                provinceTag.id,
+                managedTag.id,
+                managedChildTag.id,
+            ]);
         });
 
         test('An admin with the create right for all organizations can create an organization without tags', async () => {
-            const admin = await createAdmin({ accessRights: [AccessRight.PlatformCreateOrganizations], tagId: PermissionsResourceKey.All });
+            const admin = await createAdmin({
+                accessRights: [AccessRight.PlatformCreateOrganizations],
+                tagId: PermissionsResourceKey.All,
+            });
             const organization = await createOrganization(admin, []);
 
             expect(organization.meta.tags).toEqual([]);
@@ -305,35 +379,80 @@ describe('Endpoint.PatchOrganizationsEndpoint', () => {
         });
 
         test.each([
-            { name: 'without the create right', accessRights: [AccessRight.EventWrite], tags: [managedTag.id] },
-            { name: 'with full access to their tag but without the create right', accessRights: [], level: PermissionLevel.Full, tags: [managedTag.id] },
-            { name: 'with only a parent of their tag', accessRights: [AccessRight.PlatformCreateOrganizations], tags: [provinceTag.id] },
-            { name: 'with a tag they do not manage', accessRights: [AccessRight.PlatformCreateOrganizations], tags: [otherTag.id] },
-            { name: 'with a tag they do not manage next to their own tag', accessRights: [AccessRight.PlatformCreateOrganizations], tags: [managedTag.id, unrelatedTag.id] },
-            { name: 'without tags', accessRights: [AccessRight.PlatformCreateOrganizations], tags: [] },
-        ])('An admin $name cannot create an organization', async ({ accessRights, level, tags }) => {
-            const admin = await createAdmin({ accessRights, level });
-            await expect(createOrganization(admin, tags)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
-        });
+            {
+                name: 'without the create right',
+                accessRights: [AccessRight.EventWrite],
+                tags: [managedTag.id],
+            },
+            {
+                name: 'with full access to their tag but without the create right',
+                accessRights: [],
+                level: PermissionLevel.Full,
+                tags: [managedTag.id],
+            },
+            {
+                name: 'with only a parent of their tag',
+                accessRights: [AccessRight.PlatformCreateOrganizations],
+                tags: [provinceTag.id],
+            },
+            {
+                name: 'with a tag they do not manage',
+                accessRights: [AccessRight.PlatformCreateOrganizations],
+                tags: [otherTag.id],
+            },
+            {
+                name: 'with a tag they do not manage next to their own tag',
+                accessRights: [AccessRight.PlatformCreateOrganizations],
+                tags: [managedTag.id, unrelatedTag.id],
+            },
+            {
+                name: 'without tags',
+                accessRights: [AccessRight.PlatformCreateOrganizations],
+                tags: [],
+            },
+        ])(
+            'An admin $name cannot create an organization',
+            async ({ accessRights, level, tags }) => {
+                const admin = await createAdmin({ accessRights, level });
+                await expect(createOrganization(admin, tags)).rejects.toThrow(
+                    STExpect.errorWithCode('permission_denied'),
+                );
+            },
+        );
 
         test('An admin without the create right cannot create organizations on a platform without tags', async () => {
             await setPlatformTags([]);
             try {
-                const admin = await createAdmin({ accessRights: [AccessRight.EventWrite], tagId: PermissionsResourceKey.All });
-                await expect(createOrganization(admin, [])).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+                const admin = await createAdmin({
+                    accessRights: [AccessRight.EventWrite],
+                    tagId: PermissionsResourceKey.All,
+                });
+                await expect(createOrganization(admin, [])).rejects.toThrow(
+                    STExpect.errorWithCode('permission_denied'),
+                );
             } finally {
-                await setPlatformTags([provinceTag, managedTag, managedChildTag, otherTag, unrelatedTag]);
+                await setPlatformTags([
+                    provinceTag,
+                    managedTag,
+                    managedChildTag,
+                    otherTag,
+                    unrelatedTag,
+                ]);
             }
         });
 
         test('An admin with the create right cannot delete organizations', async () => {
-            const admin = await createAdmin({ accessRights: [AccessRight.PlatformCreateOrganizations] });
+            const admin = await createAdmin({
+                accessRights: [AccessRight.PlatformCreateOrganizations],
+            });
             const organization = await new OrganizationFactory({ tags: [managedTag.id] }).create();
 
             const patch: PatchableArrayAutoEncoder<OrganizationStruct> = new PatchableArray();
             patch.addDelete(organization.id);
 
-            await expect(sendPatch(admin, patch)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(sendPatch(admin, patch)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
             expect(await Organization.getByID(organization.id)).toBeDefined();
         });
     });

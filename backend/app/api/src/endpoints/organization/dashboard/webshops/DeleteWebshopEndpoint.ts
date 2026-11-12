@@ -35,12 +35,12 @@ export class DeleteWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
         const webshop = await Webshop.getByID(request.params.id);
-        if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+        if (!webshop || !(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full))) {
             throw Context.auth.notFoundOrNoAccess();
         }
 
@@ -53,7 +53,7 @@ export class DeleteWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         const orders = await Order.where({ webshopId: webshop.id });
-        await BalanceItem.deleteForDeletedOrders(orders.map(o => o.id));
+        await BalanceItem.deleteForDeletedOrders(orders.map((o) => o.id));
         await webshop.delete();
         return new Response(undefined);
     }

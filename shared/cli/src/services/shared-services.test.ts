@@ -1,5 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { caddyAdminPort, caddyHttpPort, caddyHttpsPort, caddyUnprivilegedHttpPort, caddyUnprivilegedHttpsPort, defaultMysqlInnodbBufferPoolSize, defaultMysqlSortBufferSize, localFilesAccessKey, localFilesSecretKey, localhostPort, localhostPortMapping, maildevPassword, maildevUsername, maildevInternalHttpPort, maildevInternalSmtpPort, mysqlDataVolume, mysqlInternalPort, rustfsInternalApiPort } from '../config/shared-service-config.js';
+import {
+    caddyAdminPort,
+    caddyHttpPort,
+    caddyHttpsPort,
+    caddyUnprivilegedHttpPort,
+    caddyUnprivilegedHttpsPort,
+    defaultMysqlInnodbBufferPoolSize,
+    defaultMysqlSortBufferSize,
+    localFilesAccessKey,
+    localFilesSecretKey,
+    localhostPort,
+    localhostPortMapping,
+    maildevPassword,
+    maildevUsername,
+    maildevInternalHttpPort,
+    maildevInternalSmtpPort,
+    mysqlDataVolume,
+    mysqlInternalPort,
+    rustfsInternalApiPort,
+} from '../config/shared-service-config.js';
 import { buildSharedServiceProfile } from '../config/shared-service-profile.js';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { CaddyService } from './definitions/caddy-service.js';
@@ -11,13 +30,13 @@ import { SsoService } from './definitions/sso-service.js';
 import { ContainerRuntime } from './docker.js';
 import { sharedServicesToStart, tailSharedLogs } from './shared-services.js';
 
-vi.mock('../runtime/command-runner.js', async importOriginal => ({
-    ...await importOriginal<typeof import('../runtime/command-runner.js')>(),
+vi.mock('../runtime/command-runner.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('../runtime/command-runner.js')>()),
     run: vi.fn(),
 }));
 
-vi.mock('./docker.js', async importOriginal => ({
-    ...await importOriginal<typeof import('./docker.js')>(),
+vi.mock('./docker.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('./docker.js')>()),
     getContainerRuntime: vi.fn(async () => ContainerRuntime.Podman),
 }));
 
@@ -27,7 +46,9 @@ describe('shared service Docker args', () => {
     });
 
     it('builds MySQL args with local port binding and volume', () => {
-        expect(MysqlService.dockerArgs(3307)).toContain(localhostPortMapping(3307, mysqlInternalPort));
+        expect(MysqlService.dockerArgs(3307)).toContain(
+            localhostPortMapping(3307, mysqlInternalPort),
+        );
         expect(MysqlService.dockerArgs(3307)).toContain(`${mysqlDataVolume}:/var/lib/mysql`);
     });
 
@@ -68,11 +89,21 @@ describe('shared service Docker args', () => {
     });
 
     it('builds CoreDNS and Caddy args from generated paths', () => {
-        expect(CorednsService.dockerArgs('/tmp/Corefile', 1053, { disableLabel: true })).toContain('--security-opt');
+        expect(CorednsService.dockerArgs('/tmp/Corefile', 1053, { disableLabel: true })).toContain(
+            '--security-opt',
+        );
         expect(CorednsService.dockerArgs('/tmp/Corefile', 1053)).toContain('127.0.0.1:1053:53/udp');
         expect(CorednsService.dockerArgs('/tmp/Corefile', 1053)).toContain('127.0.0.1:1053:53/tcp');
-        expect(CorednsService.dockerArgs('/tmp/Corefile', 1053)).toContain('/tmp/Corefile:/Corefile:ro');
-        expect(CaddyService.dockerArgs('/tmp/caddy.json', '/tmp/data', buildSharedServiceProfile(ContainerRuntime.Docker, 'linux'))).toContain('/tmp/caddy.json:/etc/caddy/caddy.json:ro');
+        expect(CorednsService.dockerArgs('/tmp/Corefile', 1053)).toContain(
+            '/tmp/Corefile:/Corefile:ro',
+        );
+        expect(
+            CaddyService.dockerArgs(
+                '/tmp/caddy.json',
+                '/tmp/data',
+                buildSharedServiceProfile(ContainerRuntime.Docker, 'linux'),
+            ),
+        ).toContain('/tmp/caddy.json:/etc/caddy/caddy.json:ro');
     });
 
     it('builds SSO args with relabeled import mount', () => {
@@ -86,7 +117,11 @@ describe('shared service Docker args', () => {
                 primary: true,
             },
         } as any;
-        const args = new SsoService().getDockerArgs(context, { redirectUris: ['https://example.com/openid/callback'] }, { importDir: '/tmp/keycloak' });
+        const args = new SsoService().getDockerArgs(
+            context,
+            { redirectUris: ['https://example.com/openid/callback'] },
+            { importDir: '/tmp/keycloak' },
+        );
 
         expect(args).toContain('/tmp/keycloak:/opt/keycloak/data/import:ro,Z');
         expect(args).toContain('stamhoofd-keycloak');
@@ -104,13 +139,23 @@ describe('shared service Docker args', () => {
                 primary: true,
             },
         } as any;
-        const service = new SsoService({ name: 'playwright', port: 6400, hostname: 'playwright-sso.stamhoofd' });
-        const args = service.getDockerArgs(context, { redirectUris: ['https://example.com/openid/callback'] }, { importDir: '/tmp/keycloak' });
+        const service = new SsoService({
+            name: 'playwright',
+            port: 6400,
+            hostname: 'playwright-sso.stamhoofd',
+        });
+        const args = service.getDockerArgs(
+            context,
+            { redirectUris: ['https://example.com/openid/callback'] },
+            { importDir: '/tmp/keycloak' },
+        );
 
         expect(args).toContain('stamhoofd-keycloak-playwright');
         expect(args).toContain('127.0.0.1:6400:8080');
         expect(args).toContain('https://playwright-sso.stamhoofd/dex');
-        expect(service.getIssuer(context)).toBe('https://playwright-sso.stamhoofd/dex/realms/stamhoofd');
+        expect(service.getIssuer(context)).toBe(
+            'https://playwright-sso.stamhoofd/dex/realms/stamhoofd',
+        );
     });
 
     it('removes the containers of other variants of the same family, but not of other families', async () => {
@@ -120,20 +165,34 @@ describe('shared service Docker args', () => {
             verbose: false,
             instance: { name: 'stamhoofd', prefix: 'stamhoofd', portOffset: 0, primary: true },
         } as any;
-        vi.mocked(run).mockResolvedValue({ status: 0, stdout: 'stamhoofd-keycloak-playwright-0\nstamhoofd-keycloak-playwright-5\n', stderr: '' } as any);
+        vi.mocked(run).mockResolvedValue({
+            status: 0,
+            stdout: 'stamhoofd-keycloak-playwright-0\nstamhoofd-keycloak-playwright-5\n',
+            stderr: '',
+        } as any);
 
-        const service = new SsoService({ name: 'playwright-5', port: 6405, hostname: 'playwright-sso-5.stamhoofd' });
+        const service = new SsoService({
+            name: 'playwright-5',
+            port: 6405,
+            hostname: 'playwright-sso-5.stamhoofd',
+        });
         await service.removeOtherVariants(context, 'playwright');
 
-        const commands = vi.mocked(run).mock.calls.map(call => (call[1] as string[]).join(' '));
-        expect(commands).toContainEqual(expect.stringContaining('name=^stamhoofd-keycloak-playwright'));
+        const commands = vi.mocked(run).mock.calls.map((call) => (call[1] as string[]).join(' '));
+        expect(commands).toContainEqual(
+            expect.stringContaining('name=^stamhoofd-keycloak-playwright'),
+        );
         expect(commands).toContainEqual('rm -f stamhoofd-keycloak-playwright-0');
         expect(commands).not.toContainEqual('rm -f stamhoofd-keycloak-playwright-5');
         expect(commands).not.toContainEqual('rm -f stamhoofd-keycloak');
     });
 
     it('builds macOS Docker bridge args for Caddy', () => {
-        const args = CaddyService.dockerArgs('/tmp/caddy.json', '/tmp/data', buildSharedServiceProfile(ContainerRuntime.Docker, 'darwin'));
+        const args = CaddyService.dockerArgs(
+            '/tmp/caddy.json',
+            '/tmp/data',
+            buildSharedServiceProfile(ContainerRuntime.Docker, 'darwin'),
+        );
 
         expect(args).toContain(localhostPortMapping(80, 80));
         expect(args).toContain(localhostPortMapping(443, 443));
@@ -142,7 +201,11 @@ describe('shared service Docker args', () => {
     });
 
     it('builds Linux rootless Caddy args with host networking on high ports', () => {
-        const args = CaddyService.dockerArgs('/tmp/caddy.json', '/tmp/data', buildSharedServiceProfile(ContainerRuntime.Docker, 'linux'));
+        const args = CaddyService.dockerArgs(
+            '/tmp/caddy.json',
+            '/tmp/data',
+            buildSharedServiceProfile(ContainerRuntime.Docker, 'linux'),
+        );
 
         expect(args).toContain('--network');
         expect(args).toContain('host');
@@ -153,32 +216,51 @@ describe('shared service Docker args', () => {
     it.skip('shows Caddy redirects and admin port in service details', async () => {
         const detail = await new CaddyService().getDetail();
 
-        expect(detail).toContain(`HTTP ${localhostPort(caddyHttpPort)} -> ${localhostPort(caddyUnprivilegedHttpPort)}`);
-        expect(detail).toContain(`HTTPS ${localhostPort(caddyHttpsPort)} -> ${localhostPort(caddyUnprivilegedHttpsPort)}`);
+        expect(detail).toContain(
+            `HTTP ${localhostPort(caddyHttpPort)} -> ${localhostPort(caddyUnprivilegedHttpPort)}`,
+        );
+        expect(detail).toContain(
+            `HTTPS ${localhostPort(caddyHttpsPort)} -> ${localhostPort(caddyUnprivilegedHttpsPort)}`,
+        );
         expect(detail).toContain(`admin ${localhostPort(caddyAdminPort)}`);
     });
 
     it('starts every shared service by default', () => {
-        expect(sharedServicesToStart().map(service => service.key)).toEqual(['coredns', 'caddy', 'mysql', 'maildev', 'rustfs']);
+        expect(sharedServicesToStart().map((service) => service.key)).toEqual([
+            'coredns',
+            'caddy',
+            'mysql',
+            'maildev',
+            'rustfs',
+        ]);
     });
 
     it('leaves only MySQL out for a run that brings its own database', () => {
-        expect(sharedServicesToStart({ skipMysql: true }).map(service => service.key)).toEqual(['coredns', 'caddy', 'maildev', 'rustfs']);
+        expect(sharedServicesToStart({ skipMysql: true }).map((service) => service.key)).toEqual([
+            'coredns',
+            'caddy',
+            'maildev',
+            'rustfs',
+        ]);
     });
 
     it('tails all shared service logs through concurrently', async () => {
         await tailSharedLogs();
 
-        expect(run).toHaveBeenCalledWith('pnpm', [
-            'exec',
-            'concurrently',
-            '-n',
-            'MySQL,MailDev,RustFS,CoreDNS,Caddy',
-            'podman logs -f stamhoofd-mysql',
-            'podman logs -f stamhoofd-maildev',
-            'podman logs -f stamhoofd-rustfs',
-            'podman logs -f stamhoofd-coredns',
-            'podman logs -f stamhoofd-caddy',
-        ], { allowFailure: true, verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenCalledWith(
+            'pnpm',
+            [
+                'exec',
+                'concurrently',
+                '-n',
+                'MySQL,MailDev,RustFS,CoreDNS,Caddy',
+                'podman logs -f stamhoofd-mysql',
+                'podman logs -f stamhoofd-maildev',
+                'podman logs -f stamhoofd-rustfs',
+                'podman logs -f stamhoofd-coredns',
+                'podman logs -f stamhoofd-caddy',
+            ],
+            { allowFailure: true, verbosity: RunVerbosity.Output },
+        );
     });
 });

@@ -53,7 +53,11 @@ export class TransferSettings extends AutoEncoder {
     }
 
     /** Replaces the first occurrence of each literal key, in Map insertion order. */
-    generateDescription(reference: string, country: Country, replacements: ReadonlyMap<string, string> = new Map()) {
+    generateDescription(
+        reference: string,
+        country: Country,
+        replacements: ReadonlyMap<string, string> = new Map(),
+    ) {
         if (this.type === TransferDescriptionType.Structured) {
             if (country === Country.Belgium) {
                 return TransferSettings.generateOGM(replacements);
@@ -62,7 +66,9 @@ export class TransferSettings extends AutoEncoder {
         }
 
         if (this.type === TransferDescriptionType.Reference) {
-            return replaceReplacements(this.prefix ? (this.prefix + ' ') : '', replacements) + reference;
+            return (
+                replaceReplacements(this.prefix ? this.prefix + ' ' : '', replacements) + reference
+            );
         }
 
         return replaceReplacements(this.prefix ?? '', replacements);
@@ -80,7 +86,7 @@ export class TransferSettings extends AutoEncoder {
 
         const length = 15; // allowed values: 15, 12, 11, 10, 9, 8, 7
         const needsLengthIdentification = length < 15;
-        const L = needsLengthIdentification ? (length % 10) : '';
+        const L = needsLengthIdentification ? length % 10 : '';
         // WARNING: lengths other than 15 are not yet supported because it is not clear whether L needs to be used in the calculation of C or not
 
         const weights = [2, 4, 8, 5, 10, 9, 7, 3, 6, 1]; // repeat if needed (in reverse order!)
@@ -91,7 +97,7 @@ export class TransferSettings extends AutoEncoder {
             numbers.push(Math.floor(Math.random() * 10));
         }
         const sum = numbers.reduce((sum, num, index) => {
-            const weight = weights[index % (weights.length)];
+            const weight = weights[index % weights.length];
             return sum + num * weight;
         }, 0);
         let C = 11 - (sum % 11);
@@ -105,7 +111,15 @@ export class TransferSettings extends AutoEncoder {
             C = 1;
         }
 
-        return C + '' + L + (numbers.reverse().map(n => n + '')).join('');
+        return (
+            C +
+            '' +
+            L +
+            numbers
+                .reverse()
+                .map((n) => n + '')
+                .join('')
+        );
     }
 
     static generateOGM(replacements: ReadonlyMap<string, string> = new Map()) {
@@ -129,9 +143,19 @@ export class TransferSettings extends AutoEncoder {
                 const paddedFirst = (firstChars + '').padStart(10, '0');
                 if (prefix.length === 4) {
                     // Add in the middle, not at the start
-                    firstChars = parseInt((paddedFirst.substring(0, 3) + number.toFixed(0).padStart(4, '0') + paddedFirst.substring(3)).padStart(10, '0').substring(0, 10));
+                    firstChars = parseInt(
+                        (
+                            paddedFirst.substring(0, 3) +
+                            number.toFixed(0).padStart(4, '0') +
+                            paddedFirst.substring(3)
+                        )
+                            .padStart(10, '0')
+                            .substring(0, 10),
+                    );
                 } else {
-                    firstChars = parseInt((number + paddedFirst).padStart(10, '0').substring(0, 10));
+                    firstChars = parseInt(
+                        (number + paddedFirst).padStart(10, '0').substring(0, 10),
+                    );
                 }
                 console.log('Changed first chars to', firstChars);
             }

@@ -6,7 +6,10 @@ export class IPaginatedResponse<Result, Query> {
     next?: Query;
 }
 
-export class UnencodeablePaginatedResponse<Result, Query> implements IPaginatedResponse<Result, Query> {
+export class UnencodeablePaginatedResponse<Result, Query> implements IPaginatedResponse<
+    Result,
+    Query
+> {
     results: Result;
     next?: Query;
 
@@ -16,7 +19,9 @@ export class UnencodeablePaginatedResponse<Result, Query> implements IPaginatedR
     }
 }
 
-export class PaginatedResponse<Result extends EncodableObject, Query extends Encodeable> implements Encodeable, IPaginatedResponse<Result, Query> {
+export class PaginatedResponse<Result extends EncodableObject, Query extends Encodeable>
+    implements Encodeable, IPaginatedResponse<Result, Query>
+{
     results: Result;
     next?: Query;
 
@@ -33,7 +38,10 @@ export class PaginatedResponse<Result extends EncodableObject, Query extends Enc
     }
 }
 
-export class PaginatedResponseDecoder<Result extends EncodableObject, Query extends Encodeable> implements Decoder<PaginatedResponse<Result, Query>> {
+export class PaginatedResponseDecoder<
+    Result extends EncodableObject,
+    Query extends Encodeable,
+> implements Decoder<PaginatedResponse<Result, Query>> {
     resultDecoder: Decoder<Result>;
     querydecoder: Decoder<Query>;
 

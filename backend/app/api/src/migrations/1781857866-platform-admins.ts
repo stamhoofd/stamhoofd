@@ -9,7 +9,8 @@ export class Admin extends QueryableModel {
 
     // Columns
     @column({
-        primary: true, type: 'string',
+        primary: true,
+        type: 'string',
     })
     id!: string;
 
@@ -20,7 +21,8 @@ export class Admin extends QueryableModel {
     password?: string;
 
     @column({
-        type: 'datetime', beforeSave(old?: Date) {
+        type: 'datetime',
+        beforeSave(old?: Date) {
             if (old !== undefined) {
                 return old;
             }
@@ -32,7 +34,8 @@ export class Admin extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;

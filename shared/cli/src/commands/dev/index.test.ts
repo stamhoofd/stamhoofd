@@ -4,8 +4,8 @@ import { DevTarget, runDev } from '../../workflows/start-dev.js';
 import { showHelp } from '../../runtime/show-help.js';
 import { checkNodeVersion, printNodeVersionStatus } from '../../workflows/setup-node.js';
 
-vi.mock('../../workflows/start-dev.js', async importOriginal => ({
-    ...await importOriginal<typeof import('../../workflows/start-dev.js')>(),
+vi.mock('../../workflows/start-dev.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('../../workflows/start-dev.js')>()),
     runDev: vi.fn(),
 }));
 
@@ -106,7 +106,10 @@ describe('Dev command', () => {
     });
 });
 
-function createCommand(parseResult: { args: { target: DevTarget | undefined }; flags: { services: boolean | undefined; stripe: boolean; open: boolean } }): Dev {
+function createCommand(parseResult: {
+    args: { target: DevTarget | undefined };
+    flags: { services: boolean | undefined; stripe: boolean; open: boolean };
+}): Dev {
     const command = new Dev([], {} as any);
     (command as any).config = {};
     (command as any).parse = vi.fn(async () => parseResult);

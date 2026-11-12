@@ -9,7 +9,10 @@ describe('Unit.RegistrationCreatedNotificationPayload', () => {
 
         // Stored as JSON in the database
         const stored = JSON.parse(JSON.stringify(payload.encodeBoxed()));
-        expect(RegistrationCreatedNotificationPayload.decodeBoxed(stored)?.group).toMatchObject({ id: 'group-1', name: 'Kapoenen' });
+        expect(RegistrationCreatedNotificationPayload.decodeBoxed(stored)?.group).toMatchObject({
+            id: 'group-1',
+            name: 'Kapoenen',
+        });
 
         vi.spyOn(console, 'error').mockImplementation(() => {});
         expect(RegistrationCreatedNotificationPayload.decodeBoxed({})).toBeNull();

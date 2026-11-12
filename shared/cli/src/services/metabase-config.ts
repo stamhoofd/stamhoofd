@@ -1,6 +1,10 @@
 import type { MetabaseAdmin } from '@stamhoofd/metabase/api';
 import type { DevelopmentDomains } from '../config/development-config.js';
-import { dockerHostGateway, mysqlRootPassword, mysqlRootUser } from '../config/shared-service-config.js';
+import {
+    dockerHostGateway,
+    mysqlRootPassword,
+    mysqlRootUser,
+} from '../config/shared-service-config.js';
 
 /**
  * The admin account the CLI creates when it completes the setup wizard, so it can keep configuring
@@ -25,7 +29,10 @@ export type MetabaseDataSource = {
     mysqlPort: number;
 };
 
-export function buildMetabaseConfigOutput(domains: DevelopmentDomains, dataSource: MetabaseDataSource): string {
+export function buildMetabaseConfigOutput(
+    domains: DevelopmentDomains,
+    dataSource: MetabaseDataSource,
+): string {
     return `Local Metabase:
 
   URL:           https://${domains.metabase}

@@ -1,6 +1,13 @@
 import { column } from '@node/database';
 import type { GroupCategory, OrganizationRegistrationPeriodSettings } from '@stamhoofd/structures';
-import { GroupPrivateSettings, GroupSettings, GroupStatus, Group as GroupStruct, GroupType, StockReservation } from '@stamhoofd/structures';
+import {
+    GroupPrivateSettings,
+    GroupSettings,
+    GroupStatus,
+    Group as GroupStruct,
+    GroupType,
+    StockReservation,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ArrayDecoder } from '@common/encoding';
@@ -18,7 +25,9 @@ export class Group extends QueryableModel {
     // static cache = new ModelCache<Group>();
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -37,7 +46,8 @@ export class Group extends QueryableModel {
     settings: GroupSettings;
 
     @column({
-        type: 'json', decoder: GroupPrivateSettings,
+        type: 'json',
+        decoder: GroupPrivateSettings,
     })
     privateSettings = GroupPrivateSettings.create({});
 
@@ -60,7 +70,8 @@ export class Group extends QueryableModel {
     cycle = 0;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -72,7 +83,8 @@ export class Group extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -117,9 +129,13 @@ export class Group extends QueryableModel {
         return false;
     }
 
-    static async getAll(organizationId: string, periodId: string | null, active = true, types: GroupType[] = [GroupType.Membership]): Promise<Group[]> {
-        const query = Group.select()
-            .where('organizationId', organizationId);
+    static async getAll(
+        organizationId: string,
+        periodId: string | null,
+        active = true,
+        types: GroupType[] = [GroupType.Membership],
+    ): Promise<Group[]> {
+        const query = Group.select().where('organizationId', organizationId);
 
         if (active) {
             query.andWhere('deletedAt', null);
@@ -140,7 +156,7 @@ export class Group extends QueryableModel {
     getParentCategories(all: GroupCategory[], recursive = true): GroupCategory[] {
         const map = new Map<string, GroupCategory>();
 
-        const parents = all.filter(g => g.groupIds.includes(this.id));
+        const parents = all.filter((g) => g.groupIds.includes(this.id));
         for (const parent of parents) {
             map.set(parent.id, parent);
 
@@ -169,7 +185,11 @@ export class Group extends QueryableModel {
         return GroupStruct.create(this);
     }
 
-    static async deleteUnreachable(organizationId: string, period: GroupRegistrationPeriod, allGroups: Group[]) {
+    static async deleteUnreachable(
+        organizationId: string,
+        period: GroupRegistrationPeriod,
+        allGroups: Group[],
+    ) {
         const reachable = new Map<string, boolean>();
 
         const visited = new Map<string, boolean>();
@@ -182,7 +202,7 @@ export class Group extends QueryableModel {
                 break;
             }
 
-            const category = period.settings.categories.find(c => c.id === id);
+            const category = period.settings.categories.find((c) => c.id === id);
             if (!category) {
                 continue;
             }
@@ -209,14 +229,25 @@ export class Group extends QueryableModel {
             }
 
             if (!reachable.get(group.id) && group.deletedAt === null) {
-                console.log('Deleting unreachable group ' + group.id + ' from organization ' + organizationId + ' org period ' + period.id);
+                console.log(
+                    'Deleting unreachable group ' +
+                        group.id +
+                        ' from organization ' +
+                        organizationId +
+                        ' org period ' +
+                        period.id,
+                );
                 group.deletedAt = new Date();
                 await group.save();
             }
         }
     }
 
-    static async applyStockReservations(groupId: string, addStockReservations: StockReservation[], free = false) {
+    static async applyStockReservations(
+        groupId: string,
+        addStockReservations: StockReservation[],
+        free = false,
+    ) {
         await QueueHandler.schedule('group-stock-update-' + groupId, async () => {
             const updatedGroup = await Group.getByID(groupId);
             if (!updatedGroup) {
@@ -224,9 +255,15 @@ export class Group extends QueryableModel {
             }
 
             if (!free) {
-                updatedGroup.stockReservations = StockReservation.added(updatedGroup.stockReservations, addStockReservations);
+                updatedGroup.stockReservations = StockReservation.added(
+                    updatedGroup.stockReservations,
+                    addStockReservations,
+                );
             } else {
-                updatedGroup.stockReservations = StockReservation.removed(updatedGroup.stockReservations, addStockReservations);
+                updatedGroup.stockReservations = StockReservation.removed(
+                    updatedGroup.stockReservations,
+                    addStockReservations,
+                );
             }
             await updatedGroup.save();
         });

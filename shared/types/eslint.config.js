@@ -5,9 +5,12 @@ export default [
     // Disable importing. This package should have ZERO dependencies
     {
         rules: {
-            'no-restricted-imports': ['error', {
-                patterns: ['@stamhoofd/*'],
-            }],
+            'no-restricted-imports': [
+                'error',
+                {
+                    patterns: ['@stamhoofd/*'],
+                },
+            ],
         },
     },
 ];

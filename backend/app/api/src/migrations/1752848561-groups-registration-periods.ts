@@ -1,7 +1,25 @@
 import { Migration } from '@node/database';
-import { Group, Organization, OrganizationRegistrationPeriod, Registration, RegistrationInvitation, RegistrationPeriod, V1GroupMigrationData, V1WaitingListMigrationData } from '@stamhoofd/models';
+import {
+    Group,
+    Organization,
+    OrganizationRegistrationPeriod,
+    Registration,
+    RegistrationInvitation,
+    RegistrationPeriod,
+    V1GroupMigrationData,
+    V1WaitingListMigrationData,
+} from '@stamhoofd/models';
 import type { CycleInformation } from '@stamhoofd/structures';
-import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, RegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
+import {
+    GroupCategory,
+    GroupCategorySettings,
+    GroupPrivateSettings,
+    GroupSettings,
+    GroupStatus,
+    GroupType,
+    RegistrationPeriodSettings,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { LoggingTools } from '@stamhoofd/utility';
 import { SeedTools } from '../helpers/SeedTools.js';
 import { GroupService } from '../services/GroupService.js';
@@ -31,14 +49,16 @@ async function start(dryRun: boolean) {
     const batchProcessor = SeedTools.createBatchProcessor({
         batchSize: 50,
         action: async (organization: Organization) => {
-            const groups: Group[] = await Group.select().where('organizationId', organization.id).fetch();
+            const groups: Group[] = await Group.select()
+                .where('organizationId', organization.id)
+                .fetch();
 
             if (groups.length === 0) {
                 await createDefaultRegistrationPeriod(organization, dryRun);
                 return;
             }
 
-            if (groups.some(g => g.cycle === cycleIfMigrated)) {
+            if (groups.some((g) => g.cycle === cycleIfMigrated)) {
                 return;
             }
 
@@ -47,10 +67,15 @@ async function start(dryRun: boolean) {
             // sort groups by start date
             groups.sort((a, b) => a.settings.startDate.getTime() - b.settings.startDate.getTime());
 
-            const activeGroups = groups.filter(g => g.status !== GroupStatus.Archived && g.deletedAt === null);
+            const activeGroups = groups.filter(
+                (g) => g.status !== GroupStatus.Archived && g.deletedAt === null,
+            );
             const bestCurrentPeriodSpan = await calculateBestCurrentPeriodSpan(activeGroups);
 
-            const allGroups: Group[] = await migrateGroups({ groups, organization, periodSpan: bestCurrentPeriodSpan }, dryRun);
+            const allGroups: Group[] = await migrateGroups(
+                { groups, organization, periodSpan: bestCurrentPeriodSpan },
+                dryRun,
+            );
 
             // cleanup
             for (const group of allGroups) {
@@ -84,35 +109,55 @@ async function cleanupGroup(group: Group, dryRun: boolean) {
     }
 }
 
-async function migrateGroups({ groups, organization, periodSpan }: { groups: Group[]; organization: Organization; periodSpan: { startDate: Date; endDate: Date } }, dryRun: boolean) {
+async function migrateGroups(
+    {
+        groups,
+        organization,
+        periodSpan,
+    }: {
+        groups: Group[];
+        organization: Organization;
+        periodSpan: { startDate: Date; endDate: Date };
+    },
+    dryRun: boolean,
+) {
     // #region create periods
     const previousYearStartDate = new Date(periodSpan.startDate);
     previousYearStartDate.setFullYear(previousYearStartDate.getFullYear() - 1);
 
-    const archivePeriod = await createRegistrationPeriod({
-        // todo: what should be the start date?
-        startDate: previousYearStartDate,
-        endDate: new Date(periodSpan.startDate.getTime() - 1),
-        // Don't lock the archive period: locking requires an extra manual step
-        // after the migration to make archived work years editable again.
-        locked: false,
-        organization,
-        previousPeriodId: undefined,
-        customName: 'Gearchiveerde periodes',
-    }, dryRun);
+    const archivePeriod = await createRegistrationPeriod(
+        {
+            // todo: what should be the start date?
+            startDate: previousYearStartDate,
+            endDate: new Date(periodSpan.startDate.getTime() - 1),
+            // Don't lock the archive period: locking requires an extra manual step
+            // after the migration to make archived work years editable again.
+            locked: false,
+            organization,
+            previousPeriodId: undefined,
+            customName: 'Gearchiveerde periodes',
+        },
+        dryRun,
+    );
 
-    const archiveOrganizationPeriod = await createOrganizationRegistrationPeriod({
-        organization,
-        period: archivePeriod,
-    }, dryRun);
+    const archiveOrganizationPeriod = await createOrganizationRegistrationPeriod(
+        {
+            organization,
+            period: archivePeriod,
+        },
+        dryRun,
+    );
 
-    const currentPeriod = await createRegistrationPeriod({
-        startDate: periodSpan.startDate,
-        endDate: periodSpan.endDate,
-        locked: false,
-        previousPeriodId: archivePeriod.id,
-        organization,
-    }, dryRun);
+    const currentPeriod = await createRegistrationPeriod(
+        {
+            startDate: periodSpan.startDate,
+            endDate: periodSpan.endDate,
+            locked: false,
+            previousPeriodId: archivePeriod.id,
+            organization,
+        },
+        dryRun,
+    );
 
     organization.periodId = currentPeriod.id;
 
@@ -120,29 +165,46 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
         await organization.save();
     }
 
-    const currentOrganizationRegistrationPeriod = await createOrganizationRegistrationPeriod({
-        organization,
-        period: currentPeriod,
-    }, dryRun);
+    const currentOrganizationRegistrationPeriod = await createOrganizationRegistrationPeriod(
+        {
+            organization,
+            period: currentPeriod,
+        },
+        dryRun,
+    );
     // #endregion
 
     // (to add to categories later)
     const groupMap = new Map<
-    // original group id
+        // original group id
         string,
         // groups in previous cycles
-        Group[]>();
+        Group[]
+    >();
 
     for (const originalGroup of groups) {
         // archived groups should be migrated to the archive period
-        const currentGroupPeriod = originalGroup.status === GroupStatus.Archived ? archivePeriod : currentPeriod;
+        const currentGroupPeriod =
+            originalGroup.status === GroupStatus.Archived ? archivePeriod : currentPeriod;
         const currentCycle = originalGroup.cycle;
         const originalGroupId: string = originalGroup.id;
         originalGroup.periodId = currentGroupPeriod.id;
-        originalGroup.settings.hasCustomDates = checkShouldSetCustomDates(originalGroup, currentGroupPeriod);
+        originalGroup.settings.hasCustomDates = checkShouldSetCustomDates(
+            originalGroup,
+            currentGroupPeriod,
+        );
 
         // first migrate registrations for the current cycle
-        await migrateRegistrations({ organization, period: currentGroupPeriod, originalGroup, newGroup: originalGroup, cycle: currentCycle }, dryRun);
+        await migrateRegistrations(
+            {
+                organization,
+                period: currentGroupPeriod,
+                originalGroup,
+                newGroup: originalGroup,
+                cycle: currentCycle,
+            },
+            dryRun,
+        );
 
         // create migration data for current cycle
         const migrationData = new V1GroupMigrationData();
@@ -154,17 +216,28 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
             await migrationData.save();
         }
 
-        const cycleSettingEntries = [...originalGroup.settings.cycleSettings.entries()].filter(([cycle]) => {
-            return cycle !== currentCycle;
-        });
+        const cycleSettingEntries = [...originalGroup.settings.cycleSettings.entries()].filter(
+            ([cycle]) => {
+                return cycle !== currentCycle;
+            },
+        );
 
         // most recent cycle first (highest cycle number)
         cycleSettingEntries.sort((a, b) => b[0] - a[0]);
 
         // create groups for the previous cycles and migrate registrations
-        for (let previousPeriodIndex = 0; previousPeriodIndex < cycleSettingEntries.length; previousPeriodIndex++) {
+        for (
+            let previousPeriodIndex = 0;
+            previousPeriodIndex < cycleSettingEntries.length;
+            previousPeriodIndex++
+        ) {
             const [cycle, cycleInformation] = cycleSettingEntries[previousPeriodIndex];
-            const newGroup = createPreviousGroup({ originalGroup, period: archivePeriod, cycleInformation, index: previousPeriodIndex });
+            const newGroup = createPreviousGroup({
+                originalGroup,
+                period: archivePeriod,
+                cycleInformation,
+                index: previousPeriodIndex,
+            });
 
             const migrationData = new V1GroupMigrationData();
             migrationData.oldGroupId = originalGroup.id;
@@ -183,7 +256,10 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
                     await migrationData.save();
                 }
 
-                await migrateRegistrations({ organization, period: archivePeriod, originalGroup, newGroup, cycle }, dryRun);
+                await migrateRegistrations(
+                    { organization, period: archivePeriod, originalGroup, newGroup, cycle },
+                    dryRun,
+                );
 
                 const allPreviousGroups = groupMap.get(originalGroupId);
                 if (allPreviousGroups) {
@@ -229,13 +305,15 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
     }
 
     // #region create categories for current period
-    const nonArchivedGroupIds = [...new Set(groups.filter(g => g.status !== GroupStatus.Archived).map(g => g.id))];
+    const nonArchivedGroupIds = [
+        ...new Set(groups.filter((g) => g.status !== GroupStatus.Archived).map((g) => g.id)),
+    ];
     const newCategoriesData = organization.meta.categories.map((c: GroupCategory) => {
         const category = GroupCategory.create({
             settings: GroupCategorySettings.create({
                 ...c.settings,
             }),
-            groupIds: [...new Set(c.groupIds.filter(id => nonArchivedGroupIds.includes(id)))],
+            groupIds: [...new Set(c.groupIds.filter((id) => nonArchivedGroupIds.includes(id)))],
         });
         return {
             category,
@@ -244,25 +322,31 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
     });
 
     newCategoriesData.forEach((c) => {
-        const newCategoryIds = [...new Set(c.originalCategory.categoryIds.flatMap((id) => {
-            const result = newCategoriesData.find(c => c.originalCategory.id === id);
-            if (result) {
-                return [result.category.id];
-            }
-            return [];
-        }))];
+        const newCategoryIds = [
+            ...new Set(
+                c.originalCategory.categoryIds.flatMap((id) => {
+                    const result = newCategoriesData.find((c) => c.originalCategory.id === id);
+                    if (result) {
+                        return [result.category.id];
+                    }
+                    return [];
+                }),
+            ),
+        ];
         c.category.categoryIds = newCategoryIds;
     });
 
     const originalRootCategoryId = organization.meta.rootCategoryId;
-    const rootCategoryData = newCategoriesData.find(c => c.originalCategory.id === originalRootCategoryId);
+    const rootCategoryData = newCategoriesData.find(
+        (c) => c.originalCategory.id === originalRootCategoryId,
+    );
     if (!rootCategoryData) {
         throw new Error('No root category found');
     }
 
     currentOrganizationRegistrationPeriod.settings.rootCategoryId = rootCategoryData.category.id;
 
-    const currentPeriodCategories = newCategoriesData.map(c => c.category);
+    const currentPeriodCategories = newCategoriesData.map((c) => c.category);
     currentOrganizationRegistrationPeriod.settings.categories = currentPeriodCategories;
 
     if (currentOrganizationRegistrationPeriod.settings.categories.length === 0) {
@@ -275,13 +359,15 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
     // #endregion
 
     // #region archived category
-    const archivedGroupIds = [...new Set(groups.filter(g => g.status === GroupStatus.Archived).map(g => g.id))];
+    const archivedGroupIds = [
+        ...new Set(groups.filter((g) => g.status === GroupStatus.Archived).map((g) => g.id)),
+    ];
     const hasArchivedGroups = archivedGroupIds.length > 0;
 
     const archiveSubCategories = archivedGroupIds.map((originalGroupId) => {
-        const originalGroup = groups.find(g => g.id === originalGroupId)!;
+        const originalGroup = groups.find((g) => g.id === originalGroupId)!;
         const childGroups = groupMap.get(originalGroupId) ?? [];
-        const groupIds = [originalGroup, ...childGroups].map(g => g.id);
+        const groupIds = [originalGroup, ...childGroups].map((g) => g.id);
 
         return GroupCategory.create({
             settings: GroupCategorySettings.create({
@@ -299,12 +385,15 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
             description: 'Gearchiveerde groepen',
             public: false,
         }),
-        categoryIds: archiveSubCategories.map(c => c.id),
+        categoryIds: archiveSubCategories.map((c) => c.id),
     });
     // #endregion
 
     // #region create categories for previous periods
-    const allPreviousPeriodCategoriesData: { category: GroupCategory; originalCategory: GroupCategory | null }[] = currentPeriodCategories.flatMap((originalCategory: GroupCategory) => {
+    const allPreviousPeriodCategoriesData: {
+        category: GroupCategory;
+        originalCategory: GroupCategory | null;
+    }[] = currentPeriodCategories.flatMap((originalCategory: GroupCategory) => {
         // important: do not set category ids on cloned category yet (because the new category ids are unknown still)
         const clonedCategory = GroupCategory.create({
             settings: GroupCategorySettings.create({
@@ -319,8 +408,8 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
 
                 // if(originalCategory)
                 if (childGroups && childGroups.length) {
-                    const originalGroup = groups.find(g => g.id === originalGroupId)!;
-                    const groupIds = childGroups.map(g => g.id);
+                    const originalGroup = groups.find((g) => g.id === originalGroupId)!;
+                    const groupIds = childGroups.map((g) => g.id);
                     const newCategory = GroupCategory.create({
                         settings: GroupCategorySettings.create({
                             name: originalGroup.settings.name.toString(),
@@ -338,9 +427,12 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
 
             clonedCategory.groupIds = [];
             // set category ids because the ids are correct
-            clonedCategory.categoryIds = newCategories.map(c => c.id);
+            clonedCategory.categoryIds = newCategories.map((c) => c.id);
 
-            return [{ category: clonedCategory, originalCategory }, ...newCategories.map(c => ({ category: c, originalCategory: null }))];
+            return [
+                { category: clonedCategory, originalCategory },
+                ...newCategories.map((c) => ({ category: c, originalCategory: null })),
+            ];
         }
 
         // important: do not set category ids on cloned category yet (because the new category ids are unknown still)
@@ -358,7 +450,9 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
         // update category ids, if the category ids are not empty this means the ids are correct already
         if (category.categoryIds.length === 0) {
             category.categoryIds = c.originalCategory.categoryIds.flatMap((originalCategoryId) => {
-                const newCategoryData = allPreviousPeriodCategoriesData.find(c => c.originalCategory && c.originalCategory.id === originalCategoryId);
+                const newCategoryData = allPreviousPeriodCategoriesData.find(
+                    (c) => c.originalCategory && c.originalCategory.id === originalCategoryId,
+                );
                 if (newCategoryData) {
                     return [newCategoryData.category.id];
                 }
@@ -370,7 +464,9 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
     });
 
     const previousRootCategoryId = currentOrganizationRegistrationPeriod.settings.rootCategoryId;
-    const previousRootCategoryData = allPreviousPeriodCategoriesData.find(c => c.originalCategory && c.originalCategory.id === previousRootCategoryId);
+    const previousRootCategoryData = allPreviousPeriodCategoriesData.find(
+        (c) => c.originalCategory && c.originalCategory.id === previousRootCategoryId,
+    );
     if (!previousRootCategoryData) {
         throw new Error(`No root category found for archive period (${previousRootCategoryId})`);
     }
@@ -381,7 +477,9 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
     }
 
     archiveOrganizationPeriod.settings.rootCategoryId = previousRootCategoryData.category.id;
-    archiveOrganizationPeriod.settings.categories = hasArchivedGroups ? [...allPreviousPeriodCategories, archiveCategory, ...archiveSubCategories] : allPreviousPeriodCategories;
+    archiveOrganizationPeriod.settings.categories = hasArchivedGroups
+        ? [...allPreviousPeriodCategories, archiveCategory, ...archiveSubCategories]
+        : allPreviousPeriodCategories;
 
     if (archiveOrganizationPeriod.settings.categories.length === 0) {
         throw new Error('No categories found for archive period');
@@ -398,7 +496,10 @@ async function migrateGroups({ groups, organization, periodSpan }: { groups: Gro
 
 export function checkShouldSetCustomDates(group: Group, period: RegistrationPeriod): boolean {
     // if difference between period start and group start, or between period and group end is bigger than 1 month
-    return isDifferenceBiggerThanMonth(period.startDate, group.settings.startDate) || isDifferenceBiggerThanMonth(period.endDate, group.settings.endDate);
+    return (
+        isDifferenceBiggerThanMonth(period.startDate, group.settings.startDate) ||
+        isDifferenceBiggerThanMonth(period.endDate, group.settings.endDate)
+    );
 }
 
 /**
@@ -414,7 +515,22 @@ function isDifferenceBiggerThanMonth(date1: Date, date2: Date): boolean {
     return diffDays > 30;
 }
 
-async function migrateRegistrations({ organization, period, originalGroup, newGroup, cycle }: { organization: Organization; period: RegistrationPeriod; originalGroup: Group; newGroup: Group; cycle: number }, dryRun: boolean) {
+async function migrateRegistrations(
+    {
+        organization,
+        period,
+        originalGroup,
+        newGroup,
+        cycle,
+    }: {
+        organization: Organization;
+        period: RegistrationPeriod;
+        originalGroup: Group;
+        newGroup: Group;
+        cycle: number;
+    },
+    dryRun: boolean,
+) {
     // what for waiting lists of archive groups (previous cycles)?
     let waitingList: Group | null = null;
 
@@ -426,7 +542,9 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
             const fetchedWaitingList = await Group.getByID(newGroup.waitingListId);
 
             if (!fetchedWaitingList) {
-                throw new Error(`Waiting list not found: (waitingListId: ${newGroup.waitingListId}, groupId: ${newGroup.id})`);
+                throw new Error(
+                    `Waiting list not found: (waitingListId: ${newGroup.waitingListId}, groupId: ${newGroup.id})`,
+                );
             }
         }
 
@@ -533,9 +651,14 @@ function getPeriodSpans() {
 const periodSpans = getPeriodSpans();
 
 const defaultYear = 2025;
-const defaultPeriodSpan = periodSpans.find(periodSpan => periodSpan.span === 12 && periodSpan.startMonth === 8)!;
+const defaultPeriodSpan = periodSpans.find(
+    (periodSpan) => periodSpan.span === 12 && periodSpan.startMonth === 8,
+)!;
 
-function findBestPeriodMatch(cyclePeriod: { startDate: Date; endDate: Date }): { year: number; periodSpan: PeriodSpan } {
+function findBestPeriodMatch(cyclePeriod: { startDate: Date; endDate: Date }): {
+    year: number;
+    periodSpan: PeriodSpan;
+} {
     // best match = most days overlap and least days missing
     const startYear = cyclePeriod.startDate.getFullYear();
     const endYear = cyclePeriod.endDate.getFullYear();
@@ -560,13 +683,12 @@ function findBestPeriodMatch(cyclePeriod: { startDate: Date; endDate: Date }): {
             const startMonth = i * periodSpan.span + periodSpan.startMonth;
 
             for (const year of yearsToLoop) {
-                const { daysMissing, daysOverlapping } = getDaysMissingAndOverlap(
-                    cycleInfo,
-                    {
-                        startDate: new Date(year, startMonth, 1),
-                        endDate: new Date(new Date(year, startMonth + periodSpan.span, 1).getTime() - 1),
-                    },
-                );
+                const { daysMissing, daysOverlapping } = getDaysMissingAndOverlap(cycleInfo, {
+                    startDate: new Date(year, startMonth, 1),
+                    endDate: new Date(
+                        new Date(year, startMonth + periodSpan.span, 1).getTime() - 1,
+                    ),
+                });
 
                 if (bestMatch === null) {
                     bestMatch = {
@@ -592,7 +714,10 @@ function findBestPeriodMatch(cyclePeriod: { startDate: Date; endDate: Date }): {
                     continue;
                 }
 
-                if (daysOverlapping === bestMatch.daysOverlapping && daysMissing < bestMatch.daysMissing) {
+                if (
+                    daysOverlapping === bestMatch.daysOverlapping &&
+                    daysMissing < bestMatch.daysMissing
+                ) {
                     bestMatch = {
                         year,
                         periodSpan,
@@ -617,19 +742,32 @@ function findBestPeriodMatch(cyclePeriod: { startDate: Date; endDate: Date }): {
  * @param period
  * @param targetPeriod
  */
-export function getDaysMissingAndOverlap(period1: { startDate: Date; endDate: Date }, period2: { startDate: Date; endDate: Date }): { daysMissing: number; daysOverlapping: number; longestPeriodInDays: number } {
+export function getDaysMissingAndOverlap(
+    period1: { startDate: Date; endDate: Date },
+    period2: { startDate: Date; endDate: Date },
+): { daysMissing: number; daysOverlapping: number; longestPeriodInDays: number } {
     const totalDays1 = differenceInDays(period1.startDate, period1.endDate);
     const totalDays2 = differenceInDays(period2.startDate, period2.endDate);
 
     const targetPeriod = totalDays1 > totalDays2 ? period1 : period2;
     const otherPeriod = totalDays1 > totalDays2 ? period2 : period1;
 
-    const startOverlap = targetPeriod.startDate.getTime() > otherPeriod.startDate.getTime() ? targetPeriod.startDate : otherPeriod.startDate;
-    const endOverlap = targetPeriod.endDate.getTime() < otherPeriod.endDate.getTime() ? targetPeriod.endDate : otherPeriod.endDate;
+    const startOverlap =
+        targetPeriod.startDate.getTime() > otherPeriod.startDate.getTime()
+            ? targetPeriod.startDate
+            : otherPeriod.startDate;
+    const endOverlap =
+        targetPeriod.endDate.getTime() < otherPeriod.endDate.getTime()
+            ? targetPeriod.endDate
+            : otherPeriod.endDate;
 
-    const daysOverlapping = startOverlap.getTime() > endOverlap.getTime() ? 0 : differenceInDays(startOverlap, endOverlap);
+    const daysOverlapping =
+        startOverlap.getTime() > endOverlap.getTime()
+            ? 0
+            : differenceInDays(startOverlap, endOverlap);
 
-    const daysMissing = totalDays1 > totalDays2 ? totalDays1 - daysOverlapping : totalDays2 - daysOverlapping;
+    const daysMissing =
+        totalDays1 > totalDays2 ? totalDays1 - daysOverlapping : totalDays2 - daysOverlapping;
 
     return {
         daysMissing,
@@ -639,7 +777,9 @@ export function getDaysMissingAndOverlap(period1: { startDate: Date; endDate: Da
 }
 // #endregion
 
-async function calculateBestCurrentPeriodSpan(groups: Group[]): Promise<{ startDate: Date; endDate: Date }> {
+async function calculateBestCurrentPeriodSpan(
+    groups: Group[],
+): Promise<{ startDate: Date; endDate: Date }> {
     // #region separate short and long groups
     const shortGroups: Group[] = [];
     const longGroups: Group[] = [];
@@ -664,13 +804,14 @@ async function calculateBestCurrentPeriodSpan(groups: Group[]): Promise<{ startD
      * If there are no long groups, use the short groups.
      * If there are no short groups, use the default period span.
      */
-    for (const group of (longGroups.length ? longGroups : shortGroups)) {
+    for (const group of longGroups.length ? longGroups : shortGroups) {
         const { startDate, endDate } = group.settings as { startDate: Date; endDate: Date };
 
         // month start, month end, span
         const { periodSpan: bestPeriod, year } = findBestPeriodMatch({
             startDate,
-            endDate });
+            endDate,
+        });
 
         const groups = periodSpanCounts.get(bestPeriod) ?? [];
         // also keep track of the year to find the best year later
@@ -702,17 +843,20 @@ function timeToDays(time: number): number {
 // #region factories
 async function createDefaultRegistrationPeriod(organization: Organization, dryRun: boolean) {
     // first check if already has a registration period for the organization
-    const registrationPeriod = await RegistrationPeriod.getByID(organization.periodId); ;
+    const registrationPeriod = await RegistrationPeriod.getByID(organization.periodId);
     if (registrationPeriod && registrationPeriod.organizationId === organization.id) {
         return;
     }
 
     // create new registration period, every organization should have a registration period with an organization id
-    const period = await createRegistrationPeriod({
-        organization,
-        startDate: new Date(2025, 0, 1, 0, 0, 0, 0),
-        endDate: new Date(2025, 11, 31, 59, 59, 59, 999),
-    }, dryRun);
+    const period = await createRegistrationPeriod(
+        {
+            organization,
+            startDate: new Date(2025, 0, 1, 0, 0, 0, 0),
+            endDate: new Date(2025, 11, 31, 59, 59, 59, 999),
+        },
+        dryRun,
+    );
 
     organization.periodId = period.id;
 
@@ -721,10 +865,13 @@ async function createDefaultRegistrationPeriod(organization: Organization, dryRu
     }
 }
 
-async function createOrganizationRegistrationPeriod(options: {
-    organization: Organization;
-    period: RegistrationPeriod;
-}, dryRun: boolean) {
+async function createOrganizationRegistrationPeriod(
+    options: {
+        organization: Organization;
+        period: RegistrationPeriod;
+    },
+    dryRun: boolean,
+) {
     const organizationRegistrationPeriod = new OrganizationRegistrationPeriod();
 
     organizationRegistrationPeriod.organizationId = options.organization.id;
@@ -737,14 +884,17 @@ async function createOrganizationRegistrationPeriod(options: {
     return organizationRegistrationPeriod;
 }
 
-async function createRegistrationPeriod(options: {
-    startDate?: Date;
-    endDate?: Date;
-    previousPeriodId?: string;
-    locked?: boolean;
-    organization?: Organization;
-    customName?: string;
-}, dryRun: boolean) {
+async function createRegistrationPeriod(
+    options: {
+        startDate?: Date;
+        endDate?: Date;
+        previousPeriodId?: string;
+        locked?: boolean;
+        organization?: Organization;
+        customName?: string;
+    },
+    dryRun: boolean,
+) {
     const period = new RegistrationPeriod();
 
     period.organizationId = options.organization ? options.organization.id : null;
@@ -767,7 +917,17 @@ async function createRegistrationPeriod(options: {
     return period;
 }
 
-function createPreviousGroup({ originalGroup, period, cycleInformation, index }: { originalGroup: Group; period: RegistrationPeriod; cycleInformation: CycleInformation; index: number }) {
+function createPreviousGroup({
+    originalGroup,
+    period,
+    cycleInformation,
+    index,
+}: {
+    originalGroup: Group;
+    period: RegistrationPeriod;
+    cycleInformation: CycleInformation;
+    index: number;
+}) {
     const newGroup = new Group();
     newGroup.organizationId = originalGroup.organizationId;
     newGroup.periodId = period.id;
@@ -801,16 +961,15 @@ function createPreviousGroup({ originalGroup, period, cycleInformation, index }:
     const isPlural = index > 0;
     const extraName = isPlural ? `${index + 1} periodes geleden` : `${index + 1} periode geleden`;
 
-    newGroup.settings = GroupSettings
-        .create({
-            ...originalSettings,
-            cycleSettings: new Map(),
-            name: new TranslatedString(`${originalSettings.name.toString()} (${extraName})`),
-            startDate,
-            endDate,
-            hasCustomDates: true,
-            period: period.getBaseStructure(),
-        });
+    newGroup.settings = GroupSettings.create({
+        ...originalSettings,
+        cycleSettings: new Map(),
+        name: new TranslatedString(`${originalSettings.name.toString()} (${extraName})`),
+        startDate,
+        endDate,
+        hasCustomDates: true,
+        period: period.getBaseStructure(),
+    });
     newGroup.type = originalGroup.type;
 
     return newGroup;
@@ -826,7 +985,9 @@ function calculateTopYear(periodSpan: PeriodSpan, groups: Group[]): number {
 
     const calculateTopYearHelper = (groups: Group[]): number => {
         // most recent groups first (in case of ties)
-        const sortedGroups = [...groups].sort((a, b) => b.settings.startDate.getTime() - a.settings.startDate.getTime());
+        const sortedGroups = [...groups].sort(
+            (a, b) => b.settings.startDate.getTime() - a.settings.startDate.getTime(),
+        );
 
         for (const group of sortedGroups) {
             const year = getBestGroupYear(periodSpan, group);
@@ -851,13 +1012,17 @@ function calculateTopYear(periodSpan: PeriodSpan, groups: Group[]): number {
 
     const yearCount = new Map<number, number>();
 
-    const areAllGroupsPossibleEvents: boolean = groups.every(group => isGroupShorterThanMonth(group));
+    const areAllGroupsPossibleEvents: boolean = groups.every((group) =>
+        isGroupShorterThanMonth(group),
+    );
 
     if (areAllGroupsPossibleEvents) {
         return calculateTopYearHelper(groups);
     }
 
-    const ifEventsExcluded = calculateTopYearHelper(groups.filter(g => !isGroupShorterThanMonth(g)));
+    const ifEventsExcluded = calculateTopYearHelper(
+        groups.filter((g) => !isGroupShorterThanMonth(g)),
+    );
     const ifEventsIncluded = calculateTopYearHelper(groups);
     const difference = Math.abs(ifEventsIncluded - ifEventsExcluded);
 
@@ -889,7 +1054,7 @@ function isGroupShorterThanMonth(group: Group) {
 
 function getTimeSpan(year: number, periodSpan: PeriodSpan): { startDate: Date; endDate: Date } {
     const startDate = new Date(year, periodSpan.startMonth, 1);
-    const endDate = new Date((new Date(year, periodSpan.startMonth + periodSpan.span)).getTime() - 1);
+    const endDate = new Date(new Date(year, periodSpan.startMonth + periodSpan.span).getTime() - 1);
     return { startDate, endDate };
 }
 

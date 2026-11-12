@@ -9,13 +9,13 @@ type UitpasTokenResponse = {
 
 function assertIsUitpasTokenResponse(json: unknown): asserts json is UitpasTokenResponse {
     if (
-        typeof json !== 'object'
-        || json === null
-        || !('access_token' in json)
-        || !('expires_in' in json)
-        || typeof json.access_token !== 'string'
-        || typeof json.expires_in !== 'number'
-        || json.expires_in <= 0
+        typeof json !== 'object' ||
+        json === null ||
+        !('access_token' in json) ||
+        !('expires_in' in json) ||
+        typeof json.access_token !== 'string' ||
+        typeof json.expires_in !== 'number' ||
+        json.expires_in <= 0
     ) {
         console.error('Invalid response when fetching UiTPAS token:', json);
         throw new SimpleError({
@@ -35,12 +35,23 @@ export class UitpasTokenRepository {
         this.uitpasClientCredential = uitpasClientCredential;
     }
 
-    static async handleInQueue<T>(organizationId: string | null, handler: () => Promise<T>): Promise<T> {
-        return await QueueHandler.schedule('uitpas/token-' + (organizationId ?? 'platform'), handler);
+    static async handleInQueue<T>(
+        organizationId: string | null,
+        handler: () => Promise<T>,
+    ): Promise<T> {
+        return await QueueHandler.schedule(
+            'uitpas/token-' + (organizationId ?? 'platform'),
+            handler,
+        );
     }
 
-    static async storeIfValid(organizationId: string | null, clientId: string, clientSecret: string): Promise<void> {
-        if (!clientId || !clientSecret) { // empty strings
+    static async storeIfValid(
+        organizationId: string | null,
+        clientId: string,
+        clientSecret: string,
+    ): Promise<void> {
+        if (!clientId || !clientSecret) {
+            // empty strings
             throw new SimpleError({
                 statusCode: 400,
                 code: 'invalid_uitpas_client_credentials',
@@ -71,7 +82,9 @@ export class UitpasTokenRepository {
     /**
      * @returns null if no creds configured, undefined if not found in memory, UitpasTokenRepository if found in memory
      */
-    private static getRepoFromMemory(organizationId: string | null): UitpasTokenRepository | undefined | null {
+    private static getRepoFromMemory(
+        organizationId: string | null,
+    ): UitpasTokenRepository | undefined | null {
         return UitpasTokenRepository.knownRepos.get(organizationId);
     }
 
@@ -92,7 +105,9 @@ export class UitpasTokenRepository {
             return model;
         }
 
-        const model = await UitpasClientCredential.select().where('organizationId', organizationId).first(false);
+        const model = await UitpasClientCredential.select()
+            .where('organizationId', organizationId)
+            .first(false);
         if (model) {
             return model; // found in database
         }
@@ -101,8 +116,13 @@ export class UitpasTokenRepository {
     }
 
     private async getNewAccessToken() {
-        console.log('UITPAS: Fetching new access token for', this.uitpasClientCredential.organizationId);
-        const url = STAMHOOFD.UITPAS_API_URL?.includes('test') ? 'https://account-test.uitid.be/realms/uitid/protocol/openid-connect/token' : 'https://account.uitid.be/realms/uitid/protocol/openid-connect/token';
+        console.log(
+            'UITPAS: Fetching new access token for',
+            this.uitpasClientCredential.organizationId,
+        );
+        const url = STAMHOOFD.UITPAS_API_URL?.includes('test')
+            ? 'https://account-test.uitid.be/realms/uitid/protocol/openid-connect/token'
+            : 'https://account.uitid.be/realms/uitid/protocol/openid-connect/token';
         const myHeaders = new Headers();
         myHeaders.append('Content-Type', 'application/x-www-form-urlencoded');
         const params = new URLSearchParams({
@@ -134,7 +154,10 @@ export class UitpasTokenRepository {
                     human: $t('%1BK'),
                 });
             }
-            console.error(`Unsuccessful response when fetching UiTPAS token for organization with id ${this.uitpasClientCredential.organizationId}:`, response.statusText);
+            console.error(
+                `Unsuccessful response when fetching UiTPAS token for organization with id ${this.uitpasClientCredential.organizationId}:`,
+                response.statusText,
+            );
             throw new SimpleError({
                 statusCode: this.uitpasClientCredential.organizationId === null ? 500 : 400, // Internal, non visible error in case it is a built in credential
                 code: 'unsuccessful_response_fetching_uitpas_token',
@@ -153,15 +176,21 @@ export class UitpasTokenRepository {
         });
         assertIsUitpasTokenResponse(json);
         this.accessToken = json.access_token;
-        this.expiresOn = new Date((Date.now() + json.expires_in * 1000) - 10000); // Set expiration 10 seconds earlier to be safe
+        this.expiresOn = new Date(Date.now() + json.expires_in * 1000 - 10000); // Set expiration 10 seconds earlier to be safe
         return this.accessToken;
     }
 
-    private static setRepoInMemory(organizationId: string | null, repo: UitpasTokenRepository | null) {
+    private static setRepoInMemory(
+        organizationId: string | null,
+        repo: UitpasTokenRepository | null,
+    ) {
         UitpasTokenRepository.knownRepos.set(organizationId, repo);
     }
 
-    private static async setModelInDb(organizationId: string | null, model: UitpasClientCredential) {
+    private static async setModelInDb(
+        organizationId: string | null,
+        model: UitpasClientCredential,
+    ) {
         const oldModel = await UitpasTokenRepository.getModelFromDb(organizationId);
         if (oldModel) {
             // update
@@ -175,11 +204,17 @@ export class UitpasTokenRepository {
         return model; // return new model
     }
 
-    static async getAccessTokenForWithPlatformFallback(orgId: string, forceRefresh: boolean = false): Promise<string> {
+    static async getAccessTokenForWithPlatformFallback(
+        orgId: string,
+        forceRefresh: boolean = false,
+    ): Promise<string> {
         try {
             return await UitpasTokenRepository.getAccessTokenFor(orgId, forceRefresh);
         } catch (error) {
-            if (error instanceof SimpleError && error.code === 'uitpas_api_not_configured_for_this_organization') {
+            if (
+                error instanceof SimpleError &&
+                error.code === 'uitpas_api_not_configured_for_this_organization'
+            ) {
                 return await UitpasTokenRepository.getAccessTokenFor(null, forceRefresh); // fallback to platform
             }
             throw error;
@@ -193,7 +228,10 @@ export class UitpasTokenRepository {
      * @returns Promise<string> the access token for the organization or platform
      * @throws SimpleError if the token cannot be obtained or the API is not configured
      */
-    static async getAccessTokenFor(organizationId: string | null, forceRefresh: boolean = false): Promise<string> {
+    static async getAccessTokenFor(
+        organizationId: string | null,
+        forceRefresh: boolean = false,
+    ): Promise<string> {
         const notConfiguredError = new SimpleError({
             code: 'uitpas_api_not_configured_for_this_organization',
             message: `UiTPAS api not configured for organization with id ${organizationId}`,
@@ -286,7 +324,9 @@ export class UitpasTokenRepository {
             const model = await UitpasTokenRepository.getModelFromDb(organizationId);
             if (model) {
                 if (cached === null) {
-                    console.warn(`Clearing UiTPAS client credentials for organization with id ${organizationId} although it was not in memory, but found in database. This is a bug, memory and database are out of sync.`);
+                    console.warn(
+                        `Clearing UiTPAS client credentials for organization with id ${organizationId} although it was not in memory, but found in database. This is a bug, memory and database are out of sync.`,
+                    );
                 }
                 await model.delete(); // remove from database
                 return true;

@@ -28,9 +28,7 @@ export function $containsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilt
                 new SQLJsonSearch(
                     new SQLLower(column.expression),
                     'one',
-                    scalarToSQLExpression(
-                        '%' + SQLWhereLike.escape(value) + '%',
-                    ),
+                    scalarToSQLExpression('%' + SQLWhereLike.escape(value) + '%'),
                 ),
                 SQLWhereSign.NotEqual,
                 new SQLNull(),
@@ -39,9 +37,7 @@ export function $containsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilt
 
         return new SQLWhereLike(
             column.expression,
-            scalarToSQLExpression(
-                '%' + SQLWhereLike.escape(value) + '%',
-            ),
+            scalarToSQLExpression('%' + SQLWhereLike.escape(value) + '%'),
         ).setNullable(column.nullable);
     };
 }

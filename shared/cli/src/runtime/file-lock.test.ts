@@ -14,22 +14,27 @@ describe('withFileLock', () => {
 
     it('runs handlers one after another and cleans up the lock file', async () => {
         const events: string[] = [];
-        const handler = async (name: string) => await withFileLock(lockPath, async () => {
-            events.push(`${name}:start`);
-            await new Promise(resolve => setTimeout(resolve, 25));
-            events.push(`${name}:end`);
-        });
+        const handler = async (name: string) =>
+            await withFileLock(lockPath, async () => {
+                events.push(`${name}:start`);
+                await new Promise((resolve) => setTimeout(resolve, 25));
+                events.push(`${name}:end`);
+            });
 
         await Promise.all([handler('a'), handler('b')]);
 
-        expect(events).toEqual(events[0] === 'a:start'
-            ? ['a:start', 'a:end', 'b:start', 'b:end']
-            : ['b:start', 'b:end', 'a:start', 'a:end']);
+        expect(events).toEqual(
+            events[0] === 'a:start'
+                ? ['a:start', 'a:end', 'b:start', 'b:end']
+                : ['b:start', 'b:end', 'a:start', 'a:end'],
+        );
         await expect(fs.stat(lockPath)).rejects.toMatchObject({ code: 'ENOENT' });
     });
 
     it('releases the lock when the handler throws', async () => {
-        await expect(withFileLock(lockPath, () => Promise.reject(new Error('boom')))).rejects.toThrow('boom');
+        await expect(
+            withFileLock(lockPath, () => Promise.reject(new Error('boom'))),
+        ).rejects.toThrow('boom');
 
         await expect(fs.stat(lockPath)).rejects.toMatchObject({ code: 'ENOENT' });
         await expect(withFileLock(lockPath, () => Promise.resolve('ok'))).resolves.toBe('ok');
@@ -37,22 +42,34 @@ describe('withFileLock', () => {
 
     it('takes over a lock of a process that no longer exists', async () => {
         await fs.mkdir(path.dirname(lockPath), { recursive: true });
-        await fs.writeFile(lockPath, JSON.stringify({ pid: 2 ** 30, startedAt: new Date().toISOString() }));
+        await fs.writeFile(
+            lockPath,
+            JSON.stringify({ pid: 2 ** 30, startedAt: new Date().toISOString() }),
+        );
 
-        await expect(withFileLock(lockPath, () => Promise.resolve('ok'), { timeoutMs: 5_000 })).resolves.toBe('ok');
+        await expect(
+            withFileLock(lockPath, () => Promise.resolve('ok'), { timeoutMs: 5_000 }),
+        ).resolves.toBe('ok');
     });
 
     it('takes over a lock that is older than the stale timeout', async () => {
         await writeForeignLock(new Date(Date.now() - 10_000));
 
-        await expect(withFileLock(lockPath, () => Promise.resolve('ok'), { staleMs: 1_000, timeoutMs: 30_000 })).resolves.toBe('ok');
+        await expect(
+            withFileLock(lockPath, () => Promise.resolve('ok'), {
+                staleMs: 1_000,
+                timeoutMs: 30_000,
+            }),
+        ).resolves.toBe('ok');
     });
 
     it('waits for a lock that is still held, and steals it after the timeout', async () => {
         await writeForeignLock(new Date());
         const start = Date.now();
 
-        await expect(withFileLock(lockPath, () => Promise.resolve('ok'), { timeoutMs: 300 })).resolves.toBe('ok');
+        await expect(
+            withFileLock(lockPath, () => Promise.resolve('ok'), { timeoutMs: 300 }),
+        ).resolves.toBe('ok');
         expect(Date.now() - start).toBeGreaterThanOrEqual(300);
     });
 
@@ -60,7 +77,9 @@ describe('withFileLock', () => {
         await fs.mkdir(path.dirname(lockPath), { recursive: true });
         await fs.writeFile(lockPath, 'not json');
 
-        await expect(withFileLock(lockPath, () => Promise.resolve('ok'), { timeoutMs: 30_000 })).resolves.toBe('ok');
+        await expect(
+            withFileLock(lockPath, () => Promise.resolve('ok'), { timeoutMs: 30_000 }),
+        ).resolves.toBe('ok');
     });
 
     /**
@@ -69,6 +88,9 @@ describe('withFileLock', () => {
      */
     async function writeForeignLock(startedAt: Date) {
         await fs.mkdir(path.dirname(lockPath), { recursive: true });
-        await fs.writeFile(lockPath, JSON.stringify({ pid: 1, startedAt: startedAt.toISOString() }));
+        await fs.writeFile(
+            lockPath,
+            JSON.stringify({ pid: 1, startedAt: startedAt.toISOString() }),
+        );
     }
 });

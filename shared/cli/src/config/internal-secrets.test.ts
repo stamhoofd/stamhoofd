@@ -1,4 +1,8 @@
-import type { BackendEnvironment, FrontendEnvironment, SharedEnvironment } from '@stamhoofd/types/Environment';
+import type {
+    BackendEnvironment,
+    FrontendEnvironment,
+    SharedEnvironment,
+} from '@stamhoofd/types/Environment';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -75,9 +79,16 @@ describe('applyInternalSecrets', () => {
             'op://DevOps Development/OpenAI/token': 'openai-token',
         });
         // MOLLIE_SECRET is intentionally not mocked, so it resolves to '' and must be preserved.
-        const env = { MOLLIE_SECRET: 'keep-me', STRIPE_SECRET_KEY: 'sk_live_existing' } as BackendEnvironment;
+        const env = {
+            MOLLIE_SECRET: 'keep-me',
+            STRIPE_SECRET_KEY: 'sk_live_existing',
+        } as BackendEnvironment;
 
-        const result = await applyInternalSecrets(context(), { backend: BackendApp.Api }, env) as BackendEnvironment;
+        const result = (await applyInternalSecrets(
+            context(),
+            { backend: BackendApp.Api },
+            env,
+        )) as BackendEnvironment;
 
         expect(result.MOLLIE_CLIENT_ID).toBe('mollie-client');
         expect(result.MOLLIE_API_KEY).toBe('mollie-api');
@@ -94,7 +105,10 @@ describe('applyInternalSecrets', () => {
 
         // STRIPE_SECRET_KEY resolution is left to the CLI and never touched here.
         expect(result.STRIPE_SECRET_KEY).toBe('sk_live_existing');
-        expect(read1PasswordCliMock).not.toHaveBeenCalledWith('op://Localhost/Stripe/STRIPE_SECRET_KEY', expect.anything());
+        expect(read1PasswordCliMock).not.toHaveBeenCalledWith(
+            'op://Localhost/Stripe/STRIPE_SECRET_KEY',
+            expect.anything(),
+        );
     });
 
     it('injects only the Mollie client id for frontend services', async () => {
@@ -102,11 +116,18 @@ describe('applyInternalSecrets', () => {
         mockSecrets({ 'op://Localhost/Mollie/MOLLIE_CLIENT_ID': 'mollie-client' });
         const env = { MOLLIE_CLIENT_ID: '' } as FrontendEnvironment;
 
-        const result = await applyInternalSecrets(context(), { frontend: FrontendApp.WebApp }, env) as FrontendEnvironment;
+        const result = (await applyInternalSecrets(
+            context(),
+            { frontend: FrontendApp.WebApp },
+            env,
+        )) as FrontendEnvironment;
 
         expect(result.MOLLIE_CLIENT_ID).toBe('mollie-client');
         expect(read1PasswordCliMock).toHaveBeenCalledTimes(1);
-        expect(read1PasswordCliMock).toHaveBeenCalledWith('op://Localhost/Mollie/MOLLIE_CLIENT_ID', expect.anything());
+        expect(read1PasswordCliMock).toHaveBeenCalledWith(
+            'op://Localhost/Mollie/MOLLIE_CLIENT_ID',
+            expect.anything(),
+        );
     });
 
     it('does not inject external secrets for non-api backends', async () => {

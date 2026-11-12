@@ -2,7 +2,11 @@ import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { getOptionalDevopsPlugin, getOptionalDevopsSetupChecks, getOptionalDocsPublishingProvider } from './devops-plugin.js';
+import {
+    getOptionalDevopsPlugin,
+    getOptionalDevopsSetupChecks,
+    getOptionalDocsPublishingProvider,
+} from './devops-plugin.js';
 
 const roots: string[] = [];
 
@@ -17,19 +21,33 @@ describe('optional devops plugin', () => {
         const root = await mkdtemp(join(tmpdir(), 'stam-devops-publishing-'));
         roots.push(root);
         expect(await getOptionalDocsPublishingProvider(root)).toBeUndefined();
-        await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'devops', type: 'module' }));
+        await writeFile(
+            join(root, 'package.json'),
+            JSON.stringify({ name: 'devops', type: 'module' }),
+        );
         expect(await getOptionalDocsPublishingProvider(root)).toBeUndefined();
         await mkdir(join(root, 'dist-cli'));
-        await writeFile(join(root, 'dist-cli/docs-publishing.js'), 'throw new Error("installed module failed");');
-        await expect(getOptionalDocsPublishingProvider(root)).rejects.toThrow('installed module failed');
+        await writeFile(
+            join(root, 'dist-cli/docs-publishing.js'),
+            'throw new Error("installed module failed");',
+        );
+        await expect(getOptionalDocsPublishingProvider(root)).rejects.toThrow(
+            'installed module failed',
+        );
     });
 
     it('returns the installed publishing provider', async () => {
         const root = await mkdtemp(join(tmpdir(), 'stam-devops-publishing-'));
         roots.push(root);
-        await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'devops', type: 'module' }));
+        await writeFile(
+            join(root, 'package.json'),
+            JSON.stringify({ name: 'devops', type: 'module' }),
+        );
         await mkdir(join(root, 'dist-cli'));
-        await writeFile(join(root, 'dist-cli/docs-publishing.js'), 'export const docsPublishingProvider = { listEnvironments: async () => [], resolve: async () => ({ registry: "registry.example.com/team" }) };');
+        await writeFile(
+            join(root, 'dist-cli/docs-publishing.js'),
+            'export const docsPublishingProvider = { listEnvironments: async () => [], resolve: async () => ({ registry: "registry.example.com/team" }) };',
+        );
         const provider = await getOptionalDocsPublishingProvider(root);
         expect(await provider?.listEnvironments()).toEqual([]);
         expect(await provider?.resolve()).toEqual({ registry: 'registry.example.com/team' });
@@ -38,13 +56,23 @@ describe('optional devops plugin', () => {
         const root = await mkdtemp(join(tmpdir(), 'stam-devops-setup-'));
         roots.push(root);
         expect(await getOptionalDevopsSetupChecks(root)).toEqual([]);
-        await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'devops', type: 'module' }));
+        await writeFile(
+            join(root, 'package.json'),
+            JSON.stringify({ name: 'devops', type: 'module' }),
+        );
         expect(await getOptionalDevopsSetupChecks(root)).toEqual([]);
         await mkdir(join(root, 'dist-cli'));
-        await writeFile(join(root, 'dist-cli/setup-checks.js'), 'export function setupChecks() { return [{ label: "OpenTofu", check: async () => ({ ok: false, details: "missing", manualFix: "install tofu" }) }]; }');
+        await writeFile(
+            join(root, 'dist-cli/setup-checks.js'),
+            'export function setupChecks() { return [{ label: "OpenTofu", check: async () => ({ ok: false, details: "missing", manualFix: "install tofu" }) }]; }',
+        );
         const checks = await getOptionalDevopsSetupChecks(root);
         expect(checks[0].label).toBe('OpenTofu');
-        expect(await checks[0].check()).toEqual({ ok: false, details: 'missing', manualFix: 'install tofu' });
+        expect(await checks[0].check()).toEqual({
+            ok: false,
+            details: 'missing',
+            manualFix: 'install tofu',
+        });
     });
     it('is absent when the checkout is missing or empty', async () => {
         const root = await mkdtemp(join(tmpdir(), 'stam-devops-'));
@@ -52,7 +80,14 @@ describe('optional devops plugin', () => {
         expect(await getOptionalDevopsPlugin(join(root, 'missing'))).toBeUndefined();
         expect(await getOptionalDevopsPlugin(root)).toBeUndefined();
 
-        await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'devops', type: 'module', oclif: { commands: './dist-cli/commands' } }));
+        await writeFile(
+            join(root, 'package.json'),
+            JSON.stringify({
+                name: 'devops',
+                type: 'module',
+                oclif: { commands: './dist-cli/commands' },
+            }),
+        );
         const commands = join(root, 'dist-cli/commands/devops');
         await mkdir(commands, { recursive: true });
         expect(await getOptionalDevopsPlugin(root)).toBeUndefined();
@@ -61,10 +96,20 @@ describe('optional devops plugin', () => {
     it('loads commands from a populated checkout', async () => {
         const root = await mkdtemp(join(tmpdir(), 'stam-devops-'));
         roots.push(root);
-        await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'devops', type: 'module', oclif: { commands: './dist-cli/commands' } }));
+        await writeFile(
+            join(root, 'package.json'),
+            JSON.stringify({
+                name: 'devops',
+                type: 'module',
+                oclif: { commands: './dist-cli/commands' },
+            }),
+        );
         const commands = join(root, 'dist-cli/commands/devops');
         await mkdir(commands, { recursive: true });
-        await writeFile(join(commands, 'example.js'), `import { Command } from '${import.meta.resolve('@oclif/core')}'; export default class Example extends Command { async run() {} }`);
+        await writeFile(
+            join(commands, 'example.js'),
+            `import { Command } from '${import.meta.resolve('@oclif/core')}'; export default class Example extends Command { async run() {} }`,
+        );
 
         const plugin = await getOptionalDevopsPlugin(root);
         expect(plugin?.commandIDs).toContain('devops:example');

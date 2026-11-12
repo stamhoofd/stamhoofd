@@ -49,7 +49,10 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
 
     doesMatchFilter(filter: StamhoofdFilter) {
         try {
-            const compiledFilter = compileToInMemoryFilter(filter, memberWithRegistrationsBlobInMemoryFilterCompilers);
+            const compiledFilter = compileToInMemoryFilter(
+                filter,
+                memberWithRegistrationsBlobInMemoryFilterCompilers,
+            );
             return compiledFilter(this);
         } catch (e) {
             console.error('Error while compiling filter', e, filter);
@@ -58,22 +61,28 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
     }
 
     hasAccount(email: string) {
-        return !!this.users.find(u => u.hasAccount && u.email === email);
+        return !!this.users.find((u) => u.hasAccount && u.email === email);
     }
 
-    getEmailRecipients(subtypes: ('member' | 'parents' | 'unverified')[] | null = null): EmailRecipient[] {
+    getEmailRecipients(
+        subtypes: ('member' | 'parents' | 'unverified')[] | null = null,
+    ): EmailRecipient[] {
         const recipients: EmailRecipient[] = [];
 
         const shared: Replacement[] = [];
-        shared.push(Replacement.create({
-            token: 'firstNameMember',
-            value: this.firstName,
-        }));
+        shared.push(
+            Replacement.create({
+                token: 'firstNameMember',
+                value: this.firstName,
+            }),
+        );
 
-        shared.push(Replacement.create({
-            token: 'lastNameMember',
-            value: this.details.lastName ?? '',
-        }));
+        shared.push(
+            Replacement.create({
+                token: 'lastNameMember',
+                value: this.details.lastName ?? '',
+            }),
+        );
 
         /* shared.push(Replacement.create({
             token: 'outstandingBalance',
@@ -81,7 +90,9 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
         })); */
 
         if (this.details.email && (subtypes === null || subtypes.includes('member'))) {
-            const user = this.users.find(u => u.email === this.details.email) ?? this.users.find(u => !!this.details.alternativeEmails.find(e => e === u.email));
+            const user =
+                this.users.find((u) => u.email === this.details.email) ??
+                this.users.find((u) => !!this.details.alternativeEmails.find((e) => e === u.email));
             recipients.push(
                 EmailRecipient.create({
                     objectId: this.id,
@@ -91,9 +102,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                     lastName: this.details.lastName,
                     email: this.details.email,
                     language: user?.language ?? this.details.language,
-                    replacements: [
-                        ...shared,
-                    ],
+                    replacements: [...shared],
                 }),
             );
         }
@@ -108,9 +117,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                     lastName: this.details.lastName,
                     email: null,
                     language: this.details.language,
-                    replacements: [
-                        ...shared,
-                    ],
+                    replacements: [...shared],
                 }),
             );
         }
@@ -118,7 +125,11 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
         if (subtypes === null || subtypes.includes('parents')) {
             for (const parent of this.details.parents) {
                 if (parent.email) {
-                    const user = this.users.find(u => u.email === parent.email) ?? this.users.find(u => !!parent.alternativeEmails.find(e => e === u.email));
+                    const user =
+                        this.users.find((u) => u.email === parent.email) ??
+                        this.users.find(
+                            (u) => !!parent.alternativeEmails.find((e) => e === u.email),
+                        );
                     recipients.push(
                         EmailRecipient.create({
                             objectId: this.id,
@@ -128,9 +139,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                             lastName: parent.lastName,
                             email: parent.email,
                             language: user?.language ?? this.details.language,
-                            replacements: [
-                                ...shared,
-                            ],
+                            replacements: [...shared],
                         }),
                     );
                 }
@@ -139,7 +148,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
 
         if (subtypes && subtypes.includes('unverified')) {
             for (const unverifiedEmail of this.details.unverifiedEmails) {
-                const user = this.users.find(u => u.email === unverifiedEmail);
+                const user = this.users.find((u) => u.email === unverifiedEmail);
                 recipients.push(
                     EmailRecipient.create({
                         objectId: this.id,
@@ -147,9 +156,7 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
                         userId: user?.id ?? null,
                         email: unverifiedEmail,
                         language: user?.language ?? this.details.language,
-                        replacements: [
-                            ...shared,
-                        ],
+                        replacements: [...shared],
                     }),
                 );
             }
@@ -160,26 +167,25 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
 
     getGroups(organization: Organization): Group[] {
         return this.registrations
-            .filter(registration =>
-                registration.registeredAt !== null
-                && registration.deactivatedAt === null
-                && registration.group.type === GroupType.Membership
-                && registration.group.periodId === organization.period.period.id,
+            .filter(
+                (registration) =>
+                    registration.registeredAt !== null &&
+                    registration.deactivatedAt === null &&
+                    registration.group.type === GroupType.Membership &&
+                    registration.group.periodId === organization.period.period.id,
             )
-            .map(registration => registration.group);
+            .map((registration) => registration.group);
     }
 
     /**
      * Determines whether a member still reflects the latest SGV sync.
      * New membership registrations and old sync timestamps become outdated, while local edits after sync become changed.
      */
-    getSGVSyncStatus(options: {
-        organization: Organization;
-        now?: Date;
-    }): SGVSyncStatus {
-        const activeRegistrations = this.registrations.filter(registration =>
-            registration.group.periodId === options.organization.period.period.id
-            && registration.group.type === GroupType.Membership,
+    getSGVSyncStatus(options: { organization: Organization; now?: Date }): SGVSyncStatus {
+        const activeRegistrations = this.registrations.filter(
+            (registration) =>
+                registration.group.periodId === options.organization.period.period.id &&
+                registration.group.type === GroupType.Membership,
         );
 
         if (activeRegistrations.length === 0) {
@@ -192,7 +198,11 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
         }
 
         for (const registration of activeRegistrations) {
-            if (registration.group.type !== GroupType.Membership || registration.deactivatedAt !== null || registration.registeredAt === null) {
+            if (
+                registration.group.type !== GroupType.Membership ||
+                registration.deactivatedAt !== null ||
+                registration.registeredAt === null
+            ) {
                 continue;
             }
 
@@ -201,11 +211,17 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
             }
         }
 
-        if (lastExternalSync.getTime() < (options.now ?? new Date()).getTime() - SGV_OUTDATED_AFTER_MS) {
+        if (
+            lastExternalSync.getTime() <
+            (options.now ?? new Date()).getTime() - SGV_OUTDATED_AFTER_MS
+        ) {
             return SGVSyncStatus.Outdated;
         }
 
-        if (Math.abs(lastExternalSync.getTime() - this.updatedAt.getTime()) < SGV_SYNC_UPDATE_TOLERANCE_MS) {
+        if (
+            Math.abs(lastExternalSync.getTime() - this.updatedAt.getTime()) <
+            SGV_SYNC_UPDATE_TOLERANCE_MS
+        ) {
             return SGVSyncStatus.Ok;
         }
 
@@ -233,7 +249,10 @@ export class MembersBlob extends AutoEncoder {
     }
 
     get isStale() {
-        return MembersBlob.lastPatchedMembersDate !== null && this.receivedAt < MembersBlob.lastPatchedMembersDate;
+        return (
+            MembersBlob.lastPatchedMembersDate !== null &&
+            this.receivedAt < MembersBlob.lastPatchedMembersDate
+        );
     }
 
     static lastPatchedMembersDate: Date | null = null;

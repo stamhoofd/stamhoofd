@@ -1,10 +1,18 @@
 import type { Order, Webshop } from '@stamhoofd/models';
 import type { WebshopTakeoutMethod } from '@stamhoofd/structures';
-import { CheckoutMethodType, PaymentGeneral, PaymentMethod, PaymentMethodHelper, RecordCategory, RecordCheckboxAnswer } from '@stamhoofd/structures';
+import {
+    CheckoutMethodType,
+    PaymentGeneral,
+    PaymentMethod,
+    PaymentMethodHelper,
+    RecordCategory,
+    RecordCheckboxAnswer,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string {
-    let str = '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
+    let str =
+        '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
 
     const data = [
         {
@@ -35,18 +43,22 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
                 return order.data.address?.shortString() ?? '';
             })(order),
         },
-        ...(
-            (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout || order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) && ((order.data.checkoutMethod as any)?.address)
-                ? [
-                        {
-                            title: $t('%Cn'),
-                            value: ((order) => {
-                                return (order.data.checkoutMethod as WebshopTakeoutMethod)?.address?.shortString() ?? '';
-                            })(order),
-                        },
-                    ]
-                : []
-        ),
+        ...((order.data.checkoutMethod?.type === CheckoutMethodType.Takeout ||
+            order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) &&
+        (order.data.checkoutMethod as any)?.address
+            ? [
+                  {
+                      title: $t('%Cn'),
+                      value: ((order) => {
+                          return (
+                              (
+                                  order.data.checkoutMethod as WebshopTakeoutMethod
+                              )?.address?.shortString() ?? ''
+                          );
+                      })(order),
+                  },
+              ]
+            : []),
         {
             title: $t('%7R'),
             value: Formatter.capitalizeFirstLetter(order.data.timeSlot?.dateString() ?? ''),
@@ -61,30 +73,34 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
         },
         ...(order.data.customer.phone
             ? [
-                    {
-                        title: $t('%18Z'),
-                        value: order.data.customer.phone,
-                    },
-                ]
+                  {
+                      title: $t('%18Z'),
+                      value: order.data.customer.phone,
+                  },
+              ]
             : []),
-        ...order.data.fieldAnswers.filter(a => a.answer).map(a => ({
-            title: a.field.name,
-            value: a.answer,
-        })),
-        ...RecordCategory.sortAnswers(order.data.recordAnswers, webshop.meta.allRecordCategories).filter(a => !a.isEmpty || a instanceof RecordCheckboxAnswer).map(a => ({
-            title: a.settings.name.toString(),
-            value: a.stringValue,
-        })),
-        ...(
-            (order.data.paymentMethod !== PaymentMethod.Unknown)
-                ? [
-                        {
-                            title: $t('%M7'),
-                            value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(order.data.paymentMethod)),
-                        },
-                    ]
-                : []
-        ),
+        ...order.data.fieldAnswers
+            .filter((a) => a.answer)
+            .map((a) => ({
+                title: a.field.name,
+                value: a.answer,
+            })),
+        ...RecordCategory.sortAnswers(order.data.recordAnswers, webshop.meta.allRecordCategories)
+            .filter((a) => !a.isEmpty || a instanceof RecordCheckboxAnswer)
+            .map((a) => ({
+                title: a.settings.name.toString(),
+                value: a.stringValue,
+            })),
+        ...(order.data.paymentMethod !== PaymentMethod.Unknown
+            ? [
+                  {
+                      title: $t('%M7'),
+                      value: Formatter.capitalizeFirstLetter(
+                          PaymentMethodHelper.getName(order.data.paymentMethod),
+                      ),
+                  },
+              ]
+            : []),
         ...order.data.priceBreakown.map((p) => {
             return {
                 title: p.name,

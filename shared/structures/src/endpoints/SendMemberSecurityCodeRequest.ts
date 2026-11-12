@@ -1,4 +1,11 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 
 import { SecurityCodeSendMethod } from '../members/SecurityCodeSendMethod.js';
 

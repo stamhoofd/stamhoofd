@@ -2,7 +2,15 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import type { ReportCard, ReportTab } from './report.js';
-import { getReportDirectory, loadReport, loadRetiredReport, loadSnippets, parseTab, parameterNames, resolveSql } from './report.js';
+import {
+    getReportDirectory,
+    loadReport,
+    loadRetiredReport,
+    loadSnippets,
+    parseTab,
+    parameterNames,
+    resolveSql,
+} from './report.js';
 import { buildVisualizationSettings, columnPalettes, layoutCards } from './sync-report.js';
 
 /**
@@ -11,7 +19,10 @@ import { buildVisualizationSettings, columnPalettes, layoutCards } from './sync-
  * below it -- commenting the rest of the expression out of the string being asserted on.
  */
 function expressionOf(sql: string): string {
-    return sql.replaceAll(/--[^\n]*/g, '').replaceAll(/\s+/g, ' ').trim();
+    return sql
+        .replaceAll(/--[^\n]*/g, '')
+        .replaceAll(/\s+/g, ' ')
+        .trim();
 }
 
 /**
@@ -20,11 +31,15 @@ function expressionOf(sql: string): string {
  * them is written per environment.
  */
 function bovenlokaalKey(env: string): string {
-    return env === 'keeo' ? 'deelnemers-bovenlokaal-werk-en-projectgroepen' : 'deelnemers-bovenlokaal';
+    return env === 'keeo'
+        ? 'deelnemers-bovenlokaal-werk-en-projectgroepen'
+        : 'deelnemers-bovenlokaal';
 }
 
 function cardOf(tabs: ReportTab[], tab: string, card: string): ReportCard {
-    const found = tabs.find(entry => entry.key === tab)?.cards.find(entry => entry.key === card);
+    const found = tabs
+        .find((entry) => entry.key === tab)
+        ?.cards.find((entry) => entry.key === card);
     if (!found) {
         throw new Error(`No card ${tab}/${card}`);
     }
@@ -40,7 +55,11 @@ function rowsOf(cards: ReportCard[]): { keys: string[]; width: number; heights: 
 
     for (const placed of layoutCards(cards)) {
         const row = rows.get(placed.row) ?? { keys: [], width: 0, heights: [] };
-        rows.set(placed.row, { keys: [...row.keys, placed.card.key], width: row.width + placed.sizeX, heights: [...new Set([...row.heights, placed.sizeY])] });
+        rows.set(placed.row, {
+            keys: [...row.keys, placed.card.key],
+            width: row.width + placed.sizeX,
+            heights: [...new Set([...row.heights, placed.sizeY])],
+        });
     }
 
     return [...rows.values()];
@@ -62,8 +81,16 @@ describe('report', () => {
 
     describe('definition', () => {
         it('has the pages of the report as tabs, plus the aanlevering and the filter values', () => {
-            expect(ravotDashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'gtp', 'netwerk', 'varia', 'jeugdbewegingen', 'filters']);
-            expect(ravotDashboards.find(tab => tab.key === 'filters')!.hidden).toBe(true);
+            expect(ravotDashboards.map((dashboard) => dashboard.key)).toEqual([
+                'nationaal',
+                'eenheden',
+                'gtp',
+                'netwerk',
+                'varia',
+                'jeugdbewegingen',
+                'filters',
+            ]);
+            expect(ravotDashboards.find((tab) => tab.key === 'filters')!.hidden).toBe(true);
         });
 
         /**
@@ -79,18 +106,37 @@ describe('report', () => {
         it('leaves the geslacht out of keeo, which no longer asks its leden for one', () => {
             // A chart says so in its dimensions; the ULDK table has the geslachten as columns and
             // reads them through the fragment it is built on.
-            const splitOnGeslacht = (tabs: ReportTab[]) => tabs
-                .filter(tab => tab.dashboard === undefined && !tab.hidden)
-                .flatMap(tab => tab.cards)
-                .filter(card => card.dimensions.includes('Geslacht') || card.snippets.includes('uldk'))
-                .map(card => card.key);
+            const splitOnGeslacht = (tabs: ReportTab[]) =>
+                tabs
+                    .filter((tab) => tab.dashboard === undefined && !tab.hidden)
+                    .flatMap((tab) => tab.cards)
+                    .filter(
+                        (card) =>
+                            card.dimensions.includes('Geslacht') || card.snippets.includes('uldk'),
+                    )
+                    .map((card) => card.key);
 
-            expect(dashboards.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'gtp', 'netwerk', 'varia', 'jeugdbewegingen', 'filters']);
+            expect(dashboards.map((dashboard) => dashboard.key)).toEqual([
+                'nationaal',
+                'eenheden',
+                'gtp',
+                'netwerk',
+                'varia',
+                'jeugdbewegingen',
+                'filters',
+            ]);
             expect(splitOnGeslacht(dashboards)).toEqual([]);
             expect(splitOnGeslacht(ravotDashboards).length).toEqual(9);
-            for (const [keeoKey, ravotKey] of [[bovenlokaalKey('keeo'), bovenlokaalKey('ravot')], ['deelnemers-lokale-groep', 'deelnemers-lokale-groep']]) {
-                expect(`${keeoKey}: ${cardOf(dashboards, 'jeugdbewegingen', keeoKey).columns.join(', ')}`).not.toContain('Gender_deelnemers');
-                expect(`${ravotKey}: ${cardOf(ravotDashboards, 'jeugdbewegingen', ravotKey).columns.join(', ')}`).toContain('Gender_deelnemers');
+            for (const [keeoKey, ravotKey] of [
+                [bovenlokaalKey('keeo'), bovenlokaalKey('ravot')],
+                ['deelnemers-lokale-groep', 'deelnemers-lokale-groep'],
+            ]) {
+                expect(
+                    `${keeoKey}: ${cardOf(dashboards, 'jeugdbewegingen', keeoKey).columns.join(', ')}`,
+                ).not.toContain('Gender_deelnemers');
+                expect(
+                    `${ravotKey}: ${cardOf(ravotDashboards, 'jeugdbewegingen', ravotKey).columns.join(', ')}`,
+                ).toContain('Gender_deelnemers');
             }
         });
 
@@ -111,11 +157,19 @@ describe('report', () => {
          * filter can reach: it would collapse to the single year the filter selected.
          */
         it('takes the parameters a card uses from its sql, so the two cannot drift', () => {
-            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').parameters).toContain('werkjaar');
-            expect(cardOf(dashboards, 'eenheden', 'eenheid-totaal-leden').parameters).toEqual(['werkjaar', 'eenheid', 'platformleden_opnemen']);
+            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').parameters).toContain(
+                'werkjaar',
+            );
+            expect(cardOf(dashboards, 'eenheden', 'eenheid-totaal-leden').parameters).toEqual([
+                'werkjaar',
+                'eenheid',
+                'platformleden_opnemen',
+            ]);
 
             for (const key of ['leden-per-werkjaar', 'percentage-blijvers-per-eenheid']) {
-                expect(`${key}: ${cardOf(dashboards, 'nationaal', key).sql.includes('p.name = {{werkjaar}}')}`).toEqual(`${key}: false`);
+                expect(
+                    `${key}: ${cardOf(dashboards, 'nationaal', key).sql.includes('p.name = {{werkjaar}}')}`,
+                ).toEqual(`${key}: false`);
             }
         });
 
@@ -130,11 +184,17 @@ describe('report', () => {
             for (const dashboard of dashboards) {
                 for (const card of dashboard.cards) {
                     // The card's own query: what the fragments themselves read is their business.
-                    const body = card.snippetSql.split('\n').filter(line => !line.startsWith('{{snippet:')).join('\n');
+                    const body = card.snippetSql
+                        .split('\n')
+                        .filter((line) => !line.startsWith('{{snippet:'))
+                        .join('\n');
 
                     for (const fragment of card.snippets) {
-                        const reads = body.match(new RegExp(`\\b(?:FROM|JOIN)\\s+${fragment}\\b`, 'g')) ?? [];
-                        expect(`${card.key} reads ${fragment} ${reads.length} times`).toEqual(`${card.key} reads ${fragment} ${Math.min(reads.length, 1)} times`);
+                        const reads =
+                            body.match(new RegExp(`\\b(?:FROM|JOIN)\\s+${fragment}\\b`, 'g')) ?? [];
+                        expect(`${card.key} reads ${fragment} ${reads.length} times`).toEqual(
+                            `${card.key} reads ${fragment} ${Math.min(reads.length, 1)} times`,
+                        );
                     }
                 }
             }
@@ -147,10 +207,14 @@ describe('report', () => {
          */
         it('leaves the units that stopped out of every card that reads them', () => {
             for (const dashboard of [...dashboards, ...ravotDashboards]) {
-                for (const card of dashboard.cards.filter(card => card.sql.includes('organizations o'))) {
+                for (const card of dashboard.cards.filter((card) =>
+                    card.sql.includes('organizations o'),
+                )) {
                     const sql = card.sql.replaceAll(/\s+/g, ' ');
 
-                    expect(`${dashboard.key}/${card.key}: ${sql.includes('o.active = 1')}`).toEqual(`${dashboard.key}/${card.key}: true`);
+                    expect(`${dashboard.key}/${card.key}: ${sql.includes('o.active = 1')}`).toEqual(
+                        `${dashboard.key}/${card.key}: true`,
+                    );
                 }
             }
         });
@@ -163,12 +227,18 @@ describe('report', () => {
          */
         it('gives both grains the same columns, since one fragment reads either', async () => {
             const aliases = async (name: string) => {
-                const sql = (await fs.readFile(path.join(getReportDirectory(), 'includes', name), 'utf-8')).replaceAll(/--[^\n]*/g, '');
+                const sql = (
+                    await fs.readFile(path.join(getReportDirectory(), 'includes', name), 'utf-8')
+                ).replaceAll(/--[^\n]*/g, '');
                 const end = sql.indexOf('\nFROM registrations');
-                return [...sql.slice(sql.lastIndexOf('SELECT', end), end).matchAll(/AS `?(\w+)`?/g)].map(match => match[1]);
+                return [
+                    ...sql.slice(sql.lastIndexOf('SELECT', end), end).matchAll(/AS `?(\w+)`?/g),
+                ].map((match) => match[1]);
             };
 
-            expect(await aliases('all-non-platform-registrations-all-years.sql')).toEqual(await aliases('all-registrations.sql'));
+            expect(await aliases('all-non-platform-registrations-all-years.sql')).toEqual(
+                await aliases('all-registrations.sql'),
+            );
         });
 
         /**
@@ -178,20 +248,31 @@ describe('report', () => {
          * the two name the grain they read -- has to stay identical.
          */
         it('picks the registration that speaks for a member the same way on both grains', async () => {
-            const body = async (name: string) => (await fs.readFile(path.join(getReportDirectory(), 'includes', name), 'utf-8'))
-                .split('\n').filter(line => !line.trim().startsWith('--')).join('\n');
+            const body = async (name: string) =>
+                (await fs.readFile(path.join(getReportDirectory(), 'includes', name), 'utf-8'))
+                    .split('\n')
+                    .filter((line) => !line.trim().startsWith('--'))
+                    .join('\n');
 
-            expect(await body('deduplicated-non-platform-registrations-all-years.sql')).toEqual(await body('deduplicated-non-platform-registrations.sql'));
+            expect(await body('deduplicated-non-platform-registrations-all-years.sql')).toEqual(
+                await body('deduplicated-non-platform-registrations.sql'),
+            );
         });
 
         it('names every column a chart plots', () => {
             for (const dashboard of dashboards) {
-                for (const card of dashboard.cards.filter(card => ['bar', 'line', 'combo', 'pie', 'map'].includes(card.display))) {
+                for (const card of dashboard.cards.filter((card) =>
+                    ['bar', 'line', 'combo', 'pie', 'map'].includes(card.display),
+                )) {
                     expect(`${card.key}: ${card.dimensions.length}`).not.toEqual(`${card.key}: 0`);
                     expect(`${card.key}: ${card.metrics.length}`).not.toEqual(`${card.key}: 0`);
 
                     for (const column of [...card.dimensions, ...card.metrics]) {
-                        expect(`${card.key} selects ${column}`).toEqual(card.sql.includes(`\`${column}\``) ? `${card.key} selects ${column}` : `${card.key} does not select ${column}`);
+                        expect(`${card.key} selects ${column}`).toEqual(
+                            card.sql.includes(`\`${column}\``)
+                                ? `${card.key} selects ${column}`
+                                : `${card.key} does not select ${column}`,
+                        );
                     }
                 }
             }
@@ -202,27 +283,48 @@ describe('report', () => {
          * it mirrors none of them, and is read once a year by whoever files it.
          */
         it('gives the aanlevering a dashboard of its own and leaves every other tab on the report', () => {
-            expect(ravotDashboards.find(tab => tab.key === 'jeugdbewegingen')!.dashboard).toEqual('Groepen en Deelnemers - Departement Jeugd');
+            expect(ravotDashboards.find((tab) => tab.key === 'jeugdbewegingen')!.dashboard).toEqual(
+                'Groepen en Deelnemers - Departement Jeugd',
+            );
 
             for (const key of ['nationaal', 'eenheden', 'gtp', 'netwerk', 'varia']) {
-                expect(`${key}: ${ravotDashboards.find(tab => tab.key === key)!.dashboard}`).toEqual(`${key}: undefined`);
+                expect(
+                    `${key}: ${ravotDashboards.find((tab) => tab.key === key)!.dashboard}`,
+                ).toEqual(`${key}: undefined`);
             }
         });
 
         /** Read on ravot, which is the environment that still writes every card of every page. */
         it('lets every card of the ledenstatistieken include the koepel on request', () => {
-            const drops = (sql: string) => /NOT EXISTS \(SELECT 1 FROM platform WHERE platform\.membershipOrganizationId = /.test(sql);
-            const pages = ravotDashboards.filter(dashboard => dashboard.dashboard === undefined && !dashboard.hidden);
+            const drops = (sql: string) =>
+                /NOT EXISTS \(SELECT 1 FROM platform WHERE platform\.membershipOrganizationId = /.test(
+                    sql,
+                );
+            const pages = ravotDashboards.filter(
+                (dashboard) => dashboard.dashboard === undefined && !dashboard.hidden,
+            );
 
-            expect(pages.map(dashboard => dashboard.key)).toEqual(['nationaal', 'eenheden', 'gtp', 'netwerk', 'varia']);
+            expect(pages.map((dashboard) => dashboard.key)).toEqual([
+                'nationaal',
+                'eenheden',
+                'gtp',
+                'netwerk',
+                'varia',
+            ]);
 
             for (const dashboard of pages) {
                 expect(dashboard.filters).toContain('platformleden_opnemen');
 
                 for (const card of dashboard.cards) {
-                    expect(`${dashboard.key}/${card.key}: ${drops(card.sql)}`).toEqual(`${dashboard.key}/${card.key}: true`);
-                    expect(`${dashboard.key}/${card.key}: ${card.parameters.includes('platformleden_opnemen')}`).toEqual(`${dashboard.key}/${card.key}: true`);
-                    expect(`${dashboard.key}/${card.key}: ${card.sql.includes('{{platformleden_opnemen}}')}`).toEqual(`${dashboard.key}/${card.key}: true`);
+                    expect(`${dashboard.key}/${card.key}: ${drops(card.sql)}`).toEqual(
+                        `${dashboard.key}/${card.key}: true`,
+                    );
+                    expect(
+                        `${dashboard.key}/${card.key}: ${card.parameters.includes('platformleden_opnemen')}`,
+                    ).toEqual(`${dashboard.key}/${card.key}: true`);
+                    expect(
+                        `${dashboard.key}/${card.key}: ${card.sql.includes('{{platformleden_opnemen}}')}`,
+                    ).toEqual(`${dashboard.key}/${card.key}: true`);
                 }
             }
 
@@ -234,11 +336,18 @@ describe('report', () => {
          * dropped -- filtered like the rest, it would deliver an empty sheet.
          */
         it('delivers the koepel itself in the aanlevering', () => {
-            for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
+            for (const [env, tabs] of [
+                ['keeo', dashboards],
+                ['ravot', ravotDashboards],
+            ] as const) {
                 const sql = cardOf(tabs, 'jeugdbewegingen', bovenlokaalKey(env)).sql;
 
-                expect(`${env}: ${sql.includes('FROM all_registrations\nJOIN platform ON platform.membershipOrganizationId = all_registrations.organization_id')}`).toEqual(`${env}: true`);
-                expect(`${env}: ${/FROM non_platform_registrations\b/.test(sql)}`).toEqual(`${env}: false`);
+                expect(
+                    `${env}: ${sql.includes('FROM all_registrations\nJOIN platform ON platform.membershipOrganizationId = all_registrations.organization_id')}`,
+                ).toEqual(`${env}: true`);
+                expect(`${env}: ${/FROM non_platform_registrations\b/.test(sql)}`).toEqual(
+                    `${env}: false`,
+                );
             }
         });
 
@@ -254,22 +363,30 @@ describe('report', () => {
          * itself.
          */
         it('delivers the ploegen of the koepel that keeo names, and no ploeg it does not', () => {
-            const sql = expressionOf(cardOf(dashboards, 'jeugdbewegingen', bovenlokaalKey('keeo')).sql);
+            const sql = expressionOf(
+                cardOf(dashboards, 'jeugdbewegingen', bovenlokaalKey('keeo')).sql,
+            );
 
             // Named on the rows themselves: a group is all this database says about one, and the
             // categories a koepel files them under reach none of it.
-            expect(cardOf(dashboards, 'jeugdbewegingen', bovenlokaalKey('keeo')).sql).toContain('`groups`.name AS group_name');
+            expect(cardOf(dashboards, 'jeugdbewegingen', bovenlokaalKey('keeo')).sql).toContain(
+                '`groups`.name AS group_name',
+            );
             expect(sql).toContain('all_registrations.group_name IN (');
 
             expect(sql).toContain("personeel_groep.name = 'Personeel'");
             expect(sql).toContain('personeel.memberId = all_registrations.member_id');
             // The koepel's own personeelsgroep: a group of an eenheid carrying that name says nothing here.
-            expect(sql).toContain('personeel_groep.organizationId = all_registrations.organization_id');
+            expect(sql).toContain(
+                'personeel_groep.organizationId = all_registrations.organization_id',
+            );
             // The aansluiting and the ploeg are still what they were: this narrows the sheet, it does
             // not replace what it counted.
             expect(sql).toContain("all_registrations.group_type = 'Membership'");
 
-            const ravot = expressionOf(cardOf(ravotDashboards, 'jeugdbewegingen', bovenlokaalKey('ravot')).sql);
+            const ravot = expressionOf(
+                cardOf(ravotDashboards, 'jeugdbewegingen', bovenlokaalKey('ravot')).sql,
+            );
             expect(ravot).not.toContain('all_registrations.group_name IN (');
             expect(ravot).not.toContain('Personeel');
         });
@@ -283,29 +400,73 @@ describe('report', () => {
          */
         it('delivers every sheet as the aanleversjabloon defines it', () => {
             const sheets = [
-                [() => 'organisatie-bovenlokaal', 'Organisatie_Bovenlokaal', ['ID_Organisatie', 'Naam_Organisatie']],
-                [bovenlokaalKey, 'Deelnemers_Bovenlokaal', ['ID_Organisatie', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']],
-                [() => 'organisatie-lokale-groep', 'Organisatie_Lokale_groep', ['ID_Organisatie', 'Naam_Organisatie', 'Postcode']],
-                [() => 'deelnemers-lokale-groep', 'Deelnemers_Lokale_groep', ['ID_Organisatie', 'Type_deelnemers', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']],
+                [
+                    () => 'organisatie-bovenlokaal',
+                    'Organisatie_Bovenlokaal',
+                    ['ID_Organisatie', 'Naam_Organisatie'],
+                ],
+                [
+                    bovenlokaalKey,
+                    'Deelnemers_Bovenlokaal',
+                    [
+                        'ID_Organisatie',
+                        'Geboortejaar_deelnemers',
+                        'Gender_deelnemers',
+                        'Aantal_deelnemers',
+                    ],
+                ],
+                [
+                    () => 'organisatie-lokale-groep',
+                    'Organisatie_Lokale_groep',
+                    ['ID_Organisatie', 'Naam_Organisatie', 'Postcode'],
+                ],
+                [
+                    () => 'deelnemers-lokale-groep',
+                    'Deelnemers_Lokale_groep',
+                    [
+                        'ID_Organisatie',
+                        'Type_deelnemers',
+                        'Geboortejaar_deelnemers',
+                        'Gender_deelnemers',
+                        'Aantal_deelnemers',
+                    ],
+                ],
             ] as const;
 
             for (const [keyOf, title, columns] of sheets) {
-                for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
+                for (const [env, tabs] of [
+                    ['keeo', dashboards],
+                    ['ravot', ravotDashboards],
+                ] as const) {
                     const key = keyOf(env);
                     const card = cardOf(tabs, 'jeugdbewegingen', key);
                     const where = `${env} ${key}`;
                     // Keeo asks its leden no geslacht, so it delivers the sheet without that column.
-                    const expected = env === 'keeo' ? columns.filter(column => column !== 'Gender_deelnemers') : columns;
+                    const expected =
+                        env === 'keeo'
+                            ? columns.filter((column) => column !== 'Gender_deelnemers')
+                            : columns;
 
                     expect(`${where}: ${card.title}`).toEqual(`${where}: ${title}`);
-                    expect(`${where}: ${card.columns.slice(0, expected.length).join(', ')}`).toEqual(`${where}: ${expected.join(', ')}`);
+                    expect(
+                        `${where}: ${card.columns.slice(0, expected.length).join(', ')}`,
+                    ).toEqual(`${where}: ${expected.join(', ')}`);
                     expect(`${where}: ${card.display}`).toEqual(`${where}: table`);
-                    expect(`${where} takes the werkjaar: ${card.parameters.includes('werkjaar')}`).toEqual(`${where} takes the werkjaar: true`);
+                    expect(
+                        `${where} takes the werkjaar: ${card.parameters.includes('werkjaar')}`,
+                    ).toEqual(`${where} takes the werkjaar: true`);
                 }
             }
 
-            for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
-                expect(tabs.find(tab => tab.key === 'jeugdbewegingen')!.cards.map(card => card.key)).toEqual(sheets.map(([keyOf]) => keyOf(env)));
+            for (const [env, tabs] of [
+                ['keeo', dashboards],
+                ['ravot', ravotDashboards],
+            ] as const) {
+                expect(
+                    tabs
+                        .find((tab) => tab.key === 'jeugdbewegingen')!
+                        .cards.map((card) => card.key),
+                ).toEqual(sheets.map(([keyOf]) => keyOf(env)));
             }
         });
 
@@ -315,13 +476,21 @@ describe('report', () => {
          * own. Kept here because nothing else notices -- an unmapped value reads as a plausible row.
          */
         it('says a geslacht in the letters the metadatafiche allows, and nothing where there is no answer', () => {
-            const cards = ravotDashboards.flatMap(dashboard => dashboard.cards.filter(card => card.columns.includes('Gender_deelnemers')));
-            expect(cards.map(card => card.key)).toEqual(['deelnemers-bovenlokaal', 'deelnemers-lokale-groep']);
+            const cards = ravotDashboards.flatMap((dashboard) =>
+                dashboard.cards.filter((card) => card.columns.includes('Gender_deelnemers')),
+            );
+            expect(cards.map((card) => card.key)).toEqual([
+                'deelnemers-bovenlokaal',
+                'deelnemers-lokale-groep',
+            ]);
 
             for (const card of cards) {
-                const letters = /CASE `Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END/;
+                const letters =
+                    /CASE `Geslacht` WHEN 'Man' THEN 'M' WHEN 'Vrouw' THEN 'V' ELSE NULL END/;
 
-                expect(`${card.key}: ${letters.test(card.sql.replaceAll(/\s+/g, ' '))}`).toEqual(`${card.key}: true`);
+                expect(`${card.key}: ${letters.test(card.sql.replaceAll(/\s+/g, ' '))}`).toEqual(
+                    `${card.key}: true`,
+                );
             }
         });
 
@@ -344,12 +513,17 @@ describe('report', () => {
                     // The last of each: the query that picks the registration speaking for a member
                     // orders within a window of its own, well before the sheet is grouped.
                     const sql = card.sql.replaceAll(/\s+/g, ' ');
-                    const grouped = sql.slice(sql.lastIndexOf('GROUP BY'), sql.lastIndexOf('ORDER BY')).trim();
+                    const grouped = sql
+                        .slice(sql.lastIndexOf('GROUP BY'), sql.lastIndexOf('ORDER BY'))
+                        .trim();
                     const ordered = sql.slice(sql.lastIndexOf('ORDER BY')).trim();
 
-                    expect(`${where}: ${grouped.endsWith(kenmerken)}, ${ordered.endsWith(kenmerken)}`).toEqual(`${where}: true, true`);
-                    expect(`${where}: ${card.columns.filter(column => kenmerken.includes(column)).join(', ')}`)
-                        .toEqual(`${where}: ${kenmerken.replaceAll('`', '')}`);
+                    expect(
+                        `${where}: ${grouped.endsWith(kenmerken)}, ${ordered.endsWith(kenmerken)}`,
+                    ).toEqual(`${where}: true, true`);
+                    expect(
+                        `${where}: ${card.columns.filter((column) => kenmerken.includes(column)).join(', ')}`,
+                    ).toEqual(`${where}: ${kenmerken.replaceAll('`', '')}`);
                 }
             }
         });
@@ -364,12 +538,23 @@ describe('report', () => {
          * means someone registered at two groups counts at both, not that two leeftijdsgroepen count twice.
          */
         it('counts a member of a group once, as leiding when they are leiding anywhere in it', () => {
-            for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
-                const sql = expressionOf(cardOf(tabs, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
+            for (const [env, tabs] of [
+                ['keeo', dashboards],
+                ['ravot', ravotDashboards],
+            ] as const) {
+                const sql = expressionOf(
+                    cardOf(tabs, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql,
+                );
 
-                expect(`${env}: ${sql.includes("CASE WHEN all_registrations.age_group_category = 'leader' THEN 2")}`).toEqual(`${env}: true`);
-                expect(`${env}: ${sql.includes('PARTITION BY inschrijvingen.organization_uri, inschrijvingen.member_id')}`).toEqual(`${env}: true`);
-                expect(`${env}: ${sql.includes("CASE WHEN deelnemers.type_number = 2 THEN 'leiding' ELSE 'leden' END")}`).toEqual(`${env}: true`);
+                expect(
+                    `${env}: ${sql.includes("CASE WHEN all_registrations.age_group_category = 'leader' THEN 2")}`,
+                ).toEqual(`${env}: true`);
+                expect(
+                    `${env}: ${sql.includes('PARTITION BY inschrijvingen.organization_uri, inschrijvingen.member_id')}`,
+                ).toEqual(`${env}: true`);
+                expect(
+                    `${env}: ${sql.includes("CASE WHEN deelnemers.type_number = 2 THEN 'leiding' ELSE 'leden' END")}`,
+                ).toEqual(`${env}: true`);
             }
         });
 
@@ -382,13 +567,23 @@ describe('report', () => {
          */
         it('delivers the ondersteunende leden of ravot as leiding, and names that leeftijdsgroep in no other environment', () => {
             // The condition rather than the prose: the fragments mention the leeftijdsgroep in their comments too.
-            const namesTheTak = (tabs: ReportTab[]) => tabs.flatMap(tab => tab.cards)
-                .filter(card => expressionOf(card.sql).includes("all_registrations.age_group_id = 'a28d290c-af71-4282-92cc-2224a18d3091'"))
-                .map(card => card.key);
-            const sql = expressionOf(cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
+            const namesTheTak = (tabs: ReportTab[]) =>
+                tabs
+                    .flatMap((tab) => tab.cards)
+                    .filter((card) =>
+                        expressionOf(card.sql).includes(
+                            "all_registrations.age_group_id = 'a28d290c-af71-4282-92cc-2224a18d3091'",
+                        ),
+                    )
+                    .map((card) => card.key);
+            const sql = expressionOf(
+                cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql,
+            );
 
             // By the id of the leeftijdsgroep rather than by its name, which the years need not agree on.
-            expect(sql).toContain("CASE WHEN all_registrations.age_group_category = 'leader' THEN 2 WHEN all_registrations.age_group_id = 'a28d290c-af71-4282-92cc-2224a18d3091' THEN 2 WHEN all_registrations.age_group_category = 'child' THEN 1 ELSE 0 END AS type_number");
+            expect(sql).toContain(
+                "CASE WHEN all_registrations.age_group_category = 'leader' THEN 2 WHEN all_registrations.age_group_id = 'a28d290c-af71-4282-92cc-2224a18d3091' THEN 2 WHEN all_registrations.age_group_category = 'child' THEN 1 ELSE 0 END AS type_number",
+            );
             expect(sql).not.toContain("`Leeftijdsgroep` = 'Ondersteunende leden'");
             expect(namesTheTak(ravotDashboards)).toEqual(['deelnemers-lokale-groep']);
             expect(namesTheTak(dashboards)).toEqual([]);
@@ -412,26 +607,56 @@ describe('report', () => {
          * keeps the two of them from summing past the row.
          */
         it('delivers the stam of keeo as leden and its ondersteunende leden as leiding, each counted apart', () => {
-            const namesTheGroups = (tabs: ReportTab[]) => tabs.flatMap(tab => tab.cards)
-                .filter(card => expressionOf(card.sql).includes("all_registrations.age_group_id = '6fc0775e-2851-4fe1-90cd-af9c74243ccd'"))
-                .map(card => card.key);
+            const namesTheGroups = (tabs: ReportTab[]) =>
+                tabs
+                    .flatMap((tab) => tab.cards)
+                    .filter((card) =>
+                        expressionOf(card.sql).includes(
+                            "all_registrations.age_group_id = '6fc0775e-2851-4fe1-90cd-af9c74243ccd'",
+                        ),
+                    )
+                    .map((card) => card.key);
             const card = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep');
             const sql = expressionOf(card.sql);
 
             // By the id of the leeftijdsgroep rather than by its name, which the years need not agree on.
-            expect(sql).toContain("CASE WHEN all_registrations.age_group_category = 'leader' THEN 2 WHEN all_registrations.age_group_id = 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 2 WHEN all_registrations.age_group_category = 'child' THEN 1 WHEN all_registrations.age_group_id = '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 1 ELSE 0 END AS type_number");
-            expect(sql).toContain("CASE all_registrations.age_group_id WHEN '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 1 WHEN 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 2 ELSE 0 END AS subgroup_number");
-            expect(sql).toContain('COUNT(DISTINCT CASE WHEN deelnemers.subgroup_number = 1 THEN deelnemers.member_id END) AS `Waarvan Stam`');
-            expect(sql).toContain('COUNT(DISTINCT CASE WHEN deelnemers.subgroup_number = 2 THEN deelnemers.member_id END) AS `Waarvan Ondersteunende leden`');
+            expect(sql).toContain(
+                "CASE WHEN all_registrations.age_group_category = 'leader' THEN 2 WHEN all_registrations.age_group_id = 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 2 WHEN all_registrations.age_group_category = 'child' THEN 1 WHEN all_registrations.age_group_id = '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 1 ELSE 0 END AS type_number",
+            );
+            expect(sql).toContain(
+                "CASE all_registrations.age_group_id WHEN '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 1 WHEN 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 2 ELSE 0 END AS subgroup_number",
+            );
+            expect(sql).toContain(
+                'COUNT(DISTINCT CASE WHEN deelnemers.subgroup_number = 1 THEN deelnemers.member_id END) AS `Waarvan Stam`',
+            );
+            expect(sql).toContain(
+                'COUNT(DISTINCT CASE WHEN deelnemers.subgroup_number = 2 THEN deelnemers.member_id END) AS `Waarvan Ondersteunende leden`',
+            );
 
             // The columns read the number the fragment gives a leeftijdsgroep, so the two files have
             // to keep agreeing on it -- a swapped pair is a plausible sheet rather than a failure.
-            expect(sql).toContain('inschrijvingen.type_number DESC, inschrijvingen.subgroup_number )');
+            expect(sql).toContain(
+                'inschrijvingen.type_number DESC, inschrijvingen.subgroup_number )',
+            );
 
             // The two columns count members the row already holds, so neither may exceed it.
-            expect(card.columns).toEqual(['ID_Organisatie', 'Type_deelnemers', 'Geboortejaar_deelnemers', 'Aantal_deelnemers', 'Waarvan Stam', 'Waarvan Ondersteunende leden']);
-            expect(cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').columns)
-                .toEqual(['ID_Organisatie', 'Type_deelnemers', 'Geboortejaar_deelnemers', 'Gender_deelnemers', 'Aantal_deelnemers']);
+            expect(card.columns).toEqual([
+                'ID_Organisatie',
+                'Type_deelnemers',
+                'Geboortejaar_deelnemers',
+                'Aantal_deelnemers',
+                'Waarvan Stam',
+                'Waarvan Ondersteunende leden',
+            ]);
+            expect(
+                cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').columns,
+            ).toEqual([
+                'ID_Organisatie',
+                'Type_deelnemers',
+                'Geboortejaar_deelnemers',
+                'Gender_deelnemers',
+                'Aantal_deelnemers',
+            ]);
             expect(namesTheGroups(dashboards)).toEqual(['deelnemers-lokale-groep']);
             expect(namesTheGroups(ravotDashboards)).toEqual([]);
         });
@@ -445,13 +670,21 @@ describe('report', () => {
          * during the year -- has nothing else to be read from, which is what the fallback is for.
          */
         it('lets the registrations that still stand decide what someone is', () => {
-            const sql = cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql.replaceAll(/\s+/g, ' ');
+            const sql = cardOf(
+                dashboards,
+                'jeugdbewegingen',
+                'deelnemers-lokale-groep',
+            ).sql.replaceAll(/\s+/g, ' ');
 
-            expect(sql).toContain('ORDER BY (inschrijvingen.deactivated_at IS NULL) DESC, inschrijvingen.type_number DESC');
+            expect(sql).toContain(
+                'ORDER BY (inschrijvingen.deactivated_at IS NULL) DESC, inschrijvingen.type_number DESC',
+            );
 
             // A gewone leeftijdsgroep is 0 and sorts ahead of every aparte one, so it decides what a
             // member is delivered as whenever the two say the same type.
-            expect(sql).toContain('inschrijvingen.type_number DESC, inschrijvingen.subgroup_number )');
+            expect(sql).toContain(
+                'inschrijvingen.type_number DESC, inschrijvingen.subgroup_number )',
+            );
         });
 
         /**
@@ -460,20 +693,29 @@ describe('report', () => {
          * what is still standing -- the one thing `facts` drops is the koepel's own organization.
          */
         it('counts the members who left during the werkjaar on both dashboards', () => {
-            for (const dashboard of dashboards.filter(dashboard => !dashboard.hidden)) {
-                for (const card of dashboard.cards.filter(card => card.snippets.includes('all-non-platform-registrations') || card.snippets.includes('all-non-platform-registrations-all-years'))) {
+            for (const dashboard of dashboards.filter((dashboard) => !dashboard.hidden)) {
+                for (const card of dashboard.cards.filter(
+                    (card) =>
+                        card.snippets.includes('all-non-platform-registrations') ||
+                        card.snippets.includes('all-non-platform-registrations-all-years'),
+                )) {
                     const sql = expressionOf(card.sql);
 
                     // The two forms the three filters were written in. `deactivated_at` still stands
                     // in the select list and in the ranking, where it decides rather than drops.
-                    expect(`${card.key}: ${sql.includes('deactivatedAt IS NULL')}`).toEqual(`${card.key}: false`);
-                    expect(`${card.key}: ${sql.includes('all_facts')}`).toEqual(`${card.key}: false`);
+                    expect(`${card.key}: ${sql.includes('deactivatedAt IS NULL')}`).toEqual(
+                        `${card.key}: false`,
+                    );
+                    expect(`${card.key}: ${sql.includes('all_facts')}`).toEqual(
+                        `${card.key}: false`,
+                    );
                 }
             }
 
             // `facts` is `all_registrations`, conditionally less the koepel, and nothing else.
-            expect(expressionOf(cardOf(dashboards, 'nationaal', 'totaal-leden').sql))
-                .toContain('SELECT all_registrations.* FROM all_registrations WHERE {{platformleden_opnemen}} OR NOT EXISTS');
+            expect(expressionOf(cardOf(dashboards, 'nationaal', 'totaal-leden').sql)).toContain(
+                'SELECT all_registrations.* FROM all_registrations WHERE {{platformleden_opnemen}} OR NOT EXISTS',
+            );
         });
 
         /**
@@ -490,7 +732,9 @@ describe('report', () => {
             const query = sql.slice(sql.indexOf('\ninschrijvingen AS ('));
 
             expect(query).toContain('all_registrations.age_group_category');
-            expect(`reads the fallback: ${query.includes('effective_category')}`).toEqual('reads the fallback: false');
+            expect(`reads the fallback: ${query.includes('effective_category')}`).toEqual(
+                'reads the fallback: false',
+            );
         });
 
         /**
@@ -500,18 +744,21 @@ describe('report', () => {
          * so neither starts counting differently because the other did.
          */
         it('gives the aanlevering and the report a list of aansluitingen each', () => {
-            for (const dashboard of dashboards.filter(dashboard => !dashboard.hidden)) {
-                for (const card of dashboard.cards.filter(card => card.snippets.length > 0)) {
+            for (const dashboard of dashboards.filter((dashboard) => !dashboard.hidden)) {
+                for (const card of dashboard.cards.filter((card) => card.snippets.length > 0)) {
                     const aanlevering = dashboard.key === 'jeugdbewegingen';
-                    const read = card.snippets.filter(snippet => snippet.endsWith('-memberships'));
+                    const read = card.snippets.filter((snippet) =>
+                        snippet.endsWith('-memberships'),
+                    );
 
                     // The organisatie sheets count no member and read neither.
                     if (read.length === 0) {
                         expect(`${dashboard.key}/${card.key}`).toMatch(/organisatie-/);
                         continue;
                     }
-                    expect(`${dashboard.key}/${card.key}: ${read.join(',')}`)
-                        .toEqual(`${dashboard.key}/${card.key}: filter-${aanlevering ? 'delivery' : 'statistics'}-memberships`);
+                    expect(`${dashboard.key}/${card.key}: ${read.join(',')}`).toEqual(
+                        `${dashboard.key}/${card.key}: filter-${aanlevering ? 'delivery' : 'statistics'}-memberships`,
+                    );
                 }
             }
         });
@@ -524,22 +771,36 @@ describe('report', () => {
          * happened.
          */
         it('delivers the aansluitingen the platform files under, and no other', () => {
-            const keeo = expressionOf(cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
-            const ravot = expressionOf(cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql);
+            const keeo = expressionOf(
+                cardOf(dashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql,
+            );
+            const ravot = expressionOf(
+                cardOf(ravotDashboards, 'jeugdbewegingen', 'deelnemers-lokale-groep').sql,
+            );
 
-            expect(keeo).toContain("member_platform_memberships.membershipTypeId IN ( '5d66134e-21b6-41f4-b791-f99779bec8c5', 'i-mtype-volledig-scoutsjaar', 'f2ffdcb2-5cb3-41ce-be5a-b39bf01570fa' )");
-            expect(ravot).toContain("member_platform_memberships.membershipTypeId IN ( 'adb9882e-6b50-467a-b89f-0727c6aa9065', '41632f5f-23e5-4dec-b7b5-b16202d3d95f' )");
+            expect(keeo).toContain(
+                "member_platform_memberships.membershipTypeId IN ( '5d66134e-21b6-41f4-b791-f99779bec8c5', 'i-mtype-volledig-scoutsjaar', 'f2ffdcb2-5cb3-41ce-be5a-b39bf01570fa' )",
+            );
+            expect(ravot).toContain(
+                "member_platform_memberships.membershipTypeId IN ( 'adb9882e-6b50-467a-b89f-0727c6aa9065', '41632f5f-23e5-4dec-b7b5-b16202d3d95f' )",
+            );
 
             // The report reads a list of its own, kept in a file of its own even where it holds the
             // same ids: one may change without dragging the other along.
-            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').snippets).toContain('filter-statistics-memberships');
-            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').snippets).not.toContain('filter-delivery-memberships');
+            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').snippets).toContain(
+                'filter-statistics-memberships',
+            );
+            expect(cardOf(dashboards, 'nationaal', 'totaal-leden').snippets).not.toContain(
+                'filter-delivery-memberships',
+            );
         });
 
         it('requires a werkjaar on both the ledenstatistieken and the aanlevering', () => {
             for (const dashboard of dashboards) {
                 const expected = dashboard.hidden ? '' : 'werkjaar';
-                expect(`${dashboard.key}: ${dashboard.required.join(',')}`).toEqual(`${dashboard.key}: ${expected}`);
+                expect(`${dashboard.key}: ${dashboard.required.join(',')}`).toEqual(
+                    `${dashboard.key}: ${expected}`,
+                );
             }
         });
 
@@ -549,11 +810,17 @@ describe('report', () => {
          * counted twice, and one on neither is a unit the dataset never hears about.
          */
         it('delivers the koepel and the local groups to one sheet each, and to no other', () => {
-            const [bovenlokaal, lokaal] = ['organisatie-bovenlokaal', 'organisatie-lokale-groep']
-                .map(key => cardOf(dashboards, 'jeugdbewegingen', key).sql.replaceAll(/\s+/g, ' '));
+            const [bovenlokaal, lokaal] = [
+                'organisatie-bovenlokaal',
+                'organisatie-lokale-groep',
+            ].map((key) => cardOf(dashboards, 'jeugdbewegingen', key).sql.replaceAll(/\s+/g, ' '));
 
-            expect(bovenlokaal).toContain('JOIN platform ON platform.membershipOrganizationId = organizations.id');
-            expect(lokaal).toContain('NOT EXISTS (SELECT 1 FROM platform WHERE platform.membershipOrganizationId = organizations.id)');
+            expect(bovenlokaal).toContain(
+                'JOIN platform ON platform.membershipOrganizationId = organizations.id',
+            );
+            expect(lokaal).toContain(
+                'NOT EXISTS (SELECT 1 FROM platform WHERE platform.membershipOrganizationId = organizations.id)',
+            );
         });
 
         /**
@@ -562,9 +829,15 @@ describe('report', () => {
          * conversion is what decides between an empty cell the koepel can fix and a wrong number.
          */
         it('delivers a postcode as the number the template asks for, and nothing when it is not one', () => {
-            const sql = cardOf(dashboards, 'jeugdbewegingen', 'organisatie-lokale-groep').sql.replaceAll(/\s+/g, ' ');
+            const sql = cardOf(
+                dashboards,
+                'jeugdbewegingen',
+                'organisatie-lokale-groep',
+            ).sql.replaceAll(/\s+/g, ' ');
 
-            expect(sql).toContain("CASE WHEN organizations.postalCode REGEXP '^[0-9]{4}$' THEN CAST(organizations.postalCode AS UNSIGNED) END");
+            expect(sql).toContain(
+                "CASE WHEN organizations.postalCode REGEXP '^[0-9]{4}$' THEN CAST(organizations.postalCode AS UNSIGNED) END",
+            );
         });
 
         /**
@@ -574,7 +847,9 @@ describe('report', () => {
          * whatever the database calls it.
          */
         it('selects the columns of a sheet in the order the sheet has them', () => {
-            const exported = dashboards.flatMap(dashboard => dashboard.cards.filter(card => card.columns.length > 0));
+            const exported = dashboards.flatMap((dashboard) =>
+                dashboard.cards.filter((card) => card.columns.length > 0),
+            );
             expect(exported.length).toBeGreaterThan(0);
 
             for (const card of exported) {
@@ -583,9 +858,11 @@ describe('report', () => {
                 // that includes no fragment opens on its SELECT, with no newline in front of it.
                 const start = card.sql.lastIndexOf('\nSELECT');
                 const query = card.sql.slice(start === -1 ? 0 : start);
-                const selected = [...query.matchAll(/AS `([^`]+)`/g)].map(match => match[1]);
+                const selected = [...query.matchAll(/AS `([^`]+)`/g)].map((match) => match[1]);
 
-                expect(`${card.key}: ${selected.join(', ')}`).toEqual(`${card.key}: ${card.columns.join(', ')}`);
+                expect(`${card.key}: ${selected.join(', ')}`).toEqual(
+                    `${card.key}: ${card.columns.join(', ')}`,
+                );
             }
         });
 
@@ -600,20 +877,44 @@ describe('report', () => {
          * still has to name the slice rather than leave it empty.
          */
         it('splits the lidgelden by the tarief they were charged at, named as the koepel names it', () => {
-            const cards = [cardOf(dashboards, 'nationaal', 'leden-per-type-lidgeld'), cardOf(dashboards, 'eenheden', 'eenheid-leden-per-type-lidgeld')];
+            const cards = [
+                cardOf(dashboards, 'nationaal', 'leden-per-type-lidgeld'),
+                cardOf(dashboards, 'eenheden', 'eenheid-leden-per-type-lidgeld'),
+            ];
 
             for (const card of cards) {
                 const sql = card.sql.replaceAll(/\s+/g, ' ');
 
-                expect(`${card.key}: ${sql.includes('CASE WHEN member_platform_memberships.reducedPrice = 1')}`).toEqual(`${card.key}: true`);
-                expect(`${card.key}: ${sql.includes("ELSE 'Standaardtarief' END AS `Type lidgeld`")}`).toEqual(`${card.key}: true`);
-                expect(`${card.key}: ${sql.includes('SELECT platform.reducedPriceName FROM platform')}`).toEqual(`${card.key}: true`);
-                expect(`${card.key}: ${sql.includes("COALESCE((SELECT platform.reducedPriceName FROM platform WHERE platform.reducedPriceName IS NOT NULL LIMIT 1), 'Verlaagd tarief')")}`).toEqual(`${card.key}: true`);
-                expect(`${card.key}: ${sql.includes('mt.name AS `Type lidgeld`')}`).toEqual(`${card.key}: false`);
+                expect(
+                    `${card.key}: ${sql.includes('CASE WHEN member_platform_memberships.reducedPrice = 1')}`,
+                ).toEqual(`${card.key}: true`);
+                expect(
+                    `${card.key}: ${sql.includes("ELSE 'Standaardtarief' END AS `Type lidgeld`")}`,
+                ).toEqual(`${card.key}: true`);
+                expect(
+                    `${card.key}: ${sql.includes('SELECT platform.reducedPriceName FROM platform')}`,
+                ).toEqual(`${card.key}: true`);
+                expect(
+                    `${card.key}: ${sql.includes("COALESCE((SELECT platform.reducedPriceName FROM platform WHERE platform.reducedPriceName IS NOT NULL LIMIT 1), 'Verlaagd tarief')")}`,
+                ).toEqual(`${card.key}: true`);
+                expect(`${card.key}: ${sql.includes('mt.name AS `Type lidgeld`')}`).toEqual(
+                    `${card.key}: false`,
+                );
             }
 
             // One expression, so the two cards cannot start naming the same tarief differently.
-            expect(new Set(cards.map(card => card.sql.replaceAll(/\s+/g, ' ').match(/CASE WHEN member_platform_memberships\.reducedPrice.*?END/)?.[0])).size).toBe(1);
+            expect(
+                new Set(
+                    cards.map(
+                        (card) =>
+                            card.sql
+                                .replaceAll(/\s+/g, ' ')
+                                .match(
+                                    /CASE WHEN member_platform_memberships\.reducedPrice.*?END/,
+                                )?.[0],
+                    ),
+                ).size,
+            ).toBe(1);
         });
 
         /**
@@ -632,22 +933,49 @@ describe('report', () => {
             const categories = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql;
 
             for (const [leeftijdsgroep, term] of [
-                ['Bevers, Zeehonden, Eekhoorns en Welpen', "( COUNT(DISTINCT CASE WHEN age_group_id = 'f274a949-9318-4c2b-ae35-e50114efe686' THEN member_id END) + COUNT(DISTINCT CASE WHEN age_group_id = '316ea554-675a-493e-a152-365012851ae3' THEN member_id END) ) / 3"],
-                ['Wolven', "+ COUNT(DISTINCT CASE WHEN age_group_id = '01d62f7d-c3fa-4314-a33a-21da526a35ff' THEN member_id END)"],
-                ['JVG/JG-A', "+ COUNT(DISTINCT CASE WHEN age_group_id = '57143f32-e4d2-46a7-96e2-9bf82f121e1c' THEN member_id END)"],
-                ['VG/G-J', "+ 2 * COUNT(DISTINCT CASE WHEN age_group_id = '0eacf56f-3a1d-4e15-bebc-2bc66fc74c7a' THEN member_id END)"],
-                ['Seniors', "+ 3 * COUNT(DISTINCT CASE WHEN age_group_id = 'b2275ec6-04ad-4232-bfe3-0eefed97f83b' THEN member_id END)"],
-                ['Leiding', "+ COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END)"],
-                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN age_group_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0)"],
+                [
+                    'Bevers, Zeehonden, Eekhoorns en Welpen',
+                    "( COUNT(DISTINCT CASE WHEN age_group_id = 'f274a949-9318-4c2b-ae35-e50114efe686' THEN member_id END) + COUNT(DISTINCT CASE WHEN age_group_id = '316ea554-675a-493e-a152-365012851ae3' THEN member_id END) ) / 3",
+                ],
+                [
+                    'Wolven',
+                    "+ COUNT(DISTINCT CASE WHEN age_group_id = '01d62f7d-c3fa-4314-a33a-21da526a35ff' THEN member_id END)",
+                ],
+                [
+                    'JVG/JG-A',
+                    "+ COUNT(DISTINCT CASE WHEN age_group_id = '57143f32-e4d2-46a7-96e2-9bf82f121e1c' THEN member_id END)",
+                ],
+                [
+                    'VG/G-J',
+                    "+ 2 * COUNT(DISTINCT CASE WHEN age_group_id = '0eacf56f-3a1d-4e15-bebc-2bc66fc74c7a' THEN member_id END)",
+                ],
+                [
+                    'Seniors',
+                    "+ 3 * COUNT(DISTINCT CASE WHEN age_group_id = 'b2275ec6-04ad-4232-bfe3-0eefed97f83b' THEN member_id END)",
+                ],
+                [
+                    'Leiding',
+                    "+ COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END)",
+                ],
+                [
+                    'omkaderingscijfer',
+                    "- 2 * COUNT(DISTINCT CASE WHEN age_group_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0)",
+                ],
             ]) {
-                expect(`${leeftijdsgroep}: ${sql.includes(term)}`).toEqual(`${leeftijdsgroep}: true`);
+                expect(`${leeftijdsgroep}: ${sql.includes(term)}`).toEqual(
+                    `${leeftijdsgroep}: true`,
+                );
             }
 
             // No leeftijdsgroep is weighed by a name any more, and every id it weighs is one the categories name
             // as kinderen -- the index has no term for anything else.
             expect(sql).not.toContain('`Leeftijdsgroep` =');
-            for (const [, term] of [...sql.matchAll(/age_group_id = '([0-9a-f-]{36})'/g)].map(match => [match[0], match[1]])) {
-                expect(`${term} is kinderen: ${new RegExp(`WHEN '${term}' THEN 'child'`).test(categories)}`).toEqual(`${term} is kinderen: true`);
+            for (const [, term] of [...sql.matchAll(/age_group_id = '([0-9a-f-]{36})'/g)].map(
+                (match) => [match[0], match[1]],
+            )) {
+                expect(
+                    `${term} is kinderen: ${new RegExp(`WHEN '${term}' THEN 'child'`).test(categories)}`,
+                ).toEqual(`${term} is kinderen: true`);
             }
         });
 
@@ -658,15 +986,36 @@ describe('report', () => {
          * wrong one is a plausible number rather than a failure.
          */
         it('weighs each leeftijd of the GTP index as the ravot formula does', () => {
-            const sql = cardOf(ravotDashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
+            const sql = cardOf(ravotDashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(
+                /\s+/g,
+                ' ',
+            );
 
             for (const [bucket, term] of [
-                ['jonger dan 10', "ROUND( COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 10 THEN member_id END) / 3"],
-                ['10 tot 13', "+ COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd BETWEEN 10 AND 13 THEN member_id END)"],
-                ['14 tot 15', "+ 2 * COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd BETWEEN 14 AND 15 THEN member_id END)"],
-                ['16', "+ 3 * COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd = 16 THEN member_id END)"],
-                ['Leiding', "+ 1.5 * COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END)"],
-                ['omkaderingscijfer', "- 2 * COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0)"],
+                [
+                    'jonger dan 10',
+                    "ROUND( COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 10 THEN member_id END) / 3",
+                ],
+                [
+                    '10 tot 13',
+                    "+ COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd BETWEEN 10 AND 13 THEN member_id END)",
+                ],
+                [
+                    '14 tot 15',
+                    "+ 2 * COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd BETWEEN 14 AND 15 THEN member_id END)",
+                ],
+                [
+                    '16',
+                    "+ 3 * COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd = 16 THEN member_id END)",
+                ],
+                [
+                    'Leiding',
+                    "+ 1.5 * COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END)",
+                ],
+                [
+                    'omkaderingscijfer',
+                    "- 2 * COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0)",
+                ],
             ]) {
                 expect(`${bucket}: ${sql.includes(term)}`).toEqual(`${bucket}: true`);
             }
@@ -696,12 +1045,23 @@ describe('report', () => {
                 ['Seniors', "WHEN 'b2275ec6-04ad-4232-bfe3-0eefed97f83b' THEN 'child'"],
                 ['Leiding', "WHEN 'b90e0833-7047-4283-8e25-cd65c5f09129' THEN 'leader'"],
                 ['Stam', "WHEN '6fc0775e-2851-4fe1-90cd-af9c74243ccd' THEN 'adult'"],
-                ['Nationaal vrijwilligers', "WHEN '77c2530c-2834-4da3-83c5-1cff9cf05c7e' THEN 'adult'"],
-                ['Nationaal vrijwilligers, rechtstreeks aan FOS', "WHEN 'd4bb14bf-4a52-44e4-a014-3333c5ebb36a' THEN 'adult'"],
+                [
+                    'Nationaal vrijwilligers',
+                    "WHEN '77c2530c-2834-4da3-83c5-1cff9cf05c7e' THEN 'adult'",
+                ],
+                [
+                    'Nationaal vrijwilligers, rechtstreeks aan FOS',
+                    "WHEN 'd4bb14bf-4a52-44e4-a014-3333c5ebb36a' THEN 'adult'",
+                ],
                 ['Ereleden', "WHEN '8d42d2df-7787-4959-995d-c5a85d0e48c9' THEN 'adult'"],
-                ['Ondersteunende leden', "WHEN 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 'adult'"],
+                [
+                    'Ondersteunende leden',
+                    "WHEN 'ac8848e9-9868-44a1-a057-2a189cce68ea' THEN 'adult'",
+                ],
             ]) {
-                expect(`${leeftijdsgroep}: ${sql.includes(term)}`).toEqual(`${leeftijdsgroep}: true`);
+                expect(`${leeftijdsgroep}: ${sql.includes(term)}`).toEqual(
+                    `${leeftijdsgroep}: true`,
+                );
             }
 
             // Every leeftijdsgroep of the platform and no more: a second row for one of them would sit under the
@@ -723,17 +1083,37 @@ describe('report', () => {
             const sql = cardOf(ravotDashboards, 'nationaal', 'totaal-leden').sql;
 
             for (const [leeftijdsgroep, term] of [
-                ['Leeuwkes, Kabouters en Sloebers', "WHEN 'bd63a6ef-d4a1-497d-87a5-d7c36b4ad220' THEN 'child'"],
-                ['Springers en Pagadders', "WHEN '23607074-624b-472f-926f-c719bb44e314' THEN 'child'"],
-                ['Jongknapen, Roodkapjes en Joro\'s', "WHEN '5730f613-fb72-465b-b902-45b281a0e8b8' THEN 'child'"],
-                ['Knapen, Jimmers en Knimmers', "WHEN '3d56a0b2-9f4b-46ac-998b-d45a9b64cab2' THEN 'child'"],
-                ['Sjo\'ers, Simmers en Jonghernieuwers', "WHEN '03680919-689c-4df1-8976-bb71758cc025' THEN 'child'"],
+                [
+                    'Leeuwkes, Kabouters en Sloebers',
+                    "WHEN 'bd63a6ef-d4a1-497d-87a5-d7c36b4ad220' THEN 'child'",
+                ],
+                [
+                    'Springers en Pagadders',
+                    "WHEN '23607074-624b-472f-926f-c719bb44e314' THEN 'child'",
+                ],
+                [
+                    "Jongknapen, Roodkapjes en Joro's",
+                    "WHEN '5730f613-fb72-465b-b902-45b281a0e8b8' THEN 'child'",
+                ],
+                [
+                    'Knapen, Jimmers en Knimmers',
+                    "WHEN '3d56a0b2-9f4b-46ac-998b-d45a9b64cab2' THEN 'child'",
+                ],
+                [
+                    "Sjo'ers, Simmers en Jonghernieuwers",
+                    "WHEN '03680919-689c-4df1-8976-bb71758cc025' THEN 'child'",
+                ],
                 ['+16', "WHEN 'bed9b513-e0ff-4cc3-a0f3-1c021fc880a9' THEN 'child'"],
                 ['Hernieuwers', "WHEN '1ad6b686-d5fa-4168-8fa2-064d49f8c0e8' THEN 'child'"],
                 ['Leiding', "WHEN 'e3ec8d48-0d10-4f5d-9e50-dd3151c6666b' THEN 'leader'"],
-                ['Ondersteunende leden', "WHEN 'a28d290c-af71-4282-92cc-2224a18d3091' THEN 'adult'"],
+                [
+                    'Ondersteunende leden',
+                    "WHEN 'a28d290c-af71-4282-92cc-2224a18d3091' THEN 'adult'",
+                ],
             ]) {
-                expect(`${leeftijdsgroep}: ${sql.includes(term)}`).toEqual(`${leeftijdsgroep}: true`);
+                expect(`${leeftijdsgroep}: ${sql.includes(term)}`).toEqual(
+                    `${leeftijdsgroep}: true`,
+                );
             }
 
             expect(sql.match(/WHEN '[0-9a-f-]{36}' THEN/g)!.length).toBe(9);
@@ -751,7 +1131,9 @@ describe('report', () => {
             const sql = cardOf(await loadReport('development'), 'nationaal', 'totaal-leden').sql;
 
             expect(sql.replaceAll(/\s+/g, ' ')).toContain('CAST(NULL AS CHAR(16)) AS category');
-            expect(`names leeftijdsgroepen by id: ${/WHEN '[0-9a-f-]{36}' THEN/.test(sql)}`).toEqual('names leeftijdsgroepen by id: false');
+            expect(
+                `names leeftijdsgroepen by id: ${/WHEN '[0-9a-f-]{36}' THEN/.test(sql)}`,
+            ).toEqual('names leeftijdsgroepen by id: false');
         });
 
         /**
@@ -760,12 +1142,21 @@ describe('report', () => {
          * the rest of the report has it categorised. Nothing about a card says which it does.
          */
         it('reads every leeftijdsgroep through the fragment that decides its category', () => {
-            for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
-                for (const card of tabs.flatMap(tab => tab.cards)) {
-                    const reads = [...card.sql.matchAll(/\b(?:FROM|JOIN) default_age_groups\b/g)].map(match => match[0]);
-                    const expected = card.sql.includes('default_age_groups_with_category AS (') ? ['FROM default_age_groups'] : [];
+            for (const [env, tabs] of [
+                ['keeo', dashboards],
+                ['ravot', ravotDashboards],
+            ] as const) {
+                for (const card of tabs.flatMap((tab) => tab.cards)) {
+                    const reads = [
+                        ...card.sql.matchAll(/\b(?:FROM|JOIN) default_age_groups\b/g),
+                    ].map((match) => match[0]);
+                    const expected = card.sql.includes('default_age_groups_with_category AS (')
+                        ? ['FROM default_age_groups']
+                        : [];
 
-                    expect(`${env}/${card.key}: ${reads.join(' + ')}`).toEqual(`${env}/${card.key}: ${expected.join(' + ')}`);
+                    expect(`${env}/${card.key}: ${reads.join(' + ')}`).toEqual(
+                        `${env}/${card.key}: ${expected.join(' + ')}`,
+                    );
                 }
             }
         });
@@ -777,8 +1168,11 @@ describe('report', () => {
          * Nothing about a card says which of the two it reads, so it is checked here.
          */
         it('counts every card of the ledenstatistieken over members rather than over their registrations', () => {
-            for (const [env, tabs] of [['keeo', dashboards], ['ravot', ravotDashboards]] as const) {
-                for (const tab of tabs.filter(tab => tab.dashboard === undefined)) {
+            for (const [env, tabs] of [
+                ['keeo', dashboards],
+                ['ravot', ravotDashboards],
+            ] as const) {
+                for (const tab of tabs.filter((tab) => tab.dashboard === undefined)) {
                     for (const card of tab.cards) {
                         const sql = card.sql.replaceAll(/\s+/g, ' ');
                         if (!sql.includes('non_platform_registrations AS (')) {
@@ -790,8 +1184,12 @@ describe('report', () => {
                         const query = sql.slice(sql.indexOf('WHERE deduplicated.rang = 1 )'));
                         const where = `${env} ${tab.key}/${card.key}`;
 
-                        expect(`${where}: ${sql.includes('WITH leden AS (')}`).toEqual(`${where}: true`);
-                        expect(`${where}: ${/\b(?:FROM|JOIN) non_platform_registrations\b/.test(query)}`).toEqual(`${where}: false`);
+                        expect(`${where}: ${sql.includes('WITH leden AS (')}`).toEqual(
+                            `${where}: true`,
+                        );
+                        expect(
+                            `${where}: ${/\b(?:FROM|JOIN) non_platform_registrations\b/.test(query)}`,
+                        ).toEqual(`${where}: false`);
                     }
                 }
             }
@@ -803,11 +1201,13 @@ describe('report', () => {
          * decides what a member is from the cancelled registrations as well. It keeps its own rows.
          */
         it('leaves the aanlevering on the grain the department asks for', () => {
-            const tabs = dashboards.filter(tab => tab.dashboard !== undefined);
-            expect(tabs.map(tab => tab.key)).toEqual(['jeugdbewegingen']);
+            const tabs = dashboards.filter((tab) => tab.dashboard !== undefined);
+            expect(tabs.map((tab) => tab.key)).toEqual(['jeugdbewegingen']);
 
             for (const card of tabs[0].cards) {
-                expect(`${card.key}: ${card.sql.includes('leden AS (')}`).toEqual(`${card.key}: false`);
+                expect(`${card.key}: ${card.sql.includes('leden AS (')}`).toEqual(
+                    `${card.key}: false`,
+                );
             }
         });
 
@@ -823,12 +1223,14 @@ describe('report', () => {
         it('lets the strongest registration of a member say what they are', () => {
             const sql = cardOf(dashboards, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ');
 
-            expect(sql).toContain('ROW_NUMBER() OVER ( PARTITION BY non_platform_registrations.organization_id, non_platform_registrations.`Werkjaar`, non_platform_registrations.member_id ORDER BY '
-                + "(non_platform_registrations.group_type = 'Membership') DESC, "
-                + '(non_platform_registrations.deactivated_at IS NULL) DESC, '
-                + "CASE non_platform_registrations.age_group_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, "
-                + "CASE non_platform_registrations.effective_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, "
-                + 'non_platform_registrations.age_group_min_age DESC, non_platform_registrations.`Leeftijdsgroep` ) AS rang');
+            expect(sql).toContain(
+                'ROW_NUMBER() OVER ( PARTITION BY non_platform_registrations.organization_id, non_platform_registrations.`Werkjaar`, non_platform_registrations.member_id ORDER BY ' +
+                    "(non_platform_registrations.group_type = 'Membership') DESC, " +
+                    '(non_platform_registrations.deactivated_at IS NULL) DESC, ' +
+                    "CASE non_platform_registrations.age_group_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, " +
+                    "CASE non_platform_registrations.effective_category WHEN 'leader' THEN 3 WHEN 'child' THEN 2 WHEN 'adult' THEN 1 ELSE 0 END DESC, " +
+                    'non_platform_registrations.age_group_min_age DESC, non_platform_registrations.`Leeftijdsgroep` ) AS rang',
+            );
             expect(sql).toContain('WHERE deduplicated.rang = 1');
         });
 
@@ -841,13 +1243,22 @@ describe('report', () => {
          * leeftijdsgroep they were a lid of, so the ranking puts the type ahead of what still stands.
          */
         it('reads a member from their leeftijdsgroep rather than from an activiteit they joined', async () => {
-            for (const name of ['deduplicated-non-platform-registrations.sql', 'deduplicated-non-platform-registrations-all-years.sql']) {
-                const sql = (await fs.readFile(path.join(getReportDirectory(), 'includes', name), 'utf-8')).replaceAll(/\s+/g, ' ');
+            for (const name of [
+                'deduplicated-non-platform-registrations.sql',
+                'deduplicated-non-platform-registrations-all-years.sql',
+            ]) {
+                const sql = (
+                    await fs.readFile(path.join(getReportDirectory(), 'includes', name), 'utf-8')
+                ).replaceAll(/\s+/g, ' ');
                 const order = sql.slice(sql.indexOf('ORDER BY'), sql.indexOf(') AS rang'));
-                const type = order.indexOf("(non_platform_registrations.group_type = 'Membership') DESC");
+                const type = order.indexOf(
+                    "(non_platform_registrations.group_type = 'Membership') DESC",
+                );
 
                 expect(`${name}: ${type}`).not.toEqual(`${name}: -1`);
-                expect(`${name}: ${type < order.indexOf('(non_platform_registrations.deactivated_at IS NULL) DESC')}`).toEqual(`${name}: true`);
+                expect(
+                    `${name}: ${type < order.indexOf('(non_platform_registrations.deactivated_at IS NULL) DESC')}`,
+                ).toEqual(`${name}: true`);
             }
         });
 
@@ -859,17 +1270,32 @@ describe('report', () => {
          */
         it('subtracts the same omkaderingscijfer it puts on the screen', () => {
             for (const [env, tabs, pattern, divisie] of [
-                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN age_group_id.*?, 2\)/,
-                    "COUNT(DISTINCT CASE WHEN age_group_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0)"],
-                ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN age_group_category.*?, 2\)/,
-                    "COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0)"],
+                [
+                    'keeo',
+                    dashboards,
+                    /ROUND\( \( COUNT\(DISTINCT CASE WHEN age_group_id.*?, 2\)/,
+                    "COUNT(DISTINCT CASE WHEN age_group_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0)",
+                ],
+                [
+                    'ravot',
+                    ravotDashboards,
+                    /ROUND\( COUNT\(DISTINCT CASE WHEN age_group_category.*?, 2\)/,
+                    "COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0)",
+                ],
             ] as const) {
-                const index = cardOf(tabs, 'eenheden', 'eenheid-gtp').sql.replaceAll(/\s+/g, ' ').match(pattern)?.[0];
-                const cijfer = cardOf(tabs, 'eenheden', 'eenheid-omkaderingscijfer').sql.replaceAll(/\s+/g, ' ');
+                const index = cardOf(tabs, 'eenheden', 'eenheid-gtp')
+                    .sql.replaceAll(/\s+/g, ' ')
+                    .match(pattern)?.[0];
+                const cijfer = cardOf(tabs, 'eenheden', 'eenheid-omkaderingscijfer').sql.replaceAll(
+                    /\s+/g,
+                    ' ',
+                );
 
                 expect(`${env}: ${index?.includes(`- 2 * ${divisie}`)}`).toEqual(`${env}: true`);
                 expect(`${env}: ${index?.includes('effective_category')}`).toEqual(`${env}: false`);
-                expect(`${env}: ${cijfer.includes(`ROUND( ${divisie}, 2)`)}`).toEqual(`${env}: true`);
+                expect(`${env}: ${cijfer.includes(`ROUND( ${divisie}, 2)`)}`).toEqual(
+                    `${env}: true`,
+                );
             }
         });
 
@@ -880,13 +1306,31 @@ describe('report', () => {
          */
         it('computes the GTP index from one expression wherever it is shown', () => {
             for (const [env, tabs, pattern] of [
-                ['keeo', dashboards, /ROUND\( \( COUNT\(DISTINCT CASE WHEN age_group_id = 'f274a949-9318-4c2b-ae35-e50114efe686'.*?, 2\)/],
-                ['ravot', ravotDashboards, /ROUND\( COUNT\(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 10.*?, 2\)/],
+                [
+                    'keeo',
+                    dashboards,
+                    /ROUND\( \( COUNT\(DISTINCT CASE WHEN age_group_id = 'f274a949-9318-4c2b-ae35-e50114efe686'.*?, 2\)/,
+                ],
+                [
+                    'ravot',
+                    ravotDashboards,
+                    /ROUND\( COUNT\(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 10.*?, 2\)/,
+                ],
             ] as const) {
-                const expressions = [['nationaal', 'leden-per-eenheid'], ['eenheden', 'eenheid-gtp'], ['eenheden', 'eenheid-gtp-meter'], ['eenheden', 'eenheid-gtp-per-werkjaar'], ['gtp', 'gtp-per-eenheid']]
-                    .map(([tab, key]) => cardOf(tabs, tab, key).sql.replaceAll(/\s+/g, ' ').match(pattern)?.[0]);
+                const expressions = [
+                    ['nationaal', 'leden-per-eenheid'],
+                    ['eenheden', 'eenheid-gtp'],
+                    ['eenheden', 'eenheid-gtp-meter'],
+                    ['eenheden', 'eenheid-gtp-per-werkjaar'],
+                    ['gtp', 'gtp-per-eenheid'],
+                ].map(
+                    ([tab, key]) =>
+                        cardOf(tabs, tab, key).sql.replaceAll(/\s+/g, ' ').match(pattern)?.[0],
+                );
 
-                expect(`${env}: ${expressions.filter(expression => expression !== undefined).length}`).toEqual(`${env}: 5`);
+                expect(
+                    `${env}: ${expressions.filter((expression) => expression !== undefined).length}`,
+                ).toEqual(`${env}: 5`);
                 expect(`${env}: ${new Set(expressions).size}`).toEqual(`${env}: 1`);
             }
         });
@@ -898,7 +1342,9 @@ describe('report', () => {
          */
         it('divides the GTP meter into the ranges the report reads the index in', () => {
             for (const tabs of [dashboards, ravotDashboards]) {
-                expect(cardOf(tabs, 'eenheden', 'eenheid-gtp-meter').segments).toEqual([0, 35, 55, 75, 95, 115, 135]);
+                expect(cardOf(tabs, 'eenheden', 'eenheid-gtp-meter').segments).toEqual([
+                    0, 35, 55, 75, 95, 115, 135,
+                ]);
             }
         });
 
@@ -911,18 +1357,30 @@ describe('report', () => {
                 const overview = cardOf(tabs, 'gtp', 'gtp-per-eenheid');
                 const meter = cardOf(tabs, 'eenheden', 'eenheid-gtp-meter');
 
-                expect(`${overview.segments.join(',')} best ${overview.best}`).toEqual(`${meter.segments.join(',')} best ${meter.best}`);
-                expect(overview.metrics).toEqual(['GTP twee werkjaren eerder', 'GTP vorig werkjaar', 'GTP dit werkjaar']);
+                expect(`${overview.segments.join(',')} best ${overview.best}`).toEqual(
+                    `${meter.segments.join(',')} best ${meter.best}`,
+                );
+                expect(overview.metrics).toEqual([
+                    'GTP twee werkjaren eerder',
+                    'GTP vorig werkjaar',
+                    'GTP dit werkjaar',
+                ]);
                 for (const column of [...overview.metrics, overview.highlight!]) {
-                    expect(`selects ${column}: ${overview.sql.includes(`AS \`${column}\``)}`).toEqual(`selects ${column}: true`);
+                    expect(
+                        `selects ${column}: ${overview.sql.includes(`AS \`${column}\``)}`,
+                    ).toEqual(`selects ${column}: true`);
                 }
             }
         });
 
         /** A value the palette does not name highlights no row, so the eenheid would go unnoticed. */
         it('colors every reason an eenheid is flagged in the GTP overview', () => {
-            const written = /CASE((?:(?!CASE)[\s\S])*?)END AS `Opvolgen`/.exec(cardOf(ravotDashboards, 'gtp', 'gtp-per-eenheid').sql);
-            const values = [...(written?.[1] ?? '').matchAll(/THEN '([^']+)'/g)].map(match => match[1]);
+            const written = /CASE((?:(?!CASE)[\s\S])*?)END AS `Opvolgen`/.exec(
+                cardOf(ravotDashboards, 'gtp', 'gtp-per-eenheid').sql,
+            );
+            const values = [...(written?.[1] ?? '').matchAll(/THEN '([^']+)'/g)].map(
+                (match) => match[1],
+            );
 
             expect(values.sort()).toEqual(Object.keys(columnPalettes.get('Opvolgen')!).sort());
         });
@@ -934,13 +1392,23 @@ describe('report', () => {
          */
         it('limits only the GTP overview to its own werkjaren', () => {
             for (const tabs of [dashboards, ravotDashboards]) {
-                const limited = tabs.flatMap(tab => tab.cards).filter(card => card.defaults.size > 0).map(card => `${card.key}: ${JSON.stringify(Object.fromEntries(card.defaults))}`);
+                const limited = tabs
+                    .flatMap((tab) => tab.cards)
+                    .filter((card) => card.defaults.size > 0)
+                    .map(
+                        (card) =>
+                            `${card.key}: ${JSON.stringify(Object.fromEntries(card.defaults))}`,
+                    );
 
                 expect(limited).toEqual(['gtp-per-eenheid: {"aantal_werkjaren":3}']);
             }
 
             const sql = cardOf(ravotDashboards, 'gtp', 'gtp-per-eenheid').sql;
-            expect(/\[\[AND registration_periods\.name IN \([\s\S]*?\{\{werkjaar\}\}[\s\S]*?\{\{aantal_werkjaren\}\}\s*\)\]\]/.test(sql)).toBe(true);
+            expect(
+                /\[\[AND registration_periods\.name IN \([\s\S]*?\{\{werkjaar\}\}[\s\S]*?\{\{aantal_werkjaren\}\}\s*\)\]\]/.test(
+                    sql,
+                ),
+            ).toBe(true);
         });
 
         /** The three werkjaren are the chosen one and the two before it, so the filter moves all of them. */
@@ -948,9 +1416,13 @@ describe('report', () => {
             const card = cardOf(ravotDashboards, 'gtp', 'gtp-per-eenheid');
 
             expect(card.parameters).toContain('werkjaar');
-            expect(ravotDashboards.find(tab => tab.key === 'gtp')!.required).toEqual(['werkjaar']);
+            expect(ravotDashboards.find((tab) => tab.key === 'gtp')!.required).toEqual([
+                'werkjaar',
+            ]);
             expect(card.snippets).toContain('deduplicated-non-platform-registrations-all-years');
-            expect(card.sql.replaceAll(/\s+/g, ' ')).toContain('WHERE leden.`Werkjaar` IN (gekozen.name, gekozen.vorig, gekozen.voorvorig)');
+            expect(card.sql.replaceAll(/\s+/g, ' ')).toContain(
+                'WHERE leden.`Werkjaar` IN (gekozen.name, gekozen.vorig, gekozen.voorvorig)',
+            );
         });
 
         /**
@@ -960,11 +1432,16 @@ describe('report', () => {
          * round from every other card over the years -- the most recent werkjaar first.
          */
         it('gives the ratio charts their most recent werkjaar on top', () => {
-            for (const key of ['eenheid-jong-versus-oud', 'eenheid-geslacht-kinderen-per-jaar', 'eenheid-geslacht-leiding-per-jaar']) {
+            for (const key of [
+                'eenheid-jong-versus-oud',
+                'eenheid-geslacht-kinderen-per-jaar',
+                'eenheid-geslacht-leiding-per-jaar',
+            ]) {
                 const card = cardOf(ravotDashboards, 'eenheden', key);
 
-                expect(`${key}: ${card.display}, ${/ORDER BY MIN\(period_start\)(?: DESC)?$/.exec(card.sql)?.[0]}`)
-                    .toEqual(`${key}: row, ORDER BY MIN(period_start) DESC`);
+                expect(
+                    `${key}: ${card.display}, ${/ORDER BY MIN\(period_start\)(?: DESC)?$/.exec(card.sql)?.[0]}`,
+                ).toEqual(`${key}: row, ORDER BY MIN(period_start) DESC`);
             }
         });
 
@@ -975,17 +1452,30 @@ describe('report', () => {
          * same page.
          */
         it('draws the geslachten in one set of colors, on every card that splits on them', () => {
-            const cards = ravotDashboards.flatMap(tab => tab.cards.filter(card => card.dimensions.includes('Geslacht')));
+            const cards = ravotDashboards.flatMap((tab) =>
+                tab.cards.filter((card) => card.dimensions.includes('Geslacht')),
+            );
             const expected = columnPalettes.get('Geslacht')!;
 
-            expect(cards.map(card => card.key).length).toEqual(7);
+            expect(cards.map((card) => card.key).length).toEqual(7);
 
             for (const card of cards) {
                 const settings = buildVisualizationSettings(card);
-                const series = settings['series_settings'] as Record<string, { color: string }> | undefined;
-                const colors = settings['pie.colors'] ?? Object.fromEntries(Object.entries(series ?? {}).map(([value, setting]) => [value, setting.color]));
+                const series = settings['series_settings'] as
+                    | Record<string, { color: string }>
+                    | undefined;
+                const colors =
+                    settings['pie.colors'] ??
+                    Object.fromEntries(
+                        Object.entries(series ?? {}).map(([value, setting]) => [
+                            value,
+                            setting.color,
+                        ]),
+                    );
 
-                expect(`${card.key}: ${JSON.stringify(colors)}`).toEqual(`${card.key}: ${JSON.stringify(expected)}`);
+                expect(`${card.key}: ${JSON.stringify(colors)}`).toEqual(
+                    `${card.key}: ${JSON.stringify(expected)}`,
+                );
             }
         });
 
@@ -995,11 +1485,20 @@ describe('report', () => {
          * color Metabase had left over. Both grains write them, so both are read here.
          */
         it('colors every geslacht the facts can hold', () => {
-            for (const key of ['eenheid-leden-per-geslacht', 'eenheid-geslacht-kinderen-per-jaar']) {
-                const written = /CASE members\.gender([\s\S]*?)END AS `Geslacht`/.exec(cardOf(ravotDashboards, 'eenheden', key).sql);
-                const values = [...(written?.[1] ?? '').matchAll(/(?:THEN|ELSE) '([^']+)'/g)].map(match => match[1]);
+            for (const key of [
+                'eenheid-leden-per-geslacht',
+                'eenheid-geslacht-kinderen-per-jaar',
+            ]) {
+                const written = /CASE members\.gender([\s\S]*?)END AS `Geslacht`/.exec(
+                    cardOf(ravotDashboards, 'eenheden', key).sql,
+                );
+                const values = [...(written?.[1] ?? '').matchAll(/(?:THEN|ELSE) '([^']+)'/g)].map(
+                    (match) => match[1],
+                );
 
-                expect(`${key}: ${values.sort().join(',')}`).toEqual(`${key}: ${Object.keys(columnPalettes.get('Geslacht')!).sort().join(',')}`);
+                expect(`${key}: ${values.sort().join(',')}`).toEqual(
+                    `${key}: ${Object.keys(columnPalettes.get('Geslacht')!).sort().join(',')}`,
+                );
             }
         });
 
@@ -1009,9 +1508,13 @@ describe('report', () => {
          * eenheid scoring differently depending on which of the two you looked at.
          */
         it('reads a number in the same ranges as the meter of the same figure', () => {
-            for (const [number, meter] of [['eenheid-gtp', 'eenheid-gtp-meter'], ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter']]) {
+            for (const [number, meter] of [
+                ['eenheid-gtp', 'eenheid-gtp-meter'],
+                ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter'],
+            ]) {
                 for (const tabs of [dashboards, ravotDashboards]) {
-                    const ranges = (key: string) => `${cardOf(tabs, 'eenheden', key).segments.join(',')} best ${cardOf(tabs, 'eenheden', key).best}`;
+                    const ranges = (key: string) =>
+                        `${cardOf(tabs, 'eenheden', key).segments.join(',')} best ${cardOf(tabs, 'eenheden', key).best}`;
 
                     expect(`${number}: ${ranges(number)}`).toEqual(`${number}: ${ranges(meter)}`);
                 }
@@ -1033,8 +1536,12 @@ describe('report', () => {
 
         /** The gauge is the one card that explains the formula, so it explains the one it draws. */
         it('describes the GTP index in the terms the environment weighs it in', () => {
-            expect(cardOf(dashboards, 'eenheden', 'eenheid-gtp-meter').description).toContain("(VG's & Seniors)");
-            expect(cardOf(ravotDashboards, 'eenheden', 'eenheid-gtp-meter').description).toContain('(14- tot 16-jarigen)');
+            expect(cardOf(dashboards, 'eenheden', 'eenheid-gtp-meter').description).toContain(
+                "(VG's & Seniors)",
+            );
+            expect(cardOf(ravotDashboards, 'eenheden', 'eenheid-gtp-meter').description).toContain(
+                '(14- tot 16-jarigen)',
+            );
         });
 
         /**
@@ -1043,8 +1550,12 @@ describe('report', () => {
          */
         it('says which leden the omkaderingscijfer counts where that is not all of them', () => {
             for (const key of ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter']) {
-                expect(`${key}: ${cardOf(dashboards, 'eenheden', key).description}`).toContain('voor hoeveel leden een leider');
-                expect(`${key}: ${cardOf(ravotDashboards, 'eenheden', key).description}`).toContain('voor hoeveel leden jonger dan 17 jaar een leider');
+                expect(`${key}: ${cardOf(dashboards, 'eenheden', key).description}`).toContain(
+                    'voor hoeveel leden een leider',
+                );
+                expect(`${key}: ${cardOf(ravotDashboards, 'eenheden', key).description}`).toContain(
+                    'voor hoeveel leden jonger dan 17 jaar een leider',
+                );
             }
         });
 
@@ -1058,30 +1569,45 @@ describe('report', () => {
          * read apart from the rest of the shape.
          */
         it('varies what a card counts, never which cards the report holds beyond what it leaves out', async () => {
-            const retired = [...await loadRetiredReport('keeo'), ...await loadRetiredReport('ravot')];
-            const goneTabs = retired.filter(tab => tab.except.length > 0).map(tab => tab.key);
-            const goneCards = retired.flatMap(tab => tab.cards.map(card => card.key));
+            const retired = [
+                ...(await loadRetiredReport('keeo')),
+                ...(await loadRetiredReport('ravot')),
+            ];
+            const goneTabs = retired.filter((tab) => tab.except.length > 0).map((tab) => tab.key);
+            const goneCards = retired.flatMap((tab) => tab.cards.map((card) => card.key));
 
-            const shapeOf = (tabs: ReportTab[]) => tabs
-                .filter(tab => !goneTabs.includes(tab.key))
-                .map(tab => ({
-                    key: tab.key,
-                    filters: tab.filters,
-                    dashboard: tab.dashboard,
-                    cards: tab.cards
-                        .filter(card => !goneCards.includes(card.key))
-                        .map(card => ({ key: card.key, title: card.title, display: card.display, parameters: card.parameters })),
-                }));
+            const shapeOf = (tabs: ReportTab[]) =>
+                tabs
+                    .filter((tab) => !goneTabs.includes(tab.key))
+                    .map((tab) => ({
+                        key: tab.key,
+                        filters: tab.filters,
+                        dashboard: tab.dashboard,
+                        cards: tab.cards
+                            .filter((card) => !goneCards.includes(card.key))
+                            .map((card) => ({
+                                key: card.key,
+                                title: card.title,
+                                display: card.display,
+                                parameters: card.parameters,
+                            })),
+                    }));
 
             expect(goneTabs).toEqual([]);
             expect(goneCards).toEqual([
                 'leden-per-geslacht',
-                'eenheid-leden-per-geslacht', 'eenheid-geslacht-kinderen-per-jaar', 'eenheid-kinderen-per-geslacht',
-                'eenheid-geslacht-leiding-per-jaar', 'eenheid-leiding-per-geslacht', 'eenheid-leeftijd-en-geslacht',
-                'uldk', 'uldk-totaal',
+                'eenheid-leden-per-geslacht',
+                'eenheid-geslacht-kinderen-per-jaar',
+                'eenheid-kinderen-per-geslacht',
+                'eenheid-geslacht-leiding-per-jaar',
+                'eenheid-leiding-per-geslacht',
+                'eenheid-leeftijd-en-geslacht',
+                'uldk',
+                'uldk-totaal',
                 'deelnemers-bovenlokaal',
                 'eenheid-leden-per-leeftijd',
-                'uldk-zonder-geslacht', 'uldk-zonder-geslacht-totaal',
+                'uldk-zonder-geslacht',
+                'uldk-zonder-geslacht-totaal',
                 'deelnemers-bovenlokaal-werk-en-projectgroepen',
             ]);
             expect(shapeOf(ravotDashboards)).toEqual(shapeOf(dashboards));
@@ -1100,9 +1626,10 @@ describe('report', () => {
                 // A platform that names neither reads the report as it stands, which is the split one.
                 ['development', await loadReport('development'), 'eenheid-leeftijd-en-geslacht'],
             ] as const) {
-                const drawn = tabs.find(tab => tab.key === 'eenheden')!.cards
-                    .filter(card => card.dimensions.includes('Leeftijd'))
-                    .map(card => card.key);
+                const drawn = tabs
+                    .find((tab) => tab.key === 'eenheden')!
+                    .cards.filter((card) => card.dimensions.includes('Leeftijd'))
+                    .map((card) => card.key);
 
                 expect(`${env}: ${drawn.join(', ')}`).toEqual(`${env}: ${expected}`);
             }
@@ -1119,10 +1646,14 @@ describe('report', () => {
                 ['ravot', ravotDashboards, 'uldk, uldk-totaal'],
                 ['development', await loadReport('development'), 'uldk, uldk-totaal'],
             ] as const) {
-                const page = tabs.find(tab => tab.key === 'varia')!;
+                const page = tabs.find((tab) => tab.key === 'varia')!;
 
-                expect(`${env}: ${page.cards.map(card => card.key).join(', ')}`).toEqual(`${env}: ${expected}`);
-                expect(`${env}: ${page.cards.map(card => card.title).join(', ')}`).toEqual(`${env}: ULDK, ULDK (totaal)`);
+                expect(`${env}: ${page.cards.map((card) => card.key).join(', ')}`).toEqual(
+                    `${env}: ${expected}`,
+                );
+                expect(`${env}: ${page.cards.map((card) => card.title).join(', ')}`).toEqual(
+                    `${env}: ULDK, ULDK (totaal)`,
+                );
             }
         });
 
@@ -1134,21 +1665,30 @@ describe('report', () => {
          */
         it('varies for the environments it names and no others', async () => {
             const directory = getReportDirectory();
-            const entries = await fs.readdir(path.join(directory, 'includes'), { withFileTypes: true });
+            const entries = await fs.readdir(path.join(directory, 'includes'), {
+                withFileTypes: true,
+            });
             const qualifiers = new Set<string>();
 
-            for (const file of (await fs.readdir(directory)).filter(entry => entry.endsWith('.sql'))) {
+            for (const file of (await fs.readdir(directory)).filter((entry) =>
+                entry.endsWith('.sql'),
+            )) {
                 const contents = await fs.readFile(path.join(directory, file), 'utf-8');
 
                 for (const match of contents.matchAll(/^--[ \t]*[a-z]+@([a-z0-9-]+):/gm)) {
                     qualifiers.add(match[1]);
                 }
                 for (const match of contents.matchAll(/^--[ \t]*(?:except|only):(.*)$/gm)) {
-                    match[1].split(',').forEach(name => qualifiers.add(name.trim()));
+                    match[1].split(',').forEach((name) => qualifiers.add(name.trim()));
                 }
             }
 
-            expect(entries.filter(entry => entry.isDirectory()).map(entry => entry.name).sort()).toEqual(['keeo', 'ravot']);
+            expect(
+                entries
+                    .filter((entry) => entry.isDirectory())
+                    .map((entry) => entry.name)
+                    .sort(),
+            ).toEqual(['keeo', 'ravot']);
             expect([...qualifiers].sort()).toEqual(['keeo', 'ravot']);
         });
 
@@ -1158,13 +1698,27 @@ describe('report', () => {
          */
         it('counts the omkaderingscijfer the same way wherever it is shown', () => {
             for (const [env, tabs, expression] of [
-                ['keeo', dashboards, "ROUND( COUNT(DISTINCT CASE WHEN age_group_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0), 2)"],
-                ['ravot', ravotDashboards, "ROUND( COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0), 2)"],
+                [
+                    'keeo',
+                    dashboards,
+                    "ROUND( COUNT(DISTINCT CASE WHEN age_group_category = 'child' THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0), 2)",
+                ],
+                [
+                    'ravot',
+                    ravotDashboards,
+                    "ROUND( COUNT(DISTINCT CASE WHEN age_group_category = 'child' AND leeftijd < 17 THEN member_id END) / NULLIF(COUNT(DISTINCT CASE WHEN age_group_category = 'leader' THEN member_id END), 0), 2)",
+                ],
             ] as const) {
-                for (const key of ['eenheid-omkaderingscijfer', 'eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-werkjaar']) {
+                for (const key of [
+                    'eenheid-omkaderingscijfer',
+                    'eenheid-omkaderingscijfer-meter',
+                    'eenheid-omkaderingscijfer-per-werkjaar',
+                ]) {
                     const sql = cardOf(tabs, 'eenheden', key).sql.replaceAll(/\s+/g, ' ');
 
-                    expect(`${env} ${key}: ${sql.includes(expression)}`).toEqual(`${env} ${key}: true`);
+                    expect(`${env} ${key}: ${sql.includes(expression)}`).toEqual(
+                        `${env} ${key}: true`,
+                    );
                 }
             }
         });
@@ -1177,9 +1731,11 @@ describe('report', () => {
          * in, it would read as 0% ledenbehoud instead of as missing.
          */
         it('measures ledenbehoud from the werkjaar it labels into the year after it', () => {
-            const cards = dashboards.flatMap(dashboard => dashboard.cards
-                .filter(card => card.sql.includes('LEAD(name)'))
-                .map(card => [dashboard.key, card] as const));
+            const cards = dashboards.flatMap((dashboard) =>
+                dashboard.cards
+                    .filter((card) => card.sql.includes('LEAD(name)'))
+                    .map((card) => [dashboard.key, card] as const),
+            );
 
             expect(cards.map(([dashboard, card]) => `${dashboard}/${card.key}`)).toEqual([
                 'nationaal/percentage-blijvers-per-eenheid',
@@ -1194,8 +1750,9 @@ describe('report', () => {
                 const cohort = /JOIN leden huidig ON huidig\.`Werkjaar` = \w+\.name/.test(sql);
                 const blijvers = /gebleven\.`Werkjaar` = \w+\.volgend/.test(sql);
 
-                expect(`${card.key}: cohort ${cohort}, blijvers ${blijvers}, laatste jaar weg ${sql.includes('volgend IS NOT NULL')}`)
-                    .toEqual(`${card.key}: cohort true, blijvers true, laatste jaar weg true`);
+                expect(
+                    `${card.key}: cohort ${cohort}, blijvers ${blijvers}, laatste jaar weg ${sql.includes('volgend IS NOT NULL')}`,
+                ).toEqual(`${card.key}: cohort true, blijvers true, laatste jaar weg true`);
             }
         });
 
@@ -1206,19 +1763,37 @@ describe('report', () => {
          * the one after it onto a row of its own.
          */
         it('lays the eenheden page out in the rows of the report it mirrors', () => {
-            const rows = rowsOf(ravotDashboards.find(dashboard => dashboard.key === 'eenheden')!.cards);
-            const rowWith = (key: string) => rows.find(row => row.keys.includes(key))!.keys;
+            const rows = rowsOf(
+                ravotDashboards.find((dashboard) => dashboard.key === 'eenheden')!.cards,
+            );
+            const rowWith = (key: string) => rows.find((row) => row.keys.includes(key))!.keys;
 
             expect(rows[0].keys).toEqual([
-                'eenheid-totaal-leden', 'eenheid-aantal-kinderen', 'eenheid-aantal-leiding',
-                'eenheid-aantal-volwassenen', 'eenheid-gtp', 'eenheid-omkaderingscijfer',
+                'eenheid-totaal-leden',
+                'eenheid-aantal-kinderen',
+                'eenheid-aantal-leiding',
+                'eenheid-aantal-volwassenen',
+                'eenheid-gtp',
+                'eenheid-omkaderingscijfer',
             ]);
-            expect(rowWith('eenheid-gtp-meter')).toEqual(['eenheid-gtp-meter', 'eenheid-gtp-per-werkjaar']);
-            expect(rowWith('eenheid-omkaderingscijfer-meter')).toEqual(['eenheid-omkaderingscijfer-meter', 'eenheid-omkaderingscijfer-per-werkjaar']);
-            expect(rowWith('eenheid-kinderen-per-geslacht')).toEqual(['eenheid-geslacht-kinderen-per-jaar', 'eenheid-kinderen-per-geslacht']);
-            expect(rowWith('eenheid-leiding-per-geslacht')).toEqual(['eenheid-geslacht-leiding-per-jaar', 'eenheid-leiding-per-geslacht']);
-            expect(rows.filter(row => row.heights.length !== 1)).toEqual([]);
-            expect(rows.filter(row => row.width !== 24)).toEqual([]);
+            expect(rowWith('eenheid-gtp-meter')).toEqual([
+                'eenheid-gtp-meter',
+                'eenheid-gtp-per-werkjaar',
+            ]);
+            expect(rowWith('eenheid-omkaderingscijfer-meter')).toEqual([
+                'eenheid-omkaderingscijfer-meter',
+                'eenheid-omkaderingscijfer-per-werkjaar',
+            ]);
+            expect(rowWith('eenheid-kinderen-per-geslacht')).toEqual([
+                'eenheid-geslacht-kinderen-per-jaar',
+                'eenheid-kinderen-per-geslacht',
+            ]);
+            expect(rowWith('eenheid-leiding-per-geslacht')).toEqual([
+                'eenheid-geslacht-leiding-per-jaar',
+                'eenheid-leiding-per-geslacht',
+            ]);
+            expect(rows.filter((row) => row.heights.length !== 1)).toEqual([]);
+            expect(rows.filter((row) => row.width !== 24)).toEqual([]);
         });
 
         /**
@@ -1228,11 +1803,24 @@ describe('report', () => {
          * its own.
          */
         it('leaves no half-empty row where keeo drops the card beside one', () => {
-            const rowWith = (tab: string, key: string) => rowsOf(dashboards.find(dashboard => dashboard.key === tab)!.cards).find(row => row.keys.includes(key))!;
+            const rowWith = (tab: string, key: string) =>
+                rowsOf(dashboards.find((dashboard) => dashboard.key === tab)!.cards).find((row) =>
+                    row.keys.includes(key),
+                )!;
 
-            expect(rowWith('nationaal', 'leden-per-leeftijdsgroep-vergelijking')).toMatchObject({ keys: ['leden-per-leeftijdsgroep-vergelijking'], width: 24 });
-            expect(rowWith('eenheden', 'eenheid-leden-per-type-lidgeld')).toMatchObject({ keys: ['eenheid-leden-per-type-lidgeld'], width: 24 });
-            expect(rowsOf(dashboards.find(dashboard => dashboard.key === 'eenheden')!.cards).filter(row => row.width !== 24)).toEqual([]);
+            expect(rowWith('nationaal', 'leden-per-leeftijdsgroep-vergelijking')).toMatchObject({
+                keys: ['leden-per-leeftijdsgroep-vergelijking'],
+                width: 24,
+            });
+            expect(rowWith('eenheden', 'eenheid-leden-per-type-lidgeld')).toMatchObject({
+                keys: ['eenheid-leden-per-type-lidgeld'],
+                width: 24,
+            });
+            expect(
+                rowsOf(dashboards.find((dashboard) => dashboard.key === 'eenheden')!.cards).filter(
+                    (row) => row.width !== 24,
+                ),
+            ).toEqual([]);
         });
 
         /**
@@ -1245,14 +1833,22 @@ describe('report', () => {
                 ['keeo', dashboards, ['uldk-zonder-geslacht', 'uldk-zonder-geslacht-totaal']],
                 ['ravot', ravotDashboards, ['uldk', 'uldk-totaal']],
             ] as const) {
-                const placed = layoutCards(tabs.find(dashboard => dashboard.key === 'varia')!.cards);
+                const placed = layoutCards(
+                    tabs.find((dashboard) => dashboard.key === 'varia')!.cards,
+                );
                 const [table, totals] = placed;
 
-                expect(`${env}: ${placed.map(entry => entry.card.key).join(', ')}`).toEqual(`${env}: ${keys.join(', ')}`);
+                expect(`${env}: ${placed.map((entry) => entry.card.key).join(', ')}`).toEqual(
+                    `${env}: ${keys.join(', ')}`,
+                );
                 // Both are titled as the page names them, since an environment writes only one pair.
-                expect(`${env}: ${placed.map(entry => entry.card.title).join(', ')}`).toEqual(`${env}: ULDK, ULDK (totaal)`);
+                expect(`${env}: ${placed.map((entry) => entry.card.title).join(', ')}`).toEqual(
+                    `${env}: ULDK, ULDK (totaal)`,
+                );
                 expect(totals.row).toEqual(table.row + table.sizeY);
-                expect(`${env}: ${totals.sizeX} wide, ${table.sizeX} wide`).toEqual(`${env}: 24 wide, 24 wide`);
+                expect(`${env}: ${totals.sizeX} wide, ${table.sizeX} wide`).toEqual(
+                    `${env}: 24 wide, 24 wide`,
+                );
             }
         });
 
@@ -1267,12 +1863,23 @@ describe('report', () => {
                 ['uldk', ravotDashboards, 'uldk-totaal', 8],
                 ['uldk-zonder-geslacht', dashboards, 'uldk-zonder-geslacht-totaal', 2],
             ] as const) {
-                const contents = await fs.readFile(path.join(getReportDirectory(), 'includes', `${fragment}.sql`), 'utf-8');
-                const columns = [...contents.matchAll(/AS `([^`]+)`/g)].map(match => match[1]).filter(column => !['Name', 'City'].includes(column));
-                const summed = [...cardOf(tabs, 'varia', key).sql.matchAll(/SUM\(`([^`]+)`\)/g)].map(match => match[1]);
+                const contents = await fs.readFile(
+                    path.join(getReportDirectory(), 'includes', `${fragment}.sql`),
+                    'utf-8',
+                );
+                const columns = [...contents.matchAll(/AS `([^`]+)`/g)]
+                    .map((match) => match[1])
+                    .filter((column) => !['Name', 'City'].includes(column));
+                const summed = [
+                    ...cardOf(tabs, 'varia', key).sql.matchAll(/SUM\(`([^`]+)`\)/g),
+                ].map((match) => match[1]);
 
-                expect(`${fragment}: ${summed.join(', ')}`).toEqual(`${fragment}: ${columns.join(', ')}`);
-                expect(`${fragment}: ${columns.length} columns`).toEqual(`${fragment}: ${held} columns`);
+                expect(`${fragment}: ${summed.join(', ')}`).toEqual(
+                    `${fragment}: ${columns.join(', ')}`,
+                );
+                expect(`${fragment}: ${columns.length} columns`).toEqual(
+                    `${fragment}: ${held} columns`,
+                );
             }
         });
 
@@ -1282,12 +1889,23 @@ describe('report', () => {
          * card of the report that stands across two rows, and it ends exactly where the pie does.
          */
         it('stands the netwerk map beside the chart and the pie stacked next to it', () => {
-            const placed = layoutCards(dashboards.find(dashboard => dashboard.key === 'netwerk')!.cards);
-            const at = (key: string) => placed.find(entry => entry.card.key === key)!;
+            const placed = layoutCards(
+                dashboards.find((dashboard) => dashboard.key === 'netwerk')!.cards,
+            );
+            const at = (key: string) => placed.find((entry) => entry.card.key === key)!;
 
-            expect(placed.map(entry => entry.card.key)).toEqual(['leden-per-netwerk', 'locatie-eenheden', 'eenheden-per-netwerk']);
+            expect(placed.map((entry) => entry.card.key)).toEqual([
+                'leden-per-netwerk',
+                'locatie-eenheden',
+                'eenheden-per-netwerk',
+            ]);
             expect(at('leden-per-netwerk')).toMatchObject({ row: 0, col: 0, sizeX: 12, sizeY: 10 });
-            expect(at('eenheden-per-netwerk')).toMatchObject({ row: 10, col: 0, sizeX: 12, sizeY: 6 });
+            expect(at('eenheden-per-netwerk')).toMatchObject({
+                row: 10,
+                col: 0,
+                sizeX: 12,
+                sizeY: 6,
+            });
             expect(at('locatie-eenheden')).toMatchObject({ row: 0, col: 12, sizeX: 12 });
 
             const map = at('locatie-eenheden');
@@ -1296,10 +1914,14 @@ describe('report', () => {
         });
 
         it('gives the unit filter to the eenheden tab only, as the report does', () => {
-            expect(ravotDashboards.find(dashboard => dashboard.key === 'eenheden')!.filters).toEqual(['werkjaar', 'eenheid', 'platformleden_opnemen']);
+            expect(
+                ravotDashboards.find((dashboard) => dashboard.key === 'eenheden')!.filters,
+            ).toEqual(['werkjaar', 'eenheid', 'platformleden_opnemen']);
 
             for (const key of ['nationaal', 'gtp', 'netwerk', 'varia']) {
-                expect(`${key}: ${ravotDashboards.find(dashboard => dashboard.key === key)!.filters.join(',')}`).toEqual(`${key}: werkjaar,platformleden_opnemen`);
+                expect(
+                    `${key}: ${ravotDashboards.find((dashboard) => dashboard.key === key)!.filters.join(',')}`,
+                ).toEqual(`${key}: werkjaar,platformleden_opnemen`);
             }
         });
 
@@ -1312,12 +1934,17 @@ describe('report', () => {
         it('offers no filter for the aansluiting or the kind of registration', () => {
             for (const dashboard of dashboards) {
                 for (const gone of ['aansluiting', 'ingeschreven_voor']) {
-                    expect(`${dashboard.key}: ${dashboard.filters.includes(gone)}`).toEqual(`${dashboard.key}: false`);
+                    expect(`${dashboard.key}: ${dashboard.filters.includes(gone)}`).toEqual(
+                        `${dashboard.key}: false`,
+                    );
                 }
             }
 
-            expect(dashboards.flatMap(dashboard => dashboard.cards).flatMap(card => card.parameters))
-                .toEqual(expect.not.arrayContaining(['aansluiting', 'ingeschreven_voor']));
+            expect(
+                dashboards
+                    .flatMap((dashboard) => dashboard.cards)
+                    .flatMap((card) => card.parameters),
+            ).toEqual(expect.not.arrayContaining(['aansluiting', 'ingeschreven_voor']));
         });
 
         /**
@@ -1332,23 +1959,38 @@ describe('report', () => {
          * where it moved that eenheid's omkaderingscijfer and GTP index as well as its ledenaantal.
          */
         it('counts a leeftijdsgroep as being a lid, an activiteit only for whoever is in none, and a wachtlijst as nobody', () => {
-            for (const dashboard of dashboards.filter(dashboard => !dashboard.hidden)) {
-                for (const card of dashboard.cards.filter(card => card.snippets.includes('filter-registration-types'))) {
+            for (const dashboard of dashboards.filter((dashboard) => !dashboard.hidden)) {
+                for (const card of dashboard.cards.filter((card) =>
+                    card.snippets.includes('filter-registration-types'),
+                )) {
                     const sql = expressionOf(card.sql);
                     const where = card.key;
 
-                    expect(`${where}: ${sql.includes("`groups`.type = 'Membership' OR ( `groups`.type = 'EventRegistration' AND NOT EXISTS (")}`).toEqual(`${where}: true`);
+                    expect(
+                        `${where}: ${sql.includes("`groups`.type = 'Membership' OR ( `groups`.type = 'EventRegistration' AND NOT EXISTS (")}`,
+                    ).toEqual(`${where}: true`);
                     // The leeftijdsgroep that suppresses it is the member's own, in the same werkjaar.
-                    expect(`${where}: ${sql.includes("leeftijdsgroep.type = 'Membership' WHERE leeftijdsgroepinschrijving.memberId = registrations.memberId AND leeftijdsgroepinschrijving.periodId = registrations.periodId")}`).toEqual(`${where}: true`);
+                    expect(
+                        `${where}: ${sql.includes("leeftijdsgroep.type = 'Membership' WHERE leeftijdsgroepinschrijving.memberId = registrations.memberId AND leeftijdsgroepinschrijving.periodId = registrations.periodId")}`,
+                    ).toEqual(`${where}: true`);
                     expect(`${where}: ${sql.includes('WaitingList')}`).toEqual(`${where}: false`);
                 }
             }
 
             // Every card that reads a grain reads it: what counts as a lid is decided once, and a
             // card that got its rows from somewhere else would count a different set of people.
-            const without = dashboards.flatMap(dashboard => dashboard.cards
-                .filter(card => (card.snippets.includes('all-non-platform-registrations') || card.snippets.includes('all-non-platform-registrations-all-years')) && !card.snippets.includes('filter-registration-types'))
-                .map(card => card.key));
+            const without = dashboards.flatMap((dashboard) =>
+                dashboard.cards
+                    .filter(
+                        (card) =>
+                            (card.snippets.includes('all-non-platform-registrations') ||
+                                card.snippets.includes(
+                                    'all-non-platform-registrations-all-years',
+                                )) &&
+                            !card.snippets.includes('filter-registration-types'),
+                    )
+                    .map((card) => card.key),
+            );
 
             expect(without).toEqual([]);
         });
@@ -1360,13 +2002,18 @@ describe('report', () => {
          * eenheid ran one.
          */
         it('never draws an activiteit as a leeftijdsgroep', () => {
-            const perLeeftijdsgroep = [...dashboards, ...ravotDashboards]
-                .flatMap(tab => tab.cards.filter(card => /GROUP BY[^;]*`Leeftijdsgroep`/.test(card.sql.replaceAll(/\s+/g, ' '))));
+            const perLeeftijdsgroep = [...dashboards, ...ravotDashboards].flatMap((tab) =>
+                tab.cards.filter((card) =>
+                    /GROUP BY[^;]*`Leeftijdsgroep`/.test(card.sql.replaceAll(/\s+/g, ' ')),
+                ),
+            );
 
             expect(perLeeftijdsgroep.length).toBeGreaterThan(0);
 
             for (const card of perLeeftijdsgroep) {
-                expect(`${card.key}: ${expressionOf(card.sql).includes("CASE WHEN `groups`.type = 'EventRegistration' THEN 'Activiteit'")}`).toEqual(`${card.key}: true`);
+                expect(
+                    `${card.key}: ${expressionOf(card.sql).includes("CASE WHEN `groups`.type = 'EventRegistration' THEN 'Activiteit'")}`,
+                ).toEqual(`${card.key}: true`);
             }
         });
 
@@ -1381,7 +2028,9 @@ describe('report', () => {
                 const sql = cardOf(dashboards, 'jeugdbewegingen', key).sql;
 
                 {
-                    expect(`${key}: ${resolveSql(sql).includes("all_registrations.group_type = 'Membership'")}`).toEqual(`${key}: true`);
+                    expect(
+                        `${key}: ${resolveSql(sql).includes("all_registrations.group_type = 'Membership'")}`,
+                    ).toEqual(`${key}: true`);
                 }
             }
         });
@@ -1393,10 +2042,18 @@ describe('report', () => {
         it('reads how a card wants its x-axis labels drawn', () => {
             // A bar per eenheid leaves too little room to read a label at an angle: Metabase drops
             // the ones that touch, so those two stand upright.
-            expect(cardOf(dashboards, 'nationaal', 'leden-per-eenheid').xLabels).toEqual('rotate-90');
-            expect(cardOf(dashboards, 'nationaal', 'percentage-blijvers-per-eenheid').xLabels).toEqual('rotate-90');
-            expect(cardOf(dashboards, 'nationaal', 'leden-per-leeftijdsgroep-vergelijking').xLabels).toEqual('rotate-45');
-            expect(cardOf(dashboards, 'nationaal', 'leden-per-geboortejaar').xLabels).toBeUndefined();
+            expect(cardOf(dashboards, 'nationaal', 'leden-per-eenheid').xLabels).toEqual(
+                'rotate-90',
+            );
+            expect(
+                cardOf(dashboards, 'nationaal', 'percentage-blijvers-per-eenheid').xLabels,
+            ).toEqual('rotate-90');
+            expect(
+                cardOf(dashboards, 'nationaal', 'leden-per-leeftijdsgroep-vergelijking').xLabels,
+            ).toEqual('rotate-45');
+            expect(
+                cardOf(dashboards, 'nationaal', 'leden-per-geboortejaar').xLabels,
+            ).toBeUndefined();
         });
 
         /**
@@ -1406,12 +2063,19 @@ describe('report', () => {
          * figure say it, so keeo and ravot read the same axis.
          */
         it('labels a leeftijdenchart per bar rather than at every tenth year', () => {
-            for (const [tabs, key] of [[dashboards, 'eenheid-leden-per-leeftijd'], [ravotDashboards, 'eenheid-leeftijd-en-geslacht']] as const) {
+            for (const [tabs, key] of [
+                [dashboards, 'eenheid-leden-per-leeftijd'],
+                [ravotDashboards, 'eenheid-leeftijd-en-geslacht'],
+            ] as const) {
                 const card = cardOf(tabs, 'eenheden', key);
 
-                const scale = buildVisualizationSettings(card)['graph.x_axis.scale'] as string | undefined;
+                const scale = buildVisualizationSettings(card)['graph.x_axis.scale'] as
+                    | string
+                    | undefined;
 
-                expect(`${key}: ${card.xScale}, ${card.xLabels}`).toEqual(`${key}: ordinal, rotate-45`);
+                expect(`${key}: ${card.xScale}, ${card.xLabels}`).toEqual(
+                    `${key}: ordinal, rotate-45`,
+                );
                 expect(`${key}: ${scale}`).toEqual(`${key}: ordinal`);
             }
         });
@@ -1421,126 +2085,261 @@ describe('report', () => {
          * block below the line, and every setting under it would be dropped without a word.
          */
         it('rejects a setting that slipped below the query', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- A note.\n-- display: bar\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('has "display:" below the query');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- A note.\n-- display: bar\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('has "display:" below the query');
 
             // Naming an environment does not make it a comment either: it is the same setting.
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- A note.\n-- description@ravot: Zo telt ravot\nSELECT 1', 'x.sql', new Map(), 'ravot'))
-                .toThrow('has "description:" below the query');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- A note.\n-- description@ravot: Zo telt ravot\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                    'ravot',
+                ),
+            ).toThrow('has "description:" below the query');
         });
 
         it('ignores a setting written for an environment other than the one being loaded', () => {
-            const tab = parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- description@keeo: Alleen daar\nSELECT 1', 'x.sql', new Map(), 'ravot');
+            const tab = parseTab(
+                '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- description@keeo: Alleen daar\nSELECT 1',
+                'x.sql',
+                new Map(),
+                'ravot',
+            );
 
             expect(tab.cards[0].description).toBeUndefined();
         });
 
         it('leaves a comment that merely looks like a setting alone', () => {
-            const tab = parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- A note.\n-- see: the note above\nSELECT 1', 'x.sql', new Map());
+            const tab = parseTab(
+                '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- A note.\n-- see: the note above\nSELECT 1',
+                'x.sql',
+                new Map(),
+            );
 
             expect(tab.cards[0].sql).toContain('-- see: the note above');
         });
 
         it('rejects an x-axis scale Metabase has no axis for', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- xscale: categorie\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('has xscale "categorie", expected one of ordinal, linear');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- xscale: categorie\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('has xscale "categorie", expected one of ordinal, linear');
         });
 
         it('rejects an x-axis setting it cannot pass on', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- xlabels: sideways\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('has xlabels "sideways"');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- xlabels: sideways\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('has xlabels "sideways"');
         });
 
         it('reads the boundaries a gauge is divided at', () => {
-            expect(parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 35, 55, 75\nSELECT 1', 'x.sql', new Map()).cards[0].segments)
-                .toEqual([0, 35, 55, 75]);
+            expect(
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 35, 55, 75\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ).cards[0].segments,
+            ).toEqual([0, 35, 55, 75]);
         });
 
         it('reads the boundaries a number is colored against', () => {
-            expect(parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: scalar\n-- segments: 0, 4, 6, 8\n-- best: low\nSELECT 1', 'x.sql', new Map()).cards[0])
-                .toMatchObject({ segments: [0, 4, 6, 8], best: 'low' });
+            expect(
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: scalar\n-- segments: 0, 4, 6, 8\n-- best: low\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ).cards[0],
+            ).toMatchObject({ segments: [0, 4, 6, 8], best: 'low' });
         });
 
         it('reads the columns a table colors and the column its rows are highlighted by', () => {
-            expect(parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- metrics: A, B\n-- segments: 0, 35, 55\n-- highlight: Opvolgen\nSELECT 1', 'x.sql', new Map()).cards[0])
-                .toMatchObject({ metrics: ['A', 'B'], segments: [0, 35, 55], best: 'high', highlight: 'Opvolgen' });
+            expect(
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- metrics: A, B\n-- segments: 0, 35, 55\n-- highlight: Opvolgen\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ).cards[0],
+            ).toMatchObject({
+                metrics: ['A', 'B'],
+                segments: [0, 35, 55],
+                best: 'high',
+                highlight: 'Opvolgen',
+            });
         });
 
         it('reads the numbers a card gives its parameters', () => {
-            expect(parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: aantal = 3\nSELECT {{aantal}}', 'x.sql', new Map()).cards[0].defaults)
-                .toEqual(new Map([['aantal', 3]]));
+            expect(
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: aantal = 3\nSELECT {{aantal}}',
+                    'x.sql',
+                    new Map(),
+                ).cards[0].defaults,
+            ).toEqual(new Map([['aantal', 3]]));
         });
 
         it('keeps zero defaults and the last value of a repeated parameter', () => {
-            expect(parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: aantal = 3, aantal = 0\nSELECT {{aantal}}', 'x.sql', new Map()).cards[0].defaults)
-                .toEqual(new Map([['aantal', 0]]));
+            expect(
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: aantal = 3, aantal = 0\nSELECT {{aantal}}',
+                    'x.sql',
+                    new Map(),
+                ).cards[0].defaults,
+            ).toEqual(new Map([['aantal', 0]]));
         });
 
         it('rejects a default that is no number, or for a parameter the query does not take', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: aantal = drie\nSELECT {{aantal}}', 'x.sql', new Map()))
-                .toThrow('expected <parameter> = <number>');
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: ander = 3\nSELECT {{aantal}}', 'x.sql', new Map()))
-                .toThrow('its query takes no {{ander}}');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: aantal = drie\nSELECT {{aantal}}',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('expected <parameter> = <number>');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- defaults: ander = 3\nSELECT {{aantal}}',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('its query takes no {{ander}}');
         });
 
         it('rejects a table with ranges but no columns to color', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- segments: 0, 35, 55\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('names no metrics to color');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- segments: 0, 35, 55\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('names no metrics to color');
         });
 
         it('rejects a highlight on a card that is not a table', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- highlight: Opvolgen\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('names highlight, which only a table reads');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- highlight: Opvolgen\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('names highlight, which only a table reads');
         });
 
         /** Every other display drops the setting without a word, leaving a chart that looks right. */
         it('rejects ranges on a card that reads none', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- segments: 0, 35, 55, 75\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('names segments, which only a gauge, a number or a table reads');
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- best: low\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('names best, which only a gauge, a number or a table reads');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- segments: 0, 35, 55, 75\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('names segments, which only a gauge, a number or a table reads');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- best: low\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('names best, which only a gauge, a number or a table reads');
         });
 
         /** A range that ends before it starts is drawn nowhere, so the arc loses it silently. */
         it('rejects gauge ranges that do not rise', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 55, 35, 75\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('expected rising numbers');
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, veel, 75\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('expected rising numbers');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 55, 35, 75\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('expected rising numbers');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, veel, 75\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('expected rising numbers');
         });
 
         it('rejects a gauge divided at fewer boundaries than it takes to draw two ranges', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 100\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('at least three boundaries');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 100\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('at least three boundaries');
         });
 
         it('rejects a gauge read from an end it cannot have', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 6, 12\n-- best: laag\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('has best "laag"');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- segments: 0, 6, 12\n-- best: laag\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('has best "laag"');
         });
 
         /** Metabase draws the ranges it falls back to in its own colors, so this one colors nothing. */
         it('rejects an end to read from without ranges to color', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- best: low\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('no segments to color');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: gauge\n-- best: low\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('no segments to color');
         });
 
         it('rejects a height that is no height', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- height: hoog\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('has height "hoog"');
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- span: 0\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('has span "0"');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- height: hoog\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('has height "hoog"');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: bar\n-- span: 0\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('has span "0"');
         });
 
         /** The rows it spans decide, so a height of its own would be read by neither. */
         it('rejects a card that spans rows and names a height as well', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: map\n-- latitude: A\n-- longitude: B\n-- span: 2\n-- height: 12\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('spans 2 rows and names a height');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: map\n-- latitude: A\n-- longitude: B\n-- span: 2\n-- height: 12\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('spans 2 rows and names a height');
         });
 
         it('rejects a filter no card can be driven by', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n-- filters: eenheid\n\n-- @card c\n-- title: C\n-- display: table\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('no card uses {{eenheid}}');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n-- filters: eenheid\n\n-- @card c\n-- title: C\n-- display: table\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('no card uses {{eenheid}}');
         });
 
         /**
@@ -1549,26 +2348,49 @@ describe('report', () => {
          * both of them show.
          */
         it('rejects two cards of a tab under the same title', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card a\n-- title: C\n-- display: scalar\nSELECT 1\n\n-- @card b\n-- title: C\n-- display: gauge\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('two cards are titled "C"');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card a\n-- title: C\n-- display: scalar\nSELECT 1\n\n-- @card b\n-- title: C\n-- display: gauge\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('two cards are titled "C"');
         });
 
         it('rejects a card without a title', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- display: table\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('"c" has no title');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- display: table\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('"c" has no title');
         });
 
         /** A fragment that includes another would otherwise expand until it runs out of memory. */
         it('rejects a fragment that includes itself', () => {
-            const includes = new Map([['facts', '-- @include aansluiting'], ['aansluiting', '-- @include facts']]);
+            const includes = new Map([
+                ['facts', '-- @include aansluiting'],
+                ['aansluiting', '-- @include facts'],
+            ]);
 
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- @include facts\nSELECT 1', 'x.sql', includes))
-                .toThrow('includes "facts" from within itself');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- @include facts\nSELECT 1',
+                    'x.sql',
+                    includes,
+                ),
+            ).toThrow('includes "facts" from within itself');
         });
 
         it('rejects an include that does not exist', () => {
-            expect(() => parseTab('-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- @include nope\nSELECT 1', 'x.sql', new Map()))
-                .toThrow('report/includes/nope.sql');
+            expect(() =>
+                parseTab(
+                    '-- @tab d\n-- title: D\n\n-- @card c\n-- title: C\n-- display: table\n-- @include nope\nSELECT 1',
+                    'x.sql',
+                    new Map(),
+                ),
+            ).toThrow('report/includes/nope.sql');
         });
     });
 
@@ -1585,7 +2407,9 @@ describe('report', () => {
         let snippets: Map<string, string>;
 
         beforeAll(async () => {
-            snippets = new Map((await loadSnippets('keeo')).map(snippet => [snippet.name, snippet.sql]));
+            snippets = new Map(
+                (await loadSnippets('keeo')).map((snippet) => [snippet.name, snippet.sql]),
+            );
         });
 
         it('offers every fragment a question refers to as a snippet of its own', () => {
@@ -1593,7 +2417,9 @@ describe('report', () => {
             expect([...snippets.keys()]).toContain('deduplicated-non-platform-registrations');
 
             for (const [name, sql] of snippets) {
-                expect(`${name}: ${/^[ \t]*--[ \t]*@(?:include|inline)\b/m.test(sql)}`).toEqual(`${name}: false`);
+                expect(`${name}: ${/^[ \t]*--[ \t]*@(?:include|inline)\b/m.test(sql)}`).toEqual(
+                    `${name}: false`,
+                );
             }
         });
 
@@ -1605,10 +2431,17 @@ describe('report', () => {
          */
         it('offers no snippet for a fragment that is only inlined', async () => {
             const written = await fs.readdir(path.join(getReportDirectory(), 'includes'));
-            const fragments = written.filter(entry => entry.endsWith('.sql')).map(entry => path.basename(entry, '.sql'));
+            const fragments = written
+                .filter((entry) => entry.endsWith('.sql'))
+                .map((entry) => path.basename(entry, '.sql'));
 
-            expect(fragments).toEqual(expect.arrayContaining(['participant-details', 'participant-detail-columns']));
-            expect(fragments.filter(name => !snippets.has(name)).sort()).toEqual(['participant-detail-columns', 'participant-details']);
+            expect(fragments).toEqual(
+                expect.arrayContaining(['participant-details', 'participant-detail-columns']),
+            );
+            expect(fragments.filter((name) => !snippets.has(name)).sort()).toEqual([
+                'participant-detail-columns',
+                'participant-details',
+            ]);
         });
 
         /** Written out in both readings of the card, so Metabase is given no reference to resolve. */
@@ -1616,20 +2449,37 @@ describe('report', () => {
             const card = cardOf(dashboards, 'jeugdbewegingen', bovenlokaalKey('keeo'));
 
             expect(card.snippetSql).toContain('YEAR(`birth_date`) AS `Geboortejaar_deelnemers`');
-            expect(card.snippetSql).toContain('GROUP BY `ID_Organisatie`,\n    `Geboortejaar_deelnemers`');
+            expect(card.snippetSql).toContain(
+                'GROUP BY `ID_Organisatie`,\n    `Geboortejaar_deelnemers`',
+            );
             expect(card.snippetSql).not.toContain('participant-detail');
-            expect(card.snippets).toEqual(['all-registrations', 'default-age-groups-with-category', 'default-age-group-category', 'filter-registration-types', 'filter-has-delivery-membership', 'filter-delivery-memberships']);
+            expect(card.snippets).toEqual([
+                'all-registrations',
+                'default-age-groups-with-category',
+                'default-age-group-category',
+                'filter-registration-types',
+                'filter-has-delivery-membership',
+                'filter-delivery-memberships',
+            ]);
         });
 
         /** A fragment refers to the fragments it reads the way a card does, so neither holds a copy. */
         it('leaves a fragment inside a fragment as a reference', () => {
-            expect(snippets.get('all-non-platform-registrations')).toContain('{{snippet: all-registrations}}');
-            expect(snippets.get('all-registrations')).toContain('{{snippet: default-age-groups-with-category}}');
-            expect(snippets.get('all-non-platform-registrations')).not.toContain('FROM registrations r');
+            expect(snippets.get('all-non-platform-registrations')).toContain(
+                '{{snippet: all-registrations}}',
+            );
+            expect(snippets.get('all-registrations')).toContain(
+                '{{snippet: default-age-groups-with-category}}',
+            );
+            expect(snippets.get('all-non-platform-registrations')).not.toContain(
+                'FROM registrations r',
+            );
         });
 
         it('gives a fragment the variant of the environment it was loaded for', async () => {
-            const ravot = new Map((await loadSnippets('ravot')).map(snippet => [snippet.name, snippet.sql]));
+            const ravot = new Map(
+                (await loadSnippets('ravot')).map((snippet) => [snippet.name, snippet.sql]),
+            );
 
             expect(ravot.get('gtp')).toContain('leeftijd < 10');
             expect(snippets.get('gtp')).not.toContain('leeftijd < 10');
@@ -1640,18 +2490,28 @@ describe('report', () => {
          * it next to the name, where a comment is only read after opening the fragment.
          */
         it('lifts the description line out of the sql and into the snippet', async () => {
-            const described = new Map((await loadSnippets('keeo')).map(snippet => [snippet.name, snippet]));
+            const described = new Map(
+                (await loadSnippets('keeo')).map((snippet) => [snippet.name, snippet]),
+            );
 
-            expect(described.get('deduplicated-non-platform-registrations')!.description).toContain('de inschrijving die voor het lid spreekt');
-            expect(described.get('deduplicated-non-platform-registrations')!.sql).not.toContain('description:');
+            expect(described.get('deduplicated-non-platform-registrations')!.description).toContain(
+                'de inschrijving die voor het lid spreekt',
+            );
+            expect(described.get('deduplicated-non-platform-registrations')!.sql).not.toContain(
+                'description:',
+            );
             // keeo names its aansluitingen without describing them, so the base fragment's words hold.
-            expect(described.get('filter-statistics-memberships')!.description).toContain('Zonder lijst telt elke aansluiting mee');
+            expect(described.get('filter-statistics-memberships')!.description).toContain(
+                'Zonder lijst telt elke aansluiting mee',
+            );
         });
 
         it('writes a card as the fragments it reads rather than a copy of them', () => {
             const card = cardOf(dashboards, 'nationaal', 'totaal-leden');
 
-            expect(card.snippetSql).toContain('{{snippet: deduplicated-non-platform-registrations}}');
+            expect(card.snippetSql).toContain(
+                '{{snippet: deduplicated-non-platform-registrations}}',
+            );
             // What `leden` reads is its own business: the card names it in a WITH of its own and
             // never spells out what a lid is, nor which fragments that answer is built from.
             expect(card.snippetSql).not.toContain('{{snippet: facts}}');
@@ -1666,7 +2526,15 @@ describe('report', () => {
             const card = cardOf(dashboards, 'nationaal', 'totaal-leden');
 
             expect(card.snippets[0]).toEqual('deduplicated-non-platform-registrations');
-            expect(card.snippets).toEqual(expect.arrayContaining(['deduplicated-non-platform-registrations', 'all-non-platform-registrations', 'all-registrations', 'default-age-groups-with-category', 'default-age-group-category']));
+            expect(card.snippets).toEqual(
+                expect.arrayContaining([
+                    'deduplicated-non-platform-registrations',
+                    'all-non-platform-registrations',
+                    'all-registrations',
+                    'default-age-groups-with-category',
+                    'default-age-group-category',
+                ]),
+            );
         });
 
         /** The tags of a question are read off the expanded query, so a filter inside a fragment counts. */
@@ -1711,7 +2579,11 @@ describe('report', () => {
         ].join('\n');
 
         afterAll(async () => {
-            await Promise.all(fixtures.map(async directory => await fs.rm(directory, { recursive: true, force: true })));
+            await Promise.all(
+                fixtures.map(
+                    async (directory) => await fs.rm(directory, { recursive: true, force: true }),
+                ),
+            );
         });
 
         it('expands the fragment an environment overrides, and the shared one everywhere else', async () => {
@@ -1721,15 +2593,26 @@ describe('report', () => {
                 'includes/ravot/telling.sql': 'COUNT(DISTINCT member_id)',
             });
 
-            expect(cardOf(await loadReport('ravot', directory), 'nationaal', 'leden').sql).toContain('COUNT(DISTINCT member_id)');
-            expect(cardOf(await loadReport('keeo', directory), 'nationaal', 'leden').sql).toContain('COUNT(*)');
+            expect(
+                cardOf(await loadReport('ravot', directory), 'nationaal', 'leden').sql,
+            ).toContain('COUNT(DISTINCT member_id)');
+            expect(cardOf(await loadReport('keeo', directory), 'nationaal', 'leden').sql).toContain(
+                'COUNT(*)',
+            );
         });
 
         it('gives a setting to the environment it names and the plain one to the rest', async () => {
-            const directory = await writeReport({ 'nationaal.sql': tab, 'includes/telling.sql': 'COUNT(*)' });
+            const directory = await writeReport({
+                'nationaal.sql': tab,
+                'includes/telling.sql': 'COUNT(*)',
+            });
 
-            expect(cardOf(await loadReport('ravot', directory), 'nationaal', 'leden').description).toEqual('Zoals ravot telt');
-            expect(cardOf(await loadReport('keeo', directory), 'nationaal', 'leden').description).toEqual('Zoals de rest telt');
+            expect(
+                cardOf(await loadReport('ravot', directory), 'nationaal', 'leden').description,
+            ).toEqual('Zoals ravot telt');
+            expect(
+                cardOf(await loadReport('keeo', directory), 'nationaal', 'leden').description,
+            ).toEqual('Zoals de rest telt');
         });
 
         it('leaves a card out of the environment that names it, and writes it everywhere else', async () => {
@@ -1738,19 +2621,29 @@ describe('report', () => {
                 'includes/telling.sql': 'COUNT(*)',
             });
 
-            expect((await loadReport('ravot', directory))[0].cards.map(card => card.key)).toEqual(['leden', 'geslacht']);
-            expect((await loadReport('keeo', directory))[0].cards.map(card => card.key)).toEqual(['leden']);
+            expect((await loadReport('ravot', directory))[0].cards.map((card) => card.key)).toEqual(
+                ['leden', 'geslacht'],
+            );
+            expect((await loadReport('keeo', directory))[0].cards.map((card) => card.key)).toEqual([
+                'leden',
+            ]);
         });
 
         it('leaves a tab out of the environment that names it, with every card of it', async () => {
             const directory = await writeReport({
                 'nationaal.sql': tab,
-                'varia.sql': '-- @tab varia\n-- title: Varia\n-- except: keeo\n\n-- @card geslacht\n-- title: Geslacht\n-- display: pie\nSELECT 1',
+                'varia.sql':
+                    '-- @tab varia\n-- title: Varia\n-- except: keeo\n\n-- @card geslacht\n-- title: Geslacht\n-- display: pie\nSELECT 1',
                 'includes/telling.sql': 'COUNT(*)',
             });
 
-            expect((await loadReport('ravot', directory)).map(entry => entry.key)).toEqual(['nationaal', 'varia']);
-            expect((await loadReport('keeo', directory)).map(entry => entry.key)).toEqual(['nationaal']);
+            expect((await loadReport('ravot', directory)).map((entry) => entry.key)).toEqual([
+                'nationaal',
+                'varia',
+            ]);
+            expect((await loadReport('keeo', directory)).map((entry) => entry.key)).toEqual([
+                'nationaal',
+            ]);
         });
 
         /**
@@ -1761,23 +2654,32 @@ describe('report', () => {
         it('offers what an environment leaves out under the tab it was written on', async () => {
             const directory = await writeReport({
                 'nationaal.sql': `${tab}\n\n-- @card geslacht\n-- title: Geslacht\n-- except: keeo\n-- display: pie\nSELECT 1`,
-                'varia.sql': '-- @tab varia\n-- title: Varia\n-- except: keeo\n\n-- @card uldk\n-- title: ULDK\n-- display: table\nSELECT 1',
+                'varia.sql':
+                    '-- @tab varia\n-- title: Varia\n-- except: keeo\n\n-- @card uldk\n-- title: ULDK\n-- display: table\nSELECT 1',
                 'includes/telling.sql': 'COUNT(*)',
             });
 
             const retired = await loadRetiredReport('keeo', directory);
 
-            expect(retired.map(entry => `${entry.title}: ${entry.cards.map(card => card.title).join(', ')}`)).toEqual(['Nationaal: Geslacht', 'Varia: ULDK']);
+            expect(
+                retired.map(
+                    (entry) =>
+                        `${entry.title}: ${entry.cards.map((card) => card.title).join(', ')}`,
+                ),
+            ).toEqual(['Nationaal: Geslacht', 'Varia: ULDK']);
             expect(await loadRetiredReport('ravot', directory)).toEqual([]);
         });
 
         /** Written as a page whatever is left on it, so an empty one is a tab that had to go itself. */
         it('rejects a tab whose every card is left out of an environment', async () => {
             const directory = await writeReport({
-                'nationaal.sql': '-- @tab nationaal\n-- title: Nationaal\n\n-- @card geslacht\n-- title: Geslacht\n-- except: keeo\n-- display: pie\nSELECT 1',
+                'nationaal.sql':
+                    '-- @tab nationaal\n-- title: Nationaal\n\n-- @card geslacht\n-- title: Geslacht\n-- except: keeo\n-- display: pie\nSELECT 1',
             });
 
-            await expect(loadReport('keeo', directory)).rejects.toThrow('Tab "nationaal" has every card left out of keeo');
+            await expect(loadReport('keeo', directory)).rejects.toThrow(
+                'Tab "nationaal" has every card left out of keeo',
+            );
             await expect(loadReport('ravot', directory)).resolves.toHaveLength(1);
         });
 
@@ -1806,7 +2708,8 @@ describe('report', () => {
                 'includes/telling.sql': 'COUNT(*)',
             });
 
-            const drawnIn = async (env: string) => (await loadReport(env, directory))[0].cards.map(card => card.key);
+            const drawnIn = async (env: string) =>
+                (await loadReport(env, directory))[0].cards.map((card) => card.key);
 
             expect(await drawnIn('keeo')).toEqual(['leden', 'leeftijd']);
             expect(await drawnIn('ravot')).toEqual(['leden', 'leeftijd-en-geslacht']);
@@ -1835,7 +2738,9 @@ describe('report', () => {
             });
 
             await expect(loadReport('keeo', directory)).resolves.toHaveLength(1);
-            await expect(loadReport('development', directory)).rejects.toThrow('two cards are titled "Leeftijd"');
+            await expect(loadReport('development', directory)).rejects.toThrow(
+                'two cards are titled "Leeftijd"',
+            );
         });
 
         /**
@@ -1868,8 +2773,12 @@ describe('report', () => {
             expect(card.snippetSql).toContain('GROUP BY\n    `Werkjaar`');
             expect(card.snippetSql).toContain('{{snippet: telling}}');
             expect(card.snippets).toEqual(['telling']);
-            expect((await loadSnippets('keeo', directory)).map(snippet => snippet.name)).toEqual(['telling']);
-            expect(cardOf(await loadReport('ravot', directory), 'nationaal', 'leden').sql).toContain('GROUP BY\n    `Werkjaar`, `Geslacht`');
+            expect((await loadSnippets('keeo', directory)).map((snippet) => snippet.name)).toEqual([
+                'telling',
+            ]);
+            expect(
+                cardOf(await loadReport('ravot', directory), 'nationaal', 'leden').sql,
+            ).toContain('GROUP BY\n    `Werkjaar`, `Geslacht`');
         });
 
         /** Metabase would resolve the nested reference against tags the question never declared. */
@@ -1880,7 +2789,9 @@ describe('report', () => {
                 'includes/kenmerken.sql': '-- @include telling',
             });
 
-            await expect(loadReport('keeo', directory)).rejects.toThrow('inlines "kenmerken", which reads a fragment of its own');
+            await expect(loadReport('keeo', directory)).rejects.toThrow(
+                'inlines "kenmerken", which reads a fragment of its own',
+            );
         });
 
         /** Nothing includes it, so a misspelled override would change nothing and say nothing. */
@@ -1891,13 +2802,20 @@ describe('report', () => {
                 'includes/ravot/teling.sql': 'COUNT(DISTINCT member_id)',
             });
 
-            await expect(loadReport('ravot', directory)).rejects.toThrow('includes/ravot/teling.sql overrides "teling"');
+            await expect(loadReport('ravot', directory)).rejects.toThrow(
+                'includes/ravot/teling.sql overrides "teling"',
+            );
         });
     });
 
     describe('resolveSql', () => {
         it('keeps an optional clause when its parameter has a value', () => {
-            expect(resolveSql('SELECT 1 [[AND name = {{werkjaar}}]]', new Map([['werkjaar', '2024 - 2025']]))).toEqual("SELECT 1 AND name = '2024 - 2025'");
+            expect(
+                resolveSql(
+                    'SELECT 1 [[AND name = {{werkjaar}}]]',
+                    new Map([['werkjaar', '2024 - 2025']]),
+                ),
+            ).toEqual("SELECT 1 AND name = '2024 - 2025'");
         });
 
         it('drops an optional clause when it has none, which is what Metabase does', () => {
@@ -1905,13 +2823,21 @@ describe('report', () => {
         });
 
         it('escapes a quote rather than ending the string', () => {
-            expect(resolveSql('{{eenheid}}', new Map([['eenheid', "'t Vloedgat"]]))).toEqual("'''t Vloedgat'");
+            expect(resolveSql('{{eenheid}}', new Map([['eenheid', "'t Vloedgat"]]))).toEqual(
+                "'''t Vloedgat'",
+            );
         });
 
         it('distinguishes empty parameters from null and missing parameters', () => {
-            expect(resolveSql('[[{{empty}}]][[{{none}}]][[{{missing}}]] {{none}} {{missing}}', new Map([
-                ['empty', ''], ['none', null],
-            ]))).toEqual("'' NULL NULL");
+            expect(
+                resolveSql(
+                    '[[{{empty}}]][[{{none}}]][[{{missing}}]] {{none}} {{missing}}',
+                    new Map([
+                        ['empty', ''],
+                        ['none', null],
+                    ]),
+                ),
+            ).toEqual("'' NULL NULL");
         });
 
         it('finds each parameter once, in the order it appears', () => {

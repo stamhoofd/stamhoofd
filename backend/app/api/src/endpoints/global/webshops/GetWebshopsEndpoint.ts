@@ -3,10 +3,24 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { Order, Organization, Webshop } from '@stamhoofd/models';
-import { SQL, SQLAlias, SQLCount, SQLSelectAs, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
+import {
+    SQL,
+    SQLAlias,
+    SQLCount,
+    SQLSelectAs,
+    applySQLSorter,
+    compileToSQLFilter,
+} from '@stamhoofd/sql';
 import type { CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { LimitedFilteredRequest, OrderStatus, PaginatedResponse, WebshopWithOrganization, assertSort, getSortFilter } from '@stamhoofd/structures';
+import {
+    LimitedFilteredRequest,
+    OrderStatus,
+    PaginatedResponse,
+    WebshopWithOrganization,
+    assertSort,
+    getSortFilter,
+} from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@node/database';
 import { Formatter } from '@stamhoofd/utility';
@@ -42,17 +56,12 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest) {
         const organization = Context.organization;
 
-        const query = SQL
-            .select(
-                SQL.wildcard('webshops'),
-            )
+        const query = SQL.select(SQL.wildcard('webshops'))
             .setMaxExecutionTime(15 * 1000)
-            .from(
-                SQL.table('webshops'),
-            );
+            .from(SQL.table('webshops'));
 
         if (organization) {
-            if (!await Context.auth.hasSomeAccess(organization.id)) {
+            if (!(await Context.auth.hasSomeAccess(organization.id))) {
                 throw Context.auth.error();
             }
 
@@ -122,14 +131,10 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             return counts;
         }
 
-        const rows = await SQL
-            .select(
-                SQL.column(Order.table, 'webshopId'),
-                new SQLSelectAs(
-                    new SQLCount(),
-                    new SQLAlias('data__count'),
-                ),
-            )
+        const rows = await SQL.select(
+            SQL.column(Order.table, 'webshopId'),
+            new SQLSelectAs(new SQLCount(), new SQLAlias('data__count')),
+        )
             .setMaxExecutionTime(15 * 1000)
             .from(SQL.table(Order.table))
             .where('webshopId', webshopIds)
@@ -144,7 +149,9 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         return counts;
     }
 
-    static async buildData(requestQuery: LimitedFilteredRequest): Promise<PaginatedResponse<WebshopWithOrganization[], LimitedFilteredRequest>> {
+    static async buildData(
+        requestQuery: LimitedFilteredRequest,
+    ): Promise<PaginatedResponse<WebshopWithOrganization[], LimitedFilteredRequest>> {
         const query = await GetWebshopsEndpoint.buildQuery(requestQuery);
         let data: SQLResultNamespacedRow[];
 
@@ -172,12 +179,17 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         // Batch-load organizations for accessible webshops
-        const organizationIds = Formatter.uniqueArray(accessibleWebshops.map(w => w.organizationId));
-        const organizationModels = organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
+        const organizationIds = Formatter.uniqueArray(
+            accessibleWebshops.map((w) => w.organizationId),
+        );
+        const organizationModels =
+            organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
 
         // Only the webshops overview of the administration portal shows the order counts. The endpoint is
         // also used in organization context (e.g. to pick a webshop in filters), where we skip the extra query.
-        const orderCounts = Context.organization ? null : await GetWebshopsEndpoint.getOrderCounts(accessibleWebshops.map(w => w.id));
+        const orderCounts = Context.organization
+            ? null
+            : await GetWebshopsEndpoint.getOrderCounts(accessibleWebshops.map((w) => w.id));
 
         let next: LimitedFilteredRequest | undefined;
 
@@ -201,19 +213,27 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         const results: WebshopWithOrganization[] = [];
         for (const webshop of accessibleWebshops) {
-            const organizationModel = organizationModels.find(o => o.id === webshop.organizationId);
+            const organizationModel = organizationModels.find(
+                (o) => o.id === webshop.organizationId,
+            );
             if (!organizationModel) {
                 // Skip webshops whose organization cannot be found
-                console.warn('Organization not found for webshop', webshop.id, webshop.organizationId);
+                console.warn(
+                    'Organization not found for webshop',
+                    webshop.id,
+                    webshop.organizationId,
+                );
                 continue;
             }
 
             const webshopStruct = await AuthenticatedStructures.webshopPreview(webshop);
-            results.push(WebshopWithOrganization.create({
-                webshop: webshopStruct,
-                organization: organizationModel.getBaseStructure(),
-                orderCount: orderCounts ? (orderCounts.get(webshop.id) ?? 0) : null,
-            }));
+            results.push(
+                WebshopWithOrganization.create({
+                    webshop: webshopStruct,
+                    organization: organizationModel.getBaseStructure(),
+                    orderCount: orderCounts ? (orderCounts.get(webshop.id) ?? 0) : null,
+                }),
+            );
         }
 
         return new PaginatedResponse<WebshopWithOrganization[], LimitedFilteredRequest>({
@@ -244,8 +264,6 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
-        return new Response(
-            await GetWebshopsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetWebshopsEndpoint.buildData(request.query));
     }
 }

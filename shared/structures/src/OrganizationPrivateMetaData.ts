@@ -1,5 +1,15 @@
 import type { Decoder } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 
 import { Premise } from './addresses/Premise.js';
 import { DNSRecord } from './DNSRecord.js';
@@ -113,7 +123,11 @@ export class BuckarooSettings extends AutoEncoder {
     secret = '';
 
     @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentMethod)) })
-    paymentMethods: PaymentMethod[] = [PaymentMethod.Bancontact, PaymentMethod.iDEAL, PaymentMethod.Payconiq];
+    paymentMethods: PaymentMethod[] = [
+        PaymentMethod.Bancontact,
+        PaymentMethod.iDEAL,
+        PaymentMethod.Payconiq,
+    ];
 
     static get placeholderSecret() {
         return '••••';
@@ -137,7 +151,7 @@ export class ExternalSyncData extends AutoEncoder {
 
 export class BalanceNotificationSettings extends AutoEncoder {
     @field({ decoder: BooleanDecoder })
-    @field({ decoder: BooleanDecoder, version: 363, upgrade: () => (false) }) // Force reset to false
+    @field({ decoder: BooleanDecoder, version: 363, upgrade: () => false }) // Force reset to false
     enabled = false;
 
     @field({ decoder: StringDecoder, nullable: true })
@@ -167,7 +181,11 @@ export class BalanceNotificationSettings extends AutoEncoder {
                 },
             },
         });
-        if (Array.isArray(unwrapped.markerValue) && unwrapped.markerValue.length && unwrapped.markerValue.every(v => typeof v === 'string')) {
+        if (
+            Array.isArray(unwrapped.markerValue) &&
+            unwrapped.markerValue.length &&
+            unwrapped.markerValue.every((v) => typeof v === 'string')
+        ) {
             return unwrapped.markerValue;
         }
         return [];
@@ -256,7 +274,11 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
     @field({ decoder: BuckarooSettings, nullable: true, version: 152 })
     buckarooSettings: BuckarooSettings | null = null;
 
-    @field({ decoder: PrivatePaymentConfiguration, version: 176, field: 'registrationProviderConfiguration' })
+    @field({
+        decoder: PrivatePaymentConfiguration,
+        version: 176,
+        field: 'registrationProviderConfiguration',
+    })
     @field({ decoder: PrivatePaymentConfiguration, version: 204 })
     registrationPaymentConfiguration = PrivatePaymentConfiguration.create({});
 
@@ -358,8 +380,15 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
         return STAMHOOFD.environment !== 'production';
     }
 
-    getPaymentProviderFor(method: PaymentMethod, stripeAccountMeta?: StripeMetaData | null): PaymentProvider | null {
-        if (method === PaymentMethod.Unknown || method === PaymentMethod.Transfer || method === PaymentMethod.PointOfSale) {
+    getPaymentProviderFor(
+        method: PaymentMethod,
+        stripeAccountMeta?: StripeMetaData | null,
+    ): PaymentProvider | null {
+        if (
+            method === PaymentMethod.Unknown ||
+            method === PaymentMethod.Transfer ||
+            method === PaymentMethod.PointOfSale
+        ) {
             return null;
         }
 
@@ -380,7 +409,13 @@ export class OrganizationPrivateMetaData extends AutoEncoder {
             }
         }
 
-        if ((this.mollieOnboarding && (this.mollieOnboarding?.canReceivePayments || this.actualTestPayments)) && (method == PaymentMethod.Bancontact || method == PaymentMethod.iDEAL || method == PaymentMethod.CreditCard)) {
+        if (
+            this.mollieOnboarding &&
+            (this.mollieOnboarding?.canReceivePayments || this.actualTestPayments) &&
+            (method == PaymentMethod.Bancontact ||
+                method == PaymentMethod.iDEAL ||
+                method == PaymentMethod.CreditCard)
+        ) {
             return PaymentProvider.Mollie;
         }
 

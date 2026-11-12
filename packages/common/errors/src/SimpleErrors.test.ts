@@ -5,14 +5,26 @@ import { isSimpleErrors, SimpleErrors } from './SimpleErrors.js';
 
 describe('SimpleErrors', () => {
     it('round-trips grouped errors and preserves lookup and status behavior', () => {
-        const first = new SimpleError({ id: 'first', code: 'first', message: 'First', field: 'name', meta: { attempt: 2 } });
-        const second = new SimpleError({ id: 'second', code: 'second', message: 'Second', human: 'Tweede fout', statusCode: 422 });
+        const first = new SimpleError({
+            id: 'first',
+            code: 'first',
+            message: 'First',
+            field: 'name',
+            meta: { attempt: 2 },
+        });
+        const second = new SimpleError({
+            id: 'second',
+            code: 'second',
+            message: 'Second',
+            human: 'Tweede fout',
+            statusCode: 422,
+        });
         const errors = new SimpleErrors(first, second);
 
         const decoded = SimpleErrors.decode(createErrorData(errors.encode({ version: 0 })));
         expect(decoded).toBeInstanceOf(SimpleErrors);
         expect(decoded.errors).toHaveLength(2);
-        expect(decoded.errors.every(error => error instanceof SimpleError)).toBe(true);
+        expect(decoded.errors.every((error) => error instanceof SimpleError)).toBe(true);
         expect(decoded.encode({ version: 0 })).toEqual(errors.encode({ version: 0 }));
 
         expect(errors.statusCode).toBe(422);
@@ -60,7 +72,7 @@ function createErrorData(value: ErrorValue): ErrorData {
             return field === undefined ? undefined : createErrorData(field);
         },
         array(decoder) {
-            return (value as ErrorValue[]).map(item => decoder.decode(createErrorData(item)));
+            return (value as ErrorValue[]).map((item) => decoder.decode(createErrorData(item)));
         },
     };
 }

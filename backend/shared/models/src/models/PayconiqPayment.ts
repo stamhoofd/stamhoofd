@@ -16,7 +16,9 @@ export class PayconiqPayment extends QueryableModel {
     static table = 'payconiq_payments';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -31,17 +33,25 @@ export class PayconiqPayment extends QueryableModel {
     getResponseStatus(response: any) {
         if (response.status) {
             switch (response.status) {
-                case 'AUTHORIZED': return PaymentStatus.Pending;
-                case 'PENDING': return PaymentStatus.Created;
+                case 'AUTHORIZED':
+                    return PaymentStatus.Pending;
+                case 'PENDING':
+                    return PaymentStatus.Created;
 
-                case 'IDENTIFIED': return PaymentStatus.Pending; // Code has been scanned!
+                case 'IDENTIFIED':
+                    return PaymentStatus.Pending; // Code has been scanned!
 
-                case 'AUTHORIZATION_FAILED': return PaymentStatus.Failed;
-                case 'EXPIRED': return PaymentStatus.Failed;
-                case 'FAILED': return PaymentStatus.Failed;
-                case 'CANCELLED': return PaymentStatus.Failed;
+                case 'AUTHORIZATION_FAILED':
+                    return PaymentStatus.Failed;
+                case 'EXPIRED':
+                    return PaymentStatus.Failed;
+                case 'FAILED':
+                    return PaymentStatus.Failed;
+                case 'CANCELLED':
+                    return PaymentStatus.Failed;
 
-                case 'SUCCEEDED': return PaymentStatus.Succeeded;
+                case 'SUCCEEDED':
+                    return PaymentStatus.Succeeded;
             }
             return PaymentStatus.Pending; // default to pending
         }
@@ -61,8 +71,15 @@ export class PayconiqPayment extends QueryableModel {
             });
         }
 
-        const testMode = organization.privateMeta.useTestPayments ?? (STAMHOOFD.environment !== 'production');
-        const response = await PayconiqPayment.request('GET', '/v3/payments/' + this.payconiqId, {}, apiKey, testMode);
+        const testMode =
+            organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production';
+        const response = await PayconiqPayment.request(
+            'GET',
+            '/v3/payments/' + this.payconiqId,
+            {},
+            apiKey,
+            testMode,
+        );
 
         if (typeof response !== 'object' || response === null) {
             throw new SimpleError({
@@ -73,7 +90,11 @@ export class PayconiqPayment extends QueryableModel {
         const status = this.getResponseStatus(response);
 
         // Check debtor
-        if ('debtor' in response && typeof response.debtor === 'object' && response.debtor !== null) {
+        if (
+            'debtor' in response &&
+            typeof response.debtor === 'object' &&
+            response.debtor !== null
+        ) {
             try {
                 const name = response.debtor.name;
                 const iban = response.debtor.iban;
@@ -86,7 +107,9 @@ export class PayconiqPayment extends QueryableModel {
                     payment.ibanName = name.substring(0, 128);
 
                     if (StringCompare.isFullCaps(payment.ibanName)) {
-                        payment.ibanName = Formatter.capitalizeWords(Formatter.removeDuplicateSpaces(payment.ibanName.toLowerCase())).substring(0, 128);
+                        payment.ibanName = Formatter.capitalizeWords(
+                            Formatter.removeDuplicateSpaces(payment.ibanName.toLowerCase()),
+                        ).substring(0, 128);
                     }
                 }
                 await payment.save();
@@ -121,36 +144,62 @@ export class PayconiqPayment extends QueryableModel {
 
         // Throws on failure
         try {
-            await PayconiqPayment.request('DELETE', '/v3/payments/' + this.payconiqId, {}, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
+            await PayconiqPayment.request(
+                'DELETE',
+                '/v3/payments/' + this.payconiqId,
+                {},
+                apiKey,
+                organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
+            );
             return true;
         } catch (e) {
-            console.error('Failed to cancel Payconiq payment', this.id, this.payconiqId, this.payconiqId, e);
+            console.error(
+                'Failed to cancel Payconiq payment',
+                this.id,
+                this.payconiqId,
+                this.payconiqId,
+                e,
+            );
             return false;
         }
     }
 
-    static async createTest(organization: Organization, payconiqAccount: PayconiqAccount): Promise<undefined | object> {
+    static async createTest(
+        organization: Organization,
+        payconiqAccount: PayconiqAccount,
+    ): Promise<undefined | object> {
         const apiKey = payconiqAccount.apiKey;
         if (!apiKey) {
             return;
         }
 
         try {
-            const response = await this.request('POST', '/v3/payments', {
-                reference: 'test-' + (new Date().getTime()), // 36 chars, max length is 35...
-                amount: 1,
-                currency: 'EUR',
-                callbackUrl: 'https://' + organization.getApiHost(),
-                description: 'Key validation test',
-
-            }, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
+            const response = await this.request(
+                'POST',
+                '/v3/payments',
+                {
+                    reference: 'test-' + new Date().getTime(), // 36 chars, max length is 35...
+                    amount: 1,
+                    currency: 'EUR',
+                    callbackUrl: 'https://' + organization.getApiHost(),
+                    description: 'Key validation test',
+                },
+                apiKey,
+                organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
+            );
             return response;
         } catch (e) {
             return;
         }
     }
 
-    static async createPayment(payment: Payment, organization: Organization, description: string, returnUrl?: string, callbackUrl?: string): Promise<{ paymentUrl: string; paymentQRCode: string }> {
+    static async createPayment(
+        payment: Payment,
+        organization: Organization,
+        description: string,
+        returnUrl?: string,
+        callbackUrl?: string,
+    ): Promise<{ paymentUrl: string; paymentQRCode: string }> {
         const apiKey = organization.privateMeta.payconiqApiKey;
         if (!apiKey) {
             throw new SimpleError({
@@ -159,14 +208,28 @@ export class PayconiqPayment extends QueryableModel {
             });
         }
 
-        const response = await this.request('POST', '/v3/payments', {
-            reference: payment.id.replaceAll('-', ''), // 36 chars, max length is 35.... The actual id is also in the description
-            amount: Math.round(payment.price / 100), // 4 decimals to 2 decimals
-            currency: 'EUR',
-            callbackUrl: callbackUrl ?? 'https://' + organization.getApiHost() + '/v' + Version + '/payments/' + encodeURIComponent(payment.id) + '?exchange=true',
-            returnUrl,
-            description: Formatter.sepaPaymentSlug(description).substring(0, 140), // Lmimit to 140 chars
-        }, apiKey, organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production');
+        const response = await this.request(
+            'POST',
+            '/v3/payments',
+            {
+                reference: payment.id.replaceAll('-', ''), // 36 chars, max length is 35.... The actual id is also in the description
+                amount: Math.round(payment.price / 100), // 4 decimals to 2 decimals
+                currency: 'EUR',
+                callbackUrl:
+                    callbackUrl ??
+                    'https://' +
+                        organization.getApiHost() +
+                        '/v' +
+                        Version +
+                        '/payments/' +
+                        encodeURIComponent(payment.id) +
+                        '?exchange=true',
+                returnUrl,
+                description: Formatter.sepaPaymentSlug(description).substring(0, 140), // Lmimit to 140 chars
+            },
+            apiKey,
+            organization.privateMeta.useTestPayments ?? STAMHOOFD.environment !== 'production',
+        );
 
         const payconiqPayment = new PayconiqPayment();
         payconiqPayment.paymentId = payment.id;
@@ -205,7 +268,13 @@ export class PayconiqPayment extends QueryableModel {
     /**
      * Do a post request on the API.
      */
-    private static request(method: string, path: string, data = {}, auth: string | null = null, testMode: boolean): Promise<any> {
+    private static request(
+        method: string,
+        path: string,
+        data = {},
+        auth: string | null = null,
+        testMode: boolean,
+    ): Promise<any> {
         return new Promise((resolve, reject) => {
             const jsonData = JSON.stringify(data);
 
@@ -213,7 +282,9 @@ export class PayconiqPayment extends QueryableModel {
             const isWero = testMode || Date.now() > new Date('2025-10-19T02:00:00+02:00').getTime();
             let hostname = !testMode ? 'api.payconiq.com' : 'api.ext.payconiq.com';
             if (isWero) {
-                hostname = !testMode ? 'merchant.api.bancontact.net' : 'merchant.api.preprod.bancontact.net';
+                hostname = !testMode
+                    ? 'merchant.api.bancontact.net'
+                    : 'merchant.api.preprod.bancontact.net';
             }
             const base = 'https://' + hostname;
 
@@ -287,7 +358,9 @@ export class PayconiqPayment extends QueryableModel {
 
                             if (response.statusCode < 200 || response.statusCode >= 300) {
                                 console.error(body);
-                                reject(new Error(response.statusCode + ' ' + response.statusMessage));
+                                reject(
+                                    new Error(response.statusCode + ' ' + response.statusMessage),
+                                );
                                 return;
                             }
 

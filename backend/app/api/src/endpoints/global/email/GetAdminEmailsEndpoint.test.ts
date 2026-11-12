@@ -1,8 +1,20 @@
 import { Request } from '@node/endpoints';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
-import { Email, EmailRecipient, MemberFactory, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import {
+    Email,
+    EmailRecipient,
+    MemberFactory,
+    OrganizationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { EmailStatus, LimitedFilteredRequest, Permissions, Replacement } from '@stamhoofd/structures';
+import {
+    EmailStatus,
+    LimitedFilteredRequest,
+    Permissions,
+    Replacement,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetAdminEmailsEndpoint } from './GetAdminEmailsEndpoint.js';
@@ -28,8 +40,7 @@ describe('Endpoint.getAdminEmails', () => {
             endDate: new Date(2023, 11, 31),
         }).create();
 
-        organization = await new OrganizationFactory({ period })
-            .create();
+        organization = await new OrganizationFactory({ period }).create();
 
         user = await new UserFactory({
             organization,
@@ -45,7 +56,11 @@ describe('Endpoint.getAdminEmails', () => {
         userToken = await SessionService.createSession(user);
     });
 
-    const getAdminEmails = async (query: LimitedFilteredRequest = new LimitedFilteredRequest({ limit: 10 }), token: Token = userToken, testOrganization: Organization = organization) => {
+    const getAdminEmails = async (
+        query: LimitedFilteredRequest = new LimitedFilteredRequest({ limit: 10 }),
+        token: Token = userToken,
+        testOrganization: Organization = organization,
+    ) => {
         const request = Request.get({
             path: baseUrl,
             host: testOrganization.getApiHost(),
@@ -72,8 +87,10 @@ describe('Endpoint.getAdminEmails', () => {
         const email = new Email();
         email.subject = 'Sensitive Data Email';
         email.status = EmailStatus.Sent;
-        email.text = 'Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}';
-        email.html = '<p>Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}</p>';
+        email.text =
+            'Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}';
+        email.html =
+            '<p>Email with sensitive replacements {{outstandingBalance}} {{loginDetails}} {{unsubscribeUrl}}</p>';
         email.json = {};
         email.organizationId = organization.id;
         email.showInMemberPortal = true;
@@ -116,7 +133,9 @@ describe('Endpoint.getAdminEmails', () => {
         ];
 
         // Rows saved before loginDetails was removed on save still contain security codes
-        const spy = vi.spyOn(EmailRecipient, 'removeUnstoredReplacements').mockImplementation(r => r);
+        const spy = vi
+            .spyOn(EmailRecipient, 'removeUnstoredReplacements')
+            .mockImplementation((r) => r);
         await sensitiveRecipient.save();
         spy.mockRestore();
 
@@ -148,8 +167,12 @@ describe('Endpoint.getAdminEmails', () => {
         expect(allReplacementsString).not.toContain('private-signin-token-67890'); // Original sensitive signin token should be gone
 
         // Verify that safe, current-user-appropriate replacements are created
-        const loginDetailsReplacement = recipient.replacements.find(r => r.token === 'loginDetails');
-        const unsubscribeUrlReplacement = recipient.replacements.find(r => r.token === 'unsubscribeUrl');
+        const loginDetailsReplacement = recipient.replacements.find(
+            (r) => r.token === 'loginDetails',
+        );
+        const unsubscribeUrlReplacement = recipient.replacements.find(
+            (r) => r.token === 'unsubscribeUrl',
+        );
 
         // loginDetails should exist and be empty/generic for web display
         expect(loginDetailsReplacement).toBeDefined();
@@ -169,13 +192,19 @@ describe('Endpoint.getAdminEmails', () => {
         // 3. Ensuring web safety of all replacement values
 
         // Check outstandingBalance replacement IS not altered
-        const balanceReplacement = recipient.replacements.find(r => r.token === 'outstandingBalance');
+        const balanceReplacement = recipient.replacements.find(
+            (r) => r.token === 'outstandingBalance',
+        );
         expect(balanceReplacement).toBeDefined();
         expect(balanceReplacement!.value).toBe('€ 150.00'); // Should be corrected to the new user
 
         // Check balanceTable replacement IS not altered
-        const balanceTableReplacement = recipient.replacements.find(r => r.token === 'balanceTable');
+        const balanceTableReplacement = recipient.replacements.find(
+            (r) => r.token === 'balanceTable',
+        );
         expect(balanceTableReplacement).toBeDefined();
-        expect(balanceTableReplacement!.html).toBe('<table><tr><td>Private balance information</td><td>€ 150.00</td></tr></table>'); // Should be corrected to the new user
+        expect(balanceTableReplacement!.html).toBe(
+            '<table><tr><td>Private balance information</td><td>€ 150.00</td></tr></table>',
+        ); // Should be corrected to the new user
     });
 });

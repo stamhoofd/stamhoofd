@@ -18,7 +18,9 @@ export const EventNotificationLogger = new ModelLogger(EventNotification, {
         }
 
         const platform = await Platform.getSharedPrivateStruct();
-        const type = platform.config.eventNotificationTypes.find(type => type.id === event.model.typeId);
+        const type = platform.config.eventNotificationTypes.find(
+            (type) => type.id === event.model.typeId,
+        );
 
         return {
             ...result,
@@ -30,11 +32,14 @@ export const EventNotificationLogger = new ModelLogger(EventNotification, {
 
     createReplacements(model, { data }) {
         return new Map([
-            ['n', AuditLogReplacement.create({
-                id: model.id,
-                value: data.title,
-                type: AuditLogReplacementType.EventNotification,
-            })],
+            [
+                'n',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: data.title,
+                    type: AuditLogReplacementType.EventNotification,
+                }),
+            ],
         ]);
     },
 });

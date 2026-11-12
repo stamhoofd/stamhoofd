@@ -19,7 +19,12 @@ it('finishes the ZIP before removing its private temporary directory', async () 
     directory = await fs.mkdtemp(path.join(os.tmpdir(), 'excel-security-'));
     vi.spyOn(os, 'tmpdir').mockReturnValue(directory);
     const chunks: Buffer[] = [];
-    const output = new Writable({ write(chunk: Buffer, _encoding, callback) { chunks.push(chunk); callback(); } });
+    const output = new Writable({
+        write(chunk: Buffer, _encoding, callback) {
+            chunks.push(chunk);
+            callback();
+        },
+    });
     const adapter = new ArchiverWriterAdapter(output);
     const writer = (await adapter.addFile('sheet.xml')).getWriter();
     await writer.write(Buffer.from('<sheet/>'));
@@ -37,7 +42,13 @@ it('keeps export data outside a pre-created shared directory and removes private
     const hostileDirectory = path.join(directory, 'attacker-controlled');
     await fs.mkdir(hostileDirectory);
     await fs.symlink(hostileDirectory, path.join(directory, 'stamhoofd-excel-writer'));
-    const adapter = new ArchiverWriterAdapter(new Writable({ write(_chunk, _encoding, callback) { callback(); } }));
+    const adapter = new ArchiverWriterAdapter(
+        new Writable({
+            write(_chunk, _encoding, callback) {
+                callback();
+            },
+        }),
+    );
     const stream = await adapter.addFile('sheet.xml');
     const writer = stream.getWriter();
     const filePath = adapter.fileStreams[0].tmpFile;

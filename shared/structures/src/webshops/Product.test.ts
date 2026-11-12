@@ -8,7 +8,9 @@ function encode(product: Product | ReturnType<typeof Product.patch>, version: nu
 }
 
 function decode(data: Record<string, unknown>, version: number) {
-    return Product.decode(new ObjectData({ ...encode(Product.create({}), version), ...data }, { version }));
+    return Product.decode(
+        new ObjectData({ ...encode(Product.create({}), version), ...data }, { version }),
+    );
 }
 
 function decodePatch(data: Record<string, unknown>, version: number) {
@@ -53,10 +55,20 @@ describe('Product.allowMultiple 423 <-> 424', () => {
 
     it('upgrades and downgrades patches', () => {
         const product = Product.create({ allowMultiple: null });
-        expect(product.patch(decodePatch({ id: product.id, allowMultiple: false }, before)).allowMultiple).toBe(false);
-        expect(product.patch(decodePatch({ id: product.id, name: 'Nieuwe naam' }, before)).allowMultiple).toBeNull();
+        expect(
+            product.patch(decodePatch({ id: product.id, allowMultiple: false }, before))
+                .allowMultiple,
+        ).toBe(false);
+        expect(
+            product.patch(decodePatch({ id: product.id, name: 'Nieuwe naam' }, before))
+                .allowMultiple,
+        ).toBeNull();
 
-        expect(encode(Product.patch({ id: product.id, allowMultiple: null }), before).allowMultiple).toBe(true);
-        expect(encode(Product.patch({ id: product.id, name: 'Nieuwe naam' }), before).allowMultiple).toBeUndefined();
+        expect(
+            encode(Product.patch({ id: product.id, allowMultiple: null }), before).allowMultiple,
+        ).toBe(true);
+        expect(
+            encode(Product.patch({ id: product.id, name: 'Nieuwe naam' }), before).allowMultiple,
+        ).toBeUndefined();
     });
 });

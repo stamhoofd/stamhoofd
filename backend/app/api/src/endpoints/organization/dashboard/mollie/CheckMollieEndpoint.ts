@@ -34,7 +34,7 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full)) {
+        if (!(await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full))) {
             throw Context.auth.error();
         }
 
@@ -49,10 +49,12 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 return new Response(await AuthenticatedStructures.organization(organization));
             }
 
-            return new Response(CheckMollieResponse.create({
-                organization: await AuthenticatedStructures.organization(organization),
-                profiles: [],
-            }));
+            return new Response(
+                CheckMollieResponse.create({
+                    organization: await AuthenticatedStructures.organization(organization),
+                    profiles: [],
+                }),
+            );
         }
         const profiles = await service.getProfiles();
 
@@ -62,7 +64,7 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // Check profile is still valid
         if (organization.privateMeta.mollieProfile) {
             const s = organization.privateMeta.mollieProfile.id;
-            const profile = profiles.find(p => p.id === s);
+            const profile = profiles.find((p) => p.id === s);
             if (!profile) {
                 organization.privateMeta.mollieProfile = null;
             } else {
@@ -76,9 +78,11 @@ export class CheckMollieEndpoint extends Endpoint<Params, Query, Body, ResponseB
             return new Response(await AuthenticatedStructures.organization(organization));
         }
 
-        return new Response(CheckMollieResponse.create({
-            organization: await AuthenticatedStructures.organization(organization),
-            profiles,
-        }));
+        return new Response(
+            CheckMollieResponse.create({
+                organization: await AuthenticatedStructures.organization(organization),
+                profiles,
+            }),
+        );
     }
 }

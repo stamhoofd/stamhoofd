@@ -17,7 +17,11 @@ describe('Endpoint.SignOutPlatformAdmins', () => {
     });
 
     const signOut = async (organization: Organization, token: Token) => {
-        const request = Request.buildJson('POST', '/platform/admins/sign-out', organization.getApiHost());
+        const request = Request.buildJson(
+            'POST',
+            '/platform/admins/sign-out',
+            organization.getApiHost(),
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -46,10 +50,18 @@ describe('Endpoint.SignOutPlatformAdmins', () => {
         organizationAdmin.organizationId = null;
         await organizationAdmin.save();
 
-        const currentToken = await SessionService.createSession(admin, { authenticatedAt: new Date() });
-        const secondDeviceOfAdmin = await SessionService.createSession(admin, { authenticatedAt: new Date() });
-        const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
-        const organizationAdminToken = await SessionService.createSession(organizationAdmin, { authenticatedAt: new Date() });
+        const currentToken = await SessionService.createSession(admin, {
+            authenticatedAt: new Date(),
+        });
+        const secondDeviceOfAdmin = await SessionService.createSession(admin, {
+            authenticatedAt: new Date(),
+        });
+        const otherAdminToken = await SessionService.createSession(otherAdmin, {
+            authenticatedAt: new Date(),
+        });
+        const organizationAdminToken = await SessionService.createSession(organizationAdmin, {
+            authenticatedAt: new Date(),
+        });
 
         const response = await signOut(organization, currentToken);
 
@@ -65,11 +77,20 @@ describe('Endpoint.SignOutPlatformAdmins', () => {
 
         const admin = await createPlatformAdmin(PermissionLevel.Write);
         const otherAdmin = await createPlatformAdmin();
-        const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
+        const otherAdminToken = await SessionService.createSession(otherAdmin, {
+            authenticatedAt: new Date(),
+        });
 
-        await expect(signOut(organization, await SessionService.createSession(admin, { authenticatedAt: new Date() }))).rejects.toThrow(STExpect.simpleError({
-            code: 'permission_denied',
-        }));
+        await expect(
+            signOut(
+                organization,
+                await SessionService.createSession(admin, { authenticatedAt: new Date() }),
+            ),
+        ).rejects.toThrow(
+            STExpect.simpleError({
+                code: 'permission_denied',
+            }),
+        );
         expect(await tokenExists(otherAdminToken)).toBe(true);
     });
 
@@ -84,11 +105,22 @@ describe('Endpoint.SignOutPlatformAdmins', () => {
         await organizationAdmin.save();
 
         const platformAdmin = await createPlatformAdmin();
-        const platformAdminToken = await SessionService.createSession(platformAdmin, { authenticatedAt: new Date() });
+        const platformAdminToken = await SessionService.createSession(platformAdmin, {
+            authenticatedAt: new Date(),
+        });
 
-        await expect(signOut(organization, await SessionService.createSession(organizationAdmin, { authenticatedAt: new Date() }))).rejects.toThrow(STExpect.simpleError({
-            code: 'permission_denied',
-        }));
+        await expect(
+            signOut(
+                organization,
+                await SessionService.createSession(organizationAdmin, {
+                    authenticatedAt: new Date(),
+                }),
+            ),
+        ).rejects.toThrow(
+            STExpect.simpleError({
+                code: 'permission_denied',
+            }),
+        );
         expect(await tokenExists(platformAdminToken)).toBe(true);
     });
 });

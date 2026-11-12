@@ -1,15 +1,38 @@
 import { Request } from '@node/endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { RateLimiter, Token } from '@stamhoofd/models';
-import { AuditLog, EmailTemplateFactory, Member, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
+import {
+    AuditLog,
+    EmailTemplateFactory,
+    Member,
+    MemberFactory,
+    OrganizationFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AuditLogReplacementType, AuditLogType, EmailTemplateType, MemberDetails, Parent, ParentType, Permissions, SecurityCodeSendMethod, SendMemberSecurityCodeRequest } from '@stamhoofd/structures';
+import {
+    AuditLogReplacementType,
+    AuditLogType,
+    EmailTemplateType,
+    MemberDetails,
+    Parent,
+    ParentType,
+    Permissions,
+    SecurityCodeSendMethod,
+    SendMemberSecurityCodeRequest,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import type { SMSMocker } from '../../../../tests/helpers/SMSMocker.js';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initSMSApi } from '../../../../tests/init/index.js';
-import { memberPhoneLookupLimiter, memberSecurityCodeSendLimiter, SendMemberSecurityCodeEndpoint, smsOrganizationLimiter, userSecurityCodeSendLimiter } from './SendMemberSecurityCodeEndpoint.js';
+import {
+    memberPhoneLookupLimiter,
+    memberSecurityCodeSendLimiter,
+    SendMemberSecurityCodeEndpoint,
+    smsOrganizationLimiter,
+    userSecurityCodeSendLimiter,
+} from './SendMemberSecurityCodeEndpoint.js';
 import { SessionService } from '../../../services/SessionService.js';
 
 const baseUrl = '/members/security-code';
@@ -52,17 +75,18 @@ describe('Endpoint.SendMemberSecurityCode', () => {
             email: 'kid@example.com',
             phone: overrides.phone !== undefined ? overrides.phone : memberPhone,
             securityCode,
-            parents: overrides.parents !== undefined
-                ? overrides.parents
-                : [
-                        Parent.create({
-                            type: ParentType.Mother,
-                            firstName: 'Anna',
-                            lastName: 'Testman',
-                            email: 'parent@example.com',
-                            phone: parentPhone,
-                        }),
-                    ],
+            parents:
+                overrides.parents !== undefined
+                    ? overrides.parents
+                    : [
+                          Parent.create({
+                              type: ParentType.Mother,
+                              firstName: 'Anna',
+                              lastName: 'Testman',
+                              email: 'parent@example.com',
+                              phone: parentPhone,
+                          }),
+                      ],
         });
 
         const member = await new MemberFactory({ organization, details }).create();
@@ -81,7 +105,11 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         };
     }
 
-    function buildRequest(host: string | undefined, token: Token, body: SendMemberSecurityCodeRequest) {
+    function buildRequest(
+        host: string | undefined,
+        token: Token,
+        body: SendMemberSecurityCodeRequest,
+    ) {
         const request = Request.buildJson('POST', baseUrl, host, body);
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return request;
@@ -90,17 +118,21 @@ describe('Endpoint.SendMemberSecurityCode', () => {
     test('sends the code via email to all known email addresses', async () => {
         const { organization, token, member } = await setup();
 
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.Email,
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.Email,
+            }),
+        );
 
         const response = await testServer.test(endpoint, request);
         expect(response.body.method).toBe(SecurityCodeSendMethod.Email);
 
         const emails = await EmailMocker.transactional.getSucceededEmails();
         expect(emails.length).toBe(2);
-        const recipients = emails.map(e => e.to).join(', ');
+        const recipients = emails.map((e) => e.to).join(', ');
         expect(recipients).toContain('kid@example.com');
         expect(recipients).toContain('parent@example.com');
         for (const email of emails) {
@@ -112,10 +144,14 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const mocker: SMSMocker = initSMSApi();
         const { organization, token, member } = await setup();
 
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.SMS,
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.SMS,
+            }),
+        );
 
         const response = await testServer.test(endpoint, request);
 
@@ -149,10 +185,14 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         });
         const member = await new MemberFactory({ details }).create();
 
-        const request = buildRequest(undefined, token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.SMS,
-        }));
+        const request = buildRequest(
+            undefined,
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.SMS,
+            }),
+        );
 
         const response = await testServer.test(endpoint, request);
 
@@ -183,7 +223,10 @@ describe('Endpoint.SendMemberSecurityCode', () => {
             method: SecurityCodeSendMethod.SMS,
             tryCount: 1,
         });
-        const response = await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, retry));
+        const response = await testServer.test(
+            endpoint,
+            buildRequest(organization.getApiHost(), token, retry),
+        );
 
         expect(mocker.sentMessages.length).toBe(2);
         expect(mocker.lastMessage!.recipient).toEqual(32471987654);
@@ -196,12 +239,16 @@ describe('Endpoint.SendMemberSecurityCode', () => {
 
         // Provide the parent number in national format. Even though tryCount 0 would normally select the
         // member number, an exact (normalized) match must win.
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.SMS,
-            tryCount: 0,
-            phone: '0471 98 76 54',
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.SMS,
+                tryCount: 0,
+                phone: '0471 98 76 54',
+            }),
+        );
 
         const response = await testServer.test(endpoint, request);
 
@@ -214,15 +261,19 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const mocker: SMSMocker = initSMSApi();
         const { organization, token, member } = await setup();
 
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.SMS,
-            phone: '+32 490 00 00 00',
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.SMS,
+                phone: '+32 490 00 00 00',
+            }),
+        );
 
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('phone_not_found'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('phone_not_found'),
+        );
 
         // No SMS may be sent to an unknown number
         expect(mocker.sentMessages.length).toBe(0);
@@ -237,25 +288,36 @@ describe('Endpoint.SendMemberSecurityCode', () => {
             memberPhoneLookupLimiter.track(member.id, 1);
         }
 
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.SMS,
-            phone: '+32 490 00 00 00',
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.SMS,
+                phone: '+32 490 00 00 00',
+            }),
+        );
 
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('too_many_requests'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('too_many_requests'),
+        );
         expect(mocker.sentMessages.length).toBe(0);
     });
 
     test('creates an audit log when a security code is requested via email', async () => {
         const { organization, user, token, member } = await setup();
 
-        await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.Email,
-        })));
+        await testServer.test(
+            endpoint,
+            buildRequest(
+                organization.getApiHost(),
+                token,
+                SendMemberSecurityCodeRequest.create({
+                    ...matchingDetails(member),
+                    method: SecurityCodeSendMethod.Email,
+                }),
+            ),
+        );
 
         const log = await AuditLog.select()
             .where('type', AuditLogType.MemberSecurityCodeRequested)
@@ -278,10 +340,17 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         initSMSApi();
         const { user, organization, token, member } = await setup();
 
-        await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.SMS,
-        })));
+        await testServer.test(
+            endpoint,
+            buildRequest(
+                organization.getApiHost(),
+                token,
+                SendMemberSecurityCodeRequest.create({
+                    ...matchingDetails(member),
+                    method: SecurityCodeSendMethod.SMS,
+                }),
+            ),
+        );
 
         const log = await AuditLog.select()
             .where('type', AuditLogType.MemberSecurityCodeRequested)
@@ -300,10 +369,14 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         member.details.securityCode = null;
         await member.save();
 
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.Email,
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.Email,
+            }),
+        );
 
         await testServer.test(endpoint, request);
 
@@ -320,44 +393,60 @@ describe('Endpoint.SendMemberSecurityCode', () => {
     test('throws when no member is found', async () => {
         const { organization, token, member } = await setup();
 
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            memberId: 'not-found',
-            method: SecurityCodeSendMethod.Email,
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                memberId: 'not-found',
+                method: SecurityCodeSendMethod.Email,
+            }),
+        );
 
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('member_not_found'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('member_not_found'),
+        );
     });
 
     test('throws when only the member id is known', async () => {
         const { organization, token, member } = await setup();
 
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            memberId: member.id,
-            method: SecurityCodeSendMethod.Email,
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                memberId: member.id,
+                method: SecurityCodeSendMethod.Email,
+            }),
+        );
 
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('client_update_required'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('client_update_required'),
+        );
         expect(await EmailMocker.transactional.getSucceededCount()).toBe(0);
     });
 
     test('throws when the name or birth day does not match the member', async () => {
         const { organization, token, member } = await setup();
 
-        for (const override of [{ firstName: 'Other' }, { lastName: 'Other' }, { birthDay: new Date(Date.UTC(2010, 4, 6)) }]) {
-            const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-                ...matchingDetails(member),
-                ...override,
-                method: SecurityCodeSendMethod.Email,
-            }));
+        for (const override of [
+            { firstName: 'Other' },
+            { lastName: 'Other' },
+            { birthDay: new Date(Date.UTC(2010, 4, 6)) },
+        ]) {
+            const request = buildRequest(
+                organization.getApiHost(),
+                token,
+                SendMemberSecurityCodeRequest.create({
+                    ...matchingDetails(member),
+                    ...override,
+                    method: SecurityCodeSendMethod.Email,
+                }),
+            );
 
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('member_not_found'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('member_not_found'),
+            );
         }
         expect(await EmailMocker.transactional.getSucceededCount()).toBe(0);
     });
@@ -365,12 +454,16 @@ describe('Endpoint.SendMemberSecurityCode', () => {
     test('matches the name case-insensitively and ignores extra whitespace', async () => {
         const { organization, token, member } = await setup();
 
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            firstName: ' jef ',
-            lastName: 'TESTMAN  ',
-            method: SecurityCodeSendMethod.Email,
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                firstName: ' jef ',
+                lastName: 'TESTMAN  ',
+                method: SecurityCodeSendMethod.Email,
+            }),
+        );
 
         const response = await testServer.test(endpoint, request);
         expect(response.body.method).toBe(SecurityCodeSendMethod.Email);
@@ -382,43 +475,52 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         const otherUser = await new UserFactory({ organization: otherOrganization }).create();
         const token = await SessionService.createSession(otherUser);
 
-        const request = buildRequest(otherOrganization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.Email,
-        }));
+        const request = buildRequest(
+            otherOrganization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.Email,
+            }),
+        );
 
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('member_not_found'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('member_not_found'),
+        );
     });
 
     test('throws when the member has no phone number for SMS', async () => {
         initSMSApi();
         const { organization, token, member } = await setup({ phone: null, parents: [] });
 
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.SMS,
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.SMS,
+            }),
+        );
 
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('no_phone'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('no_phone'),
+        );
     });
 
     test('rate limits sending email per member', async () => {
         const { organization, token, member } = await setup();
 
-        const body = () => SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.Email,
-        });
+        const body = () =>
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.Email,
+            });
 
         await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, body()));
 
-        await expect(testServer.test(endpoint, buildRequest(organization.getApiHost(), token, body())))
-            .rejects
-            .toThrow(STExpect.errorWithCode('too_many_requests'));
+        await expect(
+            testServer.test(endpoint, buildRequest(organization.getApiHost(), token, body())),
+        ).rejects.toThrow(STExpect.errorWithCode('too_many_requests'));
     });
 
     test('rate limits sending SMS per member', async () => {
@@ -426,18 +528,19 @@ describe('Endpoint.SendMemberSecurityCode', () => {
 
         const { organization, token, member } = await setup();
 
-        const body = () => SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.SMS,
-        });
+        const body = () =>
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.SMS,
+            });
 
         await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, body()));
         await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, body()));
         await testServer.test(endpoint, buildRequest(organization.getApiHost(), token, body()));
 
-        await expect(testServer.test(endpoint, buildRequest(organization.getApiHost(), token, body())))
-            .rejects
-            .toThrow(STExpect.errorWithCode('too_many_requests'));
+        await expect(
+            testServer.test(endpoint, buildRequest(organization.getApiHost(), token, body())),
+        ).rejects.toThrow(STExpect.errorWithCode('too_many_requests'));
         expect(mocker.sentMessages.length).toBe(3);
     });
 
@@ -450,14 +553,18 @@ describe('Endpoint.SendMemberSecurityCode', () => {
             smsOrganizationLimiter.track(member.organizationId ?? organization.id, 1);
         }
 
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.SMS,
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.SMS,
+            }),
+        );
 
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('too_many_sms'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('too_many_sms'),
+        );
         expect(mocker.sentMessages.length).toBe(0);
     });
 
@@ -469,14 +576,18 @@ describe('Endpoint.SendMemberSecurityCode', () => {
             userSecurityCodeSendLimiter.track(user.id, 1);
         }
 
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.Email,
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.Email,
+            }),
+        );
 
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('too_many_requests'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('too_many_requests'),
+        );
     });
 
     test('reports an error when the SMS gateway fails', async () => {
@@ -484,13 +595,17 @@ describe('Endpoint.SendMemberSecurityCode', () => {
         mocker.forceFailure();
         const { organization, token, member } = await setup();
 
-        const request = buildRequest(organization.getApiHost(), token, SendMemberSecurityCodeRequest.create({
-            ...matchingDetails(member),
-            method: SecurityCodeSendMethod.SMS,
-        }));
+        const request = buildRequest(
+            organization.getApiHost(),
+            token,
+            SendMemberSecurityCodeRequest.create({
+                ...matchingDetails(member),
+                method: SecurityCodeSendMethod.SMS,
+            }),
+        );
 
-        await expect(testServer.test(endpoint, request))
-            .rejects
-            .toThrow(STExpect.errorWithCode('sms_failed'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('sms_failed'),
+        );
     });
 });

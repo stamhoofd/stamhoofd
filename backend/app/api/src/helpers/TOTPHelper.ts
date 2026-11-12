@@ -30,7 +30,8 @@ export const TOTPHelper = {
      * Build the otpauth:// URI used to render the QR code.
      */
     keyuri(accountName: string, secret: string): string {
-        const service = STAMHOOFD.domains?.dashboard ?? Formatter.capitalizeFirstLetter(STAMHOOFD.platformName);
+        const service =
+            STAMHOOFD.domains?.dashboard ?? Formatter.capitalizeFirstLetter(STAMHOOFD.platformName);
         return authenticator.keyuri(accountName, service, secret);
     },
 

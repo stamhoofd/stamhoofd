@@ -23,7 +23,7 @@ export class BalanceItemCartItem extends AutoEncoder {
 
     validate(data: { balanceItems?: BalanceItem[] }) {
         if (data.balanceItems !== undefined) {
-            const found = data.balanceItems.find(b => b.id === this.item.id);
+            const found = data.balanceItems.find((b) => b.id === this.item.id);
             if (!found) {
                 throw new SimpleError({
                     code: 'not_found',

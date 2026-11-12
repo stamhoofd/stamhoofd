@@ -1,7 +1,10 @@
 import { column } from '@node/database';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import type { Group as GroupStruct } from '@stamhoofd/structures';
-import { MemberResponsibilityRecordBase, MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';
+import {
+    MemberResponsibilityRecordBase,
+    MemberResponsibilityRecord as MemberResponsibilityRecordStruct,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 export class MemberResponsibilityRecord extends QueryableModel {
@@ -9,7 +12,9 @@ export class MemberResponsibilityRecord extends QueryableModel {
 
     // Columns
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -28,7 +33,8 @@ export class MemberResponsibilityRecord extends QueryableModel {
     responsibilityId: string;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -56,6 +62,8 @@ export class MemberResponsibilityRecord extends QueryableModel {
     }
 
     static get whereActive() {
-        return SQL.where('startDate', '<', new Date()).and(SQL.where('endDate', null).or('endDate', '>', new Date()));
+        return SQL.where('startDate', '<', new Date()).and(
+            SQL.where('endDate', null).or('endDate', '>', new Date()),
+        );
     }
 }

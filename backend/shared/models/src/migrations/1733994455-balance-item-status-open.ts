@@ -12,10 +12,7 @@ export default new Migration(async () => {
             balance_items
         SET status = ?
         WHERE status IN (?)`;
-    await Database.update(query, [
-        BalanceItemStatus.Due,
-        ['Paid', 'Pending'],
-    ]);
+    await Database.update(query, [BalanceItemStatus.Due, ['Paid', 'Pending']]);
 
     const q2 = `
         UPDATE
@@ -23,8 +20,5 @@ export default new Migration(async () => {
         SET status = ?,
             amount = coalesce(nullif(ROUND(coalesce(pricePaid / nullif(unitPrice, 0), 0)), 0), 1)
         WHERE amount = 0 AND status = ?`;
-    await Database.update(q2, [
-        BalanceItemStatus.Canceled,
-        BalanceItemStatus.Due,
-    ]);
+    await Database.update(q2, [BalanceItemStatus.Canceled, BalanceItemStatus.Due]);
 });

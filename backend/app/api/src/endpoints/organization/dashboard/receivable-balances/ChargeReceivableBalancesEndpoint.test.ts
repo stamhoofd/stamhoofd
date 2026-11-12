@@ -1,7 +1,20 @@
 import { Request } from '@node/endpoints';
 import type { Token } from '@stamhoofd/models';
-import { BalanceItemFactory, BlockedPaymentMandate, CachedBalance, Organization, OrganizationFactory, Payment } from '@stamhoofd/models';
-import { CountFilteredRequest, MollieOnboarding, MollieStatus, PaymentMethod, PaymentType } from '@stamhoofd/structures';
+import {
+    BalanceItemFactory,
+    BlockedPaymentMandate,
+    CachedBalance,
+    Organization,
+    OrganizationFactory,
+    Payment,
+} from '@stamhoofd/models';
+import {
+    CountFilteredRequest,
+    MollieOnboarding,
+    MollieStatus,
+    PaymentMethod,
+    PaymentType,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { MollieMocker } from '../../../../../tests/helpers/MollieMocker.js';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
@@ -47,7 +60,12 @@ describe('Endpoint.ChargeReceivableBalancesEndpoint', () => {
     });
 
     const charge = async () => {
-        const request = Request.buildJson('POST', '/receivable-balances/charge', sellingOrganization.getApiHost(), new CountFilteredRequest({}));
+        const request = Request.buildJson(
+            'POST',
+            '/receivable-balances/charge',
+            sellingOrganization.getApiHost(),
+            new CountFilteredRequest({}),
+        );
         request.headers.authorization = 'Bearer ' + sellerToken.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -55,7 +73,11 @@ describe('Endpoint.ChargeReceivableBalancesEndpoint', () => {
     /**
      * Create a paying organization with an open balance at the seller and optionally a default mandate
      */
-    const init = async ({ withMandate = true, blocked = false, withOtherMandate = false }: { withMandate?: boolean; blocked?: boolean; withOtherMandate?: boolean } = {}) => {
+    const init = async ({
+        withMandate = true,
+        blocked = false,
+        withOtherMandate = false,
+    }: { withMandate?: boolean; blocked?: boolean; withOtherMandate?: boolean } = {}) => {
         const payingOrganization = await new OrganizationFactory({}).create();
         await initAdmin({ organization: payingOrganization });
         const customerId = mollieMocker.createId('cst');
@@ -66,10 +88,14 @@ describe('Endpoint.ChargeReceivableBalancesEndpoint', () => {
         if (mandate) {
             payingOrganization.serverMeta.mollieMandateId = mandate.id;
             if (blocked) {
-                payingOrganization.serverMeta.blockedMandates.push(BlockedPaymentMandate.create({ id: mandate.id }));
+                payingOrganization.serverMeta.blockedMandates.push(
+                    BlockedPaymentMandate.create({ id: mandate.id }),
+                );
             }
         }
-        const otherMandate = withOtherMandate ? mollieMocker.addMandate({ customerId, cardNumber: '9999' }) : null;
+        const otherMandate = withOtherMandate
+            ? mollieMocker.addMandate({ customerId, cardNumber: '9999' })
+            : null;
         await payingOrganization.save();
 
         await new BalanceItemFactory({
@@ -115,7 +141,10 @@ describe('Endpoint.ChargeReceivableBalancesEndpoint', () => {
     });
 
     test('An open balance is charged on another usable mandate when the default is blocked', async () => {
-        const { payingOrganization, otherMandate } = await init({ blocked: true, withOtherMandate: true });
+        const { payingOrganization, otherMandate } = await init({
+            blocked: true,
+            withOtherMandate: true,
+        });
 
         const response = await charge();
         expect(response.status).toBe(201);

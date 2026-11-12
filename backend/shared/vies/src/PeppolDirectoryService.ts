@@ -72,8 +72,10 @@ export class PeppolDirectoryServiceStatic {
 
         const expected = `${schemeID}:${id}`.toLowerCase();
         const match = data.matches.find((m: any) => {
-            return typeof m?.participantID?.value === 'string'
-                && m.participantID.value.toLowerCase() === expected;
+            return (
+                typeof m?.participantID?.value === 'string' &&
+                m.participantID.value.toLowerCase() === expected
+            );
         });
 
         if (!match) {

@@ -2,7 +2,13 @@ import type { Decoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { CountFilteredRequest, CountResponse, PaymentCustomer, PaymentMethod, ReceivableBalanceType } from '@stamhoofd/structures';
+import {
+    CountFilteredRequest,
+    CountResponse,
+    PaymentCustomer,
+    PaymentMethod,
+    ReceivableBalanceType,
+} from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 import { GetReceivableBalancesEndpoint } from './GetReceivableBalancesEndpoint.js';
@@ -42,7 +48,7 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
         const { user } = await Context.authenticate();
         const platform = await Platform.getShared();
 
-        if (!await Context.auth.canManageFinances(sellingOrganization.id)) {
+        if (!(await Context.auth.canManageFinances(sellingOrganization.id))) {
             throw Context.auth.error();
         }
         const queueId = 'charge-receivable-balances/' + sellingOrganization.id;
@@ -66,7 +72,11 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
                     });
                 }
                 // todo
-                const items = await CachedBalance.balanceForObjects(cachedBalance.organizationId, [cachedBalance.objectId], cachedBalance.objectType);
+                const items = await CachedBalance.balanceForObjects(
+                    cachedBalance.organizationId,
+                    [cachedBalance.objectId],
+                    cachedBalance.objectType,
+                );
 
                 if (items.length === 0) {
                     console.log('Nothing to charge for', cachedBalance.id);
@@ -83,9 +93,17 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
                     continue;
                 }
 
-                if (total <= 4_00_00 && sellingOrganization.id === platform.membershipOrganizationId && STAMHOOFD.userMode === 'organization') {
+                if (
+                    total <= 4_00_00 &&
+                    sellingOrganization.id === platform.membershipOrganizationId &&
+                    STAMHOOFD.userMode === 'organization'
+                ) {
                     // Skip too small payments for Stamhoofd
-                    console.error('Skipped charging too small payment for', cachedBalance.objectId, cachedBalance.objectType);
+                    console.error(
+                        'Skipped charging too small payment for',
+                        cachedBalance.objectId,
+                        cachedBalance.objectType,
+                    );
                     continue;
                 }
 
@@ -100,9 +118,12 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
                     payingOrganization = p;
                 }
 
-                if (cachedBalance.objectType === ReceivableBalanceType.user || cachedBalance.objectType === ReceivableBalanceType.userWithoutMembers) {
+                if (
+                    cachedBalance.objectType === ReceivableBalanceType.user ||
+                    cachedBalance.objectType === ReceivableBalanceType.userWithoutMembers
+                ) {
                     const p = await User.getByID(cachedBalance.objectId);
-                    if (!p || !(Context.auth.checkScope(p.organizationId))) {
+                    if (!p || !Context.auth.checkScope(p.organizationId)) {
                         console.error('Unexpected missing customer user id', cachedBalance);
                         continue;
                     }
@@ -115,25 +136,36 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
                     payingOrganization,
                 });
 
-                if (!mandates.find(m => m.isDefault)) {
+                if (!mandates.find((m) => m.isDefault)) {
                     // Not possible
                     console.error('No mandates found for', cachedBalance.id);
                     continue;
                 }
 
                 // The default if usable, otherwise the most recent usable one
-                const mandate = PaymentMandateService.groupByMandate(mandates).mandates.find(m => !m.isBlocked);
+                const mandate = PaymentMandateService.groupByMandate(mandates).mandates.find(
+                    (m) => !m.isBlocked,
+                );
 
                 if (!mandate) {
                     console.error('No usable mandate found for', cachedBalance.id);
                     continue;
                 }
 
-                customerUser = customerUser ?? (payingOrganization ? (await OrganizationAdminService.getFullAdmins(payingOrganization))[0] : null);
+                customerUser =
+                    customerUser ??
+                    (payingOrganization
+                        ? (await OrganizationAdminService.getFullAdmins(payingOrganization))[0]
+                        : null);
                 const customer = PaymentCustomer.create({
                     firstName: customerUser?.firstName,
                     lastName: customerUser?.lastName,
-                    email: customerUser?.email ?? (payingOrganization ? (await OrganizationAdminService.getReplyEmails(payingOrganization))[0].email : null),
+                    email:
+                        customerUser?.email ??
+                        (payingOrganization
+                            ? (await OrganizationAdminService.getReplyEmails(payingOrganization))[0]
+                                  .email
+                            : null),
                     company: payingOrganization?.defaultCompanies[0],
                 });
 
@@ -154,7 +186,8 @@ export class ChargeReceivableBalancesEndpoint extends Endpoint<Params, Query, Bo
                     createMandate: null,
                     useMandate: mandate,
                     paymentConfiguration: sellingOrganization.meta.registrationPaymentConfiguration,
-                    privatePaymentConfiguration: sellingOrganization.privateMeta.registrationPaymentConfiguration,
+                    privatePaymentConfiguration:
+                        sellingOrganization.privateMeta.registrationPaymentConfiguration,
                 });
 
                 // Clear cache while looping, to update the table while we are charging

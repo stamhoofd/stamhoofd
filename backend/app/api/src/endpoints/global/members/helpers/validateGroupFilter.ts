@@ -5,19 +5,27 @@ import { FilterWrapperMarker, unwrapFilterRecursively } from '@stamhoofd/structu
 import { Context } from '../../../../helpers/Context.js';
 import { StamhoofdFilterAccessHelper } from '../../../../helpers/StamhoofdFilterAccessHelper.js';
 
-export async function validateGroupFilter({ filter, permissionLevel, key }: { filter: StamhoofdFilter; permissionLevel: PermissionLevel; key: string | null }): Promise<boolean> {
+export async function validateGroupFilter({
+    filter,
+    permissionLevel,
+    key,
+}: {
+    filter: StamhoofdFilter;
+    permissionLevel: PermissionLevel;
+    key: string | null;
+}): Promise<boolean> {
     // Require presence of a filter
     const requiredFilter: WrapperFilter = key
         ? {
-                [key]: {
-                    $elemMatch: {
-                        groupId: FilterWrapperMarker,
-                    },
-                },
-            }
+              [key]: {
+                  $elemMatch: {
+                      groupId: FilterWrapperMarker,
+                  },
+              },
+          }
         : {
-                groupId: FilterWrapperMarker,
-            };
+              groupId: FilterWrapperMarker,
+          };
 
     const unwrapped = unwrapFilterRecursively(filter, requiredFilter);
     if (!unwrapped.match) {
@@ -35,11 +43,17 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
     const groupIds = StamhoofdFilterAccessHelper.getGroupIdsFromFilter(unwrapped.markerValue);
     const groups = await Context.auth.getGroups(groupIds as string[]);
 
-    console.log('Fetching members for groups before', groups.map(g => g.settings.name.toString()));
+    console.log(
+        'Fetching members for groups before',
+        groups.map((g) => g.settings.name.toString()),
+    );
 
     for (const group of groups) {
-        if (!await Context.auth.canAccessGroup(group, permissionLevel)) {
-            if (permissionLevel !== PermissionLevel.Read || !group.settings.implicitlyAllowViewRegistrations) {
+        if (!(await Context.auth.canAccessGroup(group, permissionLevel))) {
+            if (
+                permissionLevel !== PermissionLevel.Read ||
+                !group.settings.implicitlyAllowViewRegistrations
+            ) {
                 throw Context.auth.error({
                     message: 'You do not have access to this group',
                     human: $t('%15f', { groupName: group.settings.name }),

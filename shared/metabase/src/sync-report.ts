@@ -54,9 +54,31 @@ type BooleanReportFilter = {
 export type ReportFilter = StringReportFilter | BooleanReportFilter;
 
 export const reportFilters: readonly ReportFilter[] = [
-    { type: 'string', name: 'werkjaar', title: 'Werkjaar', valuesFrom: 'werkjaar', column: 'Werkjaar', keepOrder: true, multiple: false, start: 'first' },
-    { type: 'string', name: 'eenheid', title: 'Eenheid', valuesFrom: 'eenheid', column: 'Eenheid', keepOrder: false, multiple: false },
-    { type: 'boolean', name: 'platformleden_opnemen', title: 'Leden van de koepelorganisatie opnemen', start: false },
+    {
+        type: 'string',
+        name: 'werkjaar',
+        title: 'Werkjaar',
+        valuesFrom: 'werkjaar',
+        column: 'Werkjaar',
+        keepOrder: true,
+        multiple: false,
+        start: 'first',
+    },
+    {
+        type: 'string',
+        name: 'eenheid',
+        title: 'Eenheid',
+        valuesFrom: 'eenheid',
+        column: 'Eenheid',
+        keepOrder: false,
+        multiple: false,
+    },
+    {
+        type: 'boolean',
+        name: 'platformleden_opnemen',
+        title: 'Leden van de koepelorganisatie opnemen',
+        start: false,
+    },
 ];
 
 /**
@@ -74,7 +96,14 @@ export function cardName(card: ReportCard, tab: ReportTab): string {
 /** Metabase lays a dashboard out on a 24 column grid. */
 const gridWidth = 24;
 
-const widths: Record<ReportCard['size'], number> = { 'full': 24, 'two-thirds': 16, 'half': 12, 'third': 8, 'quarter': 6, 'sixth': 4 };
+const widths: Record<ReportCard['size'], number> = {
+    full: 24,
+    'two-thirds': 16,
+    half: 12,
+    third: 8,
+    quarter: 6,
+    sixth: 4,
+};
 
 /**
  * Extra rows for the band the rotated labels sit in.
@@ -84,9 +113,9 @@ const widths: Record<ReportCard['size'], number> = { 'full': 24, 'two-thirds': 1
  * do with how wide the card is, so this is added on top rather than scaled.
  */
 const xLabelRows: Record<NonNullable<ReportCard['xLabels']>, number> = {
-    'show': 0,
-    'hide': 0,
-    'compact': 0,
+    show: 0,
+    hide: 0,
+    compact: 0,
     'rotate-45': 4,
     'rotate-90': 6,
 };
@@ -113,7 +142,9 @@ function heightOf(card: ReportCard): number {
     if (card.display === 'row') {
         return 10;
     }
-    return (card.size === 'full' ? 7 : 6) + (card.xLabels === undefined ? 0 : xLabelRows[card.xLabels]);
+    return (
+        (card.size === 'full' ? 7 : 6) + (card.xLabels === undefined ? 0 : xLabelRows[card.xLabels])
+    );
 }
 
 /** A row of the page while it is being filled: which columns are taken, and how tall it ended up. */
@@ -133,7 +164,9 @@ type LayoutRow = { taken: { col: number; sizeX: number }[]; height: number };
  * the pie stacked next to it. It does not decide how tall those rows are -- the cards stacked beside
  * it do, which is what makes it end exactly where they do.
  */
-export function layoutCards(cards: ReportCard[]): { card: ReportCard; row: number; col: number; sizeX: number; sizeY: number }[] {
+export function layoutCards(
+    cards: ReportCard[],
+): { card: ReportCard; row: number; col: number; sizeX: number; sizeY: number }[] {
     const rows: LayoutRow[] = [];
     const placed: { card: ReportCard; index: number; col: number; sizeX: number }[] = [];
     let index = 0;
@@ -169,9 +202,12 @@ export function layoutCards(cards: ReportCard[]): { card: ReportCard; row: numbe
         placed.push({ card, index, col, sizeX });
     }
 
-    const tops = rows.reduce<number[]>((offsets, row, position) => [...offsets, offsets[position] + row.height], [0]);
+    const tops = rows.reduce<number[]>(
+        (offsets, row, position) => [...offsets, offsets[position] + row.height],
+        [0],
+    );
 
-    return placed.map(entry => ({
+    return placed.map((entry) => ({
         card: entry.card,
         row: tops[entry.index],
         col: entry.col,
@@ -183,7 +219,9 @@ export function layoutCards(cards: ReportCard[]): { card: ReportCard; row: numbe
 /** The leftmost column a card of this width still fits at, or nothing when the row is full. */
 function freeColumn(row: LayoutRow, sizeX: number): number | undefined {
     for (let col = 0; col + sizeX <= gridWidth; col++) {
-        if (row.taken.every(entry => col + sizeX <= entry.col || entry.col + entry.sizeX <= col)) {
+        if (
+            row.taken.every((entry) => col + sizeX <= entry.col || entry.col + entry.sizeX <= col)
+        ) {
             return col;
         }
     }
@@ -229,35 +267,42 @@ export function snippetTagName(snippet: string): string {
  * leaves the widget empty, and a card whose tag does not say so answers for every werkjaar at once
  * instead of refusing.
  */
-export function buildTemplateTags(card: ReportCard, snippetIds: Map<string, number>, required: readonly string[]): Record<string, unknown> {
+export function buildTemplateTags(
+    card: ReportCard,
+    snippetIds: Map<string, number>,
+    required: readonly string[],
+): Record<string, unknown> {
     const tags: Record<string, unknown> = {};
 
     for (const snippet of card.snippets) {
         const snippetId = snippetIds.get(snippet);
         if (snippetId === undefined) {
-            throw new Error(`Card "${card.key}" reads the fragment "${snippet}", which was not written as a snippet`);
+            throw new Error(
+                `Card "${card.key}" reads the fragment "${snippet}", which was not written as a snippet`,
+            );
         }
 
         const name = snippetTagName(snippet);
         tags[name] = {
-            'id': templateTagId(card.key, name),
+            id: templateTagId(card.key, name),
             name,
             'display-name': snippet,
-            'type': 'snippet',
+            type: 'snippet',
             'snippet-name': snippet,
             'snippet-id': snippetId,
         };
     }
 
     for (const parameter of card.parameters) {
-        const filter = reportFilters.find(entry => entry.name === parameter);
+        const filter = reportFilters.find((entry) => entry.name === parameter);
         const fallback = card.defaults.get(parameter);
 
         tags[parameter] = {
-            'id': templateTagId(card.key, parameter),
-            'name': parameter,
+            id: templateTagId(card.key, parameter),
+            name: parameter,
             'display-name': filter?.title ?? parameter,
-            'type': fallback !== undefined ? 'number' : filter?.type === 'boolean' ? 'boolean' : 'text',
+            type:
+                fallback !== undefined ? 'number' : filter?.type === 'boolean' ? 'boolean' : 'text',
             ...(filter?.type === 'boolean' ? { default: filter.start } : {}),
             ...(fallback !== undefined ? { default: fallback } : {}),
             ...(required.includes(parameter) ? { required: true } : {}),
@@ -307,7 +352,9 @@ function mixColors(from: string, to: string, ratio: number): string {
         const start = Number.parseInt(from.slice(1 + channel * 2, 3 + channel * 2), 16);
         const end = Number.parseInt(to.slice(1 + channel * 2, 3 + channel * 2), 16);
 
-        return Math.round(start + (end - start) * ratio).toString(16).padStart(2, '0');
+        return Math.round(start + (end - start) * ratio)
+            .toString(16)
+            .padStart(2, '0');
     });
 
     return `#${channels.join('')}`;
@@ -362,18 +409,24 @@ function buildSegments(card: ReportCard, display: 'gauge' | 'scalar'): Record<st
  * color Metabase gives it.
  */
 export const columnPalettes = new Map<string, Record<string, string>>([
-    ['Geslacht', {
-        Man: '#0892D0',
-        Vrouw: '#DE8A8A',
-        Andere: '#8A2BE2',
-        Onbekend: '#949AAB',
-    }],
+    [
+        'Geslacht',
+        {
+            Man: '#0892D0',
+            Vrouw: '#DE8A8A',
+            Andere: '#8A2BE2',
+            Onbekend: '#949AAB',
+        },
+    ],
     // Metabase draws a highlighted row at a fifth of this strength.
-    ['Opvolgen', {
-        'Onder 55': segmentScale[1],
-        'Gedaald': '#F2A86F',
-        'Onder 55 en gedaald': segmentScale[0],
-    }],
+    [
+        'Opvolgen',
+        {
+            'Onder 55': segmentScale[1],
+            Gedaald: '#F2A86F',
+            'Onder 55 en gedaald': segmentScale[0],
+        },
+    ],
 ]);
 
 /**
@@ -385,7 +438,8 @@ export const columnPalettes = new Map<string, Record<string, string>>([
  * first, with the outer two left open like a number's.
  */
 function buildColumnFormatting(card: ReportCard): Record<string, unknown>[] {
-    const colors = card.segments.length === 0 ? [] : segmentColors(card.segments.length - 1, card.best);
+    const colors =
+        card.segments.length === 0 ? [] : segmentColors(card.segments.length - 1, card.best);
     const last = card.segments.length - 2;
 
     const ranges = card.segments.slice(0, -1).map((min, index) => ({
@@ -403,7 +457,9 @@ function buildColumnFormatting(card: ReportCard): Record<string, unknown>[] {
 
     const palette = columnPalettes.get(card.highlight);
     if (palette === undefined) {
-        throw new Error(`Card "${card.key}" highlights its rows by "${card.highlight}", which has no colors in columnPalettes`);
+        throw new Error(
+            `Card "${card.key}" highlights its rows by "${card.highlight}", which has no colors in columnPalettes`,
+        );
     }
 
     const rows = Object.entries(palette).map(([value, color]) => ({
@@ -451,7 +507,9 @@ export function chartColors(colors: string[], count = chartColorCount): string[]
         const color = colors[index % colors.length];
         const shade = shades[Math.floor(index / colors.length) % shades.length];
 
-        return shade === 0 ? color : mixColors(color, shade > 0 ? '#FFFFFF' : '#000000', Math.abs(shade));
+        return shade === 0
+            ? color
+            : mixColors(color, shade > 0 ? '#FFFFFF' : '#000000', Math.abs(shade));
     });
 }
 
@@ -459,14 +517,18 @@ export function chartColors(colors: string[], count = chartColorCount): string[]
  * How the report describes its x-axis labels, in what Metabase calls them.
  */
 const xAxisLabels: Record<string, boolean | string> = {
-    'show': true,
-    'hide': false,
-    'compact': 'compact',
+    show: true,
+    hide: false,
+    compact: 'compact',
     'rotate-45': 'rotate-45',
     'rotate-90': 'rotate-90',
 };
 
-export function buildVisualizationSettings(card: ReportCard, hasCoordinates = true, env?: string): Record<string, unknown> {
+export function buildVisualizationSettings(
+    card: ReportCard,
+    hasCoordinates = true,
+    env?: string,
+): Record<string, unknown> {
     const settings: Record<string, unknown> = { 'card.title': card.title };
 
     if (card.description !== undefined) {
@@ -479,7 +541,12 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
     // are addressed; a key matching no column is ignored, so a renamed column loses its title
     // instead of dropping the sheet's other columns.
     if (card.columns.length > 0) {
-        settings['column_settings'] = Object.fromEntries(card.columns.map(column => [JSON.stringify(['name', column]), { column_title: column }]));
+        settings['column_settings'] = Object.fromEntries(
+            card.columns.map((column) => [
+                JSON.stringify(['name', column]),
+                { column_title: column },
+            ]),
+        );
     }
 
     const display = effectiveDisplay(card, hasCoordinates);
@@ -554,7 +621,8 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
         }
 
         if (card.stacked !== undefined) {
-            settings['stackable.stack_type'] = card.stacked === 'normalized' ? 'normalized' : 'stacked';
+            settings['stackable.stack_type'] =
+                card.stacked === 'normalized' ? 'normalized' : 'stacked';
         }
 
         // Under `series_settings` -- one of the few settings without the `graph.` prefix, and an
@@ -562,7 +630,10 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
         // value of it, keyed by the value itself; one without draws a series per metric, keyed by
         // the column name.
         const series: Record<string, Record<string, unknown>> = Object.fromEntries(
-            Object.entries(columnPalettes.get(card.dimensions[1]) ?? {}).map(([value, color]) => [value, { color }]),
+            Object.entries(columnPalettes.get(card.dimensions[1]) ?? {}).map(([value, color]) => [
+                value,
+                { color },
+            ]),
         );
 
         const platform = env === undefined ? undefined : environmentColors.get(env);
@@ -608,12 +679,16 @@ export function buildVisualizationSettings(card: ReportCard, hasCoordinates = tr
  * is visible on all of them. Which cards it actually reaches is decided per tab in `buildDashcards`,
  * so the Eenheid filter cannot quietly turn the national figures into one unit's.
  */
-export function buildParameters(tabs: ReportTab[], filterCardIds: Map<string, number>, orderedValues: Map<string, string[]> = new Map()): Record<string, unknown>[] {
-    const wanted = new Set(tabs.flatMap(tab => tab.filters));
-    const required = new Set(tabs.flatMap(tab => tab.required));
+export function buildParameters(
+    tabs: ReportTab[],
+    filterCardIds: Map<string, number>,
+    orderedValues: Map<string, string[]> = new Map(),
+): Record<string, unknown>[] {
+    const wanted = new Set(tabs.flatMap((tab) => tab.filters));
+    const required = new Set(tabs.flatMap((tab) => tab.required));
 
     return reportFilters
-        .filter(filter => wanted.has(filter.name))
+        .filter((filter) => wanted.has(filter.name))
         .map((filter) => {
             if (filter.type === 'boolean') {
                 return {
@@ -628,9 +703,12 @@ export function buildParameters(tabs: ReportTab[], filterCardIds: Map<string, nu
 
             const cardId = filterCardIds.get(filter.valuesFrom);
             const values = filter.keepOrder ? orderedValues.get(filter.valuesFrom) : undefined;
-            const start = filter.start === 'first'
-                ? (values?.[0] === undefined ? undefined : [values[0]])
-                : filter.start;
+            const start =
+                filter.start === 'first'
+                    ? values?.[0] === undefined
+                        ? undefined
+                        : [values[0]]
+                    : filter.start;
 
             return {
                 id: templateTagId('dashboard', filter.name).slice(0, 8),
@@ -655,7 +733,11 @@ export function buildParameters(tabs: ReportTab[], filterCardIds: Map<string, nu
  * Where a dropdown gets its values. A fixed list when the order matters and the values are known,
  * otherwise the question itself, which keeps the list up to date on its own.
  */
-function buildValuesSource(column: string, cardId: number | undefined, values: string[] | undefined): Record<string, unknown> {
+function buildValuesSource(
+    column: string,
+    cardId: number | undefined,
+    values: string[] | undefined,
+): Record<string, unknown> {
     if (values !== undefined && values.length > 0) {
         return { values_source_type: 'static-list', values_source_config: { values } };
     }
@@ -675,7 +757,10 @@ function buildValuesSource(column: string, cardId: number | undefined, values: s
  * The tabs, in the order the report lists them. A tab that is already there keeps its id so links
  * into it survive; a new one gets a negative id, which is how Metabase is told to create it.
  */
-export function buildTabs(tabs: ReportTab[], existing: Map<string, number>): { id: number; name: string; position: number }[] {
+export function buildTabs(
+    tabs: ReportTab[],
+    existing: Map<string, number>,
+): { id: number; name: string; position: number }[] {
     return tabs.map((tab, position) => ({
         id: existing.get(tab.title) ?? -(position + 1),
         name: tab.title,
@@ -696,7 +781,13 @@ export function dashcardKey(tabId: number | null | undefined, cardId: number | n
     return `${tabId ?? ''}:${cardId ?? ''}`;
 }
 
-export function buildDashcards(tabs: ReportTab[], cardIds: Map<string, number>, parameters: Record<string, unknown>[], tabIds: Map<string, number>, existing: Map<string, number> = new Map()): Record<string, unknown>[] {
+export function buildDashcards(
+    tabs: ReportTab[],
+    cardIds: Map<string, number>,
+    parameters: Record<string, unknown>[],
+    tabIds: Map<string, number>,
+    existing: Map<string, number> = new Map(),
+): Record<string, unknown>[] {
     const dashcards: Record<string, unknown>[] = [];
     const free = new Map(existing);
 
@@ -721,8 +812,12 @@ export function buildDashcards(tabs: ReportTab[], cardIds: Map<string, number>, 
                 visualization_settings: {},
                 parameter_mappings: parameters
                     // A filter reaches a card only when its own tab asks for it and its query takes it.
-                    .filter(parameter => tab.filters.includes(parameter.slug as string) && placed.card.parameters.includes(parameter.slug as string))
-                    .map(parameter => ({
+                    .filter(
+                        (parameter) =>
+                            tab.filters.includes(parameter.slug as string) &&
+                            placed.card.parameters.includes(parameter.slug as string),
+                    )
+                    .map((parameter) => ({
                         parameter_id: parameter.id,
                         card_id: cardId,
                         target: ['variable', ['template-tag', parameter.slug]],
@@ -768,12 +863,15 @@ export const reportCollectionPosition = 1;
  * lands on the report's own dashboard unless it names one, which is what gives a tab that mirrors no
  * page of the client's report -- the aanlevering to the department -- a dashboard of its own.
  */
-export function groupByDashboard(tabs: ReportTab[], dashboardName: string): { name: string; tabs: ReportTab[] }[] {
+export function groupByDashboard(
+    tabs: ReportTab[],
+    dashboardName: string,
+): { name: string; tabs: ReportTab[] }[] {
     const dashboards: { name: string; tabs: ReportTab[] }[] = [];
 
     for (const tab of tabs) {
         const name = tab.dashboard ?? dashboardName;
-        const dashboard = dashboards.find(entry => entry.name === name);
+        const dashboard = dashboards.find((entry) => entry.name === name);
 
         if (dashboard) {
             dashboard.tabs.push(tab);
@@ -795,12 +893,23 @@ export function groupByDashboard(tabs: ReportTab[], dashboardName: string): { na
  * fragment the report no longer has keeps its snippet, since anything the client has since built on
  * it would break with it.
  */
-export async function syncSnippets(api: MetabaseApi, snippets: readonly ReportSnippet[]): Promise<Map<string, number>> {
-    const existing = new Map((await api.listSnippets()).map(snippet => [snippet.name, snippet.id]));
+export async function syncSnippets(
+    api: MetabaseApi,
+    snippets: readonly ReportSnippet[],
+): Promise<Map<string, number>> {
+    const existing = new Map(
+        (await api.listSnippets()).map((snippet) => [snippet.name, snippet.id]),
+    );
     const ids = new Map<string, number>();
 
     for (const snippet of snippets) {
-        ids.set(snippet.name, await api.saveSnippet({ name: snippet.name, content: snippet.sql, description: snippet.description }, existing.get(snippet.name)));
+        ids.set(
+            snippet.name,
+            await api.saveSnippet(
+                { name: snippet.name, content: snippet.sql, description: snippet.description },
+                existing.get(snippet.name),
+            ),
+        );
     }
 
     return ids;
@@ -818,27 +927,42 @@ export async function syncSnippets(api: MetabaseApi, snippets: readonly ReportSn
  * questions an earlier run wrote can be told apart from the ones the client wrote themselves, and
  * cleared away rather than left standing beside the report they are no longer part of.
  */
-export async function syncReport(api: MetabaseApi, databaseId: number, tabs: ReportTab[], snippets: readonly ReportSnippet[], collection: string, dashboardName: string, hasCoordinates = false, env?: string, retired: ReportTab[] = []): Promise<ReportSyncResult> {
+export async function syncReport(
+    api: MetabaseApi,
+    databaseId: number,
+    tabs: ReportTab[],
+    snippets: readonly ReportSnippet[],
+    collection: string,
+    dashboardName: string,
+    hasCoordinates = false,
+    env?: string,
+    retired: ReportTab[] = [],
+): Promise<ReportSyncResult> {
     const snippetIds = await syncSnippets(api, snippets);
     const renamedCollection = await renameLegacyCollection(api, collection);
     const { id: collectionId, created: createdCollection } = await api.ensureCollection(collection);
 
-    const existingCards = new Map((await api.listCards(collectionId)).map(card => [card.name, card.id]));
+    const existingCards = new Map(
+        (await api.listCards(collectionId)).map((card) => [card.name, card.id]),
+    );
     const cardIds = new Map<string, number>();
     const filterCardIds = new Map<string, number>();
 
     for (const tab of tabs) {
         for (const card of tab.cards) {
-            const id = await api.saveCard({
-                name: cardName(card, tab),
-                description: card.description,
-                display: effectiveDisplay(card, hasCoordinates),
-                databaseId,
-                query: card.snippetSql,
-                templateTags: buildTemplateTags(card, snippetIds, tab.required),
-                visualizationSettings: buildVisualizationSettings(card, hasCoordinates, env),
-                collectionId,
-            }, existingCards.get(cardName(card, tab)));
+            const id = await api.saveCard(
+                {
+                    name: cardName(card, tab),
+                    description: card.description,
+                    display: effectiveDisplay(card, hasCoordinates),
+                    databaseId,
+                    query: card.snippetSql,
+                    templateTags: buildTemplateTags(card, snippetIds, tab.required),
+                    visualizationSettings: buildVisualizationSettings(card, hasCoordinates, env),
+                    collectionId,
+                },
+                existingCards.get(cardName(card, tab)),
+            );
 
             cardIds.set(card.key, id);
             if (tab.hidden) {
@@ -847,45 +971,77 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
         }
     }
 
-    const visible = tabs.filter(tab => !tab.hidden);
+    const visible = tabs.filter((tab) => !tab.hidden);
     const orderedValues = await readOrderedValues(api, filterCardIds);
     const existingDashboards = await api.listDashboards(collectionId);
     const written: ReportSyncDashboard[] = [];
 
     for (const [index, dashboard] of groupByDashboard(visible, dashboardName).entries()) {
-        const dashboardId = existingDashboards.find(entry => entry.name === dashboard.name)?.id
-            ?? await api.createDashboard(dashboard.name, undefined, collectionId);
+        const dashboardId =
+            existingDashboards.find((entry) => entry.name === dashboard.name)?.id ??
+            (await api.createDashboard(dashboard.name, undefined, collectionId));
 
         const layout = await api.getDashboardLayout(dashboardId);
-        const existingTabs = new Map(layout.tabs.map(tab => [tab.name, tab.id]));
-        const existingDashcards = new Map(layout.cards.map(placed => [dashcardKey(placed.tabId, placed.cardId), placed.id]));
+        const existingTabs = new Map(layout.tabs.map((tab) => [tab.name, tab.id]));
+        const existingDashcards = new Map(
+            layout.cards.map((placed) => [dashcardKey(placed.tabId, placed.cardId), placed.id]),
+        );
         const parameters = buildParameters(dashboard.tabs, filterCardIds, orderedValues);
         const dashboardTabs = buildTabs(dashboard.tabs, existingTabs);
-        const tabIds = new Map(dashboardTabs.map(tab => [tab.name, tab.id]));
+        const tabIds = new Map(dashboardTabs.map((tab) => [tab.name, tab.id]));
 
         await api.updateDashboard(dashboardId, {
             name: dashboard.name,
             parameters,
             tabs: dashboardTabs,
-            dashcards: buildDashcards(dashboard.tabs, cardIds, parameters, tabIds, existingDashcards),
+            dashcards: buildDashcards(
+                dashboard.tabs,
+                cardIds,
+                parameters,
+                tabIds,
+                existingDashcards,
+            ),
             // Pinned in the order the report writes them, so the pages the client knows stay first.
             collectionPosition: reportCollectionPosition + index,
         });
 
         const { created: bookmarked } = await api.bookmarkDashboard(dashboardId);
-        written.push({ name: dashboard.name, id: dashboardId, tabs: dashboard.tabs.map(tab => tab.title), bookmarked });
+        written.push({
+            name: dashboard.name,
+            id: dashboardId,
+            tabs: dashboard.tabs.map((tab) => tab.title),
+            bookmarked,
+        });
     }
 
-    await archiveSupersededDashboards(api, existingDashboards, [...visible, ...retired], written.map(dashboard => dashboard.name));
+    await archiveSupersededDashboards(
+        api,
+        existingDashboards,
+        [...visible, ...retired],
+        written.map((dashboard) => dashboard.name),
+    );
     await archiveSupersededCards(api, collectionId, tabs, retired);
 
     // Deduplicated: two tabs show a map under the same title, and naming it twice reads as an error.
-    const mapsWithoutCoordinates = [...new Set(tabs
-        .flatMap(tab => tab.cards)
-        .filter(card => card.display === 'map' && !hasCoordinates)
-        .map(card => card.title))];
+    const mapsWithoutCoordinates = [
+        ...new Set(
+            tabs
+                .flatMap((tab) => tab.cards)
+                .filter((card) => card.display === 'map' && !hasCoordinates)
+                .map((card) => card.title),
+        ),
+    ];
 
-    return { collection, collectionId, createdCollection, renamedCollection, dashboards: written, cards: cardIds.size, snippets: snippetIds.size, mapsWithoutCoordinates };
+    return {
+        collection,
+        collectionId,
+        createdCollection,
+        renamedCollection,
+        dashboards: written,
+        cards: cardIds.size,
+        snippets: snippetIds.size,
+        mapsWithoutCoordinates,
+    };
 }
 
 /**
@@ -897,12 +1053,17 @@ export async function syncReport(api: MetabaseApi, databaseId: number, tabs: Rep
  * machine that served several has no single right answer, so it gets a new collection and can throw
  * the old ones away itself.
  */
-export function collectionToRename(collections: { id: number; name: string }[], name: string): { id: number; name: string } | undefined {
-    if (collections.some(collection => collection.name === name)) {
+export function collectionToRename(
+    collections: { id: number; name: string }[],
+    name: string,
+): { id: number; name: string } | undefined {
+    if (collections.some((collection) => collection.name === name)) {
         return undefined;
     }
 
-    const legacy = collections.filter(collection => isLegacyReportCollectionName(collection.name));
+    const legacy = collections.filter((collection) =>
+        isLegacyReportCollectionName(collection.name),
+    );
     return legacy.length === 1 ? legacy[0] : undefined;
 }
 
@@ -923,21 +1084,26 @@ async function renameLegacyCollection(api: MetabaseApi, name: string): Promise<s
  * Only names this command could have produced are touched, so a question the client saved into the
  * collection themselves stays where it is.
  */
-async function archiveSupersededCards(api: MetabaseApi, collectionId: number, tabs: ReportTab[], retired: ReportTab[]): Promise<void> {
-    const wanted = new Set(tabs.flatMap(tab => tab.cards.map(card => cardName(card, tab))));
+async function archiveSupersededCards(
+    api: MetabaseApi,
+    collectionId: number,
+    tabs: ReportTab[],
+    retired: ReportTab[],
+): Promise<void> {
+    const wanted = new Set(tabs.flatMap((tab) => tab.cards.map((card) => cardName(card, tab))));
 
     // What the environment leaves out counts as ours as well: an earlier run wrote those questions
     // under names the report no longer holds, so nothing else here would recognise them.
     const written = [...tabs, ...retired];
-    const ours = new Set(written.flatMap(tab => tab.cards.map(card => card.title)));
-    const tabTitles = written.map(tab => tab.title);
+    const ours = new Set(written.flatMap((tab) => tab.cards.map((card) => card.title)));
+    const tabTitles = written.map((tab) => tab.title);
 
     for (const card of await api.listCards(collectionId)) {
         if (wanted.has(card.name)) {
             continue;
         }
 
-        const qualified = tabTitles.some(title => card.name.endsWith(` (${title})`));
+        const qualified = tabTitles.some((title) => card.name.endsWith(` (${title})`));
         if (ours.has(card.name) || qualified) {
             await api.archiveCard(card.id);
         }
@@ -949,11 +1115,18 @@ async function archiveSupersededCards(api: MetabaseApi, collectionId: number, ta
  * dashboards named exactly after a tab are touched, so anything the client built themselves stays,
  * and never one this run just wrote: a tab may share its name with the dashboard it asked for.
  */
-async function archiveSupersededDashboards(api: MetabaseApi, existing: { id: number; name: string }[], tabs: ReportTab[], written: string[]): Promise<void> {
-    const titles = new Set(tabs.map(tab => tab.title));
+async function archiveSupersededDashboards(
+    api: MetabaseApi,
+    existing: { id: number; name: string }[],
+    tabs: ReportTab[],
+    written: string[],
+): Promise<void> {
+    const titles = new Set(tabs.map((tab) => tab.title));
     const ours = new Set(written);
 
-    for (const dashboard of existing.filter(dashboard => !ours.has(dashboard.name) && titles.has(dashboard.name))) {
+    for (const dashboard of existing.filter(
+        (dashboard) => !ours.has(dashboard.name) && titles.has(dashboard.name),
+    )) {
         await api.archiveDashboard(dashboard.id);
     }
 }
@@ -965,10 +1138,15 @@ async function archiveSupersededDashboards(api: MetabaseApi, existing: { id: num
  * the whole push for: that filter falls back to reading its values from the question, which costs
  * the ordering but keeps the dashboards working.
  */
-async function readOrderedValues(api: MetabaseApi, filterCardIds: Map<string, number>): Promise<Map<string, string[]>> {
+async function readOrderedValues(
+    api: MetabaseApi,
+    filterCardIds: Map<string, number>,
+): Promise<Map<string, string[]>> {
     const values = new Map<string, string[]>();
 
-    for (const filter of reportFilters.filter((filter): filter is StringReportFilter => filter.type === 'string' && filter.keepOrder)) {
+    for (const filter of reportFilters.filter(
+        (filter): filter is StringReportFilter => filter.type === 'string' && filter.keepOrder,
+    )) {
         const cardId = filterCardIds.get(filter.valuesFrom);
         if (cardId === undefined) {
             continue;

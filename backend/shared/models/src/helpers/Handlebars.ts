@@ -17,7 +17,11 @@ class AsyncResolver {
     static ID_ESCAPED_STRING = '<_'; // Detect whether the is is escaped or not
     counter = 0;
 
-    static registerAsyncHelper(handlebars: typeof Handlebars, name: string, handler: (...args) => Promise<string>) {
+    static registerAsyncHelper(
+        handlebars: typeof Handlebars,
+        name: string,
+        handler: (...args) => Promise<string>,
+    ) {
         handlebars.registerHelper(name, function (...args) {
             const resolver = this.asyncResolver;
             if (!resolver) {
@@ -26,7 +30,13 @@ class AsyncResolver {
 
             // Return an id instead
             resolver.counter += 1;
-            const id = AsyncResolver.ID_PREFIX + AsyncResolver.ID_ESCAPED_STRING + Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + '_' + resolver.counter;
+            const id =
+                AsyncResolver.ID_PREFIX +
+                AsyncResolver.ID_ESCAPED_STRING +
+                Math.random().toString(36).substring(2) +
+                Math.random().toString(36).substring(2) +
+                '_' +
+                resolver.counter;
             resolver.cacheIds.set(id, handler(...args));
 
             return id;
@@ -41,7 +51,10 @@ class AsyncResolver {
             compiledTemplate = compiledTemplate.replace(id, value);
 
             // Replace escaped ids with the escaped value
-            compiledTemplate = compiledTemplate.replace(Handlebars.Utils.escapeExpression(id), Handlebars.Utils.escapeExpression(value));
+            compiledTemplate = compiledTemplate.replace(
+                Handlebars.Utils.escapeExpression(id),
+                Handlebars.Utils.escapeExpression(value),
+            );
         }
 
         return compiledTemplate;
@@ -68,12 +81,12 @@ Handlebars.registerHelper('formatDate', (a, options) => {
 
 Handlebars.registerHelper('or', (...args) => {
     args.pop();
-    return !!args.find(a => !!a);
+    return !!args.find((a) => !!a);
 });
 
 Handlebars.registerHelper('and', (...args) => {
     args.pop();
-    return args.every(a => !!a);
+    return args.every((a) => !!a);
 });
 
 /**
@@ -105,7 +118,7 @@ Handlebars.registerHelper('now', () => {
 });
 
 Handlebars.registerHelper('coalesce', (...args) => {
-    return args.find(a => a !== null && a !== undefined) ?? null;
+    return args.find((a) => a !== null && a !== undefined) ?? null;
 });
 
 Handlebars.registerHelper('$t', (t: string) => {
@@ -185,7 +198,10 @@ AsyncResolver.registerAsyncHelper(Handlebars, 'src', async (a, options) => {
 
     try {
         const image = Image.decode(new ObjectData(a, { version: 0 }));
-        const resolution = image.getResolutionForSize(width as number | undefined, height as number | undefined);
+        const resolution = image.getResolutionForSize(
+            width as number | undefined,
+            height as number | undefined,
+        );
 
         // Private files cannot be used unless we have a signed url
         const fileWithSignedUrl = await resolution.file.withSignedUrl();
@@ -215,7 +231,10 @@ Handlebars.registerHelper('src-width', (a, options) => {
 
     try {
         const image = Image.decode(new ObjectData(a, { version: 0 }));
-        const resolution = image.getResolutionForSize(width as number | undefined, height as number | undefined);
+        const resolution = image.getResolutionForSize(
+            width as number | undefined,
+            height as number | undefined,
+        );
         return resolution.width;
     } catch (e) {
         console.error('src-width helper:', e);
@@ -238,7 +257,10 @@ Handlebars.registerHelper('src-height', (a, options) => {
 
     try {
         const image = Image.decode(new ObjectData(a, { version: 0 }));
-        const resolution = image.getResolutionForSize(width as number | undefined, height as number | undefined);
+        const resolution = image.getResolutionForSize(
+            width as number | undefined,
+            height as number | undefined,
+        );
         return resolution.height;
     } catch (e) {
         console.error('src-height helper:', e);

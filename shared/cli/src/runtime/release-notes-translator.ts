@@ -3,7 +3,11 @@ import { join } from 'node:path';
 import { run, RunVerbosity } from './command-runner.js';
 import type { ReleaseNotes } from './release-notes.js';
 import { resolveTranslationModel } from './translation/create-translation-model.js';
-import type { CodebaseGrepper, CommitDiffFetcher, TranslationModel } from './translation/translation-model.js';
+import type {
+    CodebaseGrepper,
+    CommitDiffFetcher,
+    TranslationModel,
+} from './translation/translation-model.js';
 
 /** Editable prompt, relative to the repo root. Edit this file to tune the translation. */
 export const TRANSLATION_PROMPT_RELATIVE_PATH = '.development/release-notes-prompt.md';
@@ -48,16 +52,22 @@ export async function getCommitDiff(cwd: string, hash: string): Promise<string> 
     if (!/^[0-9a-f]{4,40}$/i.test(hash)) {
         return `Invalid commit hash: ${hash}`;
     }
-    const result = await run('git', ['show', '--no-color', '--stat', '--patch', hash], { cwd, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+    const result = await run('git', ['show', '--no-color', '--stat', '--patch', hash], {
+        cwd,
+        capture: true,
+        allowFailure: true,
+        verbosity: RunVerbosity.Quiet,
+    });
     if (result.status !== 0) {
         return `Could not load the diff for ${hash}: ${result.stderr.trim()}`;
     }
 
     // Resolve translation keys from the full diff first, so we still surface them when the diff is truncated.
     const translations = await collectTranslationsForDiff(cwd, result.stdout);
-    const diff = result.stdout.length > MAX_DIFF_LENGTH
-        ? `${result.stdout.slice(0, MAX_DIFF_LENGTH)}\n…(diff truncated)…`
-        : result.stdout;
+    const diff =
+        result.stdout.length > MAX_DIFF_LENGTH
+            ? `${result.stdout.slice(0, MAX_DIFF_LENGTH)}\n…(diff truncated)…`
+            : result.stdout;
 
     return translations ? `${diff}\n\n${translations}` : diff;
 }
@@ -94,7 +104,12 @@ export async function grepCodebase(cwd: string, input: Record<string, unknown>):
         args.push('--', input.pathspec.trim());
     }
 
-    const result = await run('git', args, { cwd, capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
+    const result = await run('git', args, {
+        cwd,
+        capture: true,
+        allowFailure: true,
+        verbosity: RunVerbosity.Quiet,
+    });
 
     // git grep exits 1 (no error output) when there are simply no matches.
     if (result.status === 1 && result.stderr.trim().length === 0) {
@@ -108,8 +123,8 @@ export async function grepCodebase(cwd: string, input: Record<string, unknown>):
     const prefix = `${commit}:`;
     const lines = result.stdout
         .split('\n')
-        .filter(line => line.length > 0)
-        .map(line => line.startsWith(prefix) ? line.slice(prefix.length) : line);
+        .filter((line) => line.length > 0)
+        .map((line) => (line.startsWith(prefix) ? line.slice(prefix.length) : line));
 
     if (lines.length <= MAX_GREP_LINES) {
         return lines.join('\n');
@@ -160,7 +175,9 @@ async function loadLocaleStrings(cwd: string): Promise<Map<string, unknown>> {
     }
     try {
         const parsed = JSON.parse(await readFile(path, 'utf8')) as unknown;
-        const strings = new Map<string, unknown>(typeof parsed === 'object' && parsed !== null ? Object.entries(parsed) : []);
+        const strings = new Map<string, unknown>(
+            typeof parsed === 'object' && parsed !== null ? Object.entries(parsed) : [],
+        );
         localeCache = { path, strings };
         return strings;
     } catch {
@@ -190,15 +207,24 @@ export async function translateReleaseNotes(
     notes: ReleaseNotes,
     englishMarkdown: string,
     model: TranslationModel,
-    options: { promptFile?: string; onToolCall?: (call: { name: string; input: Record<string, unknown> }) => void } = {},
+    options: {
+        promptFile?: string;
+        onToolCall?: (call: { name: string; input: Record<string, unknown> }) => void;
+    } = {},
 ): Promise<string> {
     const systemPrompt = await loadTranslationPrompt(cwd, options.promptFile);
     const userContent = buildTranslationUserMessage(notes, englishMarkdown);
 
-    const fetchCommitDiff: CommitDiffFetcher = hash => getCommitDiff(cwd, hash);
-    const grepCodebaseTool: CodebaseGrepper = input => grepCodebase(cwd, input);
+    const fetchCommitDiff: CommitDiffFetcher = (hash) => getCommitDiff(cwd, hash);
+    const grepCodebaseTool: CodebaseGrepper = (input) => grepCodebase(cwd, input);
 
-    const result = await model.translate({ systemPrompt, userContent, fetchCommitDiff, grepCodebase: grepCodebaseTool, onToolCall: options.onToolCall });
+    const result = await model.translate({
+        systemPrompt,
+        userContent,
+        fetchCommitDiff,
+        grepCodebase: grepCodebaseTool,
+        onToolCall: options.onToolCall,
+    });
 
     return result.trim();
 }
@@ -227,7 +253,10 @@ export async function composeReleaseNotesBody(
         return englishMarkdown;
     }
 
-    const resolution = await resolveTranslationModel({ provider: options.provider, model: options.model });
+    const resolution = await resolveTranslationModel({
+        provider: options.provider,
+        model: options.model,
+    });
     if ('unavailable' in resolution) {
         options.onWarn?.(`Skipping Dutch translation: ${resolution.unavailable}`);
         return englishMarkdown;
@@ -242,21 +271,29 @@ export async function composeReleaseNotesBody(
             onToolCall: ({ name, input }) => {
                 if (name === 'get_commit_diff') {
                     diffRequests++;
-                    options.onInfo?.(`  ↳ Inspecting commit ${typeof input.hash === 'string' ? input.hash : '?'} for a clearer translation…`);
+                    options.onInfo?.(
+                        `  ↳ Inspecting commit ${typeof input.hash === 'string' ? input.hash : '?'} for a clearer translation…`,
+                    );
                 } else if (name === 'grep_codebase') {
-                    options.onInfo?.(`  ↳ Searching the codebase for ${typeof input.pattern === 'string' ? JSON.stringify(input.pattern) : '?'}…`);
+                    options.onInfo?.(
+                        `  ↳ Searching the codebase for ${typeof input.pattern === 'string' ? JSON.stringify(input.pattern) : '?'}…`,
+                    );
                 } else {
                     options.onInfo?.(`  ↳ Model called tool ${name}(${JSON.stringify(input)})`);
                 }
             },
         });
 
-        options.onInfo?.(diffRequests > 0
-            ? `Dutch translation ready (inspected ${diffRequests} commit diff${diffRequests === 1 ? '' : 's'}).`
-            : 'Dutch translation ready (the model did not need to inspect any commit diffs).');
+        options.onInfo?.(
+            diffRequests > 0
+                ? `Dutch translation ready (inspected ${diffRequests} commit diff${diffRequests === 1 ? '' : 's'}).`
+                : 'Dutch translation ready (the model did not need to inspect any commit diffs).',
+        );
         return `${englishMarkdown.trimEnd()}\n\n---\n\n${dutch}\n`;
     } catch (error) {
-        options.onWarn?.(`Could not translate release notes: ${error instanceof Error ? error.message : String(error)}`);
+        options.onWarn?.(
+            `Could not translate release notes: ${error instanceof Error ? error.message : String(error)}`,
+        );
         return englishMarkdown;
     }
 }

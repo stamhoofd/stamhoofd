@@ -12,7 +12,12 @@ type Query = undefined;
 type Body = UitpasPriceCheckRequest;
 type ResponseBody = UitpasPriceCheckResponse;
 
-export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     bodyDecoder = UitpasPriceCheckRequest as Decoder<UitpasPriceCheckRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -50,10 +55,17 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
             } else {
                 // OFFICIAL FLOW with an UiTPAS number
                 // request should include a reduced price (estimate by the frontend)
-                const organization = await Context.setOrganizationScope({ willAuthenticate: false });
-                const reducedPrices = await UitpasService.getSocialTariffForUitpasNumbers(organization.id, request.body.uitpasNumbers, request.body.basePrice, request.body.uitpasEventUrl); // Throws if invalid
+                const organization = await Context.setOrganizationScope({
+                    willAuthenticate: false,
+                });
+                const reducedPrices = await UitpasService.getSocialTariffForUitpasNumbers(
+                    organization.id,
+                    request.body.uitpasNumbers,
+                    request.body.basePrice,
+                    request.body.uitpasEventUrl,
+                ); // Throws if invalid
                 const uitpasPriceCheckResponse = UitpasPriceCheckResponse.create({
-                    prices: reducedPrices.map(price => price.price), // ignore tariff id's here
+                    prices: reducedPrices.map((price) => price.price), // ignore tariff id's here
                 });
                 return new Response(uitpasPriceCheckResponse);
             }
@@ -78,7 +90,7 @@ export class RetrieveUitpasSocialTariffPricesEndpoint extends Endpoint<Params, Q
             const organization = await Context.setOrganizationScope({ willAuthenticate: false });
             await UitpasService.checkUitpasNumbers(organization.id, request.body.uitpasNumbers); // Throws if invalid
             const uitpasPriceCheckResponse = UitpasPriceCheckResponse.create({
-                prices: request.body.uitpasNumbers.map(_ => reducedPrice), // All reduced prices are the same in this non-official flow
+                prices: request.body.uitpasNumbers.map((_) => reducedPrice), // All reduced prices are the same in this non-official flow
             });
             return new Response(uitpasPriceCheckResponse);
         }

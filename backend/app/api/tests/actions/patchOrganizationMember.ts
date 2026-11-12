@@ -7,7 +7,13 @@ import { PatchOrganizationMembersEndpoint } from '../../src/endpoints/global/mem
 import { testServer } from '../helpers/TestServer.js';
 import { initAdmin } from '../init/initAdmin.js';
 
-export async function patchOrganizationMember({ patch, organization }: { patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>; organization: Organization }) {
+export async function patchOrganizationMember({
+    patch,
+    organization,
+}: {
+    patch: AutoEncoderPatchType<MemberWithRegistrationsBlob>;
+    organization: Organization;
+}) {
     expect(patch.id).toEqual(expect.any(String));
     const { adminToken } = await initAdmin({ organization: organization });
 

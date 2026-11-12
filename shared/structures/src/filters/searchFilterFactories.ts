@@ -2,7 +2,10 @@ import type { ParsePhoneNumber } from './SearchFilterFactory.js';
 import { SearchFilterFactory } from './SearchFilterFactory.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 
-export function getOrderSearchFilter(search: string | null, parsePhoneNumber: ParsePhoneNumber): StamhoofdFilter | null {
+export function getOrderSearchFilter(
+    search: string | null,
+    parsePhoneNumber: ParsePhoneNumber,
+): StamhoofdFilter | null {
     if (search === null || search === undefined || search === '') {
         return null;
     }

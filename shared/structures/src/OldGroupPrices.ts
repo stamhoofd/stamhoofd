@@ -1,4 +1,12 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
@@ -37,32 +45,43 @@ export class OldGroupPrices extends AutoEncoder {
     /**
      * The array contains prices: for first member, second member... If more members are present in a family (or member itself), the last price is used
      */
-    @field({ decoder: new ArrayDecoder(OldGroupPrice), version: 98, upgrade: function (this: OldGroupPrices) {
-        const arr: OldGroupPrice[] = [
-            OldGroupPrice.create({
-                price: this.price,
-                reducedPrice: this.reducedPrice,
-            }),
-        ];
-        if (this.familyPrice !== null) {
-            arr.push(
+    @field({
+        decoder: new ArrayDecoder(OldGroupPrice),
+        version: 98,
+        upgrade: function (this: OldGroupPrices) {
+            const arr: OldGroupPrice[] = [
                 OldGroupPrice.create({
-                    price: this.familyPrice,
-                    reducedPrice: (this.reducedPrice !== null && this.familyPrice < this.reducedPrice) ? null : this.reducedPrice,
+                    price: this.price,
+                    reducedPrice: this.reducedPrice,
                 }),
-            );
-
-            if (this.extraFamilyPrice !== null) {
+            ];
+            if (this.familyPrice !== null) {
                 arr.push(
                     OldGroupPrice.create({
-                        price: this.extraFamilyPrice,
-                        reducedPrice: (this.reducedPrice !== null && this.extraFamilyPrice < this.reducedPrice) ? null : this.reducedPrice,
+                        price: this.familyPrice,
+                        reducedPrice:
+                            this.reducedPrice !== null && this.familyPrice < this.reducedPrice
+                                ? null
+                                : this.reducedPrice,
                     }),
                 );
+
+                if (this.extraFamilyPrice !== null) {
+                    arr.push(
+                        OldGroupPrice.create({
+                            price: this.extraFamilyPrice,
+                            reducedPrice:
+                                this.reducedPrice !== null &&
+                                this.extraFamilyPrice < this.reducedPrice
+                                    ? null
+                                    : this.reducedPrice,
+                        }),
+                    );
+                }
             }
-        }
-        return arr;
-    } })
+            return arr;
+        },
+    })
     prices: OldGroupPrice[] = [OldGroupPrice.create({})];
 
     getPriceFor(reduced: boolean, alreadyRegisteredCount = 0) {

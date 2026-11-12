@@ -10,10 +10,10 @@ export async function setup() {
     const { Database, Migration } = await import('@node/database');
 
     // External migrations
-    if (!await Migration.runAll(path.dirname(modelsPath) + '/migrations')) {
+    if (!(await Migration.runAll(path.dirname(modelsPath) + '/migrations'))) {
         throw new Error('Migrations failed');
     }
-    if (!await Migration.runAll(path.dirname(emailPath) + '/../migrations')) {
+    if (!(await Migration.runAll(path.dirname(emailPath) + '/../migrations'))) {
         throw new Error('Email migrations failed');
     }
 
@@ -25,7 +25,10 @@ export async function setup() {
     await Database.delete('DELETE FROM `registrations`');
     await Database.delete('DELETE FROM `payments`');
     await Database.delete('DELETE FROM `members`');
-    await Database.update('UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null', ['delete']);
+    await Database.update(
+        'UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null',
+        ['delete'],
+    );
     await Database.delete('DELETE FROM `organizations`');
     await Database.delete('DELETE FROM `registration_periods` where customName = ?', ['delete']);
     await Database.delete('DELETE FROM `email_recipients`');
@@ -37,4 +40,4 @@ export async function setup() {
 
     await Database.delete('OPTIMIZE TABLE organizations;'); // fix breaking of indexes due to deletes (mysql bug?)
     await Database.end();
-};
+}

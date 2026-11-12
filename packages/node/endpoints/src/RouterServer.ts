@@ -48,17 +48,9 @@ export class RouterServer {
 
         // Todo: implement special errors to send custom status codes
         if (isSimpleError(e)) {
-            return new Response(
-                new SimpleErrors(e),
-                e.statusCode ?? 400,
-                headers,
-            );
+            return new Response(new SimpleErrors(e), e.statusCode ?? 400, headers);
         } else if (isSimpleErrors(e)) {
-            return new Response(
-                e,
-                e.statusCode ?? 400,
-                headers,
-            );
+            return new Response(e, e.statusCode ?? 400, headers);
         }
 
         return new Response(
@@ -197,13 +189,17 @@ export class RouterServer {
 
                     // Add default headers
                     for (const header in this.defaultHeaders) {
-                        if (this.defaultHeaders.hasOwnProperty(header) && !response.headers.hasOwnProperty(header)) {
+                        if (
+                            this.defaultHeaders.hasOwnProperty(header) &&
+                            !response.headers.hasOwnProperty(header)
+                        ) {
                             response.headers[header] = this.defaultHeaders[header];
                         }
                     }
 
                     // Add cache control no cache
-                    if (!response.headers['Cache-Control']) response.headers['Cache-Control'] = 'no-cache';
+                    if (!response.headers['Cache-Control'])
+                        response.headers['Cache-Control'] = 'no-cache';
 
                     // Process response middlewares
                     for (const middleware of this.responseMiddlewares) {
@@ -230,10 +226,7 @@ export class RouterServer {
                     const stream = encodedResponse.body;
                     console.log('Streaming data to client');
 
-                    await pipeline(
-                        stream,
-                        res,
-                    );
+                    await pipeline(stream, res);
 
                     console.log('Successfully streamed data to client');
                 } else {
@@ -270,7 +263,9 @@ export class RouterServer {
         this.server.timeout = 10000;
 
         this.server.listen(port, '0.0.0.0', () => {
-            console.debug(`Server running at ${this.httpsOptions ? 'https' : 'http'}://0.0.0.0:${port}`);
+            console.debug(
+                `Server running at ${this.httpsOptions ? 'https' : 'http'}://0.0.0.0:${port}`,
+            );
         });
     }
 

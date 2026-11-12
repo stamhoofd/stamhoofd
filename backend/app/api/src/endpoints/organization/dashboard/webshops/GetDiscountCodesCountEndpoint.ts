@@ -13,7 +13,12 @@ type Query = CountFilteredRequest;
 type Body = undefined;
 type ResponseBody = CountResponse;
 
-export class GetWebshopDiscountCodesCountEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetWebshopDiscountCodesCountEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     queryDecoder = CountFilteredRequest as Decoder<CountFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -21,7 +26,9 @@ export class GetWebshopDiscountCodesCountEndpoint extends Endpoint<Params, Query
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/webshop/@id/discount-codes/count', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/discount-codes/count', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -33,16 +40,18 @@ export class GetWebshopDiscountCodesCountEndpoint extends Endpoint<Params, Query
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
         const webshop = await Webshop.getByID(request.params.id);
-        if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+        if (!webshop || !(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full))) {
             throw Context.auth.notFoundOrNoAccess();
         }
 
-        const query = await GetWebshopDiscountCodesEndpoint.buildQuery(request.query, { webshopId: webshop.id });
+        const query = await GetWebshopDiscountCodesEndpoint.buildQuery(request.query, {
+            webshopId: webshop.id,
+        });
 
         const count = await query.count();
 

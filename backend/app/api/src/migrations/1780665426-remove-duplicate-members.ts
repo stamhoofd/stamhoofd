@@ -49,50 +49,24 @@ export default new Migration(async () => {
         .from(Member.table, 'a')
         .join(
             SQL.join(Member.table, 'b')
-                .where(
-                    SQL.column('b', 'id'),
-                    '!=',
-                    SQL.column('a', 'id'),
-                )
-                .andWhere(
-                    SQL.column('b', 'firstName'),
-                    SQL.column('a', 'firstName'),
-                )
-                .andWhere(
-                    SQL.column('b', 'lastName'),
-                    SQL.column('a', 'lastName'),
-                )
-                .andWhere(
-                    SQL.column('b', 'birthDay'),
-                    SQL.column('a', 'birthDay'),
-                ),
+                .where(SQL.column('b', 'id'), '!=', SQL.column('a', 'id'))
+                .andWhere(SQL.column('b', 'firstName'), SQL.column('a', 'firstName'))
+                .andWhere(SQL.column('b', 'lastName'), SQL.column('a', 'lastName'))
+                .andWhere(SQL.column('b', 'birthDay'), SQL.column('a', 'birthDay')),
         )
         .where(
-            SQL.where(
-                SQL.column('a', 'createdAt'),
-                '<',
-                SQL.column('b', 'createdAt'),
-            ).or(
-                SQL.where(
-                    SQL.column('b', 'createdAt'),
-                    SQL.column('a', 'createdAt'),
-                ).and(
+            SQL.where(SQL.column('a', 'createdAt'), '<', SQL.column('b', 'createdAt')).or(
+                SQL.where(SQL.column('b', 'createdAt'), SQL.column('a', 'createdAt')).and(
                     SQL.column('a', 'id'),
                     '<',
                     SQL.column('b', 'id'),
                 ),
             ),
         )
-        .orderBy(
-            SQL.column('a', 'createdAt'),
-            'ASC',
-        );
+        .orderBy(SQL.column('a', 'createdAt'), 'ASC');
 
     if (STAMHOOFD.userMode === 'organization') {
-        q.where(
-            SQL.column('b', 'organizationId'),
-            SQL.column('organizationId'),
-        );
+        q.where(SQL.column('b', 'organizationId'), SQL.column('organizationId'));
     }
 
     const duplicates = await q.fetch();
@@ -102,7 +76,12 @@ export default new Migration(async () => {
 
     for (const duplicate of duplicates) {
         if (mergedIntoSet.has(duplicate.b.id)) {
-            console.log('Found chained duplicate in wrong order', duplicate.a.id, 'and', duplicate.b.id);
+            console.log(
+                'Found chained duplicate in wrong order',
+                duplicate.a.id,
+                'and',
+                duplicate.b.id,
+            );
             continue; // Already merged this one
         }
 
@@ -123,7 +102,9 @@ export default new Migration(async () => {
             duplicate.b.id,
             duplicate.b.createdAt,
             'with name',
-            duplicate.a.firstName, duplicate.a.lastName);
+            duplicate.a.firstName,
+            duplicate.a.lastName,
+        );
         deletedSet.add(duplicate.b.id);
         mergedIntoSet.add(duplicate.a.id);
 
@@ -132,12 +113,25 @@ export default new Migration(async () => {
         const [memberB] = await Member.getBlobByIds(duplicate.b.id);
 
         if (memberA.details.name !== memberB.details.name) {
-            console.warn('Member names do not match', memberA.details.name, 'and', memberB.details.name);
+            console.warn(
+                'Member names do not match',
+                memberA.details.name,
+                'and',
+                memberB.details.name,
+            );
             continue; // Names do not match, cannot merge
         }
 
-        if (memberA.details.birthDayFormatted === null || memberA.details.birthDayFormatted !== memberB.details.birthDayFormatted) {
-            console.warn('Member birthday do not match', memberA.details.birthDayFormatted, 'and', memberB.details.birthDayFormatted);
+        if (
+            memberA.details.birthDayFormatted === null ||
+            memberA.details.birthDayFormatted !== memberB.details.birthDayFormatted
+        ) {
+            console.warn(
+                'Member birthday do not match',
+                memberA.details.birthDayFormatted,
+                'and',
+                memberB.details.birthDayFormatted,
+            );
             continue; // Names do not match, cannot merge
         }
 

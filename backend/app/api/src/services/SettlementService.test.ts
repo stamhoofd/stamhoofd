@@ -1,11 +1,24 @@
 import type { Organization } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, OrganizationFactory, Payment, StripeAccount } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemPayment,
+    OrganizationFactory,
+    Payment,
+    StripeAccount,
+} from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { PaymentSettlement } from '@stamhoofd/models/models/PaymentSettlement.js';
 import type { Settlement as SettlementModel } from '@stamhoofd/models/models/Settlement.js';
 import { Settlement } from '@stamhoofd/models/models/Settlement.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
-import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus, SettlementReference } from '@stamhoofd/structures';
+import {
+    BalanceItemStatus,
+    BalanceItemType,
+    PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+    SettlementReference,
+} from '@stamhoofd/structures';
 import { SimpleError } from '@common/errors';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
@@ -22,7 +35,11 @@ describe('SettlementService', () => {
         stripeAccount = await createStripeAccount();
     });
 
-    async function createPayment(price = 50_00_00, method = PaymentMethod.Bancontact, organizationId = organization.id) {
+    async function createPayment(
+        price = 50_00_00,
+        method = PaymentMethod.Bancontact,
+        organizationId = organization.id,
+    ) {
         const payment = new Payment();
         payment.organizationId = organizationId;
         payment.method = method;
@@ -45,10 +62,21 @@ describe('SettlementService', () => {
     /**
      * A fee with its deduction charge, as the sync stores them.
      */
-    async function createApplicationFee({ amount = 1_00_00, type = ApplicationFeeType.Service, settlement = null as SettlementModel | null, balanceItemId = null as string | null, occurredAt = new Date(2026, 0, 14), payingOrganizationId = organization.id, payingStripeAccountId = null as string | null } = {}) {
+    async function createApplicationFee({
+        amount = 1_00_00,
+        type = ApplicationFeeType.Service,
+        settlement = null as SettlementModel | null,
+        balanceItemId = null as string | null,
+        occurredAt = new Date(2026, 0, 14),
+        payingOrganizationId = organization.id,
+        payingStripeAccountId = null as string | null,
+    } = {}) {
         const externalId = 'fee_' + uuidv4();
         const charge = await SettlementService.upsertCharge({
-            type: type === ApplicationFeeType.Service ? SettlementChargeType.ApplicationFeeService : SettlementChargeType.ApplicationFeeTransfer,
+            type:
+                type === ApplicationFeeType.Service
+                    ? SettlementChargeType.ApplicationFeeService
+                    : SettlementChargeType.ApplicationFeeTransfer,
             externalId: externalId + ':' + type,
             amount: -amount,
             applicationFeeId: externalId,
@@ -75,7 +103,11 @@ describe('SettlementService', () => {
      * A fee the invoicer will never bill: its payer is gone, so there is no payout of theirs to
      * deduct it from either.
      */
-    async function createUncollectibleApplicationFee({ amount = 1_00_00, settlement = null as SettlementModel | null, occurredAt = new Date(2026, 0, 14) } = {}) {
+    async function createUncollectibleApplicationFee({
+        amount = 1_00_00,
+        settlement = null as SettlementModel | null,
+        occurredAt = new Date(2026, 0, 14),
+    } = {}) {
         const fee = new ApplicationFee();
         fee.externalId = 'fee_' + uuidv4();
         fee.type = ApplicationFeeType.Service;
@@ -112,7 +144,9 @@ describe('SettlementService', () => {
         return { payment, balanceItem };
     }
 
-    function settlementData(overrides: Partial<Parameters<typeof SettlementService.upsertSettlement>[0]> = {}) {
+    function settlementData(
+        overrides: Partial<Parameters<typeof SettlementService.upsertSettlement>[0]> = {},
+    ) {
         return {
             provider: PaymentProvider.Stripe,
             externalId: 'po_' + uuidv4(),
@@ -129,7 +163,10 @@ describe('SettlementService', () => {
             const data = settlementData();
             const created = await SettlementService.upsertSettlement(data);
 
-            const updated = await SettlementService.upsertSettlement({ ...data, amount: 400_00_00 });
+            const updated = await SettlementService.upsertSettlement({
+                ...data,
+                amount: 400_00_00,
+            });
 
             expect(updated.id).toBe(created.id);
             expect(updated.amount).toBe(400_00_00);
@@ -139,7 +176,9 @@ describe('SettlementService', () => {
         test('the same externalId of a different provider is a different settlement', async () => {
             const externalId = 'shared_' + uuidv4();
             const stripe = await SettlementService.upsertSettlement(settlementData({ externalId }));
-            const mollie = await SettlementService.upsertSettlement(settlementData({ externalId, provider: PaymentProvider.Mollie }));
+            const mollie = await SettlementService.upsertSettlement(
+                settlementData({ externalId, provider: PaymentProvider.Mollie }),
+            );
 
             expect(mollie.id).not.toBe(stripe.id);
         });
@@ -186,8 +225,12 @@ describe('SettlementService', () => {
 
         test('a transaction that moved to another payout leaves nothing behind', async () => {
             const payment = await createPayment();
-            const from = await SettlementService.upsertSettlement(settlementData({ amount: 50_00_00 }));
-            const to = await SettlementService.upsertSettlement(settlementData({ amount: 50_00_00 }));
+            const from = await SettlementService.upsertSettlement(
+                settlementData({ amount: 50_00_00 }),
+            );
+            const to = await SettlementService.upsertSettlement(
+                settlementData({ amount: 50_00_00 }),
+            );
 
             await SettlementService.upsertPaymentLine(from, {
                 paymentId: payment.id,
@@ -217,8 +260,14 @@ describe('SettlementService', () => {
 
         test('the line is stored on the organization of the payout', async () => {
             const otherOrganization = await new OrganizationFactory({}).create();
-            const payment = await createPayment(50_00_00, PaymentMethod.Bancontact, otherOrganization.id);
-            const settlement = await SettlementService.upsertSettlement(settlementData({ organizationId: otherOrganization.id }));
+            const payment = await createPayment(
+                50_00_00,
+                PaymentMethod.Bancontact,
+                otherOrganization.id,
+            );
+            const settlement = await SettlementService.upsertSettlement(
+                settlementData({ organizationId: otherOrganization.id }),
+            );
 
             const line = await SettlementService.upsertPaymentLine(settlement, {
                 paymentId: payment.id,
@@ -228,7 +277,9 @@ describe('SettlementService', () => {
             });
 
             expect(line.organizationId).toBe(otherOrganization.id);
-            expect((await PaymentSettlement.getByID(line.id))!.organizationId).toBe(otherOrganization.id);
+            expect((await PaymentSettlement.getByID(line.id))!.organizationId).toBe(
+                otherOrganization.id,
+            );
         });
     });
 
@@ -277,23 +328,45 @@ describe('SettlementService', () => {
     describe('updatePaymentSettlementsForApplicationFeePayment', () => {
         test('one line per payout, summing the fees it contained', async () => {
             const { payment, balanceItem } = await createFeePayment(3_25_00);
-            const first = await SettlementService.upsertSettlement(settlementData({ settledAt: new Date(2026, 0, 10) }));
-            const second = await SettlementService.upsertSettlement(settlementData({ settledAt: new Date(2026, 0, 20) }));
+            const first = await SettlementService.upsertSettlement(
+                settlementData({ settledAt: new Date(2026, 0, 10) }),
+            );
+            const second = await SettlementService.upsertSettlement(
+                settlementData({ settledAt: new Date(2026, 0, 20) }),
+            );
 
-            await createApplicationFee({ settlement: first, balanceItemId: balanceItem.id, amount: 1_00_00, occurredAt: new Date(2026, 0, 5) });
-            await createApplicationFee({ settlement: first, balanceItemId: balanceItem.id, amount: 50_00, occurredAt: new Date(2026, 0, 8) });
-            await createApplicationFee({ settlement: second, balanceItemId: balanceItem.id, amount: 1_50_00, occurredAt: new Date(2026, 0, 15) });
+            await createApplicationFee({
+                settlement: first,
+                balanceItemId: balanceItem.id,
+                amount: 1_00_00,
+                occurredAt: new Date(2026, 0, 5),
+            });
+            await createApplicationFee({
+                settlement: first,
+                balanceItemId: balanceItem.id,
+                amount: 50_00,
+                occurredAt: new Date(2026, 0, 8),
+            });
+            await createApplicationFee({
+                settlement: second,
+                balanceItemId: balanceItem.id,
+                amount: 1_50_00,
+                occurredAt: new Date(2026, 0, 15),
+            });
 
             // A fee that isn't paid out yet doesn't produce a line
-            const { fee: pending } = await createApplicationFee({ balanceItemId: balanceItem.id, amount: 25_00 });
+            const { fee: pending } = await createApplicationFee({
+                balanceItemId: balanceItem.id,
+                amount: 25_00,
+            });
 
             await SettlementService.updatePaymentSettlementsForApplicationFeePayment(payment);
 
             const lines = await PaymentSettlement.select().where('paymentId', payment.id).fetch();
             expect(lines).toHaveLength(2);
-            expect(lines.every(line => line.externalId === null)).toBe(true);
+            expect(lines.every((line) => line.externalId === null)).toBe(true);
 
-            const bySettlement = new Map(lines.map(line => [line.settlementId, line]));
+            const bySettlement = new Map(lines.map((line) => [line.settlementId, line]));
             expect(bySettlement.get(first.id)!.amount).toBe(1_50_00);
             expect(bySettlement.get(first.id)!.occurredAt).toEqual(new Date(2026, 0, 8));
             expect(bySettlement.get(second.id)!.amount).toBe(1_50_00);
@@ -306,7 +379,9 @@ describe('SettlementService', () => {
             await pending.save();
             await SettlementService.updatePaymentSettlementsForApplicationFeePayment(payment);
 
-            const completed = await PaymentSettlement.select().where('paymentId', payment.id).fetch();
+            const completed = await PaymentSettlement.select()
+                .where('paymentId', payment.id)
+                .fetch();
             expect(completed.reduce((total, line) => total + line.amount, 0)).toBe(payment.price);
         });
 
@@ -314,24 +389,42 @@ describe('SettlementService', () => {
             const settlement = await SettlementService.upsertSettlement(settlementData());
             const first = await createFeePayment(1_00_00);
             const second = await createFeePayment(2_00_00);
-            await createApplicationFee({ settlement, balanceItemId: first.balanceItem.id, amount: 1_00_00 });
-            await createApplicationFee({ settlement, balanceItemId: second.balanceItem.id, amount: 2_00_00 });
+            await createApplicationFee({
+                settlement,
+                balanceItemId: first.balanceItem.id,
+                amount: 1_00_00,
+            });
+            await createApplicationFee({
+                settlement,
+                balanceItemId: second.balanceItem.id,
+                amount: 2_00_00,
+            });
 
             await SettlementService.updatePaymentSettlementsForApplicationFeePayment(first.payment);
-            await SettlementService.updatePaymentSettlementsForApplicationFeePayment(second.payment);
+            await SettlementService.updatePaymentSettlementsForApplicationFeePayment(
+                second.payment,
+            );
             // Re-running may not duplicate: the lines have no externalId to upsert on
             await SettlementService.updatePaymentSettlementsForApplicationFeePayment(first.payment);
 
-            const lines = await PaymentSettlement.select().where('settlementId', settlement.id).fetch();
+            const lines = await PaymentSettlement.select()
+                .where('settlementId', settlement.id)
+                .fetch();
             expect(lines).toHaveLength(2);
-            expect(lines.find(line => line.paymentId === first.payment.id)!.amount).toBe(1_00_00);
-            expect(lines.find(line => line.paymentId === second.payment.id)!.amount).toBe(2_00_00);
+            expect(lines.find((line) => line.paymentId === first.payment.id)!.amount).toBe(1_00_00);
+            expect(lines.find((line) => line.paymentId === second.payment.id)!.amount).toBe(
+                2_00_00,
+            );
         });
 
         test('a line disappears again when its fees are unlinked from the payout', async () => {
             const { payment, balanceItem } = await createFeePayment(1_00_00);
             const settlement = await SettlementService.upsertSettlement(settlementData());
-            const { fee } = await createApplicationFee({ settlement, balanceItemId: balanceItem.id, amount: 1_00_00 });
+            const { fee } = await createApplicationFee({
+                settlement,
+                balanceItemId: balanceItem.id,
+                amount: 1_00_00,
+            });
 
             await SettlementService.updatePaymentSettlementsForApplicationFeePayment(payment);
             expect(await PaymentSettlement.select().where('paymentId', payment.id).count()).toBe(1);
@@ -353,13 +446,18 @@ describe('SettlementService', () => {
     describe('finishSync and markSyncFailed', () => {
         test('finishSync caches the reconciliation delta and resets the failure count', async () => {
             const payment = await createPayment();
-            const settlement = await SettlementService.upsertSettlement(settlementData({ amount: 48_70_00 }));
+            const settlement = await SettlementService.upsertSettlement(
+                settlementData({ amount: 48_70_00 }),
+            );
             await SettlementService.markSyncFailed(settlement);
             expect(settlement.syncFailureCount).toBe(1);
             expect(settlement.syncedAt).toBe(null);
 
             await SettlementService.upsertPaymentLine(settlement, {
-                paymentId: payment.id, amount: 50_00_00, externalId: 'txn_1', occurredAt: new Date(2026, 0, 14),
+                paymentId: payment.id,
+                amount: 50_00_00,
+                externalId: 'txn_1',
+                occurredAt: new Date(2026, 0, 14),
             });
             await SettlementService.upsertCharge({
                 type: SettlementChargeType.ApplicationFeeService,
@@ -381,7 +479,9 @@ describe('SettlementService', () => {
         });
 
         test('fees waiting to be invoiced explain the payout until their payment does', async () => {
-            const settlement = await SettlementService.upsertSettlement(settlementData({ amount: 1_00_00 }));
+            const settlement = await SettlementService.upsertSettlement(
+                settlementData({ amount: 1_00_00 }),
+            );
             const { fee } = await createApplicationFee({ settlement, amount: 1_00_00 });
 
             await SettlementService.finishSync(settlement, { transactionCount: 1 });
@@ -402,9 +502,15 @@ describe('SettlementService', () => {
         });
 
         test('a payout that loses its derived line has the fee pending again', async () => {
-            const settlement = await SettlementService.upsertSettlement(settlementData({ amount: 1_00_00 }));
+            const settlement = await SettlementService.upsertSettlement(
+                settlementData({ amount: 1_00_00 }),
+            );
             const { payment, balanceItem } = await createFeePayment(1_00_00);
-            const { fee } = await createApplicationFee({ settlement, balanceItemId: balanceItem.id, amount: 1_00_00 });
+            const { fee } = await createApplicationFee({
+                settlement,
+                balanceItemId: balanceItem.id,
+                amount: 1_00_00,
+            });
 
             await SettlementService.updatePaymentSettlementsForApplicationFeePayment(payment);
             await SettlementService.finishSync(settlement, { transactionCount: 1 });
@@ -422,7 +528,9 @@ describe('SettlementService', () => {
         });
 
         test('fees the invoicer will never bill explain the payout without ever being invoiced', async () => {
-            const settlement = await SettlementService.upsertSettlement(settlementData({ amount: 3_00_00 }));
+            const settlement = await SettlementService.upsertSettlement(
+                settlementData({ amount: 3_00_00 }),
+            );
             await createApplicationFee({ settlement, amount: 1_00_00 });
             await createUncollectibleApplicationFee({ settlement, amount: 1_00_00 });
 
@@ -440,11 +548,19 @@ describe('SettlementService', () => {
         });
 
         test('a sync with errors stores them, stays unsynced and counts the attempt', async () => {
-            const settlement = await SettlementService.upsertSettlement(settlementData({ amount: 1_00_00 }));
+            const settlement = await SettlementService.upsertSettlement(
+                settlementData({ amount: 1_00_00 }),
+            );
 
             await SettlementService.finishSync(settlement, {
                 transactionCount: 3,
-                errors: [SettlementSyncError.create({ code: 'payment_not_found', message: 'No payment found', transactionId: 'txn_1' })],
+                errors: [
+                    SettlementSyncError.create({
+                        code: 'payment_not_found',
+                        message: 'No payment found',
+                        transactionId: 'txn_1',
+                    }),
+                ],
             });
 
             expect(settlement.syncedAt).toBeNull();
@@ -456,7 +572,11 @@ describe('SettlementService', () => {
 
             const stored = await Settlement.getByID(settlement.id);
             expect(stored!.syncErrors).toHaveLength(1);
-            expect(stored!.syncErrors![0]).toMatchObject({ code: 'payment_not_found', message: 'No payment found', transactionId: 'txn_1' });
+            expect(stored!.syncErrors![0]).toMatchObject({
+                code: 'payment_not_found',
+                message: 'No payment found',
+                transactionId: 'txn_1',
+            });
 
             // A later error-free sync clears the queue
             await SettlementService.finishSync(settlement, { transactionCount: 3 });
@@ -467,7 +587,9 @@ describe('SettlementService', () => {
 
         test('stored sync errors are capped at 50', async () => {
             const settlement = await SettlementService.upsertSettlement(settlementData());
-            const errors = Array.from({ length: 60 }, (_, i) => SettlementSyncError.create({ message: 'Error ' + i, transactionId: 'txn_' + i }));
+            const errors = Array.from({ length: 60 }, (_, i) =>
+                SettlementSyncError.create({ message: 'Error ' + i, transactionId: 'txn_' + i }),
+            );
 
             await SettlementService.finishSync(settlement, { transactionCount: 60, errors });
 
@@ -478,10 +600,18 @@ describe('SettlementService', () => {
 
         test('markSyncFailed stores what broke the attempt and keeps it without new information', async () => {
             const settlement = await SettlementService.upsertSettlement(settlementData());
-            await SettlementService.markSyncFailed(settlement, [SettlementSyncError.fromError(new SimpleError({ code: 'unsupported_payout', message: 'Manual payout' }))]);
+            await SettlementService.markSyncFailed(settlement, [
+                SettlementSyncError.fromError(
+                    new SimpleError({ code: 'unsupported_payout', message: 'Manual payout' }),
+                ),
+            ]);
 
             expect(settlement.syncErrors).toHaveLength(1);
-            expect(settlement.syncErrors![0]).toMatchObject({ code: 'unsupported_payout', message: 'Manual payout', transactionId: null });
+            expect(settlement.syncErrors![0]).toMatchObject({
+                code: 'unsupported_payout',
+                message: 'Manual payout',
+                transactionId: null,
+            });
 
             // Without errors the stored ones stay: the last known cause beats no information
             await SettlementService.markSyncFailed(settlement);
@@ -494,8 +624,15 @@ describe('SettlementService', () => {
         test('deleting the paying organization keeps its fees as uncollectible income', async () => {
             const payer = await new OrganizationFactory({}).create();
             const payerAccount = await createStripeAccount(payer.id);
-            const settlement = await SettlementService.upsertSettlement(settlementData({ amount: 1_00_00 }));
-            const { fee, charge } = await createApplicationFee({ settlement, amount: 1_00_00, payingOrganizationId: payer.id, payingStripeAccountId: payerAccount.id });
+            const settlement = await SettlementService.upsertSettlement(
+                settlementData({ amount: 1_00_00 }),
+            );
+            const { fee, charge } = await createApplicationFee({
+                settlement,
+                amount: 1_00_00,
+                payingOrganizationId: payer.id,
+                payingStripeAccountId: payerAccount.id,
+            });
 
             // An organization that took Stripe payments is the only kind that owes fees: its
             // payments reference the account the delete has to cascade through
@@ -506,7 +643,10 @@ describe('SettlementService', () => {
             await SettlementService.finishSync(settlement, { transactionCount: 1 });
             expect(settlement.pendingFees).toBe(1_00_00);
 
-            const settlementIds = await SettlementService.getApplicationFeeSettlementIdsForPayingOrganization(payer.id);
+            const settlementIds =
+                await SettlementService.getApplicationFeeSettlementIdsForPayingOrganization(
+                    payer.id,
+                );
             expect(settlementIds).toEqual([settlement.id]);
 
             await payer.delete();
@@ -529,14 +669,24 @@ describe('SettlementService', () => {
     describe('updateLegacySettlementReference', () => {
         test('the largest line wins and re-syncs never flip-flop the column', async () => {
             const payment = await createPayment();
-            const original = await SettlementService.upsertSettlement(settlementData({ settledAt: new Date(2026, 0, 15) }));
-            const refundPayout = await SettlementService.upsertSettlement(settlementData({ settledAt: new Date(2026, 0, 22) }));
+            const original = await SettlementService.upsertSettlement(
+                settlementData({ settledAt: new Date(2026, 0, 15) }),
+            );
+            const refundPayout = await SettlementService.upsertSettlement(
+                settlementData({ settledAt: new Date(2026, 0, 22) }),
+            );
 
             await SettlementService.upsertPaymentLine(original, {
-                paymentId: payment.id, amount: 50_00_00, externalId: 'txn_pay', occurredAt: new Date(2026, 0, 14),
+                paymentId: payment.id,
+                amount: 50_00_00,
+                externalId: 'txn_pay',
+                occurredAt: new Date(2026, 0, 14),
             });
             await SettlementService.upsertPaymentLine(refundPayout, {
-                paymentId: payment.id, amount: -20_00_00, externalId: 'txn_refund', occurredAt: new Date(2026, 0, 21),
+                paymentId: payment.id,
+                amount: -20_00_00,
+                externalId: 'txn_refund',
+                occurredAt: new Date(2026, 0, 21),
             });
 
             await SettlementService.updateLegacySettlementReference(payment);
@@ -551,7 +701,10 @@ describe('SettlementService', () => {
             const payment = await createPayment();
             const settlement = await SettlementService.upsertSettlement(settlementData());
             await SettlementService.upsertPaymentLine(settlement, {
-                paymentId: payment.id, amount: 50_00_00, externalId: 'txn_pay', occurredAt: new Date(2026, 0, 14),
+                paymentId: payment.id,
+                amount: 50_00_00,
+                externalId: 'txn_pay',
+                occurredAt: new Date(2026, 0, 14),
             });
 
             // A historically stored blob that still carries a fee
@@ -570,28 +723,47 @@ describe('SettlementService', () => {
             // A different primary settlement can't invent a fee
             const bigger = await SettlementService.upsertSettlement(settlementData());
             await SettlementService.upsertPaymentLine(bigger, {
-                paymentId: payment.id, amount: 60_00_00, externalId: 'txn_bigger', occurredAt: new Date(2026, 0, 20),
+                paymentId: payment.id,
+                amount: 60_00_00,
+                externalId: 'txn_bigger',
+                occurredAt: new Date(2026, 0, 20),
             });
             await SettlementService.updateLegacySettlementReference(payment);
             expect(payment.settlement?.id).toBe(bigger.externalId);
             expect(payment.settlement?.fee).toBe(0);
         });
 
-        test('a payout of another organization is never the payment\'s payout', async () => {
+        test("a payout of another organization is never the payment's payout", async () => {
             const stripeAccount = await createStripeAccount();
             const payment = await createPayment();
             payment.stripeAccountId = stripeAccount.id;
             await payment.save();
 
             const otherOrganization = await new OrganizationFactory({}).create();
-            const foreignPayout = await SettlementService.upsertSettlement(settlementData({ organizationId: otherOrganization.id, settledAt: new Date(2026, 0, 10) }));
-            const organizationPayout = await SettlementService.upsertSettlement(settlementData({ stripeAccountId: stripeAccount.id, settledAt: new Date(2026, 0, 15) }));
+            const foreignPayout = await SettlementService.upsertSettlement(
+                settlementData({
+                    organizationId: otherOrganization.id,
+                    settledAt: new Date(2026, 0, 10),
+                }),
+            );
+            const organizationPayout = await SettlementService.upsertSettlement(
+                settlementData({
+                    stripeAccountId: stripeAccount.id,
+                    settledAt: new Date(2026, 0, 15),
+                }),
+            );
 
             await SettlementService.upsertPaymentLine(foreignPayout, {
-                paymentId: payment.id, amount: 50_00_00, externalId: 'txn_foreign', occurredAt: new Date(2026, 0, 9),
+                paymentId: payment.id,
+                amount: 50_00_00,
+                externalId: 'txn_foreign',
+                occurredAt: new Date(2026, 0, 9),
             });
             await SettlementService.upsertPaymentLine(organizationPayout, {
-                paymentId: payment.id, amount: 50_00_00, externalId: 'txn_organization', occurredAt: new Date(2026, 0, 9),
+                paymentId: payment.id,
+                amount: 50_00_00,
+                externalId: 'txn_organization',
+                occurredAt: new Date(2026, 0, 9),
             });
 
             await SettlementService.updateLegacySettlementReference(payment);
@@ -601,7 +773,10 @@ describe('SettlementService', () => {
         test('a payment without settlement rows is left untouched', async () => {
             const payment = await createPayment();
             payment.settlement = SettlementReference.create({
-                id: 'legacy', reference: 'LEGACY', settledAt: new Date(2026, 0, 15), amount: 370_00_00,
+                id: 'legacy',
+                reference: 'LEGACY',
+                settledAt: new Date(2026, 0, 15),
+                amount: 370_00_00,
             });
             await payment.save();
 

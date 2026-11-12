@@ -21,7 +21,10 @@ describe('Database.beginTransaction', () => {
         return rows.length;
     }
 
-    async function getCount(name: string, options?: { connection?: any }): Promise<number | undefined> {
+    async function getCount(
+        name: string,
+        options?: { connection?: any },
+    ): Promise<number | undefined> {
         const [rows] = await Database.select(
             'SELECT count from testModels where name = ?',
             [name],

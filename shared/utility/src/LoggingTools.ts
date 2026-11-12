@@ -3,7 +3,10 @@ export class LoggingTools {
         return new ProgressLogger(total, options);
     }
 
-    static async createProgressLoggerFromQuery(query: { count: () => Promise<number> }, options?: ProgressLoggerOptions) {
+    static async createProgressLoggerFromQuery(
+        query: { count: () => Promise<number> },
+        options?: ProgressLoggerOptions,
+    ) {
         const total = await query.count();
         return this.createProgressLogger(total, options);
     }
@@ -19,7 +22,10 @@ export class ProgressLogger {
     private readonly onePercent: number;
     private readonly prefix: string;
 
-    constructor(readonly total: number, { tag }: ProgressLoggerOptions = {}) {
+    constructor(
+        readonly total: number,
+        { tag }: ProgressLoggerOptions = {},
+    ) {
         this.onePercent = Math.floor(total / 100);
         this.prefix = tag ? `[${tag}] progress` : 'Progress';
 
@@ -39,9 +45,9 @@ export class ProgressLogger {
             return;
         }
 
-        if ((this.progress - this.progressedLogged) > this.onePercent) {
+        if (this.progress - this.progressedLogged > this.onePercent) {
             this.progressedLogged = this.progress;
-            const progress = Math.floor(this.progressedLogged / this.total * 100);
+            const progress = Math.floor((this.progressedLogged / this.total) * 100);
             this.writeOutput(this.formatProgress(progress), true);
         }
     }

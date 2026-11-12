@@ -7,7 +7,14 @@ import { PatchApiUserEndpoint } from './PatchApiUserEndpoint.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { ApiUser, ApiUserRateLimits, Permissions, ResourcePermissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
+import {
+    ApiUser,
+    ApiUserRateLimits,
+    Permissions,
+    ResourcePermissions,
+    UserMeta,
+    UserPermissions,
+} from '@stamhoofd/structures';
 import { CreateApiUserEndpoint } from './CreateApiUserEndpoint.js';
 import { PatchMap } from '@common/encoding';
 
@@ -29,24 +36,34 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
         }).create();
         const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
-        const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
-            permissions: UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({ level: PermissionLevel.Read })],
-                ]),
+        const createRequest = Request.buildJson(
+            'POST',
+            '/api-keys',
+            organization.getApiHost(),
+            ApiUser.create({
+                permissions: UserPermissions.create({
+                    organizationPermissions: new Map([
+                        [organization.id, Permissions.create({ level: PermissionLevel.Read })],
+                    ]),
+                }),
             }),
-        }));
+        );
         createRequest.headers.authorization = 'Bearer ' + token.accessToken;
         const createResponse = await testServer.test(createEndpoint, createRequest);
 
         const apiUserId = createResponse.body.id;
 
-        const r = Request.buildJson('PATCH', '/api-keys/' + apiUserId, organization.getApiHost(), ApiUser.patch({
-            id: apiUserId,
-            meta: UserMeta.patch({
-                rateLimits: ApiUserRateLimits.High,
+        const r = Request.buildJson(
+            'PATCH',
+            '/api-keys/' + apiUserId,
+            organization.getApiHost(),
+            ApiUser.patch({
+                id: apiUserId,
+                meta: UserMeta.patch({
+                    rateLimits: ApiUserRateLimits.High,
+                }),
             }),
-        }));
+        );
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         const response = await testServer.test(endpoint, r);
@@ -65,29 +82,41 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
         }).create();
         const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
-        const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
-            permissions: UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({ level: PermissionLevel.Read })],
-                ]),
+        const createRequest = Request.buildJson(
+            'POST',
+            '/api-keys',
+            organization.getApiHost(),
+            ApiUser.create({
+                permissions: UserPermissions.create({
+                    organizationPermissions: new Map([
+                        [organization.id, Permissions.create({ level: PermissionLevel.Read })],
+                    ]),
+                }),
             }),
-        }));
+        );
         createRequest.headers.authorization = 'Bearer ' + token.accessToken;
         const createResponse = await testServer.test(createEndpoint, createRequest);
 
         const apiUserId = createResponse.body.id;
 
-        const r = Request.buildJson('PATCH', '/api-keys/' + apiUserId, organization.getApiHost(), ApiUser.patch({
-            id: apiUserId,
-            meta: UserMeta.patch({
-                rateLimits: ApiUserRateLimits.High,
+        const r = Request.buildJson(
+            'PATCH',
+            '/api-keys/' + apiUserId,
+            organization.getApiHost(),
+            ApiUser.patch({
+                id: apiUserId,
+                meta: UserMeta.patch({
+                    rateLimits: ApiUserRateLimits.High,
+                }),
             }),
-        }));
+        );
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
-        await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.simpleError({
-            code: 'permission_denied',
-        }));
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(
+            STExpect.simpleError({
+                code: 'permission_denied',
+            }),
+        );
     });
 
     test('You cannot grant an API-key permissions outside its organization using a put', async () => {
@@ -100,29 +129,39 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
         }).create();
         const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
-        const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
-            permissions: UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({ level: PermissionLevel.Read })],
-                ]),
+        const createRequest = Request.buildJson(
+            'POST',
+            '/api-keys',
+            organization.getApiHost(),
+            ApiUser.create({
+                permissions: UserPermissions.create({
+                    organizationPermissions: new Map([
+                        [organization.id, Permissions.create({ level: PermissionLevel.Read })],
+                    ]),
+                }),
             }),
-        }));
+        );
         createRequest.headers.authorization = 'Bearer ' + token.accessToken;
         const createResponse = await testServer.test(createEndpoint, createRequest);
         const apiUserId = createResponse.body.id;
 
-        const r = Request.buildJson('PATCH', '/api-keys/' + apiUserId, organization.getApiHost(), ApiUser.patch({
-            id: apiUserId,
-            permissions: UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({ level: PermissionLevel.Read })],
-                    ['other', Permissions.create({ level: PermissionLevel.Full })],
-                ]),
-                globalPermissions: Permissions.create({
-                    level: PermissionLevel.Full,
+        const r = Request.buildJson(
+            'PATCH',
+            '/api-keys/' + apiUserId,
+            organization.getApiHost(),
+            ApiUser.patch({
+                id: apiUserId,
+                permissions: UserPermissions.create({
+                    organizationPermissions: new Map([
+                        [organization.id, Permissions.create({ level: PermissionLevel.Read })],
+                        ['other', Permissions.create({ level: PermissionLevel.Full })],
+                    ]),
+                    globalPermissions: Permissions.create({
+                        level: PermissionLevel.Full,
+                    }),
                 }),
             }),
-        }));
+        );
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         const response = await testServer.test(endpoint, r);
@@ -148,28 +187,38 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
         }).create();
         const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
-        const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
-            permissions: UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({ level: PermissionLevel.Read })],
-                ]),
+        const createRequest = Request.buildJson(
+            'POST',
+            '/api-keys',
+            organization.getApiHost(),
+            ApiUser.create({
+                permissions: UserPermissions.create({
+                    organizationPermissions: new Map([
+                        [organization.id, Permissions.create({ level: PermissionLevel.Read })],
+                    ]),
+                }),
             }),
-        }));
+        );
         createRequest.headers.authorization = 'Bearer ' + token.accessToken;
         const createResponse = await testServer.test(createEndpoint, createRequest);
         const apiUserId = createResponse.body.id;
 
-        const r = Request.buildJson('PATCH', '/api-keys/' + apiUserId, organization.getApiHost(), ApiUser.patch({
-            id: apiUserId,
-            permissions: UserPermissions.patch({
-                organizationPermissions: new PatchMap([
-                    ['other', Permissions.create({ level: PermissionLevel.Full })],
-                ]),
-                globalPermissions: Permissions.create({
-                    level: PermissionLevel.Full,
+        const r = Request.buildJson(
+            'PATCH',
+            '/api-keys/' + apiUserId,
+            organization.getApiHost(),
+            ApiUser.patch({
+                id: apiUserId,
+                permissions: UserPermissions.patch({
+                    organizationPermissions: new PatchMap([
+                        ['other', Permissions.create({ level: PermissionLevel.Full })],
+                    ]),
+                    globalPermissions: Permissions.create({
+                        level: PermissionLevel.Full,
+                    }),
                 }),
             }),
-        }));
+        );
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         const response = await testServer.test(endpoint, r);
@@ -195,34 +244,52 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
         }).create();
         const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
-        const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
-            permissions: UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({ level: PermissionLevel.Read })],
-                ]),
+        const createRequest = Request.buildJson(
+            'POST',
+            '/api-keys',
+            organization.getApiHost(),
+            ApiUser.create({
+                permissions: UserPermissions.create({
+                    organizationPermissions: new Map([
+                        [organization.id, Permissions.create({ level: PermissionLevel.Read })],
+                    ]),
+                }),
             }),
-        }));
+        );
         createRequest.headers.authorization = 'Bearer ' + token.accessToken;
         const createResponse = await testServer.test(createEndpoint, createRequest);
         const apiUserId = createResponse.body.id;
 
-        const r = Request.buildJson('PATCH', '/api-keys/' + apiUserId, organization.getApiHost(), ApiUser.patch({
-            id: apiUserId,
-            permissions: UserPermissions.patch({
-                organizationPermissions: new PatchMap([
-                    [organization.id, Permissions.patch({
-                        resources: new PatchMap([[
-                            PermissionsResourceType.Groups,
-                            new Map([
-                                ['group-id', ResourcePermissions.create({
-                                    level: PermissionLevel.Full,
-                                })],
-                            ]),
-                        ]]),
-                    })],
-                ]),
+        const r = Request.buildJson(
+            'PATCH',
+            '/api-keys/' + apiUserId,
+            organization.getApiHost(),
+            ApiUser.patch({
+                id: apiUserId,
+                permissions: UserPermissions.patch({
+                    organizationPermissions: new PatchMap([
+                        [
+                            organization.id,
+                            Permissions.patch({
+                                resources: new PatchMap([
+                                    [
+                                        PermissionsResourceType.Groups,
+                                        new Map([
+                                            [
+                                                'group-id',
+                                                ResourcePermissions.create({
+                                                    level: PermissionLevel.Full,
+                                                }),
+                                            ],
+                                        ]),
+                                    ],
+                                ]),
+                            }),
+                        ],
+                    ]),
+                }),
             }),
-        }));
+        );
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         const response = await testServer.test(endpoint, r);
@@ -231,17 +298,25 @@ describe('Endpoint.PatchApiUserEndpoint', () => {
         expect(response.body.permissions).toEqual(
             UserPermissions.create({
                 organizationPermissions: new Map([
-                    [organization.id, Permissions.create({
-                        level: PermissionLevel.Read,
-                        resources: new Map([[
-                            PermissionsResourceType.Groups,
-                            new Map([
-                                ['group-id', ResourcePermissions.create({
-                                    level: PermissionLevel.Full,
-                                })],
+                    [
+                        organization.id,
+                        Permissions.create({
+                            level: PermissionLevel.Read,
+                            resources: new Map([
+                                [
+                                    PermissionsResourceType.Groups,
+                                    new Map([
+                                        [
+                                            'group-id',
+                                            ResourcePermissions.create({
+                                                level: PermissionLevel.Full,
+                                            }),
+                                        ],
+                                    ]),
+                                ],
                             ]),
-                        ]]),
-                    })],
+                        }),
+                    ],
                 ]),
                 globalPermissions: null,
             }),

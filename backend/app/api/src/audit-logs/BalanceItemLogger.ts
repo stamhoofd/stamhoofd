@@ -1,5 +1,10 @@
 import { BalanceItem, Member, Organization, User } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogType, getBalanceItemTypeName } from '@stamhoofd/structures';
+import {
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    AuditLogType,
+    getBalanceItemTypeName,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 
@@ -46,7 +51,15 @@ async function getPayerReplacement(model: BalanceItem): Promise<AuditLogReplacem
 
 export const BalanceItemLogger = new ModelLogger(BalanceItem, {
     // Cached values that follow from payments, not from edits
-    skipKeys: ['priceTotal', 'pricePaid', 'pricePending', 'priceOpen', 'priceInvoiced', 'paidAt', 'failedAt'],
+    skipKeys: [
+        'priceTotal',
+        'pricePaid',
+        'pricePending',
+        'priceOpen',
+        'priceInvoiced',
+        'paidAt',
+        'failedAt',
+    ],
 
     async optionsGenerator(event) {
         const result = await defaultGenerator(event);
@@ -75,11 +88,14 @@ export const BalanceItemLogger = new ModelLogger(BalanceItem, {
 
     createReplacements(model, options) {
         return new Map([
-            ['b', AuditLogReplacement.create({
-                id: model.id,
-                value: model.name || getBalanceItemTypeName(model.type),
-                type: AuditLogReplacementType.BalanceItem,
-            })],
+            [
+                'b',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.name || getBalanceItemTypeName(model.type),
+                    type: AuditLogReplacementType.BalanceItem,
+                }),
+            ],
             ['payer', options.data.payer],
         ]);
     },

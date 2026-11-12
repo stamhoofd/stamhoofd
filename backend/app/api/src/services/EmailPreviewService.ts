@@ -1,8 +1,20 @@
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { Email } from '@stamhoofd/models';
 import { EmailRecipient, Organization, User } from '@stamhoofd/models';
-import { fillRecipientReplacements, mergeReplacementsIfEqual, removeUnusedReplacements, runWithRecipientLocale, stripRecipientReplacementsForWebDisplay, stripSensitiveRecipientReplacements } from '../helpers/EmailBuilder.js';
-import type { BaseOrganization, EmailRecipient as EmailRecipientStruct, Replacement, User as UserStruct } from '@stamhoofd/structures';
+import {
+    fillRecipientReplacements,
+    mergeReplacementsIfEqual,
+    removeUnusedReplacements,
+    runWithRecipientLocale,
+    stripRecipientReplacementsForWebDisplay,
+    stripSensitiveRecipientReplacements,
+} from '../helpers/EmailBuilder.js';
+import type {
+    BaseOrganization,
+    EmailRecipient as EmailRecipientStruct,
+    Replacement,
+    User as UserStruct,
+} from '@stamhoofd/structures';
 import { EmailPreview, EmailRecipientFilter, EmailWithRecipients } from '@stamhoofd/structures';
 import { EmailHelper } from '@stamhoofd/structures/helpers/EmailHelper.js';
 import { ExampleReplacements } from '@stamhoofd/structures/email/exampleReplacements.js';
@@ -35,7 +47,9 @@ export class EmailPreviewService {
             baseRow = EmailHelper.getExampleRecipient();
         }
 
-        const organization = email.organizationId ? (await Organization.getByID(email.organizationId))! : null;
+        const organization = email.organizationId
+            ? (await Organization.getByID(email.organizationId))!
+            : null;
         const allowedLanguages = email.getLanguages();
 
         const fillRow = async (row: EmailRecipientStruct) => {
@@ -72,14 +86,17 @@ export class EmailPreviewService {
                         // Todo: this can be improved
                         // Replace all replacements with defaults
                         for (const replacement of clone.replacements) {
-                            const example: Replacement | undefined = ExampleReplacements.all[replacement.token];
+                            const example: Replacement | undefined =
+                                ExampleReplacements.all[replacement.token];
                             if (example) {
                                 replacement.html = example.html;
                                 replacement.value = example.value;
                             }
                         }
 
-                        clone.replacements = clone.replacements.filter(r => !['organizationName'].includes(r.token));
+                        clone.replacements = clone.replacements.filter(
+                            (r) => !['organizationName'].includes(r.token),
+                        );
                     }
 
                     const rr = await fillRow(clone);
@@ -123,27 +140,38 @@ export class EmailPreviewService {
      * Recipients are returned in this language when the email has content for it, otherwise in
      * the language they received the email in.
      */
-    static async getStructureForUser(email: Email, user: User, memberIds: string[], options: { language?: Language | null } = {}) {
+    static async getStructureForUser(
+        email: Email,
+        user: User,
+        memberIds: string[],
+        options: { language?: Language | null } = {},
+    ) {
         const emailRecipients = await EmailRecipient.select()
             .where('emailId', email.id)
             .where('memberId', memberIds)
             .fetch();
-        const organization = email.organizationId ? (await Organization.getByID(email.organizationId))! : null;
+        const organization = email.organizationId
+            ? (await Organization.getByID(email.organizationId))!
+            : null;
 
         const recipientsMap: Map<string, EmailRecipient> = new Map();
         for (const memberId of memberIds) {
-            const preferred = emailRecipients.find(e => e.memberId === memberId && (e.userId === user.id || e.email === user.email));
+            const preferred = emailRecipients.find(
+                (e) => e.memberId === memberId && (e.userId === user.id || e.email === user.email),
+            );
             if (preferred) {
                 recipientsMap.set(preferred.duplicateOfRecipientId ?? preferred.id, preferred);
                 continue;
             }
 
-            const byMember = emailRecipients.find(e => e.memberId === memberId && e.userId === null && e.email === null);
+            const byMember = emailRecipients.find(
+                (e) => e.memberId === memberId && e.userId === null && e.email === null,
+            );
             if (byMember) {
                 recipientsMap.set(byMember.duplicateOfRecipientId ?? byMember.id, byMember);
                 continue;
             }
-            const anyData = emailRecipients.find(e => e.memberId === memberId);
+            const anyData = emailRecipients.find((e) => e.memberId === memberId);
             if (anyData) {
                 recipientsMap.set(anyData.duplicateOfRecipientId ?? anyData.id, anyData);
                 continue;
@@ -155,7 +183,10 @@ export class EmailPreviewService {
         const structures = await EmailRecipient.getStructures(cleanedRecipients);
 
         for (const struct of structures) {
-            if (!(struct.userId === user.id || struct.email === user.email) && !((struct.userId === null && struct.email === null))) {
+            if (
+                !(struct.userId === user.id || struct.email === user.email) &&
+                !(struct.userId === null && struct.email === null)
+            ) {
                 stripSensitiveRecipientReplacements(struct, {
                     organization,
                     willFill: true,
@@ -193,7 +224,10 @@ export class EmailPreviewService {
                 });
             });
             if (email.html) {
-                struct.replacements = removeUnusedReplacements(email.getCombinedHtml(), struct.replacements);
+                struct.replacements = removeUnusedReplacements(
+                    email.getCombinedHtml(),
+                    struct.replacements,
+                );
             }
         }
 

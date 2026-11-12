@@ -13,7 +13,9 @@ it('suspends progress, supplies cancellation and restores the terminal after pro
             expect(runtime.terminal.isSuspended).toBe(true);
             throw new Error('cancelled');
         });
-        await expect(select({ message: 'Choose', choices: [{ value: 'one' }] })).rejects.toThrow('cancelled');
+        await expect(select({ message: 'Choose', choices: [{ value: 'one' }] })).rejects.toThrow(
+            'cancelled',
+        );
         expect(selectPrompt).toHaveBeenCalledWith(expect.anything(), { signal: runtime.signal });
         expect(runtime.terminal.isSuspended).toBe(false);
     });

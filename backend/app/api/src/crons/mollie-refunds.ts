@@ -67,7 +67,9 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
             // creation, so we cannot break here: an older refund created in the Mollie UI could still
             // be unhandled). Registered refunds that are still pending locally are reconciled: Mollie
             // refunds can still fail or be canceled until they are actually executed.
-            const existingRefund = await MolliePayment.select().where('mollieId', refund.id).first(false);
+            const existingRefund = await MolliePayment.select()
+                .where('mollieId', refund.id)
+                .first(false);
             if (existingRefund) {
                 await reconcileRefundStatus(existingRefund.paymentId, refund.status, createdAt);
                 continue;
@@ -84,8 +86,17 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
             const metadata = refund.metadata as { refundPaymentId?: string } | null;
             if (metadata?.refundPaymentId) {
                 const localRefund = await Payment.getByID(metadata.refundPaymentId);
-                if (localRefund && localRefund.type === PaymentType.Refund && localRefund.organizationId === service.sellingOrganization.id) {
-                    console.error('Restoring missing link for Mollie refund ' + refund.id + ' to payment ' + localRefund.id);
+                if (
+                    localRefund &&
+                    localRefund.type === PaymentType.Refund &&
+                    localRefund.organizationId === service.sellingOrganization.id
+                ) {
+                    console.error(
+                        'Restoring missing link for Mollie refund ' +
+                            refund.id +
+                            ' to payment ' +
+                            localRefund.id,
+                    );
                     try {
                         const link = new MolliePayment();
                         link.paymentId = localRefund.id;
@@ -101,14 +112,25 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
             }
 
             if (refund.paymentId) {
-                const molliePayment = await MolliePayment.select().where('mollieId', refund.paymentId).first(false);
+                const molliePayment = await MolliePayment.select()
+                    .where('mollieId', refund.paymentId)
+                    .first(false);
                 if (molliePayment) {
                     const payment = await Payment.getByID(molliePayment.paymentId);
                     if (payment) {
                         try {
                             const amount = Math.round(parseFloat(refund.amount.value) * 100) * 100;
-                            const status = MollieService.refundStatusToPaymentStatus(refund.status) === PaymentStatus.Succeeded ? PaymentStatus.Succeeded : PaymentStatus.Pending;
-                            const createdPayment = await PaymentService.registerRefund(payment, amount, createdAt, status);
+                            const status =
+                                MollieService.refundStatusToPaymentStatus(refund.status) ===
+                                PaymentStatus.Succeeded
+                                    ? PaymentStatus.Succeeded
+                                    : PaymentStatus.Pending;
+                            const createdPayment = await PaymentService.registerRefund(
+                                payment,
+                                amount,
+                                createdAt,
+                                status,
+                            );
 
                             // Link Mollie refund ID (so we don't register it twice and can set the settlement later)
                             const molliePayment = new MolliePayment();
@@ -135,7 +157,11 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
  * Update a locally registered refund that is still pending when Mollie reports a final status
  * (refunded, failed or canceled).
  */
-async function reconcileRefundStatus(paymentId: string, mollieStatus: ListRefundResponseStatus, createdAt: Date) {
+async function reconcileRefundStatus(
+    paymentId: string,
+    mollieStatus: ListRefundResponseStatus,
+    createdAt: Date,
+) {
     const payment = await Payment.getByID(paymentId);
     if (!payment || !payment.organizationId) {
         return;

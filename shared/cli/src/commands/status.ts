@@ -1,25 +1,41 @@
 import path from 'node:path';
 import { Flags } from '@oclif/core';
 import { BaseCommand } from '../base-command.js';
-import { localFilesAccessKey, localFilesSecretKey, maildevPassword, maildevUsername, successSymbol } from '../config/shared-service-config.js';
+import {
+    localFilesAccessKey,
+    localFilesSecretKey,
+    maildevPassword,
+    maildevUsername,
+    successSymbol,
+} from '../config/shared-service-config.js';
 import { getProjectPath } from '../context/project-path.js';
 import type { CliContext } from '../context/create-context.js';
 import { listActiveInstanceManifests } from '../runtime/manifest-store.js';
 import { printSharedServicesStatus } from '../services/shared-services.js';
 import { link } from '../runtime/ux.js';
 import { checkNodeVersion, printNodeVersionStatus } from '../workflows/setup-node.js';
-import { checkPackageManager, printPackageManagerStatus } from '../workflows/setup-package-manager.js';
+import {
+    checkPackageManager,
+    printPackageManagerStatus,
+} from '../workflows/setup-package-manager.js';
 
 export default class Status extends BaseCommand {
     static summary = 'Show local development status';
-    static description = 'Use this for a quick overview of what is already running, which instances are active, and which URLs and logins are available.';
-    static examples = [
-        'stam status',
-        'stam status --current',
-        'stam status --watch',
-    ];
+    static description =
+        'Use this for a quick overview of what is already running, which instances are active, and which URLs and logins are available.';
+    static examples = ['stam status', 'stam status --current', 'stam status --watch'];
 
-    static flags = { ...this.verbosityFlags(), current: Flags.boolean({ default: false, description: 'Only show the inferred current instance' }), watch: Flags.boolean({ default: false, description: 'Refresh the status view until interrupted' }) };
+    static flags = {
+        ...this.verbosityFlags(),
+        current: Flags.boolean({
+            default: false,
+            description: 'Only show the inferred current instance',
+        }),
+        watch: Flags.boolean({
+            default: false,
+            description: 'Refresh the status view until interrupted',
+        }),
+    };
 
     async run(): Promise<void> {
         const parsed = await this.parse(Status);
@@ -38,7 +54,7 @@ export default class Status extends BaseCommand {
             while (true) {
                 process.stdout.write('\x1Bc');
                 await this.printStatus(context, flags.current);
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise((resolve) => setTimeout(resolve, 2000));
             }
         }
         await this.printStatus(context, flags.current);
@@ -47,7 +63,9 @@ export default class Status extends BaseCommand {
     private async printStatus(context: CliContext, current: boolean): Promise<void> {
         await printSharedServicesStatus(context);
         const instances = await listActiveInstanceManifests(context);
-        const visible = current ? instances.filter(instance => instance.name === context.instance.name) : instances;
+        const visible = current
+            ? instances.filter((instance) => instance.name === context.instance.name)
+            : instances;
         this.log('\nActive instances:');
         if (visible.length === 0) {
             this.log('  none');
@@ -58,8 +76,12 @@ export default class Status extends BaseCommand {
             this.log(`  ${successSymbol} ${instance.name}`);
             this.log(`    Env:       ${instance.env}`);
             this.log(`    Workspace: ${instance.workspace}`);
-            this.log(`    Dashboard: ${link(`https://${instance.domains.dashboard}`, `https://${instance.domains.dashboard}`)}`);
-            this.log(`    API:       ${link(`https://${instance.domains.api}`, `https://${instance.domains.api}`)}`);
+            this.log(
+                `    Dashboard: ${link(`https://${instance.domains.dashboard}`, `https://${instance.domains.dashboard}`)}`,
+            );
+            this.log(
+                `    API:       ${link(`https://${instance.domains.api}`, `https://${instance.domains.api}`)}`,
+            );
         }
         this.printCredentials();
     }

@@ -35,7 +35,7 @@ export class GetPlatformAdminsEndpoint extends Endpoint<Params, Query, Body, Res
 
         // Get all admins
         const admins = await User.getPlatformAdmins();
-        const users = admins.map(user => user.getStructure());
+        const users = admins.map((user) => user.getStructure());
         await TwoFactorHelper.fillTwoFactorStatus(users);
 
         return new Response(

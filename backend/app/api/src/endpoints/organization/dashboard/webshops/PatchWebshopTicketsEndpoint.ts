@@ -15,14 +15,18 @@ type Body = AutoEncoderPatchType<TicketPrivate>[];
 type ResponseBody = TicketPrivate[];
 
 export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new ArrayDecoder(TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>);
+    bodyDecoder = new ArrayDecoder(
+        TicketPrivate.patchType() as Decoder<AutoEncoderPatchType<TicketPrivate>>,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/webshop/@id/tickets/private', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/tickets/private', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -35,7 +39,7 @@ export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, R
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -44,7 +48,10 @@ export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, R
         }
 
         const webshop = await Webshop.getByID(request.params.id);
-        if (!webshop || !await Context.auth.canAccessWebshopTickets(webshop, PermissionLevel.Write)) {
+        if (
+            !webshop ||
+            !(await Context.auth.canAccessWebshopTickets(webshop, PermissionLevel.Write))
+        ) {
             throw Context.auth.notFoundOrNoAccess($t('%FU'));
         }
 
@@ -54,11 +61,13 @@ export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, R
         for (const patch of request.body) {
             const model = await Ticket.getByID(patch.id);
             if (!model || model.webshopId !== webshop.id) {
-                errors.addError(new SimpleError({
-                    code: 'ticket_not_found',
-                    field: patch.id,
-                    message: 'Ticket with id ' + patch.id + ' does not exist',
-                }));
+                errors.addError(
+                    new SimpleError({
+                        code: 'ticket_not_found',
+                        field: patch.id,
+                        message: 'Ticket with id ' + patch.id + ' does not exist',
+                    }),
+                );
                 continue;
             }
 
@@ -76,8 +85,6 @@ export class PatchWebshopTicketsEndpoint extends Endpoint<Params, Query, Body, R
         }
 
         errors.throwIfNotEmpty();
-        return new Response(
-            tickets.map(ticket => TicketPrivate.create(ticket)),
-        );
+        return new Response(tickets.map((ticket) => TicketPrivate.create(ticket)));
     }
 }

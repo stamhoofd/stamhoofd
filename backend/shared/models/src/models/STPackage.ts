@@ -1,6 +1,12 @@
 import { column } from '@node/database';
 import { SimpleError } from '@common/errors';
-import { STPackageMeta, STPackageStatus, STPackageStatusServiceFee, STPackageType, STPricingType } from '@stamhoofd/structures';
+import {
+    STPackageMeta,
+    STPackageStatus,
+    STPackageStatusServiceFee,
+    STPackageType,
+    STPricingType,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
@@ -10,7 +16,9 @@ export class STPackage extends QueryableModel {
 
     // Columns
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -26,7 +34,8 @@ export class STPackage extends QueryableModel {
     meta: STPackageMeta;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -38,7 +47,8 @@ export class STPackage extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -124,7 +134,9 @@ export class STPackage extends QueryableModel {
         pack.validAt = null;
         pack.organizationId = this.organizationId;
 
-        pack.meta.startDate = new Date(Math.max(new Date().getTime(), this.validUntil?.getTime() ?? 0));
+        pack.meta.startDate = new Date(
+            Math.max(new Date().getTime(), this.validUntil?.getTime() ?? 0),
+        );
         pack.meta.paidAmount = 0;
         pack.meta.paidPrice = 0;
         pack.meta.firstFailedPayment = null;
@@ -186,11 +198,12 @@ export class STPackage extends QueryableModel {
                     minimum: this.meta.serviceFeeMinimum,
                     maximum: this.meta.serviceFeeMaximum,
                     startDate: this.meta.startDate,
-                    endDate: this.validUntil && this.removeAt
-                        ? new Date(Math.min(this.validUntil.getTime(), this.removeAt.getTime()))
-                        : (this.validUntil ?? this.removeAt),
-                },
-                )],
+                    endDate:
+                        this.validUntil && this.removeAt
+                            ? new Date(Math.min(this.validUntil.getTime(), this.removeAt.getTime()))
+                            : (this.validUntil ?? this.removeAt),
+                }),
+            ],
         });
     }
 }

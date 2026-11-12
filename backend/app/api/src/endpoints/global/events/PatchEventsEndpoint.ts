@@ -4,7 +4,15 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { Event, Group, Platform, RegistrationPeriod, Webshop } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AuditLogSource, Event as EventStruct, Group as GroupStruct, GroupType, NamedObject, OrganizationEventType, PlatformEventType } from '@stamhoofd/structures';
+import {
+    AuditLogSource,
+    Event as EventStruct,
+    Group as GroupStruct,
+    GroupType,
+    NamedObject,
+    OrganizationEventType,
+    PlatformEventType,
+} from '@stamhoofd/structures';
 
 import { SimpleError } from '@common/errors';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
@@ -20,7 +28,11 @@ type Body = PatchableArrayAutoEncoder<EventStruct>;
 type ResponseBody = EventStruct[];
 
 export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(EventStruct as Decoder<EventStruct>, EventStruct.patchType() as Decoder<AutoEncoderPatchType<EventStruct>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(
+        EventStruct as Decoder<EventStruct>,
+        EventStruct.patchType() as Decoder<AutoEncoderPatchType<EventStruct>>,
+        StringDecoder,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -45,7 +57,8 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (!period) {
             throw new SimpleError({
                 code: 'invalid_period',
-                message: 'No period found for this start date: ' + Formatter.dateIso(event.startDate),
+                message:
+                    'No period found for this start date: ' + Formatter.dateIso(event.startDate),
                 human: $t('%ZrY'),
                 field: 'startDate',
             });
@@ -65,7 +78,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             putGroup.organizationId = event.organizationId;
         }
 
-        if (!await Context.auth.hasSomeAccessInPeriod(period.id, putGroup.organizationId)) {
+        if (!(await Context.auth.hasSomeAccessInPeriod(period.id, putGroup.organizationId))) {
             throw Context.auth.error($t('%1HQ'));
         }
 
@@ -95,7 +108,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         await Context.authenticate();
 
         if (organization) {
-            if (!await Context.auth.hasSomeAccess(organization.id)) {
+            if (!(await Context.auth.hasSomeAccess(organization.id))) {
                 throw Context.auth.error();
             }
         } else {
@@ -149,7 +162,9 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             event.endDate = put.endDate;
             event.typeId = put.typeId;
 
-            event.meta.organizationCache = eventOrganization ? NamedObject.create({ id: eventOrganization.id, name: eventOrganization.name }) : null;
+            event.meta.organizationCache = eventOrganization
+                ? NamedObject.create({ id: eventOrganization.id, name: eventOrganization.name })
+                : null;
 
             PatchEventsEndpoint.validateOrCorrectEventMeta(event);
 
@@ -172,10 +187,10 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             events.push(event);
         }
 
-        const patchingEvents = await Event.getByIDs(...request.body.getPatches().map(p => p.id));
+        const patchingEvents = await Event.getByIDs(...request.body.getPatches().map((p) => p.id));
 
         for (const patch of request.body.getPatches()) {
-            const event = patchingEvents.find(e => e.id === patch.id);
+            const event = patchingEvents.find((e) => e.id === patch.id);
 
             if (!event) {
                 throw new SimpleError({
@@ -206,7 +221,10 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
             const eventOrganization = await Context.auth.checkEventAccess(event);
             if (eventOrganization) {
-                event.meta.organizationCache = NamedObject.create({ id: eventOrganization.id, name: eventOrganization.name });
+                event.meta.organizationCache = NamedObject.create({
+                    id: eventOrganization.id,
+                    name: eventOrganization.name,
+                });
             } else {
                 event.meta.organizationCache = null;
             }
@@ -227,7 +245,9 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 if (patch.group === null) {
                     // delete
                     if (event.groupId) {
-                        await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId);
+                        await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(
+                            event.groupId,
+                        );
                         event.groupId = null;
                     }
                 } else if (patch.group.isPatch()) {
@@ -242,7 +262,11 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     patch.group.type = GroupType.EventRegistration;
 
                     const period = await PatchEventsEndpoint.getEventGroupPeriodOrThrow(event);
-                    group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(patch.group, period, { isPatchingEvent: true });
+                    group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(
+                        patch.group,
+                        period,
+                        { isPatchingEvent: true },
+                    );
                 } else {
                     if (event.groupId === patch.group.id) {
                         // ignore: bad practice: puts are not allowed like this
@@ -250,7 +274,9 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     } else {
                         if (event.groupId) {
                             // need to delete old group first
-                            await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(event.groupId);
+                            await PatchOrganizationRegistrationPeriodsEndpoint.deleteGroup(
+                                event.groupId,
+                            );
                             event.groupId = null;
                         }
                         group = await this.putEventGroup(event, patch.group);
@@ -264,16 +290,19 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     // Correct period id if needed
                     const period = await PatchEventsEndpoint.getEventGroupPeriodOrThrow(event);
 
-                    await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-                        group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(
-                            GroupStruct.patch({
-                                id: groupId,
-                                periodId: period.id,
-                            }),
-                            period,
-                            { isPatchingEvent: true },
-                        );
-                    });
+                    await AuditLogService.setContext(
+                        { source: AuditLogSource.System },
+                        async () => {
+                            group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(
+                                GroupStruct.patch({
+                                    id: groupId,
+                                    periodId: period.id,
+                                }),
+                                period,
+                                { isPatchingEvent: true },
+                            );
+                        },
+                    );
                 }
             }
 
@@ -283,7 +312,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 } else {
                     // Validate organizationId of group
                     if (event.groupId) {
-                        group = group ?? (await Group.getByID(event.groupId) ?? null);
+                        group = group ?? (await Group.getByID(event.groupId)) ?? null;
 
                         if (group && group.organizationId !== event.organizationId) {
                             throw new SimpleError({
@@ -301,7 +330,10 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     event.webshopId = null;
                 } else {
                     const webshop = await Webshop.getByID(patch.webshopId);
-                    if (!webshop || (event.organizationId && webshop.organizationId !== event.organizationId)) {
+                    if (
+                        !webshop ||
+                        (event.organizationId && webshop.organizationId !== event.organizationId)
+                    ) {
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'Webshop not found',
@@ -309,7 +341,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                             field: 'webshopId',
                         });
                     }
-                    if (!await Context.auth.canAccessWebshop(webshop, PermissionLevel.Read)) {
+                    if (!(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Read))) {
                         throw Context.auth.error($t('%185'));
                     }
                     event.webshopId = webshop.id;
@@ -321,9 +353,12 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             if (event.groupId) {
                 const group = await Group.getByID(event.groupId);
                 if (group) {
-                    await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-                        await event.syncGroupRequirements(group);
-                    });
+                    await AuditLogService.setContext(
+                        { source: AuditLogSource.System },
+                        async () => {
+                            await event.syncGroupRequirements(group);
+                        },
+                    );
                 }
             }
 
@@ -333,7 +368,11 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         for (const id of request.body.getDeletes()) {
             const event = await Event.getByID(id);
             if (!event) {
-                throw new SimpleError({ code: 'not_found', message: 'Event not found', statusCode: 404 });
+                throw new SimpleError({
+                    code: 'not_found',
+                    message: 'Event not found',
+                    statusCode: 404,
+                });
             }
 
             await Context.auth.checkEventAccess(event);
@@ -353,9 +392,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         const structures = await AuthenticatedStructures.events(events);
-        return new Response(
-            structures,
-        );
+        return new Response(structures);
     }
 
     static validateOrCorrectEventMeta(event: Event) {
@@ -394,7 +431,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         if (STAMHOOFD.userMode === 'platform') {
             const platform = await Platform.getSharedStruct();
-            type = platform.config.eventTypes.find(t => t.id === typeId);
+            type = platform.config.eventTypes.find((t) => t.id === typeId);
         } else if (typeId === OrganizationEventType.DEFAULT_ID) {
             type = OrganizationEventType.createDefault();
         }
@@ -458,7 +495,10 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 if (type.minimumDays !== null && days < type.minimumDays) {
                     throw new SimpleError({
                         code: 'minimum_days',
-                        message: 'An event with this type has a minimum of ' + type.minimumDays + ' days',
+                        message:
+                            'An event with this type has a minimum of ' +
+                            type.minimumDays +
+                            ' days',
                         human: $t('%14D', {
                             name: type.name,
                             days: Formatter.pluralText(type.minimumDays, $t('%1N7'), $t('%1N6')),
@@ -470,7 +510,10 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 if (type.maximumDays !== null && days > type.maximumDays) {
                     throw new SimpleError({
                         code: 'maximum_days',
-                        message: 'An event with this type has a maximum of ' + type.maximumDays + ' days',
+                        message:
+                            'An event with this type has a maximum of ' +
+                            type.maximumDays +
+                            ' days',
                         human: $t('%14E', {
                             name: type.name,
                             days: Formatter.pluralText(type.maximumDays, $t('%1N7'), $t('%1N6')),
@@ -480,17 +523,26 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 }
             }
 
-            if (type.maximum && (!event.existsInDatabase || ('typeId' in (event.getChangedDatabaseProperties()).fields))) {
-                const currentPeriod = await RegistrationPeriod.getByDate(event.startDate, event.organizationId);
+            if (
+                type.maximum &&
+                (!event.existsInDatabase || 'typeId' in event.getChangedDatabaseProperties().fields)
+            ) {
+                const currentPeriod = await RegistrationPeriod.getByDate(
+                    event.startDate,
+                    event.organizationId,
+                );
                 console.log('event.startDate', event.startDate);
                 if (currentPeriod) {
-                    const count = await SQL.select().from(
-                        SQL.table(Event.table),
-                    )
+                    const count = await SQL.select()
+                        .from(SQL.table(Event.table))
                         .where(SQL.column('organizationId'), event.organizationId)
                         .where(SQL.column('typeId'), event.typeId)
                         .where(SQL.column('id'), SQLWhereSign.NotEqual, event.id)
-                        .where(SQL.column('startDate'), SQLWhereSign.GreaterEqual, currentPeriod.startDate)
+                        .where(
+                            SQL.column('startDate'),
+                            SQLWhereSign.GreaterEqual,
+                            currentPeriod.startDate,
+                        )
                         .where(SQL.column('endDate'), SQLWhereSign.LessEqual, currentPeriod.endDate)
                         .count();
 
@@ -498,7 +550,8 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         throw new SimpleError({
                             code: 'type_maximum_reached',
                             message: 'Maximum number of events with this type reached',
-                            human: $t('%Dd') + ' ' + type.name + ' ' + $t('%De') + type.maximum + ')',
+                            human:
+                                $t('%Dd') + ' ' + type.name + ' ' + $t('%De') + type.maximum + ')',
                             field: 'typeId',
                         });
                     }
@@ -514,7 +567,10 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
     }
 
-    private async saveEventAndLinkExistingGroup(event: Event, putGroup: GroupStruct): Promise<void> {
+    private async saveEventAndLinkExistingGroup(
+        event: Event,
+        putGroup: GroupStruct,
+    ): Promise<void> {
         const existingGroup = await Group.getByID(putGroup.id);
 
         if (!existingGroup) {
@@ -527,7 +583,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // keep track of original data for reset in case of failure
         const originalGroupType = existingGroup.type;
 
-        if (!await Context.auth.canAccessGroup(existingGroup)) {
+        if (!(await Context.auth.canAccessGroup(existingGroup))) {
             throw Context.auth.error($t('%1N9'));
         }
 
@@ -566,7 +622,11 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             });
         }
 
-        const organizationPeriod = await PatchOrganizationRegistrationPeriodsEndpoint.getOrganizationPeriodOrThrow(existingGroup.organizationId, period);
+        const organizationPeriod =
+            await PatchOrganizationRegistrationPeriodsEndpoint.getOrganizationPeriodOrThrow(
+                existingGroup.organizationId,
+                period,
+            );
 
         event.groupId = existingGroup.id;
         await event.save();
@@ -586,7 +646,10 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw e;
         }
 
-        const allGroups = await Group.getAll(organizationPeriod.organizationId, organizationPeriod.periodId);
+        const allGroups = await Group.getAll(
+            organizationPeriod.organizationId,
+            organizationPeriod.periodId,
+        );
         await organizationPeriod.cleanCategories(allGroups);
     }
 }

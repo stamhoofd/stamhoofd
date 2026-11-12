@@ -15,7 +15,9 @@ export class IDDeleteRegisterItem extends AutoEncoder {
 
     hydrate(context: RegisterContext): DeleteRegisterItem {
         for (const member of context.members) {
-            const registration = member.patchedMember.registrations.find(r => r.id === this.registrationId);
+            const registration = member.patchedMember.registrations.find(
+                (r) => r.id === this.registrationId,
+            );
             if (!registration) {
                 continue;
             }
@@ -43,7 +45,10 @@ export class DeleteRegisterItem {
      */
     cancellationFeePercentage: number;
 
-    constructor(options: { registration: RegistrationWithPlatformMember; cancellationFeePercentage: number }) {
+    constructor(options: {
+        registration: RegistrationWithPlatformMember;
+        cancellationFeePercentage: number;
+    }) {
         this.registration = options.registration;
         this.cancellationFeePercentage = options.cancellationFeePercentage;
     }
@@ -52,7 +57,10 @@ export class DeleteRegisterItem {
      * Charges 100% if something was already paid, so the paid amount is not refunded by default
      */
     static defaultFor(registration: RegistrationWithPlatformMember) {
-        const paid = registration.registration.balances.reduce((total, balance) => total + balance.amountPaid + balance.amountPending, 0);
+        const paid = registration.registration.balances.reduce(
+            (total, balance) => total + balance.amountPaid + balance.amountPending,
+            0,
+        );
         return new DeleteRegisterItem({
             registration,
             cancellationFeePercentage: paid > 0 ? 100_00 : 0,
@@ -64,7 +72,10 @@ export class DeleteRegisterItem {
     }
 
     get cancellationFee() {
-        return Math.round(this.registration.registration.calculatedPrice * this.cancellationFeePercentage / 10000);
+        return Math.round(
+            (this.registration.registration.calculatedPrice * this.cancellationFeePercentage) /
+                10000,
+        );
     }
 
     clone() {

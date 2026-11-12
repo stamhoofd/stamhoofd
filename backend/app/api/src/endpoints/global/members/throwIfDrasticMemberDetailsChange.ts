@@ -18,14 +18,20 @@ import { StringCompare } from '@stamhoofd/utility';
  * Platform admins with full access are not restricted; callers should only run this check when the
  * user does not have platform full access.
  */
-export function throwIfDrasticMemberDetailsChange(patch: MemberDetails | AutoEncoderPatchType<MemberDetails>, originalDetails: MemberDetails) {
+export function throwIfDrasticMemberDetailsChange(
+    patch: MemberDetails | AutoEncoderPatchType<MemberDetails>,
+    originalDetails: MemberDetails,
+) {
     // First name: only allow typo-level corrections. A completely different first name is not allowed.
     if (patch.firstName !== undefined && patch.firstName !== originalDetails.firstName) {
         const typoCount = StringCompare.typoCount(originalDetails.firstName, patch.firstName);
 
         // Allow a change of at most ~40% of the (shortest) name, with a minimum of one character,
         // so short names can still have a typo corrected.
-        const maxTypos = Math.max(1, Math.floor(0.4 * Math.min(originalDetails.firstName.length, patch.firstName.length)));
+        const maxTypos = Math.max(
+            1,
+            Math.floor(0.4 * Math.min(originalDetails.firstName.length, patch.firstName.length)),
+        );
 
         if (typoCount > maxTypos) {
             throw new SimpleError({

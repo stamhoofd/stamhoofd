@@ -2,13 +2,32 @@ import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@commo
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email as EmailClass } from '@stamhoofd/email';
 import { Email, EmailRecipient, Organization, Platform } from '@stamhoofd/models';
-import { canSendFromEmail, fillRecipientReplacements, getEmailBuilder, mergeReplacementsIfEqual, removeUnusedReplacements } from '../helpers/EmailBuilder.js';
+import {
+    canSendFromEmail,
+    fillRecipientReplacements,
+    getEmailBuilder,
+    mergeReplacementsIfEqual,
+    removeUnusedReplacements,
+} from '../helpers/EmailBuilder.js';
 import { errorToSimpleErrors } from '@stamhoofd/models/helpers/errorToSimpleErrors.js';
 import { isAbortedError, QueueHandler } from '@stamhoofd/queues';
 import { SQL, SQLWhereSign } from '@stamhoofd/sql';
-import { EmailRecipientsStatus, EmailStatus, isSoftEmailRecipientError, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
+import {
+    EmailRecipientsStatus,
+    EmailStatus,
+    isSoftEmailRecipientError,
+    LimitedFilteredRequest,
+    SortItemDirection,
+} from '@stamhoofd/structures';
 
-type Attachment = { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string };
+type Attachment = {
+    filename: string;
+    path?: string;
+    href?: string;
+    content?: string | Buffer;
+    contentType?: string;
+    encoding?: string;
+};
 
 /**
  * Sends an email to its recipients: queueing, the per-recipient send and resuming an interrupted send.
@@ -52,12 +71,20 @@ export class EmailSendService {
             }
 
             if (attachment.file?.name) {
-                filename = attachment.file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+                filename = attachment.file.name
+                    .toLowerCase()
+                    .replace(/[^a-z0-9.]+/g, '-')
+                    .replace(/^-+/, '')
+                    .replace(/-+$/, '');
             }
 
             // Correct file name if needed
             if (attachment.filename) {
-                filename = attachment.filename.toLowerCase().replace(/[^a-z0-9.]+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+                filename = attachment.filename
+                    .toLowerCase()
+                    .replace(/[^a-z0-9.]+/g, '-')
+                    .replace(/^-+/, '')
+                    .replace(/-+$/, '');
             }
 
             if (attachment.content) {
@@ -101,7 +128,16 @@ export class EmailSendService {
         return attachments;
     }
 
-    private static async sendSingleRecipient(email: Email, recipient: EmailRecipient, organization: Organization | null, data: { from: EmailInterfaceRecipient; replyTo: EmailInterfaceRecipient | null; attachments: Attachment[] }) {
+    private static async sendSingleRecipient(
+        email: Email,
+        recipient: EmailRecipient,
+        organization: Organization | null,
+        data: {
+            from: EmailInterfaceRecipient;
+            replyTo: EmailInterfaceRecipient | null;
+            attachments: Attachment[];
+        },
+    ) {
         let promiseResolve: (value: void | PromiseLike<void>) => void;
         const promise = new Promise<void>((resolve) => {
             promiseResolve = resolve;
@@ -150,9 +186,7 @@ export class EmailSendService {
         // Do send the email
         // Create e-mail builder
         const builder = await getEmailBuilder(organization ?? null, {
-            recipients: [
-                virtualRecipient,
-            ],
+            recipients: [virtualRecipient],
             from: data.from,
             replyTo: data.replyTo,
             subject: email.subject!,
@@ -172,7 +206,10 @@ export class EmailSendService {
         return await promise;
     }
 
-    static async resumeSending(email: Email, singleRecipientId: string | null = null): Promise<Email | null> {
+    static async resumeSending(
+        email: Email,
+        singleRecipientId: string | null = null,
+    ): Promise<Email | null> {
         const id = email.id;
         return await QueueHandler.schedule('send-email', async ({ abort }) => {
             return await email.lock(async function (upToDate: Email) {
@@ -193,27 +230,39 @@ export class EmailSendService {
                     }
 
                     if (upToDate.status === EmailStatus.Sending) {
-                    // This is an automatic retry.
+                        // This is an automatic retry.
                         if (upToDate.emailType) {
-                        // Not eligible for retry
+                            // Not eligible for retry
                             upToDate.status = EmailStatus.Failed;
                             await upToDate.save();
                             return upToDate;
                         }
-                        if (upToDate.createdAt < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 2)) {
-                        // Too long
-                            console.error('Email has been sending for too long. Marking as failed...', upToDate.id);
+                        if (
+                            upToDate.createdAt <
+                            new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 2)
+                        ) {
+                            // Too long
+                            console.error(
+                                'Email has been sending for too long. Marking as failed...',
+                                upToDate.id,
+                            );
                             upToDate.status = EmailStatus.Failed;
                             await upToDate.save();
                             return upToDate;
                         }
                     } else if (upToDate.status !== EmailStatus.Queued) {
-                        console.error('Email is not queued or sending, cannot send', upToDate.id, upToDate.status);
+                        console.error(
+                            'Email is not queued or sending, cannot send',
+                            upToDate.id,
+                            upToDate.status,
+                        );
                         return upToDate;
                     }
                 }
 
-                const organization = upToDate.organizationId ? await Organization.getByID(upToDate.organizationId) : null;
+                const organization = upToDate.organizationId
+                    ? await Organization.getByID(upToDate.organizationId)
+                    : null;
                 let from = upToDate.getDefaultFromAddress(organization);
                 let replyTo: EmailInterfaceRecipient | null = upToDate.getFromAddress();
                 let succeededCount = 0;
@@ -233,7 +282,10 @@ export class EmailSendService {
                     }
 
                     // Can we send from this e-mail or reply-to?
-                    if (upToDate.fromAddress && await canSendFromEmail(upToDate.fromAddress, organization ?? null)) {
+                    if (
+                        upToDate.fromAddress &&
+                        (await canSendFromEmail(upToDate.fromAddress, organization ?? null))
+                    ) {
                         from = upToDate.getFromAddress();
                         replyTo = null;
                     }
@@ -291,12 +343,16 @@ export class EmailSendService {
                             if (isSavingStatus) {
                                 return;
                             }
-                            if ((new Date().getTime() - lastStatusSave.getTime()) < 1000 * 5) {
-                            // Save at most every 5 seconds
+                            if (new Date().getTime() - lastStatusSave.getTime() < 1000 * 5) {
+                                // Save at most every 5 seconds
                                 return;
                             }
-                            if (succeededCount < upToDate.succeededCount || softFailedCount < upToDate.softFailedCount || failedCount < upToDate.failedCount) {
-                            // Do not update on retries
+                            if (
+                                succeededCount < upToDate.succeededCount ||
+                                softFailedCount < upToDate.softFailedCount ||
+                                failedCount < upToDate.failedCount
+                            ) {
+                                // Do not update on retries
                                 return;
                             }
 
@@ -355,7 +411,10 @@ export class EmailSendService {
                                 if (singleRecipientId) {
                                     if (recipient.id !== singleRecipientId) {
                                         // Failed or soft-failed
-                                        if (recipient.failError && isSoftEmailRecipientError(recipient.failError)) {
+                                        if (
+                                            recipient.failError &&
+                                            isSoftEmailRecipientError(recipient.failError)
+                                        ) {
                                             softFailedCount += 1;
                                         } else {
                                             failedCount += 1;
@@ -366,25 +425,35 @@ export class EmailSendService {
                                     }
                                 }
 
-                                const promise = EmailSendService.sendSingleRecipient(upToDate, recipient, organization ?? null, {
-                                    from,
-                                    replyTo,
-                                    attachments,
-                                });
-                                sendingPromises.push(promise.then(async () => {
-                                    if (recipient.sentAt) {
-                                        succeededCount += 1;
-                                        await saveStatus();
-                                    } else {
-                                        // Failed or soft-failed
-                                        if (recipient.failError && isSoftEmailRecipientError(recipient.failError)) {
-                                            softFailedCount += 1;
+                                const promise = EmailSendService.sendSingleRecipient(
+                                    upToDate,
+                                    recipient,
+                                    organization ?? null,
+                                    {
+                                        from,
+                                        replyTo,
+                                        attachments,
+                                    },
+                                );
+                                sendingPromises.push(
+                                    promise.then(async () => {
+                                        if (recipient.sentAt) {
+                                            succeededCount += 1;
+                                            await saveStatus();
                                         } else {
-                                            failedCount += 1;
+                                            // Failed or soft-failed
+                                            if (
+                                                recipient.failError &&
+                                                isSoftEmailRecipientError(recipient.failError)
+                                            ) {
+                                                softFailedCount += 1;
+                                            } else {
+                                                failedCount += 1;
+                                            }
+                                            await saveStatus();
                                         }
-                                        await saveStatus();
-                                    }
-                                }));
+                                    }),
+                                );
                             }
 
                             if (sendingPromises.length > 0 || skipped > 0) {
@@ -404,7 +473,10 @@ export class EmailSendService {
                         upToDate.softFailedCount = softFailedCount;
                         upToDate.failedCount = failedCount;
 
-                        if (isAbortedError(e) || ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('SHUTDOWN'))) {
+                        if (
+                            isAbortedError(e) ||
+                            ((isSimpleError(e) || isSimpleErrors(e)) && e.hasCode('SHUTDOWN'))
+                        ) {
                             // Keep sending status: we'll resume after the reboot
                             await upToDate.save();
                             throw e;
@@ -418,7 +490,11 @@ export class EmailSendService {
                 }
 
                 if (!singleRecipientId) {
-                    if (upToDate.sendAsEmail && upToDate.emailRecipientsCount === 0 && upToDate.userId === null) {
+                    if (
+                        upToDate.sendAsEmail &&
+                        upToDate.emailRecipientsCount === 0 &&
+                        upToDate.userId === null
+                    ) {
                         // We only delete automated emails (email type) if they have no recipients
                         console.log('No recipients found for email ', upToDate.id, ' deleting...');
                         await upToDate.delete();
@@ -428,7 +504,11 @@ export class EmailSendService {
                     console.log('Finished sending email', upToDate.id);
                     // Mark email as sent
 
-                    if (upToDate.sendAsEmail && !upToDate.showInMemberPortal && (succeededCount + failedCount + softFailedCount) === 0) {
+                    if (
+                        upToDate.sendAsEmail &&
+                        !upToDate.showInMemberPortal &&
+                        succeededCount + failedCount + softFailedCount === 0
+                    ) {
                         upToDate.status = EmailStatus.Failed;
                         upToDate.emailErrors = new SimpleErrors(
                             new SimpleError({
@@ -455,174 +535,203 @@ export class EmailSendService {
 
     static async buildRecipients(email: Email) {
         const id = email.id;
-        await QueueHandler.schedule('email-build-recipients-' + email.id, async function ({ abort }) {
-            const upToDate = await Email.getByID(id);
+        await QueueHandler.schedule(
+            'email-build-recipients-' + email.id,
+            async function ({ abort }) {
+                const upToDate = await Email.getByID(id);
 
-            if (!upToDate || !upToDate.id) {
-                return;
-            }
-
-            if (upToDate.recipientsStatus === EmailRecipientsStatus.Created) {
-                return;
-            }
-
-            if (upToDate.status === EmailStatus.Sent) {
-                return;
-            }
-
-            abort.throwIfAborted();
-            const organization = upToDate.organizationId ? (await Organization.getByID(upToDate.organizationId) ?? null) : null;
-            if (upToDate.organizationId && !organization) {
-                throw new SimpleError({
-                    code: 'organization_not_found',
-                    message: 'Organization not found',
-                    human: $t('%1NV'),
-                });
-            }
-            const platform = await Platform.getSharedPrivateStruct();
-
-            console.log('Building recipients for email', id);
-
-            // If it is already creating -> something went wrong (e.g. server restart) and we can safely try again
-
-            upToDate.recipientsStatus = EmailRecipientsStatus.Creating;
-            await upToDate.save();
-
-            const membersSet = new Set<string>();
-            const emailsSet = new Set<string>();
-            const combinedHtml = upToDate.getCombinedHtml();
-
-            let count = 0;
-            let countWithoutEmail = 0;
-
-            try {
-                // Delete all recipients
-                await SQL
-                    .delete()
-                    .from(
-                        SQL.table('email_recipients'),
-                    )
-                    .where(SQL.column('emailId'), upToDate.id);
-
-                abort.throwIfAborted();
-
-                for (const subfilter of upToDate.recipientFilter.filters) {
-                    // Create recipients
-                    const loader = Email.recipientLoaders.get(subfilter.type);
-
-                    if (!loader) {
-                        throw new Error('Loader for type ' + subfilter.type + ' has not been initialised on the Email model');
-                    }
-
-                    let request: LimitedFilteredRequest | null = new LimitedFilteredRequest({
-                        filter: subfilter.filter,
-                        sort: [{ key: 'id', order: SortItemDirection.ASC }],
-                        limit: 100,
-                        search: subfilter.search,
-                    });
-
-                    const beforeFetchAllResult = loader.beforeFetchAll ? await loader.beforeFetchAll(request, subfilter.subfilter) : undefined;
-
-                    while (request) {
-                        abort.throwIfAborted();
-                        const response = await loader.fetch(request, subfilter.subfilter, beforeFetchAllResult, { allowedLanguages: upToDate.getLanguages() });
-
-                        for (const item of response.results) {
-                            if (!item.email && !item.memberId && !item.userId) {
-                                continue;
-                            }
-
-                            const recipient = new EmailRecipient();
-                            recipient.emailType = upToDate.emailType;
-                            recipient.objectId = item.objectId;
-                            recipient.emailId = upToDate.id;
-                            recipient.email = item.email;
-                            recipient.firstName = item.firstName;
-                            recipient.lastName = item.lastName;
-                            recipient.language = item.language ?? null;
-                            recipient.replacements = item.replacements;
-                            recipient.memberId = item.memberId ?? null;
-                            recipient.userId = item.userId ?? null;
-                            recipient.organizationId = upToDate.organizationId ?? null;
-
-                            await fillRecipientReplacements(recipient, {
-                                platform,
-                                organization,
-                                from: upToDate.getFromAddress(),
-                                replyTo: null,
-                                forPreview: false,
-                                allowedLanguages: upToDate.getLanguages(),
-                            });
-                            // Stored duplicates never contain the unstored replacements, so remove them before comparing
-                            recipient.replacements = EmailRecipient.removeUnstoredReplacements(removeUnusedReplacements(combinedHtml, recipient.replacements));
-
-                            let duplicateOfRecipientId: string | null = null;
-                            if (item.email && emailsSet.has(item.email)) {
-                                console.log('Found duplicate email recipient', item.email);
-
-                                // Try to merge
-                                const existing = await EmailRecipient.select()
-                                    .where('emailId', upToDate.id)
-                                    .where('email', item.email)
-                                    .where('duplicateOfRecipientId', null)
-                                    .fetch();
-
-                                for (const other of existing) {
-                                    const merged = mergeReplacementsIfEqual(other.replacements, recipient.replacements);
-                                    if (merged !== false) {
-                                        console.log('Found mergeable duplicate email recipient', item.email, other.id);
-                                        duplicateOfRecipientId = other.id;
-
-                                        other.replacements = merged;
-                                        other.firstName = other.firstName || item.firstName;
-                                        other.lastName = other.lastName || item.lastName;
-                                        await other.save();
-
-                                        recipient.replacements = merged;
-
-                                        break;
-                                    } else {
-                                        console.log('Could not merge duplicate email recipient', item.email, other.id, 'keeping both', other.replacements, item.replacements);
-                                    }
-                                }
-                            }
-                            recipient.duplicateOfRecipientId = duplicateOfRecipientId;
-
-                            await recipient.save();
-
-                            if (recipient.memberId) {
-                                membersSet.add(recipient.memberId);
-                            }
-
-                            if (recipient.email) {
-                                emailsSet.add(recipient.email);
-                            }
-
-                            if (!recipient.email || duplicateOfRecipientId) {
-                                countWithoutEmail += 1;
-                            } else {
-                                count += 1;
-                            }
-                        }
-
-                        request = response.next ?? null;
-                    }
+                if (!upToDate || !upToDate.id) {
+                    return;
                 }
 
-                upToDate.recipientsStatus = EmailRecipientsStatus.Created;
-                upToDate.emailRecipientsCount = count;
-                upToDate.otherRecipientsCount = countWithoutEmail;
-                upToDate.recipientsErrors = null;
-                upToDate.membersCount = membersSet.size;
+                if (upToDate.recipientsStatus === EmailRecipientsStatus.Created) {
+                    return;
+                }
+
+                if (upToDate.status === EmailStatus.Sent) {
+                    return;
+                }
+
+                abort.throwIfAborted();
+                const organization = upToDate.organizationId
+                    ? ((await Organization.getByID(upToDate.organizationId)) ?? null)
+                    : null;
+                if (upToDate.organizationId && !organization) {
+                    throw new SimpleError({
+                        code: 'organization_not_found',
+                        message: 'Organization not found',
+                        human: $t('%1NV'),
+                    });
+                }
+                const platform = await Platform.getSharedPrivateStruct();
+
+                console.log('Building recipients for email', id);
+
+                // If it is already creating -> something went wrong (e.g. server restart) and we can safely try again
+
+                upToDate.recipientsStatus = EmailRecipientsStatus.Creating;
                 await upToDate.save();
-            } catch (e: unknown) {
-                console.error('Failed to build recipients for email', id);
-                console.error(e);
-                upToDate.recipientsStatus = EmailRecipientsStatus.NotCreated;
-                upToDate.recipientsErrors = errorToSimpleErrors(e);
-                await upToDate.save();
-            }
-        });
+
+                const membersSet = new Set<string>();
+                const emailsSet = new Set<string>();
+                const combinedHtml = upToDate.getCombinedHtml();
+
+                let count = 0;
+                let countWithoutEmail = 0;
+
+                try {
+                    // Delete all recipients
+                    await SQL.delete()
+                        .from(SQL.table('email_recipients'))
+                        .where(SQL.column('emailId'), upToDate.id);
+
+                    abort.throwIfAborted();
+
+                    for (const subfilter of upToDate.recipientFilter.filters) {
+                        // Create recipients
+                        const loader = Email.recipientLoaders.get(subfilter.type);
+
+                        if (!loader) {
+                            throw new Error(
+                                'Loader for type ' +
+                                    subfilter.type +
+                                    ' has not been initialised on the Email model',
+                            );
+                        }
+
+                        let request: LimitedFilteredRequest | null = new LimitedFilteredRequest({
+                            filter: subfilter.filter,
+                            sort: [{ key: 'id', order: SortItemDirection.ASC }],
+                            limit: 100,
+                            search: subfilter.search,
+                        });
+
+                        const beforeFetchAllResult = loader.beforeFetchAll
+                            ? await loader.beforeFetchAll(request, subfilter.subfilter)
+                            : undefined;
+
+                        while (request) {
+                            abort.throwIfAborted();
+                            const response = await loader.fetch(
+                                request,
+                                subfilter.subfilter,
+                                beforeFetchAllResult,
+                                { allowedLanguages: upToDate.getLanguages() },
+                            );
+
+                            for (const item of response.results) {
+                                if (!item.email && !item.memberId && !item.userId) {
+                                    continue;
+                                }
+
+                                const recipient = new EmailRecipient();
+                                recipient.emailType = upToDate.emailType;
+                                recipient.objectId = item.objectId;
+                                recipient.emailId = upToDate.id;
+                                recipient.email = item.email;
+                                recipient.firstName = item.firstName;
+                                recipient.lastName = item.lastName;
+                                recipient.language = item.language ?? null;
+                                recipient.replacements = item.replacements;
+                                recipient.memberId = item.memberId ?? null;
+                                recipient.userId = item.userId ?? null;
+                                recipient.organizationId = upToDate.organizationId ?? null;
+
+                                await fillRecipientReplacements(recipient, {
+                                    platform,
+                                    organization,
+                                    from: upToDate.getFromAddress(),
+                                    replyTo: null,
+                                    forPreview: false,
+                                    allowedLanguages: upToDate.getLanguages(),
+                                });
+                                // Stored duplicates never contain the unstored replacements, so remove them before comparing
+                                recipient.replacements = EmailRecipient.removeUnstoredReplacements(
+                                    removeUnusedReplacements(combinedHtml, recipient.replacements),
+                                );
+
+                                let duplicateOfRecipientId: string | null = null;
+                                if (item.email && emailsSet.has(item.email)) {
+                                    console.log('Found duplicate email recipient', item.email);
+
+                                    // Try to merge
+                                    const existing = await EmailRecipient.select()
+                                        .where('emailId', upToDate.id)
+                                        .where('email', item.email)
+                                        .where('duplicateOfRecipientId', null)
+                                        .fetch();
+
+                                    for (const other of existing) {
+                                        const merged = mergeReplacementsIfEqual(
+                                            other.replacements,
+                                            recipient.replacements,
+                                        );
+                                        if (merged !== false) {
+                                            console.log(
+                                                'Found mergeable duplicate email recipient',
+                                                item.email,
+                                                other.id,
+                                            );
+                                            duplicateOfRecipientId = other.id;
+
+                                            other.replacements = merged;
+                                            other.firstName = other.firstName || item.firstName;
+                                            other.lastName = other.lastName || item.lastName;
+                                            await other.save();
+
+                                            recipient.replacements = merged;
+
+                                            break;
+                                        } else {
+                                            console.log(
+                                                'Could not merge duplicate email recipient',
+                                                item.email,
+                                                other.id,
+                                                'keeping both',
+                                                other.replacements,
+                                                item.replacements,
+                                            );
+                                        }
+                                    }
+                                }
+                                recipient.duplicateOfRecipientId = duplicateOfRecipientId;
+
+                                await recipient.save();
+
+                                if (recipient.memberId) {
+                                    membersSet.add(recipient.memberId);
+                                }
+
+                                if (recipient.email) {
+                                    emailsSet.add(recipient.email);
+                                }
+
+                                if (!recipient.email || duplicateOfRecipientId) {
+                                    countWithoutEmail += 1;
+                                } else {
+                                    count += 1;
+                                }
+                            }
+
+                            request = response.next ?? null;
+                        }
+                    }
+
+                    upToDate.recipientsStatus = EmailRecipientsStatus.Created;
+                    upToDate.emailRecipientsCount = count;
+                    upToDate.otherRecipientsCount = countWithoutEmail;
+                    upToDate.recipientsErrors = null;
+                    upToDate.membersCount = membersSet.size;
+                    await upToDate.save();
+                } catch (e: unknown) {
+                    console.error('Failed to build recipients for email', id);
+                    console.error(e);
+                    upToDate.recipientsStatus = EmailRecipientsStatus.NotCreated;
+                    upToDate.recipientsErrors = errorToSimpleErrors(e);
+                    await upToDate.save();
+                }
+            },
+        );
     }
 
     static async buildExampleRecipient(email: Email, isNewlyCreated = false) {
@@ -641,11 +750,8 @@ export class EmailSendService {
             try {
                 // Delete all recipients
                 if (!isNewlyCreated) {
-                    await SQL
-                        .delete()
-                        .from(
-                            SQL.table('email_recipients'),
-                        )
+                    await SQL.delete()
+                        .from(SQL.table('email_recipients'))
                         .where(SQL.column('emailId'), upToDate.id);
                 }
 
@@ -654,7 +760,11 @@ export class EmailSendService {
                     const loader = Email.recipientLoaders.get(subfilter.type);
 
                     if (!loader) {
-                        throw new Error('Loader for type ' + subfilter.type + ' has not been initialised on the Email model');
+                        throw new Error(
+                            'Loader for type ' +
+                                subfilter.type +
+                                ' has not been initialised on the Email model',
+                        );
                     }
 
                     let request: LimitedFilteredRequest | null = new LimitedFilteredRequest({
@@ -664,10 +774,17 @@ export class EmailSendService {
                         search: subfilter.search,
                     });
 
-                    const beforeFetchAllResult = loader.beforeFetchAll ? await loader.beforeFetchAll(request, subfilter.subfilter) : undefined;
+                    const beforeFetchAllResult = loader.beforeFetchAll
+                        ? await loader.beforeFetchAll(request, subfilter.subfilter)
+                        : undefined;
 
                     while (request) {
-                        const response = await loader.fetch(request, subfilter.subfilter, beforeFetchAllResult, { allowedLanguages: upToDate.getLanguages() });
+                        const response = await loader.fetch(
+                            request,
+                            subfilter.subfilter,
+                            beforeFetchAllResult,
+                            { allowedLanguages: upToDate.getLanguages() },
+                        );
 
                         // Note: it is possible that a result in the database doesn't return a recipient (in memory filtering)
                         // so we do need pagination

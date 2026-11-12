@@ -81,19 +81,28 @@ export function uriToApp(uri: string) {
 
 export const getAppName = (app: AppType) => {
     switch (app) {
-        case 'dashboard': return STAMHOOFD.userMode === 'organization' || !!STAMHOOFD.singleOrganization ? $t('%6v') : $t('%44');
-        case 'registration': return $t('%2g');
-        case 'admin': return $t('%IW');
-        case 'webshop': return $t('%2N');
+        case 'dashboard':
+            return STAMHOOFD.userMode === 'organization' || !!STAMHOOFD.singleOrganization
+                ? $t('%6v')
+                : $t('%44');
+        case 'registration':
+            return $t('%2g');
+        case 'admin':
+            return $t('%IW');
+        case 'webshop':
+            return $t('%2N');
     }
     return STAMHOOFD.platformName;
 };
 
 export const getAppNameDescription = (app: AppType) => {
     switch (app) {
-        case 'dashboard': return $t('%1ZJ');
-        case 'registration': return $t('%a5');
-        case 'admin': return $t('%a6');
+        case 'dashboard':
+            return $t('%1ZJ');
+        case 'registration':
+            return $t('%a5');
+        case 'admin':
+            return $t('%a6');
     }
     return null;
 };
@@ -106,7 +115,11 @@ export const getAppNameDescription = (app: AppType) => {
  */
 export type AppDisplayPosition = 'bar' | 'small-bar' | 'current' | 'other';
 
-export const getAppTitle = (app: AppType | 'auto', organization: AppTypeOrganization | undefined | null, displayPosition: AppDisplayPosition = 'other') => {
+export const getAppTitle = (
+    app: AppType | 'auto',
+    organization: AppTypeOrganization | undefined | null,
+    displayPosition: AppDisplayPosition = 'other',
+) => {
     if (displayPosition === 'current' && app !== 'auto') {
         return getAppName(app);
     }
@@ -118,7 +131,11 @@ export const getAppTitle = (app: AppType | 'auto', organization: AppTypeOrganiza
     return organization.name;
 };
 
-export const getAppDescription = (app: AppType | 'auto', organization: AppTypeOrganization | undefined | null, displayPosition: AppDisplayPosition = 'other') => {
+export const getAppDescription = (
+    app: AppType | 'auto',
+    organization: AppTypeOrganization | undefined | null,
+    displayPosition: AppDisplayPosition = 'other',
+) => {
     if (displayPosition === 'bar') {
         if (organization) {
             return getAppName(app);
@@ -169,7 +186,13 @@ export function getAppHost(
     preferDashboard = false,
     i18n?: { language: Language; locale: string } | null | false,
 ): string {
-    if (organization && organization.registerDomain && !preferDashboard && app !== 'admin' && STAMHOOFD.userMode === 'organization') {
+    if (
+        organization &&
+        organization.registerDomain &&
+        !preferDashboard &&
+        app !== 'admin' &&
+        STAMHOOFD.userMode === 'organization'
+    ) {
         let d = organization.registerDomain;
 
         if (i18n && i18n.language !== organization.i18n.language) {
@@ -212,14 +235,29 @@ export function getAppHost(
             return STAMHOOFD.domains.dashboard + localeUri(i18n);
         }
 
-        return STAMHOOFD.domains.dashboard + localeUri(i18n ?? organization?.i18n) + '/' + appToUri(app) + (includeUri && organization ? '/' + organization.uri : '');
+        return (
+            STAMHOOFD.domains.dashboard +
+            localeUri(i18n ?? organization?.i18n) +
+            '/' +
+            appToUri(app) +
+            (includeUri && organization ? '/' + organization.uri : '')
+        );
     }
 
-    const defaultDomain = STAMHOOFD.domains.registration[organization.address.country] ?? STAMHOOFD.domains.registration[''];
+    const defaultDomain =
+        STAMHOOFD.domains.registration[organization.address.country] ??
+        STAMHOOFD.domains.registration[''];
 
     if (!app) {
         return organization.uri + '.' + defaultDomain + localeUri(i18n ?? organization?.i18n);
     }
 
-    return organization.uri + '.' + defaultDomain + localeUri(i18n ?? organization?.i18n) + '/' + appToUri(app);
+    return (
+        organization.uri +
+        '.' +
+        defaultDomain +
+        localeUri(i18n ?? organization?.i18n) +
+        '/' +
+        appToUri(app)
+    );
 }

@@ -1,6 +1,13 @@
 import { Request } from '@node/endpoints';
 import type { BalanceItem, Organization, User } from '@stamhoofd/models';
-import { BalanceItemFactory, BalanceItemPayment, MemberFactory, OrganizationFactory, Payment, UserFactory } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    BalanceItemPayment,
+    MemberFactory,
+    OrganizationFactory,
+    Payment,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -14,7 +21,11 @@ describe('Endpoint.GetUserDetailedPayableBalanceEndpoint', () => {
         TestUtils.setEnvironment('userMode', 'platform');
     });
 
-    async function createPayment(organization: Organization, balanceItem: BalanceItem, payingUserId: string | null = null) {
+    async function createPayment(
+        organization: Organization,
+        balanceItem: BalanceItem,
+        payingUserId: string | null = null,
+    ) {
         const payment = new Payment();
         payment.organizationId = organization.id;
         payment.payingUserId = payingUserId;
@@ -49,14 +60,23 @@ describe('Endpoint.GetUserDetailedPayableBalanceEndpoint', () => {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
 
-        const balanceItem = await new BalanceItemFactory({ organizationId: organization.id, userId: user.id, amount: 1, unitPrice: 1000 }).create();
+        const balanceItem = await new BalanceItemFactory({
+            organizationId: organization.id,
+            userId: user.id,
+            amount: 1,
+            unitPrice: 1000,
+        }).create();
         const payment = await createPayment(organization, balanceItem, user.id);
 
         const response = await fetchBalance(organization, user);
         expect(response.status).toBe(200);
         expect(response.body.organizations).toHaveLength(1);
-        expect(response.body.organizations[0].balanceItems).toEqual([expect.objectContaining({ id: balanceItem.id })]);
-        expect(response.body.organizations[0].payments).toEqual([expect.objectContaining({ id: payment.id })]);
+        expect(response.body.organizations[0].balanceItems).toEqual([
+            expect.objectContaining({ id: balanceItem.id }),
+        ]);
+        expect(response.body.organizations[0].payments).toEqual([
+            expect.objectContaining({ id: payment.id }),
+        ]);
     });
 
     test('A user without members and without balance items gets an empty response', async () => {
@@ -73,17 +93,31 @@ describe('Endpoint.GetUserDetailedPayableBalanceEndpoint', () => {
         const user = await new UserFactory({ organization }).create();
         const member = await new MemberFactory({ organization, user }).create();
 
-        const balanceItem = await new BalanceItemFactory({ organizationId: organization.id, memberId: member.id, amount: 1, unitPrice: 1000 }).create();
+        const balanceItem = await new BalanceItemFactory({
+            organizationId: organization.id,
+            memberId: member.id,
+            amount: 1,
+            unitPrice: 1000,
+        }).create();
         const payment = await createPayment(organization, balanceItem);
 
         const otherMember = await new MemberFactory({ organization }).create();
-        const otherBalanceItem = await new BalanceItemFactory({ organizationId: organization.id, memberId: otherMember.id, amount: 1, unitPrice: 1000 }).create();
+        const otherBalanceItem = await new BalanceItemFactory({
+            organizationId: organization.id,
+            memberId: otherMember.id,
+            amount: 1,
+            unitPrice: 1000,
+        }).create();
         await createPayment(organization, otherBalanceItem);
 
         const response = await fetchBalance(organization, user);
         expect(response.status).toBe(200);
         expect(response.body.organizations).toHaveLength(1);
-        expect(response.body.organizations[0].balanceItems).toEqual([expect.objectContaining({ id: balanceItem.id })]);
-        expect(response.body.organizations[0].payments).toEqual([expect.objectContaining({ id: payment.id })]);
+        expect(response.body.organizations[0].balanceItems).toEqual([
+            expect.objectContaining({ id: balanceItem.id }),
+        ]);
+        expect(response.body.organizations[0].payments).toEqual([
+            expect.objectContaining({ id: payment.id }),
+        ]);
     });
 });

@@ -38,45 +38,43 @@ function logRequestDetails(request: Request) {
         if (json && json.clientSecret) {
             json.clientSecret = '*******';
         }
-        logger.error(
-            ...requestPrefix(request, 'query'),
-            'Request query was ',
-            json,
-        );
+        logger.error(...requestPrefix(request, 'query'), 'Request query was ', json);
     }
 
-    request.body.then((body) => {
-        if (!body) {
-            return;
-        }
-        try {
-            const json: unknown = JSON.parse(body);
-            if (typeof json === 'object' && json !== null && (Array.isArray(json) || Object.keys(json).length)) {
-                removePII(json);
+    request.body
+        .then((body) => {
+            if (!body) {
+                return;
+            }
+            try {
+                const json: unknown = JSON.parse(body);
+                if (
+                    typeof json === 'object' &&
+                    json !== null &&
+                    (Array.isArray(json) || Object.keys(json).length)
+                ) {
+                    removePII(json);
 
-                logger.error(
-                    ...requestPrefix(request, 'body'),
-                    'Request body was ',
-                    json,
-                );
+                    logger.error(...requestPrefix(request, 'body'), 'Request body was ', json);
+                }
+            } catch (e) {
+                if (typeof body === 'string') {
+                    logger.error(
+                        ...requestPrefix(request, 'body'),
+                        'Request body was invalid JSON ',
+                        body,
+                    );
+                } else {
+                    // Don't log
+                    logger.error(
+                        ...requestPrefix(request, 'body'),
+                        'Request body was of type ' + typeof body,
+                        body,
+                    );
+                }
             }
-        } catch (e) {
-            if (typeof body === 'string') {
-                logger.error(
-                    ...requestPrefix(request, 'body'),
-                    'Request body was invalid JSON ',
-                    body,
-                );
-            } else {
-                // Don't log
-                logger.error(
-                    ...requestPrefix(request, 'body'),
-                    'Request body was of type ' + typeof body,
-                    body,
-                );
-            }
-        }
-    }).catch(console.error);
+        })
+        .catch(console.error);
 }
 
 function requestOneLiner(request: Request): (StyledText | string)[] {
@@ -94,12 +92,12 @@ function requestOneLiner(request: Request): (StyledText | string)[] {
 
 export function requestPrefix(request: Request, ...classes: string[]): (StyledText | string)[] {
     if ((request as any)._uniqueIndex === undefined) {
-        return [
-            new StyledText('[UNKNOWN REQUEST] ').addClass('request', 'tag', ...classes),
-        ];
+        return [new StyledText('[UNKNOWN REQUEST] ').addClass('request', 'tag', ...classes)];
     }
     return [
-        new StyledText(`[R${((request as any)._uniqueIndex as number).toString().padStart(4, '0')}] `).addClass('request', 'tag', ...classes),
+        new StyledText(
+            `[R${((request as any)._uniqueIndex as number).toString().padStart(4, '0')}] `,
+        ).addClass('request', 'tag', ...classes),
     ];
 }
 
@@ -120,22 +118,24 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
         assignIndex(request);
 
         if (request.method !== 'OPTIONS' || STAMHOOFD.environment === 'development') {
-            logger.log(
-                ...requestPrefix(request, 'first'),
-                ...requestOneLiner(request),
-            );
+            logger.log(...requestPrefix(request, 'first'), ...requestOneLiner(request));
         }
 
-        return logger.setContext({
-            prefixes: requestPrefix(request, 'output'),
-            tags: ['request', 'request-output'],
-        }, run);
+        return logger.setContext(
+            {
+                prefixes: requestPrefix(request, 'output'),
+                tags: ['request', 'request-output'],
+            },
+            run,
+        );
     },
 
     handleResponse(request: Request, response: Response, error?: Error) {
         const endTime = process.hrtime();
         const startTime = (request as any)._startTime ?? endTime;
-        const timeInMs = Math.round((endTime[0] - startTime[0]) * 1000 + (endTime[1] - startTime[1]) / 1000000);
+        const timeInMs = Math.round(
+            (endTime[0] - startTime[0]) * 1000 + (endTime[1] - startTime[1]) / 1000000,
+        );
 
         const prefix = !error ? [] : requestPrefix(request, 'error');
 
@@ -149,29 +149,22 @@ export const LogMiddleware: ResponseMiddleware & RequestMiddleware = {
 
         if (error) {
             if (isSimpleError(error) || isSimpleErrors(error)) {
-                if (!error.hasCode('expired_access_token') && !error.hasCode('unknown_domain') && !error.hasCode('unknown_webshop')) {
-                    logger.error(
-                        ...prefix,
-                        'Request with error in response:',
-                    );
-                    logger.error(
-                        new StyledText(error).addClass('request', 'error'),
-                    );
+                if (
+                    !error.hasCode('expired_access_token') &&
+                    !error.hasCode('unknown_domain') &&
+                    !error.hasCode('unknown_webshop')
+                ) {
+                    logger.error(...prefix, 'Request with error in response:');
+                    logger.error(new StyledText(error).addClass('request', 'error'));
 
                     if (!error.hasCode('too_big_attachments')) {
                         logRequestDetails(request);
                     }
                 }
             } else {
-                logger.error(
-                    ...prefix,
-                    'Request with internal error:',
-                );
+                logger.error(...prefix, 'Request with internal error:');
 
-                logger.error(
-                    ...prefix,
-                    new StyledText(error).addClass('request', 'error'),
-                );
+                logger.error(...prefix, new StyledText(error).addClass('request', 'error'));
 
                 logRequestDetails(request);
             }

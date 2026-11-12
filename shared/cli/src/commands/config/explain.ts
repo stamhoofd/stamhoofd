@@ -4,7 +4,8 @@ import { link } from '../../runtime/ux.js';
 
 export default class ConfigExplain extends BaseCommand {
     static summary = 'Explain resolved local configuration';
-    static description = 'Use this before running a local instance if you want a readable summary instead of raw JSON.';
+    static description =
+        'Use this before running a local instance if you want a readable summary instead of raw JSON.';
     static examples = [
         'stam config explain --env keeo',
         'stam config explain --env keeo --name feature-payments',
@@ -21,7 +22,9 @@ export default class ConfigExplain extends BaseCommand {
         this.log(`Primary:     ${context.instance.primary ? 'yes' : 'no'}`);
         this.log(`Prefix:      ${context.instance.prefix || '-'}`);
         this.log(`Port offset: ${context.instance.portOffset}`);
-        this.log(`Dashboard:   ${link(`https://${domains.dashboard}`, `https://${domains.dashboard}`)}`);
+        this.log(
+            `Dashboard:   ${link(`https://${domains.dashboard}`, `https://${domains.dashboard}`)}`,
+        );
         this.log(`API:         ${link(`https://${domains.api}`, `https://${domains.api}`)}`);
     }
 }

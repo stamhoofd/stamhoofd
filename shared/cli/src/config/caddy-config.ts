@@ -7,7 +7,16 @@ import type { CaddyRouteOptions } from '../runtime/manifest-store.js';
 import type { CaddyHandler, CaddyRoute } from './caddy-types.js';
 export type { CaddyRoute } from './caddy-types.js';
 import { listActiveRouteManifests, sharedDir } from '../runtime/manifest-store.js';
-import { caddyAdminPort, caddyHttpPort, caddyHttpsPort, caddySetupAdminPort, caddySetupHttpPort, caddySetupHttpsPort, localIpv4Host, localhostPort } from './shared-service-config.js';
+import {
+    caddyAdminPort,
+    caddyHttpPort,
+    caddyHttpsPort,
+    caddySetupAdminPort,
+    caddySetupHttpPort,
+    caddySetupHttpsPort,
+    localIpv4Host,
+    localhostPort,
+} from './shared-service-config.js';
 
 /**
  * By default Caddy closes active streaming requests (WebSockets) immediately
@@ -114,18 +123,25 @@ function noHtmlCachingSubroute(): CaddyHandler {
         routes: [
             {
                 match: [{ header: { Accept: ['*text/html*'] } }],
-                handle: [{ handler: 'headers', request: { delete: ['If-None-Match', 'If-Modified-Since'] } }],
+                handle: [
+                    {
+                        handler: 'headers',
+                        request: { delete: ['If-None-Match', 'If-Modified-Since'] },
+                    },
+                ],
                 terminal: false,
             },
             {
-                handle: [{
-                    handler: 'headers',
-                    response: {
-                        require: { headers: { 'Content-Type': ['text/html*'] } },
-                        set: { 'Cache-Control': ['no-store'] },
-                        delete: ['ETag', 'Last-Modified'],
+                handle: [
+                    {
+                        handler: 'headers',
+                        response: {
+                            require: { headers: { 'Content-Type': ['text/html*'] } },
+                            set: { 'Cache-Control': ['no-store'] },
+                            delete: ['ETag', 'Last-Modified'],
+                        },
                     },
-                }],
+                ],
                 terminal: false,
             },
         ],
@@ -147,9 +163,17 @@ function cspNonceSubroute(): CaddyHandler {
                 // Documents: strict-dynamic nonce policy + rewrite the placeholder to the nonce.
                 match: [{ not: [{ path: [...resourcesPathMatchers] }] }],
                 handle: [
-                    { handler: 'headers', response: { set: { 'Content-Security-Policy': [cspNonceHeaderValue] } } },
+                    {
+                        handler: 'headers',
+                        response: { set: { 'Content-Security-Policy': [cspNonceHeaderValue] } },
+                    },
                     noHtmlCachingSubroute(),
-                    { handler: 'replace_response', replacements: [{ search: CSP_NONCE_PLACEHOLDER, replace: '{http.request.uuid}' }] },
+                    {
+                        handler: 'replace_response',
+                        replacements: [
+                            { search: CSP_NONCE_PLACEHOLDER, replace: '{http.request.uuid}' },
+                        ],
+                    },
                 ],
                 terminal: false,
             },
@@ -157,7 +181,10 @@ function cspNonceSubroute(): CaddyHandler {
                 // Resources: fully sandboxed, no scripts.
                 match: [{ path: [...resourcesPathMatchers] }],
                 handle: [
-                    { handler: 'headers', response: { set: { 'Content-Security-Policy': [cspResourceHeaderValue] } } },
+                    {
+                        handler: 'headers',
+                        response: { set: { 'Content-Security-Policy': [cspResourceHeaderValue] } },
+                    },
                 ],
                 terminal: false,
             },
@@ -177,7 +204,12 @@ function cspNoExternalScriptsSubroute(): CaddyHandler {
             {
                 match: [{ not: [{ path: [...resourcesPathMatchers] }] }],
                 handle: [
-                    { handler: 'headers', response: { add: { 'Content-Security-Policy': [cspNoExternalScriptsHeaderValue] } } },
+                    {
+                        handler: 'headers',
+                        response: {
+                            add: { 'Content-Security-Policy': [cspNoExternalScriptsHeaderValue] },
+                        },
+                    },
                 ],
                 terminal: false,
             },
@@ -192,10 +224,7 @@ function cspNoExternalScriptsSubroute(): CaddyHandler {
  * custom domains so the "no external scripts" hardening is omitted and admin custom code can run.
  */
 export function cspFrontendSubroutes(options: { customDomain: boolean }): CaddyRoute['handle'] {
-    return [
-        cspNonceSubroute(),
-        ...(options.customDomain ? [] : [cspNoExternalScriptsSubroute()]),
-    ];
+    return [cspNonceSubroute(), ...(options.customDomain ? [] : [cspNoExternalScriptsSubroute()])];
 }
 
 type CaddyConfig = {
@@ -228,9 +257,23 @@ type CaddyConfig = {
     };
 };
 
-export async function writeCaddyConfig(context: CliContext, options: { httpPort?: number; httpsPort?: number; disableRedirects?: boolean; proxyHost?: string; listenHost?: string; adminListenHost?: string; adminOrigin?: string } = {}): Promise<string> {
+export async function writeCaddyConfig(
+    context: CliContext,
+    options: {
+        httpPort?: number;
+        httpsPort?: number;
+        disableRedirects?: boolean;
+        proxyHost?: string;
+        listenHost?: string;
+        adminListenHost?: string;
+        adminOrigin?: string;
+    } = {},
+): Promise<string> {
     const configPath = path.join(sharedDir(context), 'caddy.json');
-    await writeReadableConfig(configPath, JSON.stringify(await buildCaddyConfig(context, options), null, 4));
+    await writeReadableConfig(
+        configPath,
+        JSON.stringify(await buildCaddyConfig(context, options), null, 4),
+    );
     return configPath;
 }
 
@@ -259,7 +302,11 @@ function escapeRegExp(value: string): string {
 }
 
 function reverseProxy(port: number, proxyHost: string): CaddyRoute['handle'][number] {
-    return { handler: 'reverse_proxy', upstreams: [{ dial: `${proxyHost}:${port}` }], stream_close_delay: streamCloseDelay };
+    return {
+        handler: 'reverse_proxy',
+        upstreams: [{ dial: `${proxyHost}:${port}` }],
+        stream_close_delay: streamCloseDelay,
+    };
 }
 
 function route(hosts: string[], port: number, proxyHost: string): CaddyRoute {
@@ -284,7 +331,12 @@ function route(hosts: string[], port: number, proxyHost: string): CaddyRoute {
  * Both routes are terminal, so a request matched here never also falls through to a later, broader
  * route (e.g. the webshop custom-domain catch-all).
  */
-function cspFrontendRoutesForMatch(match: CaddyRoute['match'][number], port: number, proxyHost: string, options: { customDomain: boolean }): CaddyRoute[] {
+function cspFrontendRoutesForMatch(
+    match: CaddyRoute['match'][number],
+    port: number,
+    proxyHost: string,
+    options: { customDomain: boolean },
+): CaddyRoute[] {
     const proxy = reverseProxy(port, proxyHost);
     return [
         {
@@ -301,7 +353,12 @@ function cspFrontendRoutesForMatch(match: CaddyRoute['match'][number], port: num
     ];
 }
 
-function cspFrontendRoutes(hosts: string[], port: number, proxyHost: string, options: { customDomain: boolean }): CaddyRoute[] {
+function cspFrontendRoutes(
+    hosts: string[],
+    port: number,
+    proxyHost: string,
+    options: { customDomain: boolean },
+): CaddyRoute[] {
     return cspFrontendRoutesForMatch({ host: hosts }, port, proxyHost, options);
 }
 
@@ -313,17 +370,35 @@ function cspFrontendRoutes(hosts: string[], port: number, proxyHost: string, opt
  * registration route is registered first and marked terminal: it wins over the webshop catch-all
  * on the shared suffix.
  */
-function customDomainRoutes(customSuffix: string, registrationPort: number, webshopPort: number, proxyHost: string): CaddyRoute[] {
+function customDomainRoutes(
+    customSuffix: string,
+    registrationPort: number,
+    webshopPort: number,
+    proxyHost: string,
+): CaddyRoute[] {
     const suffix = escapeRegExp(customSuffix);
     return [
         // Registration custom domains keep the "no external scripts" hardening (production parity).
-        ...cspFrontendRoutesForMatch({ header_regexp: { Host: { pattern: `^inschrijven\\..+\\.${suffix}$` } } }, registrationPort, proxyHost, { customDomain: false }),
+        ...cspFrontendRoutesForMatch(
+            { header_regexp: { Host: { pattern: `^inschrijven\\..+\\.${suffix}$` } } },
+            registrationPort,
+            proxyHost,
+            { customDomain: false },
+        ),
         // Webshop custom domains drop it so admin custom code can run on the shop's own domain.
-        ...cspFrontendRoutesForMatch({ header_regexp: { Host: { pattern: `^.+\\.${suffix}$` } } }, webshopPort, proxyHost, { customDomain: true }),
+        ...cspFrontendRoutesForMatch(
+            { header_regexp: { Host: { pattern: `^.+\\.${suffix}$` } } },
+            webshopPort,
+            proxyHost,
+            { customDomain: true },
+        ),
     ];
 }
 
-export function buildCaddyRouteOptions(context: CliContext, options: { proxyHost?: string } = {}): CaddyRouteOptions {
+export function buildCaddyRouteOptions(
+    context: CliContext,
+    options: { proxyHost?: string } = {},
+): CaddyRouteOptions {
     const domains = buildDomains(context);
     const ports = buildPorts(context);
     const proxyHost = options.proxyHost ?? localIpv4Host;
@@ -332,7 +407,12 @@ export function buildCaddyRouteOptions(context: CliContext, options: { proxyHost
         route([domains.api, `*.${domains.api}`], ports.api, proxyHost),
         route([domains.docs], ports.docs, proxyHost),
         ...cspFrontendRoutes([domains.dashboard], ports.webApp, proxyHost, { customDomain: false }),
-        ...cspFrontendRoutes([domains.registration, `*.${domains.registration}`], ports.webApp, proxyHost, { customDomain: false }),
+        ...cspFrontendRoutes(
+            [domains.registration, `*.${domains.registration}`],
+            ports.webApp,
+            proxyHost,
+            { customDomain: false },
+        ),
         ...cspFrontendRoutes([domains.webshop], ports.webshop, proxyHost, { customDomain: false }),
         // Custom domains resolve to the same web-app (registration) and webshop dev servers. The
         // registration catch-all must be registered before the webshop catch-all (see
@@ -340,15 +420,17 @@ export function buildCaddyRouteOptions(context: CliContext, options: { proxyHost
         ...customDomainRoutes(domains.customDomain, ports.webApp, ports.webshop, proxyHost),
     ];
 
-    const tlsSubjects = [...new Set([
-        domains.dashboard,
-        domains.api,
-        `*.${domains.api}`,
-        domains.renderer,
-        domains.registration,
-        `*.${domains.registration}`,
-        domains.docs,
-    ])];
+    const tlsSubjects = [
+        ...new Set([
+            domains.dashboard,
+            domains.api,
+            `*.${domains.api}`,
+            domains.renderer,
+            domains.registration,
+            `*.${domains.registration}`,
+            domains.docs,
+        ]),
+    ];
 
     return {
         routes,
@@ -356,7 +438,19 @@ export function buildCaddyRouteOptions(context: CliContext, options: { proxyHost
     };
 }
 
-export async function buildCaddyConfig(context: CliContext, options: { setup?: boolean; httpPort?: number; httpsPort?: number; disableRedirects?: boolean; proxyHost?: string; listenHost?: string; adminListenHost?: string; adminOrigin?: string } = {}): Promise<CaddyConfig> {
+export async function buildCaddyConfig(
+    context: CliContext,
+    options: {
+        setup?: boolean;
+        httpPort?: number;
+        httpsPort?: number;
+        disableRedirects?: boolean;
+        proxyHost?: string;
+        listenHost?: string;
+        adminListenHost?: string;
+        adminOrigin?: string;
+    } = {},
+): Promise<CaddyConfig> {
     const domains = buildDomains(context);
     const ports = buildPorts(context);
     const activeManifests = await listActiveRouteManifests(context);
@@ -367,7 +461,7 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
     const routes = [
         // Active instance manifests let the shared Caddy container keep routing
         // requests for other running workspaces and test workers.
-        ...activeManifests.flatMap(manifest => manifest.caddy.routes),
+        ...activeManifests.flatMap((manifest) => manifest.caddy.routes),
 
         // Shared services
         route([domains.mail], ports.maildevHttp, proxyHost),
@@ -376,20 +470,26 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
         route([domains.sso], ports.sso, proxyHost),
         route([domains.metabase], ports.metabase, proxyHost),
     ];
-    const subjects = [...new Set([
-        domains.mail,
-        domains.files,
-        `*.${domains.files}`,
-        domains.filesConsole,
-        domains.sso,
-        domains.metabase,
-        ...activeManifests.flatMap(manifest => manifest.caddy.tlsSubjects),
-    ])];
+    const subjects = [
+        ...new Set([
+            domains.mail,
+            domains.files,
+            `*.${domains.files}`,
+            domains.filesConsole,
+            domains.sso,
+            domains.metabase,
+            ...activeManifests.flatMap((manifest) => manifest.caddy.tlsSubjects),
+        ]),
+    ];
 
     return {
         admin: {
-            listen: options.setup ? localhostPort(caddySetupAdminPort) : `${adminListenHost}:${caddyAdminPort}`,
-            origins: options.setup ? undefined : [options.adminOrigin ?? `http://${localhostPort(caddyAdminPort)}`],
+            listen: options.setup
+                ? localhostPort(caddySetupAdminPort)
+                : `${adminListenHost}:${caddyAdminPort}`,
+            origins: options.setup
+                ? undefined
+                : [options.adminOrigin ?? `http://${localhostPort(caddyAdminPort)}`],
         },
         apps: {
             http: {
@@ -397,11 +497,15 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
                     stamhoofd: {
                         listen: options.setup
                             ? [listenPort(caddySetupHttpsPort), listenPort(caddySetupHttpPort)]
-                            : [listenPort(options.httpsPort ?? caddyHttpsPort), listenPort(options.httpPort ?? caddyHttpPort)],
+                            : [
+                                  listenPort(options.httpsPort ?? caddyHttpsPort),
+                                  listenPort(options.httpPort ?? caddyHttpPort),
+                              ],
                         routes,
-                        automatic_https: (options.setup || options.disableRedirects)
-                            ? { disable_redirects: true }
-                            : undefined,
+                        automatic_https:
+                            options.setup || options.disableRedirects
+                                ? { disable_redirects: true }
+                                : undefined,
                     },
                 },
             },
@@ -415,9 +519,11 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
                         },
                         {
                             on_demand: true,
-                            issuers: [{
-                                module: 'internal',
-                            }],
+                            issuers: [
+                                {
+                                    module: 'internal',
+                                },
+                            ],
                         },
                     ],
                     on_demand: {

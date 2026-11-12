@@ -22,9 +22,15 @@ export class MemberPlatformMembershipHelper {
                 continue;
             }
 
-            const isTemporary = membership.endDate.getTime() - membership.startDate.getTime() < 1000 * 60 * 60 * 24 * 31;
+            const isTemporary =
+                membership.endDate.getTime() - membership.startDate.getTime() <
+                1000 * 60 * 60 * 24 * 31;
 
-            if (status === MembershipStatus.Inactive || ((status === MembershipStatus.Expiring || status === MembershipStatus.Temporary) && !isTemporary)) {
+            if (
+                status === MembershipStatus.Inactive ||
+                ((status === MembershipStatus.Expiring || status === MembershipStatus.Temporary) &&
+                    !isTemporary)
+            ) {
                 if (isTemporary) {
                     status = MembershipStatus.Temporary;
                 } else {
@@ -41,10 +47,18 @@ export class MemberPlatformMembershipHelper {
         return status;
     }
 
-    static getContinuousMembershipStatus({ memberships, start, end }: { memberships: MemberPlatformMembership[]; start: Date; end: Date }): ContinuousMembershipStatus {
+    static getContinuousMembershipStatus({
+        memberships,
+        start,
+        end,
+    }: {
+        memberships: MemberPlatformMembership[];
+        start: Date;
+        end: Date;
+    }): ContinuousMembershipStatus {
         const sorted = memberships
             // filter memberships in period
-            .filter(m => m.endDate > start && m.startDate < end)
+            .filter((m) => m.endDate > start && m.startDate < end)
             // sort by start date (earliest first)
             .sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
 
@@ -77,6 +91,6 @@ export class MemberPlatformMembershipHelper {
 
     static hasFutureMembership(memberships: MemberPlatformMembership[]): boolean {
         const now = new Date();
-        return memberships.some(m => m.startDate > now);
+        return memberships.some((m) => m.startDate > now);
     }
 }

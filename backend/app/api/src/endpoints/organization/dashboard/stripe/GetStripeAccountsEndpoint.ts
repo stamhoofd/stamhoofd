@@ -31,11 +31,14 @@ export class GetStripeAccountLinkEndpoint extends Endpoint<Params, Query, Body, 
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Read)) {
+        if (!(await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Read))) {
             throw Context.auth.error();
         }
 
-        const models = await StripeAccount.where({ organizationId: organization.id, status: 'active' });
-        return new Response(models.map(m => StripeAccountStruct.create(m)));
+        const models = await StripeAccount.where({
+            organizationId: organization.id,
+            status: 'active',
+        });
+        return new Response(models.map((m) => StripeAccountStruct.create(m)));
     }
 }

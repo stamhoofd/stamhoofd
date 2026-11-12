@@ -51,20 +51,29 @@ export async function checkMollieChargebacksFor(service: MollieService, checkAll
             }
 
             // Check if this chargeback has been handled
-            const existingChargeback = await MolliePayment.select().where('mollieId', chargeback.id).first(false);
+            const existingChargeback = await MolliePayment.select()
+                .where('mollieId', chargeback.id)
+                .first(false);
             if (existingChargeback) {
                 // We can break because all older chargebacks will also be handled
                 break pagesLoop;
             }
 
             if (chargeback.paymentId) {
-                const molliePayment = await MolliePayment.select().where('mollieId', chargeback.paymentId).first(false);
+                const molliePayment = await MolliePayment.select()
+                    .where('mollieId', chargeback.paymentId)
+                    .first(false);
                 if (molliePayment) {
                     const payment = await Payment.getByID(molliePayment.paymentId);
                     if (payment) {
                         try {
-                            const amount = Math.round(parseFloat(chargeback.amount.value) * 100) * 100;
-                            const createdPayment = await PaymentService.registerChargeback(payment, amount, new Date(chargeback.createdAt));
+                            const amount =
+                                Math.round(parseFloat(chargeback.amount.value) * 100) * 100;
+                            const createdPayment = await PaymentService.registerChargeback(
+                                payment,
+                                amount,
+                                new Date(chargeback.createdAt),
+                            );
 
                             // Link Mollie chargeback ID (so we can set settlement later in the settlements cron)
                             const molliePayment = new MolliePayment();
@@ -76,7 +85,9 @@ export async function checkMollieChargebacksFor(service: MollieService, checkAll
                         }
                     }
                 } else {
-                    console.error('Invalid chargeback payment id ' + chargeback.paymentId + ', not found');
+                    console.error(
+                        'Invalid chargeback payment id ' + chargeback.paymentId + ', not found',
+                    );
                 }
             }
         }

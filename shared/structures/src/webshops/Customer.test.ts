@@ -22,12 +22,18 @@ describe('Customer.validate', () => {
         expect(() => customer({ firstName: 'J' }).validate(settings())).toThrow(/first name/i);
         expect(() => customer({ lastName: '' }).validate(settings())).toThrow(/last name/i);
         expect(() => customer().validate(settings())).not.toThrow();
-        expect(() => customer({ lastName: '' }).validate(settings(), { asAdmin: true })).toThrow(/last name/i);
+        expect(() => customer({ lastName: '' }).validate(settings(), { asAdmin: true })).toThrow(
+            /last name/i,
+        );
     });
 
     it('accepts an empty name when it is optional, but still checks what is given', () => {
-        expect(() => customer({ firstName: '', lastName: '' }).validate(settings({ name: Optional }))).not.toThrow();
-        expect(() => customer({ firstName: 'J', lastName: '' }).validate(settings({ name: Optional }))).toThrow(/first name/i);
+        expect(() =>
+            customer({ firstName: '', lastName: '' }).validate(settings({ name: Optional })),
+        ).not.toThrow();
+        expect(() =>
+            customer({ firstName: 'J', lastName: '' }).validate(settings({ name: Optional })),
+        ).toThrow(/first name/i);
     });
 
     it('clears the name when it is disabled', () => {
@@ -39,7 +45,19 @@ describe('Customer.validate', () => {
     });
 
     it('clears disabled fields', () => {
-        const c = customer({ email: 'john@example.com', phone: '+32470000000', birthDay: new Date('2000-01-01'), gender: Gender.Male, address: Address.create({ street: 'A', number: '1', postalCode: '2000', city: 'Antwerpen', country: Country.Belgium }) });
+        const c = customer({
+            email: 'john@example.com',
+            phone: '+32470000000',
+            birthDay: new Date('2000-01-01'),
+            gender: Gender.Male,
+            address: Address.create({
+                street: 'A',
+                number: '1',
+                postalCode: '2000',
+                city: 'Antwerpen',
+                country: Country.Belgium,
+            }),
+        });
         c.validate(settings());
 
         expect(c.email).toBe('');
@@ -54,18 +72,44 @@ describe('Customer.validate', () => {
         expect(() => customer().validate(settings({ phone: Required }))).toThrow(/phone/i);
         expect(() => customer().validate(settings({ birthDay: Required }))).toThrow(/birth day/i);
         expect(() => customer().validate(settings({ address: Required }))).toThrow(/address/i);
-        expect(() => customer({ email: 'john@example.com', phone: '+32470000000', birthDay: new Date('2000-01-01') }).validate(settings({ email: Required, phone: Required, birthDay: Required }))).not.toThrow();
+        expect(() =>
+            customer({
+                email: 'john@example.com',
+                phone: '+32470000000',
+                birthDay: new Date('2000-01-01'),
+            }).validate(settings({ email: Required, phone: Required, birthDay: Required })),
+        ).not.toThrow();
     });
 
     it('does not require required fields for admins, except the email format', () => {
-        expect(() => customer().validate(settings({ phone: Required, birthDay: Required, address: Required }), { asAdmin: true })).not.toThrow();
-        expect(() => customer().validate(settings({ email: Required }), { asAdmin: true })).toThrow(/email/i);
+        expect(() =>
+            customer().validate(
+                settings({ phone: Required, birthDay: Required, address: Required }),
+                { asAdmin: true },
+            ),
+        ).not.toThrow();
+        expect(() => customer().validate(settings({ email: Required }), { asAdmin: true })).toThrow(
+            /email/i,
+        );
     });
 
     it('accepts empty optional fields but validates their format when given', () => {
-        expect(() => customer().validate(settings({ email: Optional, phone: Optional, birthDay: Optional, address: Optional }))).not.toThrow();
-        expect(() => customer({ email: 'not-an-email' }).validate(settings({ email: Optional }))).toThrow(/email/i);
-        expect(() => customer({ phone: '12' }).validate(settings({ phone: Optional }))).toThrow(/phone/i);
+        expect(() =>
+            customer().validate(
+                settings({
+                    email: Optional,
+                    phone: Optional,
+                    birthDay: Optional,
+                    address: Optional,
+                }),
+            ),
+        ).not.toThrow();
+        expect(() =>
+            customer({ email: 'not-an-email' }).validate(settings({ email: Optional })),
+        ).toThrow(/email/i);
+        expect(() => customer({ phone: '12' }).validate(settings({ phone: Optional }))).toThrow(
+            /phone/i,
+        );
 
         const c = customer({ email: 'john@example.com', gender: Gender.Female });
         c.validate(settings({ email: Optional, gender: Optional }));

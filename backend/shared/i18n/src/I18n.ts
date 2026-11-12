@@ -38,39 +38,49 @@ export class I18n {
     }
 
     static async load() {
-        await logger.setContext({
-            prefixes: [
-                new StyledText('[I18n] ').addClass('i18n', 'tag'),
-            ],
-            tags: ['i18n'],
-        }, async () => {
-            logger.debug('Loading locales...');
+        await logger.setContext(
+            {
+                prefixes: [new StyledText('[I18n] ').addClass('i18n', 'tag')],
+                tags: ['i18n'],
+            },
+            async () => {
+                logger.debug('Loading locales...');
 
-            if (!STAMHOOFD.translationNamespace) {
-                throw new Error('STAMHOOFD.translationNamespace is not set');
-            }
+                if (!STAMHOOFD.translationNamespace) {
+                    throw new Error('STAMHOOFD.translationNamespace is not set');
+                }
 
-            const directory = path.dirname(require.resolve('@stamhoofd/locales/locales/' + STAMHOOFD.translationNamespace + '/nl-BE.json'));
-            const files = (await fs.readdir(directory, { withFileTypes: true }))
-                .filter(dirent => !dirent.isDirectory());
+                const directory = path.dirname(
+                    require.resolve(
+                        '@stamhoofd/locales/locales/' +
+                            STAMHOOFD.translationNamespace +
+                            '/nl-BE.json',
+                    ),
+                );
+                const files = (await fs.readdir(directory, { withFileTypes: true })).filter(
+                    (dirent) => !dirent.isDirectory(),
+                );
 
-            for (const file of files) {
-                const locale = file.name.substr(0, file.name.length - 5);
+                for (const file of files) {
+                    const locale = file.name.substr(0, file.name.length - 5);
 
-                // eslint-disable-next-line no-unsanitized/method -- Reads JSON from the installed locales package resolved above.
-                const messages = await import(directory + '/' + file.name, { with: { type: 'json' } });
-                this.loadedLocales.set(locale, this.loadRecursive(messages.default));
-            }
+                    // eslint-disable-next-line no-unsanitized/method -- Reads JSON from the installed locales package resolved above.
+                    const messages = await import(directory + '/' + file.name, {
+                        with: { type: 'json' },
+                    });
+                    this.loadedLocales.set(locale, this.loadRecursive(messages.default));
+                }
 
-            logger.debug('Loaded all locales');
-        });
+                logger.debug('Loaded all locales');
+            },
+        );
     }
 
     static loadRecursive(messages: any, prefix: string | null = null): Map<string, string> {
         const map = new Map();
         for (const key in messages) {
             const element = messages[key];
-            if (typeof (element) !== 'string') {
+            if (typeof element !== 'string') {
                 const map2 = this.loadRecursive(element, (prefix ? prefix + '.' : '') + key);
                 map2.forEach((val, key) => map.set(key, val));
             } else {
@@ -157,10 +167,7 @@ export class I18n {
         }
     }
 
-    switchToLocale(options: {
-        language?: Language;
-        country?: Country;
-    }) {
+    switchToLocale(options: { language?: Language; country?: Country }) {
         this.country = options.country ?? this.country;
         this.language = options.language ?? this.language;
         this.correctLanguageCountryCombination();
@@ -171,7 +178,9 @@ export class I18n {
                 this.messages = new Map();
                 return;
             }
-            throw new Error('Locale not loaded, when switching to locale ' + this.language + '-' + this.country);
+            throw new Error(
+                'Locale not loaded, when switching to locale ' + this.language + '-' + this.country,
+            );
         }
 
         this.messages = m;
@@ -182,7 +191,10 @@ export class I18n {
      * headers (X-Locale or Accept-Language). Returns nulls when nothing valid is present,
      * so callers can decide their own fallback. Country is only known for full 5-char locales.
      */
-    private static localeFromRequestHeaders(request: Request | DecodedRequest<any, any, any>): { language: Language | null; country: Country | null } {
+    private static localeFromRequestHeaders(request: Request | DecodedRequest<any, any, any>): {
+        language: Language | null;
+        country: Country | null;
+    } {
         // Try using custom property
         const localeHeader = request.headers['x-locale'];
         if (localeHeader && typeof localeHeader === 'string' && this.isValidLocale(localeHeader)) {
@@ -225,17 +237,25 @@ export class I18n {
      * determined, so callers can fall back to their own default (instead of the hardcoded default
      * language, which is what fromRequest(request).language would resolve to).
      */
-    static getLanguageFromRequest(request: Request | DecodedRequest<any, any, any>): Language | null {
+    static getLanguageFromRequest(
+        request: Request | DecodedRequest<any, any, any>,
+    ): Language | null {
         return this.localeFromRequestHeaders(request).language;
     }
 
-    static fromRequest(request: Request | DecodedRequest<any, any, any>, options?: { defaultLanguage?: Language; defaultCountry?: Country }): I18n {
+    static fromRequest(
+        request: Request | DecodedRequest<any, any, any>,
+        options?: { defaultLanguage?: Language; defaultCountry?: Country },
+    ): I18n {
         if ((request as any)._cached_i18n) {
             return (request as any)._cached_i18n;
         }
 
         const { language, country } = this.localeFromRequestHeaders(request);
-        const i18n = new I18n(language ?? options?.defaultLanguage ?? this.defaultLanguage, country ?? options?.defaultCountry ?? this.defaultCountry);
+        const i18n = new I18n(
+            language ?? options?.defaultLanguage ?? this.defaultLanguage,
+            country ?? options?.defaultCountry ?? this.defaultCountry,
+        );
         (request as any)._cached_i18n = i18n;
         return i18n;
     }
@@ -259,7 +279,10 @@ export class I18n {
         }
         const replacements = new Map(Object.entries(replace));
         for (const [key, value] of replacements) {
-            text = text.replace(new RegExp('\\{' + this.escapeRegex(key) + '\\}', 'g'), value.toString());
+            text = text.replace(
+                new RegExp('\\{' + this.escapeRegex(key) + '\\}', 'g'),
+                value.toString(),
+            );
         }
         return text;
     }
@@ -272,7 +295,9 @@ export class I18n {
         adminUrl: () => 'https://' + STAMHOOFD.domains.dashboard + '/' + appToUri('admin'),
         dashboard: STAMHOOFD.domains.dashboard,
         marketing: (): string => this.getDomain(STAMHOOFD.domains.marketing),
-        defaultTransactionalEmail: (): string => this.getDomain(STAMHOOFD.domains.defaultTransactionalEmail ?? { ['']: 'stamhoofd.be' }),
-        defaultBroadcastEmail: (): string => this.getDomain(STAMHOOFD.domains.defaultBroadcastEmail ?? { ['']: 'stamhoofd.email' }),
+        defaultTransactionalEmail: (): string =>
+            this.getDomain(STAMHOOFD.domains.defaultTransactionalEmail ?? { ['']: 'stamhoofd.be' }),
+        defaultBroadcastEmail: (): string =>
+            this.getDomain(STAMHOOFD.domains.defaultBroadcastEmail ?? { ['']: 'stamhoofd.email' }),
     };
 }

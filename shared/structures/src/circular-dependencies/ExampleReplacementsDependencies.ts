@@ -19,7 +19,11 @@ import { Order, OrderData } from '../webshops/Order.js';
 import { Product, ProductPrice } from '../webshops/Product.js';
 import { TransferDescriptionType, TransferSettings } from '../webshops/TransferSettings.js';
 import { WebshopPreview } from '../webshops/Webshop.js';
-import { WebshopMetaData, WebshopTakeoutMethod, WebshopTimeSlot } from '../webshops/WebshopMetaData.js';
+import {
+    WebshopMetaData,
+    WebshopTakeoutMethod,
+    WebshopTimeSlot,
+} from '../webshops/WebshopMetaData.js';
 import { PaymentCustomer } from '../PaymentCustomer.js';
 
 injectReplacementValues(fillReplacements);
@@ -83,11 +87,14 @@ function fillReplacements(replacements: Replacement[]) {
                             price: 550_00,
                         }),
                         amount: 2,
-                        calculatedPrices: [CartItemPrice.create({
-                            price: 550_00,
-                        }), CartItemPrice.create({
-                            price: 550_00,
-                        })],
+                        calculatedPrices: [
+                            CartItemPrice.create({
+                                price: 550_00,
+                            }),
+                            CartItemPrice.create({
+                                price: 550_00,
+                            }),
+                        ],
                     }),
                     CartItem.create({
                         product: Product.create({
@@ -97,31 +104,35 @@ function fillReplacements(replacements: Replacement[]) {
                             price: 400_00,
                         }),
                         amount: 1,
-                        calculatedPrices: [CartItemPrice.create({
-                            price: 400_00,
-                        })],
+                        calculatedPrices: [
+                            CartItemPrice.create({
+                                price: 400_00,
+                            }),
+                        ],
                     }),
                 ],
             }),
             paymentMethod: PaymentMethod.CreditCard,
-
         }),
     });
 
-    const recipient = exampleOrder.getEmailRecipient(Organization.create({
-        name: $t('%D'),
-        uri: 'demo',
-        meta: OrganizationMetaData.create({
-            type: OrganizationType.Other,
-            defaultStartDate: new Date(),
-            defaultEndDate: new Date(),
+    const recipient = exampleOrder.getEmailRecipient(
+        Organization.create({
+            name: $t('%D'),
+            uri: 'demo',
+            meta: OrganizationMetaData.create({
+                type: OrganizationType.Other,
+                defaultStartDate: new Date(),
+                defaultEndDate: new Date(),
+            }),
+            address: Address.createDefault(Country.Belgium),
         }),
-        address: Address.createDefault(Country.Belgium),
-    }), WebshopPreview.create({
-        meta: WebshopMetaData.create({
-            name: $t('%Au'),
+        WebshopPreview.create({
+            meta: WebshopMetaData.create({
+                name: $t('%Au'),
+            }),
         }),
-    }));
+    );
 
     const balance1 = BalanceItem.create({
         name: $t('%13U'),
@@ -172,10 +183,7 @@ function fillReplacements(replacements: Replacement[]) {
         Replacement.create({
             token: 'balanceTable',
             value: '',
-            html: BalanceItem.getDetailsHTMLTable([
-                balance1,
-                balance2,
-            ]),
+            html: BalanceItem.getDetailsHTMLTable([balance1, balance2]),
         }),
         Replacement.create({
             token: 'overviewTable',
@@ -191,8 +199,12 @@ function fillReplacements(replacements: Replacement[]) {
         }),
     ];
 
-    for (const replacement of [...recipient.replacements, ...recipient.getDefaultReplacements(), ...paymentReplacemnets]) {
-        const variable = replacements.find(v => v.token === replacement.token);
+    for (const replacement of [
+        ...recipient.replacements,
+        ...recipient.getDefaultReplacements(),
+        ...paymentReplacemnets,
+    ]) {
+        const variable = replacements.find((v) => v.token === replacement.token);
         if (variable) {
             if (replacement.value) {
                 variable.value = replacement.value;

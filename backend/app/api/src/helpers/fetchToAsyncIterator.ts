@@ -4,7 +4,9 @@ import { FileSignService } from '../services/FileSignService.js';
 export function fetchToAsyncIterator<T>(
     initialFilter: LimitedFilteredRequest,
     loader: {
-        fetch(request: LimitedFilteredRequest): Promise<IPaginatedResponse<T, LimitedFilteredRequest>>;
+        fetch(
+            request: LimitedFilteredRequest,
+        ): Promise<IPaginatedResponse<T, LimitedFilteredRequest>>;
     },
     options?: {
         signFiles?: boolean;

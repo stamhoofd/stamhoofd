@@ -7,10 +7,18 @@ describe('Recipient headers', () => {
     for (const version of [208, 209, 423]) {
         test(`preserves nullable header JSON and replacement patches at version ${version}`, () => {
             const context = { version, medium: EncodeMedium.Database };
-            for (const headers of [undefined, null, {}, { 'X-Custom': 'value' }, { _isPatch: 'custom header' }]) {
+            for (const headers of [
+                undefined,
+                null,
+                {},
+                { 'X-Custom': 'value' },
+                { _isPatch: 'custom header' },
+            ]) {
                 const payload = { email: 'test@example.com', headers };
                 const recipient = Recipient.decode(new ObjectData(payload, context));
-                expect(recipient.headers).toEqual(version < 209 || headers == null ? null : new Map(Object.entries(headers)));
+                expect(recipient.headers).toEqual(
+                    version < 209 || headers == null ? null : new Map(Object.entries(headers)),
+                );
                 const encoded = JSON.parse(JSON.stringify(recipient.encode(context)));
                 if (version < 209) {
                     expect(encoded).not.toHaveProperty('headers');
@@ -18,16 +26,24 @@ describe('Recipient headers', () => {
                     expect(encoded.headers ?? null).toEqual(headers ?? null);
                 }
                 const patch = Recipient.patchType().decode(new ObjectData({ headers }, context));
-                const patched = Recipient.create({ email: payload.email, headers: new Map([['old', 'value']]) }).patch(patch);
+                const patched = Recipient.create({
+                    email: payload.email,
+                    headers: new Map([['old', 'value']]),
+                }).patch(patch);
                 if (version >= 209 && headers !== undefined) {
-                    expect(patched.headers).toEqual(headers === null ? null : new Map(Object.entries(headers)));
+                    expect(patched.headers).toEqual(
+                        headers === null ? null : new Map(Object.entries(headers)),
+                    );
                 }
             }
         });
     }
 
     test('clones header Maps independently and applies incremental changes', () => {
-        const recipient = Recipient.create({ email: 'test@example.com', headers: new Map([['old', 'value']]) });
+        const recipient = Recipient.create({
+            email: 'test@example.com',
+            headers: new Map([['old', 'value']]),
+        });
         expect(recipient.clone().headers).toEqual(recipient.headers);
         expect(recipient.clone().headers).not.toBe(recipient.headers);
         const patch = Recipient.patch({});
@@ -40,14 +56,21 @@ describe('Recipient headers', () => {
 describe('Recipient.merge', () => {
     describe('language', () => {
         it('keeps its own language and ignores the incoming one when set', () => {
-            const recipient = Recipient.create({ email: 'test@example.com', language: Language.French });
-            recipient.merge(Recipient.create({ email: 'test@example.com', language: Language.Dutch }));
+            const recipient = Recipient.create({
+                email: 'test@example.com',
+                language: Language.French,
+            });
+            recipient.merge(
+                Recipient.create({ email: 'test@example.com', language: Language.Dutch }),
+            );
             expect(recipient.language).toBe(Language.French);
         });
 
         it('takes the incoming language when its own is not set', () => {
             const recipient = Recipient.create({ email: 'test@example.com', language: null });
-            recipient.merge(Recipient.create({ email: 'test@example.com', language: Language.Dutch }));
+            recipient.merge(
+                Recipient.create({ email: 'test@example.com', language: Language.Dutch }),
+            );
             expect(recipient.language).toBe(Language.Dutch);
         });
 
@@ -77,7 +100,9 @@ describe('Replacement.getHtmlForWebDisplay', () => {
         });
 
         // The signed url is used, escaped for use in an attribute
-        expect(replacement.getHtmlForWebDisplay()).toBe('<img src="https://files.example.com/users/1/abc/photo.jpg?token=a&amp;expires=b">');
+        expect(replacement.getHtmlForWebDisplay()).toBe(
+            '<img src="https://files.example.com/users/1/abc/photo.jpg?token=a&amp;expires=b">',
+        );
 
         // The html to send keeps referencing the attachment
         expect(replacement.html).toContain('cid:image-1');
@@ -86,7 +111,9 @@ describe('Replacement.getHtmlForWebDisplay', () => {
     test('leaves html without inline images untouched', () => {
         const replacement = Replacement.create({ token: 'a', html: '<table></table>' });
         expect(replacement.getHtmlForWebDisplay()).toBe('<table></table>');
-        expect(Replacement.create({ token: 'b', value: 'B' }).getHtmlForWebDisplay()).toBeUndefined();
+        expect(
+            Replacement.create({ token: 'b', value: 'B' }).getHtmlForWebDisplay(),
+        ).toBeUndefined();
     });
 });
 
@@ -106,8 +133,16 @@ describe('getUsedReplacementFiles', () => {
         const unusedFile = buildFile({ id: 'unused' });
 
         const files = getUsedReplacementFiles('<p>{{orderDetailsTable}}</p>', [
-            Replacement.create({ token: 'orderDetailsTable', html: '<table></table>', files: [usedFile] }),
-            Replacement.create({ token: 'otherTable', html: '<table></table>', files: [unusedFile] }),
+            Replacement.create({
+                token: 'orderDetailsTable',
+                html: '<table></table>',
+                files: [usedFile],
+            }),
+            Replacement.create({
+                token: 'otherTable',
+                html: '<table></table>',
+                files: [unusedFile],
+            }),
         ]);
 
         expect(files).toEqual([usedFile]);

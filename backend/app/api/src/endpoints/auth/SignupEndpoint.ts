@@ -4,7 +4,14 @@ import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { EmailVerificationCode, PasswordToken, Platform, User } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../../helpers/EmailBuilder.js';
-import { EmailTemplateType, LoginMethod, NewUser, Recipient, Replacement, SignupResponse } from '@stamhoofd/structures';
+import {
+    EmailTemplateType,
+    LoginMethod,
+    NewUser,
+    Recipient,
+    Replacement,
+    SignupResponse,
+} from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
 import { PasswordForgotService } from '../../services/PasswordForgotService.js';
@@ -59,12 +66,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
         const u = await User.getForRegister(organization?.id ?? null, request.body.email);
 
         // Don't optimize. Always run two queries atm.
-        let user = u
-            ? undefined
-            : (await User.register(
-                    organization,
-                    request.body,
-                ));
+        let user = u ? undefined : await User.register(organization, request.body);
 
         let sendCode = true;
 
@@ -91,7 +93,11 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                 // We don't await this block to avoid user enumeration attack using request response time
                 (async () => {
                     // Send an e-mail to say you already have an account + follow password forgot flow
-                    const recoveryUrl = await PasswordForgotService.getPasswordRecoveryUrl(user, organization, request.i18n);
+                    const recoveryUrl = await PasswordForgotService.getPasswordRecoveryUrl(
+                        user,
+                        organization,
+                        request.i18n,
+                    );
 
                     // Create e-mail builder
                     await sendEmailTemplate(organization, {
@@ -136,11 +142,15 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
             : await EmailVerificationCode.createDecoy(user.organizationId, user.email);
 
         if (sendCode) {
-            VerificationCodeService.send(code, user, organization, request.i18n).catch(console.error);
+            VerificationCodeService.send(code, user, organization, request.i18n).catch(
+                console.error,
+            );
         }
 
-        return new Response(SignupResponse.create({
-            token: code.token,
-        }));
+        return new Response(
+            SignupResponse.create({
+                token: code.token,
+            }),
+        );
     }
 }

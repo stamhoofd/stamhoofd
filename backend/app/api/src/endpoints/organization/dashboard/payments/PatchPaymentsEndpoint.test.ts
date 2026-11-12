@@ -2,8 +2,30 @@ import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
 import { Request } from '@node/endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, BalanceItemPayment, MolliePayment, Order, OrganizationFactory, Payment, WebshopFactory } from '@stamhoofd/models';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, Company, OrderData, OrderStatus, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, Version } from '@stamhoofd/structures';
+import {
+    BalanceItem,
+    BalanceItemFactory,
+    BalanceItemPayment,
+    MolliePayment,
+    Order,
+    OrganizationFactory,
+    Payment,
+    WebshopFactory,
+} from '@stamhoofd/models';
+import {
+    BalanceItemDetailed,
+    BalanceItemPaymentDetailed,
+    Company,
+    OrderData,
+    OrderStatus,
+    PaymentCustomer,
+    PaymentGeneral,
+    PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+    PaymentType,
+    Version,
+} from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';
 import type { MollieMockPayment } from '../../../../../tests/helpers/MollieMocker.js';
 import { MollieMocker } from '../../../../../tests/helpers/MollieMocker.js';
@@ -35,7 +57,12 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
         const arr: PatchableArrayAutoEncoder<PaymentGeneral> = new PatchableArray();
         arr.addPut(body);
 
-        const request = Request.buildJson('PATCH', `/v${Version}/organization/payments`, organization.getApiHost(), arr);
+        const request = Request.buildJson(
+            'PATCH',
+            `/v${Version}/organization/payments`,
+            organization.getApiHost(),
+            arr,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         const response = await testServer.test(endpoint, request);
         return { body: response.body[0] };
@@ -57,12 +84,21 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
             pricePaid: price,
         }).create();
 
-        const { payment, mockPayment } = await createMolliePayment({ organization, balanceItems: new Map([[balanceItem, price]]) });
+        const { payment, mockPayment } = await createMolliePayment({
+            organization,
+            balanceItems: new Map([[balanceItem, price]]),
+        });
 
         return { organization, admin, adminToken, balanceItem, payment, mockPayment };
     };
 
-    const createMolliePayment = async ({ organization, balanceItems }: { organization: Organization; balanceItems: Map<BalanceItem, number> }) => {
+    const createMolliePayment = async ({
+        organization,
+        balanceItems,
+    }: {
+        organization: Organization;
+        balanceItems: Map<BalanceItem, number>;
+    }) => {
         const price = [...balanceItems.values()].reduce((total, p) => total + p, 0);
 
         const payment = new Payment();
@@ -107,22 +143,33 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
         return { payment, mockPayment };
     };
 
-    const buildRefund = ({ sourcePayment, items }: { sourcePayment: Payment; items: Map<BalanceItem, number> }) => {
+    const buildRefund = ({
+        sourcePayment,
+        items,
+    }: {
+        sourcePayment: Payment;
+        items: Map<BalanceItem, number>;
+    }) => {
         return PaymentGeneral.create({
             type: PaymentType.Refund,
             method: PaymentMethod.Bancontact,
             reversingPaymentId: sourcePayment.id,
-            balanceItemPayments: [...items.entries()].map(([balanceItem, price]) => BalanceItemPaymentDetailed.create({
-                balanceItem: BalanceItemDetailed.create({ ...balanceItem }),
-                price,
-            })),
+            balanceItemPayments: [...items.entries()].map(([balanceItem, price]) =>
+                BalanceItemPaymentDetailed.create({
+                    balanceItem: BalanceItemDetailed.create({ ...balanceItem }),
+                    price,
+                }),
+            ),
         });
     };
 
     test('Can fully refund a Mollie payment: the refund stays pending until Mollie executes it', async () => {
         const { organization, adminToken, balanceItem, payment } = await init();
 
-        const body = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -50_0000]]) });
+        const body = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -50_0000]]),
+        });
         const response = await post(body, organization, adminToken);
 
         // Mollie still has to execute the refund (it can fail until then), so it is pending
@@ -140,7 +187,9 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
         expect(mollieMocker.refunds[0].amount.value).toBe('50.00');
 
         // The refund is linked to the Mollie refund id, so the cron won't register it twice
-        const link = await MolliePayment.select().where('mollieId', mollieMocker.refunds[0].id).first(false);
+        const link = await MolliePayment.select()
+            .where('mollieId', mollieMocker.refunds[0].id)
+            .first(false);
         expect(link).not.toBeNull();
         expect(link!.paymentId).toBe(response.body.id);
 
@@ -173,12 +222,18 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
     test('A pending refund that fails at Mollie is marked as failed and restores the refundable amount', async () => {
         const { organization, adminToken, balanceItem, payment } = await init();
 
-        const body = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -50_0000]]) });
+        const body = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -50_0000]]),
+        });
         const response = await post(body, organization, adminToken);
         expect(response.body.status).toBe(PaymentStatus.Pending);
 
         // While the refund is pending, a second refund is blocked
-        const blocked = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -10_0000]]) });
+        const blocked = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -10_0000]]),
+        });
         await expect(post(blocked, organization, adminToken)).rejects.toThrow(
             STExpect.simpleError({ code: 'refund_amount_too_high' }),
         );
@@ -199,7 +254,10 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
         expect(updatedItem!.pricePending).toBe(0);
 
         // A new refund of the full amount is possible again
-        const retry = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -50_0000]]) });
+        const retry = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -50_0000]]),
+        });
         const retryResponse = await post(retry, organization, adminToken);
         expect(retryResponse.body.price).toBe(-50_0000);
     });
@@ -214,7 +272,10 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
             unitPrice: 20_0000,
         }).create();
 
-        const body = buildRefund({ sourcePayment: payment, items: new Map([[otherBalanceItem, -20_0000]]) });
+        const body = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[otherBalanceItem, -20_0000]]),
+        });
         const response = await post(body, organization, adminToken);
 
         expect(response.body.price).toBe(-20_0000);
@@ -239,7 +300,10 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
         balanceItem.unitPrice = 60_0000;
         await balanceItem.save();
 
-        const body = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -60_0000]]) });
+        const body = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -60_0000]]),
+        });
 
         await expect(post(body, organization, adminToken)).rejects.toThrow(
             STExpect.simpleError({ code: 'refund_amount_too_high' }),
@@ -250,10 +314,16 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
     test('Earlier refunds reduce the remaining refundable amount', async () => {
         const { organization, adminToken, balanceItem, payment } = await init();
 
-        const first = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -40_0000]]) });
+        const first = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -40_0000]]),
+        });
         await post(first, organization, adminToken);
 
-        const second = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -20_0000]]) });
+        const second = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -20_0000]]),
+        });
         await expect(post(second, organization, adminToken)).rejects.toThrow(
             STExpect.simpleError({ code: 'refund_amount_too_high' }),
         );
@@ -262,7 +332,10 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
         expect(mollieMocker.refunds).toHaveLength(1);
 
         // A refund of the remaining 10 euro is still possible
-        const third = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -10_0000]]) });
+        const third = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -10_0000]]),
+        });
         const response = await post(third, organization, adminToken);
         expect(response.body.price).toBe(-10_0000);
 
@@ -279,7 +352,10 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
         // so our local check passes but Mollie refuses
         mockPayment.amount.value = '30.00';
 
-        const body = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -50_0000]]) });
+        const body = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -50_0000]]),
+        });
 
         await expect(post(body, organization, adminToken)).rejects.toThrow(
             STExpect.simpleError({ code: 'refund_failed' }),
@@ -309,7 +385,10 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
         transferPayment.paidAt = new Date();
         await transferPayment.save();
 
-        const body = buildRefund({ sourcePayment: transferPayment, items: new Map([[balanceItem, -50_0000]]) });
+        const body = buildRefund({
+            sourcePayment: transferPayment,
+            items: new Map([[balanceItem, -50_0000]]),
+        });
 
         await expect(post(body, organization, adminToken)).rejects.toThrow(
             STExpect.simpleError({ code: 'refund_not_supported' }),
@@ -338,11 +417,20 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
 
         const { payment } = await createMolliePayment({
             organization,
-            balanceItems: new Map([[item, 100_0000], [discount, -80_0000]]),
+            balanceItems: new Map([
+                [item, 100_0000],
+                [discount, -80_0000],
+            ]),
         });
 
         // Reverse both items: the discount item gets a positive price in the refund
-        const body = buildRefund({ sourcePayment: payment, items: new Map([[item, -100_0000], [discount, 80_0000]]) });
+        const body = buildRefund({
+            sourcePayment: payment,
+            items: new Map([
+                [item, -100_0000],
+                [discount, 80_0000],
+            ]),
+        });
         const response = await post(body, organization, adminToken);
 
         expect(response.body.price).toBe(-20_0000);
@@ -365,7 +453,10 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
     test('The total of a refund cannot be positive or zero', async () => {
         const { organization, adminToken, balanceItem, payment } = await init();
 
-        const body = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, 10_0000]]) });
+        const body = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, 10_0000]]),
+        });
 
         await expect(post(body, organization, adminToken)).rejects.toThrow(
             STExpect.simpleError({ code: 'invalid_field', field: 'price' }),
@@ -386,7 +477,10 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
         });
         await payment.save();
 
-        const body = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -50_0000]]) });
+        const body = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -50_0000]]),
+        });
 
         // A (changed) customer in the body is ignored: the customer of the source payment wins
         body.customer = PaymentCustomer.create({
@@ -410,7 +504,10 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
     test('The customer of the request is used when the source payment has no customer', async () => {
         const { organization, adminToken, balanceItem, payment } = await init();
 
-        const body = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -50_0000]]) });
+        const body = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -50_0000]]),
+        });
         body.customer = PaymentCustomer.create({
             firstName: 'Fallback',
             lastName: 'Customer',
@@ -428,7 +525,10 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
     test('A put without a source payment is a manual payment and cannot use an online method', async () => {
         const { organization, adminToken, balanceItem, payment } = await init();
 
-        const body = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -50_0000]]) });
+        const body = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -50_0000]]),
+        });
         body.reversingPaymentId = null;
 
         await expect(post(body, organization, adminToken)).rejects.toThrow(
@@ -440,7 +540,10 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
     test('Only refunds can reverse another payment', async () => {
         const { organization, adminToken, balanceItem, payment } = await init();
 
-        const body = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -50_0000]]) });
+        const body = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -50_0000]]),
+        });
         body.type = PaymentType.Payment;
 
         await expect(post(body, organization, adminToken)).rejects.toThrow(
@@ -469,7 +572,10 @@ describe('Endpoint.PatchPaymentsEndpoint', () => {
         const updatedAtBefore = new Date('2024-01-01T00:00:00Z');
         await Order.update().set('updatedAt', updatedAtBefore).where('id', order.id).update();
 
-        const body = buildRefund({ sourcePayment: payment, items: new Map([[balanceItem, -50_0000]]) });
+        const body = buildRefund({
+            sourcePayment: payment,
+            items: new Map([[balanceItem, -50_0000]]),
+        });
         await post(body, organization, adminToken);
 
         // The (pending) refund immediately bumps the order

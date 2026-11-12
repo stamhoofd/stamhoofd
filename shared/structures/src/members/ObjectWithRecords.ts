@@ -4,7 +4,10 @@ import type { RecordAnswer } from './records/RecordAnswer.js';
 import type { Filterable } from '../filters/Filterable.js';
 import type { RecordSettings } from './records/RecordSettings.js';
 
-export type PatchAnswers = PatchMap<string, RecordAnswer | AutoEncoderPatchType<RecordAnswer> | null>;
+export type PatchAnswers = PatchMap<
+    string,
+    RecordAnswer | AutoEncoderPatchType<RecordAnswer> | null
+>;
 
 export interface ObjectWithRecords extends Filterable {
     isRecordEnabled(record: RecordSettings): boolean;

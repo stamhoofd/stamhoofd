@@ -1,6 +1,12 @@
 import { SimpleError } from '@common/errors';
 import { Email } from '@stamhoofd/email';
-import { BalanceItem, Invoice, InvoicedBalanceItem, Organization, Payment } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    Invoice,
+    InvoicedBalanceItem,
+    Organization,
+    Payment,
+} from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
 import type { Invoice as InvoiceStruct } from '@stamhoofd/structures';
@@ -15,11 +21,16 @@ import { InvoiceXMlService } from './InvoiceXMLService.js';
 import { OrganizationAdminService } from './OrganizationAdminService.js';
 
 export class InvoiceService {
-    static async createFrom(organization: Organization, struct: InvoiceStruct, options?: { payments?: Payment[]; balanceItems?: BalanceItem[]; confirmed?: boolean }) {
+    static async createFrom(
+        organization: Organization,
+        struct: InvoiceStruct,
+        options?: { payments?: Payment[]; balanceItems?: BalanceItem[]; confirmed?: boolean },
+    ) {
         if (struct.number) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'You cannot create new invoices with a fixed number. Numbers are auto-generated.',
+                message:
+                    'You cannot create new invoices with a fixed number. Numbers are auto-generated.',
                 field: 'number',
             });
         }
@@ -35,15 +46,14 @@ export class InvoiceService {
         // A zero receipt marks payments that cancel each other out as booked. Its balance items cancelled
         // each other out completely: no goods or services moved, so the receipt has no items and lists the payments instead.
         // With items left, goods did move and a (zero) invoice is required, which is not supported yet.
-        const isZeroReceipt = model.isReceipt && struct.totalWithVAT === 0 && struct.items.length === 0;
+        const isZeroReceipt =
+            model.isReceipt && struct.totalWithVAT === 0 && struct.items.length === 0;
 
         if (struct.totalWithVAT === 0 && !isZeroReceipt) {
             throw new SimpleError({
                 code: 'invalid_invoiced_amount',
                 message: 'Cannot invoice zero',
-                human: struct.items.length === 0
-                    ? $t('%ZrR')
-                    : $t('%ZrN'),
+                human: struct.items.length === 0 ? $t('%ZrR') : $t('%ZrN'),
                 statusCode: 400,
             });
         }
@@ -124,7 +134,8 @@ export class InvoiceService {
                 field: 'payableRoundingAmount',
             });
         }
-        const payments = options?.payments ?? await Payment.getByIDs(...struct.payments.map(p => p.id));
+        const payments =
+            options?.payments ?? (await Payment.getByIDs(...struct.payments.map((p) => p.id)));
 
         if (payments.length !== struct.payments.length) {
             throw new SimpleError({
@@ -159,7 +170,7 @@ export class InvoiceService {
             }
         }
 
-        const balanceItemIds = Formatter.uniqueArray(struct.items.map(i => i.balanceItemId));
+        const balanceItemIds = Formatter.uniqueArray(struct.items.map((i) => i.balanceItemId));
 
         // Make sure priceInvoiced is up to date for these balances
         const affected = await BalanceItem.updateInvoiced(balanceItemIds);
@@ -169,7 +180,8 @@ export class InvoiceService {
             options!.balanceItems = undefined;
         }
 
-        const balanceItems = options?.balanceItems ?? await BalanceItem.getByIDs(...balanceItemIds);
+        const balanceItems =
+            options?.balanceItems ?? (await BalanceItem.getByIDs(...balanceItemIds));
         await model.save();
 
         try {
@@ -187,7 +199,7 @@ export class InvoiceService {
 
             // Validate per balance item: the same balance item can appear in multiple rows (e.g. a payment and its refund)
             for (const balanceItemId of balanceItemIds) {
-                const balanceItem = balanceItems.find(b => b.id === balanceItemId);
+                const balanceItem = balanceItems.find((b) => b.id === balanceItemId);
                 if (!balanceItem || balanceItem.organizationId !== model.organizationId) {
                     throw new SimpleError({
                         statusCode: 404,
@@ -199,7 +211,9 @@ export class InvoiceService {
                 const maximumInvoiceable = balanceItem.priceDue; // € - 10
                 const alreadyInvoiced = balanceItem.priceInvoiced; // € 5
                 const left = maximumInvoiceable - alreadyInvoiced; // € -15
-                const goingToInvoice = struct.items.filter(i => i.balanceItemId === balanceItemId).reduce((sum, i) => sum + i.balanceInvoicedAmount, 0);
+                const goingToInvoice = struct.items
+                    .filter((i) => i.balanceItemId === balanceItemId)
+                    .reduce((sum, i) => sum + i.balanceInvoicedAmount, 0);
 
                 // We do allow to credit something that was wrongfully invoiced (possible on wrong invoice details).
                 // but only manually, not automatic.
@@ -214,7 +228,7 @@ export class InvoiceService {
                                 message: 'Cannot invoice',
                                 human: $t('%1RB', {
                                     'a-euro': Formatter.price(goingToInvoice),
-                                    'name': balanceItem.getStructure().itemTitle,
+                                    name: balanceItem.getStructure().itemTitle,
                                     'left-euro': Formatter.price(-left),
                                 }),
                             });
@@ -227,7 +241,7 @@ export class InvoiceService {
                                 message: 'Cannot invoice',
                                 human: $t('%1Tm', {
                                     'a-euro': Formatter.price(-goingToInvoice),
-                                    'name': balanceItem.getStructure().itemTitle,
+                                    name: balanceItem.getStructure().itemTitle,
                                     'left-euro': Formatter.price(-left),
                                 }),
                             });
@@ -241,7 +255,7 @@ export class InvoiceService {
                                 message: 'Cannot invoice',
                                 human: $t('%1R7', {
                                     'a-euro': Formatter.price(-goingToInvoice),
-                                    'name': balanceItem.getStructure().itemTitle,
+                                    name: balanceItem.getStructure().itemTitle,
                                 }),
                             });
                         } else if (goingToInvoice > 0) {
@@ -250,7 +264,7 @@ export class InvoiceService {
                                 message: 'Cannot invoice',
                                 human: $t('%1QE', {
                                     'a-euro': Formatter.price(-goingToInvoice),
-                                    'name': balanceItem.getStructure().itemTitle,
+                                    name: balanceItem.getStructure().itemTitle,
                                 }),
                             });
                         }
@@ -263,7 +277,7 @@ export class InvoiceService {
                                 message: 'Cannot invoice',
                                 human: $t('%1RA', {
                                     'a-euro': Formatter.price(-goingToInvoice),
-                                    'name': balanceItem.getStructure().itemTitle,
+                                    name: balanceItem.getStructure().itemTitle,
                                     'left-euro': Formatter.price(left),
                                 }),
                             });
@@ -273,7 +287,7 @@ export class InvoiceService {
                                 message: 'Cannot invoice',
                                 human: $t('%1TS', {
                                     'a-euro': Formatter.price(-goingToInvoice),
-                                    'name': balanceItem.getStructure().itemTitle,
+                                    name: balanceItem.getStructure().itemTitle,
                                     'left-euro': Formatter.price(left),
                                 }),
                             });
@@ -284,7 +298,7 @@ export class InvoiceService {
 
             // Create balances
             for (const item of struct.items) {
-                const balanceItem = balanceItems.find(b => b.id === item.balanceItemId)!;
+                const balanceItem = balanceItems.find((b) => b.id === item.balanceItemId)!;
 
                 const invoiced = new InvoicedBalanceItem();
                 invoiced.invoiceId = model.id;
@@ -322,7 +336,7 @@ export class InvoiceService {
             await InvoiceCounter.assignNextNumber(model, organization.privateMeta.invoiceSettings);
 
             // Update invoiced cache
-            await BalanceItemService.updateInvoiced(struct.items.map(i => i.balanceItemId));
+            await BalanceItemService.updateInvoiced(struct.items.map((i) => i.balanceItemId));
 
             // Create PDF
             await InvoicePdfService.generatePdf(model);
@@ -331,7 +345,7 @@ export class InvoiceService {
             if (!model.isReceipt) {
                 await InvoiceXMlService.generateXml(model);
 
-                if (!await this.forwardInvoice(model, organization)) {
+                if (!(await this.forwardInvoice(model, organization))) {
                     await this.sendCustomerEmail(model, organization);
                 }
             }
@@ -339,7 +353,12 @@ export class InvoiceService {
             try {
                 await model.delete();
             } catch (ee) {
-                console.error('Error while trying to delete invoice because of fail save', ee, 'Deleting because of error', e);
+                console.error(
+                    'Error while trying to delete invoice because of fail save',
+                    ee,
+                    'Deleting because of error',
+                    e,
+                );
             }
             throw e;
         }
@@ -351,7 +370,12 @@ export class InvoiceService {
             await ApplicationFeeService.setProviderInvoiceIdsForSettlementCharges(payments, model);
         } catch (e) {
             console.error('Failed to stamp application fee charges for invoice ' + model.id, e);
-            WebmasterReport.report('Factuurnummer op applicatiekosten zetten mislukt voor factuur ' + (model.number ?? model.id) + ' (de factuur zelf is wel verstuurd)', e);
+            WebmasterReport.report(
+                'Factuurnummer op applicatiekosten zetten mislukt voor factuur ' +
+                    (model.number ?? model.id) +
+                    ' (de factuur zelf is wel verstuurd)',
+                e,
+            );
         }
 
         return model;
@@ -363,18 +387,25 @@ export class InvoiceService {
     private static async assertReceiptAllowed(struct: InvoiceStruct) {
         const error = new SimpleError({
             code: 'receipt_not_allowed',
-            message: 'Receipts cannot be created for a customer with a company number or VAT number',
+            message:
+                'Receipts cannot be created for a customer with a company number or VAT number',
             human: $t('%ZqE'),
             field: 'customer',
         });
 
-        if (struct.customer.company && (struct.customer.company.companyNumber || struct.customer.company.VATNumber)) {
+        if (
+            struct.customer.company &&
+            (struct.customer.company.companyNumber || struct.customer.company.VATNumber)
+        ) {
             throw error;
         }
 
         if (struct.payingOrganizationId) {
             const payingOrganization = await Organization.getByID(struct.payingOrganizationId);
-            if (payingOrganization && payingOrganization.meta.companies.some(c => c.companyNumber || c.VATNumber)) {
+            if (
+                payingOrganization &&
+                payingOrganization.meta.companies.some((c) => c.companyNumber || c.VATNumber)
+            ) {
                 throw error;
             }
         }
@@ -401,7 +432,7 @@ export class InvoiceService {
             return;
         }
 
-        if (!await this.forwardInvoice(model, organization) && !model.didSendPeppol && !hadPdf) {
+        if (!(await this.forwardInvoice(model, organization)) && !model.didSendPeppol && !hadPdf) {
             await this.sendCustomerEmail(model, organization);
         }
     }
@@ -420,7 +451,9 @@ export class InvoiceService {
         // Collect the affected balance items and payments before deleting, because the invoiced
         // balance items are cascade deleted and the payments' invoiceId is reset
         const { invoicedBalanceItems } = await Invoice.loadBalanceItems([invoice]);
-        const balanceItemIds = Formatter.uniqueArray(invoicedBalanceItems.map(i => i.balanceItemId));
+        const balanceItemIds = Formatter.uniqueArray(
+            invoicedBalanceItems.map((i) => i.balanceItemId),
+        );
         const payments = await Payment.select().where('invoiceId', invoice.id).fetch();
 
         await invoice.delete();
@@ -450,10 +483,16 @@ export class InvoiceService {
         // Logic: send if required or a custom peppol endpoint id is set
         if (organization.privateMeta.invoiceSettings.forwardOnlyVAT) {
             if (!invoice.customer.company?.customPeppolEndpointId) {
-                if (!invoice.customer?.company?.VATNumber || !invoice.customer?.company?.VATNumber.startsWith('BE')) {
+                if (
+                    !invoice.customer?.company?.VATNumber ||
+                    !invoice.customer?.company?.VATNumber.startsWith('BE')
+                ) {
                     return {
                         value: false,
-                        reason: 'Skipping PEPPOL for invoice ' + invoice.id + ', recipient no Belgian VAT number and no custom peppol endpoint id set',
+                        reason:
+                            'Skipping PEPPOL for invoice ' +
+                            invoice.id +
+                            ', recipient no Belgian VAT number and no custom peppol endpoint id set',
                     };
                 }
             }
@@ -516,13 +555,16 @@ export class InvoiceService {
     }
 
     static async sendCustomerEmail(invoice: Invoice, organization: Organization) {
-        let email = (invoice.customer.email || invoice.customer.company?.administrationEmail) ?? undefined;
+        let email =
+            (invoice.customer.email || invoice.customer.company?.administrationEmail) ?? undefined;
         let bcc = invoice.customer.company?.administrationEmail;
 
         if (!email && invoice.payingOrganizationId) {
             const payingOrganization = await Organization.getByID(invoice.payingOrganizationId);
             if (payingOrganization) {
-                email = (await OrganizationAdminService.getInvoicingToEmail(payingOrganization)) ?? undefined;
+                email =
+                    (await OrganizationAdminService.getInvoicingToEmail(payingOrganization)) ??
+                    undefined;
             }
         }
 
@@ -536,7 +578,7 @@ export class InvoiceService {
         }
 
         const payments = await Payment.select().where('invoiceId', invoice.id).fetch();
-        const isPaid = payments.every(p => p.status === PaymentStatus.Succeeded);
+        const isPaid = payments.every((p) => p.status === PaymentStatus.Succeeded);
 
         const pdf = await invoice.pdf?.withSignedUrl();
         const xml = await invoice.xml?.withSignedUrl();
@@ -558,19 +600,21 @@ export class InvoiceService {
         ];
 
         if (bcc) {
-            recipients.push(Recipient.create({
-                email: bcc,
-                replacements: [
-                    Replacement.create({
-                        token: 'invoiceNumber',
-                        value: invoice.number ?? '',
-                    }),
-                    Replacement.create({
-                        token: 'totalPrice',
-                        value: Formatter.price(Math.abs(invoice.totalWithVAT)),
-                    }),
-                ],
-            }));
+            recipients.push(
+                Recipient.create({
+                    email: bcc,
+                    replacements: [
+                        Replacement.create({
+                            token: 'invoiceNumber',
+                            value: invoice.number ?? '',
+                        }),
+                        Replacement.create({
+                            token: 'totalPrice',
+                            value: Formatter.price(Math.abs(invoice.totalWithVAT)),
+                        }),
+                    ],
+                }),
+            );
         }
 
         await sendEmailTemplate(organization, {
@@ -591,28 +635,32 @@ export class InvoiceService {
             ],
             template: {
                 type: isPaid
-                    ? (invoice.totalWithVAT >= 0 ? EmailTemplateType.InvoicePaid : EmailTemplateType.CreditNotePaid)
-                    : (invoice.totalWithVAT >= 0 ? EmailTemplateType.InvoiceUnpaid : EmailTemplateType.CreditNoteUnpaid),
+                    ? invoice.totalWithVAT >= 0
+                        ? EmailTemplateType.InvoicePaid
+                        : EmailTemplateType.CreditNotePaid
+                    : invoice.totalWithVAT >= 0
+                      ? EmailTemplateType.InvoiceUnpaid
+                      : EmailTemplateType.CreditNoteUnpaid,
             },
             type: 'transactional',
             attachments: [
                 ...(pdf
                     ? [
-                            {
-                                filename: invoice.generateCustomerFilename('pdf'),
-                                href: pdf.getPublicPath(),
-                                contentType: 'application/pdf',
-                            },
-                        ]
+                          {
+                              filename: invoice.generateCustomerFilename('pdf'),
+                              href: pdf.getPublicPath(),
+                              contentType: 'application/pdf',
+                          },
+                      ]
                     : []),
                 ...(xml
                     ? [
-                            {
-                                filename: invoice.generateCustomerFilename('xml'),
-                                href: xml.getPublicPath(),
-                                contentType: 'application/xml',
-                            },
-                        ]
+                          {
+                              filename: invoice.generateCustomerFilename('xml'),
+                              href: xml.getPublicPath(),
+                              contentType: 'application/xml',
+                          },
+                      ]
                     : []),
             ],
         });

@@ -36,7 +36,7 @@ export class CreateApiUserEndpoint extends Endpoint<Params, Query, Body, Respons
         await Context.authenticateFresh();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canManageAdmins(organization.id)) {
+        if (!(await Context.auth.canManageAdmins(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -55,12 +55,17 @@ export class CreateApiUserEndpoint extends Endpoint<Params, Query, Body, Respons
         if (!request.body.permissions) {
             throw new SimpleError({
                 code: 'missing_field',
-                message: 'When creating API-users, you are required to specify permissions in the request',
+                message:
+                    'When creating API-users, you are required to specify permissions in the request',
                 field: 'permissions',
             });
         }
 
-        admin.permissions = UserPermissions.limitedAdd(null, request.body.permissions, organization.id);
+        admin.permissions = UserPermissions.limitedAdd(
+            null,
+            request.body.permissions,
+            organization.id,
+        );
 
         if (request.body.meta) {
             const rateLimits = request.body.meta.rateLimits;
@@ -82,10 +87,12 @@ export class CreateApiUserEndpoint extends Endpoint<Params, Query, Body, Respons
 
         const createdToken = await SessionService.createApiSession(admin);
 
-        return new Response(ApiUserWithToken.create({
-            ...(await Token.getAPIUserWithToken(admin)),
-            token: createdToken.accessToken,
-            expiresAt: createdToken.accessTokenValidUntil,
-        }));
+        return new Response(
+            ApiUserWithToken.create({
+                ...(await Token.getAPIUserWithToken(admin)),
+                token: createdToken.accessToken,
+                expiresAt: createdToken.accessTokenValidUntil,
+            }),
+        );
     }
 }

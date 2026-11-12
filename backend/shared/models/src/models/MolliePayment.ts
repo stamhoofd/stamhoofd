@@ -6,7 +6,9 @@ export class MolliePayment extends QueryableModel {
     static table = 'mollie_payments';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })

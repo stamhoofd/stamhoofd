@@ -45,10 +45,12 @@ export class SetupTOTPEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         const otpauthUri = TOTPHelper.keyuri(user.email, secret);
 
-        return new Response(TOTPSetupResponse.create({
-            totpId: totp.id,
-            secret,
-            otpauthUri,
-        }));
+        return new Response(
+            TOTPSetupResponse.create({
+                totpId: totp.id,
+                secret,
+                otpauthUri,
+            }),
+        );
     }
 }

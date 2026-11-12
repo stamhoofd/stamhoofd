@@ -18,10 +18,13 @@ describe('Endpoint.Signup', () => {
     });
 
     async function signup(organization: Organization, email: string) {
-        const response = await testServer.test(signupEndpoint, Request.buildJson('POST', '/sign-up', organization.getApiHost(), {
-            email,
-            password: 'attacker-password-1234',
-        }));
+        const response = await testServer.test(
+            signupEndpoint,
+            Request.buildJson('POST', '/sign-up', organization.getApiHost(), {
+                email,
+                password: 'attacker-password-1234',
+            }),
+        );
         return response.body.token;
     }
 
@@ -32,17 +35,26 @@ describe('Endpoint.Signup', () => {
     }
 
     async function poll(organization: Organization, token: string) {
-        const response = await testServer.test(pollEndpoint, Request.buildJson('POST', '/verify-email/poll', organization.getApiHost(), { token }));
+        const response = await testServer.test(
+            pollEndpoint,
+            Request.buildJson('POST', '/verify-email/poll', organization.getApiHost(), { token }),
+        );
         return response.body.valid;
     }
 
     function verify(organization: Organization, token: string, code: string) {
-        return testServer.test(verifyEndpoint, Request.buildJson('POST', '/verify-email', organization.getApiHost(), { token, code }));
+        return testServer.test(
+            verifyEndpoint,
+            Request.buildJson('POST', '/verify-email', organization.getApiHost(), { token, code }),
+        );
     }
 
     test('the token returned for an existing account cannot be used to sign in', async () => {
         const organization = await new OrganizationFactory({}).create();
-        const victim = await new UserFactory({ organization, password: 'victim-password-1234' }).create();
+        const victim = await new UserFactory({
+            organization,
+            password: 'victim-password-1234',
+        }).create();
 
         const token = await signup(organization, victim.email);
 
@@ -51,14 +63,19 @@ describe('Endpoint.Signup', () => {
 
         // Even with the right code for this token, no session is handed out
         const code = await storedCodeFor(token);
-        await expect(verify(organization, token, code)).rejects.toMatchObject({ code: 'invalid_code' });
+        await expect(verify(organization, token, code)).rejects.toMatchObject({
+            code: 'invalid_code',
+        });
 
         expect(await Token.where({ userId: victim.id })).toHaveLength(0);
     });
 
     test('repeated signups for an existing account reuse the token, like a real code', async () => {
         const organization = await new OrganizationFactory({}).create();
-        const existing = await new UserFactory({ organization, password: 'victim-password-1234' }).create();
+        const existing = await new UserFactory({
+            organization,
+            password: 'victim-password-1234',
+        }).create();
 
         const token = await signup(organization, existing.email);
         expect(await signup(organization, existing.email)).toBe(token);

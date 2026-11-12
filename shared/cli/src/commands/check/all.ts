@@ -5,14 +5,15 @@ import { success } from '../../runtime/ux.js';
 
 export default class CheckAll extends BaseCommand {
     static summary = 'Run all validation checks';
-    static description = 'Use this before pushing when you want roughly the same broad safety net as the main automated checks.';
-    static examples = [
-        'stam check all',
-        'stam check all --fix',
-        'stam check all --env keeo',
-    ];
+    static description =
+        'Use this before pushing when you want roughly the same broad safety net as the main automated checks.';
+    static examples = ['stam check all', 'stam check all --fix', 'stam check all --env keeo'];
 
-    static flags = { env: BaseCommand.environmentFlags.env, fix: fixFlag, ...this.verbosityFlags() };
+    static flags = {
+        env: BaseCommand.environmentFlags.env,
+        fix: fixFlag,
+        ...this.verbosityFlags(),
+    };
 
     async run(): Promise<void> {
         const { context, flags } = await this.parseWithContext(CheckAll);

@@ -8,6 +8,6 @@ export class OrganizationLevelRecordsConfiguration extends AutoEncoder {
     recordCategories: RecordCategory[] = [];
 
     getEnabledCategories<T extends ObjectWithRecords>(organization: T) {
-        return this.recordCategories.filter(category => category.isEnabled(organization));
+        return this.recordCategories.filter((category) => category.isEnabled(organization));
     }
 }

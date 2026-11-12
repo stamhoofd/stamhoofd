@@ -12,14 +12,22 @@ export enum UmbrellaOrganization {
 export class UmbrellaOrganizationHelper {
     static getName(umbrellaOrganization: UmbrellaOrganization): string {
         switch (umbrellaOrganization) {
-            case UmbrellaOrganization.ChiroNationaal: return $t('%nk');
-            case UmbrellaOrganization.ScoutsEnGidsenVlaanderen: return $t('%nl');
-            case UmbrellaOrganization.KSA: return $t('%1s');
-            case UmbrellaOrganization.KLJ: return $t('%z');
-            case UmbrellaOrganization.FOS: return $t('%1R');
-            case UmbrellaOrganization.JeugdRodeKruis: return $t('%nm');
-            case UmbrellaOrganization.JNM: return $t('%y');
-            case UmbrellaOrganization.Other: return $t('%nn');
+            case UmbrellaOrganization.ChiroNationaal:
+                return $t('%nk');
+            case UmbrellaOrganization.ScoutsEnGidsenVlaanderen:
+                return $t('%nl');
+            case UmbrellaOrganization.KSA:
+                return $t('%1s');
+            case UmbrellaOrganization.KLJ:
+                return $t('%z');
+            case UmbrellaOrganization.FOS:
+                return $t('%1R');
+            case UmbrellaOrganization.JeugdRodeKruis:
+                return $t('%nm');
+            case UmbrellaOrganization.JNM:
+                return $t('%y');
+            case UmbrellaOrganization.Other:
+                return $t('%nn');
         }
     }
 

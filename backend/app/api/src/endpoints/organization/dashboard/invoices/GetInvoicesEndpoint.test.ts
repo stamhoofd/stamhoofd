@@ -1,6 +1,13 @@
 import { Request } from '@node/endpoints';
 import type { Organization, User } from '@stamhoofd/models';
-import { BalanceItemFactory, Invoice, InvoicedBalanceItem, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    Invoice,
+    InvoicedBalanceItem,
+    OrganizationFactory,
+    Token,
+    UserFactory,
+} from '@stamhoofd/models';
 import type { InvoiceStruct, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { LimitedFilteredRequest, Permissions } from '@stamhoofd/structures';
@@ -20,7 +27,15 @@ describe('Endpoint.GetInvoicesEndpoint', () => {
         }).create();
     };
 
-    const createInvoice = async ({ organization, balanceItemIds, isReceipt = false }: { organization: Organization; balanceItemIds: string[]; isReceipt?: boolean }) => {
+    const createInvoice = async ({
+        organization,
+        balanceItemIds,
+        isReceipt = false,
+    }: {
+        organization: Organization;
+        balanceItemIds: string[];
+        isReceipt?: boolean;
+    }) => {
         const invoice = new Invoice();
         invoice.organizationId = organization.id;
         invoice.isReceipt = isReceipt;
@@ -40,7 +55,15 @@ describe('Endpoint.GetInvoicesEndpoint', () => {
         return invoice;
     };
 
-    const getInvoices = async ({ filter, organization, user }: { filter: StamhoofdFilter | null; organization: Organization; user: User }) => {
+    const getInvoices = async ({
+        filter,
+        organization,
+        user,
+    }: {
+        filter: StamhoofdFilter | null;
+        organization: Organization;
+        user: User;
+    }) => {
         const token = await SessionService.createSession(user);
 
         const request = Request.get({
@@ -55,7 +78,10 @@ describe('Endpoint.GetInvoicesEndpoint', () => {
             },
         });
 
-        return testServer.test<PaginatedResponse<InvoiceStruct[], LimitedFilteredRequest>>(endpoint, request);
+        return testServer.test<PaginatedResponse<InvoiceStruct[], LimitedFilteredRequest>>(
+            endpoint,
+            request,
+        );
     };
 
     describe('Filtering on balance item', () => {
@@ -69,8 +95,14 @@ describe('Endpoint.GetInvoicesEndpoint', () => {
             const balanceItemId1 = (await createBalanceItem({ organization })).id;
             const balanceItemId2 = (await createBalanceItem({ organization })).id;
 
-            const invoiceWithBothItems = await createInvoice({ organization, balanceItemIds: [balanceItemId1, balanceItemId2] });
-            const invoiceWithSecondItem = await createInvoice({ organization, balanceItemIds: [balanceItemId2] });
+            const invoiceWithBothItems = await createInvoice({
+                organization,
+                balanceItemIds: [balanceItemId1, balanceItemId2],
+            });
+            const invoiceWithSecondItem = await createInvoice({
+                organization,
+                balanceItemIds: [balanceItemId2],
+            });
             const invoiceWithoutItems = await createInvoice({ organization, balanceItemIds: [] });
 
             const response = await getInvoices({
@@ -86,7 +118,7 @@ describe('Endpoint.GetInvoicesEndpoint', () => {
             });
 
             expect(response.status).toBe(200);
-            expect(response.body.results.map(r => r.id)).toEqual([invoiceWithBothItems.id]);
+            expect(response.body.results.map((r) => r.id)).toEqual([invoiceWithBothItems.id]);
 
             const response2 = await getInvoices({
                 filter: {
@@ -101,8 +133,10 @@ describe('Endpoint.GetInvoicesEndpoint', () => {
             });
 
             expect(response2.status).toBe(200);
-            expect(response2.body.results.map(r => r.id).sort()).toEqual([invoiceWithBothItems.id, invoiceWithSecondItem.id].sort());
-            expect(response2.body.results.map(r => r.id)).not.toContain(invoiceWithoutItems.id);
+            expect(response2.body.results.map((r) => r.id).sort()).toEqual(
+                [invoiceWithBothItems.id, invoiceWithSecondItem.id].sort(),
+            );
+            expect(response2.body.results.map((r) => r.id)).not.toContain(invoiceWithoutItems.id);
         });
 
         test('does not return invoices of other organizations for the same balance item', async () => {
@@ -114,7 +148,10 @@ describe('Endpoint.GetInvoicesEndpoint', () => {
             }).create();
 
             const balanceItemId = (await createBalanceItem({ organization: otherOrganization })).id;
-            await createInvoice({ organization: otherOrganization, balanceItemIds: [balanceItemId] });
+            await createInvoice({
+                organization: otherOrganization,
+                balanceItemIds: [balanceItemId],
+            });
 
             const response = await getInvoices({
                 filter: {
@@ -142,13 +179,21 @@ describe('Endpoint.GetInvoicesEndpoint', () => {
             }).create();
 
             const invoice = await createInvoice({ organization, balanceItemIds: [] });
-            const receipt = await createInvoice({ organization, balanceItemIds: [], isReceipt: true });
+            const receipt = await createInvoice({
+                organization,
+                balanceItemIds: [],
+                isReceipt: true,
+            });
 
             const receipts = await getInvoices({ filter: { isReceipt: true }, organization, user });
-            expect(receipts.body.results.map(r => r.id)).toEqual([receipt.id]);
+            expect(receipts.body.results.map((r) => r.id)).toEqual([receipt.id]);
 
-            const invoices = await getInvoices({ filter: { $not: { isReceipt: true } }, organization, user });
-            expect(invoices.body.results.map(r => r.id)).toEqual([invoice.id]);
+            const invoices = await getInvoices({
+                filter: { $not: { isReceipt: true } },
+                organization,
+                user,
+            });
+            expect(invoices.body.results.map((r) => r.id)).toEqual([invoice.id]);
         });
     });
 
@@ -160,11 +205,13 @@ describe('Endpoint.GetInvoicesEndpoint', () => {
                 permissions: Permissions.create({ level: PermissionLevel.Read }),
             }).create();
 
-            await expect(getInvoices({
-                filter: null,
-                organization,
-                user,
-            })).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(
+                getInvoices({
+                    filter: null,
+                    organization,
+                    user,
+                }),
+            ).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
         });
     });
 });

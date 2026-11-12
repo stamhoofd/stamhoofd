@@ -1,5 +1,16 @@
 import { buildDatabases, buildDomains } from '../../config/build-config.js';
-import { dockerHostGateway, localIpv4Host, localhostPortMapping, metabaseAppDatabase, metabaseContainer, metabaseImage, metabaseInternalPort, mysqlContainer, mysqlRootPassword, mysqlRootUser } from '../../config/shared-service-config.js';
+import {
+    dockerHostGateway,
+    localIpv4Host,
+    localhostPortMapping,
+    metabaseAppDatabase,
+    metabaseContainer,
+    metabaseImage,
+    metabaseInternalPort,
+    mysqlContainer,
+    mysqlRootPassword,
+    mysqlRootUser,
+} from '../../config/shared-service-config.js';
 import type { CliContext } from '../../context/create-context.js';
 import { buildPorts } from '../../context/ports.js';
 import { RunVerbosity } from '../../runtime/command-runner.js';
@@ -7,7 +18,12 @@ import { link } from '../../runtime/ux.js';
 import { SharedDockerService } from '../docker-service.js';
 import * as docker from '../docker.js';
 import { MetabaseApi, MetabaseApiError } from '@stamhoofd/metabase/api';
-import { metabaseDataSourceName, metabaseHiddenTables, metabaseReportCollectionName, metabaseReportDashboardName } from '@stamhoofd/metabase/naming';
+import {
+    metabaseDataSourceName,
+    metabaseHiddenTables,
+    metabaseReportCollectionName,
+    metabaseReportDashboardName,
+} from '@stamhoofd/metabase/naming';
 import { loadReport, loadRetiredReport, loadSnippets } from '@stamhoofd/metabase/report';
 import type { ReportSyncResult } from '@stamhoofd/metabase/sync-report';
 import { syncReport } from '@stamhoofd/metabase/sync-report';
@@ -49,7 +65,14 @@ export class MetabaseService extends SharedDockerService {
      * Runs on every start rather than only on a fresh container, so `--env keeo` after `--env ravot`
      * adds the second data source to the same Metabase.
      */
-    async provision(context: CliContext): Promise<{ database: string; dataSource: string; created: boolean; removedSampleDatabase: boolean; hiddenTables: string[]; tableCount: number }> {
+    async provision(context: CliContext): Promise<{
+        database: string;
+        dataSource: string;
+        created: boolean;
+        removedSampleDatabase: boolean;
+        hiddenTables: string[];
+        tableCount: number;
+    }> {
         const { api, id, created, database, dataSource } = await this.connectDataSource(context);
 
         await api.syncDatabaseSchema(id);
@@ -72,15 +95,33 @@ export class MetabaseService extends SharedDockerService {
      * is told the same environment: it says which colors a chart falls back to, and what the
      * environment leaves out, so the questions of a card it no longer writes are cleared away.
      */
-    async provisionReport(context: CliContext): Promise<ReportSyncResult & { database: string; dataSource: string; tableCount: number; postalCodeCount: number }> {
+    async provisionReport(context: CliContext): Promise<
+        ReportSyncResult & {
+            database: string;
+            dataSource: string;
+            tableCount: number;
+            postalCodeCount: number;
+        }
+    > {
         const { api, id, database, dataSource } = await this.connectDataSource(context);
         const tabs = await loadReport(context.env);
         const retired = await loadRetiredReport(context.env);
         const snippets = await loadSnippets(context.env);
         const tableCount = await this.countTables(context, database);
-        const postalCodeCount = tableCount === 0 ? 0 : await this.countRows(context, database, 'postal_codes');
+        const postalCodeCount =
+            tableCount === 0 ? 0 : await this.countRows(context, database, 'postal_codes');
 
-        const result = await syncReport(api, id, tabs, snippets, metabaseReportCollectionName, metabaseReportDashboardName, postalCodeCount > 0, context.env, retired);
+        const result = await syncReport(
+            api,
+            id,
+            tabs,
+            snippets,
+            metabaseReportCollectionName,
+            metabaseReportDashboardName,
+            postalCodeCount > 0,
+            context.env,
+            retired,
+        );
 
         return { ...result, database, dataSource, tableCount, postalCodeCount };
     }
@@ -89,7 +130,13 @@ export class MetabaseService extends SharedDockerService {
      * Sign in and make sure the statistics database of the selected environment is registered. Also
      * creates the MySQL database: Metabase refuses a connection to a database that does not exist.
      */
-    private async connectDataSource(context: CliContext): Promise<{ api: MetabaseApi; id: number; created: boolean; database: string; dataSource: string }> {
+    private async connectDataSource(context: CliContext): Promise<{
+        api: MetabaseApi;
+        id: number;
+        created: boolean;
+        database: string;
+        dataSource: string;
+    }> {
         await this.assertMysqlRunning();
 
         const database = buildDatabases(context).platformStatistics;
@@ -101,7 +148,10 @@ export class MetabaseService extends SharedDockerService {
             await api.authenticate(metabaseAdmin);
         } catch (error) {
             if (error instanceof MetabaseApiError && error.status === 401) {
-                throw new Error(`Cannot sign in to the local Metabase as ${metabaseAdminEmail}: this instance was set up with a different account. Set METABASE_ADMIN_EMAIL and METABASE_ADMIN_PASSWORD to those credentials, or start over with: stam clean metabase`, { cause: error });
+                throw new Error(
+                    `Cannot sign in to the local Metabase as ${metabaseAdminEmail}: this instance was set up with a different account. Set METABASE_ADMIN_EMAIL and METABASE_ADMIN_PASSWORD to those credentials, or start over with: stam clean metabase`,
+                    { cause: error },
+                );
             }
             throw error;
         }
@@ -124,7 +174,11 @@ export class MetabaseService extends SharedDockerService {
 
     getDockerArgs(context: CliContext): string[] {
         const ports = buildPorts(context);
-        return MetabaseService.dockerArgs(ports.metabase, ports.mysql, `https://${buildDomains(context).metabase}`);
+        return MetabaseService.dockerArgs(
+            ports.metabase,
+            ports.mysql,
+            `https://${buildDomains(context).metabase}`,
+        );
     }
 
     override startedMessage(context: CliContext): string {
@@ -143,8 +197,10 @@ export class MetabaseService extends SharedDockerService {
         let lastError = 'no response';
 
         while (Date.now() - start < timeoutMs) {
-            if (!await docker.containerIsRunning(MetabaseService.container)) {
-                throw new Error(`${this.name} stopped while starting up. Check: stam platform-report logs`);
+            if (!(await docker.containerIsRunning(MetabaseService.container))) {
+                throw new Error(
+                    `${this.name} stopped while starting up. Check: stam platform-report logs`,
+                );
             }
             try {
                 const response = await fetch(url, { signal: AbortSignal.timeout(2_000) });
@@ -155,15 +211,19 @@ export class MetabaseService extends SharedDockerService {
             } catch (error) {
                 lastError = error instanceof Error ? error.message : String(error);
             }
-            await new Promise(resolve => setTimeout(resolve, 1_000));
+            await new Promise((resolve) => setTimeout(resolve, 1_000));
         }
 
-        throw new Error(`Timed out waiting for ${this.name} to become ready at ${url} (${lastError})`);
+        throw new Error(
+            `Timed out waiting for ${this.name} to become ready at ${url} (${lastError})`,
+        );
     }
 
     private async assertMysqlRunning(): Promise<void> {
-        if (!await docker.containerIsRunning(mysqlContainer)) {
-            throw new Error(`${this.name} stores its data on the shared MySQL container, which is not running. Start it with: stam services up`);
+        if (!(await docker.containerIsRunning(mysqlContainer))) {
+            throw new Error(
+                `${this.name} stores its data on the shared MySQL container, which is not running. Start it with: stam services up`,
+            );
         }
     }
 
@@ -172,19 +232,76 @@ export class MetabaseService extends SharedDockerService {
      * without tables means those have not run yet.
      */
     private async countTables(context: CliContext, database: string): Promise<number> {
-        const result = await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-N', '-B', '-e', `SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = '${database.replaceAll("'", "''")}'`], { capture: true, verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
+        const result = await docker.run(
+            [
+                'exec',
+                mysqlContainer,
+                'mysql',
+                `-h${localIpv4Host}`,
+                `-u${mysqlRootUser}`,
+                `-p${mysqlRootPassword}`,
+                '-N',
+                '-B',
+                '-e',
+                `SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = '${database.replaceAll("'", "''")}'`,
+            ],
+            {
+                capture: true,
+                verbosity:
+                    context.verbosity === RunVerbosity.Output
+                        ? RunVerbosity.Command
+                        : (context.verbosity ?? RunVerbosity.Quiet),
+            },
+        );
         return Number.parseInt(result.stdout.trim(), 10) || 0;
     }
 
     /** How many rows a table holds, used to tell whether the maps have coordinates to plot. */
     private async countRows(context: CliContext, database: string, table: string): Promise<number> {
         const query = `SELECT COUNT(*) FROM \`${database.replaceAll('`', '``')}\`.\`${table.replaceAll('`', '``')}\``;
-        const result = await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-N', '-B', '-e', query], { capture: true, verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
+        const result = await docker.run(
+            [
+                'exec',
+                mysqlContainer,
+                'mysql',
+                `-h${localIpv4Host}`,
+                `-u${mysqlRootUser}`,
+                `-p${mysqlRootPassword}`,
+                '-N',
+                '-B',
+                '-e',
+                query,
+            ],
+            {
+                capture: true,
+                verbosity:
+                    context.verbosity === RunVerbosity.Output
+                        ? RunVerbosity.Command
+                        : (context.verbosity ?? RunVerbosity.Quiet),
+            },
+        );
         return Number.parseInt(result.stdout.trim(), 10) || 0;
     }
 
     private async createMysqlDatabase(context: CliContext, database: string): Promise<void> {
-        await docker.run(['exec', mysqlContainer, 'mysql', `-h${localIpv4Host}`, `-u${mysqlRootUser}`, `-p${mysqlRootPassword}`, '-e', `CREATE DATABASE IF NOT EXISTS \`${database.replaceAll('`', '``')}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`], { verbosity: context.verbosity === RunVerbosity.Output ? RunVerbosity.Command : context.verbosity ?? RunVerbosity.Quiet });
+        await docker.run(
+            [
+                'exec',
+                mysqlContainer,
+                'mysql',
+                `-h${localIpv4Host}`,
+                `-u${mysqlRootUser}`,
+                `-p${mysqlRootPassword}`,
+                '-e',
+                `CREATE DATABASE IF NOT EXISTS \`${database.replaceAll('`', '``')}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;`,
+            ],
+            {
+                verbosity:
+                    context.verbosity === RunVerbosity.Output
+                        ? RunVerbosity.Command
+                        : (context.verbosity ?? RunVerbosity.Quiet),
+            },
+        );
     }
 
     /**
@@ -194,19 +311,31 @@ export class MetabaseService extends SharedDockerService {
      */
     static dockerArgs(port: number, mysqlPort: number, siteUrl: string): string[] {
         return [
-            'run', '-d',
-            '--name', MetabaseService.container,
-            '--add-host', `${dockerHostGateway}:host-gateway`,
-            '-p', localhostPortMapping(port, metabaseInternalPort),
-            '-e', 'MB_DB_TYPE=mysql',
-            '-e', `MB_DB_HOST=${dockerHostGateway}`,
-            '-e', `MB_DB_PORT=${mysqlPort}`,
-            '-e', `MB_DB_DBNAME=${metabaseAppDatabase}`,
-            '-e', `MB_DB_USER=${mysqlRootUser}`,
-            '-e', `MB_DB_PASS=${mysqlRootPassword}`,
-            '-e', `MB_SITE_URL=${siteUrl}`,
+            'run',
+            '-d',
+            '--name',
+            MetabaseService.container,
+            '--add-host',
+            `${dockerHostGateway}:host-gateway`,
+            '-p',
+            localhostPortMapping(port, metabaseInternalPort),
+            '-e',
+            'MB_DB_TYPE=mysql',
+            '-e',
+            `MB_DB_HOST=${dockerHostGateway}`,
+            '-e',
+            `MB_DB_PORT=${mysqlPort}`,
+            '-e',
+            `MB_DB_DBNAME=${metabaseAppDatabase}`,
+            '-e',
+            `MB_DB_USER=${mysqlRootUser}`,
+            '-e',
+            `MB_DB_PASS=${mysqlRootPassword}`,
+            '-e',
+            `MB_SITE_URL=${siteUrl}`,
             // Skip the demo database and example dashboards Metabase would otherwise create on setup.
-            '-e', 'MB_LOAD_SAMPLE_CONTENT=false',
+            '-e',
+            'MB_LOAD_SAMPLE_CONTENT=false',
             metabaseImage,
         ];
     }

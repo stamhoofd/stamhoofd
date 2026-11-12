@@ -1,4 +1,11 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, field } from '@common/encoding';
+import {
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    MapDecoder,
+    NumberDecoder,
+    field,
+} from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { SetupStepReview } from './SetupStepReview.js';
 import { SetupStepType } from './SetupStepType.js';
@@ -142,7 +149,7 @@ export class SetupSteps extends AutoEncoder {
     }
 
     areAllComplete(): boolean {
-        return Array.from(this.steps.values()).every(s => s.isComplete);
+        return Array.from(this.steps.values()).every((s) => s.isComplete);
     }
 
     getStepsToDoOverview(): { type: SetupStepType; step: SetupStep }[] {
@@ -166,7 +173,7 @@ export class SetupSteps extends AutoEncoder {
 
     getProgress(): { completed: number; total: number } {
         const total = this.steps.size;
-        const completed = Array.from(this.steps.values()).filter(s => s.isComplete).length;
+        const completed = Array.from(this.steps.values()).filter((s) => s.isComplete).length;
         return { completed, total };
     }
 
@@ -184,7 +191,10 @@ export class SetupSteps extends AutoEncoder {
         }
     }
 
-    update(stepType: SetupStepType, { finishedSteps, totalSteps }: { finishedSteps: number; totalSteps: number }) {
+    update(
+        stepType: SetupStepType,
+        { finishedSteps, totalSteps }: { finishedSteps: number; totalSteps: number },
+    ) {
         const step = this.steps.get(stepType);
         if (step) {
             step.update(finishedSteps, totalSteps);

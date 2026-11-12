@@ -5,8 +5,17 @@ import { SimpleError } from '@common/errors';
 import { AuditLog } from '@stamhoofd/models';
 import type { SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { AuditLog as AuditLogStruct, CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
-import { LimitedFilteredRequest, PaginatedResponse, assertSort, getSortFilter } from '@stamhoofd/structures';
+import type {
+    AuditLog as AuditLogStruct,
+    CountFilteredRequest,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
+import {
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    assertSort,
+    getSortFilter,
+} from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
@@ -42,7 +51,7 @@ export class GetAuditLogsEndpoint extends Endpoint<Params, Query, Body, Response
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         if (organization) {
-            if (!await Context.auth.hasFullAccess(organization.id)) {
+            if (!(await Context.auth.hasFullAccess(organization.id))) {
                 throw Context.auth.error();
             }
             if (!Context.auth.hasPlatformFullAccess()) {
@@ -62,13 +71,7 @@ export class GetAuditLogsEndpoint extends Endpoint<Params, Query, Body, Response
             }
         }
 
-        const query = SQL
-            .select(
-                SQL.wildcard(AuditLog.table),
-            )
-            .from(
-                SQL.table(AuditLog.table),
-            );
+        const query = SQL.select(SQL.wildcard(AuditLog.table)).from(SQL.table(AuditLog.table));
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
@@ -153,8 +156,6 @@ export class GetAuditLogsEndpoint extends Endpoint<Params, Query, Body, Response
             });
         }
 
-        return new Response(
-            await GetAuditLogsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetAuditLogsEndpoint.buildData(request.query));
     }
 }

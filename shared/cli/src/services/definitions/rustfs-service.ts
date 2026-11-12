@@ -1,5 +1,15 @@
 import { buildPorts } from '../../context/ports.js';
-import { defaultDomain, localFilesAccessKey, localFilesSecretKey, localhostPortMapping, rustfsContainer, rustfsDataVolume, rustfsImage, rustfsInternalApiPort, rustfsInternalConsolePort } from '../../config/shared-service-config.js';
+import {
+    defaultDomain,
+    localFilesAccessKey,
+    localFilesSecretKey,
+    localhostPortMapping,
+    rustfsContainer,
+    rustfsDataVolume,
+    rustfsImage,
+    rustfsInternalApiPort,
+    rustfsInternalConsolePort,
+} from '../../config/shared-service-config.js';
 import { link } from '../../runtime/ux.js';
 import * as docker from '../docker.js';
 import { SharedDockerService } from '../docker-service.js';
@@ -39,7 +49,27 @@ export class RustfsService extends SharedDockerService {
     }
 
     static dockerArgs(apiPort: number, consolePort: number, domain?: string): string[] {
-        return ['run', '-d', '--name', RustfsService.container, '-p', localhostPortMapping(apiPort, rustfsInternalApiPort), '-p', localhostPortMapping(consolePort, rustfsInternalConsolePort), '-v', `${rustfsDataVolume}:/data`, '-e', `RUSTFS_ACCESS_KEY=${localFilesAccessKey}`, '-e', `RUSTFS_SECRET_KEY=${localFilesSecretKey}`, '-e', 'RUSTFS_CONSOLE_ENABLE=true', ...(domain ? ['-e', 'RUSTFS_SERVER_DOMAINS=' + domain] : []), rustfsImage, '/data'];
+        return [
+            'run',
+            '-d',
+            '--name',
+            RustfsService.container,
+            '-p',
+            localhostPortMapping(apiPort, rustfsInternalApiPort),
+            '-p',
+            localhostPortMapping(consolePort, rustfsInternalConsolePort),
+            '-v',
+            `${rustfsDataVolume}:/data`,
+            '-e',
+            `RUSTFS_ACCESS_KEY=${localFilesAccessKey}`,
+            '-e',
+            `RUSTFS_SECRET_KEY=${localFilesSecretKey}`,
+            '-e',
+            'RUSTFS_CONSOLE_ENABLE=true',
+            ...(domain ? ['-e', 'RUSTFS_SERVER_DOMAINS=' + domain] : []),
+            rustfsImage,
+            '/data',
+        ];
     }
 }
 

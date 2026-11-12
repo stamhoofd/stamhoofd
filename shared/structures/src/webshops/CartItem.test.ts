@@ -18,21 +18,26 @@ describe('Structure.CartItem', () => {
      * client-supplied seat data. Reject these seats regardless of their price:
      * neither a discount nor a surcharge may come from these unrelated seats.
      */
-    it.each([-10_00_00, 10_00_00])('rejects injected seats for products without a seating plan (%i)', (price) => {
-        const product = Product.create({
-            name: 'Ordinary product',
-            prices: [ProductPrice.create({ price: 10_00_00 })],
-        });
-        const item = CartItem.create({
-            product,
-            productPrice: product.prices[0],
-            seats: [CartReservedSeat.create({ price })],
-        });
-        const cart = Cart.create({ items: [item] });
-        const webshop = Webshop.create({ products: [product] });
+    it.each([-10_00_00, 10_00_00])(
+        'rejects injected seats for products without a seating plan (%i)',
+        (price) => {
+            const product = Product.create({
+                name: 'Ordinary product',
+                prices: [ProductPrice.create({ price: 10_00_00 })],
+            });
+            const item = CartItem.create({
+                product,
+                productPrice: product.prices[0],
+                seats: [CartReservedSeat.create({ price })],
+            });
+            const cart = Cart.create({ items: [item] });
+            const webshop = Webshop.create({ products: [product] });
 
-        expect(() => item.validate(webshop, cart)).toThrow(expect.objectContaining({ code: 'invalid_seats' }));
-    });
+            expect(() => item.validate(webshop, cart)).toThrow(
+                expect.objectContaining({ code: 'invalid_seats' }),
+            );
+        },
+    );
 
     it('can contain multiple options for the same multiple choice menu', () => {
         const optionA = Option.create({ name: 'A' });
@@ -181,7 +186,9 @@ describe('Structure.CartItem', () => {
 
         it('createDefault clones the product price so edits do not mutate the webshop structure', () => {
             const { webshop, product, productPrice } = buildWebshop({ allowCustomPrice: true });
-            const cartItem = CartItem.createDefault(product, Cart.create({}), webshop, { admin: false });
+            const cartItem = CartItem.createDefault(product, Cart.create({}), webshop, {
+                admin: false,
+            });
 
             expect(cartItem.productPrice).not.toBe(productPrice);
             cartItem.productPrice.price = 20_00_00;
@@ -196,7 +203,7 @@ describe('Structure.CartItem', () => {
             cart.addItem(buildCartItem(product, 5_00_00));
 
             expect(cart.items).toHaveLength(2);
-            expect(cart.items.map(i => i.productPrice.price)).toEqual([20_00_00, 5_00_00]);
+            expect(cart.items.map((i) => i.productPrice.price)).toEqual([20_00_00, 5_00_00]);
         });
 
         it('merges cart items with the same custom price', () => {
@@ -232,9 +239,18 @@ describe('Structure.CartItem', () => {
             const cart = Cart.create({});
 
             expect(() => buildCartItem(product, null).validate(webshop, cart)).toThrow(/customer/i);
-            expect(() => buildCartItem(product, Customer.create({ firstName: 'J', lastName: 'Doe' })).validate(webshop, cart)).toThrow(/first name/i);
+            expect(() =>
+                buildCartItem(
+                    product,
+                    Customer.create({ firstName: 'J', lastName: 'Doe' }),
+                ).validate(webshop, cart),
+            ).toThrow(/first name/i);
 
-            const item = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe', email: 'john@example.com' }), 3);
+            const item = buildCartItem(
+                product,
+                Customer.create({ firstName: 'John', lastName: 'Doe', email: 'john@example.com' }),
+                3,
+            );
             item.validate(webshop, cart);
             expect(item.amount).toBe(1);
             // Email is disabled by default: only the name is kept
@@ -245,26 +261,67 @@ describe('Structure.CartItem', () => {
             const { webshop, product } = buildWebshop({ email: CustomerFieldRequirement.Required });
             const cart = Cart.create({});
 
-            expect(() => buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' })).validate(webshop, cart)).toThrow(/email/i);
-            expect(() => buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe', email: 'john@example.com' })).validate(webshop, cart)).not.toThrow();
+            expect(() =>
+                buildCartItem(
+                    product,
+                    Customer.create({ firstName: 'John', lastName: 'Doe' }),
+                ).validate(webshop, cart),
+            ).toThrow(/email/i);
+            expect(() =>
+                buildCartItem(
+                    product,
+                    Customer.create({
+                        firstName: 'John',
+                        lastName: 'Doe',
+                        email: 'john@example.com',
+                    }),
+                ).validate(webshop, cart),
+            ).not.toThrow();
         });
 
         it('validates the inline record category', () => {
-            const record = RecordSettings.create({ name: TranslatedString.create('Allergieën'), type: RecordType.Text, required: true });
-            const { webshop, product } = buildWebshop({ recordCategory: RecordCategory.create({ name: TranslatedString.create('Extra'), records: [record] }) });
+            const record = RecordSettings.create({
+                name: TranslatedString.create('Allergieën'),
+                type: RecordType.Text,
+                required: true,
+            });
+            const { webshop, product } = buildWebshop({
+                recordCategory: RecordCategory.create({
+                    name: TranslatedString.create('Extra'),
+                    records: [record],
+                }),
+            });
             const cart = Cart.create({});
-            const item = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' }));
+            const item = buildCartItem(
+                product,
+                Customer.create({ firstName: 'John', lastName: 'Doe' }),
+            );
 
             expect(() => item.validate(webshop, cart)).toThrow();
 
-            item.recordAnswers.set(record.id, RecordTextAnswer.create({ settings: record, value: 'Noten' }));
+            item.recordAnswers.set(
+                record.id,
+                RecordTextAnswer.create({ settings: record, value: 'Noten' }),
+            );
             expect(() => item.validate(webshop, cart)).not.toThrow();
         });
 
         it('lets an admin save a participant without answers to the current questions', () => {
-            const record = RecordSettings.create({ name: TranslatedString.create('Allergieën'), type: RecordType.Text, required: true });
-            const { webshop, product } = buildWebshop({ recordCategory: RecordCategory.create({ name: TranslatedString.create('Extra'), records: [record] }) });
-            const item = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' }));
+            const record = RecordSettings.create({
+                name: TranslatedString.create('Allergieën'),
+                type: RecordType.Text,
+                required: true,
+            });
+            const { webshop, product } = buildWebshop({
+                recordCategory: RecordCategory.create({
+                    name: TranslatedString.create('Extra'),
+                    records: [record],
+                }),
+            });
+            const item = buildCartItem(
+                product,
+                Customer.create({ firstName: 'John', lastName: 'Doe' }),
+            );
 
             expect(() => item.validate(webshop, Cart.create({}), { admin: true })).not.toThrow();
         });
@@ -278,7 +335,11 @@ describe('Structure.CartItem', () => {
             expect(item.amount).toBe(4);
 
             // Filling in a participant does not drop the other tickets
-            const withCustomer = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' }), 4);
+            const withCustomer = buildCartItem(
+                product,
+                Customer.create({ firstName: 'John', lastName: 'Doe' }),
+                4,
+            );
             withCustomer.validate(webshop, Cart.create({}), { admin: true });
             expect(withCustomer.amount).toBe(4);
         });
@@ -286,7 +347,11 @@ describe('Structure.CartItem', () => {
         it('clears the customer when the product does not collect one', () => {
             const product = Product.create({ name: 'Ticket' });
             const webshop = Webshop.create({ products: [product] });
-            const item = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' }), 2);
+            const item = buildCartItem(
+                product,
+                Customer.create({ firstName: 'John', lastName: 'Doe' }),
+                2,
+            );
 
             item.validate(webshop, Cart.create({}));
             expect(item.customer).toBeNull();
@@ -296,14 +361,21 @@ describe('Structure.CartItem', () => {
         it('never merges people into one cart item, and keeps the customer out of the product code used for totals', () => {
             const { product } = buildWebshop();
             const cart = Cart.create({});
-            const john = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' }));
+            const john = buildCartItem(
+                product,
+                Customer.create({ firstName: 'John', lastName: 'Doe' }),
+            );
             cart.addItem(john);
-            cart.addItem(buildCartItem(product, Customer.create({ firstName: 'Jane', lastName: 'Doe' })));
+            cart.addItem(
+                buildCartItem(product, Customer.create({ firstName: 'Jane', lastName: 'Doe' })),
+            );
             // Same name twice: still two people
-            cart.addItem(buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' })));
+            cart.addItem(
+                buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' })),
+            );
 
             expect(cart.items).toHaveLength(3);
-            expect(cart.items.every(i => i.amount === 1)).toBe(true);
+            expect(cart.items.every((i) => i.amount === 1)).toBe(true);
             expect(cart.items[1].codeWithoutFields).toBe(john.codeWithoutFields);
             expect(product.isUnique).toBe(false);
         });
@@ -315,9 +387,18 @@ describe('Structure.CartItem', () => {
      */
     describe('product snapshot with allowMultiple null', () => {
         function createItem(orderMode: WebshopOrderMode) {
-            const product = Product.create({ name: 'Ticket', allowMultiple: null, prices: [ProductPrice.create({ price: 5_0000 })] });
-            const webshop = Webshop.create({ meta: WebshopMetaData.create({ orderMode }), products: [product] });
-            const item = CartItem.createDefault(product, Cart.create({}), webshop, { admin: false });
+            const product = Product.create({
+                name: 'Ticket',
+                allowMultiple: null,
+                prices: [ProductPrice.create({ price: 5_0000 })],
+            });
+            const webshop = Webshop.create({
+                meta: WebshopMetaData.create({ orderMode }),
+                products: [product],
+            });
+            const item = CartItem.createDefault(product, Cart.create({}), webshop, {
+                admin: false,
+            });
             return { product, webshop, item };
         }
 

@@ -17,7 +17,13 @@ type Body = PatchableArrayAutoEncoder<BalanceItemWithPayments>;
 type ResponseBody = BalanceItemWithPayments[];
 
 export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(BalanceItemWithPayments as Decoder<BalanceItemWithPayments>, BalanceItemWithPayments.patchType() as Decoder<AutoEncoderPatchType<BalanceItemWithPayments>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(
+        BalanceItemWithPayments as Decoder<BalanceItemWithPayments>,
+        BalanceItemWithPayments.patchType() as Decoder<
+            AutoEncoderPatchType<BalanceItemWithPayments>
+        >,
+        StringDecoder,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -36,7 +42,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -62,7 +68,10 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 model.organizationId = organization.id;
                 model.createdAt = put.createdAt;
                 model.dueAt = put.dueAt;
-                model.status = put.status === BalanceItemStatus.Hidden ? BalanceItemStatus.Hidden : BalanceItemStatus.Due;
+                model.status =
+                    put.status === BalanceItemStatus.Hidden
+                        ? BalanceItemStatus.Hidden
+                        : BalanceItemStatus.Due;
                 model.VATIncluded = put.VATIncluded;
                 model.VATPercentage = put.VATPercentage;
                 model.VATExcempt = put.VATExcempt;
@@ -124,7 +133,11 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
             for (const patch of request.body.getPatches()) {
                 // Create a new balance item
                 const model = await BalanceItem.getByID(patch.id);
-                if (!model || model.organizationId !== organization.id || !(await Context.auth.canAccessBalanceItems([model], PermissionLevel.Write))) {
+                if (
+                    !model ||
+                    model.organizationId !== organization.id ||
+                    !(await Context.auth.canAccessBalanceItems([model], PermissionLevel.Write))
+                ) {
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'BalanceItem not found',
@@ -155,7 +168,10 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 if (patch.memberId !== undefined) {
                     if (model.memberId) {
                         // Also update old member id outstanding balances
-                        additionalItems.push({ memberId: model.memberId, organizationId: model.organizationId });
+                        additionalItems.push({
+                            memberId: model.memberId,
+                            organizationId: model.organizationId,
+                        });
                     }
                     if (patch.memberId === null) {
                         if (model.userId === null) {
@@ -186,7 +202,8 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 }
 
                 model.name = patch.name ?? model.name;
-                model.description = patch.description === undefined ? model.description : patch.description;
+                model.description =
+                    patch.description === undefined ? model.description : patch.description;
                 model.unitPrice = patch.unitPrice ?? model.unitPrice;
                 model.amount = patch.amount ?? model.amount;
                 model.dueAt = patch.dueAt === undefined ? model.dueAt : patch.dueAt;
@@ -195,21 +212,33 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 const includedBefore = model.VATIncluded;
                 const excemptBefore = model.VATExcempt;
 
-                model.VATIncluded = patch.VATIncluded === undefined ? model.VATIncluded : patch.VATIncluded;
-                model.VATPercentage = patch.VATPercentage === undefined ? model.VATPercentage : patch.VATPercentage;
-                model.VATExcempt = patch.VATExcempt === undefined ? model.VATExcempt : patch.VATExcempt;
+                model.VATIncluded =
+                    patch.VATIncluded === undefined ? model.VATIncluded : patch.VATIncluded;
+                model.VATPercentage =
+                    patch.VATPercentage === undefined ? model.VATPercentage : patch.VATPercentage;
+                model.VATExcempt =
+                    patch.VATExcempt === undefined ? model.VATExcempt : patch.VATExcempt;
 
                 if (model.priceInvoiced !== 0) {
-                    if (model.VATPercentage !== VATPercentageBefore || model.VATIncluded !== includedBefore || model.VATExcempt !== excemptBefore) {
+                    if (
+                        model.VATPercentage !== VATPercentageBefore ||
+                        model.VATIncluded !== includedBefore ||
+                        model.VATExcempt !== excemptBefore
+                    ) {
                         throw new SimpleError({
                             code: 'invoiced',
-                            message: 'You cannot change VAT settings of balance items when the balance item has been invoiced',
+                            message:
+                                'You cannot change VAT settings of balance items when the balance item has been invoiced',
                             human: $t('%1Rt'),
                         });
                     }
                 }
 
-                if ((patch.dueAt !== undefined || patch.unitPrice !== undefined) && model.dueAt && model.price < 0) {
+                if (
+                    (patch.dueAt !== undefined || patch.unitPrice !== undefined) &&
+                    model.dueAt &&
+                    model.price < 0
+                ) {
                     throw new SimpleError({
                         code: 'invalid_price',
                         message: 'Cannot create negative balance in the future',
@@ -255,15 +284,15 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
         await BalanceItemService.flushCaches(organization.id);
 
         // Reload returnedModels
-        const returnedModelsReloaded = await BalanceItem.getByIDs(...returnedModels.map(m => m.id));
-
-        return new Response(
-            await BalanceItem.getStructureWithPayments(returnedModelsReloaded),
+        const returnedModelsReloaded = await BalanceItem.getByIDs(
+            ...returnedModels.map((m) => m.id),
         );
+
+        return new Response(await BalanceItem.getStructureWithPayments(returnedModelsReloaded));
     }
 
     async validateMemberId(memberId: string) {
-        const member = (await Member.getByIdWithUsersAndRegistrations(memberId));
+        const member = await Member.getByIdWithUsersAndRegistrations(memberId);
 
         if (!member || !(await Context.auth.canLinkBalanceItemToMember(member))) {
             throw new SimpleError({
@@ -279,7 +308,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
 
     async validateUserId(balanceItem: BalanceItem, userId: string) {
         const user = await User.getByID(userId);
-        if (!user || !await Context.auth.canLinkBalanceItemToUser(balanceItem, user)) {
+        if (!user || !(await Context.auth.canLinkBalanceItemToUser(balanceItem, user))) {
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'No permission to link balance items to this user',

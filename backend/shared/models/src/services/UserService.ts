@@ -43,7 +43,7 @@ export class UserService {
 
         if (members.length > 0) {
             const existingMembers = await Member.getMembersWithRegistrationForUser(user);
-            const addMembers = members.filter(m => !existingMembers.find(ee => ee.id === m.id));
+            const addMembers = members.filter((m) => !existingMembers.find((ee) => ee.id === m.id));
 
             if (addMembers.length) {
                 console.log('Moving members from user ' + other.id + ' to ' + user.id);
@@ -62,13 +62,15 @@ export class UserService {
 
         await Database.update('UPDATE emails SET userId = ? WHERE userId = ?', [user.id, other.id]);
 
-        await Database.update('UPDATE email_recipients SET userId = ? WHERE userId = ?', [user.id, other.id]);
+        await Database.update('UPDATE email_recipients SET userId = ? WHERE userId = ?', [
+            user.id,
+            other.id,
+        ]);
 
         const queries = [
             'UPDATE event_notifications SET createdBy = ? WHERE createdBy = ?',
             'UPDATE event_notifications SET submittedBy = ? WHERE submittedBy = ?',
             'UPDATE audit_logs SET userId = ? WHERE userId = ?',
-
         ];
         for (const q of queries) {
             await Database.update(q, [user.id, other.id]);

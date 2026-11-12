@@ -1,11 +1,44 @@
 import { Request } from '@node/endpoints';
-import type { Group, Organization, Registration, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import type {
+    Group,
+    Organization,
+    Registration,
+    RegistrationPeriod,
+    Token,
+} from '@stamhoofd/models';
+import {
+    EventFactory,
+    GroupFactory,
+    MemberFactory,
+    OrganizationFactory,
+    OrganizationRegistrationPeriodFactory,
+    Platform,
+    RegistrationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { CountFilteredRequest, EventMeta, GroupCategory, GroupCategorySettings, GroupPrice, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
+import {
+    CountFilteredRequest,
+    EventMeta,
+    GroupCategory,
+    GroupCategorySettings,
+    GroupPrice,
+    GroupStatus,
+    GroupType,
+    LimitedFilteredRequest,
+    NamedObject,
+    OrganizationTag,
+    PermissionRoleDetailed,
+    Permissions,
+    PermissionsResourceKey,
+    ResourcePermissions,
+    SortItemDirection,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetRegistrationsCountEndpoint } from './GetRegistrationsCountEndpoint.js';
@@ -39,39 +72,44 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
 
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
 
-            const registration1 = await new RegistrationFactory({ member: member1, group }).create();
-            const registration2 = await new RegistrationFactory({ member: member2, group }).create();
+            const registration1 = await new RegistrationFactory({
+                member: member1,
+                group,
+            }).create();
+            const registration2 = await new RegistrationFactory({
+                member: member2,
+                group,
+            }).create();
 
             // Try to request members for this group
             const request = Request.get({
@@ -108,35 +146,34 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
 
             // Give permission to a different group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group2.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group2.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -173,46 +210,52 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
 
             // Give permission to a different group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ], [
-                    group2.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                    [
+                        group2.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
 
-            const registration1 = await new RegistrationFactory({ member: member1, group }).create();
-            const registration2 = await new RegistrationFactory({ member: member2, group: group2 }).create();
+            const registration1 = await new RegistrationFactory({
+                member: member1,
+                group,
+            }).create();
+            const registration2 = await new RegistrationFactory({
+                member: member2,
+                group: group2,
+            }).create();
 
             // Try to request members for this group
             const request = Request.get({
@@ -250,35 +293,34 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
 
             // Only give permissions for one group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -317,48 +359,54 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const member3 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const member3 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
             const group3 = await new GroupFactory({ organization, period }).create();
 
             // Give permission for 2 / 3 groups
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ], [
-                    group2.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                    [
+                        group2.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
 
-            const registration1 = await new RegistrationFactory({ member: member1, group }).create();
-            const registration2 = await new RegistrationFactory({ member: member2, group: group2 }).create();
+            const registration1 = await new RegistrationFactory({
+                member: member1,
+                group,
+            }).create();
+            const registration2 = await new RegistrationFactory({
+                member: member2,
+                group: group2,
+            }).create();
             await new RegistrationFactory({ member: member3, group: group3 }).create();
 
             // Try to request registrations for this group
@@ -392,25 +440,21 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const member3 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const member3 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
             const group3 = await new GroupFactory({ organization, period }).create();
@@ -447,27 +491,27 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
 
             const defaultGroup = await new GroupFactory({ organization, period }).create();
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
             await new EventFactory({
                 organization,
                 group,
@@ -485,19 +529,28 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             // Give the user write permissions to all events targeted to the default group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    defaultGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.None,
-                        accessRights: [AccessRight.EventWrite],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        defaultGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.None,
+                            accessRights: [AccessRight.EventWrite],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
 
-            const registration1 = await new RegistrationFactory({ member: member1, group }).create();
-            const registration2 = await new RegistrationFactory({ member: member2, group }).create();
+            const registration1 = await new RegistrationFactory({
+                member: member1,
+                group,
+            }).create();
+            const registration2 = await new RegistrationFactory({
+                member: member2,
+                group,
+            }).create();
 
             // Try to request members for this group
             const request = Request.get({
@@ -532,7 +585,11 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             // The organization already moved on to `period`
             const organization = await new OrganizationFactory({ period }).create();
 
-            const group = await new GroupFactory({ organization, period: previousPeriod, type: GroupType.EventRegistration }).create();
+            const group = await new GroupFactory({
+                organization,
+                period: previousPeriod,
+                type: GroupType.EventRegistration,
+            }).create();
             const event = await new EventFactory({
                 organization,
                 group,
@@ -544,10 +601,17 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.Events,
-                        new Map([[event.id, ResourcePermissions.create({ level: PermissionLevel.Write })]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Events,
+                            new Map([
+                                [
+                                    event.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Write }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
 
@@ -597,7 +661,10 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             const organization = await new OrganizationFactory({ period }).create();
 
             // A membership group in a granted category of the previous period
-            const membershipGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
+            const membershipGroup = await new GroupFactory({
+                organization,
+                period: previousPeriod,
+            }).create();
             const category = GroupCategory.create({
                 settings: GroupCategorySettings.create({ name: 'Takken' }),
                 groupIds: [membershipGroup.id],
@@ -613,7 +680,11 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             // The event, in the same previous period, with a participant who is not a member of
             // any group of the granted category
-            const eventGroup = await new GroupFactory({ organization, period: previousPeriod, type: GroupType.EventRegistration }).create();
+            const eventGroup = await new GroupFactory({
+                organization,
+                period: previousPeriod,
+                type: GroupType.EventRegistration,
+            }).create();
             const event = await new EventFactory({
                 organization,
                 group: eventGroup,
@@ -626,15 +697,34 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
                     resources: new Map([
-                        [PermissionsResourceType.GroupCategories, new Map([[category.id, ResourcePermissions.create({ level: PermissionLevel.Write })]])],
-                        [PermissionsResourceType.Events, new Map([[event.id, ResourcePermissions.create({ level: PermissionLevel.Write })]])],
+                        [
+                            PermissionsResourceType.GroupCategories,
+                            new Map([
+                                [
+                                    category.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Write }),
+                                ],
+                            ]),
+                        ],
+                        [
+                            PermissionsResourceType.Events,
+                            new Map([
+                                [
+                                    event.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Write }),
+                                ],
+                            ]),
+                        ],
                     ]),
                 }),
             }).create();
 
             const token = await SessionService.createSession(user);
             const participant = await new MemberFactory({}).create();
-            const registration = await new RegistrationFactory({ member: participant, group: eventGroup }).create();
+            const registration = await new RegistrationFactory({
+                member: participant,
+                group: eventGroup,
+            }).create();
 
             const request = Request.get({
                 path: baseUrl,
@@ -645,10 +735,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                     filter: {
                         $and: [
                             {
-                                $and: [
-                                    { registeredAt: { $neq: null } },
-                                    { deactivatedAt: null },
-                                ],
+                                $and: [{ registeredAt: { $neq: null } }, { deactivatedAt: null }],
                             },
                             {
                                 groupId: eventGroup.id,
@@ -677,7 +764,11 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             }).create();
 
             const organization = await new OrganizationFactory({ period }).create();
-            const eventGroup = await new GroupFactory({ organization, period: previousPeriod, type: GroupType.EventRegistration }).create();
+            const eventGroup = await new GroupFactory({
+                organization,
+                period: previousPeriod,
+                type: GroupType.EventRegistration,
+            }).create();
             const event = await new EventFactory({
                 organization,
                 group: eventGroup,
@@ -689,10 +780,17 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.Events,
-                        new Map([[event.id, ResourcePermissions.create({ level: PermissionLevel.Write })]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Events,
+                            new Map([
+                                [
+                                    event.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Write }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
 
@@ -726,29 +824,34 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const member3 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const member3 = await new MemberFactory({}).create();
 
             const defaultGroup = await new GroupFactory({ organization, period }).create();
-            const waitingList = await new GroupFactory({ organization, period, type: GroupType.WaitingList }).create();
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration, waitingListId: waitingList.id }).create();
+            const waitingList = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.WaitingList,
+            }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+                waitingListId: waitingList.id,
+            }).create();
 
             await new EventFactory({
                 organization,
@@ -767,19 +870,28 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             // Give the user write permissions to all events targeted to the default group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    defaultGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.None,
-                        accessRights: [AccessRight.EventWrite],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        defaultGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.None,
+                            accessRights: [AccessRight.EventWrite],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
 
-            const registration1 = await new RegistrationFactory({ member: member1, group: waitingList }).create();
-            const registration2 = await new RegistrationFactory({ member: member2, group: waitingList }).create();
+            const registration1 = await new RegistrationFactory({
+                member: member1,
+                group: waitingList,
+            }).create();
+            const registration2 = await new RegistrationFactory({
+                member: member2,
+                group: waitingList,
+            }).create();
             await new RegistrationFactory({ member: member3, group }).create();
 
             // Try to request members for this group
@@ -816,27 +928,27 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
 
             const defaultGroup = await new GroupFactory({ organization, period }).create();
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
             await new EventFactory({
                 organization,
                 group,
@@ -854,13 +966,16 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             // The user can read registrations for default group, but not events for default group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    defaultGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                        accessRights: [],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        defaultGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                            accessRights: [],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -897,27 +1012,27 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
 
             const defaultGroup = await new GroupFactory({ organization, period }).create();
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
 
             // Event for all members of the organization (so no permission to this event)
             await new EventFactory({
@@ -929,13 +1044,16 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             // The user can read members registered for default group, but not events for default group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    defaultGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                        accessRights: [AccessRight.EventWrite],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        defaultGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                            accessRights: [AccessRight.EventWrite],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -972,29 +1090,34 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const member3 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const member3 = await new MemberFactory({}).create();
 
             const defaultGroup = await new GroupFactory({ organization, period }).create();
-            const waitingList = await new GroupFactory({ organization, period, type: GroupType.WaitingList }).create();
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration, waitingListId: waitingList.id }).create();
+            const waitingList = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.WaitingList,
+            }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+                waitingListId: waitingList.id,
+            }).create();
 
             await new EventFactory({
                 organization,
@@ -1013,13 +1136,16 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             // The user can read members registered for default group, but not events for default group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    defaultGroup.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                        accessRights: [],
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        defaultGroup.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                            accessRights: [],
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
@@ -1049,8 +1175,17 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
         test('A platform role on a national event grants access to the registrations of its group and waiting list', async () => {
             const organization = await new OrganizationFactory({ period }).create();
-            const waitingList = await new GroupFactory({ organization, period, type: GroupType.WaitingList }).create();
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration, waitingListId: waitingList.id }).create();
+            const waitingList = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.WaitingList,
+            }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+                waitingListId: waitingList.id,
+            }).create();
             const event = await new EventFactory({
                 group,
                 startDate: period.startDate,
@@ -1058,41 +1193,60 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             }).create();
             expect(event.organizationId).toBeNull();
 
-            const registration = await new RegistrationFactory({ member: await new MemberFactory({}).create(), group }).create();
-            const waitingListRegistration = await new RegistrationFactory({ member: await new MemberFactory({}).create(), group: waitingList }).create();
+            const registration = await new RegistrationFactory({
+                member: await new MemberFactory({}).create(),
+                group,
+            }).create();
+            const waitingListRegistration = await new RegistrationFactory({
+                member: await new MemberFactory({}).create(),
+                group: waitingList,
+            }).create();
 
             const role = PermissionRoleDetailed.create({
                 name: 'National event role',
-                resources: new Map([[
-                    PermissionsResourceType.Events,
-                    new Map([[event.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
-                ]]),
+                resources: new Map([
+                    [
+                        PermissionsResourceType.Events,
+                        new Map([
+                            [event.id, ResourcePermissions.create({ level: PermissionLevel.Read })],
+                        ]),
+                    ],
+                ]),
             });
             const platform = await Platform.getForEditing();
             platform.privateConfig.roles.push(role);
             await platform.save();
 
             const user = await new UserFactory({
-                globalPermissions: Permissions.create({ level: PermissionLevel.None, roles: [role] }),
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [role],
+                }),
             }).create();
             const userWithoutRole = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.None }),
             }).create();
 
-            const fetchRegistrations = async (token: Token, groupId: string) => await testServer.test(endpoint, Request.get({
-                path: baseUrl,
-                query: new LimitedFilteredRequest({ filter: { groupId }, limit: 10 }),
-                headers: {
-                    authorization: 'Bearer ' + token.accessToken,
-                },
-            }));
+            const fetchRegistrations = async (token: Token, groupId: string) =>
+                await testServer.test(
+                    endpoint,
+                    Request.get({
+                        path: baseUrl,
+                        query: new LimitedFilteredRequest({ filter: { groupId }, limit: 10 }),
+                        headers: {
+                            authorization: 'Bearer ' + token.accessToken,
+                        },
+                    }),
+                );
 
             const token = await SessionService.createSession(user);
             const response = await fetchRegistrations(token, group.id);
-            expect(response.body.results.registrations.map(r => r.id)).toEqual([registration.id]);
+            expect(response.body.results.registrations.map((r) => r.id)).toEqual([registration.id]);
 
             const waitingListResponse = await fetchRegistrations(token, waitingList.id);
-            expect(waitingListResponse.body.results.registrations.map(r => r.id)).toEqual([waitingListRegistration.id]);
+            expect(waitingListResponse.body.results.registrations.map((r) => r.id)).toEqual([
+                waitingListRegistration.id,
+            ]);
 
             const tokenWithoutRole = await SessionService.createSession(userWithoutRole);
             await expect(fetchRegistrations(tokenWithoutRole, group.id)).rejects.toThrow(
@@ -1106,14 +1260,21 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             });
             const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
             const event = await new EventFactory({
                 group,
                 startDate: period.startDate,
                 endDate: period.endDate,
             }).create();
             expect(event.organizationId).toBeNull();
-            await new RegistrationFactory({ member: await new MemberFactory({}).create(), group }).create();
+            await new RegistrationFactory({
+                member: await new MemberFactory({}).create(),
+                group,
+            }).create();
 
             role.resources.set(
                 PermissionsResourceType.Events,
@@ -1145,7 +1306,9 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
     describe('Tag-scoped platform admins', () => {
         const tags = {
             platform: OrganizationTag.create({ name: 'Tag-scoped registrations (platform)' }),
-            organization: OrganizationTag.create({ name: 'Tag-scoped registrations (organization)' }),
+            organization: OrganizationTag.create({
+                name: 'Tag-scoped registrations (organization)',
+            }),
         };
         let originalTags: OrganizationTag[];
 
@@ -1162,57 +1325,82 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             await platform.save();
         });
 
-        test.each(['platform', 'organization'] as const)('Lists registrations of every period of tagged organizations only (userMode %s)', async (userMode) => {
-            TestUtils.setEnvironment('userMode', userMode);
-            const tag = tags[userMode];
+        test.each(['platform', 'organization'] as const)(
+            'Lists registrations of every period of tagged organizations only (userMode %s)',
+            async (userMode) => {
+                TestUtils.setEnvironment('userMode', userMode);
+                const tag = tags[userMode];
 
-            const organization = await new OrganizationFactory({ tags: [tag.id] }).create();
-            const otherOrganization = await new OrganizationFactory({}).create();
-            const previousPeriod = await new RegistrationPeriodFactory({
-                organization: userMode === 'organization' ? organization : undefined,
-                startDate: new Date(2023, 0, 1),
-                endDate: new Date(2023, 11, 31),
-            }).create();
+                const organization = await new OrganizationFactory({ tags: [tag.id] }).create();
+                const otherOrganization = await new OrganizationFactory({}).create();
+                const previousPeriod = await new RegistrationPeriodFactory({
+                    organization: userMode === 'organization' ? organization : undefined,
+                    startDate: new Date(2023, 0, 1),
+                    endDate: new Date(2023, 11, 31),
+                }).create();
 
-            const currentGroup = await new GroupFactory({ organization }).create();
-            const previousPeriodGroup = await new GroupFactory({ organization, period: previousPeriod }).create();
-            const otherGroup = await new GroupFactory({ organization: otherOrganization }).create();
+                const currentGroup = await new GroupFactory({ organization }).create();
+                const previousPeriodGroup = await new GroupFactory({
+                    organization,
+                    period: previousPeriod,
+                }).create();
+                const otherGroup = await new GroupFactory({
+                    organization: otherOrganization,
+                }).create();
 
-            const member = await new MemberFactory({}).create();
-            const currentRegistration = await new RegistrationFactory({ member, group: currentGroup }).create();
-            const previousPeriodRegistration = await new RegistrationFactory({ member, group: previousPeriodGroup }).create();
-            await new RegistrationFactory({ member, group: otherGroup }).create();
+                const member = await new MemberFactory({}).create();
+                const currentRegistration = await new RegistrationFactory({
+                    member,
+                    group: currentGroup,
+                }).create();
+                const previousPeriodRegistration = await new RegistrationFactory({
+                    member,
+                    group: previousPeriodGroup,
+                }).create();
+                await new RegistrationFactory({ member, group: otherGroup }).create();
 
-            // Archived groups require full access to the organization
-            const archivedGroup = await new GroupFactory({ organization }).create();
-            archivedGroup.status = GroupStatus.Archived;
-            await archivedGroup.save();
-            await new RegistrationFactory({ member, group: archivedGroup }).create();
+                // Archived groups require full access to the organization
+                const archivedGroup = await new GroupFactory({ organization }).create();
+                archivedGroup.status = GroupStatus.Archived;
+                await archivedGroup.save();
+                await new RegistrationFactory({ member, group: archivedGroup }).create();
 
-            const user = await new UserFactory({
-                globalPermissions: Permissions.create({
-                    level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.OrganizationTags, new Map([[
-                            tag.id,
-                            ResourcePermissions.create({ level: PermissionLevel.Read }),
-                        ]]),
-                    ]]),
-                }),
-            }).create();
-            const token = await SessionService.createSession(user);
+                const user = await new UserFactory({
+                    globalPermissions: Permissions.create({
+                        level: PermissionLevel.None,
+                        resources: new Map([
+                            [
+                                PermissionsResourceType.OrganizationTags,
+                                new Map([
+                                    [
+                                        tag.id,
+                                        ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                    ],
+                                ]),
+                            ],
+                        ]),
+                    }),
+                }).create();
+                const token = await SessionService.createSession(user);
 
-            const response = await testServer.test(endpoint, Request.get({
-                path: baseUrl,
-                query: new LimitedFilteredRequest({ limit: 10 }),
-                headers: {
-                    authorization: 'Bearer ' + token.accessToken,
-                },
-            }));
+                const response = await testServer.test(
+                    endpoint,
+                    Request.get({
+                        path: baseUrl,
+                        query: new LimitedFilteredRequest({ limit: 10 }),
+                        headers: {
+                            authorization: 'Bearer ' + token.accessToken,
+                        },
+                    }),
+                );
 
-            expect(response.status).toBe(200);
-            expect(response.body.results.registrations.map(r => r.id)).toIncludeSameMembers([currentRegistration.id, previousPeriodRegistration.id]);
-        });
+                expect(response.status).toBe(200);
+                expect(response.body.results.registrations.map((r) => r.id)).toIncludeSameMembers([
+                    currentRegistration.id,
+                    previousPeriodRegistration.id,
+                ]);
+            },
+        );
     });
 
     describe('Default filtering', () => {
@@ -1226,56 +1414,67 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const member3 = await new MemberFactory({ }).create();
-            const member4 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const member3 = await new MemberFactory({}).create();
+            const member4 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
             const group3 = await new GroupFactory({ organization, period }).create();
 
-            const group4 = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group4 = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
 
             // Give permission for 2 / 3 groups + one event group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ], [
-                    group2.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ], [
-                    group4.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                    [
+                        group2.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                    [
+                        group4.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
 
-            const registration1 = await new RegistrationFactory({ member: member1, group }).create();
-            const registration2 = await new RegistrationFactory({ member: member2, group: group2 }).create();
+            const registration1 = await new RegistrationFactory({
+                member: member1,
+                group,
+            }).create();
+            const registration2 = await new RegistrationFactory({
+                member: member2,
+                group: group2,
+            }).create();
             await new RegistrationFactory({ member: member3, group: group3 }).create();
             await new RegistrationFactory({ member: member4, group: group4 }).create();
 
@@ -1312,48 +1511,63 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
             const resources = new Map();
 
-            const organization = await new OrganizationFactory({ period, roles: [role] })
-                .create();
+            const organization = await new OrganizationFactory({ period, roles: [role] }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    roles: [
-                        role,
-                    ],
+                    roles: [role],
                     resources,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
-            const member1 = await new MemberFactory({ }).create();
-            const member2 = await new MemberFactory({ }).create();
-            const member3 = await new MemberFactory({ }).create();
-            const member4 = await new MemberFactory({ }).create();
+            const member1 = await new MemberFactory({}).create();
+            const member2 = await new MemberFactory({}).create();
+            const member3 = await new MemberFactory({}).create();
+            const member4 = await new MemberFactory({}).create();
             const group = await new GroupFactory({ organization, period }).create();
             const group2 = await new GroupFactory({ organization, period }).create();
             const group3 = await new GroupFactory({ organization, period }).create();
 
-            const group4 = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group4 = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
 
             // Give permission to all groups
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    PermissionsResourceKey.CurrentPeriod,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Read,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        PermissionsResourceKey.CurrentPeriod,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Read,
+                        }),
+                    ],
+                ]),
             );
 
             await user.save();
 
-            const registration1 = await new RegistrationFactory({ member: member1, group }).create();
-            const registration2 = await new RegistrationFactory({ member: member2, group: group2 }).create();
-            const registration3 = await new RegistrationFactory({ member: member3, group: group3 }).create();
-            const registration4 = await new RegistrationFactory({ member: member4, group: group4 }).create();
+            const registration1 = await new RegistrationFactory({
+                member: member1,
+                group,
+            }).create();
+            const registration2 = await new RegistrationFactory({
+                member: member2,
+                group: group2,
+            }).create();
+            const registration3 = await new RegistrationFactory({
+                member: member3,
+                group: group3,
+            }).create();
+            const registration4 = await new RegistrationFactory({
+                member: member4,
+                group: group4,
+            }).create();
 
             // Try to request all members
             const request = Request.get({
@@ -1397,19 +1611,29 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             }).create();
 
             const token = await SessionService.createSession(user);
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
 
-            group.settings.prices = [...new Set(priceNames)].map(name => GroupPrice.create({
-                name: new TranslatedString(name),
-            }));
+            group.settings.prices = [...new Set(priceNames)].map((name) =>
+                GroupPrice.create({
+                    name: new TranslatedString(name),
+                }),
+            );
             await group.save();
 
             const registrations: Registration[] = [];
 
             for (const priceName of priceNames) {
                 const member = await new MemberFactory({}).create();
-                const groupPrice = group.settings.prices.find(p => p.name.toString() === priceName)!;
-                registrations.push(await new RegistrationFactory({ member, group, groupPrice }).create());
+                const groupPrice = group.settings.prices.find(
+                    (p) => p.name.toString() === priceName,
+                )!;
+                registrations.push(
+                    await new RegistrationFactory({ member, group, groupPrice }).create(),
+                );
             }
 
             return { host: organization.getApiHost(), token, group, registrations };
@@ -1422,9 +1646,25 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
          *
          * Returns the ids of all registrations across all pages, in the order they were received.
          */
-        async function fetchAllPages({ host, token, groupId, sort, limit }: { host: string; token: Token; groupId: string; sort: SortList; limit: number }) {
+        async function fetchAllPages({
+            host,
+            token,
+            groupId,
+            sort,
+            limit,
+        }: {
+            host: string;
+            token: Token;
+            groupId: string;
+            sort: SortList;
+            limit: number;
+        }) {
             const ids: string[] = [];
-            let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ filter: { groupId }, sort, limit });
+            let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({
+                filter: { groupId },
+                sort,
+                limit,
+            });
             let pages = 0;
 
             while (query) {
@@ -1440,7 +1680,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 const response = await testServer.test(endpoint, request);
                 expect(response.status).toBe(200);
 
-                ids.push(...response.body.results.registrations.map(r => r.id));
+                ids.push(...response.body.results.registrations.map((r) => r.id));
                 query = response.body.next;
                 pages += 1;
 
@@ -1454,7 +1694,13 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
 
         test('Registrations are sorted by group price ascending across all pages', async () => {
             // Deliberately not in alphabetical order, so a passing test cannot be explained by insertion order
-            const { host, token, group, registrations } = await setupEventRegistrations(['Weekend', 'Dagtarief', 'Kampprijs', 'Broer of zus', 'Dagtarief']);
+            const { host, token, group, registrations } = await setupEventRegistrations([
+                'Weekend',
+                'Dagtarief',
+                'Kampprijs',
+                'Broer of zus',
+                'Dagtarief',
+            ]);
             const [weekend, day1, camp, sibling, day2] = registrations;
 
             // A limit lower than the total forces the endpoint to build a next page filter from getValue
@@ -1466,16 +1712,17 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 limit: 2,
             });
 
-            expect(ids).toEqual([
-                sibling.id,
-                ...[day1.id, day2.id].sort(),
-                camp.id,
-                weekend.id,
-            ]);
+            expect(ids).toEqual([sibling.id, ...[day1.id, day2.id].sort(), camp.id, weekend.id]);
         });
 
         test('Registrations are sorted by group price descending across all pages', async () => {
-            const { host, token, group, registrations } = await setupEventRegistrations(['Weekend', 'Dagtarief', 'Kampprijs', 'Broer of zus', 'Dagtarief']);
+            const { host, token, group, registrations } = await setupEventRegistrations([
+                'Weekend',
+                'Dagtarief',
+                'Kampprijs',
+                'Broer of zus',
+                'Dagtarief',
+            ]);
             const [weekend, day1, camp, sibling, day2] = registrations;
 
             const ids = await fetchAllPages({
@@ -1495,7 +1742,11 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
         });
 
         test('Registrations are sorted by the group price name in the language of the request', async () => {
-            const { host, token, group, registrations } = await setupEventRegistrations(['Beta', 'Mango', 'Zebra']);
+            const { host, token, group, registrations } = await setupEventRegistrations([
+                'Beta',
+                'Mango',
+                'Zebra',
+            ]);
             const [beta, mango, zebra] = registrations;
 
             // A translated name has to be sorted (and paginated) on the value the requester sees, not on another language
@@ -1514,15 +1765,15 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 limit: 1,
             });
 
-            expect(ids).toEqual([
-                zebra.id,
-                beta.id,
-                mango.id,
-            ]);
+            expect(ids).toEqual([zebra.id, beta.id, mango.id]);
         });
 
         test('Filtering on a group price id keeps working', async () => {
-            const { host, token, group, registrations } = await setupEventRegistrations(['Weekend', 'Dagtarief', 'Kampprijs']);
+            const { host, token, group, registrations } = await setupEventRegistrations([
+                'Weekend',
+                'Dagtarief',
+                'Kampprijs',
+            ]);
             const [, dayRegistration] = registrations;
 
             const request = Request.get({
@@ -1570,46 +1821,72 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.Groups,
-                        new Map([[allowedGroup.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Groups,
+                            new Map([
+                                [
+                                    allowedGroup.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
             const token = await SessionService.createSession(user);
             headers = { authorization: 'Bearer ' + token.accessToken };
 
-            const allowedMember = await new MemberFactory({ firstName: 'Allowed', lastName: 'Member' }).create();
-            const hiddenMember = await new MemberFactory({ firstName: 'Hidden', lastName: 'Member' }).create();
+            const allowedMember = await new MemberFactory({
+                firstName: 'Allowed',
+                lastName: 'Member',
+            }).create();
+            const hiddenMember = await new MemberFactory({
+                firstName: 'Hidden',
+                lastName: 'Member',
+            }).create();
 
-            allowedRegistration = await new RegistrationFactory({ member: allowedMember, group: allowedGroup }).create();
+            allowedRegistration = await new RegistrationFactory({
+                member: allowedMember,
+                group: allowedGroup,
+            }).create();
             await new RegistrationFactory({ member: hiddenMember, group: forbiddenGroup }).create();
         });
 
         const fetchIds = async (filter: StamhoofdFilter) => {
-            const response = await testServer.test(endpoint, Request.get({
-                path: baseUrl,
-                host: organization.getApiHost(),
-                query: new LimitedFilteredRequest({ filter, limit: 10 }),
-                headers,
-            }));
+            const response = await testServer.test(
+                endpoint,
+                Request.get({
+                    path: baseUrl,
+                    host: organization.getApiHost(),
+                    query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                    headers,
+                }),
+            );
             expect(response.status).toBe(200);
-            return response.body.results.registrations.map(r => r.id);
+            return response.body.results.registrations.map((r) => r.id);
         };
 
         const count = async (filter: StamhoofdFilter) => {
-            const response = await testServer.test(new GetRegistrationsCountEndpoint(), Request.get({
-                path: `${baseUrl}/count`,
-                host: organization.getApiHost(),
-                query: new CountFilteredRequest({ filter }),
-                headers,
-            }));
+            const response = await testServer.test(
+                new GetRegistrationsCountEndpoint(),
+                Request.get({
+                    path: `${baseUrl}/count`,
+                    host: organization.getApiHost(),
+                    query: new CountFilteredRequest({ filter }),
+                    headers,
+                }),
+            );
             return response.body.count;
         };
 
         const expectDenied = async (filter: StamhoofdFilter) => {
-            await expect(fetchIds(filter)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
-            await expect(count(filter)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(fetchIds(filter)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
+            await expect(count(filter)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         };
 
         const expectVisible = async (filter: StamhoofdFilter, registrationIds: string[]) => {
@@ -1624,19 +1901,41 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             await expectVisible([{ groupId: allowedGroup.id, deactivatedAt: null }], expected);
             await expectVisible({ $and: [{ groupId: allowedGroup.id }] }, expected);
             await expectVisible({ $and: [[{ groupId: allowedGroup.id }]] }, expected);
-            await expectVisible([{ $and: [{ groupId: allowedGroup.id }] }, { member: { $elemMatch: { lastName: 'Member' } } }], expected);
-            await expectVisible([{ groupId: { $: '$rel', value: allowedGroup.id, name: 'Allowed' } }], expected);
+            await expectVisible(
+                [
+                    { $and: [{ groupId: allowedGroup.id }] },
+                    { member: { $elemMatch: { lastName: 'Member' } } },
+                ],
+                expected,
+            );
+            await expectVisible(
+                [{ groupId: { $: '$rel', value: allowedGroup.id, name: 'Allowed' } }],
+                expected,
+            );
         });
 
         test('A group filter inside an $or does not lift the scope filter', async () => {
-            const orFilter: StamhoofdFilter = { $or: [{ groupId: allowedGroup.id }, { member: { $elemMatch: { firstName: 'Hidden' } } }] };
+            const orFilter: StamhoofdFilter = {
+                $or: [
+                    { groupId: allowedGroup.id },
+                    { member: { $elemMatch: { firstName: 'Hidden' } } },
+                ],
+            };
             const expected = [allowedRegistration.id];
 
             await expectVisible(orFilter, expected);
             await expectVisible([orFilter], expected);
             await expectVisible({ $and: [orFilter] }, expected);
             await expectVisible({ $and: [[orFilter]] }, expected);
-            await expectVisible({ $or: [{ $and: [{ groupId: allowedGroup.id }] }, { member: { $elemMatch: { firstName: 'Hidden' } } }] }, expected);
+            await expectVisible(
+                {
+                    $or: [
+                        { $and: [{ groupId: allowedGroup.id }] },
+                        { member: { $elemMatch: { firstName: 'Hidden' } } },
+                    ],
+                },
+                expected,
+            );
             await expectVisible([{ member: { $elemMatch: { firstName: 'Hidden' } } }], []);
         });
 
@@ -1644,7 +1943,9 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             await expectVisible({ $not: { groupId: allowedGroup.id } }, []);
             await expectVisible({ $and: [{ $not: { groupId: allowedGroup.id } }] }, []);
             await expectVisible([{ $not: { groupId: allowedGroup.id } }], []);
-            await expectVisible({ $not: { member: { $elemMatch: { firstName: 'Hidden' } } } }, [allowedRegistration.id]);
+            await expectVisible({ $not: { member: { $elemMatch: { firstName: 'Hidden' } } } }, [
+                allowedRegistration.id,
+            ]);
         });
 
         test('An $and object is applied as a normal conjunction', async () => {
@@ -1653,32 +1954,72 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
         });
 
         test('Extra conditions next to the group filter can only narrow the result', async () => {
-            await expectVisible({
-                $and: [{ groupId: allowedGroup.id }],
-                $or: [{ member: { $elemMatch: { firstName: 'Hidden' } } }, { member: { $elemMatch: { firstName: 'Allowed' } } }],
-            }, [allowedRegistration.id]);
-            await expectVisible([{ groupId: allowedGroup.id }, { member: { $elemMatch: { firstName: 'Hidden' } } }], []);
-            await expectVisible([{ groupId: { $in: [allowedGroup.id], $neq: allowedGroup.id } }], []);
+            await expectVisible(
+                {
+                    $and: [{ groupId: allowedGroup.id }],
+                    $or: [
+                        { member: { $elemMatch: { firstName: 'Hidden' } } },
+                        { member: { $elemMatch: { firstName: 'Allowed' } } },
+                    ],
+                },
+                [allowedRegistration.id],
+            );
+            await expectVisible(
+                [{ groupId: allowedGroup.id }, { member: { $elemMatch: { firstName: 'Hidden' } } }],
+                [],
+            );
+            await expectVisible(
+                [{ groupId: { $in: [allowedGroup.id], $neq: allowedGroup.id } }],
+                [],
+            );
         });
 
         test('groupId only accepts a plain id or an $in list', async () => {
-            await expect(fetchIds([{ groupId: allowedGroup.id }, { groupId: { $neq: allowedGroup.id } }])).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
-            await expect(fetchIds([{ groupId: { $eq: forbiddenGroup.id } }])).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
-            await expect(fetchIds([{ groupId: { $in: [] } }])).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
+            await expect(
+                fetchIds([{ groupId: allowedGroup.id }, { groupId: { $neq: allowedGroup.id } }]),
+            ).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
+            await expect(fetchIds([{ groupId: { $eq: forbiddenGroup.id } }])).rejects.toThrow(
+                STExpect.errorWithCode('invalid_field'),
+            );
+            await expect(fetchIds([{ groupId: { $in: [] } }])).rejects.toThrow(
+                STExpect.errorWithCode('invalid_field'),
+            );
         });
 
         test('A forbidden group anywhere in the filter is rejected', async () => {
             await expectDenied([{ groupId: forbiddenGroup.id }]);
             await expectDenied([{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }]);
-            await expectDenied({ $and: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }] });
-            await expectDenied({ $and: [{ groupId: allowedGroup.id }], $or: [{ groupId: forbiddenGroup.id }, { groupId: allowedGroup.id }] });
-            await expectDenied({ $or: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }] });
-            await expectDenied([{ $or: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }] }]);
+            await expectDenied({
+                $and: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }],
+            });
+            await expectDenied({
+                $and: [{ groupId: allowedGroup.id }],
+                $or: [{ groupId: forbiddenGroup.id }, { groupId: allowedGroup.id }],
+            });
+            await expectDenied({
+                $or: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }],
+            });
+            await expectDenied([
+                { $or: [{ groupId: allowedGroup.id }, { groupId: forbiddenGroup.id }] },
+            ]);
             await expectDenied({ $not: { groupId: forbiddenGroup.id } });
             await expectDenied([{ groupId: { $in: [allowedGroup.id, forbiddenGroup.id] } }]);
-            await expectDenied([{ groupId: { $: '$rel', value: forbiddenGroup.id, name: 'Forbidden' } }]);
-            await expectDenied([{ groupId: { $in: [{ $: '$rel', value: forbiddenGroup.id, name: 'Forbidden' }] } }]);
-            await expectDenied([{ groupId: allowedGroup.id }, { member: { $elemMatch: { registrations: { $elemMatch: { groupId: forbiddenGroup.id } } } } }]);
+            await expectDenied([
+                { groupId: { $: '$rel', value: forbiddenGroup.id, name: 'Forbidden' } },
+            ]);
+            await expectDenied([
+                { groupId: { $in: [{ $: '$rel', value: forbiddenGroup.id, name: 'Forbidden' }] } },
+            ]);
+            await expectDenied([
+                { groupId: allowedGroup.id },
+                {
+                    member: {
+                        $elemMatch: {
+                            registrations: { $elemMatch: { groupId: forbiddenGroup.id } },
+                        },
+                    },
+                },
+            ]);
         });
 
         test('A user without any group access cannot use a wrapped filter to see registrations', async () => {
@@ -1692,16 +2033,28 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             const filters: StamhoofdFilter[] = [
                 [{ groupId: allowedGroup.id }],
                 { $or: [{ groupId: allowedGroup.id }] },
-                [{ $or: [{ groupId: allowedGroup.id }, { member: { $elemMatch: { firstName: 'Hidden' } } }] }],
+                [
+                    {
+                        $or: [
+                            { groupId: allowedGroup.id },
+                            { member: { $elemMatch: { firstName: 'Hidden' } } },
+                        ],
+                    },
+                ],
                 { $not: { groupId: allowedGroup.id } },
             ];
             for (const filter of filters) {
-                await expect(testServer.test(endpoint, Request.get({
-                    path: baseUrl,
-                    host: organization.getApiHost(),
-                    query: new LimitedFilteredRequest({ filter, limit: 10 }),
-                    headers: noAccessHeaders,
-                }))).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+                await expect(
+                    testServer.test(
+                        endpoint,
+                        Request.get({
+                            path: baseUrl,
+                            host: organization.getApiHost(),
+                            query: new LimitedFilteredRequest({ filter, limit: 10 }),
+                            headers: noAccessHeaders,
+                        }),
+                    ),
+                ).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
             }
         });
     });

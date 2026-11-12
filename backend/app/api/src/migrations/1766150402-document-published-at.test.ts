@@ -17,7 +17,17 @@ describe('migration.document-published-at', () => {
         const document6 = await createDocument(DocumentStatus.Draft, new Date(2025, 3, 9));
 
         // reset published at (save does not update published at automatically)
-        await SQL.update(DocumentTemplate.table).set('publishedAt', null).where('id', [document1.id, document2.id, document3.id, document4.id, document5.id, document6.id]).update();
+        await SQL.update(DocumentTemplate.table)
+            .set('publishedAt', null)
+            .where('id', [
+                document1.id,
+                document2.id,
+                document3.id,
+                document4.id,
+                document5.id,
+                document6.id,
+            ])
+            .update();
 
         // act
         await initPublishedAtForPublishedDocuments();
@@ -43,4 +53,4 @@ describe('migration.document-published-at', () => {
 
 async function createDocument(status: DocumentStatus, createdAt: Date) {
     return await new DocumentTemplateFactory({ groups: [], status, createdAt }).create();
-};
+}

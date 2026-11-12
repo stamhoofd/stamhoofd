@@ -61,13 +61,18 @@ export class AddressValidatorStatic {
 
         if (address.country !== Country.Belgium && address.country !== Country.Netherlands) {
             // No validation for other countries
-            return ValidatedAddress.create(Object.assign({ ...address }, {
-                postalCode: address.postalCode,
-                city: address.city,
-                cityId: 'unknown',
-                parentCityId: null,
-                provinceId: 'unknown',
-            }));
+            return ValidatedAddress.create(
+                Object.assign(
+                    { ...address },
+                    {
+                        postalCode: address.postalCode,
+                        city: address.city,
+                        cityId: 'unknown',
+                        parentCityId: null,
+                        provinceId: 'unknown',
+                    },
+                ),
+            );
         }
 
         const city = await PostalCode.getCity(postalCode, address.city, address.country);
@@ -104,7 +109,7 @@ export class AddressValidatorStatic {
                 let bestStreet: Street | undefined = undefined;
                 for (const street of streets) {
                     const score = StringCompare.typoCount(street.name, address.street);
-                    if ((bestStreet === undefined || score < bestScore)) {
+                    if (bestStreet === undefined || score < bestScore) {
                         bestScore = score;
                         bestStreet = street;
                     }
@@ -118,7 +123,7 @@ export class AddressValidatorStatic {
                     bestStreet = undefined;
                     for (const street of streets) {
                         const score = StringCompare.compare(street.name, address.street);
-                        if ((bestStreet === undefined || score > bestScore)) {
+                        if (bestStreet === undefined || score > bestScore) {
                             bestScore = score;
                             bestStreet = street;
                         }
@@ -145,17 +150,25 @@ export class AddressValidatorStatic {
             }
         }
 
-        return ValidatedAddress.create(Object.assign({ ...address }, {
-            postalCode: address.country === Country.Belgium ? postalCode : address.postalCode,
-            city: city.name, // override misspelled addresses
-            cityId: city.id,
-            parentCityId: city.parentCityId,
-            provinceId: city.provinceId,
-        }));
+        return ValidatedAddress.create(
+            Object.assign(
+                { ...address },
+                {
+                    postalCode:
+                        address.country === Country.Belgium ? postalCode : address.postalCode,
+                    city: city.name, // override misspelled addresses
+                    cityId: city.id,
+                    parentCityId: city.parentCityId,
+                    provinceId: city.provinceId,
+                },
+            ),
+        );
     }
 
     async downloadStreets(country: Country, city: string): Promise<string[]> {
-        let url: string | undefined = 'https://api.basisregisters.vlaanderen.be/v2/straatnamen?gemeentenaam=' + encodeURIComponent(city);
+        let url: string | undefined =
+            'https://api.basisregisters.vlaanderen.be/v2/straatnamen?gemeentenaam=' +
+            encodeURIComponent(city);
         const streetNames: string[] = [];
 
         try {
@@ -169,8 +182,12 @@ export class AddressValidatorStatic {
                 });
 
                 // TypeScript is going insane here, hence the weird type casting
-                const result = new ObjectData(response.data, { version: 0 }).decode(StraatnamenResult as Decoder<StraatnamenResult>) as any as StraatnamenResult;
-                const streets = result.straatnamen.map(street => street.straatnaam.geografischeNaam.spelling);
+                const result = new ObjectData(response.data, { version: 0 }).decode(
+                    StraatnamenResult as Decoder<StraatnamenResult>,
+                ) as any as StraatnamenResult;
+                const streets = result.straatnamen.map(
+                    (street) => street.straatnaam.geografischeNaam.spelling,
+                );
 
                 streetNames.push(...streets);
                 url = result.volgende;
@@ -190,7 +207,9 @@ export class AddressValidatorStatic {
         }
 
         await Database.delete('DELETE from `streets` WHERE `cityId` = ?', [city.id]);
-        await Database.insert('INSERT INTO `streets` (`id`, `name`, `cityId`) VALUES ?', [streetNames.map(street => [uuidv4(), street, city.id])]);
+        await Database.insert('INSERT INTO `streets` (`id`, `name`, `cityId`) VALUES ?', [
+            streetNames.map((street) => [uuidv4(), street, city.id]),
+        ]);
     }
 
     async syncAll(): Promise<void> {
@@ -208,19 +227,25 @@ export class AddressValidatorStatic {
         let lastCityId = '';
         async function syncNext() {
             // Wait 24 hours between every full update
-            if (lastFullCitySync && lastFullCitySync > new Date(new Date().getTime() - 24 * 60 * 60 * 1000)) {
+            if (
+                lastFullCitySync &&
+                lastFullCitySync > new Date(new Date().getTime() - 24 * 60 * 60 * 1000)
+            ) {
                 console.log('Skip city sync');
                 return;
             }
 
-            const cities = await City.where({
-                id: { sign: '>', value: lastCityId },
-                country: Country.Belgium,
-                parentCityId: null,
-            }, {
-                limit: 1,
-                sort: ['id'],
-            });
+            const cities = await City.where(
+                {
+                    id: { sign: '>', value: lastCityId },
+                    country: Country.Belgium,
+                    parentCityId: null,
+                },
+                {
+                    limit: 1,
+                    sort: ['id'],
+                },
+            );
 
             if (cities.length == 0) {
                 // Wait an half hour before starting again

@@ -10,10 +10,14 @@ export enum PaymentStatus {
 export class PaymentStatusHelper {
     static getName(method: PaymentStatus): string {
         switch (method) {
-            case PaymentStatus.Pending: return $t('%mu');
-            case PaymentStatus.Created: return $t('%mu');
-            case PaymentStatus.Succeeded: return $t('%mv');
-            case PaymentStatus.Failed: return $t('%mw');
+            case PaymentStatus.Pending:
+                return $t('%mu');
+            case PaymentStatus.Created:
+                return $t('%mu');
+            case PaymentStatus.Succeeded:
+                return $t('%mv');
+            case PaymentStatus.Failed:
+                return $t('%mw');
         }
     }
 

@@ -38,7 +38,9 @@ export class StripeService extends DockerService<void, StripePrepared> {
         await docker.requireDocker();
         const apiKey = await StripeService.resolveApiKey(context);
         if (!apiKey) {
-            throw new Error('Missing Stripe API key. Set STRIPE_API_KEY or STRIPE_SECRET_KEY, or run with --no-stripe.');
+            throw new Error(
+                'Missing Stripe API key. Set STRIPE_API_KEY or STRIPE_SECRET_KEY, or run with --no-stripe.',
+            );
         }
         const domains = buildDomains(context);
         const forwardTo = `http://${domains.api}/stripe/webhooks`;
@@ -51,7 +53,20 @@ export class StripeService extends DockerService<void, StripePrepared> {
     }
 
     getDockerArgs(context: CliContext, _options: void, prepared: StripePrepared): string[] {
-        return ['run', '-d', '--name', StripeService.container(context), '--network', 'host', stripeImage, 'listen', '--api-key', prepared.apiKey, '--forward-to', prepared.forwardTo];
+        return [
+            'run',
+            '-d',
+            '--name',
+            StripeService.container(context),
+            '--network',
+            'host',
+            stripeImage,
+            'listen',
+            '--api-key',
+            prepared.apiKey,
+            '--forward-to',
+            prepared.forwardTo,
+        ];
     }
 
     getEnv(_context: CliContext, _options: void, prepared: StripePrepared): NodeJS.ProcessEnv {
@@ -62,12 +77,29 @@ export class StripeService extends DockerService<void, StripePrepared> {
         };
     }
 
-    override startedMessage(_context: CliContext, _options: void, prepared: StripePrepared): string {
+    override startedMessage(
+        _context: CliContext,
+        _options: void,
+        prepared: StripePrepared,
+    ): string {
         return `Stripe listener started for ${prepared.domain}`;
     }
 
     static async fetchWebhookSecret(context: CliContext, apiKey: string): Promise<string> {
-        const result = await docker.run(['run', '--rm', '--network', 'host', stripeImage, 'listen', '--api-key', apiKey, '--print-secret'], { capture: true, verbosity: RunVerbosity.Quiet });
+        const result = await docker.run(
+            [
+                'run',
+                '--rm',
+                '--network',
+                'host',
+                stripeImage,
+                'listen',
+                '--api-key',
+                apiKey,
+                '--print-secret',
+            ],
+            { capture: true, verbosity: RunVerbosity.Quiet },
+        );
         const secret = result.stdout.trim().split('\n').at(-1)?.trim();
         if (!secret) {
             throw new Error('Stripe did not return a webhook signing secret.');

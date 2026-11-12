@@ -56,7 +56,15 @@ describe('WebshopMetaData.customerSettings 418 <-> 419', () => {
 
     describe('upgrade: 418 -> 419', () => {
         it('builds the settings from the flags', () => {
-            const meta = decode({ phoneEnabled: false, birthDayEnabled: true, addressEnabled: false, genderEnabled: true }, oldVersion);
+            const meta = decode(
+                {
+                    phoneEnabled: false,
+                    birthDayEnabled: true,
+                    addressEnabled: false,
+                    genderEnabled: true,
+                },
+                oldVersion,
+            );
 
             expect(meta.customerSettings.phone).toBe(Disabled);
             expect(meta.customerSettings.birthDay).toBe(Required);
@@ -77,10 +85,19 @@ describe('WebshopMetaData.customerSettings 418 <-> 419', () => {
         });
 
         it('does not run on data that already has the settings', () => {
-            const meta = decode({
-                phoneEnabled: true,
-                customerSettings: { email: Required, phone: Disabled, birthDay: Optional, gender: Disabled, address: Disabled },
-            }, newVersion);
+            const meta = decode(
+                {
+                    phoneEnabled: true,
+                    customerSettings: {
+                        email: Required,
+                        phone: Disabled,
+                        birthDay: Optional,
+                        gender: Disabled,
+                        address: Disabled,
+                    },
+                },
+                newVersion,
+            );
 
             expect(meta.customerSettings.phone).toBe(Disabled);
             expect(meta.customerSettings.birthDay).toBe(Optional);
@@ -90,7 +107,12 @@ describe('WebshopMetaData.customerSettings 418 <-> 419', () => {
     describe('downgrade: 419 -> 418', () => {
         it('derives the flags from the settings and drops the settings', () => {
             const meta = WebshopMetaData.create({
-                customerSettings: CustomerSettings.create({ phone: Disabled, birthDay: Optional, address: Required, gender: Disabled }),
+                customerSettings: CustomerSettings.create({
+                    phone: Disabled,
+                    birthDay: Optional,
+                    address: Required,
+                    gender: Disabled,
+                }),
                 // Stale values: an older client must not see these
                 legacyPhoneEnabled: true,
                 legacyBirthDayEnabled: false,
@@ -120,7 +142,12 @@ describe('WebshopMetaData.customerSettings 418 <-> 419', () => {
 
         it('survives a round trip through a 418 client', () => {
             const meta = WebshopMetaData.create({
-                customerSettings: CustomerSettings.create({ phone: Required, birthDay: Disabled, address: Required, gender: Disabled }),
+                customerSettings: CustomerSettings.create({
+                    phone: Required,
+                    birthDay: Disabled,
+                    address: Required,
+                    gender: Disabled,
+                }),
             });
 
             const roundTripped = decode(encode(meta, oldVersion), oldVersion);
@@ -146,10 +173,17 @@ describe('WebshopMetaData.customerSettings 418 <-> 419', () => {
     describe('upgradePatch: 418 -> 419', () => {
         it('turns a flag patch into a settings patch', () => {
             const meta = WebshopMetaData.create({
-                customerSettings: CustomerSettings.create({ phone: Required, birthDay: Required, address: Disabled, gender: Disabled }),
+                customerSettings: CustomerSettings.create({
+                    phone: Required,
+                    birthDay: Required,
+                    address: Disabled,
+                    gender: Disabled,
+                }),
             });
 
-            const patched = meta.patch(decodePatch({ phoneEnabled: false, addressEnabled: true }, oldVersion));
+            const patched = meta.patch(
+                decodePatch({ phoneEnabled: false, addressEnabled: true }, oldVersion),
+            );
 
             expect(patched.customerSettings.phone).toBe(Disabled);
             expect(patched.customerSettings.address).toBe(Required);
@@ -236,27 +270,50 @@ describe('WebshopMetaData.orderMode <-> cartEnabled', () => {
     });
 
     it('ignores a stale cartEnabled flag on data that already has the order mode', () => {
-        expect(decode({ orderMode: WebshopOrderMode.Bulk, cartEnabled: false }, Version).orderMode).toBe(WebshopOrderMode.Bulk);
+        expect(
+            decode({ orderMode: WebshopOrderMode.Bulk, cartEnabled: false }, Version).orderMode,
+        ).toBe(WebshopOrderMode.Bulk);
     });
 
     it('downgrades the order mode to the cartEnabled flag for an older client', () => {
-        expect(encode(WebshopMetaData.create({ orderMode: WebshopOrderMode.Cart }), oldVersion)).toMatchObject({ cartEnabled: true });
-        expect(encode(WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk }), oldVersion)).toMatchObject({ cartEnabled: true });
-        expect(encode(WebshopMetaData.create({ orderMode: WebshopOrderMode.Single }), oldVersion)).toMatchObject({ cartEnabled: false });
-        expect(encode(WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk }), oldVersion).orderMode).toBeUndefined();
+        expect(
+            encode(WebshopMetaData.create({ orderMode: WebshopOrderMode.Cart }), oldVersion),
+        ).toMatchObject({ cartEnabled: true });
+        expect(
+            encode(WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk }), oldVersion),
+        ).toMatchObject({ cartEnabled: true });
+        expect(
+            encode(WebshopMetaData.create({ orderMode: WebshopOrderMode.Single }), oldVersion),
+        ).toMatchObject({ cartEnabled: false });
+        expect(
+            encode(WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk }), oldVersion)
+                .orderMode,
+        ).toBeUndefined();
     });
 
     it('upgrades a cartEnabled patch of an older client', () => {
         const meta = WebshopMetaData.create({ orderMode: WebshopOrderMode.Bulk });
 
-        expect(meta.patch(decodePatch({ cartEnabled: false }, oldVersion)).orderMode).toBe(WebshopOrderMode.Single);
-        expect(meta.patch(decodePatch({ cartEnabled: true }, oldVersion)).orderMode).toBe(WebshopOrderMode.Cart);
-        expect(meta.patch(decodePatch({ name: 'Nieuwe naam' }, oldVersion)).orderMode).toBe(WebshopOrderMode.Bulk);
+        expect(meta.patch(decodePatch({ cartEnabled: false }, oldVersion)).orderMode).toBe(
+            WebshopOrderMode.Single,
+        );
+        expect(meta.patch(decodePatch({ cartEnabled: true }, oldVersion)).orderMode).toBe(
+            WebshopOrderMode.Cart,
+        );
+        expect(meta.patch(decodePatch({ name: 'Nieuwe naam' }, oldVersion)).orderMode).toBe(
+            WebshopOrderMode.Bulk,
+        );
     });
 
     it('downgrades an order mode patch for an older client', () => {
-        expect(encodePatch(WebshopMetaData.patch({ orderMode: WebshopOrderMode.Single }), oldVersion)).toMatchObject({ cartEnabled: false });
-        expect(encodePatch(WebshopMetaData.patch({ orderMode: WebshopOrderMode.Bulk }), oldVersion)).toMatchObject({ cartEnabled: true });
-        expect(encodePatch(WebshopMetaData.patch({ name: 'Nieuwe naam' }), oldVersion).cartEnabled).toBeUndefined();
+        expect(
+            encodePatch(WebshopMetaData.patch({ orderMode: WebshopOrderMode.Single }), oldVersion),
+        ).toMatchObject({ cartEnabled: false });
+        expect(
+            encodePatch(WebshopMetaData.patch({ orderMode: WebshopOrderMode.Bulk }), oldVersion),
+        ).toMatchObject({ cartEnabled: true });
+        expect(
+            encodePatch(WebshopMetaData.patch({ name: 'Nieuwe naam' }), oldVersion).cartEnabled,
+        ).toBeUndefined();
     });
 });

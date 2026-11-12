@@ -2,11 +2,29 @@ import type { Endpoint } from '@node/endpoints';
 import { Request } from '@node/endpoints';
 import { Database } from '@node/database';
 import type { User } from '@stamhoofd/models';
-import { MemberFactory, OrderFactory, OrganizationFactory, OrganizationTagFactory, RegistrationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import {
+    MemberFactory,
+    OrderFactory,
+    OrganizationFactory,
+    OrganizationTagFactory,
+    RegistrationFactory,
+    Token,
+    UserFactory,
+    WebshopFactory,
+} from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { CountFilteredRequest, LimitedFilteredRequest, OrderStatus, Permissions, ResourcePermissions, SortItemDirection, WebshopMetaData, WebshopStatus } from '@stamhoofd/structures';
+import {
+    CountFilteredRequest,
+    LimitedFilteredRequest,
+    OrderStatus,
+    Permissions,
+    ResourcePermissions,
+    SortItemDirection,
+    WebshopMetaData,
+    WebshopStatus,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetWebshopsCountEndpoint } from './GetWebshopsCountEndpoint.js';
@@ -37,12 +55,21 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
 
             const token = await SessionService.createSession(user);
 
-            const webshop1 = await new WebshopFactory({ organizationId: organization.id, name: 'Webshop A' }).create();
-            const webshop2 = await new WebshopFactory({ organizationId: organization.id, name: 'Webshop B' }).create();
+            const webshop1 = await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Webshop A',
+            }).create();
+            const webshop2 = await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Webshop B',
+            }).create();
 
             // Create a webshop in a different organization - should not appear
             const otherOrg = await new OrganizationFactory({}).create();
-            await new WebshopFactory({ organizationId: otherOrg.id, name: 'Other Webshop' }).create();
+            await new WebshopFactory({
+                organizationId: otherOrg.id,
+                name: 'Other Webshop',
+            }).create();
 
             const request = Request.get({
                 path: baseUrl,
@@ -92,20 +119,30 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
         test('An org admin with access to a specific webshop only sees that webshop', async () => {
             const organization = await new OrganizationFactory({}).create();
 
-            const webshop1 = await new WebshopFactory({ organizationId: organization.id, name: 'Accessible Webshop' }).create();
-            const webshop2 = await new WebshopFactory({ organizationId: organization.id, name: 'Inaccessible Webshop' }).create();
+            const webshop1 = await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Accessible Webshop',
+            }).create();
+            const webshop2 = await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Inaccessible Webshop',
+            }).create();
 
             const user = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.Webshops,
-                        new Map([[
-                            webshop1.id,
-                            ResourcePermissions.create({ level: PermissionLevel.Read }),
-                        ]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Webshops,
+                            new Map([
+                                [
+                                    webshop1.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
 
@@ -272,20 +309,28 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             // Organization WITHOUT the tag
             const orgWithoutTag = await new OrganizationFactory({}).create();
 
-            const webshopInTaggedOrg = await new WebshopFactory({ organizationId: orgWithTag.id }).create();
-            const webshopInUntaggedOrg = await new WebshopFactory({ organizationId: orgWithoutTag.id }).create();
+            const webshopInTaggedOrg = await new WebshopFactory({
+                organizationId: orgWithTag.id,
+            }).create();
+            const webshopInUntaggedOrg = await new WebshopFactory({
+                organizationId: orgWithoutTag.id,
+            }).create();
 
             // Platform user with read access to organizations with the specific tag
             const platformUser = await new UserFactory({
                 globalPermissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.OrganizationTags,
-                        new Map([[
-                            tag.id,
-                            ResourcePermissions.create({ level: PermissionLevel.Read }),
-                        ]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.OrganizationTags,
+                            new Map([
+                                [
+                                    tag.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
 
@@ -326,13 +371,21 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             const platformUser = await new UserFactory({
                 globalPermissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.OrganizationTags,
-                        new Map([
-                            [tag1.id, ResourcePermissions.create({ level: PermissionLevel.Read })],
-                            [tag2.id, ResourcePermissions.create({ level: PermissionLevel.Read })],
-                        ]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.OrganizationTags,
+                            new Map([
+                                [
+                                    tag1.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                                [
+                                    tag2.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
 
@@ -400,8 +453,14 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
 
             const token = await SessionService.createSession(user);
 
-            const webshop1 = await new WebshopFactory({ organizationId: organization.id, name: 'Summer Sale' }).create();
-            const webshop2 = await new WebshopFactory({ organizationId: organization.id, name: 'Winter Collection' }).create();
+            const webshop1 = await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Summer Sale',
+            }).create();
+            const webshop2 = await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Winter Collection',
+            }).create();
 
             const request = Request.get({
                 path: baseUrl,
@@ -420,7 +479,7 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
         });
 
         test('Can search with status filter when collation_connection differs', async () => {
-            await Database.statement('SET collation_connection = \'utf8mb4_general_ci\'');
+            await Database.statement("SET collation_connection = 'utf8mb4_general_ci'");
 
             try {
                 const organization = await new OrganizationFactory({}).create();
@@ -483,7 +542,10 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             // Create 5 webshops
             const webshops = await Promise.all(
                 Array.from({ length: 5 }, (_, i) =>
-                    new WebshopFactory({ organizationId: organization.id, name: `Webshop ${i}` }).create(),
+                    new WebshopFactory({
+                        organizationId: organization.id,
+                        name: `Webshop ${i}`,
+                    }).create(),
                 ),
             );
 
@@ -528,12 +590,12 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
 
             // All pages combined should equal all webshops (no duplicates, no missing)
             const allIds = [
-                ...page1.body.results.map(w => w.id),
-                ...page2.body.results.map(w => w.id),
-                ...page3.body.results.map(w => w.id),
+                ...page1.body.results.map((w) => w.id),
+                ...page2.body.results.map((w) => w.id),
+                ...page3.body.results.map((w) => w.id),
             ];
             expect(allIds).toHaveLength(5);
-            expect(allIds).toIncludeSameMembers(webshops.map(w => w.id));
+            expect(allIds).toIncludeSameMembers(webshops.map((w) => w.id));
 
             // Check ordering is stable: each page's ids should be in ascending order
             const allSorted = [...allIds].sort();
@@ -551,15 +613,26 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             const token = await SessionService.createSession(user);
 
             // Create webshops with deterministic names for ordering
-            const names = ['Apple Shop', 'Banana Market', 'Cherry Stand', 'Date Store', 'Elderberry Emporium'];
+            const names = [
+                'Apple Shop',
+                'Banana Market',
+                'Cherry Stand',
+                'Date Store',
+                'Elderberry Emporium',
+            ];
             const webshops = await Promise.all(
-                names.map(name => new WebshopFactory({ organizationId: organization.id, name }).create()),
+                names.map((name) =>
+                    new WebshopFactory({ organizationId: organization.id, name }).create(),
+                ),
             );
 
             // Fetch all in pages of 2 sorted by name ASC
             const allResults: string[] = [];
             let currentQuery: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({
-                sort: [{ key: 'name', order: SortItemDirection.ASC }, { key: 'id', order: SortItemDirection.ASC }],
+                sort: [
+                    { key: 'name', order: SortItemDirection.ASC },
+                    { key: 'id', order: SortItemDirection.ASC },
+                ],
                 limit: 2,
             });
 
@@ -577,12 +650,12 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             }
 
             expect(allResults).toHaveLength(5);
-            expect(allResults).toIncludeSameMembers(webshops.map(w => w.id));
+            expect(allResults).toIncludeSameMembers(webshops.map((w) => w.id));
 
             // Verify sorted order matches expected alphabetical order
             const expectedOrder = webshops
                 .sort((a, b) => a.meta.name.localeCompare(b.meta.name))
-                .map(w => w.id);
+                .map((w) => w.id);
             expect(allResults).toEqual(expectedOrder);
         });
     });
@@ -625,8 +698,14 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
 
             const token = await SessionService.createSession(user);
 
-            const webshop1 = await new WebshopFactory({ organizationId: organization.id, name: 'Alpha' }).create();
-            const webshop2 = await new WebshopFactory({ organizationId: organization.id, name: 'Beta' }).create();
+            const webshop1 = await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Alpha',
+            }).create();
+            const webshop2 = await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Beta',
+            }).create();
 
             const nameFilter = { name: { $contains: 'Alpha' } };
 
@@ -679,13 +758,17 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.Webshops,
-                        new Map([[
-                            accessibleWebshop.id,
-                            ResourcePermissions.create({ level: PermissionLevel.Read }),
-                        ]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Webshops,
+                            new Map([
+                                [
+                                    accessibleWebshop.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
 
@@ -725,10 +808,10 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
 
             // The accessible webshop must appear exactly once.
             expect(allResults).toContain(accessibleWebshop.id);
-            expect(allResults.filter(id => id === accessibleWebshop.id)).toHaveLength(1);
+            expect(allResults.filter((id) => id === accessibleWebshop.id)).toHaveLength(1);
 
             // None of the inaccessible webshops should appear.
-            const inaccessibleIds = new Set(inaccessibleWebshops.map(w => w.id));
+            const inaccessibleIds = new Set(inaccessibleWebshops.map((w) => w.id));
             for (const id of allResults) {
                 expect(inaccessibleIds.has(id)).toBe(false);
             }
@@ -748,7 +831,10 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             }).create();
             const token = await SessionService.createSession(user);
 
-            await new WebshopFactory({ organizationId: organization.id, name: 'Open Webshop' }).create();
+            await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Open Webshop',
+            }).create();
             const closedWebshop = await new WebshopFactory({
                 organizationId: organization.id,
                 name: 'Closed Webshop',
@@ -784,7 +870,10 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             }).create();
             const token = await SessionService.createSession(user);
 
-            const openWebshop = await new WebshopFactory({ organizationId: organization.id, name: 'Open Webshop' }).create();
+            const openWebshop = await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Open Webshop',
+            }).create();
             await new WebshopFactory({
                 organizationId: organization.id,
                 name: 'Closed Webshop',
@@ -802,7 +891,9 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 path: baseUrl,
                 host: organization.getApiHost(),
                 query: new LimitedFilteredRequest({
-                    filter: { $or: [{ status: { $eq: WebshopStatus.Open } }, { status: { $eq: null } }] },
+                    filter: {
+                        $or: [{ status: { $eq: WebshopStatus.Open } }, { status: { $eq: null } }],
+                    },
                     limit: 100,
                 }),
                 headers: { authorization: 'Bearer ' + token.accessToken },
@@ -822,7 +913,10 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             }).create();
             const token = await SessionService.createSession(user);
 
-            await new WebshopFactory({ organizationId: organization.id, name: 'Open Webshop' }).create();
+            await new WebshopFactory({
+                organizationId: organization.id,
+                name: 'Open Webshop',
+            }).create();
             await new WebshopFactory({
                 organizationId: organization.id,
                 name: 'Closed Webshop',
@@ -856,7 +950,10 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             const orgA = await new OrganizationFactory({ name: 'Groep Blauw' }).create();
             const orgB = await new OrganizationFactory({ name: 'Groep Rood' }).create();
 
-            const webshopA = await new WebshopFactory({ organizationId: orgA.id, name: 'Webshop A' }).create();
+            const webshopA = await new WebshopFactory({
+                organizationId: orgA.id,
+                name: 'Webshop A',
+            }).create();
             await new WebshopFactory({ organizationId: orgB.id, name: 'Webshop B' }).create();
 
             const platformUser = await new UserFactory({
@@ -892,20 +989,30 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             await new OrganizationTagFactory({}).create();
 
             const name = 'Groep ' + tag.id;
-            const orgWithTag = await new OrganizationFactory({ name: name + ' A', tags: [tag.id] }).create();
+            const orgWithTag = await new OrganizationFactory({
+                name: name + ' A',
+                tags: [tag.id],
+            }).create();
             const orgWithoutTag = await new OrganizationFactory({ name: name + ' B' }).create();
-            const webshopInTaggedOrg = await new WebshopFactory({ organizationId: orgWithTag.id }).create();
-            const webshopInUntaggedOrg = await new WebshopFactory({ organizationId: orgWithoutTag.id }).create();
+            const webshopInTaggedOrg = await new WebshopFactory({
+                organizationId: orgWithTag.id,
+            }).create();
+            const webshopInUntaggedOrg = await new WebshopFactory({
+                organizationId: orgWithoutTag.id,
+            }).create();
 
             const fetchWebshopIds = async (user: User, filter: StamhoofdFilter) => {
                 const token = await SessionService.createSession(user);
-                const response = await testServer.test(endpoint, Request.get({
-                    path: baseUrl,
-                    host: 'platform.stamhoofd.app',
-                    query: new LimitedFilteredRequest({ filter, limit: 100 }),
-                    headers: { authorization: 'Bearer ' + token.accessToken },
-                }));
-                return response.body.results.map(r => r.id);
+                const response = await testServer.test(
+                    endpoint,
+                    Request.get({
+                        path: baseUrl,
+                        host: 'platform.stamhoofd.app',
+                        query: new LimitedFilteredRequest({ filter, limit: 100 }),
+                        headers: { authorization: 'Bearer ' + token.accessToken },
+                    }),
+                );
+                return response.body.results.map((r) => r.id);
             };
 
             const nameFilter = { organization: { name: { $contains: name } } };
@@ -913,15 +1020,25 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             const fullAdmin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
-            expect(await fetchWebshopIds(fullAdmin, nameFilter)).toIncludeSameMembers([webshopInTaggedOrg.id, webshopInUntaggedOrg.id]);
+            expect(await fetchWebshopIds(fullAdmin, nameFilter)).toIncludeSameMembers([
+                webshopInTaggedOrg.id,
+                webshopInUntaggedOrg.id,
+            ]);
 
             const tagAdmin = await new UserFactory({
                 globalPermissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.OrganizationTags,
-                        new Map([[tag.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.OrganizationTags,
+                            new Map([
+                                [
+                                    tag.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
             expect(await fetchWebshopIds(tagAdmin, nameFilter)).toEqual([webshopInTaggedOrg.id]);
@@ -929,9 +1046,13 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             // Tag admins may use the relation filters; the result is still limited to organizations with an accessible tag
             const member = await new MemberFactory({ firstName: 'Member ' + tag.id }).create();
             await new RegistrationFactory({ member, organization: orgWithoutTag }).create();
-            const memberFilter = { organization: { members: { $elemMatch: { firstName: member.firstName } } } };
+            const memberFilter = {
+                organization: { members: { $elemMatch: { firstName: member.firstName } } },
+            };
 
-            expect(await fetchWebshopIds(fullAdmin, memberFilter)).toEqual([webshopInUntaggedOrg.id]);
+            expect(await fetchWebshopIds(fullAdmin, memberFilter)).toEqual([
+                webshopInUntaggedOrg.id,
+            ]);
             expect(await fetchWebshopIds(tagAdmin, memberFilter)).toEqual([]);
         });
     });
@@ -945,10 +1066,17 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.Webshops,
-                        new Map([[webshop.id, ResourcePermissions.create({ level: PermissionLevel.Read })]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Webshops,
+                            new Map([
+                                [
+                                    webshop.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
             const token = await SessionService.createSession(user);
@@ -957,7 +1085,11 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
                 const request = Request.get({
                     path: baseUrl + '/count',
                     host: organization.getApiHost(),
-                    query: new CountFilteredRequest({ filter: { organization: { [key]: { $elemMatch: { email: { $contains: '@' } } } } } }),
+                    query: new CountFilteredRequest({
+                        filter: {
+                            organization: { [key]: { $elemMatch: { email: { $contains: '@' } } } },
+                        },
+                    }),
                     headers: { authorization: 'Bearer ' + token.accessToken },
                 });
                 await expect(testServer.test(countEndpoint, request)).rejects.toThrow(

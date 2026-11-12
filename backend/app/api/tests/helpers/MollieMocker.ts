@@ -243,7 +243,7 @@ export class MollieMocker {
      */
     #handle(method: string, uri: string, body: unknown): [number, unknown?] {
         const path = uri.split('?')[0].replace(/^\/v2\//, '');
-        const parts = path.split('/').filter(p => p.length > 0);
+        const parts = path.split('/').filter((p) => p.length > 0);
         const decoded = this.#decodeBody(body);
 
         // payments
@@ -267,8 +267,13 @@ export class MollieMocker {
 
         if (parts[0] === 'refunds' && method === 'GET') {
             // The cron iterates newest first (sort desc)
-            const sorted = this.refunds.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-            return this.#listResource('refunds', sorted.map(r => this.#refundResource(r)));
+            const sorted = this.refunds
+                .slice()
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            return this.#listResource(
+                'refunds',
+                sorted.map((r) => this.#refundResource(r)),
+            );
         }
 
         // customers + nested mandates
@@ -302,11 +307,19 @@ export class MollieMocker {
         }
 
         if (parts[0] === 'chargebacks' && method === 'GET') {
-            return this.#listResource('chargebacks', this.chargebacks.map(c => this.#chargebackResource(c)));
+            return this.#listResource(
+                'chargebacks',
+                this.chargebacks.map((c) => this.#chargebackResource(c)),
+            );
         }
 
         // balance transactions (drives the transaction fee part of the settlements sync)
-        if (parts[0] === 'balances' && method === 'GET' && parts.length === 3 && parts[2] === 'transactions') {
+        if (
+            parts[0] === 'balances' &&
+            method === 'GET' &&
+            parts.length === 3 &&
+            parts[2] === 'transactions'
+        ) {
             return this.#listBalanceTransactions(uri);
         }
 
@@ -315,18 +328,29 @@ export class MollieMocker {
             if (parts.length === 1) {
                 return this.#listSettlements(uri);
             }
-            const settlement = this.settlements.find(s => s.id === parts[1]);
+            const settlement = this.settlements.find((s) => s.id === parts[1]);
             if (settlement && parts.length === 3 && parts[2] === 'payments') {
-                const items = this.payments.filter(p => settlement.paymentIds.includes(p.id));
-                return this.#listResource('payments', items.map(p => this.#paymentResource(p)));
+                const items = this.payments.filter((p) => settlement.paymentIds.includes(p.id));
+                return this.#listResource(
+                    'payments',
+                    items.map((p) => this.#paymentResource(p)),
+                );
             }
             if (settlement && parts.length === 3 && parts[2] === 'refunds') {
-                const items = this.refunds.filter(r => settlement.refundIds.includes(r.id));
-                return this.#listResource('refunds', items.map(r => this.#refundResource(r)));
+                const items = this.refunds.filter((r) => settlement.refundIds.includes(r.id));
+                return this.#listResource(
+                    'refunds',
+                    items.map((r) => this.#refundResource(r)),
+                );
             }
             if (settlement && parts.length === 3 && parts[2] === 'chargebacks') {
-                const items = this.chargebacks.filter(c => settlement.chargebackIds.includes(c.id));
-                return this.#listResource('chargebacks', items.map(c => this.#chargebackResource(c)));
+                const items = this.chargebacks.filter((c) =>
+                    settlement.chargebackIds.includes(c.id),
+                );
+                return this.#listResource(
+                    'chargebacks',
+                    items.map((c) => this.#chargebackResource(c)),
+                );
             }
         }
 
@@ -360,7 +384,7 @@ export class MollieMocker {
     }
 
     #getPayment(id: string): [number, unknown] {
-        const payment = this.payments.find(p => p.id === id);
+        const payment = this.payments.find((p) => p.id === id);
         if (!payment) {
             return [404, this.#errorBody(404, 'Not Found', 'No payment exists with token ' + id)];
         }
@@ -368,7 +392,7 @@ export class MollieMocker {
     }
 
     #cancelPayment(id: string): [number, unknown] {
-        const payment = this.payments.find(p => p.id === id);
+        const payment = this.payments.find((p) => p.id === id);
         if (!payment) {
             return [404, this.#errorBody(404, 'Not Found', 'No payment exists with token ' + id)];
         }
@@ -388,12 +412,17 @@ export class MollieMocker {
             customerId: payment.customerId ?? undefined,
             mandateId: payment.mandateId ?? undefined,
             details: payment.details ?? undefined,
-            metadata: payment.internalPaymentId ? { paymentId: payment.internalPaymentId } : undefined,
+            metadata: payment.internalPaymentId
+                ? { paymentId: payment.internalPaymentId }
+                : undefined,
             description: payment.description ?? '',
             profileId: payment.profileId ?? 'pfl_test',
             createdAt: payment.createdAt ?? new Date().toISOString(),
             _links: {
-                self: { href: 'https://api.mollie.com/v2/payments/' + payment.id, type: 'application/hal+json' },
+                self: {
+                    href: 'https://api.mollie.com/v2/payments/' + payment.id,
+                    type: 'application/hal+json',
+                },
                 checkout: { href: MOLLIE_CHECKOUT_URL, type: 'text/html' },
                 dashboard: this.#dashboardLink,
                 documentation: this.#documentationLink,
@@ -411,7 +440,7 @@ export class MollieMocker {
 
     #getCustomer(id: string): [number, unknown] {
         // Always return a valid test-mode customer (mirrors a real, previously created customer)
-        if (!this.customers.find(c => c.id === id)) {
+        if (!this.customers.find((c) => c.id === id)) {
             this.customers.push({ id });
         }
         return [200, this.#customerResource(id, {})];
@@ -428,7 +457,10 @@ export class MollieMocker {
             metadata: body.metadata ?? null,
             createdAt: new Date().toISOString(),
             _links: {
-                self: { href: 'https://api.mollie.com/v2/customers/' + id, type: 'application/hal+json' },
+                self: {
+                    href: 'https://api.mollie.com/v2/customers/' + id,
+                    type: 'application/hal+json',
+                },
                 dashboard: this.#dashboardLink,
                 documentation: this.#documentationLink,
             },
@@ -440,7 +472,12 @@ export class MollieMocker {
     /**
      * Register a (valid) mandate for a customer, simulating a saved card.
      */
-    addMandate(options: { customerId: string; cardNumber?: string; cardLabel?: string; cardHolder?: string }): MollieMockMandate {
+    addMandate(options: {
+        customerId: string;
+        cardNumber?: string;
+        cardLabel?: string;
+        cardHolder?: string;
+    }): MollieMockMandate {
         const mandate: MollieMockMandate = {
             id: this.createId('mdt'),
             customerId: options.customerId,
@@ -459,12 +496,14 @@ export class MollieMocker {
     }
 
     #listMandates(customerId: string): [number, unknown] {
-        const mandates = this.mandates.filter(m => m.customerId === customerId).map(m => this.#mandateResource(m));
+        const mandates = this.mandates
+            .filter((m) => m.customerId === customerId)
+            .map((m) => this.#mandateResource(m));
         return this.#listResource('mandates', mandates);
     }
 
     #revokeMandate(mandateId: string): [number, unknown] {
-        this.mandates = this.mandates.filter(m => m.id !== mandateId);
+        this.mandates = this.mandates.filter((m) => m.id !== mandateId);
         return [204, undefined];
     }
 
@@ -481,8 +520,18 @@ export class MollieMocker {
             signatureDate: mandate.createdAt.substring(0, 10),
             createdAt: mandate.createdAt,
             _links: {
-                self: { href: 'https://api.mollie.com/v2/customers/' + mandate.customerId + '/mandates/' + mandate.id, type: 'application/hal+json' },
-                customer: { href: 'https://api.mollie.com/v2/customers/' + mandate.customerId, type: 'application/hal+json' },
+                self: {
+                    href:
+                        'https://api.mollie.com/v2/customers/' +
+                        mandate.customerId +
+                        '/mandates/' +
+                        mandate.id,
+                    type: 'application/hal+json',
+                },
+                customer: {
+                    href: 'https://api.mollie.com/v2/customers/' + mandate.customerId,
+                    type: 'application/hal+json',
+                },
                 documentation: this.#documentationLink,
             },
         };
@@ -504,7 +553,10 @@ export class MollieMocker {
             status: 'verified',
             createdAt: new Date().toISOString(),
             _links: {
-                self: { href: 'https://api.mollie.com/v2/profiles/' + id, type: 'application/hal+json' },
+                self: {
+                    href: 'https://api.mollie.com/v2/profiles/' + id,
+                    type: 'application/hal+json',
+                },
                 dashboard: this.#dashboardLink,
                 documentation: this.#documentationLink,
             },
@@ -519,7 +571,12 @@ export class MollieMocker {
             canReceivePayments: true,
             canReceiveSettlements: true,
             signedUpAt: new Date().toISOString(),
-            _links: { self: { href: 'https://api.mollie.com/v2/onboarding/me', type: 'application/hal+json' } },
+            _links: {
+                self: {
+                    href: 'https://api.mollie.com/v2/onboarding/me',
+                    type: 'application/hal+json',
+                },
+            },
         };
     }
 
@@ -548,8 +605,18 @@ export class MollieMocker {
             paymentId: chargeback.paymentId,
             createdAt: chargeback.createdAt,
             _links: {
-                self: { href: 'https://api.mollie.com/v2/payments/' + chargeback.paymentId + '/chargebacks/' + chargeback.id, type: 'application/hal+json' },
-                payment: { href: 'https://api.mollie.com/v2/payments/' + chargeback.paymentId, type: 'application/hal+json' },
+                self: {
+                    href:
+                        'https://api.mollie.com/v2/payments/' +
+                        chargeback.paymentId +
+                        '/chargebacks/' +
+                        chargeback.id,
+                    type: 'application/hal+json',
+                },
+                payment: {
+                    href: 'https://api.mollie.com/v2/payments/' + chargeback.paymentId,
+                    type: 'application/hal+json',
+                },
                 documentation: this.#documentationLink,
             },
         };
@@ -562,7 +629,10 @@ export class MollieMocker {
      */
     getRemainingAmount(payment: MollieMockPayment): number {
         const refunded = this.refunds
-            .filter(r => r.paymentId === payment.id && r.status !== 'canceled' && r.status !== 'failed')
+            .filter(
+                (r) =>
+                    r.paymentId === payment.id && r.status !== 'canceled' && r.status !== 'failed',
+            )
             .reduce((total, r) => total + parseFloat(r.amount.value), 0);
         return parseFloat(payment.amount.value) - refunded;
     }
@@ -572,22 +642,43 @@ export class MollieMocker {
      * refunds that are higher than the remaining refundable amount.
      */
     #createRefund(paymentId: string, body: Record<string, any>): [number, unknown] {
-        const payment = this.payments.find(p => p.id === paymentId);
+        const payment = this.payments.find((p) => p.id === paymentId);
         if (!payment) {
-            return [404, this.#errorBody(404, 'Not Found', 'No payment exists with token ' + paymentId)];
+            return [
+                404,
+                this.#errorBody(404, 'Not Found', 'No payment exists with token ' + paymentId),
+            ];
         }
 
         if (payment.status !== 'paid') {
-            return [422, this.#errorBody(422, 'Unprocessable Entity', 'The payment is not paid; you can only refund paid payments')];
+            return [
+                422,
+                this.#errorBody(
+                    422,
+                    'Unprocessable Entity',
+                    'The payment is not paid; you can only refund paid payments',
+                ),
+            ];
         }
 
         const value = parseFloat(String(body.amount?.value ?? '0'));
         if (!(value > 0)) {
-            return [422, this.#errorBody(422, 'Unprocessable Entity', 'The amount is invalid', 'amount')];
+            return [
+                422,
+                this.#errorBody(422, 'Unprocessable Entity', 'The amount is invalid', 'amount'),
+            ];
         }
 
         if (value > this.getRemainingAmount(payment) + 0.000001) {
-            return [422, this.#errorBody(422, 'Unprocessable Entity', 'The amount is higher than the remaining payment amount', 'amount')];
+            return [
+                422,
+                this.#errorBody(
+                    422,
+                    'Unprocessable Entity',
+                    'The amount is higher than the remaining payment amount',
+                    'amount',
+                ),
+            ];
         }
 
         const refund: MollieMockRefund = {
@@ -604,9 +695,12 @@ export class MollieMocker {
     }
 
     #getRefund(paymentId: string, refundId: string): [number, unknown] {
-        const refund = this.refunds.find(r => r.id === refundId && r.paymentId === paymentId);
+        const refund = this.refunds.find((r) => r.id === refundId && r.paymentId === paymentId);
         if (!refund) {
-            return [404, this.#errorBody(404, 'Not Found', 'No refund exists with token ' + refundId)];
+            return [
+                404,
+                this.#errorBody(404, 'Not Found', 'No refund exists with token ' + refundId),
+            ];
         }
         return [200, this.#refundResource(refund)];
     }
@@ -615,11 +709,22 @@ export class MollieMocker {
      * Register a refund directly (simulating a refund created in the Mollie dashboard).
      * Used to drive the mollie-refunds cron.
      */
-    createRefund(payment: MollieMockPayment, options: { value?: string; status?: MollieMockRefund['status']; createdAt?: Date; metadata?: Record<string, unknown> } = {}): MollieMockRefund {
+    createRefund(
+        payment: MollieMockPayment,
+        options: {
+            value?: string;
+            status?: MollieMockRefund['status'];
+            createdAt?: Date;
+            metadata?: Record<string, unknown>;
+        } = {},
+    ): MollieMockRefund {
         const refund: MollieMockRefund = {
             id: this.createId('re'),
             paymentId: payment.id,
-            amount: { currency: payment.amount.currency, value: options.value ?? payment.amount.value },
+            amount: {
+                currency: payment.amount.currency,
+                value: options.value ?? payment.amount.value,
+            },
             status: options.status ?? 'pending',
             description: '',
             createdAt: (options.createdAt ?? new Date()).toISOString(),
@@ -648,7 +753,7 @@ export class MollieMocker {
     }
 
     async #exchangeRefund(refund: MollieMockRefund) {
-        const payment = this.payments.find(p => p.id === refund.paymentId);
+        const payment = this.payments.find((p) => p.id === refund.paymentId);
         if (payment) {
             await this.#exchange(payment);
         }
@@ -666,8 +771,18 @@ export class MollieMocker {
             createdAt: refund.createdAt,
             metadata: refund.metadata ?? null,
             _links: {
-                self: { href: 'https://api.mollie.com/v2/payments/' + refund.paymentId + '/refunds/' + refund.id, type: 'application/hal+json' },
-                payment: { href: 'https://api.mollie.com/v2/payments/' + refund.paymentId, type: 'application/hal+json' },
+                self: {
+                    href:
+                        'https://api.mollie.com/v2/payments/' +
+                        refund.paymentId +
+                        '/refunds/' +
+                        refund.id,
+                    type: 'application/hal+json',
+                },
+                payment: {
+                    href: 'https://api.mollie.com/v2/payments/' + refund.paymentId,
+                    type: 'application/hal+json',
+                },
                 documentation: this.#documentationLink,
             },
         };
@@ -679,17 +794,26 @@ export class MollieMocker {
      * Register a settled (paid out) settlement that groups the given payments and refunds.
      * Used to drive the MollieSettlementSync walk.
      */
-    createSettlement(options: { payments?: MollieMockPayment[]; refunds?: MollieMockRefund[]; chargebacks?: MollieMockChargeback[]; value?: string; settledAt?: Date } = {}): MollieMockSettlement {
+    createSettlement(
+        options: {
+            payments?: MollieMockPayment[];
+            refunds?: MollieMockRefund[];
+            chargebacks?: MollieMockChargeback[];
+            value?: string;
+            settledAt?: Date;
+        } = {},
+    ): MollieMockSettlement {
         const settlement: MollieMockSettlement = {
             id: this.createId('stl'),
-            reference: '1234567.' + (this.settlements.length + 1).toString().padStart(4, '0') + '.01',
+            reference:
+                '1234567.' + (this.settlements.length + 1).toString().padStart(4, '0') + '.01',
             status: 'paidout',
             amount: { currency: 'EUR', value: options.value ?? '0.00' },
             createdAt: new Date().toISOString(),
             settledAt: (options.settledAt ?? new Date()).toISOString(),
-            paymentIds: (options.payments ?? []).map(p => p.id),
-            refundIds: (options.refunds ?? []).map(r => r.id),
-            chargebackIds: (options.chargebacks ?? []).map(c => c.id),
+            paymentIds: (options.payments ?? []).map((p) => p.id),
+            refundIds: (options.refunds ?? []).map((r) => r.id),
+            chargebackIds: (options.chargebacks ?? []).map((c) => c.id),
         };
         this.settlements.push(settlement);
         return settlement;
@@ -718,17 +842,29 @@ export class MollieMocker {
         const limit = Math.min(requestedLimit, this.settlementsPageSize ?? requestedLimit);
 
         const from = query.get('from');
-        const startIndex = from ? sorted.findIndex(s => s.id === from) : 0;
+        const startIndex = from ? sorted.findIndex((s) => s.id === from) : 0;
         if (startIndex === -1) {
-            return [404, this.#errorBody(404, 'Not Found', 'No settlement exists with token ' + from)];
+            return [
+                404,
+                this.#errorBody(404, 'Not Found', 'No settlement exists with token ' + from),
+            ];
         }
 
         const page = sorted.slice(startIndex, startIndex + limit);
         const nextItem = sorted[startIndex + limit];
 
-        return this.#listResource('settlements', page.map(s => this.#settlementResource(s)), {
-            next: nextItem ? 'https://api.mollie.com/v2/settlements?limit=' + requestedLimit + '&from=' + nextItem.id : null,
-        });
+        return this.#listResource(
+            'settlements',
+            page.map((s) => this.#settlementResource(s)),
+            {
+                next: nextItem
+                    ? 'https://api.mollie.com/v2/settlements?limit=' +
+                      requestedLimit +
+                      '&from=' +
+                      nextItem.id
+                    : null,
+            },
+        );
     }
 
     #settlementResource(settlement: MollieMockSettlement) {
@@ -740,7 +876,12 @@ export class MollieMocker {
             amount: settlement.amount,
             createdAt: settlement.createdAt,
             settledAt: settlement.settledAt ?? null,
-            _links: { self: { href: 'https://api.mollie.com/v2/settlements/' + settlement.id, type: 'application/hal+json' } },
+            _links: {
+                self: {
+                    href: 'https://api.mollie.com/v2/settlements/' + settlement.id,
+                    type: 'application/hal+json',
+                },
+            },
         };
     }
 
@@ -758,7 +899,12 @@ export class MollieMocker {
         deductions?: string;
         createdAt?: Date;
     }): MollieMockBalanceTransaction {
-        const contextKey = options.type === 'payment' ? 'paymentId' : options.type === 'refund' ? 'refundId' : 'chargebackId';
+        const contextKey =
+            options.type === 'payment'
+                ? 'paymentId'
+                : options.type === 'refund'
+                  ? 'refundId'
+                  : 'chargebackId';
         const deductions = options.deductions ?? options.fee;
 
         const transaction: MollieMockBalanceTransaction = {
@@ -766,7 +912,9 @@ export class MollieMocker {
             type: options.type,
             createdAt: (options.createdAt ?? new Date()).toISOString(),
             deductions: deductions ? { currency: 'EUR', value: '-' + deductions } : null,
-            deductionDetails: options.fee ? { fees: { currency: 'EUR', value: '-' + options.fee } } : null,
+            deductionDetails: options.fee
+                ? { fees: { currency: 'EUR', value: '-' + options.fee } }
+                : null,
             context: { [contextKey]: options.entryId },
         };
         this.balanceTransactions.push(transaction);
@@ -780,23 +928,41 @@ export class MollieMocker {
         this.balanceTransactionRequests += 1;
         const query = new URLSearchParams(uri.split('?')[1] ?? '');
 
-        const sorted = this.balanceTransactions.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        const sorted = this.balanceTransactions
+            .slice()
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
         const requestedLimit = parseInt(query.get('limit') ?? '250');
         const limit = Math.min(requestedLimit, this.balanceTransactionsPageSize ?? requestedLimit);
 
         const from = query.get('from');
-        const startIndex = from ? sorted.findIndex(t => t.id === from) : 0;
+        const startIndex = from ? sorted.findIndex((t) => t.id === from) : 0;
         if (startIndex === -1) {
-            return [404, this.#errorBody(404, 'Not Found', 'No balance transaction exists with token ' + from)];
+            return [
+                404,
+                this.#errorBody(
+                    404,
+                    'Not Found',
+                    'No balance transaction exists with token ' + from,
+                ),
+            ];
         }
 
         const page = sorted.slice(startIndex, startIndex + limit);
         const nextItem = sorted[startIndex + limit];
 
-        return this.#listResource('balance_transactions', page.map(t => this.#balanceTransactionResource(t)), {
-            next: nextItem ? 'https://api.mollie.com/v2/balances/primary/transactions?limit=' + requestedLimit + '&from=' + nextItem.id : null,
-        });
+        return this.#listResource(
+            'balance_transactions',
+            page.map((t) => this.#balanceTransactionResource(t)),
+            {
+                next: nextItem
+                    ? 'https://api.mollie.com/v2/balances/primary/transactions?limit=' +
+                      requestedLimit +
+                      '&from=' +
+                      nextItem.id
+                    : null,
+            },
+        );
     }
 
     #balanceTransactionResource(transaction: MollieMockBalanceTransaction) {
@@ -813,17 +979,29 @@ export class MollieMocker {
 
     // ---- List helper ------------------------------------------------------
 
-    #listResource(binderName: string, items: unknown[], options: { next?: string | null } = {}): [number, unknown] {
-        return [200, {
-            count: items.length,
-            _embedded: { [binderName]: items },
-            _links: {
-                self: { href: 'https://api.mollie.com/v2/' + binderName, type: 'application/hal+json' },
-                documentation: { href: 'https://docs.mollie.com', type: 'text/html' },
-                next: options.next ? { href: options.next, type: 'application/hal+json' } : null,
-                previous: null,
+    #listResource(
+        binderName: string,
+        items: unknown[],
+        options: { next?: string | null } = {},
+    ): [number, unknown] {
+        return [
+            200,
+            {
+                count: items.length,
+                _embedded: { [binderName]: items },
+                _links: {
+                    self: {
+                        href: 'https://api.mollie.com/v2/' + binderName,
+                        type: 'application/hal+json',
+                    },
+                    documentation: { href: 'https://docs.mollie.com', type: 'text/html' },
+                    next: options.next
+                        ? { href: options.next, type: 'application/hal+json' }
+                        : null,
+                    previous: null,
+                },
             },
-        }];
+        ];
     }
 
     // ---- Driving payment status ------------------------------------------
@@ -840,7 +1018,10 @@ export class MollieMocker {
      * Finally it triggers the payment exchange (like Mollie's webhook) so the backend processes the
      * status change: marking balance items paid, activating packages and saving the default mandate.
      */
-    async succeedPayment(payment: MollieMockPayment = this.getLastPayment(), options: { cardNumber?: string; cardLabel?: string } = {}) {
+    async succeedPayment(
+        payment: MollieMockPayment = this.getLastPayment(),
+        options: { cardNumber?: string; cardLabel?: string } = {},
+    ) {
         if (this.#forceFailure) {
             return this.failPayment(payment);
         }
@@ -848,7 +1029,7 @@ export class MollieMocker {
         payment.status = 'paid';
         payment.isCancelable = false;
 
-        if ((payment.sequenceType === 'first') && payment.customerId && !payment.mandateId) {
+        if (payment.sequenceType === 'first' && payment.customerId && !payment.mandateId) {
             const mandate = this.addMandate({
                 customerId: payment.customerId,
                 cardNumber: options.cardNumber,
@@ -881,7 +1062,12 @@ export class MollieMocker {
             return;
         }
         const endpoint = new ExchangePaymentEndpoint();
-        const request = Request.buildJson('POST', `/v${Version}/payments/${encodeURIComponent(payment.internalPaymentId)}?exchange=true`, undefined, undefined);
+        const request = Request.buildJson(
+            'POST',
+            `/v${Version}/payments/${encodeURIComponent(payment.internalPaymentId)}?exchange=true`,
+            undefined,
+            undefined,
+        );
         await testServer.test(endpoint, request);
     }
 

@@ -5,10 +5,26 @@ import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import type { EmailInterfaceBase } from '@stamhoofd/email';
 import { Email } from '@stamhoofd/email';
-import { AuditLog, EmailVerificationCode, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, User } from '@stamhoofd/models';
+import {
+    AuditLog,
+    EmailVerificationCode,
+    Organization,
+    OrganizationRegistrationPeriod,
+    RegistrationPeriod,
+    User,
+} from '@stamhoofd/models';
 import { CreateOrganizationResponse } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AuditLogSource, AuditLogType, CreateOrganization, OrganizationPackages, Permissions, SignupResponse, UitpasClientCredentialsStatus, UserPermissions } from '@stamhoofd/structures';
+import {
+    AuditLogSource,
+    AuditLogType,
+    CreateOrganization,
+    OrganizationPackages,
+    Permissions,
+    SignupResponse,
+    UitpasClientCredentialsStatus,
+    UserPermissions,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { AuditLogService } from '../../../services/AuditLogService.js';
@@ -96,10 +112,12 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         // Packages are paid for and only set by the billing system
         organization.meta.packages = OrganizationPackages.create({});
         // Only set after the credentials were checked by UitpasService
-        organization.meta.uitpasClientCredentialsStatus = UitpasClientCredentialsStatus.NotConfigured;
+        organization.meta.uitpasClientCredentialsStatus =
+            UitpasClientCredentialsStatus.NotConfigured;
         organization.address = request.body.organization.address;
         organization.language = request.body.organization.language;
-        organization.privateMeta.acquisitionTypes = request.body.organization.privateMeta?.acquisitionTypes ?? [];
+        organization.privateMeta.acquisitionTypes =
+            request.body.organization.privateMeta?.acquisitionTypes ?? [];
 
         // Delay save until after organization is saved, but do validations before the organization is saved
         let registerCodeModels: Model[] = [];
@@ -111,14 +129,17 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             delayEmails = applied.emails;
         }
 
-        const period = await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-            const period = new RegistrationPeriod();
-            period.configureForNewOrganization();
+        const period = await AuditLogService.setContext(
+            { source: AuditLogSource.System },
+            async () => {
+                const period = new RegistrationPeriod();
+                period.configureForNewOrganization();
 
-            await period.save();
-            organization.periodId = period.id;
-            return period;
-        });
+                await period.save();
+                organization.periodId = period.id;
+                return period;
+            },
+        );
 
         try {
             await organization.save();
@@ -126,7 +147,8 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             console.error(e);
             throw new SimpleError({
                 code: 'creating_organization',
-                message: 'Something went wrong while creating the organization. Please try again later or contact us.',
+                message:
+                    'Something went wrong while creating the organization. Please try again later or contact us.',
                 statusCode: 500,
             });
         }
@@ -141,22 +163,23 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
             await organizationPeriod.save();
         });
 
-        const user = await User.register(
-            organization,
-            request.body.user,
-        );
+        const user = await User.register(organization, request.body.user);
         if (!user) {
             // This user already exists, well that is pretty impossible
             throw new SimpleError({
                 code: 'creating_user',
-                message: 'Something went wrong while creating the user. Please contact us to resolve this issue.',
+                message:
+                    'Something went wrong while creating the user. Please contact us to resolve this issue.',
                 statusCode: 500,
             });
         }
 
         // Should prevent this extra save
         user.permissions = UserPermissions.create({});
-        user.permissions.organizationPermissions.set(organization.id, Permissions.create({ level: PermissionLevel.Full }));
+        user.permissions.organizationPermissions.set(
+            organization.id,
+            Permissions.create({ level: PermissionLevel.Full }),
+        );
         await user.save();
 
         for (const model of registerCodeModels) {
@@ -164,7 +187,12 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         // Correctly assign creation
-        await AuditLog.update().where('type', AuditLogType.OrganizationAdded).where('objectId', organization.id).set('userId', user.id).set('source', AuditLogSource.User).update();
+        await AuditLog.update()
+            .where('type', AuditLogType.OrganizationAdded)
+            .where('objectId', organization.id)
+            .set('userId', user.id)
+            .set('source', AuditLogSource.User)
+            .update();
 
         const code = await EmailVerificationCode.createFor(user, user.email);
         VerificationCodeService.send(code, user, organization, request.i18n).catch(console.error);
@@ -180,9 +208,11 @@ export class CreateOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         await Context.setManualOrganizationScope(organization);
         await Context.insecurelyAuthenticateAs(user);
 
-        return new Response(CreateOrganizationResponse.create({
-            token: code.token,
-            organization: await AuthenticatedStructures.organization(organization),
-        }));
+        return new Response(
+            CreateOrganizationResponse.create({
+                token: code.token,
+                organization: await AuthenticatedStructures.organization(organization),
+            }),
+        );
     }
 }

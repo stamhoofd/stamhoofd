@@ -34,6 +34,6 @@ export class GetMailchimpSyncsEndpoint extends Endpoint<Params, Query, Body, Res
             .limit(5)
             .fetch();
 
-        return new Response(syncs.map(s => MailchimpService.getStructure(s)));
+        return new Response(syncs.map((s) => MailchimpService.getStructure(s)));
     }
 }

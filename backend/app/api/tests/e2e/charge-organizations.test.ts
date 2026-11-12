@@ -15,7 +15,12 @@ describe('E2E.ChargeOrganizations', () => {
     let chargingOrganization: Organization;
 
     const postCharge = async (body: ChargeRequest, accessToken: string) => {
-        const request = Request.buildJson('POST', `/v${Version}/admin/charge-organizations`, chargingOrganization.getApiHost(), body);
+        const request = Request.buildJson(
+            'POST',
+            `/v${Version}/admin/charge-organizations`,
+            chargingOrganization.getApiHost(),
+            body,
+        );
         request.headers.authorization = 'Bearer ' + accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -86,9 +91,9 @@ describe('E2E.ChargeOrganizations', () => {
             filter: { id: organization.id },
         });
 
-        await expect(postCharge(body, token.accessToken))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(postCharge(body, token.accessToken)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
 
         expect(await getBalanceItems(organization)).toHaveLength(0);
     });

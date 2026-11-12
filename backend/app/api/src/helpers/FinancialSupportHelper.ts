@@ -1,5 +1,9 @@
 import type { Organization, Platform } from '@stamhoofd/models';
-import type { FinancialSupportSettings, Organization as OrganizationStruct, Platform as PlatformStruct } from '@stamhoofd/structures';
+import type {
+    FinancialSupportSettings,
+    Organization as OrganizationStruct,
+    Platform as PlatformStruct,
+} from '@stamhoofd/structures';
 
 /**
  * Get the financial support settings from the platform if userMode is platform, or from the organization otherwise.
@@ -7,7 +11,10 @@ import type { FinancialSupportSettings, Organization as OrganizationStruct, Plat
  * @param getOrganization callback to prevent fetching the organization if not needed
  * @returns
  */
-export async function getFinancialSupportSettingsAsync(platform: Platform | PlatformStruct, getOrganization: () => Promise<Organization | OrganizationStruct | null>): Promise<FinancialSupportSettings | null> {
+export async function getFinancialSupportSettingsAsync(
+    platform: Platform | PlatformStruct,
+    getOrganization: () => Promise<Organization | OrganizationStruct | null>,
+): Promise<FinancialSupportSettings | null> {
     if (STAMHOOFD.userMode === 'platform') {
         return platform.config.financialSupport;
     }

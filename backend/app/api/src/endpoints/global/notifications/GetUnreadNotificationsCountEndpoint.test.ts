@@ -27,7 +27,9 @@ describe('Endpoint.GetUnreadNotificationsCountEndpoint', () => {
         const request = Request.get({
             path: '/notifications/unread-count',
             query: new CountFilteredRequest({ filter }),
-            headers: { authorization: 'Bearer ' + (await SessionService.createSession(user)).accessToken },
+            headers: {
+                authorization: 'Bearer ' + (await SessionService.createSession(user)).accessToken,
+            },
         });
         return (await testServer.test<CountResponse>(endpoint, request)).body.count;
     }
@@ -52,9 +54,13 @@ describe('Endpoint.GetUnreadNotificationsCountEndpoint', () => {
         const dismissed = await send([user]);
         await send([other]);
 
-        await NotificationService.markAsRead(await NotificationRecipient.select().where('notificationId', read.id).first(true));
+        await NotificationService.markAsRead(
+            await NotificationRecipient.select().where('notificationId', read.id).first(true),
+        );
 
-        const dismissedRecipient = await NotificationRecipient.select().where('notificationId', dismissed.id).first(true);
+        const dismissedRecipient = await NotificationRecipient.select()
+            .where('notificationId', dismissed.id)
+            .first(true);
         dismissedRecipient.dismissedAt = new Date();
         await dismissedRecipient.save();
 

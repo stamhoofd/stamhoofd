@@ -31,13 +31,12 @@ export class GetEmailRecipientsCountEndpoint extends Endpoint<Params, Query, Bod
         const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canReadEmails(organization)) {
+        if (!(await Context.auth.canReadEmails(organization))) {
             throw Context.auth.error();
         }
         const query = await GetEmailRecipientsEndpoint.buildQuery(request.query);
 
-        const count = await query
-            .count();
+        const count = await query.count();
 
         return new Response(
             CountResponse.create({

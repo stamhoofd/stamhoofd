@@ -1,7 +1,13 @@
 import { Migration } from '@node/database';
 import { Member, Organization } from '@stamhoofd/models';
 import type { Address, RecordAnswer, RecordCategory, RecordSettings } from '@stamhoofd/structures';
-import { Parent, ParentType, PropertyFilter, RecordAddressAnswer, RecordTextAnswer } from '@stamhoofd/structures';
+import {
+    Parent,
+    ParentType,
+    PropertyFilter,
+    RecordAddressAnswer,
+    RecordTextAnswer,
+} from '@stamhoofd/structures';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 
 // 1779105619-national-numbers
@@ -49,7 +55,12 @@ async function migrateNationalNumbers(dryRun = false, doLog = false) {
     }
 
     if (doLog) {
-        console.log('Migrated national numbers for organizations with id: ' + Array.from(organizationsWithNumbers).map(x => `"${x}"`).join(', '));
+        console.log(
+            'Migrated national numbers for organizations with id: ' +
+                Array.from(organizationsWithNumbers)
+                    .map((x) => `"${x}"`)
+                    .join(', '),
+        );
     }
 
     if (dryRun) {
@@ -59,11 +70,17 @@ async function migrateNationalNumbers(dryRun = false, doLog = false) {
 
 function isRrnRecord(record: RecordSettings): boolean {
     const name = record.name.toString().toLowerCase();
-    return ['rijksregister', 'rijskregister'].some(x => name.includes(x));
+    return ['rijksregister', 'rijskregister'].some((x) => name.includes(x));
 }
 
-function loopAllRecords(organization: Organization, callback: (record: RecordSettings, category: RecordCategory) => void) {
-    function recursiveLoopAllRecords(category: RecordCategory, callback: (record: RecordSettings, category: RecordCategory) => void) {
+function loopAllRecords(
+    organization: Organization,
+    callback: (record: RecordSettings, category: RecordCategory) => void,
+) {
+    function recursiveLoopAllRecords(
+        category: RecordCategory,
+        callback: (record: RecordSettings, category: RecordCategory) => void,
+    ) {
         for (const record of category.records) {
             callback(record, category);
         }
@@ -78,7 +95,11 @@ function loopAllRecords(organization: Organization, callback: (record: RecordSet
     }
 }
 
-async function migrateNumbersOfOrganization(organization: Organization, dryRun: boolean, doLog: boolean): Promise<boolean> {
+async function migrateNumbersOfOrganization(
+    organization: Organization,
+    dryRun: boolean,
+    doLog: boolean,
+): Promise<boolean> {
     const rrnRecords: { type: RrnTypes; record: RecordSettings }[] = [];
 
     const distinctCategories = new Set<RecordCategory>();
@@ -87,7 +108,7 @@ async function migrateNumbersOfOrganization(organization: Organization, dryRun: 
         const isRrn = isRrnRecord(record);
         if (isRrn) {
             rrnRecords.push({ type: getType(record, doLog), record });
-            category.records = category.records.filter(r => r.id !== record.id);
+            category.records = category.records.filter((r) => r.id !== record.id);
             distinctCategories.add(category);
         }
     });
@@ -128,7 +149,7 @@ async function migrateNumbersOfOrganization(organization: Organization, dryRun: 
     }
 
     // set always required if some rrn record is required
-    if (rrnRecords.some(x => x.record.required)) {
+    if (rrnRecords.some((x) => x.record.required)) {
         // empty filter => always required
         newPropertyFilter.requiredWhen = {};
     }
@@ -136,13 +157,17 @@ async function migrateNumbersOfOrganization(organization: Organization, dryRun: 
     // set the property filter for the national register number
     if (organization.meta.recordsConfiguration.nationalRegisterNumber) {
         // this case normally does not happen, just in case
-        organization.meta.recordsConfiguration.nationalRegisterNumber = organization.meta.recordsConfiguration.nationalRegisterNumber.merge(newPropertyFilter);
+        organization.meta.recordsConfiguration.nationalRegisterNumber =
+            organization.meta.recordsConfiguration.nationalRegisterNumber.merge(newPropertyFilter);
     } else {
         organization.meta.recordsConfiguration.nationalRegisterNumber = newPropertyFilter;
     }
 
     for await (const member of Member.select().where('organizationId', organization.id).all()) {
-        const numbersThatCouldNotBeSet = new Map<string, { type: RrnTypes; record: RecordSettings }>();
+        const numbersThatCouldNotBeSet = new Map<
+            string,
+            { type: RrnTypes; record: RecordSettings }
+        >();
 
         for (const { type, record } of rrnRecords) {
             trySetAndRemoveNumber(member, record, type, numbersThatCouldNotBeSet, doLog);
@@ -161,31 +186,37 @@ async function migrateNumbersOfOrganization(organization: Organization, dryRun: 
 function getType(record: RecordSettings, doLog: boolean): RrnTypes {
     const name = Formatter.slug(record.name.toString()).replaceAll('-', '');
 
-    if (['papa', 'vader'].some(x => name.includes(x))) {
+    if (['papa', 'vader'].some((x) => name.includes(x))) {
         return RrnTypes.Father;
     }
 
-    if (['mama', 'moeder'].some(x => name.includes(x))) {
+    if (['mama', 'moeder'].some((x) => name.includes(x))) {
         return RrnTypes.Mother;
     }
 
-    if (['ouder1', 'parent1', 'voogd1'].some(x => name.includes(x))) {
+    if (['ouder1', 'parent1', 'voogd1'].some((x) => name.includes(x))) {
         return RrnTypes.Parent1;
     }
 
-    if (['ouder2', 'parent2', 'parent2', 'voogd2', 'tweedeouder'].some(x => name.includes(x))) {
+    if (['ouder2', 'parent2', 'parent2', 'voogd2', 'tweedeouder'].some((x) => name.includes(x))) {
         return RrnTypes.Parent2;
     }
 
-    if (['kind', 'lid', 'dochter', 'zoon', 'kampdeelnemer', 'ksaer'].some(x => name.includes(x))) {
+    if (
+        ['kind', 'lid', 'dochter', 'zoon', 'kampdeelnemer', 'ksaer'].some((x) => name.includes(x))
+    ) {
         return RrnTypes.Member;
     }
 
-    if (['schuldenaar', 'schuldernaar', 'betaler', 'belastingsplichtige'].some(x => name.includes(x))) {
+    if (
+        ['schuldenaar', 'schuldernaar', 'betaler', 'belastingsplichtige'].some((x) =>
+            name.includes(x),
+        )
+    ) {
         return RrnTypes.Debtor;
     }
 
-    if (['ouder', 'voogd'].some(x => name.includes(x))) {
+    if (['ouder', 'voogd'].some((x) => name.includes(x))) {
         return RrnTypes.UnknownParent;
     }
 
@@ -200,13 +231,19 @@ function getType(record: RecordSettings, doLog: boolean): RrnTypes {
     return RrnTypes.Unknown;
 }
 
-function setRemainingNumbers(member: Member, numbersThatCouldNotBeSet: Map<string, { type: RrnTypes; record: RecordSettings }>, doLog: boolean) {
+function setRemainingNumbers(
+    member: Member,
+    numbersThatCouldNotBeSet: Map<string, { type: RrnTypes; record: RecordSettings }>,
+    doLog: boolean,
+) {
     if (member.details.nationalRegisterNumber === null) {
         const birthDay = member.details.birthDay;
 
         if (birthDay !== null) {
             // check if some is from member
-            const numberFromMember = [...numbersThatCouldNotBeSet.keys()].find(n => DataValidator.doesMatchBelgianNationalNumber(n, birthDay));
+            const numberFromMember = [...numbersThatCouldNotBeSet.keys()].find((n) =>
+                DataValidator.doesMatchBelgianNationalNumber(n, birthDay),
+            );
             if (numberFromMember !== undefined) {
                 member.details.nationalRegisterNumber = numberFromMember;
                 numbersThatCouldNotBeSet.delete(numberFromMember);
@@ -234,7 +271,9 @@ function setRemainingNumbers(member: Member, numbersThatCouldNotBeSet: Map<strin
         return;
     }
 
-    const debtorNrs = [...numbersThatCouldNotBeSet.entries()].filter(([,{ type }]) => type === RrnTypes.Debtor);
+    const debtorNrs = [...numbersThatCouldNotBeSet.entries()].filter(
+        ([, { type }]) => type === RrnTypes.Debtor,
+    );
     if (debtorNrs.length > 0) {
         if (debtorNrs.length === 1) {
             const record = debtorNrs[0][1].record;
@@ -242,15 +281,23 @@ function setRemainingNumbers(member: Member, numbersThatCouldNotBeSet: Map<strin
             if (debtor) {
                 const nr = debtorNrs[0][0];
                 debtor.nationalRegisterNumber = nr;
-                const existing = member.details.parents.find(p => p.firstName.toLowerCase() === debtor.firstName.toLowerCase() && p.lastName.toLowerCase() === debtor.lastName.toLowerCase());
+                const existing = member.details.parents.find(
+                    (p) =>
+                        p.firstName.toLowerCase() === debtor.firstName.toLowerCase() &&
+                        p.lastName.toLowerCase() === debtor.lastName.toLowerCase(),
+                );
                 if (existing) {
                     if (existing.nationalRegisterNumber !== null) {
                         if (doLog) {
-                            console.log(`Debtor is existing parent, but parent already has rrn (memberId: ${member.id})`);
+                            console.log(
+                                `Debtor is existing parent, but parent already has rrn (memberId: ${member.id})`,
+                            );
                         }
                     } else {
                         if (doLog) {
-                            console.log(`Debtor is existing parent, but parent does not have rrn -> set (memberId: ${member.id})`);
+                            console.log(
+                                `Debtor is existing parent, but parent does not have rrn -> set (memberId: ${member.id})`,
+                            );
                         }
                         existing.nationalRegisterNumber = nr;
                         numbersThatCouldNotBeSet.delete(nr);
@@ -258,7 +305,9 @@ function setRemainingNumbers(member: Member, numbersThatCouldNotBeSet: Map<strin
 
                     if (existing.address === null && debtor.address !== null) {
                         if (doLog) {
-                            console.log(`Debtor has address, but parent does not -> set address (memberId: ${member.id})`);
+                            console.log(
+                                `Debtor has address, but parent does not -> set address (memberId: ${member.id})`,
+                            );
                         }
 
                         existing.address = debtor.address;
@@ -282,7 +331,9 @@ function setRemainingNumbers(member: Member, numbersThatCouldNotBeSet: Map<strin
 
     if (parent1 && parent1.nationalRegisterNumber === null) {
         // first check parent 1
-        const parent1Entry = [...numbersThatCouldNotBeSet.entries()].find(entry => entry[1].type === RrnTypes.Parent1);
+        const parent1Entry = [...numbersThatCouldNotBeSet.entries()].find(
+            (entry) => entry[1].type === RrnTypes.Parent1,
+        );
 
         if (parent1Entry) {
             const rrn = parent1Entry[0];
@@ -295,11 +346,14 @@ function setRemainingNumbers(member: Member, numbersThatCouldNotBeSet: Map<strin
         return;
     }
 
-    const parent2 = member.details.parents.length === 1 ? member.details.parents[0] : member.details.parents[1];
+    const parent2 =
+        member.details.parents.length === 1 ? member.details.parents[0] : member.details.parents[1];
 
     if (parent2 && parent2.nationalRegisterNumber === null) {
         // next check parent 2
-        const parent2Entry = [...numbersThatCouldNotBeSet.entries()].find(entry => entry[1].type === RrnTypes.Parent2);
+        const parent2Entry = [...numbersThatCouldNotBeSet.entries()].find(
+            (entry) => entry[1].type === RrnTypes.Parent2,
+        );
 
         if (parent2Entry) {
             const rrn = parent2Entry[0];
@@ -314,7 +368,9 @@ function setRemainingNumbers(member: Member, numbersThatCouldNotBeSet: Map<strin
 
     // next set in random order
     const remainingNumbers = [...numbersThatCouldNotBeSet.keys()];
-    const parentsWithoutNumber = member.details.parents.filter(p => p.nationalRegisterNumber === null);
+    const parentsWithoutNumber = member.details.parents.filter(
+        (p) => p.nationalRegisterNumber === null,
+    );
 
     for (const parent of parentsWithoutNumber) {
         const nextNumber = remainingNumbers.shift();
@@ -377,7 +433,9 @@ function rrnTypeToParentType(type: RrnTypes): ParentType | null {
 
 function createParentFromDebtor(member: Member, record: RecordSettings): null | Parent {
     const recordName = record.name.toString().toLowerCase();
-    const textToSearch = ['schuldenaar', 'schuldernaar', 'betaler', 'belastingsplichtige'].find(x => recordName.includes(x));
+    const textToSearch = ['schuldenaar', 'schuldernaar', 'betaler', 'belastingsplichtige'].find(
+        (x) => recordName.includes(x),
+    );
     if (!textToSearch) {
         // should not happen
         throw new Error('Could not find text to search: ' + recordName);
@@ -392,8 +450,12 @@ function createParentFromDebtor(member: Member, record: RecordSettings): null | 
         return null;
     }
 
-    let firstNameRecord = getStringValueFromRecord(debtorRecords.find(r => r.settings.name.toString().toLowerCase().includes('voornaam')))?.trim();
-    let lastNameRecord = getStringValueFromRecord(debtorRecords.find(r => r.settings.name.toString().toLowerCase().includes('achternaam')))?.trim();
+    let firstNameRecord = getStringValueFromRecord(
+        debtorRecords.find((r) => r.settings.name.toString().toLowerCase().includes('voornaam')),
+    )?.trim();
+    let lastNameRecord = getStringValueFromRecord(
+        debtorRecords.find((r) => r.settings.name.toString().toLowerCase().includes('achternaam')),
+    )?.trim();
 
     if (firstNameRecord && lastNameRecord) {
         // sometimes the first and last names are repeated
@@ -407,18 +469,32 @@ function createParentFromDebtor(member: Member, record: RecordSettings): null | 
             }
         }
         // sometimes the last name record includes the first name again (e.g. firstName "John" lastName "John Doe")
-        else if (lastNameRecord.toLowerCase().startsWith(firstNameRecord.toLowerCase()) || lastNameRecord.toLowerCase().endsWith(firstNameRecord.toLowerCase())) {
+        else if (
+            lastNameRecord.toLowerCase().startsWith(firstNameRecord.toLowerCase()) ||
+            lastNameRecord.toLowerCase().endsWith(firstNameRecord.toLowerCase())
+        ) {
             if (firstNameRecord.length > 2) {
-                lastNameRecord = lastNameRecord.toLowerCase().replace(firstNameRecord.toLowerCase(), '').trim();
+                lastNameRecord = lastNameRecord
+                    .toLowerCase()
+                    .replace(firstNameRecord.toLowerCase(), '')
+                    .trim();
             }
-        } else if (firstNameRecord.toLowerCase().startsWith(lastNameRecord.toLowerCase()) || firstNameRecord.toLowerCase().endsWith(lastNameRecord.toLowerCase())) {
+        } else if (
+            firstNameRecord.toLowerCase().startsWith(lastNameRecord.toLowerCase()) ||
+            firstNameRecord.toLowerCase().endsWith(lastNameRecord.toLowerCase())
+        ) {
             if (lastNameRecord.length > 2) {
-                firstNameRecord = firstNameRecord.toLowerCase().replace(lastNameRecord.toLowerCase(), '').trim();
+                firstNameRecord = firstNameRecord
+                    .toLowerCase()
+                    .replace(lastNameRecord.toLowerCase(), '')
+                    .trim();
             }
         }
     }
 
-    const addressRecord = getAddressFromRecord(debtorRecords.find(r => r.settings.name.toString().toLowerCase().includes('adres')));
+    const addressRecord = getAddressFromRecord(
+        debtorRecords.find((r) => r.settings.name.toString().toLowerCase().includes('adres')),
+    );
 
     return Parent.create({
         type: ParentType.Other,
@@ -452,7 +528,12 @@ function getAddressFromRecord(record: RecordAnswer | undefined): null | Address 
     return record.address;
 }
 
-function addNumberThatCouldNotBeSet(numbersThatCouldNotBeSet: Map<string, { type: RrnTypes; record: RecordSettings }>, rrn: string, type: RrnTypes, record: RecordSettings) {
+function addNumberThatCouldNotBeSet(
+    numbersThatCouldNotBeSet: Map<string, { type: RrnTypes; record: RecordSettings }>,
+    rrn: string,
+    type: RrnTypes,
+    record: RecordSettings,
+) {
     const existing = numbersThatCouldNotBeSet.get(rrn);
 
     // always set if not set already
@@ -485,7 +566,13 @@ function addNumberThatCouldNotBeSet(numbersThatCouldNotBeSet: Map<string, { type
     return;
 }
 
-function trySetAndRemoveNumber(member: Member, record: RecordSettings, defaultType: RrnTypes, numbersThatCouldNotBeSet: Map<string, { type: RrnTypes; record: RecordSettings }>, doLog: boolean): boolean {
+function trySetAndRemoveNumber(
+    member: Member,
+    record: RecordSettings,
+    defaultType: RrnTypes,
+    numbersThatCouldNotBeSet: Map<string, { type: RrnTypes; record: RecordSettings }>,
+    doLog: boolean,
+): boolean {
     const rrn = getAndRemoveRrn(record.id, member, doLog);
     if (rrn === null) {
         return true;
@@ -498,19 +585,24 @@ function trySetAndRemoveNumber(member: Member, record: RecordSettings, defaultTy
 
     // always set if from member
     if (member.details.birthDay !== null) {
-        const isFromMember = DataValidator.doesMatchBelgianNationalNumber(rrn, member.details.birthDay);
+        const isFromMember = DataValidator.doesMatchBelgianNationalNumber(
+            rrn,
+            member.details.birthDay,
+        );
         if (isFromMember) {
             member.details.nationalRegisterNumber = rrn;
             return true;
         }
     }
 
-    const isAlreadySet = member.details.parents.some(p => p.nationalRegisterNumber === rrn);
+    const isAlreadySet = member.details.parents.some((p) => p.nationalRegisterNumber === rrn);
     if (isAlreadySet) {
         return true;
     }
 
-    const parentsWithoutNumber = member.details.parents.filter(p => p.nationalRegisterNumber === null);
+    const parentsWithoutNumber = member.details.parents.filter(
+        (p) => p.nationalRegisterNumber === null,
+    );
     if (parentsWithoutNumber.length === 0) {
         addNumberThatCouldNotBeSet(numbersThatCouldNotBeSet, rrn, defaultType, record);
         return false;
@@ -518,13 +610,13 @@ function trySetAndRemoveNumber(member: Member, record: RecordSettings, defaultTy
 
     // check if from father
     if (defaultType === RrnTypes.Father) {
-        const father = parentsWithoutNumber.find(p => p.type === ParentType.Father);
+        const father = parentsWithoutNumber.find((p) => p.type === ParentType.Father);
         if (father) {
             father.nationalRegisterNumber = rrn;
             return true;
         }
 
-        const stepFather = parentsWithoutNumber.find(p => p.type === ParentType.Stepfather);
+        const stepFather = parentsWithoutNumber.find((p) => p.type === ParentType.Stepfather);
         if (stepFather) {
             stepFather.nationalRegisterNumber = rrn;
             return true;
@@ -533,13 +625,13 @@ function trySetAndRemoveNumber(member: Member, record: RecordSettings, defaultTy
 
     // check if from mother
     if (defaultType === RrnTypes.Mother) {
-        const mother = parentsWithoutNumber.find(p => p.type === ParentType.Mother);
+        const mother = parentsWithoutNumber.find((p) => p.type === ParentType.Mother);
         if (mother) {
             mother.nationalRegisterNumber = rrn;
             return true;
         }
 
-        const stepMother = parentsWithoutNumber.find(p => p.type === ParentType.Mother);
+        const stepMother = parentsWithoutNumber.find((p) => p.type === ParentType.Mother);
         if (stepMother) {
             stepMother.nationalRegisterNumber = rrn;
             return true;
@@ -574,7 +666,7 @@ function getAndRemoveRrn(recordId: string, member: Member, doLog: boolean): stri
 
         const invalid = ['11111', '123456', '....', '//', '12121'];
 
-        if (invalid.some(x => text.includes(x))) {
+        if (invalid.some((x) => text.includes(x))) {
             return null;
         }
 

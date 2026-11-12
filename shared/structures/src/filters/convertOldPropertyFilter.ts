@@ -125,7 +125,14 @@ interface RegistrationsFilter {
     mode: RegistrationsFilterMode;
 }
 
-type Filter = NumberFilter | StringFilter | ChoicesFilter | DateFilter | FilterGroup | OldPropertyFilter | RegistrationsFilter;
+type Filter =
+    | NumberFilter
+    | StringFilter
+    | ChoicesFilter
+    | DateFilter
+    | FilterGroup
+    | OldPropertyFilter
+    | RegistrationsFilter;
 
 enum FilterType {
     NumberFilter = 'NumberFilter',
@@ -193,7 +200,14 @@ function isFilterForRecordAnswer(filter: Filter): boolean {
     return definitionId.startsWith('record_');
 }
 
-function wrapRecordAnswerFilter<T extends RecordAnswerFilterType>(filter: T, getInnerFilter: (filter: T, recordId: string, wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter) => StamhoofdFilter) {
+function wrapRecordAnswerFilter<T extends RecordAnswerFilterType>(
+    filter: T,
+    getInnerFilter: (
+        filter: T,
+        recordId: string,
+        wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter,
+    ) => StamhoofdFilter,
+) {
     const recordId = filter.definitionId.replace('record_', '');
 
     return {
@@ -205,7 +219,11 @@ function wrapRecordAnswerFilter<T extends RecordAnswerFilterType>(filter: T, get
     };
 }
 
-function getInnerStamhoofdFilterForNumberFilter(filter: NumberFilter, sqlFilterId: string, wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter = (f: StamhoofdFilter) => f): StamhoofdFilter {
+function getInnerStamhoofdFilterForNumberFilter(
+    filter: NumberFilter,
+    sqlFilterId: string,
+    wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter = (f: StamhoofdFilter) => f,
+): StamhoofdFilter {
     switch (filter.mode) {
         case NumberFilterMode.LessThan: {
             if (filter.end === undefined) {
@@ -235,12 +253,16 @@ function getInnerStamhoofdFilterForNumberFilter(filter: NumberFilter, sqlFilterI
 
             return {
                 $and: [
-                    { [sqlFilterId]: wrapFilter({
-                        $gte: filter.start,
-                    }) },
-                    { [sqlFilterId]: wrapFilter({
-                        $lte: filter.end,
-                    }) },
+                    {
+                        [sqlFilterId]: wrapFilter({
+                            $gte: filter.start,
+                        }),
+                    },
+                    {
+                        [sqlFilterId]: wrapFilter({
+                            $lte: filter.end,
+                        }),
+                    },
                 ],
             };
         }
@@ -251,12 +273,16 @@ function getInnerStamhoofdFilterForNumberFilter(filter: NumberFilter, sqlFilterI
 
             return {
                 $or: [
-                    { [sqlFilterId]: wrapFilter({
-                        $lt: filter.start,
-                    }) },
-                    { [sqlFilterId]: wrapFilter({
-                        $gt: filter.end,
-                    }) },
+                    {
+                        [sqlFilterId]: wrapFilter({
+                            $lt: filter.start,
+                        }),
+                    },
+                    {
+                        [sqlFilterId]: wrapFilter({
+                            $gt: filter.end,
+                        }),
+                    },
                 ],
             };
         }
@@ -299,7 +325,11 @@ function numberFilterToStamhoofdFilter(filter: NumberFilter): StamhoofdFilter {
     return getInnerStamhoofdFilterForNumberFilter(filter, sqlFilterId);
 }
 
-function getInnerStamhoofdFilterForStringFilter(filter: StringFilter, sqlFilterId: string, wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter = (f: StamhoofdFilter) => f): StamhoofdFilter {
+function getInnerStamhoofdFilterForStringFilter(
+    filter: StringFilter,
+    sqlFilterId: string,
+    wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter = (f: StamhoofdFilter) => f,
+): StamhoofdFilter {
     switch (filter.mode) {
         case StringFilterMode.Contains: {
             return {
@@ -349,7 +379,8 @@ function getInnerStamhoofdFilterForStringFilter(filter: StringFilter, sqlFilterI
                         },
                     ],
                 },
-            }; }
+            };
+        }
         case StringFilterMode.Equals: {
             return {
                 [sqlFilterId]: wrapFilter({
@@ -400,7 +431,9 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
             return {
                 recordAnswers: {
                     [recordId]: {
-                        selected: { $in: filter.choiceIds.map(choiceId => choiceId === 'checked') },
+                        selected: {
+                            $in: filter.choiceIds.map((choiceId) => choiceId === 'checked'),
+                        },
                     },
                 },
             };
@@ -434,7 +467,6 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
                                     },
                                 };
                             }),
-
                         },
                     },
                 };
@@ -445,7 +477,14 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
         }
     }
 
-    const supported = new Set(['member_gender', 'gender', 'member_missing_data', 'order_products', 'order_product_prices', 'order_checkoutMethod']);
+    const supported = new Set([
+        'member_gender',
+        'gender',
+        'member_missing_data',
+        'order_products',
+        'order_product_prices',
+        'order_checkoutMethod',
+    ]);
 
     if (!supported.has(filter.definitionId)) {
         throw new Error(`Choices filter not supported: ${filter.definitionId}`);
@@ -582,29 +621,12 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
             }
         }
 
-        const productFilters: StamhoofdFilter[] = [...productPriceIds.entries()].map(([productId, priceIds]) => {
-            const priceIdsArray = [...priceIds.values()];
+        const productFilters: StamhoofdFilter[] = [...productPriceIds.entries()].map(
+            ([productId, priceIds]) => {
+                const priceIdsArray = [...priceIds.values()];
 
-            if (filter.mode === ChoicesFilterMode.Or) {
-                return {
-                    items: {
-                        $elemMatch: {
-                            product: {
-                                id: productId,
-                            },
-                            productPrice: {
-                                id: {
-                                    $in: priceIdsArray,
-                                },
-                            },
-                        },
-                    },
-                } as StamhoofdFilter;
-            }
-
-            if (filter.mode === ChoicesFilterMode.Nor) {
-                return {
-                    $not: {
+                if (filter.mode === ChoicesFilterMode.Or) {
+                    return {
                         items: {
                             $elemMatch: {
                                 product: {
@@ -617,42 +639,61 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
                                 },
                             },
                         },
-                    },
-                };
-            }
+                    } as StamhoofdFilter;
+                }
 
-            const filters: StamhoofdFilter[] = priceIdsArray.map((priceId) => {
-                return {
-                    items: {
-                        $elemMatch: {
-                            product: {
-                                id: productId,
-                            },
-                            productPrice: {
-                                id: {
-                                    $in: [priceId],
+                if (filter.mode === ChoicesFilterMode.Nor) {
+                    return {
+                        $not: {
+                            items: {
+                                $elemMatch: {
+                                    product: {
+                                        id: productId,
+                                    },
+                                    productPrice: {
+                                        id: {
+                                            $in: priceIdsArray,
+                                        },
+                                    },
                                 },
                             },
                         },
-                    },
-                };
-            });
-
-            switch (filter.mode) {
-                case ChoicesFilterMode.And: {
-                    return {
-                        $and: filters,
                     };
                 }
-                case ChoicesFilterMode.Nand: {
+
+                const filters: StamhoofdFilter[] = priceIdsArray.map((priceId) => {
                     return {
-                        $not: {
-                            $and: filters,
+                        items: {
+                            $elemMatch: {
+                                product: {
+                                    id: productId,
+                                },
+                                productPrice: {
+                                    id: {
+                                        $in: [priceId],
+                                    },
+                                },
+                            },
                         },
                     };
+                });
+
+                switch (filter.mode) {
+                    case ChoicesFilterMode.And: {
+                        return {
+                            $and: filters,
+                        };
+                    }
+                    case ChoicesFilterMode.Nand: {
+                        return {
+                            $not: {
+                                $and: filters,
+                            },
+                        };
+                    }
                 }
-            }
-        });
+            },
+        );
 
         return groupFilterHelper(filter.mode, productFilters);
     }
@@ -733,7 +774,11 @@ function choicesFilterToStamhoofdFilter(filter: ChoicesFilter): StamhoofdFilter 
     }
 }
 
-function getInnerStamhoofdFilterForDateFilter(filter: DateFilter, sqlFilterId: string, wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter = (f: StamhoofdFilter) => f): StamhoofdFilter {
+function getInnerStamhoofdFilterForDateFilter(
+    filter: DateFilter,
+    sqlFilterId: string,
+    wrapFilter: (f: StamhoofdFilter) => StamhoofdFilter = (f: StamhoofdFilter) => f,
+): StamhoofdFilter {
     function msToFilterValue(ms: number) {
         return { $: '$date', value: ms };
     }
@@ -878,7 +923,10 @@ function getFilterType(filter: Filter): FilterType {
     return FilterType.NumberFilter;
 }
 
-function groupFilterHelper(mode: 'Or' | 'And' | 'Nand' | 'Nor', filters: StamhoofdFilter[]): StamhoofdFilter {
+function groupFilterHelper(
+    mode: 'Or' | 'And' | 'Nand' | 'Nor',
+    filters: StamhoofdFilter[],
+): StamhoofdFilter {
     if (filters.length === 0) {
         // console.error('filterGroupToStamhoofdFilter: no filters');
         return null;
@@ -914,7 +962,7 @@ function groupFilterHelper(mode: 'Or' | 'And' | 'Nand' | 'Nor', filters: Stamhoo
             };
         case 'Nand':
             return {
-                $or: filters.flatMap(f => ({
+                $or: filters.flatMap((f) => ({
                     $not: f,
                 })),
             };
@@ -924,35 +972,47 @@ function groupFilterHelper(mode: 'Or' | 'And' | 'Nand' | 'Nor', filters: Stamhoo
                     if (f !== null) {
                         // necessary to support 'order_product_prices' migration, else filter is not recognized in UI
                         if (f['$or'] && Array.isArray(f['$or'])) {
-                            return f['$or'].map(f => ({ $not: f }));
+                            return f['$or'].map((f) => ({ $not: f }));
                         }
                     }
 
-                    return [{
-                        $not: f,
-                    }];
+                    return [
+                        {
+                            $not: f,
+                        },
+                    ];
                 }),
             };
     }
 }
 
 function filterGroupToStamhoofdFilter(filter: FilterGroup): StamhoofdFilter {
-    const filters = filter.filters.map(f => filterToStamhoofdFilter(f));
+    const filters = filter.filters.map((f) => filterToStamhoofdFilter(f));
 
     return groupFilterHelper(filter.mode, filters);
 }
 
-export function convertOldPropertyFilter(filter: OldPropertyFilter): { enabledWhen: StamhoofdFilter | null; requiredWhen: StamhoofdFilter | null } {
+export function convertOldPropertyFilter(filter: OldPropertyFilter): {
+    enabledWhen: StamhoofdFilter | null;
+    requiredWhen: StamhoofdFilter | null;
+} {
     let newEnabledWhen: StamhoofdFilter | null = null;
     let newRequiredWhen: StamhoofdFilter | null = {};
 
-    if (filter.enabledWhen && filter.enabledWhen.data && (filter.enabledWhen.data as FilterGroup).filters.length !== 0) {
+    if (
+        filter.enabledWhen &&
+        filter.enabledWhen.data &&
+        (filter.enabledWhen.data as FilterGroup).filters.length !== 0
+    ) {
         newEnabledWhen = filterToStamhoofdFilter(filter.enabledWhen.data);
     }
 
     if (filter.requiredWhen === null) {
         newRequiredWhen = null;
-    } else if (filter.requiredWhen.data && (filter.requiredWhen.data as FilterGroup).filters.length !== 0) {
+    } else if (
+        filter.requiredWhen.data &&
+        (filter.requiredWhen.data as FilterGroup).filters.length !== 0
+    ) {
         newRequiredWhen = filterToStamhoofdFilter(filter.requiredWhen.data);
     }
 
@@ -961,7 +1021,9 @@ export function convertOldPropertyFilter(filter: OldPropertyFilter): { enabledWh
 
 function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): StamhoofdFilter {
     if (filter.definitionId !== 'registrations') {
-        throw new Error(`Unknown filter definitionId for registrationsFilter: ${filter.definitionId}`);
+        throw new Error(
+            `Unknown filter definitionId for registrationsFilter: ${filter.definitionId}`,
+        );
     }
 
     // todo: ids should be converted in migration for groups?
@@ -983,7 +1045,7 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
             return {
                 registrations: {
                     $elemMatch: {
-                        $or: filter.choices.map(c => createGroupIdFilter(c.id)),
+                        $or: filter.choices.map((c) => createGroupIdFilter(c.id)),
                     },
                 },
             };
@@ -992,7 +1054,7 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
             return {
                 registrations: {
                     $elemMatch: {
-                        $and: filter.choices.map(c => createGroupIdFilter(c.id)),
+                        $and: filter.choices.map((c) => createGroupIdFilter(c.id)),
                     },
                 },
             };
@@ -1002,7 +1064,7 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
                 registrations: {
                     $not: {
                         $elemMatch: {
-                            $or: filter.choices.map(c => createGroupIdFilter(c.id)),
+                            $or: filter.choices.map((c) => createGroupIdFilter(c.id)),
                         },
                     },
                 },
@@ -1013,7 +1075,7 @@ function registrationsFilterToStamhoofdFilter(filter: RegistrationsFilter): Stam
                 registrations: {
                     $not: {
                         $elemMatch: {
-                            $and: filter.choices.map(c => createGroupIdFilter(c.id)),
+                            $and: filter.choices.map((c) => createGroupIdFilter(c.id)),
                         },
                     },
                 },

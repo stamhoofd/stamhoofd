@@ -32,7 +32,7 @@ export class LoginMethodConfig extends AutoEncoder {
     /**
      * Limit this method to email addresses ending on these domains.
      * When this is empty, all domains are allowed.
-    */
+     */
     @field({ decoder: new ArrayDecoder(StringDecoder) })
     allowlist: string[] = [];
 

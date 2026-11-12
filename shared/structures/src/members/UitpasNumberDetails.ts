@@ -16,9 +16,9 @@ export enum UitpasSocialTariffStatus {
 }
 
 /**
-* Data returned from uitpas api.
-* https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-pass
-*/
+ * Data returned from uitpas api.
+ * https://docs.publiq.be/docs/uitpas/uitpas-api/reference/operations/get-a-pass
+ */
 export class UitpasSocialTariff extends AutoEncoder {
     @field({ decoder: new EnumDecoder(UitpasSocialTariffStatus) })
     status: UitpasSocialTariffStatus;

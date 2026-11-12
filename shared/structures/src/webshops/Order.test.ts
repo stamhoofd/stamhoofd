@@ -3,7 +3,11 @@ import { File } from '../files/File.js';
 import { Image } from '../files/Image.js';
 import { Resolution } from '../files/Resolution.js';
 import { Payment } from '../members/Payment.js';
-import { RecordFileAnswer, RecordImageAnswer, RecordTextAnswer } from '../members/records/RecordAnswer.js';
+import {
+    RecordFileAnswer,
+    RecordImageAnswer,
+    RecordTextAnswer,
+} from '../members/records/RecordAnswer.js';
 import { RecordCategory } from '../members/records/RecordCategory.js';
 import { RecordSettings, RecordType } from '../members/records/RecordSettings.js';
 import { Organization } from '../Organization.js';
@@ -81,9 +85,18 @@ describe('Order', () => {
             data: OrderData.create({}),
         });
         order.data.recordAnswers = new Map();
-        order.data.recordAnswers.set(fileRecordSettings.id, RecordFileAnswer.create({ settings: fileRecordSettings, file }));
-        order.data.recordAnswers.set(textRecordSettings.id, RecordTextAnswer.create({ settings: textRecordSettings, value: 'Een opmerking' }));
-        order.data.recordAnswers.set(imageRecordSettings.id, RecordImageAnswer.create({ settings: imageRecordSettings, image }));
+        order.data.recordAnswers.set(
+            fileRecordSettings.id,
+            RecordFileAnswer.create({ settings: fileRecordSettings, file }),
+        );
+        order.data.recordAnswers.set(
+            textRecordSettings.id,
+            RecordTextAnswer.create({ settings: textRecordSettings, value: 'Een opmerking' }),
+        );
+        order.data.recordAnswers.set(
+            imageRecordSettings.id,
+            RecordImageAnswer.create({ settings: imageRecordSettings, image }),
+        );
 
         return { webshop, order };
     }
@@ -104,7 +117,9 @@ describe('Order', () => {
         expect(html).toContain('<img src="cid:image-600"');
         expect(html).toContain('alt="photo.jpg"');
         // Bounded box, aspect ratio preserved
-        expect(html).toContain('style="max-width: 200px; max-height: 64px; width: auto; height: auto;"');
+        expect(html).toContain(
+            'style="max-width: 200px; max-height: 64px; width: auto; height: auto;"',
+        );
         expect(html).not.toContain('files.example.com');
     });
 
@@ -113,13 +128,13 @@ describe('Order', () => {
         const organization = Organization.create({});
 
         const recipient = order.getRecipient(organization, webshop);
-        const replacement = recipient.replacements.find(r => r.token === 'orderDetailsTable')!;
+        const replacement = recipient.replacements.find((r) => r.token === 'orderDetailsTable')!;
 
         // The image uses the same resolution file the inline image references, not its full size source
         expect(replacement.files).toEqual([file, imageResolutionFile]);
 
         // Other replacements don't carry files
-        expect(recipient.replacements.filter(r => r.files.length > 0)).toEqual([replacement]);
+        expect(recipient.replacements.filter((r) => r.files.length > 0)).toEqual([replacement]);
     });
 
     function createTransferOrder(...payments: Payment[]) {
@@ -129,7 +144,9 @@ describe('Order', () => {
             data: OrderData.create({}),
             balanceItems: [
                 BalanceItemWithPayments.create({
-                    payments: payments.map(payment => BalanceItemPaymentWithPayment.create({ payment, price: payment.price })),
+                    payments: payments.map((payment) =>
+                        BalanceItemPaymentWithPayment.create({ payment, price: payment.price }),
+                    ),
                 }),
             ],
         });
@@ -137,7 +154,11 @@ describe('Order', () => {
         return { webshop, order };
     }
 
-    function createTransferPayment(status: PaymentStatus, transferDescription: string, type = PaymentType.Payment) {
+    function createTransferPayment(
+        status: PaymentStatus,
+        transferDescription: string,
+        type = PaymentType.Payment,
+    ) {
         return Payment.create({
             method: PaymentMethod.Transfer,
             status,
@@ -154,22 +175,33 @@ describe('Order', () => {
     function getTransferReplacements(order: Order, webshop: WebshopPreview) {
         const recipient = order.getRecipient(Organization.create({}), webshop);
         return {
-            transferDescription: recipient.replacements.find(r => r.token === 'transferDescription')!.value,
-            transferBankAccount: recipient.replacements.find(r => r.token === 'transferBankAccount')!.value,
-            transferBankCreditor: recipient.replacements.find(r => r.token === 'transferBankCreditor')!.value,
+            transferDescription: recipient.replacements.find(
+                (r) => r.token === 'transferDescription',
+            )!.value,
+            transferBankAccount: recipient.replacements.find(
+                (r) => r.token === 'transferBankAccount',
+            )!.value,
+            transferBankCreditor: recipient.replacements.find(
+                (r) => r.token === 'transferBankCreditor',
+            )!.value,
         };
     }
 
     // The order confirmation email is sent before the transfer is received, so the payment is not succeeded yet
-    test.each([PaymentStatus.Created, PaymentStatus.Pending, PaymentStatus.Succeeded])('the transfer replacements are filled in for a %s transfer payment', (status) => {
-        const { webshop, order } = createTransferOrder(createTransferPayment(status, '+++123/4567/89123+++'));
+    test.each([PaymentStatus.Created, PaymentStatus.Pending, PaymentStatus.Succeeded])(
+        'the transfer replacements are filled in for a %s transfer payment',
+        (status) => {
+            const { webshop, order } = createTransferOrder(
+                createTransferPayment(status, '+++123/4567/89123+++'),
+            );
 
-        expect(getTransferReplacements(order, webshop)).toEqual({
-            transferDescription: '+++123/4567/89123+++',
-            transferBankAccount: 'BE71096123456769',
-            transferBankCreditor: 'Democlub',
-        });
-    });
+            expect(getTransferReplacements(order, webshop)).toEqual({
+                transferDescription: '+++123/4567/89123+++',
+                transferBankAccount: 'BE71096123456769',
+                transferBankCreditor: 'Democlub',
+            });
+        },
+    );
 
     test('the transfer replacements only contain the unpaid transfer if the order was partially paid by an earlier transfer', () => {
         const { webshop, order } = createTransferOrder(
@@ -177,7 +209,9 @@ describe('Order', () => {
             createTransferPayment(PaymentStatus.Created, '+++222/2222/22222+++'),
         );
 
-        expect(getTransferReplacements(order, webshop).transferDescription).toBe('+++222/2222/22222+++');
+        expect(getTransferReplacements(order, webshop).transferDescription).toBe(
+            '+++222/2222/22222+++',
+        );
     });
 
     test('a failed transfer is never used for the transfer replacements', () => {
@@ -186,7 +220,9 @@ describe('Order', () => {
 
         const recipient = order.getRecipient(Organization.create({}), webshop, failedTransfer);
 
-        expect(recipient.replacements.find(r => r.token === 'transferDescription')!.value).toBe('');
+        expect(recipient.replacements.find((r) => r.token === 'transferDescription')!.value).toBe(
+            '',
+        );
     });
 
     test('a refund of a transfer does not replace the payment instructions of the original transfer', () => {
@@ -196,14 +232,26 @@ describe('Order', () => {
             createTransferPayment(PaymentStatus.Created, '', PaymentType.Refund),
         );
 
-        expect(getTransferReplacements(order, webshop).transferDescription).toBe('+++111/1111/11111+++');
+        expect(getTransferReplacements(order, webshop).transferDescription).toBe(
+            '+++111/1111/11111+++',
+        );
     });
 
     test('removePersonalData clears the customer and record answers of every cart item', () => {
         const product = Product.create({ name: 'Ticket', enableCustomer: true });
-        const item = CartItem.create({ product, productPrice: product.prices[0], customer: Customer.create({ firstName: 'John', lastName: 'Doe' }) });
-        item.recordAnswers.set(textRecordSettings.id, RecordTextAnswer.create({ settings: textRecordSettings, value: 'Noten' }));
-        const order = Order.create({ webshopId: 'x', data: OrderData.create({ cart: Cart.create({ items: [item] }) }) });
+        const item = CartItem.create({
+            product,
+            productPrice: product.prices[0],
+            customer: Customer.create({ firstName: 'John', lastName: 'Doe' }),
+        });
+        item.recordAnswers.set(
+            textRecordSettings.id,
+            RecordTextAnswer.create({ settings: textRecordSettings, value: 'Noten' }),
+        );
+        const order = Order.create({
+            webshopId: 'x',
+            data: OrderData.create({ cart: Cart.create({ items: [item] }) }),
+        });
 
         order.data.removePersonalData();
 

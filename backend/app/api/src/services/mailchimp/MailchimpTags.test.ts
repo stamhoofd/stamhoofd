@@ -27,7 +27,13 @@ describe('MailchimpTags', () => {
 
     test('tags start with the name of the platform, and tags from before that are still managed', () => {
         const i18n = new I18n(Language.Dutch, Country.Belgium);
-        i18n.messages = new Map([['%1PI', 'Groep'], ['%wH', 'Leeftijdsgroep'], ['%1PM', 'Lid'], ['%ZwU', 'Besteller'], ['%1AV', 'Webshop']]);
+        i18n.messages = new Map([
+            ['%1PI', 'Groep'],
+            ['%wH', 'Leeftijdsgroep'],
+            ['%1PM', 'Lid'],
+            ['%ZwU', 'Besteller'],
+            ['%1AV', 'Webshop'],
+        ]);
         const tags = new MailchimpTags(i18n, 'Ravot');
 
         expect(tags.member).toBe('Ravot: Lid');

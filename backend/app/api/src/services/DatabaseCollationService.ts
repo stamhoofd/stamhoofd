@@ -11,7 +11,9 @@ export class DatabaseCollationService {
     static expectedCollation = EXPECTED_COLLATION;
 
     static async getCurrentCollations() {
-        const connectionResult = await Database.statement("SHOW VARIABLES LIKE 'collation_connection'");
+        const connectionResult = await Database.statement(
+            "SHOW VARIABLES LIKE 'collation_connection'",
+        );
         const databaseResult = await Database.statement("SHOW VARIABLES LIKE 'collation_database'");
 
         const collationConnection = this.extractVariableValue(connectionResult);
@@ -42,10 +44,8 @@ export class DatabaseCollationService {
             return '';
         }
 
-        const value = firstRow.Value
-            ?? firstRow.value
-            ?? firstRow.VARIABLE_VALUE
-            ?? firstRow.variable_value;
+        const value =
+            firstRow.Value ?? firstRow.value ?? firstRow.VARIABLE_VALUE ?? firstRow.variable_value;
 
         if (typeof value === 'string') {
             return value;

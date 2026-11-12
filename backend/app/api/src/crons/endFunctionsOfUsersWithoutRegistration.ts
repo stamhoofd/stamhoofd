@@ -4,7 +4,10 @@ import { FlagMomentCleanup } from '../helpers/FlagMomentCleanup.js';
 // Only run the cleanup once per calendar day (crons tick every 5 minutes).
 let lastRunDate: number | null = null;
 
-registerTenantCron('endFunctionsOfUsersWithoutRegistration', endFunctionsOfUsersWithoutRegistration);
+registerTenantCron(
+    'endFunctionsOfUsersWithoutRegistration',
+    endFunctionsOfUsersWithoutRegistration,
+);
 
 function shouldRun() {
     const now = new Date();

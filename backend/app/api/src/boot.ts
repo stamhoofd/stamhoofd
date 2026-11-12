@@ -66,15 +66,21 @@ const MAXIMUM_SHUTDOWN_WAIT = 29 * 1000;
 
 const seeds = async (options: { shutdown: () => Promise<void> }) => {
     if (await checkReadOnly()) {
-        console.error(new StyledText('[SEEDS] ').addClass('migration', 'tag'), new StyledText('MySQL is in read-only mode: Seeds are disabled.').addClass('error'));
+        console.error(
+            new StyledText('[SEEDS] ').addClass('migration', 'tag'),
+            new StyledText('MySQL is in read-only mode: Seeds are disabled.').addClass('error'),
+        );
         return;
     }
 
     try {
         // Internal
         await AuditLogService.disable(async () => {
-            if (!await Migration.runAll(import.meta.dirname + '/seeds')) {
-                console.error(new StyledText('[SEEDS] ').addClass('migration', 'tag'), new StyledText('Seeds failed!').addClass('error'));
+            if (!(await Migration.runAll(import.meta.dirname + '/seeds'))) {
+                console.error(
+                    new StyledText('[SEEDS] ').addClass('migration', 'tag'),
+                    new StyledText('Seeds failed!').addClass('error'),
+                );
 
                 if (STAMHOOFD.environment === 'test' || STAMHOOFD.environment === 'development') {
                     await options.shutdown();
@@ -187,14 +193,16 @@ export const boot = async (options: { killProcess: boolean; lifecycle?: Applicat
     await import('./excel-loaders/registrations.js');
     await import('./email-recipient-loaders/documents.js');
     await import('./email-recipient-loaders/discount-codes.js');
-    await import ('./email-recipient-loaders/payments.js');
-    await import ('./email-recipient-loaders/organizations.js');
+    await import('./email-recipient-loaders/payments.js');
+    await import('./email-recipient-loaders/organizations.js');
 
     productionLog('Opening port...');
     routerServer.listen(STAMHOOFD.PORT ?? 9090);
 
     const hrend = process.hrtime(bootTime);
-    productionLog('🟢 HTTP server started in ' + Math.ceil(hrend[0] * 1000 + hrend[1] / 1000000) + 'ms');
+    productionLog(
+        '🟢 HTTP server started in ' + Math.ceil(hrend[0] * 1000 + hrend[1] / 1000000) + 'ms',
+    );
 
     resumeEmails().catch(console.error);
 
@@ -235,7 +243,9 @@ export const boot = async (options: { killProcess: boolean; lifecycle?: Applicat
         QueryableModel.shutdownMigrations = true;
         productionLog('Shutting down...');
         // Disable keep alive
-        routerServer.defaultHeaders = Object.assign(routerServer.defaultHeaders, { Connection: 'close' });
+        routerServer.defaultHeaders = Object.assign(routerServer.defaultHeaders, {
+            Connection: 'close',
+        });
         if (routerServer.server) {
             routerServer.server.headersTimeout = 1000;
             routerServer.server.keepAliveTimeout = 1;
@@ -276,12 +286,17 @@ export const boot = async (options: { killProcess: boolean; lifecycle?: Applicat
         await waitUntilDeadline(QueueHandler.awaitAll(), { deadline, description: 'queues' });
 
         // Wait for emails
-        await waitUntilDeadline((async () => {
-            while (Email.currentQueue.length > 0) {
-                console.log(`${Email.currentQueue.length} emails still in queue. Waiting 500ms...`);
-                await sleep(500);
-            }
-        })(), { deadline, description: 'emails' });
+        await waitUntilDeadline(
+            (async () => {
+                while (Email.currentQueue.length > 0) {
+                    console.log(
+                        `${Email.currentQueue.length} emails still in queue. Waiting 500ms...`,
+                    );
+                    await sleep(500);
+                }
+            })(),
+            { deadline, description: 'emails' },
+        );
 
         try {
             await Database.end();

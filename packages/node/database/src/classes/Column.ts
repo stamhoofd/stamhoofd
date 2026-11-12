@@ -62,7 +62,9 @@ export class Column {
             return null;
         }
         if (!this.nullable && data === null) {
-            throw new Error('Received null value from database. Expected a non-nullable value for ' + this.name);
+            throw new Error(
+                'Received null value from database. Expected a non-nullable value for ' + this.name,
+            );
         }
         switch (this.type) {
             case 'integer':
@@ -114,24 +116,61 @@ export class Column {
 
                 if (this.decoder) {
                     if (this.decoder.decodeField) {
-                        if (typeof parsed === 'object' && parsed !== null && 'value' in parsed && typeof (parsed as any).version === 'number') {
-                            return this.decoder.decodeField(parsed.value, { version: (parsed as any).version, medium: EncodeMedium.Database }, this.name);
+                        if (
+                            typeof parsed === 'object' &&
+                            parsed !== null &&
+                            'value' in parsed &&
+                            typeof (parsed as any).version === 'number'
+                        ) {
+                            return this.decoder.decodeField(
+                                parsed.value,
+                                { version: (parsed as any).version, medium: EncodeMedium.Database },
+                                this.name,
+                            );
                         }
 
                         // Fallback decoding without version (since we don't know the saved version)
-                        return this.decoder.decodeField(parsed, { version: 0, medium: EncodeMedium.Database }, this.name);
+                        return this.decoder.decodeField(
+                            parsed,
+                            { version: 0, medium: EncodeMedium.Database },
+                            this.name,
+                        );
                     }
-                    if (typeof parsed === 'object' && parsed !== null && 'version' in parsed && 'value' in parsed && typeof parsed.version === 'number') {
-                        return this.decoder.decode(new ObjectData(parsed.value, { version: parsed.version, medium: EncodeMedium.Database }, this.name));
+                    if (
+                        typeof parsed === 'object' &&
+                        parsed !== null &&
+                        'version' in parsed &&
+                        'value' in parsed &&
+                        typeof parsed.version === 'number'
+                    ) {
+                        return this.decoder.decode(
+                            new ObjectData(
+                                parsed.value,
+                                { version: parsed.version, medium: EncodeMedium.Database },
+                                this.name,
+                            ),
+                        );
                     }
 
                     // Fallback decoding without version (since we don't know the saved version)
-                    return this.decoder.decode(new ObjectData(parsed, { version: 0, medium: EncodeMedium.Database }, this.name));
+                    return this.decoder.decode(
+                        new ObjectData(
+                            parsed,
+                            { version: 0, medium: EncodeMedium.Database },
+                            this.name,
+                        ),
+                    );
                 } else {
                     console.warn('It is recommended to always use a decoder for JSON columns');
                 }
 
-                if (typeof parsed === 'object' && parsed !== null && 'version' in parsed && 'value' in parsed && typeof parsed.version === 'number') {
+                if (
+                    typeof parsed === 'object' &&
+                    parsed !== null &&
+                    'version' in parsed &&
+                    'value' in parsed &&
+                    typeof parsed.version === 'number'
+                ) {
                     return parsed.value;
                 }
 
@@ -153,21 +192,27 @@ export class Column {
             return null;
         }
         if (!this.nullable && data === null) {
-            throw new Error('Tried to set null to non-nullable value. Expected a non-nullable value');
+            throw new Error(
+                'Tried to set null to non-nullable value. Expected a non-nullable value',
+            );
         }
 
         switch (this.type) {
             case 'integer':
                 // Mapped correctly by MySQL
                 if (typeof data !== 'number') {
-                    throw new Error('Expected integer for ' + this.name + ', received ' + (typeof data));
+                    throw new Error(
+                        'Expected integer for ' + this.name + ', received ' + typeof data,
+                    );
                 }
 
                 return data;
 
             case 'number':
                 if (typeof data !== 'number') {
-                    throw new Error('Expected number for ' + this.name + ', received ' + (typeof data));
+                    throw new Error(
+                        'Expected number for ' + this.name + ', received ' + typeof data,
+                    );
                 }
 
                 // Mapped correctly by node MySQL
@@ -175,14 +220,18 @@ export class Column {
 
             case 'string':
                 if (typeof data !== 'string') {
-                    throw new Error('Expected string for ' + this.name + ', received ' + (typeof data));
+                    throw new Error(
+                        'Expected string for ' + this.name + ', received ' + typeof data,
+                    );
                 }
 
                 return data;
 
             case 'boolean':
                 if (typeof data !== 'boolean') {
-                    throw new Error('Expected boolean for ' + this.name + ', received ' + (typeof data));
+                    throw new Error(
+                        'Expected boolean for ' + this.name + ', received ' + typeof data,
+                    );
                 }
 
                 return data ? 1 : 0;
@@ -190,7 +239,7 @@ export class Column {
             case 'date':
             case 'datetime':
                 if (!(data instanceof Date)) {
-                    throw new Error('Expected Date for ' + this.name + ', received ' + (typeof data));
+                    throw new Error('Expected Date for ' + this.name + ', received ' + typeof data);
                 }
                 // This information cannot be stored in the database - so also update it in JS to keep it in sync
                 data.setMilliseconds(0);
@@ -203,9 +252,11 @@ export class Column {
 
                 return JSON.stringify({
                     // Warning: keys should be sorted or they will get marked as changed every time
-                    value: encodeObject(data as EncodableObject, { version, medium: EncodeMedium.Database }),
+                    value: encodeObject(data as EncodableObject, {
+                        version,
+                        medium: EncodeMedium.Database,
+                    }),
                     version: version,
-
                 });
             }
 

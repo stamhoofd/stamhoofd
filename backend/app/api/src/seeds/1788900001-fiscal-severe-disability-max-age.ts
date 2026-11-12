@@ -9,7 +9,10 @@ import { SeedTools } from '../helpers/SeedTools.js';
  * templates were seeded with 21, which also certified the year the member was 21.
  */
 export function correctSevereDisabilityMaxAge(template: DocumentTemplate): boolean {
-    if (template.privateSettings.templateDefinition.type !== 'fiscal' || template.settings.maxAgeSevereDisability !== 21) {
+    if (
+        template.privateSettings.templateDefinition.type !== 'fiscal' ||
+        template.settings.maxAgeSevereDisability !== 21
+    ) {
         return false;
     }
 
@@ -44,5 +47,11 @@ export default new Migration(async () => {
         });
     });
 
-    console.log('Corrected the severe disability age limit of ' + updated + ' of ' + result.total + ' document templates');
+    console.log(
+        'Corrected the severe disability age limit of ' +
+            updated +
+            ' of ' +
+            result.total +
+            ' document templates',
+    );
 });

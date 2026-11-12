@@ -71,14 +71,37 @@ async function provision() {
             await docker(args, Math.min(120_000, remaining));
         };
         await run(['pull', process.env.CI_MYSQL_IMAGE]);
-        await run(['run', '-d', '--name', container,
-            '-e', 'MYSQL_ROOT_PASSWORD=root', '-e', 'MYSQL_DATABASE=stamhoofd-tests',
-            '-p', '127.0.0.1:3306:3306', process.env.CI_MYSQL_IMAGE]);
+        await run([
+            'run',
+            '-d',
+            '--name',
+            container,
+            '-e',
+            'MYSQL_ROOT_PASSWORD=root',
+            '-e',
+            'MYSQL_DATABASE=stamhoofd-tests',
+            '-p',
+            '127.0.0.1:3306:3306',
+            process.env.CI_MYSQL_IMAGE,
+        ]);
 
         // TCP avoids accepting the entrypoint's temporary, socket-only initialization server.
         while (true) {
             try {
-                await exec('docker', ['exec', container, 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'SELECT 1'], { timeout: 5_000 });
+                await exec(
+                    'docker',
+                    [
+                        'exec',
+                        container,
+                        'mysql',
+                        '-h127.0.0.1',
+                        '-uroot',
+                        '-proot',
+                        '-e',
+                        'SELECT 1',
+                    ],
+                    { timeout: 5_000 },
+                );
                 break;
             } catch (error) {
                 if (Date.now() - startedAt >= timeout) {
@@ -118,10 +141,17 @@ async function wait() {
 
 try {
     switch (process.argv[2]) {
-        case 'start': await start(); break;
-        case 'provision': await provision(); break;
-        case 'wait': await wait(); break;
-        default: throw new Error('Expected start, provision, or wait.');
+        case 'start':
+            await start();
+            break;
+        case 'provision':
+            await provision();
+            break;
+        case 'wait':
+            await wait();
+            break;
+        default:
+            throw new Error('Expected start, provision, or wait.');
     }
 } catch (error) {
     console.error(error);

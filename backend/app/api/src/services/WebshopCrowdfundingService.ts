@@ -9,7 +9,7 @@ import { ThrottledQueue } from '../helpers/ThrottledQueue.js';
 // Balance items only store the orderId, so the webshop is resolved inside the queue
 const orderUpdateQueue = new ThrottledQueue(async (orderIds: string[]) => {
     const orders = await Order.getByIDs(...orderIds);
-    const webshopIds = Formatter.uniqueArray(orders.map(o => o.webshopId));
+    const webshopIds = Formatter.uniqueArray(orders.map((o) => o.webshopId));
 
     for (const webshopId of webshopIds) {
         await WebshopCrowdfundingService.updateForWebshop(webshopId);
@@ -76,18 +76,25 @@ export class WebshopCrowdfundingService {
         )
             .from(BalanceItem.table)
             .join(
-                SQL.join(Order.table)
-                    .where(SQL.column(BalanceItem.table, 'orderId'), SQL.column(Order.table, 'id')),
+                SQL.join(Order.table).where(
+                    SQL.column(BalanceItem.table, 'orderId'),
+                    SQL.column(Order.table, 'id'),
+                ),
             )
             .where(SQL.column(Order.table, 'webshopId'), webshop.id)
             .where(SQL.column(BalanceItem.table, 'status'), BalanceItemStatus.Due)
             .first(false);
 
         // Sums are null when the webshop has no balance items
-        const progressAmount = typeof row?.['data']?.['pricePaid'] === 'number' ? row['data']['pricePaid'] : 0;
-        const pendingAmount = typeof row?.['data']?.['pricePending'] === 'number' ? row['data']['pricePending'] : 0;
+        const progressAmount =
+            typeof row?.['data']?.['pricePaid'] === 'number' ? row['data']['pricePaid'] : 0;
+        const pendingAmount =
+            typeof row?.['data']?.['pricePending'] === 'number' ? row['data']['pricePending'] : 0;
 
-        if (crowdfunding.progressAmount === progressAmount && crowdfunding.pendingAmount === pendingAmount) {
+        if (
+            crowdfunding.progressAmount === progressAmount &&
+            crowdfunding.pendingAmount === pendingAmount
+        ) {
             return;
         }
 

@@ -7,12 +7,18 @@ import { BalanceItemStatus } from '@stamhoofd/structures';
 // Charge manual service fees every night
 registerRootTenantCron('members-fees', chargeMembers);
 
-const { iterate, isHoursAgo } = useSavedIterator(() => {
-    return Organization.select();
-}, { limit: 10, maxQueries: 5 });
+const { iterate, isHoursAgo } = useSavedIterator(
+    () => {
+        return Organization.select();
+    },
+    { limit: 10, maxQueries: 5 },
+);
 
 async function chargeMembers() {
-    if (STAMHOOFD.environment !== 'development' && (new Date().getHours() > 5 || new Date().getHours() < 2)) {
+    if (
+        STAMHOOFD.environment !== 'development' &&
+        (new Date().getHours() > 5 || new Date().getHours() < 2)
+    ) {
         return;
     }
 
@@ -36,11 +42,18 @@ async function chargeMembers() {
  * Charge the (increase in) per-member fees for every active package of an organization.
  * For per-member packages this only charges the members that aren't paid/pending yet.
  */
-export async function chargeMemberFeesForOrganization(organization: Organization, sellingOrganization: Organization) {
+export async function chargeMemberFeesForOrganization(
+    organization: Organization,
+    sellingOrganization: Organization,
+) {
     const packages = await STPackageService.getActivePackages(organization.id);
 
     for (const pack of packages) {
-        const item = await STPackageService.chargePackage(pack, sellingOrganization, organization.defaultCompanies[0]);
+        const item = await STPackageService.chargePackage(
+            pack,
+            sellingOrganization,
+            organization.defaultCompanies[0],
+        );
         if (item) {
             item.status = BalanceItemStatus.Due;
             await item.save();

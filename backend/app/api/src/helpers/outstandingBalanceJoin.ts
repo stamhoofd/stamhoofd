@@ -7,17 +7,17 @@ type SQLJoin = ReturnType<typeof SQL.leftJoin>;
 const memberCachedBalanceJoinCache = new Map<string, SQLJoin>();
 
 export const memberCachedBalanceForOrganizationJoin = SQL.leftJoin(
-    SQL.select('objectId', 'organizationId',
-        new SQLSelectAs(
-            new SQLSum(
-                SQL.column('amountOpen'),
-            ),
-            new SQLAlias('amountOpen'),
-        ),
+    SQL.select(
+        'objectId',
+        'organizationId',
+        new SQLSelectAs(new SQLSum(SQL.column('amountOpen')), new SQLAlias('amountOpen')),
     )
         .from(CachedBalance.table)
         .where(SQL.column(CachedBalance.table, 'objectType'), 'member')
-        .groupBy(SQL.column(CachedBalance.table, 'objectId'), SQL.column(CachedBalance.table, 'organizationId'))
+        .groupBy(
+            SQL.column(CachedBalance.table, 'objectId'),
+            SQL.column(CachedBalance.table, 'organizationId'),
+        )
         .as('memberCachedBalance') as SQLNamedExpression,
     'memberCachedBalance',
 )
@@ -46,12 +46,11 @@ export function memberCachedBalanceJoinForOrganization(organizationId: string): 
 }
 
 export const registrationCachedBalanceJoin = SQL.leftJoin(
-    SQL.select('objectId', 'organizationId',
+    SQL.select(
+        'objectId',
+        'organizationId',
         new SQLSelectAs(
-            new SQLSum(
-                SQL.calculation(SQL.column('amountOpen'))
-                    .add(SQL.column('amountPending')),
-            ),
+            new SQLSum(SQL.calculation(SQL.column('amountOpen')).add(SQL.column('amountPending'))),
             new SQLAlias('toPay'),
         ),
         new SQLSelectAs(
@@ -65,6 +64,10 @@ export const registrationCachedBalanceJoin = SQL.leftJoin(
     )
         .from(CachedBalance.table)
         .where(SQL.column(CachedBalance.table, 'objectType'), 'registration')
-        .groupBy(SQL.column(CachedBalance.table, 'objectId'), SQL.column(CachedBalance.table, 'organizationId')).as('registrationCachedBalance') as SQLNamedExpression, 'registrationCachedBalance',
-)
-    .where(SQL.column('objectId'), SQL.column(Registration.table, 'id'));
+        .groupBy(
+            SQL.column(CachedBalance.table, 'objectId'),
+            SQL.column(CachedBalance.table, 'organizationId'),
+        )
+        .as('registrationCachedBalance') as SQLNamedExpression,
+    'registrationCachedBalance',
+).where(SQL.column('objectId'), SQL.column(Registration.table, 'id'));

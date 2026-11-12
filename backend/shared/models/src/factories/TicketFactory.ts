@@ -32,7 +32,10 @@ export class TicketFactory extends Factory<Options, Ticket> {
         if (this.options.updatedAt) {
             const forced = new Date(this.options.updatedAt);
             forced.setMilliseconds(0);
-            await Database.update('UPDATE `webshop_tickets` SET `updatedAt` = ? WHERE `id` = ?', [forced, ticket.id]);
+            await Database.update('UPDATE `webshop_tickets` SET `updatedAt` = ? WHERE `id` = ?', [
+                forced,
+                ticket.id,
+            ]);
             ticket.updatedAt = forced;
         }
 

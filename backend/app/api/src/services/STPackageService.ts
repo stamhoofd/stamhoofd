@@ -2,7 +2,21 @@ import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/model
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { SQL } from '@stamhoofd/sql';
 import type { Company } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, getPricingTypeName, Recipient, Replacement, STPackageStatus, STPackageType, STPackageTypeHelper, STPricingType, TranslatedString } from '@stamhoofd/structures';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    EmailTemplateType,
+    getPricingTypeName,
+    Recipient,
+    Replacement,
+    STPackageStatus,
+    STPackageType,
+    STPackageTypeHelper,
+    STPricingType,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { VATService } from './VATService.js';
 import { OrganizationAdminService } from './OrganizationAdminService.js';
@@ -12,10 +26,7 @@ export class STPackageService {
         return await STPackage.select()
             .where('organizationId', organizationId)
             .andWhere('validAt', '!=', null)
-            .andWhere(
-                SQL.where('removeAt', null)
-                    .or('removeAt', '>', new Date()),
-            )
+            .andWhere(SQL.where('removeAt', null).or('removeAt', '>', new Date()))
             .orderBy('validAt', 'DESC')
             .fetch();
     }
@@ -41,7 +52,7 @@ export class STPackageService {
         }
 
         if (amount < (pack.meta.minimumAmount || 1)) {
-            amount = (pack.meta.minimumAmount || 1);
+            amount = pack.meta.minimumAmount || 1;
         }
 
         return amount;
@@ -116,7 +127,12 @@ export class STPackageService {
      * This will calculate the price to expand the package to the given amount
      * If you want to renew a package, you need to create a new package first
      */
-    static async chargePackage(pack: STPackage, sellingOrganization: Organization, company: Company | null | undefined, date?: Date): Promise<BalanceItem | null> {
+    static async chargePackage(
+        pack: STPackage,
+        sellingOrganization: Organization,
+        company: Company | null | undefined,
+        date?: Date,
+    ): Promise<BalanceItem | null> {
         let unitPrice = Math.round(pack.meta.unitPrice);
 
         let amount = await this.getChargeableQuantity(pack);
@@ -138,8 +154,12 @@ export class STPackageService {
         }
 
         if (pack.endDate && pack.meta.pricingType !== STPricingType.Fixed) {
-            const totalDays = Math.round((pack.endDate.getTime() - pack.meta.startDate.getTime()) / (1000 * 60 * 60 * 24));
-            let remainingDays = Math.round((pack.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            const totalDays = Math.round(
+                (pack.endDate.getTime() - pack.meta.startDate.getTime()) / (1000 * 60 * 60 * 24),
+            );
+            let remainingDays = Math.round(
+                (pack.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+            );
 
             /// First 3 months are full price
             const paidDays = 30 * 3;
@@ -154,7 +174,12 @@ export class STPackageService {
             }
 
             if (pack.meta.pricingType === STPricingType.PerMember) {
-                unitPrice = Math.round(Math.min(unitPrice, unitPrice * remainingDays / (Math.max(365, totalDays) - paidDays)));
+                unitPrice = Math.round(
+                    Math.min(
+                        unitPrice,
+                        (unitPrice * remainingDays) / (Math.max(365, totalDays) - paidDays),
+                    ),
+                );
             } else {
                 unitPrice = Math.round(unitPrice);
             }
@@ -162,19 +187,29 @@ export class STPackageService {
 
         const item = new BalanceItem();
         item.type = BalanceItemType.STPackage;
-        item.name = pack.meta.name + ' ' + (
-            pack.endDate
-                ? $t('%1LM', { startDate: Formatter.startDate(now, false, true), endDate: Formatter.endDate(pack.endDate, false, true) })
-                : $t('%1LN', { startDate: Formatter.startDate(pack.meta.startDate, false, true) })
+        item.name =
+            pack.meta.name +
+            ' ' +
+            (pack.endDate
+                ? $t('%1LM', {
+                      startDate: Formatter.startDate(now, false, true),
+                      endDate: Formatter.endDate(pack.endDate, false, true),
+                  })
+                : $t('%1LN', { startDate: Formatter.startDate(pack.meta.startDate, false, true) }));
+        item.relations.set(
+            BalanceItemRelationType.STPackage,
+            BalanceItemRelation.create({
+                id: pack.id,
+                name: TranslatedString.create(pack.meta.name),
+            }),
         );
-        item.relations.set(BalanceItemRelationType.STPackage, BalanceItemRelation.create({
-            id: pack.id,
-            name: TranslatedString.create(pack.meta.name),
-        }));
-        item.relations.set(BalanceItemRelationType.STPricingType, BalanceItemRelation.create({
-            id: pack.meta.pricingType,
-            name: TranslatedString.create(getPricingTypeName(pack.meta.pricingType)),
-        }));
+        item.relations.set(
+            BalanceItemRelationType.STPricingType,
+            BalanceItemRelation.create({
+                id: pack.meta.pricingType,
+                name: TranslatedString.create(getPricingTypeName(pack.meta.pricingType)),
+            }),
+        );
 
         item.packageId = pack.id;
         item.startDate = now;
@@ -210,17 +245,28 @@ export class STPackageService {
         return packages;
     }
 
-    private static async getOrganizationPackagesMap(organizationId: string): Promise<Map<STPackageType, STPackageStatus>> {
+    private static async getOrganizationPackagesMap(
+        organizationId: string,
+    ): Promise<Map<STPackageType, STPackageStatus>> {
         const map = new Map<STPackageType, STPackageStatus>();
 
-        if (STAMHOOFD.userMode === 'platform' || organizationId === ((await Platform.getShared()).membershipOrganizationId)) {
-            map.set(STPackageType.Webshops, STPackageStatus.create({
-                startDate: new Date(0),
-            }));
+        if (
+            STAMHOOFD.userMode === 'platform' ||
+            organizationId === (await Platform.getShared()).membershipOrganizationId
+        ) {
+            map.set(
+                STPackageType.Webshops,
+                STPackageStatus.create({
+                    startDate: new Date(0),
+                }),
+            );
 
-            map.set(STPackageType.Members, STPackageStatus.create({
-                startDate: new Date(0),
-            }));
+            map.set(
+                STPackageType.Members,
+                STPackageStatus.create({
+                    startDate: new Date(0),
+                }),
+            );
             return map;
         }
 
@@ -302,7 +348,12 @@ export class STPackageService {
         }
 
         const allowFrom = new Date(Date.now() + 1000 * 60 * 60 * 24 * allowDays);
-        if (type && (pack.validUntil === null || pack.validUntil < new Date() || pack.validUntil > allowFrom)) {
+        if (
+            type &&
+            (pack.validUntil === null ||
+                pack.validUntil < new Date() ||
+                pack.validUntil > allowFrom)
+        ) {
             console.log('Skip sending expiration email for ' + pack.id);
             return;
         }
@@ -326,9 +377,12 @@ export class STPackageService {
     /**
      * Send an email template about a package to the full administrators of its organization.
      */
-    static async sendEmailTemplate(pack: STPackage, data: {
-        type: EmailTemplateType;
-    }) {
+    static async sendEmailTemplate(
+        pack: STPackage,
+        data: {
+            type: EmailTemplateType;
+        },
+    ) {
         const organization = await Organization.getByID(pack.organizationId);
 
         if (!organization) {
@@ -338,7 +392,7 @@ export class STPackageService {
 
         const admins = await OrganizationAdminService.getFullAdmins(organization);
 
-        const recipients = admins.map(admin =>
+        const recipients = admins.map((admin) =>
             Recipient.create({
                 firstName: admin.firstName,
                 lastName: admin.lastName,
@@ -363,7 +417,7 @@ export class STPackageService {
                     }),
                     Replacement.create({
                         token: 'renewUrl',
-                        value: `https://${(STAMHOOFD.domains.dashboard ?? 'stamhoofd.app')}/${organization.i18n.locale}/beheerders/${organization.uri}/instellingen/functionaliteiten`,
+                        value: `https://${STAMHOOFD.domains.dashboard ?? 'stamhoofd.app'}/${organization.i18n.locale}/beheerders/${organization.uri}/instellingen/functionaliteiten`,
                     }),
                 ],
             }),

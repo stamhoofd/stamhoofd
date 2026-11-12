@@ -1,5 +1,10 @@
 import { StripeAccount } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
+import {
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    AuditLogSource,
+    AuditLogType,
+} from '@stamhoofd/structures';
 import { getDefaultGenerator, ModelLogger } from './ModelLogger.js';
 
 const defaultGenerator = getDefaultGenerator({
@@ -16,7 +21,11 @@ export const StripeAccountLogger = new ModelLogger(StripeAccount, {
             return;
         }
 
-        if (event.type === 'updated' && 'status' in event.changedFields && event.changedFields.status === 'deleted') {
+        if (
+            event.type === 'updated' &&
+            'status' in event.changedFields &&
+            event.changedFields.status === 'deleted'
+        ) {
             result.type = AuditLogType.StripeAccountDeleted;
             result.generatePatchList = false;
         }
@@ -26,11 +35,14 @@ export const StripeAccountLogger = new ModelLogger(StripeAccount, {
 
     createReplacements(model) {
         return new Map([
-            ['a', AuditLogReplacement.create({
-                id: model.id,
-                value: model.accountId,
-                type: AuditLogReplacementType.StripeAccount,
-            })],
+            [
+                'a',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.accountId,
+                    type: AuditLogReplacementType.StripeAccount,
+                }),
+            ],
         ]);
     },
 

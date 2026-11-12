@@ -5,11 +5,23 @@ import { AccessRightHelper } from '../AccessRight.js';
 import { CountryHelper } from '../addresses/CountryDecoder.js';
 import { AuditLogReplacementDependencies, registerAuditLogEnum } from '../AuditLogReplacement.js';
 import { LanguageHelper } from '../Language.js';
-import { BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getVATExcemptReasonName, VATExcemptReason } from '../BalanceItem.js';
+import {
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    getBalanceItemRelationTypeName,
+    getBalanceItemStatusName,
+    getBalanceItemTypeName,
+    getVATExcemptReasonName,
+    VATExcemptReason,
+} from '../BalanceItem.js';
 import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
 import { DocumentStatus, DocumentStatusHelper } from '../Document.js';
 import { EmailTemplate, EmailTemplateType } from '../email/EmailTemplate.js';
-import { EventNotificationStatus, EventNotificationStatusHelper } from '../EventNotificationStatus.js';
+import {
+    EventNotificationStatus,
+    EventNotificationStatusHelper,
+} from '../EventNotificationStatus.js';
 import { GroupStatus, getGroupStatusName } from '../Group.js';
 import { Gender, getGenderName } from '../members/Gender.js';
 import { MFAMethodType, getMFAMethodTypeName } from '../MFA.js';
@@ -22,27 +34,53 @@ import { UmbrellaOrganization, UmbrellaOrganizationHelper } from '../UmbrellaOrg
 import { OrderStatus, OrderStatusHelper } from '../webshops/Order.js';
 import { CheckoutMethodType, CheckoutMethodTypeHelper } from '../webshops/WebshopMetaData.js';
 
-registerAuditLogEnum('PaymentMethod', PaymentMethod, PaymentMethodHelper.getPluralName, { legacy: true });
+registerAuditLogEnum('PaymentMethod', PaymentMethod, PaymentMethodHelper.getPluralName, {
+    legacy: true,
+});
 registerAuditLogEnum('ParentType', ParentType, ParentTypeHelper.getName, { legacy: true });
 registerAuditLogEnum('OrderStatus', OrderStatus, OrderStatusHelper.getName, { legacy: true });
-registerAuditLogEnum('DocumentStatus', DocumentStatus, DocumentStatusHelper.getName, { legacy: true });
+registerAuditLogEnum('DocumentStatus', DocumentStatus, DocumentStatusHelper.getName, {
+    legacy: true,
+});
 registerAuditLogEnum('AccessRight', AccessRight, AccessRightHelper.getName, { legacy: true });
-registerAuditLogEnum('CheckoutMethodType', CheckoutMethodType, CheckoutMethodTypeHelper.getName, { legacy: true });
+registerAuditLogEnum('CheckoutMethodType', CheckoutMethodType, CheckoutMethodTypeHelper.getName, {
+    legacy: true,
+});
 registerAuditLogEnum('Country', Country, CountryHelper.getName, { legacy: true });
-registerAuditLogEnum('OrganizationType', OrganizationType, (key: OrganizationType) => OrganizationTypeHelper.getName(key), { legacy: true });
+registerAuditLogEnum(
+    'OrganizationType',
+    OrganizationType,
+    (key: OrganizationType) => OrganizationTypeHelper.getName(key),
+    { legacy: true },
+);
 registerAuditLogEnum('PaymentStatus', PaymentStatus, PaymentStatusHelper.getName, { legacy: true });
-registerAuditLogEnum('UmbrellaOrganization', UmbrellaOrganization, UmbrellaOrganizationHelper.getName, { legacy: true });
+registerAuditLogEnum(
+    'UmbrellaOrganization',
+    UmbrellaOrganization,
+    UmbrellaOrganizationHelper.getName,
+    { legacy: true },
+);
 registerAuditLogEnum('STPackageType', STPackageType, STPackageTypeHelper.getName, { legacy: true });
 registerAuditLogEnum('GroupStatus', GroupStatus, getGroupStatusName, { legacy: true });
 registerAuditLogEnum('Gender', Gender, getGenderName, { legacy: true });
 registerAuditLogEnum('SetupStepType', SetupStepType, getSetupStepName, { legacy: true });
-registerAuditLogEnum('EmailTemplateType', EmailTemplateType, EmailTemplate.getTypeTitle, { legacy: true });
-registerAuditLogEnum('EventNotificationStatus', EventNotificationStatus, EventNotificationStatusHelper.getName);
+registerAuditLogEnum('EmailTemplateType', EmailTemplateType, EmailTemplate.getTypeTitle, {
+    legacy: true,
+});
+registerAuditLogEnum(
+    'EventNotificationStatus',
+    EventNotificationStatus,
+    EventNotificationStatusHelper.getName,
+);
 registerAuditLogEnum('Language', Language, LanguageHelper.getName);
 registerAuditLogEnum('MFAMethodType', MFAMethodType, getMFAMethodTypeName);
 registerAuditLogEnum('BalanceItemStatus', BalanceItemStatus, getBalanceItemStatusName);
 registerAuditLogEnum('BalanceItemType', BalanceItemType, getBalanceItemTypeName);
-registerAuditLogEnum('BalanceItemRelationType', BalanceItemRelationType, getBalanceItemRelationTypeName);
+registerAuditLogEnum(
+    'BalanceItemRelationType',
+    BalanceItemRelationType,
+    getBalanceItemRelationTypeName,
+);
 registerAuditLogEnum('VATExcemptReason', VATExcemptReason, getVATExcemptReasonName);
 
 // AuditLogReplacementDependencies.uuidToName is deliberately not registered here: resolving a uuid

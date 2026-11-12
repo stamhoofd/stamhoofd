@@ -1,4 +1,11 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    StringDecoder,
+} from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { Address } from '../addresses/Address.js';
@@ -45,13 +52,15 @@ export class MemberSummary extends AutoEncoder {
     organizationId: string;
 
     get addresses() {
-        const addresses = this.parents.map(p => p.address).filter(a => a !== null) as Address[];
+        const addresses = this.parents.map((p) => p.address).filter((a) => a !== null) as Address[];
         if (this.address) {
             addresses.push(this.address);
         }
 
         // Remove duplicates by toString()
-        return addresses.filter((a, i, self) => self.findIndex(b => b.toString() === a.toString()) === i);
+        return addresses.filter(
+            (a, i, self) => self.findIndex((b) => b.toString() === a.toString()) === i,
+        );
     }
 
     get age(): number | null {
@@ -75,41 +84,45 @@ export class MemberSummary extends AutoEncoder {
         const recipients: Recipient[] = [];
         for (const parent of this.parents) {
             if (parent.email) {
-                recipients.push(Recipient.create({
-                    firstName: parent.firstName,
-                    lastName: parent.lastName,
-                    email: parent.email,
-                    types: ['parent'],
+                recipients.push(
+                    Recipient.create({
+                        firstName: parent.firstName,
+                        lastName: parent.lastName,
+                        email: parent.email,
+                        types: ['parent'],
+                        replacements: [
+                            Replacement.create({
+                                token: 'organization',
+                                value: this.organizationName,
+                            }),
+                        ],
+                    }),
+                );
+            }
+        }
+
+        if (this.email && (!this.age || this.age >= 18)) {
+            recipients.push(
+                Recipient.create({
+                    firstName: this.firstName,
+                    lastName: this.lastName,
+                    email: this.email,
+                    types: ['member'],
                     replacements: [
                         Replacement.create({
                             token: 'organization',
                             value: this.organizationName,
                         }),
                     ],
-                }));
-            }
-        }
-
-        if (this.email && (!this.age || this.age >= 18)) {
-            recipients.push(Recipient.create({
-                firstName: this.firstName,
-                lastName: this.lastName,
-                email: this.email,
-                types: ['member'],
-                replacements: [
-                    Replacement.create({
-                        token: 'organization',
-                        value: this.organizationName,
-                    }),
-                ],
-            }));
+                }),
+            );
         }
 
         return recipients;
     }
 
     get emailaddresses() {
-        const emails = this.parents.map(p => p.email).filter(e => e !== null) as string[];
+        const emails = this.parents.map((p) => p.email).filter((e) => e !== null) as string[];
         if (this.email && (!this.age || this.age >= 18)) {
             emails.push(this.email);
         }

@@ -15,15 +15,34 @@ describe('e2e shard selection', () => {
         await expect(Parser.parse(['--verbose', '--quiet'], TestE2e)).rejects.toThrow();
     });
 
-    it.each([undefined, '1/1', '1/4', '4/4'])('forwards shard %s and the worker count', async (shard) => {
-        const command = createCommand(shard);
+    it.each([undefined, '1/1', '1/4', '4/4'])(
+        'forwards shard %s and the worker count',
+        async (shard) => {
+            const command = createCommand(shard);
 
-        await command.run();
+            await command.run();
 
-        expect(testE2e).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ shard, workers: 2 }));
-    });
+            expect(testE2e).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({ shard, workers: 2 }),
+            );
+        },
+    );
 
-    it.each(['', '0/4', '1/0', '5/4', '-1/4', '1.5/4', '1', '1/4/2', '1/4foo', ' 1/4', '01/4', '1/9007199254740992'])('rejects invalid shard %s before starting services', async (shard) => {
+    it.each([
+        '',
+        '0/4',
+        '1/0',
+        '5/4',
+        '-1/4',
+        '1.5/4',
+        '1',
+        '1/4/2',
+        '1/4foo',
+        ' 1/4',
+        '01/4',
+        '1/9007199254740992',
+    ])('rejects invalid shard %s before starting services', async (shard) => {
         await expect(createCommand(shard).run()).rejects.toThrow('--shard must be index/total');
 
         expect(testE2e).not.toHaveBeenCalled();

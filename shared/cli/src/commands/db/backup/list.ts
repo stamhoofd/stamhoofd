@@ -4,10 +4,9 @@ import { info, table } from '../../../runtime/ux.js';
 
 export default class DbBackupList extends BaseCommand {
     static summary = 'List local MySQL data volume backups';
-    static description = 'Use this to see the backups created with `stam db backup`, including when they were created and how large they are.';
-    static examples = [
-        'stam db backup list',
-    ];
+    static description =
+        'Use this to see the backups created with `stam db backup`, including when they were created and how large they are.';
+    static examples = ['stam db backup list'];
 
     static flags = {
         ...BaseCommand.instanceFlags,
@@ -22,11 +21,14 @@ export default class DbBackupList extends BaseCommand {
             return;
         }
 
-        table(['NAME', 'CREATED', 'SIZE'], backups.map(backup => [
-            backup.name,
-            backup.createdAt.toLocaleString(),
-            formatBytes(backup.sizeBytes),
-        ]));
+        table(
+            ['NAME', 'CREATED', 'SIZE'],
+            backups.map((backup) => [
+                backup.name,
+                backup.createdAt.toLocaleString(),
+                formatBytes(backup.sizeBytes),
+            ]),
+        );
     }
 }
 

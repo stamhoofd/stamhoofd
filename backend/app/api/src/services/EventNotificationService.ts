@@ -1,5 +1,12 @@
 import { SimpleError } from '@common/errors';
-import { EventNotification, Member, MemberResponsibilityRecord, Organization, Platform, User } from '@stamhoofd/models';
+import {
+    EventNotification,
+    Member,
+    MemberResponsibilityRecord,
+    Organization,
+    Platform,
+    User,
+} from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import type { EmailTemplateType } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
@@ -12,7 +19,9 @@ import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 export class EventNotificationService {
     static async validateType(notification: EventNotification) {
         const platform = await Platform.getSharedPrivateStruct();
-        const type = platform.config.eventNotificationTypes.find(t => t.id === notification.typeId);
+        const type = platform.config.eventNotificationTypes.find(
+            (t) => t.id === notification.typeId,
+        );
 
         if (!type) {
             throw new SimpleError({
@@ -49,19 +58,21 @@ export class EventNotificationService {
                 .andWhere('responsibilityId', responsibilityIds)
                 .andWhere(MemberResponsibilityRecord.whereActive)
                 .fetch();
-            const memberIds = records.map(r => r.memberId);
+            const memberIds = records.map((r) => r.memberId);
             const members = await Member.getByIDs(...memberIds);
 
             for (const member of members) {
                 if (!member.details.email) {
                     continue;
                 }
-                recipients.push(Recipient.create({
-                    firstName: member.details.firstName,
-                    lastName: member.details.lastName,
-                    email: member.details.email,
-                    language: member.details.language,
-                }));
+                recipients.push(
+                    Recipient.create({
+                        firstName: member.details.firstName,
+                        lastName: member.details.lastName,
+                        email: member.details.email,
+                        language: member.details.language,
+                    }),
+                );
             }
         }
 
@@ -71,12 +82,14 @@ export class EventNotificationService {
                 const p = new AdminPermissionChecker(user, platform);
 
                 if (await p.canAccessEventNotification(notification, PermissionLevel.Write)) {
-                    recipients.push(Recipient.create({
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        email: user.email,
-                        language: user.language,
-                    }));
+                    recipients.push(
+                        Recipient.create({
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            email: user.email,
+                            language: user.language,
+                        }),
+                    );
                 }
             }
         }
@@ -87,12 +100,14 @@ export class EventNotificationService {
                 const p = new AdminPermissionChecker(user, platform);
 
                 if (await p.canAccessEventNotification(notification, PermissionLevel.Write)) {
-                    recipients.push(Recipient.create({
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        email: user.email,
-                        language: user.language,
-                    }));
+                    recipients.push(
+                        Recipient.create({
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            email: user.email,
+                            language: user.language,
+                        }),
+                    );
                 }
             }
         }
@@ -120,12 +135,14 @@ export class EventNotificationService {
             const p = new AdminPermissionChecker(user, platform);
 
             if (await p.canReviewEventNotification(notification)) {
-                recipients.push(Recipient.create({
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email,
-                    language: user.language,
-                }));
+                recipients.push(
+                    Recipient.create({
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        email: user.email,
+                        language: user.language,
+                    }),
+                );
             }
         }
 
@@ -137,7 +154,9 @@ export class EventNotificationService {
         if (!organization) {
             throw new Error('Organization not found');
         }
-        const events = EventNotification.events.isLoaded(notification) ? notification.events : await EventNotification.events.load(notification);
+        const events = EventNotification.events.isLoaded(notification)
+            ? notification.events
+            : await EventNotification.events.load(notification);
         const type = await this.validateType(notification);
         let submitterName = $t('%wq');
 
@@ -151,7 +170,7 @@ export class EventNotificationService {
         return [
             Replacement.create({
                 token: 'eventName',
-                value: events.map(e => e.name).join(', '),
+                value: events.map((e) => e.name).join(', '),
             }),
             Replacement.create({
                 token: 'organizationName',
@@ -159,11 +178,26 @@ export class EventNotificationService {
             }),
             Replacement.create({
                 token: 'reviewUrl',
-                value: forReviewers ? Context.i18n.localizedDomains.adminUrl() + '/kampmeldingen/' + encodeURIComponent(notification.id) : (events.length === 0 ? organization.getBaseStructure().dashboardUrl : (organization.getBaseStructure().dashboardUrl + '/activiteiten/' + events[0].id + '/' + Formatter.slug(type.title))),
+                value: forReviewers
+                    ? Context.i18n.localizedDomains.adminUrl() +
+                      '/kampmeldingen/' +
+                      encodeURIComponent(notification.id)
+                    : events.length === 0
+                      ? organization.getBaseStructure().dashboardUrl
+                      : organization.getBaseStructure().dashboardUrl +
+                        '/activiteiten/' +
+                        events[0].id +
+                        '/' +
+                        Formatter.slug(type.title),
             }),
             Replacement.create({
                 token: 'dateRange',
-                value: Formatter.dateRange(notification.startDate, notification.endDate, undefined, false),
+                value: Formatter.dateRange(
+                    notification.startDate,
+                    notification.endDate,
+                    undefined,
+                    false,
+                ),
             }),
             Replacement.create({
                 token: 'submitterName',
@@ -171,7 +205,9 @@ export class EventNotificationService {
             }),
             Replacement.create({
                 token: 'feedbackText',
-                html: notification.feedbackText ? `<p class="pre-wrap"><em>${Formatter.escapeHtml(notification.feedbackText)}</em></p>` : `<p class="pre-wrap"><em>${Formatter.escapeHtml($t('%Av'))}</em></p>`,
+                html: notification.feedbackText
+                    ? `<p class="pre-wrap"><em>${Formatter.escapeHtml(notification.feedbackText)}</em></p>`
+                    : `<p class="pre-wrap"><em>${Formatter.escapeHtml($t('%Av'))}</em></p>`,
             }),
         ];
     }
@@ -208,4 +244,4 @@ export class EventNotificationService {
             type: 'transactional',
         });
     }
-};
+}

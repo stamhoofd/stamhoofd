@@ -3,7 +3,10 @@ import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from 
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 
-export const paymentSorters: SQLSortDefinitions<Payment> = new Map<string, SQLSortDefinition<Payment>>([
+export const paymentSorters: SQLSortDefinitions<Payment> = new Map<
+    string,
+    SQLSortDefinition<Payment>
+>([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -12,81 +15,102 @@ export const paymentSorters: SQLSortDefinitions<Payment> = new Map<string, SQLSo
     // And that again causes issues with pagination because the next query will append a filter of name > 'John Doe' - causing duplicate and/or skipped results
     // What if you need mapping? simply map the sorters in the frontend: name -> firstname, lastname, age -> birthDay, etc.
 
-    ['id', {
-        getValue(a) {
-            return a.id;
+    [
+        'id',
+        {
+            getValue(a) {
+                return a.id;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('id'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('id'),
-                direction,
-            });
+    ],
+    [
+        'createdAt',
+        {
+            getValue(a) {
+                return Formatter.dateTimeIso(a.createdAt, 'UTC');
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('createdAt'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['createdAt', {
-        getValue(a) {
-            return Formatter.dateTimeIso(a.createdAt, 'UTC');
+    ],
+    [
+        'paidAt',
+        {
+            getValue(a) {
+                return a.paidAt !== null ? Formatter.dateTimeIso(a.paidAt, 'UTC') : null;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('paidAt'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('createdAt'),
-                direction,
-            });
+    ],
+    [
+        'price',
+        {
+            getValue(a) {
+                return a.price;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('price'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['paidAt', {
-        getValue(a) {
-            return a.paidAt !== null ? Formatter.dateTimeIso(a.paidAt, 'UTC') : null;
+    ],
+    [
+        'hasInvoice',
+        {
+            getValue(a) {
+                return a.invoiceId ? 1 : 0;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.isNull(SQL.column('invoiceId')),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('paidAt'),
-                direction,
-            });
+    ],
+    [
+        'method',
+        {
+            getValue(a) {
+                return a.method;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('method'),
+                    direction,
+                });
+            },
         },
-    }],
-    ['price', {
-        getValue(a) {
-            return a.price;
+    ],
+    [
+        'type',
+        {
+            getValue(a) {
+                return a.type;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: SQL.column('type'),
+                    direction,
+                });
+            },
         },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('price'),
-                direction,
-            });
-        },
-    }],
-    ['hasInvoice', {
-        getValue(a) {
-            return a.invoiceId ? 1 : 0;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.isNull(SQL.column('invoiceId')),
-                direction,
-            });
-        },
-    }],
-    ['method', {
-        getValue(a) {
-            return a.method;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('method'),
-                direction,
-            });
-        },
-    }],
-    ['type', {
-        getValue(a) {
-            return a.type;
-        },
-        toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
-            return new SQLOrderBy({
-                column: SQL.column('type'),
-                direction,
-            });
-        },
-    }],
+    ],
 ]);

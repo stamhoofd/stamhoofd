@@ -1,6 +1,12 @@
 import { I18n } from '@stamhoofd/backend-i18n';
 import { EmailMocker } from '@stamhoofd/email';
-import { EmailTemplateFactory, EmailVerificationCode, OrganizationFactory, Platform, UserFactory } from '@stamhoofd/models';
+import {
+    EmailTemplateFactory,
+    EmailVerificationCode,
+    OrganizationFactory,
+    Platform,
+    UserFactory,
+} from '@stamhoofd/models';
 import { EmailTemplateType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { VerificationCodeService } from './VerificationCodeService.js';
@@ -42,7 +48,9 @@ describe('VerificationCodeService', () => {
             TestUtils.setEnvironment('userMode', 'organization');
             await createVerifyEmailTemplate();
 
-            const organization = await new OrganizationFactory({ name: 'Organization with a name' }).create();
+            const organization = await new OrganizationFactory({
+                name: 'Organization with a name',
+            }).create();
             const user = await new UserFactory({ organization }).create();
             const code = await EmailVerificationCode.createFor(user, user.email);
 

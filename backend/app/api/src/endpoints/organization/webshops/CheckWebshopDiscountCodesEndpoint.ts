@@ -21,7 +21,9 @@ export class CheckWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/webshop/@id/discount-codes', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/discount-codes', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -53,9 +55,7 @@ export class CheckWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
             const codes = await WebshopDiscountCode.getActiveCodes(webshop.id, request.body);
 
             // todo
-            return new Response(
-                codes.map(c => c.getStructure()),
-            );
+            return new Response(codes.map((c) => c.getStructure()));
         }
 
         return new Response([]);

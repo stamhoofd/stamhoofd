@@ -1,5 +1,9 @@
 import path from 'node:path';
-import { resolvePrimaryInstance, resolvePrimaryWorkspaceRoot, resolveWorkspaceName } from './workspace.js';
+import {
+    resolvePrimaryInstance,
+    resolvePrimaryWorkspaceRoot,
+    resolveWorkspaceName,
+} from './workspace.js';
 import { buildInstance } from './instance.js';
 import { getProjectPath } from './project-path.js';
 import { resolvePortOffset } from './port-allocation.js';
@@ -20,7 +24,11 @@ export type CliContext = {
     };
 };
 
-export async function createContext(options: { env: string; instanceName?: string; verbose: boolean }): Promise<CliContext> {
+export async function createContext(options: {
+    env: string;
+    instanceName?: string;
+    verbose: boolean;
+}): Promise<CliContext> {
     const rootDir = path.resolve(getProjectPath());
     const workspace = await resolveWorkspaceName(rootDir);
     const workspaceRoot = await resolvePrimaryWorkspaceRoot(rootDir);

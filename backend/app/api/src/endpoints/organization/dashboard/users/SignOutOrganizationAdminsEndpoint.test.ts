@@ -18,7 +18,11 @@ describe('Endpoint.SignOutOrganizationAdmins', () => {
     });
 
     const signOut = async (organization: Organization, token: Token) => {
-        const request = Request.buildJson('POST', '/organization/admins/sign-out', organization.getApiHost());
+        const request = Request.buildJson(
+            'POST',
+            '/organization/admins/sign-out',
+            organization.getApiHost(),
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -49,11 +53,22 @@ describe('Endpoint.SignOutOrganizationAdmins', () => {
         const otherOrganizationAdmin = await createAdmin(otherOrganization);
         const member = await new UserFactory({ organization }).create();
 
-        const currentToken = await SessionService.createSession(admin, { authenticatedAt: new Date() });
-        const secondDeviceOfAdmin = await SessionService.createSession(admin, { authenticatedAt: new Date() });
-        const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
-        const otherOrganizationAdminToken = await SessionService.createSession(otherOrganizationAdmin, { authenticatedAt: new Date() });
-        const memberToken = await SessionService.createSession(member, { authenticatedAt: new Date() });
+        const currentToken = await SessionService.createSession(admin, {
+            authenticatedAt: new Date(),
+        });
+        const secondDeviceOfAdmin = await SessionService.createSession(admin, {
+            authenticatedAt: new Date(),
+        });
+        const otherAdminToken = await SessionService.createSession(otherAdmin, {
+            authenticatedAt: new Date(),
+        });
+        const otherOrganizationAdminToken = await SessionService.createSession(
+            otherOrganizationAdmin,
+            { authenticatedAt: new Date() },
+        );
+        const memberToken = await SessionService.createSession(member, {
+            authenticatedAt: new Date(),
+        });
 
         const response = await signOut(organization, currentToken);
 
@@ -73,11 +88,20 @@ describe('Endpoint.SignOutOrganizationAdmins', () => {
 
         const admin = await createAdmin(organization, PermissionLevel.Write);
         const otherAdmin = await createAdmin(organization);
-        const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
+        const otherAdminToken = await SessionService.createSession(otherAdmin, {
+            authenticatedAt: new Date(),
+        });
 
-        await expect(signOut(organization, await SessionService.createSession(admin, { authenticatedAt: new Date() }))).rejects.toThrow(STExpect.simpleError({
-            code: 'permission_denied',
-        }));
+        await expect(
+            signOut(
+                organization,
+                await SessionService.createSession(admin, { authenticatedAt: new Date() }),
+            ),
+        ).rejects.toThrow(
+            STExpect.simpleError({
+                code: 'permission_denied',
+            }),
+        );
         expect(await tokenExists(otherAdminToken)).toBe(true);
     });
 
@@ -86,23 +110,33 @@ describe('Endpoint.SignOutOrganizationAdmins', () => {
 
         const apiUser = await new UserFactory({ organization, apiUser: true }).create();
         apiUser.permissions = UserPermissions.create({
-            organizationPermissions: new Map([[organization.id, Permissions.create({ level: PermissionLevel.Full })]]),
+            organizationPermissions: new Map([
+                [organization.id, Permissions.create({ level: PermissionLevel.Full })],
+            ]),
         });
         await apiUser.save();
 
         const otherAdmin = await createAdmin(organization);
-        const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
+        const otherAdminToken = await SessionService.createSession(otherAdmin, {
+            authenticatedAt: new Date(),
+        });
 
-        await expect(signOut(organization, await SessionService.createApiSession(apiUser))).rejects.toThrow(STExpect.simpleError({
-            code: 'permission_denied',
-        }));
+        await expect(
+            signOut(organization, await SessionService.createApiSession(apiUser)),
+        ).rejects.toThrow(
+            STExpect.simpleError({
+                code: 'permission_denied',
+            }),
+        );
         expect(await tokenExists(otherAdminToken)).toBe(true);
     });
 
     test('an organization without admins is a no-op', async () => {
         const organization = await new OrganizationFactory({}).create();
         const member = await new UserFactory({ organization }).create();
-        const memberToken = await SessionService.createSession(member, { authenticatedAt: new Date() });
+        const memberToken = await SessionService.createSession(member, {
+            authenticatedAt: new Date(),
+        });
 
         // Not reachable through the endpoint (the caller is an admin themselves), but the
         // empty list of users may not turn into a query that deletes everything.
@@ -128,10 +162,17 @@ describe('Endpoint.SignOutOrganizationAdmins', () => {
             }).create();
             const member = await new UserFactory({ organization }).create();
 
-            const otherAdminToken = await SessionService.createSession(otherAdmin, { authenticatedAt: new Date() });
-            const memberToken = await SessionService.createSession(member, { authenticatedAt: new Date() });
+            const otherAdminToken = await SessionService.createSession(otherAdmin, {
+                authenticatedAt: new Date(),
+            });
+            const memberToken = await SessionService.createSession(member, {
+                authenticatedAt: new Date(),
+            });
 
-            const response = await signOut(organization, await SessionService.createSession(admin, { authenticatedAt: new Date() }));
+            const response = await signOut(
+                organization,
+                await SessionService.createSession(admin, { authenticatedAt: new Date() }),
+            );
 
             expect(response.body.count).toBe(1);
             expect(await tokenExists(otherAdminToken)).toBe(false);
@@ -148,12 +189,17 @@ describe('Endpoint.SignOutOrganizationAdmins', () => {
 
             const apiUser = await new UserFactory({ organization, apiUser: true }).create();
             apiUser.permissions = UserPermissions.create({
-                organizationPermissions: new Map([[organization.id, Permissions.create({ level: PermissionLevel.Full })]]),
+                organizationPermissions: new Map([
+                    [organization.id, Permissions.create({ level: PermissionLevel.Full })],
+                ]),
             });
             await apiUser.save();
             const apiToken = await SessionService.createApiSession(apiUser);
 
-            const response = await signOut(organization, await SessionService.createSession(admin, { authenticatedAt: new Date() }));
+            const response = await signOut(
+                organization,
+                await SessionService.createSession(admin, { authenticatedAt: new Date() }),
+            );
 
             expect(response.body.count).toBe(0);
             expect(await tokenExists(apiToken)).toBe(true);

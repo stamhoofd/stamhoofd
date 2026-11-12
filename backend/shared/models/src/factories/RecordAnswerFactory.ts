@@ -1,13 +1,31 @@
 import { Factory } from '@node/database';
 import type { RecordCategory, RecordSettings } from '@stamhoofd/structures';
-import { File, Image, RecordAddressAnswer, RecordAnswer, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordFileAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import {
+    File,
+    Image,
+    RecordAddressAnswer,
+    RecordAnswer,
+    RecordCheckboxAnswer,
+    RecordChooseOneAnswer,
+    RecordDateAnswer,
+    RecordFileAnswer,
+    RecordImageAnswer,
+    RecordIntegerAnswer,
+    RecordMultipleChoiceAnswer,
+    RecordPriceAnswer,
+    RecordTextAnswer,
+    RecordType,
+} from '@stamhoofd/structures';
 import { AddressFactory } from './AddressFactory.js';
 
-type Options = ({
-    records: RecordSettings[];
-} | {
-    recordCategories: RecordCategory[];
-}) & {
+type Options = (
+    | {
+          records: RecordSettings[];
+      }
+    | {
+          recordCategories: RecordCategory[];
+      }
+) & {
     /**
      * Defaults to true
      */
@@ -16,7 +34,10 @@ type Options = ({
 
 export class RecordAnswerFactory extends Factory<Options, Map<string, RecordAnswer>> {
     async create(): Promise<Map<string, RecordAnswer>> {
-        const records = 'records' in this.options ? this.options.records : this.options.recordCategories.flatMap(c => c.getAllRecords());
+        const records =
+            'records' in this.options
+                ? this.options.records
+                : this.options.recordCategories.flatMap((c) => c.getAllRecords());
 
         const map: Map<string, RecordAnswer> = new Map();
 
@@ -37,7 +58,7 @@ export class RecordAnswerFactory extends Factory<Options, Map<string, RecordAnsw
                         answer.value = 'Test ' + Math.floor(Math.random() * 100000);
 
                         switch (record.type) {
-                            case RecordType.Phone:{
+                            case RecordType.Phone: {
                                 answer.value = '+32 477 77 77 77';
                                 break;
                             }
@@ -46,7 +67,8 @@ export class RecordAnswerFactory extends Factory<Options, Map<string, RecordAnsw
                                 break;
                             }
                             case RecordType.Textarea: {
-                                answer.value = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nVivamus lacinia odio vitae vestibulum.';
+                                answer.value =
+                                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\nVivamus lacinia odio vitae vestibulum.';
                                 break;
                             }
                         }
@@ -55,15 +77,15 @@ export class RecordAnswerFactory extends Factory<Options, Map<string, RecordAnsw
 
                     case answer instanceof RecordMultipleChoiceAnswer: {
                         // If it is a multiple choice, select all
-                        answer.selectedChoices = record.choices.map(c => c.clone());
+                        answer.selectedChoices = record.choices.map((c) => c.clone());
                         break;
-                    };
+                    }
 
                     case answer instanceof RecordChooseOneAnswer: {
                         // Select first
                         answer.selectedChoice = record.choices[0]?.clone() ?? null;
                         break;
-                    };
+                    }
 
                     case answer instanceof RecordAddressAnswer: {
                         answer.address = await new AddressFactory({}).create();

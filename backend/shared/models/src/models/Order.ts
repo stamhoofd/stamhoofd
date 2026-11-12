@@ -5,7 +5,22 @@ import { QueueHandler } from '@stamhoofd/queues';
 import { Language } from '@stamhoofd/types/Language';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import type { TransferSettings, WebshopTimeSlot } from '@stamhoofd/structures';
-import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemWithPayments, BalanceItemWithPrivatePayments, OrderData, OrderStatus, Order as OrderStruct, PaymentMethod, PaymentStatus, Payment as PaymentStruct, PrivateOrder, PrivatePayment, ProductType, WebshopTicketType } from '@stamhoofd/structures';
+import {
+    BalanceItemPaymentWithPayment,
+    BalanceItemPaymentWithPrivatePayment,
+    BalanceItemWithPayments,
+    BalanceItemWithPrivatePayments,
+    OrderData,
+    OrderStatus,
+    Order as OrderStruct,
+    PaymentMethod,
+    PaymentStatus,
+    Payment as PaymentStruct,
+    PrivateOrder,
+    PrivatePayment,
+    ProductType,
+    WebshopTicketType,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,7 +37,9 @@ export class Order extends QueryableModel {
 
     // Columns
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -47,7 +64,8 @@ export class Order extends QueryableModel {
     number: number | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -59,7 +77,8 @@ export class Order extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -84,26 +103,38 @@ export class Order extends QueryableModel {
     /**
      * Cached value for faster in database filtering
      */
-    @column({ type: 'integer', nullable: true, beforeSave(this: Order) {
-        return this.data.totalPrice;
-    } })
+    @column({
+        type: 'integer',
+        nullable: true,
+        beforeSave(this: Order) {
+            return this.data.totalPrice;
+        },
+    })
     totalPrice: number = 0;
 
     /**
      * Cached value for faster in database filtering
      */
-    @column({ type: 'integer', nullable: true, beforeSave(this: Order) {
-        return this.data.amount;
-    } })
+    @column({
+        type: 'integer',
+        nullable: true,
+        beforeSave(this: Order) {
+            return this.data.amount;
+        },
+    })
     amount: number = 0;
 
-    @column({ type: 'string', nullable: true, beforeSave(this: Order) {
-        return this.data.timeSlot?.timeIndex ?? null;
-    } })
+    @column({
+        type: 'string',
+        nullable: true,
+        beforeSave(this: Order) {
+            return this.data.timeSlot?.timeIndex ?? null;
+        },
+    })
     timeSlotTime: string | null = null;
 
     static webshop: ManyToOneRelation<'webshop', Webshop>;
-    static payment: ManyToOneRelation<'payment', Payment>; ;
+    static payment: ManyToOneRelation<'payment', Payment>;
     static organization: ManyToOneRelation<'organization', Organization>;
 
     /** Record-answer slugs overwrite built-in replacements with the same literal key. */
@@ -144,7 +175,10 @@ export class Order extends QueryableModel {
     /**
      * Fetch an order
      */
-    static async getForPayment(organizationId: string | null, paymentId: string): Promise<Order | undefined> {
+    static async getForPayment(
+        organizationId: string | null,
+        paymentId: string,
+    ): Promise<Order | undefined> {
         const order = (await this.where({ paymentId }, { limit: 1 }))[0];
         if (!order) {
             return;
@@ -161,11 +195,20 @@ export class Order extends QueryableModel {
     }
 
     async shouldCreateTickets(options?: { hasPaidPayment?: boolean }) {
-        if (this.status === OrderStatus.Canceled || this.status === OrderStatus.Deleted || this.id === undefined || this.id === null) {
+        if (
+            this.status === OrderStatus.Canceled ||
+            this.status === OrderStatus.Deleted ||
+            this.id === undefined ||
+            this.id === null
+        ) {
             return false;
         }
 
-        if (this.data.paymentMethod === PaymentMethod.PointOfSale || this.data.paymentMethod === PaymentMethod.Unknown || this.data.totalPrice === 0) {
+        if (
+            this.data.paymentMethod === PaymentMethod.PointOfSale ||
+            this.data.paymentMethod === PaymentMethod.Unknown ||
+            this.data.totalPrice === 0
+        ) {
             return true;
         }
 
@@ -176,20 +219,19 @@ export class Order extends QueryableModel {
         // Check we paid at least 1 cent
         // note: do not use cached values such as pricePaid here, because their value could be delayed.
         console.log('Checking payments for order ' + this.id);
-        const payments = await Payment.select(
-            SQL.wildcard(Payment.table),
-        )
+        const payments = await Payment.select(SQL.wildcard(Payment.table))
+            .join(SQL.join(BalanceItemPayment.table).where('paymentId', SQL.parentColumn('id')))
             .join(
-                SQL.join(BalanceItemPayment.table).where('paymentId', SQL.parentColumn('id')),
-            )
-            .join(
-                SQL.join(BalanceItem.table).where('id', SQL.column(BalanceItemPayment.table, 'balanceItemId')),
+                SQL.join(BalanceItem.table).where(
+                    'id',
+                    SQL.column(BalanceItemPayment.table, 'balanceItemId'),
+                ),
             )
             .where(SQL.column(BalanceItem.table, 'orderId'), this.id)
             .groupBy(SQL.column(Payment.table, 'id'))
             .fetch();
 
-        if (payments.find(p => p.status === PaymentStatus.Succeeded && p.price > 0)) {
+        if (payments.find((p) => p.status === PaymentStatus.Succeeded && p.price > 0)) {
             console.log('Order ' + this.id + ' has a succeeded payment with price > 0');
             return true;
         }
@@ -233,7 +275,12 @@ export class Order extends QueryableModel {
             const webshop = await Webshop.getByID(this.webshopId);
             if (!webshop) {
                 // ignore for now
-                console.error('Missing webshop with id ' + this.webshopId + ' in webshop stock queue for order ' + this.id);
+                console.error(
+                    'Missing webshop with id ' +
+                        this.webshopId +
+                        ' in webshop stock queue for order ' +
+                        this.id,
+                );
                 return;
             }
 
@@ -256,7 +303,12 @@ export class Order extends QueryableModel {
             const webshop = await Webshop.getByID(this.webshopId);
             if (!webshop) {
                 // ignore for now
-                console.error('Missing webshop with id ' + this.webshopId + ' in webshop stock queue for order ' + this.id);
+                console.error(
+                    'Missing webshop with id ' +
+                        this.webshopId +
+                        ' in webshop stock queue for order ' +
+                        this.id,
+                );
                 return;
             }
 
@@ -277,18 +329,26 @@ export class Order extends QueryableModel {
             }
             await this.save();
 
-            const webshop = await QueueHandler.schedule('webshop-stock/' + this.webshopId, async () => {
-                // Fetch webshop inside queue to make sure the stock is up to date
-                const webshop = await Webshop.getByID(this.webshopId);
-                if (!webshop) {
-                    // ignore for now
-                    console.error('Missing webshop with id ' + this.webshopId + ' in webshop stock queue for order ' + this.id);
-                    return;
-                }
+            const webshop = await QueueHandler.schedule(
+                'webshop-stock/' + this.webshopId,
+                async () => {
+                    // Fetch webshop inside queue to make sure the stock is up to date
+                    const webshop = await Webshop.getByID(this.webshopId);
+                    if (!webshop) {
+                        // ignore for now
+                        console.error(
+                            'Missing webshop with id ' +
+                                this.webshopId +
+                                ' in webshop stock queue for order ' +
+                                this.id,
+                        );
+                        return;
+                    }
 
-                await this.setRelation(Order.webshop, webshop).updateStock(); // remove reserved stock
-                return webshop;
-            });
+                    await this.setRelation(Order.webshop, webshop).updateStock(); // remove reserved stock
+                    return webshop;
+                },
+            );
 
             if (webshop) {
                 await this.setRelation(Order.webshop, webshop).updateTickets();
@@ -305,7 +365,11 @@ export class Order extends QueryableModel {
      * Should always happen in the webshop-stock queue to prevent multiple webshop writes at the same time
      * + in combination with validation and reading the webshop
      */
-    async updateStock(this: Order & { webshop: Webshop }, previousData: OrderData | null = null, skipOrderSave = false) {
+    async updateStock(
+        this: Order & { webshop: Webshop },
+        previousData: OrderData | null = null,
+        skipOrderSave = false,
+    ) {
         // Previous data?
 
         // Add or delete this order from the stock?
@@ -317,7 +381,7 @@ export class Order extends QueryableModel {
         if (previousData !== null) {
             // Remove stock from old items without modifying old data
             for (const item of previousData.cart.items) {
-                const product = this.webshop.products.find(p => p.id === item.product.id);
+                const product = this.webshop.products.find((p) => p.id === item.product.id);
                 if (product) {
                     if (item.reservedAmount > 0) {
                         product.usedStock -= item.reservedAmount;
@@ -329,7 +393,7 @@ export class Order extends QueryableModel {
 
                     // Product price
                     for (const [priceId, amount] of item.reservedPrices) {
-                        const productPrice = product.prices.find(p => p.id === priceId);
+                        const productPrice = product.prices.find((p) => p.id === priceId);
                         if (productPrice) {
                             productPrice.usedStock -= amount;
                             if (productPrice.usedStock < 0) {
@@ -341,7 +405,9 @@ export class Order extends QueryableModel {
 
                     // Options
                     for (const [optionId, amount] of item.reservedOptions) {
-                        const option = product.optionMenus.flatMap(om => om.options).find(o => o.id === optionId);
+                        const option = product.optionMenus
+                            .flatMap((om) => om.options)
+                            .find((o) => o.id === optionId);
                         if (option) {
                             option.usedStock -= amount;
                             if (option.usedStock < 0) {
@@ -355,7 +421,9 @@ export class Order extends QueryableModel {
                     if (item.reservedSeats.length > 0) {
                         for (const seat of item.reservedSeats) {
                             // Only remove each seat once
-                            const reservedIndex = product.reservedSeats.findIndex(s => s.equals(seat));
+                            const reservedIndex = product.reservedSeats.findIndex((s) =>
+                                s.equals(seat),
+                            );
                             if (reservedIndex !== -1) {
                                 product.reservedSeats.splice(reservedIndex, 1);
                                 changed = true;
@@ -384,9 +452,9 @@ export class Order extends QueryableModel {
                 changed = true;
             }
 
-            const difference = add ? (item.amount - item.reservedAmount) : -item.reservedAmount;
+            const difference = add ? item.amount - item.reservedAmount : -item.reservedAmount;
             if (difference !== 0) {
-                const product = this.webshop.products.find(p => p.id === item.product.id);
+                const product = this.webshop.products.find((p) => p.id === item.product.id);
                 if (product) {
                     product.usedStock += difference;
                     if (product.usedStock < 0) {
@@ -397,7 +465,7 @@ export class Order extends QueryableModel {
                     item.reservedAmount += difference;
                     changed = true;
 
-                    const productPrice = product.prices.find(p => p.id === item.productPrice.id);
+                    const productPrice = product.prices.find((p) => p.id === item.productPrice.id);
                     if (productPrice) {
                         productPrice.usedStock += difference;
                         if (productPrice.usedStock < 0) {
@@ -405,12 +473,17 @@ export class Order extends QueryableModel {
                         }
 
                         // Keep track that we included this order in the stock already
-                        item.reservedPrices.set(productPrice.id, (item.reservedPrices.get(productPrice.id) ?? 0) + difference);
+                        item.reservedPrices.set(
+                            productPrice.id,
+                            (item.reservedPrices.get(productPrice.id) ?? 0) + difference,
+                        );
                     }
 
                     // Options
                     for (const cartItemOption of item.options) {
-                        const option = product.optionMenus.find(om => om.id === cartItemOption.optionMenu.id)?.options.find(o => o.id === cartItemOption.option.id);
+                        const option = product.optionMenus
+                            .find((om) => om.id === cartItemOption.optionMenu.id)
+                            ?.options.find((o) => o.id === cartItemOption.option.id);
                         if (option) {
                             option.usedStock += difference;
                             if (option.usedStock < 0) {
@@ -418,7 +491,10 @@ export class Order extends QueryableModel {
                             }
 
                             // Keep track that we included this order in the stock already
-                            item.reservedOptions.set(option.id, (item.reservedOptions.get(option.id) ?? 0) + difference);
+                            item.reservedOptions.set(
+                                option.id,
+                                (item.reservedOptions.get(option.id) ?? 0) + difference,
+                            );
                         }
                     }
                 }
@@ -428,7 +504,10 @@ export class Order extends QueryableModel {
         if (previousData !== null && previousData.timeSlot) {
             // Changed timeslot. Remove all reserved ones
             const ps = previousData.timeSlot;
-            const timeSlot = this.webshop.meta.checkoutMethods.flatMap(m => m.timeSlots).flatMap(t => t.timeSlots).find(t => t.id === ps.id);
+            const timeSlot = this.webshop.meta.checkoutMethods
+                .flatMap((m) => m.timeSlots)
+                .flatMap((t) => t.timeSlots)
+                .find((t) => t.id === ps.id);
             if (timeSlot) {
                 // Remove any reserved stock
                 const updated = Order.updateTimeSlotStock(timeSlot, this.data, false);
@@ -442,7 +521,10 @@ export class Order extends QueryableModel {
 
         if (this.data.timeSlot !== null) {
             const s = this.data.timeSlot;
-            const timeSlot = this.webshop.meta.checkoutMethods.flatMap(m => m.timeSlots).flatMap(t => t.timeSlots).find(t => t.id === s.id);
+            const timeSlot = this.webshop.meta.checkoutMethods
+                .flatMap((m) => m.timeSlots)
+                .flatMap((t) => t.timeSlots)
+                .find((t) => t.id === s.id);
 
             if (timeSlot) {
                 const updated = Order.updateTimeSlotStock(timeSlot, this.data, add);
@@ -455,7 +537,7 @@ export class Order extends QueryableModel {
         // Seats
         for (const item of this.data.cart.items) {
             if (item.seats.length > 0) {
-                const product = this.webshop.products.find(p => p.id === item.product.id);
+                const product = this.webshop.products.find((p) => p.id === item.product.id);
                 if (product) {
                     if (previousData !== null) {
                         // Already removed
@@ -466,7 +548,9 @@ export class Order extends QueryableModel {
 
                     // First remove all (but only once!), to avoid duplicates
                     for (const seat of item.reservedSeats) {
-                        const reservedIndex = product.reservedSeats.findIndex(s => s.equals(seat));
+                        const reservedIndex = product.reservedSeats.findIndex((s) =>
+                            s.equals(seat),
+                        );
                         if (reservedIndex !== -1) {
                             product.reservedSeats.splice(reservedIndex, 1);
                         }
@@ -549,14 +633,22 @@ export class Order extends QueryableModel {
         return changed;
     }
 
-    async updateTickets(this: Order & { webshop: Webshop }, options?: { hasPaidPayment?: boolean }): Promise<{ tickets: Ticket[]; didCreateTickets: boolean }> {
+    async updateTickets(
+        this: Order & { webshop: Webshop },
+        options?: { hasPaidPayment?: boolean },
+    ): Promise<{ tickets: Ticket[]; didCreateTickets: boolean }> {
         const webshop = this.webshop;
 
-        if (webshop.meta.ticketType !== WebshopTicketType.Tickets && webshop.meta.ticketType !== WebshopTicketType.SingleTicket) {
+        if (
+            webshop.meta.ticketType !== WebshopTicketType.Tickets &&
+            webshop.meta.ticketType !== WebshopTicketType.SingleTicket
+        ) {
             return { tickets: [], didCreateTickets: false };
         }
 
-        const existingTickets = !this.id ? [] : await Ticket.select().where('orderId', this.id).fetch();
+        const existingTickets = !this.id
+            ? []
+            : await Ticket.select().where('orderId', this.id).fetch();
 
         if (!(await this.shouldCreateTickets(options))) {
             // Delete all existing tickets
@@ -577,7 +669,10 @@ export class Order extends QueryableModel {
             const ticketMap = new Map<string, number>();
 
             for (const item of this.data.cart.items) {
-                if (item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) {
+                if (
+                    item.product.type === ProductType.Ticket ||
+                    item.product.type === ProductType.Voucher
+                ) {
                     const offset = ticketMap.get(item.product.id) ?? 0;
 
                     // Separate ticket if multiple amounts
@@ -634,7 +729,9 @@ export class Order extends QueryableModel {
         // First try to keep existing tickets
         for (const existing of existingTickets) {
             if (existing.originalSeat) {
-                const index = tickets.findIndex(t => t.seat && t.seat.equals(existing.originalSeat!));
+                const index = tickets.findIndex(
+                    (t) => t.seat && t.seat.equals(existing.originalSeat!),
+                );
                 if (index !== -1) {
                     const ticket = tickets[index];
                     tickets.splice(index, 1);
@@ -647,7 +744,9 @@ export class Order extends QueryableModel {
                 }
                 continue;
             }
-            const index = tickets.findIndex(ticket => existing.itemId === ticket.itemId && ticket.index === existing.index);
+            const index = tickets.findIndex(
+                (ticket) => existing.itemId === ticket.itemId && ticket.index === existing.index,
+            );
             if (index !== -1) {
                 const ticket = tickets[index];
                 tickets.splice(index, 1);
@@ -662,12 +761,12 @@ export class Order extends QueryableModel {
 
         // Try to reuse tickets instead of recreating if no match is found
         for (const existing of existingTickets) {
-            if (mergedTickets.find(m => m.id === existing.id)) {
+            if (mergedTickets.find((m) => m.id === existing.id)) {
                 // Already mapped
                 continue;
             }
 
-            const index = tickets.findIndex(ticket => existing.itemId === ticket.itemId);
+            const index = tickets.findIndex((ticket) => existing.itemId === ticket.itemId);
             if (index !== -1) {
                 const ticket = tickets[index];
                 tickets.splice(index, 1);
@@ -690,15 +789,17 @@ export class Order extends QueryableModel {
 
         // Wait to save them all
         console.log('Saving merged tickets for order ' + this.id);
-        await Promise.all(tickets.map(ticket => ticket.save()));
+        await Promise.all(tickets.map((ticket) => ticket.save()));
 
         // Delete others
         for (const existing of existingTickets) {
-            if (!mergedTickets.find(m => m.id === existing.id)) {
+            if (!mergedTickets.find((m) => m.id === existing.id)) {
                 if (existing.isDeleted) {
                     continue;
                 }
-                console.log('Deleting ticket for order ' + this.id + ', ticket id = ' + existing.id);
+                console.log(
+                    'Deleting ticket for order ' + this.id + ', ticket id = ' + existing.id,
+                );
                 await existing.softDelete();
             }
         }
@@ -716,16 +817,29 @@ export class Order extends QueryableModel {
     /**
      * A payment changed the total paid amount
      */
-    async paymentChanged(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
+    async paymentChanged(
+        this: Order,
+        payment: Payment | null,
+        organization: Organization,
+        knownWebshop?: Webshop,
+    ) {
         this.markUpdated();
         await this.save();
     }
 
-    async undoPaid(this: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
+    async undoPaid(
+        this: Order,
+        payment: Payment | null,
+        organization: Organization,
+        knownWebshop?: Webshop,
+    ) {
         this.markUpdated();
         await this.save();
 
-        const webshop = (knownWebshop ?? (await Webshop.getByID(this.webshopId)))?.setRelation(Webshop.organization, organization);
+        const webshop = (knownWebshop ?? (await Webshop.getByID(this.webshopId)))?.setRelation(
+            Webshop.organization,
+            organization,
+        );
         if (!webshop) {
             console.error('Missing webshop for order ' + this.id);
             return;
@@ -755,27 +869,33 @@ export class Order extends QueryableModel {
         }
 
         // Balance items
-        const allBalanceItems = await BalanceItem.where({ orderId: {
-            sign: 'IN',
-            value: orders.map(o => o.id),
-        } });
+        const allBalanceItems = await BalanceItem.where({
+            orderId: {
+                sign: 'IN',
+                value: orders.map((o) => o.id),
+            },
+        });
 
         const { payments, balanceItemPayments } = await BalanceItem.loadPayments(allBalanceItems);
 
         const structures: OrderStruct[] = [];
         for (const order of orders) {
-            const balanceItems = allBalanceItems.filter(b => b.orderId === order.id);
+            const balanceItems = allBalanceItems.filter((b) => b.orderId === order.id);
 
             const balanceItemStructures = balanceItems.map((balanceItem) => {
                 return BalanceItemWithPayments.create({
                     ...balanceItem,
-                    payments: balanceItemPayments.filter(b => b.balanceItemId === balanceItem.id).map((balanceItemPayment) => {
-                        const payment = payments.find(pp => pp.id === balanceItemPayment.paymentId)!;
-                        return BalanceItemPaymentWithPayment.create({
-                            ...balanceItemPayment,
-                            payment: PaymentStruct.create(payment),
-                        });
-                    }),
+                    payments: balanceItemPayments
+                        .filter((b) => b.balanceItemId === balanceItem.id)
+                        .map((balanceItemPayment) => {
+                            const payment = payments.find(
+                                (pp) => pp.id === balanceItemPayment.paymentId,
+                            )!;
+                            return BalanceItemPaymentWithPayment.create({
+                                ...balanceItemPayment,
+                                payment: PaymentStruct.create(payment),
+                            });
+                        }),
                 });
             });
 
@@ -798,27 +918,33 @@ export class Order extends QueryableModel {
         }
 
         // Balance items
-        const allBalanceItems = await BalanceItem.where({ orderId: {
-            sign: 'IN',
-            value: orders.map(o => o.id),
-        } });
+        const allBalanceItems = await BalanceItem.where({
+            orderId: {
+                sign: 'IN',
+                value: orders.map((o) => o.id),
+            },
+        });
 
         const { payments, balanceItemPayments } = await BalanceItem.loadPayments(allBalanceItems);
 
         const structures: PrivateOrder[] = [];
         for (const order of orders) {
-            const balanceItems = allBalanceItems.filter(b => b.orderId === order.id);
+            const balanceItems = allBalanceItems.filter((b) => b.orderId === order.id);
 
             const balanceItemStructures = balanceItems.map((balanceItem) => {
                 return BalanceItemWithPrivatePayments.create({
                     ...balanceItem,
-                    payments: balanceItemPayments.filter(b => b.balanceItemId === balanceItem.id).map((balanceItemPayment) => {
-                        const payment = payments.find(pp => pp.id === balanceItemPayment.paymentId)!;
-                        return BalanceItemPaymentWithPrivatePayment.create({
-                            ...balanceItemPayment,
-                            payment: PrivatePayment.create(payment),
-                        });
-                    }),
+                    payments: balanceItemPayments
+                        .filter((b) => b.balanceItemId === balanceItem.id)
+                        .map((balanceItemPayment) => {
+                            const payment = payments.find(
+                                (pp) => pp.id === balanceItemPayment.paymentId,
+                            )!;
+                            return BalanceItemPaymentWithPrivatePayment.create({
+                                ...balanceItemPayment,
+                                payment: PrivatePayment.create(payment),
+                            });
+                        }),
                 });
             });
 
@@ -845,8 +971,13 @@ export class Order extends QueryableModel {
      * @param shouldThrowIfNoIban
      * @returns
      */
-    getTransferSettings(this: Order & { webshop: Webshop & { organization: Organization } }, { shouldThrowIfNoIban }: { shouldThrowIfNoIban?: boolean } = {}): TransferSettings {
-        const transferSettings = this.webshop.meta.transferSettings.fillMissing(this.webshop.organization.mappedTransferSettings);
+    getTransferSettings(
+        this: Order & { webshop: Webshop & { organization: Organization } },
+        { shouldThrowIfNoIban }: { shouldThrowIfNoIban?: boolean } = {},
+    ): TransferSettings {
+        const transferSettings = this.webshop.meta.transferSettings.fillMissing(
+            this.webshop.organization.mappedTransferSettings,
+        );
 
         if (shouldThrowIfNoIban && !transferSettings.iban) {
             throw new SimpleError({

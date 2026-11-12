@@ -5,7 +5,13 @@ import { SimpleError } from '@common/errors';
 import { Platform, User } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../../helpers/EmailBuilder.js';
 import type { UserWithMembers } from '@stamhoofd/structures';
-import { EmailTemplateType, Recipient, Replacement, UserPermissions, User as UserStruct } from '@stamhoofd/structures';
+import {
+    EmailTemplateType,
+    Recipient,
+    Replacement,
+    UserPermissions,
+    User as UserStruct,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../helpers/AuthenticatedStructures.js';
@@ -38,7 +44,7 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         // Fast throw first (more in depth checking for patches later)
         if (organization) {
-            if (!await Context.auth.canManageAdmins(organization.id)) {
+            if (!(await Context.auth.canManageAdmins(organization.id))) {
                 throw Context.auth.error();
             }
         } else {
@@ -49,7 +55,11 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         if (organization) {
-            if (request.body.permissions === null || request.body.permissions.organizationPermissions.get(organization.id)?.isEmpty !== false) {
+            if (
+                request.body.permissions === null ||
+                request.body.permissions.organizationPermissions.get(organization.id)?.isEmpty !==
+                    false
+            ) {
                 throw new SimpleError({
                     code: 'empty_permissions',
                     message: 'Cannot add an admin without permissions',
@@ -71,12 +81,14 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // First check if a user exists with this email?
         const existing = await User.getForRegister(organization?.id ?? null, request.body.email);
 
-        const admin = existing ?? (await User.createInvited(organization, {
-            firstName: request.body.firstName,
-            lastName: request.body.lastName,
-            email: request.body.email,
-            allowPlatform: true,
-        }));
+        const admin =
+            existing ??
+            (await User.createInvited(organization, {
+                firstName: request.body.firstName,
+                lastName: request.body.lastName,
+                email: request.body.email,
+                allowPlatform: true,
+            }));
 
         if (!admin) {
             throw new SimpleError({
@@ -91,13 +103,18 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (!request.body.permissions) {
             throw new SimpleError({
                 code: 'missing_field',
-                message: 'When creating administrators, you are required to specify permissions in the request',
+                message:
+                    'When creating administrators, you are required to specify permissions in the request',
                 field: 'permissions',
             });
         }
 
         if (organization) {
-            admin.permissions = UserPermissions.limitedAdd(admin.permissions, request.body.permissions, organization.id);
+            admin.permissions = UserPermissions.limitedAdd(
+                admin.permissions,
+                request.body.permissions,
+                organization.id,
+            );
         } else {
             admin.permissions = UserPermissions.add(admin.permissions, request.body.permissions);
         }
@@ -119,8 +136,13 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
         validUntil.setTime(validUntil.getTime() + 7 * 24 * 3600 * 1000);
 
         const dateTime = Formatter.dateTime(validUntil);
-        const recoveryUrl = await PasswordForgotService.getPasswordRecoveryUrl(admin, organization, request.i18n, validUntil);
-        const platformName = ((await Platform.getSharedStruct()).config.name);
+        const recoveryUrl = await PasswordForgotService.getPasswordRecoveryUrl(
+            admin,
+            organization,
+            request.i18n,
+            validUntil,
+        );
+        const platformName = (await Platform.getSharedStruct()).config.name;
 
         const name = organization?.name ?? platformName;
         const what = organization ? $t('%C4', { name, platform: platformName }) : platformName;
@@ -156,13 +178,13 @@ export class CreateAdminEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 }),
             ],
             template: {
-                type: admin.hasAccount() ? EmailTemplateType.AdminInvitation : EmailTemplateType.AdminInvitationNewUser,
+                type: admin.hasAccount()
+                    ? EmailTemplateType.AdminInvitation
+                    : EmailTemplateType.AdminInvitationNewUser,
             },
             type: 'transactional',
         });
 
-        return new Response(
-            await AuthenticatedStructures.userWithMembers(admin),
-        );
+        return new Response(await AuthenticatedStructures.userWithMembers(admin));
     }
 }

@@ -1,6 +1,11 @@
 import { column, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from '@node/database';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
-import { MemberDetails, PlatformMembershipMemberDetails, RegistrationWithTinyMember, TinyMember } from '@stamhoofd/structures';
+import {
+    MemberDetails,
+    PlatformMembershipMemberDetails,
+    RegistrationWithTinyMember,
+    TinyMember,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import basex from 'base-x';
 import crypto from 'crypto';
@@ -14,17 +19,19 @@ export type MemberWithUsers = Member & {
     users: User[];
 };
 export type MemberWithRegistrations<R extends Registration = Registration> = Member & {
-    registrations: (R)[];
+    registrations: R[];
 };
 export type RegistrationWithGroup = Registration & { group: Group };
 export type MemberWithRegistrationsAndGroups = MemberWithRegistrations<RegistrationWithGroup>;
-export type MemberWithUsersAndRegistrations<R extends Registration = Registration> = MemberWithUsers & MemberWithRegistrations<R>;
+export type MemberWithUsersAndRegistrations<R extends Registration = Registration> =
+    MemberWithUsers & MemberWithRegistrations<R>;
 
 /**
  * @deprecated
  * For performance reasons, avoid loading the groups of registrations when not required. Use MemberWithRegistrations instead.
  */
-export type MemberWithUsersRegistrationsAndGroups = MemberWithUsers & MemberWithUsersAndRegistrations<RegistrationWithGroup>;
+export type MemberWithUsersRegistrationsAndGroups = MemberWithUsers &
+    MemberWithUsersAndRegistrations<RegistrationWithGroup>;
 
 // Defined here to prevent cycles
 export type RegistrationWithMember = Registration & { member: Member };
@@ -39,7 +46,9 @@ export class Member extends QueryableModel {
 
     // #region Columns
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -62,10 +71,12 @@ export class Member extends QueryableModel {
     })
     firstName: string;
 
-    @column({ type: 'string',
+    @column({
+        type: 'string',
         beforeSave: function () {
             return this.details?.lastName ?? '';
-        } })
+        },
+    })
     lastName: string;
 
     @column({
@@ -97,7 +108,8 @@ export class Member extends QueryableModel {
     outstandingBalance = 0;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -109,7 +121,8 @@ export class Member extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -150,14 +163,18 @@ export class Member extends QueryableModel {
     /**
      * Fetch all members with their corresponding (valid) registration
      */
-    static async getWithRegistrations(id: string): Promise<MemberWithUsersRegistrationsAndGroups | null> {
+    static async getWithRegistrations(
+        id: string,
+    ): Promise<MemberWithUsersRegistrationsAndGroups | null> {
         return (await this.getBlobByIds(id))[0] ?? null;
     }
 
     /**
      * Fetch all members with their corresponding (valid) registration
      */
-    static async getByIdWithRegistrationsAndGroups(id: string): Promise<MemberWithRegistrationsAndGroups | null> {
+    static async getByIdWithRegistrationsAndGroups(
+        id: string,
+    ): Promise<MemberWithRegistrationsAndGroups | null> {
         const member = await this.getByID(id);
         if (!member) {
             return null;
@@ -181,7 +198,9 @@ export class Member extends QueryableModel {
     /**
      * Fetch all members with their corresponding (valid) registration
      */
-    static async getByIdWithUsersAndRegistrations(id: string): Promise<MemberWithUsersAndRegistrations | null> {
+    static async getByIdWithUsersAndRegistrations(
+        id: string,
+    ): Promise<MemberWithUsersAndRegistrations | null> {
         const member = await this.getByID(id);
         if (!member) {
             return null;
@@ -211,12 +230,14 @@ export class Member extends QueryableModel {
     /**
      * Fetch all registrations with members with their corresponding (valid) registrations
      */
-    static async loadMembersForRegistrations(registrations: Registration[]): Promise<RegistrationWithMember[]> {
+    static async loadMembersForRegistrations(
+        registrations: Registration[],
+    ): Promise<RegistrationWithMember[]> {
         if (registrations.length === 0) {
             return [];
         }
 
-        const memberIds = Formatter.uniqueArray(registrations.map(r => r.memberId));
+        const memberIds = Formatter.uniqueArray(registrations.map((r) => r.memberId));
         if (memberIds.length) {
             // In the future we might add a 'reverse' method on manytoone relation, instead of defining the new relation. But then we need to store 2 model types in the many to one relation.
             const registrationMemberRelation = new ManyToOneRelation(Member, 'member');
@@ -224,11 +245,13 @@ export class Member extends QueryableModel {
 
             const members = await Member.getByIDs(...memberIds);
             for (const registration of registrations) {
-                const member = members.find(m => m.id === registration.memberId);
+                const member = members.find((m) => m.id === registration.memberId);
                 if (member) {
                     registration.setRelation(registrationMemberRelation, member);
                 } else {
-                    throw new Error('Unexpected missing member for registration ' + registration.id);
+                    throw new Error(
+                        'Unexpected missing member for registration ' + registration.id,
+                    );
                 }
             }
         }
@@ -239,7 +262,9 @@ export class Member extends QueryableModel {
     /**
      * Fetch all registrations with members with their corresponding (valid) registrations
      */
-    static async getRegistrationWithMembersForGroup(groupId: string): Promise<RegistrationWithMember[]> {
+    static async getRegistrationWithMembersForGroup(
+        groupId: string,
+    ): Promise<RegistrationWithMember[]> {
         const registrations = await Registration.select()
             .where('groupId', groupId)
             .where('registeredAt', '!=', null)
@@ -249,9 +274,18 @@ export class Member extends QueryableModel {
         return this.loadMembersForRegistrations(registrations);
     }
 
-    static async loadRegistrations(members: Member[], withGroups?: false): Promise<MemberWithRegistrations[]>;
-    static async loadRegistrations(members: Member[], withGroups: true): Promise<MemberWithRegistrationsAndGroups[]>;
-    static async loadRegistrations(members: Member[], withGroups: boolean | undefined = true): Promise<MemberWithRegistrations[] | MemberWithRegistrationsAndGroups[]> {
+    static async loadRegistrations(
+        members: Member[],
+        withGroups?: false,
+    ): Promise<MemberWithRegistrations[]>;
+    static async loadRegistrations(
+        members: Member[],
+        withGroups: true,
+    ): Promise<MemberWithRegistrationsAndGroups[]>;
+    static async loadRegistrations(
+        members: Member[],
+        withGroups: boolean | undefined = true,
+    ): Promise<MemberWithRegistrations[] | MemberWithRegistrationsAndGroups[]> {
         if (members.length === 0) {
             return members as MemberWithRegistrations[];
         }
@@ -268,7 +302,7 @@ export class Member extends QueryableModel {
                     continue;
                 }
 
-                alreadyLoadedRegistrations.push(...member.registrations as Registration[]);
+                alreadyLoadedRegistrations.push(...(member.registrations as Registration[]));
                 continue;
             }
             loadAllFor.push(member.id);
@@ -276,12 +310,10 @@ export class Member extends QueryableModel {
 
         const ids = Formatter.uniqueArray(loadAllFor);
         if (ids.length) {
-            const registrations = await Registration.select()
+            const registrations = (await Registration.select()
                 .where('memberId', ids)
-                .where(
-                    SQL.where('registeredAt', '!=', null),
-                )
-                .fetch() as (Registration | undefined)[];
+                .where(SQL.where('registeredAt', '!=', null))
+                .fetch()) as (Registration | undefined)[];
             alreadyLoadedRegistrations.push(...registrations);
         } else {
             if (!withGroups) {
@@ -290,7 +322,9 @@ export class Member extends QueryableModel {
         }
 
         if (withGroups) {
-            const groupIds = Formatter.uniqueArray(alreadyLoadedRegistrations.map(r => r && 'group' in r ? undefined : r?.groupId));
+            const groupIds = Formatter.uniqueArray(
+                alreadyLoadedRegistrations.map((r) => (r && 'group' in r ? undefined : r?.groupId)),
+            );
             if (groupIds.length) {
                 const groups = await Group.getByIDs(...groupIds);
 
@@ -298,7 +332,7 @@ export class Member extends QueryableModel {
                     if ('group' in registration!) {
                         continue;
                     }
-                    const group = groups.find(g => g.id === registration!.groupId);
+                    const group = groups.find((g) => g.id === registration!.groupId);
                     if (group && !group.deletedAt) {
                         registration!.setRelation(Registration.group, group);
                     } else {
@@ -316,7 +350,9 @@ export class Member extends QueryableModel {
 
         for (const member of members) {
             // Add registrations
-            const memberRegistrations = alreadyLoadedRegistrations.filter(r => !!r && r.memberId === member.id) as Registration[];
+            const memberRegistrations = alreadyLoadedRegistrations.filter(
+                (r) => !!r && r.memberId === member.id,
+            ) as Registration[];
             member.setManyRelation(Member.registrations, memberRegistrations);
         }
 
@@ -326,7 +362,7 @@ export class Member extends QueryableModel {
     static async loadUsers(members: Member[]): Promise<MemberWithUsers[]> {
         // Load relations
         // Load registrations of these members
-        const ids = Formatter.uniqueArray(members.map(m => ('users' in m) ? undefined : m.id));
+        const ids = Formatter.uniqueArray(members.map((m) => ('users' in m ? undefined : m.id)));
         if (ids.length === 0) {
             return members as MemberWithUsers[];
         }
@@ -335,13 +371,7 @@ export class Member extends QueryableModel {
             SQL.wildcard(User.table),
             SQL.column(MemberUser.table, 'membersId'),
         )
-            .join(
-                SQL.join(MemberUser.table)
-                    .where(
-                        SQL.parentColumn('id'),
-                        SQL.column('usersId'),
-                    ),
-            )
+            .join(SQL.join(MemberUser.table).where(SQL.parentColumn('id'), SQL.column('usersId')))
             .where(SQL.column(MemberUser.table, 'membersId'), ids)
             .fetch();
 
@@ -384,9 +414,18 @@ export class Member extends QueryableModel {
     /**
      * Fetch all members with their corresponding (valid) registrations, users
      */
-    static async loadRegistrationsAndUsers(members: Member[], withGroups?: false): Promise<MemberWithUsersAndRegistrations[]>;
-    static async loadRegistrationsAndUsers(members: Member[], withGroups: true): Promise<MemberWithUsersRegistrationsAndGroups[]>;
-    static async loadRegistrationsAndUsers(members: Member[], withGroups: boolean | undefined = true): Promise<MemberWithUsersAndRegistrations[] | MemberWithUsersRegistrationsAndGroups[]> {
+    static async loadRegistrationsAndUsers(
+        members: Member[],
+        withGroups?: false,
+    ): Promise<MemberWithUsersAndRegistrations[]>;
+    static async loadRegistrationsAndUsers(
+        members: Member[],
+        withGroups: true,
+    ): Promise<MemberWithUsersRegistrationsAndGroups[]>;
+    static async loadRegistrationsAndUsers(
+        members: Member[],
+        withGroups: boolean | undefined = true,
+    ): Promise<MemberWithUsersAndRegistrations[] | MemberWithUsersRegistrationsAndGroups[]> {
         await this.loadRegistrations(members, withGroups as true);
         await this.loadUsers(members);
         return members as MemberWithUsersAndRegistrations[];
@@ -414,21 +453,15 @@ export class Member extends QueryableModel {
      * Fetch all members with their corresponding (valid) registrations and payment
      */
     static async getFamily(id: string): Promise<Member[]> {
-        const results = await SQL.select(
-            SQL.column('l2', 'membersId'),
-        )
+        const results = await SQL.select(SQL.column('l2', 'membersId'))
             .from('_members_users', 'l1')
             .join(
-                SQL.join('_members_users', 'l2')
-                    .where(
-                        SQL.column('l2', 'usersId'),
-                        SQL.column('l1', 'usersId'),
-                    ),
+                SQL.join('_members_users', 'l2').where(
+                    SQL.column('l2', 'usersId'),
+                    SQL.column('l1', 'usersId'),
+                ),
             )
-            .where(
-                SQL.column('l1', 'membersId'),
-                id,
-            )
+            .where(SQL.column('l1', 'membersId'), id)
             .groupBy(SQL.column('l2', 'membersId'))
             .fetch();
 
@@ -444,9 +477,9 @@ export class Member extends QueryableModel {
 
         const members = await this.getByIDs(...ids);
 
-        const member = members.find(r => r.id === id);
+        const member = members.find((r) => r.id === id);
         if (member) {
-            return members.filter(r => r.organizationId === member.organizationId);
+            return members.filter((r) => r.organizationId === member.organizationId);
         }
 
         return members;
@@ -456,7 +489,9 @@ export class Member extends QueryableModel {
      * @deprecated Please avoid implicit relation loading and only load the rel
      * Fetch all members with their corresponding (valid) registrations and payment
      */
-    static async getFamilyWithRegistrations(id: string): Promise<MemberWithUsersRegistrationsAndGroups[]> {
+    static async getFamilyWithRegistrations(
+        id: string,
+    ): Promise<MemberWithUsersRegistrationsAndGroups[]> {
         const members = await this.getFamily(id);
         return await this.loadRegistrationsAndUsers(members, true);
     }
@@ -465,13 +500,10 @@ export class Member extends QueryableModel {
      * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
     static async getMemberIdsForUser(user: User): Promise<string[]> {
-        const query = SQL
-            .select('membersId')
-            .from('_members_users')
-            .where('usersId', user.id);
+        const query = SQL.select('membersId').from('_members_users').where('usersId', user.id);
 
         const data = await query.fetch();
-        return Formatter.uniqueArray(data.map(r => r._members_users.membersId as string));
+        return Formatter.uniqueArray(data.map((r) => r._members_users.membersId as string));
     }
 
     /**
@@ -485,7 +517,9 @@ export class Member extends QueryableModel {
      * @deprecated Use getMembersForUser and load relations as needed
      * Fetch all members with their corresponding (valid) registrations or waiting lists and payments
      */
-    static async getMembersWithRegistrationForUser(user: User): Promise<MemberWithUsersRegistrationsAndGroups[]> {
+    static async getMembersWithRegistrationForUser(
+        user: User,
+    ): Promise<MemberWithUsersRegistrationsAndGroups[]> {
         return this.getBlobByIds(...(await this.getMemberIdsForUser(user)));
     }
 
@@ -496,7 +530,9 @@ export class Member extends QueryableModel {
         });
     }
 
-    static getRegistrationWithTinyMemberStructure(registration: RegistrationWithMember & { group: Group }): RegistrationWithTinyMember {
+    static getRegistrationWithTinyMemberStructure(
+        registration: RegistrationWithMember & { group: Group },
+    ): RegistrationWithTinyMember {
         return RegistrationWithTinyMember.create({
             ...registration.getStructure(),
             cycle: registration.cycle,

@@ -16,14 +16,20 @@ type Body = PatchableArrayAutoEncoder<PrivateDiscountCode>;
 type ResponseBody = PrivateDiscountCode[];
 
 export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(PrivateDiscountCode as Decoder<PrivateDiscountCode>, PrivateDiscountCode.patchType() as Decoder<AutoEncoderPatchType<PrivateDiscountCode>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(
+        PrivateDiscountCode as Decoder<PrivateDiscountCode>,
+        PrivateDiscountCode.patchType() as Decoder<AutoEncoderPatchType<PrivateDiscountCode>>,
+        StringDecoder,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/webshop/@id/discount-codes', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/webshop/@id/discount-codes', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];
@@ -36,12 +42,12 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
         const webshop = await Webshop.getByID(request.params.id);
-        if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+        if (!webshop || !(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full))) {
             throw Context.auth.notFoundOrNoAccess();
         }
 
@@ -65,13 +71,19 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
 
                 // Saves are not transactional, so refuse the batch before anything is written.
                 // The unique index is case-insensitive.
-                const codes = puts.map(put => put.put.code);
-                if (codes.some(code => code.length === 0)) {
+                const codes = puts.map((put) => put.put.code);
+                if (codes.some((code) => code.length === 0)) {
                     throw emptyCodeError();
                 }
-                const lowercased = codes.map(code => code.toLowerCase());
-                const duplicate = codes.find((_, index) => lowercased.indexOf(lowercased[index]) !== index)
-                    ?? (await WebshopDiscountCode.where({ webshopId: webshop.id, code: { sign: 'IN', value: codes } }))[0]?.code;
+                const lowercased = codes.map((code) => code.toLowerCase());
+                const duplicate =
+                    codes.find((_, index) => lowercased.indexOf(lowercased[index]) !== index) ??
+                    (
+                        await WebshopDiscountCode.where({
+                            webshopId: webshop.id,
+                            code: { sign: 'IN', value: codes },
+                        })
+                    )[0]?.code;
 
                 if (duplicate !== undefined) {
                     throw new SimpleError({
@@ -159,9 +171,7 @@ export class PatchWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
             }
         });
 
-        return new Response(
-            discountCodes.map(d => d.getPrivateStructure()),
-        );
+        return new Response(discountCodes.map((d) => d.getPrivateStructure()));
     }
 }
 

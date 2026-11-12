@@ -1,9 +1,34 @@
 import { Request } from '@node/endpoints';
-import type { Organization, OrganizationRegistrationPeriod, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import type {
+    Organization,
+    OrganizationRegistrationPeriod,
+    RegistrationPeriod,
+    Token,
+} from '@stamhoofd/models';
+import {
+    GroupFactory,
+    MemberFactory,
+    OrganizationFactory,
+    OrganizationRegistrationPeriodFactory,
+    Registration,
+    RegistrationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { Group, GroupCategory, GroupCategorySettings, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, OrganizationRegistrationPeriodSettings, Permissions, PermissionsResourceKey, ResourcePermissions, Version } from '@stamhoofd/structures';
+import {
+    Group,
+    GroupCategory,
+    GroupCategorySettings,
+    GroupType,
+    OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct,
+    OrganizationRegistrationPeriodSettings,
+    Permissions,
+    PermissionsResourceKey,
+    ResourcePermissions,
+    Version,
+} from '@stamhoofd/structures';
 import { PatchOrganizationRegistrationPeriodsEndpoint } from './PatchOrganizationRegistrationPeriodsEndpoint.js';
 import { SessionService } from '../../../../services/SessionService.js';
 
@@ -32,7 +57,10 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
             organization = await new OrganizationFactory({ period }).create();
             period.organizationId = organization.id;
             await period.save();
-            organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+            organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period,
+            }).create();
 
             const user = await new UserFactory({
                 organization,
@@ -45,21 +73,41 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
             const allGroupsUser = await new UserFactory({
                 organization,
                 permissions: Permissions.create({
-                    resources: new Map([[
-                        PermissionsResourceType.Groups,
-                        new Map([[
-                            PermissionsResourceKey.CurrentPeriod, ResourcePermissions.create({
-                                level: PermissionLevel.Full,
-                            }),
-                        ]]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Groups,
+                            new Map([
+                                [
+                                    PermissionsResourceKey.CurrentPeriod,
+                                    ResourcePermissions.create({
+                                        level: PermissionLevel.Full,
+                                    }),
+                                ],
+                            ]),
+                        ],
+                    ]),
                 }),
             }).create();
             allGroupsToken = await SessionService.createSession(allGroupsUser);
         });
 
-        const patchOrganizationRegistrationPeriods = async ({ patch, organization, token }: { patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> | OrganizationRegistrationPeriodStruct[]; organization: Organization; token: Token }) => {
-            const request = Request.buildJson('PATCH', `/v${Version}/organization/registration-periods`, organization.getApiHost(), patch);
+        const patchOrganizationRegistrationPeriods = async ({
+            patch,
+            organization,
+            token,
+        }: {
+            patch:
+                | PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>
+                | OrganizationRegistrationPeriodStruct[];
+            organization: Organization;
+            token: Token;
+        }) => {
+            const request = Request.buildJson(
+                'PATCH',
+                `/v${Version}/organization/registration-periods`,
+                organization.getApiHost(),
+                patch,
+            );
             request.headers.authorization = 'Bearer ' + token.accessToken;
             return await testServer.test(endpoint, request);
         };
@@ -68,17 +116,28 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
             const group = await new GroupFactory({ organization }).create();
 
             const otherPeriod = await new RegistrationPeriodFactory({ organization }).create();
-            const otherOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const otherOrganizationRegistrationPeriod =
+                await new OrganizationRegistrationPeriodFactory({
+                    organization,
+                    period: otherPeriod,
+                }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: otherOrganizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: otherOrganizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            const result = await patchOrganizationRegistrationPeriods({ patch: body, organization, token });
+            const result = await patchOrganizationRegistrationPeriods({
+                patch: body,
+                organization,
+                token,
+            });
 
             expect(result.body).toHaveLength(1);
             expect(result.body[0].groups).toHaveLength(1);
@@ -90,17 +149,28 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
             const group = await new GroupFactory({ organization }).create();
 
             const otherPeriod = await new RegistrationPeriodFactory({ organization }).create();
-            const otherOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const otherOrganizationRegistrationPeriod =
+                await new OrganizationRegistrationPeriodFactory({
+                    organization,
+                    period: otherPeriod,
+                }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: otherOrganizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: otherOrganizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            const result = await patchOrganizationRegistrationPeriods({ patch: body, organization, token: allGroupsToken });
+            const result = await patchOrganizationRegistrationPeriods({
+                patch: body,
+                organization,
+                token: allGroupsToken,
+            });
 
             expect(result.body).toHaveLength(1);
             expect(result.body[0].groups).toHaveLength(1);
@@ -110,84 +180,150 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
 
         test('Move group to period of other organization should fail', async () => {
             const group = await new GroupFactory({ organization }).create();
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
             const otherOrganization = await new OrganizationFactory({}).create();
-            const otherPeriod = await new RegistrationPeriodFactory({ organization: otherOrganization }).create();
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: organizationRegistrationPeriod.id });
+            const otherPeriod = await new RegistrationPeriodFactory({
+                organization: otherOrganization,
+            }).create();
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: organizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            await expect(patchOrganizationRegistrationPeriods({ patch: body, organization, token })).rejects.toThrow('Cannot patch periodId to a different period then the one being patched');
+            await expect(
+                patchOrganizationRegistrationPeriods({ patch: body, organization, token }),
+            ).rejects.toThrow(
+                'Cannot patch periodId to a different period then the one being patched',
+            );
         });
 
         test('Move group to other period than period being patched should fail', async () => {
             const group = await new GroupFactory({ organization }).create();
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
             const otherPeriod = await new RegistrationPeriodFactory({ organization }).create();
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: organizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: organizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            await expect(patchOrganizationRegistrationPeriods({ patch: body, organization, token })).rejects.toThrow('Cannot patch periodId to a different period then the one being patched');
+            await expect(
+                patchOrganizationRegistrationPeriods({ patch: body, organization, token }),
+            ).rejects.toThrow(
+                'Cannot patch periodId to a different period then the one being patched',
+            );
         });
 
         test('Moving group TO locked period should fail as normal admin', async () => {
             const group = await new GroupFactory({ organization }).create();
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
-            const otherPeriod = await new RegistrationPeriodFactory({ organization, locked: true }).create();
-            const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const otherPeriod = await new RegistrationPeriodFactory({
+                organization,
+                locked: true,
+            }).create();
+            const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: otherPeriod,
+            }).create();
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: organizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: organizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            await expect(patchOrganizationRegistrationPeriods({ patch: body, organization, token: allGroupsToken })).rejects.toThrow(STExpect.simpleError({
-                code: 'locked_period',
-                message: 'This period is locked',
-            }));
+            await expect(
+                patchOrganizationRegistrationPeriods({
+                    patch: body,
+                    organization,
+                    token: allGroupsToken,
+                }),
+            ).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'locked_period',
+                    message: 'This period is locked',
+                }),
+            );
         });
 
         test('Moving group FROM locked period should fail as normal admin', async () => {
-            const initialPeriod = await new RegistrationPeriodFactory({ organization, locked: true }).create();
-            await new OrganizationRegistrationPeriodFactory({ organization, period: initialPeriod }).create();
+            const initialPeriod = await new RegistrationPeriodFactory({
+                organization,
+                locked: true,
+            }).create();
+            await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: initialPeriod,
+            }).create();
             const group = await new GroupFactory({ organization, period: initialPeriod }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
             const otherPeriod = await new RegistrationPeriodFactory({ organization }).create();
-            const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: otherPeriod,
+            }).create();
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: organizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: organizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            await expect(patchOrganizationRegistrationPeriods({ patch: body, organization, token: allGroupsToken })).rejects.toThrow(STExpect.simpleError({
-                code: 'permission_denied',
-            }));
+            await expect(
+                patchOrganizationRegistrationPeriods({
+                    patch: body,
+                    organization,
+                    token: allGroupsToken,
+                }),
+            ).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'permission_denied',
+                }),
+            );
         });
 
         test('Moving group TO locked period should not fail as full admin', async () => {
             const group = await new GroupFactory({ organization }).create();
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
-            const otherPeriod = await new RegistrationPeriodFactory({ organization, locked: true }).create();
-            const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const otherPeriod = await new RegistrationPeriodFactory({
+                organization,
+                locked: true,
+            }).create();
+            const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: otherPeriod,
+            }).create();
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: organizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: organizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            const result = await patchOrganizationRegistrationPeriods({ patch: body, organization, token });
+            const result = await patchOrganizationRegistrationPeriods({
+                patch: body,
+                organization,
+                token,
+            });
 
             expect(result.body).toHaveLength(1);
             expect(result.body[0].groups).toHaveLength(1);
@@ -196,21 +332,37 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
         });
 
         test('Moving group FROM locked period should not fail as full admin', async () => {
-            const initialPeriod = await new RegistrationPeriodFactory({ organization, locked: true }).create();
-            await new OrganizationRegistrationPeriodFactory({ organization, period: initialPeriod }).create();
+            const initialPeriod = await new RegistrationPeriodFactory({
+                organization,
+                locked: true,
+            }).create();
+            await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: initialPeriod,
+            }).create();
             const group = await new GroupFactory({ organization, period: initialPeriod }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
             const otherPeriod = await new RegistrationPeriodFactory({ organization }).create();
-            const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: otherPeriod,
+            }).create();
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: organizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: organizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            const result = await patchOrganizationRegistrationPeriods({ patch: body, organization, token });
+            const result = await patchOrganizationRegistrationPeriods({
+                patch: body,
+                organization,
+                token,
+            });
 
             expect(result.body).toHaveLength(1);
             expect(result.body[0].groups).toHaveLength(1);
@@ -219,63 +371,112 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
         });
 
         test('Move group to period if waiting list linked to other groups should fail', async () => {
-            const waitingList = await new GroupFactory({ organization, type: GroupType.WaitingList }).create();
-            const group = await new GroupFactory({ organization, waitingListId: waitingList.id }).create();
+            const waitingList = await new GroupFactory({
+                organization,
+                type: GroupType.WaitingList,
+            }).create();
+            const group = await new GroupFactory({
+                organization,
+                waitingListId: waitingList.id,
+            }).create();
             // link other group to waiting list
             await new GroupFactory({ organization, waitingListId: waitingList.id }).create();
 
             const otherPeriod = await new RegistrationPeriodFactory({ organization }).create();
-            const otherOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const otherOrganizationRegistrationPeriod =
+                await new OrganizationRegistrationPeriodFactory({
+                    organization,
+                    period: otherPeriod,
+                }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: otherOrganizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: otherOrganizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            await expect(patchOrganizationRegistrationPeriods({ patch: body, organization, token })).rejects.toThrow('Group has waiting list with other groups in the current period');
+            await expect(
+                patchOrganizationRegistrationPeriods({ patch: body, organization, token }),
+            ).rejects.toThrow('Group has waiting list with other groups in the current period');
         });
 
         test('Move group with other type than Membership should fail', async () => {
-            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration }).create();
+            const group = await new GroupFactory({
+                organization,
+                type: GroupType.EventRegistration,
+            }).create();
 
             const otherPeriod = await new RegistrationPeriodFactory({ organization }).create();
-            const otherOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const otherOrganizationRegistrationPeriod =
+                await new OrganizationRegistrationPeriodFactory({
+                    organization,
+                    period: otherPeriod,
+                }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: otherOrganizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: otherOrganizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            await expect(patchOrganizationRegistrationPeriods({ patch: body, organization, token })).rejects.toThrow(`Moving group with type ${GroupType.EventRegistration} to a different period is not supported`);
+            await expect(
+                patchOrganizationRegistrationPeriods({ patch: body, organization, token }),
+            ).rejects.toThrow(
+                `Moving group with type ${GroupType.EventRegistration} to a different period is not supported`,
+            );
         });
 
         test('Move group to period if waiting list only linked to this group should also update waiting list period', async () => {
-            const waitingList = await new GroupFactory({ organization, type: GroupType.WaitingList }).create();
-            const group = await new GroupFactory({ organization, waitingListId: waitingList.id }).create();
+            const waitingList = await new GroupFactory({
+                organization,
+                type: GroupType.WaitingList,
+            }).create();
+            const group = await new GroupFactory({
+                organization,
+                waitingListId: waitingList.id,
+            }).create();
 
             const otherPeriod = await new RegistrationPeriodFactory({ organization }).create();
-            const otherOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const otherOrganizationRegistrationPeriod =
+                await new OrganizationRegistrationPeriodFactory({
+                    organization,
+                    period: otherPeriod,
+                }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: otherOrganizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: otherOrganizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            const result = await patchOrganizationRegistrationPeriods({ patch: body, organization, token });
+            const result = await patchOrganizationRegistrationPeriods({
+                patch: body,
+                organization,
+                token,
+            });
 
             expect(result.body).toHaveLength(1);
             expect(result.body[0].groups).toHaveLength(2);
             expect(result.body[0].groups).toEqual(
-                expect.arrayContaining([expect.objectContaining({ id: group.id, periodId: otherPeriod.id }), expect.objectContaining({ id: waitingList.id, periodId: otherPeriod.id })]),
+                expect.arrayContaining([
+                    expect.objectContaining({ id: group.id, periodId: otherPeriod.id }),
+                    expect.objectContaining({ id: waitingList.id, periodId: otherPeriod.id }),
+                ]),
             );
         });
 
@@ -285,11 +486,18 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
             const registration = await new RegistrationFactory({ group, member }).create();
 
             const otherPeriod = await new RegistrationPeriodFactory({ organization }).create();
-            const otherOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const otherOrganizationRegistrationPeriod =
+                await new OrganizationRegistrationPeriodFactory({
+                    organization,
+                    period: otherPeriod,
+                }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: otherOrganizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: otherOrganizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
@@ -312,7 +520,10 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
             period = await new RegistrationPeriodFactory({}).create();
             organization = await new OrganizationFactory({ period }).create();
             await period.save();
-            organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+            organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period,
+            }).create();
 
             const user = await new UserFactory({
                 organization,
@@ -323,8 +534,23 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
             token = await SessionService.createSession(user);
         });
 
-        const patchOrganizationRegistrationPeriods = async ({ patch, organization, token }: { patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> | OrganizationRegistrationPeriodStruct[]; organization: Organization; token: Token }) => {
-            const request = Request.buildJson('PATCH', `/v${Version}/organization/registration-periods`, organization.getApiHost(), patch);
+        const patchOrganizationRegistrationPeriods = async ({
+            patch,
+            organization,
+            token,
+        }: {
+            patch:
+                | PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>
+                | OrganizationRegistrationPeriodStruct[];
+            organization: Organization;
+            token: Token;
+        }) => {
+            const request = Request.buildJson(
+                'PATCH',
+                `/v${Version}/organization/registration-periods`,
+                organization.getApiHost(),
+                patch,
+            );
             request.headers.authorization = 'Bearer ' + token.accessToken;
             return await testServer.test(endpoint, request);
         };
@@ -332,18 +558,29 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
         test('Moving group to a different period is possible', async () => {
             const group = await new GroupFactory({ organization }).create();
 
-            const otherPeriod = await new RegistrationPeriodFactory({ }).create();
-            const otherOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const otherPeriod = await new RegistrationPeriodFactory({}).create();
+            const otherOrganizationRegistrationPeriod =
+                await new OrganizationRegistrationPeriodFactory({
+                    organization,
+                    period: otherPeriod,
+                }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: otherOrganizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: otherOrganizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            const result = await patchOrganizationRegistrationPeriods({ patch: body, organization, token });
+            const result = await patchOrganizationRegistrationPeriods({
+                patch: body,
+                organization,
+                token,
+            });
 
             expect(result.body).toHaveLength(1);
             expect(result.body[0].groups).toHaveLength(1);
@@ -353,115 +590,194 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
 
         test('Move group to other period than period being patched should fail', async () => {
             const group = await new GroupFactory({ organization }).create();
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
-            const otherPeriod = await new RegistrationPeriodFactory({ }).create();
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const otherPeriod = await new RegistrationPeriodFactory({}).create();
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: organizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: organizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            await expect(patchOrganizationRegistrationPeriods({ patch: body, organization, token })).rejects.toThrow('Cannot patch periodId to a different period then the one being patched');
+            await expect(
+                patchOrganizationRegistrationPeriods({ patch: body, organization, token }),
+            ).rejects.toThrow(
+                'Cannot patch periodId to a different period then the one being patched',
+            );
         });
 
         test('Moving group TO locked period should fail', async () => {
             const group = await new GroupFactory({ organization }).create();
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
             const otherPeriod = await new RegistrationPeriodFactory({ locked: true }).create();
-            const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: otherPeriod,
+            }).create();
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: organizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: organizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            await expect(patchOrganizationRegistrationPeriods({ patch: body, organization, token })).rejects.toThrow(STExpect.simpleError({
-                code: 'locked_period',
-                message: 'This period is locked',
-            }));
+            await expect(
+                patchOrganizationRegistrationPeriods({ patch: body, organization, token }),
+            ).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'locked_period',
+                    message: 'This period is locked',
+                }),
+            );
         });
 
         test('Moving group FROM locked period should fail', async () => {
             const initialPeriod = await new RegistrationPeriodFactory({ locked: true }).create();
-            await new OrganizationRegistrationPeriodFactory({ organization, period: initialPeriod }).create();
+            await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: initialPeriod,
+            }).create();
             const group = await new GroupFactory({ organization, period: initialPeriod }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
-            const otherPeriod = await new RegistrationPeriodFactory({ }).create();
-            const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const otherPeriod = await new RegistrationPeriodFactory({}).create();
+            const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
+                organization,
+                period: otherPeriod,
+            }).create();
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: organizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: organizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            await expect(patchOrganizationRegistrationPeriods({ patch: body, organization, token })).rejects.toThrow(STExpect.simpleError({
-                code: 'locked_period',
-                message: 'This period is locked',
-            }));
+            await expect(
+                patchOrganizationRegistrationPeriods({ patch: body, organization, token }),
+            ).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'locked_period',
+                    message: 'This period is locked',
+                }),
+            );
         });
 
         test('Move group to period if waiting list linked to other groups should fail', async () => {
-            const waitingList = await new GroupFactory({ organization, type: GroupType.WaitingList }).create();
-            const group = await new GroupFactory({ organization, waitingListId: waitingList.id }).create();
+            const waitingList = await new GroupFactory({
+                organization,
+                type: GroupType.WaitingList,
+            }).create();
+            const group = await new GroupFactory({
+                organization,
+                waitingListId: waitingList.id,
+            }).create();
             // link other group to waiting list
             await new GroupFactory({ organization, waitingListId: waitingList.id }).create();
 
-            const otherPeriod = await new RegistrationPeriodFactory({ }).create();
-            const otherOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const otherPeriod = await new RegistrationPeriodFactory({}).create();
+            const otherOrganizationRegistrationPeriod =
+                await new OrganizationRegistrationPeriodFactory({
+                    organization,
+                    period: otherPeriod,
+                }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: otherOrganizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: otherOrganizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            await expect(patchOrganizationRegistrationPeriods({ patch: body, organization, token })).rejects.toThrow('Group has waiting list with other groups in the current period');
+            await expect(
+                patchOrganizationRegistrationPeriods({ patch: body, organization, token }),
+            ).rejects.toThrow('Group has waiting list with other groups in the current period');
         });
 
         test('Move group with other type than Membership should fail', async () => {
-            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration }).create();
+            const group = await new GroupFactory({
+                organization,
+                type: GroupType.EventRegistration,
+            }).create();
 
-            const otherPeriod = await new RegistrationPeriodFactory({ }).create();
-            const otherOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const otherPeriod = await new RegistrationPeriodFactory({}).create();
+            const otherOrganizationRegistrationPeriod =
+                await new OrganizationRegistrationPeriodFactory({
+                    organization,
+                    period: otherPeriod,
+                }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: otherOrganizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: otherOrganizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            await expect(patchOrganizationRegistrationPeriods({ patch: body, organization, token })).rejects.toThrow(`Moving group with type ${GroupType.EventRegistration} to a different period is not supported`);
+            await expect(
+                patchOrganizationRegistrationPeriods({ patch: body, organization, token }),
+            ).rejects.toThrow(
+                `Moving group with type ${GroupType.EventRegistration} to a different period is not supported`,
+            );
         });
 
         test('Move group to period if waiting list only linked to this group should also update waiting list period', async () => {
-            const waitingList = await new GroupFactory({ organization, type: GroupType.WaitingList }).create();
-            const group = await new GroupFactory({ organization, waitingListId: waitingList.id }).create();
+            const waitingList = await new GroupFactory({
+                organization,
+                type: GroupType.WaitingList,
+            }).create();
+            const group = await new GroupFactory({
+                organization,
+                waitingListId: waitingList.id,
+            }).create();
 
-            const otherPeriod = await new RegistrationPeriodFactory({ }).create();
-            const otherOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const otherPeriod = await new RegistrationPeriodFactory({}).create();
+            const otherOrganizationRegistrationPeriod =
+                await new OrganizationRegistrationPeriodFactory({
+                    organization,
+                    period: otherPeriod,
+                }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: otherOrganizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: otherOrganizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
             body.addPatch(periodPatch);
 
-            const result = await patchOrganizationRegistrationPeriods({ patch: body, organization, token });
+            const result = await patchOrganizationRegistrationPeriods({
+                patch: body,
+                organization,
+                token,
+            });
 
             expect(result.body).toHaveLength(1);
             expect(result.body[0].groups).toHaveLength(2);
             expect(result.body[0].groups).toEqual(
-                expect.arrayContaining([expect.objectContaining({ id: group.id, periodId: otherPeriod.id }), expect.objectContaining({ id: waitingList.id, periodId: otherPeriod.id })]),
+                expect.arrayContaining([
+                    expect.objectContaining({ id: group.id, periodId: otherPeriod.id }),
+                    expect.objectContaining({ id: waitingList.id, periodId: otherPeriod.id }),
+                ]),
             );
         });
 
@@ -470,12 +786,19 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveRegistration
             const member = await new MemberFactory({ organization }).create();
             const registration = await new RegistrationFactory({ group, member }).create();
 
-            const otherPeriod = await new RegistrationPeriodFactory({ }).create();
-            const otherOrganizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
+            const otherPeriod = await new RegistrationPeriodFactory({}).create();
+            const otherOrganizationRegistrationPeriod =
+                await new OrganizationRegistrationPeriodFactory({
+                    organization,
+                    period: otherPeriod,
+                }).create();
 
-            const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+            const body =
+                new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
-            const periodPatch = OrganizationRegistrationPeriodStruct.patch({ id: otherOrganizationRegistrationPeriod.id });
+            const periodPatch = OrganizationRegistrationPeriodStruct.patch({
+                id: otherOrganizationRegistrationPeriod.id,
+            });
             const groupPatch = Group.patch({ id: group.id, periodId: otherPeriod.id });
             periodPatch.groups.addPatch(groupPatch);
 
@@ -512,8 +835,17 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
         token = await SessionService.createSession(user);
     });
 
-    const patchOrganizationRegistrationPeriods = async ({ patch }: { patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> }) => {
-        const request = Request.buildJson('PATCH', `/v${Version}/organization/registration-periods`, organization.getApiHost(), patch);
+    const patchOrganizationRegistrationPeriods = async ({
+        patch,
+    }: {
+        patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+    }) => {
+        const request = Request.buildJson(
+            'PATCH',
+            `/v${Version}/organization/registration-periods`,
+            organization.getApiHost(),
+            patch,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -523,7 +855,10 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
      */
     const createPeriodWithCategory = async (groupIds: string[]) => {
         const period = await new RegistrationPeriodFactory({}).create();
-        const organizationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+        const organizationPeriod = await new OrganizationRegistrationPeriodFactory({
+            organization,
+            period,
+        }).create();
 
         const category = GroupCategory.create({
             settings: GroupCategorySettings.create({ name: 'Movable category' }),
@@ -543,7 +878,14 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
      * the category and all its descendants are added to the destination, the groups are moved,
      * and the category is removed from its parent in the source period.
      */
-    const buildMovePatch = ({ source, destination, categories, topCategoryId, groupIds, destinationPeriodId }: {
+    const buildMovePatch = ({
+        source,
+        destination,
+        categories,
+        topCategoryId,
+        groupIds,
+        destinationPeriodId,
+    }: {
         source: OrganizationRegistrationPeriod;
         destination: OrganizationRegistrationPeriod;
         categories: GroupCategory[];
@@ -551,7 +893,8 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
         groupIds: string[];
         destinationPeriodId: string;
     }) => {
-        const body = new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+        const body =
+            new PatchableArray() as PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
 
         const destinationSettings = OrganizationRegistrationPeriodSettings.patch({});
         for (const category of categories) {
@@ -561,16 +904,24 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
         destinationParent.categoryIds.addPut(topCategoryId);
         destinationSettings.categories.addPatch(destinationParent);
 
-        const destinationPatch = OrganizationRegistrationPeriodStruct.patch({ id: destination.id, settings: destinationSettings });
+        const destinationPatch = OrganizationRegistrationPeriodStruct.patch({
+            id: destination.id,
+            settings: destinationSettings,
+        });
         for (const groupId of groupIds) {
-            destinationPatch.groups.addPatch(Group.patch({ id: groupId, periodId: destinationPeriodId }));
+            destinationPatch.groups.addPatch(
+                Group.patch({ id: groupId, periodId: destinationPeriodId }),
+            );
         }
 
         const sourceSettings = OrganizationRegistrationPeriodSettings.patch({});
         const sourceParent = GroupCategory.patch({ id: source.settings.rootCategoryId });
         sourceParent.categoryIds.addDelete(topCategoryId);
         sourceSettings.categories.addPatch(sourceParent);
-        const sourcePatch = OrganizationRegistrationPeriodStruct.patch({ id: source.id, settings: sourceSettings });
+        const sourcePatch = OrganizationRegistrationPeriodStruct.patch({
+            id: source.id,
+            settings: sourceSettings,
+        });
 
         // Order is important: the destination patch moves the groups first, then the source is cleaned up
         body.addPatch(destinationPatch);
@@ -587,7 +938,10 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
         const { organizationPeriod: source, category } = await createPeriodWithCategory([group.id]);
 
         const destinationPeriod = await new RegistrationPeriodFactory({}).create();
-        const destination = await new OrganizationRegistrationPeriodFactory({ organization, period: destinationPeriod }).create();
+        const destination = await new OrganizationRegistrationPeriodFactory({
+            organization,
+            period: destinationPeriod,
+        }).create();
 
         const body = buildMovePatch({
             source,
@@ -600,20 +954,22 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
 
         const result = await patchOrganizationRegistrationPeriods({ patch: body });
 
-        const destinationResult = result.body.find(p => p.id === destination.id)!;
-        const sourceResult = result.body.find(p => p.id === source.id)!;
+        const destinationResult = result.body.find((p) => p.id === destination.id)!;
+        const sourceResult = result.body.find((p) => p.id === source.id)!;
 
         // Category and group are now in the destination period
-        expect(destinationResult.settings.categories.find(c => c.id === category.id)).toBeDefined();
+        expect(
+            destinationResult.settings.categories.find((c) => c.id === category.id),
+        ).toBeDefined();
         expect(destinationResult.settings.rootCategory?.categoryIds).toContain(category.id);
-        const movedGroup = destinationResult.groups.find(g => g.id === group.id);
+        const movedGroup = destinationResult.groups.find((g) => g.id === group.id);
         expect(movedGroup).toBeDefined();
         expect(movedGroup!.periodId).toBe(destinationPeriod.id);
 
         // Category and group are removed from the source period
-        expect(sourceResult.settings.categories.find(c => c.id === category.id)).toBeUndefined();
+        expect(sourceResult.settings.categories.find((c) => c.id === category.id)).toBeUndefined();
         expect(sourceResult.settings.rootCategory?.categoryIds ?? []).not.toContain(category.id);
-        expect(sourceResult.groups.find(g => g.id === group.id)).toBeUndefined();
+        expect(sourceResult.groups.find((g) => g.id === group.id)).toBeUndefined();
 
         // The registration in the group is also moved to the destination period
         const updatedRegistration = await Registration.getByID(registration.id);
@@ -622,7 +978,10 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
 
     test('Moving a category also moves its nested subcategories', async () => {
         const period = await new RegistrationPeriodFactory({}).create();
-        const source = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+        const source = await new OrganizationRegistrationPeriodFactory({
+            organization,
+            period,
+        }).create();
         const group = await new GroupFactory({ organization, period }).create();
 
         // root -> parent -> child(group)
@@ -640,7 +999,10 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
         await source.save();
 
         const destinationPeriod = await new RegistrationPeriodFactory({}).create();
-        const destination = await new OrganizationRegistrationPeriodFactory({ organization, period: destinationPeriod }).create();
+        const destination = await new OrganizationRegistrationPeriodFactory({
+            organization,
+            period: destinationPeriod,
+        }).create();
 
         const body = buildMovePatch({
             source,
@@ -653,24 +1015,33 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
 
         const result = await patchOrganizationRegistrationPeriods({ patch: body });
 
-        const destinationResult = result.body.find(p => p.id === destination.id)!;
-        const sourceResult = result.body.find(p => p.id === source.id)!;
+        const destinationResult = result.body.find((p) => p.id === destination.id)!;
+        const sourceResult = result.body.find((p) => p.id === source.id)!;
 
         // The whole subtree is now in the destination period
         expect(destinationResult.settings.rootCategory?.categoryIds).toContain(parent.id);
-        expect(destinationResult.settings.categories.find(c => c.id === parent.id)?.categoryIds).toContain(child.id);
-        expect(destinationResult.settings.categories.find(c => c.id === child.id)?.groupIds).toContain(group.id);
-        expect(destinationResult.groups.find(g => g.id === group.id)?.periodId).toBe(destinationPeriod.id);
+        expect(
+            destinationResult.settings.categories.find((c) => c.id === parent.id)?.categoryIds,
+        ).toContain(child.id);
+        expect(
+            destinationResult.settings.categories.find((c) => c.id === child.id)?.groupIds,
+        ).toContain(group.id);
+        expect(destinationResult.groups.find((g) => g.id === group.id)?.periodId).toBe(
+            destinationPeriod.id,
+        );
 
         // Nothing is left behind in the source period
-        expect(sourceResult.settings.categories.find(c => c.id === parent.id)).toBeUndefined();
-        expect(sourceResult.settings.categories.find(c => c.id === child.id)).toBeUndefined();
-        expect(sourceResult.groups.find(g => g.id === group.id)).toBeUndefined();
+        expect(sourceResult.settings.categories.find((c) => c.id === parent.id)).toBeUndefined();
+        expect(sourceResult.settings.categories.find((c) => c.id === child.id)).toBeUndefined();
+        expect(sourceResult.groups.find((g) => g.id === group.id)).toBeUndefined();
     });
 
     test('Moving towards a locked period is blocked', async () => {
         const period = await new RegistrationPeriodFactory({}).create();
-        const source = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+        const source = await new OrganizationRegistrationPeriodFactory({
+            organization,
+            period,
+        }).create();
         const group = await new GroupFactory({ organization, period }).create();
 
         // root -> parent -> child(group)
@@ -689,7 +1060,10 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
 
         const destinationPeriod = await new RegistrationPeriodFactory({}).create();
 
-        const destination = await new OrganizationRegistrationPeriodFactory({ organization, period: destinationPeriod }).create();
+        const destination = await new OrganizationRegistrationPeriodFactory({
+            organization,
+            period: destinationPeriod,
+        }).create();
 
         const body = buildMovePatch({
             source,
@@ -703,9 +1077,11 @@ describe('Endpoint.PatchOrganizationRegistrationPeriodsEndpoint.MoveCategoryToPe
         await destinationPeriod.save();
         expect(group.periodId).toEqual(period.id);
 
-        await expect(patchOrganizationRegistrationPeriods({ patch: body })).rejects.toThrow(STExpect.simpleError({
-            code: 'locked_period',
-        }));
+        await expect(patchOrganizationRegistrationPeriods({ patch: body })).rejects.toThrow(
+            STExpect.simpleError({
+                code: 'locked_period',
+            }),
+        );
 
         // Check nothing moved
         await group.refresh();

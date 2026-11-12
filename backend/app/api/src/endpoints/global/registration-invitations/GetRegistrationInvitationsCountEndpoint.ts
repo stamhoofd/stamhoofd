@@ -11,7 +11,12 @@ type Query = CountFilteredRequest;
 type Body = undefined;
 type ResponseBody = CountResponse;
 
-export class GetRegistrationInvitationsCountEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetRegistrationInvitationsCountEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     queryDecoder = CountFilteredRequest as Decoder<CountFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -33,8 +38,7 @@ export class GetRegistrationInvitationsCountEndpoint extends Endpoint<Params, Qu
 
         const query = await GetRegistrationInvitationsEndpoint.buildQuery(request.query);
 
-        const count = await query
-            .count();
+        const count = await query.count();
 
         return new Response(
             CountResponse.create({

@@ -19,7 +19,14 @@ import {
 } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { v4 as uuidv4 } from 'uuid';
-import { BalanceItem, BalanceItemFactory, CachedBalance, Member, MemberFactory, OrganizationFactory } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemFactory,
+    CachedBalance,
+    Member,
+    MemberFactory,
+    OrganizationFactory,
+} from '@stamhoofd/models';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { BalanceItemService } from '../services/BalanceItemService.js';
 import { mergeMemberDetails, mergeTwoMembers, selectBaseMember } from './MemberMerger.js';
@@ -141,7 +148,9 @@ describe('member merge', () => {
             });
 
             test('uitpasNumber', () => {
-                expect(d1.uitpasNumberDetails?.uitpasNumber).toBe(d2Old.uitpasNumberDetails?.uitpasNumber);
+                expect(d1.uitpasNumberDetails?.uitpasNumber).toBe(
+                    d2Old.uitpasNumberDetails?.uitpasNumber,
+                );
             });
 
             test('email', () => {
@@ -159,9 +168,7 @@ describe('member merge', () => {
             });
 
             test('birthDay', () => {
-                expect(d1.birthDay?.getTime() ?? -1).toBe(
-                    d2Old.birthDay?.getTime() ?? -1,
-                );
+                expect(d1.birthDay?.getTime() ?? -1).toBe(d2Old.birthDay?.getTime() ?? -1);
             });
 
             test('requires financial support', () => {
@@ -185,15 +192,11 @@ describe('member merge', () => {
             });
 
             test('emergency contacts', () => {
-                expect(d1.emergencyContacts.length).toBe(
-                    d2Old.emergencyContacts.length,
-                );
+                expect(d1.emergencyContacts.length).toBe(d2Old.emergencyContacts.length);
             });
 
             test('review times', () => {
-                expect(d1.reviewTimes.times.length).toBe(
-                    d2Old.reviewTimes.times.length,
-                );
+                expect(d1.reviewTimes.times.length).toBe(d2Old.reviewTimes.times.length);
             });
 
             test('answers', () => {
@@ -209,9 +212,7 @@ describe('member merge', () => {
             });
 
             test('unverifiedAddresses', () => {
-                expect(d1.unverifiedAddresses.length).toBe(
-                    d2Old.unverifiedAddresses.length,
-                );
+                expect(d1.unverifiedAddresses.length).toBe(d2Old.unverifiedAddresses.length);
             });
 
             test('notes', () => {
@@ -335,7 +336,9 @@ describe('member merge', () => {
             });
 
             test('uitpasNumber', () => {
-                expect(d1.uitpasNumberDetails?.uitpasNumber).toBe(d1Old.uitpasNumberDetails?.uitpasNumber);
+                expect(d1.uitpasNumberDetails?.uitpasNumber).toBe(
+                    d1Old.uitpasNumberDetails?.uitpasNumber,
+                );
             });
 
             test('email', () => {
@@ -353,9 +356,7 @@ describe('member merge', () => {
             });
 
             test('birthDay', () => {
-                expect(d1.birthDay?.getTime() ?? -1).toBe(
-                    d1Old.birthDay?.getTime() ?? -1,
-                );
+                expect(d1.birthDay?.getTime() ?? -1).toBe(d1Old.birthDay?.getTime() ?? -1);
             });
 
             test('requires financial support', () => {
@@ -379,15 +380,11 @@ describe('member merge', () => {
             });
 
             test('emergency contacts', () => {
-                expect(d1.emergencyContacts.length).toBe(
-                    d1Old.emergencyContacts.length,
-                );
+                expect(d1.emergencyContacts.length).toBe(d1Old.emergencyContacts.length);
             });
 
             test('review times', () => {
-                expect(d1.reviewTimes.times.length).toBe(
-                    d1Old.reviewTimes.times.length,
-                );
+                expect(d1.reviewTimes.times.length).toBe(d1Old.reviewTimes.times.length);
             });
 
             test('answers', () => {
@@ -403,9 +400,7 @@ describe('member merge', () => {
             });
 
             test('unverifiedAddresses', () => {
-                expect(d1.unverifiedAddresses.length).toBe(
-                    d1Old.unverifiedAddresses.length,
-                );
+                expect(d1.unverifiedAddresses.length).toBe(d1Old.unverifiedAddresses.length);
             });
 
             test('notes', () => {
@@ -561,10 +556,7 @@ describe('member merge', () => {
                     postalCode: '1011AB',
                     country: Country.Netherlands,
                 }),
-                parents: [
-                    parent1Alt,
-                    Parent.create({ firstName: 'John', lastName: 'Other' }),
-                ],
+                parents: [parent1Alt, Parent.create({ firstName: 'John', lastName: 'Other' })],
                 emergencyContacts: [
                     EmergencyContact.create({
                         name: 'other emergency contact',
@@ -619,7 +611,7 @@ describe('member merge', () => {
             beforeAll(() => {
                 mergeMemberDetails(m1, m2);
                 d1 = m1.details;
-                parent1 = d1.parents.find(p => p.id === oldParent1.id)!;
+                parent1 = d1.parents.find((p) => p.id === oldParent1.id)!;
             });
 
             // assert
@@ -636,7 +628,9 @@ describe('member merge', () => {
             });
 
             test('uitpasNumber', () => {
-                expect(d1.uitpasNumberDetails?.uitpasNumber).toBe(d2Old.uitpasNumberDetails?.uitpasNumber);
+                expect(d1.uitpasNumberDetails?.uitpasNumber).toBe(
+                    d2Old.uitpasNumberDetails?.uitpasNumber,
+                );
             });
 
             test('email', () => {
@@ -655,9 +649,7 @@ describe('member merge', () => {
             });
 
             test('birthDay', () => {
-                expect(d1.birthDay?.getTime() ?? -1).toBe(
-                    d2Old.birthDay?.getTime() ?? -1,
-                );
+                expect(d1.birthDay?.getTime() ?? -1).toBe(d2Old.birthDay?.getTime() ?? -1);
             });
 
             test('requires financial support', () => {
@@ -674,9 +666,7 @@ describe('member merge', () => {
 
             test('address', () => {
                 expect(d1.address?.id).toBe(d2Old.address?.id);
-                expect(d1.unverifiedAddresses.map(a => a.id)).toContain(
-                    d1Old.address?.id,
-                );
+                expect(d1.unverifiedAddresses.map((a) => a.id)).toContain(d1Old.address?.id);
             });
 
             test('parents', () => {
@@ -703,11 +693,9 @@ describe('member merge', () => {
             });
 
             test('unverifiedEmails', () => {
-                expect(d1.unverifiedEmails.sort()).toEqual([
-                    'email1@test.be',
-                    'email2@test.be',
-                    'otherunverivied@test.be',
-                ].sort());
+                expect(d1.unverifiedEmails.sort()).toEqual(
+                    ['email1@test.be', 'email2@test.be', 'otherunverivied@test.be'].sort(),
+                );
             });
 
             test('unverifiedPhones', () => {
@@ -718,12 +706,14 @@ describe('member merge', () => {
                 // expect(d1.unverifiedAddresses.length).toBe(3);
 
                 // Should be combination of unverified addresses + address of the second member (which coulnd't be merged)
-                const addressIds = d1.unverifiedAddresses.map(a => a.id);
-                expect(addressIds.sort()).toEqual([
-                    d1Old.address!.id,
-                    d1Old.unverifiedAddresses[0].id,
-                    d2Old.unverifiedAddresses[0].id,
-                ].sort());
+                const addressIds = d1.unverifiedAddresses.map((a) => a.id);
+                expect(addressIds.sort()).toEqual(
+                    [
+                        d1Old.address!.id,
+                        d1Old.unverifiedAddresses[0].id,
+                        d2Old.unverifiedAddresses[0].id,
+                    ].sort(),
+                );
             });
 
             test('notes', () => {
@@ -750,7 +740,7 @@ describe('member merge', () => {
         expect(base.id).toBe(m3.id);
 
         expect(others).toHaveLength(2);
-        const otherIds = others.map(m => m.id);
+        const otherIds = others.map((m) => m.id);
         expect(otherIds).toContain(m1.id);
         expect(otherIds).toContain(m2.id);
     });
@@ -945,8 +935,16 @@ describe('mergeTwoMembers balance items', () => {
 
     test('moves the balance items to the base member, rewrites the Member relation and recalculates cached balances', async () => {
         const organization = await new OrganizationFactory({}).create();
-        const base = await new MemberFactory({ organization, firstName: 'Base', lastName: 'Member' }).create();
-        const other = await new MemberFactory({ organization, firstName: 'Other', lastName: 'Member' }).create();
+        const base = await new MemberFactory({
+            organization,
+            firstName: 'Base',
+            lastName: 'Member',
+        }).create();
+        const other = await new MemberFactory({
+            organization,
+            firstName: 'Other',
+            lastName: 'Member',
+        }).create();
 
         const baseItem = await createBalanceItem(organization.id, base, 30_00);
         const otherItem = await createBalanceItem(organization.id, other, 50_00);
@@ -974,11 +972,19 @@ describe('mergeTwoMembers balance items', () => {
         await BalanceItemService.flushAll();
 
         // The base member now owes both balance items
-        const [baseBalance] = await CachedBalance.getForObjects([base.id], organization.id, ReceivableBalanceType.member);
+        const [baseBalance] = await CachedBalance.getForObjects(
+            [base.id],
+            organization.id,
+            ReceivableBalanceType.member,
+        );
         expect(baseBalance?.amountOpen).toBe(80_00);
 
         // The removed member no longer has an outstanding cached balance
-        const [otherBalance] = await CachedBalance.getForObjects([other.id], organization.id, ReceivableBalanceType.member);
+        const [otherBalance] = await CachedBalance.getForObjects(
+            [other.id],
+            organization.id,
+            ReceivableBalanceType.member,
+        );
         expect(otherBalance?.amountOpen ?? 0).toBe(0);
     });
 });
@@ -988,7 +994,10 @@ describe('mergeTwoMembers lastRegisteredAt', () => {
         TestUtils.setEnvironment('userMode', 'platform');
     });
 
-    const createMembers = async (baseLastRegisteredAt: Date | null, otherLastRegisteredAt: Date | null) => {
+    const createMembers = async (
+        baseLastRegisteredAt: Date | null,
+        otherLastRegisteredAt: Date | null,
+    ) => {
         const organization = await new OrganizationFactory({}).create();
         const base = await new MemberFactory({ organization }).create();
         const other = await new MemberFactory({ organization }).create();

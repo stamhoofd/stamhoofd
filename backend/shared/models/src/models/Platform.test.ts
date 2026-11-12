@@ -1,4 +1,9 @@
-import { PermissionRoleDetailed, PlatformConfig, PlatformMembershipType, PlatformPrivateConfig } from '@stamhoofd/structures';
+import {
+    PermissionRoleDetailed,
+    PlatformConfig,
+    PlatformMembershipType,
+    PlatformPrivateConfig,
+} from '@stamhoofd/structures';
 import { Platform } from './Platform.js';
 import { Database } from '@node/database';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -160,15 +165,22 @@ describe('Model.Platform', () => {
             const struct = await Platform.getStructForTenant('child-tenant');
 
             expect(struct.parentTenant?.id).toBe(root.id);
-            expect(struct.parentTenant?.config.membershipTypes.map(m => m.name)).toEqual(['Root type']);
+            expect(struct.parentTenant?.config.membershipTypes.map((m) => m.name)).toEqual([
+                'Root type',
+            ]);
         });
 
         test('the parent never carries its private config', async () => {
             await createChildOfRoot();
 
             // Both variants: a child tenant administrator has no rights on the parent either way
-            expect((await Platform.getStructForTenant('child-tenant')).parentTenant?.privateConfig).toBeNull();
-            expect((await Platform.getPrivateStructForTenant('child-tenant')).parentTenant?.privateConfig).toBeNull();
+            expect(
+                (await Platform.getStructForTenant('child-tenant')).parentTenant?.privateConfig,
+            ).toBeNull();
+            expect(
+                (await Platform.getPrivateStructForTenant('child-tenant')).parentTenant
+                    ?.privateConfig,
+            ).toBeNull();
         });
 
         test('the parent is only one level deep', async () => {
@@ -252,7 +264,9 @@ describe('Model.Platform', () => {
             other.id = 'second-tenant';
             other.periodId = root.periodId;
             other.config = PlatformConfig.create({
-                membershipTypes: [PlatformMembershipType.create({ id: 't2', name: 'Second tenant type' })],
+                membershipTypes: [
+                    PlatformMembershipType.create({ id: 't2', name: 'Second tenant type' }),
+                ],
             });
             await other.save();
 
@@ -268,14 +282,18 @@ describe('Model.Platform', () => {
         test('each tenant caches its own struct', async () => {
             const { root } = await createSecondTenant();
 
-            root.config.membershipTypes = [PlatformMembershipType.create({ id: 't1', name: 'Root type' })];
+            root.config.membershipTypes = [
+                PlatformMembershipType.create({ id: 't1', name: 'Root type' }),
+            ];
             await root.save();
 
             const rootStruct = await Platform.getStructForTenant('1');
             const otherStruct = await Platform.getStructForTenant('second-tenant');
 
-            expect(rootStruct.config.membershipTypes.map(m => m.name)).toEqual(['Root type']);
-            expect(otherStruct.config.membershipTypes.map(m => m.name)).toEqual(['Second tenant type']);
+            expect(rootStruct.config.membershipTypes.map((m) => m.name)).toEqual(['Root type']);
+            expect(otherStruct.config.membershipTypes.map((m) => m.name)).toEqual([
+                'Second tenant type',
+            ]);
         });
 
         test('saving one tenant does not discard another tenant cache', async () => {
@@ -283,12 +301,16 @@ describe('Model.Platform', () => {
 
             const otherBefore = await Platform.getStructForTenant('second-tenant');
 
-            root.config.membershipTypes = [PlatformMembershipType.create({ id: 't1', name: 'Changed' })];
+            root.config.membershipTypes = [
+                PlatformMembershipType.create({ id: 't1', name: 'Changed' }),
+            ];
             await root.save();
 
             // Same object identity: the second tenant's cache was never rebuilt
             expect(await Platform.getStructForTenant('second-tenant')).toBe(otherBefore);
-            expect((await Platform.getStructForTenant('1')).config.membershipTypes[0].name).toBe('Changed');
+            expect((await Platform.getStructForTenant('1')).config.membershipTypes[0].name).toBe(
+                'Changed',
+            );
         });
 
         test('clearing one tenant cache leaves the other in place', async () => {

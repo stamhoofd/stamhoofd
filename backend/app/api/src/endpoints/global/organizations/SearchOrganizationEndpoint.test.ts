@@ -11,9 +11,14 @@ describe('Endpoint.SearchOrganization', () => {
     const endpoint = new SearchOrganizationEndpoint();
 
     afterEach(async () => {
-        await Database.update('UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null', ['delete']);
+        await Database.update(
+            'UPDATE registration_periods set organizationId = null, customName = ? where organizationId is not null',
+            ['delete'],
+        );
         await Database.delete('DELETE FROM `organizations`');
-        await Database.delete('DELETE FROM `registration_periods` where customName = ?', ['delete']);
+        await Database.delete('DELETE FROM `registration_periods` where customName = ?', [
+            'delete',
+        ]);
 
         // Force reload Platform (membership organization id might be cleared)
         await Platform.clearCache();
@@ -21,7 +26,7 @@ describe('Endpoint.SearchOrganization', () => {
 
     test('Search for a given organization using exact search', async () => {
         const organization = await new OrganizationFactory({
-            name: (uuidv4()).replace(/-/g, ''),
+            name: uuidv4().replace(/-/g, ''),
         }).create();
 
         const r = Request.buildJson('GET', '/v19/organizations/search');
@@ -59,7 +64,9 @@ describe('Endpoint.SearchOrganization', () => {
 
         // Access token should be expired
         expect(response.status).toEqual(200);
-        expect(response.body.map(o => o.id).sort()).toEqual(organizations.map(o => o.id).sort());
+        expect(response.body.map((o) => o.id).sort()).toEqual(
+            organizations.map((o) => o.id).sort(),
+        );
     });
 
     test('Search organization by name using word should return best match first', async () => {
@@ -110,7 +117,13 @@ describe('Endpoint.SearchOrganization', () => {
     test('Search on organization by name using sentence should return best match first', async () => {
         const query = 'Spaghetti Vreters';
 
-        for (const name of ['De Spaghetti Eters', 'Vreters', 'Spaghetti', 'De Spaghetti', 'De Spaghetti Vretersschool']) {
+        for (const name of [
+            'De Spaghetti Eters',
+            'Vreters',
+            'Spaghetti',
+            'De Spaghetti',
+            'De Spaghetti Vretersschool',
+        ]) {
             await new OrganizationFactory({
                 name,
             }).create();
@@ -182,14 +195,37 @@ describe('Endpoint.SearchOrganization', () => {
         const query = 'De Spaghetti Vreters';
 
         // without the where like (if the limit is reached), 'Spaghetti Vreters Spaghetti Vreters' would come first ('De' is a stopword)
-        for (const name of ['De Spaghetti Eters', 'Vreters', 'Spaghetti', 'De Spaghetti', 'Spaghetti Vreters', 'Spaghetti Vreters Spaghetti Vreters', 'De Spaghetti Vretersschool', 'Spaghetti 2', 'Spaghetti 3', 'Spaghetti 4', 'Spaghetti 5', 'Spaghetti 6', 'Spaghetti 7', 'Spaghetti 8', 'Spaghetti 9', 'Spaghetti 10']) {
+        for (const name of [
+            'De Spaghetti Eters',
+            'Vreters',
+            'Spaghetti',
+            'De Spaghetti',
+            'Spaghetti Vreters',
+            'Spaghetti Vreters Spaghetti Vreters',
+            'De Spaghetti Vretersschool',
+            'Spaghetti 2',
+            'Spaghetti 3',
+            'Spaghetti 4',
+            'Spaghetti 5',
+            'Spaghetti 6',
+            'Spaghetti 7',
+            'Spaghetti 8',
+            'Spaghetti 9',
+            'Spaghetti 10',
+        ]) {
             await new OrganizationFactory({
                 name,
             }).create();
         }
 
         let i = 1;
-        for (const city of ['De Spaghetti Eters', 'Vreters', 'Spaghetti', 'De Spaghetti', 'De Spaghetti Vretersschool']) {
+        for (const city of [
+            'De Spaghetti Eters',
+            'Vreters',
+            'Spaghetti',
+            'De Spaghetti',
+            'De Spaghetti Vretersschool',
+        ]) {
             await new OrganizationFactory({
                 name: 'name ' + i,
                 city,
@@ -266,7 +302,7 @@ describe('Endpoint.SearchOrganization', () => {
         const response = await testServer.test(endpoint, r);
         expect(response.status).toEqual(200);
         expect(response.body).toHaveLength(15);
-        expect(response.body.map(o => o.id)).not.toContain(inactiveOrganization.id);
+        expect(response.body.map((o) => o.id)).not.toContain(inactiveOrganization.id);
     });
 
     test('Search escapes LIKE wildcards in the query if limit reached', async () => {
@@ -291,6 +327,6 @@ describe('Endpoint.SearchOrganization', () => {
         const response = await testServer.test(endpoint, r);
         expect(response.status).toEqual(200);
         expect(response.body).toHaveLength(15);
-        expect(response.body.map(o => o.id)).not.toContain(wildcardOrganization.id);
+        expect(response.body.map((o) => o.id)).not.toContain(wildcardOrganization.id);
     });
 });

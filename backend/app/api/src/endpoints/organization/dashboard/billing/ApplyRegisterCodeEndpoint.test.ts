@@ -1,5 +1,11 @@
 import { Request } from '@node/endpoints';
-import { BalanceItem, OrganizationFactory, RegisterCodeFactory, Token, UserFactory } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    OrganizationFactory,
+    RegisterCodeFactory,
+    Token,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions } from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
@@ -21,20 +27,20 @@ describe('Endpoint.ApplyRegisterCodeEndpoint', () => {
         const code = await new RegisterCodeFactory({ organization: otherOrganization }).create();
 
         const organization = await new OrganizationFactory({}).create();
-        const user = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+        const user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
         const token = await SessionService.createSession(user);
 
-        const r = Request.buildJson(
-            'POST',
-            '/billing/register-code',
-            organization.getApiHost(),
-            {
-                registerCode: code.code,
-            },
-        );
+        const r = Request.buildJson('POST', '/billing/register-code', organization.getApiHost(), {
+            registerCode: code.code,
+        });
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
-        await expect(testServer.test(endpoint, r)).rejects.toThrow('You do not have permissions for this action');
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(
+            'You do not have permissions for this action',
+        );
     });
 
     test('Can apply a register code and apply the discount', async () => {
@@ -49,27 +55,26 @@ describe('Endpoint.ApplyRegisterCodeEndpoint', () => {
         }).create();
         const token = await SessionService.createSession(user);
 
-        const r = Request.buildJson(
-            'POST',
-            '/billing/register-code',
-            organization.getApiHost(),
-            {
-                registerCode: code.code,
-            },
-        );
+        const r = Request.buildJson('POST', '/billing/register-code', organization.getApiHost(), {
+            registerCode: code.code,
+        });
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         const response = await testServer.test(endpoint, r);
         expect(response.body).toBeUndefined();
 
         // Check if this organization has an open register code
-        const credits = await BalanceItem.select().where('payingOrganizationId', organization.id).fetch();
+        const credits = await BalanceItem.select()
+            .where('payingOrganizationId', organization.id)
+            .fetch();
         expect(credits.length).toBe(1);
         expect(credits[0].unitPrice).toBe(-code.value);
 
         // Other not yet applied because no package bought yet
         // Check if other organization has an open register code
-        const otherCredits = await BalanceItem.select().where('payingOrganizationId', otherOrganization.id).fetch();
+        const otherCredits = await BalanceItem.select()
+            .where('payingOrganizationId', otherOrganization.id)
+            .fetch();
         expect(otherCredits.length).toBe(0);
     });
 });

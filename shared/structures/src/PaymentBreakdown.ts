@@ -1,4 +1,14 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItemRelation, BalanceItemRelationType } from './BalanceItem.js';
 import { StamhoofdFilterDecoder } from './filters/FilteredRequest.js';
@@ -147,7 +157,9 @@ export class BreakdownGroup extends AutoEncoder {
      * The relations that are shared by everything in this group, e.g. the webshop of an article. Use
      * these to show extra context, like the price or option a registration was for.
      */
-    @field({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation) })
+    @field({
+        decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation),
+    })
     relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map();
 
     /**
@@ -238,7 +250,10 @@ export class BreakdownGraph extends AutoEncoder {
         let expected = Formatter.luxon(this.points[0].date);
 
         for (const point of this.points) {
-            while (expected.toMillis() < point.date.getTime() && filled.length <= MAX_GRAPH_POINTS) {
+            while (
+                expected.toMillis() < point.date.getTime() &&
+                filled.length <= MAX_GRAPH_POINTS
+            ) {
                 filled.push(BreakdownGraphPoint.create({ date: expected.toJSDate() }));
                 expected = expected.plus(step);
             }

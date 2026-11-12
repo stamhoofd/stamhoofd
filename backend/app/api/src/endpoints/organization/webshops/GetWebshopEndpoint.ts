@@ -41,8 +41,6 @@ export class GetWebshopEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         await WebshopAuthHelper.optionalAuthenticateForWebshop(webshop);
 
-        return new Response(
-            await AuthenticatedStructures.webshop(webshop),
-        );
+        return new Response(await AuthenticatedStructures.webshop(webshop));
     }
 }

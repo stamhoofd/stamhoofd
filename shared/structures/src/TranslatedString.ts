@@ -1,4 +1,11 @@
-import type { Data, Decoder, Encodeable, EncodeContext, Patchable, PatchType } from '@common/encoding';
+import type {
+    Data,
+    Decoder,
+    Encodeable,
+    EncodeContext,
+    Patchable,
+    PatchType,
+} from '@common/encoding';
 import { EnumDecoder, ObjectData, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import type { StringLikeObject } from '@stamhoofd/utility/StringLikeObject.js';
@@ -29,7 +36,10 @@ export class TranslatedStringPatch implements Encodeable, Patchable<TranslatedSt
             return this;
         }
 
-        const c = typeof this.translations === 'string' ? new TranslatedStringPatch({}) as this : new TranslatedStringPatch({ ...this.translations }) as this;
+        const c =
+            typeof this.translations === 'string'
+                ? (new TranslatedStringPatch({}) as this)
+                : (new TranslatedStringPatch({ ...this.translations }) as this);
         for (const key in patch.translations) {
             if (Object.prototype.hasOwnProperty.call(patch.translations, key)) {
                 const value = patch.translations[key] as string | null;
@@ -51,7 +61,9 @@ export class TranslatedStringPatch implements Encodeable, Patchable<TranslatedSt
  * Accepts legacy untranslated strings as well as language maps, so existing stored
  * text can be decoded without first migrating it to a translated representation.
  */
-export class TranslatedString implements Encodeable, Patchable<TranslatedStringPatch>, StringLikeObject {
+export class TranslatedString
+    implements Encodeable, Patchable<TranslatedStringPatch>, StringLikeObject
+{
     translations: LanguageMap | string; // set to a string if not known in which language it is
 
     constructor(translations: LanguageMap | string = '') {
@@ -165,7 +177,10 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
             return this;
         }
 
-        const c = typeof this.translations === 'string' ? new TranslatedString({}) as this : new TranslatedString({ ...this.translations }) as this;
+        const c =
+            typeof this.translations === 'string'
+                ? (new TranslatedString({}) as this)
+                : (new TranslatedString({ ...this.translations }) as this);
         for (const key in patch.translations) {
             if (key in patch.translations) {
                 const value = patch.translations[key] as string | null;
@@ -219,10 +234,19 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
         if (keys.length === 0) {
             return '';
         }
-        return this.translations[Language.English] ?? this.translations[Language.Dutch] ?? this.translations[keys[0]];
+        return (
+            this.translations[Language.English] ??
+            this.translations[Language.Dutch] ??
+            this.translations[keys[0]]
+        );
     }
 
-    static field(options: { version?: number; nullable?: boolean; defaultValue?: () => TranslatedString; isDefaultValue?: (v: TranslatedString | undefined | null) => boolean }) {
+    static field(options: {
+        version?: number;
+        nullable?: boolean;
+        defaultValue?: () => TranslatedString;
+        isDefaultValue?: (v: TranslatedString | undefined | null) => boolean;
+    }) {
         return {
             ...options,
             decoder: TranslatedStringDecoder,
@@ -235,7 +259,12 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
                 return new TranslatedStringPatch({ [Language.Dutch]: str }); // Note: before the version we expect the string to be in Dutch
             },
             downgradePatch: (name: TranslatedStringPatch): PatchType<string> => {
-                return name.translations[$getLanguage()] ?? name.translations[Language.English] ?? name.translations[Language.Dutch] ?? undefined;
+                return (
+                    name.translations[$getLanguage()] ??
+                    name.translations[Language.English] ??
+                    name.translations[Language.Dutch] ??
+                    undefined
+                );
             },
             defaultValue: options.defaultValue, // ?? (() => new TranslatedString()),
             isDefaultValue: options.isDefaultValue,
@@ -321,7 +350,9 @@ export class TranslatedStringPatchDecoderStatic implements Decoder<PatchType<Tra
                 if (key === '_isPatch') {
                     continue;
                 }
-                const language = new EnumDecoder(Language).decode(new ObjectData(key, data.context, data.addToCurrentField(key)));
+                const language = new EnumDecoder(Language).decode(
+                    new ObjectData(key, data.context, data.addToCurrentField(key)),
+                );
                 const str = data.field(key).nullable(StringDecoder);
                 dictionary.translations[language] = str;
             }
@@ -367,7 +398,9 @@ export class TranslatedStringDecoderStatic implements Decoder<TranslatedString> 
         const dictionary: { [key in Language]?: string } = {};
         for (const key in data.value) {
             if (Object.prototype.hasOwnProperty.call(data.value, key)) {
-                const language = new EnumDecoder(Language).decode(new ObjectData(key, data.context, data.addToCurrentField(key)));
+                const language = new EnumDecoder(Language).decode(
+                    new ObjectData(key, data.context, data.addToCurrentField(key)),
+                );
                 const str = data.field(key).string;
                 dictionary[language] = str;
             }

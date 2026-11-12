@@ -14,7 +14,9 @@ export default new Migration(async () => {
 
     const result = await SeedTools.loop({
         batchSize: 1000,
-        query: User.select().whereNot('organizationPermissions', null).whereNot('organizationId', null),
+        query: User.select()
+            .whereNot('organizationPermissions', null)
+            .whereNot('organizationId', null),
         useTransactionPerBatch: true,
         action: async (admin: User) => {
             if (!admin.organizationPermissions || !admin.organizationId) {
@@ -22,18 +24,26 @@ export default new Migration(async () => {
             }
             const p = UserPermissions.create({});
             p.organizationPermissions.set(admin.organizationId, admin.organizationPermissions);
-            admin.permissions = UserPermissions.limitedAdd(admin.permissions, p, admin.organizationId);
+            admin.permissions = UserPermissions.limitedAdd(
+                admin.permissions,
+                p,
+                admin.organizationId,
+            );
             admin.organizationPermissions = null;
-            if (await admin.save({
-                skipMarkSaved: true,
-                skipSendEvents: true,
-            })) {
+            if (
+                await admin.save({
+                    skipMarkSaved: true,
+                    skipSendEvents: true,
+                })
+            ) {
                 realUpdate++;
             }
         },
     });
 
-    console.log('Updated permissions of ' + realUpdate + ' users, looped ' + result.total + ' users');
+    console.log(
+        'Updated permissions of ' + realUpdate + ' users, looped ' + result.total + ' users',
+    );
 
     // Do something here
     return Promise.resolve();

@@ -41,7 +41,11 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         // Login-method changes require recent authentication; ordinary profile edits do not.
         // A password can only be set for the authenticated user, even with a fresh session.
-        if (request.body.password || request.body.hasPassword === false || request.body.meta?.loginProviderIds) {
+        if (
+            request.body.password ||
+            request.body.hasPassword === false ||
+            request.body.meta?.loginProviderIds
+        ) {
             if (request.body.password && request.body.id !== user.id) {
                 throw Context.auth.error();
             }
@@ -58,7 +62,11 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id);
 
-        if (!editUser || !await Context.auth.canAccessUser(editUser, PermissionLevel.Write) || editUser.isApiUser) {
+        if (
+            !editUser ||
+            !(await Context.auth.canAccessUser(editUser, PermissionLevel.Write)) ||
+            editUser.isApiUser
+        ) {
             throw Context.auth.notFoundOrNoAccess($t('%DE'));
         }
 
@@ -83,7 +91,10 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         }
 
         if (!Context.isImpersonating) {
-            if (request.body.language !== undefined && request.body.language !== editUser.language) {
+            if (
+                request.body.language !== undefined &&
+                request.body.language !== editUser.language
+            ) {
                 editUser.language = request.body.language;
 
                 if (editUser.language !== null) {
@@ -98,7 +109,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         if (request.body.permissions !== undefined) {
             Context.assertNotImpersonating();
 
-            if (!await Context.auth.canAccessUser(editUser, PermissionLevel.Full)) {
+            if (!(await Context.auth.canAccessUser(editUser, PermissionLevel.Full))) {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: $t('%DF'),
@@ -109,14 +120,27 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 const platform = await Platform.getSharedStruct();
 
                 if (organization) {
-                    if (!await Context.auth.hasFullAccess(organization.id)) {
+                    if (!(await Context.auth.hasFullAccess(organization.id))) {
                         // Cannot grant permissions for this organization
                         throw Context.auth.error();
                     }
 
-                    editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, request.body.permissions, organization.id);
+                    editUser.permissions = UserPermissions.limitedPatch(
+                        editUser.permissions,
+                        request.body.permissions,
+                        organization.id,
+                    );
 
-                    if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization, platform, editUser.email, { inheritFromPlatform: false })?.hasFullAccess()) && STAMHOOFD.environment !== 'development') {
+                    if (
+                        editUser.id === user.id &&
+                        (!editUser.permissions ||
+                            !editUser.permissions
+                                .forOrganization(organization, platform, editUser.email, {
+                                    inheritFromPlatform: false,
+                                })
+                                ?.hasFullAccess()) &&
+                        STAMHOOFD.environment !== 'development'
+                    ) {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: $t('%DG'),
@@ -131,14 +155,22 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     if (editUser.permissions) {
                         editUser.permissions.patchOrPut(request.body.permissions);
                     } else {
-                        editUser.permissions = request.body.permissions.isPut() ? request.body.permissions : null;
+                        editUser.permissions = request.body.permissions.isPut()
+                            ? request.body.permissions
+                            : null;
                     }
 
                     if (editUser.permissions && editUser.permissions.isEmpty) {
                         editUser.permissions = null;
                     }
 
-                    if (editUser.id === user.id && !editUser.permissions?.forPlatform(platform, editUser.email)?.hasFullAccess() && STAMHOOFD.environment !== 'development') {
+                    if (
+                        editUser.id === user.id &&
+                        !editUser.permissions
+                            ?.forPlatform(platform, editUser.email)
+                            ?.hasFullAccess() &&
+                        STAMHOOFD.environment !== 'development'
+                    ) {
                         throw new SimpleError({
                             code: 'permission_denied',
                             message: $t('%DG'),
@@ -154,13 +186,18 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 for (const [key, value] of request.body.meta.loginProviderIds) {
                     if (value !== null) {
                         // Not allowed
-                        throw Context.auth.error('You are not allowed to change the login provider ids');
+                        throw Context.auth.error(
+                            'You are not allowed to change the login provider ids',
+                        );
                     }
                     Context.assertNotImpersonating();
 
                     if (editUser.meta?.loginProviderIds.has(key)) {
                         // Check has remaining method
-                        if (editUser.meta.loginProviderIds.size <= 1 && !editUser.hasPasswordBasedAccount()) {
+                        if (
+                            editUser.meta.loginProviderIds.size <= 1 &&
+                            !editUser.hasPasswordBasedAccount()
+                        ) {
                             throw new SimpleError({
                                 code: 'invalid_request',
                                 message: 'You cannot remove the last login provider',
@@ -205,7 +242,10 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             // password changes
             await editUser.changePassword(request.body.password);
             await PasswordToken.clearFor(editUser.id);
-            await SessionService.clearFor({ userId: editUser.id, keepAccessToken: token.accessToken });
+            await SessionService.clearFor({
+                userId: editUser.id,
+                keepAccessToken: token.accessToken,
+            });
         }
 
         if (request.body.hasPassword === false) {
@@ -223,7 +263,10 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 }
                 editUser.password = null;
                 await PasswordToken.clearFor(editUser.id);
-                await SessionService.clearFor({ userId: editUser.id, keepAccessToken: token.accessToken });
+                await SessionService.clearFor({
+                    userId: editUser.id,
+                    keepAccessToken: token.accessToken,
+                });
             }
         }
 
@@ -237,7 +280,13 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 // Otherwise the requester could guess the code, and confirming merges the account
                 // that already uses this address.
                 const code = await EmailVerificationCode.createFor(editUser, request.body.email);
-                VerificationCodeService.send(code, editUser, organization, request.i18n, false).catch(console.error);
+                VerificationCodeService.send(
+                    code,
+                    editUser,
+                    organization,
+                    request.i18n,
+                    false,
+                ).catch(console.error);
 
                 throw new SimpleError({
                     code: 'verify_email_link',
@@ -248,8 +297,6 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             }
         }
 
-        return new Response(
-            await AuthenticatedStructures.userWithMembers(editUser),
-        );
+        return new Response(await AuthenticatedStructures.userWithMembers(editUser));
     }
 }

@@ -1,7 +1,12 @@
 import type { SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
 import type { SQLDynamicExpression } from './SQLExpressions.js';
-import { SQLArray, SQLColumnExpression, SQLNull, readDynamicSQLExpression } from './SQLExpressions.js';
+import {
+    SQLArray,
+    SQLColumnExpression,
+    SQLNull,
+    readDynamicSQLExpression,
+} from './SQLExpressions.js';
 import type { SQLJoinExpression } from './SQLQueryContracts.js';
 import { SQLJoinType, SQLSelectBase } from './SQLQueryContracts.js';
 
@@ -14,7 +19,7 @@ export enum SQLWhereSign {
     Less = '<',
     LessEqual = '<=',
     NotEqual = '!=',
-};
+}
 
 export const SQLWhereSignMap = {
     '=': SQLWhereSign.Equal,
@@ -32,16 +37,14 @@ function parseWhereSign(sign: SQLWhereSign | keyof typeof SQLWhereSignMap): SQLW
     return sign as SQLWhereSign;
 }
 
-export type ParseWhereArguments = [
-    where: SQLWhere,
-] | [
-    whereOrColumn: SQLExpression | string,
-    value: SQLDynamicExpression,
-] | [
-    whereOrColumn: SQLExpression | string,
-    sign: SQLWhereSign | keyof typeof SQLWhereSignMap,
-    value: SQLDynamicExpression,
-];
+export type ParseWhereArguments =
+    | [where: SQLWhere]
+    | [whereOrColumn: SQLExpression | string, value: SQLDynamicExpression]
+    | [
+          whereOrColumn: SQLExpression | string,
+          sign: SQLWhereSign | keyof typeof SQLWhereSignMap,
+          value: SQLDynamicExpression,
+      ];
 
 function assertWhereable(o: any): any {
     return o;
@@ -103,21 +106,11 @@ export abstract class SQLWhere implements SQLExpression {
     }
 
     andNot(...args: ParseWhereArguments): SQLWhere {
-        return new SQLWhereAnd([
-            this,
-            new SQLWhereNot(
-                SQLWhereEqual.parseWhere(...args),
-            ),
-        ]);
+        return new SQLWhereAnd([this, new SQLWhereNot(SQLWhereEqual.parseWhere(...args))]);
     }
 
     orNot(...args: ParseWhereArguments): SQLWhere {
-        return new SQLWhereOr([
-            this,
-            new SQLWhereNot(
-                SQLWhereEqual.parseWhere(...args),
-            ),
-        ]);
+        return new SQLWhereOr([this, new SQLWhereNot(SQLWhereEqual.parseWhere(...args))]);
     }
 
     get isSingle(): boolean {
@@ -154,15 +147,11 @@ export class SQLEmptyWhere extends SQLWhere {
     }
 
     andNot(...args: ParseWhereArguments): SQLWhere {
-        return new SQLWhereNot(
-            SQLWhereEqual.parseWhere(...args),
-        );
+        return new SQLWhereNot(SQLWhereEqual.parseWhere(...args));
     }
 
     orNot(...args: ParseWhereArguments): SQLWhere {
-        return new SQLWhereNot(
-            SQLWhereEqual.parseWhere(...args),
-        );
+        return new SQLWhereNot(SQLWhereEqual.parseWhere(...args));
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
@@ -205,7 +194,11 @@ export class SQLWhereEqual extends SQLWhere {
 
     constructor(column: SQLExpression, sign: SQLWhereSign, value: SQLExpression);
     constructor(column: SQLExpression, value: SQLExpression);
-    constructor(column: SQLExpression, signOrValue: SQLExpression | SQLWhereSign, value?: SQLExpression) {
+    constructor(
+        column: SQLExpression,
+        signOrValue: SQLExpression | SQLWhereSign,
+        value?: SQLExpression,
+    ) {
         super();
         this.column = column;
 
@@ -218,7 +211,7 @@ export class SQLWhereEqual extends SQLWhere {
     }
 
     clone(): this {
-        const c = (new (this.constructor as any)(this.column, this.sign, this.value)) as this;
+        const c = new (this.constructor as any)(this.column, this.sign, this.value) as this;
         Object.assign(c, this);
         return c;
     }
@@ -327,7 +320,7 @@ export class SQLWhereEqual extends SQLWhere {
 
             return joinSQLQuery([
                 this.column.getSQL(options),
-                ` ${(this.sign === SQLWhereSign.NotEqual) ? 'NOT IN' : 'IN'} `,
+                ` ${this.sign === SQLWhereSign.NotEqual ? 'NOT IN' : 'IN'} `,
                 this.value.getSQL(options),
             ]);
         }
@@ -339,7 +332,7 @@ export class SQLWhereEqual extends SQLWhere {
 
             return joinSQLQuery([
                 this.column.getSQL(options),
-                ` IS ${(this.sign === SQLWhereSign.NotEqual) ? 'NOT ' : ''}`,
+                ` IS ${this.sign === SQLWhereSign.NotEqual ? 'NOT ' : ''}`,
                 this.value.getSQL(options),
             ]);
         }
@@ -359,11 +352,7 @@ export class SQLWhereEqual extends SQLWhere {
             ]);
         }
 
-        return joinSQLQuery([
-            this.column.getSQL(options),
-            ` ${sign} `,
-            this.value.getSQL(options),
-        ]);
+        return joinSQLQuery([this.column.getSQL(options), ` ${sign} `, this.value.getSQL(options)]);
     }
 }
 
@@ -389,7 +378,7 @@ export class SQLWhereLike extends SQLWhere {
     }
 
     clone(): this {
-        const c = (new (this.constructor as any)(this.column, this.value)) as this;
+        const c = new (this.constructor as any)(this.column, this.value) as this;
         Object.assign(c, this);
         return c;
     }
@@ -419,18 +408,18 @@ export class SQLWhereLike extends SQLWhere {
             // (NOT (value LIKE ...)) would drop those rows (NOT NULL is NULL). Coalesce the comparison to
             // false so it is two-valued, matching the in-memory engine: a null value never contains the
             // needle, so its negation matches.
-            return joinSQLQuery([
-                'COALESCE(',
-                comparison,
-                ', 0)',
-            ]);
+            return joinSQLQuery(['COALESCE(', comparison, ', 0)']);
         }
 
         return comparison;
     }
 }
 
-export type SQLMatchSearchModifier = 'IN NATURAL LANGUAGE MODE' | 'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION' | 'IN BOOLEAN MODE' | 'WITH QUERY EXPANSION';
+export type SQLMatchSearchModifier =
+    | 'IN NATURAL LANGUAGE MODE'
+    | 'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION'
+    | 'IN BOOLEAN MODE'
+    | 'WITH QUERY EXPANSION';
 
 export class SQLMatch extends SQLWhere {
     column: SQLExpression;
@@ -438,7 +427,11 @@ export class SQLMatch extends SQLWhere {
     value: SQLExpression;
     searchModifier: SQLMatchSearchModifier;
 
-    constructor(column: SQLExpression, value: SQLExpression, searchModifier: SQLMatchSearchModifier = 'IN BOOLEAN MODE') {
+    constructor(
+        column: SQLExpression,
+        value: SQLExpression,
+        searchModifier: SQLMatchSearchModifier = 'IN BOOLEAN MODE',
+    ) {
         super();
         this.column = column;
         this.value = value;
@@ -446,7 +439,7 @@ export class SQLMatch extends SQLWhere {
     }
 
     clone(): this {
-        const c = (new (this.constructor as any)(this.column, this.value)) as this;
+        const c = new (this.constructor as any)(this.column, this.value) as this;
         Object.assign(c, this);
         return c;
     }
@@ -491,7 +484,7 @@ export class SQLWhereExists extends SQLWhere {
     }
 
     clone(): this {
-        const c = (new (this.constructor as any)(this.subquery)) as this;
+        const c = new (this.constructor as any)(this.subquery) as this;
         Object.assign(c, this);
         return c;
     }
@@ -550,7 +543,11 @@ export class SQLWhereJoin extends SQLWhere {
      */
     doesRelationAlwaysExist = false;
 
-    constructor(join: SQLJoinExpression, where: SQLWhere, options?: { doesRelationAlwaysExist?: boolean }) {
+    constructor(
+        join: SQLJoinExpression,
+        where: SQLWhere,
+        options?: { doesRelationAlwaysExist?: boolean },
+    ) {
         super();
         this.join = join;
         this.where = where;
@@ -566,8 +563,13 @@ export class SQLWhereJoin extends SQLWhere {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        if (this.where.isAlways !== null && (this.doesRelationAlwaysExist || this.join.type === SQLJoinType.Left)) {
-            throw new Error('SQLWhereJoin: should not be included in query if result is determined');
+        if (
+            this.where.isAlways !== null &&
+            (this.doesRelationAlwaysExist || this.join.type === SQLJoinType.Left)
+        ) {
+            throw new Error(
+                'SQLWhereJoin: should not be included in query if result is determined',
+            );
         }
 
         return this.where.getSQL({
@@ -578,14 +580,17 @@ export class SQLWhereJoin extends SQLWhere {
     }
 
     getJoins(): SQLJoinExpression[] {
-        if (this.where.isAlways !== null && (this.doesRelationAlwaysExist || this.join.type === SQLJoinType.Left)) {
+        if (
+            this.where.isAlways !== null &&
+            (this.doesRelationAlwaysExist || this.join.type === SQLJoinType.Left)
+        ) {
             return [];
         }
         return [this.join, ...this.where.getJoins()];
     }
 
     clone(): this {
-        const c = (new (this.constructor as any)(this.join, this.where.clone())) as this;
+        const c = new (this.constructor as any)(this.join, this.where.clone()) as this;
         c.doesRelationAlwaysExist = this.doesRelationAlwaysExist;
         return c;
     }
@@ -601,7 +606,9 @@ export class SQLWhereAnd extends SQLWhere {
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         if (this.isAlways === false) {
-            throw new Error('SQLWhereAnd: $and is always false and should be removed from the query');
+            throw new Error(
+                'SQLWhereAnd: $and is always false and should be removed from the query',
+            );
         }
 
         return joinSQLQuery(
@@ -617,11 +624,13 @@ export class SQLWhereAnd extends SQLWhere {
 
     get filteredChildren(): SQLWhere[] {
         // Children that always return true should not be included in the query (because the result only depends on the other children)
-        return this.children.filter(c => c.isAlways !== true).flatMap(c => c instanceof SQLWhereAnd ? c.filteredChildren : [c]);
+        return this.children
+            .filter((c) => c.isAlways !== true)
+            .flatMap((c) => (c instanceof SQLWhereAnd ? c.filteredChildren : [c]));
     }
 
     getJoins(): SQLJoinExpression[] {
-        return this.children.flatMap(c => c.getJoins()); // note: keep all joins
+        return this.children.flatMap((c) => c.getJoins()); // note: keep all joins
     }
 
     get isSingle(): boolean {
@@ -646,11 +655,13 @@ export class SQLWhereAnd extends SQLWhere {
 
     inverted(): SQLWhereOr {
         // NOT (A AND B) is the same as (NOT A OR NOT B)
-        return new SQLWhereOr(this.children.map(c => new SQLWhereNot(c)));
+        return new SQLWhereOr(this.children.map((c) => new SQLWhereNot(c)));
     }
 
     clone(): this {
-        const c = (new (this.constructor as any)(this.children.map(child => child.clone()))) as this;
+        const c = new (this.constructor as any)(
+            this.children.map((child) => child.clone()),
+        ) as this;
         return c;
     }
 }
@@ -666,7 +677,9 @@ export class SQLWhereOr extends SQLWhere {
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         if (this.filteredChildren.length === 0) {
             // Always false: throw an error (the parent should filter out this query)
-            throw new Error('SQLWhereOr: empty $or is always false and should be removed from the query');
+            throw new Error(
+                'SQLWhereOr: empty $or is always false and should be removed from the query',
+            );
         }
 
         return joinSQLQuery(
@@ -681,12 +694,14 @@ export class SQLWhereOr extends SQLWhere {
     }
 
     getJoins(): SQLJoinExpression[] {
-        return this.children.flatMap(c => c.getJoins());
+        return this.children.flatMap((c) => c.getJoins());
     }
 
     get filteredChildren(): SQLWhere[] {
         // Children that always return false should not be included in the query (because the result only depends on the other children)
-        return this.children.filter(c => c.isAlways !== false).flatMap(c => c instanceof SQLWhereOr ? c.filteredChildren : [c]);
+        return this.children
+            .filter((c) => c.isAlways !== false)
+            .flatMap((c) => (c instanceof SQLWhereOr ? c.filteredChildren : [c]));
     }
 
     get isSingle(): boolean {
@@ -711,11 +726,13 @@ export class SQLWhereOr extends SQLWhere {
 
     inverted(): SQLWhereOr {
         // NOT (A OR B) is the same as (NOT A AND NOT B)
-        return new SQLWhereAnd(this.children.map(c => new SQLWhereNot(c)));
+        return new SQLWhereAnd(this.children.map((c) => new SQLWhereNot(c)));
     }
 
     clone(): this {
-        const c = (new (this.constructor as any)(this.children.map(child => child.clone()))) as this;
+        const c = new (this.constructor as any)(
+            this.children.map((child) => child.clone()),
+        ) as this;
         return c;
     }
 }
@@ -729,7 +746,12 @@ export class SQLWhereNot extends SQLWhere {
     }
 
     get isSingle(): boolean {
-        if (this.a instanceof SQLWhereEqual || this.a instanceof SQLWhereAnd || this.a instanceof SQLWhereOr || this.a instanceof SQLWhereNot) {
+        if (
+            this.a instanceof SQLWhereEqual ||
+            this.a instanceof SQLWhereAnd ||
+            this.a instanceof SQLWhereOr ||
+            this.a instanceof SQLWhereNot
+        ) {
             return this.a.inverted().isSingle;
         }
 
@@ -738,7 +760,12 @@ export class SQLWhereNot extends SQLWhere {
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         // Optimize query
-        if (this.a instanceof SQLWhereEqual || this.a instanceof SQLWhereAnd || this.a instanceof SQLWhereOr || this.a instanceof SQLWhereNot) {
+        if (
+            this.a instanceof SQLWhereEqual ||
+            this.a instanceof SQLWhereAnd ||
+            this.a instanceof SQLWhereOr ||
+            this.a instanceof SQLWhereNot
+        ) {
             return this.a.inverted().getSQL(options);
         }
 
@@ -770,7 +797,7 @@ export class SQLWhereNot extends SQLWhere {
     }
 
     clone(): this {
-        const c = (new (this.constructor as any)(this.a.clone())) as this;
+        const c = new (this.constructor as any)(this.a.clone()) as this;
         return c;
     }
 }

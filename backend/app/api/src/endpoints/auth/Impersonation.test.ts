@@ -3,9 +3,28 @@ import { Request } from '@node/endpoints';
 import type { SimpleError } from '@common/errors';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
 import type { Organization } from '@stamhoofd/models';
-import { AuditLog, ImpersonationToken, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, RegistrationFactory, Token, User, UserFactory, UserSession } from '@stamhoofd/models';
+import {
+    AuditLog,
+    ImpersonationToken,
+    MemberFactory,
+    MemberResponsibilityRecordFactory,
+    OrganizationFactory,
+    Platform,
+    RegistrationFactory,
+    Token,
+    User,
+    UserFactory,
+    UserSession,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AuditLogType, BooleanStatus, NewUser, Permissions, Token as TokenStruct, UserPermissions } from '@stamhoofd/structures';
+import {
+    AuditLogType,
+    BooleanStatus,
+    NewUser,
+    Permissions,
+    Token as TokenStruct,
+    UserPermissions,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 
 import { testServer } from '../../../tests/helpers/TestServer.js';
@@ -72,20 +91,38 @@ function bearer(request: Request, token: { accessToken: string }): Request {
 }
 
 function startRequest(organization: Organization | null, userId: string, ip = adminIp) {
-    return from(Request.buildJson('POST', '/impersonation', organization?.getApiHost(), { userId }), ip);
+    return from(
+        Request.buildJson('POST', '/impersonation', organization?.getApiHost(), { userId }),
+        ip,
+    );
 }
 
 function redeemRequest(organization: Organization | null, ticket: string, ip = adminIp) {
-    return from(Request.buildJson('POST', '/impersonation/token', organization?.getApiHost(), { ticket }), ip);
+    return from(
+        Request.buildJson('POST', '/impersonation/token', organization?.getApiHost(), { ticket }),
+        ip,
+    );
 }
 
-async function createTicket(organization: Organization | null, admin: User, target: User, ip = adminIp): Promise<string> {
+async function createTicket(
+    organization: Organization | null,
+    admin: User,
+    target: User,
+    ip = adminIp,
+): Promise<string> {
     const token = await SessionService.createSession(admin);
-    const response = await testServer.test(startEndpoint, bearer(startRequest(organization, target.id, ip), token));
+    const response = await testServer.test(
+        startEndpoint,
+        bearer(startRequest(organization, target.id, ip), token),
+    );
     return response.body.ticket;
 }
 
-function patchUserRequest(organization: Organization, session: TokenStruct, body: AutoEncoderPatchType<NewUser>) {
+function patchUserRequest(
+    organization: Organization,
+    session: TokenStruct,
+    body: AutoEncoderPatchType<NewUser>,
+) {
     return Request.patch({
         path: '/user/' + body.id,
         host: organization.getApiHost(),
@@ -97,7 +134,11 @@ function patchUserRequest(organization: Organization, session: TokenStruct, body
 /**
  * The full flow: an administrator asks for a link and opens it.
  */
-async function impersonate(organization: Organization | null, admin: User, target: User): Promise<TokenStruct> {
+async function impersonate(
+    organization: Organization | null,
+    admin: User,
+    target: User,
+): Promise<TokenStruct> {
     const ticket = await createTicket(organization, admin, target);
     const response = await testServer.test(redeemEndpoint, redeemRequest(organization, ticket));
     return response.body;
@@ -123,7 +164,11 @@ async function setPlatformFeatureFlags(featureFlags: string[]) {
 async function setup() {
     const organization = await new OrganizationFactory({}).create();
     await enableImpersonation(organization);
-    const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+    const admin = await new UserFactory({
+        organization,
+        password,
+        permissions: Permissions.create({ level: PermissionLevel.Full }),
+    }).create();
     const user = await new UserFactory({ organization, password }).create();
     const member = await new MemberFactory({ organization, user }).create();
     await new RegistrationFactory({ member, organization }).create();
@@ -156,22 +201,34 @@ describe('Impersonation', () => {
     describe('the feature flag', () => {
         test('without it nobody can impersonate', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const user = await new UserFactory({ organization, password }).create();
 
             const token = await SessionService.createSession(admin);
-            const error = await captureError(testServer.test(startEndpoint, bearer(startRequest(organization, user.id), token)));
+            const error = await captureError(
+                testServer.test(startEndpoint, bearer(startRequest(organization, user.id), token)),
+            );
             expect(error.code).toBe('feature_disabled');
         });
 
         test('the platform flag enables it for every organization', async () => {
             await setPlatformFeatureFlags(['impersonation']);
             const organization = await new OrganizationFactory({}).create();
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const user = await new UserFactory({ organization, password }).create();
 
             const token = await impersonate(organization, admin, user);
-            expect((await Token.getByAccessToken(token.accessToken))!.session.impersonatedUserId).toBe(user.id);
+            expect(
+                (await Token.getByAccessToken(token.accessToken))!.session.impersonatedUserId,
+            ).toBe(user.id);
         });
 
         test('a link that was made before the flag was turned off no longer works', async () => {
@@ -181,7 +238,9 @@ describe('Impersonation', () => {
             organization.privateMeta.featureFlags = [];
             await organization.save();
 
-            const error = await captureError(testServer.test(redeemEndpoint, redeemRequest(organization, ticket)));
+            const error = await captureError(
+                testServer.test(redeemEndpoint, redeemRequest(organization, ticket)),
+            );
             expect(error.code).toBe('invalid_impersonation_ticket');
         });
     });
@@ -203,7 +262,13 @@ describe('Impersonation', () => {
             const { organization, admin, user } = await setup();
             const token = await impersonate(organization, admin, user);
 
-            const response = await testServer.test(userEndpoint, bearer(Request.buildJson('GET', '/v1/user', organization.getApiHost()), (await Token.getByAccessToken(token.accessToken))!));
+            const response = await testServer.test(
+                userEndpoint,
+                bearer(
+                    Request.buildJson('GET', '/v1/user', organization.getApiHost()),
+                    (await Token.getByAccessToken(token.accessToken))!,
+                ),
+            );
 
             expect(response.body.id).toBe(user.id);
             expect(response.body.email).toBe(user.email);
@@ -215,7 +280,10 @@ describe('Impersonation', () => {
             const { organization, admin, user } = await setup();
             await impersonate(organization, admin, user);
 
-            const logs = await AuditLog.select().where('type', AuditLogType.UserImpersonated).where('objectId', user.id).fetch();
+            const logs = await AuditLog.select()
+                .where('type', AuditLogType.UserImpersonated)
+                .where('objectId', user.id)
+                .fetch();
             expect(logs.length).toBe(1);
             expect(logs[0].userId).toBe(admin.id);
             expect(logs[0].organizationId).toBe(organization.id);
@@ -224,12 +292,18 @@ describe('Impersonation', () => {
         test('an administrator without full access cannot start one', async () => {
             const organization = await new OrganizationFactory({}).create();
             await enableImpersonation(organization);
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Write }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+            }).create();
             const user = await new UserFactory({ organization, password }).create();
             await new MemberFactory({ organization, user }).create();
 
             const token = await SessionService.createSession(admin);
-            const error = await captureError(testServer.test(startEndpoint, bearer(startRequest(organization, user.id), token)));
+            const error = await captureError(
+                testServer.test(startEndpoint, bearer(startRequest(organization, user.id), token)),
+            );
             expect(error.code).toBe('permission_denied');
         });
 
@@ -240,7 +314,12 @@ describe('Impersonation', () => {
             await new MemberFactory({ organization: other, user: stranger }).create();
 
             const token = await SessionService.createSession(admin);
-            const error = await captureError(testServer.test(startEndpoint, bearer(startRequest(organization, stranger.id), token)));
+            const error = await captureError(
+                testServer.test(
+                    startEndpoint,
+                    bearer(startRequest(organization, stranger.id), token),
+                ),
+            );
             expect(error.code).toBe('permission_denied');
         });
 
@@ -248,22 +327,44 @@ describe('Impersonation', () => {
             TestUtils.setEnvironment('userMode', 'platform');
             const organization = await new OrganizationFactory({}).create();
             await enableImpersonation(organization);
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const colleague = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Write }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const colleague = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+            }).create();
 
             const token = await impersonate(organization, admin, colleague);
-            expect((await Token.getByAccessToken(token.accessToken))!.session.impersonatedUserId).toBe(colleague.id);
+            expect(
+                (await Token.getByAccessToken(token.accessToken))!.session.impersonatedUserId,
+            ).toBe(colleague.id);
         });
 
         test('an organization admin cannot impersonate a platform admin', async () => {
             TestUtils.setEnvironment('userMode', 'platform');
             const organization = await new OrganizationFactory({}).create();
             await enableImpersonation(organization);
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const platformAdmin = await new UserFactory({ password, globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const platformAdmin = await new UserFactory({
+                password,
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
 
             const token = await SessionService.createSession(admin);
-            const error = await captureError(testServer.test(startEndpoint, bearer(startRequest(organization, platformAdmin.id), token)));
+            const error = await captureError(
+                testServer.test(
+                    startEndpoint,
+                    bearer(startRequest(organization, platformAdmin.id), token),
+                ),
+            );
             expect(error.code).toBe('permission_denied');
         });
 
@@ -273,13 +374,26 @@ describe('Impersonation', () => {
             const organization = await new OrganizationFactory({}).create();
             const other = await new OrganizationFactory({}).create();
             await enableImpersonation(organization);
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const parent = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Read }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const parent = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Read }),
+            }).create();
             const member = await new MemberFactory({ organization: other, user: parent }).create();
             await new RegistrationFactory({ member, organization: other }).create();
 
             const token = await SessionService.createSession(admin);
-            const error = await captureError(testServer.test(startEndpoint, bearer(startRequest(organization, parent.id), token)));
+            const error = await captureError(
+                testServer.test(
+                    startEndpoint,
+                    bearer(startRequest(organization, parent.id), token),
+                ),
+            );
             expect(error.code).toBe('permission_denied');
         });
 
@@ -289,16 +403,25 @@ describe('Impersonation', () => {
             const organization = await new OrganizationFactory({}).create();
             const other = await new OrganizationFactory({}).create();
             await enableImpersonation(organization);
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const parent = await new UserFactory({ organization, password }).create();
             const ours = await new MemberFactory({ organization, user: parent }).create();
             await new RegistrationFactory({ member: ours, organization }).create();
-            const elsewhere = await new MemberFactory({ organization: other, user: parent }).create();
+            const elsewhere = await new MemberFactory({
+                organization: other,
+                user: parent,
+            }).create();
             await new RegistrationFactory({ member: elsewhere, organization: other }).create();
             await new MemberFactory({ user: parent }).create();
 
             const token = await impersonate(organization, admin, parent);
-            expect((await Token.getByAccessToken(token.accessToken))!.session.impersonatedUserId).toBe(parent.id);
+            expect(
+                (await Token.getByAccessToken(token.accessToken))!.session.impersonatedUserId,
+            ).toBe(parent.id);
         });
 
         test('an organization admin cannot impersonate a parent whose children have no registration anywhere', async () => {
@@ -306,12 +429,21 @@ describe('Impersonation', () => {
             TestUtils.setEnvironment('userMode', 'platform');
             const organization = await new OrganizationFactory({}).create();
             await enableImpersonation(organization);
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const parent = await new UserFactory({ organization, password }).create();
             await new MemberFactory({ user: parent }).create();
 
             const token = await SessionService.createSession(admin);
-            const error = await captureError(testServer.test(startEndpoint, bearer(startRequest(organization, parent.id), token)));
+            const error = await captureError(
+                testServer.test(
+                    startEndpoint,
+                    bearer(startRequest(organization, parent.id), token),
+                ),
+            );
             expect(error.code).toBe('permission_denied');
         });
 
@@ -321,16 +453,28 @@ describe('Impersonation', () => {
             const organization = await new OrganizationFactory({}).create();
             const other = await new OrganizationFactory({}).create();
             await enableImpersonation(organization);
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const parent = await new UserFactory({ organization, password }).create();
             const ours = await new MemberFactory({ organization, user: parent }).create();
             await new RegistrationFactory({ member: ours, organization }).create();
             const leader = await new MemberFactory({ organization: other, user: parent }).create();
             await new RegistrationFactory({ member: leader, organization: other }).create();
-            await new MemberResponsibilityRecordFactory({ member: leader, organizationId: other.id }).create();
+            await new MemberResponsibilityRecordFactory({
+                member: leader,
+                organizationId: other.id,
+            }).create();
 
             const token = await SessionService.createSession(admin);
-            const error = await captureError(testServer.test(startEndpoint, bearer(startRequest(organization, parent.id), token)));
+            const error = await captureError(
+                testServer.test(
+                    startEndpoint,
+                    bearer(startRequest(organization, parent.id), token),
+                ),
+            );
             expect(error.code).toBe('permission_denied');
         });
 
@@ -338,14 +482,23 @@ describe('Impersonation', () => {
             TestUtils.setEnvironment('userMode', 'platform');
             const organization = await new OrganizationFactory({}).create();
             await enableImpersonation(organization);
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const parent = await new UserFactory({ organization, password }).create();
             const leader = await new MemberFactory({ organization, user: parent }).create();
             await new RegistrationFactory({ member: leader, organization }).create();
             await new MemberResponsibilityRecordFactory({ member: leader }).create();
 
             const token = await SessionService.createSession(admin);
-            const error = await captureError(testServer.test(startEndpoint, bearer(startRequest(organization, parent.id), token)));
+            const error = await captureError(
+                testServer.test(
+                    startEndpoint,
+                    bearer(startRequest(organization, parent.id), token),
+                ),
+            );
             expect(error.code).toBe('permission_denied');
         });
 
@@ -355,15 +508,27 @@ describe('Impersonation', () => {
             const organization = await new OrganizationFactory({}).create();
             const other = await new OrganizationFactory({}).create();
             await enableImpersonation(organization);
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const parent = await new UserFactory({ organization, password }).create();
             const ours = await new MemberFactory({ organization, user: parent }).create();
             await new RegistrationFactory({ member: ours, organization }).create();
             const unregisteredLeader = await new MemberFactory({ user: parent }).create();
-            await new MemberResponsibilityRecordFactory({ member: unregisteredLeader, organizationId: other.id }).create();
+            await new MemberResponsibilityRecordFactory({
+                member: unregisteredLeader,
+                organizationId: other.id,
+            }).create();
 
             const token = await SessionService.createSession(admin);
-            const error = await captureError(testServer.test(startEndpoint, bearer(startRequest(organization, parent.id), token)));
+            const error = await captureError(
+                testServer.test(
+                    startEndpoint,
+                    bearer(startRequest(organization, parent.id), token),
+                ),
+            );
             expect(error.code).toBe('permission_denied');
         });
 
@@ -371,14 +536,23 @@ describe('Impersonation', () => {
             TestUtils.setEnvironment('userMode', 'platform');
             const organization = await new OrganizationFactory({}).create();
             await enableImpersonation(organization);
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const parent = await new UserFactory({ organization, password }).create();
             const leader = await new MemberFactory({ organization, user: parent }).create();
             await new RegistrationFactory({ member: leader, organization }).create();
-            await new MemberResponsibilityRecordFactory({ member: leader, organizationId: organization.id }).create();
+            await new MemberResponsibilityRecordFactory({
+                member: leader,
+                organizationId: organization.id,
+            }).create();
 
             const token = await impersonate(organization, admin, parent);
-            expect((await Token.getByAccessToken(token.accessToken))!.session.impersonatedUserId).toBe(parent.id);
+            expect(
+                (await Token.getByAccessToken(token.accessToken))!.session.impersonatedUserId,
+            ).toBe(parent.id);
         });
 
         test('a platform admin can impersonate a user with members registered at several organizations', async () => {
@@ -386,14 +560,19 @@ describe('Impersonation', () => {
             await setPlatformFeatureFlags(['impersonation']);
             const organization = await new OrganizationFactory({}).create();
             const other = await new OrganizationFactory({}).create();
-            const platformAdmin = await new UserFactory({ password, globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const platformAdmin = await new UserFactory({
+                password,
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const parent = await new UserFactory({ organization, password }).create();
             const member = await new MemberFactory({ organization, user: parent }).create();
             await new RegistrationFactory({ member, organization }).create();
             await new RegistrationFactory({ member, organization: other }).create();
 
             const token = await impersonate(null, platformAdmin, parent);
-            expect((await Token.getByAccessToken(token.accessToken))!.session.impersonatedUserId).toBe(parent.id);
+            expect(
+                (await Token.getByAccessToken(token.accessToken))!.session.impersonatedUserId,
+            ).toBe(parent.id);
         });
 
         test('an impersonated session cannot start another impersonation', async () => {
@@ -402,7 +581,15 @@ describe('Impersonation', () => {
             const other = await new UserFactory({ organization, password }).create();
             await new MemberFactory({ organization, user: other }).create();
 
-            const error = await captureError(testServer.test(startEndpoint, bearer(startRequest(organization, other.id), (await Token.getByAccessToken(session.accessToken))!)));
+            const error = await captureError(
+                testServer.test(
+                    startEndpoint,
+                    bearer(
+                        startRequest(organization, other.id),
+                        (await Token.getByAccessToken(session.accessToken))!,
+                    ),
+                ),
+            );
             expect(error.code).toBe('not_allowed_while_impersonating');
         });
     });
@@ -414,7 +601,9 @@ describe('Impersonation', () => {
 
             await testServer.test(redeemEndpoint, redeemRequest(organization, ticket));
 
-            const error = await captureError(testServer.test(redeemEndpoint, redeemRequest(organization, ticket)));
+            const error = await captureError(
+                testServer.test(redeemEndpoint, redeemRequest(organization, ticket)),
+            );
             expect(error.code).toBe('invalid_impersonation_ticket');
         });
 
@@ -422,12 +611,17 @@ describe('Impersonation', () => {
             const { organization, admin, user } = await setup();
             const ticket = await createTicket(organization, admin, user);
 
-            const error = await captureError(testServer.test(redeemEndpoint, redeemRequest(organization, ticket, '81.164.9.9')));
+            const error = await captureError(
+                testServer.test(redeemEndpoint, redeemRequest(organization, ticket, '81.164.9.9')),
+            );
             expect(error.code).toBe('invalid_impersonation_ticket');
 
             // The ticket is not consumed by a failed attempt: the administrator can still
             // open their own link.
-            const response = await testServer.test(redeemEndpoint, redeemRequest(organization, ticket));
+            const response = await testServer.test(
+                redeemEndpoint,
+                redeemRequest(organization, ticket),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
         });
 
@@ -439,7 +633,9 @@ describe('Impersonation', () => {
             model.expiresAt = new Date(Date.now() - 1000);
             await model.save();
 
-            const error = await captureError(testServer.test(redeemEndpoint, redeemRequest(organization, ticket)));
+            const error = await captureError(
+                testServer.test(redeemEndpoint, redeemRequest(organization, ticket)),
+            );
             expect(error.code).toBe('invalid_impersonation_ticket');
         });
 
@@ -450,13 +646,17 @@ describe('Impersonation', () => {
             admin.permissions = null;
             await admin.save();
 
-            const error = await captureError(testServer.test(redeemEndpoint, redeemRequest(organization, ticket)));
+            const error = await captureError(
+                testServer.test(redeemEndpoint, redeemRequest(organization, ticket)),
+            );
             expect(error.code).toBe('permission_denied');
         });
 
         test('a made up ticket is rejected', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const error = await captureError(testServer.test(redeemEndpoint, redeemRequest(organization, 'not-a-real-ticket')));
+            const error = await captureError(
+                testServer.test(redeemEndpoint, redeemRequest(organization, 'not-a-real-ticket')),
+            );
             expect(error.code).toBe('invalid_impersonation_ticket');
         });
     });
@@ -469,7 +669,15 @@ describe('Impersonation', () => {
             admin.permissions = null;
             await admin.save();
 
-            const error = await captureError(testServer.test(userEndpoint, bearer(Request.buildJson('GET', '/v1/user', organization.getApiHost()), (await Token.getByAccessToken(session.accessToken))!)));
+            const error = await captureError(
+                testServer.test(
+                    userEndpoint,
+                    bearer(
+                        Request.buildJson('GET', '/v1/user', organization.getApiHost()),
+                        (await Token.getByAccessToken(session.accessToken))!,
+                    ),
+                ),
+            );
             expect(error.code).toBe('invalid_access_token');
         });
 
@@ -477,10 +685,15 @@ describe('Impersonation', () => {
             const { organization, admin, user } = await setup();
             const session = await impersonate(organization, admin, user);
 
-            const error = await captureError(testServer.test(new CreateTokenEndpoint(), Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
-                grant_type: 'refresh_token',
-                refresh_token: session.refreshToken,
-            })));
+            const error = await captureError(
+                testServer.test(
+                    new CreateTokenEndpoint(),
+                    Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+                        grant_type: 'refresh_token',
+                        refresh_token: session.refreshToken,
+                    }),
+                ),
+            );
             expect(error.code).toBe('invalid_refresh_token');
         });
 
@@ -503,10 +716,19 @@ describe('Impersonation', () => {
             const { organization, admin, user } = await setup();
             const session = await impersonate(organization, admin, user);
 
-            const error = await captureError(testServer.test(new PatchUserEndpoint(), patchUserRequest(organization, session, NewUser.patch({
-                id: user.id,
-                password: 'a-brand-new-password',
-            }))));
+            const error = await captureError(
+                testServer.test(
+                    new PatchUserEndpoint(),
+                    patchUserRequest(
+                        organization,
+                        session,
+                        NewUser.patch({
+                            id: user.id,
+                            password: 'a-brand-new-password',
+                        }),
+                    ),
+                ),
+            );
             expect(error.code).toBe('permission_denied');
 
             // The account still belongs to whoever knows the original password.
@@ -517,26 +739,55 @@ describe('Impersonation', () => {
             const { organization, admin, user } = await setup();
             const session = await impersonate(organization, admin, user);
 
-            const error = await captureError(testServer.test(new PatchUserEndpoint(), patchUserRequest(organization, session, NewUser.patch({
-                id: user.id,
-                email: 'somebody-else@example.com',
-            }))));
+            const error = await captureError(
+                testServer.test(
+                    new PatchUserEndpoint(),
+                    patchUserRequest(
+                        organization,
+                        session,
+                        NewUser.patch({
+                            id: user.id,
+                            email: 'somebody-else@example.com',
+                        }),
+                    ),
+                ),
+            );
             expect(error.code).toBe('not_allowed_while_impersonating');
         });
 
         test('attributes what it changes to the administrator, not to the account while impersonating', async () => {
             const organization = await new OrganizationFactory({}).create();
             await enableImpersonation(organization);
-            const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const colleague = await new UserFactory({ organization, password, firstName: 'Oude', lastName: 'Naam', permissions: Permissions.create({ level: PermissionLevel.Write }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const colleague = await new UserFactory({
+                organization,
+                password,
+                firstName: 'Oude',
+                lastName: 'Naam',
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+            }).create();
 
             const session = await impersonate(organization, admin, colleague);
-            await testServer.test(new PatchUserEndpoint(), patchUserRequest(organization, session, NewUser.patch({
-                id: colleague.id,
-                firstName: 'Nieuwe',
-            })));
+            await testServer.test(
+                new PatchUserEndpoint(),
+                patchUserRequest(
+                    organization,
+                    session,
+                    NewUser.patch({
+                        id: colleague.id,
+                        firstName: 'Nieuwe',
+                    }),
+                ),
+            );
 
-            const logs = await AuditLog.select().where('type', AuditLogType.UserEdited).where('objectId', colleague.id).fetch();
+            const logs = await AuditLog.select()
+                .where('type', AuditLogType.UserEdited)
+                .where('objectId', colleague.id)
+                .fetch();
             expect(logs.length).toBe(1);
             expect(logs[0].userId).toBe(admin.id);
         });
@@ -545,7 +796,15 @@ describe('Impersonation', () => {
             const { organization, admin, user } = await setup();
             const session = await impersonate(organization, admin, user);
 
-            const error = await captureError(testServer.test(new DeleteUserEndpoint(), bearer(Request.buildJson('DELETE', '/v1/user', organization.getApiHost()), (await Token.getByAccessToken(session.accessToken))!)));
+            const error = await captureError(
+                testServer.test(
+                    new DeleteUserEndpoint(),
+                    bearer(
+                        Request.buildJson('DELETE', '/v1/user', organization.getApiHost()),
+                        (await Token.getByAccessToken(session.accessToken))!,
+                    ),
+                ),
+            );
             expect(error.code).toBe('not_allowed_while_impersonating');
         });
 
@@ -554,8 +813,12 @@ describe('Impersonation', () => {
             const session = await impersonate(organization, admin, user);
 
             const token = (await Token.getByAccessToken(session.accessToken))!;
-            expect(token.accessTokenValidUntil.getTime()).toBeGreaterThan(Date.now() + IMPERSONATION_SESSION_DURATION - 10_000);
-            expect(token.accessTokenValidUntil.getTime()).toBeLessThanOrEqual(Date.now() + IMPERSONATION_SESSION_DURATION);
+            expect(token.accessTokenValidUntil.getTime()).toBeGreaterThan(
+                Date.now() + IMPERSONATION_SESSION_DURATION - 10_000,
+            );
+            expect(token.accessTokenValidUntil.getTime()).toBeLessThanOrEqual(
+                Date.now() + IMPERSONATION_SESSION_DURATION,
+            );
             expect(token.refreshTokenValidUntil).toEqual(token.accessTokenValidUntil);
         });
 
@@ -566,7 +829,12 @@ describe('Impersonation', () => {
             const token = (await Token.getByAccessToken(session.accessToken))!;
             expect(token.isFresh()).toBe(false);
 
-            const error = await captureError(testServer.test(new GetMFAStatusEndpoint(), bearer(Request.buildJson('GET', '/v1/mfa', organization.getApiHost()), token)));
+            const error = await captureError(
+                testServer.test(
+                    new GetMFAStatusEndpoint(),
+                    bearer(Request.buildJson('GET', '/v1/mfa', organization.getApiHost()), token),
+                ),
+            );
             expect(error.code).toBe('not_allowed_while_impersonating');
         });
 
@@ -574,7 +842,10 @@ describe('Impersonation', () => {
             const { organization, admin, user } = await setup();
             const session = await impersonate(organization, admin, user);
 
-            await SessionService.clearFor({ userId: user.id, keepAccessToken: 'some-other-session' });
+            await SessionService.clearFor({
+                userId: user.id,
+                keepAccessToken: 'some-other-session',
+            });
 
             expect(await Token.getByAccessToken(session.accessToken)).toBeUndefined();
         });
@@ -600,24 +871,48 @@ describe('Impersonation', () => {
 
         const admin = await new UserFactory({ password }).create();
         admin.permissions = UserPermissions.create({});
-        admin.permissions.organizationPermissions.set(fullOrganization.id, Permissions.create({ level: PermissionLevel.Full }));
+        admin.permissions.organizationPermissions.set(
+            fullOrganization.id,
+            Permissions.create({ level: PermissionLevel.Full }),
+        );
         await admin.save();
 
         const user = await new UserFactory({ password }).create();
 
         const fullMember = await markSensitive(await new MemberFactory({ user }).create());
-        await new RegistrationFactory({ member: fullMember, organization: fullOrganization }).create();
+        await new RegistrationFactory({
+            member: fullMember,
+            organization: fullOrganization,
+        }).create();
 
         // A child registered elsewhere does not end the session: the parent stays ours through the first child
         const session = await impersonate(fullOrganization, admin, user);
         const otherMember = await markSensitive(await new MemberFactory({ user }).create());
-        await new RegistrationFactory({ member: otherMember, organization: otherOrganization }).create();
-        await expect(testServer.test(new GetUserMembersEndpoint(), membersRequest(fullOrganization, session))).toResolve();
+        await new RegistrationFactory({
+            member: otherMember,
+            organization: otherOrganization,
+        }).create();
+        await expect(
+            testServer.test(
+                new GetUserMembersEndpoint(),
+                membersRequest(fullOrganization, session),
+            ),
+        ).toResolve();
 
         // A responsibility of that child in the other organization does: the session could hand out its permissions
-        await new MemberResponsibilityRecordFactory({ member: otherMember, organizationId: otherOrganization.id }).create();
-        await expect(testServer.test(new GetUserMembersEndpoint(), membersRequest(fullOrganization, session))).rejects.toThrow(STExpect.errorWithCode('invalid_access_token'));
-        await expect(impersonate(fullOrganization, admin, user)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        await new MemberResponsibilityRecordFactory({
+            member: otherMember,
+            organizationId: otherOrganization.id,
+        }).create();
+        await expect(
+            testServer.test(
+                new GetUserMembersEndpoint(),
+                membersRequest(fullOrganization, session),
+            ),
+        ).rejects.toThrow(STExpect.errorWithCode('invalid_access_token'));
+        await expect(impersonate(fullOrganization, admin, user)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     test('an admin gets locked out of an existing impersonation session when their own permissions are reduced', async () => {
@@ -626,18 +921,31 @@ describe('Impersonation', () => {
         const organization = await new OrganizationFactory({}).create();
         await enableImpersonation(organization);
 
-        const admin = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+        const admin = await new UserFactory({
+            organization,
+            password,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
         const user = await new UserFactory({ password }).create();
         const member = await markSensitive(await new MemberFactory({ user }).create());
         await new RegistrationFactory({ member, organization }).create();
 
         const session = await impersonate(organization, admin, user);
-        await expect(testServer.test(new GetUserMembersEndpoint(), membersRequest(organization, session))).toResolve();
+        await expect(
+            testServer.test(new GetUserMembersEndpoint(), membersRequest(organization, session)),
+        ).toResolve();
 
-        admin.permissions!.organizationPermissions.set(organization.id, Permissions.create({ level: PermissionLevel.Read }));
+        admin.permissions!.organizationPermissions.set(
+            organization.id,
+            Permissions.create({ level: PermissionLevel.Read }),
+        );
         await admin.save();
 
-        await expect(testServer.test(new GetUserMembersEndpoint(), membersRequest(organization, session))).rejects.toThrow(STExpect.errorWithCode('invalid_access_token'));
-        await expect(impersonate(organization, admin, user)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(
+            testServer.test(new GetUserMembersEndpoint(), membersRequest(organization, session)),
+        ).rejects.toThrow(STExpect.errorWithCode('invalid_access_token'));
+        await expect(impersonate(organization, admin, user)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 });

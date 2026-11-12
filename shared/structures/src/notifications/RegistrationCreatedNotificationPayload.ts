@@ -16,7 +16,11 @@ export class RegistrationCreatedNotificationPayload extends AutoEncoder {
 
     static decodeBoxed(payload: unknown): RegistrationCreatedNotificationPayload | null {
         try {
-            return new ObjectData(payload, { version: 0 }).decode(new VersionBoxDecoder(RegistrationCreatedNotificationPayload as Decoder<RegistrationCreatedNotificationPayload>)).data;
+            return new ObjectData(payload, { version: 0 }).decode(
+                new VersionBoxDecoder(
+                    RegistrationCreatedNotificationPayload as Decoder<RegistrationCreatedNotificationPayload>,
+                ),
+            ).data;
         } catch (e) {
             console.error('Failed to decode notification payload', e);
             return null;

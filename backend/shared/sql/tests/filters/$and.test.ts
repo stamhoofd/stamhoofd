@@ -7,7 +7,14 @@ describe('$and', () => {
     it('If one child is always false, the whole $and is always false', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: true,
+                }),
+            ],
         ]);
 
         await test({
@@ -40,7 +47,14 @@ describe('$and', () => {
     it('Grouping nullable $lte and $gte correctly inside $and', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['birthDay', createColumnFilter({ expression: SQL.column('birthDay'), type: SQLValueType.Datetime, nullable: true })],
+            [
+                'birthDay',
+                createColumnFilter({
+                    expression: SQL.column('birthDay'),
+                    type: SQLValueType.Datetime,
+                    nullable: true,
+                }),
+            ],
         ]);
 
         await test({
@@ -63,7 +77,14 @@ describe('$and', () => {
     it('An empty $and is always true', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: true,
+                }),
+            ],
         ]);
 
         await test({
@@ -81,7 +102,14 @@ describe('$and', () => {
     it('If all children are always true, the whole $and is always true', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: true,
+                }),
+            ],
         ]);
 
         await test({
@@ -108,7 +136,14 @@ describe('$and', () => {
     it('Children that are always true are removed from the $and', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            ],
         ]);
 
         await test({
@@ -134,7 +169,14 @@ describe('$and', () => {
     it('Can be used with direct object child', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            ],
         ]);
 
         await test({
@@ -157,8 +199,22 @@ describe('$and', () => {
     it('NOT (A AND B) is simplified to (NOT A or not B)', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
-            ['createdAt', createColumnFilter({ expression: SQL.column('createdAt'), type: SQLValueType.Datetime, nullable: false })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            ],
+            [
+                'createdAt',
+                createColumnFilter({
+                    expression: SQL.column('createdAt'),
+                    type: SQLValueType.Datetime,
+                    nullable: false,
+                }),
+            ],
         ]);
 
         await test({
@@ -179,15 +235,20 @@ describe('$and', () => {
     it('empty $and branches are removed', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            ],
         ]);
 
         await test({
             filter: {
                 name: 'John Doe',
-                $and: [
-                    {},
-                ],
+                $and: [{}],
             },
             filters,
             query: {
@@ -200,7 +261,14 @@ describe('$and', () => {
     it('deep $and branches are cleaned up', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: false,
+                }),
+            ],
         ]);
 
         await test({

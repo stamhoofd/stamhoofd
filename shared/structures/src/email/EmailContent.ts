@@ -32,7 +32,11 @@ export class EmailContent extends AutoEncoder {
  * to a different template (level), so the content always stays correct — better correct content
  * in the wrong language than wrong content in the right language.
  */
-export function getEmailContentForLanguage(defaultContent: EmailContent, translations: Map<Language, EmailContent>, language: Language | null): EmailContent {
+export function getEmailContentForLanguage(
+    defaultContent: EmailContent,
+    translations: Map<Language, EmailContent>,
+    language: Language | null,
+): EmailContent {
     if (language !== null) {
         const translated = translations.get(language);
         if (translated) {
@@ -49,7 +53,13 @@ export function getEmailContentForLanguage(defaultContent: EmailContent, transla
  * 3. Multiple languages: language set, the default content holds that language and
  *    translations hold every other language — never the default language itself
  */
-export function validateEmailTranslations({ language, translations }: { language: Language | null; translations: Map<Language, EmailContent> }) {
+export function validateEmailTranslations({
+    language,
+    translations,
+}: {
+    language: Language | null;
+    translations: Map<Language, EmailContent>;
+}) {
     if (language === null && translations.size > 0) {
         throw new SimpleError({
             code: 'invalid_translations',

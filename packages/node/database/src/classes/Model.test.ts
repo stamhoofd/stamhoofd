@@ -49,9 +49,18 @@ describe('Model', () => {
         static table = 'testModels';
         static parent = new ManyToOneRelation(TestModel, 'parent');
         static friends = new ManyToManyRelation(TestModel, TestModel, 'friends', TestModelFriend);
-        static sortedFriends = new ManyToManyRelation(TestModel, TestModel, 'sortedFriends').setSort('priority');
+        static sortedFriends = new ManyToManyRelation(
+            TestModel,
+            TestModel,
+            'sortedFriends',
+        ).setSort('priority');
         static children = new OneToManyRelation(TestModel, TestModel, 'children', 'parentId');
-        static sortedChildren = new OneToManyRelation(TestModel, TestModel, 'sortedChildren', 'parentId').setSort('count');
+        static sortedChildren = new OneToManyRelation(
+            TestModel,
+            TestModel,
+            'sortedChildren',
+            'parentId',
+        ).setSort('count');
 
         @column({ primary: true, type: 'integer' })
         id: number | null = null;
@@ -205,11 +214,7 @@ describe('Model', () => {
         expect(row).toHaveProperty('testModels');
         const selected = TestModel.fromRow(row['testModels']) as TestModel;
 
-        expect(
-            omit(selected, 'savedProperties'),
-        ).toEqual(
-            omit(m, 'savedProperties'),
-        );
+        expect(omit(selected, 'savedProperties')).toEqual(omit(m, 'savedProperties'));
         expect(selected.id).toEqual(m.id);
 
         // Should not save again
@@ -297,11 +302,7 @@ describe('Model', () => {
         if (!o) {
             throw new Error('Save failed');
         }
-        expect(
-            omit(o, 'savedProperties'),
-        ).toEqual(
-            omit(other, 'savedProperties'),
-        );
+        expect(omit(o, 'savedProperties')).toEqual(omit(other, 'savedProperties'));
 
         const children = await TestModel.children.load(o);
         expect(children).toHaveLength(3);
@@ -310,7 +311,7 @@ describe('Model', () => {
         const sortedChildren = await TestModel.sortedChildren.load(o);
         expect(sortedChildren).toHaveLength(3);
         expect(TestModel.sortedChildren.isLoaded(o)).toBe(true);
-        expect(sortedChildren.map(c => c.count)).toEqual([1, 4, 5]);
+        expect(sortedChildren.map((c) => c.count)).toEqual([1, 4, 5]);
     });
 
     test('Setting a many to one relation by ID', async () => {
@@ -485,9 +486,12 @@ describe('Model', () => {
         }
 
         // Check also saved in database
-        const [rows] = await Database.select('SELECT * from testModels ' + TestModel.friends.joinQuery('testModels', 'friends') + ' where testModels.id = ?', [
-            meWithFriends.id,
-        ]);
+        const [rows] = await Database.select(
+            'SELECT * from testModels ' +
+                TestModel.friends.joinQuery('testModels', 'friends') +
+                ' where testModels.id = ?',
+            [meWithFriends.id],
+        );
 
         const _meWithoutFriends = TestModel.fromRow(rows[0]['testModels']);
         expect(_meWithoutFriends).toBeDefined();
@@ -530,7 +534,9 @@ describe('Model', () => {
 
         expect(await meWithFriends.save()).toEqual(true);
 
-        await TestModel.sortedFriends.link(meWithFriends, [friend1, friend2, friend3], { priority: [6, 2, 1] });
+        await TestModel.sortedFriends.link(meWithFriends, [friend1, friend2, friend3], {
+            priority: [6, 2, 1],
+        });
         if (TestModel.sortedFriends.isLoaded(meWithFriends)) {
             expect(meWithFriends.sortedFriends).toHaveLength(3);
             expect(meWithFriends.sortedFriends[0].id).toEqual(friend1.id);
@@ -542,10 +548,10 @@ describe('Model', () => {
 
         // Check also saved in database
         const [rows] = await Database.select(
-            'SELECT * from testModels '
-            + TestModel.sortedFriends.joinQuery('testModels', 'sortedFriends')
-            + ' where testModels.id = ? '
-            + TestModel.sortedFriends.orderByQuery('testModels', 'sortedFriends'),
+            'SELECT * from testModels ' +
+                TestModel.sortedFriends.joinQuery('testModels', 'sortedFriends') +
+                ' where testModels.id = ? ' +
+                TestModel.sortedFriends.orderByQuery('testModels', 'sortedFriends'),
             [meWithFriends.id],
         );
 
@@ -583,9 +589,12 @@ describe('Model', () => {
             expect('other friends not loaded').toEqual('other friends loaded');
         }
 
-        const [rows] = await Database.select('SELECT * from testModels ' + TestModel.friends.joinQuery('testModels', 'friends') + ' where testModels.id = ?', [
-            meWithFriends.id,
-        ]);
+        const [rows] = await Database.select(
+            'SELECT * from testModels ' +
+                TestModel.friends.joinQuery('testModels', 'friends') +
+                ' where testModels.id = ?',
+            [meWithFriends.id],
+        );
 
         const meAgain = TestModel.fromRow(rows[0]['testModels']);
         expect(meAgain).toBeDefined();
@@ -606,9 +615,12 @@ describe('Model', () => {
             expect('other friends not loaded').toEqual('other friends loaded');
         }
 
-        const [rows] = await Database.select('SELECT * from testModels ' + TestModel.friends.joinQuery('testModels', 'friends') + ' where testModels.id = ?', [
-            meWithFriends.id,
-        ]);
+        const [rows] = await Database.select(
+            'SELECT * from testModels ' +
+                TestModel.friends.joinQuery('testModels', 'friends') +
+                ' where testModels.id = ?',
+            [meWithFriends.id],
+        );
 
         const meAgain = TestModel.fromRow(rows[0]['testModels']);
         expect(meAgain).toBeDefined();
@@ -621,12 +633,17 @@ describe('Model', () => {
 
     test('Link a not loaded many to many relation', async () => {
         // Now unlink one
-        await TestModel.friends.link(meWithoutFriends, [friend3, friend2, friend1], { priority: [30, 20, 10] });
+        await TestModel.friends.link(meWithoutFriends, [friend3, friend2, friend1], {
+            priority: [30, 20, 10],
+        });
         expect(TestModel.friends.isLoaded(meWithoutFriends)).toEqual(false);
 
-        const [rows] = await Database.select('SELECT * from testModels ' + TestModel.friends.joinQuery('testModels', 'friends') + ' where testModels.id = ?', [
-            meWithoutFriends.id,
-        ]);
+        const [rows] = await Database.select(
+            'SELECT * from testModels ' +
+                TestModel.friends.joinQuery('testModels', 'friends') +
+                ' where testModels.id = ?',
+            [meWithoutFriends.id],
+        );
 
         const meAgain = TestModel.fromRow(rows[0]['testModels']);
         expect(meAgain).toBeDefined();
@@ -635,7 +652,9 @@ describe('Model', () => {
 
         const friendsAgain = TestModel.fromRows(rows, 'friends');
         expect(friendsAgain).toHaveLength(3);
-        expect(friendsAgain.map(f => f.id).sort()).toEqual([friend3.id, friend2.id, friend1.id].sort());
+        expect(friendsAgain.map((f) => f.id).sort()).toEqual(
+            [friend3.id, friend2.id, friend1.id].sort(),
+        );
     });
 
     test('Unlink a not loaded many to many relation', async () => {
@@ -643,9 +662,12 @@ describe('Model', () => {
         await TestModel.friends.unlink(meWithoutFriends, friend3);
         expect(TestModel.friends.isLoaded(meWithoutFriends)).toEqual(false);
 
-        const [rows] = await Database.select('SELECT * from testModels ' + TestModel.friends.joinQuery('testModels', 'friends') + ' where testModels.id = ?', [
-            meWithoutFriends.id,
-        ]);
+        const [rows] = await Database.select(
+            'SELECT * from testModels ' +
+                TestModel.friends.joinQuery('testModels', 'friends') +
+                ' where testModels.id = ?',
+            [meWithoutFriends.id],
+        );
 
         const meAgain = TestModel.fromRow(rows[0]['testModels']);
         expect(meAgain).toBeDefined();
@@ -653,12 +675,14 @@ describe('Model', () => {
         expect(meAgain.id).toEqual(meWithoutFriends.id);
 
         const friendsAgain = TestModel.fromRows(rows, 'friends');
-        expect(friendsAgain.map(f => f.id).sort()).toEqual([friend2.id, friend1.id].sort());
+        expect(friendsAgain.map((f) => f.id).sort()).toEqual([friend2.id, friend1.id].sort());
     });
 
     test('Load a M2M relation', async () => {
         // Get a clean one, because we don't want to affect the other tests
-        const [rows] = await Database.select('SELECT * from testModels where id = ? LIMIT 1', [meWithFriends.id]);
+        const [rows] = await Database.select('SELECT * from testModels where id = ? LIMIT 1', [
+            meWithFriends.id,
+        ]);
         expect(rows).toHaveLength(1);
         const row = rows[0];
         expect(row).toHaveProperty('testModels');
@@ -669,7 +693,7 @@ describe('Model', () => {
         const friends = await TestModel.friends.load(selected);
         expect(TestModel.friends.isLoaded(selected)).toEqual(true);
         expect(selected.friends).toEqual(friends);
-        expect(friends.map(f => f.id).sort()).toEqual([friend2.id, friend1.id].sort());
+        expect(friends.map((f) => f.id).sort()).toEqual([friend2.id, friend1.id].sort());
 
         expect(friends[0]._link).toMatchObject({
             priority: friends[0].id === friend2.id ? 20 : 10,
@@ -685,7 +709,7 @@ describe('Model', () => {
 
         const sortedFriends = await TestModel.sortedFriends.load(selected);
         expect(TestModel.sortedFriends.isLoaded(selected)).toEqual(true);
-        expect(sortedFriends.map(f => f.id)).toEqual([friend1.id, friend2.id]);
+        expect(sortedFriends.map((f) => f.id)).toEqual([friend1.id, friend2.id]);
     });
 
     test('Clear a not loaded many to many relation', async () => {
@@ -694,9 +718,12 @@ describe('Model', () => {
         expect(TestModel.friends.isLoaded(meWithoutFriends)).toEqual(true); // should be true, because we can automatically load the relation if it is not yet loaded
         expect((meWithoutFriends as any).friends).toHaveLength(0);
 
-        const [rows] = await Database.select('SELECT * from testModels ' + TestModel.friends.joinQuery('testModels', 'friends') + ' where testModels.id = ?', [
-            meWithoutFriends.id,
-        ]);
+        const [rows] = await Database.select(
+            'SELECT * from testModels ' +
+                TestModel.friends.joinQuery('testModels', 'friends') +
+                ' where testModels.id = ?',
+            [meWithoutFriends.id],
+        );
 
         const meAgain = TestModel.fromRow(rows[0]['testModels']);
         expect(meAgain).toBeDefined();
@@ -709,7 +736,9 @@ describe('Model', () => {
 
     test('Load an empty M2M relation', async () => {
         // Get a clean one, because we don't want to affect the other tests
-        const [rows] = await Database.select('SELECT * from testModels where id = ? LIMIT 1', [meWithFriends.id]);
+        const [rows] = await Database.select('SELECT * from testModels where id = ? LIMIT 1', [
+            meWithFriends.id,
+        ]);
         expect(rows).toHaveLength(1);
         const row = rows[0];
         expect(row).toHaveProperty('testModels');
@@ -742,12 +771,21 @@ describe('Model', () => {
         other.count = 1;
 
         expect(await other.save()).toEqual(true);
-        await expect(TestModel.friends.link(other, [friend1, friend2])).rejects.toThrow(/not saved yet/);
+        await expect(TestModel.friends.link(other, [friend1, friend2])).rejects.toThrow(
+            /not saved yet/,
+        );
     });
 
     test('Get by IDs', async () => {
-        const models = await TestModel.getByIDs(friend1.id, friend2.id, friend3.id, meWithFriends.id!);
+        const models = await TestModel.getByIDs(
+            friend1.id,
+            friend2.id,
+            friend3.id,
+            meWithFriends.id!,
+        );
         expect(models).toHaveLength(4);
-        expect(models.map(e => e.id).sort()).toEqual([friend1.id, friend2.id, friend3.id, meWithFriends.id!].sort());
+        expect(models.map((e) => e.id).sort()).toEqual(
+            [friend1.id, friend2.id, friend3.id, meWithFriends.id!].sort(),
+        );
     });
 });

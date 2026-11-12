@@ -2,7 +2,10 @@ import type { Decoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { TranslateRequest, TranslateResponse } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
+import {
+    TranslateRequest,
+    TranslateResponse,
+} from '@stamhoofd/structures/endpoints/TranslateRequest.js';
 
 import { Context } from '../../../helpers/Context.js';
 import { TranslationService } from '../../../services/TranslationService.js';

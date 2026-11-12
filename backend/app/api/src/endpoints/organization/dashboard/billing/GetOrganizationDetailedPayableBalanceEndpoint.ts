@@ -13,12 +13,21 @@ type Query = undefined;
 type ResponseBody = DetailedPayableBalance;
 type Body = undefined;
 
-export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/payable-balance', { sellingOrganizationId: String });
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/billing/@sellingOrganizationId/payable-balance',
+            { sellingOrganizationId: String },
+        );
 
         if (params) {
             return [true, params as Params];
@@ -31,7 +40,7 @@ export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Para
         await Context.authenticate();
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!await Context.auth.canManageFinances(organization.id)) {
+        if (!(await Context.auth.canManageFinances(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -55,14 +64,15 @@ export class GetOrganizationDetailedPayableBalanceEndpoint extends Endpoint<Para
             });
         }
 
-        const balanceItemModels = await BalanceItem.balanceItemsForOrganization(organization.id, request.params.sellingOrganizationId);
+        const balanceItemModels = await BalanceItem.balanceItemsForOrganization(
+            organization.id,
+            request.params.sellingOrganizationId,
+        );
 
         const paymentModels = await Payment.select()
             .where('payingOrganizationId', organization.id)
             .where('organizationId', request.params.sellingOrganizationId)
-            .andWhere(
-                SQL.whereNot('status', PaymentStatus.Failed),
-            )
+            .andWhere(SQL.whereNot('status', PaymentStatus.Failed))
             .fetch();
 
         const balanceItems = await BalanceItem.getStructureWithPayments(balanceItemModels);

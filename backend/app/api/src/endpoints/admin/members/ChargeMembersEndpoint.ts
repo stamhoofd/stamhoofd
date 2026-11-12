@@ -67,7 +67,7 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
 
         await Context.authenticate();
 
-        if (!await Context.auth.canManagePayments(organization.id)) {
+        if (!(await Context.auth.canManagePayments(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -84,12 +84,16 @@ export class ChargeMembersEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         await QueueHandler.schedule(queueId, async () => {
-            const dataGenerator = fetchToAsyncIterator(new LimitedFilteredRequest({
-                filter: body.filter,
-                limit: 100,
-            }), {
-                fetch: request => GetMembersEndpoint.buildData(request, PermissionLevel.Write),
-            });
+            const dataGenerator = fetchToAsyncIterator(
+                new LimitedFilteredRequest({
+                    filter: body.filter,
+                    limit: 100,
+                }),
+                {
+                    fetch: (request) =>
+                        GetMembersEndpoint.buildData(request, PermissionLevel.Write),
+                },
+            );
 
             for await (const data of dataGenerator) {
                 await MemberCharger.chargeMany({

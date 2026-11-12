@@ -24,7 +24,9 @@ export async function handleUitpasResponse(response: Response) {
 }
 
 async function uitpasErrorToSimpleError(response: Response) {
-    const json: unknown = await response.json().catch(() => { /* ignore */ });
+    const json: unknown = await response.json().catch(() => {
+        /* ignore */
+    });
     console.error('[UITPAS ERROR]', json);
 
     const statusCode = response.status;
@@ -56,8 +58,8 @@ function jsonToUitpasErrorResponse(json: unknown): UitpasErrorResponse {
         title: json.title,
         endUserMessage: json.endUserMessage
             ? {
-                    nl: json.endUserMessage.nl,
-                }
+                  nl: json.endUserMessage.nl,
+              }
             : undefined,
     };
 }

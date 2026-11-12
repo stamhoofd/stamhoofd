@@ -21,7 +21,11 @@ describe('SimpleError', () => {
     });
 
     it('preserves generated IDs, field namespaces, and human-readable messages', () => {
-        const error = new SimpleError({ code: 'invalid', message: 'Invalid value', field: 'email' });
+        const error = new SimpleError({
+            code: 'invalid',
+            message: 'Invalid value',
+            field: 'email',
+        });
         error.addNamespace('member');
 
         expect(error.id).toMatch(/^[0-9a-f-]{36}@\d+$/);
@@ -32,7 +36,9 @@ describe('SimpleError', () => {
     });
 
     it('recognizes structured errors without accepting ordinary errors', () => {
-        expect(isSimpleError(new SimpleError({ code: 'invalid', message: 'Invalid value' }))).toBe(true);
+        expect(isSimpleError(new SimpleError({ code: 'invalid', message: 'Invalid value' }))).toBe(
+            true,
+        );
         expect(isSimpleError(null)).toBe(false);
         expect(isSimpleError(new Error('ordinary error'))).toBe(false);
     });

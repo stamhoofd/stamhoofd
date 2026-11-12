@@ -12,7 +12,13 @@ export class ApplicationFeeDetails {
     minimumDate: Date | null = null;
     maximumDate: Date | null = null;
 
-    constructor(details: { count?: number; transferFee: number; serviceFee: number; minimumDate: Date | null; maximumDate: Date | null }) {
+    constructor(details: {
+        count?: number;
+        transferFee: number;
+        serviceFee: number;
+        minimumDate: Date | null;
+        maximumDate: Date | null;
+    }) {
         this.count = details.count ?? 0;
         this.transferFee = details.transferFee;
         this.serviceFee = details.serviceFee;
@@ -24,7 +30,9 @@ export class ApplicationFeeDetails {
         return this.transferFee + this.serviceFee;
     }
 
-    static fromStripe(transaction: Pick<Stripe.BalanceTransaction, 'source' | 'amount' | 'created'>) {
+    static fromStripe(
+        transaction: Pick<Stripe.BalanceTransaction, 'source' | 'amount' | 'created'>,
+    ) {
         const source = transaction.source as Stripe.ApplicationFee;
 
         // Only a destination charge has an originating transaction on our own account. A direct
@@ -32,7 +40,11 @@ export class ApplicationFeeDetails {
         // the metadata that splits the fee
         const originatingTransaction = source.originating_transaction;
         if (!originatingTransaction || typeof originatingTransaction === 'string') {
-            throw new Error('Application fee ' + source.id + ' has no expanded originating transaction, which is not supported for direct charges');
+            throw new Error(
+                'Application fee ' +
+                    source.id +
+                    ' has no expanded originating transaction, which is not supported for direct charges',
+            );
         }
 
         const metadata = (originatingTransaction as Stripe.Charge).metadata;
@@ -52,7 +64,12 @@ export class ApplicationFeeDetails {
         // Both parts are billed as their own balance item, so a negative one would invent a credit
         // out of wrong metadata instead of failing
         if (serviceFee < 0 || transferFee < 0) {
-            throw new Error('Application fee of ' + transaction.amount * 100 + ' does not cover its serviceFee of ' + serviceFee);
+            throw new Error(
+                'Application fee of ' +
+                    transaction.amount * 100 +
+                    ' does not cover its serviceFee of ' +
+                    serviceFee,
+            );
         }
 
         return new ApplicationFeeDetails({

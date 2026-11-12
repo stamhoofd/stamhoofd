@@ -9,7 +9,9 @@ export default new Migration(async () => {
     }
 
     console.log('Start locking document templates.');
-    await Database.statement(`update document_templates set isLocked = 1 where status = 'Published';`);
+    await Database.statement(
+        `update document_templates set isLocked = 1 where status = 'Published';`,
+    );
 
     console.log('Start locking documents.');
     await Database.statement(`update documents set isLocked = 1 where status = 'Published';`);

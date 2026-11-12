@@ -8,7 +8,9 @@ export class MemberPlatformMembership extends QueryableModel {
 
     // Columns
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -70,12 +72,14 @@ export class MemberPlatformMembership extends QueryableModel {
     generated = false;
 
     @column({
-        type: 'datetime', nullable: true,
+        type: 'datetime',
+        nullable: true,
     })
     deletedAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -87,7 +91,8 @@ export class MemberPlatformMembership extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;

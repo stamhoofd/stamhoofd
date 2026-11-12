@@ -22,7 +22,10 @@ export class TestServer {
         this.responseMiddlewares.push(middleware);
     }
 
-    async test<ResponseBody extends Encodeable | Encodeable[] | string | Buffer | undefined>(endpoint: Endpoint<any, any, any, ResponseBody>, request: Request): Promise<Response<ResponseBody>> {
+    async test<ResponseBody extends Encodeable | Encodeable[] | string | Buffer | undefined>(
+        endpoint: Endpoint<any, any, any, ResponseBody>,
+        request: Request,
+    ): Promise<Response<ResponseBody>> {
         let run = async () => {
             // Process response middlewares
             for (const middleware of this.requestMiddlewares) {

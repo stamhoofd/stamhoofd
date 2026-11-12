@@ -33,7 +33,7 @@ export class GroupedThrottledQueue<T> {
             this.startTimeout();
             return;
         }
-        const newQueue = new ThrottledQueue<T>(items => this.handler(group, items), {
+        const newQueue = new ThrottledQueue<T>((items) => this.handler(group, items), {
             maxDelay: this.itemDelay,
             emptyHandler: () => {
                 this.queues.delete(group);

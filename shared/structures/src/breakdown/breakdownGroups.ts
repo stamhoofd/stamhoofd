@@ -2,7 +2,12 @@ import type { BalanceItem, BalanceItemRelation, BalanceItemRelationType } from '
 import { getBalanceItemTypeIcon, getBalanceItemTypeName } from '../BalanceItem.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import type { PaymentAccount } from '../PaymentAccount.js';
-import { BreakdownAmountType, BreakdownGroup, BreakdownObjectType, BreakdownSelection } from '../PaymentBreakdown.js';
+import {
+    BreakdownAmountType,
+    BreakdownGroup,
+    BreakdownObjectType,
+    BreakdownSelection,
+} from '../PaymentBreakdown.js';
 import type { PaymentSettlementGroup } from '../PaymentSettlement.js';
 import { PaymentStatus } from '../PaymentStatus.js';
 import { TranslatedString } from '../TranslatedString.js';
@@ -14,17 +19,24 @@ import { toBalanceItemFilter } from './breakdownFilters.js';
  */
 export function getWholeAmount(item: BalanceItem, amountType: BreakdownAmountType): number {
     switch (amountType) {
-        case BreakdownAmountType.Paid: return item.pricePaid;
-        case BreakdownAmountType.Pending: return item.pricePending;
-        case BreakdownAmountType.Open: return item.priceOpen;
-        default: return item.payablePriceWithVAT;
+        case BreakdownAmountType.Paid:
+            return item.pricePaid;
+        case BreakdownAmountType.Pending:
+            return item.pricePending;
+        case BreakdownAmountType.Open:
+            return item.priceOpen;
+        default:
+            return item.payablePriceWithVAT;
     }
 }
 
 /**
  * Where the money of a row that is added up over payments lives.
  */
-export function createPaymentSelection(filter: StamhoofdFilter, amountType = BreakdownAmountType.Total): BreakdownSelection {
+export function createPaymentSelection(
+    filter: StamhoofdFilter,
+    amountType = BreakdownAmountType.Total,
+): BreakdownSelection {
     return BreakdownSelection.create({
         objectType: BreakdownObjectType.Payments,
         listObjectType: BreakdownObjectType.Payments,
@@ -36,7 +48,10 @@ export function createPaymentSelection(filter: StamhoofdFilter, amountType = Bre
 /**
  * Where the money of a row that is added up over balance items lives.
  */
-export function createBalanceItemSelection(filter: StamhoofdFilter, amountType = BreakdownAmountType.Total): BreakdownSelection {
+export function createBalanceItemSelection(
+    filter: StamhoofdFilter,
+    amountType = BreakdownAmountType.Total,
+): BreakdownSelection {
     return BreakdownSelection.create({
         objectType: BreakdownObjectType.BalanceItems,
         listObjectType: BreakdownObjectType.BalanceItems,
@@ -61,7 +76,10 @@ export function createNamedGroup(source: PaymentAccount | PaymentSettlementGroup
     });
 }
 
-export function createCategoryGroup(balanceItem: BalanceItem, amountType = BreakdownAmountType.Total): BreakdownGroup {
+export function createCategoryGroup(
+    balanceItem: BalanceItem,
+    amountType = BreakdownAmountType.Total,
+): BreakdownGroup {
     const relationType = balanceItem.categoryRelationType;
     const relation = relationType ? balanceItem.relations.get(relationType) : undefined;
     const relations = new Map<BalanceItemRelationType, BalanceItemRelation>();
@@ -99,7 +117,10 @@ export function createRoundingGroup(): BreakdownGroup {
         icon: 'calculator',
         // What a payment rounded away is a part of the payment itself, not of one of the things it
         // paid for
-        selection: createPaymentSelection({ roundingAmount: { $neq: 0 } }, BreakdownAmountType.Rounding),
+        selection: createPaymentSelection(
+            { roundingAmount: { $neq: 0 } },
+            BreakdownAmountType.Rounding,
+        ),
     });
 }
 
@@ -164,13 +185,18 @@ const HAS_FAILED_PAYMENT: StamhoofdFilter = toBalanceItemFilter({ status: Paymen
  * same ones: what tells them apart is how much of the open amount they hold, which is not something a
  * list of items can show (see BreakdownSelection.isListPartial).
  */
-const OPEN_AFTER_FAILED_ATTEMPT: StamhoofdFilter = { $and: [{ priceOpen: { $gt: 0 } }, HAS_FAILED_PAYMENT] };
+const OPEN_AFTER_FAILED_ATTEMPT: StamhoofdFilter = {
+    $and: [{ priceOpen: { $gt: 0 } }, HAS_FAILED_PAYMENT],
+};
 
 /**
  * A balance item doesn't carry how it was paid, so a row of the payout tab selects the items through
  * their payments.
  */
-export function createBalanceItemGroup(group: PaymentSettlementGroup, amountType: BreakdownAmountType): BreakdownGroup {
+export function createBalanceItemGroup(
+    group: PaymentSettlementGroup,
+    amountType: BreakdownAmountType,
+): BreakdownGroup {
     const result = createNamedGroup(group);
 
     result.selection = BreakdownSelection.create({
@@ -215,7 +241,10 @@ export function createOpenGroup(): BreakdownGroup {
         description: $t('%Zjj'),
         icon: 'label',
         canNarrowDown: true,
-        selection: createBalanceItemSelection({ $and: [{ priceOpen: { $gt: 0 } }, { $not: HAS_FAILED_PAYMENT }] }, BreakdownAmountType.Open),
+        selection: createBalanceItemSelection(
+            { $and: [{ priceOpen: { $gt: 0 } }, { $not: HAS_FAILED_PAYMENT }] },
+            BreakdownAmountType.Open,
+        ),
     });
 }
 

@@ -40,7 +40,7 @@ describe('TenantContext', () => {
 
         const observe = async (tenantId: string, delay: number) => {
             return await TenantContext.run(tenantId, async () => {
-                await new Promise(resolve => setTimeout(resolve, delay));
+                await new Promise((resolve) => setTimeout(resolve, delay));
                 seen.push(`${tenantId}:${TenantContext.current.tenantId}`);
                 return TenantContext.current.tenantId;
             });
@@ -69,13 +69,17 @@ describe('TenantContext', () => {
             other.id = 'context-tenant';
             other.periodId = root.periodId;
             other.config = PlatformConfig.create({
-                membershipTypes: [PlatformMembershipType.create({ id: 'ct', name: 'Context tenant type' })],
+                membershipTypes: [
+                    PlatformMembershipType.create({ id: 'ct', name: 'Context tenant type' }),
+                ],
             });
             await other.save();
 
             await TenantContext.run('context-tenant', async () => {
                 const struct = await TenantContext.current.getStruct();
-                expect(struct.config.membershipTypes.map(m => m.name)).toEqual(['Context tenant type']);
+                expect(struct.config.membershipTypes.map((m) => m.name)).toEqual([
+                    'Context tenant type',
+                ]);
                 expect(struct.privateConfig).toBeNull();
 
                 const privateStruct = await TenantContext.current.getPrivateStruct();

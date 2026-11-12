@@ -9,10 +9,20 @@ import { SessionService } from '../../src/services/SessionService.js';
 /**
  * You cannot assign access rights directy to a user, but it can be done using roles. So when setting accessRights, a role wil be created and assigned to the user.
  */
-export async function initAdmin({ organization, permissions, accessRights }: { organization: Organization; permissions?: Permissions; accessRights?: AccessRight[] }) {
-    permissions = permissions ?? Permissions.create({
-        level: accessRights === undefined ? PermissionLevel.Full : PermissionLevel.None,
-    });
+export async function initAdmin({
+    organization,
+    permissions,
+    accessRights,
+}: {
+    organization: Organization;
+    permissions?: Permissions;
+    accessRights?: AccessRight[];
+}) {
+    permissions =
+        permissions ??
+        Permissions.create({
+            level: accessRights === undefined ? PermissionLevel.Full : PermissionLevel.None,
+        });
 
     if (accessRights) {
         const role = await initPermissionRole({

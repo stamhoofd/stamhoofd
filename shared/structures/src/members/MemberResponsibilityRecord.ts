@@ -45,7 +45,11 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
         return AuditLogReplacement.uuid(this.responsibilityId);
     }
 
-    getAutoRemoveDate(registrations: Registration[], currentPeriod: { id: string; startDate: Date; endDate: Date }, platformResponsibilityIds: string[]): Date | null {
+    getAutoRemoveDate(
+        registrations: Registration[],
+        currentPeriod: { id: string; startDate: Date; endDate: Date },
+        platformResponsibilityIds: string[],
+    ): Date | null {
         const now = new Date();
 
         // Rule A: Global (not organization-scoped) responsibilities are never auto-removed
@@ -71,7 +75,11 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
             if (registration.group.periodId !== currentPeriod.id) {
                 return false; // other period
             }
-            if (STAMHOOFD.userMode === 'platform' && platformResponsibilityIds.includes(this.responsibilityId) && registration.group.defaultAgeGroupId === null) {
+            if (
+                STAMHOOFD.userMode === 'platform' &&
+                platformResponsibilityIds.includes(this.responsibilityId) &&
+                registration.group.defaultAgeGroupId === null
+            ) {
                 return false; // not a group tracked by platform
             }
             return true;
@@ -83,19 +91,32 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
                 continue;
             }
 
-            if ((registration.endDate === null || registration.endDate >= now) && registration.deactivatedAt === null) {
+            if (
+                (registration.endDate === null || registration.endDate >= now) &&
+                registration.deactivatedAt === null
+            ) {
                 if (registration.group.deletedAt === null) {
                     return null; // Rule C: records from members with an active registration (ongoing or not yet ended) are never auto-removed
-                } else if (endDate === null || registration.group.deletedAt.getTime() > endDate.getTime()) {
+                } else if (
+                    endDate === null ||
+                    registration.group.deletedAt.getTime() > endDate.getTime()
+                ) {
                     endDate = registration.group.deletedAt; // Rule D1: an active registration whose group was deleted, makes the group's deletion date the end date
                 }
             }
 
-            if (registration.deactivatedAt && (endDate === null || registration.deactivatedAt.getTime() > endDate.getTime())) {
+            if (
+                registration.deactivatedAt &&
+                (endDate === null || registration.deactivatedAt.getTime() > endDate.getTime())
+            ) {
                 endDate = registration.deactivatedAt; // Rule D2: end date can be the latest registration date (via deactivatedAt)
             }
 
-            if (registration.endDate && registration.endDate < now && (endDate === null || registration.endDate.getTime() > endDate.getTime())) {
+            if (
+                registration.endDate &&
+                registration.endDate < now &&
+                (endDate === null || registration.endDate.getTime() > endDate.getTime())
+            ) {
                 endDate = registration.endDate; // Rule D3: end date can be the latest registration date (via endDate)
             }
         }
@@ -111,7 +132,10 @@ export class MemberResponsibilityRecordBase extends AutoEncoder {
         endDate = new Date(endDate.getTime() + AUTO_REMOVE_GRACE_MS);
 
         for (const graceStart of [currentPeriod.startDate, currentPeriod.endDate]) {
-            if (graceStart.getTime() <= endDate.getTime() && endDate.getTime() <= graceStart.getTime() + PERIOD_GRACE_MS) {
+            if (
+                graceStart.getTime() <= endDate.getTime() &&
+                endDate.getTime() <= graceStart.getTime() + PERIOD_GRACE_MS
+            ) {
                 // Rule E: if the end date falls within 60 days after the start or end of the current period, extend it to the end of that window
                 endDate = new Date(graceStart.getTime() + PERIOD_GRACE_MS);
             }
@@ -128,12 +152,15 @@ export class MemberResponsibilityRecord extends MemberResponsibilityRecordBase {
     getName(member: PlatformMember, includeOrganization = true) {
         let allResponsibilities = member.family.platform.config.responsibilities;
 
-        let suffix = (this.group ? ' ' + $t('%wR') + ' ' + this.group.settings.name : '');
+        let suffix = this.group ? ' ' + $t('%wR') + ' ' + this.group.settings.name : '';
 
         if (this.organizationId) {
             const organization = member.family.getOrganization(this.organizationId);
             if (organization && organization.privateMeta) {
-                allResponsibilities = [...allResponsibilities, ...organization.privateMeta.responsibilities];
+                allResponsibilities = [
+                    ...allResponsibilities,
+                    ...organization.privateMeta.responsibilities,
+                ];
             }
 
             if (organization && includeOrganization) {
@@ -141,7 +168,7 @@ export class MemberResponsibilityRecord extends MemberResponsibilityRecordBase {
             }
         }
 
-        const responsibility = allResponsibilities.find(r => r.id == this.responsibilityId);
+        const responsibility = allResponsibilities.find((r) => r.id == this.responsibilityId);
         return (responsibility ? responsibility.name : $t('%qZ')) + suffix;
     }
 }

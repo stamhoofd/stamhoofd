@@ -25,8 +25,11 @@ export async function setup(project: TestProject) {
     await run();
 
     const { I18n } = await import('@stamhoofd/backend-i18n');
-    const locales: ApiLocales = [...I18n.loadedLocales].map(([locale, messages]) => [locale, [...messages]]);
+    const locales: ApiLocales = [...I18n.loadedLocales].map(([locale, messages]) => [
+        locale,
+        [...messages],
+    ]);
     project.provide('apiLocales', locales);
 
     await Database.end();
-};
+}

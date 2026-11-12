@@ -1,7 +1,19 @@
 import { column, Database } from '@node/database';
 import type { SQLWhere } from '@stamhoofd/sql';
-import { QueryableModel, SQL, SQLAlias, SQLMin, SQLSelectAs, SQLSum, SQLWhereSign } from '@stamhoofd/sql';
-import { BalanceItemStatus, BalanceItem as BalanceItemStruct, ReceivableBalanceType } from '@stamhoofd/structures';
+import {
+    QueryableModel,
+    SQL,
+    SQLAlias,
+    SQLMin,
+    SQLSelectAs,
+    SQLSum,
+    SQLWhereSign,
+} from '@stamhoofd/sql';
+import {
+    BalanceItemStatus,
+    BalanceItem as BalanceItemStruct,
+    ReceivableBalanceType,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem } from './BalanceItem.js';
@@ -14,7 +26,9 @@ export class CachedBalance extends QueryableModel {
     static table = 'cached_outstanding_balances';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -63,7 +77,8 @@ export class CachedBalance extends QueryableModel {
     reminderEmailCount = 0;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -75,7 +90,8 @@ export class CachedBalance extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -84,13 +100,16 @@ export class CachedBalance extends QueryableModel {
     })
     updatedAt: Date;
 
-    static async getForObjects(objectIds: string[], limitOrganizationId?: string | null, objectType?: ReceivableBalanceType): Promise<CachedBalance[]> {
+    static async getForObjects(
+        objectIds: string[],
+        limitOrganizationId?: string | null,
+        objectType?: ReceivableBalanceType,
+    ): Promise<CachedBalance[]> {
         if (objectIds.length === 0) {
             return [];
         }
 
-        const query = this.select()
-            .where('objectId', objectIds);
+        const query = this.select().where('objectId', objectIds);
 
         if (limitOrganizationId) {
             query.where('organizationId', limitOrganizationId);
@@ -141,8 +160,9 @@ export class CachedBalance extends QueryableModel {
                 // the balances of all members linked to that user, so it is only orphaned when
                 // neither of those exists.
                 objectType: ReceivableBalanceType.user,
-                condition: `NOT EXISTS (SELECT 1 FROM \`${biTable}\` bi WHERE bi.organizationId = cb.organizationId AND bi.userId = cb.objectId AND bi.memberId IS NULL)`
-                    + ` AND NOT EXISTS (SELECT 1 FROM \`${memberUserTable}\` mu JOIN \`${biTable}\` bi2 ON bi2.memberId = mu.membersId AND bi2.organizationId = cb.organizationId WHERE mu.usersId = cb.objectId)`,
+                condition:
+                    `NOT EXISTS (SELECT 1 FROM \`${biTable}\` bi WHERE bi.organizationId = cb.organizationId AND bi.userId = cb.objectId AND bi.memberId IS NULL)` +
+                    ` AND NOT EXISTS (SELECT 1 FROM \`${memberUserTable}\` mu JOIN \`${biTable}\` bi2 ON bi2.memberId = mu.membersId AND bi2.organizationId = cb.organizationId WHERE mu.usersId = cb.objectId)`,
             },
         ];
 
@@ -159,7 +179,11 @@ export class CachedBalance extends QueryableModel {
         return deleted;
     }
 
-    static async updateForObjects(organizationId: string, objectIds: string[], objectType: ReceivableBalanceType) {
+    static async updateForObjects(
+        organizationId: string,
+        objectIds: string[],
+        objectType: ReceivableBalanceType,
+    ) {
         if (objectIds.length === 0) {
             return;
         }
@@ -181,7 +205,11 @@ export class CachedBalance extends QueryableModel {
         }
     }
 
-    static async balanceForObjects(organizationId: string, objectIds: string[], objectType: ReceivableBalanceType) {
+    static async balanceForObjects(
+        organizationId: string,
+        objectIds: string[],
+        objectType: ReceivableBalanceType,
+    ) {
         if (objectIds.length === 0) {
             return [];
         }
@@ -200,14 +228,22 @@ export class CachedBalance extends QueryableModel {
         }
     }
 
-    private static async fetchBalanceItems(organizationId: string, objectIds: string[], columnName: string, customWhere?: SQLWhere) {
+    private static async fetchBalanceItems(
+        organizationId: string,
+        objectIds: string[],
+        columnName: string,
+        customWhere?: SQLWhere,
+    ) {
         const query = BalanceItem.select()
             .where('organizationId', organizationId)
             .where(columnName, objectIds)
             .whereNot('status', BalanceItemStatus.Hidden)
             .where(
-                SQL.where(SQL.column('priceOpen'), SQLWhereSign.NotEqual, 0)
-                    .or('pricePending', SQLWhereSign.NotEqual, 0),
+                SQL.where(SQL.column('priceOpen'), SQLWhereSign.NotEqual, 0).or(
+                    'pricePending',
+                    SQLWhereSign.NotEqual,
+                    0,
+                ),
             );
 
         if (customWhere) {
@@ -221,26 +257,19 @@ export class CachedBalance extends QueryableModel {
         return SQL.where('nextDueAt', SQLWhereSign.LessEqual, BalanceItemStruct.getDueOffset());
     }
 
-    private static async fetchForObjects(organizationId: string, objectIds: string[], columnName: string, customWhere?: SQLWhere) {
+    private static async fetchForObjects(
+        organizationId: string,
+        objectIds: string[],
+        columnName: string,
+        customWhere?: SQLWhere,
+    ) {
         const dueOffset = BalanceItemStruct.getDueOffset();
         const query = SQL.select(
             SQL.column(columnName),
+            new SQLSelectAs(new SQLSum(SQL.column('pricePaid')), new SQLAlias('data__amountPaid')),
+            new SQLSelectAs(new SQLSum(SQL.column('priceOpen')), new SQLAlias('data__amountOpen')),
             new SQLSelectAs(
-                new SQLSum(
-                    SQL.column('pricePaid'),
-                ),
-                new SQLAlias('data__amountPaid'),
-            ),
-            new SQLSelectAs(
-                new SQLSum(
-                    SQL.column('priceOpen'),
-                ),
-                new SQLAlias('data__amountOpen'),
-            ),
-            new SQLSelectAs(
-                new SQLSum(
-                    SQL.column('pricePending'),
-                ),
+                new SQLSum(SQL.column('pricePending')),
                 new SQLAlias('data__amountPending'),
             ),
         )
@@ -260,29 +289,12 @@ export class CachedBalance extends QueryableModel {
         // Calculate future due
         const dueQuery = SQL.select(
             SQL.column(columnName),
-            new SQLSelectAs(
-                new SQLMin(
-                    SQL.column('dueAt'),
-                ),
-                new SQLAlias('data__dueAt'),
-            ),
+            new SQLSelectAs(new SQLMin(SQL.column('dueAt')), new SQLAlias('data__dueAt')),
             // If the current amount_due is negative, we can ignore that negative part if there is a future due item
+            new SQLSelectAs(new SQLSum(SQL.column('pricePaid')), new SQLAlias('data__amountPaid')),
+            new SQLSelectAs(new SQLSum(SQL.column('priceOpen')), new SQLAlias('data__amountOpen')),
             new SQLSelectAs(
-                new SQLSum(
-                    SQL.column('pricePaid'),
-                ),
-                new SQLAlias('data__amountPaid'),
-            ),
-            new SQLSelectAs(
-                new SQLSum(
-                    SQL.column('priceOpen'),
-                ),
-                new SQLAlias('data__amountOpen'),
-            ),
-            new SQLSelectAs(
-                new SQLSum(
-                    SQL.column('pricePending'),
-                ),
+                new SQLSum(SQL.column('pricePending')),
                 new SQLAlias('data__amountPending'),
             ),
         )
@@ -300,7 +312,15 @@ export class CachedBalance extends QueryableModel {
 
         const dueResult = await dueQuery.fetch();
 
-        const results: [string, { amountPaid: number; amountOpen: number; amountPending: number; nextDueAt: Date | null }][] = [];
+        const results: [
+            string,
+            {
+                amountPaid: number;
+                amountOpen: number;
+                amountPending: number;
+                nextDueAt: Date | null;
+            },
+        ][] = [];
         for (const row of result) {
             if (!row['data']) {
                 throw new Error('Invalid data namespace');
@@ -369,7 +389,7 @@ export class CachedBalance extends QueryableModel {
                 throw new Error('Invalid amountPaid');
             }
 
-            const result = results.find(r => r[0] === objectId);
+            const result = results.find((r) => r[0] === objectId);
             if (result) {
                 if (amountOpen !== 0) {
                     result[1].nextDueAt = dueAt;
@@ -385,21 +405,44 @@ export class CachedBalance extends QueryableModel {
                 result[1].amountPending += amountPending;
                 result[1].amountPaid += amountPaid;
             } else {
-                results.push([objectId, { amountPaid, amountOpen: 0, amountPending, nextDueAt: amountOpen !== 0 ? dueAt : null }]);
+                results.push([
+                    objectId,
+                    {
+                        amountPaid,
+                        amountOpen: 0,
+                        amountPending,
+                        nextDueAt: amountOpen !== 0 ? dueAt : null,
+                    },
+                ]);
             }
         }
 
         // Add missing object ids (with 0 amount, otherwise we don't reset the amounts back to zero when all the balance items are hidden)
         for (const objectId of objectIds) {
             if (!results.find(([id]) => id === objectId)) {
-                results.push([objectId, { amountPaid: 0, amountOpen: 0, amountPending: 0, nextDueAt: null }]);
+                results.push([
+                    objectId,
+                    { amountPaid: 0, amountOpen: 0, amountPending: 0, nextDueAt: null },
+                ]);
             }
         }
 
         return results;
     }
 
-    private static async setForResults(organizationId: string, result: [string, { amountPaid: number; amountOpen: number; amountPending: number; nextDueAt: null | Date }][], objectType: ReceivableBalanceType) {
+    private static async setForResults(
+        organizationId: string,
+        result: [
+            string,
+            {
+                amountPaid: number;
+                amountOpen: number;
+                amountPending: number;
+                nextDueAt: null | Date;
+            },
+        ][],
+        objectType: ReceivableBalanceType,
+    ) {
         if (result.length === 0) {
             return;
         }
@@ -417,21 +460,25 @@ export class CachedBalance extends QueryableModel {
                 'updatedAt',
                 'reminderEmailCount',
             )
-            .values(...result.map(([objectId, { amountPaid, amountOpen, amountPending, nextDueAt }]) => {
-                return [
-                    uuidv4(),
-                    organizationId,
-                    objectId,
-                    objectType,
-                    amountPaid,
-                    amountOpen,
-                    amountPending,
-                    nextDueAt,
-                    new Date(),
-                    new Date(),
-                    0,
-                ];
-            }))
+            .values(
+                ...result.map(
+                    ([objectId, { amountPaid, amountOpen, amountPending, nextDueAt }]) => {
+                        return [
+                            uuidv4(),
+                            organizationId,
+                            objectId,
+                            objectType,
+                            amountPaid,
+                            amountOpen,
+                            amountPending,
+                            nextDueAt,
+                            new Date(),
+                            new Date(),
+                            0,
+                        ];
+                    },
+                ),
+            )
             .as('v')
             .onDuplicateKeyUpdate(
                 SQL.assignment('amountPaid', SQL.column('v', 'amountPaid')),
@@ -464,7 +511,11 @@ export class CachedBalance extends QueryableModel {
         if (organizationIds.length === 0) {
             return [];
         }
-        const results = await this.fetchForObjects(organizationId, organizationIds, 'payingOrganizationId');
+        const results = await this.fetchForObjects(
+            organizationId,
+            organizationIds,
+            'payingOrganizationId',
+        );
         await this.setForResults(organizationId, results, ReceivableBalanceType.organization);
 
         return results;
@@ -482,7 +533,11 @@ export class CachedBalance extends QueryableModel {
         if (registrationIds.length === 0) {
             return;
         }
-        const results = await this.fetchForObjects(organizationId, registrationIds, 'registrationId');
+        const results = await this.fetchForObjects(
+            organizationId,
+            registrationIds,
+            'registrationId',
+        );
         await this.setForResults(organizationId, results, ReceivableBalanceType.registration);
     }
 
@@ -502,11 +557,15 @@ export class CachedBalance extends QueryableModel {
 
         // Fetch members of these users
         const memberUsers = await MemberUser.select().where('usersId', userIds).fetch();
-        const memberIds = memberUsers.map(mu => mu.membersId);
+        const memberIds = memberUsers.map((mu) => mu.membersId);
         const memberCachedBalances = await this.getForObjects(memberIds, organizationId);
 
         for (const memberCachedBalance of memberCachedBalances) {
-            const userIds = Formatter.uniqueArray(memberUsers.filter(mu => mu.membersId === memberCachedBalance.objectId).map(mu => mu.usersId));
+            const userIds = Formatter.uniqueArray(
+                memberUsers
+                    .filter((mu) => mu.membersId === memberCachedBalance.objectId)
+                    .map((mu) => mu.usersId),
+            );
 
             for (const userId of userIds) {
                 // if already in results: append
@@ -516,7 +575,11 @@ export class CachedBalance extends QueryableModel {
                     result[1].amountPaid += memberCachedBalance.amountPaid;
                     result[1].amountOpen += memberCachedBalance.amountOpen;
                     result[1].amountPending += memberCachedBalance.amountPending;
-                    if (memberCachedBalance.nextDueAt && (!result[1].nextDueAt || memberCachedBalance.nextDueAt < result[1].nextDueAt)) {
+                    if (
+                        memberCachedBalance.nextDueAt &&
+                        (!result[1].nextDueAt ||
+                            memberCachedBalance.nextDueAt < result[1].nextDueAt)
+                    ) {
                         result[1].nextDueAt = memberCachedBalance.nextDueAt;
                     }
                 } else {
@@ -534,7 +597,11 @@ export class CachedBalance extends QueryableModel {
         if (organizationIds.length === 0) {
             return [];
         }
-        return await this.fetchBalanceItems(organizationId, organizationIds, 'payingOrganizationId');
+        return await this.fetchBalanceItems(
+            organizationId,
+            organizationIds,
+            'payingOrganizationId',
+        );
     }
 
     static async balanceForMembers(organizationId: string, memberIds: string[]) {
@@ -544,18 +611,27 @@ export class CachedBalance extends QueryableModel {
         return await this.fetchBalanceItems(organizationId, memberIds, 'memberId');
     }
 
-    static async balanceForUsers(organizationId: string, userIds: string[], includeUserMembers = false) {
+    static async balanceForUsers(
+        organizationId: string,
+        userIds: string[],
+        includeUserMembers = false,
+    ) {
         if (userIds.length === 0) {
             return [];
         }
-        const base = await this.fetchBalanceItems(organizationId, userIds, 'userId', SQL.where('memberId', null));
+        const base = await this.fetchBalanceItems(
+            organizationId,
+            userIds,
+            'userId',
+            SQL.where('memberId', null),
+        );
 
         if (!includeUserMembers) {
             return base;
         }
 
         const memberUsers = await MemberUser.select().where('usersId', userIds).fetch();
-        const memberIds = Formatter.uniqueArray(memberUsers.map(mu => mu.membersId));
+        const memberIds = Formatter.uniqueArray(memberUsers.map((mu) => mu.membersId));
         const memberCachedBalances = await this.balanceForMembers(organizationId, memberIds);
         return base.concat(memberCachedBalances);
     }

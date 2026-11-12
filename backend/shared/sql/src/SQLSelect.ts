@@ -1,9 +1,21 @@
 import type { SQLResultNamespacedRow } from '@node/database';
 import { Database } from '@node/database';
 import { Formatter } from '@stamhoofd/utility';
-import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
+import type {
+    SQLExpression,
+    SQLExpressionOptions,
+    SQLNamedExpression,
+    SQLQuery,
+} from './SQLExpression.js';
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
-import { SQLAlias, SQLColumnExpression, SQLCount, SQLSelectAs, SQLSum, SQLTableExpression } from './SQLExpressions.js';
+import {
+    SQLAlias,
+    SQLColumnExpression,
+    SQLCount,
+    SQLSelectAs,
+    SQLSum,
+    SQLTableExpression,
+} from './SQLExpressions.js';
 import type { SQLJoinExpression } from './SQLQueryContracts.js';
 import { SQLSelectBase } from './SQLQueryContracts.js';
 import { SQLLogger } from './SQLLogger.js';
@@ -11,7 +23,10 @@ import { Orderable } from './SQLOrderBy.js';
 import type { SQLWhere } from './SQLWhere.js';
 import { Whereable } from './SQLWhere.js';
 
-export function parseTable(tableOrExpression: SQLNamedExpression | string, asNamespace?: string): SQLNamedExpression {
+export function parseTable(
+    tableOrExpression: SQLNamedExpression | string,
+    asNamespace?: string,
+): SQLNamedExpression {
     if (typeof tableOrExpression === 'string') {
         return new SQLTableExpression(tableOrExpression, asNamespace);
     } else {
@@ -19,7 +34,10 @@ export function parseTable(tableOrExpression: SQLNamedExpression | string, asNam
     }
 }
 
-export type IterableSQLSelect<T extends object = SQLResultNamespacedRow> = AsyncIterableIterator<T, undefined> & {
+export type IterableSQLSelect<T extends object = SQLResultNamespacedRow> = AsyncIterableIterator<
+    T,
+    undefined
+> & {
     isDone: boolean;
     options: IterableSQLSelectOptions;
     maxQueries(maxQueries: number): IterableSQLSelect<T>;
@@ -32,9 +50,14 @@ export type IterableSQLSelectOptions = {
     nextEachHook?: () => void;
 };
 
-export type SQLNamedSelect<T extends object = SQLResultNamespacedRow> = SQLSelect<T> & { getName(): string };
+export type SQLNamedSelect<T extends object = SQLResultNamespacedRow> = SQLSelect<T> & {
+    getName(): string;
+};
 
-export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Whereable(Orderable(SQLSelectBase)) implements SQLExpression {
+export class SQLSelect<T extends object = SQLResultNamespacedRow>
+    extends Whereable(Orderable(SQLSelectBase))
+    implements SQLExpression
+{
     _columns: SQLExpression[];
     _from: SQLNamedExpression;
 
@@ -57,14 +80,19 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     _transformer: ((row: SQLResultNamespacedRow) => T) | null = null;
 
     constructor(...columns: (SQLExpression | string)[]);
-    constructor(transformer: ((row: SQLResultNamespacedRow) => T), ...columns: (SQLExpression | string)[]);
+    constructor(
+        transformer: (row: SQLResultNamespacedRow) => T,
+        ...columns: (SQLExpression | string)[]
+    );
     constructor(...columns: (SQLExpression | string | ((row: SQLResultNamespacedRow) => T))[]) {
         super();
 
         if (typeof columns[0] === 'function') {
             this._transformer = columns.shift() as any;
         }
-        this._columns = columns.map(c => typeof c === 'string' ? new SQLColumnExpression(c) : c) as any;
+        this._columns = columns.map((c) =>
+            typeof c === 'string' ? new SQLColumnExpression(c) : c,
+        ) as any;
     }
 
     log() {
@@ -94,7 +122,9 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     }
 
     select(...columns: (SQLExpression | string)[]): this {
-        this._columns.push(...columns.map(c => typeof c === 'string' ? new SQLColumnExpression(c) : c));
+        this._columns.push(
+            ...columns.map((c) => (typeof c === 'string' ? new SQLColumnExpression(c) : c)),
+        );
         return this;
     }
 
@@ -132,9 +162,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
             throw new Error('Forgot to define .from(...) for SQLSelect');
         }
 
-        const query: SQLQuery[] = [
-            'SELECT',
-        ];
+        const query: SQLQuery[] = ['SELECT'];
 
         if (this._max_execution_time !== null) {
             query.push('/*+ MAX_EXECUTION_TIME(' + this._max_execution_time + ') */');
@@ -149,22 +177,20 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
             options.parentNamespace = parentOptions.defaultNamespace;
         }
 
-        const columns = this._columns.map(c => c.getSQL(options));
-        query.push(
-            joinSQLQuery(columns, ', '),
-        );
+        const columns = this._columns.map((c) => c.getSQL(options));
+        query.push(joinSQLQuery(columns, ', '));
 
-        query.push(
-            'FROM',
-        );
+        query.push('FROM');
 
         query.push(this._from.getSQL(options));
 
         // Joins
-        query.push(...this._joins.map(j => j.getSQL(options)));
+        query.push(...this._joins.map((j) => j.getSQL(options)));
         if (this._where) {
-            const whereJoins = Formatter.uniqueArray(this._where.getJoins()).filter(j => !this._joins.includes(j));
-            query.push(...whereJoins.map(j => j.getSQL(options)));
+            const whereJoins = Formatter.uniqueArray(this._where.getJoins()).filter(
+                (j) => !this._joins.includes(j),
+            );
+            query.push(...whereJoins.map((j) => j.getSQL(options)));
         }
 
         // Where
@@ -182,7 +208,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
             query.push('GROUP BY');
             query.push(
                 joinSQLQuery(
-                    this._groupBy.map(c => c.getSQL(options)),
+                    this._groupBy.map((c) => c.getSQL(options)),
                     ', ',
                 ),
             );
@@ -245,7 +271,11 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         // console.log(query, params);
         let rows: SQLResultNamespacedRow[];
         try {
-            const [_rows] = await SQLLogger.log(Database.select(query, params, { nestTables: true }), query, params);
+            const [_rows] = await SQLLogger.log(
+                Database.select(query, params, { nestTables: true }),
+                query,
+                params,
+            );
             rows = _rows;
         } catch (e) {
             console.error('Error executing SQL query', query, params, e);
@@ -298,19 +328,18 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
             return 0;
         }
 
-        this._columns = [
-            new SQLSelectAs(
-                new SQLCount(expression ?? null),
-                new SQLAlias('c'),
-            ),
-        ];
+        this._columns = [new SQLSelectAs(new SQLCount(expression ?? null), new SQLAlias('c'))];
         this._offset = null;
         this._limit = null;
         this._orderBy = null;
 
         const { query, params } = normalizeSQLQuery(this.getSQL());
 
-        const [rows] = await SQLLogger.log(Database.select(query, params, { nestTables: true }), query, params);
+        const [rows] = await SQLLogger.log(
+            Database.select(query, params, { nestTables: true }),
+            query,
+            params,
+        );
         if (rows.length === 1) {
             const row = rows[0];
             if ('' in row) {
@@ -333,12 +362,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
             return 0;
         }
 
-        this._columns = [
-            new SQLSelectAs(
-                new SQLSum(expression),
-                new SQLAlias('c'),
-            ),
-        ];
+        this._columns = [new SQLSelectAs(new SQLSum(expression), new SQLAlias('c'))];
         this._offset = null;
         this._limit = null;
         this._orderBy = null;
@@ -346,7 +370,11 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
         const { query, params } = normalizeSQLQuery(this.getSQL());
         // console.log(query, params);
 
-        const [rows] = await SQLLogger.log(Database.select(query, params, { nestTables: true }), query, params);
+        const [rows] = await SQLLogger.log(
+            Database.select(query, params, { nestTables: true }),
+            query,
+            params,
+        );
         if (rows.length === 1) {
             const row = rows[0];
             if ('' in row) {
@@ -369,10 +397,18 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
      * maxQueries caps database queries, not the number of rows.
      */
     all(options?: IterableSQLSelectOptions): IterableSQLSelect<T>;
-    all<PrimaryKey extends keyof T & string>(options: IterableSQLSelectOptions, primaryKey: PrimaryKey): T extends Record<PrimaryKey, string> ? IterableSQLSelect<T> : never;
-    all<PrimaryKey extends keyof T & string>(options: IterableSQLSelectOptions = {}, preferredPrimaryKey?: PrimaryKey) {
+    all<PrimaryKey extends keyof T & string>(
+        options: IterableSQLSelectOptions,
+        primaryKey: PrimaryKey,
+    ): T extends Record<PrimaryKey, string> ? IterableSQLSelect<T> : never;
+    all<PrimaryKey extends keyof T & string>(
+        options: IterableSQLSelectOptions = {},
+        preferredPrimaryKey?: PrimaryKey,
+    ) {
         if (this._orderBy) {
-            throw new Error('Cannot use async iterator with custom order by. Results should be ordered by ID');
+            throw new Error(
+                'Cannot use async iterator with custom order by. Results should be ordered by ID',
+            );
         }
 
         if (this._offset !== null) {
@@ -405,7 +441,7 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                 };
             },
             get isDone() {
-                return !next && (stackIndex + 1) >= stack.length;
+                return !next && stackIndex + 1 >= stack.length;
             },
             async next(): Promise<IteratorResult<T, undefined>> {
                 stackIndex++;
@@ -426,7 +462,10 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                     };
                 }
 
-                if (this.options.maxQueries !== undefined && this.queryCount >= this.options.maxQueries) {
+                if (
+                    this.options.maxQueries !== undefined &&
+                    this.queryCount >= this.options.maxQueries
+                ) {
                     // Stopping early
                     return {
                         done: true,
@@ -450,12 +489,16 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                     next = base.clone();
                     const lastResult = stack[stack.length - 1]!;
                     if (!(primaryKey in lastResult)) {
-                        throw new Error('Cannot use async iterator without ' + primaryKey + ' column');
+                        throw new Error(
+                            'Cannot use async iterator without ' + primaryKey + ' column',
+                        );
                     }
 
                     const lastId = lastResult[primaryKey as keyof T];
                     if (typeof lastId !== 'string') {
-                        throw new Error('Cannot use async iterator without string ' + primaryKey + ' column');
+                        throw new Error(
+                            'Cannot use async iterator without string ' + primaryKey + ' column',
+                        );
                     }
 
                     next.andWhere(primaryKey, '>', lastId);
@@ -477,7 +520,9 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
     /** Same pagination constraints as all(), but yields arrays of up to limit rows (default 100). */
     allBatched(options: IterableSQLSelectOptions = {}): IterableSQLSelect<T[]> {
         if (this._orderBy) {
-            throw new Error('Cannot use async iterator with custom order by. Results should be ordered by ID');
+            throw new Error(
+                'Cannot use async iterator with custom order by. Results should be ordered by ID',
+            );
         }
 
         if (this._offset !== null) {
@@ -517,7 +562,10 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                     };
                 }
 
-                if (this.options.maxQueries !== undefined && this.queryCount >= this.options.maxQueries) {
+                if (
+                    this.options.maxQueries !== undefined &&
+                    this.queryCount >= this.options.maxQueries
+                ) {
                     // Stopping early
                     return {
                         done: true,
@@ -540,12 +588,16 @@ export class SQLSelect<T extends object = SQLResultNamespacedRow> extends Wherea
                     next = base.clone();
                     const lastResult = stack[stack.length - 1]!;
                     if (!(primaryKey in lastResult)) {
-                        throw new Error('Cannot use async iterator without ' + primaryKey + ' column');
+                        throw new Error(
+                            'Cannot use async iterator without ' + primaryKey + ' column',
+                        );
                     }
 
                     const lastId = lastResult[primaryKey as keyof T];
                     if (typeof lastId !== 'string') {
-                        throw new Error('Cannot use async iterator without string ' + primaryKey + ' column');
+                        throw new Error(
+                            'Cannot use async iterator without string ' + primaryKey + ' column',
+                        );
                     }
 
                     next.andWhere(primaryKey, '>', lastId);

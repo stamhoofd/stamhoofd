@@ -16,7 +16,9 @@ export class GetMailchimpSyncEndpoint extends Endpoint<Params, Query, Body, Resp
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/mailchimp/syncs/@id', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/mailchimp/syncs/@id', {
+            id: String,
+        });
 
         if (params) {
             return [true, params as Params];

@@ -9,9 +9,12 @@ const baseTable = SQL.table(MemberResponsibilityRecord.table);
  */
 export const memberResponsibilityRecordFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    ['responsibilityId', createColumnFilter({
-        expression: SQL.column(baseTable, 'responsibilityId'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
+    [
+        'responsibilityId',
+        createColumnFilter({
+            expression: SQL.column(baseTable, 'responsibilityId'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
 ]);

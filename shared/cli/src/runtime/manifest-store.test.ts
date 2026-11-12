@@ -4,7 +4,12 @@ import os from 'node:os';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { CliContext } from '../context/create-context.js';
 import type { RouteManifestInput } from './manifest-store.js';
-import { listActiveRouteManifests, listInstanceManifests, removeOwnRouteManifests, writeRouteManifest } from './manifest-store.js';
+import {
+    listActiveRouteManifests,
+    listInstanceManifests,
+    removeOwnRouteManifests,
+    writeRouteManifest,
+} from './manifest-store.js';
 
 describe('manifest store', () => {
     afterEach(() => {
@@ -21,22 +26,29 @@ describe('manifest store', () => {
         const context = await testContext();
         const instancesDir = path.join(context.generatedDir, 'instances');
         await fs.mkdir(instancesDir, { recursive: true });
-        await fs.writeFile(path.join(instancesDir, 'valid.json'), JSON.stringify({
-            name: 'main',
-            env: 'stamhoofd',
-            workspace: 'main',
-            primary: true,
-            prefix: '',
-            portOffset: 0,
-            startedAt: '2026-01-01T00:00:00.000Z',
-            rootPath: '/repo',
-            domains: {
-                dashboard: 'dashboard.stamhoofd',
-                api: 'api.stamhoofd',
-                renderer: 'renderer.stamhoofd',
-            },
-            ports: {},
-        }, null, 4));
+        await fs.writeFile(
+            path.join(instancesDir, 'valid.json'),
+            JSON.stringify(
+                {
+                    name: 'main',
+                    env: 'stamhoofd',
+                    workspace: 'main',
+                    primary: true,
+                    prefix: '',
+                    portOffset: 0,
+                    startedAt: '2026-01-01T00:00:00.000Z',
+                    rootPath: '/repo',
+                    domains: {
+                        dashboard: 'dashboard.stamhoofd',
+                        api: 'api.stamhoofd',
+                        renderer: 'renderer.stamhoofd',
+                    },
+                    ports: {},
+                },
+                null,
+                4,
+            ),
+        );
         await fs.writeFile(path.join(instancesDir, 'broken.json'), '{broken');
         const warnings: string[] = [];
         const writeOutputLine = vi.fn((message: string) => {
@@ -61,15 +73,23 @@ describe('manifest store', () => {
 
     it('ignores and removes expired route manifests', async () => {
         const context = await testContext();
-        await writeRouteManifest(context, routeManifest({ expiresAt: new Date(Date.now() - 60_000) }));
+        await writeRouteManifest(
+            context,
+            routeManifest({ expiresAt: new Date(Date.now() - 60_000) }),
+        );
 
         await expect(listActiveRouteManifests(context)).resolves.toEqual([]);
-        await expect(fs.stat(path.join(context.generatedDir, 'instances', 'playwright-worker-0.json'))).rejects.toMatchObject({ code: 'ENOENT' });
+        await expect(
+            fs.stat(path.join(context.generatedDir, 'instances', 'playwright-worker-0.json')),
+        ).rejects.toMatchObject({ code: 'ENOENT' });
     });
 
     it('ignores and removes route manifests with a dead pid', async () => {
         const context = await testContext();
-        vi.spyOn(process, 'kill').mockImplementation(((pid: number, signal?: NodeJS.Signals | number) => {
+        vi.spyOn(process, 'kill').mockImplementation(((
+            pid: number,
+            signal?: NodeJS.Signals | number,
+        ) => {
             if (signal === 0 && pid === 123456) {
                 throw new Error('not alive');
             }
@@ -78,17 +98,24 @@ describe('manifest store', () => {
         await writeRouteManifest(context, routeManifest({ pid: 123456 }));
 
         await expect(listActiveRouteManifests(context)).resolves.toEqual([]);
-        await expect(fs.stat(path.join(context.generatedDir, 'instances', 'playwright-worker-0.json'))).rejects.toMatchObject({ code: 'ENOENT' });
+        await expect(
+            fs.stat(path.join(context.generatedDir, 'instances', 'playwright-worker-0.json')),
+        ).rejects.toMatchObject({ code: 'ENOENT' });
     });
 
     it('removes only the route manifests of this process', async () => {
         const context = await testContext();
-        await writeRouteManifest(context, { ...routeManifest({ pid: process.pid }), name: 'own-run' });
+        await writeRouteManifest(context, {
+            ...routeManifest({ pid: process.pid }),
+            name: 'own-run',
+        });
         await writeRouteManifest(context, { ...routeManifest({ pid: 1 }), name: 'other-run' });
 
         await removeOwnRouteManifests(context, 'playwright-worker');
 
-        await expect(listActiveRouteManifests(context)).resolves.toMatchObject([{ name: 'other-run' }]);
+        await expect(listActiveRouteManifests(context)).resolves.toMatchObject([
+            { name: 'other-run' },
+        ]);
     });
 });
 
@@ -103,7 +130,12 @@ function routeManifest(options: { pid?: number; expiresAt?: Date } = {}): RouteM
         workspace: 'playwright',
         reservedPorts: [6000, 6100],
         caddy: {
-            routes: [{ match: [{ host: ['playwright-dashboard-0.stamhoofd'] }], handle: [{ handler: 'reverse_proxy', upstreams: [{ dial: '127.0.0.1:6100' }] }] }],
+            routes: [
+                {
+                    match: [{ host: ['playwright-dashboard-0.stamhoofd'] }],
+                    handle: [{ handler: 'reverse_proxy', upstreams: [{ dial: '127.0.0.1:6100' }] }],
+                },
+            ],
             tlsSubjects: ['playwright-dashboard-0.stamhoofd'],
         },
     };

@@ -23,11 +23,14 @@ export const EmailTemplateLogger = new ModelLogger(EmailTemplate, {
 
     createReplacements(model) {
         return new Map([
-            ['e', AuditLogReplacement.create({
-                id: model.id,
-                value: model.type.includes('Saved') ? model.subject : model.type, // Translated in UI
-                type: AuditLogReplacementType.EmailTemplate,
-            })],
+            [
+                'e',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.type.includes('Saved') ? model.subject : model.type, // Translated in UI
+                    type: AuditLogReplacementType.EmailTemplate,
+                }),
+            ],
         ]);
     },
 });

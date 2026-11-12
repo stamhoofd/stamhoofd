@@ -1,14 +1,30 @@
 import type { Organization } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, Invoice, OrganizationFactory, Payment, StripeAccount } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemPayment,
+    Invoice,
+    OrganizationFactory,
+    Payment,
+    StripeAccount,
+} from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { SettlementCharge } from '@stamhoofd/models/models/SettlementCharge.js';
-import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import {
+    BalanceItemStatus,
+    BalanceItemType,
+    PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+} from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { v4 as uuidv4 } from 'uuid';
 
 import { initMembershipOrganization } from '../../tests/init/initMembershipOrganization.js';
-import { ApplicationFeeService, LEGACY_FEE_PAYMENT_REFERENCE_PREFIX } from './ApplicationFeeService.js';
+import {
+    ApplicationFeeService,
+    LEGACY_FEE_PAYMENT_REFERENCE_PREFIX,
+} from './ApplicationFeeService.js';
 import { SettlementService } from './SettlementService.js';
 
 describe('ApplicationFeeService', () => {
@@ -38,7 +54,11 @@ describe('ApplicationFeeService', () => {
     /**
      * The fee payment and balance items the legacy invoicer created for a month.
      */
-    const createLegacyFeePayment = async (organization: Organization, stripeAccount: StripeAccount | null, { types = [BalanceItemType.ServiceFee, BalanceItemType.TransferFee], price = 2_50_00 } = {}) => {
+    const createLegacyFeePayment = async (
+        organization: Organization,
+        stripeAccount: StripeAccount | null,
+        { types = [BalanceItemType.ServiceFee, BalanceItemType.TransferFee], price = 2_50_00 } = {},
+    ) => {
         const payment = new Payment();
         payment.organizationId = membershipOrganization.id;
         payment.payingOrganizationId = organization.id;
@@ -74,10 +94,17 @@ describe('ApplicationFeeService', () => {
         return { payment, balanceItems };
     };
 
-    const upsertFee = async (organization: Organization, stripeAccount: StripeAccount, { type = ApplicationFeeType.Service, amount = 30_00 } = {}) => {
+    const upsertFee = async (
+        organization: Organization,
+        stripeAccount: StripeAccount,
+        { type = ApplicationFeeType.Service, amount = 30_00 } = {},
+    ) => {
         const externalId = 'fee_' + uuidv4();
         const charge = await SettlementService.upsertCharge({
-            type: type === ApplicationFeeType.Service ? SettlementChargeType.ApplicationFeeService : SettlementChargeType.ApplicationFeeTransfer,
+            type:
+                type === ApplicationFeeType.Service
+                    ? SettlementChargeType.ApplicationFeeService
+                    : SettlementChargeType.ApplicationFeeTransfer,
             externalId: externalId + ':' + type,
             amount: -amount,
             applicationFeeId: externalId,
@@ -105,11 +132,19 @@ describe('ApplicationFeeService', () => {
             const { organization, stripeAccount } = await init();
             const { balanceItems } = await createLegacyFeePayment(organization, stripeAccount);
 
-            const { fee } = await upsertFee(organization, stripeAccount, { type: ApplicationFeeType.Service });
-            const { fee: transferFee } = await upsertFee(organization, stripeAccount, { type: ApplicationFeeType.Transfer });
+            const { fee } = await upsertFee(organization, stripeAccount, {
+                type: ApplicationFeeType.Service,
+            });
+            const { fee: transferFee } = await upsertFee(organization, stripeAccount, {
+                type: ApplicationFeeType.Transfer,
+            });
 
-            expect(fee.balanceItemId).toBe(balanceItems.find(i => i.type === BalanceItemType.ServiceFee)!.id);
-            expect(transferFee.balanceItemId).toBe(balanceItems.find(i => i.type === BalanceItemType.TransferFee)!.id);
+            expect(fee.balanceItemId).toBe(
+                balanceItems.find((i) => i.type === BalanceItemType.ServiceFee)!.id,
+            );
+            expect(transferFee.balanceItemId).toBe(
+                balanceItems.find((i) => i.type === BalanceItemType.TransferFee)!.id,
+            );
         });
 
         test('legacy payments without a Stripe account are found too', async () => {
@@ -118,7 +153,9 @@ describe('ApplicationFeeService', () => {
 
             const { fee } = await upsertFee(organization, stripeAccount);
 
-            expect(fee.balanceItemId).toBe(balanceItems.find(i => i.type === BalanceItemType.ServiceFee)!.id);
+            expect(fee.balanceItemId).toBe(
+                balanceItems.find((i) => i.type === BalanceItemType.ServiceFee)!.id,
+            );
         });
 
         test('a month that was never billed stays uninvoiced', async () => {
@@ -131,9 +168,13 @@ describe('ApplicationFeeService', () => {
 
         test('a legacy payment without the matching balance item leaves the fee uninvoiced', async () => {
             const { organization, stripeAccount } = await init();
-            await createLegacyFeePayment(organization, stripeAccount, { types: [BalanceItemType.ServiceFee] });
+            await createLegacyFeePayment(organization, stripeAccount, {
+                types: [BalanceItemType.ServiceFee],
+            });
 
-            const { fee } = await upsertFee(organization, stripeAccount, { type: ApplicationFeeType.Transfer });
+            const { fee } = await upsertFee(organization, stripeAccount, {
+                type: ApplicationFeeType.Transfer,
+            });
 
             expect(fee.balanceItemId).toBeNull();
         });
@@ -168,7 +209,9 @@ describe('ApplicationFeeService', () => {
             const linked = await ApplicationFeeService.upsertFee(data);
 
             expect(linked.id).toBe(unlinked.id);
-            expect(linked.balanceItemId).toBe(balanceItems.find(i => i.type === BalanceItemType.ServiceFee)!.id);
+            expect(linked.balanceItemId).toBe(
+                balanceItems.find((i) => i.type === BalanceItemType.ServiceFee)!.id,
+            );
         });
     });
 
@@ -213,7 +256,10 @@ describe('ApplicationFeeService', () => {
             expect(fee.balanceItemId).not.toBeNull();
 
             const invoice = await createInvoice(payment, '2025042');
-            await ApplicationFeeService.setProviderInvoiceIdsForSettlementCharges([payment], invoice);
+            await ApplicationFeeService.setProviderInvoiceIdsForSettlementCharges(
+                [payment],
+                invoice,
+            );
             expect((await SettlementCharge.getByID(charge.id))!.providerInvoiceId).toBe('2025042');
 
             await ApplicationFeeService.setProviderInvoiceIdsForSettlementCharges([payment], null);
@@ -230,7 +276,9 @@ describe('ApplicationFeeService', () => {
             payment.price = 10_00;
             await payment.save();
 
-            await expect(ApplicationFeeService.setProviderInvoiceIdsForSettlementCharges([payment], null)).resolves.toBeUndefined();
+            await expect(
+                ApplicationFeeService.setProviderInvoiceIdsForSettlementCharges([payment], null),
+            ).resolves.toBeUndefined();
         });
     });
 

@@ -1,7 +1,13 @@
 import type { SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery } from './SQLExpression.js';
 import type { SQLScalarValue } from './SQLExpressions.js';
-import { SQLJSONFalse, SQLJSONNull, SQLJSONTrue, SQLSafeValue, SQLScalar } from './SQLExpressions.js';
+import {
+    SQLJSONFalse,
+    SQLJSONNull,
+    SQLJSONTrue,
+    SQLSafeValue,
+    SQLScalar,
+} from './SQLExpressions.js';
 import { SQLWhere } from './SQLWhere.js';
 
 export function scalarToSQLJSONExpression(s: SQLScalarValue | null): SQLExpression {
@@ -28,15 +34,22 @@ export class SQLJsonUnquote implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            'JSON_UNQUOTE(',
-            this.target.getSQL(options),
-            ')',
-        ]);
+        return joinSQLQuery(['JSON_UNQUOTE(', this.target.getSQL(options), ')']);
     }
 }
 
-export type SQLJsonValueType = 'FLOAT' | 'DOUBLE' | 'DECIMAL' | 'SIGNED' | 'UNSIGNED' | 'DATE' | 'TIME' | 'DATETIME' | 'YEAR' | 'CHAR' | 'JSON';
+export type SQLJsonValueType =
+    | 'FLOAT'
+    | 'DOUBLE'
+    | 'DECIMAL'
+    | 'SIGNED'
+    | 'UNSIGNED'
+    | 'DATE'
+    | 'TIME'
+    | 'DATETIME'
+    | 'YEAR'
+    | 'CHAR'
+    | 'JSON';
 
 export class SQLJsonValue implements SQLExpression {
     target: SQLExpression;
@@ -63,7 +76,9 @@ export class SQLJsonValue implements SQLExpression {
             this.target.getSQL(options),
             ',',
             this.path.getSQL(options),
-            (this.type ? ' RETURNING ' + this.type + (this.type === 'CHAR' ? ' CHARACTER SET utf8mb4' : '') : ''),
+            this.type
+                ? ' RETURNING ' + this.type + (this.type === 'CHAR' ? ' CHARACTER SET utf8mb4' : '')
+                : '',
             ' NULL ON ERROR)',
             ...(this.type === 'CHAR' ? [' COLLATE utf8mb4_0900_ai_ci'] : []),
         ]);
@@ -110,11 +125,7 @@ export class SQLJsonType implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            'JSON_TYPE(',
-            this.target.getSQL(options),
-            ')',
-        ]);
+        return joinSQLQuery(['JSON_TYPE(', this.target.getSQL(options), ')']);
     }
 }
 
@@ -129,11 +140,7 @@ export class SQLJsonKeys implements SQLExpression {
     }
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
-        return joinSQLQuery([
-            'JSON_KEYS(',
-            this.target.getSQL(options),
-            ')',
-        ]);
+        return joinSQLQuery(['JSON_KEYS(', this.target.getSQL(options), ')']);
     }
 }
 
@@ -150,12 +157,7 @@ export class SQLJsonLength implements SQLExpression {
         return joinSQLQuery([
             'JSON_LENGTH(',
             this.target.getSQL(options),
-            ...(this.path
-                ? [
-                        ',',
-                        this.path.getSQL(options),
-                    ]
-                : []),
+            ...(this.path ? [',', this.path.getSQL(options)] : []),
             ')',
         ]);
     }
@@ -169,7 +171,12 @@ export class SQLJsonSearch implements SQLExpression {
     searchStr: SQLExpression;
     path: SQLExpression | null;
 
-    constructor(target: SQLExpression, oneOrAll: 'one' | 'all', searchStr: SQLExpression, path: SQLExpression | null = null) {
+    constructor(
+        target: SQLExpression,
+        oneOrAll: 'one' | 'all',
+        searchStr: SQLExpression,
+        path: SQLExpression | null = null,
+    ) {
         this.target = target;
         this.oneOrAll = oneOrAll;
         this.searchStr = searchStr;
@@ -184,12 +191,7 @@ export class SQLJsonSearch implements SQLExpression {
             new SQLSafeValue(this.oneOrAll).getSQL(options),
             ',',
             this.searchStr.getSQL(options),
-            ...(this.path
-                ? [
-                        ',',
-                        this.path.getSQL(options),
-                    ]
-                : []),
+            ...(this.path ? [',', this.path.getSQL(options)] : []),
             ')',
         ]);
     }
@@ -203,7 +205,11 @@ export class SQLJsonContains extends SQLWhere {
     candidate: SQLExpression;
     path: SQLExpression | null;
 
-    constructor(target: SQLExpression, candidate: SQLExpression, path: SQLExpression | null = null) {
+    constructor(
+        target: SQLExpression,
+        candidate: SQLExpression,
+        path: SQLExpression | null = null,
+    ) {
         super();
         this.target = target;
         this.candidate = candidate;
@@ -216,18 +222,13 @@ export class SQLJsonContains extends SQLWhere {
             this.target.getSQL(options),
             ',',
             this.candidate.getSQL(options),
-            ...(this.path
-                ? [
-                        ',',
-                        this.path.getSQL(options),
-                    ]
-                : []),
+            ...(this.path ? [',', this.path.getSQL(options)] : []),
             ')',
         ]);
     }
 
     clone(): this {
-        const c = (new (this.constructor as any)(this.target, this.candidate, this.path)) as this;
+        const c = new (this.constructor as any)(this.target, this.candidate, this.path) as this;
         return c;
     }
 }
@@ -256,7 +257,7 @@ export class SQLJsonOverlaps extends SQLWhere {
     }
 
     clone(): this {
-        const c = (new (this.constructor as any)(this.jsonDoc1, this.jsonDoc2)) as this;
+        const c = new (this.constructor as any)(this.jsonDoc1, this.jsonDoc2) as this;
         return c;
     }
 }

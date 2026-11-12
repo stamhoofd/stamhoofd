@@ -3,7 +3,11 @@ import { Organization, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { RecordSettings } from '@stamhoofd/structures';
 
-export type RecordCacheEntry = { record: RecordSettings; rootCategoryId: string; organizationId: string | null };
+export type RecordCacheEntry = {
+    record: RecordSettings;
+    rootCategoryId: string;
+    organizationId: string | null;
+};
 
 /**
  * Service that caches all available member records in the system.
@@ -51,7 +55,8 @@ class MemberRecordStoreService {
                 }
 
                 // Readd of this model
-                for (const recordCategory of event.model.config.recordsConfiguration.recordCategories) {
+                for (const recordCategory of event.model.config.recordsConfiguration
+                    .recordCategories) {
                     for (const record of recordCategory.getAllRecords()) {
                         // Add to cache
                         this.cache.set(record.id, {
@@ -72,7 +77,8 @@ class MemberRecordStoreService {
                 }
 
                 // Readd of this model
-                for (const recordCategory of event.model.meta.recordsConfiguration.recordCategories) {
+                for (const recordCategory of event.model.meta.recordsConfiguration
+                    .recordCategories) {
                     for (const record of recordCategory.getAllRecords()) {
                         // Add to cache
                         this.cache.set(record.id, {
@@ -139,10 +145,13 @@ class MemberRecordStoreService {
             abort.throwIfAborted();
 
             for await (const organization of Organization.select().all()) {
-                for (const recordCategory of organization.meta.recordsConfiguration.recordCategories) {
+                for (const recordCategory of organization.meta.recordsConfiguration
+                    .recordCategories) {
                     for (const record of recordCategory.getAllRecords()) {
                         if (this.cache.has(record.id)) {
-                            console.error(`Duplicate record id ${record.id} found in organization ${organization.id} for record ${record.name.toString()} (${record.id}) in ${recordCategory.name.toString()}`);
+                            console.error(
+                                `Duplicate record id ${record.id} found in organization ${organization.id} for record ${record.name.toString()} (${record.id}) in ${recordCategory.name.toString()}`,
+                            );
                             continue;
                         }
                         // Add to cache

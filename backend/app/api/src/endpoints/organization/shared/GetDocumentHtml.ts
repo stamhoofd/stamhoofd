@@ -68,8 +68,19 @@ export class GetDocumentHtml extends Endpoint<Params, Query, Body, ResponseBody>
         const expires = String(Date.now() + 60000);
         response.headers['cache-control'] = 'no-store';
         response.headers['x-cache-expires'] = expires;
-        response.headers['x-cache-read-signature'] = signInternal('pdf-cache', 'document-' + document.id, document.updatedAt.getTime().toString(), expires);
-        response.headers['x-cache-signature'] = signInternal('html-to-pdf', 'document-' + document.id, document.updatedAt.getTime().toString(), expires, html);
+        response.headers['x-cache-read-signature'] = signInternal(
+            'pdf-cache',
+            'document-' + document.id,
+            document.updatedAt.getTime().toString(),
+            expires,
+        );
+        response.headers['x-cache-signature'] = signInternal(
+            'html-to-pdf',
+            'document-' + document.id,
+            document.updatedAt.getTime().toString(),
+            expires,
+            html,
+        );
         return response;
     }
 }

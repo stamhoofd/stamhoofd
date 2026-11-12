@@ -2,7 +2,13 @@ import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import { LegacyRecordType } from './LegacyRecordType.js';
 import { RecordCategory } from './RecordCategory.js';
-import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
+import {
+    RecordChoice,
+    RecordSettings,
+    RecordType,
+    RecordWarning,
+    RecordWarningType,
+} from './RecordSettings.js';
 
 export class RecordFactory {
     static getRecordCategory(type: LegacyRecordType): RecordCategory | undefined {
@@ -115,8 +121,8 @@ export class RecordFactory {
         const allTypes = Object.values(LegacyRecordType);
 
         types.sort((a, b) => {
-            const index1 = allTypes.findIndex(q => q == a);
-            const index2 = allTypes.findIndex(q => q == b);
+            const index1 = allTypes.findIndex((q) => q == a);
+            const index2 = allTypes.findIndex((q) => q == b);
             return index1 - index2;
         });
 
@@ -131,12 +137,15 @@ export class RecordFactory {
                 continue;
             }
 
-            if (type == LegacyRecordType.PicturePermissions && types.includes(LegacyRecordType.GroupPicturePermissions)) {
+            if (
+                type == LegacyRecordType.PicturePermissions &&
+                types.includes(LegacyRecordType.GroupPicturePermissions)
+            ) {
                 // Skip: we ask group picture permissions alreadys
                 continue;
             }
 
-            let exists = categories.find(c => c.id === category.id);
+            let exists = categories.find((c) => c.id === category.id);
 
             if (!exists) {
                 categories.push(category);
@@ -178,7 +187,6 @@ export class RecordFactory {
 
             case LegacyRecordType.PicturePermissions:
             case LegacyRecordType.GroupPicturePermissions:
-
                 // Force same id for group and normal pictures
                 record.id = 'legacy-type-' + LegacyRecordType.PicturePermissions;
                 record.sensitive = false;
@@ -200,7 +208,6 @@ export class RecordFactory {
                         id: 'yes',
                         name: TranslatedString.create($t('%rB')),
                     }),
-
                 ];
 
                 if (type == LegacyRecordType.GroupPicturePermissions) {
@@ -631,18 +638,12 @@ export class RecordFactory {
     static createDoctorCategory(required = true) {
         return RecordCategory.create({
             name: TranslatedString.create($t('%s7')),
-            records: [
-                this.createDoctorName(),
-                this.createDoctorPhone(),
-            ],
+            records: [this.createDoctorName(), this.createDoctorPhone()],
             // Allow to skip this step?
             filter: required
                 ? undefined
-                // Optional
-                : new PropertyFilter(
-                        {},
-                        null,
-                    ),
+                : // Optional
+                  new PropertyFilter({}, null),
         });
     }
 }

@@ -33,8 +33,6 @@ export class MarkAllNotificationsReadEndpoint extends Endpoint<Params, Query, Bo
 
         const count = await NotificationService.markAllAsRead(Context.impersonatedUserOrUser);
 
-        return new Response(
-            CountResponse.create({ count }),
-        );
+        return new Response(CountResponse.create({ count }));
     }
 }

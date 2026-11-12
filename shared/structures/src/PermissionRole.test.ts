@@ -15,7 +15,10 @@ describe('Unit.PermissionRoleDetailed', () => {
             const resources = new Map<PermissionsResourceType, Map<string, ResourcePermissions>>();
 
             if (options.groups) {
-                resources.set(PermissionsResourceType.Groups, new Map(Object.entries(options.groups)));
+                resources.set(
+                    PermissionsResourceType.Groups,
+                    new Map(Object.entries(options.groups)),
+                );
             }
 
             return PermissionRoleDetailed.create({
@@ -74,7 +77,9 @@ describe('Unit.PermissionRoleDetailed', () => {
         test('Keeps $currentPeriod even when it is already covered', () => {
             const role = createRole({
                 groups: {
-                    [PermissionsResourceKey.All]: ResourcePermissions.create({ level: PermissionLevel.Full }),
+                    [PermissionsResourceKey.All]: ResourcePermissions.create({
+                        level: PermissionLevel.Full,
+                    }),
                     [PermissionsResourceKey.CurrentPeriod]: read(),
                 },
             });
@@ -88,7 +93,9 @@ describe('Unit.PermissionRoleDetailed', () => {
         test('Keeps a specific group that only $currentPeriod covers', () => {
             const role = createRole({
                 groups: {
-                    [PermissionsResourceKey.CurrentPeriod]: ResourcePermissions.create({ level: PermissionLevel.Full }),
+                    [PermissionsResourceKey.CurrentPeriod]: ResourcePermissions.create({
+                        level: PermissionLevel.Full,
+                    }),
                     'group-1': read(),
                 },
             });
@@ -137,7 +144,9 @@ describe('Unit.PermissionRoleDetailed', () => {
             const role = createRole({
                 groups: {
                     'group-1': ResourcePermissions.create({ level: PermissionLevel.None }),
-                    [PermissionsResourceKey.CurrentPeriod]: ResourcePermissions.create({ level: PermissionLevel.None }),
+                    [PermissionsResourceKey.CurrentPeriod]: ResourcePermissions.create({
+                        level: PermissionLevel.None,
+                    }),
                 },
             });
 

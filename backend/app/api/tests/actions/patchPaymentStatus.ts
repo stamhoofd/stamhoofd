@@ -6,15 +6,25 @@ import { Request } from '@node/endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { initAdmin } from '../init/initAdmin.js';
 
-export async function changePaymentStatus({ payment, organization, status }: { payment: { id: string }; organization: Organization; status: PaymentStatus }) {
+export async function changePaymentStatus({
+    payment,
+    organization,
+    status,
+}: {
+    payment: { id: string };
+    organization: Organization;
+    status: PaymentStatus;
+}) {
     expect(payment.id).toEqual(expect.any(String));
     const { adminToken } = await initAdmin({ organization: organization });
 
     const arr = new PatchableArray();
-    arr.addPatch(PaymentGeneral.patch({
-        id: payment.id,
-        status,
-    }));
+    arr.addPatch(
+        PaymentGeneral.patch({
+            id: payment.id,
+            status,
+        }),
+    );
 
     const request = Request.patch({
         path: '/organization/payments',
@@ -28,7 +38,13 @@ export async function changePaymentStatus({ payment, organization, status }: { p
     const response = await testServer.test(new PatchPaymentsEndpoint(), request);
     expect(response.status).toBe(200);
 }
-export async function markPaid({ payment, organization }: { payment: { id: string }; organization: Organization }) {
+export async function markPaid({
+    payment,
+    organization,
+}: {
+    payment: { id: string };
+    organization: Organization;
+}) {
     await changePaymentStatus({
         payment,
         organization,
@@ -36,7 +52,13 @@ export async function markPaid({ payment, organization }: { payment: { id: strin
     });
 }
 
-export async function markNotPaid({ payment, organization }: { payment: { id: string }; organization: Organization }) {
+export async function markNotPaid({
+    payment,
+    organization,
+}: {
+    payment: { id: string };
+    organization: Organization;
+}) {
     await changePaymentStatus({
         payment,
         organization,

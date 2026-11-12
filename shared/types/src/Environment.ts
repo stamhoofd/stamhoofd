@@ -237,7 +237,6 @@ export type FrontendSpecificEnvironment = {
      * Custom documentation page for members
      */
     readonly memberDocumentationPage?: LanguageMap;
-
 };
 
 /**

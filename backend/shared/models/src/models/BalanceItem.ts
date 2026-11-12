@@ -1,5 +1,18 @@
 import { column, Database } from '@node/database';
-import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, Payment as PaymentStruct, PrivatePayment, VATExcemptReason } from '@stamhoofd/structures';
+import {
+    BalanceItemPaymentWithPayment,
+    BalanceItemPaymentWithPrivatePayment,
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItem as BalanceItemStruct,
+    BalanceItemType,
+    BalanceItemWithPayments,
+    BalanceItemWithPrivatePayments,
+    Payment as PaymentStruct,
+    PrivatePayment,
+    VATExcemptReason,
+} from '@stamhoofd/structures';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,7 +28,9 @@ export class BalanceItem extends QueryableModel {
     static table = 'balance_items';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -66,7 +81,10 @@ export class BalanceItem extends QueryableModel {
     @column({ type: 'string', decoder: new EnumDecoder(BalanceItemType) })
     type = BalanceItemType.Other;
 
-    @column({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation), type: 'json' })
+    @column({
+        decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation),
+        type: 'json',
+    })
     relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map();
 
     @column({ type: 'string' })
@@ -222,7 +240,8 @@ export class BalanceItem extends QueryableModel {
     failedAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -234,7 +253,8 @@ export class BalanceItem extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -267,12 +287,15 @@ export class BalanceItem extends QueryableModel {
 
         if (this.VATIncluded) {
             // Calculate VAT on price incl. VAT, which is not 100% correct and causes roudning issues
-            return this.unitPrice * this.amount - STMath.round(this.unitPrice * this.amount * 100 / (100 + this.VATPercentage));
+            return (
+                this.unitPrice * this.amount -
+                STMath.round((this.unitPrice * this.amount * 100) / (100 + this.VATPercentage))
+            );
         }
 
         // Note: the rounding is only to avoid floating point errors in software, this should not cause any actual rounding
         // That is the reason why we store it up to 4 digits after comma
-        return STMath.round(this.VATPercentage * this.unitPrice * this.amount / 100);
+        return STMath.round((this.VATPercentage * this.unitPrice * this.amount) / 100);
     }
 
     /**
@@ -371,9 +394,14 @@ export class BalanceItem extends QueryableModel {
      * By default 0% will be charged
      * Will create a new cancellation fee if the cancellation fee percentage is not 0%
      */
-    static async deleteItems(items: BalanceItem[], options?: { cancellationFeePercentage?: number }) {
+    static async deleteItems(
+        items: BalanceItem[],
+        options?: { cancellationFeePercentage?: number },
+    ) {
         // Find depending items
-        const dependingItemIds = Formatter.uniqueArray(items.filter(i => !!i.dependingBalanceItemId).map(i => i.dependingBalanceItemId!)).filter(id => !items.some(item => item.id === id));
+        const dependingItemIds = Formatter.uniqueArray(
+            items.filter((i) => !!i.dependingBalanceItemId).map((i) => i.dependingBalanceItemId!),
+        ).filter((id) => !items.some((item) => item.id === id));
 
         if (dependingItemIds.length) {
             // Remove depending items too
@@ -393,13 +421,25 @@ export class BalanceItem extends QueryableModel {
             item.status = BalanceItemStatus.Canceled;
             await item.save();
 
-            if (options && options.cancellationFeePercentage !== undefined && options.cancellationFeePercentage !== 0) {
-                if (options.cancellationFeePercentage < 0 || options.cancellationFeePercentage > 100 * 100) {
-                    throw new Error('Invalid cancellation fee percentage. Range 0-10000 expected, received ' + options.cancellationFeePercentage);
+            if (
+                options &&
+                options.cancellationFeePercentage !== undefined &&
+                options.cancellationFeePercentage !== 0
+            ) {
+                if (
+                    options.cancellationFeePercentage < 0 ||
+                    options.cancellationFeePercentage > 100 * 100
+                ) {
+                    throw new Error(
+                        'Invalid cancellation fee percentage. Range 0-10000 expected, received ' +
+                            options.cancellationFeePercentage,
+                    );
                 }
 
                 // Refund the user
-                const cancellationFee = STMath.round(item.price * options.cancellationFeePercentage / 10000);
+                const cancellationFee = STMath.round(
+                    (item.price * options.cancellationFeePercentage) / 10000,
+                );
                 if (cancellationFee !== 0) {
                     // Create a new item
                     const cancellationItem = await item.createCancellationItem(cancellationFee);
@@ -461,7 +501,10 @@ export class BalanceItem extends QueryableModel {
         await this.reactivateItems(items);
     }
 
-    static async deleteForDeletedOrders(orderIds: string[], options?: { cancellationFeePercentage?: number }) {
+    static async deleteForDeletedOrders(
+        orderIds: string[],
+        options?: { cancellationFeePercentage?: number },
+    ) {
         if (orderIds.length === 0) {
             return;
         }
@@ -469,15 +512,24 @@ export class BalanceItem extends QueryableModel {
         return await this.deleteItems(items, options);
     }
 
-    static async deleteForDeletedMember(memberId: string, options?: { cancellationFeePercentage?: number }) {
+    static async deleteForDeletedMember(
+        memberId: string,
+        options?: { cancellationFeePercentage?: number },
+    ) {
         const items = await BalanceItem.where({ memberId });
         return await this.deleteItems(items, options);
     }
 
-    static async deleteForDeletedRegistration(registrationId: string, options?: { cancellationFeePercentage?: number }) {
+    static async deleteForDeletedRegistration(
+        registrationId: string,
+        options?: { cancellationFeePercentage?: number },
+    ) {
         const items = await BalanceItem.select()
             .where('registrationId', registrationId)
-            .where('type', [BalanceItemType.Registration, BalanceItemType.RegistrationBundleDiscount])
+            .where('type', [
+                BalanceItemType.Registration,
+                BalanceItemType.RegistrationBundleDiscount,
+            ])
             .fetch();
         return await this.deleteItems(items, options);
     }
@@ -491,8 +543,7 @@ export class BalanceItem extends QueryableModel {
             q = q.where('organizationId', organizationId);
         }
 
-        const items = await q
-            .fetch();
+        const items = await q.fetch();
 
         return {
             items,
@@ -611,10 +662,13 @@ export class BalanceItem extends QueryableModel {
         // Load balance payment items
         const { BalanceItemPayment } = await import('./BalanceItemPayment.js');
         const balanceItemPayments = await BalanceItemPayment.select()
-            .where('balanceItemId', items.map(i => i.id))
+            .where(
+                'balanceItemId',
+                items.map((i) => i.id),
+            )
             .fetch();
 
-        const payments = await Payment.getByIDs(...balanceItemPayments.map(p => p.paymentId));
+        const payments = await Payment.getByIDs(...balanceItemPayments.map((p) => p.paymentId));
 
         return { payments, balanceItemPayments };
     }
@@ -625,7 +679,9 @@ export class BalanceItem extends QueryableModel {
         });
     }
 
-    static async getStructureWithPayments(items: (BalanceItem | BalanceItemStruct)[]): Promise<BalanceItemWithPayments[]> {
+    static async getStructureWithPayments(
+        items: (BalanceItem | BalanceItemStruct)[],
+    ): Promise<BalanceItemWithPayments[]> {
         if (items.length === 0) {
             return [];
         }
@@ -633,12 +689,14 @@ export class BalanceItem extends QueryableModel {
         const { payments, balanceItemPayments } = await BalanceItem.loadPayments(items);
 
         return items.map((item) => {
-            const thisBalanceItemPayments = balanceItemPayments.filter(p => p.balanceItemId === item.id);
+            const thisBalanceItemPayments = balanceItemPayments.filter(
+                (p) => p.balanceItemId === item.id,
+            );
 
             return BalanceItemWithPayments.create({
                 ...item,
                 payments: thisBalanceItemPayments.map((p) => {
-                    const payment = payments.find(pp => pp.id === p.paymentId)!;
+                    const payment = payments.find((pp) => pp.id === p.paymentId)!;
                     return BalanceItemPaymentWithPayment.create({
                         ...p,
                         payment: PaymentStruct.create(payment),
@@ -648,7 +706,9 @@ export class BalanceItem extends QueryableModel {
         });
     }
 
-    static async getStructureWithPrivatePayments(items: BalanceItem[]): Promise<BalanceItemWithPrivatePayments[]> {
+    static async getStructureWithPrivatePayments(
+        items: BalanceItem[],
+    ): Promise<BalanceItemWithPrivatePayments[]> {
         if (items.length === 0) {
             return [];
         }
@@ -656,12 +716,14 @@ export class BalanceItem extends QueryableModel {
         const { payments, balanceItemPayments } = await BalanceItem.loadPayments(items);
 
         return items.map((item) => {
-            const thisBalanceItemPayments = balanceItemPayments.filter(p => p.balanceItemId === item.id);
+            const thisBalanceItemPayments = balanceItemPayments.filter(
+                (p) => p.balanceItemId === item.id,
+            );
 
             return BalanceItemWithPrivatePayments.create({
                 ...item,
                 payments: thisBalanceItemPayments.map((p) => {
-                    const payment = payments.find(pp => pp.id === p.paymentId)!;
+                    const payment = payments.find((pp) => pp.id === p.paymentId)!;
                     return BalanceItemPaymentWithPrivatePayment.create({
                         ...p,
                         payment: PrivatePayment.create(payment),
@@ -671,13 +733,16 @@ export class BalanceItem extends QueryableModel {
         });
     }
 
-    static async balanceItemsForUsersAndMembers(organizationId: string | null, userIds: string[], memberIds: string[]): Promise<BalanceItem[]> {
+    static async balanceItemsForUsersAndMembers(
+        organizationId: string | null,
+        userIds: string[],
+        memberIds: string[],
+    ): Promise<BalanceItem[]> {
         if (memberIds.length === 0 && userIds.length === 0) {
             return [];
         }
 
-        const base = BalanceItem.select()
-            .whereNot('status', BalanceItemStatus.Hidden);
+        const base = BalanceItem.select().whereNot('status', BalanceItemStatus.Hidden);
 
         if (organizationId) {
             base.andWhere('organizationId', organizationId);
@@ -687,12 +752,11 @@ export class BalanceItem extends QueryableModel {
             // Don't include other members than the provided members
             base.andWhere(
                 SQL.where('memberId', memberIds)
-                // Include null member
+                    // Include null member
                     .or(
-                    // Don't include balances of other members, even when userId matches
-                    // this allows removing access for a member
-                        SQL.where('userId', userIds)
-                            .and('memberId', null),
+                        // Don't include balances of other members, even when userId matches
+                        // this allows removing access for a member
+                        SQL.where('userId', userIds).and('memberId', null),
                     ),
             );
         } else if (memberIds.length) {
@@ -706,7 +770,10 @@ export class BalanceItem extends QueryableModel {
         return await base.fetch();
     }
 
-    static async balanceItemsForOrganization(payingOrganizationId: string, organizationId?: string): Promise<BalanceItem[]> {
+    static async balanceItemsForOrganization(
+        payingOrganizationId: string,
+        organizationId?: string,
+    ): Promise<BalanceItem[]> {
         const base = BalanceItem.select()
             .where('payingOrganizationId', payingOrganizationId)
             .whereNot('status', BalanceItemStatus.Hidden);

@@ -1,5 +1,17 @@
 import { column } from '@node/database';
-import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, SettlementReference, TransferSettings } from '@stamhoofd/structures';
+import {
+    BalanceItemDetailed,
+    BalanceItemPaymentDetailed,
+    BaseOrganization,
+    PaymentCustomer,
+    PaymentGeneral,
+    PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+    PaymentType,
+    SettlementReference,
+    TransferSettings,
+} from '@stamhoofd/structures';
 import { PaymentSettlementDetailed } from '@stamhoofd/structures/settlements/PaymentSettlement.js';
 import { Settlement as SettlementStruct } from '@stamhoofd/structures/settlements/Settlement.js';
 import type { PaymentSettlement as PaymentSettlementModel } from './PaymentSettlement.js';
@@ -17,7 +29,9 @@ export class Payment extends QueryableModel {
     static table = 'payments';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -199,7 +213,8 @@ export class Payment extends QueryableModel {
     adminUserId: string | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -213,7 +228,8 @@ export class Payment extends QueryableModel {
     _forceUpdatedAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             if (this._forceUpdatedAt) {
                 return this._forceUpdatedAt;
             }
@@ -239,12 +255,25 @@ export class Payment extends QueryableModel {
     ibanName: string | null = null;
 
     get canChangeStatus() {
-        return this.price !== 0 && (this.method === PaymentMethod.Transfer || this.method === PaymentMethod.PointOfSale || this.method === PaymentMethod.Unknown);
+        return (
+            this.price !== 0 &&
+            (this.method === PaymentMethod.Transfer ||
+                this.method === PaymentMethod.PointOfSale ||
+                this.method === PaymentMethod.Unknown)
+        );
     }
 
-    generateDescription(organization: Organization, reference: string, replacements: ReadonlyMap<string, string> = new Map()) {
+    generateDescription(
+        organization: Organization,
+        reference: string,
+        replacements: ReadonlyMap<string, string> = new Map(),
+    ) {
         const settings = this.transferSettings ?? organization.meta.transferSettings;
-        this.transferDescription = settings.generateDescription(reference, organization.address.country, replacements);
+        this.transferDescription = settings.generateDescription(
+            reference,
+            organization.address.country,
+            replacements,
+        );
     }
 
     async updateRefundedAmount() {
@@ -254,11 +283,13 @@ export class Payment extends QueryableModel {
             .fetch();
 
         this.refundedAmount = reversals
-            .filter(p => p.status === PaymentStatus.Succeeded)
+            .filter((p) => p.status === PaymentStatus.Succeeded)
             .reduce((total, p) => total + p.price, 0);
 
         this.pendingRefundAmount = reversals
-            .filter(p => p.status !== PaymentStatus.Succeeded && p.status !== PaymentStatus.Failed)
+            .filter(
+                (p) => p.status !== PaymentStatus.Succeeded && p.status !== PaymentStatus.Failed,
+            )
             .reduce((total, p) => total + p.price, 0);
 
         await this.save();
@@ -268,75 +299,114 @@ export class Payment extends QueryableModel {
         return STMath.round(price / 100) * 100;
     }
 
-    static async getGeneralStructure(payments: Payment[], includeSettlements = false): Promise<PaymentGeneral[]> {
+    static async getGeneralStructure(
+        payments: Payment[],
+        includeSettlements = false,
+    ): Promise<PaymentGeneral[]> {
         if (payments.length === 0) {
             return [];
         }
 
         const { balanceItemPayments, balanceItems } = await Payment.loadBalanceItems(payments);
         const { payingOrganizations } = await Payment.loadPayingOrganizations(payments);
-        const { paymentSettlements, settlements } = includeSettlements ? await Payment.loadSettlements(payments) : { paymentSettlements: [], settlements: [] };
+        const { paymentSettlements, settlements } = includeSettlements
+            ? await Payment.loadSettlements(payments)
+            : { paymentSettlements: [], settlements: [] };
 
-        return this.getGeneralStructureFromRelations({
+        return this.getGeneralStructureFromRelations(
+            {
+                payments,
+                balanceItemPayments,
+                balanceItems,
+                payingOrganizations,
+                paymentSettlements,
+                settlements,
+            },
+            includeSettlements,
+        );
+    }
+
+    static getGeneralStructureFromRelations(
+        {
             payments,
             balanceItemPayments,
             balanceItems,
             payingOrganizations,
             paymentSettlements,
             settlements,
-        }, includeSettlements);
-    }
-
-    static getGeneralStructureFromRelations({ payments, balanceItemPayments, balanceItems, payingOrganizations, paymentSettlements, settlements }: {
-        payments: Payment[];
-        balanceItemPayments: BalanceItemPayment[];
-        balanceItems: BalanceItem[];
-        payingOrganizations: Organization[];
-        paymentSettlements?: PaymentSettlementModel[];
-        settlements?: SettlementModel[];
-    }, includeSettlements = false): PaymentGeneral[] {
+        }: {
+            payments: Payment[];
+            balanceItemPayments: BalanceItemPayment[];
+            balanceItems: BalanceItem[];
+            payingOrganizations: Organization[];
+            paymentSettlements?: PaymentSettlementModel[];
+            settlements?: SettlementModel[];
+        },
+        includeSettlements = false,
+    ): PaymentGeneral[] {
         if (payments.length === 0) {
             return [];
         }
 
         return payments.map((payment) => {
-            const payingOrganization = payment.payingOrganizationId ? payingOrganizations.find(o => o.id === payment.payingOrganizationId) : null;
+            const payingOrganization = payment.payingOrganizationId
+                ? payingOrganizations.find((o) => o.id === payment.payingOrganizationId)
+                : null;
             return PaymentGeneral.create({
                 ...payment,
                 payingOrganization: payingOrganization
                     ? BaseOrganization.create({
-                            ...payingOrganization,
-                        })
+                          ...payingOrganization,
+                      })
                     : null,
-                balanceItemPayments: balanceItemPayments.filter(item => item.paymentId === payment.id).map((item) => {
-                    const balanceItem = balanceItems.find(b => b.id === item.balanceItemId);
+                balanceItemPayments: balanceItemPayments
+                    .filter((item) => item.paymentId === payment.id)
+                    .map((item) => {
+                        const balanceItem = balanceItems.find((b) => b.id === item.balanceItemId);
 
-                    return BalanceItemPaymentDetailed.create({
-                        ...item,
-                        balanceItem: BalanceItemDetailed.create({
-                            ...balanceItem,
-                        }),
-                    });
-                }),
+                        return BalanceItemPaymentDetailed.create({
+                            ...item,
+                            balanceItem: BalanceItemDetailed.create({
+                                ...balanceItem,
+                            }),
+                        });
+                    }),
                 ...(payment.provider !== PaymentProvider.Stripe ? { stripeAccountId: null } : {}),
                 ...(includeSettlements
                     ? {
-                            settlements: (paymentSettlements ?? []).filter((line) => {
-                                if (line.paymentId !== payment.id) {
-                                    return false;
-                                }
-                                // A payment is only settled by the payouts of its own organization
-                                const settlement = (settlements ?? []).find(s => s.id === line.settlementId);
-                                return settlement !== undefined && settlement.organizationId === payment.organizationId;
-                            }).map((line) => {
-                                const settlement = (settlements ?? []).find(s => s.id === line.settlementId);
-                                return PaymentSettlementDetailed.create({
-                                    ...line,
-                                    settlement: SettlementStruct.create({ ...settlement }),
-                                });
-                            }),
-                        }
-                    : { settlement: null, settlements: [], transferFee: 0, stripeAccountId: null, serviceFeeManual: 0, serviceFeeManualCharged: 0, serviceFeePayout: 0 }),
+                          settlements: (paymentSettlements ?? [])
+                              .filter((line) => {
+                                  if (line.paymentId !== payment.id) {
+                                      return false;
+                                  }
+                                  // A payment is only settled by the payouts of its own organization
+                                  const settlement = (settlements ?? []).find(
+                                      (s) => s.id === line.settlementId,
+                                  );
+                                  return (
+                                      settlement !== undefined &&
+                                      settlement.organizationId === payment.organizationId
+                                  );
+                              })
+                              .map((line) => {
+                                  const settlement = (settlements ?? []).find(
+                                      (s) => s.id === line.settlementId,
+                                  );
+                                  return PaymentSettlementDetailed.create({
+                                      ...line,
+                                      settlement: SettlementStruct.create({ ...settlement }),
+                                  });
+                              }),
+                      }
+                    : {
+                          settlement: null,
+                          settlements: [],
+                          transferFee: 0,
+                          stripeAccountId: null,
+                          serviceFeeManual: 0,
+                          serviceFeeManualCharged: 0,
+                          serviceFeePayout: 0,
+                      }),
             });
         });
     }
@@ -361,10 +431,10 @@ export class Payment extends QueryableModel {
         const balanceItemPayments = await BalanceItemPayment.where({
             paymentId: {
                 sign: 'IN',
-                value: payments.map(p => p.id),
+                value: payments.map((p) => p.id),
             },
         });
-        const ids = Formatter.uniqueArray(balanceItemPayments.map(p => p.balanceItemId));
+        const ids = Formatter.uniqueArray(balanceItemPayments.map((p) => p.balanceItemId));
         const balanceItems = await BalanceItem.getByIDs(...ids);
 
         return { balanceItemPayments, balanceItems };
@@ -382,20 +452,29 @@ export class Payment extends QueryableModel {
         const { Settlement } = await import('./Settlement.js');
 
         const paymentSettlements = await PaymentSettlement.select()
-            .where('paymentId', payments.map(p => p.id))
+            .where(
+                'paymentId',
+                payments.map((p) => p.id),
+            )
             .fetch();
 
-        const ids = Formatter.uniqueArray(paymentSettlements.map(line => line.settlementId));
-        const organizationIds = Formatter.uniqueArray(payments.map(p => p.organizationId));
-        const settlements = ids.length > 0
-            ? await Settlement.select().where('id', ids).where('organizationId', organizationIds).fetch()
-            : [];
+        const ids = Formatter.uniqueArray(paymentSettlements.map((line) => line.settlementId));
+        const organizationIds = Formatter.uniqueArray(payments.map((p) => p.organizationId));
+        const settlements =
+            ids.length > 0
+                ? await Settlement.select()
+                      .where('id', ids)
+                      .where('organizationId', organizationIds)
+                      .fetch()
+                : [];
 
         return { paymentSettlements, settlements };
     }
 
     static async loadPayingOrganizations(payments: Payment[]) {
-        const ids = Formatter.uniqueArray(payments.map(p => p.payingOrganizationId).filter(p => p !== null));
+        const ids = Formatter.uniqueArray(
+            payments.map((p) => p.payingOrganizationId).filter((p) => p !== null),
+        );
         if (ids.length === 0) {
             return { payingOrganizations: [] };
         }
@@ -410,8 +489,12 @@ export class Payment extends QueryableModel {
         const { Member } = await import('./Member.js');
 
         // Load members and orders
-        const registrationIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.registrationId ? [b.registrationId] : []));
-        const orderIds = Formatter.uniqueArray(balanceItems.flatMap(b => b.orderId ? [b.orderId] : []));
+        const registrationIds = Formatter.uniqueArray(
+            balanceItems.flatMap((b) => (b.registrationId ? [b.registrationId] : [])),
+        );
+        const orderIds = Formatter.uniqueArray(
+            balanceItems.flatMap((b) => (b.orderId ? [b.orderId] : [])),
+        );
 
         const registrations = await Member.getRegistrationWithMembersByIDs(registrationIds);
         const orders = await Order.getByIDs(...orderIds);

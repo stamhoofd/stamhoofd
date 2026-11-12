@@ -13,7 +13,10 @@ async function loadConfig() {
         return config;
     }
 
-    return Config.load({ root: cliRoot, plugins: new Map([...config.plugins, [devops.name, devops]]) });
+    return Config.load({
+        root: cliRoot,
+        plugins: new Map([...config.plugins, [devops.name, devops]]),
+    });
 }
 
 async function main() {
@@ -22,8 +25,11 @@ async function main() {
     const config = await loadConfig();
 
     // Shortcut setup owns completion installation. Hide helpers in metadata so help and completion agree, while direct invocation remains available.
-    const isCompletionHelper = id => ['autocomplete', 'completion'].includes(id.split(':')[0]);
-    for (const command of [...config.commands, ...config.getPluginsList().flatMap(plugin => plugin.commands)]) {
+    const isCompletionHelper = (id) => ['autocomplete', 'completion'].includes(id.split(':')[0]);
+    for (const command of [
+        ...config.commands,
+        ...config.getPluginsList().flatMap((plugin) => plugin.commands),
+    ]) {
         if (isCompletionHelper(command.id)) command.hidden = true;
     }
     for (const topic of config.topics) {

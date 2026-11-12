@@ -10,4 +10,4 @@ if (new Date().getTimezoneOffset() !== 0) {
 
 export async function setup() {
     TestUtils.globalSetup();
-};
+}

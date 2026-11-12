@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import {
-    DeleteMessageCommand,
-    ReceiveMessageCommand,
-    SQSClient,
-} from '@aws-sdk/client-sqs';
+import { DeleteMessageCommand, ReceiveMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { registerCron } from '@stamhoofd/crons';
 import { Email, EmailAddress } from '@stamhoofd/email';
 import { AuditLog, EmailRecipient, Organization } from '@stamhoofd/models';
-import { AuditLogReplacement, AuditLogReplacementType, AuditLogSource, AuditLogType } from '@stamhoofd/structures';
+import {
+    AuditLogReplacement,
+    AuditLogReplacementType,
+    AuditLogSource,
+    AuditLogType,
+} from '@stamhoofd/structures';
 import { ForwardHandler } from '../helpers/ForwardHandler.js';
 import { Email as EmailModel } from '@stamhoofd/models';
 
@@ -15,7 +16,25 @@ registerCron('checkComplaints', checkComplaints);
 registerCron('checkReplies', checkReplies);
 registerCron('checkBounces', checkBounces);
 
-async function saveLog({ email, organization, type, subType, subject, response, sender, id }: { id: string; email: string; organization: Organization | undefined; type: AuditLogType; subType?: string; subject: string; response: string; sender: string }) {
+async function saveLog({
+    email,
+    organization,
+    type,
+    subType,
+    subject,
+    response,
+    sender,
+    id,
+}: {
+    id: string;
+    email: string;
+    organization: Organization | undefined;
+    type: AuditLogType;
+    subType?: string;
+    subject: string;
+    response: string;
+    sender: string;
+}) {
     if (!id || typeof id !== 'string') {
         throw new Error('Invalid AWS SES id received');
     }
@@ -27,16 +46,22 @@ async function saveLog({ email, organization, type, subType, subject, response, 
     log.source = AuditLogSource.System;
     log.objectId = email;
     log.replacements = new Map([
-        ['e', AuditLogReplacement.create({
-            value: email || '',
-            type: AuditLogReplacementType.EmailAddress,
-        })],
+        [
+            'e',
+            AuditLogReplacement.create({
+                value: email || '',
+                type: AuditLogReplacementType.EmailAddress,
+            }),
+        ],
         ['subType', AuditLogReplacement.key(subType || 'unknown')],
         ['subject', AuditLogReplacement.string(subject)],
-        ['sender', AuditLogReplacement.create({
-            value: sender,
-            type: AuditLogReplacementType.EmailAddress,
-        })],
+        [
+            'sender',
+            AuditLogReplacement.create({
+                value: sender,
+                type: AuditLogReplacementType.EmailAddress,
+            }),
+        ],
     ]);
 
     if (response) {
@@ -53,7 +78,15 @@ async function saveLog({ email, organization, type, subType, subject, response, 
     await log.save();
 }
 
-async function storeEmailStatus({ headers, type, message }: { headers: ReadonlyMap<string, string>; type: 'hard-bounce' | 'soft-bounce' | 'complaint'; message: string }) {
+async function storeEmailStatus({
+    headers,
+    type,
+    message,
+}: {
+    headers: ReadonlyMap<string, string>;
+    type: 'hard-bounce' | 'soft-bounce' | 'complaint';
+    message: string;
+}) {
     const emailId = headers.get('x-email-id');
     const recipientId = headers.get('x-email-recipient-id');
 
@@ -95,7 +128,14 @@ async function storeEmailStatus({ headers, type, message }: { headers: ReadonlyM
             }
         }
 
-        console.log('[AWS FORWARDING] Marking email recipient ' + recipientId + ' for email ' + emailId + ' as ' + type);
+        console.log(
+            '[AWS FORWARDING] Marking email recipient ' +
+                recipientId +
+                ' for email ' +
+                emailId +
+                ' as ' +
+                type,
+        );
         if (await emailRecipient.save()) {
             if (isNew) {
                 await EmailModel.bumpNotificationCount(emailId, type);
@@ -111,7 +151,12 @@ export function readHeaders(message: any): Map<string, string> {
         const headers = new Map<string, string>();
         if (mail && typeof mail === 'object' && mail !== null && Array.isArray(mail.headers)) {
             for (const header of mail.headers) {
-                if (typeof header?.name === 'string' && header.name && typeof header.value === 'string' && header.value) {
+                if (
+                    typeof header?.name === 'string' &&
+                    header.name &&
+                    typeof header.value === 'string' &&
+                    header.value
+                ) {
                     headers.set(header.name.toLowerCase(), header.value);
                 }
             }
@@ -142,16 +187,22 @@ async function handleBounce(message: any) {
             const email = recipient.emailAddress;
 
             if (
-                type === 'Permanent'
-                || (
-                    recipient.diagnosticCode && (
-                        (recipient.diagnosticCode as string).toLowerCase().includes('invalid domain')
-                        || (recipient.diagnosticCode as string).toLowerCase().includes('unable to lookup dns')
-                    )
-                )
+                type === 'Permanent' ||
+                (recipient.diagnosticCode &&
+                    ((recipient.diagnosticCode as string)
+                        .toLowerCase()
+                        .includes('invalid domain') ||
+                        (recipient.diagnosticCode as string)
+                            .toLowerCase()
+                            .includes('unable to lookup dns')))
             ) {
-                const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined;
-                const emailAddress = await EmailAddress.getOrCreate(email, organization?.id ?? null);
+                const organization: Organization | undefined = source
+                    ? await Organization.getByEmail(source)
+                    : undefined;
+                const emailAddress = await EmailAddress.getOrCreate(
+                    email,
+                    organization?.id ?? null,
+                );
                 emailAddress.hardBounce = true;
                 await emailAddress.save();
 
@@ -171,10 +222,10 @@ async function handleBounce(message: any) {
                     response: recipient.diagnosticCode || '',
                     subject: message.mail.commonHeaders?.subject || '',
                 });
-            } else if (
-                type === 'Transient'
-            ) {
-                const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined;
+            } else if (type === 'Transient') {
+                const organization: Organization | undefined = source
+                    ? await Organization.getByEmail(source)
+                    : undefined;
 
                 await storeEmailStatus({
                     headers,
@@ -205,9 +256,12 @@ async function handleComplaint(message: any) {
         const headers = readHeaders(message);
         const b = message.complaint;
         const source = message.mail.source;
-        const organization: Organization | undefined = source ? await Organization.getByEmail(source) : undefined;
+        const organization: Organization | undefined = source
+            ? await Organization.getByEmail(source)
+            : undefined;
 
-        const type: 'abuse' | 'auth-failure' | 'fraud' | 'not-spam' | 'other' | 'virus' = b.complaintFeedbackType;
+        const type: 'abuse' | 'auth-failure' | 'fraud' | 'not-spam' | 'other' | 'virus' =
+            b.complaintFeedbackType;
 
         for (const recipient of b.complainedRecipients) {
             const email = recipient.emailAddress;
@@ -254,7 +308,12 @@ async function handleComplaint(message: any) {
             if (STAMHOOFD.environment !== 'development') {
                 Email.sendWebmaster({
                     subject: 'Received a ' + type + ' email notification',
-                    text: 'We received a ' + type + ' notification for an e-mail from the organization: ' + organization?.name + '. Please check and adjust if needed.\n',
+                    text:
+                        'We received a ' +
+                        type +
+                        ' notification for an e-mail from the organization: ' +
+                        organization?.name +
+                        '. Please check and adjust if needed.\n',
                 });
             }
         }
@@ -378,7 +437,9 @@ async function readAllFromQueue(queueUrl: string) {
         }
         readCount += didProcess;
     }
-    console.log(`[AWS Queue] Finished processing all messages from queue (${readCount} messages processed)`);
+    console.log(
+        `[AWS Queue] Finished processing all messages from queue (${readCount} messages processed)`,
+    );
     return true;
 }
 

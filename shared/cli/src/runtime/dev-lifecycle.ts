@@ -2,7 +2,14 @@ import { context, propagation, SpanStatusCode, trace } from '@opentelemetry/api'
 import type { Span } from '@opentelemetry/api';
 import type { DevEvent } from '@node/dev-tools/events';
 
-type Operation = { generation: bigint; processId: string; time: bigint; cycle?: bigint; phase: string; span?: Span };
+type Operation = {
+    generation: bigint;
+    processId: string;
+    time: bigint;
+    cycle?: bigint;
+    phase: string;
+    span?: Span;
+};
 
 /**
  * Owns finite build/startup spans and filters late lifecycle events across processes.
@@ -26,7 +33,12 @@ export class DevLifecycle {
         const key = `${event.app}:${build ? 'build' : 'app'}`;
         const generation = BigInt(event.generation);
         let operation = this.operations.get(key);
-        if (operation && (generation < operation.generation || (generation === operation.generation && event.processId !== operation.processId))) return;
+        if (
+            operation &&
+            (generation < operation.generation ||
+                (generation === operation.generation && event.processId !== operation.processId))
+        )
+            return;
         if (!operation || generation > operation.generation) {
             this.end(operation, 'superseded');
             operation = { generation, processId: event.processId, time: -1n, phase: '' };
@@ -45,7 +57,12 @@ export class DevLifecycle {
                 operation.cycle = cycle;
                 operation.phase = '';
             }
-            if (operation.phase === event.event || operation.phase === 'build.succeeded' || operation.phase === 'build.failed') return;
+            if (
+                operation.phase === event.event ||
+                operation.phase === 'build.succeeded' ||
+                operation.phase === 'build.failed'
+            )
+                return;
         } else {
             if (operation.phase === 'stopped' || operation.phase === event.event) return;
         }
@@ -57,17 +74,28 @@ export class DevLifecycle {
                 return;
             }
             const parent = propagation.extract(this.parent, { traceparent: event.traceparent });
-            operation.span = trace.getTracer('stam.dev').startSpan(`dev.${build ? 'build' : 'startup'}`, {
-                startTime: eventTime,
-                attributes: {
-                    'operation.label': `[${event.app}] ${build ? 'Build' : 'Startup'}`,
-                    'dev.app': event.app, 'dev.process.id': event.processId,
-                    ...(event.cycleId ? { 'dev.build.cycle': event.cycleId } : {}),
+            operation.span = trace.getTracer('stam.dev').startSpan(
+                `dev.${build ? 'build' : 'startup'}`,
+                {
+                    startTime: eventTime,
+                    attributes: {
+                        'operation.label': `[${event.app}] ${build ? 'Build' : 'Startup'}`,
+                        'dev.app': event.app,
+                        'dev.process.id': event.processId,
+                        ...(event.cycleId ? { 'dev.build.cycle': event.cycleId } : {}),
+                    },
                 },
-            }, parent);
+                parent,
+            );
         } else {
-            if (event.errors !== undefined) operation.span?.setAttribute('dev.build.errors', event.errors);
-            this.end(operation, event.event, event.event === 'build.failed' || event.failed === true, eventTime);
+            if (event.errors !== undefined)
+                operation.span?.setAttribute('dev.build.errors', event.errors);
+            this.end(
+                operation,
+                event.event,
+                event.event === 'build.failed' || event.failed === true,
+                eventTime,
+            );
         }
         this.changed(event);
     }
@@ -79,7 +107,12 @@ export class DevLifecycle {
         this.operations.clear();
     }
 
-    private end(operation: Operation | undefined, outcome: string, failed = false, time?: number): void {
+    private end(
+        operation: Operation | undefined,
+        outcome: string,
+        failed = false,
+        time?: number,
+    ): void {
         if (!operation?.span) return;
         operation.span.setAttribute('dev.outcome', outcome);
         if (failed) operation.span.setStatus({ code: SpanStatusCode.ERROR });

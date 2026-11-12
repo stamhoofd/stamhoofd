@@ -21,7 +21,11 @@ export class RegistrationNotificationService {
 
         const organization = await Organization.getByID(registration.organizationId);
         const platform = await Platform.getSharedPrivateStruct();
-        if (!organization || (!platform.config.featureFlags.includes(featureFlag) && !organization.privateMeta.featureFlags.includes(featureFlag))) {
+        if (
+            !organization ||
+            (!platform.config.featureFlags.includes(featureFlag) &&
+                !organization.privateMeta.featureFlags.includes(featureFlag))
+        ) {
             return;
         }
 
@@ -31,7 +35,7 @@ export class RegistrationNotificationService {
         }
 
         // Administrators that registered their own family don't need to be notified about it
-        const memberUserIds = new Set(member.users.map(u => u.id));
+        const memberUserIds = new Set(member.users.map((u) => u.id));
         const recipients: User[] = [];
 
         for (const admin of await User.getAdmins(organization.id)) {

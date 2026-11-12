@@ -1,11 +1,23 @@
 import type { AutoEncoderPatchType } from '@common/encoding';
 import { Request } from '@node/endpoints';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
-import { OrderFactory, OrganizationFactory, Ticket, TicketFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import {
+    OrderFactory,
+    OrganizationFactory,
+    Ticket,
+    TicketFactory,
+    UserFactory,
+    WebshopFactory,
+} from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { CartReservedSeat, Permissions, ResourcePermissions, TicketPrivate } from '@stamhoofd/structures';
+import {
+    CartReservedSeat,
+    Permissions,
+    ResourcePermissions,
+    TicketPrivate,
+} from '@stamhoofd/structures';
 import { STExpect } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { SessionService } from '../../../../services/SessionService.js';
@@ -14,7 +26,15 @@ import { PatchWebshopTicketsEndpoint } from './PatchWebshopTicketsEndpoint.js';
 describe('Endpoint.PatchWebshopTicketsEndpoint', () => {
     const endpoint = new PatchWebshopTicketsEndpoint();
 
-    const patchTickets = async ({ patches, webshop, user }: { patches: AutoEncoderPatchType<TicketPrivate>[]; webshop: Webshop; user: User }) => {
+    const patchTickets = async ({
+        patches,
+        webshop,
+        user,
+    }: {
+        patches: AutoEncoderPatchType<TicketPrivate>[];
+        webshop: Webshop;
+        user: User;
+    }) => {
         const token = await SessionService.createSession(user);
 
         const request = Request.patch({
@@ -32,24 +52,45 @@ describe('Endpoint.PatchWebshopTicketsEndpoint', () => {
     /**
      * Same patch as the ticket scanner sends
      */
-    const scanPatch = (ticket: Ticket, { scannedAt = new Date(), scannedBy = 'Scanner' }: { scannedAt?: Date; scannedBy?: string } = {}) => TicketPrivate.patch({
-        id: ticket.id,
-        secret: ticket.secret,
-        scannedAt,
-        scannedBy,
-    });
+    const scanPatch = (
+        ticket: Ticket,
+        {
+            scannedAt = new Date(),
+            scannedBy = 'Scanner',
+        }: { scannedAt?: Date; scannedBy?: string } = {},
+    ) =>
+        TicketPrivate.patch({
+            id: ticket.id,
+            secret: ticket.secret,
+            scannedAt,
+            scannedBy,
+        });
 
-    const createWebshopAdmin = async ({ level, accessRights = [] }: { level: PermissionLevel; accessRights?: AccessRight[] }) => {
+    const createWebshopAdmin = async ({
+        level,
+        accessRights = [],
+    }: {
+        level: PermissionLevel;
+        accessRights?: AccessRight[];
+    }) => {
         return await new UserFactory({
             organization,
             permissions: Permissions.create({
                 level: PermissionLevel.None,
                 resources: new Map([
-                    [PermissionsResourceType.Webshops, new Map([[webshop.id, ResourcePermissions.create({
-                        resourceName: webshop.meta.name,
-                        level,
-                        accessRights,
-                    })]])],
+                    [
+                        PermissionsResourceType.Webshops,
+                        new Map([
+                            [
+                                webshop.id,
+                                ResourcePermissions.create({
+                                    resourceName: webshop.meta.name,
+                                    level,
+                                    accessRights,
+                                }),
+                            ],
+                        ]),
+                    ],
                 ]),
             }),
         }).create();
@@ -77,9 +118,15 @@ describe('Endpoint.PatchWebshopTicketsEndpoint', () => {
         const scannedAt = new Date(Date.now() - 5 * 60 * 1000);
         scannedAt.setMilliseconds(0);
 
-        const response = await patchTickets({ webshop, user, patches: [scanPatch(ticket, { scannedAt, scannedBy: 'Jan' })] });
+        const response = await patchTickets({
+            webshop,
+            user,
+            patches: [scanPatch(ticket, { scannedAt, scannedBy: 'Jan' })],
+        });
 
-        expect(response.body).toEqual([expect.objectContaining({ id: ticket.id, scannedAt, scannedBy: 'Jan' })]);
+        expect(response.body).toEqual([
+            expect.objectContaining({ id: ticket.id, scannedAt, scannedBy: 'Jan' }),
+        ]);
 
         const updated = await Ticket.getByID(ticket.id);
         expect(updated!.scannedAt).toEqual(scannedAt);
@@ -91,7 +138,18 @@ describe('Endpoint.PatchWebshopTicketsEndpoint', () => {
         await patchTickets({ webshop, user, patches: [scanPatch(ticket)] });
         await Ticket.update().set('updatedAt', ticket.updatedAt).where('id', ticket.id).update();
 
-        await patchTickets({ webshop, user, patches: [TicketPrivate.patch({ id: ticket.id, secret: ticket.secret, scannedAt: null, scannedBy: null })] });
+        await patchTickets({
+            webshop,
+            user,
+            patches: [
+                TicketPrivate.patch({
+                    id: ticket.id,
+                    secret: ticket.secret,
+                    scannedAt: null,
+                    scannedBy: null,
+                }),
+            ],
+        });
 
         const updated = await Ticket.getByID(ticket.id);
         expect(updated!.scannedAt).toBeNull();
@@ -102,17 +160,23 @@ describe('Endpoint.PatchWebshopTicketsEndpoint', () => {
     test('only changes the scan of a ticket', async () => {
         const otherOrder = await new OrderFactory({ webshop }).create();
 
-        await patchTickets({ webshop, user, patches: [TicketPrivate.patch({
-            id: ticket.id,
-            secret: 'changed-secret',
-            orderId: otherOrder.id,
-            itemId: 'other-item',
-            index: 5,
-            total: 5,
-            deletedAt: new Date(),
-            seat: CartReservedSeat.create({ section: 'A', row: '1', seat: '1' }),
-            scannedAt: new Date(),
-        })] });
+        await patchTickets({
+            webshop,
+            user,
+            patches: [
+                TicketPrivate.patch({
+                    id: ticket.id,
+                    secret: 'changed-secret',
+                    orderId: otherOrder.id,
+                    itemId: 'other-item',
+                    index: 5,
+                    total: 5,
+                    deletedAt: new Date(),
+                    seat: CartReservedSeat.create({ section: 'A', row: '1', seat: '1' }),
+                    scannedAt: new Date(),
+                }),
+            ],
+        });
 
         const updated = await Ticket.getByID(ticket.id);
         expect(updated).toMatchObject({
@@ -133,8 +197,16 @@ describe('Endpoint.PatchWebshopTicketsEndpoint', () => {
         const secondScan = new Date(Date.now() - 60 * 1000);
         secondScan.setMilliseconds(0);
 
-        await patchTickets({ webshop, user, patches: [scanPatch(ticket, { scannedAt: secondScan, scannedBy: 'Device B' })] });
-        await patchTickets({ webshop, user, patches: [scanPatch(ticket, { scannedAt: firstScan, scannedBy: 'Device A' })] });
+        await patchTickets({
+            webshop,
+            user,
+            patches: [scanPatch(ticket, { scannedAt: secondScan, scannedBy: 'Device B' })],
+        });
+        await patchTickets({
+            webshop,
+            user,
+            patches: [scanPatch(ticket, { scannedAt: firstScan, scannedBy: 'Device A' })],
+        });
 
         const updated = await Ticket.getByID(ticket.id);
         expect(updated!.scannedAt).toEqual(firstScan);
@@ -146,31 +218,48 @@ describe('Endpoint.PatchWebshopTicketsEndpoint', () => {
         scannedAt.setMilliseconds(0);
 
         await patchTickets({ webshop, user, patches: [scanPatch(ticket, { scannedAt })] });
-        const response = await patchTickets({ webshop, user, patches: [scanPatch(ticket, { scannedAt })] });
+        const response = await patchTickets({
+            webshop,
+            user,
+            patches: [scanPatch(ticket, { scannedAt })],
+        });
 
         expect(response.body).toEqual([expect.objectContaining({ id: ticket.id, scannedAt })]);
     });
 
     test('rejects tickets of another webshop, but still saves the other scans of the request', async () => {
         const otherWebshop = await new WebshopFactory({ organizationId: organization.id }).create();
-        const otherTicket = await new TicketFactory({ order: await new OrderFactory({ webshop: otherWebshop }).create() }).create();
+        const otherTicket = await new TicketFactory({
+            order: await new OrderFactory({ webshop: otherWebshop }).create(),
+        }).create();
 
-        await expect(patchTickets({ webshop, user, patches: [scanPatch(otherTicket), scanPatch(ticket)] }))
-            .rejects.toThrow(STExpect.simpleError({ code: 'ticket_not_found', field: otherTicket.id }));
+        await expect(
+            patchTickets({ webshop, user, patches: [scanPatch(otherTicket), scanPatch(ticket)] }),
+        ).rejects.toThrow(
+            STExpect.simpleError({ code: 'ticket_not_found', field: otherTicket.id }),
+        );
 
         expect((await Ticket.getByID(otherTicket.id))!.scannedAt).toBeNull();
         expect((await Ticket.getByID(ticket.id))!.scannedAt).not.toBeNull();
     });
 
     test('rejects tickets that do not exist', async () => {
-        const deleted = TicketPrivate.patch({ id: 'deleted-ticket-id', secret: 'deleted', scannedAt: new Date() });
+        const deleted = TicketPrivate.patch({
+            id: 'deleted-ticket-id',
+            secret: 'deleted',
+            scannedAt: new Date(),
+        });
 
-        await expect(patchTickets({ webshop, user, patches: [deleted] }))
-            .rejects.toThrow(STExpect.simpleError({ code: 'ticket_not_found', field: 'deleted-ticket-id' }));
+        await expect(patchTickets({ webshop, user, patches: [deleted] })).rejects.toThrow(
+            STExpect.simpleError({ code: 'ticket_not_found', field: 'deleted-ticket-id' }),
+        );
     });
 
     test('a user who can only scan tickets can save scans', async () => {
-        const scanner = await createWebshopAdmin({ level: PermissionLevel.None, accessRights: [AccessRight.WebshopScanTickets] });
+        const scanner = await createWebshopAdmin({
+            level: PermissionLevel.None,
+            accessRights: [AccessRight.WebshopScanTickets],
+        });
 
         await patchTickets({ webshop, user: scanner, patches: [scanPatch(ticket)] });
 
@@ -180,8 +269,9 @@ describe('Endpoint.PatchWebshopTicketsEndpoint', () => {
     test('a user with read access cannot save scans', async () => {
         const reader = await createWebshopAdmin({ level: PermissionLevel.Read });
 
-        await expect(patchTickets({ webshop, user: reader, patches: [scanPatch(ticket)] }))
-            .rejects.toThrow(STExpect.errorWithCode('not_found'));
+        await expect(
+            patchTickets({ webshop, user: reader, patches: [scanPatch(ticket)] }),
+        ).rejects.toThrow(STExpect.errorWithCode('not_found'));
 
         expect((await Ticket.getByID(ticket.id))!.scannedAt).toBeNull();
     });

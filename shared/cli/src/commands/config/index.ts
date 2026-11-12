@@ -3,7 +3,8 @@ import { showHelp } from '../../runtime/show-help.js';
 
 export default class Config extends BaseCommand {
     static summary = 'Inspect resolved local configuration';
-    static description = 'Use these commands to confirm which environment, instance, domains, and settings `stam` resolved before you start running things locally.';
+    static description =
+        'Use these commands to confirm which environment, instance, domains, and settings `stam` resolved before you start running things locally.';
     static examples = [
         'stam config print --env keeo',
         'stam config explain --env keeo --name feature-payments',

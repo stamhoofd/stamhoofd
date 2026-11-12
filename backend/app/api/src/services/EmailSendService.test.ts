@@ -1,15 +1,35 @@
 import type { LimitedFilteredRequest } from '@stamhoofd/structures';
-import { BalanceItemType, EmailRecipientFilter, EmailRecipientsStatus, EmailRecipient as EmailRecipientStruct, EmailRecipientSubfilter, EmailStatus, OrganizationMetaData, PaginatedResponse } from '@stamhoofd/structures';
+import {
+    BalanceItemType,
+    EmailRecipientFilter,
+    EmailRecipientsStatus,
+    EmailRecipient as EmailRecipientStruct,
+    EmailRecipientSubfilter,
+    EmailStatus,
+    OrganizationMetaData,
+    PaginatedResponse,
+} from '@stamhoofd/structures';
 import { EmailMocker } from '@stamhoofd/email';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
-import { BalanceItemFactory, CachedBalance, Email, EmailRecipient, MemberFactory, OrganizationFactory, Platform, UserFactory } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    CachedBalance,
+    Email,
+    EmailRecipient,
+    MemberFactory,
+    OrganizationFactory,
+    Platform,
+    UserFactory,
+} from '@stamhoofd/models';
 import { EmailSendService } from './EmailSendService.js';
 import { Formatter } from '@stamhoofd/utility';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
-async function buildEmail(data: {
-    recipients: EmailRecipientStruct[];
-} & Partial<Email>) {
+async function buildEmail(
+    data: {
+        recipients: EmailRecipientStruct[];
+    } & Partial<Email>,
+) {
     Email.recipientLoaders.set(EmailRecipientFilterType.Members, {
         fetch: async (query: LimitedFilteredRequest) => {
             return Promise.resolve(
@@ -55,9 +75,11 @@ async function buildEmail(data: {
 /**
  * An email that won't be able to fetch recipients
  */
-async function buildFailEmail(data: {
-    recipients: EmailRecipientStruct[];
-} & Partial<Email>) {
+async function buildFailEmail(
+    data: {
+        recipients: EmailRecipientStruct[];
+    } & Partial<Email>,
+) {
     Email.recipientLoaders.set(EmailRecipientFilterType.Members, {
         fetch: async (query: LimitedFilteredRequest) => {
             throw new Error('This is a simulated error while fetching recipients');
@@ -97,7 +119,9 @@ async function buildFailEmail(data: {
 
 describe('EmailSendService', () => {
     it('Correctly whitelists email recipients', async () => {
-        TestUtils.setEnvironment('WHITELISTED_EMAIL_DESTINATIONS', ['*@stamhoofd-allowed-domain-tests.be']);
+        TestUtils.setEnvironment('WHITELISTED_EMAIL_DESTINATIONS', [
+            '*@stamhoofd-allowed-domain-tests.be',
+        ]);
         const model = await buildEmail({
             recipients: [
                 EmailRecipientStruct.create({
@@ -220,10 +244,14 @@ describe('EmailSendService', () => {
 
         // Check if it was sent correctly
         expect(model.recipientsStatus).toBe(EmailRecipientsStatus.NotCreated);
-        expect(model.recipientsErrors).toEqual(STExpect.simpleErrors([{
-            code: 'unknown_error',
-            message: 'This is a simulated error while fetching recipients',
-        }]));
+        expect(model.recipientsErrors).toEqual(
+            STExpect.simpleErrors([
+                {
+                    code: 'unknown_error',
+                    message: 'This is a simulated error while fetching recipients',
+                },
+            ]),
+        );
 
         expect(model.emailRecipientsCount).toBe(null);
         expect(model.status).toBe(EmailStatus.Failed);
@@ -281,9 +309,11 @@ describe('EmailSendService', () => {
                 email: 'example@domain.be',
                 sentAt: null,
                 failCount: 1,
-                failError: STExpect.simpleErrors([{
-                    message: /This is a simulated network error ([3-6])/,
-                }]),
+                failError: STExpect.simpleErrors([
+                    {
+                        message: /This is a simulated network error ([3-6])/,
+                    },
+                ]),
                 firstFailedAt: expect.any(Date),
                 lastFailedAt: expect.any(Date),
             }),
@@ -291,9 +321,11 @@ describe('EmailSendService', () => {
                 email: 'example2@domain.be',
                 sentAt: null,
                 failCount: 1,
-                failError: STExpect.simpleErrors([{
-                    message: /This is a simulated network error ([3-6])/,
-                }]),
+                failError: STExpect.simpleErrors([
+                    {
+                        message: /This is a simulated network error ([3-6])/,
+                    },
+                ]),
                 firstFailedAt: expect.any(Date),
                 lastFailedAt: expect.any(Date),
             }),
@@ -414,10 +446,12 @@ describe('EmailSendService', () => {
                 lastName: 'Von Doe',
                 email: 'invalid',
                 failCount: 1,
-                failError: STExpect.simpleErrors([{
-                    code: 'invalid_email_address',
-                    message: 'Invalid email address',
-                }]),
+                failError: STExpect.simpleErrors([
+                    {
+                        code: 'invalid_email_address',
+                        message: 'Invalid email address',
+                    },
+                ]),
                 firstFailedAt: expect.any(Date),
                 lastFailedAt: expect.any(Date),
             }),
@@ -736,7 +770,8 @@ describe('EmailSendService', () => {
                 fromAddress: 'custom@customdomain.com',
                 html: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
                 text: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
-                subject: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+                subject:
+                    '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
                 emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
             });
 
@@ -795,7 +830,8 @@ describe('EmailSendService', () => {
                 fromName: 'Custom Name',
                 html: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
                 text: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
-                subject: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+                subject:
+                    '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
                 emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
             });
 
@@ -846,7 +882,8 @@ describe('EmailSendService', () => {
                 fromAddress: 'custom@customdomain.com',
                 html: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
                 text: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
-                subject: '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
+                subject:
+                    '{{primaryColor}};{{primaryColorContrast}};{{organizationName}};{{fromName}}',
                 emailType: 'system-test', // Makes sure we don't need to include unsubscribeUrl
             });
 
@@ -931,7 +968,9 @@ describe('EmailSendService', () => {
                     subject: `${expectedAmount}`,
                 });
 
-                expect(EmailMocker.getSucceededEmail(0).html).toMatch('<p>' + expectedAmount + '</p>');
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch(
+                    '<p>' + expectedAmount + '</p>',
+                );
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch(expectedAmount);
 
                 // Check if the table is correct
@@ -944,7 +983,9 @@ describe('EmailSendService', () => {
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch('2 x '); // amount
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch(Formatter.price(12_99_00)); // unit price
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch(expectedAmount); // total price in table
-                expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toMatch('test balance item'); // description
+                expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toMatch(
+                    'test balance item',
+                ); // description
             }, 15_000);
 
             it('The balance is zero for unknown users', async () => {
@@ -992,16 +1033,22 @@ describe('EmailSendService', () => {
                     subject: `${expectedAmount}`,
                 });
 
-                expect(EmailMocker.getSucceededEmail(0).html).toMatch('<p>' + expectedAmount + '</p>');
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch(
+                    '<p>' + expectedAmount + '</p>',
+                );
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch(expectedAmount);
 
                 // Check if the table is correct
                 expect(EmailMocker.getSucceededEmail(0).html).not.toMatch('<table');
                 expect(EmailMocker.getSucceededEmail(0).html).not.toMatch(' x '); // amount
-                expect(EmailMocker.getSucceededEmail(0).html).toMatch('<p class="description">' + $t('%hX') + '</p>');
+                expect(EmailMocker.getSucceededEmail(0).html).toMatch(
+                    '<p class="description">' + $t('%hX') + '</p>',
+                );
 
                 expect(EmailMocker.getSucceededEmail(0).text).not.toMatch(' x '); // amount
-                expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toMatch($t('%hX').toLowerCase());
+                expect(EmailMocker.getSucceededEmail(0).text?.toLowerCase()).toMatch(
+                    $t('%hX').toLowerCase(),
+                );
             }, 15_000);
 
             it('loginDetails are added for existing users without password', async () => {
@@ -1047,7 +1094,9 @@ describe('EmailSendService', () => {
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
                 expect(EmailMocker.getSucceededEmail(0).html).toMatch(
-                    $t('%1EB', { email: `<strong>${Formatter.escapeHtml(existingUser.email)}</strong>` }),
+                    $t('%1EB', {
+                        email: `<strong>${Formatter.escapeHtml(existingUser.email)}</strong>`,
+                    }),
                 );
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch(
                     $t('%1EB', { email: existingUser.email }),
@@ -1142,7 +1191,9 @@ describe('EmailSendService', () => {
                 expect(await EmailMocker.getFailedCount()).toBe(0);
 
                 expect(EmailMocker.getSucceededEmail(0).html).toMatch(
-                    $t('%1EA', { email: `<strong>${Formatter.escapeHtml(existingUser.email)}</strong>` }),
+                    $t('%1EA', {
+                        email: `<strong>${Formatter.escapeHtml(existingUser.email)}</strong>`,
+                    }),
                 );
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch(
                     $t('%1EA', { email: existingUser.email }),
@@ -1209,7 +1260,11 @@ describe('EmailSendService', () => {
                 expect(EmailMocker.getSucceededEmail(0).text).toMatch(
                     $t('%1EC', {
                         firstName: member.firstName,
-                        securityCode: Formatter.spaceString(member.details.securityCode ?? '', 4, '-'),
+                        securityCode: Formatter.spaceString(
+                            member.details.securityCode ?? '',
+                            4,
+                            '-',
+                        ),
                     }),
                 );
             }, 15_000);
@@ -1231,11 +1286,13 @@ describe('EmailSendService', () => {
 
                 const model = await buildEmail({
                     organizationId: organization.id,
-                    recipients: members.map(member => EmailRecipientStruct.create({
-                        email: existingUser.email,
-                        userId: existingUser.id,
-                        memberId: member.id,
-                    })),
+                    recipients: members.map((member) =>
+                        EmailRecipientStruct.create({
+                            email: existingUser.email,
+                            userId: existingUser.id,
+                            memberId: member.id,
+                        }),
+                    ),
                     html: '{{loginDetails}}',
                     emailType: 'system-test',
                 });
@@ -1246,14 +1303,18 @@ describe('EmailSendService', () => {
 
                 expect(await EmailMocker.getSucceededCount()).toBe(1);
                 for (const member of members) {
-                    expect(EmailMocker.getSucceededEmail(0).html).toContain(Formatter.spaceString(member.details.securityCode!, 4, '-'));
+                    expect(EmailMocker.getSucceededEmail(0).html).toContain(
+                        Formatter.spaceString(member.details.securityCode!, 4, '-'),
+                    );
                 }
 
                 const recipients = await EmailRecipient.select().where('emailId', model.id).fetch();
                 expect(recipients).toHaveLength(2);
-                expect(recipients.filter(r => r.duplicateOfRecipientId !== null)).toHaveLength(1);
+                expect(recipients.filter((r) => r.duplicateOfRecipientId !== null)).toHaveLength(1);
                 for (const recipient of recipients) {
-                    expect(recipient.replacements.find(r => r.token === 'loginDetails')).toBeUndefined();
+                    expect(
+                        recipient.replacements.find((r) => r.token === 'loginDetails'),
+                    ).toBeUndefined();
                 }
             }, 15_000);
         });

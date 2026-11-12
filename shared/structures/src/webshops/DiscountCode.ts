@@ -1,4 +1,13 @@
-import { AutoEncoder, field, StringDecoder, ArrayDecoder, IntegerDecoder, BooleanDecoder, DateDecoder, EmailDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    field,
+    StringDecoder,
+    ArrayDecoder,
+    IntegerDecoder,
+    BooleanDecoder,
+    DateDecoder,
+    EmailDecoder,
+} from '@common/encoding';
 import { Discount } from './Discount.js';
 import { v4 as uuidv4 } from 'uuid';
 

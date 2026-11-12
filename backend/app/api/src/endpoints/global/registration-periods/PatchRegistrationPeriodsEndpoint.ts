@@ -1,4 +1,8 @@
-import type { ConvertArrayToPatchableArray, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import type {
+    ConvertArrayToPatchableArray,
+    Decoder,
+    PatchableArrayAutoEncoder,
+} from '@common/encoding';
 import { PatchableArrayDecoder, StringDecoder, patchObject } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
@@ -21,8 +25,12 @@ type ResponseBody = RegistrationPeriodStruct[];
  */
 
 export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    bodyDecoder = new PatchableArrayDecoder(RegistrationPeriodStruct as any, RegistrationPeriodStruct.patchType(), StringDecoder) as any as Decoder<ConvertArrayToPatchableArray<RegistrationPeriodStruct[]>>;
+    bodyDecoder = new PatchableArrayDecoder(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        RegistrationPeriodStruct as any,
+        RegistrationPeriodStruct.patchType(),
+        StringDecoder,
+    ) as any as Decoder<ConvertArrayToPatchableArray<RegistrationPeriodStruct[]>>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -68,7 +76,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
         // Fast throw first (more in depth checking for patches later)
         if (organization) {
-            if (!await Context.auth.hasFullAccess(organization.id)) {
+            if (!(await Context.auth.hasFullAccess(organization.id))) {
                 throw Context.auth.error();
             }
         } else {
@@ -92,8 +100,10 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             const registration = await Registration.select()
                 .join(
-                    SQL.innerJoin(SQL.table(Group.table))
-                        .where(SQL.column(Group.table, 'id'), SQL.column(Registration.table, 'groupId')),
+                    SQL.innerJoin(SQL.table(Group.table)).where(
+                        SQL.column(Group.table, 'id'),
+                        SQL.column(Registration.table, 'groupId'),
+                    ),
                 )
                 .where(SQL.column(Group.table, 'periodId'), model.id)
                 .where(SQL.column(Group.table, 'deletedAt'), null)
@@ -134,7 +144,11 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             if (put.locked === true) {
                 // current period cannot be locked
-                const isCurrentRegistrationPeriod = await PatchRegistrationPeriodsEndpoint.isCurrentRegistrationPeriod(period.organizationId, period.id);
+                const isCurrentRegistrationPeriod =
+                    await PatchRegistrationPeriodsEndpoint.isCurrentRegistrationPeriod(
+                        period.organizationId,
+                        period.id,
+                    );
 
                 if (isCurrentRegistrationPeriod) {
                     throw new SimpleError({
@@ -146,7 +160,10 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             }
 
             await period.save();
-            await RegistrationPeriodService.updatePreviousNextPeriods(period.organizationId, period);
+            await RegistrationPeriodService.updatePreviousNextPeriods(
+                period.organizationId,
+                period,
+            );
             periods.push(period);
         }
 
@@ -163,7 +180,11 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
 
             if (patch.locked === true) {
                 // current period cannot be locked
-                const isCurrentRegistrationPeriod = await PatchRegistrationPeriodsEndpoint.isCurrentRegistrationPeriod(model.organizationId, model.id);
+                const isCurrentRegistrationPeriod =
+                    await PatchRegistrationPeriodsEndpoint.isCurrentRegistrationPeriod(
+                        model.organizationId,
+                        model.id,
+                    );
 
                 if (isCurrentRegistrationPeriod) {
                     throw new SimpleError({
@@ -228,8 +249,6 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
         // Clear platform cache
         await Platform.clearCache();
 
-        return new Response(
-            periods.map(p => p.getStructure()),
-        );
+        return new Response(periods.map((p) => p.getStructure()));
     }
 }

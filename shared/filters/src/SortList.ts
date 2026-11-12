@@ -12,7 +12,7 @@ export type AssertSortItem = { key: string; order?: SortItemDirection };
 export type AssertSortList = AssertSortItem[];
 
 export function encodeSortList(sort: SortList): string {
-    return sort.map(s => `${s.key} ${s.order}`).join(',');
+    return sort.map((s) => `${s.key} ${s.order}`).join(',');
 }
 
 export class SortListDecoder {
@@ -36,13 +36,16 @@ export class SortListDecoder {
                 });
             }
 
-            const direction = sub.length === 1
-                ? SortItemDirection.ASC
-                : data.clone({
-                        data: sub[1],
-                        context: data.context,
-                        field: data.addToCurrentField(index),
-                    }).enum(SortItemDirection);
+            const direction =
+                sub.length === 1
+                    ? SortItemDirection.ASC
+                    : data
+                          .clone({
+                              data: sub[1],
+                              context: data.context,
+                              field: data.addToCurrentField(index),
+                          })
+                          .enum(SortItemDirection);
 
             const key = sub[0].trim();
             list.push({

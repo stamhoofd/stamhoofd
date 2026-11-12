@@ -4,7 +4,13 @@ import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { SessionService } from '../../src/services/SessionService.js';
 
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { ApiUser, ApiUserRateLimits, Permissions, UserMeta, UserPermissions } from '@stamhoofd/structures';
+import {
+    ApiUser,
+    ApiUserRateLimits,
+    Permissions,
+    UserMeta,
+    UserPermissions,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { GetUserEndpoint } from '../../src/endpoints/auth/GetUserEndpoint.js';
 import { CreateApiUserEndpoint } from '../../src/endpoints/organization/dashboard/users/CreateApiUserEndpoint.js';
@@ -33,16 +39,21 @@ describe('E2E.APIRateLimits', () => {
         }).create();
         const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
 
-        const createRequest = Request.buildJson('POST', '/api-keys', organization.getApiHost(), ApiUser.create({
-            permissions: UserPermissions.create({
-                organizationPermissions: new Map([
-                    [organization.id, Permissions.create({ level: PermissionLevel.Read })],
-                ]),
+        const createRequest = Request.buildJson(
+            'POST',
+            '/api-keys',
+            organization.getApiHost(),
+            ApiUser.create({
+                permissions: UserPermissions.create({
+                    organizationPermissions: new Map([
+                        [organization.id, Permissions.create({ level: PermissionLevel.Read })],
+                    ]),
+                }),
+                meta: UserMeta.create({
+                    rateLimits,
+                }),
             }),
-            meta: UserMeta.create({
-                rateLimits,
-            }),
-        }));
+        );
         createRequest.headers.authorization = 'Bearer ' + token.accessToken;
         const createResponse = await testServer.test(createEndpoint, createRequest);
 
@@ -70,7 +81,12 @@ describe('E2E.APIRateLimits', () => {
                     } catch (e) {
                         error = e;
                     }
-                    throw new Error('The endpoint rejected at call ' + i + ' with error message ' + error?.message);
+                    throw new Error(
+                        'The endpoint rejected at call ' +
+                            i +
+                            ' with error message ' +
+                            error?.message,
+                    );
                 }
             } else {
                 await expect(promise).rejects.toThrow(
@@ -101,7 +117,12 @@ describe('E2E.APIRateLimits', () => {
                     } catch (e) {
                         error = e;
                     }
-                    throw new Error('The endpoint rejected at call ' + i + ' with error message ' + error?.message);
+                    throw new Error(
+                        'The endpoint rejected at call ' +
+                            i +
+                            ' with error message ' +
+                            error?.message,
+                    );
                 }
             } else {
                 await expect(promise).rejects.toThrow(
@@ -132,7 +153,12 @@ describe('E2E.APIRateLimits', () => {
                     } catch (e) {
                         error = e;
                     }
-                    throw new Error('The endpoint rejected at call ' + i + ' with error message ' + error?.message);
+                    throw new Error(
+                        'The endpoint rejected at call ' +
+                            i +
+                            ' with error message ' +
+                            error?.message,
+                    );
                 }
             } else {
                 await expect(promise).rejects.toThrow(
@@ -163,7 +189,12 @@ describe('E2E.APIRateLimits', () => {
                     } catch (e) {
                         error = e;
                     }
-                    throw new Error('The endpoint rejected at call ' + i + ' with error message ' + error?.message);
+                    throw new Error(
+                        'The endpoint rejected at call ' +
+                            i +
+                            ' with error message ' +
+                            error?.message,
+                    );
                 }
             } else {
                 await expect(promise).rejects.toThrow(

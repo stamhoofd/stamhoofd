@@ -36,7 +36,10 @@ export class CheckDomainCertEndpoint extends Endpoint<Params, Query, Body, Respo
         // check if the domain ends on one of our localized registration domains
         for (const domain of this.registrationDomains) {
             if (request.query.domain.endsWith('.' + domain)) {
-                const strippped = request.query.domain.substr(0, request.query.domain.length - ('.' + domain).length);
+                const strippped = request.query.domain.substr(
+                    0,
+                    request.query.domain.length - ('.' + domain).length,
+                );
                 if (strippped.includes('.')) {
                     throw new SimpleError({
                         code: 'invalid_domain',
@@ -65,8 +68,14 @@ export class CheckDomainCertEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        if (STAMHOOFD.domains.legacyWebshop && request.query.domain.endsWith('.' + STAMHOOFD.domains.legacyWebshop)) {
-            const strippped = request.query.domain.substr(0, request.query.domain.length - ('.' + STAMHOOFD.domains.legacyWebshop).length);
+        if (
+            STAMHOOFD.domains.legacyWebshop &&
+            request.query.domain.endsWith('.' + STAMHOOFD.domains.legacyWebshop)
+        ) {
+            const strippped = request.query.domain.substr(
+                0,
+                request.query.domain.length - ('.' + STAMHOOFD.domains.legacyWebshop).length,
+            );
             if (strippped.includes('.')) {
                 throw new SimpleError({
                     code: 'invalid_domain',

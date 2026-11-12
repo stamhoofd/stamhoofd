@@ -17,18 +17,24 @@ describe('filter compiler registries', () => {
 
     it('keeps exact dotted keys ahead of namespaces', () => {
         const namespace: FilterDefinitions<string> = new Map([['field', exact]]);
-        const definitions: FilterDefinitions<string> = new Map<string, FilterCompiler<string> | FilterDefinitions<string>>([
+        const definitions: FilterDefinitions<string> = new Map<
+            string,
+            FilterCompiler<string> | FilterDefinitions<string>
+        >([
             ['nested', namespace],
             ['nested.field', wildcard],
         ]);
         const compiler = filterDefinitionsToCompiler(definitions);
-        expect(compileFilter({ 'nested.field': null }, compiler)).toEqual(['wildcard:nested.field']);
+        expect(compileFilter({ 'nested.field': null }, compiler)).toEqual([
+            'wildcard:nested.field',
+        ]);
         definitions.delete('nested.field');
         expect(compileFilter({ 'nested.field': null }, compiler)).toEqual(['exact:field']);
     });
 
     it('passes dotted remainders to a registered namespace compiler', () => {
-        const namespace: FilterCompiler<string> = (filter, _parent, key) => `${key}:${JSON.stringify(filter)}`;
+        const namespace: FilterCompiler<string> = (filter, _parent, key) =>
+            `${key}:${JSON.stringify(filter)}`;
         const compiler = filterDefinitionsToCompiler(new Map([['nested', namespace]]));
         expect(compileFilter({ 'nested.field': 1 }, compiler)).toEqual(['nested:{"field":1}']);
     });
@@ -40,15 +46,24 @@ describe('filter compiler registries', () => {
             ['unsupported', () => undefined],
         ]);
         const compiler = filterDefinitionsToCompiler(definitions);
-        expect(compileFilter({ known: null, missing: null }, compiler)).toEqual(['exact:known', 'wildcard:missing']);
+        expect(compileFilter({ known: null, missing: null }, compiler)).toEqual([
+            'exact:known',
+            'wildcard:missing',
+        ]);
         expect(compiler(null, compiler, 'unsupported')).toBeUndefined();
         expect(compiler(null, compiler, '$unknown')).toBeUndefined();
-        expect(() => compiler(null, compiler, 'missing.field')).toThrow('Unknown filter missing.field');
+        expect(() => compiler(null, compiler, 'missing.field')).toThrow(
+            'Unknown filter missing.field',
+        );
     });
 
     it('compiles namespace objects through their own logical operator', () => {
-        const and: FilterCompiler<string> = (filter, parent) => compileFilter(filter, parent).join(',');
-        const nested: FilterDefinitions<string> = new Map([['$and', and], ['field', exact]]);
+        const and: FilterCompiler<string> = (filter, parent) =>
+            compileFilter(filter, parent).join(',');
+        const nested: FilterDefinitions<string> = new Map([
+            ['$and', and],
+            ['field', exact],
+        ]);
         const compiler = filterDefinitionsToCompiler(new Map([['nested', nested]]));
         expect(compileFilter({ nested: { field: null } }, compiler)).toEqual(['exact:field']);
     });

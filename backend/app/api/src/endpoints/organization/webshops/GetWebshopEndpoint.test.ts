@@ -23,7 +23,11 @@ describe('Endpoint.GetWebshop', () => {
         const token = await SessionService.createSession(user);
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
 
-        const r = Request.buildJson('GET', '/v244/webshop/' + webshop.id, organization.getApiHost());
+        const r = Request.buildJson(
+            'GET',
+            '/v244/webshop/' + webshop.id,
+            organization.getApiHost(),
+        );
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         const response = await testServer.test(endpoint, r);
@@ -67,7 +71,9 @@ describe('Endpoint.GetWebshop', () => {
 
         const r = Request.buildJson('GET', '/webshop/' + webshop.id, organization.getApiHost());
 
-        await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.errorWithCode('not_authenticated'));
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(
+            STExpect.errorWithCode('not_authenticated'),
+        );
     });
 
     test('Allow signed in user access for required-auth webshop', async () => {
@@ -100,7 +106,11 @@ describe('Endpoint.GetWebshop', () => {
 
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
 
-        const r = Request.buildJson('GET', '/v244/webshop/' + webshop.id, organization.getApiHost());
+        const r = Request.buildJson(
+            'GET',
+            '/v244/webshop/' + webshop.id,
+            organization.getApiHost(),
+        );
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         const response = await testServer.test(endpoint, r);
@@ -122,7 +132,11 @@ describe('Endpoint.GetWebshop', () => {
 
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
 
-        const r = Request.buildJson('GET', '/v244/webshop/' + webshop.id, organization.getApiHost());
+        const r = Request.buildJson(
+            'GET',
+            '/v244/webshop/' + webshop.id,
+            organization.getApiHost(),
+        );
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         const response = await testServer.test(endpoint, r);
@@ -145,7 +159,11 @@ describe('Endpoint.GetWebshop', () => {
         const token = await SessionService.createSession(user);
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
 
-        const r = Request.buildJson('GET', '/v244/webshop/' + webshop.id, organization.getApiHost());
+        const r = Request.buildJson(
+            'GET',
+            '/v244/webshop/' + webshop.id,
+            organization.getApiHost(),
+        );
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
         const response = await testServer.test(endpoint, r);

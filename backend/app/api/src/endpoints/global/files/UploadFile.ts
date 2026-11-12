@@ -77,7 +77,12 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
             });
         }
 
-        if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
+        if (
+            !STAMHOOFD.SPACES_BUCKET ||
+            !STAMHOOFD.SPACES_ENDPOINT ||
+            !STAMHOOFD.SPACES_KEY ||
+            !STAMHOOFD.SPACES_SECRET
+        ) {
             throw new SimpleError({
                 code: 'not_available',
                 message: 'This endpoint is temporarily not available',
@@ -102,14 +107,22 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         // even if a parser error prevents selecting the required file field.
         const uploadDirectory = await fs.mkdtemp(join(tmpdir(), 'stamhoofd-file-'));
         try {
-            const form = formidable({ uploadDir: uploadDirectory, maxFileSize: 20 * 1024 * 1024, maxFiles: 1, maxFields: 1, keepExtensions: true });
+            const form = formidable({
+                uploadDir: uploadDirectory,
+                maxFileSize: 20 * 1024 * 1024,
+                maxFiles: 1,
+                maxFields: 1,
+                keepExtensions: true,
+            });
             const file = await new Promise<FormidableFile>((resolve, reject) => {
                 if (!request.request.request) {
-                    reject(new SimpleError({
-                        code: 'invalid_request',
-                        message: 'Invalid request',
-                        statusCode: 500,
-                    }));
+                    reject(
+                        new SimpleError({
+                            code: 'invalid_request',
+                            message: 'Invalid request',
+                            statusCode: 500,
+                        }),
+                    );
                     return;
                 }
                 try {
@@ -124,11 +137,13 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
                         }
 
                         if (!files.file || !Array.isArray(files.file) || files.file.length !== 1) {
-                            reject(new SimpleError({
-                                code: 'missing_field',
-                                message: 'Missing file',
-                                field: 'file',
-                            }));
+                            reject(
+                                new SimpleError({
+                                    code: 'missing_field',
+                                    message: 'Missing file',
+                                    field: 'file',
+                                }),
+                            );
                             return;
                         }
 
@@ -148,8 +163,18 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         }
     }
 
-    private async upload(request: DecodedRequest<Params, Query, Body>, file: FormidableFile, organization: Organization | null, user?: { id: string }) {
-        if (!STAMHOOFD.SPACES_BUCKET || !STAMHOOFD.SPACES_ENDPOINT || !STAMHOOFD.SPACES_KEY || !STAMHOOFD.SPACES_SECRET) {
+    private async upload(
+        request: DecodedRequest<Params, Query, Body>,
+        file: FormidableFile,
+        organization: Organization | null,
+        user?: { id: string },
+    ) {
+        if (
+            !STAMHOOFD.SPACES_BUCKET ||
+            !STAMHOOFD.SPACES_ENDPOINT ||
+            !STAMHOOFD.SPACES_KEY ||
+            !STAMHOOFD.SPACES_SECRET
+        ) {
             throw new SimpleError({
                 code: 'not_available',
                 message: 'Uploading is not available',
@@ -159,12 +184,19 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
         // Never trust the content type of the uploader: it is served back to browsers when the file is
         // downloaded, so we only allow content types we know are safe to serve.
-        const uploadType = File.resolveUploadType({ contentType: file.mimetype, filename: file.originalFilename });
+        const uploadType = File.resolveUploadType({
+            contentType: file.mimetype,
+            filename: file.originalFilename,
+        });
 
         if (!uploadType) {
             throw new SimpleError({
                 code: 'invalid_file_type',
-                message: 'Unsupported file type ' + (file.mimetype ?? 'unknown') + ' for file ' + (file.originalFilename ?? 'unknown'),
+                message:
+                    'Unsupported file type ' +
+                    (file.mimetype ?? 'unknown') +
+                    ' for file ' +
+                    (file.originalFilename ?? 'unknown'),
                 human: $t('%ZiD'),
                 field: 'file',
                 statusCode: 400,
@@ -173,7 +205,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
         const fileContent = await fs.readFile(file.filepath);
 
-        let prefix = (STAMHOOFD.SPACES_PREFIX ?? '');
+        let prefix = STAMHOOFD.SPACES_PREFIX ?? '';
         if (prefix.length > 0) {
             prefix += '/';
         }
@@ -198,8 +230,14 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
         // Also include the source, in private mode
         const fileId = uuidv4();
 
-        const filenameWithoutExt = file.originalFilename ? File.removeExtension(file.originalFilename) : '';
-        const key = prefix + fileId + '/' + ((Formatter.slug(filenameWithoutExt) || fileId) + '.' + uploadType.extension);
+        const filenameWithoutExt = file.originalFilename
+            ? File.removeExtension(file.originalFilename)
+            : '';
+        const key =
+            prefix +
+            fileId +
+            '/' +
+            ((Formatter.slug(filenameWithoutExt) || fileId) + '.' + uploadType.extension);
 
         const fileStruct = new File({
             id: fileId,
@@ -214,7 +252,7 @@ export class UploadFile extends Endpoint<Params, Query, Body, ResponseBody> {
 
         // Generate an upload signature for this file if it is private
         if (request.query.isPrivate) {
-            if (!await fileStruct.sign()) {
+            if (!(await fileStruct.sign())) {
                 throw new SimpleError({
                     code: 'failed_to_sign',
                     message: 'Failed to sign file',

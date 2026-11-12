@@ -11,8 +11,8 @@ vi.mock('../../runtime/prompts.js', () => ({
     select: vi.fn(),
 }));
 
-vi.mock('../../runtime/command-runner.js', async importOriginal => ({
-    ...await importOriginal<typeof import('../../runtime/command-runner.js')>(),
+vi.mock('../../runtime/command-runner.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('../../runtime/command-runner.js')>()),
     run: vi.fn(),
 }));
 
@@ -49,11 +49,47 @@ describe('database management commands', () => {
         await command.run();
 
         expect(select).not.toHaveBeenCalled();
-        expect(run).toHaveBeenNthCalledWith(1, 'podman', ['--version'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
-        expect(run).toHaveBeenNthCalledWith(2, 'podman', ['info'], { verbosity: RunVerbosity.Quiet });
-        expect(run).toHaveBeenNthCalledWith(3, 'podman', ['inspect', '-f', '{{.State.Running}}', 'stamhoofd-mysql'], expect.anything());
-        expect(run).toHaveBeenNthCalledWith(4, 'podman', ['exec', 'stamhoofd-mysql', 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'CREATE DATABASE IF NOT EXISTS `target-db` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], expect.anything());
-        expect(run).toHaveBeenNthCalledWith(5, 'podman', ['exec', 'stamhoofd-mysql', 'sh', '-c', "mysqldump -h'127.0.0.1' -u'root' -p'root' --single-transaction --routines --triggers --events 'source-db' | mysql -h'127.0.0.1' -u'root' -p'root' 'target-db'"], expect.anything());
+        expect(run).toHaveBeenNthCalledWith(1, 'podman', ['--version'], {
+            capture: true,
+            allowFailure: true,
+            verbosity: RunVerbosity.Quiet,
+        });
+        expect(run).toHaveBeenNthCalledWith(2, 'podman', ['info'], {
+            verbosity: RunVerbosity.Quiet,
+        });
+        expect(run).toHaveBeenNthCalledWith(
+            3,
+            'podman',
+            ['inspect', '-f', '{{.State.Running}}', 'stamhoofd-mysql'],
+            expect.anything(),
+        );
+        expect(run).toHaveBeenNthCalledWith(
+            4,
+            'podman',
+            [
+                'exec',
+                'stamhoofd-mysql',
+                'mysql',
+                '-h127.0.0.1',
+                '-uroot',
+                '-proot',
+                '-e',
+                'CREATE DATABASE IF NOT EXISTS `target-db` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;',
+            ],
+            expect.anything(),
+        );
+        expect(run).toHaveBeenNthCalledWith(
+            5,
+            'podman',
+            [
+                'exec',
+                'stamhoofd-mysql',
+                'sh',
+                '-c',
+                "mysqldump -h'127.0.0.1' -u'root' -p'root' --single-transaction --routines --triggers --events 'source-db' | mysql -h'127.0.0.1' -u'root' -p'root' 'target-db'",
+            ],
+            expect.anything(),
+        );
     });
 
     it('moves a database by copying and dropping the source', async () => {
@@ -61,7 +97,20 @@ describe('database management commands', () => {
 
         await command.run();
 
-        expect(run).toHaveBeenCalledWith('podman', ['exec', 'stamhoofd-mysql', 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'DROP DATABASE IF EXISTS `source-db`;'], expect.anything());
+        expect(run).toHaveBeenCalledWith(
+            'podman',
+            [
+                'exec',
+                'stamhoofd-mysql',
+                'mysql',
+                '-h127.0.0.1',
+                '-uroot',
+                '-proot',
+                '-e',
+                'DROP DATABASE IF EXISTS `source-db`;',
+            ],
+            expect.anything(),
+        );
     });
 
     it('removes a database selected by explicit from flag', async () => {
@@ -70,11 +119,26 @@ describe('database management commands', () => {
         await command.run();
 
         expect(select).not.toHaveBeenCalled();
-        expect(run).toHaveBeenCalledWith('podman', ['exec', 'stamhoofd-mysql', 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'DROP DATABASE IF EXISTS `source-db`;'], expect.anything());
+        expect(run).toHaveBeenCalledWith(
+            'podman',
+            [
+                'exec',
+                'stamhoofd-mysql',
+                'mysql',
+                '-h127.0.0.1',
+                '-uroot',
+                '-proot',
+                '-e',
+                'DROP DATABASE IF EXISTS `source-db`;',
+            ],
+            expect.anything(),
+        );
     });
 
     it('prompts for missing from and to databases', async () => {
-        vi.mocked(select).mockResolvedValueOnce('source-db').mockResolvedValueOnce('stamhoofd-development');
+        vi.mocked(select)
+            .mockResolvedValueOnce('source-db')
+            .mockResolvedValueOnce('stamhoofd-development');
         const command = createCommand(DbCopy, {});
 
         await command.run();
@@ -98,7 +162,9 @@ describe('database management commands', () => {
     });
 
     it('allows a custom target database name for missing to option', async () => {
-        vi.mocked(select).mockResolvedValueOnce('source-db').mockResolvedValueOnce('__stamhoofd_custom_database__');
+        vi.mocked(select)
+            .mockResolvedValueOnce('source-db')
+            .mockResolvedValueOnce('__stamhoofd_custom_database__');
         vi.mocked(input).mockResolvedValueOnce('custom-target-db');
         const command = createCommand(DbCopy, {});
 
@@ -108,7 +174,20 @@ describe('database management commands', () => {
             message: 'Enter the target database name',
             validate: expect.any(Function),
         });
-        expect(run).toHaveBeenCalledWith('podman', ['exec', 'stamhoofd-mysql', 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'CREATE DATABASE IF NOT EXISTS `custom-target-db` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;'], expect.anything());
+        expect(run).toHaveBeenCalledWith(
+            'podman',
+            [
+                'exec',
+                'stamhoofd-mysql',
+                'mysql',
+                '-h127.0.0.1',
+                '-uroot',
+                '-proot',
+                '-e',
+                'CREATE DATABASE IF NOT EXISTS `custom-target-db` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;',
+            ],
+            expect.anything(),
+        );
     });
 
     it('starts MySQL when the container is not running', async () => {
@@ -117,8 +196,25 @@ describe('database management commands', () => {
 
         await command.run();
 
-        expect(run).toHaveBeenCalledWith('podman', expect.arrayContaining(['run', '-d', '--name', 'stamhoofd-mysql']), expect.anything());
-        expect(run).toHaveBeenCalledWith('podman', ['exec', 'stamhoofd-mysql', 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'DROP DATABASE IF EXISTS `source-db`;'], expect.anything());
+        expect(run).toHaveBeenCalledWith(
+            'podman',
+            expect.arrayContaining(['run', '-d', '--name', 'stamhoofd-mysql']),
+            expect.anything(),
+        );
+        expect(run).toHaveBeenCalledWith(
+            'podman',
+            [
+                'exec',
+                'stamhoofd-mysql',
+                'mysql',
+                '-h127.0.0.1',
+                '-uroot',
+                '-proot',
+                '-e',
+                'DROP DATABASE IF EXISTS `source-db`;',
+            ],
+            expect.anything(),
+        );
     });
 
     it('marks existing current setup database in interactive choices', async () => {
@@ -138,10 +234,15 @@ describe('database management commands', () => {
     });
 });
 
-function createCommand<T extends DbCopy | DbMove | DbRemove>(CommandClass: new (argv: string[], config: any) => T, flags: { from?: string; to?: string }): T {
+function createCommand<T extends DbCopy | DbMove | DbRemove>(
+    CommandClass: new (argv: string[], config: any) => T,
+    flags: { from?: string; to?: string },
+): T {
     const command = new CommandClass([], {} as any);
     (command as any).config = {};
-    (command as any).parse = vi.fn(async () => ({ flags: { env: 'stamhoofd', verbose: false, ...flags } }));
+    (command as any).parse = vi.fn(async () => ({
+        flags: { env: 'stamhoofd', verbose: false, ...flags },
+    }));
     (command as any).createContext = vi.fn(async () => ({
         rootDir: '/repo',
         generatedDir: '/repo/.development/cli/generated',

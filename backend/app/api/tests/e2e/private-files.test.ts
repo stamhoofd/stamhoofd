@@ -1,4 +1,14 @@
-import { File, MemberDetails, MemberWithRegistrationsBlob, RecordCategory, RecordFileAnswer, RecordSettings, RecordType, TranslatedString, Version } from '@stamhoofd/structures';
+import {
+    File,
+    MemberDetails,
+    MemberWithRegistrationsBlob,
+    RecordCategory,
+    RecordFileAnswer,
+    RecordSettings,
+    RecordType,
+    TranslatedString,
+    Version,
+} from '@stamhoofd/structures';
 import { SessionService } from '../../src/services/SessionService.js';
 
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
@@ -30,9 +40,7 @@ describe('E2E.PrivateFiles', () => {
         const category = RecordCategory.create({
             name: TranslatedString.create('Voorbeeld'),
             defaultEnabled: true,
-            records: [
-                recordSettings,
-            ],
+            records: [recordSettings],
         });
 
         organization.meta.recordsConfiguration.recordCategories = [category];
@@ -70,10 +78,13 @@ describe('E2E.PrivateFiles', () => {
             isPrivate: true,
         });
 
-        member.details.recordAnswers.set(recordSettings.id, RecordFileAnswer.create({
-            file: privateFile,
-            settings: recordSettings,
-        }));
+        member.details.recordAnswers.set(
+            recordSettings.id,
+            RecordFileAnswer.create({
+                file: privateFile,
+                settings: recordSettings,
+            }),
+        );
 
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
         arr.addPut(member);
@@ -81,7 +92,9 @@ describe('E2E.PrivateFiles', () => {
         const r = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
-        await expect(testServer.test(endpoint, r)).rejects.toThrow(/Missing signature for private file/);
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(
+            /Missing signature for private file/,
+        );
     });
 
     test('Cannot set private files with invalid signatures', async () => {
@@ -114,10 +127,13 @@ describe('E2E.PrivateFiles', () => {
             signature: 'invalid',
         });
 
-        member.details.recordAnswers.set(recordSettings.id, RecordFileAnswer.create({
-            file: privateFile,
-            settings: recordSettings,
-        }));
+        member.details.recordAnswers.set(
+            recordSettings.id,
+            RecordFileAnswer.create({
+                file: privateFile,
+                settings: recordSettings,
+            }),
+        );
 
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
         arr.addPut(member);
@@ -158,10 +174,13 @@ describe('E2E.PrivateFiles', () => {
         });
         await privateFile.sign();
 
-        member.details.recordAnswers.set(recordSettings.id, RecordFileAnswer.create({
-            file: privateFile,
-            settings: recordSettings,
-        }));
+        member.details.recordAnswers.set(
+            recordSettings.id,
+            RecordFileAnswer.create({
+                file: privateFile,
+                settings: recordSettings,
+            }),
+        );
 
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
         arr.addPut(member);
@@ -211,46 +230,67 @@ describe('E2E.PrivateFiles', () => {
                 }),
             });
 
-            member.details.recordAnswers.set(recordSettings.id, RecordFileAnswer.create({
-                file: new File({
-                    id: 'test',
-                    server: 'https://replace-me.example.com',
-                    path: 'test.pdf',
-                    size: 100,
-                    isPrivate: false,
+            member.details.recordAnswers.set(
+                recordSettings.id,
+                RecordFileAnswer.create({
+                    file: new File({
+                        id: 'test',
+                        server: 'https://replace-me.example.com',
+                        path: 'test.pdf',
+                        size: 100,
+                        isPrivate: false,
+                    }),
+                    settings: recordSettings,
                 }),
-                settings: recordSettings,
-            }));
+            );
 
-            const arr = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
+            const arr =
+                new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
             arr.addPut(member);
 
             // An attacker doesn't use our client, so build the request body they would send instead
             const encoded = encodeObject(arr, { version: Version, medium: EncodeMedium.Network });
-            return JSON.parse(JSON.stringify(encoded).replaceAll('https://replace-me.example.com', server));
+            return JSON.parse(
+                JSON.stringify(encoded).replaceAll('https://replace-me.example.com', server),
+            );
         };
 
         const attacks = [
             { server: 'javascript:alert(document.domain)', error: /can only be http or https/i },
-            { server: 'data:text/html,<script>alert(1)</script>', error: /can only be http or https/i },
+            {
+                server: 'data:text/html,<script>alert(1)</script>',
+                error: /can only be http or https/i,
+            },
             { server: 'not-a-url', error: /invalid url for a file/i },
             { server: '', error: /invalid url for a file/i },
         ];
 
         for (const attack of attacks) {
-            const r = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), buildBody(attack.server));
+            const r = Request.buildJson(
+                'PATCH',
+                baseUrl,
+                organization.getApiHost(),
+                buildBody(attack.server),
+            );
             r.headers.authorization = 'Bearer ' + token.accessToken;
 
             await expect(testServer.test(endpoint, r), attack.server).rejects.toThrow(attack.error);
         }
 
         // ... and our own code can never store one either
-        expect(() => Request.buildJson('PATCH', baseUrl, organization.getApiHost(), new File({
-            id: 'test',
-            server: 'javascript:alert(document.domain)',
-            path: 'test.pdf',
-            size: 100,
-        }))).toThrow(/can only be http or https/i);
+        expect(() =>
+            Request.buildJson(
+                'PATCH',
+                baseUrl,
+                organization.getApiHost(),
+                new File({
+                    id: 'test',
+                    server: 'javascript:alert(document.domain)',
+                    path: 'test.pdf',
+                    size: 100,
+                }),
+            ),
+        ).toThrow(/can only be http or https/i);
     });
 
     test('Can set public files', async () => {
@@ -282,10 +322,13 @@ describe('E2E.PrivateFiles', () => {
             isPrivate: false,
         });
 
-        member.details.recordAnswers.set(recordSettings.id, RecordFileAnswer.create({
-            file: publicFile,
-            settings: recordSettings,
-        }));
+        member.details.recordAnswers.set(
+            recordSettings.id,
+            RecordFileAnswer.create({
+                file: publicFile,
+                settings: recordSettings,
+            }),
+        );
 
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
         arr.addPut(member);
@@ -364,10 +407,13 @@ describe('E2E.PrivateFiles', () => {
             throw new Error('Member not found');
         }
 
-        model.details.recordAnswers.set(recordSettings.id, RecordFileAnswer.create({
-            file: maliciousFile,
-            settings: recordSettings,
-        }));
+        model.details.recordAnswers.set(
+            recordSettings.id,
+            RecordFileAnswer.create({
+                file: maliciousFile,
+                settings: recordSettings,
+            }),
+        );
 
         await model.save();
 
@@ -446,10 +492,13 @@ describe('E2E.PrivateFiles', () => {
             throw new Error('Member not found');
         }
 
-        model.details.recordAnswers.set(recordSettings.id, RecordFileAnswer.create({
-            file: maliciousFile,
-            settings: recordSettings,
-        }));
+        model.details.recordAnswers.set(
+            recordSettings.id,
+            RecordFileAnswer.create({
+                file: maliciousFile,
+                settings: recordSettings,
+            }),
+        );
 
         await model.save();
 
@@ -526,10 +575,7 @@ describe('E2E.PrivateFiles', () => {
                     file1: privateFile,
                     file2: privateFile,
                 },
-                arr: [
-                    privateFile,
-                    privateFile,
-                ],
+                arr: [privateFile, privateFile],
             };
 
             await FileSignService.fillSignedUrlsForStruct(data);
@@ -588,10 +634,7 @@ describe('E2E.PrivateFiles', () => {
                     file1: privateFile,
                     file2: privateFile,
                 },
-                arr: [
-                    privateFile,
-                    privateFile,
-                ],
+                arr: [privateFile, privateFile],
             };
 
             await expect(FileSignService.verifyFilesInStruct(data)).toResolve();
@@ -621,7 +664,9 @@ describe('E2E.PrivateFiles', () => {
 
             data.circular.data.here = data;
 
-            await expect(FileSignService.verifyFilesInStruct(data)).rejects.toThrow(/Invalid signature for file/);
+            await expect(FileSignService.verifyFilesInStruct(data)).rejects.toThrow(
+                /Invalid signature for file/,
+            );
         });
 
         test('Can handle duplicate files that are not signed', async () => {
@@ -642,13 +687,12 @@ describe('E2E.PrivateFiles', () => {
                     file1: privateFile,
                     file2: privateFile,
                 },
-                arr: [
-                    privateFile,
-                    privateFile,
-                ],
+                arr: [privateFile, privateFile],
             };
 
-            await expect(FileSignService.verifyFilesInStruct(data)).rejects.toThrow(/Invalid signature for file/);
+            await expect(FileSignService.verifyFilesInStruct(data)).rejects.toThrow(
+                /Invalid signature for file/,
+            );
         });
     });
 
@@ -704,10 +748,13 @@ describe('E2E.PrivateFiles', () => {
             throw new Error('Member not found');
         }
 
-        model.details.recordAnswers.set(recordSettings.id, RecordFileAnswer.create({
-            file: maliciousFile,
-            settings: recordSettings,
-        }));
+        model.details.recordAnswers.set(
+            recordSettings.id,
+            RecordFileAnswer.create({
+                file: maliciousFile,
+                settings: recordSettings,
+            }),
+        );
 
         await model.save();
 

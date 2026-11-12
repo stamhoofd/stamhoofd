@@ -1,9 +1,23 @@
 import { Request } from '@node/endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { EmailTemplate, GroupFactory, OrganizationFactory, Platform, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import {
+    EmailTemplate,
+    GroupFactory,
+    OrganizationFactory,
+    Platform,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { EmailTemplateType, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, Version } from '@stamhoofd/structures';
+import {
+    EmailTemplateType,
+    PermissionRoleDetailed,
+    Permissions,
+    PermissionsResourceKey,
+    ResourcePermissions,
+    Version,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetEmailTemplatesEndpoint } from './GetEmailTemplatesEndpoint.js';
@@ -15,7 +29,19 @@ describe('Endpoint.GetEmailTemplatesEndpoint', () => {
     const endpoint = new GetEmailTemplatesEndpoint();
     let period: RegistrationPeriod;
 
-    const getEmailTemplates = async ({ token, organization = undefined, types = null, groupIds = null, webshopId = null }: { token: Token; organization?: Organization; types?: EmailTemplateType[] | null; groupIds?: string[] | null; webshopId?: string | null }) => {
+    const getEmailTemplates = async ({
+        token,
+        organization = undefined,
+        types = null,
+        groupIds = null,
+        webshopId = null,
+    }: {
+        token: Token;
+        organization?: Organization;
+        types?: EmailTemplateType[] | null;
+        groupIds?: string[] | null;
+        webshopId?: string | null;
+    }) => {
         const request = Request.buildJson('GET', baseUrl, organization?.getApiHost());
 
         request.query = {
@@ -42,19 +68,24 @@ describe('Endpoint.GetEmailTemplatesEndpoint', () => {
     test('User with platform role who has full permission for all organizations should see templates for organizations', async () => {
         const role = PermissionRoleDetailed.create({
             name: 'Beroepsmedewerker',
-            resources: new Map([[PermissionsResourceType.OrganizationTags, new Map([[
-                PermissionsResourceKey.All,
-                ResourcePermissions.create({
-                    level: PermissionLevel.Full,
-                }),
-            ]])]]),
+            resources: new Map([
+                [
+                    PermissionsResourceType.OrganizationTags,
+                    new Map([
+                        [
+                            PermissionsResourceKey.All,
+                            ResourcePermissions.create({
+                                level: PermissionLevel.Full,
+                            }),
+                        ],
+                    ]),
+                ],
+            ]),
         });
 
         const globalPermissions = Permissions.create({
             level: PermissionLevel.None,
-            roles: [
-                role,
-            ],
+            roles: [role],
         });
 
         const platform = await Platform.getForEditing();
@@ -63,8 +94,7 @@ describe('Endpoint.GetEmailTemplatesEndpoint', () => {
 
         const user = await new UserFactory({
             globalPermissions,
-        })
-            .create();
+        }).create();
 
         const organization = await new OrganizationFactory({ period }).create();
         const group = await new GroupFactory({ organization }).create();

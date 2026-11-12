@@ -4,7 +4,9 @@ import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
 
 let _injectedReplacementValues = (replacements: Replacement[]): void => {
-    throw new Error('injectReplacementValues is not yet injected. Call injectReplacementValues to inject dependencies.');
+    throw new Error(
+        'injectReplacementValues is not yet injected. Call injectReplacementValues to inject dependencies.',
+    );
 };
 
 export function injectReplacementValues(injected: typeof _injectedReplacementValues) {
@@ -98,10 +100,7 @@ function getReplacements() {
         }),
         balanceTable: Replacement.create({
             token: 'balanceTable',
-            html: BalanceItem.getDetailsHTMLTable([
-                exampleBalanceItem,
-                exampleBalanceItem2,
-            ]),
+            html: BalanceItem.getDetailsHTMLTable([exampleBalanceItem, exampleBalanceItem2]),
         }),
         outstandingBalance: Replacement.create({
             token: 'outstandingBalance',
@@ -189,8 +188,9 @@ function getReplacements() {
         }),
         securityCode: Replacement.create({
             token: 'securityCode',
-            html: `<p class="style-code-large">${
-                Formatter.injectPattern(Formatter.escapeHtml($t('%ID').toLocaleUpperCase().padEnd(16, '0')), [
+            html: `<p class="style-code-large">${Formatter.injectPattern(
+                Formatter.escapeHtml($t('%ID').toLocaleUpperCase().padEnd(16, '0')),
+                [
                     { length: 4 },
                     '-',
                     { length: 4 },
@@ -200,8 +200,8 @@ function getReplacements() {
                     { length: 4 },
                     '-',
                     { length: 4 },
-                ])
-            }</p>`,
+                ],
+            )}</p>`,
         }),
         registerUrl: Replacement.create({
             token: 'registerUrl',
@@ -227,8 +227,8 @@ function getReplacements() {
         loginDetails: Replacement.create({
             token: 'loginDetails',
             html: `<p class="description"><em>${$t('%1EA', {
-                email: '<strong>' + $t('%13a') + '</strong>' },
-            )} ${$t('%1EC', {
+                email: '<strong>' + $t('%13a') + '</strong>',
+            })} ${$t('%1EC', {
                 firstName: $t('%13h'),
                 securityCode: '<span class="style-inline-code">xxxx-xxxx-xxxx-xxxx</span>',
             })}</em></p>`,
@@ -344,8 +344,12 @@ function getReplacements() {
 
         errors: Replacement.create({
             token: 'errors',
-            html: '<p>' + Formatter.escapeHtml($t('%1Su')) + '</p><p>' + Formatter.escapeHtml($t('%1Rl')) + '</p>',
+            html:
+                '<p>' +
+                Formatter.escapeHtml($t('%1Su')) +
+                '</p><p>' +
+                Formatter.escapeHtml($t('%1Rl')) +
+                '</p>',
         }),
-
     };
 }

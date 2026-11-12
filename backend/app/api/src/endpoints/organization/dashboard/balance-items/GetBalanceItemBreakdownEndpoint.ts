@@ -5,7 +5,10 @@ import type { BalanceItem as BalanceItemStruct } from '@stamhoofd/structures';
 import { BalanceItemBreakdownBuilder } from '@stamhoofd/structures/breakdown/BalanceItemBreakdownBuilder.js';
 import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
 import type { BalanceItemBreakdown } from '@stamhoofd/structures/PaymentBreakdown.js';
-import { loadOrdersForBreakdown, loadPaymentsForBreakdown } from '../../../../helpers/breakdownRelations.js';
+import {
+    loadOrdersForBreakdown,
+    loadPaymentsForBreakdown,
+} from '../../../../helpers/breakdownRelations.js';
 import { Context } from '../../../../helpers/Context.js';
 import { streamForBreakdown } from '../../../../helpers/streamForBreakdown.js';
 import { GetBalanceItemsEndpoint } from './GetBalanceItemsEndpoint.js';
@@ -47,7 +50,7 @@ export class GetBalanceItemBreakdownEndpoint extends Endpoint<Params, Query, Bod
             throw Context.auth.error();
         }
 
-        if (!await Context.auth.canManagePayments(organization.id)) {
+        if (!(await Context.auth.canManagePayments(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -65,8 +68,8 @@ export class GetBalanceItemBreakdownEndpoint extends Endpoint<Params, Query, Bod
             },
             handle: async (items) => {
                 const [orders, balanceItemPayments] = await Promise.all([
-                    loadOrdersForBreakdown(items.map(item => item.orderId)),
-                    loadPaymentsForBreakdown(items.map(item => item.id)),
+                    loadOrdersForBreakdown(items.map((item) => item.orderId)),
+                    loadPaymentsForBreakdown(items.map((item) => item.id)),
                 ]);
 
                 builder.add(items, { orders, balanceItemPayments });

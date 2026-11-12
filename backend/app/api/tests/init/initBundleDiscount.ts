@@ -1,6 +1,13 @@
 import type { Group, OrganizationRegistrationPeriod } from '@stamhoofd/models';
 import type { GroupPrice } from '@stamhoofd/structures';
-import { GroupPriceDiscountType, BundleDiscount, TranslatedString, GroupPriceDiscount, ReduceablePrice, BundleDiscountGroupPriceSettings } from '@stamhoofd/structures';
+import {
+    GroupPriceDiscountType,
+    BundleDiscount,
+    TranslatedString,
+    GroupPriceDiscount,
+    ReduceablePrice,
+    BundleDiscountGroupPriceSettings,
+} from '@stamhoofd/structures';
 
 function createBundleDiscount({
     name = 'Bundle discount',
@@ -20,27 +27,46 @@ function createBundleDiscount({
         name: new TranslatedString(name),
         countWholeFamily,
         countPerGroup,
-        discounts: discounts.map(d => GroupPriceDiscount.create({
-            value: ReduceablePrice.create({
-                price: d.value,
-                reducedPrice: d.reducedValue ?? null,
+        discounts: discounts.map((d) =>
+            GroupPriceDiscount.create({
+                value: ReduceablePrice.create({
+                    price: d.value,
+                    reducedPrice: d.reducedValue ?? null,
+                }),
+                type: d.type,
             }),
-            type: d.type,
-        })),
+        ),
     });
 }
 
-export async function enableDiscount({ group, groupPrice, bundleDiscount }: { group: Group; groupPrice: GroupPrice; bundleDiscount: BundleDiscount }) {
-    groupPrice.bundleDiscounts.set(bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
-        name: bundleDiscount.name,
-    }));
+export async function enableDiscount({
+    group,
+    groupPrice,
+    bundleDiscount,
+}: {
+    group: Group;
+    groupPrice: GroupPrice;
+    bundleDiscount: BundleDiscount;
+}) {
+    groupPrice.bundleDiscounts.set(
+        bundleDiscount.id,
+        BundleDiscountGroupPriceSettings.create({
+            name: bundleDiscount.name,
+        }),
+    );
     await group.save();
 }
 
 /**
  * Create a bundle discount
  */
-export async function initBundleDiscount({ organizationRegistrationPeriod, discount }: { organizationRegistrationPeriod: OrganizationRegistrationPeriod; discount: Parameters<typeof createBundleDiscount>[0] }) {
+export async function initBundleDiscount({
+    organizationRegistrationPeriod,
+    discount,
+}: {
+    organizationRegistrationPeriod: OrganizationRegistrationPeriod;
+    discount: Parameters<typeof createBundleDiscount>[0];
+}) {
     const bundleDiscount = createBundleDiscount(discount);
     organizationRegistrationPeriod.settings.bundleDiscounts.push(bundleDiscount);
     await organizationRegistrationPeriod.save();

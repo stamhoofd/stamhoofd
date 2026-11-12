@@ -1,6 +1,12 @@
 import { Request } from '@node/endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import {
+    GroupFactory,
+    OrganizationFactory,
+    OrganizationRegistrationPeriodFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { GroupType, LimitedFilteredRequest, Permissions } from '@stamhoofd/structures';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
@@ -43,8 +49,7 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
     });
 
     const initOrganization = async (registrationPeriod: RegistrationPeriod) => {
-        return await new OrganizationFactory({ period: registrationPeriod })
-            .create();
+        return await new OrganizationFactory({ period: registrationPeriod }).create();
     };
 
     describe('Groups', () => {
@@ -61,8 +66,7 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
                 permissions: Permissions.create({
                     level: PermissionLevel.Full,
                 }),
-            })
-                .create();
+            }).create();
             const token = await SessionService.createSession(user);
 
             const otherOrganization = await initOrganization(registrationPeriod1);
@@ -101,17 +105,19 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
             const organizationPeriodStruct = result.body.results[0];
             const groups = organizationPeriodStruct.groups;
             expect(groups.length).toBe(3);
-            expect(groups).toEqual(expect.arrayContaining([
-                expect.objectContaining({
-                    id: groupWithWaitingList.id,
-                }),
-                expect.objectContaining({
-                    id: waitingList1.id,
-                }),
-                expect.objectContaining({
-                    id: waitingList2.id,
-                }),
-            ]));
+            expect(groups).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        id: groupWithWaitingList.id,
+                    }),
+                    expect.objectContaining({
+                        id: waitingList1.id,
+                    }),
+                    expect.objectContaining({
+                        id: waitingList2.id,
+                    }),
+                ]),
+            );
             expect(organizationPeriodStruct.waitingLists.length).toBe(2);
         });
 
@@ -144,8 +150,7 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
                 permissions: Permissions.create({
                     level: PermissionLevel.Full,
                 }),
-            })
-                .create();
+            }).create();
 
             const token = await SessionService.createSession(user);
 
@@ -203,14 +208,16 @@ describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
             expect(result.body.results.length).toBe(1);
             const groups = result.body.results[0].groups;
             expect(groups.length).toBe(2);
-            expect(groups).toEqual(expect.arrayContaining([
-                expect.objectContaining({
-                    id: group1.id,
-                }),
-                expect.objectContaining({
-                    id: group2.id,
-                }),
-            ]));
+            expect(groups).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        id: group1.id,
+                    }),
+                    expect.objectContaining({
+                        id: group2.id,
+                    }),
+                ]),
+            );
         });
     });
 });

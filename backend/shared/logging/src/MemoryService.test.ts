@@ -67,9 +67,13 @@ describe('MemoryService', () => {
 
         test('does not report a system error above 90% usage while more than 500 MiB is available', () => {
             for (let i = 0; i < 12; i++) {
-                MemoryService.record(sample({ systemTotal: 15.2 * GiB, systemAvailable: 1.4 * GiB }));
+                MemoryService.record(
+                    sample({ systemTotal: 15.2 * GiB, systemAvailable: 1.4 * GiB }),
+                );
             }
-            expect(MemoryService.getSystemUsedRatio()).toBeGreaterThan(MemoryService.systemUsedWarningRatio);
+            expect(MemoryService.getSystemUsedRatio()).toBeGreaterThan(
+                MemoryService.systemUsedWarningRatio,
+            );
             expect(MemoryService.getErrors()).toEqual([]);
         });
 
@@ -118,7 +122,9 @@ describe('MemoryService', () => {
             recordHealthyMinute();
             MemoryService.record(sample({ systemAvailable: 400 * MiB }));
 
-            expect(MemoryService.getSystemUsedRatio()).toBeLessThan(MemoryService.systemUsedWarningRatio);
+            expect(MemoryService.getSystemUsedRatio()).toBeLessThan(
+                MemoryService.systemUsedWarningRatio,
+            );
             expect(MemoryService.getErrors()).toEqual([
                 'System memory is exhausted: 400 MiB available of 16.0 GiB (98% used)',
             ]);
@@ -160,8 +166,8 @@ describe('MemoryService', () => {
 
     test('formats a sample for the log', () => {
         expect(MemoryService.formatSample(sample())).toBe(
-            '[MEMORY] heap: 1.0 GiB / 4.0 GiB (25%), rss: 1.5 GiB, external: 200 MiB\n'
-            + '[MEMORY] system available: 8.0 GiB / 16.0 GiB (50%)',
+            '[MEMORY] heap: 1.0 GiB / 4.0 GiB (25%), rss: 1.5 GiB, external: 200 MiB\n' +
+                '[MEMORY] system available: 8.0 GiB / 16.0 GiB (50%)',
         );
     });
 });

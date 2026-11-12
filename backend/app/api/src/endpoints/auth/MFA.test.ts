@@ -4,9 +4,33 @@ import type { SimpleError } from '@common/errors';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
 import { EmailMocker } from '@stamhoofd/email';
 import type { Organization } from '@stamhoofd/models';
-import { AuditLog, EmailTemplateFactory, EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, PasswordToken, Platform, Token, User, UserFactory, OrganizationFactory, UserSession, WebauthnChallenge, WebauthnCredential } from '@stamhoofd/models';
+import {
+    AuditLog,
+    EmailTemplateFactory,
+    EmailVerificationCode,
+    MFARecoveryCode,
+    MFATOTP,
+    MFAToken,
+    PasswordToken,
+    Platform,
+    Token,
+    User,
+    UserFactory,
+    OrganizationFactory,
+    UserSession,
+    WebauthnChallenge,
+    WebauthnCredential,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AuditLogReplacementType, AuditLogType, EmailTemplateType, MFAMethodType, Permissions, SessionLoginMethod, Token as TokenStruct } from '@stamhoofd/structures';
+import {
+    AuditLogReplacementType,
+    AuditLogType,
+    EmailTemplateType,
+    MFAMethodType,
+    Permissions,
+    SessionLoginMethod,
+    Token as TokenStruct,
+} from '@stamhoofd/structures';
 import { authenticator } from 'otplib';
 import crypto from 'crypto';
 import { SessionService } from '../../services/SessionService.js';
@@ -63,12 +87,19 @@ async function addConfirmedTOTP(user: User): Promise<{ id: string; secret: strin
  * In organization mode the factory only leaves organizationId null for platform admins.
  */
 async function platformUser(): Promise<User> {
-    const user = await new UserFactory({ password, globalPermissions: Permissions.create({ level: PermissionLevel.None }) }).create();
+    const user = await new UserFactory({
+        password,
+        globalPermissions: Permissions.create({ level: PermissionLevel.None }),
+    }).create();
     expect(user.organizationId).toBeNull();
     return user;
 }
 
-const twoFactorLogTypes = [AuditLogType.UserTwoFactorMethodAdded, AuditLogType.UserTwoFactorMethodDeleted, AuditLogType.UserRecoveryCodesRegenerated];
+const twoFactorLogTypes = [
+    AuditLogType.UserTwoFactorMethodAdded,
+    AuditLogType.UserTwoFactorMethodDeleted,
+    AuditLogType.UserRecoveryCodesRegenerated,
+];
 
 /**
  * The two-factor audit logs of a user, oldest first (the ids are uuidv7, so they sort by
@@ -77,14 +108,15 @@ const twoFactorLogTypes = [AuditLogType.UserTwoFactorMethodAdded, AuditLogType.U
 async function twoFactorLogs(user: User): Promise<AuditLog[]> {
     const logs = await AuditLog.select().where('objectId', user.id).fetch();
     return logs
-        .filter(l => twoFactorLogTypes.includes(l.type))
+        .filter((l) => twoFactorLogTypes.includes(l.type))
         .sort((a, b) => a.id.localeCompare(b.id));
 }
 
 async function addPasskey(user: User, credentialId?: string): Promise<WebauthnCredential> {
     const credential = new WebauthnCredential();
     credential.userId = user.id;
-    credential.credentialId = credentialId ?? 'cred-' + crypto.randomBytes(16).toString('base64url');
+    credential.credentialId =
+        credentialId ?? 'cred-' + crypto.randomBytes(16).toString('base64url');
     credential.publicKey = crypto.randomBytes(32).toString('base64url');
     credential.counter = 0;
     credential.name = 'Test passkey';
@@ -101,7 +133,10 @@ function passwordLogin(organization: Organization | null, email: string, passwor
 }
 
 function mfaGrant(organization: Organization, body: Record<string, unknown>) {
-    return Request.buildJson('POST', '/oauth/token', organization.getApiHost(), { grant_type: 'mfa', ...body });
+    return Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+        grant_type: 'mfa',
+        ...body,
+    });
 }
 
 function bearer(request: Request, token: Token) {
@@ -118,8 +153,14 @@ async function staleToken(user: User): Promise<Token> {
     return await SessionService.createSession(user);
 }
 
-async function requireMfa(organization: Organization | null, email: string, password: string): Promise<{ token: string; methods: string[]; webauthnAuthenticationOptions: unknown }> {
-    const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, email, password)));
+async function requireMfa(
+    organization: Organization | null,
+    email: string,
+    password: string,
+): Promise<{ token: string; methods: string[]; webauthnAuthenticationOptions: unknown }> {
+    const err = await captureError(
+        testServer.test(tokenEndpoint, passwordLogin(organization, email, password)),
+    );
     expect(err.code).toBe('require_mfa');
     return err.meta as { token: string; methods: string[]; webauthnAuthenticationOptions: unknown };
 }
@@ -149,7 +190,10 @@ describe('MFA', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
 
-            const response = await testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password));
+            const response = await testServer.test(
+                tokenEndpoint,
+                passwordLogin(organization, user.email, password),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
         });
 
@@ -173,9 +217,13 @@ describe('MFA', () => {
             await RecoveryCodeHelper.regenerateForUser(user.id);
 
             const challenge = await requireMfa(organization, user.email, password);
-            expect(challenge.methods).toEqual(expect.arrayContaining(['TOTP', 'Passkey', 'RecoveryCode']));
+            expect(challenge.methods).toEqual(
+                expect.arrayContaining(['TOTP', 'Passkey', 'RecoveryCode']),
+            );
             expect(challenge.webauthnAuthenticationOptions).not.toBeNull();
-            expect((challenge.webauthnAuthenticationOptions as { challenge?: string }).challenge).toBeTruthy();
+            expect(
+                (challenge.webauthnAuthenticationOptions as { challenge?: string }).challenge,
+            ).toBeTruthy();
         });
 
         test('a wrong password is rejected before any challenge', async () => {
@@ -183,7 +231,12 @@ describe('MFA', () => {
             const user = await new UserFactory({ organization, password }).create();
             await addConfirmedTOTP(user);
 
-            const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, 'wrong-password')));
+            const err = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    passwordLogin(organization, user.email, 'wrong-password'),
+                ),
+            );
             expect(err.code).toBe('invalid_username_or_password');
         });
     });
@@ -198,26 +251,51 @@ describe('MFA', () => {
             const { secret } = await addConfirmedTOTP(user);
             const challenge = await requireMfa(organization, user.email, password);
 
-            const response = await testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: authenticator.generate(secret) }));
+            const response = await testServer.test(
+                tokenEndpoint,
+                mfaGrant(organization, {
+                    mfa_token: challenge.token,
+                    method: 'TOTP',
+                    code: authenticator.generate(secret),
+                }),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
 
-            const dbToken = await Token.getByAccessToken((response.body as TokenStruct).accessToken);
+            const dbToken = await Token.getByAccessToken(
+                (response.body as TokenStruct).accessToken,
+            );
             expect(dbToken).toBeDefined();
             expect(dbToken!.isFresh()).toBe(true);
 
             // consumed
-            const replay = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: authenticator.generate(secret) })));
+            const replay = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'TOTP',
+                        code: authenticator.generate(secret),
+                    }),
+                ),
+            );
             expect(replay.code).toBe('invalid_mfa_token');
         });
 
-        test('any of the user\'s multiple authenticators can complete the login', async () => {
+        test("any of the user's multiple authenticators can complete the login", async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
             await addConfirmedTOTP(user);
             const second = await addConfirmedTOTP(user);
 
             const challenge = await requireMfa(organization, user.email, password);
-            const response = await testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: authenticator.generate(second.secret) }));
+            const response = await testServer.test(
+                tokenEndpoint,
+                mfaGrant(organization, {
+                    mfa_token: challenge.token,
+                    method: 'TOTP',
+                    code: authenticator.generate(second.secret),
+                }),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
         });
 
@@ -228,14 +306,41 @@ describe('MFA', () => {
             const challenge = await requireMfa(organization, user.email, password);
 
             for (let i = 0; i < 4; i++) {
-                const e = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: '000000' })));
+                const e = await captureError(
+                    testServer.test(
+                        tokenEndpoint,
+                        mfaGrant(organization, {
+                            mfa_token: challenge.token,
+                            method: 'TOTP',
+                            code: '000000',
+                        }),
+                    ),
+                );
                 expect(e.code).toBe('invalid_mfa_code');
             }
-            const locked = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: '000000' })));
+            const locked = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'TOTP',
+                        code: '000000',
+                    }),
+                ),
+            );
             expect(locked.code).toBe('too_many_attempts');
 
             // even a correct code no longer works
-            const afterLock = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: authenticator.generate(secret) })));
+            const afterLock = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'TOTP',
+                        code: authenticator.generate(secret),
+                    }),
+                ),
+            );
             expect(afterLock.code).toBe('invalid_mfa_token');
         });
 
@@ -249,13 +354,31 @@ describe('MFA', () => {
             row.expiresAt = new Date(Date.now() - 1000);
             await row.save();
 
-            const err = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: authenticator.generate(secret) })));
+            const err = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'TOTP',
+                        code: authenticator.generate(secret),
+                    }),
+                ),
+            );
             expect(err.code).toBe('invalid_mfa_token');
         });
 
         test('an unknown mfa token is rejected', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const err = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: 'does-not-exist', method: 'TOTP', code: '000000' })));
+            const err = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: 'does-not-exist',
+                        method: 'TOTP',
+                        code: '000000',
+                    }),
+                ),
+            );
             expect(err.code).toBe('invalid_mfa_token');
         });
 
@@ -265,7 +388,16 @@ describe('MFA', () => {
             await addConfirmedTOTP(user);
             const challenge = await requireMfa(organization, user.email, password);
 
-            const err = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: 'abcdef' })));
+            const err = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'TOTP',
+                        code: 'abcdef',
+                    }),
+                ),
+            );
             expect(err.code).toBe('invalid_mfa_code');
         });
     });
@@ -282,7 +414,14 @@ describe('MFA', () => {
             const challenge = await requireMfa(organization, user.email, password);
             expect((await User.getByID(user.id))!.lastActiveAt).toBeNull();
 
-            await testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: authenticator.generate(secret) }));
+            await testServer.test(
+                tokenEndpoint,
+                mfaGrant(organization, {
+                    mfa_token: challenge.token,
+                    method: 'TOTP',
+                    code: authenticator.generate(secret),
+                }),
+            );
             expect((await User.getByID(user.id))!.lastActiveAt).not.toBeNull();
         });
 
@@ -292,7 +431,16 @@ describe('MFA', () => {
             await addConfirmedTOTP(user);
 
             const challenge = await requireMfa(organization, user.email, password);
-            const err = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: '000000' })));
+            const err = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'TOTP',
+                        code: '000000',
+                    }),
+                ),
+            );
             expect(err.code).toBe('invalid_mfa_code');
 
             expect((await User.getByID(user.id))!.lastActiveAt).toBeNull();
@@ -310,14 +458,37 @@ describe('MFA', () => {
             const codes = await RecoveryCodeHelper.regenerateForUser(user.id);
 
             const challenge = await requireMfa(organization, user.email, password);
-            const response = await testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'RecoveryCode', code: codes[0] }));
+            const response = await testServer.test(
+                tokenEndpoint,
+                mfaGrant(organization, {
+                    mfa_token: challenge.token,
+                    method: 'RecoveryCode',
+                    code: codes[0],
+                }),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
 
             const challenge2 = await requireMfa(organization, user.email, password);
-            const reuse = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge2.token, method: 'RecoveryCode', code: codes[0] })));
+            const reuse = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge2.token,
+                        method: 'RecoveryCode',
+                        code: codes[0],
+                    }),
+                ),
+            );
             expect(reuse.code).toBe('invalid_mfa_code');
 
-            const response2 = await testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge2.token, method: 'RecoveryCode', code: codes[1] }));
+            const response2 = await testServer.test(
+                tokenEndpoint,
+                mfaGrant(organization, {
+                    mfa_token: challenge2.token,
+                    method: 'RecoveryCode',
+                    code: codes[1],
+                }),
+            );
             expect(response2.body).toBeInstanceOf(TokenStruct);
         });
 
@@ -328,7 +499,16 @@ describe('MFA', () => {
             await RecoveryCodeHelper.regenerateForUser(user.id);
             const challenge = await requireMfa(organization, user.email, password);
 
-            const err = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'RecoveryCode', code: 'AAAA-BBBB-CCCC-DDDD' })));
+            const err = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'RecoveryCode',
+                        code: 'AAAA-BBBB-CCCC-DDDD',
+                    }),
+                ),
+            );
             expect(err.code).toBe('invalid_mfa_code');
         });
     });
@@ -362,28 +542,64 @@ describe('MFA', () => {
         test('a malformed (non-object) assertion is rejected with a decode error, not a crash', async () => {
             const { organization, challenge } = await passkeyChallenge();
             // captureError() only resolves for handled SimpleError(s); a 500/crash would rethrow.
-            const err = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'Passkey', assertion: 'not-an-object' })));
+            const err = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'Passkey',
+                        assertion: 'not-an-object',
+                    }),
+                ),
+            );
             expect(err.statusCode ?? 400).toBeLessThan(500);
         });
 
         test('an assertion for an unknown credential is rejected', async () => {
             const { organization, challenge } = await passkeyChallenge();
-            const err = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'Passkey', assertion: validAssertionShape('unknown-credential') })));
+            const err = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'Passkey',
+                        assertion: validAssertionShape('unknown-credential'),
+                    }),
+                ),
+            );
             expect(err.code).toBe('invalid_mfa_code');
         });
 
-        test('an assertion for another user\'s credential is rejected', async () => {
+        test("an assertion for another user's credential is rejected", async () => {
             const { organization, challenge } = await passkeyChallenge();
             const otherUser = await new UserFactory({ organization, password }).create();
             const otherCredential = await addPasskey(otherUser);
 
-            const err = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'Passkey', assertion: validAssertionShape(otherCredential.credentialId) })));
+            const err = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'Passkey',
+                        assertion: validAssertionShape(otherCredential.credentialId),
+                    }),
+                ),
+            );
             expect(err.code).toBe('invalid_mfa_code');
         });
 
         test('a well-formed but cryptographically invalid assertion is rejected', async () => {
             const { organization, credential, challenge } = await passkeyChallenge();
-            const err = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'Passkey', assertion: validAssertionShape(credential.credentialId) })));
+            const err = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'Passkey',
+                        assertion: validAssertionShape(credential.credentialId),
+                    }),
+                ),
+            );
             expect(err.code).toBe('invalid_mfa_code');
         });
     });
@@ -401,9 +617,15 @@ describe('MFA', () => {
 
         test('an org admin without a factor is forced to enroll when the org requires 2FA', async () => {
             const organization = await orgRequiringTwoFactor();
-            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
 
-            const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            const err = await captureError(
+                testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)),
+            );
             expect(err.code).toBe('require_mfa_setup');
             expect((err.meta as { setupToken: string }).setupToken).toBeTruthy();
         });
@@ -412,39 +634,67 @@ describe('MFA', () => {
             const organization = await orgRequiringTwoFactor();
             const user = await new UserFactory({ organization, password }).create();
 
-            const response = await testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password));
+            const response = await testServer.test(
+                tokenEndpoint,
+                passwordLogin(organization, user.email, password),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
         });
 
         test('an org admin is NOT forced when the org does not require 2FA', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
 
-            const response = await testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password));
+            const response = await testServer.test(
+                tokenEndpoint,
+                passwordLogin(organization, user.email, password),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
         });
 
         test('a platform admin without a factor is forced to enroll when the platform requires 2FA', async () => {
             await setPlatformRequiresTwoFactor(true);
-            const user = await new UserFactory({ password, globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                password,
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
 
-            const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(null, user.email, password)));
+            const err = await captureError(
+                testServer.test(tokenEndpoint, passwordLogin(null, user.email, password)),
+            );
             expect(err.code).toBe('require_mfa_setup');
         });
 
         test('a platform admin is NOT forced when the platform does not require 2FA', async () => {
-            const user = await new UserFactory({ password, globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                password,
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
 
-            const response = await testServer.test(tokenEndpoint, passwordLogin(null, user.email, password));
+            const response = await testServer.test(
+                tokenEndpoint,
+                passwordLogin(null, user.email, password),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
         });
 
         test('an org admin without platform permissions is NOT forced when only the platform requires 2FA', async () => {
             await setPlatformRequiresTwoFactor(true);
             const organization = await new OrganizationFactory({}).create();
-            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
 
-            const response = await testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password));
+            const response = await testServer.test(
+                tokenEndpoint,
+                passwordLogin(organization, user.email, password),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
         });
     });
@@ -457,10 +707,20 @@ describe('MFA', () => {
             const organization = await new OrganizationFactory({}).create();
             organization.privateMeta.requireTwoFactor = true;
             await organization.save();
-            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            const user = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const err = await captureError(
+                testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)),
+            );
             expect(err.code).toBe('require_mfa_setup');
-            return { organization, user, setupToken: (err.meta as { setupToken: string }).setupToken };
+            return {
+                organization,
+                user,
+                setupToken: (err.meta as { setupToken: string }).setupToken,
+            };
         }
 
         function withSetup(request: Request, setupToken: string) {
@@ -471,20 +731,48 @@ describe('MFA', () => {
         test('TOTP setup + confirm issues a session token + recovery codes and consumes the setup token', async () => {
             const { organization, setupToken } = await startForcedSetup();
 
-            const setupResponse = await testServer.test(new SetupTOTPEndpoint(), withSetup(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), setupToken));
+            const setupResponse = await testServer.test(
+                new SetupTOTPEndpoint(),
+                withSetup(
+                    Request.buildJson('POST', '/mfa/totp', organization.getApiHost()),
+                    setupToken,
+                ),
+            );
             const totpId = (setupResponse.body as { totpId: string }).totpId;
             const secret = (setupResponse.body as { secret: string }).secret;
             expect(totpId).toBeTruthy();
             expect(secret).toBeTruthy();
 
-            const confirmResponse = await testServer.test(new ConfirmTOTPEndpoint(), withSetup(Request.buildJson('POST', `/mfa/totp/${totpId}/confirm`, organization.getApiHost(), { code: authenticator.generate(secret), name: 'My phone' }), setupToken));
-            const body = confirmResponse.body as { token: TokenStruct | null; recoveryCodes: { codes: string[] } | null };
+            const confirmResponse = await testServer.test(
+                new ConfirmTOTPEndpoint(),
+                withSetup(
+                    Request.buildJson(
+                        'POST',
+                        `/mfa/totp/${totpId}/confirm`,
+                        organization.getApiHost(),
+                        { code: authenticator.generate(secret), name: 'My phone' },
+                    ),
+                    setupToken,
+                ),
+            );
+            const body = confirmResponse.body as {
+                token: TokenStruct | null;
+                recoveryCodes: { codes: string[] } | null;
+            };
             expect(body.token).toBeTruthy();
             expect(body.recoveryCodes?.codes.length).toBeGreaterThan(0);
             expect(await Token.getByAccessToken(body.token!.accessToken)).toBeDefined();
 
             // setup token consumed
-            const reuse = await captureError(testServer.test(new SetupTOTPEndpoint(), withSetup(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), setupToken)));
+            const reuse = await captureError(
+                testServer.test(
+                    new SetupTOTPEndpoint(),
+                    withSetup(
+                        Request.buildJson('POST', '/mfa/totp', organization.getApiHost()),
+                        setupToken,
+                    ),
+                ),
+            );
             expect(reuse.code).toBe('mfa_setup_expired');
         });
 
@@ -492,17 +780,42 @@ describe('MFA', () => {
             const { organization, user, setupToken } = await startForcedSetup();
             expect((await User.getByID(user.id))!.lastActiveAt).toBeNull();
 
-            const setupResponse = await testServer.test(new SetupTOTPEndpoint(), withSetup(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), setupToken));
+            const setupResponse = await testServer.test(
+                new SetupTOTPEndpoint(),
+                withSetup(
+                    Request.buildJson('POST', '/mfa/totp', organization.getApiHost()),
+                    setupToken,
+                ),
+            );
             const { totpId, secret } = setupResponse.body as { totpId: string; secret: string };
             expect((await User.getByID(user.id))!.lastActiveAt).toBeNull();
 
-            await testServer.test(new ConfirmTOTPEndpoint(), withSetup(Request.buildJson('POST', `/mfa/totp/${totpId}/confirm`, organization.getApiHost(), { code: authenticator.generate(secret), name: 'My phone' }), setupToken));
+            await testServer.test(
+                new ConfirmTOTPEndpoint(),
+                withSetup(
+                    Request.buildJson(
+                        'POST',
+                        `/mfa/totp/${totpId}/confirm`,
+                        organization.getApiHost(),
+                        { code: authenticator.generate(secret), name: 'My phone' },
+                    ),
+                    setupToken,
+                ),
+            );
             expect((await User.getByID(user.id))!.lastActiveAt).not.toBeNull();
         });
 
         test('an invalid setup token is rejected', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const err = await captureError(testServer.test(new SetupTOTPEndpoint(), withSetup(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), 'invalid-setup-token')));
+            const err = await captureError(
+                testServer.test(
+                    new SetupTOTPEndpoint(),
+                    withSetup(
+                        Request.buildJson('POST', '/mfa/totp', organization.getApiHost()),
+                        'invalid-setup-token',
+                    ),
+                ),
+            );
             expect(err.code).toBe('mfa_setup_expired');
         });
 
@@ -510,10 +823,24 @@ describe('MFA', () => {
             const { organization, user, setupToken } = await startForcedSetup();
             const totp = await addConfirmedTOTP(user);
 
-            const err = await captureError(testServer.test(new DeleteTOTPEndpoint(), withSetup(Request.buildJson('DELETE', `/mfa/totp/${totp.id}`, organization.getApiHost()), setupToken)));
+            const err = await captureError(
+                testServer.test(
+                    new DeleteTOTPEndpoint(),
+                    withSetup(
+                        Request.buildJson(
+                            'DELETE',
+                            `/mfa/totp/${totp.id}`,
+                            organization.getApiHost(),
+                        ),
+                        setupToken,
+                    ),
+                ),
+            );
             // authenticateFresh() only accepts Bearer, so the MFASetup scheme is refused.
             expect(err.statusCode).toBeGreaterThanOrEqual(400);
-            expect(['not_supported_authentication', 'not_authenticated'].includes(err.code)).toBe(true);
+            expect(['not_supported_authentication', 'not_authenticated'].includes(err.code)).toBe(
+                true,
+            );
         });
     });
 
@@ -529,12 +856,19 @@ describe('MFA', () => {
             await new EmailTemplateFactory({ type: EmailTemplateType.ForgotPassword }).create();
         });
 
-        async function inactiveAdmin({ inactiveDays = INACTIVE_ADMIN_ENROLLMENT_DAYS + 1, requireTwoFactor = true }: { inactiveDays?: number; requireTwoFactor?: boolean } = {}) {
+        async function inactiveAdmin({
+            inactiveDays = INACTIVE_ADMIN_ENROLLMENT_DAYS + 1,
+            requireTwoFactor = true,
+        }: { inactiveDays?: number; requireTwoFactor?: boolean } = {}) {
             const organization = await new OrganizationFactory({}).create();
             organization.privateMeta.requireTwoFactor = requireTwoFactor;
             await organization.save();
 
-            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             user.lastActiveAt = new Date(Date.now() - inactiveDays * day);
             await user.save();
             return { organization, user };
@@ -545,13 +879,17 @@ describe('MFA', () => {
         }
 
         async function recoveryEmailsFor(user: User) {
-            return (await EmailMocker.transactional.getSucceededEmails()).filter(e => e.to.includes(user.email));
+            return (await EmailMocker.transactional.getSucceededEmails()).filter((e) =>
+                e.to.includes(user.email),
+            );
         }
 
         test('a long inactive admin is locked out and gets a password recovery link', async () => {
             const { organization, user } = await inactiveAdmin();
 
-            const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            const err = await captureError(
+                testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)),
+            );
             expect(err.code).toBe('require_email_confirmation');
             expect(err.statusCode).toBe(403);
 
@@ -565,13 +903,19 @@ describe('MFA', () => {
 
             // No setup token was handed out: the enrollment may not start from the password alone.
             expect(await MFAToken.select().where('userId', user.id).fetch()).toHaveLength(0);
-            expect((await User.getByID(user.id))!.lastActiveAt!.getTime()).toBeLessThan(Date.now() - INACTIVE_ADMIN_ENROLLMENT_DAYS * day);
+            expect((await User.getByID(user.id))!.lastActiveAt!.getTime()).toBeLessThan(
+                Date.now() - INACTIVE_ADMIN_ENROLLMENT_DAYS * day,
+            );
         });
 
         test('an admin who signed in recently is only forced to enroll', async () => {
-            const { organization, user } = await inactiveAdmin({ inactiveDays: INACTIVE_ADMIN_ENROLLMENT_DAYS - 1 });
+            const { organization, user } = await inactiveAdmin({
+                inactiveDays: INACTIVE_ADMIN_ENROLLMENT_DAYS - 1,
+            });
 
-            const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            const err = await captureError(
+                testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)),
+            );
             expect(err.code).toBe('require_mfa_setup');
             expect(await passwordTokensFor(user)).toHaveLength(0);
             expect(await recoveryEmailsFor(user)).toHaveLength(0);
@@ -579,11 +923,16 @@ describe('MFA', () => {
 
         test('a long inactive platform admin is locked out too', async () => {
             await setPlatformRequiresTwoFactor(true);
-            const user = await new UserFactory({ password, globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                password,
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             user.lastActiveAt = new Date(Date.now() - (INACTIVE_ADMIN_ENROLLMENT_DAYS + 1) * day);
             await user.save();
 
-            const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(null, user.email, password)));
+            const err = await captureError(
+                testServer.test(tokenEndpoint, passwordLogin(null, user.email, password)),
+            );
             expect(err.code).toBe('require_email_confirmation');
         });
 
@@ -592,7 +941,14 @@ describe('MFA', () => {
             const { secret } = await addConfirmedTOTP(user);
 
             const challenge = await requireMfa(organization, user.email, password);
-            const response = await testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: authenticator.generate(secret) }));
+            const response = await testServer.test(
+                tokenEndpoint,
+                mfaGrant(organization, {
+                    mfa_token: challenge.token,
+                    method: 'TOTP',
+                    code: authenticator.generate(secret),
+                }),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
             expect(await passwordTokensFor(user)).toHaveLength(0);
         });
@@ -606,14 +962,20 @@ describe('MFA', () => {
             user.lastActiveAt = new Date(Date.now() - 400 * day);
             await user.save();
 
-            const response = await testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password));
+            const response = await testServer.test(
+                tokenEndpoint,
+                passwordLogin(organization, user.email, password),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
         });
 
         test('an inactive admin is not blocked when 2FA is not required', async () => {
             const { organization, user } = await inactiveAdmin({ requireTwoFactor: false });
 
-            const response = await testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password));
+            const response = await testServer.test(
+                tokenEndpoint,
+                passwordLogin(organization, user.email, password),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
         });
 
@@ -622,24 +984,38 @@ describe('MFA', () => {
             user.lastActiveAt = null;
             await user.save();
 
-            const fresh = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            const fresh = await captureError(
+                testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)),
+            );
             expect(fresh.code).toBe('require_mfa_setup');
 
             user.createdAt = new Date(Date.now() - (INACTIVE_ADMIN_ENROLLMENT_DAYS + 1) * day);
             await user.save();
 
-            const stale = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            const stale = await captureError(
+                testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)),
+            );
             expect(stale.code).toBe('require_email_confirmation');
         });
 
         test('the emailed link confirms the email address and unlocks the enrollment', async () => {
             const { organization, user } = await inactiveAdmin();
-            await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            await captureError(
+                testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)),
+            );
 
             const [passwordToken] = await passwordTokensFor(user);
             expect(passwordToken).toBeDefined();
 
-            const err = await captureError(testServer.test(tokenEndpoint, Request.buildJson('POST', '/oauth/token', organization.getApiHost(), { grant_type: 'password_token', token: passwordToken.token })));
+            const err = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+                        grant_type: 'password_token',
+                        token: passwordToken.token,
+                    }),
+                ),
+            );
             expect(err.code).toBe('require_mfa_setup');
             expect((err.meta as { setupToken: string }).setupToken).toBeTruthy();
         });
@@ -648,7 +1024,15 @@ describe('MFA', () => {
             const { organization, user } = await inactiveAdmin();
 
             const code = await EmailVerificationCode.createFor(user, user.email);
-            const err = await captureError(testServer.test(new VerifyEmailEndpoint(), Request.buildJson('POST', '/verify-email', organization.getApiHost(), { token: code.token, code: code.code })));
+            const err = await captureError(
+                testServer.test(
+                    new VerifyEmailEndpoint(),
+                    Request.buildJson('POST', '/verify-email', organization.getApiHost(), {
+                        token: code.token,
+                        code: code.code,
+                    }),
+                ),
+            );
             expect(err.code).toBe('require_mfa_setup');
         });
 
@@ -656,7 +1040,12 @@ describe('MFA', () => {
             const { organization, user } = await inactiveAdmin();
 
             for (let i = 0; i < 6; i++) {
-                const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+                const err = await captureError(
+                    testServer.test(
+                        tokenEndpoint,
+                        passwordLogin(organization, user.email, password),
+                    ),
+                );
                 expect(err.code).toBe('require_email_confirmation');
             }
 
@@ -666,10 +1055,17 @@ describe('MFA', () => {
 
         test('a failing email does not turn the lockout into a server error', async () => {
             const { organization, user } = await inactiveAdmin();
-            const send = vi.spyOn(PasswordForgotService, 'sendPasswordRecoveryEmail').mockRejectedValue(new Error('Mail server down'));
+            const send = vi
+                .spyOn(PasswordForgotService, 'sendPasswordRecoveryEmail')
+                .mockRejectedValue(new Error('Mail server down'));
 
             try {
-                const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+                const err = await captureError(
+                    testServer.test(
+                        tokenEndpoint,
+                        passwordLogin(organization, user.email, password),
+                    ),
+                );
                 expect(err.code).toBe('require_email_confirmation');
                 expect(send).toHaveBeenCalledOnce();
             } finally {
@@ -682,10 +1078,14 @@ describe('MFA', () => {
 
             // A minute on either side of the limit, so the datetime column losing
             // milliseconds cannot decide the outcome.
-            user.lastActiveAt = new Date(Date.now() - INACTIVE_ADMIN_ENROLLMENT_DAYS * day + 60 * 1000);
+            user.lastActiveAt = new Date(
+                Date.now() - INACTIVE_ADMIN_ENROLLMENT_DAYS * day + 60 * 1000,
+            );
             expect(TwoFactorHelper.isInactiveForEnrollment(user)).toBe(false);
 
-            user.lastActiveAt = new Date(Date.now() - INACTIVE_ADMIN_ENROLLMENT_DAYS * day - 60 * 1000);
+            user.lastActiveAt = new Date(
+                Date.now() - INACTIVE_ADMIN_ENROLLMENT_DAYS * day - 60 * 1000,
+            );
             expect(TwoFactorHelper.isInactiveForEnrollment(user)).toBe(true);
         });
 
@@ -693,7 +1093,11 @@ describe('MFA', () => {
             // The identity provider authenticated the user, so there is nothing to confirm.
             const { organization, user } = await inactiveAdmin();
 
-            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: SessionLoginMethod.SSO });
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(
+                user,
+                organization,
+                { loginMethod: SessionLoginMethod.SSO },
+            );
             expect(requirement.type).toBe('setup');
         });
     });
@@ -707,7 +1111,10 @@ describe('MFA', () => {
             const user = await new UserFactory({ organization, password }).create();
             const token = await freshToken(user);
 
-            const response = await testServer.test(new SetupTOTPEndpoint(), bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), token));
+            const response = await testServer.test(
+                new SetupTOTPEndpoint(),
+                bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), token),
+            );
             const body = response.body as { totpId: string; secret: string; otpauthUri: string };
             expect(body.secret).toBeTruthy();
             expect(body.otpauthUri).toContain('otpauth://');
@@ -721,11 +1128,29 @@ describe('MFA', () => {
             const user = await new UserFactory({ organization, password }).create();
             const token = await freshToken(user);
 
-            const setup = await testServer.test(new SetupTOTPEndpoint(), bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), token));
+            const setup = await testServer.test(
+                new SetupTOTPEndpoint(),
+                bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), token),
+            );
             const { totpId, secret } = setup.body as { totpId: string; secret: string };
 
-            const confirm = await testServer.test(new ConfirmTOTPEndpoint(), bearer(Request.buildJson('POST', `/mfa/totp/${totpId}/confirm`, organization.getApiHost(), { code: authenticator.generate(secret), name: 'Phone' }), await freshToken(user)));
-            const body = confirm.body as { token: unknown; recoveryCodes: { codes: string[] } | null; status: { totp: unknown[] } };
+            const confirm = await testServer.test(
+                new ConfirmTOTPEndpoint(),
+                bearer(
+                    Request.buildJson(
+                        'POST',
+                        `/mfa/totp/${totpId}/confirm`,
+                        organization.getApiHost(),
+                        { code: authenticator.generate(secret), name: 'Phone' },
+                    ),
+                    await freshToken(user),
+                ),
+            );
+            const body = confirm.body as {
+                token: unknown;
+                recoveryCodes: { codes: string[] } | null;
+                status: { totp: unknown[] };
+            };
             expect(body.token).toBeNull(); // already logged in
             expect(body.recoveryCodes?.codes.length).toBeGreaterThan(0);
             expect(body.status.totp.length).toBe(1);
@@ -736,20 +1161,56 @@ describe('MFA', () => {
             const user = await new UserFactory({ organization, password }).create();
             await addConfirmedTOTP(user);
 
-            const setup = await testServer.test(new SetupTOTPEndpoint(), bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), await freshToken(user)));
+            const setup = await testServer.test(
+                new SetupTOTPEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/totp', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
             const { totpId, secret } = setup.body as { totpId: string; secret: string };
 
-            const confirm = await testServer.test(new ConfirmTOTPEndpoint(), bearer(Request.buildJson('POST', `/mfa/totp/${totpId}/confirm`, organization.getApiHost(), { code: authenticator.generate(secret), name: 'Phone 2' }), await freshToken(user)));
+            const confirm = await testServer.test(
+                new ConfirmTOTPEndpoint(),
+                bearer(
+                    Request.buildJson(
+                        'POST',
+                        `/mfa/totp/${totpId}/confirm`,
+                        organization.getApiHost(),
+                        { code: authenticator.generate(secret), name: 'Phone 2' },
+                    ),
+                    await freshToken(user),
+                ),
+            );
             expect((confirm.body as { recoveryCodes: unknown }).recoveryCodes).toBeNull();
         });
 
         test('confirming with a wrong code fails and leaves the authenticator unconfirmed', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
-            const setup = await testServer.test(new SetupTOTPEndpoint(), bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), await freshToken(user)));
+            const setup = await testServer.test(
+                new SetupTOTPEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/totp', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
             const { totpId } = setup.body as { totpId: string };
 
-            const err = await captureError(testServer.test(new ConfirmTOTPEndpoint(), bearer(Request.buildJson('POST', `/mfa/totp/${totpId}/confirm`, organization.getApiHost(), { code: '000000', name: 'x' }), await freshToken(user))));
+            const err = await captureError(
+                testServer.test(
+                    new ConfirmTOTPEndpoint(),
+                    bearer(
+                        Request.buildJson(
+                            'POST',
+                            `/mfa/totp/${totpId}/confirm`,
+                            organization.getApiHost(),
+                            { code: '000000', name: 'x' },
+                        ),
+                        await freshToken(user),
+                    ),
+                ),
+            );
             expect(err.code).toBe('invalid_mfa_code');
             expect((await MFATOTP.getByID(totpId))?.confirmedAt).toBeNull();
         });
@@ -757,7 +1218,20 @@ describe('MFA', () => {
         test('confirming a non-existent authenticator returns not_found', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
-            const err = await captureError(testServer.test(new ConfirmTOTPEndpoint(), bearer(Request.buildJson('POST', '/mfa/totp/does-not-exist/confirm', organization.getApiHost(), { code: '000000', name: 'x' }), await freshToken(user))));
+            const err = await captureError(
+                testServer.test(
+                    new ConfirmTOTPEndpoint(),
+                    bearer(
+                        Request.buildJson(
+                            'POST',
+                            '/mfa/totp/does-not-exist/confirm',
+                            organization.getApiHost(),
+                            { code: '000000', name: 'x' },
+                        ),
+                        await freshToken(user),
+                    ),
+                ),
+            );
             expect(err.code).toBe('not_found');
         });
 
@@ -768,8 +1242,19 @@ describe('MFA', () => {
             await addPasskey(user);
             await RecoveryCodeHelper.regenerateForUser(user.id);
 
-            const response = await testServer.test(new GetMFAStatusEndpoint(), bearer(Request.buildJson('GET', '/mfa', organization.getApiHost()), await freshToken(user)));
-            const body = response.body as { totp: unknown[]; passkeys: unknown[]; hasRecoveryCodes: boolean; recoveryCodesRemaining: number };
+            const response = await testServer.test(
+                new GetMFAStatusEndpoint(),
+                bearer(
+                    Request.buildJson('GET', '/mfa', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
+            const body = response.body as {
+                totp: unknown[];
+                passkeys: unknown[];
+                hasRecoveryCodes: boolean;
+                recoveryCodesRemaining: number;
+            };
             expect(body.totp.length).toBe(1);
             expect(body.passkeys.length).toBe(1);
             expect(body.hasRecoveryCodes).toBe(true);
@@ -782,24 +1267,54 @@ describe('MFA', () => {
             await addConfirmedTOTP(user);
             const oldCodes = await RecoveryCodeHelper.regenerateForUser(user.id);
 
-            const response = await testServer.test(new RegenerateRecoveryCodesEndpoint(), bearer(Request.buildJson('POST', '/mfa/recovery-codes', organization.getApiHost()), await freshToken(user)));
+            const response = await testServer.test(
+                new RegenerateRecoveryCodesEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/recovery-codes', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
             const newCodes = (response.body as { codes: string[] }).codes;
             expect(newCodes.length).toBeGreaterThan(0);
 
             // old code no longer works at login
             const challenge = await requireMfa(organization, user.email, password);
-            const oldFails = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'RecoveryCode', code: oldCodes[0] })));
+            const oldFails = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'RecoveryCode',
+                        code: oldCodes[0],
+                    }),
+                ),
+            );
             expect(oldFails.code).toBe('invalid_mfa_code');
 
             // a new code works exactly once
-            const ok = await testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'RecoveryCode', code: newCodes[0] }));
+            const ok = await testServer.test(
+                tokenEndpoint,
+                mfaGrant(organization, {
+                    mfa_token: challenge.token,
+                    method: 'RecoveryCode',
+                    code: newCodes[0],
+                }),
+            );
             expect(ok.body).toBeInstanceOf(TokenStruct);
         });
 
         test('recovery codes cannot be generated without any factor', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
-            const err = await captureError(testServer.test(new RegenerateRecoveryCodesEndpoint(), bearer(Request.buildJson('POST', '/mfa/recovery-codes', organization.getApiHost()), await freshToken(user))));
+            const err = await captureError(
+                testServer.test(
+                    new RegenerateRecoveryCodesEndpoint(),
+                    bearer(
+                        Request.buildJson('POST', '/mfa/recovery-codes', organization.getApiHost()),
+                        await freshToken(user),
+                    ),
+                ),
+            );
             expect(err.code).toBe('no_factors');
         });
 
@@ -808,7 +1323,13 @@ describe('MFA', () => {
             // Passkeys are limited to platform level accounts, see User.canUsePasskeys.
             const user = await platformUser();
 
-            const response = await testServer.test(new RegisterPasskeyOptionsEndpoint(), bearer(Request.buildJson('POST', '/mfa/passkeys/options', organization.getApiHost()), await freshToken(user)));
+            const response = await testServer.test(
+                new RegisterPasskeyOptionsEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/passkeys/options', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
             const options = (response.body as { options: { challenge?: string } }).options;
             expect(options.challenge).toBeTruthy();
             expect(await WebauthnChallenge.consumeForUser(user.id)).toBeTruthy();
@@ -817,12 +1338,31 @@ describe('MFA', () => {
         test('an invalid passkey registration response is rejected', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await platformUser();
-            await testServer.test(new RegisterPasskeyOptionsEndpoint(), bearer(Request.buildJson('POST', '/mfa/passkeys/options', organization.getApiHost()), await freshToken(user)));
+            await testServer.test(
+                new RegisterPasskeyOptionsEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/passkeys/options', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
 
-            const err = await captureError(testServer.test(new RegisterPasskeyEndpoint(), bearer(Request.buildJson('POST', '/mfa/passkeys', organization.getApiHost(), {
-                name: 'My key',
-                response: { id: 'x', rawId: 'x', type: 'public-key', response: { clientDataJSON: 'x', attestationObject: 'x' } },
-            }), await freshToken(user))));
+            const err = await captureError(
+                testServer.test(
+                    new RegisterPasskeyEndpoint(),
+                    bearer(
+                        Request.buildJson('POST', '/mfa/passkeys', organization.getApiHost(), {
+                            name: 'My key',
+                            response: {
+                                id: 'x',
+                                rawId: 'x',
+                                type: 'public-key',
+                                response: { clientDataJSON: 'x', attestationObject: 'x' },
+                            },
+                        }),
+                        await freshToken(user),
+                    ),
+                ),
+            );
             expect(err.code).toBe('invalid_passkey');
         });
     });
@@ -837,7 +1377,13 @@ describe('MFA', () => {
             const first = await addConfirmedTOTP(user);
             await addConfirmedTOTP(user);
 
-            const response = await testServer.test(new DeleteTOTPEndpoint(), bearer(Request.buildJson('DELETE', `/mfa/totp/${first.id}`, organization.getApiHost()), await freshToken(user)));
+            const response = await testServer.test(
+                new DeleteTOTPEndpoint(),
+                bearer(
+                    Request.buildJson('DELETE', `/mfa/totp/${first.id}`, organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
             expect((response.body as { totp: unknown[] }).totp.length).toBe(1);
             expect(await MFATOTP.getByID(first.id)).toBeUndefined();
         });
@@ -845,17 +1391,37 @@ describe('MFA', () => {
         test('deleting an unknown authenticator returns not_found', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
-            const err = await captureError(testServer.test(new DeleteTOTPEndpoint(), bearer(Request.buildJson('DELETE', '/mfa/totp/unknown', organization.getApiHost()), await freshToken(user))));
+            const err = await captureError(
+                testServer.test(
+                    new DeleteTOTPEndpoint(),
+                    bearer(
+                        Request.buildJson('DELETE', '/mfa/totp/unknown', organization.getApiHost()),
+                        await freshToken(user),
+                    ),
+                ),
+            );
             expect(err.code).toBe('not_found');
         });
 
-        test('a user cannot delete another user\'s authenticator', async () => {
+        test("a user cannot delete another user's authenticator", async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
             const other = await new UserFactory({ organization, password }).create();
             const otherTotp = await addConfirmedTOTP(other);
 
-            const err = await captureError(testServer.test(new DeleteTOTPEndpoint(), bearer(Request.buildJson('DELETE', `/mfa/totp/${otherTotp.id}`, organization.getApiHost()), await freshToken(user))));
+            const err = await captureError(
+                testServer.test(
+                    new DeleteTOTPEndpoint(),
+                    bearer(
+                        Request.buildJson(
+                            'DELETE',
+                            `/mfa/totp/${otherTotp.id}`,
+                            organization.getApiHost(),
+                        ),
+                        await freshToken(user),
+                    ),
+                ),
+            );
             expect(err.code).toBe('not_found');
         });
 
@@ -863,10 +1429,26 @@ describe('MFA', () => {
             const organization = await new OrganizationFactory({}).create();
             organization.privateMeta.requireTwoFactor = true;
             await organization.save();
-            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const totp = await addConfirmedTOTP(user);
 
-            const err = await captureError(testServer.test(new DeleteTOTPEndpoint(), bearer(Request.buildJson('DELETE', `/mfa/totp/${totp.id}`, organization.getApiHost()), await freshToken(user))));
+            const err = await captureError(
+                testServer.test(
+                    new DeleteTOTPEndpoint(),
+                    bearer(
+                        Request.buildJson(
+                            'DELETE',
+                            `/mfa/totp/${totp.id}`,
+                            organization.getApiHost(),
+                        ),
+                        await freshToken(user),
+                    ),
+                ),
+            );
             expect(err.code).toBe('cannot_remove_last_factor');
         });
 
@@ -875,7 +1457,13 @@ describe('MFA', () => {
             const user = await new UserFactory({ organization, password }).create();
             const totp = await addConfirmedTOTP(user);
 
-            const response = await testServer.test(new DeleteTOTPEndpoint(), bearer(Request.buildJson('DELETE', `/mfa/totp/${totp.id}`, organization.getApiHost()), await freshToken(user)));
+            const response = await testServer.test(
+                new DeleteTOTPEndpoint(),
+                bearer(
+                    Request.buildJson('DELETE', `/mfa/totp/${totp.id}`, organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
             expect((response.body as { totp: unknown[] }).totp.length).toBe(0);
         });
 
@@ -885,7 +1473,17 @@ describe('MFA', () => {
             const passkey = await addPasskey(user);
             await addConfirmedTOTP(user);
 
-            const response = await testServer.test(new DeletePasskeyEndpoint(), bearer(Request.buildJson('DELETE', `/mfa/passkeys/${passkey.id}`, organization.getApiHost()), await freshToken(user)));
+            const response = await testServer.test(
+                new DeletePasskeyEndpoint(),
+                bearer(
+                    Request.buildJson(
+                        'DELETE',
+                        `/mfa/passkeys/${passkey.id}`,
+                        organization.getApiHost(),
+                    ),
+                    await freshToken(user),
+                ),
+            );
             expect((response.body as { passkeys: unknown[] }).passkeys.length).toBe(0);
         });
 
@@ -893,10 +1491,26 @@ describe('MFA', () => {
             const organization = await new OrganizationFactory({}).create();
             organization.privateMeta.requireTwoFactor = true;
             await organization.save();
-            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             const passkey = await addPasskey(user);
 
-            const err = await captureError(testServer.test(new DeletePasskeyEndpoint(), bearer(Request.buildJson('DELETE', `/mfa/passkeys/${passkey.id}`, organization.getApiHost()), await freshToken(user))));
+            const err = await captureError(
+                testServer.test(
+                    new DeletePasskeyEndpoint(),
+                    bearer(
+                        Request.buildJson(
+                            'DELETE',
+                            `/mfa/passkeys/${passkey.id}`,
+                            organization.getApiHost(),
+                        ),
+                        await freshToken(user),
+                    ),
+                ),
+            );
             expect(err.code).toBe('cannot_remove_last_factor');
         });
     });
@@ -913,12 +1527,29 @@ describe('MFA', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
 
-            const setup = await testServer.test(new SetupTOTPEndpoint(), bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), await freshToken(user)));
+            const setup = await testServer.test(
+                new SetupTOTPEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/totp', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
             const { totpId, secret } = setup.body as { totpId: string; secret: string };
             // Starting a setup is not a change to the account yet, so it is not logged.
             expect(await twoFactorLogs(user)).toHaveLength(0);
 
-            await testServer.test(new ConfirmTOTPEndpoint(), bearer(Request.buildJson('POST', `/mfa/totp/${totpId}/confirm`, organization.getApiHost(), { code: authenticator.generate(secret), name: 'GSM van Jan' }), await freshToken(user)));
+            await testServer.test(
+                new ConfirmTOTPEndpoint(),
+                bearer(
+                    Request.buildJson(
+                        'POST',
+                        `/mfa/totp/${totpId}/confirm`,
+                        organization.getApiHost(),
+                        { code: authenticator.generate(secret), name: 'GSM van Jan' },
+                    ),
+                    await freshToken(user),
+                ),
+            );
 
             const logs = await twoFactorLogs(user);
             expect(logs).toHaveLength(1);
@@ -944,7 +1575,13 @@ describe('MFA', () => {
             const totp = await MFATestHelper.addConfirmedTOTP(user, 'Oude GSM');
             await addConfirmedTOTP(user);
 
-            await testServer.test(new DeleteTOTPEndpoint(), bearer(Request.buildJson('DELETE', `/mfa/totp/${totp.id}`, organization.getApiHost()), await freshToken(user)));
+            await testServer.test(
+                new DeleteTOTPEndpoint(),
+                bearer(
+                    Request.buildJson('DELETE', `/mfa/totp/${totp.id}`, organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
 
             const logs = await twoFactorLogs(user);
             expect(logs).toHaveLength(1);
@@ -957,7 +1594,13 @@ describe('MFA', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await platformUser();
 
-            await testServer.test(new RegisterPasskeyOptionsEndpoint(), bearer(Request.buildJson('POST', '/mfa/passkeys/options', organization.getApiHost()), await freshToken(user)));
+            await testServer.test(
+                new RegisterPasskeyOptionsEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/passkeys/options', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
 
             // The browser part of the registration can't be simulated, so only the
             // verification of the response is replaced.
@@ -974,18 +1617,42 @@ describe('MFA', () => {
                 backupEligible: false,
             });
 
-            await testServer.test(new RegisterPasskeyEndpoint(), bearer(Request.buildJson('POST', '/mfa/passkeys', organization.getApiHost(), {
-                name: 'YubiKey',
-                response: { id: 'x', rawId: 'x', type: 'public-key', response: { clientDataJSON: 'x', attestationObject: 'x' } },
-            }), await freshToken(user)));
+            await testServer.test(
+                new RegisterPasskeyEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/passkeys', organization.getApiHost(), {
+                        name: 'YubiKey',
+                        response: {
+                            id: 'x',
+                            rawId: 'x',
+                            type: 'public-key',
+                            response: { clientDataJSON: 'x', attestationObject: 'x' },
+                        },
+                    }),
+                    await freshToken(user),
+                ),
+            );
 
             const credential = await WebauthnCredential.getByCredentialId(credentialId);
             expect(credential).toBeDefined();
 
-            await testServer.test(new DeletePasskeyEndpoint(), bearer(Request.buildJson('DELETE', `/mfa/passkeys/${credential!.id}`, organization.getApiHost()), await freshToken(user)));
+            await testServer.test(
+                new DeletePasskeyEndpoint(),
+                bearer(
+                    Request.buildJson(
+                        'DELETE',
+                        `/mfa/passkeys/${credential!.id}`,
+                        organization.getApiHost(),
+                    ),
+                    await freshToken(user),
+                ),
+            );
 
             const logs = await twoFactorLogs(user);
-            expect(logs.map(l => l.type)).toEqual([AuditLogType.UserTwoFactorMethodAdded, AuditLogType.UserTwoFactorMethodDeleted]);
+            expect(logs.map((l) => l.type)).toEqual([
+                AuditLogType.UserTwoFactorMethodAdded,
+                AuditLogType.UserTwoFactorMethodDeleted,
+            ]);
             for (const log of logs) {
                 // A platform account has no organization of its own: the log stays private
                 // for the platform, even though the request was made on an organization host.
@@ -1000,7 +1667,13 @@ describe('MFA', () => {
             const user = await new UserFactory({ organization, password }).create();
             await addConfirmedTOTP(user);
 
-            await testServer.test(new RegenerateRecoveryCodesEndpoint(), bearer(Request.buildJson('POST', '/mfa/recovery-codes', organization.getApiHost()), await freshToken(user)));
+            await testServer.test(
+                new RegenerateRecoveryCodesEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/recovery-codes', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
 
             const logs = await twoFactorLogs(user);
             expect(logs).toHaveLength(1);
@@ -1014,16 +1687,51 @@ describe('MFA', () => {
             const organization = await new OrganizationFactory({}).create();
             organization.privateMeta.requireTwoFactor = true;
             await organization.save();
-            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
 
             // A wrong confirmation code
-            const setup = await testServer.test(new SetupTOTPEndpoint(), bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), await freshToken(user)));
+            const setup = await testServer.test(
+                new SetupTOTPEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/totp', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
             const { totpId } = setup.body as { totpId: string };
-            await captureError(testServer.test(new ConfirmTOTPEndpoint(), bearer(Request.buildJson('POST', `/mfa/totp/${totpId}/confirm`, organization.getApiHost(), { code: '000000', name: 'x' }), await freshToken(user))));
+            await captureError(
+                testServer.test(
+                    new ConfirmTOTPEndpoint(),
+                    bearer(
+                        Request.buildJson(
+                            'POST',
+                            `/mfa/totp/${totpId}/confirm`,
+                            organization.getApiHost(),
+                            { code: '000000', name: 'x' },
+                        ),
+                        await freshToken(user),
+                    ),
+                ),
+            );
 
             // Removing the last factor while 2FA is required
             const totp = await addConfirmedTOTP(user);
-            await captureError(testServer.test(new DeleteTOTPEndpoint(), bearer(Request.buildJson('DELETE', `/mfa/totp/${totp.id}`, organization.getApiHost()), await freshToken(user))));
+            await captureError(
+                testServer.test(
+                    new DeleteTOTPEndpoint(),
+                    bearer(
+                        Request.buildJson(
+                            'DELETE',
+                            `/mfa/totp/${totp.id}`,
+                            organization.getApiHost(),
+                        ),
+                        await freshToken(user),
+                    ),
+                ),
+            );
 
             expect(await twoFactorLogs(user)).toHaveLength(0);
         });
@@ -1033,14 +1741,55 @@ describe('MFA', () => {
     // Fresh-session requirement for ALL sensitive endpoints
     // -----------------------------------------------------------------------
     describe('sensitive endpoints require a fresh session', () => {
-        const cases: { name: string; endpoint: () => Endpoint<any, any, any, any>; build: (org: Organization) => Request }[] = [
-            { name: 'SetupTOTP', endpoint: () => new SetupTOTPEndpoint(), build: org => Request.buildJson('POST', '/mfa/totp', org.getApiHost()) },
-            { name: 'ConfirmTOTP', endpoint: () => new ConfirmTOTPEndpoint(), build: org => Request.buildJson('POST', '/mfa/totp/x/confirm', org.getApiHost(), { code: '000000', name: 'x' }) },
-            { name: 'RegisterPasskeyOptions', endpoint: () => new RegisterPasskeyOptionsEndpoint(), build: org => Request.buildJson('POST', '/mfa/passkeys/options', org.getApiHost()) },
-            { name: 'RegisterPasskey', endpoint: () => new RegisterPasskeyEndpoint(), build: org => Request.buildJson('POST', '/mfa/passkeys', org.getApiHost(), { name: 'x', response: {} }) },
-            { name: 'DeleteTOTP', endpoint: () => new DeleteTOTPEndpoint(), build: org => Request.buildJson('DELETE', '/mfa/totp/x', org.getApiHost()) },
-            { name: 'DeletePasskey', endpoint: () => new DeletePasskeyEndpoint(), build: org => Request.buildJson('DELETE', '/mfa/passkeys/x', org.getApiHost()) },
-            { name: 'RegenerateRecoveryCodes', endpoint: () => new RegenerateRecoveryCodesEndpoint(), build: org => Request.buildJson('POST', '/mfa/recovery-codes', org.getApiHost()) },
+        const cases: {
+            name: string;
+            endpoint: () => Endpoint<any, any, any, any>;
+            build: (org: Organization) => Request;
+        }[] = [
+            {
+                name: 'SetupTOTP',
+                endpoint: () => new SetupTOTPEndpoint(),
+                build: (org) => Request.buildJson('POST', '/mfa/totp', org.getApiHost()),
+            },
+            {
+                name: 'ConfirmTOTP',
+                endpoint: () => new ConfirmTOTPEndpoint(),
+                build: (org) =>
+                    Request.buildJson('POST', '/mfa/totp/x/confirm', org.getApiHost(), {
+                        code: '000000',
+                        name: 'x',
+                    }),
+            },
+            {
+                name: 'RegisterPasskeyOptions',
+                endpoint: () => new RegisterPasskeyOptionsEndpoint(),
+                build: (org) =>
+                    Request.buildJson('POST', '/mfa/passkeys/options', org.getApiHost()),
+            },
+            {
+                name: 'RegisterPasskey',
+                endpoint: () => new RegisterPasskeyEndpoint(),
+                build: (org) =>
+                    Request.buildJson('POST', '/mfa/passkeys', org.getApiHost(), {
+                        name: 'x',
+                        response: {},
+                    }),
+            },
+            {
+                name: 'DeleteTOTP',
+                endpoint: () => new DeleteTOTPEndpoint(),
+                build: (org) => Request.buildJson('DELETE', '/mfa/totp/x', org.getApiHost()),
+            },
+            {
+                name: 'DeletePasskey',
+                endpoint: () => new DeletePasskeyEndpoint(),
+                build: (org) => Request.buildJson('DELETE', '/mfa/passkeys/x', org.getApiHost()),
+            },
+            {
+                name: 'RegenerateRecoveryCodes',
+                endpoint: () => new RegenerateRecoveryCodesEndpoint(),
+                build: (org) => Request.buildJson('POST', '/mfa/recovery-codes', org.getApiHost()),
+            },
         ];
 
         for (const c of cases) {
@@ -1049,7 +1798,9 @@ describe('MFA', () => {
                 const user = await new UserFactory({ organization, password }).create();
                 const token = await staleToken(user);
 
-                const err = await captureError(testServer.test(c.endpoint() as never, bearer(c.build(organization), token)));
+                const err = await captureError(
+                    testServer.test(c.endpoint() as never, bearer(c.build(organization), token)),
+                );
                 expect(err.code).toBe('require_fresh_auth');
             });
         }
@@ -1057,7 +1808,13 @@ describe('MFA', () => {
         test('GetMFAStatus does NOT require a fresh session (read-only)', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
-            const response = await testServer.test(new GetMFAStatusEndpoint(), bearer(Request.buildJson('GET', '/mfa', organization.getApiHost()), await staleToken(user)));
+            const response = await testServer.test(
+                new GetMFAStatusEndpoint(),
+                bearer(
+                    Request.buildJson('GET', '/mfa', organization.getApiHost()),
+                    await staleToken(user),
+                ),
+            );
             expect(response.body).toBeDefined();
         });
     });
@@ -1067,7 +1824,10 @@ describe('MFA', () => {
     // -----------------------------------------------------------------------
     describe('no MFA bypass via alternate grants', () => {
         function passwordTokenLogin(organization: Organization, token: string) {
-            return Request.buildJson('POST', '/oauth/token', organization.getApiHost(), { grant_type: 'password_token', token });
+            return Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
+                grant_type: 'password_token',
+                token,
+            });
         }
 
         test('password_token grant challenges MFA for a user with a factor (no bypass)', async () => {
@@ -1076,7 +1836,9 @@ describe('MFA', () => {
             await addConfirmedTOTP(user);
 
             const pwToken = await PasswordToken.createToken(user);
-            const err = await captureError(testServer.test(tokenEndpoint, passwordTokenLogin(organization, pwToken.token)));
+            const err = await captureError(
+                testServer.test(tokenEndpoint, passwordTokenLogin(organization, pwToken.token)),
+            );
             expect(err.code).toBe('require_mfa');
         });
 
@@ -1084,10 +1846,16 @@ describe('MFA', () => {
             const organization = await new OrganizationFactory({}).create();
             organization.privateMeta.requireTwoFactor = true;
             await organization.save();
-            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
 
             const pwToken = await PasswordToken.createToken(user);
-            const err = await captureError(testServer.test(tokenEndpoint, passwordTokenLogin(organization, pwToken.token)));
+            const err = await captureError(
+                testServer.test(tokenEndpoint, passwordTokenLogin(organization, pwToken.token)),
+            );
             expect(err.code).toBe('require_mfa_setup');
 
             // A temporary session token is included: this flow is also used to choose a
@@ -1106,9 +1874,15 @@ describe('MFA', () => {
             const organization = await new OrganizationFactory({}).create();
             organization.privateMeta.requireTwoFactor = true;
             await organization.save();
-            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
 
-            const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            const err = await captureError(
+                testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)),
+            );
             expect(err.code).toBe('require_mfa_setup');
             expect((err.meta as { setupToken: string; token: unknown }).setupToken).toBeTruthy();
             expect((err.meta as { token: unknown }).token).toBeNull();
@@ -1119,7 +1893,10 @@ describe('MFA', () => {
             const user = await new UserFactory({ organization, password }).create();
 
             const pwToken = await PasswordToken.createToken(user);
-            const response = await testServer.test(tokenEndpoint, passwordTokenLogin(organization, pwToken.token));
+            const response = await testServer.test(
+                tokenEndpoint,
+                passwordTokenLogin(organization, pwToken.token),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
         });
 
@@ -1129,7 +1906,15 @@ describe('MFA', () => {
             await addConfirmedTOTP(user);
 
             const code = await EmailVerificationCode.createFor(user, user.email);
-            const err = await captureError(testServer.test(new VerifyEmailEndpoint(), Request.buildJson('POST', '/verify-email', organization.getApiHost(), { token: code.token, code: code.code })));
+            const err = await captureError(
+                testServer.test(
+                    new VerifyEmailEndpoint(),
+                    Request.buildJson('POST', '/verify-email', organization.getApiHost(), {
+                        token: code.token,
+                        code: code.code,
+                    }),
+                ),
+            );
             expect(err.code).toBe('require_mfa');
         });
 
@@ -1138,7 +1923,13 @@ describe('MFA', () => {
             const user = await new UserFactory({ organization, password }).create();
 
             const code = await EmailVerificationCode.createFor(user, user.email);
-            const response = await testServer.test(new VerifyEmailEndpoint(), Request.buildJson('POST', '/verify-email', organization.getApiHost(), { token: code.token, code: code.code }));
+            const response = await testServer.test(
+                new VerifyEmailEndpoint(),
+                Request.buildJson('POST', '/verify-email', organization.getApiHost(), {
+                    token: code.token,
+                    code: code.code,
+                }),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
         });
 
@@ -1152,7 +1943,16 @@ describe('MFA', () => {
             const session = await freshToken(user);
 
             const code = await EmailVerificationCode.createFor(user, newEmail);
-            const response = await testServer.test(new VerifyEmailEndpoint(), bearer(Request.buildJson('POST', '/verify-email', organization.getApiHost(), { token: code.token, code: code.code }), session));
+            const response = await testServer.test(
+                new VerifyEmailEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/verify-email', organization.getApiHost(), {
+                        token: code.token,
+                        code: code.code,
+                    }),
+                    session,
+                ),
+            );
             expect(response.body).toBeInstanceOf(TokenStruct);
 
             const updated = await User.getByID(user.id);
@@ -1166,7 +1966,18 @@ describe('MFA', () => {
             const other = await new UserFactory({ organization, password }).create();
 
             const code = await EmailVerificationCode.createFor(user, user.email);
-            const err = await captureError(testServer.test(new VerifyEmailEndpoint(), bearer(Request.buildJson('POST', '/verify-email', organization.getApiHost(), { token: code.token, code: code.code }), await freshToken(other))));
+            const err = await captureError(
+                testServer.test(
+                    new VerifyEmailEndpoint(),
+                    bearer(
+                        Request.buildJson('POST', '/verify-email', organization.getApiHost(), {
+                            token: code.token,
+                            code: code.code,
+                        }),
+                        await freshToken(other),
+                    ),
+                ),
+            );
             expect(err.code).toBe('require_mfa');
         });
     });
@@ -1184,11 +1995,19 @@ describe('MFA', () => {
             const code = authenticator.generate(secret);
 
             const challenge1 = await requireMfa(organization, user.email, password);
-            const ok = await testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge1.token, method: 'TOTP', code }));
+            const ok = await testServer.test(
+                tokenEndpoint,
+                mfaGrant(organization, { mfa_token: challenge1.token, method: 'TOTP', code }),
+            );
             expect(ok.body).toBeInstanceOf(TokenStruct);
 
             const challenge2 = await requireMfa(organization, user.email, password);
-            const replay = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge2.token, method: 'TOTP', code })));
+            const replay = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, { mfa_token: challenge2.token, method: 'TOTP', code }),
+                ),
+            );
             expect(replay.code).toBe('invalid_mfa_code');
         });
 
@@ -1197,14 +2016,33 @@ describe('MFA', () => {
             const user = await new UserFactory({ organization, password }).create();
             const token = await freshToken(user);
 
-            const setup = await testServer.test(new SetupTOTPEndpoint(), bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), token));
+            const setup = await testServer.test(
+                new SetupTOTPEndpoint(),
+                bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), token),
+            );
             const { totpId, secret } = setup.body as { totpId: string; secret: string };
 
             const code = authenticator.generate(secret);
-            await testServer.test(new ConfirmTOTPEndpoint(), bearer(Request.buildJson('POST', `/mfa/totp/${totpId}/confirm`, organization.getApiHost(), { code, name: 'Phone' }), await freshToken(user)));
+            await testServer.test(
+                new ConfirmTOTPEndpoint(),
+                bearer(
+                    Request.buildJson(
+                        'POST',
+                        `/mfa/totp/${totpId}/confirm`,
+                        organization.getApiHost(),
+                        { code, name: 'Phone' },
+                    ),
+                    await freshToken(user),
+                ),
+            );
 
             const challenge = await requireMfa(organization, user.email, password);
-            const replay = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code })));
+            const replay = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code }),
+                ),
+            );
             expect(replay.code).toBe('invalid_mfa_code');
         });
 
@@ -1218,7 +2056,7 @@ describe('MFA', () => {
             const second = (await MFATOTP.getByID(id))!;
 
             const claims = await Promise.all([first.claimCounter(42), second.claimCounter(42)]);
-            expect(claims.filter(claimed => claimed)).toHaveLength(1);
+            expect(claims.filter((claimed) => claimed)).toHaveLength(1);
 
             // A later code is still accepted, an earlier one never again.
             expect(await (await MFATOTP.getByID(id))!.claimCounter(43)).toBe(true);
@@ -1233,11 +2071,17 @@ describe('MFA', () => {
 
             const challenge = await requireMfa(organization, user.email, password);
             const results = await Promise.allSettled([
-                testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code })),
-                testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code })),
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code }),
+                ),
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code }),
+                ),
             ]);
 
-            expect(results.filter(r => r.status === 'fulfilled')).toHaveLength(1);
+            expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
             expect(await Token.where({ userId: user.id })).toHaveLength(1);
         });
     });
@@ -1255,7 +2099,16 @@ describe('MFA', () => {
             // trips; only the aggregate per-user limiter can stop this.
             for (let i = 0; i < 10; i++) {
                 const challenge = await requireMfa(organization, user.email, password);
-                const e = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: '000000' })));
+                const e = await captureError(
+                    testServer.test(
+                        tokenEndpoint,
+                        mfaGrant(organization, {
+                            mfa_token: challenge.token,
+                            method: 'TOTP',
+                            code: '000000',
+                        }),
+                    ),
+                );
                 expect(e.code).toBe('invalid_mfa_code');
             }
 
@@ -1263,7 +2116,16 @@ describe('MFA', () => {
             // The limiter is checked before verification, so brute-forcing until a lucky
             // (or leaked) code lands still gets rejected once the limit is exceeded.
             const challenge = await requireMfa(organization, user.email, password);
-            const limited = await captureError(testServer.test(tokenEndpoint, mfaGrant(organization, { mfa_token: challenge.token, method: 'TOTP', code: authenticator.generate(secret) })));
+            const limited = await captureError(
+                testServer.test(
+                    tokenEndpoint,
+                    mfaGrant(organization, {
+                        mfa_token: challenge.token,
+                        method: 'TOTP',
+                        code: authenticator.generate(secret),
+                    }),
+                ),
+            );
             expect(limited.code).toBe('rate_limit');
         });
     });
@@ -1287,7 +2149,9 @@ describe('MFA', () => {
             const codes = await RecoveryCodeHelper.regenerateForUser(user.id);
             expect(codes.length).toBeGreaterThan(0);
 
-            const allowed = new RegExp(`^([${RECOVERY_CODE_ALPHABET}]{4}-){3}[${RECOVERY_CODE_ALPHABET}]{4}$`);
+            const allowed = new RegExp(
+                `^([${RECOVERY_CODE_ALPHABET}]{4}-){3}[${RECOVERY_CODE_ALPHABET}]{4}$`,
+            );
             for (const code of codes) {
                 expect(code).toMatch(allowed);
             }
@@ -1314,10 +2178,22 @@ describe('MFA', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
 
-            const first = await testServer.test(new SetupTOTPEndpoint(), bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), await freshToken(user)));
+            const first = await testServer.test(
+                new SetupTOTPEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/totp', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
             const firstId = (first.body as { totpId: string }).totpId;
 
-            const second = await testServer.test(new SetupTOTPEndpoint(), bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), await freshToken(user)));
+            const second = await testServer.test(
+                new SetupTOTPEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/totp', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
             const secondId = (second.body as { totpId: string }).totpId;
 
             expect(await MFATOTP.getByID(firstId)).toBeUndefined();
@@ -1329,7 +2205,13 @@ describe('MFA', () => {
             const user = await new UserFactory({ organization, password }).create();
             const confirmed = await addConfirmedTOTP(user);
 
-            await testServer.test(new SetupTOTPEndpoint(), bearer(Request.buildJson('POST', '/mfa/totp', organization.getApiHost()), await freshToken(user)));
+            await testServer.test(
+                new SetupTOTPEndpoint(),
+                bearer(
+                    Request.buildJson('POST', '/mfa/totp', organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
             expect(await MFATOTP.getByID(confirmed.id)).toBeDefined();
         });
 
@@ -1376,7 +2258,13 @@ describe('MFA', () => {
             const totp = await addConfirmedTOTP(user);
             await RecoveryCodeHelper.regenerateForUser(user.id);
 
-            const response = await testServer.test(new DeleteTOTPEndpoint(), bearer(Request.buildJson('DELETE', `/mfa/totp/${totp.id}`, organization.getApiHost()), await freshToken(user)));
+            const response = await testServer.test(
+                new DeleteTOTPEndpoint(),
+                bearer(
+                    Request.buildJson('DELETE', `/mfa/totp/${totp.id}`, organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
 
             expect((response.body as { hasRecoveryCodes: boolean }).hasRecoveryCodes).toBe(false);
             expect(await MFARecoveryCode.getForUser(user.id)).toHaveLength(0);
@@ -1389,7 +2277,13 @@ describe('MFA', () => {
             await addPasskey(user);
             const codes = await RecoveryCodeHelper.regenerateForUser(user.id);
 
-            await testServer.test(new DeleteTOTPEndpoint(), bearer(Request.buildJson('DELETE', `/mfa/totp/${totp.id}`, organization.getApiHost()), await freshToken(user)));
+            await testServer.test(
+                new DeleteTOTPEndpoint(),
+                bearer(
+                    Request.buildJson('DELETE', `/mfa/totp/${totp.id}`, organization.getApiHost()),
+                    await freshToken(user),
+                ),
+            );
 
             expect(await MFARecoveryCode.getUnusedForUser(user.id)).toHaveLength(codes.length);
         });
@@ -1404,7 +2298,11 @@ describe('MFA', () => {
             organization.privateMeta.requireTwoFactor = true;
             await organization.save();
 
-            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
             if (!withPassword) {
                 // An SSO-only account: it was never given a password.
                 user.password = null;
@@ -1414,59 +2312,96 @@ describe('MFA', () => {
         }
 
         test('an SSO login still has to pass an enrolled second factor', async () => {
-            const { organization, user } = await adminOfOrgRequiringTwoFactor({ withPassword: false });
+            const { organization, user } = await adminOfOrgRequiringTwoFactor({
+                withPassword: false,
+            });
             await addConfirmedTOTP(user);
 
-            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: SessionLoginMethod.SSO });
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(
+                user,
+                organization,
+                { loginMethod: SessionLoginMethod.SSO },
+            );
             expect(requirement.type).toBe('challenge');
         });
 
         test('an SSO-only account is not forced to enroll: the provider is the second factor', async () => {
-            const { organization, user } = await adminOfOrgRequiringTwoFactor({ withPassword: false });
+            const { organization, user } = await adminOfOrgRequiringTwoFactor({
+                withPassword: false,
+            });
 
-            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: SessionLoginMethod.SSO });
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(
+                user,
+                organization,
+                { loginMethod: SessionLoginMethod.SSO },
+            );
             expect(requirement.type).toBe('none');
         });
 
         test('an account that also has a password is forced to enroll, even through SSO', async () => {
             // The password stays a way in that skips whatever the provider enforces, so the
             // requirement is not satisfied by signing in through SSO.
-            const { organization, user } = await adminOfOrgRequiringTwoFactor({ withPassword: true });
+            const { organization, user } = await adminOfOrgRequiringTwoFactor({
+                withPassword: true,
+            });
 
-            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: SessionLoginMethod.SSO });
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(
+                user,
+                organization,
+                { loginMethod: SessionLoginMethod.SSO },
+            );
             expect(requirement.type).toBe('setup');
         });
 
         test('a password login is always forced to enroll', async () => {
-            const { organization, user } = await adminOfOrgRequiringTwoFactor({ withPassword: true });
+            const { organization, user } = await adminOfOrgRequiringTwoFactor({
+                withPassword: true,
+            });
 
-            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: SessionLoginMethod.Password });
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(
+                user,
+                organization,
+                { loginMethod: SessionLoginMethod.Password },
+            );
             expect(requirement.type).toBe('setup');
         });
 
         test('the session of an SSO login that passed a second factor is an SSO session', async () => {
             // The session is only created after the second factor, so the challenge has to
             // remember how the user got there: it decides how long the session may live.
-            const { organization, user } = await adminOfOrgRequiringTwoFactor({ withPassword: false });
+            const { organization, user } = await adminOfOrgRequiringTwoFactor({
+                withPassword: false,
+            });
             const { secret } = await addConfirmedTOTP(user);
 
-            const requirement = await TwoFactorHelper.getSecondFactorRequirement(user, organization, { loginMethod: SessionLoginMethod.SSO });
+            const requirement = await TwoFactorHelper.getSecondFactorRequirement(
+                user,
+                organization,
+                { loginMethod: SessionLoginMethod.SSO },
+            );
             if (requirement.type !== 'challenge') {
                 throw new Error('Expected a challenge');
             }
 
-            const response = await testServer.test(tokenEndpoint, mfaGrant(organization, {
-                mfa_token: requirement.challenge.token,
-                method: 'TOTP',
-                code: authenticator.generate(secret),
-            }));
+            const response = await testServer.test(
+                tokenEndpoint,
+                mfaGrant(organization, {
+                    mfa_token: requirement.challenge.token,
+                    method: 'TOTP',
+                    code: authenticator.generate(secret),
+                }),
+            );
             if (!(response.body instanceof TokenStruct)) {
                 throw new Error('Expected TokenStruct');
             }
 
             const token = await Token.getByAccessToken(response.body.accessToken);
-            expect((await UserSession.getByID(token!.sessionId))!.loginMethod).toBe(SessionLoginMethod.SSO);
-            expect(token!.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(Date.now() + 8 * 60 * 60 * 1000);
+            expect((await UserSession.getByID(token!.sessionId))!.loginMethod).toBe(
+                SessionLoginMethod.SSO,
+            );
+            expect(token!.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(
+                Date.now() + 8 * 60 * 60 * 1000,
+            );
         });
     });
 
@@ -1481,7 +2416,19 @@ describe('MFA', () => {
             const user = await new UserFactory({ organization, password }).create();
             expect(user.organizationId).not.toBeNull();
 
-            const err = await captureError(testServer.test(new RegisterPasskeyOptionsEndpoint(), bearer(Request.buildJson('POST', '/mfa/passkeys/options', organization.getApiHost()), await freshToken(user))));
+            const err = await captureError(
+                testServer.test(
+                    new RegisterPasskeyOptionsEndpoint(),
+                    bearer(
+                        Request.buildJson(
+                            'POST',
+                            '/mfa/passkeys/options',
+                            organization.getApiHost(),
+                        ),
+                        await freshToken(user),
+                    ),
+                ),
+            );
             expect(err.code).toBe('passkeys_not_available');
         });
 
@@ -1489,10 +2436,23 @@ describe('MFA', () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({ organization, password }).create();
 
-            const err = await captureError(testServer.test(new RegisterPasskeyEndpoint(), bearer(Request.buildJson('POST', '/mfa/passkeys', organization.getApiHost(), {
-                name: 'My key',
-                response: { id: 'x', rawId: 'x', type: 'public-key', response: { clientDataJSON: 'x', attestationObject: 'x' } },
-            }), await freshToken(user))));
+            const err = await captureError(
+                testServer.test(
+                    new RegisterPasskeyEndpoint(),
+                    bearer(
+                        Request.buildJson('POST', '/mfa/passkeys', organization.getApiHost(), {
+                            name: 'My key',
+                            response: {
+                                id: 'x',
+                                rawId: 'x',
+                                type: 'public-key',
+                                response: { clientDataJSON: 'x', attestationObject: 'x' },
+                            },
+                        }),
+                        await freshToken(user),
+                    ),
+                ),
+            );
             expect(err.code).toBe('passkeys_not_available');
         });
 
@@ -1501,10 +2461,22 @@ describe('MFA', () => {
             const organizationUser = await new UserFactory({ organization, password }).create();
             const platformAdmin = await platformUser();
 
-            const scoped = await testServer.test(new GetMFAStatusEndpoint(), bearer(Request.buildJson('GET', '/mfa', organization.getApiHost()), await freshToken(organizationUser)));
+            const scoped = await testServer.test(
+                new GetMFAStatusEndpoint(),
+                bearer(
+                    Request.buildJson('GET', '/mfa', organization.getApiHost()),
+                    await freshToken(organizationUser),
+                ),
+            );
             expect((scoped.body as { canUsePasskeys: boolean }).canUsePasskeys).toBe(false);
 
-            const platform = await testServer.test(new GetMFAStatusEndpoint(), bearer(Request.buildJson('GET', '/mfa', undefined), await freshToken(platformAdmin)));
+            const platform = await testServer.test(
+                new GetMFAStatusEndpoint(),
+                bearer(
+                    Request.buildJson('GET', '/mfa', undefined),
+                    await freshToken(platformAdmin),
+                ),
+            );
             expect((platform.body as { canUsePasskeys: boolean }).canUsePasskeys).toBe(true);
         });
 
@@ -1512,9 +2484,15 @@ describe('MFA', () => {
             const organization = await new OrganizationFactory({}).create();
             organization.privateMeta.requireTwoFactor = true;
             await organization.save();
-            const user = await new UserFactory({ organization, password, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const user = await new UserFactory({
+                organization,
+                password,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
 
-            const err = await captureError(testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)));
+            const err = await captureError(
+                testServer.test(tokenEndpoint, passwordLogin(organization, user.email, password)),
+            );
             expect(err.code).toBe('require_mfa_setup');
             expect((err.meta as { canUsePasskeys: boolean }).canUsePasskeys).toBe(false);
         });
@@ -1583,7 +2561,12 @@ describe('MFA', () => {
             await RecoveryCodeHelper.regenerateForUser(user.id);
 
             const mfaToken = await MFAToken.createFor(user.id, 'login');
-            const response = await testServer.test(new GetMFAChallengeEndpoint(), Request.buildJson('POST', '/mfa/challenge', organization.getApiHost(), { token: mfaToken.token }));
+            const response = await testServer.test(
+                new GetMFAChallengeEndpoint(),
+                Request.buildJson('POST', '/mfa/challenge', organization.getApiHost(), {
+                    token: mfaToken.token,
+                }),
+            );
 
             const body = response.body as { token: string; methods: string[] };
             expect(body.token).toBe(mfaToken.token);
@@ -1598,9 +2581,16 @@ describe('MFA', () => {
             const mfaToken = await MFAToken.createFor(user.id, 'login');
             expect(mfaToken.webauthnChallenge).toBeNull();
 
-            const response = await testServer.test(new GetMFAChallengeEndpoint(), Request.buildJson('POST', '/mfa/challenge', organization.getApiHost(), { token: mfaToken.token }));
+            const response = await testServer.test(
+                new GetMFAChallengeEndpoint(),
+                Request.buildJson('POST', '/mfa/challenge', organization.getApiHost(), {
+                    token: mfaToken.token,
+                }),
+            );
 
-            const options = (response.body as { webauthnAuthenticationOptions: { challenge?: string } }).webauthnAuthenticationOptions;
+            const options = (
+                response.body as { webauthnAuthenticationOptions: { challenge?: string } }
+            ).webauthnAuthenticationOptions;
             expect(options.challenge).toBeTruthy();
 
             const stored = await MFAToken.select().where('token', mfaToken.token).first(true);

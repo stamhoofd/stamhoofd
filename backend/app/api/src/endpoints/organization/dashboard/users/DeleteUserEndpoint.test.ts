@@ -36,16 +36,22 @@ describe('Endpoint.DeleteUser', () => {
             const admin = await createFullAdmin(organization);
             const parent = await new UserFactory({}).create();
 
-            await expect(deleteUser(organization, admin, parent.id)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(deleteUser(organization, admin, parent.id)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
             expect(await User.getByID(parent.id)).toBeDefined();
         });
 
         test('an organization admin cannot delete a platform admin', async () => {
             const organization = await new OrganizationFactory({}).create();
             const admin = await createFullAdmin(organization);
-            const platformAdmin = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const platformAdmin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
 
-            await expect(deleteUser(organization, admin, platformAdmin.id)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(deleteUser(organization, admin, platformAdmin.id)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
             expect(await User.getByID(platformAdmin.id)).toBeDefined();
         });
 
@@ -53,12 +59,21 @@ describe('Endpoint.DeleteUser', () => {
             const organization = await new OrganizationFactory({}).create();
             const other = await new OrganizationFactory({}).create();
             const admin = await createFullAdmin(organization);
-            const colleague = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Write }) }).create();
-            colleague.permissions!.organizationPermissions.set(other.id, Permissions.create({ level: PermissionLevel.Read }));
+            const colleague = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+            }).create();
+            colleague.permissions!.organizationPermissions.set(
+                other.id,
+                Permissions.create({ level: PermissionLevel.Read }),
+            );
             await colleague.save();
 
             // The admin has full access to the other organization too, so the colleague's permissions are covered
-            admin.permissions!.organizationPermissions.set(other.id, Permissions.create({ level: PermissionLevel.Full }));
+            admin.permissions!.organizationPermissions.set(
+                other.id,
+                Permissions.create({ level: PermissionLevel.Full }),
+            );
             await admin.save();
 
             const response = await deleteUser(organization, admin, colleague.id);
@@ -66,22 +81,36 @@ describe('Endpoint.DeleteUser', () => {
 
             const refreshed = await User.getByID(colleague.id);
             expect(refreshed).toBeDefined();
-            expect(refreshed!.permissions!.organizationPermissions.get(organization.id)).toBeUndefined();
-            expect(refreshed!.permissions!.organizationPermissions.get(other.id)?.level).toBe(PermissionLevel.Read);
+            expect(
+                refreshed!.permissions!.organizationPermissions.get(organization.id),
+            ).toBeUndefined();
+            expect(refreshed!.permissions!.organizationPermissions.get(other.id)?.level).toBe(
+                PermissionLevel.Read,
+            );
         });
 
         test('an organization admin cannot delete an admin with permissions in an organization they do not manage', async () => {
             const organization = await new OrganizationFactory({}).create();
             const other = await new OrganizationFactory({}).create();
             const admin = await createFullAdmin(organization);
-            const colleague = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Write }) }).create();
-            colleague.permissions!.organizationPermissions.set(other.id, Permissions.create({ level: PermissionLevel.Read }));
+            const colleague = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+            }).create();
+            colleague.permissions!.organizationPermissions.set(
+                other.id,
+                Permissions.create({ level: PermissionLevel.Read }),
+            );
             await colleague.save();
 
-            await expect(deleteUser(organization, admin, colleague.id)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(deleteUser(organization, admin, colleague.id)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
 
             const refreshed = await User.getByID(colleague.id);
-            expect(refreshed!.permissions!.organizationPermissions.get(organization.id)?.level).toBe(PermissionLevel.Write);
+            expect(
+                refreshed!.permissions!.organizationPermissions.get(organization.id)?.level,
+            ).toBe(PermissionLevel.Write);
         });
 
         test('an organization admin can delete an API key of their organization, but not of another organization', async () => {
@@ -89,15 +118,25 @@ describe('Endpoint.DeleteUser', () => {
             const other = await new OrganizationFactory({}).create();
             const admin = await createFullAdmin(organization);
             // API keys are always bound to the organization that created them, also in platform mode
-            const ownKey = await new UserFactory({ organization, apiUser: true, permissions: Permissions.create({ level: PermissionLevel.Read }) }).create();
+            const ownKey = await new UserFactory({
+                organization,
+                apiUser: true,
+                permissions: Permissions.create({ level: PermissionLevel.Read }),
+            }).create();
             ownKey.organizationId = organization.id;
             await ownKey.save();
-            const otherKey = await new UserFactory({ organization: other, apiUser: true, permissions: Permissions.create({ level: PermissionLevel.Read }) }).create();
+            const otherKey = await new UserFactory({
+                organization: other,
+                apiUser: true,
+                permissions: Permissions.create({ level: PermissionLevel.Read }),
+            }).create();
             otherKey.organizationId = other.id;
             await otherKey.save();
             expect(ownKey.isApiUser).toBe(true);
 
-            await expect(deleteUser(organization, admin, otherKey.id)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(deleteUser(organization, admin, otherKey.id)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
             expect(await User.getByID(otherKey.id)).toBeDefined();
 
             const response = await deleteUser(organization, admin, ownKey.id);
@@ -107,8 +146,13 @@ describe('Endpoint.DeleteUser', () => {
 
         test('a platform admin deleting a platform-level user on an organization host only revokes the organization permissions', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const platformAdmin = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
-            const colleague = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Write }) }).create();
+            const platformAdmin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const colleague = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+            }).create();
 
             const response = await deleteUser(organization, platformAdmin, colleague.id);
             expect(response.status).toBe(200);
@@ -122,7 +166,9 @@ describe('Endpoint.DeleteUser', () => {
             const organization = await new OrganizationFactory({}).create();
             const admin = await createFullAdmin(organization);
 
-            await expect(deleteUser(organization, admin, admin.id)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(deleteUser(organization, admin, admin.id)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
             expect(await User.getByID(admin.id)).toBeDefined();
         });
 
@@ -130,15 +176,25 @@ describe('Endpoint.DeleteUser', () => {
             const organization = await new OrganizationFactory({}).create();
             const admin = await createFullAdmin(organization);
 
-            await expect(deleteUser(organization, admin, 'does-not-exist')).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(deleteUser(organization, admin, 'does-not-exist')).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         });
 
         test('an admin without full access cannot delete anything', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const admin = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Write }) }).create();
-            const colleague = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Read }) }).create();
+            const admin = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+            }).create();
+            const colleague = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Read }),
+            }).create();
 
-            await expect(deleteUser(organization, admin, colleague.id)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(deleteUser(organization, admin, colleague.id)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         });
     });
 
@@ -150,7 +206,10 @@ describe('Endpoint.DeleteUser', () => {
         test('a full admin deletes an admin of their organization', async () => {
             const organization = await new OrganizationFactory({}).create();
             const admin = await createFullAdmin(organization);
-            const colleague = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Write }) }).create();
+            const colleague = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Write }),
+            }).create();
 
             const response = await deleteUser(organization, admin, colleague.id);
             expect(response.status).toBe(200);
@@ -163,7 +222,9 @@ describe('Endpoint.DeleteUser', () => {
             const admin = await createFullAdmin(organization);
             const stranger = await new UserFactory({ organization: other }).create();
 
-            await expect(deleteUser(organization, admin, stranger.id)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(deleteUser(organization, admin, stranger.id)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
             expect(await User.getByID(stranger.id)).toBeDefined();
         });
     });

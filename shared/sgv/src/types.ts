@@ -1,5 +1,14 @@
 import type { Decoder, ObjectData } from '@common/encoding';
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@common/encoding';
+import {
+    AnyDecoder,
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    field,
+    IntegerDecoder,
+    NumberDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
@@ -54,36 +63,47 @@ export class SGVFoutenDecoder implements Decoder<SimpleErrors> {
         const msg = data.optionalField('msg')?.string;
 
         if (msg) {
-            return new SimpleErrors(new SimpleError({
-                code: 'SGVError',
-                message: msg,
-            }));
+            return new SimpleErrors(
+                new SimpleError({
+                    code: 'SGVError',
+                    message: msg,
+                }),
+            );
         }
 
-        const titel = data.optionalField('titel')?.string ?? data.optionalField('boodschap')?.string;
+        const titel =
+            data.optionalField('titel')?.string ?? data.optionalField('boodschap')?.string;
 
         if (!titel) {
             console.error('Onbekende foutmelding van de groepsadministratie: ', data.data);
 
             try {
-                return new SimpleErrors(new SimpleError({
-                    code: 'unknown_SGVError',
-                    message: JSON.stringify(data.data),
-                    human: 'Foutmelding van de groepsadministratie. Kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, foutieve postcode, rare straat en huisnummer volgorde, postcode of gemeente ingevuld bij straatnaam, onjuiste schrijfwijze straat, ... en probeer opnieuw. Foutmelding groepsadministratie: ' + JSON.stringify(data.data),
-                }));
+                return new SimpleErrors(
+                    new SimpleError({
+                        code: 'unknown_SGVError',
+                        message: JSON.stringify(data.data),
+                        human:
+                            'Foutmelding van de groepsadministratie. Kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, foutieve postcode, rare straat en huisnummer volgorde, postcode of gemeente ingevuld bij straatnaam, onjuiste schrijfwijze straat, ... en probeer opnieuw. Foutmelding groepsadministratie: ' +
+                            JSON.stringify(data.data),
+                    }),
+                );
             } catch (e) {
-                return new SimpleErrors(new SimpleError({
-                    code: 'unknown_SGVError',
-                    message: data.data + '',
-                    human: 'Foutmelding van de groepsadministratie. Kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, foutieve postcode, rare straat en huisnummer volgorde, postcode of gemeente ingevuld bij straatnaam, onjuiste schrijfwijze straat, ... en probeer opnieuw.',
-                }));
+                return new SimpleErrors(
+                    new SimpleError({
+                        code: 'unknown_SGVError',
+                        message: data.data + '',
+                        human: 'Foutmelding van de groepsadministratie. Kijk na of er niets vreemd is aan de gegevens van dit lid, zoals een adres zonder huisnummer, foutieve postcode, rare straat en huisnummer volgorde, postcode of gemeente ingevuld bij straatnaam, onjuiste schrijfwijze straat, ... en probeer opnieuw.',
+                    }),
+                );
             }
         }
         const beschrijving = data.optionalField('beschrijving')?.string;
-        return new SimpleErrors(new SimpleError({
-            code: 'SGVError',
-            message: titel + (beschrijving ? (': ' + beschrijving) : ''),
-        }));
+        return new SimpleErrors(
+            new SimpleError({
+                code: 'SGVError',
+                message: titel + (beschrijving ? ': ' + beschrijving : ''),
+            }),
+        );
     }
 }
 
@@ -133,7 +153,6 @@ export type SGVVerbondsGegevens = {
     klantnummer?: string;
     lidgeldbetaald?: boolean;
     lidkaartafgedrukt?: boolean;
-
 };
 
 export type SGVLink = { method: string; sections?: string[] };
@@ -160,14 +179,18 @@ export class SGVLid {
     }
 
     static decode(data: ObjectData) {
-        const date = data.field('waarden').field('be.vvksm.groepsadmin.model.column.GeboorteDatumColumn').string;
+        const date = data
+            .field('waarden')
+            .field('be.vvksm.groepsadmin.model.column.GeboorteDatumColumn').string;
 
         const splitted = date.split('/');
         if (splitted.length !== 3) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Expected DD/MM/YYYY formatted string',
-                field: data.addToCurrentField('waarden.be.vvksm.groepsadmin.model.column.GeboorteDatumColumn'),
+                field: data.addToCurrentField(
+                    'waarden.be.vvksm.groepsadmin.model.column.GeboorteDatumColumn',
+                ),
             });
         }
 
@@ -175,20 +198,36 @@ export class SGVLid {
         const month = parseInt(splitted[1]);
         const day = parseInt(splitted[0]);
 
-        if (isNaN(year) || isNaN(month) || isNaN(day) || day > 31 || month > 12 || year > 2200 || year < 1900) {
+        if (
+            isNaN(year) ||
+            isNaN(month) ||
+            isNaN(day) ||
+            day > 31 ||
+            month > 12 ||
+            year > 2200 ||
+            year < 1900
+        ) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Expected DD/MM/YYYY formatted string',
-                field: data.addToCurrentField('waarden.be.vvksm.groepsadmin.model.column.GeboorteDatumColumn'),
+                field: data.addToCurrentField(
+                    'waarden.be.vvksm.groepsadmin.model.column.GeboorteDatumColumn',
+                ),
             });
         }
 
         return new SGVLid({
             id: data.field('id').string,
-            firstName: data.field('waarden').field('be.vvksm.groepsadmin.model.column.VoornaamColumn').string,
-            lastName: data.field('waarden').field('be.vvksm.groepsadmin.model.column.AchternaamColumn').string,
+            firstName: data
+                .field('waarden')
+                .field('be.vvksm.groepsadmin.model.column.VoornaamColumn').string,
+            lastName: data
+                .field('waarden')
+                .field('be.vvksm.groepsadmin.model.column.AchternaamColumn').string,
             birthDay: new Date(year, month - 1, day, 12),
-            lidNummer: data.field('waarden').field('be.vvksm.groepsadmin.model.column.LidNummerColumn').string,
+            lidNummer: data
+                .field('waarden')
+                .field('be.vvksm.groepsadmin.model.column.LidNummerColumn').string,
         });
     }
 
@@ -197,11 +236,24 @@ export class SGVLid {
             return false;
         }
 
-        if (member.details.memberNumber && this.lidNummer && member.details.memberNumber === this.lidNummer) {
+        if (
+            member.details.memberNumber &&
+            this.lidNummer &&
+            member.details.memberNumber === this.lidNummer
+        ) {
             return true;
         }
 
-        return StringCompare.typoCount(member.details.firstName + ' ' + member.details.lastName, this.firstName + ' ' + this.lastName) === 0 && StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay)) === 0;
+        return (
+            StringCompare.typoCount(
+                member.details.firstName + ' ' + member.details.lastName,
+                this.firstName + ' ' + this.lastName,
+            ) === 0 &&
+            StringCompare.typoCount(
+                Formatter.dateNumber(member.details.birthDay),
+                Formatter.dateNumber(this.birthDay),
+            ) === 0
+        );
     }
 
     /// Typo in name
@@ -214,10 +266,25 @@ export class SGVLid {
             return member.details.memberNumber === this.lidNummer;
         }
 
-        const t = StringCompare.typoCount(member.details.firstName + ' ' + member.details.lastName, this.firstName + ' ' + this.lastName);
-        const y = StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay));
+        const t = StringCompare.typoCount(
+            member.details.firstName + ' ' + member.details.lastName,
+            this.firstName + ' ' + this.lastName,
+        );
+        const y = StringCompare.typoCount(
+            Formatter.dateNumber(member.details.birthDay),
+            Formatter.dateNumber(this.birthDay),
+        );
 
-        if (t + y <= 3 && y <= 0 && t < 0.4 * Math.min(this.firstName.length + this.lastName.length, member.details.firstName.length + member.details.lastName.length)) {
+        if (
+            t + y <= 3 &&
+            y <= 0 &&
+            t <
+                0.4 *
+                    Math.min(
+                        this.firstName.length + this.lastName.length,
+                        member.details.firstName.length + member.details.lastName.length,
+                    )
+        ) {
             return true;
         }
         return false;
@@ -225,9 +292,20 @@ export class SGVLid {
 
     // Typo in name or birthday
     isProbablyEqualLastResort(member: Member) {
-        const t = StringCompare.typoCount(member.details.firstName + ' ' + member.details.lastName, this.firstName + ' ' + this.lastName);
+        const t = StringCompare.typoCount(
+            member.details.firstName + ' ' + member.details.lastName,
+            this.firstName + ' ' + this.lastName,
+        );
 
-        if (t <= 2 && t < 0.4 * Math.min(this.firstName.length + this.lastName.length, member.details.firstName.length + member.details.lastName.length)) {
+        if (
+            t <= 2 &&
+            t <
+                0.4 *
+                    Math.min(
+                        this.firstName.length + this.lastName.length,
+                        member.details.firstName.length + member.details.lastName.length,
+                    )
+        ) {
             return true;
         }
         return false;
@@ -272,7 +350,15 @@ export class SGVZoekLid extends AutoEncoder {
         const month = parseInt(splitted[1]);
         const day = parseInt(splitted[2]);
 
-        if (isNaN(year) || isNaN(month) || isNaN(day) || day > 31 || month > 12 || year > 2200 || year < 1900) {
+        if (
+            isNaN(year) ||
+            isNaN(month) ||
+            isNaN(day) ||
+            day > 31 ||
+            month > 12 ||
+            year > 2200 ||
+            year < 1900
+        ) {
             return new Date();
         }
 
@@ -285,7 +371,16 @@ export class SGVZoekLid extends AutoEncoder {
             return false;
         }
 
-        return StringCompare.typoCount(member.details.firstName + ' ' + member.details.lastName, this.firstName + ' ' + this.lastName) === 0 && StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay)) === 0;
+        return (
+            StringCompare.typoCount(
+                member.details.firstName + ' ' + member.details.lastName,
+                this.firstName + ' ' + this.lastName,
+            ) === 0 &&
+            StringCompare.typoCount(
+                Formatter.dateNumber(member.details.birthDay),
+                Formatter.dateNumber(this.birthDay),
+            ) === 0
+        );
     }
 
     /// typo in name
@@ -294,10 +389,25 @@ export class SGVZoekLid extends AutoEncoder {
             return false;
         }
 
-        const t = StringCompare.typoCount(member.details.firstName + ' ' + member.details.lastName, this.firstName + ' ' + this.lastName);
-        const y = StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay));
+        const t = StringCompare.typoCount(
+            member.details.firstName + ' ' + member.details.lastName,
+            this.firstName + ' ' + this.lastName,
+        );
+        const y = StringCompare.typoCount(
+            Formatter.dateNumber(member.details.birthDay),
+            Formatter.dateNumber(this.birthDay),
+        );
 
-        if (t + y <= 3 && y <= 0 && t < 0.4 * Math.min(this.firstName.length + this.lastName.length, member.details.firstName.length + member.details.lastName.length)) {
+        if (
+            t + y <= 3 &&
+            y <= 0 &&
+            t <
+                0.4 *
+                    Math.min(
+                        this.firstName.length + this.lastName.length,
+                        member.details.firstName.length + member.details.lastName.length,
+                    )
+        ) {
             return true;
         }
         return false;
@@ -309,10 +419,25 @@ export class SGVZoekLid extends AutoEncoder {
             return false;
         }
 
-        const t = StringCompare.typoCount(member.details.firstName + ' ' + member.details.lastName, this.firstName + ' ' + this.lastName);
-        const y = StringCompare.typoCount(Formatter.dateNumber(member.details.birthDay), Formatter.dateNumber(this.birthDay));
+        const t = StringCompare.typoCount(
+            member.details.firstName + ' ' + member.details.lastName,
+            this.firstName + ' ' + this.lastName,
+        );
+        const y = StringCompare.typoCount(
+            Formatter.dateNumber(member.details.birthDay),
+            Formatter.dateNumber(this.birthDay),
+        );
 
-        if (t <= 2 && y <= 2 && t < 0.4 * Math.min(this.firstName.length + this.lastName.length, member.details.firstName.length + member.details.lastName.length)) {
+        if (
+            t <= 2 &&
+            y <= 2 &&
+            t <
+                0.4 *
+                    Math.min(
+                        this.firstName.length + this.lastName.length,
+                        member.details.firstName.length + member.details.lastName.length,
+                    )
+        ) {
             return true;
         }
         return false;
@@ -348,7 +473,10 @@ export class SGVLedenLijstWaarden extends AutoEncoder {
     @field({ decoder: StringDecoder, field: 'be.vvksm.groepsadmin.model.column.AchternaamColumn' })
     lastName: string;
 
-    @field({ decoder: StringDecoder, field: 'be.vvksm.groepsadmin.model.column.GeboorteDatumColumn' })
+    @field({
+        decoder: StringDecoder,
+        field: 'be.vvksm.groepsadmin.model.column.GeboorteDatumColumn',
+    })
     birthDay: string;
 }
 
@@ -567,9 +695,7 @@ export type SGVContact = {
     lidtenlaste?: unknown;
 };
 
-export type SGVContactNieuw = Partial<
-    Omit<SGVContact, 'id'>
-> & {
+export type SGVContactNieuw = Partial<Omit<SGVContact, 'id'>> & {
     id?: string;
 };
 

@@ -1,5 +1,12 @@
 import type { Decoder } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+} from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
@@ -19,7 +26,11 @@ class Body extends AutoEncoder {
     @field({ decoder: DateDecoder, nullable: true, optional: true })
     end: Date | null = null;
 
-    @field({ decoder: new ArrayDecoder(new EnumDecoder(PaymentProvider)), nullable: true, optional: true })
+    @field({
+        decoder: new ArrayDecoder(new EnumDecoder(PaymentProvider)),
+        nullable: true,
+        optional: true,
+    })
     providers: PaymentProvider[] | null = null;
 
     @field({ decoder: BooleanDecoder, optional: true })
@@ -63,10 +74,14 @@ export class SettlementsSyncEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         const platform = await Platform.getShared();
-        if (!platform.membershipOrganizationId || platform.membershipOrganizationId !== organization.id) {
+        if (
+            !platform.membershipOrganizationId ||
+            platform.membershipOrganizationId !== organization.id
+        ) {
             throw new SimpleError({
                 code: 'not_available',
-                message: 'Settlement syncs are only available for the platform membership organization',
+                message:
+                    'Settlement syncs are only available for the platform membership organization',
                 statusCode: 400,
             });
         }
@@ -96,9 +111,13 @@ export class SettlementsSyncEndpoint extends Endpoint<Params, Query, Body, Respo
                 item.failed = summary.failed + summary.failedFeeMonths;
             };
             await runner.run({ start, end, providers, stripe: { force }, abort });
-        }).finally(() => {
-            SettlementsSyncEndpoint.queue = SettlementsSyncEndpoint.queue.filter(queued => queued !== item);
-        }).catch(console.error);
+        })
+            .finally(() => {
+                SettlementsSyncEndpoint.queue = SettlementsSyncEndpoint.queue.filter(
+                    (queued) => queued !== item,
+                );
+            })
+            .catch(console.error);
 
         return new Response(undefined);
     }

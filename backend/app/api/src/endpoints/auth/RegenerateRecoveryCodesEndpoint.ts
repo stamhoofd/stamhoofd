@@ -31,7 +31,10 @@ export class RegenerateRecoveryCodesEndpoint extends Endpoint<Params, Query, Bod
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
         await Context.setOptionalOrganizationScope();
-        const { user } = await Context.authenticateFresh({ allowWithoutAccount: true, allowUnscoped: true });
+        const { user } = await Context.authenticateFresh({
+            allowWithoutAccount: true,
+            allowUnscoped: true,
+        });
 
         if (!(await TwoFactorHelper.userHasFactors(user.id))) {
             throw new SimpleError({

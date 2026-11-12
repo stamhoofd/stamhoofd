@@ -1,4 +1,13 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    AnyDecoder,
+    ArrayDecoder,
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem, BalanceItemWithPayments } from './BalanceItem.js';
 import { Invoice } from './billing/Invoice.js';
@@ -17,11 +26,16 @@ export enum ReceivableBalanceType {
 
 export function getReceivableBalanceTypeName(type: ReceivableBalanceType): string {
     switch (type) {
-        case ReceivableBalanceType.organization: return $t('%78');
-        case ReceivableBalanceType.member: return $t('%79');
-        case ReceivableBalanceType.user: return $t('%2S');
-        case ReceivableBalanceType.registration: return $t('%82');
-        case ReceivableBalanceType.userWithoutMembers: return $t('%2S');
+        case ReceivableBalanceType.organization:
+            return $t('%78');
+        case ReceivableBalanceType.member:
+            return $t('%79');
+        case ReceivableBalanceType.user:
+            return $t('%2S');
+        case ReceivableBalanceType.registration:
+            return $t('%82');
+        case ReceivableBalanceType.userWithoutMembers:
+            return $t('%2S');
     }
 }
 

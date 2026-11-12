@@ -39,7 +39,10 @@ export function loadRequestQueries({ routerServer }: { routerServer: RouterServe
             if (context && request.method !== 'OPTIONS') {
                 logger.log(
                     ...prefix,
-                    ' - Queries ' + context.queries.map(q => `\n- ${q.query} (${q.time?.toFixed(2) ?? '-'}ms)`).join(''),
+                    ' - Queries ' +
+                        context.queries
+                            .map((q) => `\n- ${q.query} (${q.time?.toFixed(2) ?? '-'}ms)`)
+                            .join(''),
                 );
             }
         },
@@ -61,7 +64,10 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
         // Count total request
         const context = ContextInstance.optional;
         if (context) {
-            context.timers.set('JSON.stringify', (context.timers.get('JSON.stringify') ?? 0) + elapsedTimeMs);
+            context.timers.set(
+                'JSON.stringify',
+                (context.timers.get('JSON.stringify') ?? 0) + elapsedTimeMs,
+            );
         }
         return result;
     };
@@ -80,7 +86,10 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
         // Count total request
         const context = ContextInstance.optional;
         if (context) {
-            context.timers.set('JSON.parse', (context.timers.get('JSON.parse') ?? 0) + elapsedTimeMs);
+            context.timers.set(
+                'JSON.parse',
+                (context.timers.get('JSON.parse') ?? 0) + elapsedTimeMs,
+            );
         }
         return result;
     };
@@ -99,7 +108,10 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
         // Count total request
         const context = ContextInstance.optional;
         if (context) {
-            context.timers.set('Router.decode', (context.timers.get('Router.decode') ?? 0) + elapsedTimeMs);
+            context.timers.set(
+                'Router.decode',
+                (context.timers.get('Router.decode') ?? 0) + elapsedTimeMs,
+            );
         }
         return result;
     };
@@ -118,7 +130,10 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
         // Count total request
         const context = ContextInstance.optional;
         if (context) {
-            context.timers.set('EncodedResponse.encode', (context.timers.get('EncodedResponse.encode') ?? 0) + elapsedTimeMs);
+            context.timers.set(
+                'EncodedResponse.encode',
+                (context.timers.get('EncodedResponse.encode') ?? 0) + elapsedTimeMs,
+            );
         }
 
         return result;
@@ -133,7 +148,9 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
         const elapsedTimeMs = Number(elapsedTime) / 1000 / 1000;
 
         if (elapsedTimeMs > 1) {
-            console.log(`Column.to for ${this.constructor.name} took ${elapsedTimeMs.toFixed(2)}ms`);
+            console.log(
+                `Column.to for ${this.constructor.name} took ${elapsedTimeMs.toFixed(2)}ms`,
+            );
         }
 
         // Count total request
@@ -152,13 +169,18 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
         const elapsedTimeMs = Number(elapsedTime) / 1000 / 1000;
 
         if (elapsedTimeMs > 1) {
-            console.log(`Column.from for ${this.constructor.name} took ${elapsedTimeMs.toFixed(2)}ms`);
+            console.log(
+                `Column.from for ${this.constructor.name} took ${elapsedTimeMs.toFixed(2)}ms`,
+            );
         }
 
         // Count total request
         const context = ContextInstance.optional;
         if (context) {
-            context.timers.set('Column.from', (context.timers.get('Column.from') ?? 0) + elapsedTimeMs);
+            context.timers.set(
+                'Column.from',
+                (context.timers.get('Column.from') ?? 0) + elapsedTimeMs,
+            );
         }
         return result;
     };
@@ -182,7 +204,10 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
 
         const context = ContextInstance.optional;
         if (context) {
-            context.timers.set('AutoEncoder.decode', (context.timers.get('AutoEncoder.decode') ?? 0) + elapsedTimeMs);
+            context.timers.set(
+                'AutoEncoder.decode',
+                (context.timers.get('AutoEncoder.decode') ?? 0) + elapsedTimeMs,
+            );
         }
 
         return result;
@@ -207,7 +232,10 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
 
         const context = ContextInstance.optional;
         if (context) {
-            context.timers.set('AutoEncoder.encode', (context.timers.get('AutoEncoder.encode') ?? 0) + elapsedTimeMs);
+            context.timers.set(
+                'AutoEncoder.encode',
+                (context.timers.get('AutoEncoder.encode') ?? 0) + elapsedTimeMs,
+            );
         }
 
         return result;
@@ -222,9 +250,13 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
             if (context && request.method !== 'OPTIONS') {
                 logger.log(
                     ...prefix,
-                    ' - Timers: ' + Array.from(context.timers.entries()).sort((a, b) => {
-                        return b[1] - a[1];
-                    }).map(([key, value]) => `\n- ${key}: ${value.toFixed(2)}ms`).join(''),
+                    ' - Timers: ' +
+                        Array.from(context.timers.entries())
+                            .sort((a, b) => {
+                                return b[1] - a[1];
+                            })
+                            .map(([key, value]) => `\n- ${key}: ${value.toFixed(2)}ms`)
+                            .join(''),
                 );
             }
         },

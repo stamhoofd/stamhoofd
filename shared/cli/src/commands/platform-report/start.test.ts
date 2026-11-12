@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PlatformReportStart from './start.js';
-import { migratePlatformStatistics, runPlatformStatisticsSync } from '../../runtime/monorepo-runner.js';
+import {
+    migratePlatformStatistics,
+    runPlatformStatisticsSync,
+} from '../../runtime/monorepo-runner.js';
 import { warning } from '../../runtime/ux.js';
 import { CaddyService } from '../../services/definitions/caddy-service.js';
 import { metabaseService } from '../../services/definitions/metabase-service.js';
@@ -69,7 +72,9 @@ describe('Platform report start command', () => {
             collectionId: 4,
             createdCollection: true,
             renamedCollection: undefined,
-            dashboards: [{ name: 'Ledenstatistieken', id: 2, tabs: ['Ledenaantallen'], bookmarked: true }],
+            dashboards: [
+                { name: 'Ledenstatistieken', id: 2, tabs: ['Ledenaantallen'], bookmarked: true },
+            ],
             cards: 24,
             mapsWithoutCoordinates: [],
             database: 'statistics-development',
@@ -82,15 +87,21 @@ describe('Platform report start command', () => {
     it('migrates the statistics database before Metabase reads its schema', async () => {
         await createCommand().run();
 
-        expect(migratePlatformStatistics).toHaveBeenCalledWith(expect.objectContaining({ env: 'stamhoofd' }));
+        expect(migratePlatformStatistics).toHaveBeenCalledWith(
+            expect.objectContaining({ env: 'stamhoofd' }),
+        );
         expect(order(migratePlatformStatistics)).toBeLessThan(order(metabaseService.provision));
     });
 
     it('writes the report and then syncs until it is stopped', async () => {
         await createCommand().run();
 
-        expect(order(metabaseService.provisionReport)).toBeLessThan(order(runPlatformStatisticsSync));
-        expect(runPlatformStatisticsSync).toHaveBeenCalledWith(expect.objectContaining({ env: 'stamhoofd' }));
+        expect(order(metabaseService.provisionReport)).toBeLessThan(
+            order(runPlatformStatisticsSync),
+        );
+        expect(runPlatformStatisticsSync).toHaveBeenCalledWith(
+            expect.objectContaining({ env: 'stamhoofd' }),
+        );
     });
 
     it('starts the shared services only when they are not running', async () => {
@@ -141,7 +152,9 @@ describe('Platform report start command', () => {
         const command = createCommand();
         await command.run();
 
-        expect((command as any).log).toHaveBeenCalledWith(expect.stringContaining('renamed from Ledenstatistieken (stamhoofd)'));
+        expect((command as any).log).toHaveBeenCalledWith(
+            expect.stringContaining('renamed from Ledenstatistieken (stamhoofd)'),
+        );
     });
 
     it('warns when the statistics database is still empty after migrating', async () => {

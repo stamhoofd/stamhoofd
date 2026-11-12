@@ -17,17 +17,23 @@ export enum PeppolScheme {
 export class PeppolSchemeHelper {
     static getLongName(scheme: PeppolScheme): string {
         switch (scheme) {
-            case PeppolScheme.KBO: return $t('%ZcO');
-            case PeppolScheme.GLN: return $t('%Zcm');
-            case PeppolScheme.DUNS: return $t('%Zcl');
+            case PeppolScheme.KBO:
+                return $t('%ZcO');
+            case PeppolScheme.GLN:
+                return $t('%Zcm');
+            case PeppolScheme.DUNS:
+                return $t('%Zcl');
         }
     }
 
     static getShortName(scheme: PeppolScheme): string {
         switch (scheme) {
-            case PeppolScheme.KBO: return $t('%ZcN');
-            case PeppolScheme.GLN: return $t('%ZcS');
-            case PeppolScheme.DUNS: return $t('%ZcQ');
+            case PeppolScheme.KBO:
+                return $t('%ZcN');
+            case PeppolScheme.GLN:
+                return $t('%ZcS');
+            case PeppolScheme.DUNS:
+                return $t('%ZcQ');
         }
     }
 }
@@ -56,7 +62,7 @@ export class PeppolEndointId extends AutoEncoder {
      */
     getShortLabel(): string {
         const suffix = this.entityName ? ' (' + this.entityName + ')' : '';
-        const scheme = Object.values(PeppolScheme).find(s => (s as string) === this.schemeID);
+        const scheme = Object.values(PeppolScheme).find((s) => (s as string) === this.schemeID);
         if (scheme) {
             return `${PeppolSchemeHelper.getShortName(scheme)}: ${this.id}` + suffix;
         }
@@ -109,7 +115,9 @@ export class Company extends AutoEncoder {
             return null;
         }
 
-        const companyNumber = (this.VATNumber ? this.VATNumber.substring(2) : companyNumberOrVAT).replace(/\D+/g, '');
+        const companyNumber = (
+            this.VATNumber ? this.VATNumber.substring(2) : companyNumberOrVAT
+        ).replace(/\D+/g, '');
 
         const id = Formatter.slugVATNumber(companyNumber);
 
@@ -148,14 +156,19 @@ export class Company extends AutoEncoder {
 
     isSameEntity(other: Company) {
         if (this.VATNumber && other.VATNumber) {
-            if (Formatter.slugVATNumber(this.VATNumber) === Formatter.slugVATNumber(other.VATNumber)) {
+            if (
+                Formatter.slugVATNumber(this.VATNumber) === Formatter.slugVATNumber(other.VATNumber)
+            ) {
                 return true;
             }
             return false;
         }
 
         if (this.companyNumber && other.companyNumber) {
-            if (Formatter.slugVATNumber(this.companyNumber) === Formatter.slugVATNumber(other.companyNumber)) {
+            if (
+                Formatter.slugVATNumber(this.companyNumber) ===
+                Formatter.slugVATNumber(other.companyNumber)
+            ) {
                 if (this.address && other.address) {
                     // Ignore if different country (only for company numbers)
                     return this.address.country === other.address.country;

@@ -66,7 +66,13 @@ describe('XlsxTransformerColumnHelper', () => {
                 }),
             });
 
-            return { organization, period, ageGroupsCategory, leadershipCategory, groups: { kapoenen, wouters, jonggivers, groepsleiding, takleiding } };
+            return {
+                organization,
+                period,
+                ageGroupsCategory,
+                leadershipCategory,
+                groups: { kapoenen, wouters, jonggivers, groepsleiding, takleiding },
+            };
         }
 
         function createMember(organization: Organization, registeredGroups: Group[]) {
@@ -75,24 +81,29 @@ describe('XlsxTransformerColumnHelper', () => {
                 members: [
                     MemberWithRegistrationsBlob.create({
                         details: MemberDetails.create({ firstName: 'John', lastName: 'Doe' }),
-                        registrations: registeredGroups.map(group => Registration.create({
-                            organizationId: organization.id,
-                            group,
-                            groupPrice: group.settings.prices[0],
-                            registeredAt: new Date(),
-                        })),
+                        registrations: registeredGroups.map((group) =>
+                            Registration.create({
+                                organizationId: organization.id,
+                                group,
+                                groupPrice: group.settings.prices[0],
+                                registeredAt: new Date(),
+                            }),
+                        ),
                     }),
                 ],
             });
 
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            const family = PlatformFamily.create(blob, {
+                platform: Platform.create({}),
+                contextOrganization: organization,
+            });
             return family.members[0];
         }
 
         function getColumn(categoryId: string): XlsxTransformerConcreteColumn<PlatformMember> {
             const column = XlsxTransformerColumnHelper.createGroupCategoryColumns<PlatformMember>({
                 matchId: 'groupCategory',
-                getMember: member => member,
+                getMember: (member) => member,
             });
 
             if (!('match' in column)) {
@@ -107,9 +118,15 @@ describe('XlsxTransformerColumnHelper', () => {
 
         it('lists the groups a member is registered for within a category', () => {
             const { organization, ageGroupsCategory, leadershipCategory, groups } = setup();
-            const member = createMember(organization, [groups.kapoenen, groups.jonggivers, groups.groepsleiding]);
+            const member = createMember(organization, [
+                groups.kapoenen,
+                groups.jonggivers,
+                groups.groepsleiding,
+            ]);
 
-            expect(getColumn(ageGroupsCategory.id).getValue(member).value).toBe('Jonggivers, Kapoenen');
+            expect(getColumn(ageGroupsCategory.id).getValue(member).value).toBe(
+                'Jonggivers, Kapoenen',
+            );
             expect(getColumn(leadershipCategory.id).getValue(member).value).toBe('Groepsleiding');
         });
 
@@ -123,7 +140,7 @@ describe('XlsxTransformerColumnHelper', () => {
         it('does not match ids without a category id', () => {
             const column = XlsxTransformerColumnHelper.createGroupCategoryColumns<PlatformMember>({
                 matchId: 'groupCategory',
-                getMember: member => member,
+                getMember: (member) => member,
             });
 
             if (!('match' in column)) {
@@ -175,18 +192,27 @@ describe('XlsxTransformerColumnHelper', () => {
                 organizations: [organization],
                 members: [
                     MemberWithRegistrationsBlob.create({
-                        details: MemberDetails.create({ firstName: 'John', lastName: 'Doe', emergencyContacts }),
+                        details: MemberDetails.create({
+                            firstName: 'John',
+                            lastName: 'Doe',
+                            emergencyContacts,
+                        }),
                     }),
                 ],
             });
 
-            const family = PlatformFamily.create(blob, { platform: Platform.create({}), contextOrganization: organization });
+            const family = PlatformFamily.create(blob, {
+                platform: Platform.create({}),
+                contextOrganization: organization,
+            });
             return family.members[0];
         }
 
         function getValue(member: PlatformMember, id: string) {
             const columns = XlsxTransformerColumnHelper.createColumnsForEmergencyContacts();
-            const column = columns.find(c => 'id' in c && c.id === id) as XlsxTransformerConcreteColumn<PlatformMember> | undefined;
+            const column = columns.find((c) => 'id' in c && c.id === id) as
+                | XlsxTransformerConcreteColumn<PlatformMember>
+                | undefined;
 
             if (!column) {
                 throw new Error(`Column ${id} not found`);
@@ -197,8 +223,16 @@ describe('XlsxTransformerColumnHelper', () => {
 
         it('returns the values of the first two emergency contacts', () => {
             const member = createMember([
-                EmergencyContact.create({ name: 'An Peeters', title: 'Oma', phone: '0470 12 34 56' }),
-                EmergencyContact.create({ name: 'Jan Janssens', title: 'Buur', phone: '0470 65 43 21' }),
+                EmergencyContact.create({
+                    name: 'An Peeters',
+                    title: 'Oma',
+                    phone: '0470 12 34 56',
+                }),
+                EmergencyContact.create({
+                    name: 'Jan Janssens',
+                    title: 'Buur',
+                    phone: '0470 65 43 21',
+                }),
             ]);
 
             expect(getValue(member, 'emergencyContact.0.name')).toBe('An Peeters');
@@ -212,7 +246,11 @@ describe('XlsxTransformerColumnHelper', () => {
 
         it('returns empty values when the member has fewer emergency contacts', () => {
             const member = createMember([
-                EmergencyContact.create({ name: 'An Peeters', title: 'Oma', phone: '0470 12 34 56' }),
+                EmergencyContact.create({
+                    name: 'An Peeters',
+                    title: 'Oma',
+                    phone: '0470 12 34 56',
+                }),
             ]);
 
             expect(getValue(member, 'emergencyContact.1.name')).toBe('');

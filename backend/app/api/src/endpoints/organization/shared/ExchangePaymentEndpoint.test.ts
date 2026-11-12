@@ -17,7 +17,10 @@ describe('Endpoint.ExchangePayment', () => {
     async function createOrderPayment(createdAt: Date) {
         const organization = await new OrganizationFactory({}).create();
         const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
-        const order = await new OrderFactory({ webshop, paymentMethod: PaymentMethod.Transfer }).create();
+        const order = await new OrderFactory({
+            webshop,
+            paymentMethod: PaymentMethod.Transfer,
+        }).create();
 
         const payment = new Payment();
         payment.organizationId = organization.id;
@@ -27,7 +30,10 @@ describe('Endpoint.ExchangePayment', () => {
         await payment.save();
 
         createdAt.setMilliseconds(0);
-        await Database.update('UPDATE `payments` SET `createdAt` = ? WHERE `id` = ?', [createdAt, payment.id]);
+        await Database.update('UPDATE `payments` SET `createdAt` = ? WHERE `id` = ?', [
+            createdAt,
+            payment.id,
+        ]);
 
         order.paymentId = payment.id;
         await order.save();
@@ -36,7 +42,9 @@ describe('Endpoint.ExchangePayment', () => {
     }
 
     test('An order payment created less than an hour ago can be read without authentication', async () => {
-        const { organization, payment } = await createOrderPayment(new Date(Date.now() - 30 * 60 * 1000));
+        const { organization, payment } = await createOrderPayment(
+            new Date(Date.now() - 30 * 60 * 1000),
+        );
 
         const r = Request.buildJson('POST', '/payments/' + payment.id, organization.getApiHost());
         const response = await testServer.test(endpoint, r);
@@ -45,9 +53,13 @@ describe('Endpoint.ExchangePayment', () => {
     });
 
     test('An order payment created more than an hour ago cannot be read without authentication', async () => {
-        const { organization, payment } = await createOrderPayment(new Date(Date.now() - 90 * 60 * 1000));
+        const { organization, payment } = await createOrderPayment(
+            new Date(Date.now() - 90 * 60 * 1000),
+        );
 
         const r = Request.buildJson('POST', '/payments/' + payment.id, organization.getApiHost());
-        await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.simpleError({ code: 'permission_denied' }));
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(
+            STExpect.simpleError({ code: 'permission_denied' }),
+        );
     });
 });

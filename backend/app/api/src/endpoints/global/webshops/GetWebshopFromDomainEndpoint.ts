@@ -54,7 +54,9 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
         }
 
         // Clean up google translate domains -> make sure we can translate register pages
-        request.query.domain = GoogleTranslateHelper.getDomainFromTranslateDomain(request.query.domain);
+        request.query.domain = GoogleTranslateHelper.getDomainFromTranslateDomain(
+            request.query.domain,
+        );
 
         if (request.query.uri) {
             for (const domain of this.webshopDomains) {
@@ -80,17 +82,25 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
                         });
                     }
 
-                    return new Response(GetWebshopFromDomainResult.create({
-                        organization: organization.getBaseStructure(),
-                        webshop: WebshopStruct.create(webshop),
-                    }));
+                    return new Response(
+                        GetWebshopFromDomainResult.create({
+                            organization: organization.getBaseStructure(),
+                            webshop: WebshopStruct.create(webshop),
+                        }),
+                    );
                 }
             }
         }
 
         // If ends with the legacy webshop domain
-        if (STAMHOOFD.domains.legacyWebshop && request.query.domain.endsWith('.' + STAMHOOFD.domains.legacyWebshop)) {
-            const strippped = request.query.domain.substr(0, request.query.domain.length - ('.' + STAMHOOFD.domains.legacyWebshop).length);
+        if (
+            STAMHOOFD.domains.legacyWebshop &&
+            request.query.domain.endsWith('.' + STAMHOOFD.domains.legacyWebshop)
+        ) {
+            const strippped = request.query.domain.substr(
+                0,
+                request.query.domain.length - ('.' + STAMHOOFD.domains.legacyWebshop).length,
+            );
             if (strippped.includes('.')) {
                 throw new SimpleError({
                     code: 'invalid_domain',
@@ -115,17 +125,21 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
 
             if (!webshop) {
                 // Return organization, so we know the locale + can do some custom logic
-                return new Response(GetWebshopFromDomainResult.create({
-                    organization: organization.getBaseStructure(),
-                    webshop: null,
-                    webshops: [],
-                }));
+                return new Response(
+                    GetWebshopFromDomainResult.create({
+                        organization: organization.getBaseStructure(),
+                        webshop: null,
+                        webshops: [],
+                    }),
+                );
             }
 
-            return new Response(GetWebshopFromDomainResult.create({
-                organization: organization.getBaseStructure(),
-                webshop: WebshopStruct.create(webshop),
-            }));
+            return new Response(
+                GetWebshopFromDomainResult.create({
+                    organization: organization.getBaseStructure(),
+                    webshop: WebshopStruct.create(webshop),
+                }),
+            );
         }
 
         // Check if we have an organization with a custom domain name
@@ -137,7 +151,9 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
             // Check organization
             if (!request.query.uri) {
                 const webshops = await Webshop.getByDomainOnly(request.query.domain);
-                const organizationId = Sorter.getMostOccuringElement(webshops.map(w => w.organizationId));
+                const organizationId = Sorter.getMostOccuringElement(
+                    webshops.map((w) => w.organizationId),
+                );
 
                 if (webshops.length == 0 || !organizationId) {
                     throw new SimpleError({
@@ -158,11 +174,19 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
                 }
 
                 // Return organization, and the known webshops on this domain
-                return new Response(GetWebshopFromDomainResult.create({
-                    organization: organization.getBaseStructure(),
-                    webshop: null,
-                    webshops: (await Promise.all(webshops.map(w => AuthenticatedStructures.webshopPreview(w)))).filter(w => w.isClosed(0) === false).sort((a, b) => Sorter.byStringValue(a.meta.name, b.meta.name)),
-                }));
+                return new Response(
+                    GetWebshopFromDomainResult.create({
+                        organization: organization.getBaseStructure(),
+                        webshop: null,
+                        webshops: (
+                            await Promise.all(
+                                webshops.map((w) => AuthenticatedStructures.webshopPreview(w)),
+                            )
+                        )
+                            .filter((w) => w.isClosed(0) === false)
+                            .sort((a, b) => Sorter.byStringValue(a.meta.name, b.meta.name)),
+                    }),
+                );
             }
 
             throw new SimpleError({
@@ -182,9 +206,11 @@ export class GetWebshopFromDomainEndpoint extends Endpoint<Params, Query, Body, 
             });
         }
 
-        return new Response(GetWebshopFromDomainResult.create({
-            organization: organization.getBaseStructure(),
-            webshop: WebshopStruct.create(webshop),
-        }));
+        return new Response(
+            GetWebshopFromDomainResult.create({
+                organization: organization.getBaseStructure(),
+                webshop: WebshopStruct.create(webshop),
+            }),
+        );
     }
 }

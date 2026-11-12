@@ -50,7 +50,10 @@ export class Migration {
      * options.database. That database keeps the migration history of the migrations that ran on it,
      * in its own 'migrations' table.
      */
-    static async runAll(folder: string, options?: { database?: DatabaseInstance }): Promise<boolean> {
+    static async runAll(
+        folder: string,
+        options?: { database?: DatabaseInstance },
+    ): Promise<boolean> {
         if (options?.database) {
             return await DatabaseInstance.use(options.database, () => this.runAll(folder));
         }
@@ -58,7 +61,10 @@ export class Migration {
         const dirname = __dirname;
 
         // Get the current working directory by removing shared part of folder and dirname
-        const shared = dirname.split('/').filter((part, index) => part === folder.split('/')[index]).join('/');
+        const shared = dirname
+            .split('/')
+            .filter((part, index) => part === folder.split('/')[index])
+            .join('/');
         const cwd = folder.replace(shared, '');
 
         logger.debug(
@@ -72,7 +78,9 @@ export class Migration {
 
         // First check if we have migrations table
         const projectRoot = await getProjectRoot();
-        const setupMigration = await this.getMigration(projectRoot + '/migrations/000000000-setup-migrations.sql');
+        const setupMigration = await this.getMigration(
+            projectRoot + '/migrations/000000000-setup-migrations.sql',
+        );
         if (!setupMigration) {
             throw new Error('Setup migration missing');
         }
@@ -92,12 +100,14 @@ export class Migration {
                 const newQueue: string[] = [];
                 for (folder of folderQueue) {
                     // Read all directories
-                    const recursiveFolders = (await fs.readdir(folder, { withFileTypes: true })).filter(dirent => dirent.isDirectory()).map(dirent => folder + '/' + dirent.name);
+                    const recursiveFolders = (await fs.readdir(folder, { withFileTypes: true }))
+                        .filter((dirent) => dirent.isDirectory())
+                        .map((dirent) => folder + '/' + dirent.name);
                     newQueue.push(...recursiveFolders);
                 }
                 folderQueue = newQueue;
             } else {
-                folderQueue = folderQueue.map(folder => folder + '/' + part);
+                folderQueue = folderQueue.map((folder) => folder + '/' + part);
             }
         }
         let found = 0;
@@ -122,7 +132,11 @@ export class Migration {
                 ' ',
                 new StyledText('✗').addClass('migration', 'failed', 'tag'),
                 ' ',
-                new StyledText('No migrations found in ' + folder).addClass('migration', 'failed', 'text'),
+                new StyledText('No migrations found in ' + folder).addClass(
+                    'migration',
+                    'failed',
+                    'text',
+                ),
             );
             return false;
         }
@@ -150,29 +164,47 @@ export class Migration {
             );
 
             try {
-                await logger.setContext({
-                    prefixes: [new StyledText('[Migration]').addClass('migration', 'prefix'), ' '],
-                    tags: ['migration'],
-                }, async () => {
-                    await migration.up();
-                    await MigrationModel.markAsExecuted(name);
-                });
+                await logger.setContext(
+                    {
+                        prefixes: [
+                            new StyledText('[Migration]').addClass('migration', 'prefix'),
+                            ' ',
+                        ],
+                        tags: ['migration'],
+                    },
+                    async () => {
+                        await migration.up();
+                        await MigrationModel.markAsExecuted(name);
+                    },
+                );
 
                 logger.log(
-                    new StyledText('[Migration]').addClass('migration', 'prefix').addTag('migration'),
+                    new StyledText('[Migration]')
+                        .addClass('migration', 'prefix')
+                        .addTag('migration'),
                     ' ',
                     new StyledText('✓').addClass('migration', 'success', 'tag'),
                     ' ',
-                    new StyledText('Migration ' + name + ' ran successfully').addClass('migration', 'success', 'text'),
+                    new StyledText('Migration ' + name + ' ran successfully').addClass(
+                        'migration',
+                        'success',
+                        'text',
+                    ),
                 );
             } catch (e) {
                 // Logger.errorWithContext({textColor: ['dim', 'red'], prefix: ' FAILED ', addSpace: true, prefixColor: ['bgRed']}, "Migration " + name + " failed", e)
                 logger.error(
-                    new StyledText('[Migration]').addClass('migration', 'prefix').addTag('migration'),
+                    new StyledText('[Migration]')
+                        .addClass('migration', 'prefix')
+                        .addTag('migration'),
                     ' ',
                     new StyledText('✗').addClass('migration', 'failed', 'tag'),
                     ' ',
-                    new StyledText('Migration ' + name + ' failed').addClass('migration', 'failed', 'text'),
+                    new StyledText('Migration ' + name + ' failed').addClass(
+                        'migration',
+                        'failed',
+                        'text',
+                    ),
                     ' ',
                     new StyledText(e).addClass('migration', 'failed', 'error'),
                 );

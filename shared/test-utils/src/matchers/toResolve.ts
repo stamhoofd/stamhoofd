@@ -3,7 +3,7 @@
  * Licensed under the MIT License
  * https://opensource.org/licenses/MIT
  * Original code from: https://github.com/jest-community/jest-extended
-*/
+ */
 
 export async function toResolve(actual: Promise<unknown>) {
     const { matcherHint } = this.utils;
@@ -17,7 +17,9 @@ export async function toResolve(actual: Promise<unknown>) {
         pass,
         message: () =>
             pass
-                ? matcherHint('.not.toResolve', 'received', '') + '\n\nExpected promise to reject, however it resolved.\n'
-                : matcherHint('.toResolve', 'received', '') + '\n\nExpected promise to resolve, however it rejected.\n',
+                ? matcherHint('.not.toResolve', 'received', '') +
+                  '\n\nExpected promise to reject, however it resolved.\n'
+                : matcherHint('.toResolve', 'received', '') +
+                  '\n\nExpected promise to resolve, however it rejected.\n',
     };
 }

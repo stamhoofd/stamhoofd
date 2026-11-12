@@ -5,7 +5,8 @@ import { buildSsoConfigOutput } from '../../services/sso-config.js';
 
 export default class SsoConfig extends BaseCommand {
     static summary = 'Print local SSO settings';
-    static description = 'Use this while configuring SSO in Stamhoofd or checking which issuer, credentials, and redirect URI the local SSO server expects.';
+    static description =
+        'Use this while configuring SSO in Stamhoofd or checking which issuer, credentials, and redirect URI the local SSO server expects.';
     static examples = [
         'stam sso config',
         'stam sso config "https://keeo.api.stamhoofd/openid/callback"',

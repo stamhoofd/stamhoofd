@@ -30,12 +30,16 @@ afterAll(async () => {
 it('waits for listening without a development session and emits one completed startup', async () => {
     const server = createServer();
     const events: unknown[] = [];
-    const observer = (event: unknown) => { events.push(event); };
+    const observer = (event: unknown) => {
+        events.push(event);
+    };
     const bus = channel('stamhoofd.application.lifecycle');
     bus.subscribe(observer);
     const lifecycle = new ApplicationLifecycle('test-listener');
     let ready = false;
-    const pending = lifecycle.ready(server).then(() => { ready = true; });
+    const pending = lifecycle.ready(server).then(() => {
+        ready = true;
+    });
     try {
         await Promise.resolve();
         expect(ready).toBe(false);
@@ -53,10 +57,12 @@ it('waits for listening without a development session and emits one completed st
         expect(startup.name).toBe('application.startup');
         expect(startup.duration).toBeDefined();
         expect(startup.ended).toBe(true);
-        expect(records.getFinishedLogRecords().at(-1)?.spanContext?.traceId).toBe(startup.spanContext().traceId);
+        expect(records.getFinishedLogRecords().at(-1)?.spanContext?.traceId).toBe(
+            startup.spanContext().traceId,
+        );
     } finally {
         bus.unsubscribe(observer);
-        await new Promise<void>(resolve => server.close(() => resolve()));
+        await new Promise<void>((resolve) => server.close(() => resolve()));
     }
 });
 
@@ -82,20 +88,22 @@ it('accepts an already-listening server and non-HTTP initialization', async () =
         await new ApplicationLifecycle('http').ready(server);
         await new ApplicationLifecycle('stats').ready();
     } finally {
-        await new Promise<void>(resolve => server.close(() => resolve()));
+        await new Promise<void>((resolve) => server.close(() => resolve()));
     }
 });
 
 it('exports only approved fields and fixed messages, retaining real SDK span timing', async () => {
     const tracer = trace.getTracer('@node/observability');
-    const span = tracer.startSpan('http.server.request', { attributes: {
-        'http.request.method': 'GET',
-        'http.response.status_code': 503,
-        'http.route': '/members/:id',
-        'url.full': '/members/123?token=synthetic-secret',
-        'http.request.header.cookie': 'synthetic-secret',
-        'request.body': '{"name":"synthetic-secret"}',
-    } });
+    const span = tracer.startSpan('http.server.request', {
+        attributes: {
+            'http.request.method': 'GET',
+            'http.response.status_code': 503,
+            'http.route': '/members/:id',
+            'url.full': '/members/123?token=synthetic-secret',
+            'http.request.header.cookie': 'synthetic-secret',
+            'request.body': '{"name":"synthetic-secret"}',
+        },
+    });
     span.recordException(new Error('synthetic-secret'));
     span.setStatus({ code: SpanStatusCode.ERROR, message: 'synthetic-secret' });
     span.end();

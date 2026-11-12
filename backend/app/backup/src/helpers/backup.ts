@@ -1,4 +1,10 @@
-import { DeleteObjectCommand, HeadObjectCommand, ListObjectsCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
+import {
+    DeleteObjectCommand,
+    HeadObjectCommand,
+    ListObjectsCommand,
+    PutObjectCommand,
+    S3Client,
+} from '@aws-sdk/client-s3'; // ES Modules import
 import { Upload } from '@aws-sdk/lib-storage';
 import { Database } from '@node/database';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
@@ -44,7 +50,7 @@ async function hashFile(path: string, algo = 'md5') {
 
     const contentStream = createReadStream(path);
     const updateDone = new Promise<void>((resolve, reject) => {
-        contentStream.on('data', data => hashFunc.update(data));
+        contentStream.on('data', (data) => hashFunc.update(data));
         contentStream.on('close', resolve);
         contentStream.on('error', reject);
     });
@@ -86,14 +92,14 @@ export function getHealth(): BackupHealth {
     return BackupHealth.create({
         lastBinaryBackup: LAST_BINARY_BACKUP
             ? BackupDateSize.create({
-                    date: Formatter.dateTimeIso(LAST_BINARY_BACKUP.date),
-                })
+                  date: Formatter.dateTimeIso(LAST_BINARY_BACKUP.date),
+              })
             : null,
         lastBackup: LAST_BACKUP
             ? BackupDateSize.create({
-                    date: Formatter.dateTimeIso(LAST_BACKUP.date),
-                    size: Formatter.fileSize(LAST_BACKUP.size),
-                })
+                  date: Formatter.dateTimeIso(LAST_BACKUP.date),
+                  size: Formatter.fileSize(LAST_BACKUP.size),
+              })
             : null,
         status,
     });
@@ -119,10 +125,12 @@ export async function cleanBackups() {
             if (filename < boundaryFileName) {
                 console.log('Deleting old backup ' + filename);
 
-                await client.send(new DeleteObjectCommand({
-                    Bucket: STAMHOOFD.SPACES_BUCKET,
-                    Key: file.key,
-                }));
+                await client.send(
+                    new DeleteObjectCommand({
+                        Bucket: STAMHOOFD.SPACES_BUCKET,
+                        Key: file.key,
+                    }),
+                );
             } else {
                 if (!lastBackup || lastBackup.key < file.key) {
                     lastBackup = file;
@@ -147,7 +155,9 @@ export async function cleanBinaryLogBackups() {
     const client = getS3Client();
 
     // List all backup files on the server
-    const allBackups = (await listAllFiles(STAMHOOFD.objectStoragePath + '/binlogs')).filter(f => f.key.endsWith('.enc') && f.key.startsWith(BINARY_LOG_PREFIX));
+    const allBackups = (await listAllFiles(STAMHOOFD.objectStoragePath + '/binlogs')).filter(
+        (f) => f.key.endsWith('.enc') && f.key.startsWith(BINARY_LOG_PREFIX),
+    );
 
     const numberToDelete = allBackups.length - MAX_BINARY_LOGS;
 
@@ -162,10 +172,12 @@ export async function cleanBinaryLogBackups() {
         const file = allBackups[i];
         console.log('Deleting old binary log ' + file.key);
 
-        await client.send(new DeleteObjectCommand({
-            Bucket: STAMHOOFD.SPACES_BUCKET,
-            Key: file.key,
-        }));
+        await client.send(
+            new DeleteObjectCommand({
+                Bucket: STAMHOOFD.SPACES_BUCKET,
+                Key: file.key,
+            }),
+        );
     }
 }
 
@@ -178,20 +190,22 @@ export async function listAllFiles(prefix: string): Promise<ObjectStorageFile[]>
 
     // List all backup files on the server
     while (true) {
-        const response = await client.send(new ListObjectsCommand({
-            Bucket: STAMHOOFD.SPACES_BUCKET,
-            Prefix: prefix + '/', // / suffix is required to make Delimiter work
-            MaxKeys: 1000,
-            Marker: marker,
-            Delimiter: '/', // this makes sure we don't go into folders
-        }));
+        const response = await client.send(
+            new ListObjectsCommand({
+                Bucket: STAMHOOFD.SPACES_BUCKET,
+                Prefix: prefix + '/', // / suffix is required to make Delimiter work
+                MaxKeys: 1000,
+                Marker: marker,
+                Delimiter: '/', // this makes sure we don't go into folders
+            }),
+        );
 
         if (response.Contents === undefined) {
             break;
         }
 
         for (const object of response.Contents) {
-            if (files.find(f => f.key === object.Key)) {
+            if (files.find((f) => f.key === object.Key)) {
                 throw new Error('Duplicate key found: ' + object.Key);
             }
 
@@ -262,7 +276,10 @@ export function getBackupFileDate(filename: string) {
         throw new Error('Invalid backup filename: ' + filename);
     }
 
-    const dateString = filename.substring(BACKUP_PREFIX.length, filename.length - '.sql.gz.enc'.length);
+    const dateString = filename.substring(
+        BACKUP_PREFIX.length,
+        filename.length - '.sql.gz.enc'.length,
+    );
 
     const year = parseInt(dateString.substring(0, 4));
     const month = parseInt(dateString.substring(5, 7));
@@ -271,22 +288,30 @@ export function getBackupFileDate(filename: string) {
     const hour = parseInt(dateString.substring(11, 13));
     const minute = parseInt(dateString.substring(14, 16));
 
-    console.log('Found date ', {
-        year,
-        month,
-        day,
-        hour,
-        minute,
-    }, 'from', dateString);
+    console.log(
+        'Found date ',
+        {
+            year,
+            month,
+            day,
+            hour,
+            minute,
+        },
+        'from',
+        dateString,
+    );
 
     // Convert Brussels timeezone string to date object
-    const date = DateTime.fromObject({
-        year,
-        month,
-        day,
-        hour,
-        minute,
-    }, { zone: 'Europe/Brussels' }).toJSDate();
+    const date = DateTime.fromObject(
+        {
+            year,
+            month,
+            day,
+            hour,
+            minute,
+        },
+        { zone: 'Europe/Brussels' },
+    ).toJSDate();
 
     // Check match
     const expected = getBackupBaseFileName(date) + '.gz.enc';
@@ -363,9 +388,14 @@ export async function backup() {
 
         // Assert disk space
         const availableDiskSpace = (await diskSpace()) / 1000 / 1000 / 1000;
-        const required = Math.max(10, LAST_BACKUP ? Math.ceil(LAST_BACKUP?.size * 15 / 1000 / 1000 / 1000) : 0); // Minimum disk size = 15 times size of a backup (uncompressed size of backup is a lot more than compressed size)
+        const required = Math.max(
+            10,
+            LAST_BACKUP ? Math.ceil((LAST_BACKUP?.size * 15) / 1000 / 1000 / 1000) : 0,
+        ); // Minimum disk size = 15 times size of a backup (uncompressed size of backup is a lot more than compressed size)
         if (availableDiskSpace < required) {
-            throw new Error(`Less than ${required.toFixed(2)}GB disk space available. Avoid creating backups now until this has been resolved.`);
+            throw new Error(
+                `Less than ${required.toFixed(2)}GB disk space available. Avoid creating backups now until this has been resolved.`,
+            );
         }
 
         // Recreate folder
@@ -374,7 +404,15 @@ export async function backup() {
         const tmpFile = `${localBackupFolder}${getBackupBaseFileName(new Date())}`;
         const compressedFile = tmpFile + '.gz';
 
-        const cmd = 'mysqldump -u ' + escapeShellArg(STAMHOOFD.DB_USER) + ' -p' + escapeShellArg(STAMHOOFD.DB_PASS) + ' --flush-logs --single-transaction --quick --hex-blob --default-character-set=utf8mb4 --max_allowed_packet=1G --triggers --routines --events --lock-tables=false ' + escapeShellArg(STAMHOOFD.DB_DATABASE) + ' > ' + escapeShellArg(tmpFile);
+        const cmd =
+            'mysqldump -u ' +
+            escapeShellArg(STAMHOOFD.DB_USER) +
+            ' -p' +
+            escapeShellArg(STAMHOOFD.DB_PASS) +
+            ' --flush-logs --single-transaction --quick --hex-blob --default-character-set=utf8mb4 --max_allowed_packet=1G --triggers --routines --events --lock-tables=false ' +
+            escapeShellArg(STAMHOOFD.DB_DATABASE) +
+            ' > ' +
+            escapeShellArg(tmpFile);
 
         console.log('Creating MySQL dump...');
         await execPromise(cmd);
@@ -431,10 +469,12 @@ export async function backup() {
             if (progress.loaded === undefined) {
                 return;
             }
-            const percentage = Math.floor(progress.loaded / fileSize * 100);
+            const percentage = Math.floor((progress.loaded / fileSize) * 100);
             if (percentage > lastLoggedPercentage) {
                 lastLoggedPercentage = percentage;
-                console.log(`Uploaded ${percentage}% (${Formatter.fileSize(progress.loaded)} of ${Formatter.fileSize(fileSize)})`);
+                console.log(
+                    `Uploaded ${percentage}% (${Formatter.fileSize(progress.loaded)} of ${Formatter.fileSize(fileSize)})`,
+                );
             }
         });
 
@@ -469,7 +509,13 @@ export async function backupBinlogs() {
     const [rows] = await Database.select('SHOW BINARY LOGS');
 
     if (rows.length > MAX_BINARY_LOGS) {
-        console.error(chalk.bold(chalk.red('Warning: MAX_BINARY_LOGS is larger than the binary logs stored on the system. Please check the MySQL configuration.')));
+        console.error(
+            chalk.bold(
+                chalk.red(
+                    'Warning: MAX_BINARY_LOGS is larger than the binary logs stored on the system. Please check the MySQL configuration.',
+                ),
+            ),
+        );
         console.error('Found ' + rows.length + ' binlogs. Increasing binary logs max size.');
         MAX_BINARY_LOGS = rows.length;
     }
@@ -500,7 +546,12 @@ export async function backupBinlogs() {
     };
 }
 
-export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, gzip = true, allBinaryLogs: ObjectStorageFile[]) {
+export async function uploadBinaryLog(
+    binaryLogPath: string,
+    partial: boolean,
+    gzip = true,
+    allBinaryLogs: ObjectStorageFile[],
+) {
     const client = getS3Client();
 
     const number = parseInt(path.basename(binaryLogPath).split('.')[1]);
@@ -513,9 +564,10 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
 
     if (!partial) {
         // Check if the file exists in S3
-        const key = STAMHOOFD.objectStoragePath + '/binlogs/' + uploadedName + (gzip ? '.gz' : '') + '.enc';
+        const key =
+            STAMHOOFD.objectStoragePath + '/binlogs/' + uploadedName + (gzip ? '.gz' : '') + '.enc';
 
-        if (allBinaryLogs.find(f => f.key === key)) {
+        if (allBinaryLogs.find((f) => f.key === key)) {
             // Delete partial if found
             await deletePartial(client, uploadedName, binaryLogPath, gzip, allBinaryLogs);
             return;
@@ -523,11 +575,13 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
 
         // Double check using HEAD
         try {
-            await client.send(new HeadObjectCommand({
-                Bucket: STAMHOOFD.SPACES_BUCKET,
-                Key: key,
-                ResponseCacheControl: 'no-cache',
-            }));
+            await client.send(
+                new HeadObjectCommand({
+                    Bucket: STAMHOOFD.SPACES_BUCKET,
+                    Key: key,
+                    ResponseCacheControl: 'no-cache',
+                }),
+            );
             console.log('Binary log already exists: ' + uploadedName);
             return;
         } catch (e) {
@@ -545,12 +599,15 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
         throw new Error('Backup folder should end with a /');
     }
 
-    let binaryLogPathMoved = localBackupFolder + 'binlogs/' + uploadedName + (partial ? '.partial' : '');
+    let binaryLogPathMoved =
+        localBackupFolder + 'binlogs/' + uploadedName + (partial ? '.partial' : '');
 
     // Mkdir
     await execPromise('mkdir -p ' + escapeShellArg(path.dirname(binaryLogPathMoved)));
 
-    await execPromise(`${STAMHOOFD.environment === 'development' ? '' : 'sudo '}cp ${escapeShellArg(binaryLogPath)} ${escapeShellArg(binaryLogPathMoved)}`);
+    await execPromise(
+        `${STAMHOOFD.environment === 'development' ? '' : 'sudo '}cp ${escapeShellArg(binaryLogPath)} ${escapeShellArg(binaryLogPathMoved)}`,
+    );
 
     if (STAMHOOFD.environment !== 'development') {
         await execPromise(`sudo chown stamhoofd:stamhoofd ${escapeShellArg(binaryLogPathMoved)}`);
@@ -628,17 +685,33 @@ export async function uploadBinaryLog(binaryLogPath: string, partial: boolean, g
     }
 }
 
-async function deletePartial(client: S3Client, uploadedName: string, binaryLogPath: string, gzip: boolean, allBinaryLogs: ObjectStorageFile[]) {
+async function deletePartial(
+    client: S3Client,
+    uploadedName: string,
+    binaryLogPath: string,
+    gzip: boolean,
+    allBinaryLogs: ObjectStorageFile[],
+) {
     // Check if a partial exists on the server and delete it to keep it clean
-    const key = STAMHOOFD.objectStoragePath + '/binlogs/' + uploadedName + '.partial' + (gzip ? '.gz' : '') + '.enc';
+    const key =
+        STAMHOOFD.objectStoragePath +
+        '/binlogs/' +
+        uploadedName +
+        '.partial' +
+        (gzip ? '.gz' : '') +
+        '.enc';
     try {
-        if (allBinaryLogs.find(f => f.key === key)) {
-            console.log('Partial binary log exists at ' + key + ', which is no longer needed. Deleting...');
+        if (allBinaryLogs.find((f) => f.key === key)) {
+            console.log(
+                'Partial binary log exists at ' + key + ', which is no longer needed. Deleting...',
+            );
 
-            await client.send(new DeleteObjectCommand({
-                Bucket: STAMHOOFD.SPACES_BUCKET,
-                Key: key,
-            }));
+            await client.send(
+                new DeleteObjectCommand({
+                    Bucket: STAMHOOFD.SPACES_BUCKET,
+                    Key: key,
+                }),
+            );
 
             console.log('Partial binary log deleted');
         }

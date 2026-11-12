@@ -1,7 +1,12 @@
 import { registerRootTenantCron } from './helpers/registerTenantCron.js';
 import { BalanceItem, Organization, Payment, Platform } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import {
+    BalanceItemStatus,
+    BalanceItemType,
+    PaymentMethod,
+    PaymentStatus,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItemService } from '../services/BalanceItemService.js';
 import { PaymentService } from '../services/PaymentService.js';
@@ -11,7 +16,10 @@ import { VATService } from '../services/VATService.js';
 registerRootTenantCron('service-fees', chargeServiceFees);
 
 async function chargeServiceFees() {
-    if (STAMHOOFD.environment !== 'development' && (new Date().getHours() > 5 || new Date().getHours() < 2)) {
+    if (
+        STAMHOOFD.environment !== 'development' &&
+        (new Date().getHours() > 5 || new Date().getHours() < 2)
+    ) {
         return;
     }
     const membershipOrganizationId = (await Platform.getShared()).membershipOrganizationId;
@@ -26,7 +34,13 @@ async function chargeServiceFees() {
         .where('status', PaymentStatus.Succeeded)
         .where('serviceFeeManual', '>', 0)
         .where('serviceFeeManualCharged', 0)
-        .where('createdAt', '<', STAMHOOFD.environment !== 'development' ? new Date() : Formatter.dateIso(new Date(Date.now() + 1000 * 60 * 60 * 24)))
+        .where(
+            'createdAt',
+            '<',
+            STAMHOOFD.environment !== 'development'
+                ? new Date()
+                : Formatter.dateIso(new Date(Date.now() + 1000 * 60 * 60 * 24)),
+        )
         .limit(200)
         .orderBy('createdAt', 'ASC')
         .fetch();
@@ -76,7 +90,10 @@ async function chargeServiceFees() {
         }
 
         for (const [_, payments] of groupedPayments) {
-            const totalFees = payments.reduce((sum, payment) => sum + payment.serviceFeeManual - payment.serviceFeeManualCharged, 0);
+            const totalFees = payments.reduce(
+                (sum, payment) => sum + payment.serviceFeeManual - payment.serviceFeeManualCharged,
+                0,
+            );
             const groupedByDate = new Map<string, Payment[]>();
 
             for (const p of payments) {
@@ -90,7 +107,7 @@ async function chargeServiceFees() {
             }
 
             for (const [day, payments] of groupedByDate) {
-                const date = new Date(Math.min(...payments.map(p => p.createdAt.getTime())));
+                const date = new Date(Math.min(...payments.map((p) => p.createdAt.getTime())));
                 const startOfDay = Formatter.luxon(date).startOf('day').toJSDate();
                 const endOfDay = Formatter.luxon(date).endOf('day').toJSDate();
 
@@ -140,11 +157,19 @@ async function chargeServiceFees() {
                 }
 
                 const { changedRows } = await Payment.update()
-                    .where('id', payments.map(p => p.id))
+                    .where(
+                        'id',
+                        payments.map((p) => p.id),
+                    )
                     .set('serviceFeeManualCharged', SQL.column('serviceFeeManual'))
                     .update();
                 if (changedRows !== payments.length) {
-                    console.error('Unexpected change in serviceFeeManualCharged. Expected ' + payments.length + ', updated only ' + changedRows);
+                    console.error(
+                        'Unexpected change in serviceFeeManualCharged. Expected ' +
+                            payments.length +
+                            ', updated only ' +
+                            changedRows,
+                    );
                 }
             }
         }

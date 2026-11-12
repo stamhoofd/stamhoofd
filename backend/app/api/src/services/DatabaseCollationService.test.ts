@@ -3,7 +3,7 @@ import { DatabaseCollationService } from './DatabaseCollationService.js';
 
 describe('DatabaseCollationService', () => {
     test('Detects collation_connection mismatch', async () => {
-        await Database.statement('SET collation_connection = \'utf8mb4_general_ci\'');
+        await Database.statement("SET collation_connection = 'utf8mb4_general_ci'");
 
         try {
             const error = await DatabaseCollationService.getMismatchError();

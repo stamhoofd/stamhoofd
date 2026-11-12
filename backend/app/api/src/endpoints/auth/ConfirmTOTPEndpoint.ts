@@ -28,7 +28,9 @@ export class ConfirmTOTPEndpoint extends Endpoint<Params, Query, Body, ResponseB
         if (request.method !== 'POST') {
             return [false];
         }
-        const params = Endpoint.parseParameters(request.url, '/mfa/totp/@id/confirm', { id: String });
+        const params = Endpoint.parseParameters(request.url, '/mfa/totp/@id/confirm', {
+            id: String,
+        });
         if (params) {
             return [true, params as Params];
         }
@@ -79,6 +81,8 @@ export class ConfirmTOTPEndpoint extends Endpoint<Params, Query, Body, ResponseB
 
         await TwoFactorAuditLogService.logMethodAdded(user, MFAMethodType.TOTP, totp.name);
 
-        return new Response(await TwoFactorHelper.completeEnrollment(user, setupToken, wasFirstFactor, token));
+        return new Response(
+            await TwoFactorHelper.completeEnrollment(user, setupToken, wasFirstFactor, token),
+        );
     }
 }

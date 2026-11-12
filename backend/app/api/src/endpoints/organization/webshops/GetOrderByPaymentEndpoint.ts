@@ -18,7 +18,11 @@ export class GetOrderByPaymentEndpoint extends Endpoint<Params, Query, Body, Res
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/webshop/@id/payment/@paymentId/order', { id: String, paymentId: String });
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/webshop/@id/payment/@paymentId/order',
+            { id: String, paymentId: String },
+        );
 
         if (params) {
             return [true, params as Params];
@@ -38,7 +42,11 @@ export class GetOrderByPaymentEndpoint extends Endpoint<Params, Query, Body, Res
             });
         }
         const [order] = await Order.where({ paymentId: payment.id }, { limit: 1 });
-        if (!order || order.webshopId !== request.params.id || order.organizationId !== organization.id) {
+        if (
+            !order ||
+            order.webshopId !== request.params.id ||
+            order.organizationId !== organization.id
+        ) {
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Order not found',

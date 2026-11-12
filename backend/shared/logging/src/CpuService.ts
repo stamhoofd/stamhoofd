@@ -95,7 +95,9 @@ class StaticCpuService {
 
         if (this.currentIndex % 5 === 0 || five > 80) {
             const min = this.getAverage(60);
-            console.log(`[CPU] 5s: ${five.toFixed(2)}%\n[CPU] 1 min: ${min.toFixed(2)}%\n[CPU] 5 min: ${this.getAverage(60 * 5).toFixed(2)}%`);
+            console.log(
+                `[CPU] 5s: ${five.toFixed(2)}%\n[CPU] 1 min: ${min.toFixed(2)}%\n[CPU] 5 min: ${this.getAverage(60 * 5).toFixed(2)}%`,
+            );
         }
 
         for (const listener of this.sampleListeners) {

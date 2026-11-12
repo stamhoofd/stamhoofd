@@ -1,6 +1,14 @@
 import { DecodedRequest, Request } from '@node/endpoints';
 import { OrganizationFactory, Platform, Token, User, UserFactory } from '@stamhoofd/models';
-import { LoginMethod, LoginMethodConfig, LoginProviderType, OpenIDClientConfiguration, Permissions, SessionClientType, UserMeta } from '@stamhoofd/structures';
+import {
+    LoginMethod,
+    LoginMethodConfig,
+    LoginProviderType,
+    OpenIDClientConfiguration,
+    Permissions,
+    SessionClientType,
+    UserMeta,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { ContextInstance } from '../helpers/Context.js';
@@ -31,7 +39,11 @@ describe('SSO callback account scope', () => {
             clientSecret: 'organization-secret',
         });
         organization.meta.loginMethods.set(LoginMethod.SSO, LoginMethodConfig.create({}));
-        return new SSOService({ provider: LoginProviderType.SSO, organization, platform: await Platform.getForEditing() });
+        return new SSOService({
+            provider: LoginProviderType.SSO,
+            organization,
+            platform: await Platform.getForEditing(),
+        });
     }
 
     /**
@@ -71,10 +83,17 @@ describe('SSO callback account scope', () => {
             }),
         } as any);
 
-        const request = new Request({ method: 'POST', url: '/openid/callback', host: '', headers: { cookie: 'oid_session_id=test-session' } });
+        const request = new Request({
+            method: 'POST',
+            url: '/openid/callback',
+            host: '',
+            headers: { cookie: 'oid_session_id=test-session' },
+        });
         const decoded = await DecodedRequest.fromRequest(request, {}, undefined, undefined);
         const context = new ContextInstance(request);
-        const response = await ContextInstance.asyncLocalStorage.run(context, () => new SSOServiceWithSession(session, service, decoded).callback());
+        const response = await ContextInstance.asyncLocalStorage.run(context, () =>
+            new SSOServiceWithSession(session, service, decoded).callback(),
+        );
         return new URL(response.headers.location as string);
     }
 
@@ -89,29 +108,34 @@ describe('SSO callback account scope', () => {
      * subject. Even valid claims must fail across scopes, without issuing a token
      * or changing the global account's verification, profile or identity links.
      */
-    it.each(['invited', 'linked'])('does not authenticate a global %s account through an organization issuer', async (kind) => {
-        const service = await createService();
-        const user = await new UserFactory({
-            password: null,
-            verified: false,
-            globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
-        }).create();
-        if (kind === 'linked') {
-            user.meta = UserMeta.create({ loginProviderIds: new Map([[LoginProviderType.SSO, 'matching-subject']]) });
-            await user.save();
-        }
-        const before = await User.getByID(user.id);
+    it.each(['invited', 'linked'])(
+        'does not authenticate a global %s account through an organization issuer',
+        async (kind) => {
+            const service = await createService();
+            const user = await new UserFactory({
+                password: null,
+                verified: false,
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            if (kind === 'linked') {
+                user.meta = UserMeta.create({
+                    loginProviderIds: new Map([[LoginProviderType.SSO, 'matching-subject']]),
+                });
+                await user.save();
+            }
+            const before = await User.getByID(user.id);
 
-        const redirect = await callback(service, user);
+            const redirect = await callback(service, user);
 
-        expect(redirect.searchParams.has('oid_rt')).toBe(false);
-        expect(redirect.searchParams.has('error')).toBe(true);
-        expect(await Token.where({ userId: user.id })).toHaveLength(0);
-        const after = await User.getByID(user.id);
-        expect(after?.verified).toBe(before?.verified);
-        expect(after?.firstName).toBe(before?.firstName);
-        expect(after?.meta).toEqual(before?.meta);
-    });
+            expect(redirect.searchParams.has('oid_rt')).toBe(false);
+            expect(redirect.searchParams.has('error')).toBe(true);
+            expect(await Token.where({ userId: user.id })).toHaveLength(0);
+            const after = await User.getByID(user.id);
+            expect(after?.verified).toBe(before?.verified);
+            expect(after?.firstName).toBe(before?.firstName);
+            expect(after?.meta).toEqual(before?.meta);
+        },
+    );
 
     /**
      * Positive control: the same callback may activate an invitation owned by its
@@ -120,7 +144,11 @@ describe('SSO callback account scope', () => {
      */
     it('authenticates an invited account owned by the organization', async () => {
         const service = await createService();
-        const user = await new UserFactory({ organization: service.organization!, password: null, verified: false }).create();
+        const user = await new UserFactory({
+            organization: service.organization!,
+            password: null,
+            verified: false,
+        }).create();
 
         const redirect = await callback(service, user);
 

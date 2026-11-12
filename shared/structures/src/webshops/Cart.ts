@@ -129,11 +129,17 @@ export class Cart extends AutoEncoder {
     }
 
     get priceWithDiscounts() {
-        return Math.max(0, this.items.reduce((c, item) => c + item.getPriceWithDiscounts(), 0));
+        return Math.max(
+            0,
+            this.items.reduce((c, item) => c + item.getPriceWithDiscounts(), 0),
+        );
     }
 
     get priceWithoutDiscounts() {
-        return Math.max(0, this.items.reduce((c, item) => c + item.getPriceWithoutDiscounts(), 0));
+        return Math.max(
+            0,
+            this.items.reduce((c, item) => c + item.getPriceWithoutDiscounts(), 0),
+        );
     }
 
     get count() {
@@ -141,7 +147,10 @@ export class Cart extends AutoEncoder {
     }
 
     get persons() {
-        return this.items.reduce((sum, item) => sum + (item.product.type === ProductType.Person ? item.amount : 0), 0);
+        return this.items.reduce(
+            (sum, item) => sum + (item.product.type === ProductType.Person ? item.amount : 0),
+            0,
+        );
     }
 
     /**
@@ -177,9 +186,14 @@ export class Cart extends AutoEncoder {
                 continue; // skip unofficial flow
             }
             if (officialUitpasSales.has(item.product.uitpasEvent.url)) {
-                officialUitpasSales.get(item.product.uitpasEvent.url)!.push(...item.uitpasNumbers.map(p => p.uitpasNumber));
+                officialUitpasSales
+                    .get(item.product.uitpasEvent.url)!
+                    .push(...item.uitpasNumbers.map((p) => p.uitpasNumber));
             } else {
-                officialUitpasSales.set(item.product.uitpasEvent.url, item.uitpasNumbers.map(p => p.uitpasNumber));
+                officialUitpasSales.set(
+                    item.product.uitpasEvent.url,
+                    item.uitpasNumbers.map((p) => p.uitpasNumber),
+                );
             }
         }
         for (const [, uitpasNumbers] of officialUitpasSales.entries()) {
@@ -199,23 +213,34 @@ export class Cart extends AutoEncoder {
      * are chosen. Pass validateSeats or validateDetails = false while that step hasn't been reached yet, so items
      * aren't rejected for data the customer still has to enter. See CartItem.validate for what validateDetails covers.
      */
-    validate(webshop: Webshop, asAdmin = false, { validateSeats = true, validateDetails = true }: { validateSeats?: boolean; validateDetails?: boolean } = {}) {
+    validate(
+        webshop: Webshop,
+        asAdmin = false,
+        {
+            validateSeats = true,
+            validateDetails = true,
+        }: { validateSeats?: boolean; validateDetails?: boolean } = {},
+    ) {
         const newItems: CartItem[] = [];
         const errors = new SimpleErrors();
         const singleItem = webshop.orderMode === WebshopOrderMode.Single;
 
         for (const [index, item] of this.items.entries()) {
             try {
-                item.validate(webshop, Cart.create({ items: [...newItems, ...this.items.slice(index)] }), {
-                    refresh: true,
-                    admin: asAdmin,
-                    validateSeats,
-                    validateDetails,
-                    // Only the items kept so far count against the stock, so the first units within stock stay. Otherwise
-                    // every unit of a product with one item per unit (bulk, per-item customers) sees all the others.
-                    // Seats are still checked against every other item.
-                    stockCart: Cart.create({ items: [...newItems, item] }),
-                });
+                item.validate(
+                    webshop,
+                    Cart.create({ items: [...newItems, ...this.items.slice(index)] }),
+                    {
+                        refresh: true,
+                        admin: asAdmin,
+                        validateSeats,
+                        validateDetails,
+                        // Only the items kept so far count against the stock, so the first units within stock stay. Otherwise
+                        // every unit of a product with one item per unit (bulk, per-item customers) sees all the others.
+                        // Seats are still checked against every other item.
+                        stockCart: Cart.create({ items: [...newItems, item] }),
+                    },
+                );
                 newItems.push(item);
 
                 if (singleItem) {

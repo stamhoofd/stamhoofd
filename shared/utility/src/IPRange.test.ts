@@ -173,7 +173,7 @@ describe('IPRangeSet', () => {
         test('skips unparseable lines and reports them via onError', () => {
             const other = new IPRangeSet();
             const errors: string[] = [];
-            other.addText('1.2.3.4\nnot-an-ip\n10.0.0.0/8', line => errors.push(line));
+            other.addText('1.2.3.4\nnot-an-ip\n10.0.0.0/8', (line) => errors.push(line));
             expect(other.size).toBe(2);
             expect(errors).toEqual(['not-an-ip']);
         });

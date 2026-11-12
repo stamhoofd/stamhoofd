@@ -1,6 +1,12 @@
 import { Request } from '@node/endpoints';
 import type { Organization, User } from '@stamhoofd/models';
-import { MFATOTP, OrganizationFactory, Token, UserFactory, WebauthnCredential } from '@stamhoofd/models';
+import {
+    MFATOTP,
+    OrganizationFactory,
+    Token,
+    UserFactory,
+    WebauthnCredential,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { OrganizationAdmins, Permissions } from '@stamhoofd/structures';
 import crypto from 'crypto';
@@ -55,10 +61,12 @@ describe('Endpoint.GetOrganizationAdmins', () => {
         expect(response.body).toBeInstanceOf(OrganizationAdmins);
 
         const users = (response.body as OrganizationAdmins).users;
-        expect(users.find(u => u.id === inactiveAdmin.id)?.lastActiveAt?.getTime()).toEqual(lastActiveAt.getTime());
+        expect(users.find((u) => u.id === inactiveAdmin.id)?.lastActiveAt?.getTime()).toEqual(
+            lastActiveAt.getTime(),
+        );
 
         // The user never signed in: the token was created directly.
-        expect(users.find(u => u.id === user.id)?.lastActiveAt).toBeNull();
+        expect(users.find((u) => u.id === user.id)?.lastActiveAt).toBeNull();
     });
 
     test('Whether an admin has two-factor authentication is returned', async () => {
@@ -80,10 +88,10 @@ describe('Endpoint.GetOrganizationAdmins', () => {
 
         const users = await getAdmins(organization, me);
 
-        expect(users.find(u => u.id === withTotp.id)?.hasTwoFactor).toBe(true);
-        expect(users.find(u => u.id === withPasskey.id)?.hasTwoFactor).toBe(true);
-        expect(users.find(u => u.id === withoutFactors.id)?.hasTwoFactor).toBe(false);
-        expect(users.find(u => u.id === me.id)?.hasTwoFactor).toBe(false);
+        expect(users.find((u) => u.id === withTotp.id)?.hasTwoFactor).toBe(true);
+        expect(users.find((u) => u.id === withPasskey.id)?.hasTwoFactor).toBe(true);
+        expect(users.find((u) => u.id === withoutFactors.id)?.hasTwoFactor).toBe(false);
+        expect(users.find((u) => u.id === me.id)?.hasTwoFactor).toBe(false);
     });
 
     test('An authenticator that was never confirmed does not count as two-factor authentication', async () => {
@@ -97,6 +105,6 @@ describe('Endpoint.GetOrganizationAdmins', () => {
         await totp.save();
 
         const users = await getAdmins(organization, me);
-        expect(users.find(u => u.id === me.id)?.hasTwoFactor).toBe(false);
+        expect(users.find((u) => u.id === me.id)?.hasTwoFactor).toBe(false);
     });
 });

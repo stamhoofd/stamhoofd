@@ -2,12 +2,28 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, ResourcePermissions, Version } from '@stamhoofd/structures';
+import {
+    GroupPrivateSettings,
+    Group as GroupStruct,
+    GroupType,
+    OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct,
+    ResourcePermissions,
+    Version,
+} from '@stamhoofd/structures';
 
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArrayDecoder, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { Event, Group, Organization, OrganizationRegistrationPeriod, Platform, Registration, RegistrationInvitation, RegistrationPeriod } from '@stamhoofd/models';
+import {
+    Event,
+    Group,
+    Organization,
+    OrganizationRegistrationPeriod,
+    Platform,
+    Registration,
+    RegistrationInvitation,
+    RegistrationPeriod,
+} from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
@@ -24,15 +40,30 @@ type ResponseBody = OrganizationRegistrationPeriodStruct[];
  * One endpoint to create, patch and delete members and their registrations and payments
  */
 
-export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(OrganizationRegistrationPeriodStruct as Decoder<OrganizationRegistrationPeriodStruct>, OrganizationRegistrationPeriodStruct.patchType() as Decoder<AutoEncoderPatchType<OrganizationRegistrationPeriodStruct>>, StringDecoder);
+export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
+    bodyDecoder = new PatchableArrayDecoder(
+        OrganizationRegistrationPeriodStruct as Decoder<OrganizationRegistrationPeriodStruct>,
+        OrganizationRegistrationPeriodStruct.patchType() as Decoder<
+            AutoEncoderPatchType<OrganizationRegistrationPeriodStruct>
+        >,
+        StringDecoder,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/registration-periods', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/organization/registration-periods',
+            {},
+        );
 
         if (params) {
             return [true, params as Params];
@@ -44,17 +75,22 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.hasSomeAccess(organization.id)) {
+        if (!(await Context.auth.hasSomeAccess(organization.id))) {
             throw Context.auth.error();
         }
 
         const periods: OrganizationRegistrationPeriod[] = [];
 
         for (const { put } of request.body.getPuts()) {
-            if (!await Context.auth.hasFullAccess(organization.id)) {
+            if (!(await Context.auth.hasFullAccess(organization.id))) {
                 throw Context.auth.error();
             }
-            periods.push(await PatchOrganizationRegistrationPeriodsEndpoint.createOrganizationPeriod(organization, put));
+            periods.push(
+                await PatchOrganizationRegistrationPeriodsEndpoint.createOrganizationPeriod(
+                    organization,
+                    put,
+                ),
+            );
         }
 
         const forceGroupIds: string[] = [];
@@ -73,7 +109,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
             const period = await RegistrationPeriod.getByID(organizationPeriod.periodId);
 
-            if (!period || (STAMHOOFD.userMode === 'organization' && period.organizationId !== organization.id)) {
+            if (
+                !period ||
+                (STAMHOOFD.userMode === 'organization' && period.organizationId !== organization.id)
+            ) {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Period not found',
@@ -82,7 +121,12 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 });
             }
 
-            if ((!period.organizationId && period.locked) || (period.locked && period.organizationId && !await Context.auth.hasFullAccess(period.organizationId))) {
+            if (
+                (!period.organizationId && period.locked) ||
+                (period.locked &&
+                    period.organizationId &&
+                    !(await Context.auth.hasFullAccess(period.organizationId)))
+            ) {
                 throw new SimpleError({
                     code: 'locked_period',
                     message: 'This period is locked',
@@ -123,18 +167,25 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     // Only allow adding groups if we have create permissions in a given category group
                     if (patch.settings.categories && !Array.isArray(patch.settings.categories)) {
                         for (const pp of patch.settings.categories.getPatches()) {
-                            const category = organizationPeriod.settings.categories.find(c => c.id === pp.id);
+                            const category = organizationPeriod.settings.categories.find(
+                                (c) => c.id === pp.id,
+                            );
                             if (!category) {
                                 // Fail silently
                                 continue;
                             }
 
-                            if (!await Context.auth.canCreateGroupInCategory(organization.id, category)) {
+                            if (
+                                !(await Context.auth.canCreateGroupInCategory(
+                                    organization.id,
+                                    category,
+                                ))
+                            ) {
                                 throw Context.auth.error($t('%Ez'));
                             }
 
                             // Only process puts
-                            const ids = pp.groupIds.getPuts().map(p => p.put);
+                            const ids = pp.groupIds.getPuts().map((p) => p.put);
                             allowedIds.push(...ids);
                             category.groupIds.push(...ids);
                         }
@@ -170,8 +221,12 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     if (locked) {
                         // todo: use existing function, now a category could still be deleted if the category is moved to another category and that catetory is deleted
                         const categoryId = categoryBefore.id;
-                        const refCountBefore = originalCategories.filter(c => c.categoryIds.includes(categoryId)).length;
-                        const refCountAfter = categoriesAfterPatch.filter(c => c.categoryIds.includes(categoryId)).length;
+                        const refCountBefore = originalCategories.filter((c) =>
+                            c.categoryIds.includes(categoryId),
+                        ).length;
+                        const refCountAfter = categoriesAfterPatch.filter((c) =>
+                            c.categoryIds.includes(categoryId),
+                        ).length;
                         const isDeleted = refCountAfter < refCountBefore;
 
                         if (isDeleted) {
@@ -179,7 +234,9 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                         }
                     }
 
-                    const categoryAfter = categoriesAfterPatch.find(c => c.id === categoryBefore.id);
+                    const categoryAfter = categoriesAfterPatch.find(
+                        (c) => c.id === categoryBefore.id,
+                    );
 
                     if (!categoryAfter) {
                         if (locked) {
@@ -227,13 +284,21 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     });
                 }
 
-                const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(groupPut.put, organization.id, period, { allowedIds });
+                const group = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
+                    groupPut.put,
+                    organization.id,
+                    period,
+                    { allowedIds },
+                );
                 deleteUnreachable = true;
                 forceGroupIds.push(group.id);
             }
 
             for (const struct of patch.groups.getPatches()) {
-                const group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(struct, period);
+                const group = await PatchOrganizationRegistrationPeriodsEndpoint.patchGroup(
+                    struct,
+                    period,
+                );
                 forceGroupIds.push(group.id);
             }
 
@@ -253,7 +318,9 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
 
         return new Response(
-            await AuthenticatedStructures.organizationRegistrationPeriods(periods, undefined, { forceGroupIds }),
+            await AuthenticatedStructures.organizationRegistrationPeriods(periods, undefined, {
+                forceGroupIds,
+            }),
         );
     }
 
@@ -263,7 +330,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
         const platform = await Platform.getSharedStruct();
 
-        const defaultAgeGroup = platform.config.defaultAgeGroups.find(g => g.id === id);
+        const defaultAgeGroup = platform.config.defaultAgeGroups.find((g) => g.id === id);
 
         if (defaultAgeGroup) {
             const organization = Context.organization;
@@ -289,7 +356,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         });
     }
 
-    static async createOrganizationPeriod(organization: Organization, struct: OrganizationRegistrationPeriodStruct) {
+    static async createOrganizationPeriod(
+        organization: Organization,
+        struct: OrganizationRegistrationPeriodStruct,
+    ) {
         const period = await RegistrationPeriod.getByID(struct.period.id);
 
         if (!period) {
@@ -318,7 +388,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
 
         const maximumStart = 1000 * 60 * 60 * 24 * 31 * 8; // 8 months in advance
-        if (period.startDate > new Date(Date.now() + maximumStart) && STAMHOOFD.userMode === 'platform') {
+        if (
+            period.startDate > new Date(Date.now() + maximumStart) &&
+            STAMHOOFD.userMode === 'platform'
+        ) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Period start date is too far in the future',
@@ -328,7 +401,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         }
 
         // Period has ended
-        if (STAMHOOFD.environment !== 'development' && period.endDate < new Date() && STAMHOOFD.userMode === 'platform') {
+        if (
+            STAMHOOFD.environment !== 'development' &&
+            period.endDate < new Date() &&
+            STAMHOOFD.userMode === 'platform'
+        ) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Period has ended',
@@ -361,7 +438,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             s.settings.registeredMembers = 0;
             s.settings.reservedMembers = 0;
             try {
-                await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(s, organization.id, period);
+                await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
+                    s,
+                    organization.id,
+                    period,
+                );
             } catch (e) {
                 // Can happen when a group is no longer valid anymore when duplicating a period
                 console.error('Error creating group', s.id, e);
@@ -378,7 +459,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
     static async deleteGroup(id: string) {
         const model = await Group.getByID(id);
-        if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
+        if (!model || !(await Context.auth.canAccessGroup(model, PermissionLevel.Full))) {
             throw Context.auth.error($t('%F6'));
         }
 
@@ -401,12 +482,16 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         await RegistrationInvitation.delete().where('groupId', id);
     }
 
-    static async patchGroup(struct: AutoEncoderPatchType<GroupStruct>, period?: RegistrationPeriod | null, options: { allowPatchWaitingListPeriod?: boolean; isPatchingEvent?: boolean } = {}) {
+    static async patchGroup(
+        struct: AutoEncoderPatchType<GroupStruct>,
+        period?: RegistrationPeriod | null,
+        options: { allowPatchWaitingListPeriod?: boolean; isPatchingEvent?: boolean } = {},
+    ) {
         const { allowPatchWaitingListPeriod = false, isPatchingEvent = false } = options;
 
         const model = await Group.getByID(struct.id);
 
-        if (!model || !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
+        if (!model || !(await Context.auth.canAccessGroup(model, PermissionLevel.Full))) {
             throw Context.auth.error($t('%F7'));
         }
 
@@ -414,7 +499,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             struct.settings.period = undefined; // Not allowed to patch manually
 
             if (struct.settings.recordCategories) {
-                RecordAnswerHelper.throwIfPatchOrPutIsInvalid(model.settings.recordCategories, struct.settings.recordCategories);
+                RecordAnswerHelper.throwIfPatchOrPutIsInvalid(
+                    model.settings.recordCategories,
+                    struct.settings.recordCategories,
+                );
             }
 
             model.settings.patchOrPut(struct.settings);
@@ -427,7 +515,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         if (struct.privateSettings) {
             model.privateSettings.patchOrPut(struct.privateSettings);
 
-            if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
+            if (!(await Context.auth.canAccessGroup(model, PermissionLevel.Full))) {
                 throw new SimpleError({
                     code: 'missing_permissions',
                     message: 'You cannot restrict your own permissions',
@@ -466,7 +554,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             shouldUpdatePeriodIds = period.id !== model.periodId;
 
             if (shouldUpdatePeriodIds && period.locked) {
-                if (period.organizationId === null || !await Context.auth.hasFullAccess(period.organizationId)) {
+                if (
+                    period.organizationId === null ||
+                    !(await Context.auth.hasFullAccess(period.organizationId))
+                ) {
                     throw new SimpleError({
                         code: 'locked_period',
                         message: 'This period is locked',
@@ -476,11 +567,18 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             }
 
             if (shouldUpdatePeriodIds) {
-                const oldOrganizationPeriod = await OrganizationRegistrationPeriod.select().where('periodId', model.periodId).where('organizationId', model.organizationId).first(false);
-                if (oldOrganizationPeriod && model.settings.hasBundleDiscounts(oldOrganizationPeriod)) {
+                const oldOrganizationPeriod = await OrganizationRegistrationPeriod.select()
+                    .where('periodId', model.periodId)
+                    .where('organizationId', model.organizationId)
+                    .first(false);
+                if (
+                    oldOrganizationPeriod &&
+                    model.settings.hasBundleDiscounts(oldOrganizationPeriod)
+                ) {
                     throw new SimpleError({
                         code: 'change_period_not_allowed',
-                        message: 'This group cannot be moved to another period because it has bundle discounts.',
+                        message:
+                            'This group cannot be moved to another period because it has bundle discounts.',
                         human: Context.i18n.$t('%1dG'),
                     });
                 }
@@ -493,7 +591,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     });
                 }
 
-                if (STAMHOOFD.userMode === 'organization' && period.organizationId !== model.organizationId) {
+                if (
+                    STAMHOOFD.userMode === 'organization' &&
+                    period.organizationId !== model.organizationId
+                ) {
                     throw new SimpleError({
                         code: 'invalid_period',
                         message: 'Period has different organization id',
@@ -513,7 +614,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 }
 
                 if (currentPeriod.locked) {
-                    if (currentPeriod.organizationId === null || !await Context.auth.hasFullAccess(currentPeriod.organizationId)) {
+                    if (
+                        currentPeriod.organizationId === null ||
+                        !(await Context.auth.hasFullAccess(currentPeriod.organizationId))
+                    ) {
                         throw new SimpleError({
                             code: 'locked_period',
                             message: 'This period is locked',
@@ -522,7 +626,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     }
                 }
 
-                if ((!isPatchingEvent && model.type === GroupType.EventRegistration) || (model.type === GroupType.WaitingList && !allowPatchWaitingListPeriod)) {
+                if (
+                    (!isPatchingEvent && model.type === GroupType.EventRegistration) ||
+                    (model.type === GroupType.WaitingList && !allowPatchWaitingListPeriod)
+                ) {
                     throw new SimpleError({
                         code: 'not_supported',
                         message: `Moving group with type ${model.type} to a different period is not supported`,
@@ -531,7 +638,9 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 }
 
                 if (model.type === GroupType.EventRegistration) {
-                    await this.getOrganizationPeriodOrThrow(model.organizationId, period, { isPatchingEvent });
+                    await this.getOrganizationPeriodOrThrow(model.organizationId, period, {
+                        isPatchingEvent,
+                    });
                 }
             }
 
@@ -540,7 +649,8 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     throw new SimpleError({
                         code: 'invalid_field',
                         field: 'periodId',
-                        message: 'Cannot patch periodId to a different period then the one being patched',
+                        message:
+                            'Cannot patch periodId to a different period then the one being patched',
                     });
                 }
             }
@@ -553,7 +663,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     model.settings.endDate = period.endDate;
 
                     // Note: start date is customizable, as long as it stays between period start and end
-                    if (model.settings.startDate < period.startDate || model.settings.startDate > period.endDate) {
+                    if (
+                        model.settings.startDate < period.startDate ||
+                        model.settings.startDate > period.endDate
+                    ) {
                         model.settings.startDate = period.startDate;
                     }
                 }
@@ -572,7 +685,9 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 const groupCount = await Group.select()
                     .where('waitingListId', waitingListId)
                     .whereNot('id', model.id)
-                    .whereNot('periodId', model.periodId).limit(1).count();
+                    .whereNot('periodId', model.periodId)
+                    .limit(1)
+                    .count();
 
                 if (groupCount > 0) {
                     throw new SimpleError({
@@ -655,7 +770,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         if (shouldUpdatePeriodIds) {
             // change the period ids of the registrations in the group
-            const { changedRows } = await SQL.update(Registration.table).set('periodId', model.periodId).where('groupId', model.id).update();
+            const { changedRows } = await SQL.update(Registration.table)
+                .set('periodId', model.periodId)
+                .where('groupId', model.id)
+                .update();
             console.log(`Moved ${changedRows} registrations to period ${model.periodId}`);
         }
 
@@ -679,7 +797,11 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
      * groups need this: every other type is created and moved through an organization period that
      * exists by construction, since that period is what the request addresses.
      */
-    static async getOrganizationPeriodOrThrow(organizationId: string, period: RegistrationPeriod, options?: { isPatchingEvent?: boolean }): Promise<OrganizationRegistrationPeriod> {
+    static async getOrganizationPeriodOrThrow(
+        organizationId: string,
+        period: RegistrationPeriod,
+        options?: { isPatchingEvent?: boolean },
+    ): Promise<OrganizationRegistrationPeriod> {
         const organizationPeriod = await OrganizationRegistrationPeriod.select()
             .where('organizationId', organizationId)
             .where('periodId', period.id)
@@ -705,11 +827,16 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         return organizationPeriod;
     }
 
-    static async createGroup(struct: GroupStruct, organizationId: string, period: RegistrationPeriod, options?: { allowedIds?: string[] }): Promise<Group> {
+    static async createGroup(
+        struct: GroupStruct,
+        organizationId: string,
+        period: RegistrationPeriod,
+        options?: { allowedIds?: string[] },
+    ): Promise<Group> {
         const allowedIds = options?.allowedIds ?? [];
 
         if (struct.type !== GroupType.EventRegistration && !allowedIds.includes(struct.id)) {
-            if (!await Context.auth.hasFullAccess(organizationId)) {
+            if (!(await Context.auth.hasFullAccess(organizationId))) {
                 throw Context.auth.error($t('%FA'));
             }
         } else {
@@ -726,7 +853,7 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
 
         struct.settings.validateName();
 
-        if (STAMHOOFD.userMode === 'organization' && (period.organizationId !== organizationId)) {
+        if (STAMHOOFD.userMode === 'organization' && period.organizationId !== organizationId) {
             throw new SimpleError({
                 code: 'invalid_period',
                 message: 'Period has different organization id',
@@ -755,7 +882,10 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
             model.settings.endDate = period.endDate;
 
             // Note: start date is customizable, as long as it stays between period start and end
-            if (model.settings.startDate < period.startDate || model.settings.startDate > period.endDate) {
+            if (
+                model.settings.startDate < period.startDate ||
+                model.settings.startDate > period.endDate
+            ) {
                 model.settings.startDate = period.startDate;
             }
         }
@@ -767,9 +897,13 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         model.settings.registeredMembers = 0;
         model.settings.reservedMembers = 0;
 
-        if (struct.type !== GroupType.EventRegistration && !await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
+        if (
+            struct.type !== GroupType.EventRegistration &&
+            !(await Context.auth.canAccessGroup(model, PermissionLevel.Full))
+        ) {
             // Create a temporary permission role for this user
-            const organizationPermissions = user.permissions?.organizationPermissions?.get(organizationId);
+            const organizationPermissions =
+                user.permissions?.organizationPermissions?.get(organizationId);
             if (!organizationPermissions) {
                 throw new Error('Unexpected missing permissions');
             }
@@ -777,13 +911,28 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 resourceName: model.settings.getNameWithPeriod(),
                 level: PermissionLevel.Full,
             });
-            const patch = resourcePermissions.createInsertPatch(PermissionsResourceType.Groups, model.id, organizationPermissions);
-            user.permissions!.organizationPermissions.set(organizationId, organizationPermissions.patch(patch));
-            console.log('Automatically granted author full permissions to resource', 'group', model.id, 'user', user.id, 'patch', patch.encode({ version: Version }));
+            const patch = resourcePermissions.createInsertPatch(
+                PermissionsResourceType.Groups,
+                model.id,
+                organizationPermissions,
+            );
+            user.permissions!.organizationPermissions.set(
+                organizationId,
+                organizationPermissions.patch(patch),
+            );
+            console.log(
+                'Automatically granted author full permissions to resource',
+                'group',
+                model.id,
+                'user',
+                user.id,
+                'patch',
+                patch.encode({ version: Version }),
+            );
             await user.save();
 
             // Check if current user has permissions to this new group -> else fail with error
-            if (!await Context.auth.canAccessGroup(model, PermissionLevel.Full)) {
+            if (!(await Context.auth.canAccessGroup(model, PermissionLevel.Full))) {
                 throw new SimpleError({
                     code: 'missing_permissions',
                     message: 'You cannot restrict your own permissions',

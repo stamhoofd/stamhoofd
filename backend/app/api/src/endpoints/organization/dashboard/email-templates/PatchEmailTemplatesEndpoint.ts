@@ -4,7 +4,10 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { EmailTemplate, Group, Platform, Webshop } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { EmailTemplate as EmailTemplateStruct, validateEmailTranslations } from '@stamhoofd/structures';
+import {
+    EmailTemplate as EmailTemplateStruct,
+    validateEmailTranslations,
+} from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 
@@ -15,7 +18,11 @@ type Query = undefined;
 type ResponseBody = EmailTemplateStruct[];
 
 export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(EmailTemplateStruct as Decoder<EmailTemplateStruct>, EmailTemplateStruct.patchType() as Decoder<AutoEncoderPatchType<EmailTemplateStruct>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(
+        EmailTemplateStruct as Decoder<EmailTemplateStruct>,
+        EmailTemplateStruct.patchType() as Decoder<AutoEncoderPatchType<EmailTemplateStruct>>,
+        StringDecoder,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -35,7 +42,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
         await Context.authenticate();
 
         if (organization) {
-            if (!await Context.auth.canReadEmailTemplates(organization.id)) {
+            if (!(await Context.auth.canReadEmailTemplates(organization.id))) {
                 throw Context.auth.error();
             }
         }
@@ -44,7 +51,10 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
         // Get all patches
         for (const patch of request.body.getPatches()) {
             const template = await EmailTemplate.getByID(patch.id);
-            if (!template || !(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
+            if (
+                !template ||
+                !(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))
+            ) {
                 throw Context.auth.notFoundOrNoAccess($t('%ES'));
             }
 
@@ -70,7 +80,14 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
         for (const put of request.body.getPuts()) {
             const struct = put.put;
 
-            if (organization && !EmailTemplateStruct.allowOrganizationLevel(struct.type, organization, await Platform.getShared())) {
+            if (
+                organization &&
+                !EmailTemplateStruct.allowOrganizationLevel(
+                    struct.type,
+                    organization,
+                    await Platform.getShared(),
+                )
+            ) {
                 throw Context.auth.error();
             }
 
@@ -86,7 +103,7 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
 
             if (struct.groupId) {
                 const group = await Group.getByID(struct.groupId);
-                if (!group || !await Context.auth.canAccessGroup(group, PermissionLevel.Full)) {
+                if (!group || !(await Context.auth.canAccessGroup(group, PermissionLevel.Full))) {
                     throw Context.auth.error();
                 }
                 template.organizationId = group.organizationId;
@@ -94,7 +111,10 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
 
             if (struct.webshopId) {
                 const webshop = await Webshop.getByID(struct.webshopId);
-                if (!webshop || !await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+                if (
+                    !webshop ||
+                    !(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full))
+                ) {
                     throw Context.auth.error();
                 }
                 template.organizationId = webshop.organizationId;
@@ -123,13 +143,16 @@ export class PatchEmailTemplatesEndpoint extends Endpoint<Params, Query, Body, R
 
         for (const id of request.body.getDeletes()) {
             const template = await EmailTemplate.getByID(id);
-            if (!template || !(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))) {
+            if (
+                !template ||
+                !(await Context.auth.canAccessEmailTemplate(template, PermissionLevel.Write))
+            ) {
                 throw Context.auth.notFoundOrNoAccess($t('%EU'));
             }
 
             await template.delete();
         }
 
-        return new Response(templates.map(template => EmailTemplateStruct.create(template)));
+        return new Response(templates.map((template) => EmailTemplateStruct.create(template)));
     }
 }

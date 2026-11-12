@@ -2,7 +2,13 @@ import { column } from '@node/database';
 import { SimpleError } from '@common/errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import { QueryableModel } from '@stamhoofd/sql';
-import { AuditLogReplacementDependencies, PlatformConfig, PlatformPrivateConfig, PlatformServerConfig, Platform as PlatformStruct } from '@stamhoofd/structures';
+import {
+    AuditLogReplacementDependencies,
+    PlatformConfig,
+    PlatformPrivateConfig,
+    PlatformServerConfig,
+    Platform as PlatformStruct,
+} from '@stamhoofd/structures';
 import { uuidToName } from '@stamhoofd/structures/helpers/uuidToName.js';
 import type { Language } from '@stamhoofd/types/Language';
 import { deepFreeze } from '@stamhoofd/utility';
@@ -21,7 +27,9 @@ export class Platform extends QueryableModel {
     static table = 'platform';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -116,7 +124,9 @@ export class Platform extends QueryableModel {
         this.nextPeriodId = period?.nextPeriodId ?? null;
     }
 
-    static async getPrivateStructForTenant(tenantId: string): Promise<PlatformStruct & { privateConfig: PlatformPrivateConfig }> {
+    static async getPrivateStructForTenant(
+        tenantId: string,
+    ): Promise<PlatformStruct & { privateConfig: PlatformPrivateConfig }> {
         const privateStruct = (await this.getCache(tenantId)).privateStruct;
 
         if (!privateStruct.privateConfig) {
@@ -126,7 +136,9 @@ export class Platform extends QueryableModel {
         return privateStruct;
     }
 
-    static async getSharedPrivateStruct(): Promise<PlatformStruct & { privateConfig: PlatformPrivateConfig }> {
+    static async getSharedPrivateStruct(): Promise<
+        PlatformStruct & { privateConfig: PlatformPrivateConfig }
+    > {
         return await this.getPrivateStructForTenant(ROOT_TENANT_ID);
     }
 
@@ -139,7 +151,7 @@ export class Platform extends QueryableModel {
             return undefined;
         }
 
-        return await this.select().where('uri', uri).first(false) ?? undefined;
+        return (await this.select().where('uri', uri).first(false)) ?? undefined;
     }
 
     static async getByDomain(domain: string): Promise<Platform | undefined> {
@@ -147,7 +159,7 @@ export class Platform extends QueryableModel {
             return undefined;
         }
 
-        return await this.select().where('domain', domain).first(false) ?? undefined;
+        return (await this.select().where('domain', domain).first(false)) ?? undefined;
     }
 
     static async getForEditing(tenantId: string = ROOT_TENANT_ID): Promise<Platform> {
@@ -177,7 +189,9 @@ export class Platform extends QueryableModel {
                 if (STAMHOOFD.userMode === 'platform') {
                     model.periodId = (await RegistrationPeriod.all())[0].id;
                 } else {
-                    const period = await RegistrationPeriod.select().where('organizationId', null).first(true);
+                    const period = await RegistrationPeriod.select()
+                        .where('organizationId', null)
+                        .first(true);
                     model.periodId = period.id;
                 }
 
@@ -238,7 +252,9 @@ export class Platform extends QueryableModel {
         });
 
         // We clone to avoid the chance of updating the platform model
-        const privateStruct = struct.clone() as PlatformStruct & { privateConfig: PlatformPrivateConfig };
+        const privateStruct = struct.clone() as PlatformStruct & {
+            privateConfig: PlatformPrivateConfig;
+        };
 
         const clone = struct.clone();
         clone.privateConfig = null;
@@ -249,7 +265,7 @@ export class Platform extends QueryableModel {
             // together with the caches. Uses the public struct on purpose: resolving privateConfig
             // roles would change the names that get persisted in audit logs.
             // Still process-wide: it becomes tenant-aware once a request carries its tenant.
-            AuditLogReplacementDependencies.uuidToName = uuid => uuidToName(uuid, clone);
+            AuditLogReplacementDependencies.uuidToName = (uuid) => uuidToName(uuid, clone);
         }
 
         deepFreeze(model);
@@ -275,7 +291,10 @@ export class Platform extends QueryableModel {
 
         const parent = await this.getByID(model.parentTenantId);
         if (!parent) {
-            console.error('[Platform] Tenant ' + model.id + ' has an unknown parentTenantId', model.parentTenantId);
+            console.error(
+                '[Platform] Tenant ' + model.id + ' has an unknown parentTenantId',
+                model.parentTenantId,
+            );
             return null;
         }
 

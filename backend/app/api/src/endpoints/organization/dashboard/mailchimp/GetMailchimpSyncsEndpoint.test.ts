@@ -4,7 +4,10 @@ import { MailchimpSyncStatus } from '@stamhoofd/structures/mailchimp/MailchimpSy
 import { MailchimpSyncRequest } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { initMailchimpApi } from '../../../../../tests/init/initMailchimpApi.js';
-import { initMailchimpOrganization, mailchimpRequest } from '../../../../../tests/init/initMailchimpOrganization.js';
+import {
+    initMailchimpOrganization,
+    mailchimpRequest,
+} from '../../../../../tests/init/initMailchimpOrganization.js';
 import { GetMailchimpSyncsEndpoint } from './GetMailchimpSyncsEndpoint.js';
 
 describe('Endpoint.GetMailchimpSyncs', () => {
@@ -34,7 +37,18 @@ describe('Endpoint.GetMailchimpSyncs', () => {
         otherSync.request = MailchimpSyncRequest.create({ full: true });
         await otherSync.save();
 
-        const response = await mailchimpRequest<MailchimpSyncStruct[]>(endpoint, 'GET', '/mailchimp/syncs', context.host, context.token);
-        expect(response.body.map(s => s.id)).toEqual(created.slice(2).reverse().map(s => s.id));
+        const response = await mailchimpRequest<MailchimpSyncStruct[]>(
+            endpoint,
+            'GET',
+            '/mailchimp/syncs',
+            context.host,
+            context.token,
+        );
+        expect(response.body.map((s) => s.id)).toEqual(
+            created
+                .slice(2)
+                .reverse()
+                .map((s) => s.id),
+        );
     });
 });

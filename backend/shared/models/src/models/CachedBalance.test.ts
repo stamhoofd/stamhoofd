@@ -34,7 +34,11 @@ describe('CachedBalance', () => {
 
         // Update cached balance for user.
         await CachedBalance.updateForMembers(organization.id, [member.id]);
-        const cached = await CachedBalance.getForObjects([member.id], organization.id, ReceivableBalanceType.member);
+        const cached = await CachedBalance.getForObjects(
+            [member.id],
+            organization.id,
+            ReceivableBalanceType.member,
+        );
         expect(cached).toHaveLength(1);
         expect(cached[0].amountOpen).toBe(2_00);
         expect(cached[0].amountPaid).toBe(0);
@@ -57,7 +61,11 @@ describe('CachedBalance', () => {
 
         // Update cached balance for user.
         await CachedBalance.updateForMembers(organization.id, [member.id]);
-        const cached = await CachedBalance.getForObjects([member.id], organization.id, ReceivableBalanceType.member);
+        const cached = await CachedBalance.getForObjects(
+            [member.id],
+            organization.id,
+            ReceivableBalanceType.member,
+        );
         expect(cached).toHaveLength(1);
         expect(cached[0].amountOpen).toBe(1_00);
         expect(cached[0].amountPaid).toBe(0);
@@ -80,7 +88,11 @@ describe('CachedBalance', () => {
 
         // Update cached balance for user.
         await CachedBalance.updateForMembers(organization.id, [member.id]);
-        const cached = await CachedBalance.getForObjects([member.id], organization.id, ReceivableBalanceType.member);
+        const cached = await CachedBalance.getForObjects(
+            [member.id],
+            organization.id,
+            ReceivableBalanceType.member,
+        );
         expect(cached).toHaveLength(1);
         expect(cached[0].amountOpen).toBe(0);
         expect(cached[0].amountPaid).toBe(0);
@@ -104,7 +116,11 @@ describe('CachedBalance', () => {
 
         // Update cached balance for user.
         await CachedBalance.updateForMembers(organization.id, [member.id]);
-        const cached = await CachedBalance.getForObjects([member.id], organization.id, ReceivableBalanceType.member);
+        const cached = await CachedBalance.getForObjects(
+            [member.id],
+            organization.id,
+            ReceivableBalanceType.member,
+        );
         expect(cached).toHaveLength(1);
         expect(cached[0].amountOpen).toBe(0);
         expect(cached[0].amountPaid).toBe(2_00);
@@ -128,7 +144,11 @@ describe('CachedBalance', () => {
 
         // Update cached balance for user.
         await CachedBalance.updateForMembers(organization.id, [member.id]);
-        const cached = await CachedBalance.getForObjects([member.id], organization.id, ReceivableBalanceType.member);
+        const cached = await CachedBalance.getForObjects(
+            [member.id],
+            organization.id,
+            ReceivableBalanceType.member,
+        );
         expect(cached).toHaveLength(1);
         expect(cached[0].amountOpen).toBe(0);
         expect(cached[0].amountPaid).toBe(1_00);
@@ -151,7 +171,11 @@ describe('CachedBalance', () => {
 
         // Update cached balance for user.
         await CachedBalance.updateForMembers(organization.id, [member.id]);
-        const cached = await CachedBalance.getForObjects([member.id], organization.id, ReceivableBalanceType.member);
+        const cached = await CachedBalance.getForObjects(
+            [member.id],
+            organization.id,
+            ReceivableBalanceType.member,
+        );
         expect(cached).toHaveLength(1);
         expect(cached[0].amountOpen).toBe(0);
         expect(cached[0].amountPaid).toBe(0);
@@ -173,7 +197,11 @@ describe('CachedBalance', () => {
 
         // Update cached balance for user.
         await CachedBalance.updateForMembers(organization.id, [member.id]);
-        const cached = await CachedBalance.getForObjects([member.id], organization.id, ReceivableBalanceType.member);
+        const cached = await CachedBalance.getForObjects(
+            [member.id],
+            organization.id,
+            ReceivableBalanceType.member,
+        );
         expect(cached).toHaveLength(1);
         expect(cached[0].amountOpen).toBe(0);
         expect(cached[0].amountPaid).toBe(0);
@@ -211,7 +239,11 @@ describe('CachedBalance', () => {
             await CachedBalance.updateForMembers(organization.id, [member.id]);
             await CachedBalance.updateForUsers(organization.id, [user.id]);
             {
-                const cached = await CachedBalance.getForObjects([user.id], organization.id, ReceivableBalanceType.user);
+                const cached = await CachedBalance.getForObjects(
+                    [user.id],
+                    organization.id,
+                    ReceivableBalanceType.user,
+                );
                 expect(cached).toHaveLength(1);
                 expect(cached[0].amountOpen).toBe(2_00);
                 expect(cached[0].amountPaid).toBe(0);
@@ -220,7 +252,11 @@ describe('CachedBalance', () => {
             }
 
             {
-                const cached = await CachedBalance.getForObjects([user.id], organization.id, ReceivableBalanceType.userWithoutMembers);
+                const cached = await CachedBalance.getForObjects(
+                    [user.id],
+                    organization.id,
+                    ReceivableBalanceType.userWithoutMembers,
+                );
                 expect(cached).toHaveLength(1);
                 expect(cached[0].amountOpen).toBe(1_00);
                 expect(cached[0].amountPaid).toBe(0);
@@ -259,7 +295,11 @@ describe('CachedBalance', () => {
             await CachedBalance.updateForMembers(organization.id, [member.id]);
             await CachedBalance.updateForUsers(organization.id, [user.id]);
             {
-                const cached = await CachedBalance.getForObjects([user.id], organization.id, ReceivableBalanceType.user);
+                const cached = await CachedBalance.getForObjects(
+                    [user.id],
+                    organization.id,
+                    ReceivableBalanceType.user,
+                );
                 expect(cached).toHaveLength(1);
                 expect(cached[0].amountOpen).toBe(0);
                 expect(cached[0].amountPaid).toBe(0);
@@ -268,7 +308,11 @@ describe('CachedBalance', () => {
             }
 
             {
-                const cached = await CachedBalance.getForObjects([user.id], organization.id, ReceivableBalanceType.userWithoutMembers);
+                const cached = await CachedBalance.getForObjects(
+                    [user.id],
+                    organization.id,
+                    ReceivableBalanceType.userWithoutMembers,
+                );
                 expect(cached).toHaveLength(1);
                 expect(cached[0].amountOpen).toBe(0);
                 expect(cached[0].amountPaid).toBe(0);
@@ -281,7 +325,11 @@ describe('CachedBalance', () => {
             vitest.setSystemTime(new Date(now.getTime() + 1000 * 60 * 60 * 24 * 1));
             await CachedBalance.updateForMembers(organization.id, [member.id]);
             await CachedBalance.updateForUsers(organization.id, [user.id]);
-            const cachedAfter = await CachedBalance.getForObjects([user.id], organization.id, ReceivableBalanceType.user);
+            const cachedAfter = await CachedBalance.getForObjects(
+                [user.id],
+                organization.id,
+                ReceivableBalanceType.user,
+            );
             expect(cachedAfter).toHaveLength(1);
             expect(cachedAfter[0].amountOpen).toBe(1_00);
             expect(cachedAfter[0].amountPaid).toBe(0);
@@ -320,7 +368,11 @@ describe('CachedBalance', () => {
             // Update cached balance for user.
             await CachedBalance.updateForMembers(organization.id, [member.id]);
             await CachedBalance.updateForUsers(organization.id, [user.id]);
-            const cached = await CachedBalance.getForObjects([user.id], organization.id, ReceivableBalanceType.user);
+            const cached = await CachedBalance.getForObjects(
+                [user.id],
+                organization.id,
+                ReceivableBalanceType.user,
+            );
             expect(cached).toHaveLength(1);
             expect(cached[0].amountOpen).toBe(0);
             expect(cached[0].amountPaid).toBe(1_00);

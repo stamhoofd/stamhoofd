@@ -49,7 +49,11 @@ export class ExchangePaymentEndpoint extends Endpoint<Params, Query, Body, Respo
         await Context.optionalAuthenticate();
 
         // Not method on payment because circular references (not supprted in ts)
-        const payment = await PaymentService.pollStatus(request.params.id, organization, request.query.cancel);
+        const payment = await PaymentService.pollStatus(
+            request.params.id,
+            organization,
+            request.query.cancel,
+        );
         if (!payment) {
             throw new SimpleError({
                 code: '',

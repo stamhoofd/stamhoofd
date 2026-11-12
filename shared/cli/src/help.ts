@@ -44,8 +44,8 @@ export default class StamhoofdHelp extends Help {
         this.log('');
 
         if (!this.opts.all) {
-            rootTopics = rootTopics.filter(topic => !topic.name.includes(':'));
-            rootCommands = rootCommands.filter(command => !command.id.includes(':'));
+            rootTopics = rootTopics.filter((topic) => !topic.name.includes(':'));
+            rootCommands = rootCommands.filter((command) => !command.id.includes(':'));
         }
 
         const featuredIds = new Set<string>();
@@ -64,11 +64,11 @@ export default class StamhoofdHelp extends Help {
             }
         }
 
-        rootTopics = rootTopics.filter(topic => !featuredIds.has(topic.name));
-        rootCommands = rootCommands.filter(command => command.id && !featuredIds.has(command.id));
+        rootTopics = rootTopics.filter((topic) => !featuredIds.has(topic.name));
+        rootCommands = rootCommands.filter((command) => command.id && !featuredIds.has(command.id));
 
-        const topicNames = new Set(rootTopics.map(topic => topic.name));
-        rootCommands = rootCommands.filter(command => command.id && !topicNames.has(command.id));
+        const topicNames = new Set(rootTopics.map((topic) => topic.name));
+        rootCommands = rootCommands.filter((command) => command.id && !topicNames.has(command.id));
 
         const otherCommands = this.otherCommands(rootTopics, rootCommands);
         if (otherCommands) {
@@ -85,9 +85,20 @@ export default class StamhoofdHelp extends Help {
         }
     }
 
-    private rootGroup(header: string, groupIds: readonly string[], topics: Interfaces.Topic[], commands: Command.Loadable[]): { ids: string[]; section: string } | undefined {
-        const topicByName = new Map(topics.map(topic => [topic.name, topic]));
-        const commandById = new Map(commands.filter((command): command is Command.Loadable & { id: string } => Boolean(command.id)).map(command => [command.id, command]));
+    private rootGroup(
+        header: string,
+        groupIds: readonly string[],
+        topics: Interfaces.Topic[],
+        commands: Command.Loadable[],
+    ): { ids: string[]; section: string } | undefined {
+        const topicByName = new Map(topics.map((topic) => [topic.name, topic]));
+        const commandById = new Map(
+            commands
+                .filter((command): command is Command.Loadable & { id: string } =>
+                    Boolean(command.id),
+                )
+                .map((command) => [command.id, command]),
+        );
         const entries: Array<[string, string | undefined]> = [];
         const ids: string[] = [];
 
@@ -116,10 +127,18 @@ export default class StamhoofdHelp extends Help {
         };
     }
 
-    private otherCommands(topics: Interfaces.Topic[], commands: Command.Loadable[]): string | undefined {
+    private otherCommands(
+        topics: Interfaces.Topic[],
+        commands: Command.Loadable[],
+    ): string | undefined {
         const entries: Array<[string, string | undefined]> = [
-            ...topics.map(topic => [topic.name, topic.description?.split('\n')[0]] as [string, string | undefined]),
-            ...commands.map(command => [command.id, command.summary] as [string, string | undefined]),
+            ...topics.map(
+                (topic) =>
+                    [topic.name, topic.description?.split('\n')[0]] as [string, string | undefined],
+            ),
+            ...commands.map(
+                (command) => [command.id, command.summary] as [string, string | undefined],
+            ),
         ];
 
         if (entries.length === 0) {
@@ -130,25 +149,31 @@ export default class StamhoofdHelp extends Help {
     }
 
     private topicExamples(topic: Interfaces.Topic): string | undefined {
-        const topicCommand = this.config.commands.find(command => command.id === topic.name);
+        const topicCommand = this.config.commands.find((command) => command.id === topic.name);
         const examples = topicCommand?.examples;
         if (!examples || examples.length === 0) {
             return undefined;
         }
 
         const commands = Array.isArray(examples) ? examples : [examples];
-        return this.section('EXAMPLES', commands.map(example => `$ ${formatExampleCommand(example)}`).join('\n'));
+        return this.section(
+            'EXAMPLES',
+            commands.map((example) => `$ ${formatExampleCommand(example)}`).join('\n'),
+        );
     }
 
     private formatRootList(header: string, entries: Array<[string, string | undefined]>): string {
-        const body = this.renderList(entries.map(([name, summary]) => [
-            colorize(this.config?.theme?.command, name),
-            summary && colorize(this.config?.theme?.sectionDescription, summary),
-        ]), {
-            indentation: 2,
-            spacer: '\n',
-            stripAnsi: this.opts.stripAnsi,
-        });
+        const body = this.renderList(
+            entries.map(([name, summary]) => [
+                colorize(this.config?.theme?.command, name),
+                summary && colorize(this.config?.theme?.sectionDescription, summary),
+            ]),
+            {
+                indentation: 2,
+                spacer: '\n',
+                stripAnsi: this.opts.stripAnsi,
+            },
+        );
 
         return this.section(header, body);
     }

@@ -1,5 +1,14 @@
 import type { AutoEncoderPatchType, Data, Decoder, PatchableDecoder } from '@common/encoding';
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -141,8 +150,18 @@ export class WebshopTimeSlot extends AutoEncoder {
     }
 
     static sort(a: WebshopTimeSlot, b: WebshopTimeSlot) {
-        const aa = Formatter.dateIso(a.date) + ' ' + Formatter.minutesPadded(a.startTime) + ' ' + Formatter.minutesPadded(a.endTime);
-        const bb = Formatter.dateIso(b.date) + ' ' + Formatter.minutesPadded(b.startTime) + ' ' + Formatter.minutesPadded(b.endTime);
+        const aa =
+            Formatter.dateIso(a.date) +
+            ' ' +
+            Formatter.minutesPadded(a.startTime) +
+            ' ' +
+            Formatter.minutesPadded(a.endTime);
+        const bb =
+            Formatter.dateIso(b.date) +
+            ' ' +
+            Formatter.minutesPadded(b.startTime) +
+            ' ' +
+            Formatter.minutesPadded(b.endTime);
         if (aa < bb) {
             return -1;
         }
@@ -236,7 +255,11 @@ export abstract class CheckoutMethod extends AutoEncoder {
 }
 
 export class WebshopTakeoutMethod extends CheckoutMethod {
-    @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Takeout, defaultValue: () => CheckoutMethodType.Takeout }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
+    @field({
+        decoder: new EnumDecoder(CheckoutMethodType),
+        patchDefaultValue: () => CheckoutMethodType.Takeout,
+        defaultValue: () => CheckoutMethodType.Takeout,
+    }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
     type: CheckoutMethodType.Takeout;
 
     @field({ decoder: Address })
@@ -248,7 +271,10 @@ export class WebshopTakeoutMethod extends CheckoutMethod {
  */
 export class WebshopOnSiteMethod extends CheckoutMethod {
     // Indicate this field exists for all versions, but the downgrade should get executed
-    @field({ decoder: new EnumDecoder(CheckoutMethodType), defaultValue: () => CheckoutMethodType.Takeout })
+    @field({
+        decoder: new EnumDecoder(CheckoutMethodType),
+        defaultValue: () => CheckoutMethodType.Takeout,
+    })
     @field({
         decoder: new EnumDecoder(CheckoutMethodType),
         version: 105,
@@ -288,7 +314,11 @@ export class CheckoutMethodPrice extends AutoEncoder {
 }
 
 export class WebshopDeliveryMethod extends CheckoutMethod {
-    @field({ decoder: new EnumDecoder(CheckoutMethodType), patchDefaultValue: () => CheckoutMethodType.Delivery, defaultValue: () => CheckoutMethodType.Delivery }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
+    @field({
+        decoder: new EnumDecoder(CheckoutMethodType),
+        patchDefaultValue: () => CheckoutMethodType.Delivery,
+        defaultValue: () => CheckoutMethodType.Delivery,
+    }) // patchDefaultVAlue -> to include this value in all patches and make sure we can recognize the type of the patch
     type: CheckoutMethodType.Delivery;
 
     @field({ decoder: CheckoutMethodPrice, version: 45 })
@@ -305,7 +335,10 @@ export class WebshopDeliveryMethod extends CheckoutMethod {
 }
 
 export type AnyCheckoutMethod = WebshopTakeoutMethod | WebshopDeliveryMethod | WebshopOnSiteMethod;
-export type AnyCheckoutMethodPatch = AutoEncoderPatchType<WebshopTakeoutMethod> | AutoEncoderPatchType<WebshopDeliveryMethod> | AutoEncoderPatchType<WebshopOnSiteMethod>;
+export type AnyCheckoutMethodPatch =
+    | AutoEncoderPatchType<WebshopTakeoutMethod>
+    | AutoEncoderPatchType<WebshopDeliveryMethod>
+    | AutoEncoderPatchType<WebshopOnSiteMethod>;
 
 export class AnyCheckoutMethodPatchDecoder {
     static decode(data: Data): AnyCheckoutMethodPatch {
@@ -324,7 +357,8 @@ export class AnyCheckoutMethodPatchDecoder {
 
         throw new SimpleError({
             code: 'invalid_field',
-            message: 'Unsupported checkout type in patch. Make sure checkout type is always set when patching.',
+            message:
+                'Unsupported checkout type in patch. Make sure checkout type is always set when patching.',
             field: data.addToCurrentField('type'),
         });
     }
@@ -379,7 +413,6 @@ export enum WebshopType {
     Performance = 'Performance',
     Event = 'Event',
     Registrations = 'Registrations',
-
 }
 
 export enum WebshopTicketType {
@@ -423,18 +456,25 @@ export enum WebshopStatus {
 
 export function getWebshopTypeName(type: WebshopType): string {
     switch (type) {
-        case WebshopType.Performance: return $t('%1Nl');
-        case WebshopType.Event: return $t('%1PG');
-        case WebshopType.Registrations: return $t('%1EI');
-        case WebshopType.TakeawayAndDelivery: return $t('%1OT');
-        case WebshopType.Donations: return $t('%1O4');
-        case WebshopType.Webshop: return $t('%1OV');
+        case WebshopType.Performance:
+            return $t('%1Nl');
+        case WebshopType.Event:
+            return $t('%1PG');
+        case WebshopType.Registrations:
+            return $t('%1EI');
+        case WebshopType.TakeawayAndDelivery:
+            return $t('%1OT');
+        case WebshopType.Donations:
+            return $t('%1O4');
+        case WebshopType.Webshop:
+            return $t('%1OV');
     }
 }
 
 export function getWebshopOrderModeName(mode: WebshopOrderMode, meta: WebshopMetaData): string {
     switch (mode) {
-        case WebshopOrderMode.Cart: return $t('%1DQ');
+        case WebshopOrderMode.Cart:
+            return $t('%1DQ');
         case WebshopOrderMode.Single: {
             if (meta.isTicketBased) {
                 return $t('%Zyf');
@@ -444,15 +484,19 @@ export function getWebshopOrderModeName(mode: WebshopOrderMode, meta: WebshopMet
             }
             return $t('%Zxs');
         }
-        case WebshopOrderMode.Bulk: return $t('%Zzo');
+        case WebshopOrderMode.Bulk:
+            return $t('%Zzo');
     }
 }
 
 export function getWebshopStatusName(status: WebshopStatus): string {
     switch (status) {
-        case WebshopStatus.Open: return $t('%1Nw');
-        case WebshopStatus.Closed: return $t('%1PH');
-        case WebshopStatus.Archived: return $t('%1Pg');
+        case WebshopStatus.Open:
+            return $t('%1Nw');
+        case WebshopStatus.Closed:
+            return $t('%1PH');
+        case WebshopStatus.Archived:
+            return $t('%1Pg');
     }
 }
 
@@ -501,7 +545,14 @@ export class WebshopMetaData extends AutoEncoder {
     title = '';
 
     @field({ decoder: StringDecoder })
-    @field({ decoder: RichText, version: 181, upgrade: data => RichText.create({ text: data }), downgrade: data => data.text, upgradePatch: data => RichText.patch({ text: data }), downgradePatch: data => data.text })
+    @field({
+        decoder: RichText,
+        version: 181,
+        upgrade: (data) => RichText.create({ text: data }),
+        downgrade: (data) => data.text,
+        upgradePatch: (data) => RichText.patch({ text: data }),
+        downgradePatch: (data) => data.text,
+    })
     description = RichText.create({});
 
     /**
@@ -540,7 +591,13 @@ export class WebshopMetaData extends AutoEncoder {
      * Replaced by customerSettings. Kept in sync for older clients, never read by new code.
      */
     @field({ decoder: BooleanDecoder, optional: true, field: 'phoneEnabled' })
-    @field({ decoder: BooleanDecoder, version: 419, field: 'phoneEnabled', downgrade: downgradeCustomerField('phone'), downgradePatch: downgradeCustomerFieldPatch('phone') })
+    @field({
+        decoder: BooleanDecoder,
+        version: 419,
+        field: 'phoneEnabled',
+        downgrade: downgradeCustomerField('phone'),
+        downgradePatch: downgradeCustomerFieldPatch('phone'),
+    })
     legacyPhoneEnabled = true;
 
     /**
@@ -548,7 +605,13 @@ export class WebshopMetaData extends AutoEncoder {
      * Replaced by customerSettings.
      */
     @field({ decoder: BooleanDecoder, version: 403, field: 'birthDayEnabled' })
-    @field({ decoder: BooleanDecoder, version: 419, field: 'birthDayEnabled', downgrade: downgradeCustomerField('birthDay'), downgradePatch: downgradeCustomerFieldPatch('birthDay') })
+    @field({
+        decoder: BooleanDecoder,
+        version: 419,
+        field: 'birthDayEnabled',
+        downgrade: downgradeCustomerField('birthDay'),
+        downgradePatch: downgradeCustomerFieldPatch('birthDay'),
+    })
     legacyBirthDayEnabled = false;
 
     /**
@@ -556,7 +619,13 @@ export class WebshopMetaData extends AutoEncoder {
      * Replaced by customerSettings.
      */
     @field({ decoder: BooleanDecoder, version: 403, field: 'addressEnabled' })
-    @field({ decoder: BooleanDecoder, version: 419, field: 'addressEnabled', downgrade: downgradeCustomerField('address'), downgradePatch: downgradeCustomerFieldPatch('address') })
+    @field({
+        decoder: BooleanDecoder,
+        version: 419,
+        field: 'addressEnabled',
+        downgrade: downgradeCustomerField('address'),
+        downgradePatch: downgradeCustomerFieldPatch('address'),
+    })
     legacyAddressEnabled = false;
 
     /**
@@ -564,7 +633,13 @@ export class WebshopMetaData extends AutoEncoder {
      * Replaced by customerSettings.
      */
     @field({ decoder: BooleanDecoder, version: 403, field: 'genderEnabled' })
-    @field({ decoder: BooleanDecoder, version: 419, field: 'genderEnabled', downgrade: downgradeCustomerField('gender'), downgradePatch: downgradeCustomerFieldPatch('gender') })
+    @field({
+        decoder: BooleanDecoder,
+        version: 419,
+        field: 'genderEnabled',
+        downgrade: downgradeCustomerField('gender'),
+        downgradePatch: downgradeCustomerFieldPatch('gender'),
+    })
     legacyGenderEnabled = false;
 
     /**
@@ -587,7 +662,12 @@ export class WebshopMetaData extends AutoEncoder {
         upgradePatch: function (this: AutoEncoderPatchType<WebshopMetaData>) {
             const patch = CustomerSettings.patch({});
 
-            for (const [key, enabled] of [['phone', this.legacyPhoneEnabled], ['birthDay', this.legacyBirthDayEnabled], ['gender', this.legacyGenderEnabled], ['address', this.legacyAddressEnabled]] as const) {
+            for (const [key, enabled] of [
+                ['phone', this.legacyPhoneEnabled],
+                ['birthDay', this.legacyBirthDayEnabled],
+                ['gender', this.legacyGenderEnabled],
+                ['address', this.legacyAddressEnabled],
+            ] as const) {
                 if (enabled !== undefined) {
                     patch[key] = toCustomerFieldRequirement(enabled);
                 }
@@ -595,19 +675,21 @@ export class WebshopMetaData extends AutoEncoder {
 
             return patch;
         },
-        defaultValue: () => CustomerSettings.create({
-            name: CustomerFieldRequirement.Required,
-            email: CustomerFieldRequirement.Required,
-            phone: CustomerFieldRequirement.Required,
-        }),
+        defaultValue: () =>
+            CustomerSettings.create({
+                name: CustomerFieldRequirement.Required,
+                email: CustomerFieldRequirement.Required,
+                phone: CustomerFieldRequirement.Required,
+            }),
     })
     @field({
         decoder: CustomerSettings,
         version: 424,
-        defaultValue: () => CustomerSettings.create({
-            name: CustomerFieldRequirement.Required,
-            email: CustomerFieldRequirement.Required,
-        }),
+        defaultValue: () =>
+            CustomerSettings.create({
+                name: CustomerFieldRequirement.Required,
+                email: CustomerFieldRequirement.Required,
+            }),
     })
     customerSettings: CustomerSettings;
 
@@ -623,7 +705,9 @@ export class WebshopMetaData extends AutoEncoder {
      */
     get allRecordCategories(): RecordCategory[] {
         const customerCategory = this.customerSettings.recordCategory;
-        return customerCategory ? [customerCategory, ...this.recordCategories] : this.recordCategories;
+        return customerCategory
+            ? [customerCategory, ...this.recordCategories]
+            : this.recordCategories;
     }
 
     /**
@@ -775,7 +859,8 @@ export class WebshopMetaData extends AutoEncoder {
     @field({
         decoder: new EnumDecoder(WebshopOrderMode),
         version: 422,
-        upgrade: (cartEnabled: boolean) => (cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single),
+        upgrade: (cartEnabled: boolean) =>
+            cartEnabled ? WebshopOrderMode.Cart : WebshopOrderMode.Single,
         downgrade: (orderMode: WebshopOrderMode) => orderMode !== WebshopOrderMode.Single,
     })
     orderMode = WebshopOrderMode.Cart;
@@ -798,7 +883,14 @@ export class WebshopMetaData extends AutoEncoder {
      * The default language used when loading the webshop (instead of the hardcoded Dutch default).
      */
     @field({ decoder: new EnumDecoder(Language), version: 404, defaultValue: () => Language.Dutch })
-    @field({ decoder: new EnumDecoder(Language), nullable: true, version: 414, upgrade: d => d, downgrade: d => d === null ? Language.Dutch : d, defaultValue: () => null })
+    @field({
+        decoder: new EnumDecoder(Language),
+        nullable: true,
+        version: 414,
+        upgrade: (d) => d,
+        downgrade: (d) => (d === null ? Language.Dutch : d),
+        defaultValue: () => null,
+    })
     defaultLanguage: Language | null;
 
     /**
@@ -815,7 +907,11 @@ export class WebshopMetaData extends AutoEncoder {
      * Returns whether the webshop is event/ticketing based - regardless whether scanners are used or not
      */
     get isTicketBased() {
-        return this.type === WebshopType.Event || this.type === WebshopType.Performance || this.ticketType === WebshopTicketType.Tickets;
+        return (
+            this.type === WebshopType.Event ||
+            this.type === WebshopType.Performance ||
+            this.ticketType === WebshopTicketType.Tickets
+        );
     }
 
     get isRegistrations() {
@@ -823,7 +919,10 @@ export class WebshopMetaData extends AutoEncoder {
     }
 
     get hasTickets() {
-        return this.ticketType === WebshopTicketType.SingleTicket || this.ticketType === WebshopTicketType.Tickets;
+        return (
+            this.ticketType === WebshopTicketType.SingleTicket ||
+            this.ticketType === WebshopTicketType.Tickets
+        );
     }
 
     get hasSingleTickets() {

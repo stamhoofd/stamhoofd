@@ -2,7 +2,13 @@ import { column } from '@node/database';
 import type { Decoder } from '@common/encoding';
 import { ArrayDecoder, MapDecoder, StringDecoder, StringOrNumberDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
-import { AuditLogPatchItem, AuditLogReplacement, AuditLogSource, AuditLogType, getAuditLogTypeReplacements } from '@stamhoofd/structures';
+import {
+    AuditLogPatchItem,
+    AuditLogReplacement,
+    AuditLogSource,
+    AuditLogType,
+    getAuditLogTypeReplacements,
+} from '@stamhoofd/structures';
 import { v7 as uuidv7 } from 'uuid';
 
 export class AuditLog extends QueryableModel {
@@ -10,7 +16,9 @@ export class AuditLog extends QueryableModel {
 
     // Columns
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             // We use uuidv7 to keep the order of the logs
             return value ?? uuidv7();
         },
@@ -51,17 +59,24 @@ export class AuditLog extends QueryableModel {
     @column({ type: 'string' })
     description: string = '';
 
-    @column({ type: 'json', decoder: new MapDecoder(StringDecoder, AuditLogReplacement as Decoder<AuditLogReplacement>) })
+    @column({
+        type: 'json',
+        decoder: new MapDecoder(StringDecoder, AuditLogReplacement as Decoder<AuditLogReplacement>),
+    })
     replacements: Map<string, AuditLogReplacement> = new Map();
 
     @column({ type: 'json', decoder: new MapDecoder(StringDecoder, StringOrNumberDecoder) })
     meta: Map<string, string | number> = new Map();
 
-    @column({ type: 'json', decoder: new ArrayDecoder(AuditLogPatchItem as Decoder<AuditLogPatchItem>) })
+    @column({
+        type: 'json',
+        decoder: new ArrayDecoder(AuditLogPatchItem as Decoder<AuditLogPatchItem>),
+    })
     patchList: AuditLogPatchItem[] = [];
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }

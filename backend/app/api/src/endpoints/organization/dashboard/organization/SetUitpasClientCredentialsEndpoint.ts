@@ -2,7 +2,11 @@ import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { UitpasClientCredentialsStatus, UitpasClientIdAndSecret, UitpasSetClientCredentialsResponse } from '@stamhoofd/structures';
+import {
+    UitpasClientCredentialsStatus,
+    UitpasClientIdAndSecret,
+    UitpasSetClientCredentialsResponse,
+} from '@stamhoofd/structures';
 import { Context } from '../../../../helpers/Context.js';
 import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
 
@@ -15,15 +19,26 @@ type ResponseBody = UitpasSetClientCredentialsResponse;
  * One endpoint to create, patch and delete groups. Usefull because on organization setup, we need to create multiple groups at once. Also, sometimes we need to link values and update multiple groups at once
  */
 
-export class SetUitpasClientCredentialsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = UitpasClientIdAndSecret.patchType() as Decoder<AutoEncoderPatchType<UitpasClientIdAndSecret>>;
+export class SetUitpasClientCredentialsEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
+    bodyDecoder = UitpasClientIdAndSecret.patchType() as Decoder<
+        AutoEncoderPatchType<UitpasClientIdAndSecret>
+    >;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'POST') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/uitpas-client-credentials', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/organization/uitpas-client-credentials',
+            {},
+        );
 
         if (params) {
             return [true, params as Params];
@@ -35,14 +50,15 @@ export class SetUitpasClientCredentialsEndpoint extends Endpoint<Params, Query, 
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.hasFullAccess(organization.id)) {
+        if (!(await Context.auth.hasFullAccess(organization.id))) {
             throw Context.auth.error();
         }
 
         if (request.body.clientId === '' && request.body.clientSecret === '') {
             // clear
             await UitpasService.clearClientCredentialsFor(organization.id);
-            organization.meta.uitpasClientCredentialsStatus = UitpasClientCredentialsStatus.NotConfigured;
+            organization.meta.uitpasClientCredentialsStatus =
+                UitpasClientCredentialsStatus.NotConfigured;
             await organization.save();
             const resp = new UitpasSetClientCredentialsResponse();
             resp.status = UitpasClientCredentialsStatus.NotConfigured;
@@ -64,7 +80,10 @@ export class SetUitpasClientCredentialsEndpoint extends Endpoint<Params, Query, 
                 field: 'clientSecret',
             });
         }
-        if (request.body.clientSecret === UitpasClientIdAndSecret.placeholderClientSecret && (await UitpasService.getClientIdFor(organization.id)) !== request.body.clientId) {
+        if (
+            request.body.clientSecret === UitpasClientIdAndSecret.placeholderClientSecret &&
+            (await UitpasService.getClientIdFor(organization.id)) !== request.body.clientId
+        ) {
             throw new SimpleError({
                 message: 'You cannot use the placeholder client secret for a different client id',
                 code: 'invalid_client_secret',
@@ -72,7 +91,8 @@ export class SetUitpasClientCredentialsEndpoint extends Endpoint<Params, Query, 
                 field: 'clientSecret',
             });
         }
-        const reEvaluation = request.body.clientSecret === UitpasClientIdAndSecret.placeholderClientSecret;
+        const reEvaluation =
+            request.body.clientSecret === UitpasClientIdAndSecret.placeholderClientSecret;
 
         if (!organization.meta.uitpasOrganizerId) {
             throw new SimpleError({
@@ -84,13 +104,20 @@ export class SetUitpasClientCredentialsEndpoint extends Endpoint<Params, Query, 
 
         // store the client credentials and store new status in one operation
         if (!reEvaluation) {
-            await UitpasService.storeIfValid(organization.id, request.body.clientId, request.body.clientSecret);
+            await UitpasService.storeIfValid(
+                organization.id,
+                request.body.clientId,
+                request.body.clientSecret,
+            );
         }
         organization.meta.uitpasClientCredentialsStatus = UitpasClientCredentialsStatus.NotChecked;
         await organization.save();
 
         // now we update the status (but if this fails, the status will safely remain NOT_CHECKED)
-        const { status, human } = await UitpasService.checkPermissionsFor(organization.id, organization.meta.uitpasOrganizerId);
+        const { status, human } = await UitpasService.checkPermissionsFor(
+            organization.id,
+            organization.meta.uitpasOrganizerId,
+        );
         organization.meta.uitpasClientCredentialsStatus = status;
         await organization.save(); // save the organization to update the status
 

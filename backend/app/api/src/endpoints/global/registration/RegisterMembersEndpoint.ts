@@ -4,12 +4,41 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { Email } from '@stamhoofd/email';
-import type { MemberWithUsersRegistrationsAndGroups, Organization, Payment, User } from '@stamhoofd/models';
-import { BalanceItem, CachedBalance, Group, Member, Platform, RateLimiter, Registration, RegistrationPeriod } from '@stamhoofd/models';
+import type {
+    MemberWithUsersRegistrationsAndGroups,
+    Organization,
+    Payment,
+    User,
+} from '@stamhoofd/models';
+import {
+    BalanceItem,
+    CachedBalance,
+    Group,
+    Member,
+    Platform,
+    RateLimiter,
+    Registration,
+    RegistrationPeriod,
+} from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
-import type { BalanceItem as BalanceItemStruct, PlatformMember, RegisterItem } from '@stamhoofd/structures';
+import type {
+    BalanceItem as BalanceItemStruct,
+    PlatformMember,
+    RegisterItem,
+} from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, Payment as PaymentStruct, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedString } from '@stamhoofd/structures';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    IDRegisterCheckout,
+    Payment as PaymentStruct,
+    PlatformFamily,
+    ReceivableBalanceType,
+    RegisterResponse,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -42,9 +71,11 @@ export const demoLimiter = new RateLimiter({
 export type RegistrationWithMemberAndGroup = Registration & { member: Member } & { group: Group };
 
 function hasStockLimit(group: Group) {
-    return group.settings.maxMembers !== null
-        || group.settings.prices.some(p => p.stock !== null)
-        || group.settings.optionMenus.some(m => m.options.some(o => o.stock !== null));
+    return (
+        group.settings.maxMembers !== null ||
+        group.settings.prices.some((p) => p.stock !== null) ||
+        group.settings.optionMenus.some((m) => m.options.some((o) => o.stock !== null))
+    );
 }
 
 /**
@@ -87,7 +118,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         if (request.body.asOrganizationId && request.body.asOrganizationId === organization.id) {
             // Fast fail
-            if (!await Context.auth.hasSomeAccess(request.body.asOrganizationId)) {
+            if (!(await Context.auth.hasSomeAccess(request.body.asOrganizationId))) {
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to register members manually',
@@ -98,13 +129,17 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             // We won't create a payment. The balance will get added to the outstanding amount of the member / already paying organization
             whoWillPayNow = 'nobody';
-        } else if (request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
+        } else if (
+            request.body.asOrganizationId &&
+            request.body.asOrganizationId !== organization.id
+        ) {
             // Paying balance to a different organization requires finance permissions
             // we'll check later if you are also registering members, which requires full permissions
-            if (!await Context.auth.canManageFinances(request.body.asOrganizationId)) {
+            if (!(await Context.auth.canManageFinances(request.body.asOrganizationId))) {
                 throw new SimpleError({
                     code: 'forbidden',
-                    message: 'No permission to checkout as this organization for a different organization',
+                    message:
+                        'No permission to checkout as this organization for a different organization',
                     human: $t('%1HR'),
                     statusCode: 403,
                 });
@@ -123,7 +158,15 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             } catch (e) {
                 Email.sendWebmaster({
                     subject: '[Limiet] Limiet bereikt voor aantal inschrijvingen',
-                    text: 'Beste, \nDe limiet werd bereikt voor het aantal inschrijvingen per dag. \nVereniging: ' + organization.id + ' (' + organization.name + ')' + '\n\n' + e.message + '\n\nStamhoofd',
+                    text:
+                        'Beste, \nDe limiet werd bereikt voor het aantal inschrijvingen per dag. \nVereniging: ' +
+                        organization.id +
+                        ' (' +
+                        organization.name +
+                        ')' +
+                        '\n\n' +
+                        e.message +
+                        '\n\nStamhoofd',
                 });
 
                 throw new SimpleError({
@@ -142,34 +185,56 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         });
     }
 
-    private async register(request: DecodedRequest<Params, Query, Body>, { organization, user, whoWillPayNow }: { organization: Organization; user: User; whoWillPayNow: 'member' | 'organization' | 'nobody' }) {
+    private async register(
+        request: DecodedRequest<Params, Query, Body>,
+        {
+            organization,
+            user,
+            whoWillPayNow,
+        }: {
+            organization: Organization;
+            user: User;
+            whoWillPayNow: 'member' | 'organization' | 'nobody';
+        },
+    ) {
         // Update balances before we start
         await BalanceItemService.flushCaches(organization.id);
 
-        const deleteRegistrationIds = request.body.cart.deleteRegistrations.map(i => i.registrationId);
-        const deleteRegistrationModels = (deleteRegistrationIds.length ? (await Registration.getByIDs(...deleteRegistrationIds)) : []).filter(r => r.organizationId === organization.id);
+        const deleteRegistrationIds = request.body.cart.deleteRegistrations.map(
+            (i) => i.registrationId,
+        );
+        const deleteRegistrationModels = (
+            deleteRegistrationIds.length
+                ? await Registration.getByIDs(...deleteRegistrationIds)
+                : []
+        ).filter((r) => r.organizationId === organization.id);
 
         // Validate balance items (can only happen serverside)
-        const balanceItemIds = request.body.cart.balanceItems.map(i => i.item.id);
+        const balanceItemIds = request.body.cart.balanceItems.map((i) => i.item.id);
         console.log('cart ids', balanceItemIds);
         let memberBalanceItemsStructs: BalanceItemStruct[] = [];
         let balanceItemsModels: BalanceItem[] = [];
         if (balanceItemIds.length > 0) {
-            balanceItemsModels = await BalanceItem.where({ id: { sign: 'IN', value: balanceItemIds }, organizationId: organization.id });
+            balanceItemsModels = await BalanceItem.where({
+                id: { sign: 'IN', value: balanceItemIds },
+                organizationId: organization.id,
+            });
             if (balanceItemsModels.length !== balanceItemIds.length) {
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: $t('%vg'),
                 });
             }
-            memberBalanceItemsStructs = balanceItemsModels.map(i => i.getStructure());
+            memberBalanceItemsStructs = balanceItemsModels.map((i) => i.getStructure());
         }
 
         let members: MemberWithUsersRegistrationsAndGroups[] = [];
         if (request.body.asOrganizationId) {
-            const memberIds = Formatter.uniqueArray(
-                [...request.body.memberIds, ...deleteRegistrationModels.map(i => i.memberId), ...balanceItemsModels.map(i => i.memberId).filter(m => m !== null)],
-            );
+            const memberIds = Formatter.uniqueArray([
+                ...request.body.memberIds,
+                ...deleteRegistrationModels.map((i) => i.memberId),
+                ...balanceItemsModels.map((i) => i.memberId).filter((m) => m !== null),
+            ]);
             members = await Member.getBlobByIds(...memberIds);
         } else {
             // Load the user family (required to correctly calculate discounts across family members)
@@ -178,11 +243,13 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Only allow balance items of the user, the user's members or the paying organization
         // (members of balance items are access checked below when registering as an organization)
-        const userMemberIds = new Set(members.map(m => m.id));
+        const userMemberIds = new Set(members.map((m) => m.id));
         for (const balanceItem of balanceItemsModels) {
             const allowed = request.body.asOrganizationId
-                ? (balanceItem.memberId !== null || balanceItem.payingOrganizationId === request.body.asOrganizationId)
-                : ((balanceItem.memberId !== null && userMemberIds.has(balanceItem.memberId)) || balanceItem.userId === user.id);
+                ? balanceItem.memberId !== null ||
+                  balanceItem.payingOrganizationId === request.body.asOrganizationId
+                : (balanceItem.memberId !== null && userMemberIds.has(balanceItem.memberId)) ||
+                  balanceItem.userId === user.id;
 
             if (!allowed) {
                 throw new SimpleError({
@@ -206,10 +273,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         const isBulkUpdate = members.length > 5;
 
         for (const member of members) {
-            if (!await Context.auth.canAccessMember(
-                member,
-                request.body.asOrganizationId ? PermissionLevel.Read : PermissionLevel.Write,
-            )) {
+            if (
+                !(await Context.auth.canAccessMember(
+                    member,
+                    request.body.asOrganizationId ? PermissionLevel.Read : PermissionLevel.Write,
+                ))
+            ) {
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to register this member',
@@ -219,8 +288,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             // update uitpas social tariff
-            if (!isBulkUpdate && member.details.uitpasNumberDetails
-                && member.details.uitpasNumberDetails.socialTariff.shouldUpdateForRegistration(member.details.requiresFinancialSupport?.value)
+            if (
+                !isBulkUpdate &&
+                member.details.uitpasNumberDetails &&
+                member.details.uitpasNumberDetails.socialTariff.shouldUpdateForRegistration(
+                    member.details.requiresFinancialSupport?.value,
+                )
             ) {
                 let isUpdated: boolean = false;
 
@@ -238,16 +311,18 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         // Family members are added below for discount calculations, but only these members can be returned to the caller
-        const accessibleMemberIds = new Set(members.map(m => m.id));
+        const accessibleMemberIds = new Set(members.map((m) => m.id));
 
         const platformMembers: PlatformMember[] = [];
 
         let payingOrganization: Organization | null = null;
 
         if (request.body.asOrganizationId) {
-            const memberIds = Formatter.uniqueArray(
-                [...request.body.memberIds, ...deleteRegistrationModels.map(i => i.memberId), ...balanceItemsModels.map(i => i.memberId).filter(m => m !== null)],
-            );
+            const memberIds = Formatter.uniqueArray([
+                ...request.body.memberIds,
+                ...deleteRegistrationModels.map((i) => i.memberId),
+                ...balanceItemsModels.map((i) => i.memberId).filter((m) => m !== null),
+            ]);
 
             // todo: optimize performance of this
             // Load family for each member
@@ -255,14 +330,19 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const platformStruct = await Platform.getSharedStruct();
             const contextOrganization = await AuthenticatedStructures.organization(organization);
             for (const memberId of memberIds) {
-                const familyMembers = (await Member.getFamilyWithRegistrations(memberId));
+                const familyMembers = await Member.getFamilyWithRegistrations(memberId);
                 members.push(...familyMembers);
-                const blob = await AuthenticatedStructures.membersBlob(familyMembers, true, undefined, { forAdminCartCalculation: true });
+                const blob = await AuthenticatedStructures.membersBlob(
+                    familyMembers,
+                    true,
+                    undefined,
+                    { forAdminCartCalculation: true },
+                );
                 const family = PlatformFamily.create(blob, {
                     platform: platformStruct,
                     contextOrganization,
                 });
-                const platformMember = family.members.find(m => m.id === memberId);
+                const platformMember = family.members.find((m) => m.id === memberId);
                 if (!platformMember) {
                     throw new SimpleError({
                         code: 'invalid_data',
@@ -273,12 +353,17 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             payingOrganization = await Context.auth.getOrganization(request.body.asOrganizationId);
-            if (memberIds.length > 0 && request.body.asOrganizationId && request.body.asOrganizationId !== organization.id) {
+            if (
+                memberIds.length > 0 &&
+                request.body.asOrganizationId &&
+                request.body.asOrganizationId !== organization.id
+            ) {
                 // For registering members at a different organization, you need full permissions
-                if (!await Context.auth.hasFullAccess(request.body.asOrganizationId)) {
+                if (!(await Context.auth.hasFullAccess(request.body.asOrganizationId))) {
                     throw new SimpleError({
                         code: 'forbidden',
-                        message: 'No permission to register as this organization for a different organization',
+                        message:
+                            'No permission to register as this organization for a different organization',
                         human: $t('%ve'),
                         statusCode: 403,
                     });
@@ -308,7 +393,10 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         checkout.setDefaultOrganization(organizationStruct);
 
         const registrations: RegistrationWithMemberAndGroup[] = [];
-        const payRegistrations: { registration: RegistrationWithMemberAndGroup; item: RegisterItem }[] = [];
+        const payRegistrations: {
+            registration: RegistrationWithMemberAndGroup;
+            item: RegisterItem;
+        }[] = [];
         const deactivatedRegistrations: Registration[] = [];
 
         if (checkout.cart.isEmpty) {
@@ -341,7 +429,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (totalPrice % 100 !== 0) {
             throw new SimpleError({
                 code: 'more_than_2_decimal_places',
-                message: 'Unexpected total price. The total price should be rounded to maximum 2 decimal places',
+                message:
+                    'Unexpected total price. The total price should be rounded to maximum 2 decimal places',
             });
         }
 
@@ -349,7 +438,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         registrationMemberRelation.foreignKey = 'memberId';
 
         for (const item of checkout.cart.items) {
-            const member = members.find(m => m.id == item.memberId);
+            const member = members.find((m) => m.id == item.memberId);
             if (!member) {
                 throw new SimpleError({
                     code: 'invalid_member',
@@ -357,7 +446,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 });
             }
 
-            const group = groups.find(g => g.id == item.groupId);
+            const group = groups.find((g) => g.id == item.groupId);
             if (!group) {
                 throw new SimpleError({
                     code: 'invalid_member',
@@ -367,7 +456,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
             if (request.body.asOrganizationId) {
                 // Do you have write access to this group?
-                if (!await Context.auth.canRegisterMembersInGroup(group, request.body.asOrganizationId)) {
+                if (
+                    !(await Context.auth.canRegisterMembersInGroup(
+                        group,
+                        request.body.asOrganizationId,
+                    ))
+                ) {
                     throw new SimpleError({
                         code: 'forbidden',
                         message: 'No permission to register in this group',
@@ -378,23 +472,41 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             // Check if this member is already registered in this group?
-            const existingRegistrations = await Registration.where({ memberId: member.id, groupId: item.groupId, cycle: group.cycle, periodId: group.periodId, registeredAt: { sign: '!=', value: null } });
+            const existingRegistrations = await Registration.where({
+                memberId: member.id,
+                groupId: item.groupId,
+                cycle: group.cycle,
+                periodId: group.periodId,
+                registeredAt: { sign: '!=', value: null },
+            });
 
             for (const existingRegistration of existingRegistrations) {
-                if (item.replaceRegistrations.some(r => r.registration.id === existingRegistration.id)) {
+                if (
+                    item.replaceRegistrations.some(
+                        (r) => r.registration.id === existingRegistration.id,
+                    )
+                ) {
                     // Safe
                     continue;
                 }
 
-                if (checkout.cart.deleteRegistrations.some(r => r.id === existingRegistration.id)) {
+                if (
+                    checkout.cart.deleteRegistrations.some((r) => r.id === existingRegistration.id)
+                ) {
                     // Safe
                     continue;
                 }
 
-                if (existingRegistration.registeredAt !== null && existingRegistration.deactivatedAt === null) {
+                if (
+                    existingRegistration.registeredAt !== null &&
+                    existingRegistration.deactivatedAt === null
+                ) {
                     throw new SimpleError({
                         code: 'already_registered',
-                        message: $t('%vo', { member: member.firstName, group: group.settings.name }),
+                        message: $t('%vo', {
+                            member: member.firstName,
+                            group: group.settings.name,
+                        }),
                     });
                 }
             }
@@ -402,29 +514,49 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             let reuseRegistration: Registration | null = null;
 
             // For now don't reuse replace registrations - it has too many side effects and not a lot of added value
-            if (item.replaceRegistrations.length === 1 && item.replaceRegistrations[0].group.id === item.group.id) {
+            if (
+                item.replaceRegistrations.length === 1 &&
+                item.replaceRegistrations[0].group.id === item.group.id
+            ) {
                 // Try to reuse this specific one
-                reuseRegistration = (await Registration.getByID(item.replaceRegistrations[0].registration.id)) ?? null;
+                reuseRegistration =
+                    (await Registration.getByID(item.replaceRegistrations[0].registration.id)) ??
+                    null;
             }
 
             let startDate = item.calculatedStartDate;
 
             if (!reuseRegistration) {
                 // Otherwise try to reuse a registration in the same period, for the same group that has been deactived for less than 7 days since the start of the new registration
-                const possibleReuseRegistrations = existingRegistrations.filter(r =>
-                    r.deactivatedAt !== null
-                    && r.deactivatedAt.getTime() > startDate.getTime() - 7 * 24 * 60 * 60 * 1000,
+                const possibleReuseRegistrations = existingRegistrations.filter(
+                    (r) =>
+                        r.deactivatedAt !== null &&
+                        r.deactivatedAt.getTime() > startDate.getTime() - 7 * 24 * 60 * 60 * 1000,
                 );
 
                 // Never reuse a registration that has a balance - that means they had a cancellation fee and not all balance items were canceled (we don't want to merge in that state)
-                const balances = await CachedBalance.getForObjects(possibleReuseRegistrations.map(r => r.id), null, ReceivableBalanceType.registration);
+                const balances = await CachedBalance.getForObjects(
+                    possibleReuseRegistrations.map((r) => r.id),
+                    null,
+                    ReceivableBalanceType.registration,
+                );
 
-                reuseRegistration = possibleReuseRegistrations.find((r) => {
-                    const balance = balances.filter(b => b.objectId === r.id).reduce((a, b) => a + b.amountOpen + b.amountPaid + b.amountPending, 0);
-                    return balance === 0;
-                }) ?? null;
+                reuseRegistration =
+                    possibleReuseRegistrations.find((r) => {
+                        const balance = balances
+                            .filter((b) => b.objectId === r.id)
+                            .reduce((a, b) => a + b.amountOpen + b.amountPaid + b.amountPending, 0);
+                        return balance === 0;
+                    }) ?? null;
 
-                if (!item.customStartDate && reuseRegistration && reuseRegistration.startDate && reuseRegistration.startDate < startDate && reuseRegistration.startDate >= group.settings.startDate && !item.trial) {
+                if (
+                    !item.customStartDate &&
+                    reuseRegistration &&
+                    reuseRegistration.startDate &&
+                    reuseRegistration.startDate < startDate &&
+                    reuseRegistration.startDate >= group.settings.startDate &&
+                    !item.trial
+                ) {
                     startDate = reuseRegistration.startDate;
                 }
             }
@@ -456,7 +588,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 registration.sendConfirmationEmail = true;
                 if (checkout.asOrganizationId) {
                     // use group default
-                    registration.sendConfirmationEmail = group.privateSettings.sendConfirmationEmailForManualRegistrations;
+                    registration.sendConfirmationEmail =
+                        group.privateSettings.sendConfirmationEmailForManualRegistrations;
                 }
             }
 
@@ -475,7 +608,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (whoWillPayNow === 'nobody' && item.replaceRegistrations.length > 0) {
                 // If the replace registration was paid by an organization
                 // Make sure this updated registration will also be paid by the organization, not the member
-                const paidAsOrganization = item.replaceRegistrations[0].registration.payingOrganizationId;
+                const paidAsOrganization =
+                    item.replaceRegistrations[0].registration.payingOrganizationId;
                 if (paidAsOrganization) {
                     registration.payingOrganizationId = paidAsOrganization;
                 }
@@ -489,7 +623,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registrations.push(registration);
         }
 
-        console.log('Registering members using whoWillPayNow', whoWillPayNow, checkout.paymentMethod, totalPrice);
+        console.log(
+            'Registering members using whoWillPayNow',
+            whoWillPayNow,
+            checkout.paymentMethod,
+            totalPrice,
+        );
 
         const createdBalanceItems: BalanceItem[] = [];
         const deletedBalanceItems: BalanceItem[] = [];
@@ -497,7 +636,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         // Create negative balance items
         for (const { registration: registrationStruct, cancellationFeePercentage } of [
             ...checkout.cart.deleteRegistrations,
-            ...checkout.cart.items.flatMap(i => i.replaceRegistrations).map(r => ({ registration: r, cancellationFeePercentage: 0 })),
+            ...checkout.cart.items
+                .flatMap((i) => i.replaceRegistrations)
+                .map((r) => ({ registration: r, cancellationFeePercentage: 0 })),
         ]) {
             if (whoWillPayNow !== 'nobody') {
                 // this also fixes the issue that we cannot delete the registration right away if we would need to wait for a payment
@@ -509,7 +650,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 });
             }
 
-            const existingRegistration = await Registration.getByID(registrationStruct.registration.id);
+            const existingRegistration = await Registration.getByID(
+                registrationStruct.registration.id,
+            );
             if (!existingRegistration || existingRegistration.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'invalid_data',
@@ -517,7 +660,12 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 });
             }
 
-            if (!await Context.auth.canAccessRegistration(existingRegistration, PermissionLevel.Write)) {
+            if (
+                !(await Context.auth.canAccessRegistration(
+                    existingRegistration,
+                    PermissionLevel.Write,
+                ))
+            ) {
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to delete this registration',
@@ -539,20 +687,22 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (cancellationFeePercentage !== 100_00) {
                 // Only cancel balances if we don't charge 100% cancellation fee
                 // Also - this avoid creating a new cancellation fee balance item together with canceling the registration balance item, which is more complicated
-                deletedBalanceItems.push(...(await BalanceItem.deleteForDeletedRegistration(existingRegistration.id, {
-                    cancellationFeePercentage,
-                })));
+                deletedBalanceItems.push(
+                    ...(await BalanceItem.deleteForDeletedRegistration(existingRegistration.id, {
+                        cancellationFeePercentage,
+                    })),
+                );
             }
 
             // Clear the registration
-            let group = groups.find(g => g.id === existingRegistration.groupId);
+            let group = groups.find((g) => g.id === existingRegistration.groupId);
             if (!group) {
                 group = await Group.getByID(existingRegistration.groupId);
                 if (group) {
                     groups.push(group);
                 }
             }
-            const member = members.find(m => m.id === existingRegistration.memberId);
+            const member = members.find((m) => m.id === existingRegistration.memberId);
 
             await RegistrationService.deactivate(existingRegistration, group, member);
             deactivatedRegistrations.push(existingRegistration);
@@ -568,16 +718,39 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const period = await RegistrationPeriod.getByID(periodId);
             const relation = period
                 ? BalanceItemRelation.create({
-                        id: period.id,
-                        name: new TranslatedString(period.getBaseStructure().name),
-                    })
+                      id: period.id,
+                      name: new TranslatedString(period.getBaseStructure().name),
+                  })
                 : null;
 
             periodRelationCache.set(periodId, relation);
             return relation;
         }
 
-        async function createBalanceItem({ registration, periodId, skipZero, amount, unitPrice, name, type, relations }: { amount?: number; skipZero?: boolean; registration: { id: string; payingOrganizationId: string | null; memberId: string; trialUntil: Date | null }; periodId: string; unitPrice: number; name: string; relations: Map<BalanceItemRelationType, BalanceItemRelation>; type: BalanceItemType }) {
+        async function createBalanceItem({
+            registration,
+            periodId,
+            skipZero,
+            amount,
+            unitPrice,
+            name,
+            type,
+            relations,
+        }: {
+            amount?: number;
+            skipZero?: boolean;
+            registration: {
+                id: string;
+                payingOrganizationId: string | null;
+                memberId: string;
+                trialUntil: Date | null;
+            };
+            periodId: string;
+            unitPrice: number;
+            name: string;
+            relations: Map<BalanceItemRelationType, BalanceItemRelation>;
+            type: BalanceItemType;
+        }) {
             // NOTE: We also need to save zero-price balance items because for online payments, we need to know which registrations to activate after payment
             if (skipZero === true) {
                 if (unitPrice === 0 || amount === 0) {
@@ -632,7 +805,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             registration.reservedUntil = null;
 
             // Reserve registration for 30 minutes (if needed)
-            const group = groups.find(g => g.id === registration.groupId);
+            const group = groups.find((g) => g.id === registration.groupId);
 
             if (group && hasStockLimit(group) && whoWillPayNow !== 'nobody') {
                 registration.reservedUntil = new Date(new Date().getTime() + 1000 * 60 * 30);
@@ -680,9 +853,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 type: BalanceItemType.Registration,
                 skipZero: false, // Always create at least one balance item for each registration - even when the price is zero
                 name: `${item.member.patchedMember.name} bij ${item.group.settings.name.toString()}`,
-                relations: new Map([
-                    ...sharedRelations,
-                ]),
+                relations: new Map([...sharedRelations]),
             });
 
             // Options
@@ -752,7 +923,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             // }
 
             for (const [registration, newDiscountValue] of loopMap) {
-                const oldDiscountValue = registration.registration.discounts.get(discount.bundle.id)?.amount ?? 0;
+                const oldDiscountValue =
+                    registration.registration.discounts.get(discount.bundle.id)?.amount ?? 0;
 
                 // Saving the discount change directly on the registration now is not safe , because it can only be applied after the payment has succeededs)
                 // Solution: let the balance item handle it in its 'paid' handlers
@@ -810,7 +982,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
         }
 
-        const oldestMember = members.slice().sort((a, b) => b.details.defaultAge - a.details.defaultAge)[0];
+        const oldestMember = members
+            .slice()
+            .sort((a, b) => b.details.defaultAge - a.details.defaultAge)[0];
         if (checkout.freeContribution && !request.body.asOrganizationId) {
             // Create balance item
             const balanceItem = new BalanceItem();
@@ -884,7 +1058,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             }
 
             for (const item of checkout.cart.balanceItems) {
-                const balanceItem = balanceItemsModels.find(i => i.id === item.item.id);
+                const balanceItem = balanceItemsModels.find((i) => i.id === item.item.id);
                 if (!balanceItem) {
                     throw new Error('Balance item not found');
                 }
@@ -919,7 +1093,8 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     createMandate: null,
                     useMandate: null,
                     paymentConfiguration: organization.meta.registrationPaymentConfiguration,
-                    privatePaymentConfiguration: organization.privateMeta.registrationPaymentConfiguration,
+                    privatePaymentConfiguration:
+                        organization.privateMeta.registrationPaymentConfiguration,
                 });
 
                 if (response) {
@@ -946,7 +1121,9 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
 
         // Update occupancy
         for (const group of groups) {
-            if ([...registrations, ...deactivatedRegistrations].some(r => r.groupId === group.id)) {
+            if (
+                [...registrations, ...deactivatedRegistrations].some((r) => r.groupId === group.id)
+            ) {
                 await GroupService.refreshOccupancy(group);
                 await group.save();
             }
@@ -962,12 +1139,20 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         Member.unloadRegistrations(members);
         await Member.loadRegistrations(members, true);
 
-        return new Response(RegisterResponse.create({
-            payment: payment ? await AuthenticatedStructures.paymentGeneral(payment, true) : null,
-            members: await AuthenticatedStructures.membersBlob(members.filter(m => accessibleMemberIds.has(m.id))),
-            registrations: registrations.map(r => Member.getRegistrationWithTinyMemberStructure(r)),
-            paymentUrl,
-            paymentQRCode,
-        }));
+        return new Response(
+            RegisterResponse.create({
+                payment: payment
+                    ? await AuthenticatedStructures.paymentGeneral(payment, true)
+                    : null,
+                members: await AuthenticatedStructures.membersBlob(
+                    members.filter((m) => accessibleMemberIds.has(m.id)),
+                ),
+                registrations: registrations.map((r) =>
+                    Member.getRegistrationWithTinyMemberStructure(r),
+                ),
+                paymentUrl,
+                paymentQRCode,
+            }),
+        );
     }
 }

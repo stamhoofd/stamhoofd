@@ -80,7 +80,10 @@ describe('Helper.SettlementSyncRunner', () => {
         const organization = await new OrganizationFactory({}).create();
         const stripePayment = await createStripePayment(organization);
 
-        const payout = stripeMocker.createPayout({ amount: 10000, arrivalDate: new Date(2026, 0, 20) });
+        const payout = stripeMocker.createPayout({
+            amount: 10000,
+            arrivalDate: new Date(2026, 0, 20),
+        });
         stripeMocker.createBalanceTransaction({
             type: 'charge',
             amount: 10000,
@@ -109,7 +112,9 @@ describe('Helper.SettlementSyncRunner', () => {
         const stripeRow = await Settlement.select().where('externalId', payout.id).first(true);
         expect(stripeRow.syncedAt).not.toBeNull();
 
-        const mollieRow = await Settlement.select().where('externalId', mollieSettlement.id).first(true);
+        const mollieRow = await Settlement.select()
+            .where('externalId', mollieSettlement.id)
+            .first(true);
         expect(mollieRow.syncedAt).not.toBeNull();
 
         expect(summary.synced).toBeGreaterThanOrEqual(2);
@@ -125,7 +130,9 @@ describe('Helper.SettlementSyncRunner', () => {
             settledAt: new Date(2026, 0, 20),
         });
 
-        const spy = vi.spyOn(StripeSettlementSyncRunner.prototype, 'run').mockRejectedValue(new Error('Stripe is down'));
+        const spy = vi
+            .spyOn(StripeSettlementSyncRunner.prototype, 'run')
+            .mockRejectedValue(new Error('Stripe is down'));
         try {
             const summary = await new SettlementSyncRunner().run({
                 start: new Date(2026, 0, 1),
@@ -138,7 +145,9 @@ describe('Helper.SettlementSyncRunner', () => {
             spy.mockRestore();
         }
 
-        const mollieRow = await Settlement.select().where('externalId', mollieSettlement.id).first(true);
+        const mollieRow = await Settlement.select()
+            .where('externalId', mollieSettlement.id)
+            .first(true);
         expect(mollieRow.syncedAt).not.toBeNull();
     });
 
@@ -146,7 +155,10 @@ describe('Helper.SettlementSyncRunner', () => {
         const organization = await new OrganizationFactory({}).create();
         const stripePayment = await createStripePayment(organization);
 
-        const payout = stripeMocker.createPayout({ amount: 10000, arrivalDate: new Date(2026, 0, 20) });
+        const payout = stripeMocker.createPayout({
+            amount: 10000,
+            arrivalDate: new Date(2026, 0, 20),
+        });
         stripeMocker.createBalanceTransaction({
             type: 'charge',
             amount: 10000,
@@ -160,12 +172,14 @@ describe('Helper.SettlementSyncRunner', () => {
 
         // Throwing instead of returning a summary: a caller may not read an interrupted run as a
         // completed one
-        await expect(new SettlementSyncRunner().run({
-            start: new Date(2026, 0, 1),
-            end: new Date(2026, 0, 31),
-            providers: [PaymentProvider.Stripe, PaymentProvider.Mollie],
-            abort,
-        })).rejects.toThrow(STExpect.simpleError({ code: 'queue-aborted' }));
+        await expect(
+            new SettlementSyncRunner().run({
+                start: new Date(2026, 0, 1),
+                end: new Date(2026, 0, 31),
+                providers: [PaymentProvider.Stripe, PaymentProvider.Mollie],
+                abort,
+            }),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'queue-aborted' }));
 
         expect(await Settlement.select().where('externalId', payout.id).first(false)).toBeNull();
     });
@@ -183,14 +197,18 @@ describe('Helper.SettlementSyncRunner', () => {
         const abort = new AbortSignal();
         abort.abort();
 
-        await expect(new SettlementSyncRunner().run({
-            start: new Date(2026, 0, 1),
-            end: new Date(2026, 0, 31),
-            providers: [PaymentProvider.Mollie],
-            abort,
-        })).rejects.toThrow(STExpect.simpleError({ code: 'queue-aborted' }));
+        await expect(
+            new SettlementSyncRunner().run({
+                start: new Date(2026, 0, 1),
+                end: new Date(2026, 0, 31),
+                providers: [PaymentProvider.Mollie],
+                abort,
+            }),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'queue-aborted' }));
 
-        expect(await Settlement.select().where('externalId', mollieSettlement.id).first(false)).toBeNull();
+        expect(
+            await Settlement.select().where('externalId', mollieSettlement.id).first(false),
+        ).toBeNull();
     });
 
     test('The stripe retryUnsynced option flows through the run', async () => {

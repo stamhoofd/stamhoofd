@@ -28,7 +28,12 @@ export class RegistrationWithMember extends Registration {
         return MemberPlatformMembershipHelper.hasFutureMembership(this.platformMemberships);
     }
 
-    static from(registration: Registration, member: Member, responsibilities: MemberResponsibilityRecord[], platformMemberships: MemberPlatformMembership[]) {
+    static from(
+        registration: Registration,
+        member: Member,
+        responsibilities: MemberResponsibilityRecord[],
+        platformMemberships: MemberPlatformMembership[],
+    ) {
         return RegistrationWithMember.create({
             ...registration,
             member,
@@ -38,6 +43,10 @@ export class RegistrationWithMember extends Registration {
     }
 
     getContinuousMembershipStatus({ start, end }: { start: Date; end: Date }) {
-        return MemberPlatformMembershipHelper.getContinuousMembershipStatus({ memberships: this.platformMemberships, start, end });
+        return MemberPlatformMembershipHelper.getContinuousMembershipStatus({
+            memberships: this.platformMemberships,
+            start,
+            end,
+        });
     }
 }

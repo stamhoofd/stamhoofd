@@ -1,8 +1,17 @@
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
-import type { LimitedFilteredRequest, PlatformMember, Platform as PlatformStruct } from '@stamhoofd/structures';
-import { ExcelExportType, getGroupTypeName, PlatformRegistration, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
+import type {
+    LimitedFilteredRequest,
+    PlatformMember,
+    Platform as PlatformStruct,
+} from '@stamhoofd/structures';
+import {
+    ExcelExportType,
+    getGroupTypeName,
+    PlatformRegistration,
+    UnencodeablePaginatedResponse,
+} from '@stamhoofd/structures';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetRegistrationsEndpoint } from '../endpoints/global/registration/GetRegistrationsEndpoint.js';
 import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
@@ -11,7 +20,9 @@ import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHel
 import { getBaseMemberColumns } from './members.js';
 
 // Assign to a typed variable to assure we have correct type checking in place
-export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember, PlatformRegistration> => ({
+export const getSheet = (
+    platform: PlatformStruct,
+): XlsxTransformerSheet<PlatformMember, PlatformRegistration> => ({
     id: 'registrations',
     name: $t('%1EI'),
     columns: [
@@ -39,7 +50,11 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
             width: 30,
             getValue: (registration: PlatformRegistration) => {
                 return {
-                    value: registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0) / 1_0000,
+                    value:
+                        registration.balances.reduce(
+                            (sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending),
+                            0,
+                        ) / 1_0000,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -54,7 +69,11 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
             name: $t('%m0'),
             getValue: (registration: PlatformRegistration) => {
                 return {
-                    value: registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0) / 1_0000,
+                    value:
+                        registration.balances.reduce(
+                            (sum, r) => sum + (r.amountOpen + r.amountPending),
+                            0,
+                        ) / 1_0000,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -62,7 +81,6 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
                     },
                 };
             },
-
         },
         {
             id: 'outstandingBalance',
@@ -70,7 +88,8 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
             width: 30,
             getValue: (v) => {
                 return {
-                    value: v.member.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0) / 1_0000,
+                    value:
+                        v.member.member.balances.reduce((sum, r) => sum + r.amountOpen, 0) / 1_0000,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -78,7 +97,6 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
                     },
                 };
             },
-
         },
         {
             id: 'registeredAt',
@@ -137,10 +155,12 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
             name: $t('%1PI'),
             width: 40,
             getValue: (registration: PlatformRegistration) => {
-                const organization = registration.member.family.getOrganization(registration.group.organizationId);
-                return ({
+                const organization = registration.member.family.getOrganization(
+                    registration.group.organizationId,
+                );
+                return {
                     value: organization?.name ?? $t('%Gr'),
-                });
+                };
             },
         },
         {
@@ -148,10 +168,12 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
             name: $t('%1O1'),
             width: 40,
             getValue: (registration: PlatformRegistration) => {
-                const organization = registration.member.family.getOrganization(registration.group.organizationId);
-                return ({
+                const organization = registration.member.family.getOrganization(
+                    registration.group.organizationId,
+                );
+                return {
                     value: organization?.uri ?? $t('%Gr'),
-                });
+                };
             },
         },
         {
@@ -162,15 +184,17 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
                 let value: string;
 
                 if (registration.payingOrganizationId) {
-                    const organization = registration.member.organizations.find(o => o.id === registration.payingOrganizationId);
+                    const organization = registration.member.organizations.find(
+                        (o) => o.id === registration.payingOrganizationId,
+                    );
                     value = organization ? organization.name : $t('%Gr');
                 } else {
                     value = $t('%18s');
                 }
 
-                return ({
+                return {
                     value,
-                });
+                };
             },
         },
         {
@@ -212,31 +236,40 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
                     const optionId = splitted[2];
                     const returnAmount = splitted.length > 3 && splitted[3] === 'amount';
 
-                    return [{
-                        id: `optionMenu.${menuId}.${optionId}${returnAmount ? '.amount' : ''}`,
-                        name: $t('%wO'),
-                        width: 30,
-                        getValue: (registration: PlatformRegistration) => {
-                            const options = registration.options.filter(o => o.optionMenu.id === menuId && o.option.id === optionId);
+                    return [
+                        {
+                            id: `optionMenu.${menuId}.${optionId}${returnAmount ? '.amount' : ''}`,
+                            name: $t('%wO'),
+                            width: 30,
+                            getValue: (registration: PlatformRegistration) => {
+                                const options = registration.options.filter(
+                                    (o) => o.optionMenu.id === menuId && o.option.id === optionId,
+                                );
 
-                            if (!options.length) {
+                                if (!options.length) {
+                                    return {
+                                        value: '',
+                                    };
+                                }
+
                                 return {
-                                    value: '',
+                                    style:
+                                        options.length === 1 && returnAmount
+                                            ? {
+                                                  numberFormat: {
+                                                      id: XlsxBuiltInNumberFormat.Number,
+                                                  },
+                                              }
+                                            : {},
+                                    value: options
+                                        .map((option) =>
+                                            returnAmount ? option.amount : option.option.name,
+                                        )
+                                        .join(', '),
                                 };
-                            }
-
-                            return {
-                                style: options.length === 1 && returnAmount
-                                    ? {
-                                            numberFormat: {
-                                                id: XlsxBuiltInNumberFormat.Number,
-                                            },
-                                        }
-                                    : {},
-                                value: options.map(option => returnAmount ? option.amount : option.option.name).join(', '),
-                            };
+                            },
                         },
-                    }];
+                    ];
                 }
 
                 return [
@@ -245,7 +278,9 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
                         name: $t('%Tb'),
                         width: 30,
                         getValue: (registration: PlatformRegistration) => {
-                            const options = registration.options.filter(o => o.optionMenu.id === menuId);
+                            const options = registration.options.filter(
+                                (o) => o.optionMenu.id === menuId,
+                            );
 
                             if (!options.length) {
                                 return {
@@ -254,7 +289,13 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
                             }
 
                             return {
-                                value: options.map(option => (option.amount > 1 ? `${option.amount}x ` : '') + option.option.name).join(', '),
+                                value: options
+                                    .map(
+                                        (option) =>
+                                            (option.amount > 1 ? `${option.amount}x ` : '') +
+                                            option.option.name,
+                                    )
+                                    .join(', '),
                             };
                         },
                     },
@@ -264,7 +305,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
         // Group categories
         XlsxTransformerColumnHelper.createGroupCategoryColumns<PlatformRegistration>({
             matchId: 'groupCategory',
-            getMember: registration => registration.member,
+            getMember: (registration) => registration.member,
         }),
         // recordAnswers
         {
@@ -287,18 +328,22 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
                         width: 35,
                         getValue: (registration: PlatformRegistration) => {
                             return {
-                                value: registration.recordAnswers.get(recordId)?.excelValues[0]?.value ?? '',
+                                value:
+                                    registration.recordAnswers.get(recordId)?.excelValues[0]
+                                        ?.value ?? '',
                             };
                         },
                     },
                 ];
             },
         },
-        ...getBaseMemberColumns(platform).map(column => XlsxTransformerColumnHelper.transformColumnForProperty({
-            column,
-            key: 'member',
-            getPropertyValue: (registration: PlatformRegistration) => registration.member,
-        })),
+        ...getBaseMemberColumns(platform).map((column) =>
+            XlsxTransformerColumnHelper.transformColumnForProperty({
+                column,
+                key: 'member',
+                getPropertyValue: (registration: PlatformRegistration) => registration.member,
+            }),
+        ),
         {
             id: 'group',
             name: $t('%wH'),
@@ -321,7 +366,9 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
                     };
                 }
                 return {
-                    value: platform.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId)?.name ?? $t('%wJ'),
+                    value:
+                        platform.config.defaultAgeGroups.find((g) => g.id === defaultAgeGroupId)
+                            ?.name ?? $t('%wJ'),
                 };
             },
         },
@@ -344,13 +391,13 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Registrations, {
 
         return new UnencodeablePaginatedResponse({
             results: PlatformRegistration.createSingles(result.results, {
-                contextOrganization: Context.organization ? (await AuthenticatedStructures.organization(Context.organization)) : null,
+                contextOrganization: Context.organization
+                    ? await AuthenticatedStructures.organization(Context.organization)
+                    : null,
                 platform: await Platform.getSharedStruct(),
             }),
             next: result.next,
         });
     },
-    getSheets: platform => [
-        getSheet(platform),
-    ],
+    getSheets: (platform) => [getSheet(platform)],
 });

@@ -13,13 +13,25 @@ afterEach(() => {
 describe('shell completion destinations', () => {
     it('uses Linux vendor directories without requiring Homebrew', async () => {
         Object.defineProperty(process, 'platform', { value: 'linux' });
-        expect(await shellCompletionPaths()).toEqual({ bash: '/usr/share/bash-completion/completions/stam', zsh: '/usr/share/zsh/site-functions/_stam' });
+        expect(await shellCompletionPaths()).toEqual({
+            bash: '/usr/share/bash-completion/completions/stam',
+            zsh: '/usr/share/zsh/site-functions/_stam',
+        });
     });
 
-    it.each(['/opt/homebrew', '/usr/local'])('uses the actual Homebrew prefix %s', async (prefix) => {
-        Object.defineProperty(process, 'platform', { value: 'darwin' });
-        vi.mocked(exec).mockResolvedValueOnce({ stdout: `${prefix}\n` } as never);
-        expect(await shellCompletionPaths()).toEqual({ bash: `${prefix}/etc/bash_completion.d/stam`, zsh: `${prefix}/share/zsh/site-functions/_stam` });
-        expect(exec).toHaveBeenCalledWith('brew', ['--prefix'], { capture: true, label: false });
-    });
+    it.each(['/opt/homebrew', '/usr/local'])(
+        'uses the actual Homebrew prefix %s',
+        async (prefix) => {
+            Object.defineProperty(process, 'platform', { value: 'darwin' });
+            vi.mocked(exec).mockResolvedValueOnce({ stdout: `${prefix}\n` } as never);
+            expect(await shellCompletionPaths()).toEqual({
+                bash: `${prefix}/etc/bash_completion.d/stam`,
+                zsh: `${prefix}/share/zsh/site-functions/_stam`,
+            });
+            expect(exec).toHaveBeenCalledWith('brew', ['--prefix'], {
+                capture: true,
+                label: false,
+            });
+        },
+    );
 });

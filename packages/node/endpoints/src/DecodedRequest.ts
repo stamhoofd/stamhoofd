@@ -41,11 +41,20 @@ export class DecodedRequest<Params, Query, Body> {
             // Only require version if we have to decode something
             const version = request.getVersion();
 
-            const query = queryDecoder !== undefined ? queryDecoder.decode(new ObjectData(request.query, { version, medium: EncodeMedium.Network })) : undefined;
+            const query =
+                queryDecoder !== undefined
+                    ? queryDecoder.decode(
+                          new ObjectData(request.query, { version, medium: EncodeMedium.Network }),
+                      )
+                    : undefined;
             r.query = query as Query;
 
             // Read body type
-            if (r.headers['content-type']?.toLowerCase().startsWith('application/x-www-form-urlencoded')) {
+            if (
+                r.headers['content-type']
+                    ?.toLowerCase()
+                    .startsWith('application/x-www-form-urlencoded')
+            ) {
                 if (bodyDecoder !== undefined) {
                     const str = await request.body;
                     let parsed;
@@ -55,11 +64,14 @@ export class DecodedRequest<Params, Query, Body> {
                         throw new SimpleError({
                             statusCode: 400,
                             code: 'invalid_json',
-                            message: 'body is malformed (application/x-www-form-urlencoded) or wrong content-type',
+                            message:
+                                'body is malformed (application/x-www-form-urlencoded) or wrong content-type',
                         });
                     }
 
-                    const body = bodyDecoder.decode(new ObjectData(parsed, { version, medium: EncodeMedium.Network }));
+                    const body = bodyDecoder.decode(
+                        new ObjectData(parsed, { version, medium: EncodeMedium.Network }),
+                    );
                     r.body = body as Body;
                 }
             } else {
@@ -76,7 +88,9 @@ export class DecodedRequest<Params, Query, Body> {
                         });
                     }
 
-                    const body = bodyDecoder.decode(new ObjectData(parsed, { version, medium: EncodeMedium.Network }));
+                    const body = bodyDecoder.decode(
+                        new ObjectData(parsed, { version, medium: EncodeMedium.Network }),
+                    );
                     r.body = body as Body;
                 }
             }

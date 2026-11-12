@@ -1,14 +1,20 @@
 import { column } from '@node/database';
 import { SimpleError } from '@common/errors';
 import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
-import { RegistrationPeriodBase, RegistrationPeriodSettings, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
+import {
+    RegistrationPeriodBase,
+    RegistrationPeriodSettings,
+    RegistrationPeriod as RegistrationPeriodStruct,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 export class RegistrationPeriod extends QueryableModel {
     static table = 'registration_periods';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -45,7 +51,8 @@ export class RegistrationPeriod extends QueryableModel {
     locked = false;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -57,7 +64,8 @@ export class RegistrationPeriod extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -80,7 +88,10 @@ export class RegistrationPeriod extends QueryableModel {
         this.endDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 31); // 1 month
     }
 
-    static async getByDate(date: Date, organizationId: string | null): Promise<RegistrationPeriod | null> {
+    static async getByDate(
+        date: Date,
+        organizationId: string | null,
+    ): Promise<RegistrationPeriod | null> {
         if (STAMHOOFD.userMode === 'organization' && organizationId === null) {
             throw new SimpleError({
                 code: 'invalid_argument',
@@ -89,7 +100,8 @@ export class RegistrationPeriod extends QueryableModel {
             });
         }
 
-        const query = SQL.select().from(SQL.table(this.table))
+        const query = SQL.select()
+            .from(SQL.table(this.table))
             .where(SQL.column('startDate'), SQLWhereSign.LessEqual, date)
             .where(SQL.column('endDate'), SQLWhereSign.GreaterEqual, date);
 

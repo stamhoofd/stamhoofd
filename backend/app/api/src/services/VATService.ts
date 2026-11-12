@@ -1,14 +1,26 @@
 import type { Organization } from '@stamhoofd/models';
 import { BalanceItem } from '@stamhoofd/models';
 import type { Company, Organization as OrganizationStruct } from '@stamhoofd/structures';
-import { BalanceItemStatus, getBalanceItemTypeVATType, VATExcemptReason } from '@stamhoofd/structures';
+import {
+    BalanceItemStatus,
+    getBalanceItemTypeVATType,
+    VATExcemptReason,
+} from '@stamhoofd/structures';
 
 export class VATService {
-    static getDefaultCompanyForOrganization(sellingOrganization: Organization | OrganizationStruct): Company {
+    static getDefaultCompanyForOrganization(
+        sellingOrganization: Organization | OrganizationStruct,
+    ): Company {
         return sellingOrganization.defaultCompanies[0];
     }
 
-    static async updateVATExcempt({ organization, sellingOrganization }: { organization: Organization; sellingOrganization: Organization | OrganizationStruct }) {
+    static async updateVATExcempt({
+        organization,
+        sellingOrganization,
+    }: {
+        organization: Organization;
+        sellingOrganization: Organization | OrganizationStruct;
+    }) {
         const company = organization.defaultCompanies[0];
         const exempt = this.isVATExcempt({ company, sellingOrganization });
         console.log('updating VAT excempt', exempt);
@@ -51,7 +63,13 @@ export class VATService {
         }
     }
 
-    static isVATExcempt({ company, sellingOrganization }: { company: Company | null | undefined; sellingOrganization: Organization | OrganizationStruct }) {
+    static isVATExcempt({
+        company,
+        sellingOrganization,
+    }: {
+        company: Company | null | undefined;
+        sellingOrganization: Organization | OrganizationStruct;
+    }) {
         // Validate VAT rates for this customer
         const seller = this.getDefaultCompanyForOrganization(sellingOrganization);
 
@@ -59,7 +77,12 @@ export class VATService {
             // B2B validation
             // No address -> we guess the same country as the seller (least risk of not applying VAT when it is required)
             // Reverse charged vat applicable?
-            if ((company.address && company.address.country !== seller.address.country) && company.VATNumber && !company.VATNumber.trim().startsWith(seller.address.country)) {
+            if (
+                company.address &&
+                company.address.country !== seller.address.country &&
+                company.VATNumber &&
+                !company.VATNumber.trim().startsWith(seller.address.country)
+            ) {
                 return true;
             }
         }
@@ -74,7 +97,15 @@ export class VATService {
         return VATExcemptReason.IntraCommunityGoods;
     }
 
-    static getVATExcempt({ company, sellingOrganization, type }: { company: Company | null | undefined; sellingOrganization: Organization | OrganizationStruct; type: 'services' | 'goods' }) {
+    static getVATExcempt({
+        company,
+        sellingOrganization,
+        type,
+    }: {
+        company: Company | null | undefined;
+        sellingOrganization: Organization | OrganizationStruct;
+        type: 'services' | 'goods';
+    }) {
         // Reverse charged vat applicable?
         if (this.isVATExcempt({ company, sellingOrganization })) {
             return this.getVATExcemptType({ type });

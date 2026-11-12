@@ -2,7 +2,12 @@ import { Database } from '@node/database';
 import type { SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
 import type { SQLDynamicExpression } from './SQLExpressions.js';
-import { readDynamicSQLExpression, SQLAssignment, SQLColumnExpression, SQLTableExpression } from './SQLExpressions.js';
+import {
+    readDynamicSQLExpression,
+    SQLAssignment,
+    SQLColumnExpression,
+    SQLTableExpression,
+} from './SQLExpressions.js';
 import { Whereable } from './SQLWhere.js';
 import { SQLLogger } from './SQLLogger.js';
 
@@ -28,7 +33,14 @@ export class SQLUpdate extends Whereable(EmptyClass) implements SQLExpression {
             this._set = [];
         }
 
-        this._set.push(new SQLAssignment(typeof whereOrColumn === 'string' ? new SQLColumnExpression(whereOrColumn) : whereOrColumn, readDynamicSQLExpression(value)));
+        this._set.push(
+            new SQLAssignment(
+                typeof whereOrColumn === 'string'
+                    ? new SQLColumnExpression(whereOrColumn)
+                    : whereOrColumn,
+                readDynamicSQLExpression(value),
+            ),
+        );
         return this;
     }
 
@@ -40,23 +52,21 @@ export class SQLUpdate extends Whereable(EmptyClass) implements SQLExpression {
         // Create a clone since we are mutating the default namespaces
         const parentOptions = options;
         options = options ? { ...options } : {};
-        options.defaultNamespace = (this._table as any).namespace ?? (this._table).table ?? undefined;
+        options.defaultNamespace = (this._table as any).namespace ?? this._table.table ?? undefined;
 
         if (parentOptions?.defaultNamespace) {
             options.parentNamespace = parentOptions.defaultNamespace;
         }
 
-        const query: SQLQuery[] = [
-            'UPDATE ',
-            this._table.getSQL(options),
-        ];
+        const query: SQLQuery[] = ['UPDATE ', this._table.getSQL(options)];
+
+        query.push('SET');
 
         query.push(
-            'SET',
-        );
-
-        query.push(
-            joinSQLQuery(this._set.map(a => a.getSQL(options)), ', '),
+            joinSQLQuery(
+                this._set.map((a) => a.getSQL(options)),
+                ', ',
+            ),
         );
 
         if (this._where) {

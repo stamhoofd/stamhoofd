@@ -8,7 +8,10 @@ import type { Platform } from '../Platform.js';
  * @param organization
  * @returns
  */
-export function getFinancialSupportSettings(platform: Platform, organization: Organization | null): FinancialSupportSettings | null {
+export function getFinancialSupportSettings(
+    platform: Platform,
+    organization: Organization | null,
+): FinancialSupportSettings | null {
     if (STAMHOOFD.userMode === 'platform') {
         return platform.config.financialSupport;
     }
@@ -27,6 +30,11 @@ export function getFinancialSupportSettings(platform: Platform, organization: Or
  * @param organization
  * @returns
  */
-export function getFinancialSupportSettingsOrDefault(platform: Platform, organization: Organization | null): FinancialSupportSettings {
-    return getFinancialSupportSettings(platform, organization) ?? FinancialSupportSettings.create({});
+export function getFinancialSupportSettingsOrDefault(
+    platform: Platform,
+    organization: Organization | null,
+): FinancialSupportSettings {
+    return (
+        getFinancialSupportSettings(platform, organization) ?? FinancialSupportSettings.create({})
+    );
 }

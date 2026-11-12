@@ -8,11 +8,21 @@ import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-tr
 import { context, propagation, SpanStatusCode, trace } from '@opentelemetry/api';
 
 vi.mock('./port-probe.js', () => ({ isPortListening: vi.fn(async () => true) }));
-const event = (event: DevEvent['event'], fields: Partial<DevEvent> = {}): DevEvent => ({ version: 1, session: 'session', app: 'api', processId: 'one', generation: '1', time: process.hrtime.bigint().toString(), sequence: 1, event, ...fields });
+const event = (event: DevEvent['event'], fields: Partial<DevEvent> = {}): DevEvent => ({
+    version: 1,
+    session: 'session',
+    app: 'api',
+    processId: 'one',
+    generation: '1',
+    time: process.hrtime.bigint().toString(),
+    sequence: 1,
+    event,
+    ...fields,
+});
 
 it('keeps readiness explicit and preserves a running server through failed rebuilds', async () => {
     const status = new DevStatus([{ id: 'api', label: 'api', port: 9091 }], () => {});
-    const lifecycle = new DevLifecycle(value => status.event(value));
+    const lifecycle = new DevLifecycle((value) => status.event(value));
     lifecycle.receive(event('starting'));
     await status.check();
     expect(status.items()[0].state).toBe('starting');
@@ -63,11 +73,20 @@ it('detects listener loss after structured readiness', async () => {
 
 it('exports finite spans with explicit parent correlation and distinguishes failure from cancellation', async () => {
     const exporter = new InMemorySpanExporter();
-    const sdk = new NodeSDK({ autoDetectResources: false, spanProcessors: [new SimpleSpanProcessor({ exporter })] });
+    const sdk = new NodeSDK({
+        autoDetectResources: false,
+        spanProcessors: [new SimpleSpanProcessor({ exporter })],
+    });
     sdk.start();
     const lifecycle = new DevLifecycle(() => {});
     try {
-        lifecycle.receive(event('build.started', { cycleId: '1', time: (process.hrtime.bigint() - 10_000_000_000n).toString(), traceparent: `00-${'a'.repeat(32)}-${'b'.repeat(16)}-01` }));
+        lifecycle.receive(
+            event('build.started', {
+                cycleId: '1',
+                time: (process.hrtime.bigint() - 10_000_000_000n).toString(),
+                traceparent: `00-${'a'.repeat(32)}-${'b'.repeat(16)}-01`,
+            }),
+        );
         lifecycle.receive(event('build.failed', { cycleId: '1', errors: 1 }));
         lifecycle.receive(event('starting'));
         lifecycle.close();

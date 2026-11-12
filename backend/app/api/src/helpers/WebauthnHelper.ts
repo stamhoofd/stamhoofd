@@ -4,23 +4,42 @@ import {
     verifyAuthenticationResponse,
     verifyRegistrationResponse,
 } from '@simplewebauthn/server';
-import type { AuthenticationResponseJSON, AuthenticatorTransportFuture, RegistrationResponseJSON } from '@simplewebauthn/server';
+import type {
+    AuthenticationResponseJSON,
+    AuthenticatorTransportFuture,
+    RegistrationResponseJSON,
+} from '@simplewebauthn/server';
 import type { User, WebauthnCredential } from '@stamhoofd/models';
-import type { WebauthnAuthenticationCredential, WebauthnRegistrationCredential } from '@stamhoofd/structures';
+import type {
+    WebauthnAuthenticationCredential,
+    WebauthnRegistrationCredential,
+} from '@stamhoofd/structures';
 import { getWebauthnRpId } from '@stamhoofd/structures';
 import aaguids from './data/aaguids.json' with { type: 'json' };
 const RP_NAME = 'Stamhoofd';
 
-const VALID_TRANSPORTS: AuthenticatorTransportFuture[] = ['ble', 'cable', 'hybrid', 'internal', 'nfc', 'smart-card', 'usb'];
+const VALID_TRANSPORTS: AuthenticatorTransportFuture[] = [
+    'ble',
+    'cable',
+    'hybrid',
+    'internal',
+    'nfc',
+    'smart-card',
+    'usb',
+];
 
 /**
  * Narrow an untrusted string[] to valid AuthenticatorTransport values (no unchecked casts).
  */
-function coerceTransports(transports: string[] | null | undefined): AuthenticatorTransportFuture[] | undefined {
+function coerceTransports(
+    transports: string[] | null | undefined,
+): AuthenticatorTransportFuture[] | undefined {
     if (!transports) {
         return undefined;
     }
-    const filtered = transports.filter((t): t is AuthenticatorTransportFuture => (VALID_TRANSPORTS as string[]).includes(t));
+    const filtered = transports.filter((t): t is AuthenticatorTransportFuture =>
+        (VALID_TRANSPORTS as string[]).includes(t),
+    );
     return filtered.length > 0 ? filtered : undefined;
 }
 
@@ -56,7 +75,10 @@ function getCredentialRpID(credential: WebauthnCredential): string {
 function fingerprintToBase64URL(fingerprint: string): string {
     const hex = fingerprint.replace(/[\s:-]/g, '');
     if (!/^[0-9a-f]{64}$/i.test(hex)) {
-        throw new Error('Invalid SHA-256 certificate fingerprint in ANDROID_PASSKEY_SHA256_CERT_FINGERPRINTS: ' + fingerprint);
+        throw new Error(
+            'Invalid SHA-256 certificate fingerprint in ANDROID_PASSKEY_SHA256_CERT_FINGERPRINTS: ' +
+                fingerprint,
+        );
     }
     return Buffer.from(hex, 'hex').toString('base64url');
 }
@@ -71,7 +93,9 @@ function fingerprintToBase64URL(fingerprint: string): string {
  * the app in the first place.
  */
 function getAndroidOrigins(): string[] {
-    return (STAMHOOFD.ANDROID_PASSKEY_SHA256_CERT_FINGERPRINTS ?? []).map(fingerprint => 'android:apk-key-hash:' + fingerprintToBase64URL(fingerprint));
+    return (STAMHOOFD.ANDROID_PASSKEY_SHA256_CERT_FINGERPRINTS ?? []).map(
+        (fingerprint) => 'android:apk-key-hash:' + fingerprintToBase64URL(fingerprint),
+    );
 }
 
 /**
@@ -102,7 +126,7 @@ export const WebauthnHelper = {
             userID: new Uint8Array(Buffer.from(user.id)),
             userDisplayName: user.name || user.email,
             attestationType: 'direct',
-            excludeCredentials: existingCredentials.map(c => ({
+            excludeCredentials: existingCredentials.map((c) => ({
                 id: c.credentialId,
                 transports: coerceTransports(c.transportsArray),
             })),
@@ -116,7 +140,10 @@ export const WebauthnHelper = {
     /**
      * @returns the verified credential info to persist, or null when verification failed.
      */
-    async verifyRegistration(credential: WebauthnRegistrationCredential, expectedChallenge: string) {
+    async verifyRegistration(
+        credential: WebauthnRegistrationCredential,
+        expectedChallenge: string,
+    ) {
         const response: RegistrationResponseJSON = {
             id: credential.id,
             rawId: credential.rawId,
@@ -154,7 +181,12 @@ export const WebauthnHelper = {
             return null;
         }
 
-        const { credential: verifiedCredential, credentialBackedUp, credentialDeviceType, aaguid } = verification.registrationInfo;
+        const {
+            credential: verifiedCredential,
+            credentialBackedUp,
+            credentialDeviceType,
+            aaguid,
+        } = verification.registrationInfo;
         return {
             rpId,
             providerId: aaguid || null,
@@ -175,13 +207,13 @@ export const WebauthnHelper = {
      */
     filterForCurrentRpID(credentials: WebauthnCredential[]): WebauthnCredential[] {
         const rpId = getRpID();
-        return credentials.filter(c => getCredentialRpID(c) === rpId);
+        return credentials.filter((c) => getCredentialRpID(c) === rpId);
     },
 
     async generateAuthentication(credentials: WebauthnCredential[]) {
         return await generateAuthenticationOptions({
             rpID: getRpID(),
-            allowCredentials: WebauthnHelper.filterForCurrentRpID(credentials).map(c => ({
+            allowCredentials: WebauthnHelper.filterForCurrentRpID(credentials).map((c) => ({
                 id: c.credentialId,
                 transports: coerceTransports(c.transportsArray),
             })),
@@ -192,7 +224,11 @@ export const WebauthnHelper = {
     /**
      * @returns the new signature counter on success, or null when verification failed.
      */
-    async verifyAuthentication(credential: WebauthnAuthenticationCredential, expectedChallenge: string, storedCredential: WebauthnCredential): Promise<number | null> {
+    async verifyAuthentication(
+        credential: WebauthnAuthenticationCredential,
+        expectedChallenge: string,
+        storedCredential: WebauthnCredential,
+    ): Promise<number | null> {
         const response: AuthenticationResponseJSON = {
             id: credential.id,
             rawId: credential.rawId,

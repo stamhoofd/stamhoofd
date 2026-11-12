@@ -15,7 +15,11 @@ export class DocumentRenderService {
     /**
      * Build the handlebars context of a single document.
      */
-    static buildDocumentContext(document: Document, organization: Organization, platform: PlatformStruct) {
+    static buildDocumentContext(
+        document: Document,
+        organization: Organization,
+        platform: PlatformStruct,
+    ) {
         // Convert the field answers in a simplified javascript object
         const data: Record<string, any> = {
             id: document.id,
@@ -30,7 +34,10 @@ export class DocumentRenderService {
                 companyAddress: organization.meta.companies[0]?.address ?? organization.address,
             },
         };
-        const platformLogo = platform.config.logoDocuments ?? platform.config.horizontalLogo ?? platform.config.squareLogo;
+        const platformLogo =
+            platform.config.logoDocuments ??
+            platform.config.horizontalLogo ??
+            platform.config.squareLogo;
         const organizationLogo = organization.meta.horizontalLogo ?? organization.meta.squareLogo;
         const logo = organizationLogo || platformLogo;
 
@@ -59,10 +66,13 @@ export class DocumentRenderService {
      * Field ids are dot separated paths into the context, e.g. 'registration.price'.
      * They are user input, so keys that reach the prototype chain are rejected.
      */
-    private static assignFieldAnswers(data: Record<string, any>, fieldAnswers: Iterable<RecordAnswer>) {
+    private static assignFieldAnswers(
+        data: Record<string, any>,
+        fieldAnswers: Iterable<RecordAnswer>,
+    ) {
         for (const field of fieldAnswers) {
             const keys = field.settings.id.split('.');
-            if (keys.some(key => !key || FORBIDDEN_KEYS.has(key))) {
+            if (keys.some((key) => !key || FORBIDDEN_KEYS.has(key))) {
                 throw new Error('Invalid field id');
             }
             const lastKey = keys.pop()!;
@@ -87,9 +97,14 @@ export class DocumentRenderService {
      * Note that this writes: an XML export is the moment the numbering becomes final, so any gaps
      * left by deleted documents are closed and the new numbers are saved.
      */
-    private static async buildTemplateContext(template: DocumentTemplate, organization: Organization) {
+    private static async buildTemplateContext(
+        template: DocumentTemplate,
+        organization: Organization,
+    ) {
         // Convert the field answers in a simplified javascript object
-        const documents = (await template.buildAll({ generateNumbers: true })).filter(d => d.status === DocumentStatus.Published && !!d.number).sort((a, b) => Sorter.byNumberValue(b.number ?? 0, a.number ?? 0));
+        const documents = (await template.buildAll({ generateNumbers: true }))
+            .filter((d) => d.status === DocumentStatus.Published && !!d.number)
+            .sort((a, b) => Sorter.byNumberValue(b.number ?? 0, a.number ?? 0));
 
         // Check numbers are strictly increasing
         let lastNumber = 0;
@@ -106,7 +121,7 @@ export class DocumentRenderService {
         const data: Record<string, any> = {
             id: template.id,
             created_at: template.createdAt,
-            documents: documents.map(d => this.buildDocumentContext(d, organization, platform)),
+            documents: documents.map((d) => this.buildDocumentContext(d, organization, platform)),
             organization: {
                 name: organization.name,
                 companyName: organization.meta.companies[0]?.name || organization.name,
@@ -124,7 +139,10 @@ export class DocumentRenderService {
     /**
      * Render a document with the html of the template it belongs to.
      */
-    static async getRenderedHtml(document: Document, organization: Organization): Promise<string | null> {
+    static async getRenderedHtml(
+        document: Document,
+        organization: Organization,
+    ): Promise<string | null> {
         const template = await DocumentTemplate.getByID(document.templateId);
         if (!template) {
             return null;
@@ -133,7 +151,11 @@ export class DocumentRenderService {
         return await this.getRenderedHtmlForTemplate(document, organization, template.html);
     }
 
-    private static async getRenderedHtmlForTemplate(document: Document, organization: Organization, htmlTemplate: string): Promise<string | null> {
+    private static async getRenderedHtmlForTemplate(
+        document: Document,
+        organization: Organization,
+        htmlTemplate: string,
+    ): Promise<string | null> {
         try {
             const platform = await Platform.getSharedStruct();
             const context = this.buildDocumentContext(document, organization, platform);
@@ -152,14 +174,20 @@ export class DocumentRenderService {
      * numbering, and a failure there (a locked document for example) has to reach the user instead of
      * silently turning into a missing export.
      */
-    static async getRenderedXml(template: DocumentTemplate, organization: Organization): Promise<string | null> {
+    static async getRenderedXml(
+        template: DocumentTemplate,
+        organization: Organization,
+    ): Promise<string | null> {
         if (!template.privateSettings.templateDefinition.xmlExport) {
             return null;
         }
 
         try {
             const context = await this.buildTemplateContext(template, organization);
-            const renderedHtml = await render(template.privateSettings.templateDefinition.xmlExport, context);
+            const renderedHtml = await render(
+                template.privateSettings.templateDefinition.xmlExport,
+                context,
+            );
             return renderedHtml;
         } catch (e) {
             if (isSimpleError(e) || isSimpleErrors(e)) {

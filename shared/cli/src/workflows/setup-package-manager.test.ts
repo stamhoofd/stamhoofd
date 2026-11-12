@@ -19,7 +19,9 @@ describe('setup package manager workflow', () => {
 
     it('reports when pnpm matches the version pinned with an integrity suffix', async () => {
         tmpDir = await createProject('pnpm@12.4.2+sha512.abcdef');
-        const run = vi.spyOn(commandRunner, 'run').mockResolvedValue({ stdout: '12.4.2\n', stderr: '', status: 0 });
+        const run = vi
+            .spyOn(commandRunner, 'run')
+            .mockResolvedValue({ stdout: '12.4.2\n', stderr: '', status: 0 });
 
         await expect(checkPackageManager(tmpDir)).resolves.toEqual({
             ok: true,
@@ -27,12 +29,21 @@ describe('setup package manager workflow', () => {
             expected: '12.4.2',
             details: 'pnpm 12.4.2 matches package.json',
         });
-        expect(run).toHaveBeenCalledWith('pnpm', ['--version'], { capture: true, allowFailure: true, cwd: tmpDir, verbosity: RunVerbosity.Quiet });
+        expect(run).toHaveBeenCalledWith('pnpm', ['--version'], {
+            capture: true,
+            allowFailure: true,
+            cwd: tmpDir,
+            verbosity: RunVerbosity.Quiet,
+        });
     });
 
     it('reports a missing pnpm executable', async () => {
         tmpDir = await createProject('pnpm@12.4.2');
-        vi.spyOn(commandRunner, 'run').mockResolvedValue({ stdout: '', stderr: 'Error: spawn pnpm ENOENT', status: 1 });
+        vi.spyOn(commandRunner, 'run').mockResolvedValue({
+            stdout: '',
+            stderr: 'Error: spawn pnpm ENOENT',
+            status: 1,
+        });
 
         await expect(checkPackageManager(tmpDir)).resolves.toMatchObject({
             ok: false,
@@ -44,16 +55,27 @@ describe('setup package manager workflow', () => {
 
     it('forwards the selected verbosity when checking pnpm', async () => {
         tmpDir = await createProject('pnpm@12.4.2');
-        const run = vi.spyOn(commandRunner, 'run').mockResolvedValue({ stdout: '12.4.2\n', stderr: '', status: 0 });
+        const run = vi
+            .spyOn(commandRunner, 'run')
+            .mockResolvedValue({ stdout: '12.4.2\n', stderr: '', status: 0 });
 
         await checkPackageManager(tmpDir, RunVerbosity.Output);
 
-        expect(run).toHaveBeenCalledWith('pnpm', ['--version'], { capture: true, allowFailure: true, cwd: tmpDir, verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenCalledWith('pnpm', ['--version'], {
+            capture: true,
+            allowFailure: true,
+            cwd: tmpDir,
+            verbosity: RunVerbosity.Output,
+        });
     });
 
     it('reports a pnpm command failure', async () => {
         tmpDir = await createProject('pnpm@12.4.2');
-        vi.spyOn(commandRunner, 'run').mockResolvedValue({ stdout: '', stderr: 'pnpm failed', status: 1 });
+        vi.spyOn(commandRunner, 'run').mockResolvedValue({
+            stdout: '',
+            stderr: 'pnpm failed',
+            status: 1,
+        });
 
         await expect(checkPackageManager(tmpDir)).resolves.toMatchObject({
             ok: false,
@@ -65,7 +87,11 @@ describe('setup package manager workflow', () => {
 
     it('reports an incorrect pnpm version', async () => {
         tmpDir = await createProject('pnpm@12.4.2');
-        vi.spyOn(commandRunner, 'run').mockResolvedValue({ stdout: '11.5.0\n', stderr: '', status: 0 });
+        vi.spyOn(commandRunner, 'run').mockResolvedValue({
+            stdout: '11.5.0\n',
+            stderr: '',
+            status: 0,
+        });
 
         await expect(checkPackageManager(tmpDir)).resolves.toEqual({
             ok: false,
@@ -91,7 +117,7 @@ describe('setup package manager workflow', () => {
         tmpDir = await createProject('pnpm@12.4.2');
         const run = vi.spyOn(commandRunner, 'run').mockResolvedValue(undefined);
         const messages: string[] = [];
-        vi.spyOn(console, 'log').mockImplementation(message => messages.push(String(message)));
+        vi.spyOn(console, 'log').mockImplementation((message) => messages.push(String(message)));
 
         await setupPackageManager(tmpDir, { dryRun: true });
 

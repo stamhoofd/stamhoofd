@@ -1,5 +1,10 @@
 import { Migration } from '@node/database';
-import { DocumentTemplate, Group, RegistrationPeriod, V1GroupMigrationData } from '@stamhoofd/models';
+import {
+    DocumentTemplate,
+    Group,
+    RegistrationPeriod,
+    V1GroupMigrationData,
+} from '@stamhoofd/models';
 import { GroupType, NamedObject } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SeedTools } from '../helpers/SeedTools.js';
@@ -36,7 +41,13 @@ export default new Migration(async () => {
                     group.group = NamedObject.create({
                         id: newGroup.id,
                         name: newGroup.settings.name.toString(),
-                        description: newGroup.type === GroupType.Membership && period ? getPeriodName(period) : (Formatter.dateRange(newGroup.settings.startDate, newGroup.settings.endDate)),
+                        description:
+                            newGroup.type === GroupType.Membership && period
+                                ? getPeriodName(period)
+                                : Formatter.dateRange(
+                                      newGroup.settings.startDate,
+                                      newGroup.settings.endDate,
+                                  ),
                     });
 
                     await template.save({ forceSave: true });
@@ -50,7 +61,9 @@ export default new Migration(async () => {
 
     console.log('Finished updating groups on document templates:');
     // check if reasonable amount of groups had been found
-    console.log(`totalGroups: ${totalGroups}, totalNotFound: ${totalNotFound} (${totalNotFound / totalGroups * 100}%)`);
+    console.log(
+        `totalGroups: ${totalGroups}, totalNotFound: ${totalNotFound} (${(totalNotFound / totalGroups) * 100}%)`,
+    );
 });
 
 // see get name on period structure (same logic)
@@ -63,7 +76,9 @@ function getPeriodName(period: RegistrationPeriod) {
         return $t('%7Z') + ' ' + Formatter.year(period.startDate);
     }
 
-    return $t('%7Z') + ' ' + Formatter.year(period.startDate) + ' - ' + Formatter.year(period.endDate);
+    return (
+        $t('%7Z') + ' ' + Formatter.year(period.startDate) + ' - ' + Formatter.year(period.endDate)
+    );
 }
 
 async function getNewGroup(oldGroupId: string, cycle: number, templateId: string) {

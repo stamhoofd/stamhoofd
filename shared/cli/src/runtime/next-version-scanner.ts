@@ -68,7 +68,7 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
             state.commentLineStack = '';
         }
 
-        if (char === '\'' || char === '"' || char === '`') {
+        if (char === "'" || char === '"' || char === '`') {
             state.stringQuote = char;
             state.contentStack = '';
             continue;
@@ -106,7 +106,10 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
                             const startIndex = i - needle.length + 1 + offset;
                             const endIndex = i + offset;
 
-                            newContent = newContent.substring(0, startIndex) + replaceBy + newContent.substring(endIndex + 1);
+                            newContent =
+                                newContent.substring(0, startIndex) +
+                                replaceBy +
+                                newContent.substring(endIndex + 1);
                             offset += replaceBy.length - needle.length;
                             replaced++;
 
@@ -171,8 +174,15 @@ export function readReleasedVersion(content: string): number {
 /**
  * Writes a new `ReleasedVersion` into the contents of shared/structures/src/Version.ts
  */
-export function writeReleasedVersion(content: string, currentVersion: number, nextVersion: number): string {
-    const newContent = content.replace('ReleasedVersion = ' + currentVersion, 'ReleasedVersion = ' + nextVersion);
+export function writeReleasedVersion(
+    content: string,
+    currentVersion: number,
+    nextVersion: number,
+): string {
+    const newContent = content.replace(
+        'ReleasedVersion = ' + currentVersion,
+        'ReleasedVersion = ' + nextVersion,
+    );
     if (newContent === content) {
         throw new Error('Failed to update version in Version.ts');
     }

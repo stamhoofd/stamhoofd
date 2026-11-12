@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EmailDecoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    EmailDecoder,
+    EnumDecoder,
+    field,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Language } from '@stamhoofd/types/Language';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -76,7 +85,7 @@ export function getUsedReplacementFiles(html: string, replacements: Replacement[
             );
 
             for (const file of replacement.files) {
-                if (!files.some(f => f.id === file.id && f.path === file.path)) {
+                if (!files.some((f) => f.id === file.id && f.path === file.path)) {
                     files.push(file);
                 }
             }
@@ -91,10 +100,7 @@ export function replaceEmailHtml(html: string, replacements: Replacement[]) {
 
     for (const replacement of replacements) {
         replacedHtml = replacedHtml.replace(
-            new RegExp(
-                Formatter.escapeRegex('{{' + replacement.token + '}}'),
-                'g',
-            ),
+            new RegExp(Formatter.escapeRegex('{{' + replacement.token + '}}'), 'g'),
             replacement.html || Formatter.escapeHtml(replacement.value),
         );
     }
@@ -102,10 +108,7 @@ export function replaceEmailHtml(html: string, replacements: Replacement[]) {
     // Do two passes to support recursive replacements
     for (const replacement of replacements) {
         replacedHtml = replacedHtml.replace(
-            new RegExp(
-                Formatter.escapeRegex('{{' + replacement.token + '}}'),
-                'g',
-            ),
+            new RegExp(Formatter.escapeRegex('{{' + replacement.token + '}}'), 'g'),
             replacement.html || Formatter.escapeHtml(replacement.value),
         );
     }
@@ -118,10 +121,7 @@ export function replaceEmailText(text: string, replacements: Replacement[]) {
 
     for (const replacement of replacements) {
         replacedText = replacedText.replace(
-            new RegExp(
-                Formatter.escapeRegex('{{' + replacement.token + '}}'),
-                'g',
-            ),
+            new RegExp(Formatter.escapeRegex('{{' + replacement.token + '}}'), 'g'),
             replacement.value,
         );
     }
@@ -129,10 +129,7 @@ export function replaceEmailText(text: string, replacements: Replacement[]) {
     // Two passes to support recursive replacements
     for (const replacement of replacements) {
         replacedText = replacedText.replace(
-            new RegExp(
-                Formatter.escapeRegex('{{' + replacement.token + '}}'),
-                'g',
-            ),
+            new RegExp(Formatter.escapeRegex('{{' + replacement.token + '}}'), 'g'),
             replacement.value,
         );
     }
@@ -198,18 +195,20 @@ export class Recipient extends AutoEncoder {
             }),
             Replacement.create({
                 token: 'greeting',
-                value: this.firstName
-                    ? $t('%qP', { name: this.firstName })
-                    : $t('%ZgF'),
+                value: this.firstName ? $t('%qP', { name: this.firstName }) : $t('%ZgF'),
             }),
         ];
     }
 
     merge(recipient: Recipient) {
-        this.firstName = this.firstName !== null && this.firstName.length > 0 ? this.firstName : recipient.firstName;
-        this.lastName = this.lastName !== null && this.lastName.length > 0 ? this.lastName : recipient.lastName;
+        this.firstName =
+            this.firstName !== null && this.firstName.length > 0
+                ? this.firstName
+                : recipient.firstName;
+        this.lastName =
+            this.lastName !== null && this.lastName.length > 0 ? this.lastName : recipient.lastName;
         for (const replacement of recipient.replacements) {
-            const existing = this.replacements.find(r => r.token == replacement.token);
+            const existing = this.replacements.find((r) => r.token == replacement.token);
             if (!existing) {
                 this.replacements.push(replacement);
             } else {
@@ -229,7 +228,7 @@ export class Recipient extends AutoEncoder {
     removeDuplicates() {
         const replacements: Replacement[] = [];
         for (const replacement of this.replacements.slice().reverse()) {
-            if (!replacements.find(r => r.token === replacement.token)) {
+            if (!replacements.find((r) => r.token === replacement.token)) {
                 replacements.unshift(replacement);
             }
         }
@@ -271,7 +270,10 @@ export class EmailAttachment extends AutoEncoder {
         }
 
         // Calculates bytes of base64 string
-        return Math.ceil((this.content.length / 4) * 3) - (this.content.endsWith('==') ? 2 : this.content.endsWith('=') ? 1 : 0);
+        return (
+            Math.ceil((this.content.length / 4) * 3) -
+            (this.content.endsWith('==') ? 2 : this.content.endsWith('=') ? 1 : 0)
+        );
     }
 
     get icon() {

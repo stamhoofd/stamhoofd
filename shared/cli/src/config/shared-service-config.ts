@@ -70,9 +70,13 @@ export const defaultMysqlSortBufferSize = '2M';
  * environment variables (e.g. "512M", "1G"), falling back to safe defaults.
  */
 export function mysqlServerArgs(): string[] {
-    const innodbBufferPoolSize = process.env.STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE ?? defaultMysqlInnodbBufferPoolSize;
-    const bufferPoolInstances = process.env.STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_INSTANCES ?? defaultInnodbBufferPoolInstances;
-    const sortBufferSize = process.env.STAMHOOFD_MYSQL_SORT_BUFFER_SIZE ?? defaultMysqlSortBufferSize;
+    const innodbBufferPoolSize =
+        process.env.STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE ?? defaultMysqlInnodbBufferPoolSize;
+    const bufferPoolInstances =
+        process.env.STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_INSTANCES ??
+        defaultInnodbBufferPoolInstances;
+    const sortBufferSize =
+        process.env.STAMHOOFD_MYSQL_SORT_BUFFER_SIZE ?? defaultMysqlSortBufferSize;
 
     return [
         '--mysql-native-password=ON',

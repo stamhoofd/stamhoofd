@@ -34,9 +34,14 @@ describe('SsoStart command', () => {
 
         expect(log).toHaveBeenCalledWith(expect.stringContaining('Local SSO settings:'));
         expect(log).toHaveBeenCalledWith(expect.stringContaining(`Redirect URI:  ${redirectUri}`));
-        expect(log).toHaveBeenCalledWith(expect.stringContaining('Client secret: stamhoofd-local-secret'));
+        expect(log).toHaveBeenCalledWith(
+            expect.stringContaining('Client secret: stamhoofd-local-secret'),
+        );
         expect(CaddyService.reload).toHaveBeenCalledWith(createContext());
-        expect(ssoService.start).toHaveBeenCalledWith(createContext(), { redirectUris: [redirectUri], background: false });
+        expect(ssoService.start).toHaveBeenCalledWith(createContext(), {
+            redirectUris: [redirectUri],
+            background: false,
+        });
     });
 
     it('starts shared services first when they are not running', async () => {
@@ -48,11 +53,17 @@ describe('SsoStart command', () => {
         await command.run();
 
         expect(startServices).toHaveBeenCalledWith(createContext(), sharedServiceDefinitions);
-        expect(ssoService.start).toHaveBeenCalledWith(createContext(), { redirectUris: [redirectUri], background: true });
+        expect(ssoService.start).toHaveBeenCalledWith(createContext(), {
+            redirectUris: [redirectUri],
+            background: true,
+        });
     });
 });
 
-function createCommand(parseResult: { args: { redirectUri: string }; flags: { background: boolean } }): SsoStart {
+function createCommand(parseResult: {
+    args: { redirectUri: string };
+    flags: { background: boolean };
+}): SsoStart {
     const command = new SsoStart([], {} as any);
     (command as any).config = {};
     (command as any).parse = vi.fn(async () => parseResult);

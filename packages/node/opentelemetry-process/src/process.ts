@@ -39,28 +39,34 @@ export type ProcessOptions = {
     redact?: string[];
     /** Optional destination for applications without a scoped OpenTelemetry log sink. */
     log?: LogSink;
-} & ({
-    /** Interactive passthrough. Output bypasses capture, diagnostics and redaction. */
-    inheritStdio: true;
-    inheritStdin?: never;
-    input?: never;
-    capture?: false;
-    sanitizeStdout?: never;
-} | ({
-    inheritStdio?: false;
-    /** Return raw stdout to the caller; only diagnostics are sanitized. Defaults to false. */
-    capture?: boolean;
-    /** Buffer and sanitize structured stdout before diagnostics; thrown errors withhold output. */
-    sanitizeStdout?: (stdout: string) => string;
-} & ({
-    /** Inherit stdin while retaining output diagnostics; cannot be combined with input. */
-    inheritStdin?: boolean;
-    input?: never;
-} | {
-    inheritStdin?: false;
-    /** Text or a Readable piped with backpressure. Input errors terminate execution. */
-    input?: string | Readable;
-})));
+} & (
+    | {
+          /** Interactive passthrough. Output bypasses capture, diagnostics and redaction. */
+          inheritStdio: true;
+          inheritStdin?: never;
+          input?: never;
+          capture?: false;
+          sanitizeStdout?: never;
+      }
+    | ({
+          inheritStdio?: false;
+          /** Return raw stdout to the caller; only diagnostics are sanitized. Defaults to false. */
+          capture?: boolean;
+          /** Buffer and sanitize structured stdout before diagnostics; thrown errors withhold output. */
+          sanitizeStdout?: (stdout: string) => string;
+      } & (
+          | {
+                /** Inherit stdin while retaining output diagnostics; cannot be combined with input. */
+                inheritStdin?: boolean;
+                input?: never;
+            }
+          | {
+                inheritStdin?: false;
+                /** Text or a Readable piped with backpressure. Input errors terminate execution. */
+                input?: string | Readable;
+            }
+      ))
+);
 
 /** Completed execution, including nonzero exits and controlled termination. */
 export type ProcessResult = {
@@ -89,16 +95,24 @@ export type ProcessResult = {
  * @remarks This function neither throws nor logs. Retained stderr stays available
  * on the original result even when omitted from the message to avoid repetition.
  */
-export function processError(message: string, command: string, result: Pick<ProcessResult, 'code'> & Partial<ProcessResult>): Error {
+export function processError(
+    message: string,
+    command: string,
+    result: Pick<ProcessResult, 'code'> & Partial<ProcessResult>,
+): Error {
     const status = `${message}\n  Command: ${command}\n  Exit code: ${result.code}${result.signal ? `\n  Signal: ${result.signal}` : ''}${result.reason ? `\n  Reason: ${result.reason}` : ''}${result.diagnosticsFile ? `\n  Diagnostics: ${result.diagnosticsFile}` : ''}`;
-    return new Error(result.stderrReported ? status : `${status}\n\n  ${command.split(' ')[0]} stderr:\n    ${(result.stderr ?? '(no stderr returned)').replaceAll('\n', '\n    ')}`);
+    return new Error(
+        result.stderrReported
+            ? status
+            : `${status}\n\n  ${command.split(' ')[0]} stderr:\n    ${(result.stderr ?? '(no stderr returned)').replaceAll('\n', '\n    ')}`,
+    );
 }
 
 /** Hold potential secret prefixes between chunks, redacting before emitting or truncating. */
 function redactor(secrets: string[], emit: (text: string) => void) {
     let pending = '';
     let covered = 0;
-    const longest = Math.max(0, ...secrets.map(secret => secret.length));
+    const longest = Math.max(0, ...secrets.map((secret) => secret.length));
     return (text: string, final = false) => {
         pending += text;
         const end = final ? pending.length : Math.max(0, pending.length - longest);
@@ -117,7 +131,8 @@ function redactor(secrets: string[], emit: (text: string) => void) {
         const ranges: { start: number; end: number }[] = [];
         for (const match of matches.sort((a, b) => a.start - b.start)) {
             const previous = ranges.at(-1);
-            if (previous && match.start < previous.end) previous.end = Math.max(previous.end, match.end);
+            if (previous && match.start < previous.end)
+                previous.end = Math.max(previous.end, match.end);
             else ranges.push({ ...match });
         }
         let ready = '';
@@ -138,7 +153,11 @@ function redactor(secrets: string[], emit: (text: string) => void) {
 }
 
 function redactionValues(values: string[] = []): string[] {
-    return [...new Set(values.filter(Boolean).flatMap(value => [value, JSON.stringify(value).slice(1, -1)]))].sort((a, b) => b.length - a.length);
+    return [
+        ...new Set(
+            values.filter(Boolean).flatMap((value) => [value, JSON.stringify(value).slice(1, -1)]),
+        ),
+    ].sort((a, b) => b.length - a.length);
 }
 
 function sanitize(value: string, secrets: string[]): string {
@@ -157,13 +176,20 @@ function sanitize(value: string, secrets: string[]): string {
  * @returns Display text with terminal escape sequences removed; not a shell script.
  */
 export function formatCommandLine(command: string, args: string[], redact: string[] = []): string {
-    return sanitize([command, ...args].map(value => /^[\w./:=@+-]+$/.test(value) ? value : JSON.stringify(value)).join(' '), redactionValues(redact));
+    return sanitize(
+        [command, ...args]
+            .map((value) => (/^[\w./:=@+-]+$/.test(value) ? value : JSON.stringify(value)))
+            .join(' '),
+        redactionValues(redact),
+    );
 }
 
 function finishResult(result: ProcessResult): ProcessResult {
     try {
         trace.getActiveSpan()?.setAttribute('process.exit.code', result.code);
-    } catch { /* Span processors are best-effort. */ }
+    } catch {
+        /* Span processors are best-effort. */
+    }
     if (result.code !== 0) markSpanFailed();
     return result;
 }
@@ -193,182 +219,294 @@ function finishResult(result: ProcessResult): ProcessResult {
  * if (result.code !== 0) throw processError('Could not inspect repository.', 'git status', result);
  * ```
  */
-export const runProcess = instrument('process.run', async function (command: string, args: string[], options: ProcessOptions = {}): Promise<ProcessResult> {
-    const emit: LogSink = (level, message, fields) => {
+export const runProcess = instrument(
+    'process.run',
+    async function (
+        command: string,
+        args: string[],
+        options: ProcessOptions = {},
+    ): Promise<ProcessResult> {
+        const emit: LogSink = (level, message, fields) => {
+            try {
+                return (options.log ?? log)(level, message, {
+                    ...fields,
+                    'diagnostic.output.style': options.outputStyle,
+                });
+            } catch {
+                return false;
+            }
+        };
+        const secrets = redactionValues(options.redact);
+        const clean = (value: string) => sanitize(value, secrets);
+        diagnostic(
+            { kind: 'command', message: formatCommandLine(command, args, options.redact) },
+            emit,
+        );
+        if ((options.inheritStdin || options.inheritStdio) && options.input !== undefined)
+            throw new Error('Inherited stdin cannot be combined with input.');
+        if (options.inheritStdio && (options.capture || options.sanitizeStdout !== undefined))
+            throw new Error(
+                'Inherited stdio cannot be combined with capture or stdout sanitization.',
+            );
+        if (options.inheritStdio && options.output === 'on-failure')
+            throw new Error('Inherited stdio cannot retain failure diagnostics.');
+        for (const limit of [
+            options.timeoutMs,
+            options.killAfterMs,
+            options.maxCaptureChars,
+            options.maxDiagnosticChars,
+        ]) {
+            if (limit !== undefined && (!Number.isFinite(limit) || limit < 0))
+                throw new Error('Process limits must be finite nonnegative numbers.');
+        }
+        if (options.signal?.aborted)
+            return finishResult({
+                code: 130,
+                signal: null,
+                reason: 'aborted',
+                stdout: '',
+                stderr: '(no stderr returned)',
+            });
+        const directory =
+            options.output === 'on-failure'
+                ? fs.mkdtempSync(path.join(os.tmpdir(), 'process-log-'))
+                : undefined;
+        const file = directory ? path.join(directory, 'output.ndjson') : undefined;
+        let fd: number | undefined;
+        let retainSpool = false;
         try {
-            return (options.log ?? log)(level, message, { ...fields, 'diagnostic.output.style': options.outputStyle });
-        } catch {
-            return false;
+            fd = file ? fs.openSync(file, 'wx', 0o600) : undefined;
+        } catch (error) {
+            if (directory) fs.rmSync(directory, { recursive: true, force: true });
+            throw error;
         }
-    };
-    const secrets = redactionValues(options.redact);
-    const clean = (value: string) => sanitize(value, secrets);
-    diagnostic({ kind: 'command', message: formatCommandLine(command, args, options.redact) }, emit);
-    if ((options.inheritStdin || options.inheritStdio) && options.input !== undefined) throw new Error('Inherited stdin cannot be combined with input.');
-    if (options.inheritStdio && (options.capture || options.sanitizeStdout !== undefined)) throw new Error('Inherited stdio cannot be combined with capture or stdout sanitization.');
-    if (options.inheritStdio && options.output === 'on-failure') throw new Error('Inherited stdio cannot retain failure diagnostics.');
-    for (const limit of [options.timeoutMs, options.killAfterMs, options.maxCaptureChars, options.maxDiagnosticChars]) {
-        if (limit !== undefined && (!Number.isFinite(limit) || limit < 0)) throw new Error('Process limits must be finite nonnegative numbers.');
-    }
-    if (options.signal?.aborted) return finishResult({ code: 130, signal: null, reason: 'aborted', stdout: '', stderr: '(no stderr returned)' });
-    const directory = options.output === 'on-failure' ? fs.mkdtempSync(path.join(os.tmpdir(), 'process-log-')) : undefined;
-    const file = directory ? path.join(directory, 'output.ndjson') : undefined;
-    let fd: number | undefined;
-    let retainSpool = false;
-    try {
-        fd = file ? fs.openSync(file, 'wx', 0o600) : undefined;
-    } catch (error) {
-        if (directory) fs.rmSync(directory, { recursive: true, force: true });
-        throw error;
-    }
-    return await new Promise<ProcessResult>((resolve, reject) => {
-        const grouped = options.processGroup === true && process.platform !== 'win32';
-        const child = spawn(command, args, { cwd: options.cwd, env: options.env ?? process.env, detached: grouped, stdio: options.inheritStdio ? 'inherit' : [options.inheritStdin ? 'inherit' : options.input === undefined ? 'ignore' : 'pipe', 'pipe', 'pipe'] });
-        let reason: ProcessResult['reason'];
-        let closed = false;
-        let timeout: ReturnType<typeof setTimeout> | undefined;
-        let escalation: ReturnType<typeof setTimeout> | undefined;
-        let escalated: Promise<void> | undefined;
-        const kill = (signal: NodeJS.Signals) => {
-            try {
-                if (grouped && child.pid) process.kill(-child.pid, signal);
-                else child.kill(signal);
-            } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ESRCH') child.kill(signal); }
-        };
-        const stop = (cause: NonNullable<ProcessResult['reason']>) => {
-            if (reason || closed) return;
-            reason = cause;
-            kill('SIGTERM');
-            escalated = new Promise<void>((resolve) => {
-                escalation = setTimeout(() => {
-                    kill('SIGKILL');
-                    resolve();
-                }, options.killAfterMs ?? 2000);
+        return await new Promise<ProcessResult>((resolve, reject) => {
+            const grouped = options.processGroup === true && process.platform !== 'win32';
+            const child = spawn(command, args, {
+                cwd: options.cwd,
+                env: options.env ?? process.env,
+                detached: grouped,
+                stdio: options.inheritStdio
+                    ? 'inherit'
+                    : [
+                          options.inheritStdin
+                              ? 'inherit'
+                              : options.input === undefined
+                                ? 'ignore'
+                                : 'pipe',
+                          'pipe',
+                          'pipe',
+                      ],
             });
-        };
-        const abort = () => stop('aborted');
-        options.signal?.addEventListener('abort', abort, { once: true });
-        if (options.signal?.aborted) abort();
-        if (options.timeoutMs !== undefined) timeout = setTimeout(() => stop('timeout'), options.timeoutMs);
-        const cleanup = () => {
-            closed = true;
-            if (timeout) clearTimeout(timeout);
-            if (escalation) clearTimeout(escalation);
-            options.signal?.removeEventListener('abort', abort);
-        };
-        if (child.stdin && options.input !== undefined) {
-            const input = typeof options.input === 'string' ? Readable.from([options.input]) : options.input;
-            void pipeline(input, child.stdin).catch((error: NodeJS.ErrnoException) => {
-                if (error.code !== 'EPIPE' && error.code !== 'ERR_STREAM_PREMATURE_CLOSE') stop('input-error');
-            });
-        }
-        let stdout = '';
-        let stderr = '';
-        let truncated = false;
-        let diagnosticSize = 0;
-        let diagnosticLimit = false;
-        let stderrReported = true;
-        let hasStderr = false;
-        let spoolError: unknown;
-        const output = (text: string, kind: 'stdout' | 'stderr') => {
-            if (fd !== undefined) {
+            let reason: ProcessResult['reason'];
+            let closed = false;
+            let timeout: ReturnType<typeof setTimeout> | undefined;
+            let escalation: ReturnType<typeof setTimeout> | undefined;
+            let escalated: Promise<void> | undefined;
+            const kill = (signal: NodeJS.Signals) => {
                 try {
-                    fs.writeSync(fd, JSON.stringify({ kind, text }) + '\n');
+                    if (grouped && child.pid) process.kill(-child.pid, signal);
+                    else child.kill(signal);
                 } catch (error) {
-                    spoolError = error;
-                    stop('output-limit');
+                    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') child.kill(signal);
                 }
-                return false;
+            };
+            const stop = (cause: NonNullable<ProcessResult['reason']>) => {
+                if (reason || closed) return;
+                reason = cause;
+                kill('SIGTERM');
+                escalated = new Promise<void>((resolve) => {
+                    escalation = setTimeout(() => {
+                        kill('SIGKILL');
+                        resolve();
+                    }, options.killAfterMs ?? 2000);
+                });
+            };
+            const abort = () => stop('aborted');
+            options.signal?.addEventListener('abort', abort, { once: true });
+            if (options.signal?.aborted) abort();
+            if (options.timeoutMs !== undefined)
+                timeout = setTimeout(() => stop('timeout'), options.timeoutMs);
+            const cleanup = () => {
+                closed = true;
+                if (timeout) clearTimeout(timeout);
+                if (escalation) clearTimeout(escalation);
+                options.signal?.removeEventListener('abort', abort);
+            };
+            if (child.stdin && options.input !== undefined) {
+                const input =
+                    typeof options.input === 'string'
+                        ? Readable.from([options.input])
+                        : options.input;
+                void pipeline(input, child.stdin).catch((error: NodeJS.ErrnoException) => {
+                    if (error.code !== 'EPIPE' && error.code !== 'ERR_STREAM_PREMATURE_CLOSE')
+                        stop('input-error');
+                });
             }
-            if (diagnosticLimit) return false;
-            diagnosticSize += text.length;
-            if (diagnosticSize > (options.maxDiagnosticChars ?? 1024 * 1024)) {
-                diagnosticLimit = true;
-                diagnostic({ kind: 'output', stream: kind, message: '[process diagnostics truncated]\n', always: options.output === 'always' }, emit);
-                return false;
-            }
-            return diagnostic({ kind: 'output', stream: kind, message: text, always: options.output === 'always' }, emit);
-        };
-        const stdoutDiagnostic = redactor(secrets, text => output(text, 'stdout'));
-        const stderrDiagnostic = redactor(secrets, (text) => {
-            stderr += stripVTControlCharacters(text);
-            if (stderr.length > 8192) {
-                truncated = true;
-                stderr = stderr.slice(-8192);
-            }
-            hasStderr = true;
-            stderrReported = output(text, 'stderr') && stderrReported;
-        });
-        child.stdout?.setEncoding('utf8');
-        child.stderr?.setEncoding('utf8');
-        child.stdout?.on('data', (text: string) => {
-            if (options.capture || options.sanitizeStdout) {
-                const remaining = Math.max(0, (options.maxCaptureChars ?? 16 * 1024 * 1024) - stdout.length);
-                stdout += text.slice(0, remaining);
-                if (text.length > remaining) stop('output-limit');
-            }
-            if (!options.sanitizeStdout) stdoutDiagnostic(text);
-        });
-        child.stderr?.on('data', (text: string) => stderrDiagnostic(text));
-        child.once('error', (error) => {
-            cleanup();
-            reject(new Error(clean(error.message)));
-        });
-        const finish = async (code: number | null, signal: NodeJS.Signals | null) => {
-            if (closed) return;
-            try {
-                if (grouped && child.pid && escalated) {
-                    let exists = true;
+            let stdout = '';
+            let stderr = '';
+            let truncated = false;
+            let diagnosticSize = 0;
+            let diagnosticLimit = false;
+            let stderrReported = true;
+            let hasStderr = false;
+            let spoolError: unknown;
+            const output = (text: string, kind: 'stdout' | 'stderr') => {
+                if (fd !== undefined) {
                     try {
-                        process.kill(-child.pid, 0);
+                        fs.writeSync(fd, JSON.stringify({ kind, text }) + '\n');
                     } catch (error) {
-                        if ((error as NodeJS.ErrnoException).code === 'ESRCH') exists = false;
+                        spoolError = error;
+                        stop('output-limit');
                     }
-                    if (exists) await escalated;
+                    return false;
                 }
-                cleanup();
-                if (options.sanitizeStdout) {
-                    let safe: string;
-                    try {
-                        safe = reason === 'output-limit' ? '[stdout withheld: capture limit exceeded]\n' : options.sanitizeStdout(stdout);
-                    } catch {
-                        safe = '[stdout withheld: unable to sanitize structured output]\n';
-                    }
-                    stdoutDiagnostic(safe, true);
-                } else stdoutDiagnostic('', true);
-                stderrDiagnostic('', true);
-                // eslint-disable-next-line security/detect-object-injection -- Node supplies the signal name; this reads the OS signal-number table.
-                const status = reason ? reason === 'aborted' ? 130 : reason === 'timeout' ? 124 : 1 : code ?? (signal ? 128 + constants.signals[signal] : 1);
-                if (spoolError) throw new Error(`Could not retain process diagnostics: ${clean(spoolError instanceof Error ? spoolError.message : 'Unknown write error')}`);
-                if (file && status !== 0 && reason !== 'aborted') {
-                    stderrReported = true;
-                    const lines = createInterface({ input: fs.createReadStream(file), crlfDelay: Infinity });
-                    for await (const line of lines) {
-                        const record = JSON.parse(line) as { kind: 'stdout' | 'stderr'; text: string };
-                        const reported = emit('error', record.text, { 'diagnostic.kind': record.kind });
-                        if (reported !== true) retainSpool = true;
-                        if (record.kind === 'stderr') stderrReported = reported === true && stderrReported;
-                    }
+                if (diagnosticLimit) return false;
+                diagnosticSize += text.length;
+                if (diagnosticSize > (options.maxDiagnosticChars ?? 1024 * 1024)) {
+                    diagnosticLimit = true;
+                    diagnostic(
+                        {
+                            kind: 'output',
+                            stream: kind,
+                            message: '[process diagnostics truncated]\n',
+                            always: options.output === 'always',
+                        },
+                        emit,
+                    );
+                    return false;
                 }
-                resolve(finishResult({ code: status, signal: signal ?? null, reason, stderrReported: (hasStderr || !!file && status !== 0 && reason !== 'aborted') && stderrReported, diagnosticsFile: retainSpool ? file : undefined, stdout: options.capture ? stdout : '', stderr: `${truncated ? '[stderr truncated]\n' : ''}${stderr.trim() || '(no stderr returned)'}` }));
-            } catch (error) {
+                return diagnostic(
+                    {
+                        kind: 'output',
+                        stream: kind,
+                        message: text,
+                        always: options.output === 'always',
+                    },
+                    emit,
+                );
+            };
+            const stdoutDiagnostic = redactor(secrets, (text) => output(text, 'stdout'));
+            const stderrDiagnostic = redactor(secrets, (text) => {
+                stderr += stripVTControlCharacters(text);
+                if (stderr.length > 8192) {
+                    truncated = true;
+                    stderr = stderr.slice(-8192);
+                }
+                hasStderr = true;
+                stderrReported = output(text, 'stderr') && stderrReported;
+            });
+            child.stdout?.setEncoding('utf8');
+            child.stderr?.setEncoding('utf8');
+            child.stdout?.on('data', (text: string) => {
+                if (options.capture || options.sanitizeStdout) {
+                    const remaining = Math.max(
+                        0,
+                        (options.maxCaptureChars ?? 16 * 1024 * 1024) - stdout.length,
+                    );
+                    stdout += text.slice(0, remaining);
+                    if (text.length > remaining) stop('output-limit');
+                }
+                if (!options.sanitizeStdout) stdoutDiagnostic(text);
+            });
+            child.stderr?.on('data', (text: string) => stderrDiagnostic(text));
+            child.once('error', (error) => {
                 cleanup();
-                reject(error);
-            }
-        };
-        child.once('close', (code: number | null, signal: NodeJS.Signals | null) => {
-            void finish(code, signal);
+                reject(new Error(clean(error.message)));
+            });
+            const finish = async (code: number | null, signal: NodeJS.Signals | null) => {
+                if (closed) return;
+                try {
+                    if (grouped && child.pid && escalated) {
+                        let exists = true;
+                        try {
+                            process.kill(-child.pid, 0);
+                        } catch (error) {
+                            if ((error as NodeJS.ErrnoException).code === 'ESRCH') exists = false;
+                        }
+                        if (exists) await escalated;
+                    }
+                    cleanup();
+                    if (options.sanitizeStdout) {
+                        let safe: string;
+                        try {
+                            safe =
+                                reason === 'output-limit'
+                                    ? '[stdout withheld: capture limit exceeded]\n'
+                                    : options.sanitizeStdout(stdout);
+                        } catch {
+                            safe = '[stdout withheld: unable to sanitize structured output]\n';
+                        }
+                        stdoutDiagnostic(safe, true);
+                    } else stdoutDiagnostic('', true);
+                    stderrDiagnostic('', true);
+                    // eslint-disable-next-line security/detect-object-injection -- Node supplies the signal name; this reads the OS signal-number table.
+                    const status = reason
+                        ? reason === 'aborted'
+                            ? 130
+                            : reason === 'timeout'
+                              ? 124
+                              : 1
+                        : (code ?? (signal ? 128 + constants.signals[signal] : 1));
+                    if (spoolError)
+                        throw new Error(
+                            `Could not retain process diagnostics: ${clean(spoolError instanceof Error ? spoolError.message : 'Unknown write error')}`,
+                        );
+                    if (file && status !== 0 && reason !== 'aborted') {
+                        stderrReported = true;
+                        const lines = createInterface({
+                            input: fs.createReadStream(file),
+                            crlfDelay: Infinity,
+                        });
+                        for await (const line of lines) {
+                            const record = JSON.parse(line) as {
+                                kind: 'stdout' | 'stderr';
+                                text: string;
+                            };
+                            const reported = emit('error', record.text, {
+                                'diagnostic.kind': record.kind,
+                            });
+                            if (reported !== true) retainSpool = true;
+                            if (record.kind === 'stderr')
+                                stderrReported = reported === true && stderrReported;
+                        }
+                    }
+                    resolve(
+                        finishResult({
+                            code: status,
+                            signal: signal ?? null,
+                            reason,
+                            stderrReported:
+                                (hasStderr || (!!file && status !== 0 && reason !== 'aborted')) &&
+                                stderrReported,
+                            diagnosticsFile: retainSpool ? file : undefined,
+                            stdout: options.capture ? stdout : '',
+                            stderr: `${truncated ? '[stderr truncated]\n' : ''}${stderr.trim() || '(no stderr returned)'}`,
+                        }),
+                    );
+                } catch (error) {
+                    cleanup();
+                    reject(error);
+                }
+            };
+            child.once('close', (code: number | null, signal: NodeJS.Signals | null) => {
+                void finish(code, signal);
+            });
+        }).finally(() => {
+            if (fd !== undefined) fs.closeSync(fd);
+            if (directory && !retainSpool) fs.rmSync(directory, { recursive: true, force: true });
         });
-    }).finally(() => {
-        if (fd !== undefined) fs.closeSync(fd);
-        if (directory && !retainSpool) fs.rmSync(directory, { recursive: true, force: true });
-    });
-}, { fields: ([command, args, options]) => ({
-    'process.executable.name': command,
-    'operation.label': options?.label === false
-        ? undefined
-        : options?.label === undefined
-            ? formatCommandLine(command, args, options?.redact)
-            : sanitize(options.label, redactionValues(options.redact)),
-    'operation.label.kind': options?.label === undefined ? 'command' : 'description',
-}) });
+    },
+    {
+        fields: ([command, args, options]) => ({
+            'process.executable.name': command,
+            'operation.label':
+                options?.label === false
+                    ? undefined
+                    : options?.label === undefined
+                      ? formatCommandLine(command, args, options?.redact)
+                      : sanitize(options.label, redactionValues(options.redact)),
+            'operation.label.kind': options?.label === undefined ? 'command' : 'description',
+        }),
+    },
+);

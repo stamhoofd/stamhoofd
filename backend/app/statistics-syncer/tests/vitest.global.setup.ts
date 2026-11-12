@@ -19,11 +19,11 @@ export async function setup() {
     const { runStatisticsMigrations } = await import('../src/schema.js');
 
     // The sync reads the source tables, so the main database has to be migrated as well.
-    if (!await Migration.runAll(path.dirname(modelsPath) + '/migrations')) {
+    if (!(await Migration.runAll(path.dirname(modelsPath) + '/migrations'))) {
         throw new Error('Migrations failed');
     }
 
     await runStatisticsMigrations();
     await endStatisticsConnection();
     await Database.end();
-};
+}

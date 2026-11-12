@@ -104,6 +104,8 @@ describe('Endpoint.GetPackagesEndpoint', () => {
             },
         });
 
-        await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 });

@@ -25,7 +25,11 @@ export class PatchOrganizationMandatesEndpoint extends Endpoint<Params, Query, B
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/mandates', { sellingOrganizationId: String });
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/billing/@sellingOrganizationId/mandates',
+            { sellingOrganizationId: String },
+        );
 
         if (params) {
             return [true, params as Params];
@@ -57,7 +61,12 @@ export class PatchOrganizationMandatesEndpoint extends Endpoint<Params, Query, B
             });
         }
 
-        if (!await Context.auth.canViewPaymentMandates({ payingOrganizationId: payingOrganization.id, sellingOrganizationId: sellingOrganization.id })) {
+        if (
+            !(await Context.auth.canViewPaymentMandates({
+                payingOrganizationId: payingOrganization.id,
+                sellingOrganizationId: sellingOrganization.id,
+            }))
+        ) {
             throw Context.auth.error();
         }
 
@@ -68,7 +77,7 @@ export class PatchOrganizationMandatesEndpoint extends Endpoint<Params, Query, B
         });
 
         for (const patch of request.body.getPatches()) {
-            const mandate = mandates.find(m => m.id === patch.id);
+            const mandate = mandates.find((m) => m.id === patch.id);
             if (!mandate) {
                 throw new SimpleError({
                     code: 'not_found',
@@ -79,7 +88,7 @@ export class PatchOrganizationMandatesEndpoint extends Endpoint<Params, Query, B
 
             if (patch.blockedAt !== undefined) {
                 // Only the seller can block or unblock
-                if (!await Context.auth.canManagePayments(sellingOrganization.id)) {
+                if (!(await Context.auth.canManagePayments(sellingOrganization.id))) {
                     throw Context.auth.error();
                 }
 
@@ -102,7 +111,7 @@ export class PatchOrganizationMandatesEndpoint extends Endpoint<Params, Query, B
             }
 
             if (patch.isDefault === true) {
-                if (!await Context.auth.canManageFinances(payingOrganization.id)) {
+                if (!(await Context.auth.canManageFinances(payingOrganization.id))) {
                     throw Context.auth.error();
                 }
 

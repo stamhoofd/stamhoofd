@@ -1,10 +1,22 @@
 import { Request } from '@node/endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { Member, Organization, Token, User } from '@stamhoofd/models';
-import { Email, EmailRecipient, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
+import {
+    Email,
+    EmailRecipient,
+    MemberFactory,
+    OrganizationFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { EmailRecipientsStatus, EmailStatus, OrganizationEmail, Permissions, ResourcePermissions } from '@stamhoofd/structures';
+import {
+    EmailRecipientsStatus,
+    EmailStatus,
+    OrganizationEmail,
+    Permissions,
+    ResourcePermissions,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -35,10 +47,18 @@ describe('Endpoint.RetryEmailRecipient', () => {
             permissions: Permissions.create({
                 level: PermissionLevel.None,
                 resources: new Map([
-                    [PermissionsResourceType.Senders, new Map([[sender.id, ResourcePermissions.create({
-                        resourceName: sender.name!,
-                        level: PermissionLevel.Write,
-                    })]])],
+                    [
+                        PermissionsResourceType.Senders,
+                        new Map([
+                            [
+                                sender.id,
+                                ResourcePermissions.create({
+                                    resourceName: sender.name!,
+                                    level: PermissionLevel.Write,
+                                }),
+                            ],
+                        ]),
+                    ],
                 ]),
             }),
         }).create();
@@ -56,7 +76,11 @@ describe('Endpoint.RetryEmailRecipient', () => {
     });
 
     const retry = async (recipient: EmailRecipient) => {
-        const request = Request.buildJson('POST', `/email-recipients/${recipient.id}/retry`, organization.getApiHost());
+        const request = Request.buildJson(
+            'POST',
+            `/email-recipients/${recipient.id}/retry`,
+            organization.getApiHost(),
+        );
         request.headers.authorization = 'Bearer ' + adminToken.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -99,10 +123,14 @@ describe('Endpoint.RetryEmailRecipient', () => {
         for (const member of members) {
             expect(serialized).not.toContain(member.details.securityCode!.substring(0, 4));
         }
-        expect(response.body.replacements.find(r => r.token === 'loginDetails')?.html).toContain('••••');
-        expect(response.body.replacements.find(r => r.token === 'unsubscribeUrl')?.value).toContain('token=example');
+        expect(response.body.replacements.find((r) => r.token === 'loginDetails')?.html).toContain(
+            '••••',
+        );
+        expect(
+            response.body.replacements.find((r) => r.token === 'unsubscribeUrl')?.value,
+        ).toContain('token=example');
 
         await recipient.refresh();
-        expect(recipient.replacements.find(r => r.token === 'loginDetails')).toBeUndefined();
+        expect(recipient.replacements.find((r) => r.token === 'loginDetails')).toBeUndefined();
     });
 });

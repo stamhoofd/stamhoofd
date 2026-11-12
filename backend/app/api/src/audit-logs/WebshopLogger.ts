@@ -25,11 +25,14 @@ export const WebshopLogger = new ModelLogger(Webshop, {
 
     createReplacements: (model) => {
         return new Map([
-            ['w', AuditLogReplacement.create({
-                id: model.id,
-                value: model.meta.name,
-                type: AuditLogReplacementType.Webshop,
-            })],
+            [
+                'w',
+                AuditLogReplacement.create({
+                    id: model.id,
+                    value: model.meta.name,
+                    type: AuditLogReplacementType.Webshop,
+                }),
+            ],
         ]);
     },
 });

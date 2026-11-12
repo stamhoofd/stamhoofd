@@ -18,7 +18,11 @@ export class ContainerStoppedError extends Error {
     }
 }
 
-export async function containerStatus(name: string, serviceName: string, detail: string): Promise<ServiceStatus> {
+export async function containerStatus(
+    name: string,
+    serviceName: string,
+    detail: string,
+): Promise<ServiceStatus> {
     return {
         name: serviceName,
         running: await docker.containerIsRunning(name),
@@ -34,7 +38,10 @@ export async function tailContainerLogs(name: string): Promise<void> {
     await docker.run(['logs', '-f', name], { allowFailure: true, verbosity: RunVerbosity.Output });
 }
 
-export abstract class DockerService<TOptions = void, TPrepared = void> implements ServiceDefinition<TOptions> {
+export abstract class DockerService<
+    TOptions = void,
+    TPrepared = void,
+> implements ServiceDefinition<TOptions> {
     abstract key: string;
     abstract name: string;
 
@@ -42,7 +49,11 @@ export abstract class DockerService<TOptions = void, TPrepared = void> implement
     readonly runQuiet: boolean = true;
 
     abstract getContainer(context: CliContext): string;
-    abstract getDockerArgs(context: CliContext, options: TOptions, prepared: PreparedValue<TPrepared>): MaybePromise<string[]>;
+    abstract getDockerArgs(
+        context: CliContext,
+        options: TOptions,
+        prepared: PreparedValue<TPrepared>,
+    ): MaybePromise<string[]>;
 
     getDetail(_context: CliContext): MaybePromise<string> {
         return '';
@@ -52,21 +63,40 @@ export abstract class DockerService<TOptions = void, TPrepared = void> implement
         return undefined;
     }
 
-    prepare(_context: CliContext, _options: TOptions, _status: ServiceStatus): MaybePromise<PreparedValue<TPrepared>> {
+    prepare(
+        _context: CliContext,
+        _options: TOptions,
+        _status: ServiceStatus,
+    ): MaybePromise<PreparedValue<TPrepared>> {
         return undefined;
     }
 
-    canReuse(_context: CliContext, _options: TOptions, _prepared: PreparedValue<TPrepared>, status: ServiceStatus): MaybePromise<boolean> {
+    canReuse(
+        _context: CliContext,
+        _options: TOptions,
+        _prepared: PreparedValue<TPrepared>,
+        status: ServiceStatus,
+    ): MaybePromise<boolean> {
         return status.running;
     }
 
-    beforeRun(_context: CliContext, _options: TOptions, _prepared: PreparedValue<TPrepared>): MaybePromise<void> {
-    }
+    beforeRun(
+        _context: CliContext,
+        _options: TOptions,
+        _prepared: PreparedValue<TPrepared>,
+    ): MaybePromise<void> {}
 
-    afterRun(_context: CliContext, _options: TOptions, _prepared: PreparedValue<TPrepared>): MaybePromise<void> {
-    }
+    afterRun(
+        _context: CliContext,
+        _options: TOptions,
+        _prepared: PreparedValue<TPrepared>,
+    ): MaybePromise<void> {}
 
-    getEnv(_context: CliContext, _options: TOptions, _prepared: PreparedValue<TPrepared>): MaybePromise<NodeJS.ProcessEnv | undefined> {
+    getEnv(
+        _context: CliContext,
+        _options: TOptions,
+        _prepared: PreparedValue<TPrepared>,
+    ): MaybePromise<NodeJS.ProcessEnv | undefined> {
         return undefined;
     }
 
@@ -74,7 +104,11 @@ export abstract class DockerService<TOptions = void, TPrepared = void> implement
         return `${status.name} already running`;
     }
 
-    startedMessage(_context: CliContext, _options: TOptions, _prepared: PreparedValue<TPrepared>): string {
+    startedMessage(
+        _context: CliContext,
+        _options: TOptions,
+        _prepared: PreparedValue<TPrepared>,
+    ): string {
         return `${this.name} started`;
     }
 
@@ -84,7 +118,11 @@ export abstract class DockerService<TOptions = void, TPrepared = void> implement
 
     async status(context: CliContext): Promise<ServiceStatus> {
         return {
-            ...await containerStatus(this.getContainer(context), this.name, await this.getDetail(context)),
+            ...(await containerStatus(
+                this.getContainer(context),
+                this.name,
+                await this.getDetail(context),
+            )),
             login: await this.getLogin(context),
         };
     }
@@ -100,12 +138,26 @@ export abstract class DockerService<TOptions = void, TPrepared = void> implement
 
         await stopContainer(this.getContainer(context), context.verbose);
         await this.beforeRun(context, options, prepared);
-        await docker.run(await this.getDockerArgs(context, options, prepared), { verbosity: this.runQuiet ? (context.verbosity ?? RunVerbosity.Quiet) : RunVerbosity.Output });
+        await docker.run(await this.getDockerArgs(context, options, prepared), {
+            verbosity: this.runQuiet
+                ? (context.verbosity ?? RunVerbosity.Quiet)
+                : RunVerbosity.Output,
+        });
         const afterStart = await this.status(context);
         if (!afterStart.running) {
             const logs = await docker.getContainerLogs(this.getContainer(context));
-            const lastLine = logs.split('\n').map(line => line.trim()).filter(Boolean).at(-1) ?? `${this.name} stopped immediately after start`;
-            throw new ContainerStoppedError(`${this.name} stopped immediately after start`, this.name, lastLine, logs || lastLine);
+            const lastLine =
+                logs
+                    .split('\n')
+                    .map((line) => line.trim())
+                    .filter(Boolean)
+                    .at(-1) ?? `${this.name} stopped immediately after start`;
+            throw new ContainerStoppedError(
+                `${this.name} stopped immediately after start`,
+                this.name,
+                lastLine,
+                logs || lastLine,
+            );
         }
         await this.afterRun(context, options, prepared);
 
@@ -127,5 +179,7 @@ export abstract class DockerService<TOptions = void, TPrepared = void> implement
     }
 }
 
-export abstract class SharedDockerService<TPrepared = void> extends DockerService<void, TPrepared> {
-}
+export abstract class SharedDockerService<TPrepared = void> extends DockerService<
+    void,
+    TPrepared
+> {}

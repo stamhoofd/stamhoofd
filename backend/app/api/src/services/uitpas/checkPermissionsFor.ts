@@ -22,14 +22,16 @@ function assertIsPermissionsResponse(json: unknown): asserts json is Permissions
 
     for (const item of json) {
         if (
-            typeof item !== 'object' || item === null
-            || !('organizer' in item)
-            || typeof (item as any).organizer !== 'object' || (item as any).organizer === null
-            || typeof (item as any).organizer.id !== 'string'
-            || typeof (item as any).organizer.name !== 'string'
-            || !('permissions' in item)
-            || !Array.isArray((item as any).permissions)
-            || !(item as any).permissions.every((perm: unknown) => typeof perm === 'string')
+            typeof item !== 'object' ||
+            item === null ||
+            !('organizer' in item) ||
+            typeof (item as any).organizer !== 'object' ||
+            (item as any).organizer === null ||
+            typeof (item as any).organizer.id !== 'string' ||
+            typeof (item as any).organizer.name !== 'string' ||
+            !('permissions' in item) ||
+            !Array.isArray((item as any).permissions) ||
+            !(item as any).permissions.every((perm: unknown) => typeof perm === 'string')
         ) {
             console.error('Invalid PermissionsResponse:', json);
             throw new SimpleError({
@@ -41,7 +43,11 @@ function assertIsPermissionsResponse(json: unknown): asserts json is Permissions
     }
 }
 
-export async function checkPermissionsFor(access_token: string, organizationId: string | null, uitpasOrganizerId: string) {
+export async function checkPermissionsFor(
+    access_token: string,
+    organizationId: string | null,
+    uitpasOrganizerId: string,
+) {
     const url = `${STAMHOOFD.UITPAS_API_URL}/permissions`;
     const myHeaders = new Headers();
     myHeaders.append('Authorization', 'Bearer ' + access_token);
@@ -58,7 +64,10 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
         });
     });
     if (!response.ok) {
-        console.error(`Unsuccessful response whe n checking UiTPAS permissions for organization with id ${organizationId}:`, response.statusText);
+        console.error(
+            `Unsuccessful response whe n checking UiTPAS permissions for organization with id ${organizationId}:`,
+            response.statusText,
+        );
         throw new SimpleError({
             code: 'unsuccessful_response_checking_permissions',
             message: 'Unsuccesful response when checking UiTPAS permissions',
@@ -74,33 +83,51 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
         });
     });
     assertIsPermissionsResponse(json);
-    const neededPermissions = [{
-        permission: 'PASSES_READ',
-        human: 'Basis UiTPAS informatie ophalen met UiTPAS nummer',
-    }];
+    const neededPermissions = [
+        {
+            permission: 'PASSES_READ',
+            human: 'Basis UiTPAS informatie ophalen met UiTPAS nummer',
+        },
+    ];
     if (organizationId) {
-        neededPermissions.push(...[{
-            permission: 'TARIFFS_READ',
-            human: 'Tarieven opvragen',
-        }, {
-            permission: 'TICKETSALES_REGISTER',
-            human: 'Ticketsales registreren',
-        }, {
-            permission: 'TICKETSALES_SEARCH',
-            human: 'Ticketsales zoeken',
-        }]);
+        neededPermissions.push(
+            ...[
+                {
+                    permission: 'TARIFFS_READ',
+                    human: 'Tarieven opvragen',
+                },
+                {
+                    permission: 'TICKETSALES_REGISTER',
+                    human: 'Ticketsales registreren',
+                },
+                {
+                    permission: 'TICKETSALES_SEARCH',
+                    human: 'Ticketsales zoeken',
+                },
+            ],
+        );
     }
-    const item = json.find(item => item.organizer.id === uitpasOrganizerId);
+    const item = json.find((item) => item.organizer.id === uitpasOrganizerId);
     if (!item) {
-        const organizers = Formatter.joinLast(json.map(i => i.organizer.name), ', ', ' ' + $t('%1BM') + ' ');
+        const organizers = Formatter.joinLast(
+            json.map((i) => i.organizer.name),
+            ', ',
+            ' ' + $t('%1BM') + ' ',
+        );
         return {
             status: UitpasClientCredentialsStatus.NoPermissions,
             human: $t('%1BN') + organizers,
         };
     }
-    const missingPermissions = neededPermissions.filter(needed => !item.permissions.includes(needed.permission));
+    const missingPermissions = neededPermissions.filter(
+        (needed) => !item.permissions.includes(needed.permission),
+    );
     if (missingPermissions.length > 0) {
-        const missingPermissionsHuman = Formatter.joinLast(missingPermissions.map(p => p.human), ', ', ' ' + $t('%1BM') + ' ');
+        const missingPermissionsHuman = Formatter.joinLast(
+            missingPermissions.map((p) => p.human),
+            ', ',
+            ' ' + $t('%1BM') + ' ',
+        );
         return {
             status: UitpasClientCredentialsStatus.MissingPermissions,
             human: $t('%1BO') + missingPermissionsHuman,

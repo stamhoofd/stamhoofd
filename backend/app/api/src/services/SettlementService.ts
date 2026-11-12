@@ -88,16 +88,24 @@ export class SettlementService {
      * Interrupting a walk is opt-in: the caller's signal governs the whole sync (so it stops as
      * one, and every caller in it recognizes the abort), and a caller without one walks to the end.
      */
-    static lock<T>(provider: PaymentProvider, externalId: string, handler: (abort: AbortSignal) => Promise<T>, { abort }: { abort?: AbortSignal } = {}): Promise<T> {
-        return QueueHandler.schedule('settlement-sync-' + provider + '-' + externalId, async (o) => {
-            const signal = abort ?? o.abort;
+    static lock<T>(
+        provider: PaymentProvider,
+        externalId: string,
+        handler: (abort: AbortSignal) => Promise<T>,
+        { abort }: { abort?: AbortSignal } = {},
+    ): Promise<T> {
+        return QueueHandler.schedule(
+            'settlement-sync-' + provider + '-' + externalId,
+            async (o) => {
+                const signal = abort ?? o.abort;
 
-            // Waiting behind another settlement may have taken a while: don't start a walk that is
-            // interrupted at its first step anyway
-            signal.throwIfAborted();
+                // Waiting behind another settlement may have taken a while: don't start a walk that is
+                // interrupted at its first step anyway
+                signal.throwIfAborted();
 
-            return await handler(signal);
-        });
+                return await handler(signal);
+            },
+        );
     }
 
     static getPeriodStart(date: Date): Date {
@@ -116,8 +124,13 @@ export class SettlementService {
      * before the next month).
      */
     static getMonthUnixStartEnd(date: Date) {
-        const start = Math.floor((new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0).getTime()) / 1000);
-        const end = Math.ceil((new Date(date.getFullYear(), date.getMonth() + 1, 1, 0, 0, 0, 0).getTime() - 1000) / 1000);
+        const start = Math.floor(
+            new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0, 0).getTime() / 1000,
+        );
+        const end = Math.ceil(
+            (new Date(date.getFullYear(), date.getMonth() + 1, 1, 0, 0, 0, 0).getTime() - 1000) /
+                1000,
+        );
         return { start, end };
     }
 
@@ -131,7 +144,8 @@ export class SettlementService {
         if (!membershipOrganizationId) {
             throw new SimpleError({
                 code: 'missing_membership_organization',
-                message: 'Platform has no membership organization configured, so platform payouts cannot be attributed to an organization',
+                message:
+                    'Platform has no membership organization configured, so platform payouts cannot be attributed to an organization',
             });
         }
         return membershipOrganizationId;
@@ -142,10 +156,11 @@ export class SettlementService {
      * finishSync/markSyncFailed.
      */
     static async upsertSettlement(data: SettlementData): Promise<Settlement> {
-        const settlement = await Settlement.select()
-            .where('provider', data.provider)
-            .where('externalId', data.externalId)
-            .first(false) ?? new Settlement();
+        const settlement =
+            (await Settlement.select()
+                .where('provider', data.provider)
+                .where('externalId', data.externalId)
+                .first(false)) ?? new Settlement();
 
         settlement.provider = data.provider;
         settlement.externalId = data.externalId;
@@ -175,7 +190,10 @@ export class SettlementService {
      * provider transaction appears in a settlement only once. A derived fee line has no provider
      * transaction, so it upserts on (settlementId, paymentId): one per fee payment and payout.
      */
-    static async upsertPaymentLine(settlement: Settlement, data: PaymentLineData): Promise<PaymentSettlement> {
+    static async upsertPaymentLine(
+        settlement: Settlement,
+        data: PaymentLineData,
+    ): Promise<PaymentSettlement> {
         const query = PaymentSettlement.select()
             .where('settlementId', settlement.id)
             .where('externalId', data.externalId);
@@ -184,7 +202,7 @@ export class SettlementService {
             query.where('paymentId', data.paymentId);
         }
 
-        const line = await query.first(false) ?? new PaymentSettlement();
+        const line = (await query.first(false)) ?? new PaymentSettlement();
 
         line.settlementId = settlement.id;
         line.organizationId = settlement.organizationId;
@@ -207,7 +225,7 @@ export class SettlementService {
             for (const stale of moved) {
                 await stale.delete();
             }
-            await this.refreshTotalsForIds(Formatter.uniqueArray(moved.map(l => l.settlementId)));
+            await this.refreshTotalsForIds(Formatter.uniqueArray(moved.map((l) => l.settlementId)));
         }
 
         return line;
@@ -220,9 +238,9 @@ export class SettlementService {
      * it, when the fee is invoiced.
      */
     static async upsertCharge(data: ChargeData): Promise<SettlementCharge> {
-        const charge = await SettlementCharge.select()
-            .where('externalId', data.externalId)
-            .first(false) ?? new SettlementCharge();
+        const charge =
+            (await SettlementCharge.select().where('externalId', data.externalId).first(false)) ??
+            new SettlementCharge();
 
         // A charge that moves to another payout leaves the one it came from with cached totals
         // that still count it
@@ -265,7 +283,10 @@ export class SettlementService {
      * Stamps which invoice bills a charge to the charged party. Kept here so all
      * settlement_charges writes stay in this service; ApplicationFeeService decides when.
      */
-    static async setChargeProviderInvoiceId(settlementChargeId: string, providerInvoiceId: string | null) {
+    static async setChargeProviderInvoiceId(
+        settlementChargeId: string,
+        providerInvoiceId: string | null,
+    ) {
         await this.setChargeProviderInvoiceIds([settlementChargeId], providerInvoiceId);
     }
 
@@ -273,8 +294,15 @@ export class SettlementService {
      * One invoice can bill a whole month of fees, so the charges are stamped in one statement per
      * batch instead of loading and saving every row.
      */
-    static async setChargeProviderInvoiceIds(settlementChargeIds: string[], providerInvoiceId: string | null) {
-        for (let offset = 0; offset < settlementChargeIds.length; offset += CHARGE_UPDATE_BATCH_SIZE) {
+    static async setChargeProviderInvoiceIds(
+        settlementChargeIds: string[],
+        providerInvoiceId: string | null,
+    ) {
+        for (
+            let offset = 0;
+            offset < settlementChargeIds.length;
+            offset += CHARGE_UPDATE_BATCH_SIZE
+        ) {
             const batch = settlementChargeIds.slice(offset, offset + CHARGE_UPDATE_BATCH_SIZE);
             await SQL.update(SettlementCharge.table)
                 .set('providerInvoiceId', providerInvoiceId)
@@ -305,44 +333,48 @@ export class SettlementService {
      * same breath save once.
      */
     private static async applyTotals(settlement: Settlement): Promise<void> {
-        const paymentSum = await PaymentSettlement.select()
-            .where('settlementId', settlement.id)
-            .sum(SQL.column('amount')) ?? 0;
+        const paymentSum =
+            (await PaymentSettlement.select()
+                .where('settlementId', settlement.id)
+                .sum(SQL.column('amount'))) ?? 0;
 
-        const chargeSum = await SettlementCharge.select()
-            .where('settlementId', settlement.id)
-            .sum(SQL.column('amount')) ?? 0;
+        const chargeSum =
+            (await SettlementCharge.select()
+                .where('settlementId', settlement.id)
+                .sum(SQL.column('amount'))) ?? 0;
 
         // Once a fee is invoiced it drops out of this sum and its payment's derived line takes
         // over, so the two never count the same fee twice
-        const pendingFees = await ApplicationFee.select()
-            .where('settlementId', settlement.id)
-            .where('balanceItemId', null)
-            .where('payingOrganizationId', '!=', null)
-            .where('payingStripeAccountId', '!=', null)
-            .sum(SQL.column('amount')) ?? 0;
+        const pendingFees =
+            (await ApplicationFee.select()
+                .where('settlementId', settlement.id)
+                .where('balanceItemId', null)
+                .where('payingOrganizationId', '!=', null)
+                .where('payingStripeAccountId', '!=', null)
+                .sum(SQL.column('amount'))) ?? 0;
 
         // Fees without a payer: billed later without one. Every uninvoiced fee sits in exactly
         // one of the two sums
-        const uncollectibleFees = await ApplicationFee.select()
-            .where('settlementId', settlement.id)
-            .where('balanceItemId', null)
-            .where(
-                SQL.where('payingOrganizationId', null)
-                    .or('payingStripeAccountId', null),
-            )
-            .sum(SQL.column('amount')) ?? 0;
+        const uncollectibleFees =
+            (await ApplicationFee.select()
+                .where('settlementId', settlement.id)
+                .where('balanceItemId', null)
+                .where(SQL.where('payingOrganizationId', null).or('payingStripeAccountId', null))
+                .sum(SQL.column('amount'))) ?? 0;
 
         settlement.pendingFees = pendingFees;
         settlement.uncollectibleFees = uncollectibleFees;
-        settlement.unexplainedAmount = settlement.amount - paymentSum - chargeSum - pendingFees - uncollectibleFees;
+        settlement.unexplainedAmount =
+            settlement.amount - paymentSum - chargeSum - pendingFees - uncollectibleFees;
     }
 
     /**
      * The payouts holding application fees this organization paid: after deleting it, they have to
      * recount, because those fees moved from pending to uncollectible.
      */
-    static async getApplicationFeeSettlementIdsForPayingOrganization(organizationId: string): Promise<string[]> {
+    static async getApplicationFeeSettlementIdsForPayingOrganization(
+        organizationId: string,
+    ): Promise<string[]> {
         // An organization has one fee row per payment per type, so they are never all loaded at
         // once just to collect the handful of payouts behind them
         const settlementIds = new Set<string>();
@@ -378,7 +410,13 @@ export class SettlementService {
      * attempt. A walk with errors stored everything else, but may not claim it is synced: syncedAt
      * stays NULL so the next run retries it, and the attempt counts towards the retry cap.
      */
-    static async finishSync(settlement: Settlement, { transactionCount, errors = [] }: { transactionCount: number; errors?: SettlementSyncError[] }): Promise<Settlement> {
+    static async finishSync(
+        settlement: Settlement,
+        {
+            transactionCount,
+            errors = [],
+        }: { transactionCount: number; errors?: SettlementSyncError[] },
+    ): Promise<Settlement> {
         await this.applyTotals(settlement);
 
         settlement.transactionCount = transactionCount;
@@ -413,11 +451,15 @@ export class SettlementService {
             .where('paymentId', payment.id)
             .fetch();
 
-        const fees = balanceItemPayments.length > 0
-            ? await ApplicationFee.select()
-                    .where('balanceItemId', balanceItemPayments.map(b => b.balanceItemId))
-                    .fetch()
-            : [];
+        const fees =
+            balanceItemPayments.length > 0
+                ? await ApplicationFee.select()
+                      .where(
+                          'balanceItemId',
+                          balanceItemPayments.map((b) => b.balanceItemId),
+                      )
+                      .fetch()
+                : [];
 
         const perSettlement = new Map<string, { amount: number; occurredAt: Date }>();
         for (const fee of fees) {
@@ -431,7 +473,10 @@ export class SettlementService {
                     group.occurredAt = fee.occurredAt;
                 }
             } else {
-                perSettlement.set(fee.settlementId, { amount: fee.amount, occurredAt: fee.occurredAt });
+                perSettlement.set(fee.settlementId, {
+                    amount: fee.amount,
+                    occurredAt: fee.occurredAt,
+                });
             }
         }
 
@@ -471,7 +516,9 @@ export class SettlementService {
      * Refreshes the derived lines of every fee payment that billed one of these balance items:
      * called after a walk linked or unlinked invoiced fees, so the lines follow the fees.
      */
-    static async updatePaymentSettlementsForApplicationFeeBalanceItems(balanceItemIds: string[]): Promise<void> {
+    static async updatePaymentSettlementsForApplicationFeeBalanceItems(
+        balanceItemIds: string[],
+    ): Promise<void> {
         if (balanceItemIds.length === 0) {
             return;
         }
@@ -479,7 +526,7 @@ export class SettlementService {
         const balanceItemPayments = await BalanceItemPayment.select()
             .where('balanceItemId', balanceItemIds)
             .fetch();
-        const paymentIds = Formatter.uniqueArray(balanceItemPayments.map(b => b.paymentId));
+        const paymentIds = Formatter.uniqueArray(balanceItemPayments.map((b) => b.paymentId));
         if (paymentIds.length === 0) {
             return;
         }
@@ -506,7 +553,10 @@ export class SettlementService {
      * A failed sync leaves syncedAt NULL: that is the whole error queue. Callers that know what
      * broke pass it along, so the stored errors always describe the last attempt.
      */
-    static async markSyncFailed(settlement: Settlement, errors?: SettlementSyncError[]): Promise<Settlement> {
+    static async markSyncFailed(
+        settlement: Settlement,
+        errors?: SettlementSyncError[],
+    ): Promise<Settlement> {
         settlement.syncedAt = null;
         settlement.syncFailureCount += 1;
         if (errors !== undefined) {
@@ -522,23 +572,24 @@ export class SettlementService {
      * settledAt as tiebreaker — re-syncs never flip-flop the column.
      */
     static async updateLegacySettlementReference(payment: Payment): Promise<void> {
-        const lines = await PaymentSettlement.select()
-            .where('paymentId', payment.id)
-            .fetch();
+        const lines = await PaymentSettlement.select().where('paymentId', payment.id).fetch();
 
         if (lines.length === 0) {
             return;
         }
 
         const settlements = await Settlement.select()
-            .where('id', lines.map(l => l.settlementId))
+            .where(
+                'id',
+                lines.map((l) => l.settlementId),
+            )
             .where('organizationId', payment.organizationId)
             .fetch();
-        const settlementsById = new Map(settlements.map(s => [s.id, s]));
+        const settlementsById = new Map(settlements.map((s) => [s.id, s]));
 
         // Only payouts of the payment's own organization settle it. None stored yet (e.g. that
         // payout isn't synced) means the blob stays untouched.
-        const candidates = lines.filter(line => settlementsById.has(line.settlementId));
+        const candidates = lines.filter((line) => settlementsById.has(line.settlementId));
         if (candidates.length === 0) {
             return;
         }

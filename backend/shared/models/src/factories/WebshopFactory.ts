@@ -17,12 +17,15 @@ class Options {
 
 export class WebshopFactory extends Factory<Options, Webshop> {
     async create(): Promise<Webshop> {
-        const organizationId = this.options.organizationId ?? (await new OrganizationFactory({}).create()).id;
+        const organizationId =
+            this.options.organizationId ?? (await new OrganizationFactory({}).create()).id;
 
         const webshop = new Webshop();
         webshop.organizationId = organizationId;
         webshop.meta = WebshopMetaData.create({
-            name: this.options?.name ?? ('Webshop ' + (new Date().getTime() + Math.floor(Math.random() * 999999))),
+            name:
+                this.options?.name ??
+                'Webshop ' + (new Date().getTime() + Math.floor(Math.random() * 999999)),
         });
         webshop.uri = Formatter.slug(this.randomString(20));
 

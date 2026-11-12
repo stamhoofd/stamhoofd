@@ -1,4 +1,15 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, NumberDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    NumberDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Language } from '@stamhoofd/types/Language';
@@ -10,7 +21,11 @@ import { Image } from './files/Image.js';
 import { LoginMethod, LoginMethodConfig } from './LoginMethod.js';
 import { MailchimpSettings } from './mailchimp/MailchimpSettings.js';
 import { MemberResponsibility } from './MemberResponsibility.js';
-import { DataPermissionsSettings, FinancialSupportSettings, OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
+import {
+    DataPermissionsSettings,
+    FinancialSupportSettings,
+    OrganizationRecordsConfiguration,
+} from './members/OrganizationRecordsConfiguration.js';
 import { OrganizationEmail } from './OrganizationEmail.js';
 import { OrganizationLevelRecordsConfiguration } from './OrganizationLevelRecordsConfiguration.js';
 import { PermissionRoleDetailed } from './PermissionRole.js';
@@ -116,7 +131,7 @@ export class OrganizationTag extends AutoEncoder {
             return OrganizationTagType.Tag;
         }
 
-        const childTag = allTags.find(t => t.id === this.childTags[0]);
+        const childTag = allTags.find((t) => t.id === this.childTags[0]);
         if (!childTag) {
             return OrganizationTagType.Tag;
         }
@@ -142,8 +157,8 @@ export class PlatformPremiseType extends AutoEncoder {
     max: null | number = null;
 
     /**
-    * Minimum number of premises allowed for this premise type
-    */
+     * Minimum number of premises allowed for this premise type
+     */
     @field({ decoder: IntegerDecoder, nullable: true, version: 319 })
     min: null | number = null;
 }
@@ -246,7 +261,12 @@ export class PlatformMembershipTypeConfig extends AutoEncoder {
         if (date === undefined) {
             throw new Error('Date is required');
         }
-        const sorted = this.prices.slice().sort((a, b) => (a.startDate ?? new Date(0)).getTime() - (b.startDate ?? new Date(0)).getTime());
+        const sorted = this.prices
+            .slice()
+            .sort(
+                (a, b) =>
+                    (a.startDate ?? new Date(0)).getTime() - (b.startDate ?? new Date(0)).getTime(),
+            );
         let result = sorted[0];
 
         for (const priceConfig of sorted) {
@@ -315,7 +335,9 @@ export class PlatformMembershipType extends AutoEncoder {
     }
 
     isEnabled(tagIds: string[], defaultAgeGroupIds: string[]): boolean {
-        return this.isEnabledForDefaultAgeGroup(defaultAgeGroupIds) && this.isEnabledForTags(tagIds);
+        return (
+            this.isEnabledForDefaultAgeGroup(defaultAgeGroupIds) && this.isEnabledForTags(tagIds)
+        );
     }
 
     private isEnabledForDefaultAgeGroup(defaultAgeGroupIds: string[]): boolean {
@@ -324,7 +346,9 @@ export class PlatformMembershipType extends AutoEncoder {
             return true;
         }
 
-        return defaultAgeGroupIds.find(id => requiredDefaultAgeGroupIds.includes(id)) !== undefined;
+        return (
+            defaultAgeGroupIds.find((id) => requiredDefaultAgeGroupIds.includes(id)) !== undefined
+        );
     }
 
     private isEnabledForTags(tags: string[]): boolean {
@@ -333,7 +357,7 @@ export class PlatformMembershipType extends AutoEncoder {
             return true;
         }
 
-        return tags.find(tagId => requiredTags.includes(tagId)) !== undefined;
+        return tags.find((tagId) => requiredTags.includes(tagId)) !== undefined;
     }
 }
 
@@ -425,7 +449,10 @@ export class PlatformConfig extends AutoEncoder {
         if (at === -1) {
             return false;
         }
-        const emailDomain = email.slice(at + 1).trim().toLowerCase();
+        const emailDomain = email
+            .slice(at + 1)
+            .trim()
+            .toLowerCase();
         return this.responsibilityEmailDomains.some((d) => {
             const domain = PlatformConfig.normalizeEmailDomain(d);
             return domain.length > 0 && emailDomain === domain;
@@ -520,16 +547,21 @@ export class PlatformConfig extends AutoEncoder {
     @field({ decoder: PrivacySettings, version: 327 })
     privacy = PrivacySettings.create({});
 
-    @field({ decoder: new MapDecoder(new EnumDecoder(LoginMethod), LoginMethodConfig), version: 361 })
-    loginMethods: Map<LoginMethod, LoginMethodConfig> = new Map([[
-        LoginMethod.Password,
-        LoginMethodConfig.create({}),
-    ]]);
+    @field({
+        decoder: new MapDecoder(new EnumDecoder(LoginMethod), LoginMethodConfig),
+        version: 361,
+    })
+    loginMethods: Map<LoginMethod, LoginMethodConfig> = new Map([
+        [LoginMethod.Password, LoginMethodConfig.create({})],
+    ]);
 
     @field({ decoder: BooleanDecoder, optional: true, version: 425 })
     onlyAdminCanChangeOrganizationName = false;
 
-    getEmailReplacements(platform: { privateConfig: PlatformPrivateConfig | null }, isPreviewing = false) {
+    getEmailReplacements(
+        platform: { privateConfig: PlatformPrivateConfig | null },
+        isPreviewing = false,
+    ) {
         const base = [
             Replacement.create({
                 token: 'primaryColor',
@@ -541,7 +573,9 @@ export class PlatformConfig extends AutoEncoder {
             }),
         ];
 
-        const fromAddress = platform.privateConfig?.emails?.find(e => e.default) || platform.privateConfig?.emails[0];
+        const fromAddress =
+            platform.privateConfig?.emails?.find((e) => e.default) ||
+            platform.privateConfig?.emails[0];
 
         if (fromAddress) {
             base.push(
@@ -592,8 +626,11 @@ export class PlatformConfig extends AutoEncoder {
         return base;
     }
 
-    getEnabledPlatformMembershipTypes(tagIds: string[], defaultAgeGroupIds: string[]): PlatformMembershipType[] {
-        return this.membershipTypes.filter(type => type.isEnabled(tagIds, defaultAgeGroupIds));
+    getEnabledPlatformMembershipTypes(
+        tagIds: string[],
+        defaultAgeGroupIds: string[],
+    ): PlatformMembershipType[] {
+        return this.membershipTypes.filter((type) => type.isEnabled(tagIds, defaultAgeGroupIds));
     }
 }
 

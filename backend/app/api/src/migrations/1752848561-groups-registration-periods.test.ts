@@ -3,7 +3,11 @@ import { checkShouldSetCustomDates } from './1752848561-groups-registration-peri
 
 describe('migration.groupsRegistrationPeriods', () => {
     describe('checkShouldSetCustomDate', () => {
-        const cases: { group: { startDate: Date; endDate: Date }; period: { startDate: Date; endDate: Date }; expected: boolean }[] = [
+        const cases: {
+            group: { startDate: Date; endDate: Date };
+            period: { startDate: Date; endDate: Date };
+            expected: boolean;
+        }[] = [
             // case 1
             {
                 group: {

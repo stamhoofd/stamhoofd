@@ -1,15 +1,24 @@
 import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
-import { EventMeta, Event as EventStruct, GroupType, TranslatedString } from '@stamhoofd/structures';
+import {
+    EventMeta,
+    Event as EventStruct,
+    GroupType,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { Group } from './Group.js';
 
 export class Event extends QueryableModel {
     static table = 'events';
 
-    @column({ primary: true, type: 'string', beforeSave(value) {
-        return value ?? uuidv4();
-    } })
+    @column({
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
+            return value ?? uuidv4();
+        },
+    })
     id!: string;
 
     @column({ type: 'string' })
@@ -37,7 +46,8 @@ export class Event extends QueryableModel {
     meta = EventMeta.create({});
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -49,7 +59,8 @@ export class Event extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -88,7 +99,7 @@ export class Event extends QueryableModel {
         }
 
         group.settings.requireDefaultAgeGroupIds = this.meta.defaultAgeGroupIds ?? [];
-        group.settings.requireGroupIds = this.meta.groups?.map(g => g.id) ?? [];
+        group.settings.requireGroupIds = this.meta.groups?.map((g) => g.id) ?? [];
         group.settings.startDate = this.startDate;
         group.settings.endDate = this.endDate;
         group.settings.minAge = this.meta.minAge ?? null;
@@ -103,7 +114,9 @@ export class Event extends QueryableModel {
 
         if (this.organizationId) {
             // This is a not-national event, so require the organization (unless non-members are allowed)
-            group.settings.requireOrganizationIds = this.meta.allowNonMembers ? [] : [this.organizationId];
+            group.settings.requireOrganizationIds = this.meta.allowNonMembers
+                ? []
+                : [this.organizationId];
             group.settings.requireOrganizationTags = [];
             group.settings.requirePlatformMembershipOn = null;
         } else {

@@ -84,11 +84,13 @@ export class AbortSignal {
         if (this.isAborted) {
             return;
         }
-        this.abortWithError = error ?? new SimpleError({
-            code: 'queue-aborted',
-            message: 'Queue was aborted',
-            statusCode: 500,
-        });
+        this.abortWithError =
+            error ??
+            new SimpleError({
+                code: 'queue-aborted',
+                message: 'Queue was aborted',
+                statusCode: 500,
+            });
 
         for (const listener of this.listeners) {
             const promise = listener(this.abortWithError);
@@ -147,10 +149,13 @@ export class QueueHandler {
             // This doesn't interfere any running items
             for (const item of q.items) {
                 item.handler = () => {
-                    return Promise.reject(error ?? new SimpleError({
-                        code: 'queue-canceled',
-                        message: 'Queue ' + queue + ' was canceled',
-                    }));
+                    return Promise.reject(
+                        error ??
+                            new SimpleError({
+                                code: 'queue-canceled',
+                                message: 'Queue ' + queue + ' was canceled',
+                            }),
+                    );
                 };
             }
         }
@@ -165,10 +170,13 @@ export class QueueHandler {
             // This doesn't interfere any running items
             for (const item of q.items) {
                 item.handler = () => {
-                    return Promise.reject(error ?? new SimpleError({
-                        code: 'queue-canceled',
-                        message: 'Queue ' + queue + ' was canceled',
-                    }));
+                    return Promise.reject(
+                        error ??
+                            new SimpleError({
+                                code: 'queue-canceled',
+                                message: 'Queue ' + queue + ' was canceled',
+                            }),
+                    );
                 };
             }
 
@@ -188,13 +196,20 @@ export class QueueHandler {
      *
      * Note: this will throw if the handler was debounced and not yet executed
      */
-    static async debounce<T>(queue: string, handler: (options: QueueHandlerOptions) => Promise<T>, timeout: number): Promise<T> {
+    static async debounce<T>(
+        queue: string,
+        handler: (options: QueueHandlerOptions) => Promise<T>,
+        timeout: number,
+    ): Promise<T> {
         // Stop any running items that were not yet executed
-        this.abort(queue, new SimpleError({
-            code: 'queue-debounced',
-            message: 'Debounced',
-            statusCode: 500,
-        }));
+        this.abort(
+            queue,
+            new SimpleError({
+                code: 'queue-debounced',
+                message: 'Debounced',
+                statusCode: 500,
+            }),
+        );
 
         // Schedule timeout (will throw if cancelled)
         await this.schedule(queue, ({ abort }) => {
@@ -214,7 +229,11 @@ export class QueueHandler {
         return await this.schedule(queue, handler);
     }
 
-    static async schedule<T>(queue: string, handler: (options: QueueHandlerOptions) => Promise<T>, parallel = 1): Promise<T> {
+    static async schedule<T>(
+        queue: string,
+        handler: (options: QueueHandlerOptions) => Promise<T>,
+        parallel = 1,
+    ): Promise<T> {
         // console.log("[QUEUE] Schedule "+queue)
 
         const currentQueues = this.asyncLocalStorage.getStore();
@@ -228,12 +247,13 @@ export class QueueHandler {
         const snapshot = AsyncLocalStorage.snapshot();
 
         const item = new QueueItem<T>();
-        item.handler = options => snapshot(async () => {
-            const currentQueues = this.asyncLocalStorage.getStore() ?? [];
-            return await this.asyncLocalStorage.run([...currentQueues, queue], async () => {
-                return await handler(options);
+        item.handler = (options) =>
+            snapshot(async () => {
+                const currentQueues = this.asyncLocalStorage.getStore() ?? [];
+                return await this.asyncLocalStorage.run([...currentQueues, queue], async () => {
+                    return await handler(options);
+                });
             });
-        });
 
         const promise = new Promise<T>((resolve, reject) => {
             item.resolve = resolve;
@@ -262,7 +282,7 @@ export class QueueHandler {
      */
     static getSize(queue: string) {
         const q = this.queues.get(queue);
-        return q ? (q.runCount + q.items.length) : 0;
+        return q ? q.runCount + q.items.length : 0;
     }
 
     static async awaitAll(): Promise<void> {
@@ -273,7 +293,11 @@ export class QueueHandler {
                 if (STAMHOOFD.environment !== 'production') {
                     timeout = setTimeout(() => {
                         if (!didResolve) {
-                            console.warn('[QUEUE] Still waiting for queue', queue, 'to finish. This might indicate a deadlock or a long-running task.');
+                            console.warn(
+                                '[QUEUE] Still waiting for queue',
+                                queue,
+                                'to finish. This might indicate a deadlock or a long-running task.',
+                            );
                         }
                     }, 2000);
                 }
@@ -310,22 +334,64 @@ export class QueueHandler {
         const abort = q.createAbortSignal();
 
         try {
-            next.resolve(await next.handler({
-                abort,
-            }));
+            next.resolve(
+                await next.handler({
+                    abort,
+                }),
+            );
             // console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Resolved "+queue+" ("+q.items.length+" remaining)")
         } catch (e) {
             next.reject(e);
             if (!isDebouncedError(e) && !isCanceledError(e) && !isAbortedError(e)) {
-                console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Rejected ' + queue + ' (' + q.items.length + ' remaining)');
+                console.log(
+                    '[QUEUE] (' +
+                        (q.runCount - 1) +
+                        '/' +
+                        q.parallel +
+                        ') Rejected ' +
+                        queue +
+                        ' (' +
+                        q.items.length +
+                        ' remaining)',
+                );
                 console.error(e);
             } else {
                 if (isDebouncedError(e)) {
-                    console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Debounced ' + queue + ' (' + q.items.length + ' remaining)');
+                    console.log(
+                        '[QUEUE] (' +
+                            (q.runCount - 1) +
+                            '/' +
+                            q.parallel +
+                            ') Debounced ' +
+                            queue +
+                            ' (' +
+                            q.items.length +
+                            ' remaining)',
+                    );
                 } else if (isCanceledError(e)) {
-                    console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Canceled ' + queue + ' (' + q.items.length + ' remaining)');
+                    console.log(
+                        '[QUEUE] (' +
+                            (q.runCount - 1) +
+                            '/' +
+                            q.parallel +
+                            ') Canceled ' +
+                            queue +
+                            ' (' +
+                            q.items.length +
+                            ' remaining)',
+                    );
                 } else if (isAbortedError(e)) {
-                    console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Aborted ' + queue + ' (' + q.items.length + ' remaining)');
+                    console.log(
+                        '[QUEUE] (' +
+                            (q.runCount - 1) +
+                            '/' +
+                            q.parallel +
+                            ') Aborted ' +
+                            queue +
+                            ' (' +
+                            q.items.length +
+                            ' remaining)',
+                    );
                 }
             }
         } finally {

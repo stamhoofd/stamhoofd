@@ -1,4 +1,9 @@
-import type { CellAlignmentOptions, CellStyleRequest, FontOptions, NumberFormatOptions } from '../interfaces.js';
+import type {
+    CellAlignmentOptions,
+    CellStyleRequest,
+    FontOptions,
+    NumberFormatOptions,
+} from '../interfaces.js';
 import { XlsxBuiltInNumberFormat } from '../interfaces.js';
 import { escapeXml } from './escapeXml.js';
 import { XlsxFileWriter } from './XlsxFileWriter.js';
@@ -94,16 +99,20 @@ export class XlsxStylesWriter extends XlsxFileWriter {
     }
 
     alignmentEquals(a: CellAlignmentOptions, b: CellAlignmentOptions): boolean {
-        return a.horizontal === b.horizontal && a.vertical === b.vertical && a.wrapText === b.wrapText;
+        return (
+            a.horizontal === b.horizontal && a.vertical === b.vertical && a.wrapText === b.wrapText
+        );
     }
 
     styleEquals(a: CellStyle, b: CellStyle): boolean {
-        return a.fontId === b.fontId
-            && a.numberFormatId === b.numberFormatId
-            && a.applyNumberFormat === b.applyNumberFormat
-            && a.applyFont === b.applyFont
-            && this.alignmentEquals(a.alignment || {}, b.alignment || {})
-            && a.applyAlignment === b.applyAlignment;
+        return (
+            a.fontId === b.fontId &&
+            a.numberFormatId === b.numberFormatId &&
+            a.applyNumberFormat === b.applyNumberFormat &&
+            a.applyFont === b.applyFont &&
+            this.alignmentEquals(a.alignment || {}, b.alignment || {}) &&
+            a.applyAlignment === b.applyAlignment
+        );
     }
 
     async requestCellStyleId(request: CellStyleRequest): Promise<number> {
@@ -122,12 +131,16 @@ export class XlsxStylesWriter extends XlsxFileWriter {
     async close() {
         await this.write('<?xml version="1.0" encoding="UTF-8"?>');
 
-        await this.write('<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">');
+        await this.write(
+            '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">',
+        );
 
         await this.write(`<numFmts count="${this.numberFormats.length}">`);
 
         for (const format of this.numberFormats) {
-            await this.write(`<numFmt numFmtId="${escapeXml(format.id.toString())}" formatCode="${escapeXml(format.formatCode)}" />`);
+            await this.write(
+                `<numFmt numFmtId="${escapeXml(format.id.toString())}" formatCode="${escapeXml(format.formatCode)}" />`,
+            );
         }
 
         await this.write('</numFmts>');

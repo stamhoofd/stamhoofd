@@ -10,11 +10,18 @@ export function Orderable<Sup extends Constructor<object>>(Base: Sup) {
 
         orderBy<T>(this: T, orderBy: SQLOrderBy): T;
         orderBy<T>(this: T, column: SQLExpression | string, direction?: SQLOrderByDirection): T;
-        orderBy<T>(this: T, columnOrOrderBy: SQLExpression | string, direction?: SQLOrderByDirection): T {
+        orderBy<T>(
+            this: T,
+            columnOrOrderBy: SQLExpression | string,
+            direction?: SQLOrderByDirection,
+        ): T {
             let o = columnOrOrderBy as SQLOrderBy;
             if (!(columnOrOrderBy instanceof SQLOrderBy)) {
                 o = new SQLOrderBy({
-                    column: typeof columnOrOrderBy === 'string' ? new SQLColumnExpression(columnOrOrderBy) : columnOrOrderBy,
+                    column:
+                        typeof columnOrOrderBy === 'string'
+                            ? new SQLColumnExpression(columnOrOrderBy)
+                            : columnOrOrderBy,
                     direction: direction ?? 'ASC',
                 });
             }
@@ -41,7 +48,7 @@ export class SQLOrderBy implements SQLExpression {
     }
 
     static combine(orderBy: SQLOrderBy[]) {
-        return new SQLOrderBy(...orderBy.flatMap(o => o.orderBy));
+        return new SQLOrderBy(...orderBy.flatMap((o) => o.orderBy));
     }
 
     add(orderBy: SQLOrderBy) {
@@ -57,10 +64,7 @@ export class SQLOrderBy implements SQLExpression {
             'ORDER BY ',
             joinSQLQuery(
                 this.orderBy.map((o) => {
-                    return joinSQLQuery([
-                        o.column.getSQL(options),
-                        o.direction,
-                    ], ' ');
+                    return joinSQLQuery([o.column.getSQL(options), o.direction], ' ');
                 }),
                 ', ',
             ),

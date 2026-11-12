@@ -1,4 +1,11 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, field, PatchMap, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    field,
+    PatchMap,
+    StringDecoder,
+} from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleErrors } from '@common/errors';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -44,7 +51,7 @@ export class RecordCategory extends AutoEncoder {
     filter: PropertyFilter | null = null;
 
     get containsSensitiveData() {
-        return !!this.getAllRecords().find(r => r.sensitive);
+        return !!this.getAllRecords().find((r) => r.sensitive);
     }
 
     get icon() {
@@ -60,23 +67,31 @@ export class RecordCategory extends AutoEncoder {
 
     getAllRecords(): RecordSettings[] {
         if (this.childCategories.length > 0) {
-            return [...this.records, ...this.childCategories.flatMap(c => c.getAllRecords())];
+            return [...this.records, ...this.childCategories.flatMap((c) => c.getAllRecords())];
         }
         return this.records;
     }
 
-    getAllFilteredRecords<T extends ObjectWithRecords>(filterValue: T, options?: RecordFilterOptions): RecordSettings[] {
+    getAllFilteredRecords<T extends ObjectWithRecords>(
+        filterValue: T,
+        options?: RecordFilterOptions,
+    ): RecordSettings[] {
         if (this.childCategories.length > 0) {
             return [
-                ...this.filterChildCategories(filterValue).flatMap(c => c.getAllFilteredRecords(filterValue, options)),
+                ...this.filterChildCategories(filterValue).flatMap((c) =>
+                    c.getAllFilteredRecords(filterValue, options),
+                ),
                 ...this.filterRecords(filterValue, options),
             ];
         }
         return this.filterRecords(filterValue, options);
     }
 
-    filterRecords<T extends ObjectWithRecords>(filterValue: T, options?: RecordFilterOptions): RecordSettings[] {
-        return this.records.filter(r => r.isEnabled(filterValue, options));
+    filterRecords<T extends ObjectWithRecords>(
+        filterValue: T,
+        options?: RecordFilterOptions,
+    ): RecordSettings[] {
+        return this.records.filter((r) => r.isEnabled(filterValue, options));
     }
 
     validate<T extends ObjectWithRecords>(value: T) {
@@ -100,7 +115,11 @@ export class RecordCategory extends AutoEncoder {
         errors.throwIfNotEmpty();
     }
 
-    isComplete<T extends ObjectWithRecords>(value: T, outdatedTime: number | null = null, options?: RecordFilterOptions) {
+    isComplete<T extends ObjectWithRecords>(
+        value: T,
+        outdatedTime: number | null = null,
+        options?: RecordFilterOptions,
+    ) {
         // check if everything has been answered already + check out of date
         const records = this.getAllFilteredRecords(value, options);
 
@@ -156,7 +175,11 @@ export class RecordCategory extends AutoEncoder {
         return count;
     }
 
-    isEnabled<T extends ObjectWithRecords>(filterValue: T, ignoreFilter = false, filterOptions?: RecordFilterOptions) {
+    isEnabled<T extends ObjectWithRecords>(
+        filterValue: T,
+        ignoreFilter = false,
+        filterOptions?: RecordFilterOptions,
+    ) {
         if (!ignoreFilter) {
             if (!this.defaultEnabled) {
                 return false;
@@ -193,13 +216,15 @@ export class RecordCategory extends AutoEncoder {
 
     checkPermissionForUserManager(level: PermissionLevel): boolean {
         const levelNumber = getPermissionLevelNumber(level);
-        const hasPermission = this.records.some(r => getPermissionLevelNumber(r.externalPermissionLevel) >= levelNumber);
+        const hasPermission = this.records.some(
+            (r) => getPermissionLevelNumber(r.externalPermissionLevel) >= levelNumber,
+        );
         if (hasPermission) {
             return true;
         }
 
         if (this.childCategories.length) {
-            return this.childCategories.some(c => c.checkPermissionForUserManager(level));
+            return this.childCategories.some((c) => c.checkPermissionForUserManager(level));
         }
         return false;
     }
@@ -211,25 +236,32 @@ export class RecordCategory extends AutoEncoder {
         return false;
     }
 
-    static filterCategories<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T, filterOptions?: RecordFilterOptions): RecordCategory[] {
+    static filterCategories<T extends ObjectWithRecords>(
+        categories: RecordCategory[],
+        filterValue: T,
+        filterOptions?: RecordFilterOptions,
+    ): RecordCategory[] {
         return categories.filter((category) => {
             return category.isEnabled(filterValue, false, filterOptions);
         });
     }
 
-    filterChildCategories<T extends ObjectWithRecords>(filterValue: T, filterOptions?: RecordFilterOptions): RecordCategory[] {
+    filterChildCategories<T extends ObjectWithRecords>(
+        filterValue: T,
+        filterOptions?: RecordFilterOptions,
+    ): RecordCategory[] {
         return RecordCategory.filterCategories(this.childCategories, filterValue, filterOptions);
     }
 
     /**
      * Flatten all categories and child categories into a single array
      */
-    static flattenCategories<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T, options?: RecordFilterOptions): RecordCategory[] {
-        return RecordCategory.filterCategories(
-            categories,
-            filterValue,
-            options,
-        ).flatMap((cat) => {
+    static flattenCategories<T extends ObjectWithRecords>(
+        categories: RecordCategory[],
+        filterValue: T,
+        options?: RecordFilterOptions,
+    ): RecordCategory[] {
+        return RecordCategory.filterCategories(categories, filterValue, options).flatMap((cat) => {
             // Make a (not deep!) clone
             const cat2 = RecordCategory.create(cat);
             cat2.childCategories = [];
@@ -239,22 +271,27 @@ export class RecordCategory extends AutoEncoder {
                 // Make a (not deep!) clone
                 return [
                     ...(cat2.records.length > 0 ? [cat2] : []),
-                    ...this.flattenCategories(cat.childCategories, filterValue, options).map((c) => {
-                        // Make a (not deep!) clone
-                        const cc = RecordCategory.create(c);
-                        cc.name = cat.name.append(' → ', c.name);
-                        return cc;
-                    }),
+                    ...this.flattenCategories(cat.childCategories, filterValue, options).map(
+                        (c) => {
+                            // Make a (not deep!) clone
+                            const cc = RecordCategory.create(c);
+                            cc.name = cat.name.append(' → ', c.name);
+                            return cc;
+                        },
+                    ),
                 ];
             }
-            return (cat2.records.length > 0 ? [cat2] : []);
+            return cat2.records.length > 0 ? [cat2] : [];
         });
     }
 
     /**
      * Get a flat array with record categories whose records match the filter
      */
-    static flattenCategoriesWith(categories: RecordCategory[], filter: (record: RecordSettings) => boolean): RecordCategory[] {
+    static flattenCategoriesWith(
+        categories: RecordCategory[],
+        filter: (record: RecordSettings) => boolean,
+    ): RecordCategory[] {
         return categories.flatMap((cat) => {
             // Make a (not deep!) clone
             const cat2 = RecordCategory.create(cat);
@@ -285,7 +322,10 @@ export class RecordCategory extends AutoEncoder {
     /**
      * Remove (child) categories that don't have a record that matches the filter
      */
-    static filterRecordsWith(categories: RecordCategory[], filter: (record: RecordSettings) => boolean): RecordCategory[] {
+    static filterRecordsWith(
+        categories: RecordCategory[],
+        filter: (record: RecordSettings) => boolean,
+    ): RecordCategory[] {
         return categories.flatMap((cat) => {
             // Make a (not deep!) clone
             const cat2 = RecordCategory.create(cat);
@@ -322,7 +362,7 @@ export class RecordCategory extends AutoEncoder {
     static sortAnswers(answers: Map<string, RecordAnswer>, categories: RecordCategory[]) {
         // Sort answers based on the category order + remove extra answers
         const orderedMap = new Map<string, RecordAnswer>();
-        for (const record of categories.flatMap(c => c.getAllRecords())) {
+        for (const record of categories.flatMap((c) => c.getAllRecords())) {
             const answer = answers.get(record.id);
             if (answer) {
                 orderedMap.set(record.id, answer);
@@ -339,15 +379,25 @@ export class RecordCategory extends AutoEncoder {
         return [...orderedMap.values()];
     }
 
-    static removeOldAnswers<T extends ObjectWithRecords>(categories: RecordCategory[], filterValue: T, filterOptions?: RecordFilterOptions): T {
+    static removeOldAnswers<T extends ObjectWithRecords>(
+        categories: RecordCategory[],
+        filterValue: T,
+        filterOptions?: RecordFilterOptions,
+    ): T {
         const answers = filterValue.getRecordAnswers();
-        const filteredCategories = RecordCategory.filterCategories(categories, filterValue, filterOptions);
-        const records = filteredCategories.flatMap(c => c.getAllFilteredRecords(filterValue, filterOptions));
+        const filteredCategories = RecordCategory.filterCategories(
+            categories,
+            filterValue,
+            filterOptions,
+        );
+        const records = filteredCategories.flatMap((c) =>
+            c.getAllFilteredRecords(filterValue, filterOptions),
+        );
         const patch: PatchAnswers = new PatchMap();
 
         // Remove all answers not in the list
         for (const [id, _] of answers) {
-            if (!records.find(r => r.id === id)) {
+            if (!records.find((r) => r.id === id)) {
                 patch.set(id, null);
             }
         }
@@ -360,8 +410,8 @@ export class RecordCategory extends AutoEncoder {
 
         c.id = uuidv4();
 
-        c.childCategories = this.childCategories.map(c => c.duplicate());
-        c.records = this.records.map(r => r.duplicate());
+        c.childCategories = this.childCategories.map((c) => c.duplicate());
+        c.records = this.records.map((r) => r.duplicate());
 
         return c;
     }

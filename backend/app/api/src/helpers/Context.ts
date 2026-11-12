@@ -116,7 +116,11 @@ export class ContextInstance {
         return c;
     }
 
-    static async startForUser<T>(user: User, organization: Organization | null, handler: () => Promise<T>): Promise<T> {
+    static async startForUser<T>(
+        user: User,
+        organization: Organization | null,
+        handler: () => Promise<T>,
+    ): Promise<T> {
         const request = new Request({
             method: 'GET',
             url: '/',
@@ -130,7 +134,11 @@ export class ContextInstance {
         }
 
         context.user = user;
-        context.#auth = new AdminPermissionChecker(user, await Platform.getSharedPrivateStruct(), context.organization);
+        context.#auth = new AdminPermissionChecker(
+            user,
+            await Platform.getSharedPrivateStruct(),
+            context.organization,
+        );
 
         return await this.asyncLocalStorage.run(context, async () => {
             return await handler();
@@ -180,7 +188,8 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'internal_error',
                 statusCode: 500,
-                message: 'AdminPermissionChecker not set in RequestContext: make sure the request is authenticated before using the permissionChecker',
+                message:
+                    'AdminPermissionChecker not set in RequestContext: make sure the request is authenticated before using the permissionChecker',
             });
         }
         return this.#auth;
@@ -204,7 +213,8 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'internal_error',
                 statusCode: 500,
-                message: 'AdminPermissionChecker not set in RequestContext: make sure the request is authenticated before using the permissionChecker',
+                message:
+                    'AdminPermissionChecker not set in RequestContext: make sure the request is authenticated before using the permissionChecker',
             });
         }
         return this.#actorAuth;
@@ -261,7 +271,9 @@ export class ContextInstance {
         return organization;
     }
 
-    async optionalAuthenticate({ allowWithoutAccount = false }: { allowWithoutAccount?: boolean } = {}): Promise<{ user?: User }> {
+    async optionalAuthenticate({
+        allowWithoutAccount = false,
+    }: { allowWithoutAccount?: boolean } = {}): Promise<{ user?: User }> {
         try {
             return await this.authenticate({ allowWithoutAccount });
         } catch (e) {
@@ -295,9 +307,25 @@ export class ContextInstance {
         }
     }
 
-    async authenticate(options: { allowMFASetupToken: true; allowWithoutAccount?: boolean; allowUnscoped?: boolean }): Promise<{ user: User; token: Token } | { user: User; setupToken: MFAToken }>;
-    async authenticate(options?: { allowMFASetupToken?: false | undefined; allowWithoutAccount?: boolean; allowUnscoped?: boolean }): Promise<{ user: User; token: Token }>;
-    async authenticate({ allowWithoutAccount = false, allowUnscoped = false, allowMFASetupToken = false }: { allowMFASetupToken?: boolean; allowWithoutAccount?: boolean; allowUnscoped?: boolean } = {}): Promise<{ user: User; token: Token } | { user: User; setupToken: MFAToken }> {
+    async authenticate(options: {
+        allowMFASetupToken: true;
+        allowWithoutAccount?: boolean;
+        allowUnscoped?: boolean;
+    }): Promise<{ user: User; token: Token } | { user: User; setupToken: MFAToken }>;
+    async authenticate(options?: {
+        allowMFASetupToken?: false | undefined;
+        allowWithoutAccount?: boolean;
+        allowUnscoped?: boolean;
+    }): Promise<{ user: User; token: Token }>;
+    async authenticate({
+        allowWithoutAccount = false,
+        allowUnscoped = false,
+        allowMFASetupToken = false,
+    }: {
+        allowMFASetupToken?: boolean;
+        allowWithoutAccount?: boolean;
+        allowUnscoped?: boolean;
+    } = {}): Promise<{ user: User; token: Token } | { user: User; setupToken: MFAToken }> {
         const header = this.request.headers.authorization;
 
         if (!header) {
@@ -326,11 +354,17 @@ export class ContextInstance {
 
         const token = await Token.getByAccessToken(accessToken, true);
 
-        if (!token || (this.organization && token.user.organizationId !== null && token.user.organizationId !== this.organization.id) || (!this.organization && token.user.organizationId && (!allowUnscoped || !token.user.isApiUser))) {
+        if (
+            !token ||
+            (this.organization &&
+                token.user.organizationId !== null &&
+                token.user.organizationId !== this.organization.id) ||
+            (!this.organization &&
+                token.user.organizationId &&
+                (!allowUnscoped || !token.user.isApiUser))
+        ) {
             if (token?.user) {
-                console.log(
-                    'Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')',
-                );
+                console.log('Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')');
             }
             throw new SimpleError({
                 code: 'invalid_access_token',
@@ -342,14 +376,14 @@ export class ContextInstance {
 
         if (!this.organization && token.user.organizationId && allowUnscoped) {
             // Automatically scope full request to the user's scope
-            await this.setManualOrganizationScope(await Organization.getByID(token.user.organizationId, true));
+            await this.setManualOrganizationScope(
+                await Organization.getByID(token.user.organizationId, true),
+            );
         }
 
         if (token.isAccessTokenExpired()) {
             if (token?.user) {
-                console.log(
-                    'Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')',
-                );
+                console.log('Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')');
             }
             throw new SimpleError({
                 code: 'expired_access_token',
@@ -359,7 +393,7 @@ export class ContextInstance {
             });
         }
 
-        if (!await SessionService.activateToken(token)) {
+        if (!(await SessionService.activateToken(token))) {
             throw new SimpleError({
                 code: 'invalid_access_token',
                 message: 'The access token is invalid',
@@ -370,9 +404,7 @@ export class ContextInstance {
 
         if (!token.user.hasAccount() && !allowWithoutAccount) {
             if (token?.user) {
-                console.log(
-                    'Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')',
-                );
+                console.log('Failed auth: ' + token?.user.email + ' (' + token?.user.id + ')');
             }
             throw new SimpleError({
                 code: 'not_activated',
@@ -384,20 +416,32 @@ export class ContextInstance {
 
         // Rate limits for api users
         if (token.user.isApiUser) {
-            apiUserRateLimiter.track(this.organization?.id ?? token.user.id, 1, token.user.meta?.rateLimits ?? undefined);
+            apiUserRateLimiter.track(
+                this.organization?.id ?? token.user.id,
+                1,
+                token.user.meta?.rateLimits ?? undefined,
+            );
         }
 
         const user = token.user;
-        const impersonatedUser = token.session.impersonatedUserId ? await this.resolveImpersonation(token.session.impersonatedUserId, user) : null;
+        const impersonatedUser = token.session.impersonatedUserId
+            ? await this.resolveImpersonation(token.session.impersonatedUserId, user)
+            : null;
 
         if (impersonatedUser) {
             console.log(
-                'Auth: ' + user.email + ' (' + user.id + ') impersonating ' + impersonatedUser.email + ' (' + impersonatedUser.id + ')',
+                'Auth: ' +
+                    user.email +
+                    ' (' +
+                    user.id +
+                    ') impersonating ' +
+                    impersonatedUser.email +
+                    ' (' +
+                    impersonatedUser.id +
+                    ')',
             );
         } else {
-            console.log(
-                'Auth: ' + user.email + ' (' + user.id + ')',
-            );
+            console.log('Auth: ' + user.email + ' (' + user.id + ')');
         }
 
         // Load member of user
@@ -429,14 +473,31 @@ export class ContextInstance {
 
         // The impersonated account has to live in the scope of the request, exactly like
         // the account the token belongs to.
-        if (impersonatedUser.organizationId !== null && impersonatedUser.organizationId !== (this.organization?.id ?? null)) {
+        if (
+            impersonatedUser.organizationId !== null &&
+            impersonatedUser.organizationId !== (this.organization?.id ?? null)
+        ) {
             throw invalid;
         }
 
-        const auth = new AdminPermissionChecker(actor, await Platform.getSharedPrivateStruct(), this.organization);
+        const auth = new AdminPermissionChecker(
+            actor,
+            await Platform.getSharedPrivateStruct(),
+            this.organization,
+        );
 
-        if (!await auth.canImpersonate(impersonatedUser)) {
-            console.log('Failed impersonation: ' + actor.email + ' (' + actor.id + ') as ' + impersonatedUser.email + ' (' + impersonatedUser.id + ')');
+        if (!(await auth.canImpersonate(impersonatedUser))) {
+            console.log(
+                'Failed impersonation: ' +
+                    actor.email +
+                    ' (' +
+                    actor.id +
+                    ') as ' +
+                    impersonatedUser.email +
+                    ' (' +
+                    impersonatedUser.id +
+                    ')',
+            );
             throw invalid;
         }
 
@@ -488,7 +549,9 @@ export class ContextInstance {
      * (minted by a real authentication within the FRESH_WINDOW, not via a refresh).
      * Used to gate sensitive actions such as managing 2FA methods.
      */
-    async authenticateFresh(options: { allowWithoutAccount?: boolean; allowUnscoped?: boolean } = {}): Promise<{ user: User; token: Token }> {
+    async authenticateFresh(
+        options: { allowWithoutAccount?: boolean; allowUnscoped?: boolean } = {},
+    ): Promise<{ user: User; token: Token }> {
         const result = await this.authenticate(options);
 
         // An impersonated session can never become fresh: there is no way to re-enter the
@@ -543,7 +606,8 @@ export class ContextInstance {
                 await setupToken.consume();
                 throw new SimpleError({
                     code: 'mfa_setup_expired',
-                    message: 'The MFA setup session is no longer valid: the user already has a second factor',
+                    message:
+                        'The MFA setup session is no longer valid: the user already has a second factor',
                     human: $t('%ZhJ'),
                     statusCode: 401,
                 });
@@ -564,7 +628,11 @@ export class ContextInstance {
      * Exactly one of `setupToken` / `token` is set: `token` is the session the request was
      * made with, which enrollment keeps alive while signing out the user's other sessions.
      */
-    async authenticateMFAEnrollment(): Promise<{ user: User; setupToken: MFAToken | null; token: Token | null }> {
+    async authenticateMFAEnrollment(): Promise<{
+        user: User;
+        setupToken: MFAToken | null;
+        token: Token | null;
+    }> {
         const mfa = await this.authenticateMFASetup();
         if (mfa) {
             return { ...mfa, token: null };
@@ -586,7 +654,10 @@ export class ContextInstance {
 
         if (this.organization && !this.organization.active) {
             // For inactive organizations, you always need permissions to view them
-            if (!this.auth.hasSomePlatformAccess() || !await this.auth.hasFullAccess(this.organization.id)) {
+            if (
+                !this.auth.hasSomePlatformAccess() ||
+                !(await this.auth.hasFullAccess(this.organization.id))
+            ) {
                 throw new SimpleError({
                     code: 'archived',
                     message: 'Platform access is required to view inactive organizations',

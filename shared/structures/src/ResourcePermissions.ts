@@ -1,17 +1,32 @@
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { AutoEncoder, field, StringDecoder, EnumDecoder, ArrayDecoder, PatchMap } from '@common/encoding';
+import {
+    AutoEncoder,
+    field,
+    StringDecoder,
+    EnumDecoder,
+    ArrayDecoder,
+    PatchMap,
+} from '@common/encoding';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { AccessRightHelper } from './AccessRight.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { getPermissionLevelNumber } from './PermissionLevel.js';
 import type { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { getPermissionResourceTypeName, PermissionsResourceKey } from './PermissionsResourceType.js';
+import {
+    getPermissionResourceTypeName,
+    PermissionsResourceKey,
+} from './PermissionsResourceType.js';
 import { Formatter } from '@stamhoofd/utility';
 
-type ResourceLike = { accessRights: AccessRight[]; level: PermissionLevel; isEmpty: boolean; resourceName?: string };
+type ResourceLike = {
+    accessRights: AccessRight[];
+    level: PermissionLevel;
+    isEmpty: boolean;
+    resourceName?: string;
+};
 type ResourcePermissionsInsertPatchMap = PatchMap<
     PermissionsResourceType,
-    Map<string, ResourcePermissions>
+    | Map<string, ResourcePermissions>
     | PatchMap<string, ResourcePermissions | AutoEncoderPatchType<ResourcePermissions> | null>
     | null
 >;
@@ -53,24 +68,44 @@ export class ResourcePermissions extends AutoEncoder {
     }
 
     isCoveredBy(other: ResourcePermissions): boolean {
-        return other.hasAccess(this.level) && this.accessRights.every(right => other.hasAccessRight(right));
+        return (
+            other.hasAccess(this.level) &&
+            this.accessRights.every((right) => other.hasAccessRight(right))
+        );
     }
 
     /**
      * The baseline coverage a role grants for every resource of every type.
      */
-    static baseline(source: { level: PermissionLevel; accessRights: AccessRight[] }): ResourcePermissions {
-        return ResourcePermissions.create({ level: source.level, accessRights: source.accessRights });
+    static baseline(source: {
+        level: PermissionLevel;
+        accessRights: AccessRight[];
+    }): ResourcePermissions {
+        return ResourcePermissions.create({
+            level: source.level,
+            accessRights: source.accessRights,
+        });
     }
 
-    createInsertPatch<T extends AutoEncoder & { resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> }>(type: PermissionsResourceType, resourceId: string, roleOrPermissions: T): AutoEncoderPatchType<T> {
+    createInsertPatch<
+        T extends AutoEncoder & {
+            resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>>;
+        },
+    >(
+        type: PermissionsResourceType,
+        resourceId: string,
+        roleOrPermissions: T,
+    ): AutoEncoderPatchType<T> {
         const patch = roleOrPermissions.static.patch({}) as AutoEncoderPatchType<T>;
         const resources = patch.resources as ResourcePermissionsInsertPatchMap;
 
         // First check if we need to insert the type
         if (roleOrPermissions.resources.get(type)) {
             // We need to patch
-            const p = new PatchMap<string, ResourcePermissions | AutoEncoderPatchType<ResourcePermissions> | null>();
+            const p = new PatchMap<
+                string,
+                ResourcePermissions | AutoEncoderPatchType<ResourcePermissions> | null
+            >();
             p.set(resourceId, this);
             resources.set(type, p);
         } else {
@@ -113,18 +148,22 @@ export class ResourcePermissions extends AutoEncoder {
     }
 
     removeAccessRights(rights: AccessRight[]) {
-        this.accessRights = this.accessRights.filter(r => !rights.includes(r));
+        this.accessRights = this.accessRights.filter((r) => !rights.includes(r));
     }
 
     get isEmpty() {
         return this.level === PermissionLevel.None && this.accessRights.length === 0;
     }
 
-    static getMapDescription(map: Map<PermissionsResourceType, Map<string, ResourceLike>>): string[] {
+    static getMapDescription(
+        map: Map<PermissionsResourceType, Map<string, ResourceLike>>,
+    ): string[] {
         const stack: string[] = [];
 
         const resourceDescription = (resource: ResourceLike) => {
-            const accessRights = resource.accessRights.map(a => AccessRightHelper.getDescription(a));
+            const accessRights = resource.accessRights.map((a) =>
+                AccessRightHelper.getDescription(a),
+            );
             if (resource.level === PermissionLevel.None) {
                 return Formatter.joinLast(accessRights, ', ', ' ' + $t('%M1') + ' ');
             }
@@ -137,7 +176,15 @@ export class ResourcePermissions extends AutoEncoder {
                 prefix = $t('%m9');
             }
 
-            return prefix + (accessRights.length > 0 ? ' ' + $t('%nE') + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t('%M1') + ' ') : '');
+            return (
+                prefix +
+                (accessRights.length > 0
+                    ? ' ' +
+                      $t('%nE') +
+                      ' ' +
+                      Formatter.joinLast(accessRights, ', ', ' ' + $t('%M1') + ' ')
+                    : '')
+            );
         };
 
         for (const [type, resources] of map) {
@@ -150,12 +197,22 @@ export class ResourcePermissions extends AutoEncoder {
                     continue;
                 }
 
-                const name = getPermissionResourceTypeName(type, true) + (key === PermissionsResourceKey.CurrentPeriod ? ' ' + $t('%Zrx') : '');
-                const accessRights = all.accessRights.map(a => AccessRightHelper.getDescription(a));
+                const name =
+                    getPermissionResourceTypeName(type, true) +
+                    (key === PermissionsResourceKey.CurrentPeriod ? ' ' + $t('%Zrx') : '');
+                const accessRights = all.accessRights.map((a) =>
+                    AccessRightHelper.getDescription(a),
+                );
                 allDescriptions.push(resourceDescription(all));
 
                 if (all.level === PermissionLevel.None) {
-                    stack.push($t('%nF') + ' ' + name + ': ' + Formatter.joinLast(accessRights, ', ', ' ' + $t('%M1') + ' '));
+                    stack.push(
+                        $t('%nF') +
+                            ' ' +
+                            name +
+                            ': ' +
+                            Formatter.joinLast(accessRights, ', ', ' ' + $t('%M1') + ' '),
+                    );
                     continue;
                 }
 
@@ -169,13 +226,26 @@ export class ResourcePermissions extends AutoEncoder {
                     suffix = '';
                 }
 
-                stack.push(prefix + name + suffix + (accessRights.length > 0 ? ' ' + $t('%nE') + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t('%M1') + ' ') : ''));
+                stack.push(
+                    prefix +
+                        name +
+                        suffix +
+                        (accessRights.length > 0
+                            ? ' ' +
+                              $t('%nE') +
+                              ' ' +
+                              Formatter.joinLast(accessRights, ', ', ' ' + $t('%M1') + ' ')
+                            : ''),
+                );
             }
 
             const countsPer = new Map<string, { count: number; firstName: string | null }>();
 
             for (const [id, resource] of resources) {
-                if (id === PermissionsResourceKey.All || id === PermissionsResourceKey.CurrentPeriod) {
+                if (
+                    id === PermissionsResourceKey.All ||
+                    id === PermissionsResourceKey.CurrentPeriod
+                ) {
                     continue;
                 }
 
@@ -185,14 +255,24 @@ export class ResourcePermissions extends AutoEncoder {
                         continue;
                     }
                     if (!countsPer.has(description)) {
-                        countsPer.set(description, { count: 0, firstName: resource.resourceName ?? null });
+                        countsPer.set(description, {
+                            count: 0,
+                            firstName: resource.resourceName ?? null,
+                        });
                     }
                     countsPer.get(description)!.count += 1;
                 }
             }
 
             for (const [description, { count, firstName }] of countsPer) {
-                stack.push((count === 1 && firstName ? firstName : (count + ' ' + getPermissionResourceTypeName(type, count > 1))) + ' (' + description + ')');
+                stack.push(
+                    (count === 1 && firstName
+                        ? firstName
+                        : count + ' ' + getPermissionResourceTypeName(type, count > 1)) +
+                        ' (' +
+                        description +
+                        ')',
+                );
             }
         }
 

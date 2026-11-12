@@ -81,11 +81,16 @@ export async function createFakeSettlements() {
             batchQuery = batchQuery.where('paidAt', '>', scanAfter);
         }
         const payments = await batchQuery.limit(BATCH_SIZE).fetch();
-        const settledCount = await settleWeek(payments, weekStart, settledAt, platformOrganizationId);
+        const settledCount = await settleWeek(
+            payments,
+            weekStart,
+            settledAt,
+            platformOrganizationId,
+        );
 
         if (settledCount === 0) {
             // Everything in this batch was skipped: continue behind it
-            scanAfter = new Date(Math.max(...payments.map(p => p.paidAt!.getTime())));
+            scanAfter = new Date(Math.max(...payments.map((p) => p.paidAt!.getTime())));
         }
     }
 }
@@ -107,7 +112,9 @@ function selectUnsettledPayments() {
  * the organization that received the payment.
  */
 function getPayoutAccount(payment: Payment): string {
-    return payment.provider + '-' + (payment.stripeAccountId ?? payment.organizationId ?? 'platform');
+    return (
+        payment.provider + '-' + (payment.stripeAccountId ?? payment.organizationId ?? 'platform')
+    );
 }
 
 function getStripeFakeFees(payment: Payment) {
@@ -118,7 +125,15 @@ function getStripeFakeFees(payment: Payment) {
  * Upsert a settlement while accumulating the amount: a week larger than one batch settles in
  * multiple rounds, all in the same payout.
  */
-async function upsertFakeSettlement(data: { provider: PaymentProvider; externalId: string; stripeAccountId: string | null; organizationId: string; reference: string; settledAt: Date; addedAmount: number }) {
+async function upsertFakeSettlement(data: {
+    provider: PaymentProvider;
+    externalId: string;
+    stripeAccountId: string | null;
+    organizationId: string;
+    reference: string;
+    settledAt: Date;
+    addedAmount: number;
+}) {
     const existing = await Settlement.select()
         .where('provider', data.provider)
         .where('externalId', data.externalId)
@@ -137,12 +152,21 @@ async function upsertFakeSettlement(data: { provider: PaymentProvider; externalI
 
 async function finishFakeSync(settlement: Settlement) {
     const lineCount = await PaymentSettlement.select().where('settlementId', settlement.id).count();
-    const chargeCount = await SettlementCharge.select().where('settlementId', settlement.id).count();
+    const chargeCount = await SettlementCharge.select()
+        .where('settlementId', settlement.id)
+        .count();
     const feeCount = await ApplicationFee.select().where('settlementId', settlement.id).count();
-    await SettlementService.finishSync(settlement, { transactionCount: lineCount + chargeCount + feeCount });
+    await SettlementService.finishSync(settlement, {
+        transactionCount: lineCount + chargeCount + feeCount,
+    });
 }
 
-async function settleWeek(payments: Payment[], weekStart: DateTime, settledAt: Date, platformOrganizationId: string | null): Promise<number> {
+async function settleWeek(
+    payments: Payment[],
+    weekStart: DateTime,
+    settledAt: Date,
+    platformOrganizationId: string | null,
+): Promise<number> {
     let settledCount = 0;
     const groups = new Map<string, Payment[]>();
 
@@ -169,7 +193,11 @@ async function settleWeek(payments: Payment[], weekStart: DateTime, settledAt: D
         // Payments without an organization arrived on the platform's own account
         const organizationId = group[0].organizationId ?? platformOrganizationId;
         if (!organizationId) {
-            console.log('Skipped fake settlement ' + reference + ': no platform membership organization configured');
+            console.log(
+                'Skipped fake settlement ' +
+                    reference +
+                    ': no platform membership organization configured',
+            );
             continue;
         }
 
@@ -206,7 +234,12 @@ async function settleWeek(payments: Payment[], weekStart: DateTime, settledAt: D
                 occurredAt: payment.paidAt!,
             });
 
-            payment.settlement = SettlementReference.create({ id, reference, settledAt, amount: settlement.amount });
+            payment.settlement = SettlementReference.create({
+                id,
+                reference,
+                settledAt,
+                amount: settlement.amount,
+            });
             await payment.save();
 
             // Mark order as 'updated', or the frontend won't pull in the updates
@@ -227,7 +260,15 @@ async function settleWeek(payments: Payment[], weekStart: DateTime, settledAt: D
         await finishFakeSync(settlement);
         settledCount += group.length;
 
-        console.log('Created settlement ' + reference + ' of ' + Formatter.price(settlement.amount) + ' for ' + group.length + ' payments');
+        console.log(
+            'Created settlement ' +
+                reference +
+                ' of ' +
+                Formatter.price(settlement.amount) +
+                ' for ' +
+                group.length +
+                ' payments',
+        );
     }
 
     return settledCount;
@@ -238,14 +279,27 @@ async function settleWeek(payments: Payment[], weekStart: DateTime, settledAt: D
  * deduction rows on the organization payout, and two application fee rows received in a fake
  * monthly platform payout.
  */
-async function createStripeFeeRows(settlement: Settlement, group: Payment[], settledAt: Date, platformOrganizationId: string | null) {
+async function createStripeFeeRows(
+    settlement: Settlement,
+    group: Payment[],
+    settledAt: Date,
+    platformOrganizationId: string | null,
+) {
     const month = SettlementService.getPeriodKey(settledAt);
     let addedFees = 0;
-    const feeRows: { payment: Payment; applicationFeeId: string; parts: { type: ApplicationFeeType; amount: number; charge: SettlementCharge }[] }[] = [];
+    const feeRows: {
+        payment: Payment;
+        applicationFeeId: string;
+        parts: { type: ApplicationFeeType; amount: number; charge: SettlementCharge }[];
+    }[] = [];
 
     for (const payment of group) {
         const { serviceFee, transferFee } = getStripeFakeFees(payment);
-        if ((serviceFee === 0 && transferFee === 0) || !payment.organizationId || !payment.stripeAccountId) {
+        if (
+            (serviceFee === 0 && transferFee === 0) ||
+            !payment.organizationId ||
+            !payment.stripeAccountId
+        ) {
             continue;
         }
 
@@ -282,7 +336,9 @@ async function createStripeFeeRows(settlement: Settlement, group: Payment[], set
     }
 
     if (!platformOrganizationId) {
-        console.log('Skipped the fake platform fee payout: no platform membership organization configured');
+        console.log(
+            'Skipped the fake platform fee payout: no platform membership organization configured',
+        );
         return;
     }
 
@@ -320,7 +376,9 @@ async function createStripeFeeRows(settlement: Settlement, group: Payment[], set
 
     // A dev database can contain fee payments (e.g. copied history): keep their derived lines
     // in sync like a real payout walk does
-    await SettlementService.updatePaymentSettlementsForApplicationFeeBalanceItems([...invoicedFeeBalanceItemIds]);
+    await SettlementService.updatePaymentSettlementsForApplicationFeeBalanceItems([
+        ...invoicedFeeBalanceItemIds,
+    ]);
 
     await finishFakeSync(platformSettlement);
 }

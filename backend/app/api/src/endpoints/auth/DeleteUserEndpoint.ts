@@ -37,9 +37,12 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         // Delete the account
 
-        const bcc = (await getDefaultEmailFrom(STAMHOOFD.userMode === 'platform' ? null : organization, {
-            template: {},
-        }));
+        const bcc = await getDefaultEmailFrom(
+            STAMHOOFD.userMode === 'platform' ? null : organization,
+            {
+                template: {},
+            },
+        );
         await sendEmailTemplate(STAMHOOFD.userMode === 'platform' ? null : organization, {
             recipients: [
                 Recipient.create({

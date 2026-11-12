@@ -34,7 +34,7 @@ export class PackagePurchases extends AutoEncoder {
 
         // Renewals
         for (const id of this.renewPackageIds) {
-            const pack = currentPackages.packages.find(c => c.id === id);
+            const pack = currentPackages.packages.find((c) => c.id === id);
             if (!pack) {
                 throw new SimpleError({
                     code: 'not_found',
@@ -58,7 +58,9 @@ export class PackagePurchases extends AutoEncoder {
                 if (!STPackageBundleHelper.isCombineable(bundle, currentPack)) {
                     if (!STPackageBundleHelper.isStackable(bundle, currentPack)) {
                         // We skip silently
-                        console.error('Tried to activate non combineable, non stackable packages...');
+                        console.error(
+                            'Tried to activate non combineable, non stackable packages...',
+                        );
                         skip = true;
                         continue;
                     }
@@ -87,7 +89,10 @@ export class PackagePurchases extends AutoEncoder {
         // Remove all packages that would be valid for more than 2 years in the future
         // This prevents renewing 2 years in a row
         for (const pack of packages) {
-            if (pack.validUntil && pack.validUntil.getTime() > new Date().getTime() + 1000 * 60 * 60 * 24 * 365 * 2) {
+            if (
+                pack.validUntil &&
+                pack.validUntil.getTime() > new Date().getTime() + 1000 * 60 * 60 * 24 * 365 * 2
+            ) {
                 throw new SimpleError({
                     code: 'invalid_package',
                     message: 'Package valid until date is too far in the future',

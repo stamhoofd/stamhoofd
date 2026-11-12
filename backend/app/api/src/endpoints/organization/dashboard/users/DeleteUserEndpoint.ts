@@ -38,7 +38,7 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         const { user } = await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canManageAdmins(organization.id)) {
+        if (!(await Context.auth.canManageAdmins(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -69,15 +69,19 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             return new Response(undefined);
         }
 
-        if (!await Context.auth.canAccessUser(editUser, PermissionLevel.Full)) {
+        if (!(await Context.auth.canAccessUser(editUser, PermissionLevel.Full))) {
             throw Context.auth.error();
         }
 
         if (editUser.organizationId !== organization.id) {
             // A platform-level account is not owned by this organization: only revoke its permissions here
-            editUser.permissions = UserPermissions.limitedPatch(editUser.permissions, UserPermissions.patch({
-                organizationPermissions: new PatchMap([[organization.id, null]]),
-            }), organization.id);
+            editUser.permissions = UserPermissions.limitedPatch(
+                editUser.permissions,
+                UserPermissions.patch({
+                    organizationPermissions: new PatchMap([[organization.id, null]]),
+                }),
+                organization.id,
+            );
             await editUser.save();
             return new Response(undefined);
         }

@@ -41,11 +41,20 @@ describe('Endpoint.SettlementsExport', () => {
         return { user, token: await SessionService.createSession(user) };
     };
 
-    const post = async (organization: Organization, token: Token, { start = new Date(2026, 0, 1), end = new Date(2026, 1, 1) } = {}) => {
-        const request = Request.buildJson('POST', '/settlements/export', organization.getApiHost(), {
-            start: start.getTime(),
-            end: end.getTime(),
-        });
+    const post = async (
+        organization: Organization,
+        token: Token,
+        { start = new Date(2026, 0, 1), end = new Date(2026, 1, 1) } = {},
+    ) => {
+        const request = Request.buildJson(
+            'POST',
+            '/settlements/export',
+            organization.getApiHost(),
+            {
+                start: start.getTime(),
+                end: end.getTime(),
+            },
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -110,7 +119,7 @@ describe('Endpoint.SettlementsExport', () => {
         await QueueHandler.awaitAll();
 
         const emails = await EmailMocker.transactional.getSucceededEmails();
-        const reportEmail = emails.find(e => e.subject.startsWith('Uitbetalingen export'));
+        const reportEmail = emails.find((e) => e.subject.startsWith('Uitbetalingen export'));
         expect(reportEmail).toBeDefined();
         expect(reportEmail!.attachments).toHaveLength(1);
         expect(reportEmail!.attachments![0].filename).toContain('.xlsx');
@@ -139,16 +148,20 @@ describe('Endpoint.SettlementsExport', () => {
         await QueueHandler.awaitAll();
 
         const emails = await EmailMocker.transactional.getSucceededEmails();
-        const reportEmail = emails.filter(e => e.subject.startsWith('Uitbetalingen export')).at(-1);
+        const reportEmail = emails
+            .filter((e) => e.subject.startsWith('Uitbetalingen export'))
+            .at(-1);
         expect(reportEmail).toBeDefined();
         expect(reportEmail!.to).toContain(user.email);
     });
 
     test('Only a full platform admin gets the sync errors in the export', async () => {
         const captured: boolean[] = [];
-        const spy = vi.spyOn(SettlementExporter.prototype, 'sendEmail').mockImplementation(async function (this: SettlementExporter) {
-            captured.push(this.includeSyncErrors);
-        });
+        const spy = vi
+            .spyOn(SettlementExporter.prototype, 'sendEmail')
+            .mockImplementation(async function (this: SettlementExporter) {
+                captured.push(this.includeSyncErrors);
+            });
 
         try {
             const response = await post(membershipOrganization, adminToken);
@@ -178,8 +191,11 @@ describe('Endpoint.SettlementsExport', () => {
     });
 
     test('An unbounded range is rejected', async () => {
-        await expect(post(membershipOrganization, adminToken, { start: new Date(2020, 0, 1), end: new Date(2026, 0, 1) })).rejects.toThrow(
-            STExpect.simpleError({ code: 'range_too_large' }),
-        );
+        await expect(
+            post(membershipOrganization, adminToken, {
+                start: new Date(2020, 0, 1),
+                end: new Date(2026, 0, 1),
+            }),
+        ).rejects.toThrow(STExpect.simpleError({ code: 'range_too_large' }));
     });
 });

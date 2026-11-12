@@ -5,9 +5,21 @@ import { SimpleError } from '@common/errors';
 import { Group, Member, Registration } from '@stamhoofd/models';
 import type { SQLExpression, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLSelect, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, RegistrationWithMemberBlob, RegistrationsBlob, StamhoofdFilter, StamhoofdKeyFilter } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    RegistrationWithMemberBlob,
+    RegistrationsBlob,
+    StamhoofdFilter,
+    StamhoofdKeyFilter,
+} from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponse, assertSort } from '@stamhoofd/structures';
+import {
+    GroupStatus,
+    GroupType,
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    assertSort,
+} from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@node/database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -42,35 +54,58 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         return [false];
     }
 
-    static selectRegistrationWithGroup(...columns: (SQLExpression | string)[]): SQLSelect<Registration & { group: Group }> {
+    static selectRegistrationWithGroup(
+        ...columns: (SQLExpression | string)[]
+    ): SQLSelect<Registration & { group: Group }> {
         const transformer = (row: SQLResultNamespacedRow): Registration & { group: Group } => {
             const d = Registration.fromRow(row[Registration.table]);
 
             if (!d) {
-                console.error('Could not transform row', row, 'into model', Registration.table, 'check if the primary key is returned in the query');
+                console.error(
+                    'Could not transform row',
+                    row,
+                    'into model',
+                    Registration.table,
+                    'check if the primary key is returned in the query',
+                );
                 throw new Error('Missing data for model ' + Registration.table);
             }
 
             const g = Group.fromRow(row[Group.table]);
             if (!g) {
-                console.error('Could not transform row', row, 'into model', Group.table, 'check if the primary key is returned in the query');
+                console.error(
+                    'Could not transform row',
+                    row,
+                    'into model',
+                    Group.table,
+                    'check if the primary key is returned in the query',
+                );
                 throw new Error('Missing data for model ' + Group.table);
             }
 
             return d.setRelation(Registration.group, g);
         };
 
-        const select = new SQLSelect(transformer, ...(columns.length === 0 ? [SQL.wildcard(), SQL.wildcard(Group.table)] : columns));
+        const select = new SQLSelect(
+            transformer,
+            ...(columns.length === 0 ? [SQL.wildcard(), SQL.wildcard(Group.table)] : columns),
+        );
         select.join(groupJoin);
         return select.from(SQL.table(Registration.table));
     }
 
-    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    static async buildQuery(
+        q: CountFilteredRequest | LimitedFilteredRequest,
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+    ) {
         const organization = Context.organization;
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         // First do a quick validation of the groups, so that prevents the backend from having to add a scope filter
-        if (!Context.auth.canAccessAllPlatformMembers(permissionLevel) && !await validateGroupFilter({ filter: q.filter, permissionLevel, key: null })) {
+        if (
+            !Context.auth.canAccessAllPlatformMembers(permissionLevel) &&
+            !(await validateGroupFilter({ filter: q.filter, permissionLevel, key: null }))
+        ) {
             if (!organization) {
                 const tags = Context.auth.getPlatformAccessibleOrganizationTags(permissionLevel);
                 if (tags !== 'all' && tags.length === 0) {
@@ -86,7 +121,6 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                                     $in: tags,
                                 },
                             },
-
                         },
                         group: { status: { $neq: GroupStatus.Archived } },
                     };
@@ -95,11 +129,17 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                 // Add organization scope filter.
                 // Grants that cover a whole period or the whole organization never reach archived
                 // groups: canAccessGroup only allows those with full access.
-                const groupStateFilter: StamhoofdKeyFilter = await Context.auth.canAccessArchivedGroups(organization.id)
-                    ? {}
-                    : { group: { status: { $neq: GroupStatus.Archived } } };
+                const groupStateFilter: StamhoofdKeyFilter =
+                    (await Context.auth.canAccessArchivedGroups(organization.id))
+                        ? {}
+                        : { group: { status: { $neq: GroupStatus.Archived } } };
 
-                if (await Context.auth.canAccessAllMembersInEveryPeriod(organization.id, permissionLevel)) {
+                if (
+                    await Context.auth.canAccessAllMembersInEveryPeriod(
+                        organization.id,
+                        permissionLevel,
+                    )
+                ) {
                     scopeFilter = {
                         member: {
                             registrations: {
@@ -112,7 +152,11 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                     };
                 } else {
                     const filters: StamhoofdFilter[] = [];
-                    const canAccessCurrentPeriod = await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel);
+                    const canAccessCurrentPeriod =
+                        await Context.auth.canAccessAllMembersInCurrentPeriod(
+                            organization.id,
+                            permissionLevel,
+                        );
 
                     if (canAccessCurrentPeriod) {
                         filters.push({
@@ -131,7 +175,10 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                     // Check which normal membership groups we have access to and filter on those.
                     // These are added next to the current period filter, not instead of it: a role
                     // can hold a grant on a group of a period the organization already left.
-                    const groups = await Group.getAll(organization.id, null, true, [GroupType.Membership, GroupType.WaitingList]);
+                    const groups = await Group.getAll(organization.id, null, true, [
+                        GroupType.Membership,
+                        GroupType.WaitingList,
+                    ]);
                     Context.auth.cacheGroups(groups);
                     const groupIds: string[] = [];
 
@@ -161,7 +208,8 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
                     if (filters.length === 0) {
                         throw Context.auth.error({
-                            message: 'You must filter on a group of the organization you are trying to access',
+                            message:
+                                'You must filter on a group of the organization you are trying to access',
                             human: $t('%15g'),
                         });
                     }
@@ -212,7 +260,10 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         return query;
     }
 
-    static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
+    static async buildData(
+        requestQuery: LimitedFilteredRequest,
+        permissionLevel = PermissionLevel.Read,
+    ) {
         const query = await GetRegistrationsEndpoint.buildQuery(requestQuery, permissionLevel);
         let data: (Registration & {
             group: Group;
@@ -235,29 +286,33 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             if (registration.group.settings.implicitlyAllowViewRegistrations) {
                 // okay, only need to check if we can access the members (next step)
             } else {
-                if (!await Context.auth.canAccessRegistration(registration, permissionLevel)) {
+                if (!(await Context.auth.canAccessRegistration(registration, permissionLevel))) {
                     throw Context.auth.error();
                 }
             }
         }
 
-        const members = await Member.getBlobByIds(...data.map(r => r.memberId));
+        const members = await Member.getBlobByIds(...data.map((r) => r.memberId));
 
         for (const member of members) {
-            if (!await Context.auth.canAccessMember(member, permissionLevel)) {
+            if (!(await Context.auth.canAccessMember(member, permissionLevel))) {
                 throw Context.auth.error();
             }
         }
 
         const registrationsBlob = await AuthenticatedStructures.registrationsBlob(data, members);
 
-        const next = LimitedFilteredRequestHelper.fixInfiniteLoadingLoopWithTransform<RegistrationWithMemberBlob, RegistrationSortData>({
+        const next = LimitedFilteredRequestHelper.fixInfiniteLoadingLoopWithTransform<
+            RegistrationWithMemberBlob,
+            RegistrationSortData
+        >({
             request: requestQuery,
             results: registrationsBlob.registrations,
-            transformer: registration => new RegistrationSortData({
-                registration,
-                organizations: registrationsBlob.organizations,
-            }),
+            transformer: (registration) =>
+                new RegistrationSortData({
+                    registration,
+                    organizations: registrationsBlob.organizations,
+                }),
             sorters,
         });
 
@@ -289,8 +344,6 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             });
         }
 
-        return new Response(
-            await GetRegistrationsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetRegistrationsEndpoint.buildData(request.query));
     }
 }

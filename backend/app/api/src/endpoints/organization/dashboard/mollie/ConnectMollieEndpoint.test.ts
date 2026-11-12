@@ -36,7 +36,9 @@ describe('Endpoint.ConnectMollie', () => {
         }).create();
         const token = await SessionService.createSession(user);
 
-        const request = Request.buildJson('POST', '/mollie/connect', organization.getApiHost(), { code: 'auth_code_test' });
+        const request = Request.buildJson('POST', '/mollie/connect', organization.getApiHost(), {
+            code: 'auth_code_test',
+        });
         request.headers.authorization = 'Bearer ' + token.accessToken;
         const response = await testServer.test(endpoint, request);
 
@@ -53,12 +55,14 @@ describe('Endpoint.ConnectMollie', () => {
     });
 
     test('A connection that was granted fewer scopes reports the missing ones', async () => {
-        mollieMocker.oauthScopes = MollieRequiredScopes.filter(s => s !== 'balances.read');
+        mollieMocker.oauthScopes = MollieRequiredScopes.filter((s) => s !== 'balances.read');
 
         const { organization, response } = await connect();
 
         const mollieToken = await MollieToken.getTokenFor(organization.id);
         expect(mollieToken?.missingScopes).toEqual(['balances.read']);
-        expect(response.body.privateMeta?.mollieOnboarding?.missingScopes).toEqual(['balances.read']);
+        expect(response.body.privateMeta?.mollieOnboarding?.missingScopes).toEqual([
+            'balances.read',
+        ]);
     });
 });

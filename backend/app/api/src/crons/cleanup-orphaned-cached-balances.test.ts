@@ -1,4 +1,10 @@
-import { BalanceItemFactory, CachedBalance, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    CachedBalance,
+    MemberFactory,
+    OrganizationFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { ReceivableBalanceType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -39,7 +45,13 @@ describe('cron.cleanup-orphaned-cached-balances', () => {
         await orphanOrganization.save();
 
         // Sanity check: all rows exist before cleanup
-        expect(await CachedBalance.getForObjects([orphanMember.id], organization.id, ReceivableBalanceType.member)).toHaveLength(1);
+        expect(
+            await CachedBalance.getForObjects(
+                [orphanMember.id],
+                organization.id,
+                ReceivableBalanceType.member,
+            ),
+        ).toHaveLength(1);
 
         await CachedBalance.deleteOrphaned();
 
@@ -49,7 +61,7 @@ describe('cron.cleanup-orphaned-cached-balances', () => {
             organization.id,
             ReceivableBalanceType.member,
         );
-        expect(remainingMembers.map(b => b.objectId)).toEqual([memberWithItem.id]);
+        expect(remainingMembers.map((b) => b.objectId)).toEqual([memberWithItem.id]);
 
         // The orphaned registration and organization cached balances are deleted
         expect(await CachedBalance.getByID(orphanRegistration.id)).toBeUndefined();
@@ -74,7 +86,7 @@ describe('cron.cleanup-orphaned-cached-balances', () => {
 
         // Both a 'user' and a 'userWithoutMembers' row are created for the user
         const before = await CachedBalance.getForObjects([user.id], organization.id);
-        expect(before.map(b => b.objectType).sort()).toEqual(
+        expect(before.map((b) => b.objectType).sort()).toEqual(
             [ReceivableBalanceType.user, ReceivableBalanceType.userWithoutMembers].sort(),
         );
 
@@ -83,6 +95,6 @@ describe('cron.cleanup-orphaned-cached-balances', () => {
         // The 'user' row is kept (the linked member still has balance items), the
         // 'userWithoutMembers' row is deleted (the user has no direct balance items)
         const after = await CachedBalance.getForObjects([user.id], organization.id);
-        expect(after.map(b => b.objectType)).toEqual([ReceivableBalanceType.user]);
+        expect(after.map((b) => b.objectType)).toEqual([ReceivableBalanceType.user]);
     });
 });

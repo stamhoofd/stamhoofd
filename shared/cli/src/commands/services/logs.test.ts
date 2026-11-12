@@ -15,7 +15,9 @@ describe('ServicesLogs command', () => {
     it('tails shared logs at the selected verbosity', async () => {
         const command = new ServicesLogs([], {} as any);
         (command as any).config = {};
-        (command as any).parseWithContext = vi.fn(async () => ({ context: { verbosity: RunVerbosity.Command } }));
+        (command as any).parseWithContext = vi.fn(async () => ({
+            context: { verbosity: RunVerbosity.Command },
+        }));
 
         await command.run();
 

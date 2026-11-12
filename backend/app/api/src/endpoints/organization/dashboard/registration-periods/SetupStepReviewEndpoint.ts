@@ -35,7 +35,11 @@ export class SetupStepReviewEndpoint extends Endpoint<Params, Query, Body, Respo
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/registration-period/@id/setup-steps/review', { id: String });
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/organization/registration-period/@id/setup-steps/review',
+            { id: String },
+        );
 
         if (params) {
             return [true, params as Params];
@@ -47,7 +51,7 @@ export class SetupStepReviewEndpoint extends Endpoint<Params, Query, Body, Respo
         const organization = await Context.setOrganizationScope();
         const { user } = await Context.authenticate();
 
-        if (!await Context.auth.hasFullAccess(organization.id)) {
+        if (!(await Context.auth.hasFullAccess(organization.id))) {
             throw Context.auth.error();
         }
 

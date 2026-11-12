@@ -16,7 +16,10 @@ import type { DevEvent } from '@node/dev-tools/events';
  * The caller must await close exactly once after stopping producers; it disconnects
  * remaining clients and removes the socket directory. stdout/stderr are untouched.
  */
-export async function openDevEventChannel(receive: (event: DevEvent) => void, traceparent?: string) {
+export async function openDevEventChannel(
+    receive: (event: DevEvent) => void,
+    traceparent?: string,
+) {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'stam-events-'));
     const socketPath = path.join(directory, 'events.sock');
     const session = randomUUID();
@@ -34,7 +37,11 @@ export async function openDevEventChannel(receive: (event: DevEvent) => void, tr
                 const line = pending.subarray(0, end).toString('utf8');
                 pending = pending.subarray(end + 1);
                 let value: unknown;
-                try { value = JSON.parse(line); } catch { return socket.destroy(); }
+                try {
+                    value = JSON.parse(line);
+                } catch {
+                    return socket.destroy();
+                }
                 if (!isDevEvent(value) || value.session !== session) return socket.destroy();
                 receive(value);
             }
@@ -54,10 +61,16 @@ export async function openDevEventChannel(receive: (event: DevEvent) => void, tr
         throw error;
     }
     return {
-        env: { STAM_DEV_SOCKET: socketPath, STAM_DEV_SESSION: session, STAM_DEV_TRACEPARENT: traceparent },
+        env: {
+            STAM_DEV_SOCKET: socketPath,
+            STAM_DEV_SESSION: session,
+            STAM_DEV_TRACEPARENT: traceparent,
+        },
         async close() {
             for (const socket of sockets) socket.destroy();
-            await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+            await new Promise<void>((resolve, reject) =>
+                server.close((error) => (error ? reject(error) : resolve())),
+            );
             await fs.rm(directory, { recursive: true, force: true });
         },
     };

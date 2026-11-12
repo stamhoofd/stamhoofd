@@ -9,7 +9,10 @@ import type Stripe from 'stripe';
  * The `stripePlatform` client must not be account-scoped: checkout sessions live on the platform
  * account.
  */
-export async function getPaymentIdForStripeCharge(charge: Stripe.Charge, { stripePlatform }: { stripePlatform: Stripe }): Promise<string | null> {
+export async function getPaymentIdForStripeCharge(
+    charge: Stripe.Charge,
+    { stripePlatform }: { stripePlatform: Stripe },
+): Promise<string | null> {
     // A destination charge shows up twice: as the platform charge (the application fee's
     // originating transaction) and as the charge on the connected account. Both point to the same
     // payment, so both are usable candidates.
@@ -34,14 +37,24 @@ export async function getPaymentIdForStripeCharge(charge: Stripe.Charge, { strip
         if (!candidate.payment_intent) {
             continue;
         }
-        const paymentIntentId = typeof candidate.payment_intent === 'string' ? candidate.payment_intent : candidate.payment_intent.id;
+        const paymentIntentId =
+            typeof candidate.payment_intent === 'string'
+                ? candidate.payment_intent
+                : candidate.payment_intent.id;
 
-        const stripePayments = await StripePaymentIntent.where({
-            stripeIntentId: paymentIntentId,
-        }, { limit: 1 });
+        const stripePayments = await StripePaymentIntent.where(
+            {
+                stripeIntentId: paymentIntentId,
+            },
+            { limit: 1 },
+        );
 
         if (stripePayments.length === 1) {
-            console.log('Found missing payment metadata for payment intent', paymentIntentId, stripePayments[0].paymentId);
+            console.log(
+                'Found missing payment metadata for payment intent',
+                paymentIntentId,
+                stripePayments[0].paymentId,
+            );
             return stripePayments[0].paymentId;
         }
 
@@ -55,12 +68,19 @@ export async function getPaymentIdForStripeCharge(charge: Stripe.Charge, { strip
             continue;
         }
 
-        const stripeCheckoutSessions = await StripeCheckoutSession.where({
-            stripeSessionId: checkoutSessions.data[0].id,
-        }, { limit: 1 });
+        const stripeCheckoutSessions = await StripeCheckoutSession.where(
+            {
+                stripeSessionId: checkoutSessions.data[0].id,
+            },
+            { limit: 1 },
+        );
 
         if (stripeCheckoutSessions.length === 1) {
-            console.log('Found missing payment metadata for payment intent', paymentIntentId, stripeCheckoutSessions[0].paymentId);
+            console.log(
+                'Found missing payment metadata for payment intent',
+                paymentIntentId,
+                stripeCheckoutSessions[0].paymentId,
+            );
             return stripeCheckoutSessions[0].paymentId;
         }
 

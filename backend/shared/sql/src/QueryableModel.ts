@@ -20,7 +20,10 @@ export class QueryableModel extends Model {
     static shutdownMigrations = false;
 
     /** Selects all columns by default. Custom selections must include the primary key for model hydration. */
-    static select<T extends typeof Model & typeof QueryableModel>(this: T, ...columns: (SQLExpression | string)[]): SQLSelect<InstanceType<T>> {
+    static select<T extends typeof Model & typeof QueryableModel>(
+        this: T,
+        ...columns: (SQLExpression | string)[]
+    ): SQLSelect<InstanceType<T>> {
         const transformer = (row: SQLResultNamespacedRow): InstanceType<T> => {
             const d = (this as T).fromRow(row[this.table]) as InstanceType<T> | undefined;
 
@@ -31,7 +34,13 @@ export class QueryableModel extends Model {
             // If there are any other namespaces, include it as metadata
 
             if (!d) {
-                console.error('Could not transform row', row, 'into model', this.table, 'check if the primary key is returned in the query');
+                console.error(
+                    'Could not transform row',
+                    row,
+                    'into model',
+                    this.table,
+                    'check if the primary key is returned in the query',
+                );
                 throw new Error('Missing data for model ' + this.table);
             }
             if (d instanceof QueryableModel) {
@@ -41,7 +50,10 @@ export class QueryableModel extends Model {
             return d;
         };
 
-        const select = new SQLSelect(transformer, ...(columns.length === 0 ? [SQL.wildcard()] : columns));
+        const select = new SQLSelect(
+            transformer,
+            ...(columns.length === 0 ? [SQL.wildcard()] : columns),
+        );
         return select.from(SQL.table(this.table)).primaryKey(this.primary.name);
     }
 
@@ -65,7 +77,10 @@ export class QueryableModel extends Model {
             throw new Error('Cannot refresh a model that has unsaved changes');
         }
 
-        const me = await (this.static as typeof QueryableModel).select().where(this.static.primary.name, this.getPrimaryKey()).first(true);
+        const me = await (this.static as typeof QueryableModel)
+            .select()
+            .where(this.static.primary.name, this.getPrimaryKey())
+            .first(true);
         this.copyFrom(me);
     }
 
@@ -74,7 +89,7 @@ export class QueryableModel extends Model {
         const batchSize = 100;
         for (let i = 0; i < list.length; i += batchSize) {
             const batch = list.slice(i, i + batchSize);
-            const ids = list.map(item => item.getPrimaryKey()).filter(id => id !== null);
+            const ids = list.map((item) => item.getPrimaryKey()).filter((id) => id !== null);
             if (ids.length === 0) {
                 continue;
             }
@@ -82,7 +97,9 @@ export class QueryableModel extends Model {
             const refreshed = await this.getByIDs(...ids);
 
             for (const item of batch) {
-                const refreshedItem = refreshed.find(r => r.getPrimaryKey() === item.getPrimaryKey());
+                const refreshedItem = refreshed.find(
+                    (r) => r.getPrimaryKey() === item.getPrimaryKey(),
+                );
                 if (refreshedItem) {
                     for (const column of this.columns.values()) {
                         item[column.name] = refreshedItem[column.name];
@@ -96,9 +113,20 @@ export class QueryableModel extends Model {
      * Get a model by its primary key; returns undefined when absent, or throws when required is true.
      * @param id primary key
      */
-    static override async getByID<T extends typeof Model>(this: T & typeof QueryableModel, id: number | string, required: true): Promise<InstanceType<T>>;
-    static override async getByID<T extends typeof Model>(this: T & typeof QueryableModel, id: number | string): Promise<InstanceType<T> | undefined>;
-    static override async getByID<T extends typeof Model>(this: T & typeof QueryableModel, id: number | string, required?: boolean): Promise<InstanceType<T> | undefined> {
+    static override async getByID<T extends typeof Model>(
+        this: T & typeof QueryableModel,
+        id: number | string,
+        required: true,
+    ): Promise<InstanceType<T>>;
+    static override async getByID<T extends typeof Model>(
+        this: T & typeof QueryableModel,
+        id: number | string,
+    ): Promise<InstanceType<T> | undefined>;
+    static override async getByID<T extends typeof Model>(
+        this: T & typeof QueryableModel,
+        id: number | string,
+        required?: boolean,
+    ): Promise<InstanceType<T> | undefined> {
         if (this.cache) {
             const hit = this.cache.getById(id);
             if (hit) {
@@ -106,14 +134,20 @@ export class QueryableModel extends Model {
                 return hit as InstanceType<T>;
             }
         }
-        return ((await (this as any as typeof QueryableModel).select().where(this.primary.name, id).first(required ?? false)) ?? undefined) as any as InstanceType<T> | undefined;
+        return ((await (this as any as typeof QueryableModel)
+            .select()
+            .where(this.primary.name, id)
+            .first(required ?? false)) ?? undefined) as any as InstanceType<T> | undefined;
     }
 
     /**
      * Get multiple models by their ID
      * @param ids primary key of the models you want to fetch
      */
-    static override async getByIDs<T extends typeof Model>(this: T & typeof QueryableModel, ...ids: (number | string)[]): Promise<InstanceType<T>[]> {
+    static override async getByIDs<T extends typeof Model>(
+        this: T & typeof QueryableModel,
+        ...ids: (number | string)[]
+    ): Promise<InstanceType<T>[]> {
         if (ids.length === 0) {
             return [];
         }
@@ -134,11 +168,19 @@ export class QueryableModel extends Model {
             if (remaining.length === 0) {
                 return hits;
             }
-            const fetched = await (this as any as typeof QueryableModel).select().where(this.primary.name, ids).limit(ids.length).fetch() as any as InstanceType<T>[];
+            const fetched = (await (this as any as typeof QueryableModel)
+                .select()
+                .where(this.primary.name, ids)
+                .limit(ids.length)
+                .fetch()) as any as InstanceType<T>[];
             return [...fetched, ...hits];
         }
 
-        return (this as any as typeof QueryableModel).select().where(this.primary.name, ids).limit(ids.length).fetch() as any as InstanceType<T>[];
+        return (this as any as typeof QueryableModel)
+            .select()
+            .where(this.primary.name, ids)
+            .limit(ids.length)
+            .fetch() as any as InstanceType<T>[];
     }
 
     disableSave() {

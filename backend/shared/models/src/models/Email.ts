@@ -1,6 +1,21 @@
 import { column } from '@node/database';
-import type { EmailRecipient as EmailRecipientStruct, EmailTemplateType, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
-import { EmailAttachment, EmailContent, EmailRecipientFilter, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, LanguageHelper, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
+import type {
+    EmailRecipient as EmailRecipientStruct,
+    EmailTemplateType,
+    PaginatedResponse,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
+import {
+    EmailAttachment,
+    EmailContent,
+    EmailRecipientFilter,
+    EmailRecipientsStatus,
+    EmailStatus,
+    Email as EmailStruct,
+    LanguageHelper,
+    LimitedFilteredRequest,
+    SortItemDirection,
+} from '@stamhoofd/structures';
 import type { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,7 +27,14 @@ import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import type { QueueHandlerOptions } from '@stamhoofd/queues';
 import { isAbortedError, QueueHandler } from '@stamhoofd/queues';
-import { QueryableModel, readDynamicSQLExpression, SQL, SQLAlias, SQLCount, SQLSelectAs } from '@stamhoofd/sql';
+import {
+    QueryableModel,
+    readDynamicSQLExpression,
+    SQL,
+    SQLAlias,
+    SQLCount,
+    SQLSelectAs,
+} from '@stamhoofd/sql';
 import { errorToSimpleErrors } from '../helpers/errorToSimpleErrors.js';
 import { EmailRecipient } from './EmailRecipient.js';
 import { EmailTemplate } from './EmailTemplate.js';
@@ -23,8 +45,16 @@ export type RecipientLoader<BeforeFetchAllResult = any> = {
      * Run one or multiple queries before fetching all recipients.
      * The result of this function will be passed to the `fetch` function.
      */
-    beforeFetchAll?: (request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null) => Promise<BeforeFetchAllResult>;
-    fetch(request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null, beforeFetchAllResult?: BeforeFetchAllResult, options?: { allowedLanguages?: Language[] | null }): Promise<PaginatedResponse<EmailRecipientStruct[], LimitedFilteredRequest>>;
+    beforeFetchAll?: (
+        request: LimitedFilteredRequest,
+        subfilter: StamhoofdFilter | null,
+    ) => Promise<BeforeFetchAllResult>;
+    fetch(
+        request: LimitedFilteredRequest,
+        subfilter: StamhoofdFilter | null,
+        beforeFetchAllResult?: BeforeFetchAllResult,
+        options?: { allowedLanguages?: Language[] | null },
+    ): Promise<PaginatedResponse<EmailRecipientStruct[], LimitedFilteredRequest>>;
     count(request: LimitedFilteredRequest, subfilter: StamhoofdFilter | null): Promise<number>;
 };
 
@@ -32,7 +62,9 @@ export class Email extends QueryableModel {
     static table = 'emails';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -88,7 +120,10 @@ export class Email extends QueryableModel {
     text: string | null = null;
 
     /** Full content overrides per language. The default content (subject/html/text/json) is used for all recipients without a matching override. Never contains `language` itself */
-    @column({ type: 'json', decoder: new MapDecoder(new EnumDecoder(Language), EmailContent as Decoder<EmailContent>) })
+    @column({
+        type: 'json',
+        decoder: new MapDecoder(new EnumDecoder(Language), EmailContent as Decoder<EmailContent>),
+    })
     translations: Map<Language, EmailContent> = new Map();
 
     /** The language of the default content (subject/html/text/json); null when the content is untranslated */
@@ -197,7 +232,8 @@ export class Email extends QueryableModel {
     deletedAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -209,7 +245,8 @@ export class Email extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -220,7 +257,10 @@ export class Email extends QueryableModel {
 
     static recipientLoaders: Map<EmailRecipientFilterType, RecipientLoader> = new Map();
 
-    static pendingNotificationCountUpdates: Map<string, { timer: NodeJS.Timeout | null; lastUpdate: Date | null }> = new Map();
+    static pendingNotificationCountUpdates: Map<
+        string,
+        { timer: NodeJS.Timeout | null; lastUpdate: Date | null }
+    > = new Map();
 
     throwIfNotReadyToSend() {
         if (this.subject == null || this.subject.length == 0) {
@@ -248,7 +288,11 @@ export class Email extends QueryableModel {
         }
 
         for (const [language, content] of this.translations) {
-            if (content.subject.length === 0 || content.text.length === 0 || content.html.length === 0) {
+            if (
+                content.subject.length === 0 ||
+                content.text.length === 0 ||
+                content.html.length === 0
+            ) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Missing subject, text or html in translation ' + language,
@@ -265,7 +309,11 @@ export class Email extends QueryableModel {
             });
         }
 
-        if (this.status === EmailStatus.Draft && this.recipientsErrors !== null && this.recipientsStatus !== EmailRecipientsStatus.Created) {
+        if (
+            this.status === EmailStatus.Draft &&
+            this.recipientsErrors !== null &&
+            this.recipientsStatus !== EmailRecipientsStatus.Created
+        ) {
             throw new SimpleError({
                 code: 'invalid_recipients',
                 message: 'Failed to build recipients (count)',
@@ -309,7 +357,10 @@ export class Email extends QueryableModel {
         }
 
         for (const [language, content] of this.translations) {
-            if ((content.html && !content.html.includes(replacement)) || (content.text && !content.text.includes(replacement))) {
+            if (
+                (content.html && !content.html.includes(replacement)) ||
+                (content.text && !content.text.includes(replacement))
+            ) {
                 throw new SimpleError({
                     code: 'missing_unsubscribe_button',
                     message: 'Missing unsubscribe button in translation ' + language,
@@ -429,13 +480,26 @@ export class Email extends QueryableModel {
         };
     }
 
-    async setFromTemplate(type: EmailTemplateType, options?: { language?: Language; keepTranslations?: boolean }) {
+    async setFromTemplate(
+        type: EmailTemplateType,
+        options?: { language?: Language; keepTranslations?: boolean },
+    ) {
         // Most specific template: for specific group
-        let templates = (await EmailTemplate.where({ type, organizationId: this.organizationId, groupId: null, webshopId: null }));
+        let templates = await EmailTemplate.where({
+            type,
+            organizationId: this.organizationId,
+            groupId: null,
+            webshopId: null,
+        });
 
         // Then default
         if (templates.length === 0 && this.organizationId) {
-            templates = (await EmailTemplate.where({ type, organizationId: null, groupId: null, webshopId: null }));
+            templates = await EmailTemplate.where({
+                type,
+                organizationId: null,
+                groupId: null,
+                webshopId: null,
+            });
         }
 
         if (templates.length === 0) {
@@ -482,10 +546,15 @@ export class Email extends QueryableModel {
      * The html of all languages combined - only used to check which replacements are in use.
      */
     getCombinedHtml(): string {
-        return [this.html ?? '', ...[...this.translations.values()].map(content => content.html)].join(' ');
+        return [
+            this.html ?? '',
+            ...[...this.translations.values()].map((content) => content.html),
+        ].join(' ');
     }
 
-    async lock<T>(callback: (upToDate: Email, options: QueueHandlerOptions) => Promise<T> | T): Promise<T> {
+    async lock<T>(
+        callback: (upToDate: Email, options: QueueHandlerOptions) => Promise<T> | T,
+    ): Promise<T> {
         if (!this.id) {
             await this.save();
         }
@@ -505,30 +574,38 @@ export class Email extends QueryableModel {
         });
     }
 
-    static async bumpNotificationCount(emailId: string, type: 'hard-bounce' | 'soft-bounce' | 'complaint') {
+    static async bumpNotificationCount(
+        emailId: string,
+        type: 'hard-bounce' | 'soft-bounce' | 'complaint',
+    ) {
         // Send an update query
-        const base = Email.update()
-            .where('id', emailId);
+        const base = Email.update().where('id', emailId);
 
         switch (type) {
             case 'hard-bounce': {
-                base.set('hardBouncesCount',
-                    SQL.calculation(SQL.column('hardBouncesCount'))
-                        .add(readDynamicSQLExpression(1)),
+                base.set(
+                    'hardBouncesCount',
+                    SQL.calculation(SQL.column('hardBouncesCount')).add(
+                        readDynamicSQLExpression(1),
+                    ),
                 );
                 break;
             }
             case 'soft-bounce': {
-                base.set('softBouncesCount',
-                    SQL.calculation(SQL.column('softBouncesCount'))
-                        .add(readDynamicSQLExpression(1)),
+                base.set(
+                    'softBouncesCount',
+                    SQL.calculation(SQL.column('softBouncesCount')).add(
+                        readDynamicSQLExpression(1),
+                    ),
                 );
                 break;
             }
             case 'complaint': {
-                base.set('spamComplaintsCount',
-                    SQL.calculation(SQL.column('spamComplaintsCount'))
-                        .add(readDynamicSQLExpression(1)),
+                base.set(
+                    'spamComplaintsCount',
+                    SQL.calculation(SQL.column('spamComplaintsCount')).add(
+                        readDynamicSQLExpression(1),
+                    ),
                 );
                 break;
             }
@@ -564,10 +641,13 @@ export class Email extends QueryableModel {
 
         // Schedule a slow update of all counts
         if (!object.timer) {
-            object.timer = setTimeout(() => {
-                object.timer = null;
-                this.checkNeedsNotificationCountUpdate(emailId).catch(console.error);
-            }, 1 * 60 * 1000);
+            object.timer = setTimeout(
+                () => {
+                    object.timer = null;
+                    this.checkNeedsNotificationCountUpdate(emailId).catch(console.error);
+                },
+                1 * 60 * 1000,
+            );
         }
     }
 
@@ -576,23 +656,17 @@ export class Email extends QueryableModel {
         return await QueueHandler.schedule('updateNotificationsCounts-' + emailId, async () => {
             const query = SQL.select(
                 new SQLSelectAs(
-                    new SQLCount(
-                        SQL.column('hardBounceError'),
-                    ),
+                    new SQLCount(SQL.column('hardBounceError')),
                     new SQLAlias('data__hardBounces'),
                 ),
                 // If the current amount_due is negative, we can ignore that negative part if there is a future due item
                 new SQLSelectAs(
-                    new SQLCount(
-                        SQL.column('softBounceError'),
-                    ),
+                    new SQLCount(SQL.column('softBounceError')),
                     new SQLAlias('data__softBounces'),
                 ),
 
                 new SQLSelectAs(
-                    new SQLCount(
-                        SQL.column('spamComplaintError'),
-                    ),
+                    new SQLCount(SQL.column('spamComplaintError')),
                     new SQLAlias('data__complaints'),
                 ),
             )
@@ -614,12 +688,22 @@ export class Email extends QueryableModel {
             const softBounces = row['softBounces'];
             const complaints = row['complaints'];
 
-            if (typeof hardBounces !== 'number' || typeof softBounces !== 'number' || typeof complaints !== 'number') {
+            if (
+                typeof hardBounces !== 'number' ||
+                typeof softBounces !== 'number' ||
+                typeof complaints !== 'number'
+            ) {
                 console.error('Unexpected result values', row);
                 return;
             }
 
-            console.log('Updating email notification counts', emailId, hardBounces, softBounces, complaints);
+            console.log(
+                'Updating email notification counts',
+                emailId,
+                hardBounces,
+                softBounces,
+                complaints,
+            );
 
             // Send an update query
             await Email.update()
@@ -638,7 +722,12 @@ export class Email extends QueryableModel {
         await QueueHandler.schedule('email-count-' + this.id, async function () {
             const upToDate = await Email.getByID(id);
 
-            if (!upToDate || upToDate.sentAt || !upToDate.id || upToDate.status !== EmailStatus.Draft) {
+            if (
+                !upToDate ||
+                upToDate.sentAt ||
+                !upToDate.id ||
+                upToDate.status !== EmailStatus.Draft
+            ) {
                 return;
             }
 
@@ -656,7 +745,12 @@ export class Email extends QueryableModel {
         QueueHandler.schedule('email-count-' + this.id, async function ({ abort }) {
             let upToDate = await Email.getByID(id);
 
-            if (!upToDate || upToDate.sentAt || !upToDate.id || upToDate.status !== EmailStatus.Draft) {
+            if (
+                !upToDate ||
+                upToDate.sentAt ||
+                !upToDate.id ||
+                upToDate.status !== EmailStatus.Draft
+            ) {
                 return;
             }
 
@@ -674,7 +768,11 @@ export class Email extends QueryableModel {
                     const loader = Email.recipientLoaders.get(subfilter.type);
 
                     if (!loader) {
-                        throw new Error('Loader for type ' + subfilter.type + ' has not been initialised on the Email model');
+                        throw new Error(
+                            'Loader for type ' +
+                                subfilter.type +
+                                ' has not been initialised on the Email model',
+                        );
                     }
 
                     const request = new LimitedFilteredRequest({
@@ -698,7 +796,11 @@ export class Email extends QueryableModel {
                     return;
                 }
                 if (upToDate.recipientsStatus === EmailRecipientsStatus.Created) {
-                    console.log('Canceled recipient count update for email', id, 'already created recipients');
+                    console.log(
+                        'Canceled recipient count update for email',
+                        id,
+                        'already created recipients',
+                    );
                     return;
                 }
                 upToDate.emailRecipientsCount = count;
@@ -759,6 +861,8 @@ export class Email extends QueryableModel {
         for (const language of this.translations.keys()) {
             languages.add(language);
         }
-        return [...languages].filter(language => new I18n(language, country).language === language);
+        return [...languages].filter(
+            (language) => new I18n(language, country).language === language,
+        );
     }
 }

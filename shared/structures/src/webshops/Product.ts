@@ -1,4 +1,13 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -142,12 +151,10 @@ export class OptionMenu extends AutoEncoder {
     autoSelectFirst = true;
 
     @field({ decoder: new ArrayDecoder(Option) })
-    options: Option[] = [
-        Option.create({}),
-    ];
+    options: Option[] = [Option.create({})];
 
     clearStock() {
-        this.options.forEach(o => o.clearStock());
+        this.options.forEach((o) => o.clearStock());
     }
 }
 
@@ -169,12 +176,17 @@ export class ProductLocation extends AutoEncoder {
     name = '';
 
     @field({ decoder: Address })
-    @field({ decoder: Address, nullable: true, version: 146, downgrade: (v) => {
-        if (!v) {
-            return Address.createDefault();
-        }
-        return v;
-    } })
+    @field({
+        decoder: Address,
+        nullable: true,
+        version: 146,
+        downgrade: (v) => {
+            if (!v) {
+                return Address.createDefault();
+            }
+            return v;
+        },
+    })
     address: Address | null = null;
 
     // TODO: coordinates here (only filled in by backend)
@@ -241,11 +253,22 @@ export class Product extends AutoEncoder {
     disableAfter: Date | null = null;
 
     get isEnabled() {
-        return this.enabled && !this.hidden && (!this.enableAfter || this.enableAfter <= new Date()) && (!this.disableAfter || this.disableAfter >= new Date());
+        return (
+            this.enabled &&
+            !this.hidden &&
+            (!this.enableAfter || this.enableAfter <= new Date()) &&
+            (!this.disableAfter || this.disableAfter >= new Date())
+        );
     }
 
     get enableInFuture() {
-        return this.enabled && !this.hidden && this.enableAfter !== null && this.enableAfter > new Date() && (!this.disableAfter || this.disableAfter >= new Date());
+        return (
+            this.enabled &&
+            !this.hidden &&
+            this.enableAfter !== null &&
+            this.enableAfter > new Date() &&
+            (!this.disableAfter || this.disableAfter >= new Date())
+        );
     }
 
     get isTicket() {
@@ -345,8 +368,8 @@ export class Product extends AutoEncoder {
     clearStock() {
         this.usedStock = 0;
         this.reservedSeats = [];
-        this.optionMenus.forEach(o => o.clearStock());
-        this.prices.forEach(p => p.clearStock());
+        this.optionMenus.forEach((o) => o.clearStock());
+        this.prices.forEach((p) => p.clearStock());
     }
 
     get isSoldOut(): boolean {
@@ -445,7 +468,7 @@ export class Product extends AutoEncoder {
         if (this.seatingPlanId === null) {
             return null;
         }
-        const seatingPlan = webshop.meta.seatingPlans.find(p => p.id === this.seatingPlanId);
+        const seatingPlan = webshop.meta.seatingPlans.find((p) => p.id === this.seatingPlanId);
         if (!seatingPlan) {
             return null;
         }
@@ -454,7 +477,11 @@ export class Product extends AutoEncoder {
             return seatingPlan.seatCount - this.reservedSeats.length;
         }
 
-        return seatingPlan.seatCount - seatingPlan.adminSeatCount - this.reservedSeats.filter(r => !seatingPlan.isAdminSeat(r)).length;
+        return (
+            seatingPlan.seatCount -
+            seatingPlan.adminSeatCount -
+            this.reservedSeats.filter((r) => !seatingPlan.isAdminSeat(r)).length
+        );
     }
 
     /**
@@ -472,7 +499,11 @@ export class Product extends AutoEncoder {
         }
 
         // No choice options
-        if (this.optionMenus.length === 0 && this.prices.length <= 1 && this.customFields.length === 0) {
+        if (
+            this.optionMenus.length === 0 &&
+            this.prices.length <= 1 &&
+            this.customFields.length === 0
+        ) {
             return true;
         }
 
@@ -523,7 +554,15 @@ export class Product extends AutoEncoder {
 
         if (this.enableInFuture && this.enableAfter) {
             if (this.disableAfter) {
-                return $t('%tC') + ' ' + Formatter.dateTime(this.enableAfter) + ' ' + $t('%10C') + ' ' + Formatter.dateTime(this.disableAfter);
+                return (
+                    $t('%tC') +
+                    ' ' +
+                    Formatter.dateTime(this.enableAfter) +
+                    ' ' +
+                    $t('%10C') +
+                    ' ' +
+                    Formatter.dateTime(this.disableAfter)
+                );
             }
             return $t('%tC') + ' ' + Formatter.dateTime(this.enableAfter);
         }
@@ -556,6 +595,6 @@ export class Product extends AutoEncoder {
             return this.prices;
         }
 
-        return this.prices.filter(p => !p.hidden);
+        return this.prices.filter((p) => !p.hidden);
     }
 }

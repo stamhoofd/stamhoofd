@@ -1,9 +1,23 @@
 import type { BalanceItem, BalanceItemPaymentWithPrivatePayment } from '../BalanceItem.js';
 import type { BreakdownGroup } from '../PaymentBreakdown.js';
 import { BreakdownAmountType } from '../PaymentBreakdown.js';
-import { getPaymentSettlement, getPendingPaymentGroup, PENDING_PAYMENT_ID } from '../PaymentSettlement.js';
+import {
+    getPaymentSettlement,
+    getPendingPaymentGroup,
+    PENDING_PAYMENT_ID,
+} from '../PaymentSettlement.js';
 import { PaymentStatus } from '../PaymentStatus.js';
-import { createBalanceItemGroup, createFailedGroup, createOpenAfterFailedGroup, createOpenGroup, createRefundGroup, REFUND_ID, UNPAID_FAILED_ID, UNPAID_OPEN_AFTER_FAILED_ID, UNPAID_OPEN_ID } from './breakdownGroups.js';
+import {
+    createBalanceItemGroup,
+    createFailedGroup,
+    createOpenAfterFailedGroup,
+    createOpenGroup,
+    createRefundGroup,
+    REFUND_ID,
+    UNPAID_FAILED_ID,
+    UNPAID_OPEN_AFTER_FAILED_ID,
+    UNPAID_OPEN_ID,
+} from './breakdownGroups.js';
 
 /**
  * One part of what a balance item costs, and where that part ended up: paid out in a payout, still
@@ -36,9 +50,17 @@ export type BalanceItemPart = {
  * A part lands in a row exactly when the row's filter selects the item, so the list and the export
  * behind a row hold exactly what it was added up from.
  */
-export function getBalanceItemParts(item: BalanceItem, payments: BalanceItemPaymentWithPrivatePayment[]): BalanceItemPart[] {
+export function getBalanceItemParts(
+    item: BalanceItem,
+    payments: BalanceItemPaymentWithPrivatePayment[],
+): BalanceItemPart[] {
     const parts = new Map<string, BalanceItemPart>();
-    const add = (id: string, price: number, amountType: BreakdownAmountType, createGroup: () => BreakdownGroup) => {
+    const add = (
+        id: string,
+        price: number,
+        amountType: BreakdownAmountType,
+        createGroup: () => BreakdownGroup,
+    ) => {
         const existing = parts.get(id);
 
         if (existing) {
@@ -60,7 +82,9 @@ export function getBalanceItemParts(item: BalanceItem, payments: BalanceItemPaym
 
         if (payment.status === PaymentStatus.Succeeded) {
             paid += price;
-            add(group.id, price, BreakdownAmountType.Paid, () => createBalanceItemGroup(group, BreakdownAmountType.Paid));
+            add(group.id, price, BreakdownAmountType.Paid, () =>
+                createBalanceItemGroup(group, BreakdownAmountType.Paid),
+            );
             continue;
         }
 
@@ -76,7 +100,9 @@ export function getBalanceItemParts(item: BalanceItem, payments: BalanceItemPaym
     }
 
     if (hasPending) {
-        add(PENDING_PAYMENT_ID, pending, BreakdownAmountType.Pending, () => createBalanceItemGroup(getPendingPaymentGroup(), BreakdownAmountType.Pending));
+        add(PENDING_PAYMENT_ID, pending, BreakdownAmountType.Pending, () =>
+            createBalanceItemGroup(getPendingPaymentGroup(), BreakdownAmountType.Pending),
+        );
     }
 
     // What is left of what was charged after everything that came in and everything that is on its way.

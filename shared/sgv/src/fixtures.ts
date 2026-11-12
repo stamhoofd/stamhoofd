@@ -110,9 +110,7 @@ export const defaultSGVProfile: SGVProfielResponse = SGVProfielResponse.create({
 });
 
 /** Creates a complete SGV member payload with realistic defaults and shallow overrides for focused tests. */
-export function createSGVLidFixture(
-    overrides: Partial<SGVLidGet> = {},
-): SGVLidGet {
+export function createSGVLidFixture(overrides: Partial<SGVLidGet> = {}): SGVLidGet {
     const id = overrides.id ?? 'member-1';
     const vgagegevens = {
         voornaam: 'Existing',
@@ -130,7 +128,9 @@ export function createSGVLidFixture(
         lidkaartafgedrukt: false,
         ...overrides.verbondsgegevens,
     };
-    const [year, month, day] = vgagegevens.geboortedatum.split('-').map(value => Number.parseInt(value, 10));
+    const [year, month, day] = vgagegevens.geboortedatum
+        .split('-')
+        .map((value) => Number.parseInt(value, 10));
 
     const member = new SGVLidGet({
         id,

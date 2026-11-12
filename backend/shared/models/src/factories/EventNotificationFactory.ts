@@ -26,12 +26,15 @@ export class EventNotificationFactory extends Factory<Options, EventNotification
         const eventNotification = new EventNotification();
 
         eventNotification.organizationId = this.options.organization.id;
-        eventNotification.typeId = this.options.typeId ?? (await new EventNotificationTypeFactory({}).create()).id;
+        eventNotification.typeId =
+            this.options.typeId ?? (await new EventNotificationTypeFactory({}).create()).id;
         eventNotification.status = this.options.status ?? EventNotificationStatus.Draft;
         eventNotification.createdBy = null;
         eventNotification.feedbackText = this.options.feedbackText ?? null;
 
-        const events = this.options.events ?? [await new EventFactory({ organization: this.options.organization }).create()];
+        const events = this.options.events ?? [
+            await new EventFactory({ organization: this.options.organization }).create(),
+        ];
 
         eventNotification.startDate = events[0].startDate;
         eventNotification.endDate = events[0].endDate;

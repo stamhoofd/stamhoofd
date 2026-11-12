@@ -1,7 +1,16 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
-import type { CountFilteredRequest, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
+import {
+    assertSort,
+    getSortFilter,
+    LimitedFilteredRequest,
+    PaginatedResponse,
+} from '@stamhoofd/structures';
 
 import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
@@ -16,12 +25,21 @@ import { organizationRegistrationPeriodSorters } from '../../../../sql-sorters/o
 type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
-type ResponseBody = PaginatedResponse<OrganizationRegistrationPeriodStruct[], LimitedFilteredRequest>;
+type ResponseBody = PaginatedResponse<
+    OrganizationRegistrationPeriodStruct[],
+    LimitedFilteredRequest
+>;
 
 const filterCompilers: SQLFilterDefinitions = organizationRegistrationPeriodFilterCompilers;
-const sorters: SQLSortDefinitions<OrganizationRegistrationPeriod> = organizationRegistrationPeriodSorters;
+const sorters: SQLSortDefinitions<OrganizationRegistrationPeriod> =
+    organizationRegistrationPeriodSorters;
 
-export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -29,7 +47,11 @@ export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params,
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/registration-periods', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/organization/registration-periods',
+            {},
+        );
 
         if (params) {
             return [true, params as Params];
@@ -89,7 +111,8 @@ export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params,
         let next: LimitedFilteredRequest | undefined;
 
         if (organizationRegistrationPeriods.length >= requestQuery.limit) {
-            const lastObject = organizationRegistrationPeriods[organizationRegistrationPeriods.length - 1];
+            const lastObject =
+                organizationRegistrationPeriods[organizationRegistrationPeriods.length - 1];
             const nextFilter = getSortFilter(lastObject, sorters, requestQuery.sort);
 
             next = new LimitedFilteredRequest({
@@ -106,8 +129,13 @@ export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params,
             }
         }
 
-        return new PaginatedResponse<OrganizationRegistrationPeriodStruct[], LimitedFilteredRequest>({
-            results: await AuthenticatedStructures.organizationRegistrationPeriods(organizationRegistrationPeriods),
+        return new PaginatedResponse<
+            OrganizationRegistrationPeriodStruct[],
+            LimitedFilteredRequest
+        >({
+            results: await AuthenticatedStructures.organizationRegistrationPeriods(
+                organizationRegistrationPeriods,
+            ),
             next,
         });
     }
@@ -117,7 +145,8 @@ export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params,
             throw new SimpleError({
                 code: 'client_update_required',
                 statusCode: 400,
-                message: 'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
+                message:
+                    'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
                 human: $t('%G8'),
             });
         }
@@ -126,7 +155,7 @@ export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params,
         await Context.authenticate();
 
         if (organization) {
-            if (!await Context.auth.hasSomeAccess(organization.id)) {
+            if (!(await Context.auth.hasSomeAccess(organization.id))) {
                 throw Context.auth.error();
             }
         } else {

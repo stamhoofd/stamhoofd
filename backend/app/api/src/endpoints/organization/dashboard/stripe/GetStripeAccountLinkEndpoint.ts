@@ -52,7 +52,7 @@ export class GetStripeAccountLinkEndpoint extends Endpoint<Params, Query, Body, 
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full)) {
+        if (!(await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full))) {
             throw Context.auth.error();
         }
 
@@ -75,8 +75,10 @@ export class GetStripeAccountLinkEndpoint extends Endpoint<Params, Query, Body, 
             },
         });
 
-        return new Response(ResponseBody.create({
-            url: accountLink.url,
-        }));
+        return new Response(
+            ResponseBody.create({
+                url: accountLink.url,
+            }),
+        );
     }
 }

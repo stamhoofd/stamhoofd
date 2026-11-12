@@ -1,9 +1,21 @@
 import { SimpleError } from '@common/errors';
 import type { Organization } from '@stamhoofd/models';
 import { Platform, Webshop } from '@stamhoofd/models';
-import type { MemberWithRegistrationsBlob, RecordAnswer, StamhoofdFilter } from '@stamhoofd/structures';
+import type {
+    MemberWithRegistrationsBlob,
+    RecordAnswer,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
 import type { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
-import { GroupType, LimitedFilteredRequest, OrderStatus, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, SortItemDirection } from '@stamhoofd/structures';
+import {
+    GroupType,
+    LimitedFilteredRequest,
+    OrderStatus,
+    RecordCheckboxAnswer,
+    RecordChooseOneAnswer,
+    RecordMultipleChoiceAnswer,
+    SortItemDirection,
+} from '@stamhoofd/structures';
 import type { MailchimpSyncRequest } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
 import { MailchimpSyncType } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
 import { Formatter } from '@stamhoofd/utility';
@@ -29,14 +41,14 @@ async function loadPlatformNames(tags: MailchimpTags): Promise<PlatformNames> {
     const or = ' ' + tags.i18n.$t('%GT') + ' ';
     const defaultAgeGroups = new Map<string, string>();
     for (const group of platform.config.defaultAgeGroups) {
-        const names = group.names.filter(n => n.trim().length > 0);
+        const names = group.names.filter((n) => n.trim().length > 0);
         if (names.length > 0) {
             defaultAgeGroups.set(group.id, Formatter.joinLast(names, ', ', or));
         }
     }
     return {
         defaultAgeGroups,
-        responsibilities: new Map(platform.config.responsibilities.map(r => [r.id, r.name])),
+        responsibilities: new Map(platform.config.responsibilities.map((r) => [r.id, r.name])),
     };
 }
 
@@ -70,10 +82,14 @@ function getRecordTags(answer: RecordAnswer, tags: MailchimpTags): string[] {
         return answer.selected ? [tags.record(name)] : [];
     }
     if (answer instanceof RecordChooseOneAnswer) {
-        return answer.selectedChoice ? [tags.recordChoice(name, answer.selectedChoice.name.toString())] : [];
+        return answer.selectedChoice
+            ? [tags.recordChoice(name, answer.selectedChoice.name.toString())]
+            : [];
     }
     if (answer instanceof RecordMultipleChoiceAnswer) {
-        return answer.selectedChoices.map(choice => tags.recordChoice(name, choice.name.toString()));
+        return answer.selectedChoices.map((choice) =>
+            tags.recordChoice(name, choice.name.toString()),
+        );
     }
     return [];
 }
@@ -86,50 +102,80 @@ function hasConsent(answer: RecordAnswer | undefined, settings: MailchimpSetting
         return answer.selected;
     }
     if (answer instanceof RecordChooseOneAnswer) {
-        return !!answer.selectedChoice && settings.newsletterChoiceIds.includes(answer.selectedChoice.id);
+        return (
+            !!answer.selectedChoice &&
+            settings.newsletterChoiceIds.includes(answer.selectedChoice.id)
+        );
     }
     if (answer instanceof RecordMultipleChoiceAnswer) {
-        return answer.selectedChoices.some(choice => settings.newsletterChoiceIds.includes(choice.id));
+        return answer.selectedChoices.some((choice) =>
+            settings.newsletterChoiceIds.includes(choice.id),
+        );
     }
     return false;
 }
 
-function getResponsibilityTags(member: MemberWithRegistrationsBlob, platformNames: PlatformNames, tags: MailchimpTags): string[] {
-    return member.responsibilities.filter(r => r.isActive).flatMap((record) => {
-        const name = platformNames.responsibilities.get(record.responsibilityId);
-        if (!name) {
-            return [];
-        }
-        const ageGroup = platformNames.defaultAgeGroups.get(record.group?.defaultAgeGroupId ?? '');
-        return ageGroup ? [tags.responsibility(name), tags.responsibility(name, ageGroup)] : [tags.responsibility(name)];
-    });
+function getResponsibilityTags(
+    member: MemberWithRegistrationsBlob,
+    platformNames: PlatformNames,
+    tags: MailchimpTags,
+): string[] {
+    return member.responsibilities
+        .filter((r) => r.isActive)
+        .flatMap((record) => {
+            const name = platformNames.responsibilities.get(record.responsibilityId);
+            if (!name) {
+                return [];
+            }
+            const ageGroup = platformNames.defaultAgeGroups.get(
+                record.group?.defaultAgeGroupId ?? '',
+            );
+            return ageGroup
+                ? [tags.responsibility(name), tags.responsibility(name, ageGroup)]
+                : [tags.responsibility(name)];
+        });
 }
 
 function getMemberSources(
     member: MemberWithRegistrationsBlob,
     organizationNames: Map<string, string>,
-    options: { organization: Organization | null; periodId: string; settings: MailchimpSettings; tags: MailchimpTags; platformNames: PlatformNames | null },
+    options: {
+        organization: Organization | null;
+        periodId: string;
+        settings: MailchimpSettings;
+        tags: MailchimpTags;
+        platformNames: PlatformNames | null;
+    },
 ): MailchimpContactSource[] {
-    const registrations = member.registrations.filter(r =>
-        r.registeredAt !== null
-        && r.deactivatedAt === null
-        && r.group.periodId === options.periodId
-        && r.group.type === GroupType.Membership
-        && (!options.organization || r.organizationId === options.organization.id),
+    const registrations = member.registrations.filter(
+        (r) =>
+            r.registeredAt !== null &&
+            r.deactivatedAt === null &&
+            r.group.periodId === options.periodId &&
+            r.group.type === GroupType.Membership &&
+            (!options.organization || r.organizationId === options.organization.id),
     );
 
     // Group records are answered per registration
-    const findAnswer = (recordId: string) => member.details.recordAnswers.get(recordId) ?? registrations.find(r => r.recordAnswers.has(recordId))?.recordAnswers.get(recordId);
+    const findAnswer = (recordId: string) =>
+        member.details.recordAnswers.get(recordId) ??
+        registrations.find((r) => r.recordAnswers.has(recordId))?.recordAnswers.get(recordId);
 
     const platformNames = options.platformNames;
     const groups = platformNames
-        ? registrations.flatMap(r => platformNames.defaultAgeGroups.get(r.group.defaultAgeGroupId ?? '') ?? [])
-        : registrations.map(r => r.group.settings.name.toString());
-    const organizations = options.organization ? [] : registrations.map(r => organizationNames.get(r.organizationId) ?? '').filter(n => !!n);
+        ? registrations.flatMap(
+              (r) => platformNames.defaultAgeGroups.get(r.group.defaultAgeGroupId ?? '') ?? [],
+          )
+        : registrations.map((r) => r.group.settings.name.toString());
+    const organizations = options.organization
+        ? []
+        : registrations
+              .map((r) => organizationNames.get(r.organizationId) ?? '')
+              .filter((n) => !!n);
 
     const tags = [
-        ...groups.map(g => platformNames ? options.tags.ageGroup(g) : options.tags.group(g)),
-        ...organizations.map(o => options.tags.organization(o)),
+        ...groups.map((g) => (platformNames ? options.tags.ageGroup(g) : options.tags.group(g))),
+        ...organizations.map((o) => options.tags.organization(o)),
     ];
     for (const recordId of options.settings.tagRecordIds) {
         const answer = findAnswer(recordId);
@@ -138,7 +184,9 @@ function getMemberSources(
         }
     }
 
-    const consent = options.settings.newsletterRecordId ? hasConsent(findAnswer(options.settings.newsletterRecordId), options.settings) : null;
+    const consent = options.settings.newsletterRecordId
+        ? hasConsent(findAnswer(options.settings.newsletterRecordId), options.settings)
+        : null;
 
     const base = {
         sortKey: member.id,
@@ -155,7 +203,13 @@ function getMemberSources(
             email: member.details.email,
             firstName: member.details.firstName,
             lastName: member.details.lastName,
-            tags: [options.tags.member, ...tags, ...(platformNames ? getResponsibilityTags(member, platformNames, options.tags) : [])],
+            tags: [
+                options.tags.member,
+                ...tags,
+                ...(platformNames
+                    ? getResponsibilityTags(member, platformNames, options.tags)
+                    : []),
+            ],
         });
     }
     for (const parent of member.details.parents) {
@@ -172,7 +226,13 @@ function getMemberSources(
     return sources;
 }
 
-async function loadMemberSources(organization: Organization | null, request: MailchimpSyncRequest, settings: MailchimpSettings, tags: MailchimpTags, signal?: MailchimpAbortSignal) {
+async function loadMemberSources(
+    organization: Organization | null,
+    request: MailchimpSyncRequest,
+    settings: MailchimpSettings,
+    tags: MailchimpTags,
+    signal?: MailchimpAbortSignal,
+) {
     const periodId = await getCurrentPeriodId(organization);
     const platformNames = organization ? null : await loadPlatformNames(tags);
     const sources: MailchimpContactSource[] = [];
@@ -187,17 +247,32 @@ async function loadMemberSources(organization: Organization | null, request: Mai
     while (query) {
         signal?.throwIfAborted();
         const response = await GetMembersEndpoint.buildData(query);
-        const organizationNames = new Map(response.results.organizations.map(o => [o.id, o.name]));
+        const organizationNames = new Map(
+            response.results.organizations.map((o) => [o.id, o.name]),
+        );
 
         for (const member of response.results.members) {
-            sources.push(...getMemberSources(member, organizationNames, { organization, periodId, settings, tags, platformNames }));
+            sources.push(
+                ...getMemberSources(member, organizationNames, {
+                    organization,
+                    periodId,
+                    settings,
+                    tags,
+                    platformNames,
+                }),
+            );
         }
         query = response.next ?? null;
     }
     return sources;
 }
 
-async function loadOrderSources(organization: Organization | null, request: MailchimpSyncRequest, mailchimpTags: MailchimpTags, signal?: MailchimpAbortSignal) {
+async function loadOrderSources(
+    organization: Organization | null,
+    request: MailchimpSyncRequest,
+    mailchimpTags: MailchimpTags,
+    signal?: MailchimpAbortSignal,
+) {
     const webshop = request.webshopId ? await Webshop.getByID(request.webshopId) : null;
     if (!organization || !webshop || webshop.organizationId !== organization.id) {
         throw new SimpleError({
@@ -211,7 +286,9 @@ async function loadOrderSources(organization: Organization | null, request: Mail
     const tags = [mailchimpTags.customer, mailchimpTags.webshop(webshop.meta.name)];
     const sources: MailchimpContactSource[] = [];
 
-    const filter: StamhoofdFilter = request.filter ? [{ webshopId: webshop.id }, request.filter] : { webshopId: webshop.id };
+    const filter: StamhoofdFilter = request.filter
+        ? [{ webshopId: webshop.id }, request.filter]
+        : { webshopId: webshop.id };
     let query: LimitedFilteredRequest | null = new LimitedFilteredRequest({
         filter,
         search: request.search,
@@ -224,7 +301,11 @@ async function loadOrderSources(organization: Organization | null, request: Mail
         const response = await GetWebshopOrdersEndpoint.buildData(query);
 
         for (const order of response.results) {
-            if (order.webshopId !== webshop.id || order.status === OrderStatus.Canceled || order.status === OrderStatus.Deleted) {
+            if (
+                order.webshopId !== webshop.id ||
+                order.status === OrderStatus.Canceled ||
+                order.status === OrderStatus.Deleted
+            ) {
                 continue;
             }
             const customer = order.data.customer;
@@ -251,7 +332,13 @@ async function loadOrderSources(organization: Organization | null, request: Mail
 /**
  * Loads the data via the same builders as the dashboard, so filters and permission scoping are identical
  */
-export async function loadMailchimpSources(organization: Organization | null, request: MailchimpSyncRequest, settings: MailchimpSettings, tags: MailchimpTags, signal?: MailchimpAbortSignal): Promise<MailchimpContactSource[]> {
+export async function loadMailchimpSources(
+    organization: Organization | null,
+    request: MailchimpSyncRequest,
+    settings: MailchimpSettings,
+    tags: MailchimpTags,
+    signal?: MailchimpAbortSignal,
+): Promise<MailchimpContactSource[]> {
     if (request.type === MailchimpSyncType.Orders) {
         return await loadOrderSources(organization, request, tags, signal);
     }

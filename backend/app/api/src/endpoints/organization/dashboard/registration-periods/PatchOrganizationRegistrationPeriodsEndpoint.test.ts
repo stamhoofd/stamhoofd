@@ -1,8 +1,25 @@
 import { Request } from '@node/endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
-import { Group, GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import {
+    Group,
+    GroupFactory,
+    OrganizationFactory,
+    OrganizationRegistrationPeriod,
+    OrganizationRegistrationPeriodFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { GroupCategory, GroupSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Permissions, TranslatedString, Version } from '@stamhoofd/structures';
+import {
+    GroupCategory,
+    GroupSettings,
+    Group as GroupStruct,
+    GroupType,
+    OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct,
+    Permissions,
+    TranslatedString,
+    Version,
+} from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
 
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
@@ -19,8 +36,21 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
         TestUtils.setEnvironment('userMode', 'platform');
     });
 
-    const patchOrganizationRegistrationPeriods = async ({ patch, organization, token }: { patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>; organization: Organization; token: Token }) => {
-        const request = Request.buildJson('PATCH', `/v${Version}/organization/registration-periods`, organization.getApiHost(), patch);
+    const patchOrganizationRegistrationPeriods = async ({
+        patch,
+        organization,
+        token,
+    }: {
+        patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct>;
+        organization: Organization;
+        token: Token;
+    }) => {
+        const request = Request.buildJson(
+            'PATCH',
+            `/v${Version}/organization/registration-periods`,
+            organization.getApiHost(),
+            patch,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -31,7 +61,7 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
         });
 
         test('should not be able to patch registration periods with global period', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
 
             // create global period
             const newPeriod = await new RegistrationPeriodFactory({}).create();
@@ -49,21 +79,24 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
 
             const token = await SessionService.createSession(user);
 
-            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
+            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> =
+                new PatchableArray();
 
-            patch.addPatch(OrganizationRegistrationPeriodStruct.patch({
-                id: newOrganizationPeriod.id,
-                groups: new PatchableArray(),
-            }));
+            patch.addPatch(
+                OrganizationRegistrationPeriodStruct.patch({
+                    id: newOrganizationPeriod.id,
+                    groups: new PatchableArray(),
+                }),
+            );
 
             // patch organization registration period should fail
-            await expect(patchOrganizationRegistrationPeriods({ patch, organization, token })).rejects.toThrow(
-                STExpect.simpleError({ code: 'not_found' }),
-            );
+            await expect(
+                patchOrganizationRegistrationPeriods({ patch, organization, token }),
+            ).rejects.toThrow(STExpect.simpleError({ code: 'not_found' }));
         });
 
         test('should be able to patch registration periods', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
 
             // create period
             const newPeriod = await new RegistrationPeriodFactory({ organization }).create();
@@ -81,20 +114,27 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
 
             const token = await SessionService.createSession(user);
 
-            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
+            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> =
+                new PatchableArray();
 
-            patch.addPatch(OrganizationRegistrationPeriodStruct.patch({
-                id: newOrganizationPeriod.id,
-                groups: new PatchableArray(),
-            }));
+            patch.addPatch(
+                OrganizationRegistrationPeriodStruct.patch({
+                    id: newOrganizationPeriod.id,
+                    groups: new PatchableArray(),
+                }),
+            );
 
             // patch organization registration period should not fail
-            const response = await patchOrganizationRegistrationPeriods({ patch, organization, token });
+            const response = await patchOrganizationRegistrationPeriods({
+                patch,
+                organization,
+                token,
+            });
             expect(response.body).toBeDefined();
         });
 
         test('should not be able to create registration periods with global period', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
 
             // create global period
             const newPeriod = await new RegistrationPeriodFactory({}).create();
@@ -111,18 +151,19 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
 
             const token = await SessionService.createSession(user);
 
-            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
+            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> =
+                new PatchableArray();
 
             patch.addPut(newOrganizationPeriod);
 
             // patch organization registration period should fail
-            await expect(patchOrganizationRegistrationPeriods({ patch, organization, token })).rejects.toThrow(
-                STExpect.simpleError({ code: 'invalid_period' }),
-            );
+            await expect(
+                patchOrganizationRegistrationPeriods({ patch, organization, token }),
+            ).rejects.toThrow(STExpect.simpleError({ code: 'invalid_period' }));
         });
 
         test('should be able to create registration periods', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
 
             // create period
             const startDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
@@ -146,17 +187,22 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
 
             const token = await SessionService.createSession(user);
 
-            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
+            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> =
+                new PatchableArray();
 
             patch.addPut(newOrganizationPeriod);
 
             // patch organization registration period should not fail
-            const response = await patchOrganizationRegistrationPeriods({ patch, organization, token });
+            const response = await patchOrganizationRegistrationPeriods({
+                patch,
+                organization,
+                token,
+            });
             expect(response.body).toBeDefined();
         });
 
         test('should copy groups that reference a waiting list', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
 
             // create period
             const startDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
@@ -185,7 +231,10 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
 
             const regularGroup = GroupStruct.create({
                 type: GroupType.Membership,
-                settings: GroupSettings.create({ name: TranslatedString.create('Kapoenen'), maxAge: 8 }),
+                settings: GroupSettings.create({
+                    name: TranslatedString.create('Kapoenen'),
+                    maxAge: 8,
+                }),
                 waitingList: waitingListGroup,
             });
 
@@ -198,16 +247,24 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
             ];
             newOrganizationPeriod.settings.rootCategoryId = 'root';
 
-            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
+            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> =
+                new PatchableArray();
             patch.addPut(newOrganizationPeriod);
 
-            const response = await patchOrganizationRegistrationPeriods({ patch, organization, token });
+            const response = await patchOrganizationRegistrationPeriods({
+                patch,
+                organization,
+                token,
+            });
             expect(response.body).toBeDefined();
 
             // Both the regular group and its waiting list should have been created
-            const createdGroups = await Group.getAll(organization.id, newPeriod.id, true, [GroupType.Membership, GroupType.WaitingList]);
-            const regular = createdGroups.find(g => g.id === regularGroup.id);
-            const waitingList = createdGroups.find(g => g.id === waitingListGroup.id);
+            const createdGroups = await Group.getAll(organization.id, newPeriod.id, true, [
+                GroupType.Membership,
+                GroupType.WaitingList,
+            ]);
+            const regular = createdGroups.find((g) => g.id === regularGroup.id);
+            const waitingList = createdGroups.find((g) => g.id === waitingListGroup.id);
 
             expect(waitingList).toBeDefined();
             expect(regular).toBeDefined();
@@ -215,8 +272,8 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
         });
 
         test('should not be able to patch groups of other organization', async () => {
-            const organization = await new OrganizationFactory({ }).create();
-            const otherOrganization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
+            const otherOrganization = await new OrganizationFactory({}).create();
 
             // create period
             const startDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
@@ -244,26 +301,31 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
             // create group
             const group = await new GroupFactory({ organization: otherOrganization }).create();
 
-            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> = new PatchableArray();
+            const patch: PatchableArrayAutoEncoder<OrganizationRegistrationPeriodStruct> =
+                new PatchableArray();
             const groupsPatch: PatchableArrayAutoEncoder<GroupStruct> = new PatchableArray();
 
             // patch group
-            groupsPatch.addPatch(GroupStruct.patch({
-                id: group.id,
-                settings: GroupSettings.patch({
-                    name: 'new name',
+            groupsPatch.addPatch(
+                GroupStruct.patch({
+                    id: group.id,
+                    settings: GroupSettings.patch({
+                        name: 'new name',
+                    }),
                 }),
-            }));
+            );
 
-            patch.addPatch(OrganizationRegistrationPeriodStruct.patch({
-                id: newOrganizationPeriod.id,
-                groups: groupsPatch,
-            }));
+            patch.addPatch(
+                OrganizationRegistrationPeriodStruct.patch({
+                    id: newOrganizationPeriod.id,
+                    groups: groupsPatch,
+                }),
+            );
 
             // patch organization registration period should fail because of group of other organization
-            await expect(patchOrganizationRegistrationPeriods({ patch, organization, token })).rejects.toThrow(
-                STExpect.simpleError({ code: 'permission_denied' }),
-            );
+            await expect(
+                patchOrganizationRegistrationPeriods({ patch, organization, token }),
+            ).rejects.toThrow(STExpect.simpleError({ code: 'permission_denied' }));
         });
     });
 });

@@ -1,14 +1,29 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    EnumDecoder,
+    field,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 
 import { MemberResponsibilityRecordBase } from './members/MemberResponsibilityRecord.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { getPermissionLevelNumber } from './PermissionLevel.js';
 import { PermissionRole } from './PermissionRole.js';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { downgradeResourceKeys, PermissionsResourceKey, upgradeResourceKeys } from './PermissionsResourceType.js';
+import {
+    downgradeResourceKeys,
+    PermissionsResourceKey,
+    upgradeResourceKeys,
+} from './PermissionsResourceType.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
 
-export function getUnlistedResources(resourceType: PermissionsResourceType, permissions: { resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> }, listedResources: { id: string }[]): { id: string; name: string; type: PermissionsResourceType }[] {
+export function getUnlistedResources(
+    resourceType: PermissionsResourceType,
+    permissions: { resources: Map<PermissionsResourceType, Map<string, ResourcePermissions>> },
+    listedResources: { id: string }[],
+): { id: string; name: string; type: PermissionsResourceType }[] {
     const resources = permissions.resources.get(resourceType);
     if (!resources) {
         return [];
@@ -16,7 +31,11 @@ export function getUnlistedResources(resourceType: PermissionsResourceType, perm
 
     const result: { id: string; name: string; type: PermissionsResourceType }[] = [];
     for (const [id, resource] of resources) {
-        if (id !== PermissionsResourceKey.All && id !== PermissionsResourceKey.CurrentPeriod && !listedResources.find(r => r.id === id)) {
+        if (
+            id !== PermissionsResourceKey.All &&
+            id !== PermissionsResourceKey.CurrentPeriod &&
+            !listedResources.find((r) => r.id === id)
+        ) {
             result.push({ id, name: resource.resourceName, type: resourceType });
         }
     }
@@ -75,7 +94,7 @@ export class Permissions extends AutoEncoder {
     }
 
     hasRole(role: PermissionRole): boolean {
-        return this.roles.find(r => r.id === role.id) !== undefined;
+        return this.roles.find((r) => r.id === role.id) !== undefined;
     }
 
     add(other: Permissions) {
@@ -84,19 +103,24 @@ export class Permissions extends AutoEncoder {
         }
 
         for (const role of other.roles) {
-            if (!this.roles.find(r => r.id === role.id)) {
+            if (!this.roles.find((r) => r.id === role.id)) {
                 this.roles.push(role.clone());
             }
         }
 
         for (const responsibility of other.responsibilities) {
-            if (!this.responsibilities.find(r => r.id === responsibility.id)) {
+            if (!this.responsibilities.find((r) => r.id === responsibility.id)) {
                 this.responsibilities.push(responsibility.clone());
             }
         }
     }
 
     get isEmpty() {
-        return this.level === PermissionLevel.None && this.roles.length === 0 && this.responsibilities.length === 0 && this.resources.size === 0;
+        return (
+            this.level === PermissionLevel.None &&
+            this.roles.length === 0 &&
+            this.responsibilities.length === 0 &&
+            this.resources.size === 0
+        );
     }
 }

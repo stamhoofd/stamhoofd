@@ -1,6 +1,12 @@
 import { Request } from '@node/endpoints';
 import type { Member, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { MemberFactory, MemberPlatformMembership, OrganizationFactory, Platform, RegistrationPeriodFactory } from '@stamhoofd/models';
+import {
+    MemberFactory,
+    MemberPlatformMembership,
+    OrganizationFactory,
+    Platform,
+    RegistrationPeriodFactory,
+} from '@stamhoofd/models';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -30,7 +36,11 @@ describe('Endpoint.GetChargeMembershipsSummary', () => {
     };
 
     // Creates an uncharged (not yet invoiced) membership that should show up in the summary
-    const createUnchargedMembership = async (period: RegistrationPeriod, organization: Organization, member: Member) => {
+    const createUnchargedMembership = async (
+        period: RegistrationPeriod,
+        organization: Organization,
+        member: Member,
+    ) => {
         const membership = new MemberPlatformMembership();
         membership.memberId = member.id;
         membership.membershipTypeId = uuidv4();

@@ -1,4 +1,12 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { Address } from './addresses/Address.js';
@@ -134,7 +142,8 @@ export class Event extends AutoEncoder {
 
         for (const event of events) {
             const year = Formatter.year(event.startDate);
-            const title = Formatter.month(event.startDate) + (year !== currentYear ? ` ${year}` : '');
+            const title =
+                Formatter.month(event.startDate) + (year !== currentYear ? ` ${year}` : '');
 
             const group = queue[queue.length - 1];
             if (group && group.title === title) {
@@ -147,7 +156,9 @@ export class Event extends AutoEncoder {
     }
 
     getEventNotificationTypes(platform: Platform) {
-        return platform.config.eventNotificationTypes.filter(t => t.eventTypeIds.includes(this.typeId));
+        return platform.config.eventNotificationTypes.filter((t) =>
+            t.eventTypeIds.includes(this.typeId),
+        );
     }
 
     static decodeField(...args: Parameters<typeof AutoEncoder.decode>) {

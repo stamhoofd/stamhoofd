@@ -1,4 +1,12 @@
-import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder, StringDecoder, field } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    EnumDecoder,
+    IntegerDecoder,
+    StringDecoder,
+    field,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { PermissionRoleForResponsibility } from './PermissionRole.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
@@ -61,14 +69,16 @@ export class MemberResponsibility extends AutoEncoder {
     }
 
     getPermissions(groupId: string | null) {
-        const r = this.permissions?.clone() ?? PermissionRoleForResponsibility.create({
-            id: this.id,
-            name: this.name,
-            level: PermissionLevel.None,
-            responsibilityId: this.id,
-            responsibilityGroupId: groupId,
-            resources: new Map(),
-        });
+        const r =
+            this.permissions?.clone() ??
+            PermissionRoleForResponsibility.create({
+                id: this.id,
+                name: this.name,
+                level: PermissionLevel.None,
+                responsibilityId: this.id,
+                responsibilityGroupId: groupId,
+                resources: new Map(),
+            });
 
         r.name = this.name;
         r.id = this.id + (groupId ? '-' + groupId : '');
@@ -87,5 +97,4 @@ export class MemberResponsibility extends AutoEncoder {
 
 export class PlatformResponsibility extends MemberResponsibility {
     // todo
-
 }

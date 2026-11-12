@@ -17,11 +17,16 @@ export async function fillGroupCachedPeriods() {
             }
 
             if (!periods.has(group.periodId)) {
-                periods.set(group.periodId, await RegistrationPeriod.getByID(group.periodId) ?? null);
+                periods.set(
+                    group.periodId,
+                    (await RegistrationPeriod.getByID(group.periodId)) ?? null,
+                );
             }
             const period = periods.get(group.periodId);
             if (!period) {
-                console.error(`No period found for group ${group.id} (periodId: ${group.periodId})`);
+                console.error(
+                    `No period found for group ${group.id} (periodId: ${group.periodId})`,
+                );
                 return;
             }
 

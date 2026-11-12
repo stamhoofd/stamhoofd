@@ -35,7 +35,7 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
         // null if platform
         const organizationId: string | null = organization ? organization.id : null;
 
-        if (!await Context.auth.canAccessEmailBounces(organizationId)) {
+        if (!(await Context.auth.canAccessEmailBounces(organizationId))) {
             throw Context.auth.error();
         }
 
@@ -54,7 +54,7 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
         const cleaned: EmailInformation[] = [];
         for (const email of emails) {
             const c = EmailInformation.create(email);
-            const existing = cleaned.find(cc => cc.email === email.email);
+            const existing = cleaned.find((cc) => cc.email === email.email);
             if (existing) {
                 existing.markedAsSpam = existing.markedAsSpam || c.markedAsSpam;
                 existing.hardBounce = existing.hardBounce || c.hardBounce;
@@ -77,6 +77,11 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
         }
 
         // We don't return empty ones to increase privacy a bit - admins should not know what email addresses are in the system unless they have bounced
-        return new Response(cleaned.filter(c => c.markedAsSpam || c.hardBounce || c.unsubscribedAll || c.unsubscribedMarketing));
+        return new Response(
+            cleaned.filter(
+                (c) =>
+                    c.markedAsSpam || c.hardBounce || c.unsubscribedAll || c.unsubscribedMarketing,
+            ),
+        );
     }
 }

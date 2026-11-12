@@ -1,10 +1,23 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
+import {
+    ArrayDecoder,
+    AutoEncoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { PaymentCustomer } from '../PaymentCustomer.js';
 import { PaymentSettlementDetailed } from '../settlements/PaymentSettlement.js';
-import { downgradePaymentMethodV150, PaymentMethod, PaymentMethodHelper, PaymentMethodV150 } from '../PaymentMethod.js';
+import {
+    downgradePaymentMethodV150,
+    PaymentMethod,
+    PaymentMethodHelper,
+    PaymentMethodV150,
+} from '../PaymentMethod.js';
 import { PaymentProvider } from '../PaymentProvider.js';
 import { PaymentStatus } from '../PaymentStatus.js';
 import { PaymentType, PaymentTypeHelper } from '../PaymentType.js';
@@ -99,7 +112,10 @@ export class Payment extends AutoEncoder {
 
     get isOverDue() {
         const daysToPay = 7;
-        return this.isPending && this.createdAt < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * daysToPay);
+        return (
+            this.isPending &&
+            this.createdAt < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * daysToPay)
+        );
     }
 
     get isSucceeded() {
@@ -111,7 +127,12 @@ export class Payment extends AutoEncoder {
     }
 
     get canChangeStatus() {
-        return this.price !== 0 && (this.method === PaymentMethod.Transfer || this.method === PaymentMethod.PointOfSale || this.method === PaymentMethod.Unknown);
+        return (
+            this.price !== 0 &&
+            (this.method === PaymentMethod.Transfer ||
+                this.method === PaymentMethod.PointOfSale ||
+                this.method === PaymentMethod.Unknown)
+        );
     }
 
     get title() {
@@ -135,7 +156,8 @@ export class Payment extends AutoEncoder {
     }
 
     getHTMLTable(): string {
-        let str = '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
+        let str =
+            '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
 
         /**
          * Replacement.create({
@@ -162,31 +184,33 @@ export class Payment extends AutoEncoder {
         const data = [
             {
                 title: $t('%M7'),
-                value: this.method ? Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.method)) : '',
+                value: this.method
+                    ? Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.method))
+                    : '',
             },
             {
                 title: $t('%m0'),
-                value: this.status !== PaymentStatus.Succeeded ? Formatter.price(this?.price ?? 0) : Formatter.price(0),
+                value:
+                    this.status !== PaymentStatus.Succeeded
+                        ? Formatter.price(this?.price ?? 0)
+                        : Formatter.price(0),
             },
-            ...(
-                this.method === PaymentMethod.Transfer
-                    ? [
-                            {
-                                title: $t('%J8'),
-                                value: this.transferDescription ?? '',
-                            },
-                            {
-                                title: $t('%kc'),
-                                value: this.transferSettings?.iban ?? '',
-                            },
-                            {
-                                title: $t('%J5'),
-                                value: this.transferSettings?.creditor ?? '',
-                            },
-                        ]
-                    : []
-            ),
-
+            ...(this.method === PaymentMethod.Transfer
+                ? [
+                      {
+                          title: $t('%J8'),
+                          value: this.transferDescription ?? '',
+                      },
+                      {
+                          title: $t('%kc'),
+                          value: this.transferSettings?.iban ?? '',
+                      },
+                      {
+                          title: $t('%J5'),
+                          value: this.transferSettings?.creditor ?? '',
+                      },
+                  ]
+                : []),
         ];
 
         for (const replacement of data) {
@@ -227,7 +251,12 @@ export class Payment extends AutoEncoder {
         }
 
         if (difference > 100 || difference < -100) {
-            throw new Error('Unexpected rounding difference of ' + difference + ' for price ' + amount.toString());
+            throw new Error(
+                'Unexpected rounding difference of ' +
+                    difference +
+                    ' for price ' +
+                    amount.toString(),
+            );
         }
 
         return {

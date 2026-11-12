@@ -8,14 +8,14 @@ describe('MemberLogger', () => {
     });
 
     test('does not write an audit log when only lastExternalSync changes', async () => {
-        const member = await AuditLogService.disable(async () => await new MemberFactory({}).create());
+        const member = await AuditLogService.disable(
+            async () => await new MemberFactory({}).create(),
+        );
 
         member.details.lastExternalSync = new Date();
         await member.save();
 
-        const logs = await AuditLog.select()
-            .where('objectId', member.id)
-            .fetch();
+        const logs = await AuditLog.select().where('objectId', member.id).fetch();
 
         expect(logs).toHaveLength(0);
     });

@@ -46,7 +46,7 @@ export class GetStripeLoginLinkEndpoint extends Endpoint<Params, Query, Body, Re
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full)) {
+        if (!(await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full))) {
             throw Context.auth.error();
         }
 
@@ -61,16 +61,20 @@ export class GetStripeLoginLinkEndpoint extends Endpoint<Params, Query, Body, Re
         }
 
         if (model.meta.type === 'standard') {
-            return new Response(ResponseBody.create({
-                url: 'https://dashboard.stripe.com/',
-            }));
+            return new Response(
+                ResponseBody.create({
+                    url: 'https://dashboard.stripe.com/',
+                }),
+            );
         }
 
         const stripe = StripeHelper.getInstance();
         const accountLink = await stripe.accounts.createLoginLink(model.accountId);
 
-        return new Response(ResponseBody.create({
-            url: accountLink.url,
-        }));
+        return new Response(
+            ResponseBody.create({
+                url: accountLink.url,
+            }),
+        );
     }
 }

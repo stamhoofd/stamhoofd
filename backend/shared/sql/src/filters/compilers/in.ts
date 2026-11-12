@@ -31,10 +31,15 @@ export function $inSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunn
             return new SQLWhereOr([]);
         }
 
-        const column = normalizeColumn(originalColumn, assertFilterCompareValue(filter.find(f => f !== null) ?? null));
-        const values = filter.map(val => normalizeCompareValue(assertFilterCompareValue(val), column.type));
+        const column = normalizeColumn(
+            originalColumn,
+            assertFilterCompareValue(filter.find((f) => f !== null) ?? null),
+        );
+        const values = filter.map((val) =>
+            normalizeCompareValue(assertFilterCompareValue(val), column.type),
+        );
 
-        const valuesWithoutNulls = values.filter(val => val !== null);
+        const valuesWithoutNulls = values.filter((val) => val !== null);
         const hasNull = values.length !== valuesWithoutNulls.length;
 
         if (hasNull) {
@@ -49,12 +54,12 @@ export function $inSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilterRunn
             const jsonValues = JSON.stringify(valuesWithoutNulls);
             const valuesExpression = scalarToSQLExpression(jsonValues);
 
-            return new SQLJsonOverlaps(
-                new SQLLower(column.expression),
-                valuesExpression,
-            );
+            return new SQLJsonOverlaps(new SQLLower(column.expression), valuesExpression);
         }
-        const valuesExpression = valuesWithoutNulls.length === 1 ? scalarToSQLExpression(valuesWithoutNulls[0]) : new SQLArray(valuesWithoutNulls);
+        const valuesExpression =
+            valuesWithoutNulls.length === 1
+                ? scalarToSQLExpression(valuesWithoutNulls[0])
+                : new SQLArray(valuesWithoutNulls);
 
         return new SQLWhereEqual(
             column.expression,

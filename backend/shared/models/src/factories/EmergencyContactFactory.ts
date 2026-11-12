@@ -24,18 +24,18 @@ export class EmergencyContactFactory extends Factory<Options, EmergencyContact> 
         ]);
         contact.name = this.randomFirstName(Gender.Other) + ' ' + this.randomLastName();
 
-        contact.phone
-            = '+32 47'
-                + Math.floor(Math.random() * 10)
-                + ' '
-                + Math.floor(Math.random() * 10)
-                + Math.floor(Math.random() * 10)
-                + ' '
-                + Math.floor(Math.random() * 10)
-                + Math.floor(Math.random() * 10)
-                + ' '
-                + Math.floor(Math.random() * 10)
-                + Math.floor(Math.random() * 10);
+        contact.phone =
+            '+32 47' +
+            Math.floor(Math.random() * 10) +
+            ' ' +
+            Math.floor(Math.random() * 10) +
+            Math.floor(Math.random() * 10) +
+            ' ' +
+            Math.floor(Math.random() * 10) +
+            Math.floor(Math.random() * 10) +
+            ' ' +
+            Math.floor(Math.random() * 10) +
+            Math.floor(Math.random() * 10);
 
         return Promise.resolve(contact);
     }

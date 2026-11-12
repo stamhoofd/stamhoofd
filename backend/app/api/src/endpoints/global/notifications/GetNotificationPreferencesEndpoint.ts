@@ -13,7 +13,12 @@ type ResponseBody = NotificationPreference[];
 /**
  * Stored notification preferences of the authenticated user. Missing preferences are enabled.
  */
-export class GetNotificationPreferencesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetNotificationPreferencesEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
@@ -31,10 +36,10 @@ export class GetNotificationPreferencesEndpoint extends Endpoint<Params, Query, 
         await Context.setUserOrganizationScope();
         await Context.authenticate();
 
-        const preferences = await NotificationService.getPreferences(Context.impersonatedUserOrUser);
-
-        return new Response(
-            preferences.map(p => p.getStructure()),
+        const preferences = await NotificationService.getPreferences(
+            Context.impersonatedUserOrUser,
         );
+
+        return new Response(preferences.map((p) => p.getStructure()));
     }
 }

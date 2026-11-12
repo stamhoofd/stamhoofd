@@ -16,7 +16,9 @@ describe('Model.StripeAccount', () => {
         expect(model.meta.capabilities).toEqual(new Map(Object.entries(account.capabilities)));
         expect(model.meta.paymentMethods).toEqual([PaymentMethod.CreditCard]);
         expect(model.meta.blob).toBe(account);
-        const encoded = JSON.parse(JSON.stringify(model.meta.encode({ version: Version, medium: EncodeMedium.Database })));
+        const encoded = JSON.parse(
+            JSON.stringify(model.meta.encode({ version: Version, medium: EncodeMedium.Database })),
+        );
         expect(encoded).toMatchObject({ capabilities: account.capabilities, blob: account });
         model.meta.capabilities.set('ideal_payments', 'active');
         expect(account.capabilities.ideal_payments).toBe('pending');

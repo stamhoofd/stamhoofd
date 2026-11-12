@@ -1,10 +1,36 @@
 import { Request } from '@node/endpoints';
 import type { BalanceItem, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    GroupFactory,
+    MemberFactory,
+    OrganizationFactory,
+    OrganizationRegistrationPeriodFactory,
+    Registration,
+    RegistrationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { AppliedRegistrationDiscount, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, GroupPriceDiscount, GroupPriceDiscountType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, Permissions, ReduceablePrice, ResourcePermissions } from '@stamhoofd/structures';
+import {
+    AppliedRegistrationDiscount,
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    BooleanStatus,
+    GroupPriceDiscount,
+    GroupPriceDiscountType,
+    IDRegisterCart,
+    IDRegisterCheckout,
+    IDRegisterItem,
+    PaymentMethod,
+    Permissions,
+    ReduceablePrice,
+    ResourcePermissions,
+} from '@stamhoofd/structures';
 import { IDDeleteRegisterItem } from '@stamhoofd/structures/members/checkout/DeleteRegisterItem.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { RegisterMembersEndpoint } from '../../src/endpoints/global/registration/RegisterMembersEndpoint.js';
@@ -59,10 +85,12 @@ describe('E2E.Bundle Discounts', () => {
     });
 
     async function initData() {
-        const organization = await new OrganizationFactory({ period })
-            .create();
+        const organization = await new OrganizationFactory({ period }).create();
 
-        const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+        const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
+            organization,
+            period,
+        }).create();
 
         const user = await new UserFactory({
             organization,
@@ -71,8 +99,7 @@ describe('E2E.Bundle Discounts', () => {
 
         const token = await SessionService.createSession(user);
 
-        const member = await new MemberFactory({ organization, user })
-            .create();
+        const member = await new MemberFactory({ organization, user }).create();
 
         return {
             organization,
@@ -85,13 +112,12 @@ describe('E2E.Bundle Discounts', () => {
 
     describe('Registering as member', () => {
         test('PointOfSale: The first registration has no discount applied', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 20_00, type: GroupPriceDiscountType.Percentage }],
                 },
             });
 
@@ -99,8 +125,7 @@ describe('E2E.Bundle Discounts', () => {
                 organization,
                 price: 25_0000,
                 bundleDiscount,
-            })
-                .create();
+            }).create();
 
             const groupPrice = group.settings.prices[0];
 
@@ -141,13 +166,12 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Unrelated registrations do not get counted for bundle discounts', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 20_00, type: GroupPriceDiscountType.Percentage }],
                 },
             });
 
@@ -236,13 +260,12 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('PointOfSale: A bundle discount can be applied to a previous registration', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 20_00, type: GroupPriceDiscountType.Percentage }],
                 },
             });
 
@@ -308,12 +331,17 @@ describe('E2E.Bundle Discounts', () => {
             // Get registration 1 again, it should now have the bundle discount applied
             const updatedRegistration1 = (await Registration.getByID(registration1.id))!;
             expect(updatedRegistration1).toBeDefined();
-            expect(updatedRegistration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
+            expect(updatedRegistration1.discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 5_0000,
+                        }),
+                    ],
+                ]),
+            );
 
             await assertBalances({ user }, [
                 {
@@ -347,13 +375,12 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('PointOfSale: A bundle discount can be applied to an added registration', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 20_00, type: GroupPriceDiscountType.Percentage }],
                 },
             });
 
@@ -361,8 +388,7 @@ describe('E2E.Bundle Discounts', () => {
                 organization,
                 price: 25_0000,
                 bundleDiscount,
-            })
-                .create();
+            }).create();
 
             const groupPrice = group.settings.prices[0];
 
@@ -415,15 +441,17 @@ describe('E2E.Bundle Discounts', () => {
 
             const registration2 = response2.body.registrations[0];
             expect(registration2.registeredAt).not.toBeNull();
-            expect(registration2.discounts).toMatchMap(new Map([
-                [
-                    bundleDiscount.id,
-                    AppliedRegistrationDiscount.create({
-                        name: bundleDiscount.name,
-                        amount: 7_0000,
-                    }),
-                ],
-            ]));
+            expect(registration2.discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 7_0000,
+                        }),
+                    ],
+                ]),
+            );
 
             // Get registration 1 again, it should now have the bundle discount applied
             const updatedRegistration1 = (await Registration.getByID(registration1.id))!;
@@ -462,7 +490,8 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('PointOfSale: A bundle discount can be applied to a new and previous registration at the same time', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
@@ -537,8 +566,12 @@ describe('E2E.Bundle Discounts', () => {
             });
             const response = await post(checkout, organization, token);
             expect(response.body.registrations.length).toBe(2);
-            const registration2 = response.body.registrations.find(r => r.groupId === groups[1].id)!;
-            const registration3 = response.body.registrations.find(r => r.groupId === groups[2].id)!;
+            const registration2 = response.body.registrations.find(
+                (r) => r.groupId === groups[1].id,
+            )!;
+            const registration3 = response.body.registrations.find(
+                (r) => r.groupId === groups[2].id,
+            )!;
 
             expect(registration2).toMatchObject({
                 registeredAt: expect.any(Date),
@@ -603,7 +636,8 @@ describe('E2E.Bundle Discounts', () => {
          * This also mainly applies to corrections that happen later
          */
         test('Discounts are calculated based on the price at time of registration', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
@@ -709,7 +743,8 @@ describe('E2E.Bundle Discounts', () => {
          * This tests that we don't substract the discounts on those registration on new registrations.
          */
         test('A previous discount on a cancelled registration that has a 100% cancellation fee is not taken into account', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
@@ -826,21 +861,29 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration3).toMatchObject({
                 registeredAt: expect.any(Date),
                 discounts: new Map([
-                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                        name: bundleDiscount.name,
-                        amount: 7_0000,
-                    })],
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 7_0000,
+                        }),
+                    ],
                 ]),
             });
 
             // Check registration 1 still has the discount applied
             await registrations[0].refresh();
-            expect(registrations[0].discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
+            expect(registrations[0].discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 5_0000,
+                        }),
+                    ],
+                ]),
+            );
 
             // Check balances as expected
             await assertBalances({ user }, [
@@ -893,7 +936,8 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('A wrong discount on a previous registration is automatically corrected', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
@@ -986,10 +1030,13 @@ describe('E2E.Bundle Discounts', () => {
             expect(registration2).toMatchObject({
                 registeredAt: expect.any(Date),
                 discounts: new Map([
-                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                        name: bundleDiscount.name,
-                        amount: 7_0000,
-                    })],
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 7_0000,
+                        }),
+                    ],
                 ]),
             });
 
@@ -1049,7 +1096,8 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('New registrations do not autocorrect if they are not eligible for the discount', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
@@ -1145,12 +1193,17 @@ describe('E2E.Bundle Discounts', () => {
 
             // Check registration 1 has NOT removed the wrong discount
             await registrations[0].refresh();
-            expect(registrations[0].discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 15_0000,
-                })],
-            ]));
+            expect(registrations[0].discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 15_0000,
+                        }),
+                    ],
+                ]),
+            );
 
             // Check balances as expected
             await assertBalances({ user }, [
@@ -1185,13 +1238,12 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('PointOfSale: A bundle discount is applied when registering for two groups at once', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 20_00, type: GroupPriceDiscountType.Percentage }],
                 },
             });
 
@@ -1242,10 +1294,13 @@ describe('E2E.Bundle Discounts', () => {
                     registeredAt: expect.any(Date),
                     groupId: groups[0].id,
                     discounts: new Map([
-                        [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                            name: bundleDiscount.name,
-                            amount: 5_0000,
-                        })],
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
                     ]),
                 }),
                 expect.objectContaining({
@@ -1287,15 +1342,14 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Apply a discount on a previous registration with online payment (2 tries)', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const { stripeMocker } = await initStripe({ organization });
 
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 20_00, type: GroupPriceDiscountType.Percentage }],
                 },
             });
 
@@ -1304,8 +1358,7 @@ describe('E2E.Bundle Discounts', () => {
                 price: 25_0000,
                 stock: 500,
                 bundleDiscount,
-            })
-                .create();
+            }).create();
             const groupPrice = group.settings.prices[0];
 
             const group2 = await new GroupFactory({
@@ -1517,12 +1570,17 @@ describe('E2E.Bundle Discounts', () => {
 
             // Check registration 1 now has the discounts saved
             await updatedRegistration1.refresh();
-            expect(updatedRegistration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
+            expect(updatedRegistration1.discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 5_0000,
+                        }),
+                    ],
+                ]),
+            );
 
             // Only price pending and open has changed now
             expectedBalances.push(
@@ -1554,7 +1612,8 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Multiple discounts can be applied to a single registration', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
 
             const bundleDiscounts = [
                 await initBundleDiscount({
@@ -1637,8 +1696,12 @@ describe('E2E.Bundle Discounts', () => {
             });
             const response = await post(checkout, organization, token);
             expect(response.body.registrations.length).toBe(2);
-            const registration2 = response.body.registrations.find(r => r.groupId === groups[1].id)!;
-            const registration3 = response.body.registrations.find(r => r.groupId === groups[2].id)!;
+            const registration2 = response.body.registrations.find(
+                (r) => r.groupId === groups[1].id,
+            )!;
+            const registration3 = response.body.registrations.find(
+                (r) => r.groupId === groups[2].id,
+            )!;
 
             expect(registration2).toMatchObject({
                 registeredAt: expect.any(Date),
@@ -1743,207 +1806,223 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         // We run this test 5 times because it should be stable
-        test.each([1, 2, 3, 4, 5])('If discounts are the same, they are not moved around after new registrations are added (%i th try)', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
-            const bundleDiscount = await initBundleDiscount({
-                organizationRegistrationPeriod,
-                discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
-                },
-            });
+        test.each([1, 2, 3, 4, 5])(
+            'If discounts are the same, they are not moved around after new registrations are added (%i th try)',
+            async () => {
+                const { organizationRegistrationPeriod, organization, member, token, user } =
+                    await initData();
+                const bundleDiscount = await initBundleDiscount({
+                    organizationRegistrationPeriod,
+                    discount: {
+                        discounts: [
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                        ],
+                    },
+                });
 
-            const groups = [
-                await new GroupFactory({
+                const groups = [
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00
+                        bundleDiscount,
+                    }).create(),
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00 (same as group 1)
+                        bundleDiscount,
+                    }).create(),
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00 (same as groups 1 & 2)
+                        bundleDiscount,
+                    }).create(),
+                ];
+
+                // Create existing registrations for group 1 & 2 with discounts already applied
+                const registration1 = await new RegistrationFactory({
                     organization,
-                    price: 25_0000, // 20% discount = 5_00
-                    bundleDiscount,
-                }).create(),
-                await new GroupFactory({
+                    member,
+                    group: groups[0],
+                }).create();
+
+                const registration2 = await new RegistrationFactory({
                     organization,
-                    price: 25_0000, // 20% discount = 5_00 (same as group 1)
-                    bundleDiscount,
-                }).create(),
-                await new GroupFactory({
-                    organization,
-                    price: 25_0000, // 20% discount = 5_00 (same as groups 1 & 2)
-                    bundleDiscount,
-                }).create(),
-            ];
+                    member,
+                    group: groups[1],
+                }).create();
 
-            // Create existing registrations for group 1 & 2 with discounts already applied
-            const registration1 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[0],
-            }).create();
-
-            const registration2 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[1],
-            }).create();
-
-            // Create balance items for existing registrations
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration1.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_0000,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration1.id,
-                type: BalanceItemType.RegistrationBundleDiscount,
-                amount: 1,
-                unitPrice: -5_0000,
-                status: BalanceItemStatus.Due,
-                relations: new Map([
-                    [
-                        BalanceItemRelationType.Discount,
-                        BalanceItemRelation.create({
-                            id: bundleDiscount.id,
-                            name: bundleDiscount.name,
-                        }),
-                    ],
-                ]),
-            }).create();
-
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration2.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_0000,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            // No discount on 2 ( = first)
-
-            await BalanceItemService.flushCaches(organization.id);
-            await registration1.refresh();
-            await registration2.refresh();
-
-            // Check this is what we expect
-            expect(registration2.discounts).toMatchMap(new Map([]));
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-
-            // Now register the member for group 3
-            const checkout = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            groupPrice: groups[2].settings.prices[0],
-                            groupId: groups[2].id,
-                            organizationId: organization.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                }),
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_0000 - 5_0000, // 20% discount on new registration
-            });
-
-            const response = await post(checkout, organization, token);
-            expect(response.body.registrations.length).toBe(1);
-            const registration3 = response.body.registrations[0];
-
-            expect(registration3).toMatchObject({
-                registeredAt: expect.any(Date),
-                discounts: new Map([
-                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                        name: bundleDiscount.name,
-                        amount: 5_0000,
-                    })],
-                ]),
-            });
-
-            // Verify that existing registrations still have their original discounts
-            await registration1.refresh();
-            await registration2.refresh();
-
-            expect(registration2.discounts).toMatchMap(new Map([]));
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-
-            await assertBalances({ user }, [
-                {
-                    type: BalanceItemType.Registration,
+                // Create balance items for existing registrations
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
                     registrationId: registration1.id,
+                    type: BalanceItemType.Registration,
                     amount: 1,
-                    price: 25_0000,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 25_0000,
-                    pricePending: 0,
-                },
-                {
+                }).create();
+
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration1.id,
                     type: BalanceItemType.RegistrationBundleDiscount,
-                    registrationId: registration1.id,
                     amount: 1,
-                    price: -5_0000,
+                    unitPrice: -5_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: -5_0000,
-                    pricePending: 0,
-                },
-                {
-                    type: BalanceItemType.Registration,
+                    relations: new Map([
+                        [
+                            BalanceItemRelationType.Discount,
+                            BalanceItemRelation.create({
+                                id: bundleDiscount.id,
+                                name: bundleDiscount.name,
+                            }),
+                        ],
+                    ]),
+                }).create();
+
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
                     registrationId: registration2.id,
-                    amount: 1,
-                    price: 25_0000,
-                    status: BalanceItemStatus.Due,
-                    priceOpen: 25_0000,
-                    pricePending: 0,
-                },
-                {
                     type: BalanceItemType.Registration,
-                    registrationId: registration3.id,
                     amount: 1,
-                    price: 25_0000,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 0,
-                    pricePending: 25_0000,
-                },
-                {
-                    type: BalanceItemType.RegistrationBundleDiscount,
-                    registrationId: registration3.id,
-                    amount: 1,
-                    price: -5_0000,
-                    status: BalanceItemStatus.Due,
-                    priceOpen: 0,
-                    pricePending: -5_0000,
-                },
-            ]);
-        });
+                }).create();
+
+                // No discount on 2 ( = first)
+
+                await BalanceItemService.flushCaches(organization.id);
+                await registration1.refresh();
+                await registration2.refresh();
+
+                // Check this is what we expect
+                expect(registration2.discounts).toMatchMap(new Map([]));
+                expect(registration1.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+
+                // Now register the member for group 3
+                const checkout = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                groupPrice: groups[2].settings.prices[0],
+                                groupId: groups[2].id,
+                                organizationId: organization.id,
+                                memberId: member.id,
+                            }),
+                        ],
+                    }),
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    totalPrice: 25_0000 - 5_0000, // 20% discount on new registration
+                });
+
+                const response = await post(checkout, organization, token);
+                expect(response.body.registrations.length).toBe(1);
+                const registration3 = response.body.registrations[0];
+
+                expect(registration3).toMatchObject({
+                    registeredAt: expect.any(Date),
+                    discounts: new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                });
+
+                // Verify that existing registrations still have their original discounts
+                await registration1.refresh();
+                await registration2.refresh();
+
+                expect(registration2.discounts).toMatchMap(new Map([]));
+                expect(registration1.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+
+                await assertBalances({ user }, [
+                    {
+                        type: BalanceItemType.Registration,
+                        registrationId: registration1.id,
+                        amount: 1,
+                        price: 25_0000,
+                        status: BalanceItemStatus.Due,
+                        priceOpen: 25_0000,
+                        pricePending: 0,
+                    },
+                    {
+                        type: BalanceItemType.RegistrationBundleDiscount,
+                        registrationId: registration1.id,
+                        amount: 1,
+                        price: -5_0000,
+                        status: BalanceItemStatus.Due,
+                        priceOpen: -5_0000,
+                        pricePending: 0,
+                    },
+                    {
+                        type: BalanceItemType.Registration,
+                        registrationId: registration2.id,
+                        amount: 1,
+                        price: 25_0000,
+                        status: BalanceItemStatus.Due,
+                        priceOpen: 25_0000,
+                        pricePending: 0,
+                    },
+                    {
+                        type: BalanceItemType.Registration,
+                        registrationId: registration3.id,
+                        amount: 1,
+                        price: 25_0000,
+                        status: BalanceItemStatus.Due,
+                        priceOpen: 0,
+                        pricePending: 25_0000,
+                    },
+                    {
+                        type: BalanceItemType.RegistrationBundleDiscount,
+                        registrationId: registration3.id,
+                        amount: 1,
+                        price: -5_0000,
+                        status: BalanceItemStatus.Due,
+                        priceOpen: 0,
+                        pricePending: -5_0000,
+                    },
+                ]);
+            },
+        );
 
         test('Wrong discounts are not corrected for unrelated registrations', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 20_00, type: GroupPriceDiscountType.Percentage }],
                 },
             });
 
@@ -2010,12 +2089,17 @@ describe('E2E.Bundle Discounts', () => {
             await registration1.refresh();
 
             // Check this is what we expect
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
+            expect(registration1.discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 5_0000,
+                        }),
+                    ],
+                ]),
+            );
 
             // Now register the member for group 2
             const checkout = IDRegisterCheckout.create({
@@ -2044,12 +2128,17 @@ describe('E2E.Bundle Discounts', () => {
 
             // Verify that existing registrations still have their original discounts
             await registration1.refresh();
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
+            expect(registration1.discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 5_0000,
+                        }),
+                    ],
+                ]),
+            );
 
             await assertBalances({ user }, [
                 {
@@ -2083,123 +2172,129 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         // We run this test 5 times because it should be stable
-        test.each([1, 2, 3, 4, 5])('If discounts are the same, they are preferrably added to the new registration, not the existing registrations (%i th try)', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
-            const bundleDiscount = await initBundleDiscount({
-                organizationRegistrationPeriod,
-                discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
-                },
-            });
+        test.each([1, 2, 3, 4, 5])(
+            'If discounts are the same, they are preferrably added to the new registration, not the existing registrations (%i th try)',
+            async () => {
+                const { organizationRegistrationPeriod, organization, member, token, user } =
+                    await initData();
+                const bundleDiscount = await initBundleDiscount({
+                    organizationRegistrationPeriod,
+                    discount: {
+                        discounts: [{ value: 20_00, type: GroupPriceDiscountType.Percentage }],
+                    },
+                });
 
-            const groups = [
-                await new GroupFactory({
+                const groups = [
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00
+                        bundleDiscount,
+                    }).create(),
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00 (same as group 1)
+                        bundleDiscount,
+                    }).create(),
+                ];
+
+                // Create existing registrations for group 1
+                const registration1 = await new RegistrationFactory({
                     organization,
-                    price: 25_0000, // 20% discount = 5_00
-                    bundleDiscount,
-                }).create(),
-                await new GroupFactory({
-                    organization,
-                    price: 25_0000, // 20% discount = 5_00 (same as group 1)
-                    bundleDiscount,
-                }).create(),
-            ];
+                    member,
+                    group: groups[0],
+                }).create();
 
-            // Create existing registrations for group 1
-            const registration1 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[0],
-            }).create();
-
-            // Create balance items for existing registrations
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration1.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_0000,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            // No discount on 2 ( = first)
-            await BalanceItemService.flushCaches(organization.id);
-            await registration1.refresh();
-
-            // Check this is what we expect
-            expect(registration1.discounts).toMatchMap(new Map([]));
-
-            // Now register the member for group 3
-            const checkout = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            groupPrice: groups[1].settings.prices[0],
-                            groupId: groups[1].id,
-                            organizationId: organization.id,
-                            memberId: member.id,
-                        }),
-                    ],
-                }),
-                paymentMethod: PaymentMethod.PointOfSale,
-                totalPrice: 25_0000 - 5_0000, // 20% discount on new registration
-            });
-
-            const response = await post(checkout, organization, token);
-            expect(response.body.registrations.length).toBe(1);
-            const registration2 = response.body.registrations[0];
-
-            expect(registration2).toMatchObject({
-                registeredAt: expect.any(Date),
-                discounts: new Map([
-                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                        name: bundleDiscount.name,
-                        amount: 5_0000,
-                    })],
-                ]),
-            });
-
-            // Verify that existing registrations still have their original discounts
-            await registration1.refresh();
-            expect(registration1.discounts).toMatchMap(new Map([]));
-
-            await assertBalances({ user }, [
-                {
-                    type: BalanceItemType.Registration,
+                // Create balance items for existing registrations
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
                     registrationId: registration1.id,
-                    amount: 1,
-                    price: 25_0000,
-                    status: BalanceItemStatus.Due,
-                    priceOpen: 25_0000,
-                    pricePending: 0,
-                },
-                {
                     type: BalanceItemType.Registration,
-                    registrationId: registration2.id,
                     amount: 1,
-                    price: 25_0000,
+                    unitPrice: 25_0000,
                     status: BalanceItemStatus.Due,
-                    priceOpen: 0,
-                    pricePending: 25_0000,
-                },
-                {
-                    type: BalanceItemType.RegistrationBundleDiscount,
-                    registrationId: registration2.id,
-                    amount: 1,
-                    price: -5_0000,
-                    status: BalanceItemStatus.Due,
-                    priceOpen: 0,
-                    pricePending: -5_0000,
-                },
-            ]);
-        });
+                }).create();
+
+                // No discount on 2 ( = first)
+                await BalanceItemService.flushCaches(organization.id);
+                await registration1.refresh();
+
+                // Check this is what we expect
+                expect(registration1.discounts).toMatchMap(new Map([]));
+
+                // Now register the member for group 3
+                const checkout = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                groupPrice: groups[1].settings.prices[0],
+                                groupId: groups[1].id,
+                                organizationId: organization.id,
+                                memberId: member.id,
+                            }),
+                        ],
+                    }),
+                    paymentMethod: PaymentMethod.PointOfSale,
+                    totalPrice: 25_0000 - 5_0000, // 20% discount on new registration
+                });
+
+                const response = await post(checkout, organization, token);
+                expect(response.body.registrations.length).toBe(1);
+                const registration2 = response.body.registrations[0];
+
+                expect(registration2).toMatchObject({
+                    registeredAt: expect.any(Date),
+                    discounts: new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                });
+
+                // Verify that existing registrations still have their original discounts
+                await registration1.refresh();
+                expect(registration1.discounts).toMatchMap(new Map([]));
+
+                await assertBalances({ user }, [
+                    {
+                        type: BalanceItemType.Registration,
+                        registrationId: registration1.id,
+                        amount: 1,
+                        price: 25_0000,
+                        status: BalanceItemStatus.Due,
+                        priceOpen: 25_0000,
+                        pricePending: 0,
+                    },
+                    {
+                        type: BalanceItemType.Registration,
+                        registrationId: registration2.id,
+                        amount: 1,
+                        price: 25_0000,
+                        status: BalanceItemStatus.Due,
+                        priceOpen: 0,
+                        pricePending: 25_0000,
+                    },
+                    {
+                        type: BalanceItemType.RegistrationBundleDiscount,
+                        registrationId: registration2.id,
+                        amount: 1,
+                        price: -5_0000,
+                        status: BalanceItemStatus.Due,
+                        priceOpen: 0,
+                        pricePending: -5_0000,
+                    },
+                ]);
+            },
+        );
 
         test('Negative prices are not possible for combination of discounts', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscounts = [
                 await initBundleDiscount({
                     organizationRegistrationPeriod,
@@ -2267,10 +2362,11 @@ describe('E2E.Bundle Discounts', () => {
                 paymentMethod: PaymentMethod.PointOfSale,
                 totalPrice: 35_0000 - 42_0000, // 120% discount on 35_00
             });
-            await expect(post(checkout, organization, token)).rejects
-                .toThrow(STExpect.simpleError({
+            await expect(post(checkout, organization, token)).rejects.toThrow(
+                STExpect.simpleError({
                     code: 'negative_price',
-                }));
+                }),
+            );
 
             // The backend should have thrown the error early enough, so no balances should have been created
             await assertBalances({ user }, [
@@ -2287,7 +2383,8 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Reduced prices and discounts are used', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             member.details.requiresFinancialSupport = BooleanStatus.create({ value: true });
             await member.save();
 
@@ -2361,12 +2458,17 @@ describe('E2E.Bundle Discounts', () => {
 
             // Get registration 1 again, it should now have the bundle discount applied
             await registration1.refresh();
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 2_0000,
-                })],
-            ]));
+            expect(registration1.discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 2_0000,
+                        }),
+                    ],
+                ]),
+            );
 
             await assertBalances({ user }, [
                 {
@@ -2400,7 +2502,8 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Custom discounts are used for certain groups', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             member.details.requiresFinancialSupport = BooleanStatus.create({ value: true });
             await member.save();
 
@@ -2477,12 +2580,17 @@ describe('E2E.Bundle Discounts', () => {
 
             const registration2 = response2.body.registrations[0];
             expect(registration2.registeredAt).not.toBeNull();
-            expect(registration2.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 7_5000,
-                })],
-            ]));
+            expect(registration2.discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 7_5000,
+                        }),
+                    ],
+                ]),
+            );
 
             // Get registration 1 again, it should now have the bundle discount applied
             await registration1.refresh();
@@ -2520,7 +2628,8 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Discounts work across family members', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
 
             const otherMember = await new MemberFactory({
                 organization,
@@ -2595,12 +2704,17 @@ describe('E2E.Bundle Discounts', () => {
 
             // Get registration 1 again, it should now have the bundle discount applied
             await registration1.refresh();
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
+            expect(registration1.discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 5_0000,
+                        }),
+                    ],
+                ]),
+            );
 
             await assertBalances({ user }, [
                 {
@@ -2634,7 +2748,8 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Discounts can be disabled across family members', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
 
             const otherMember = await new MemberFactory({
                 organization,
@@ -2740,9 +2855,7 @@ describe('E2E.Bundle Discounts', () => {
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
+                    discounts: [{ value: 20_00, type: GroupPriceDiscountType.Percentage }],
                 },
             });
 
@@ -2826,10 +2939,13 @@ describe('E2E.Bundle Discounts', () => {
                 groupId: groups[0].id,
                 registeredAt: expect.any(Date),
                 discounts: new Map([
-                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                        name: bundleDiscount.name,
-                        amount: 5_0000,
-                    })],
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 5_0000,
+                        }),
+                    ],
                 ]),
             });
 
@@ -2849,7 +2965,8 @@ describe('E2E.Bundle Discounts', () => {
          * a more optimal discount can be applied. In that case, the bundle discount can be moved from the unaltered registration to the newly created registration.
          */
         test('Replacing a registration can move the bundle discount of an unaltered registration', async () => {
-            const { organization, bundleDiscount, groups, registration1, registration2, member } = await initDataWithRegistrations();
+            const { organization, bundleDiscount, groups, registration1, registration2, member } =
+                await initDataWithRegistrations();
             const { adminToken } = await initAdmin({ organization });
 
             // Now replace registration 2 with group 3, which is more expensive and should give more discount
@@ -2877,10 +2994,13 @@ describe('E2E.Bundle Discounts', () => {
                 groupId: groups[2].id,
                 registeredAt: expect.any(Date),
                 discounts: new Map([
-                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                        name: bundleDiscount.name,
-                        amount: 8_0000,
-                    })],
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 8_0000,
+                        }),
+                    ],
                 ]),
             });
 
@@ -2973,7 +3093,8 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Replacing a registration with discount', async () => {
-            const { organization, bundleDiscount, groups, registration1, registration2, member } = await initDataWithRegistrations();
+            const { organization, bundleDiscount, groups, registration1, registration2, member } =
+                await initDataWithRegistrations();
             const { adminToken } = await initAdmin({ organization });
 
             // Now replace registration 2 with group 3, which is more expensive and should give more discount
@@ -3001,10 +3122,13 @@ describe('E2E.Bundle Discounts', () => {
                 groupId: groups[2].id,
                 registeredAt: expect.any(Date),
                 discounts: new Map([
-                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                        name: bundleDiscount.name,
-                        amount: 8_0000,
-                    })],
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 8_0000,
+                        }),
+                    ],
                 ]),
             });
 
@@ -3075,13 +3199,19 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Deleting a registration with discount, without cancellation fee', async () => {
-            const { organization, registration1, registration2, member } = await initDataWithRegistrations();
+            const { organization, registration1, registration2, member } =
+                await initDataWithRegistrations();
             const { adminToken } = await initAdmin({ organization });
 
             // Now delete registration 1, which has discount
             const checkout = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration1.id, cancellationFeePercentage: 0 })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({
+                            registrationId: registration1.id,
+                            cancellationFeePercentage: 0,
+                        }),
+                    ],
                 }),
                 asOrganizationId: organization.id,
                 totalPrice: -25_0000 + 5_0000,
@@ -3129,13 +3259,19 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Deleting a registration with discount, with cancellation fee', async () => {
-            const { organization, bundleDiscount, registration1, registration2, member } = await initDataWithRegistrations();
+            const { organization, bundleDiscount, registration1, registration2, member } =
+                await initDataWithRegistrations();
             const { adminToken } = await initAdmin({ organization });
 
             // Now delete registration 1, which has discount
             const checkout = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration1.id, cancellationFeePercentage: 100_00 })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({
+                            registrationId: registration1.id,
+                            cancellationFeePercentage: 100_00,
+                        }),
+                    ],
                 }),
                 asOrganizationId: organization.id,
                 totalPrice: 0, // no change in outstanding balance, because we charge a cancellation fee
@@ -3147,12 +3283,17 @@ describe('E2E.Bundle Discounts', () => {
 
             // Check discount has NOT been removed in registration 1
             expect(registration2.discounts).toMatchMap(new Map());
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
+            expect(registration1.discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 5_0000,
+                        }),
+                    ],
+                ]),
+            );
             expect(registration1.deactivatedAt).not.toBeNull(); // should be cancelled
 
             // Check balances
@@ -3188,13 +3329,19 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Deleting a registration can alter a discount on a different registration, without cancellation fee', async () => {
-            const { organization, registration1, registration2, member } = await initDataWithRegistrations();
+            const { organization, registration1, registration2, member } =
+                await initDataWithRegistrations();
             const { adminToken } = await initAdmin({ organization });
 
             // Now delete registration 2, which does not have a discount
             const checkout = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration2.id, cancellationFeePercentage: 0 })],
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({
+                            registrationId: registration2.id,
+                            cancellationFeePercentage: 0,
+                        }),
+                    ],
                 }),
                 asOrganizationId: organization.id,
                 totalPrice: -15_0000 + 5_0000, // -15 back, but also lose discount on registration 1, so add 5
@@ -3262,13 +3409,19 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Deleting a registration can alter a discount on a different registration, with cancellation fee', async () => {
-            const { organization, registration1, registration2, member } = await initDataWithRegistrations();
+            const { organization, registration1, registration2, member } =
+                await initDataWithRegistrations();
             const { adminToken } = await initAdmin({ organization });
 
             // Now delete registration 2, which does not have a discount
             const checkout = IDRegisterCheckout.create({
                 cart: IDRegisterCart.create({
-                    deleteRegistrations: [IDDeleteRegisterItem.create({ registrationId: registration2.id, cancellationFeePercentage: 100_00 })], // we charge a cancellation fee
+                    deleteRegistrations: [
+                        IDDeleteRegisterItem.create({
+                            registrationId: registration2.id,
+                            cancellationFeePercentage: 100_00,
+                        }),
+                    ], // we charge a cancellation fee
                 }),
                 asOrganizationId: organization.id,
                 totalPrice: 5_0000, // Positive 5 because we lose the discount on registration 1
@@ -3336,7 +3489,8 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Discounts work across family members when admins register members', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const { adminToken } = await initAdmin({ organization });
 
             const otherMember = await new MemberFactory({
@@ -3428,12 +3582,17 @@ describe('E2E.Bundle Discounts', () => {
 
             // Get registration 1 again, it should now have the bundle discount applied
             await registration1.refresh();
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
+            expect(registration1.discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 5_0000,
+                        }),
+                    ],
+                ]),
+            );
 
             await assertBalances({ member: otherMember }, [
                 {
@@ -3473,7 +3632,8 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Discounts work across family members when admins register members, even when the admin does not have access to the family members', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
@@ -3515,29 +3675,33 @@ describe('E2E.Bundle Discounts', () => {
             // Make sure the user has financial access so we can check the responses
             const role = await initPermissionRole({
                 organization,
-                accessRights: [
-                    AccessRight.MemberReadFinancialData,
-                ],
+                accessRights: [AccessRight.MemberReadFinancialData],
             });
 
             const { adminToken } = await initAdmin({
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.Groups, new Map([
-                            [
-                                randomGroup.id, ResourcePermissions.create({
-                                    level: PermissionLevel.Write,
-                                }),
-                            ], [
-                                groups[1].id, ResourcePermissions.create({
-                                    level: PermissionLevel.Write,
-                                }),
-                            ],
-                            // No permission for group 0
-                        ]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Groups,
+                            new Map([
+                                [
+                                    randomGroup.id,
+                                    ResourcePermissions.create({
+                                        level: PermissionLevel.Write,
+                                    }),
+                                ],
+                                [
+                                    groups[1].id,
+                                    ResourcePermissions.create({
+                                        level: PermissionLevel.Write,
+                                    }),
+                                ],
+                                // No permission for group 0
+                            ]),
+                        ],
+                    ]),
                     roles: [role],
                 }),
             });
@@ -3593,12 +3757,17 @@ describe('E2E.Bundle Discounts', () => {
 
             // Get registration 1 again, it should now have the bundle discount applied
             await registration1.refresh();
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
+            expect(registration1.discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 5_0000,
+                        }),
+                    ],
+                ]),
+            );
 
             await assertBalances({ member: otherMember }, [
                 {
@@ -3638,7 +3807,8 @@ describe('E2E.Bundle Discounts', () => {
         });
 
         test('Discounts work across family members when admins register members, even when the admin does not have access to the family members nor financial access rights', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
+            const { organizationRegistrationPeriod, organization, member, token, user } =
+                await initData();
             const bundleDiscount = await initBundleDiscount({
                 organizationRegistrationPeriod,
                 discount: {
@@ -3681,20 +3851,26 @@ describe('E2E.Bundle Discounts', () => {
                 organization,
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
-                    resources: new Map([[
-                        PermissionsResourceType.Groups, new Map([
-                            [
-                                randomGroup.id, ResourcePermissions.create({
-                                    level: PermissionLevel.Write,
-                                }),
-                            ], [
-                                groups[1].id, ResourcePermissions.create({
-                                    level: PermissionLevel.Write,
-                                }),
-                            ],
-                            // No permission for group 0
-                        ]),
-                    ]]),
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.Groups,
+                            new Map([
+                                [
+                                    randomGroup.id,
+                                    ResourcePermissions.create({
+                                        level: PermissionLevel.Write,
+                                    }),
+                                ],
+                                [
+                                    groups[1].id,
+                                    ResourcePermissions.create({
+                                        level: PermissionLevel.Write,
+                                    }),
+                                ],
+                                // No permission for group 0
+                            ]),
+                        ],
+                    ]),
                 }),
             });
 
@@ -3749,12 +3925,17 @@ describe('E2E.Bundle Discounts', () => {
 
             // Get registration 1 again, it should now have the bundle discount applied
             await registration1.refresh();
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
+            expect(registration1.discounts).toMatchMap(
+                new Map([
+                    [
+                        bundleDiscount.id,
+                        AppliedRegistrationDiscount.create({
+                            name: bundleDiscount.name,
+                            amount: 5_0000,
+                        }),
+                    ],
+                ]),
+            );
 
             await assertBalances({ member: otherMember }, [
                 {
@@ -3795,621 +3976,699 @@ describe('E2E.Bundle Discounts', () => {
 
         // Test repeats 5 times because it should be stable
         // This tests real edge cases that were fixed
-        test.each([1, 2, 3, 4, 5])('If discounts are the same, they are not moved when the one without discount is edited (%i th try)', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
-            const { adminToken } = await initAdmin({ organization });
+        test.each([1, 2, 3, 4, 5])(
+            'If discounts are the same, they are not moved when the one without discount is edited (%i th try)',
+            async () => {
+                const { organizationRegistrationPeriod, organization, member, token, user } =
+                    await initData();
+                const { adminToken } = await initAdmin({ organization });
 
-            const bundleDiscount = await initBundleDiscount({
-                organizationRegistrationPeriod,
-                discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
-                },
-            });
+                const bundleDiscount = await initBundleDiscount({
+                    organizationRegistrationPeriod,
+                    discount: {
+                        discounts: [
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                        ],
+                    },
+                });
 
-            const groups = [
-                await new GroupFactory({
+                const groups = [
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00
+                        bundleDiscount,
+                    }).create(),
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00 (same as group 1)
+                        bundleDiscount,
+                    }).create(),
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00 (same as groups 1 & 2)
+                        bundleDiscount,
+                    }).create(),
+                ];
+
+                // Create existing registrations for group 1 & 2 with discounts already applied
+                const registration1 = await new RegistrationFactory({
                     organization,
-                    price: 25_0000, // 20% discount = 5_00
-                    bundleDiscount,
-                }).create(),
-                await new GroupFactory({
+                    member,
+                    group: groups[0],
+                }).create();
+
+                const registration2 = await new RegistrationFactory({
                     organization,
-                    price: 25_0000, // 20% discount = 5_00 (same as group 1)
-                    bundleDiscount,
-                }).create(),
-                await new GroupFactory({
+                    member,
+                    group: groups[1],
+                }).create();
+
+                const registration3 = await new RegistrationFactory({
                     organization,
-                    price: 25_0000, // 20% discount = 5_00 (same as groups 1 & 2)
-                    bundleDiscount,
-                }).create(),
-            ];
+                    member,
+                    group: groups[2],
+                }).create();
 
-            // Create existing registrations for group 1 & 2 with discounts already applied
-            const registration1 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[0],
-            }).create();
+                // Create balance items for existing registrations
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration1.id,
+                    type: BalanceItemType.Registration,
+                    amount: 1,
+                    unitPrice: 25_0000,
+                    status: BalanceItemStatus.Due,
+                }).create();
 
-            const registration2 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[1],
-            }).create();
-
-            const registration3 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[2],
-            }).create();
-
-            // Create balance items for existing registrations
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration1.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_0000,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration1.id,
-                type: BalanceItemType.RegistrationBundleDiscount,
-                amount: 1,
-                unitPrice: -5_0000,
-                status: BalanceItemStatus.Due,
-                relations: new Map([
-                    [
-                        BalanceItemRelationType.Discount,
-                        BalanceItemRelation.create({
-                            id: bundleDiscount.id,
-                            name: bundleDiscount.name,
-                        }),
-                    ],
-                ]),
-            }).create();
-
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration2.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_0000,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            // No discount on 2 ( = first)
-
-            // Discount on third
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration3.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_0000,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration3.id,
-                type: BalanceItemType.RegistrationBundleDiscount,
-                amount: 1,
-                unitPrice: -5_0000,
-                status: BalanceItemStatus.Due,
-                relations: new Map([
-                    [
-                        BalanceItemRelationType.Discount,
-                        BalanceItemRelation.create({
-                            id: bundleDiscount.id,
-                            name: bundleDiscount.name,
-                        }),
-                    ],
-                ]),
-            }).create();
-
-            await BalanceItemService.flushCaches(organization.id);
-            await registration1.refresh();
-            await registration2.refresh();
-            await registration3.refresh();
-
-            // Check this is what we expect
-            expect(registration2.discounts).toMatchMap(new Map([]));
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-            expect(registration3.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-
-            // Now alter the third registration (the one which didn't had a discount)
-            const checkout = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            groupPrice: groups[1].settings.prices[0],
-                            groupId: groups[1].id,
-                            organizationId: organization.id,
-                            memberId: member.id,
-                            replaceRegistrationIds: [registration2.id],
-                        }),
-                    ],
-                }),
-                totalPrice: 0, // no balance change
-                asOrganizationId: organization.id,
-            });
-
-            const response = await post(checkout, organization, adminToken);
-            expect(response.body.registrations.length).toBe(1);
-            const registration2Struct = response.body.registrations[0];
-
-            expect(registration2Struct).toMatchObject({
-                id: registration2.id,
-                registeredAt: expect.any(Date),
-                discounts: new Map([]),
-            });
-
-            // Verify that existing registrations still have their original discounts
-            await registration1.refresh();
-            await registration2.refresh();
-            await registration3.refresh();
-
-            expect(registration2.discounts).toMatchMap(new Map([]));
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-            expect(registration3.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-        });
-
-        // Test repeats 5 times because it should be stable
-        // This tests real edge cases that were fixed
-        test.each([1, 2, 3, 4, 5])('If discounts are the same, they are not moved when the one with discount is edited (%i th try)', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
-            const { adminToken } = await initAdmin({ organization });
-
-            const bundleDiscount = await initBundleDiscount({
-                organizationRegistrationPeriod,
-                discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
-                },
-            });
-
-            const groups = [
-                await new GroupFactory({
-                    organization,
-                    price: 25_0000, // 20% discount = 5_00
-                    bundleDiscount,
-                }).create(),
-                await new GroupFactory({
-                    organization,
-                    price: 25_0000, // 20% discount = 5_00 (same as group 1)
-                    bundleDiscount,
-                }).create(),
-                await new GroupFactory({
-                    organization,
-                    price: 25_0000, // 20% discount = 5_00 (same as groups 1 & 2)
-                    bundleDiscount,
-                }).create(),
-            ];
-
-            // Create existing registrations for group 1 & 2 with discounts already applied
-            const registration1 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[0],
-            }).create();
-
-            const registration2 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[1],
-            }).create();
-
-            const registration3 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[2],
-            }).create();
-
-            // Create balance items for existing registrations
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration1.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_0000,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration1.id,
-                type: BalanceItemType.RegistrationBundleDiscount,
-                amount: 1,
-                unitPrice: -5_0000,
-                status: BalanceItemStatus.Due,
-                relations: new Map([
-                    [
-                        BalanceItemRelationType.Discount,
-                        BalanceItemRelation.create({
-                            id: bundleDiscount.id,
-                            name: bundleDiscount.name,
-                        }),
-                    ],
-                ]),
-            }).create();
-
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration2.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_0000,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            // No discount on 2 ( = first)
-
-            // Discount on third
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration3.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_0000,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration3.id,
-                type: BalanceItemType.RegistrationBundleDiscount,
-                amount: 1,
-                unitPrice: -5_0000,
-                status: BalanceItemStatus.Due,
-                relations: new Map([
-                    [
-                        BalanceItemRelationType.Discount,
-                        BalanceItemRelation.create({
-                            id: bundleDiscount.id,
-                            name: bundleDiscount.name,
-                        }),
-                    ],
-                ]),
-            }).create();
-
-            await BalanceItemService.flushCaches(organization.id);
-            await registration1.refresh();
-            await registration2.refresh();
-            await registration3.refresh();
-
-            // Check this is what we expect
-            expect(registration2.discounts).toMatchMap(new Map([]));
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-            expect(registration3.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-
-            // Now alter the third registration (the one which didn't had a discount)
-            const checkout = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        IDRegisterItem.create({
-                            groupPrice: groups[0].settings.prices[0],
-                            groupId: groups[0].id,
-                            organizationId: organization.id,
-                            memberId: member.id,
-                            replaceRegistrationIds: [registration1.id],
-                        }),
-                    ],
-                }),
-                totalPrice: 0, // no balance change
-                asOrganizationId: organization.id,
-            });
-
-            const response = await post(checkout, organization, adminToken);
-            expect(response.body.registrations.length).toBe(1);
-            const registration1Struct = response.body.registrations[0];
-
-            expect(registration1Struct).toMatchObject({
-                id: registration1.id,
-                registeredAt: expect.any(Date),
-                discounts: new Map([
-                    [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                        name: bundleDiscount.name,
-                        amount: 5_0000,
-                    })],
-                ]),
-            });
-
-            // Verify that existing registrations still have their original discounts
-            await registration1.refresh();
-            await registration2.refresh();
-            await registration3.refresh();
-
-            expect(registration2.discounts).toMatchMap(new Map([]));
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-            expect(registration3.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-        });
-
-        // Test repeats 5 times because it should be stable
-        // This tests real edge cases that were fixed
-        test.each([1, 2, 3, 4, 5])('If discounts are the same, they are not moved when the one with and one without discount are edited (%i th try)', async () => {
-            const { organizationRegistrationPeriod, organization, member, token, user } = await initData();
-            const { adminToken } = await initAdmin({ organization });
-
-            const bundleDiscount = await initBundleDiscount({
-                organizationRegistrationPeriod,
-                discount: {
-                    discounts: [
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                        { value: 20_00, type: GroupPriceDiscountType.Percentage },
-                    ],
-                },
-            });
-
-            const groups = [
-                await new GroupFactory({
-                    organization,
-                    price: 25_0000, // 20% discount = 5_00
-                    bundleDiscount,
-                }).create(),
-                await new GroupFactory({
-                    organization,
-                    price: 25_0000, // 20% discount = 5_00 (same as group 1)
-                    bundleDiscount,
-                }).create(),
-                await new GroupFactory({
-                    organization,
-                    price: 25_0000, // 20% discount = 5_00 (same as groups 1 & 2)
-                    bundleDiscount,
-                }).create(),
-            ];
-
-            // Create existing registrations for group 1 & 2 with discounts already applied
-            const registration1 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[0],
-            }).create();
-
-            const registration2 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[1],
-            }).create();
-
-            const registration3 = await new RegistrationFactory({
-                organization,
-                member,
-                group: groups[2],
-            }).create();
-
-            // Create balance items for existing registrations
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration1.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_0000,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration1.id,
-                type: BalanceItemType.RegistrationBundleDiscount,
-                amount: 1,
-                unitPrice: -5_0000,
-                status: BalanceItemStatus.Due,
-                relations: new Map([
-                    [
-                        BalanceItemRelationType.Discount,
-                        BalanceItemRelation.create({
-                            id: bundleDiscount.id,
-                            name: bundleDiscount.name,
-                        }),
-                    ],
-                ]),
-            }).create();
-
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration2.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_0000,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            // No discount on 2 ( = first)
-
-            // Discount on third
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration3.id,
-                type: BalanceItemType.Registration,
-                amount: 1,
-                unitPrice: 25_0000,
-                status: BalanceItemStatus.Due,
-            }).create();
-
-            await new BalanceItemFactory({
-                userId: user.id,
-                memberId: member.id,
-                organizationId: organization.id,
-                registrationId: registration3.id,
-                type: BalanceItemType.RegistrationBundleDiscount,
-                amount: 1,
-                unitPrice: -5_0000,
-                status: BalanceItemStatus.Due,
-                relations: new Map([
-                    [
-                        BalanceItemRelationType.Discount,
-                        BalanceItemRelation.create({
-                            id: bundleDiscount.id,
-                            name: bundleDiscount.name,
-                        }),
-                    ],
-                ]),
-            }).create();
-
-            await BalanceItemService.flushCaches(organization.id);
-            await registration1.refresh();
-            await registration2.refresh();
-            await registration3.refresh();
-
-            // Check this is what we expect
-            expect(registration2.discounts).toMatchMap(new Map([]));
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-            expect(registration3.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-
-            // Now alter the third registration (the one which didn't had a discount)
-            const checkout = IDRegisterCheckout.create({
-                cart: IDRegisterCart.create({
-                    items: [
-                        // Keep the one without last in the cart, since these normally get discount priority
-                        IDRegisterItem.create({
-                            groupPrice: groups[0].settings.prices[0],
-                            groupId: groups[0].id,
-                            organizationId: organization.id,
-                            memberId: member.id,
-                            replaceRegistrationIds: [registration1.id],
-                        }),
-                        IDRegisterItem.create({
-                            groupPrice: groups[1].settings.prices[0],
-                            groupId: groups[1].id,
-                            organizationId: organization.id,
-                            memberId: member.id,
-                            replaceRegistrationIds: [registration2.id],
-                        }),
-                    ],
-                }),
-                totalPrice: 0, // no balance change
-                asOrganizationId: organization.id,
-            });
-
-            const response = await post(checkout, organization, adminToken);
-            expect(response.body.registrations.length).toBe(2);
-
-            // Check array matches
-            expect(response.body.registrations).toIncludeSameMembers([
-                expect.objectContaining({
-                    id: registration1.id,
-                    registeredAt: expect.any(Date),
-                    discounts: new Map([
-                        [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                            name: bundleDiscount.name,
-                            amount: 5_0000,
-                        })],
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration1.id,
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    amount: 1,
+                    unitPrice: -5_0000,
+                    status: BalanceItemStatus.Due,
+                    relations: new Map([
+                        [
+                            BalanceItemRelationType.Discount,
+                            BalanceItemRelation.create({
+                                id: bundleDiscount.id,
+                                name: bundleDiscount.name,
+                            }),
+                        ],
                     ]),
-                }),
-                expect.objectContaining({
+                }).create();
+
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration2.id,
+                    type: BalanceItemType.Registration,
+                    amount: 1,
+                    unitPrice: 25_0000,
+                    status: BalanceItemStatus.Due,
+                }).create();
+
+                // No discount on 2 ( = first)
+
+                // Discount on third
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration3.id,
+                    type: BalanceItemType.Registration,
+                    amount: 1,
+                    unitPrice: 25_0000,
+                    status: BalanceItemStatus.Due,
+                }).create();
+
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration3.id,
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    amount: 1,
+                    unitPrice: -5_0000,
+                    status: BalanceItemStatus.Due,
+                    relations: new Map([
+                        [
+                            BalanceItemRelationType.Discount,
+                            BalanceItemRelation.create({
+                                id: bundleDiscount.id,
+                                name: bundleDiscount.name,
+                            }),
+                        ],
+                    ]),
+                }).create();
+
+                await BalanceItemService.flushCaches(organization.id);
+                await registration1.refresh();
+                await registration2.refresh();
+                await registration3.refresh();
+
+                // Check this is what we expect
+                expect(registration2.discounts).toMatchMap(new Map([]));
+                expect(registration1.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+                expect(registration3.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+
+                // Now alter the third registration (the one which didn't had a discount)
+                const checkout = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                groupPrice: groups[1].settings.prices[0],
+                                groupId: groups[1].id,
+                                organizationId: organization.id,
+                                memberId: member.id,
+                                replaceRegistrationIds: [registration2.id],
+                            }),
+                        ],
+                    }),
+                    totalPrice: 0, // no balance change
+                    asOrganizationId: organization.id,
+                });
+
+                const response = await post(checkout, organization, adminToken);
+                expect(response.body.registrations.length).toBe(1);
+                const registration2Struct = response.body.registrations[0];
+
+                expect(registration2Struct).toMatchObject({
                     id: registration2.id,
                     registeredAt: expect.any(Date),
                     discounts: new Map([]),
-                }),
-            ]);
+                });
 
-            // Verify that existing registrations still have their original discounts
-            await registration1.refresh();
-            await registration2.refresh();
-            await registration3.refresh();
+                // Verify that existing registrations still have their original discounts
+                await registration1.refresh();
+                await registration2.refresh();
+                await registration3.refresh();
 
-            expect(registration2.discounts).toMatchMap(new Map([]));
-            expect(registration1.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-            expect(registration3.discounts).toMatchMap(new Map([
-                [bundleDiscount.id, AppliedRegistrationDiscount.create({
-                    name: bundleDiscount.name,
-                    amount: 5_0000,
-                })],
-            ]));
-        });
+                expect(registration2.discounts).toMatchMap(new Map([]));
+                expect(registration1.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+                expect(registration3.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+            },
+        );
+
+        // Test repeats 5 times because it should be stable
+        // This tests real edge cases that were fixed
+        test.each([1, 2, 3, 4, 5])(
+            'If discounts are the same, they are not moved when the one with discount is edited (%i th try)',
+            async () => {
+                const { organizationRegistrationPeriod, organization, member, token, user } =
+                    await initData();
+                const { adminToken } = await initAdmin({ organization });
+
+                const bundleDiscount = await initBundleDiscount({
+                    organizationRegistrationPeriod,
+                    discount: {
+                        discounts: [
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                        ],
+                    },
+                });
+
+                const groups = [
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00
+                        bundleDiscount,
+                    }).create(),
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00 (same as group 1)
+                        bundleDiscount,
+                    }).create(),
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00 (same as groups 1 & 2)
+                        bundleDiscount,
+                    }).create(),
+                ];
+
+                // Create existing registrations for group 1 & 2 with discounts already applied
+                const registration1 = await new RegistrationFactory({
+                    organization,
+                    member,
+                    group: groups[0],
+                }).create();
+
+                const registration2 = await new RegistrationFactory({
+                    organization,
+                    member,
+                    group: groups[1],
+                }).create();
+
+                const registration3 = await new RegistrationFactory({
+                    organization,
+                    member,
+                    group: groups[2],
+                }).create();
+
+                // Create balance items for existing registrations
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration1.id,
+                    type: BalanceItemType.Registration,
+                    amount: 1,
+                    unitPrice: 25_0000,
+                    status: BalanceItemStatus.Due,
+                }).create();
+
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration1.id,
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    amount: 1,
+                    unitPrice: -5_0000,
+                    status: BalanceItemStatus.Due,
+                    relations: new Map([
+                        [
+                            BalanceItemRelationType.Discount,
+                            BalanceItemRelation.create({
+                                id: bundleDiscount.id,
+                                name: bundleDiscount.name,
+                            }),
+                        ],
+                    ]),
+                }).create();
+
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration2.id,
+                    type: BalanceItemType.Registration,
+                    amount: 1,
+                    unitPrice: 25_0000,
+                    status: BalanceItemStatus.Due,
+                }).create();
+
+                // No discount on 2 ( = first)
+
+                // Discount on third
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration3.id,
+                    type: BalanceItemType.Registration,
+                    amount: 1,
+                    unitPrice: 25_0000,
+                    status: BalanceItemStatus.Due,
+                }).create();
+
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration3.id,
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    amount: 1,
+                    unitPrice: -5_0000,
+                    status: BalanceItemStatus.Due,
+                    relations: new Map([
+                        [
+                            BalanceItemRelationType.Discount,
+                            BalanceItemRelation.create({
+                                id: bundleDiscount.id,
+                                name: bundleDiscount.name,
+                            }),
+                        ],
+                    ]),
+                }).create();
+
+                await BalanceItemService.flushCaches(organization.id);
+                await registration1.refresh();
+                await registration2.refresh();
+                await registration3.refresh();
+
+                // Check this is what we expect
+                expect(registration2.discounts).toMatchMap(new Map([]));
+                expect(registration1.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+                expect(registration3.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+
+                // Now alter the third registration (the one which didn't had a discount)
+                const checkout = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            IDRegisterItem.create({
+                                groupPrice: groups[0].settings.prices[0],
+                                groupId: groups[0].id,
+                                organizationId: organization.id,
+                                memberId: member.id,
+                                replaceRegistrationIds: [registration1.id],
+                            }),
+                        ],
+                    }),
+                    totalPrice: 0, // no balance change
+                    asOrganizationId: organization.id,
+                });
+
+                const response = await post(checkout, organization, adminToken);
+                expect(response.body.registrations.length).toBe(1);
+                const registration1Struct = response.body.registrations[0];
+
+                expect(registration1Struct).toMatchObject({
+                    id: registration1.id,
+                    registeredAt: expect.any(Date),
+                    discounts: new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                });
+
+                // Verify that existing registrations still have their original discounts
+                await registration1.refresh();
+                await registration2.refresh();
+                await registration3.refresh();
+
+                expect(registration2.discounts).toMatchMap(new Map([]));
+                expect(registration1.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+                expect(registration3.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+            },
+        );
+
+        // Test repeats 5 times because it should be stable
+        // This tests real edge cases that were fixed
+        test.each([1, 2, 3, 4, 5])(
+            'If discounts are the same, they are not moved when the one with and one without discount are edited (%i th try)',
+            async () => {
+                const { organizationRegistrationPeriod, organization, member, token, user } =
+                    await initData();
+                const { adminToken } = await initAdmin({ organization });
+
+                const bundleDiscount = await initBundleDiscount({
+                    organizationRegistrationPeriod,
+                    discount: {
+                        discounts: [
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                            { value: 20_00, type: GroupPriceDiscountType.Percentage },
+                        ],
+                    },
+                });
+
+                const groups = [
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00
+                        bundleDiscount,
+                    }).create(),
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00 (same as group 1)
+                        bundleDiscount,
+                    }).create(),
+                    await new GroupFactory({
+                        organization,
+                        price: 25_0000, // 20% discount = 5_00 (same as groups 1 & 2)
+                        bundleDiscount,
+                    }).create(),
+                ];
+
+                // Create existing registrations for group 1 & 2 with discounts already applied
+                const registration1 = await new RegistrationFactory({
+                    organization,
+                    member,
+                    group: groups[0],
+                }).create();
+
+                const registration2 = await new RegistrationFactory({
+                    organization,
+                    member,
+                    group: groups[1],
+                }).create();
+
+                const registration3 = await new RegistrationFactory({
+                    organization,
+                    member,
+                    group: groups[2],
+                }).create();
+
+                // Create balance items for existing registrations
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration1.id,
+                    type: BalanceItemType.Registration,
+                    amount: 1,
+                    unitPrice: 25_0000,
+                    status: BalanceItemStatus.Due,
+                }).create();
+
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration1.id,
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    amount: 1,
+                    unitPrice: -5_0000,
+                    status: BalanceItemStatus.Due,
+                    relations: new Map([
+                        [
+                            BalanceItemRelationType.Discount,
+                            BalanceItemRelation.create({
+                                id: bundleDiscount.id,
+                                name: bundleDiscount.name,
+                            }),
+                        ],
+                    ]),
+                }).create();
+
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration2.id,
+                    type: BalanceItemType.Registration,
+                    amount: 1,
+                    unitPrice: 25_0000,
+                    status: BalanceItemStatus.Due,
+                }).create();
+
+                // No discount on 2 ( = first)
+
+                // Discount on third
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration3.id,
+                    type: BalanceItemType.Registration,
+                    amount: 1,
+                    unitPrice: 25_0000,
+                    status: BalanceItemStatus.Due,
+                }).create();
+
+                await new BalanceItemFactory({
+                    userId: user.id,
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    registrationId: registration3.id,
+                    type: BalanceItemType.RegistrationBundleDiscount,
+                    amount: 1,
+                    unitPrice: -5_0000,
+                    status: BalanceItemStatus.Due,
+                    relations: new Map([
+                        [
+                            BalanceItemRelationType.Discount,
+                            BalanceItemRelation.create({
+                                id: bundleDiscount.id,
+                                name: bundleDiscount.name,
+                            }),
+                        ],
+                    ]),
+                }).create();
+
+                await BalanceItemService.flushCaches(organization.id);
+                await registration1.refresh();
+                await registration2.refresh();
+                await registration3.refresh();
+
+                // Check this is what we expect
+                expect(registration2.discounts).toMatchMap(new Map([]));
+                expect(registration1.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+                expect(registration3.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+
+                // Now alter the third registration (the one which didn't had a discount)
+                const checkout = IDRegisterCheckout.create({
+                    cart: IDRegisterCart.create({
+                        items: [
+                            // Keep the one without last in the cart, since these normally get discount priority
+                            IDRegisterItem.create({
+                                groupPrice: groups[0].settings.prices[0],
+                                groupId: groups[0].id,
+                                organizationId: organization.id,
+                                memberId: member.id,
+                                replaceRegistrationIds: [registration1.id],
+                            }),
+                            IDRegisterItem.create({
+                                groupPrice: groups[1].settings.prices[0],
+                                groupId: groups[1].id,
+                                organizationId: organization.id,
+                                memberId: member.id,
+                                replaceRegistrationIds: [registration2.id],
+                            }),
+                        ],
+                    }),
+                    totalPrice: 0, // no balance change
+                    asOrganizationId: organization.id,
+                });
+
+                const response = await post(checkout, organization, adminToken);
+                expect(response.body.registrations.length).toBe(2);
+
+                // Check array matches
+                expect(response.body.registrations).toIncludeSameMembers([
+                    expect.objectContaining({
+                        id: registration1.id,
+                        registeredAt: expect.any(Date),
+                        discounts: new Map([
+                            [
+                                bundleDiscount.id,
+                                AppliedRegistrationDiscount.create({
+                                    name: bundleDiscount.name,
+                                    amount: 5_0000,
+                                }),
+                            ],
+                        ]),
+                    }),
+                    expect.objectContaining({
+                        id: registration2.id,
+                        registeredAt: expect.any(Date),
+                        discounts: new Map([]),
+                    }),
+                ]);
+
+                // Verify that existing registrations still have their original discounts
+                await registration1.refresh();
+                await registration2.refresh();
+                await registration3.refresh();
+
+                expect(registration2.discounts).toMatchMap(new Map([]));
+                expect(registration1.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+                expect(registration3.discounts).toMatchMap(
+                    new Map([
+                        [
+                            bundleDiscount.id,
+                            AppliedRegistrationDiscount.create({
+                                name: bundleDiscount.name,
+                                amount: 5_0000,
+                            }),
+                        ],
+                    ]),
+                );
+            },
+        );
     });
 });

@@ -1,72 +1,124 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createWildcardColumnFilter, SQL, SQLJsonExtract, SQLValueType } from '@stamhoofd/sql';
+import {
+    baseSQLFilterCompilers,
+    createColumnFilter,
+    createWildcardColumnFilter,
+    SQL,
+    SQLJsonExtract,
+    SQLValueType,
+} from '@stamhoofd/sql';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 
 export const groupFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    ['id', createColumnFilter({
-        expression: SQL.column('id'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['organizationId', createColumnFilter({
-        expression: SQL.column('organizationId'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['eventId', createColumnFilter({
-        expression: SQL.column('eventId'),
-        type: SQLValueType.String,
-        nullable: true,
-    })],
-    ['periodId', createColumnFilter({
-        expression: SQL.column('periodId'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['name', createColumnFilter({
-        expression: new SQLTranslatedString(SQL.column('settings'), '$.value.name'),
-        type: SQLValueType.String,
-        nullable: true,
-    })],
-    ['status', createColumnFilter({
-        expression: SQL.column('status'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['defaultAgeGroupId', createColumnFilter({
-        expression: SQL.column('defaultAgeGroupId'),
-        type: SQLValueType.String,
-        nullable: true,
-    })],
-    ['type', createColumnFilter({
-        expression: SQL.column('type'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['waitingListId', createColumnFilter({
-        expression: SQL.column('waitingListId'),
-        type: SQLValueType.String,
-        nullable: true,
-    })],
-    ['deletedAt', createColumnFilter({
-        expression: SQL.column('deletedAt'),
-        type: SQLValueType.Datetime,
-        nullable: true,
-    })],
-    ['bundleDiscounts', createWildcardColumnFilter(
-        (key: string) => ({
-            expression: SQL.jsonExtract(SQL.column('settings'), `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}`, true),
-            type: SQLValueType.JSONArray,
+    [
+        'id',
+        createColumnFilter({
+            expression: SQL.column('id'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'organizationId',
+        createColumnFilter({
+            expression: SQL.column('organizationId'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'eventId',
+        createColumnFilter({
+            expression: SQL.column('eventId'),
+            type: SQLValueType.String,
             nullable: true,
         }),
-        (key: string) => (new Map([
-            ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({
-                expression: SQL.jsonExtract(SQL.column('settings'), `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}.name`, true),
+    ],
+    [
+        'periodId',
+        createColumnFilter({
+            expression: SQL.column('periodId'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'name',
+        createColumnFilter({
+            expression: new SQLTranslatedString(SQL.column('settings'), '$.value.name'),
+            type: SQLValueType.String,
+            nullable: true,
+        }),
+    ],
+    [
+        'status',
+        createColumnFilter({
+            expression: SQL.column('status'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'defaultAgeGroupId',
+        createColumnFilter({
+            expression: SQL.column('defaultAgeGroupId'),
+            type: SQLValueType.String,
+            nullable: true,
+        }),
+    ],
+    [
+        'type',
+        createColumnFilter({
+            expression: SQL.column('type'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'waitingListId',
+        createColumnFilter({
+            expression: SQL.column('waitingListId'),
+            type: SQLValueType.String,
+            nullable: true,
+        }),
+    ],
+    [
+        'deletedAt',
+        createColumnFilter({
+            expression: SQL.column('deletedAt'),
+            type: SQLValueType.Datetime,
+            nullable: true,
+        }),
+    ],
+    [
+        'bundleDiscounts',
+        createWildcardColumnFilter(
+            (key: string) => ({
+                expression: SQL.jsonExtract(
+                    SQL.column('settings'),
+                    `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}`,
+                    true,
+                ),
                 type: SQLValueType.JSONArray,
                 nullable: true,
-            })],
-        ])),
-    )],
+            }),
+            (key: string) =>
+                new Map([
+                    ...baseSQLFilterCompilers,
+                    [
+                        'name',
+                        createColumnFilter({
+                            expression: SQL.jsonExtract(
+                                SQL.column('settings'),
+                                `$.value.prices[*].bundleDiscounts.${SQLJsonExtract.escapePathComponent(key)}.name`,
+                                true,
+                            ),
+                            type: SQLValueType.JSONArray,
+                            nullable: true,
+                        }),
+                    ],
+                ]),
+        ),
+    ],
 ]);

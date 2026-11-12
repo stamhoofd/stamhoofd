@@ -13,19 +13,31 @@ type Query = undefined;
 type ResponseBody = DetailedPayableBalanceCollection;
 type Body = undefined;
 
-export class GetOrganizationDetailedPayableBalanceCollectionEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetOrganizationDetailedPayableBalanceCollectionEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'GET') {
             return [false];
         }
 
-        const params = request.getVersion() >= 339
-            ? Endpoint.parseParameters(request.url, '/organization/payable-balance/detailed', {})
-            : (
-                    request.getVersion() <= 334
-                        ? Endpoint.parseParameters(request.url, '/organization/billing/status', {})
-                        : Endpoint.parseParameters(request.url, '/organization/billing/status/detailed', {})
-                );
+        const params =
+            request.getVersion() >= 339
+                ? Endpoint.parseParameters(
+                      request.url,
+                      '/organization/payable-balance/detailed',
+                      {},
+                  )
+                : request.getVersion() <= 334
+                  ? Endpoint.parseParameters(request.url, '/organization/billing/status', {})
+                  : Endpoint.parseParameters(
+                        request.url,
+                        '/organization/billing/status/detailed',
+                        {},
+                    );
 
         if (params) {
             return [true, params as Params];
@@ -38,7 +50,7 @@ export class GetOrganizationDetailedPayableBalanceCollectionEndpoint extends End
         await Context.authenticate();
 
         // If the user has permission, we'll also search if he has access to the organization's key
-        if (!await Context.auth.canManageFinances(organization.id)) {
+        if (!(await Context.auth.canManageFinances(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -46,12 +58,16 @@ export class GetOrganizationDetailedPayableBalanceCollectionEndpoint extends End
 
         const paymentModels = await Payment.select()
             .where('payingOrganizationId', organization.id)
-            .andWhere(
-                SQL.whereNot('status', PaymentStatus.Failed),
-            )
+            .andWhere(SQL.whereNot('status', PaymentStatus.Failed))
             .fetch();
 
-        return new Response(await GetUserDetailedPayableBalanceEndpoint.getDetailedBillingStatus(balanceItemModels, paymentModels, await this.getAlwaysIncludedOrganizationIds(organization.id)));
+        return new Response(
+            await GetUserDetailedPayableBalanceEndpoint.getDetailedBillingStatus(
+                balanceItemModels,
+                paymentModels,
+                await this.getAlwaysIncludedOrganizationIds(organization.id),
+            ),
+        );
     }
 
     private async getAlwaysIncludedOrganizationIds(organizationId: string): Promise<string[]> {

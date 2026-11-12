@@ -7,7 +7,10 @@ export const upgradePriceFrom2To4DecimalPlaces = {
             return null;
         }
         if (typeof oldValue !== 'number') {
-            console.warn('Unexpcted number when upgrading using upgradePrice migration. Got', oldValue);
+            console.warn(
+                'Unexpcted number when upgrading using upgradePrice migration. Got',
+                oldValue,
+            );
             return oldValue;
         }
         return oldValue * 100;
@@ -17,7 +20,10 @@ export const upgradePriceFrom2To4DecimalPlaces = {
             return null;
         }
         if (typeof newValue !== 'number') {
-            console.warn('Unexpcted number when downgrading using upgradePrice migration. Got', newValue);
+            console.warn(
+                'Unexpcted number when downgrading using upgradePrice migration. Got',
+                newValue,
+            );
             return newValue;
         }
         return Math.round(newValue / 100);

@@ -1,10 +1,32 @@
 import { ManyToOneRelation } from '@node/database';
 import { encodeObject } from '@common/encoding';
-import { BalanceItem, Document, Group, Member, Organization, Platform, Registration, RegistrationInvitation } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    Document,
+    Group,
+    Member,
+    Organization,
+    Platform,
+    Registration,
+    RegistrationInvitation,
+} from '@stamhoofd/models';
 import { DocumentService } from './DocumentService.js';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { isCanceledError, QueueHandler } from '@stamhoofd/queues';
-import { AppliedRegistrationDiscount, AuditLogSource, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, getAppHost, GroupType, Recipient, Replacement, StockReservation, Version } from '@stamhoofd/structures';
+import {
+    AppliedRegistrationDiscount,
+    AuditLogSource,
+    BalanceItemRelationType,
+    BalanceItemStatus,
+    BalanceItemType,
+    EmailTemplateType,
+    getAppHost,
+    GroupType,
+    Recipient,
+    Replacement,
+    StockReservation,
+    Version,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { AuditLogService } from './AuditLogService.js';
 import { GroupService } from './GroupService.js';
@@ -72,10 +94,13 @@ export const RegistrationService = {
         if (member) {
             const registrationMemberRelation = new ManyToOneRelation(Member, 'member');
             registrationMemberRelation.foreignKey = Member.registrations.foreignKey;
-            await DocumentService.updateForRegistration(registration.setRelation(registrationMemberRelation, member));
+            await DocumentService.updateForRegistration(
+                registration.setRelation(registrationMemberRelation, member),
+            );
 
             // update lastRegisteredAt (should not be awaited)
-            member.tryUpdateLastRegisteredAt(registration)
+            member
+                .tryUpdateLastRegisteredAt(registration)
                 // errors should never stop other logic, lastRegisteredAt is only used for sorting
                 .catch(console.error);
         }
@@ -86,7 +111,10 @@ export const RegistrationService = {
         try {
             const group = await Group.getByID(registration.groupId);
             if (group) {
-                await RegistrationNotificationService.notifyRegistrationCreated(registration, group);
+                await RegistrationNotificationService.notifyRegistrationCreated(
+                    registration,
+                    group,
+                );
             }
         } catch (e) {
             console.error('Failed to send registration notification', e);
@@ -164,36 +192,54 @@ export const RegistrationService = {
         const allowedEmails = member.details.getNotificationEmails();
         const platform = await Platform.getSharedStruct();
 
-        return member.users.map(user => Recipient.create({
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            userId: user.id,
-            language: user.language ?? member.details.language,
-            replacements: [
-                Replacement.create({
-                    token: 'firstNameMember',
-                    value: member.details.firstName,
+        return member.users
+            .map((user) =>
+                Recipient.create({
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    userId: user.id,
+                    language: user.language ?? member.details.language,
+                    replacements: [
+                        Replacement.create({
+                            token: 'firstNameMember',
+                            value: member.details.firstName,
+                        }),
+                        Replacement.create({
+                            token: 'lastNameMember',
+                            value: member.details.lastName,
+                        }),
+                        Replacement.create({
+                            token: 'registerUrl',
+                            value:
+                                'https://' +
+                                getAppHost(
+                                    'registration',
+                                    organization,
+                                    user.permissions?.forOrganization(
+                                        organization,
+                                        platform,
+                                        user.email,
+                                        { inheritFromPlatform: false },
+                                    )?.isEmpty === false,
+                                ),
+                        }),
+                        Replacement.create({
+                            token: 'groupName',
+                            value: group.settings.name.toString(),
+                        }),
+                    ],
                 }),
-                Replacement.create({
-                    token: 'lastNameMember',
-                    value: member.details.lastName,
-                }),
-                Replacement.create({
-                    token: 'registerUrl',
-                    value: 'https://' + getAppHost('registration', organization, user.permissions?.forOrganization(organization, platform, user.email, { inheritFromPlatform: false })?.isEmpty === false),
-                }),
-                Replacement.create({
-                    token: 'groupName',
-                    value: group.settings.name.toString(),
-                }),
-            ],
-        })).filter(r => allowedEmails.includes(r.email.toLocaleLowerCase()));
+            )
+            .filter((r) => allowedEmails.includes(r.email.toLocaleLowerCase()));
     },
 
-    async sendEmailTemplate(registration: Registration, data: {
-        type: EmailTemplateType;
-    }) {
+    async sendEmailTemplate(
+        registration: Registration,
+        data: {
+            type: EmailTemplateType;
+        },
+    ) {
         const group = await Group.getByID(registration.groupId);
 
         if (!group) {
@@ -205,7 +251,11 @@ export const RegistrationService = {
             return;
         }
 
-        const recipients = await RegistrationService.getRecipients(registration, organization, group);
+        const recipients = await RegistrationService.getRecipients(
+            registration,
+            organization,
+            group,
+        );
 
         // Create e-mail builder
         await sendEmailTemplate(organization, {
@@ -220,64 +270,81 @@ export const RegistrationService = {
 
     async updateDiscounts(registrationId: string) {
         await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-            await QueueHandler.schedule('registration-discounts-update-' + registrationId, async function (this: undefined) {
-                const registration = await Registration.getByID(registrationId);
-                if (!registration) {
-                    throw new Error('Registration not found');
-                }
-
-                // Fetch all discounts that have been granted to this registration
-                const discountBalanceItems = await BalanceItem.select()
-                    .where('registrationId', registrationId)
-                    .where('organizationId', registration.organizationId)
-                    .where('type', BalanceItemType.RegistrationBundleDiscount)
-                    .where('status', BalanceItemStatus.Due)
-                    .fetch();
-
-                let before: string | undefined;
-                if (STAMHOOFD.environment !== 'production') {
-                    // This is an expensive operation, so keep track of whether it was actually necessary so we can detect performance issues
-                    before = JSON.stringify(encodeObject(registration.discounts, { version: Version }));
-                }
-
-                // Reset registration discounts
-                registration.discounts = new Map();
-
-                for (const balanceItem of discountBalanceItems) {
-                    const discount = balanceItem.relations.get(BalanceItemRelationType.Discount);
-                    if (!discount) {
-                        continue;
+            await QueueHandler.schedule(
+                'registration-discounts-update-' + registrationId,
+                async function (this: undefined) {
+                    const registration = await Registration.getByID(registrationId);
+                    if (!registration) {
+                        throw new Error('Registration not found');
                     }
 
-                    let existing = registration.discounts.get(discount.id);
+                    // Fetch all discounts that have been granted to this registration
+                    const discountBalanceItems = await BalanceItem.select()
+                        .where('registrationId', registrationId)
+                        .where('organizationId', registration.organizationId)
+                        .where('type', BalanceItemType.RegistrationBundleDiscount)
+                        .where('status', BalanceItemStatus.Due)
+                        .fetch();
 
-                    if (!existing) {
-                        existing = AppliedRegistrationDiscount.create({
-                            name: discount.name,
-                            amount: 0,
-                        });
-                        registration.discounts.set(discount.id, existing);
+                    let before: string | undefined;
+                    if (STAMHOOFD.environment !== 'production') {
+                        // This is an expensive operation, so keep track of whether it was actually necessary so we can detect performance issues
+                        before = JSON.stringify(
+                            encodeObject(registration.discounts, { version: Version }),
+                        );
                     }
-                    existing.amount += -balanceItem.price; // price is negative means it has been discounted, and we store a positive amount with the discount
 
-                    if (existing.amount === 0) {
-                        // Delete the discount
-                        registration.discounts.delete(discount.id);
+                    // Reset registration discounts
+                    registration.discounts = new Map();
+
+                    for (const balanceItem of discountBalanceItems) {
+                        const discount = balanceItem.relations.get(
+                            BalanceItemRelationType.Discount,
+                        );
+                        if (!discount) {
+                            continue;
+                        }
+
+                        let existing = registration.discounts.get(discount.id);
+
+                        if (!existing) {
+                            existing = AppliedRegistrationDiscount.create({
+                                name: discount.name,
+                                amount: 0,
+                            });
+                            registration.discounts.set(discount.id, existing);
+                        }
+                        existing.amount += -balanceItem.price; // price is negative means it has been discounted, and we store a positive amount with the discount
+
+                        if (existing.amount === 0) {
+                            // Delete the discount
+                            registration.discounts.delete(discount.id);
+                        }
                     }
-                }
 
-                console.log('Saving updated discounts for', registrationId, registration.discounts);
+                    console.log(
+                        'Saving updated discounts for',
+                        registrationId,
+                        registration.discounts,
+                    );
 
-                if (STAMHOOFD.environment !== 'production') {
-                    const after = JSON.stringify(encodeObject(registration.discounts, { version: Version }));
-                    if (before === after) {
-                        console.warn('Unnecessary update of registration discounts', registrationId, before);
+                    if (STAMHOOFD.environment !== 'production') {
+                        const after = JSON.stringify(
+                            encodeObject(registration.discounts, { version: Version }),
+                        );
+                        if (before === after) {
+                            console.warn(
+                                'Unnecessary update of registration discounts',
+                                registrationId,
+                                before,
+                            );
+                        }
                     }
-                }
 
-                await registration.save();
-                return true;
-            });
+                    await registration.save();
+                    return true;
+                },
+            );
         });
     },
 
@@ -312,7 +379,11 @@ export const RegistrationService = {
     async unsafeStockUpdate(updated: Registration) {
         // Start with clearing all the stock reservations we've already made
         if (updated.stockReservations) {
-            const groupIds = Formatter.uniqueArray(updated.stockReservations.flatMap(r => r.objectType === 'Group' ? [r.objectId] : []));
+            const groupIds = Formatter.uniqueArray(
+                updated.stockReservations.flatMap((r) =>
+                    r.objectType === 'Group' ? [r.objectId] : [],
+                ),
+            );
             for (const groupId of groupIds) {
                 const stocks = StockReservation.filter('Group', groupId, updated.stockReservations);
 
@@ -323,7 +394,7 @@ export const RegistrationService = {
 
         if (updated.shouldIncludeStock()) {
             const groupStockReservations: StockReservation[] = [
-            // Group level stock reservations (stored in the group)
+                // Group level stock reservations (stored in the group)
                 StockReservation.create({
                     objectId: updated.groupPrice.id,
                     objectType: 'GroupPrice',
@@ -341,7 +412,7 @@ export const RegistrationService = {
             await Group.applyStockReservations(updated.groupId, groupStockReservations);
 
             updated.stockReservations = [
-            // Global level stock reservations (stored in each group)
+                // Global level stock reservations (stored in each group)
                 StockReservation.create({
                     objectId: updated.groupId,
                     objectType: 'Group',
@@ -362,15 +433,18 @@ export const RegistrationService = {
         QueueHandler.cancel('registration-stock-update-' + id);
 
         await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
-            await QueueHandler.schedule('registration-stock-update-' + id, async function (this: undefined) {
-                const updated = await Registration.getByID(id);
+            await QueueHandler.schedule(
+                'registration-stock-update-' + id,
+                async function (this: undefined) {
+                    const updated = await Registration.getByID(id);
 
-                if (!updated) {
-                    return;
-                }
+                    if (!updated) {
+                        return;
+                    }
 
-                await RegistrationService.unsafeStockUpdate(updated);
-            });
+                    await RegistrationService.unsafeStockUpdate(updated);
+                },
+            );
         }).catch((e) => {
             // A newer update for the same registration replaced this one
             if (!isCanceledError(e)) {

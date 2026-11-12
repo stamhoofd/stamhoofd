@@ -1,9 +1,30 @@
 import { Request } from '@node/endpoints';
 import type { Organization, User } from '@stamhoofd/models';
-import { BalanceItemFactory, GroupFactory, MemberFactory, OrderFactory, OrganizationFactory, RegistrationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import type { BalanceItem as BalanceItemStruct, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
+import {
+    BalanceItemFactory,
+    GroupFactory,
+    MemberFactory,
+    OrderFactory,
+    OrganizationFactory,
+    RegistrationFactory,
+    Token,
+    UserFactory,
+    WebshopFactory,
+} from '@stamhoofd/models';
+import type {
+    BalanceItem as BalanceItemStruct,
+    PaginatedResponse,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, LimitedFilteredRequest, Permissions, TranslatedString } from '@stamhoofd/structures';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemType,
+    LimitedFilteredRequest,
+    Permissions,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetBalanceItemsEndpoint } from './GetBalanceItemsEndpoint.js';
 import { SessionService } from '../../../../services/SessionService.js';
@@ -11,7 +32,15 @@ import { SessionService } from '../../../../services/SessionService.js';
 describe('Endpoint.GetBalanceItemsEndpoint', () => {
     const endpoint = new GetBalanceItemsEndpoint();
 
-    const getBalanceItems = async ({ filter, organization, user }: { filter: StamhoofdFilter | null; organization: Organization; user: User }) => {
+    const getBalanceItems = async ({
+        filter,
+        organization,
+        user,
+    }: {
+        filter: StamhoofdFilter | null;
+        organization: Organization;
+        user: User;
+    }) => {
         const token = await SessionService.createSession(user);
 
         const request = Request.get({
@@ -26,7 +55,10 @@ describe('Endpoint.GetBalanceItemsEndpoint', () => {
             },
         });
 
-        return testServer.test<PaginatedResponse<BalanceItemStruct[], LimitedFilteredRequest>>(endpoint, request);
+        return testServer.test<PaginatedResponse<BalanceItemStruct[], LimitedFilteredRequest>>(
+            endpoint,
+            request,
+        );
     };
 
     const createFinanceUser = async (organization: Organization) => {
@@ -42,7 +74,9 @@ describe('Endpoint.GetBalanceItemsEndpoint', () => {
             const user = await createFinanceUser(organization);
 
             const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
-            const otherWebshop = await new WebshopFactory({ organizationId: organization.id }).create();
+            const otherWebshop = await new WebshopFactory({
+                organizationId: organization.id,
+            }).create();
 
             const order = await new OrderFactory({ webshop }).create();
             const otherOrder = await new OrderFactory({ webshop: otherWebshop }).create();
@@ -83,7 +117,7 @@ describe('Endpoint.GetBalanceItemsEndpoint', () => {
             });
 
             expect(response.status).toBe(200);
-            expect(response.body.results.map(r => r.id)).toEqual([matchingItem.id]);
+            expect(response.body.results.map((r) => r.id)).toEqual([matchingItem.id]);
         });
     });
 
@@ -97,7 +131,10 @@ describe('Endpoint.GetBalanceItemsEndpoint', () => {
             const otherGroup = await new GroupFactory({ organization }).create();
 
             const registration = await new RegistrationFactory({ member, group }).create();
-            const otherRegistration = await new RegistrationFactory({ member, group: otherGroup }).create();
+            const otherRegistration = await new RegistrationFactory({
+                member,
+                group: otherGroup,
+            }).create();
 
             const matchingItem = await new BalanceItemFactory({
                 organizationId: organization.id,
@@ -129,12 +166,18 @@ describe('Endpoint.GetBalanceItemsEndpoint', () => {
             });
 
             expect(response.status).toBe(200);
-            expect(response.body.results.map(r => r.id)).toEqual([matchingItem.id]);
+            expect(response.body.results.map((r) => r.id)).toEqual([matchingItem.id]);
         });
     });
 
     describe('Filtering on the membership type', () => {
-        const createMembershipItem = async ({ organization, membershipTypeId }: { organization: Organization; membershipTypeId: string }) => {
+        const createMembershipItem = async ({
+            organization,
+            membershipTypeId,
+        }: {
+            organization: Organization;
+            membershipTypeId: string;
+        }) => {
             return await new BalanceItemFactory({
                 organizationId: organization.id,
                 type: BalanceItemType.PlatformMembership,
@@ -179,7 +222,7 @@ describe('Endpoint.GetBalanceItemsEndpoint', () => {
             });
 
             expect(response.status).toBe(200);
-            expect(response.body.results.map(r => r.id)).toEqual([matchingItem.id]);
+            expect(response.body.results.map((r) => r.id)).toEqual([matchingItem.id]);
         });
     });
 });

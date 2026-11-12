@@ -3,11 +3,9 @@ import { ssoService } from '../../services/definitions/sso-service.js';
 
 export default class SsoLogs extends BaseCommand {
     static summary = 'Tail local SSO server logs';
-    static description = 'Use this while debugging login failures, redirect problems, or identity provider configuration issues.';
-    static examples = [
-        'stam sso logs',
-        'stam sso logs --env keeo',
-    ];
+    static description =
+        'Use this while debugging login failures, redirect problems, or identity provider configuration issues.';
+    static examples = ['stam sso logs', 'stam sso logs --env keeo'];
 
     static flags = BaseCommand.instanceFlags;
 

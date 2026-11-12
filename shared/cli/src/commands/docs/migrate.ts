@@ -24,7 +24,10 @@ export default class DocsMigrate extends BaseCommand {
 
     static flags = {
         ...this.verbosityFlags(),
-        clean: Flags.boolean({ default: false, description: 'Remove all existing content before importing' }),
+        clean: Flags.boolean({
+            default: false,
+            description: 'Remove all existing content before importing',
+        }),
         yes: yesFlag,
     };
 
@@ -47,9 +50,13 @@ export default class DocsMigrate extends BaseCommand {
             ...(flags.yes ? ['--yes'] : []),
         ];
 
-        await run('pnpm', ['--dir', '.development/docs-migration', 'run', 'start', ...passthrough], {
-            cwd: context.rootDir,
-            verbosity: context.verbosity ?? RunVerbosity.Output,
-        });
+        await run(
+            'pnpm',
+            ['--dir', '.development/docs-migration', 'run', 'start', ...passthrough],
+            {
+                cwd: context.rootDir,
+                verbosity: context.verbosity ?? RunVerbosity.Output,
+            },
+        );
     }
 }

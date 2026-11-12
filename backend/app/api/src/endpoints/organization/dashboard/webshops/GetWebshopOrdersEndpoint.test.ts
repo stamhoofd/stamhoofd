@@ -1,10 +1,33 @@
 import { Request } from '@node/endpoints';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
-import { OrderFactory, OrganizationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
-import type { CountResponse, PaginatedResponse, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
+import {
+    OrderFactory,
+    OrganizationFactory,
+    Token,
+    UserFactory,
+    WebshopFactory,
+} from '@stamhoofd/models';
+import type {
+    CountResponse,
+    PaginatedResponse,
+    PrivateOrder,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { Cart, CountFilteredRequest, Customer, LimitedFilteredRequest, OrderData, Permissions, PermissionsResourceKey, RecordDateAnswer, RecordSettings, RecordType, ResourcePermissions } from '@stamhoofd/structures';
+import {
+    Cart,
+    CountFilteredRequest,
+    Customer,
+    LimitedFilteredRequest,
+    OrderData,
+    Permissions,
+    PermissionsResourceKey,
+    RecordDateAnswer,
+    RecordSettings,
+    RecordType,
+    ResourcePermissions,
+} from '@stamhoofd/structures';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetWebshopOrdersCountEndpoint } from './GetWebshopOrdersCountEndpoint.js';
 import { GetWebshopOrdersEndpoint } from './GetWebshopOrdersEndpoint.js';
@@ -14,7 +37,15 @@ describe('Endpoint.GetWebshopOrdersEndpoint', () => {
     const endpoint = new GetWebshopOrdersEndpoint();
     const countEndpoint = new GetWebshopOrdersCountEndpoint();
 
-    const getOrders = async ({ filter, organization, user }: { filter: StamhoofdFilter | null; organization: Organization; user: User }) => {
+    const getOrders = async ({
+        filter,
+        organization,
+        user,
+    }: {
+        filter: StamhoofdFilter | null;
+        organization: Organization;
+        user: User;
+    }) => {
         const token = await SessionService.createSession(user);
 
         const request = Request.get({
@@ -29,10 +60,21 @@ describe('Endpoint.GetWebshopOrdersEndpoint', () => {
             },
         });
 
-        return testServer.test<PaginatedResponse<PrivateOrder[], LimitedFilteredRequest>>(endpoint, request);
+        return testServer.test<PaginatedResponse<PrivateOrder[], LimitedFilteredRequest>>(
+            endpoint,
+            request,
+        );
     };
 
-    const countOrders = async ({ filter, organization, user }: { filter: StamhoofdFilter | null; organization: Organization; user: User }) => {
+    const countOrders = async ({
+        filter,
+        organization,
+        user,
+    }: {
+        filter: StamhoofdFilter | null;
+        organization: Organization;
+        user: User;
+    }) => {
         const token = await SessionService.createSession(user);
 
         const request = Request.get({
@@ -47,7 +89,15 @@ describe('Endpoint.GetWebshopOrdersEndpoint', () => {
         return testServer.test<CountResponse>(countEndpoint, request);
     };
 
-    const createOrderWithDateAnswer = async ({ webshop, record, dateValue }: { webshop: Webshop; record: RecordSettings; dateValue: Date | null }) => {
+    const createOrderWithDateAnswer = async ({
+        webshop,
+        record,
+        dateValue,
+    }: {
+        webshop: Webshop;
+        record: RecordSettings;
+        dateValue: Date | null;
+    }) => {
         const answer = RecordDateAnswer.create({ settings: record });
         answer.dateValue = dateValue;
 
@@ -134,7 +184,9 @@ describe('Endpoint.GetWebshopOrdersEndpoint', () => {
         test('orders of webshops the admin cannot access are not listed or counted', async () => {
             const organization = await new OrganizationFactory({}).create();
             const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
-            const otherWebshop = await new WebshopFactory({ organizationId: organization.id }).create();
+            const otherWebshop = await new WebshopFactory({
+                organizationId: organization.id,
+            }).create();
 
             const order = await new OrderFactory({ webshop }).create();
             const ownOrder = await new OrderFactory({ webshop: otherWebshop }).create();
@@ -144,7 +196,15 @@ describe('Endpoint.GetWebshopOrdersEndpoint', () => {
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
                     resources: new Map([
-                        [PermissionsResourceType.Webshops, new Map([[otherWebshop.id, ResourcePermissions.create({ level: PermissionLevel.Full })]])],
+                        [
+                            PermissionsResourceType.Webshops,
+                            new Map([
+                                [
+                                    otherWebshop.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ]),
+                        ],
                     ]),
                 }),
             }).create();
@@ -173,7 +233,9 @@ describe('Endpoint.GetWebshopOrdersEndpoint', () => {
         test('an admin with access to all webshops sees the orders of every webshop', async () => {
             const organization = await new OrganizationFactory({}).create();
             const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
-            const otherWebshop = await new WebshopFactory({ organizationId: organization.id }).create();
+            const otherWebshop = await new WebshopFactory({
+                organizationId: organization.id,
+            }).create();
 
             const order = await new OrderFactory({ webshop }).create();
             const otherOrder = await new OrderFactory({ webshop: otherWebshop }).create();
@@ -183,7 +245,15 @@ describe('Endpoint.GetWebshopOrdersEndpoint', () => {
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
                     resources: new Map([
-                        [PermissionsResourceType.Webshops, new Map([[PermissionsResourceKey.All, ResourcePermissions.create({ level: PermissionLevel.Read })]])],
+                        [
+                            PermissionsResourceType.Webshops,
+                            new Map([
+                                [
+                                    PermissionsResourceKey.All,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                            ]),
+                        ],
                     ]),
                 }),
             }).create();

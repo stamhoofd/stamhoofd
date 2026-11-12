@@ -6,7 +6,9 @@ export class UitpasClientCredential extends QueryableModel {
     static table = 'uitpas_client_credentials';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -26,7 +28,8 @@ export class UitpasClientCredential extends QueryableModel {
     organizationId: string | null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -38,7 +41,8 @@ export class UitpasClientCredential extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -49,7 +53,9 @@ export class UitpasClientCredential extends QueryableModel {
 
     async save() {
         if (this.organizationId === null) {
-            throw new Error('Not allowed to save uitpas client credentials for platform (organizationId = null)');
+            throw new Error(
+                'Not allowed to save uitpas client credentials for platform (organizationId = null)',
+            );
         }
         return await super.save();
     }

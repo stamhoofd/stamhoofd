@@ -18,9 +18,7 @@ describe('Unit.LoadedPermissions', () => {
 
             const specificTag = ResourcePermissions.create({
                 level: PermissionLevel.Write,
-                accessRights: [
-                    AccessRight.OrganizationEventNotificationReviewer,
-                ],
+                accessRights: [AccessRight.OrganizationEventNotificationReviewer],
             });
 
             const responsibility = MemberResponsibility.create({
@@ -31,9 +29,7 @@ describe('Unit.LoadedPermissions', () => {
                     level: PermissionLevel.Read,
                     accessRights: [AccessRight.MemberReadFinancialData],
                     resources: new Map([
-                        [PermissionsResourceType.OrganizationTags, new Map([
-                            ['my-id', allTags],
-                        ])],
+                        [PermissionsResourceType.OrganizationTags, new Map([['my-id', allTags]])],
                     ]),
                 }),
             });
@@ -46,9 +42,10 @@ describe('Unit.LoadedPermissions', () => {
                     responsibilityId: 'resp-2',
                     accessRights: [AccessRight.WebshopScanTickets],
                     resources: new Map([
-                        [PermissionsResourceType.OrganizationTags, new Map([
-                            ['my-id', specificTag],
-                        ])],
+                        [
+                            PermissionsResourceType.OrganizationTags,
+                            new Map([['my-id', specificTag]]),
+                        ],
                     ]),
                 }),
             });
@@ -84,14 +81,19 @@ describe('Unit.LoadedPermissions', () => {
                 AccessRight.WebshopScanTickets,
             ]);
             expect(result.level).toBe(PermissionLevel.Write);
-            expect(result.resources.get(PermissionsResourceType.OrganizationTags)?.get('my-id')?.level).toBe(PermissionLevel.Write);
-            expect(result.resources.get(PermissionsResourceType.OrganizationTags)?.get('my-id')?.accessRights).toEqual([
-                AccessRight.OrganizationEventNotificationReviewer,
-            ]);
+            expect(
+                result.resources.get(PermissionsResourceType.OrganizationTags)?.get('my-id')?.level,
+            ).toBe(PermissionLevel.Write);
+            expect(
+                result.resources.get(PermissionsResourceType.OrganizationTags)?.get('my-id')
+                    ?.accessRights,
+            ).toEqual([AccessRight.OrganizationEventNotificationReviewer]);
 
             // Check responsibility not altered
             expect(responsibility.permissions?.level).toBe(PermissionLevel.Read);
-            expect(responsibility.permissions?.accessRights).toEqual([AccessRight.MemberReadFinancialData]);
+            expect(responsibility.permissions?.accessRights).toEqual([
+                AccessRight.MemberReadFinancialData,
+            ]);
             expect(allTags.level).toBe(PermissionLevel.Read);
             expect(allTags.accessRights).toEqual([]);
 

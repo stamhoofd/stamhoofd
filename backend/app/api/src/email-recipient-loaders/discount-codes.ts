@@ -1,23 +1,36 @@
 import { Email, WebshopDiscountCode } from '@stamhoofd/models';
-import { CountFilteredRequest, EmailRecipient, LimitedFilteredRequest, mergeFilters, PaginatedResponse } from '@stamhoofd/structures';
+import {
+    CountFilteredRequest,
+    EmailRecipient,
+    LimitedFilteredRequest,
+    mergeFilters,
+    PaginatedResponse,
+} from '@stamhoofd/structures';
 import { EmailRecipientFilterType } from '@stamhoofd/structures/email/EmailRecipientFilterType.js';
 
-import { buildDiscountCodeReplacementsOptions, getEmailReplacementsForDiscountCode } from '../email-replacements/getEmailReplacementsForDiscountCode.js';
+import {
+    buildDiscountCodeReplacementsOptions,
+    getEmailReplacementsForDiscountCode,
+} from '../email-replacements/getEmailReplacementsForDiscountCode.js';
 import { GetWebshopDiscountCodesEndpoint } from '../endpoints/organization/dashboard/webshops/GetDiscountCodesEndpoint.js';
 import { LimitedFilteredRequestHelper } from '../helpers/LimitedFilteredRequestHelper.js';
 import { discountCodeSorters } from '../sql-sorters/discount-codes.js';
 
 function withEmailFilter(query: LimitedFilteredRequest): LimitedFilteredRequest {
     return new LimitedFilteredRequest({
-        filter: mergeFilters([query.filter, {
-            email: {
-                $neq: null,
+        filter: mergeFilters([
+            query.filter,
+            {
+                email: {
+                    $neq: null,
+                },
             },
-        }, {
-            email: {
-                $neq: '',
+            {
+                email: {
+                    $neq: '',
+                },
             },
-        }]),
+        ]),
         pageFilter: query.pageFilter,
         sort: query.sort,
         limit: query.limit,
@@ -57,7 +70,10 @@ async function fetch(query: LimitedFilteredRequest) {
                 EmailRecipient.create({
                     objectId: discountCode.id,
                     email: discountCode.email,
-                    replacements: getEmailReplacementsForDiscountCode(discountCode, replacementOptions),
+                    replacements: getEmailReplacementsForDiscountCode(
+                        discountCode,
+                        replacementOptions,
+                    ),
                 }),
             ];
         }),

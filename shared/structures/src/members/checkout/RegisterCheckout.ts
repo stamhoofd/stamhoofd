@@ -1,4 +1,12 @@
-import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder, URLDecoder } from '@common/encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    StringDecoder,
+    URLDecoder,
+} from '@common/encoding';
 
 import { SimpleError } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';
@@ -46,7 +54,12 @@ export class IDRegisterCheckout extends AutoEncoder {
     /**
      * @deprecated removed, moved to cart.deleteRegistrations
      */
-    @field({ decoder: IntegerDecoder, version: 362, optional: true, field: 'cancellationFeePercentage' })
+    @field({
+        decoder: IntegerDecoder,
+        version: 362,
+        optional: true,
+        field: 'cancellationFeePercentage',
+    })
     _cancellationFeePercentage?: number;
 
     @field({ decoder: new EnumDecoder(PaymentMethod), nullable: true })
@@ -99,9 +112,16 @@ export class IDRegisterCheckout extends AutoEncoder {
         checkout.customer = this.customer;
         checkout.sendConfirmationEmail = this.sendConfirmationEmail;
 
-        if (context.organizations[0] && !checkout.cart.isEmpty && checkout.defaultOrganization === null) {
+        if (
+            context.organizations[0] &&
+            !checkout.cart.isEmpty &&
+            checkout.defaultOrganization === null
+        ) {
             const preferredId = checkout.singleOrganizationId;
-            checkout.setDefaultOrganization((preferredId ? context.organizations.find(o => o.id === preferredId) : null) ?? context.organizations[0]);
+            checkout.setDefaultOrganization(
+                (preferredId ? context.organizations.find((o) => o.id === preferredId) : null) ??
+                    context.organizations[0],
+            );
         } else {
             if (!checkout.cart.isEmpty && !checkout.singleOrganization) {
                 throw new Error('Missing default organization');
@@ -112,11 +132,11 @@ export class IDRegisterCheckout extends AutoEncoder {
     }
 
     get memberIds() {
-        return Formatter.uniqueArray(this.cart.items.map(i => i.memberId));
+        return Formatter.uniqueArray(this.cart.items.map((i) => i.memberId));
     }
 
     get groupIds() {
-        return Formatter.uniqueArray(this.cart.items.map(i => i.groupId));
+        return Formatter.uniqueArray(this.cart.items.map((i) => i.groupId));
     }
 }
 
@@ -178,7 +198,11 @@ export class RegisterCheckout {
     }
 
     get singleOrganizationId() {
-        return this.singleOrganization?.id ?? this.cart.deleteRegistrations[0]?.registration.registration.organizationId ?? this.cart.balanceItems[0]?.item.organizationId;
+        return (
+            this.singleOrganization?.id ??
+            this.cart.deleteRegistrations[0]?.registration.registration.organizationId ??
+            this.cart.balanceItems[0]?.item.organizationId
+        );
     }
 
     setDefaultOrganization(organization: Organization | null) {
@@ -227,7 +251,10 @@ export class RegisterCheckout {
         }
     }
 
-    removeRegistration(registration: RegistrationWithPlatformMember, options?: { calculate?: boolean }) {
+    removeRegistration(
+        registration: RegistrationWithPlatformMember,
+        options?: { calculate?: boolean },
+    ) {
         this.cart.removeRegistration(registration);
 
         if (this.cart.isEmpty) {
@@ -239,7 +266,10 @@ export class RegisterCheckout {
         }
     }
 
-    unremoveRegistration(registration: RegistrationWithPlatformMember, options?: { calculate?: boolean }) {
+    unremoveRegistration(
+        registration: RegistrationWithPlatformMember,
+        options?: { calculate?: boolean },
+    ) {
         this.cart.unremoveRegistration(registration);
 
         if (this.cart.isEmpty) {
@@ -276,7 +306,7 @@ export class RegisterCheckout {
     }
 
     removeBalanceItemByBalance(item: BalanceItem) {
-        const _item = this.cart.balanceItems.find(i => i.item.id === item.id);
+        const _item = this.cart.balanceItems.find((i) => i.item.id === item.id);
         if (!_item) {
             return;
         }
@@ -290,7 +320,10 @@ export class RegisterCheckout {
         if (this.isAdminFromSameOrganization || !this.singleOrganization) {
             this.administrationFee = 0;
         } else {
-            this.administrationFee = this.singleOrganization.meta.registrationPaymentConfiguration.administrationFee.calculate(this.cart.price - this.bundleDiscount - this.cart.refund) ?? 0;
+            this.administrationFee =
+                this.singleOrganization.meta.registrationPaymentConfiguration.administrationFee.calculate(
+                    this.cart.price - this.bundleDiscount - this.cart.refund,
+                ) ?? 0;
         }
     }
 
@@ -344,9 +377,19 @@ export class RegisterCheckout {
      *
      * @param payingNow Open balance items that are being paid as part of the same price
      */
-    static calculateAutomaticDiscounts({ organizationId, balanceItems, payingNow, price }: { organizationId: string; balanceItems: BalanceItem[]; payingNow: number; price: number }): Map<BalanceItem, number> {
+    static calculateAutomaticDiscounts({
+        organizationId,
+        balanceItems,
+        payingNow,
+        price,
+    }: {
+        organizationId: string;
+        balanceItems: BalanceItem[];
+        payingNow: number;
+        price: number;
+    }): Map<BalanceItem, number> {
         const discounts = new Map<BalanceItem, number>();
-        const items = balanceItems.filter(b => b.organizationId === organizationId);
+        const items = balanceItems.filter((b) => b.organizationId === organizationId);
         const totalOpenBalance = items.reduce((a, b) => a + b.priceOpen, 0) - payingNow;
 
         if (totalOpenBalance >= 0) {
@@ -382,7 +425,11 @@ export class RegisterCheckout {
         this.cart.validate(this, data ?? this.balanceItems);
         this.updatePrices();
 
-        if (this.singleOrganization && (this.singleOrganization.meta.recordsConfiguration.freeContribution?.amounts.length ?? 0) === 0) {
+        if (
+            this.singleOrganization &&
+            (this.singleOrganization.meta.recordsConfiguration.freeContribution?.amounts.length ??
+                0) === 0
+        ) {
             // Automatically clear free contribution if there are no options
             this.freeContribution = 0;
         }
@@ -413,7 +460,14 @@ export class RegisterCheckout {
      * Only includes 'due now' items - so excludes trials (doesn't work 100% yet with deleted registrations but this is not a problem at the moment)
      */
     get totalPrice() {
-        return this.cart.price - this.bundleDiscount - this.cart.refund + this.administrationFee + this.freeContribution + this.cart.cancellationFees;
+        return (
+            this.cart.price -
+            this.bundleDiscount -
+            this.cart.refund +
+            this.administrationFee +
+            this.freeContribution +
+            this.cart.cancellationFees
+        );
     }
 
     /**
@@ -436,7 +490,9 @@ export class RegisterCheckout {
         return !this.isAdminFromSameOrganization;
     }
 
-    getPriceBreakown(options?: { balanceItemDiscountsAction?: PriceBreakdownAction }): PriceBreakdown {
+    getPriceBreakown(options?: {
+        balanceItemDiscountsAction?: PriceBreakdownAction;
+    }): PriceBreakdown {
         const all: PriceBreakdown = [];
 
         // Discounts
@@ -468,24 +524,26 @@ export class RegisterCheckout {
             });
         }
 
-        all.push(...[
-            {
-                name: $t('%17F'),
-                price: -this.cart.refund,
-            },
-            {
-                name: $t('%qs'),
-                price: this.administrationFee,
-            },
-            {
-                name: $t('%Ot'),
-                price: this.freeContribution,
-            },
-            {
-                name: $t('%17G'),
-                price: this.cart.cancellationFees,
-            },
-        ].filter(a => a.price !== 0));
+        all.push(
+            ...[
+                {
+                    name: $t('%17F'),
+                    price: -this.cart.refund,
+                },
+                {
+                    name: $t('%qs'),
+                    price: this.administrationFee,
+                },
+                {
+                    name: $t('%Ot'),
+                    price: this.freeContribution,
+                },
+                {
+                    name: $t('%17G'),
+                    price: this.cart.cancellationFees,
+                },
+            ].filter((a) => a.price !== 0),
+        );
 
         if (all.length > 0 && subtotal !== 0) {
             all.unshift({
@@ -497,17 +555,15 @@ export class RegisterCheckout {
         const totalLater = this.cart.priceDueLater - this.bundleDiscountDueLater;
 
         if (totalLater !== 0) {
-            all.push(
-                {
-                    name: $t('%10Z'),
-                    price: totalLater,
-                },
-            );
+            all.push({
+                name: $t('%10Z'),
+                price: totalLater,
+            });
         }
 
         if (this.isAdminFromSameOrganization) {
             all.push({
-                name: (this.totalPrice >= 0 ? $t('%vb') : $t('%vc')),
+                name: this.totalPrice >= 0 ? $t('%vb') : $t('%vc'),
                 price: Math.abs(this.totalPrice),
             });
         } else {

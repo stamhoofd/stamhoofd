@@ -2,7 +2,22 @@ import { SimpleError } from '@common/errors';
 import { Document, DocumentTemplateFactory, Organization } from '@stamhoofd/models';
 import { render } from '@stamhoofd/models/helpers/Handlebars.js';
 import type { RecordAnswer } from '@stamhoofd/structures';
-import { Address, DocumentData, DocumentStatus, File, Image, OrganizationMetaData, PlatformConfig, Platform as PlatformStruct, RecordCheckboxAnswer, RecordDateAnswer, RecordPriceAnswer, RecordSettings, RecordTextAnswer, RecordType } from '@stamhoofd/structures';
+import {
+    Address,
+    DocumentData,
+    DocumentStatus,
+    File,
+    Image,
+    OrganizationMetaData,
+    PlatformConfig,
+    Platform as PlatformStruct,
+    RecordCheckboxAnswer,
+    RecordDateAnswer,
+    RecordPriceAnswer,
+    RecordSettings,
+    RecordTextAnswer,
+    RecordType,
+} from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { DocumentRenderService } from './DocumentRenderService.js';
@@ -22,7 +37,9 @@ function createImage(id: string) {
 /**
  * An organization that is not saved in the database: enough to build a context with.
  */
-function createOrganization(meta?: Partial<{ horizontalLogo: Image | null; squareLogo: Image | null }>) {
+function createOrganization(
+    meta?: Partial<{ horizontalLogo: Image | null; squareLogo: Image | null }>,
+) {
     const organization = new Organization();
     organization.name = 'Test organization';
     organization.meta = OrganizationMetaData.create({
@@ -45,7 +62,13 @@ function createDocument() {
     return document;
 }
 
-function createPlatform(config: Partial<{ logoDocuments: Image | null; horizontalLogo: Image | null; squareLogo: Image | null }>) {
+function createPlatform(
+    config: Partial<{
+        logoDocuments: Image | null;
+        horizontalLogo: Image | null;
+        squareLogo: Image | null;
+    }>,
+) {
     return PlatformStruct.create({
         config: PlatformConfig.create({
             logoDocuments: config.logoDocuments ?? null,
@@ -60,57 +83,91 @@ function createPlatform(config: Partial<{ logoDocuments: Image | null; horizonta
  */
 function createInvalidFieldAnswers() {
     return new Map([
-        ['', RecordTextAnswer.create({
-            settings: RecordSettings.create({ id: '', type: RecordType.Text }),
-            value: 'Some value',
-        })],
+        [
+            '',
+            RecordTextAnswer.create({
+                settings: RecordSettings.create({ id: '', type: RecordType.Text }),
+                value: 'Some value',
+            }),
+        ],
     ]);
 }
 
 function createFieldAnswers(id: string) {
     return new Map([
-        [id, RecordTextAnswer.create({
-            settings: RecordSettings.create({ id, type: RecordType.Text }),
-            value: 'polluted',
-        })],
+        [
+            id,
+            RecordTextAnswer.create({
+                settings: RecordSettings.create({ id, type: RecordType.Text }),
+                value: 'polluted',
+            }),
+        ],
     ]);
 }
 
-const prototypePollutionIds = ['__proto__.polluted', 'registration.__proto__.polluted', 'constructor.prototype.polluted', '__proto__'];
+const prototypePollutionIds = [
+    '__proto__.polluted',
+    'registration.__proto__.polluted',
+    'constructor.prototype.polluted',
+    '__proto__',
+];
 
-const xmlExport = '<documents>{{#each documents}}<document>{{{this.number}}}</document>{{/each}}</documents>';
+const xmlExport =
+    '<documents>{{#each documents}}<document>{{{this.number}}}</document>{{/each}}</documents>';
 
 /**
  * The day price row of the participation template (templates/participation.html in the dashboard).
  */
-const dayPriceTemplate = '{{#if (and registration.showDayPrice (coalesce registration.price registration.priceOriginal 0)) }}'
-    + 'Bedrag per dag: {{ formatPrice (div (coalesce registration.price registration.priceOriginal 0) (coalesce registration.days (days registration.startDate registration.endDate))) round=true }}'
-    + '{{/if}}';
+const dayPriceTemplate =
+    '{{#if (and registration.showDayPrice (coalesce registration.price registration.priceOriginal 0)) }}' +
+    'Bedrag per dag: {{ formatPrice (div (coalesce registration.price registration.priceOriginal 0) (coalesce registration.days (days registration.startDate registration.endDate))) round=true }}' +
+    '{{/if}}';
 
-function createParticipationDocument(answers: { showDayPrice: boolean; price?: number | null; priceOriginal?: number | null; startDate?: Date; endDate?: Date }) {
+function createParticipationDocument(answers: {
+    showDayPrice: boolean;
+    price?: number | null;
+    priceOriginal?: number | null;
+    startDate?: Date;
+    endDate?: Date;
+}) {
     const settingsFor = (id: string, type: RecordType) => RecordSettings.create({ id, type });
 
     const fieldAnswers = new Map<string, RecordAnswer>([
-        ['registration.showDayPrice', RecordCheckboxAnswer.create({
-            settings: settingsFor('registration.showDayPrice', RecordType.Checkbox),
-            selected: answers.showDayPrice,
-        })],
-        ['registration.price', RecordPriceAnswer.create({
-            settings: settingsFor('registration.price', RecordType.Price),
-            value: answers.price ?? null,
-        })],
-        ['registration.priceOriginal', RecordPriceAnswer.create({
-            settings: settingsFor('registration.priceOriginal', RecordType.Price),
-            value: answers.priceOriginal ?? null,
-        })],
-        ['registration.startDate', RecordDateAnswer.create({
-            settings: settingsFor('registration.startDate', RecordType.Date),
-            dateValue: answers.startDate ?? new Date(2024, 6, 1),
-        })],
-        ['registration.endDate', RecordDateAnswer.create({
-            settings: settingsFor('registration.endDate', RecordType.Date),
-            dateValue: answers.endDate ?? new Date(2024, 6, 7),
-        })],
+        [
+            'registration.showDayPrice',
+            RecordCheckboxAnswer.create({
+                settings: settingsFor('registration.showDayPrice', RecordType.Checkbox),
+                selected: answers.showDayPrice,
+            }),
+        ],
+        [
+            'registration.price',
+            RecordPriceAnswer.create({
+                settings: settingsFor('registration.price', RecordType.Price),
+                value: answers.price ?? null,
+            }),
+        ],
+        [
+            'registration.priceOriginal',
+            RecordPriceAnswer.create({
+                settings: settingsFor('registration.priceOriginal', RecordType.Price),
+                value: answers.priceOriginal ?? null,
+            }),
+        ],
+        [
+            'registration.startDate',
+            RecordDateAnswer.create({
+                settings: settingsFor('registration.startDate', RecordType.Date),
+                dateValue: answers.startDate ?? new Date(2024, 6, 1),
+            }),
+        ],
+        [
+            'registration.endDate',
+            RecordDateAnswer.create({
+                settings: settingsFor('registration.endDate', RecordType.Date),
+                dateValue: answers.endDate ?? new Date(2024, 6, 7),
+            }),
+        ],
     ]);
 
     const document = createDocument();
@@ -119,7 +176,11 @@ function createParticipationDocument(answers: { showDayPrice: boolean; price?: n
 }
 
 async function renderDayPrice(answers: Parameters<typeof createParticipationDocument>[0]) {
-    const context = DocumentRenderService.buildDocumentContext(createParticipationDocument(answers), createOrganization(), createPlatform({}));
+    const context = DocumentRenderService.buildDocumentContext(
+        createParticipationDocument(answers),
+        createOrganization(),
+        createPlatform({}),
+    );
     return await render(dayPriceTemplate, context);
 }
 
@@ -127,13 +188,17 @@ async function renderDayPrice(answers: Parameters<typeof createParticipationDocu
  * Builds a locked template: a locked template makes buildAll return the documents unchanged, so the
  * numbers set up here are exactly what the renumbering logic gets to see.
  */
-async function createTemplateWithDocuments(numbers: number[], options?: { xmlExport?: string | null; lockDocuments?: boolean }) {
+async function createTemplateWithDocuments(
+    numbers: number[],
+    options?: { xmlExport?: string | null; lockDocuments?: boolean },
+) {
     const template = await new DocumentTemplateFactory({
         groups: [],
         status: DocumentStatus.Published,
     }).createWithoutSave();
 
-    template.privateSettings.templateDefinition.xmlExport = options?.xmlExport === undefined ? xmlExport : options.xmlExport;
+    template.privateSettings.templateDefinition.xmlExport =
+        options?.xmlExport === undefined ? xmlExport : options.xmlExport;
     await template.save();
 
     const documents: Document[] = [];
@@ -171,21 +236,37 @@ describe('DocumentRenderService', () => {
             const organization = createOrganization();
             const document = createDocument();
 
-            const all = DocumentRenderService.buildDocumentContext(document, organization, createPlatform({ logoDocuments, horizontalLogo, squareLogo }));
+            const all = DocumentRenderService.buildDocumentContext(
+                document,
+                organization,
+                createPlatform({ logoDocuments, horizontalLogo, squareLogo }),
+            );
             expect(all['platform'].logo.id).toBe(logoDocuments.id);
             expect(all['logo'].id).toBe(logoDocuments.id);
 
-            const withoutDocumentsLogo = DocumentRenderService.buildDocumentContext(document, organization, createPlatform({ horizontalLogo, squareLogo }));
+            const withoutDocumentsLogo = DocumentRenderService.buildDocumentContext(
+                document,
+                organization,
+                createPlatform({ horizontalLogo, squareLogo }),
+            );
             expect(withoutDocumentsLogo['platform'].logo.id).toBe(horizontalLogo.id);
             expect(withoutDocumentsLogo['logo'].id).toBe(horizontalLogo.id);
 
-            const onlySquareLogo = DocumentRenderService.buildDocumentContext(document, organization, createPlatform({ squareLogo }));
+            const onlySquareLogo = DocumentRenderService.buildDocumentContext(
+                document,
+                organization,
+                createPlatform({ squareLogo }),
+            );
             expect(onlySquareLogo['platform'].logo.id).toBe(squareLogo.id);
             expect(onlySquareLogo['logo'].id).toBe(squareLogo.id);
         });
 
         test('No logo is added to the context when the platform and the organization have none', () => {
-            const context = DocumentRenderService.buildDocumentContext(createDocument(), createOrganization(), createPlatform({}));
+            const context = DocumentRenderService.buildDocumentContext(
+                createDocument(),
+                createOrganization(),
+                createPlatform({}),
+            );
 
             expect(context['platform']).toBeUndefined();
             expect(context['logo']).toBeUndefined();
@@ -197,7 +278,11 @@ describe('DocumentRenderService', () => {
             const organizationLogo = createImage('organization-horizontal-logo');
 
             const organization = createOrganization({ horizontalLogo: organizationLogo });
-            const context = DocumentRenderService.buildDocumentContext(createDocument(), organization, createPlatform({ logoDocuments: platformLogo }));
+            const context = DocumentRenderService.buildDocumentContext(
+                createDocument(),
+                organization,
+                createPlatform({ logoDocuments: platformLogo }),
+            );
 
             expect(context['logo'].id).toBe(organizationLogo.id);
             expect(context['organization'].logo.id).toBe(organizationLogo.id);
@@ -206,19 +291,32 @@ describe('DocumentRenderService', () => {
             expect(context['platform'].logo.id).toBe(platformLogo.id);
         });
 
-        test.each(prototypePollutionIds)('A field id %s cannot write to the prototype chain', (id) => {
-            const document = createDocument();
-            document.data.fieldAnswers = createFieldAnswers(id);
+        test.each(prototypePollutionIds)(
+            'A field id %s cannot write to the prototype chain',
+            (id) => {
+                const document = createDocument();
+                document.data.fieldAnswers = createFieldAnswers(id);
 
-            expect(() => DocumentRenderService.buildDocumentContext(document, createOrganization(), createPlatform({}))).toThrow('Invalid field id');
-            expect(({} as Record<string, unknown>)['polluted']).toBeUndefined();
-        });
+                expect(() =>
+                    DocumentRenderService.buildDocumentContext(
+                        document,
+                        createOrganization(),
+                        createPlatform({}),
+                    ),
+                ).toThrow('Invalid field id');
+                expect(({} as Record<string, unknown>)['polluted']).toBeUndefined();
+            },
+        );
 
         test('A field id matching an inherited property creates an own property', () => {
             const document = createDocument();
             document.data.fieldAnswers = createFieldAnswers('toString.value');
 
-            const context = DocumentRenderService.buildDocumentContext(document, createOrganization(), createPlatform({}));
+            const context = DocumentRenderService.buildDocumentContext(
+                document,
+                createOrganization(),
+                createPlatform({}),
+            );
 
             expect(context['toString']).toEqual({ value: 'polluted' });
             expect(Object.prototype.toString).toBeTypeOf('function');
@@ -230,15 +328,21 @@ describe('DocumentRenderService', () => {
         const dayPriceOf25 = 'Bedrag per dag: ' + Formatter.price(3_5700);
 
         test('It divides the price by the amount of days, both start and end date included', async () => {
-            await expect(renderDayPrice({ showDayPrice: true, price: 25_0000 })).resolves.toBe(dayPriceOf25);
+            await expect(renderDayPrice({ showDayPrice: true, price: 25_0000 })).resolves.toBe(
+                dayPriceOf25,
+            );
         });
 
         test('It uses the original price when the price itself is hidden on the document', async () => {
-            await expect(renderDayPrice({ showDayPrice: true, price: null, priceOriginal: 25_0000 })).resolves.toBe(dayPriceOf25);
+            await expect(
+                renderDayPrice({ showDayPrice: true, price: null, priceOriginal: 25_0000 }),
+            ).resolves.toBe(dayPriceOf25);
         });
 
         test('It prefers the price of the document over the original price', async () => {
-            await expect(renderDayPrice({ showDayPrice: true, price: 14_0000, priceOriginal: 25_0000 })).resolves.toBe('Bedrag per dag: ' + Formatter.price(2_0000));
+            await expect(
+                renderDayPrice({ showDayPrice: true, price: 14_0000, priceOriginal: 25_0000 }),
+            ).resolves.toBe('Bedrag per dag: ' + Formatter.price(2_0000));
         });
 
         test('It is left out when the checkbox is not selected', async () => {
@@ -246,7 +350,9 @@ describe('DocumentRenderService', () => {
         });
 
         test('It is left out when no price is known', async () => {
-            await expect(renderDayPrice({ showDayPrice: true, price: null, priceOriginal: null })).resolves.toBe('');
+            await expect(
+                renderDayPrice({ showDayPrice: true, price: null, priceOriginal: null }),
+            ).resolves.toBe('');
         });
     });
 
@@ -262,8 +368,13 @@ describe('DocumentRenderService', () => {
             const consoleError = vitest.spyOn(console, 'error').mockImplementation(() => {});
 
             try {
-                await expect(DocumentRenderService.getRenderedHtml(document, createOrganization())).resolves.toBeNull();
-                expect(consoleError).toHaveBeenCalledWith('Failed to render document html', expect.any(Error));
+                await expect(
+                    DocumentRenderService.getRenderedHtml(document, createOrganization()),
+                ).resolves.toBeNull();
+                expect(consoleError).toHaveBeenCalledWith(
+                    'Failed to render document html',
+                    expect.any(Error),
+                );
             } finally {
                 consoleError.mockRestore();
             }
@@ -273,17 +384,23 @@ describe('DocumentRenderService', () => {
             const document = createDocument();
             document.templateId = '00000000-0000-4000-8000-000000000000';
 
-            await expect(DocumentRenderService.getRenderedHtml(document, createOrganization())).resolves.toBeNull();
+            await expect(
+                DocumentRenderService.getRenderedHtml(document, createOrganization()),
+            ).resolves.toBeNull();
         });
     });
 
     describe('getRenderedXml', () => {
         test('It renumbers the published documents to be strictly increasing and saves them', async () => {
-            const { template, organization, documents } = await createTemplateWithDocuments([1, 3, 7]);
+            const { template, organization, documents } = await createTemplateWithDocuments([
+                1, 3, 7,
+            ]);
 
             const xml = await DocumentRenderService.getRenderedXml(template, organization);
 
-            expect(xml).toBe('<documents><document>1</document><document>2</document><document>3</document></documents>');
+            expect(xml).toBe(
+                '<documents><document>1</document><document>2</document><document>3</document></documents>',
+            );
 
             // The gaps are closed in the database too
             for (const [index, document] of documents.entries()) {
@@ -294,9 +411,14 @@ describe('DocumentRenderService', () => {
 
         test('It rethrows a SimpleError instead of swallowing it', async () => {
             // A locked document cannot be renumbered: saving it throws a SimpleError
-            const { template, organization } = await createTemplateWithDocuments([2], { lockDocuments: true });
+            const { template, organization } = await createTemplateWithDocuments([2], {
+                lockDocuments: true,
+            });
 
-            const error = await DocumentRenderService.getRenderedXml(template, organization).then(() => null, (e: unknown) => e);
+            const error = await DocumentRenderService.getRenderedXml(template, organization).then(
+                () => null,
+                (e: unknown) => e,
+            );
 
             expect(error).toBeInstanceOf(SimpleError);
             expect((error as SimpleError).code).toBe('locked');
@@ -310,8 +432,13 @@ describe('DocumentRenderService', () => {
             const consoleError = vitest.spyOn(console, 'error').mockImplementation(() => {});
 
             try {
-                await expect(DocumentRenderService.getRenderedXml(template, organization)).resolves.toBeNull();
-                expect(consoleError).toHaveBeenCalledWith('Failed to render document html', expect.any(Error));
+                await expect(
+                    DocumentRenderService.getRenderedXml(template, organization),
+                ).resolves.toBeNull();
+                expect(consoleError).toHaveBeenCalledWith(
+                    'Failed to render document html',
+                    expect.any(Error),
+                );
             } finally {
                 consoleError.mockRestore();
             }
@@ -324,7 +451,9 @@ describe('DocumentRenderService', () => {
             const consoleError = vitest.spyOn(console, 'error').mockImplementation(() => {});
 
             try {
-                await expect(DocumentRenderService.getRenderedXml(template, organization)).resolves.toBeNull();
+                await expect(
+                    DocumentRenderService.getRenderedXml(template, organization),
+                ).resolves.toBeNull();
                 expect(({} as Record<string, unknown>)['polluted']).toBeUndefined();
             } finally {
                 consoleError.mockRestore();
@@ -332,9 +461,13 @@ describe('DocumentRenderService', () => {
         });
 
         test('It returns null without building anything when the template has no xml export', async () => {
-            const { template, organization, documents } = await createTemplateWithDocuments([2], { xmlExport: null });
+            const { template, organization, documents } = await createTemplateWithDocuments([2], {
+                xmlExport: null,
+            });
 
-            await expect(DocumentRenderService.getRenderedXml(template, organization)).resolves.toBeNull();
+            await expect(
+                DocumentRenderService.getRenderedXml(template, organization),
+            ).resolves.toBeNull();
 
             // No renumbering happened
             expect((await Document.getByID(documents[0]!.id))!.number).toBe(2);

@@ -21,7 +21,11 @@ export class GetOrganizationMandatesEndpoint extends Endpoint<Params, Query, Bod
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/billing/@sellingOrganizationId/mandates', { sellingOrganizationId: String });
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/billing/@sellingOrganizationId/mandates',
+            { sellingOrganizationId: String },
+        );
 
         if (params) {
             return [true, params as Params];
@@ -53,7 +57,12 @@ export class GetOrganizationMandatesEndpoint extends Endpoint<Params, Query, Bod
             });
         }
 
-        if (!await Context.auth.canViewPaymentMandates({ payingOrganizationId: payingOrganization.id, sellingOrganizationId: sellingOrganization.id })) {
+        if (
+            !(await Context.auth.canViewPaymentMandates({
+                payingOrganizationId: payingOrganization.id,
+                sellingOrganizationId: sellingOrganization.id,
+            }))
+        ) {
             throw Context.auth.error();
         }
 

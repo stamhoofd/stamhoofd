@@ -16,7 +16,9 @@ describe('Caddy data directory', () => {
         vi.stubEnv('XDG_DATA_HOME', path.join(os.homedir(), '.local/share'));
 
         expect(caddyDataDir()).toBe(path.join(os.homedir(), '.local/share/caddy'));
-        expect(caddyRootCaPath()).toBe(path.join(os.homedir(), '.local/share/caddy/pki/authorities/local/root.crt'));
+        expect(caddyRootCaPath()).toBe(
+            path.join(os.homedir(), '.local/share/caddy/pki/authorities/local/root.crt'),
+        );
     });
 
     it('falls back to Application Support on macOS without XDG_DATA_HOME', () => {

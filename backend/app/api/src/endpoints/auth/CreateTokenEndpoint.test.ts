@@ -139,7 +139,11 @@ describe('Endpoint.CreateToken', () => {
             expect(date.getTime()).toBeLessThanOrEqual(Date.now() + duration);
         }
 
-        async function login(organization: Organization, user: User, platform: string | null = null): Promise<Token> {
+        async function login(
+            organization: Organization,
+            user: User,
+            platform: string | null = null,
+        ): Promise<Token> {
             const r = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
                 grant_type: 'password',
                 username: user.email,
@@ -192,7 +196,10 @@ describe('Endpoint.CreateToken', () => {
             const token = await login(organization, admin, 'web');
 
             expect((await getSession(token)).clientType).toBe(SessionClientType.Browser);
-            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.Browser].refreshToken);
+            expectValidFor(
+                token.refreshTokenValidUntil,
+                SESSION_DURATIONS.admin[SessionClientType.Browser].refreshToken,
+            );
         });
 
         test('an administrator that signs in in the native app has no maximum session length', async () => {
@@ -206,9 +213,13 @@ describe('Endpoint.CreateToken', () => {
             const token = await login(organization, admin, 'ios');
 
             expect((await getSession(token)).clientType).toBe(SessionClientType.iOS);
-            expectValidFor(token.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.iOS].refreshToken);
+            expectValidFor(
+                token.refreshTokenValidUntil,
+                SESSION_DURATIONS.admin[SessionClientType.iOS].refreshToken,
+            );
 
-            const browserSessionDuration = SESSION_DURATIONS.admin[SessionClientType.Browser].session;
+            const browserSessionDuration =
+                SESSION_DURATIONS.admin[SessionClientType.Browser].session;
             if (browserSessionDuration === null) {
                 throw new Error('Expected browser administrator sessions to have a maximum length');
             }
@@ -217,7 +228,10 @@ describe('Endpoint.CreateToken', () => {
             await userSession.save();
 
             const renewed = await refresh(organization, token.refreshToken);
-            expectValidFor(renewed.refreshTokenValidUntil, SESSION_DURATIONS.admin[SessionClientType.iOS].refreshToken);
+            expectValidFor(
+                renewed.refreshTokenValidUntil,
+                SESSION_DURATIONS.admin[SessionClientType.iOS].refreshToken,
+            );
         });
 
         test('renewing the same active token twice revokes the first replacement', async () => {
@@ -234,13 +248,22 @@ describe('Endpoint.CreateToken', () => {
             expect(await Token.getByAccessToken(secondReplacement.accessToken)).toBeDefined();
 
             const sessionTokens = await Token.where({ sessionId: original.sessionId });
-            expect(sessionTokens.map(token => token.id).sort()).toEqual([original.id, secondReplacement.id].sort());
+            expect(sessionTokens.map((token) => token.id).sort()).toEqual(
+                [original.id, secondReplacement.id].sort(),
+            );
 
-            const forkRequest = Request.buildJson('POST', '/oauth/token', organization.getApiHost(), {
-                grant_type: 'refresh_token',
-                refresh_token: firstReplacement.refreshToken,
+            const forkRequest = Request.buildJson(
+                'POST',
+                '/oauth/token',
+                organization.getApiHost(),
+                {
+                    grant_type: 'refresh_token',
+                    refresh_token: firstReplacement.refreshToken,
+                },
+            );
+            await expect(testServer.test(endpoint, forkRequest)).rejects.toMatchObject({
+                code: 'invalid_refresh_token',
             });
-            await expect(testServer.test(endpoint, forkRequest)).rejects.toMatchObject({ code: 'invalid_refresh_token' });
         });
 
         test('an SSO handoff refresh token can only be exchanged once', async () => {
@@ -266,8 +289,8 @@ describe('Endpoint.CreateToken', () => {
                 refresh(organization, handoff.refreshToken),
             ]);
 
-            expect(exchanges.filter(result => result.status === 'fulfilled')).toHaveLength(1);
-            const rejected = exchanges.filter(result => result.status === 'rejected');
+            expect(exchanges.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+            const rejected = exchanges.filter((result) => result.status === 'rejected');
             expect(rejected).toHaveLength(1);
             expect(rejected[0].reason).toMatchObject({ code: 'invalid_refresh_token' });
         });
@@ -295,7 +318,9 @@ describe('Endpoint.CreateToken', () => {
             const renewed = await refresh(organization, token.refreshToken);
 
             expect((await getSession(renewed)).startedAt).toEqual(sessionStartedAt);
-            expect(renewed.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(sessionStartedAt.getTime() + sessionDuration);
+            expect(renewed.refreshTokenValidUntil.getTime()).toBeLessThanOrEqual(
+                sessionStartedAt.getTime() + sessionDuration,
+            );
             expect(renewed.refreshTokenValidUntil.getTime()).toBeGreaterThan(Date.now());
         });
 
@@ -325,10 +350,14 @@ describe('Endpoint.CreateToken', () => {
                 refresh_token: token.refreshToken,
             });
 
-            await expect(testServer.test(endpoint, r)).rejects.toMatchObject({ code: 'invalid_refresh_token' });
+            await expect(testServer.test(endpoint, r)).rejects.toMatchObject({
+                code: 'invalid_refresh_token',
+            });
             expect(await Token.getByAccessToken(otherSession.accessToken)).toBeDefined();
 
-            await expect(testServer.test(endpoint, r)).rejects.toMatchObject({ code: 'invalid_refresh_token' });
+            await expect(testServer.test(endpoint, r)).rejects.toMatchObject({
+                code: 'invalid_refresh_token',
+            });
             expect(await Token.getByAccessToken(otherSession.accessToken)).toBeDefined();
         });
     });

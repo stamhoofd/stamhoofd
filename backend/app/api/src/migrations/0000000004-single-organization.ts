@@ -19,7 +19,8 @@ export default new Migration(async () => {
         return;
     }
 
-    const registrationPeriod = (await RegistrationPeriod.select().first(false)) ?? new RegistrationPeriod();
+    const registrationPeriod =
+        (await RegistrationPeriod.select().first(false)) ?? new RegistrationPeriod();
     if (!registrationPeriod.id) {
         const s = Formatter.luxon();
         const startDate = s.set({

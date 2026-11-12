@@ -34,7 +34,9 @@ export class GetUserMembersEndpoint extends Endpoint<Params, Query, Body, Respon
         await Context.authenticate();
 
         return new Response(
-            await AuthenticatedStructures.membersBlob(await Member.getMembersWithRegistrationForUser(Context.impersonatedUserOrUser)),
+            await AuthenticatedStructures.membersBlob(
+                await Member.getMembersWithRegistrationForUser(Context.impersonatedUserOrUser),
+            ),
         );
     }
 }

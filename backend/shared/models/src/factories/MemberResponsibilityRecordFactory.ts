@@ -12,12 +12,17 @@ class Options {
     organizationId?: string;
 }
 
-export class MemberResponsibilityRecordFactory extends Factory<Options, MemberResponsibilityRecord> {
+export class MemberResponsibilityRecordFactory extends Factory<
+    Options,
+    MemberResponsibilityRecord
+> {
     async create(): Promise<MemberResponsibilityRecord> {
         const record = new MemberResponsibilityRecord();
-        const responsibility = this.options.responsibility ?? (await new PlatformResponsibilityFactory({
-            organizationBased: !!this.options.organizationId,
-        }).create());
+        const responsibility =
+            this.options.responsibility ??
+            (await new PlatformResponsibilityFactory({
+                organizationBased: !!this.options.organizationId,
+            }).create());
         record.responsibilityId = this.options.responsibility?.id ?? responsibility.id;
         record.memberId = this.options.member.id;
         record.startDate = new Date();
@@ -26,7 +31,9 @@ export class MemberResponsibilityRecordFactory extends Factory<Options, MemberRe
 
         if (!record.organizationId) {
             if (responsibility.organizationBased) {
-                throw new Error('This responsibility is organization based. Please also provide the organizationId option when creating the record with MemberResponsibilityRecordFactory');
+                throw new Error(
+                    'This responsibility is organization based. Please also provide the organizationId option when creating the record with MemberResponsibilityRecordFactory',
+                );
             }
         }
 

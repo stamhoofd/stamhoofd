@@ -1,12 +1,17 @@
 import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
-import { SessionClientType, SessionDeviceType, SessionLoginMethod, SessionOS } from '@stamhoofd/structures';
+import {
+    SessionClientType,
+    SessionDeviceType,
+    SessionLoginMethod,
+    SessionOS,
+} from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 export class UserSession extends QueryableModel {
     static table = 'user_sessions';
 
-    @column({ primary: true, type: 'string', beforeSave: value => value ?? uuidv4() })
+    @column({ primary: true, type: 'string', beforeSave: (value) => value ?? uuidv4() })
     id: string;
 
     @column({ type: 'string' })

@@ -43,7 +43,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full)) {
+        if (!(await Context.auth.canManagePaymentAccounts(organization.id, PermissionLevel.Full))) {
             throw Context.auth.error();
         }
 
@@ -54,7 +54,9 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
             await service.setupOnboarding();
 
             // Check settlements after linking (shouldn't block)
-            new MollieSettlementSync({ token: mollieToken }).syncSettlements({ start: organization.createdAt }).catch(console.error);
+            new MollieSettlementSync({ token: mollieToken })
+                .syncSettlements({ start: organization.createdAt })
+                .catch(console.error);
         }
 
         return new Response(await AuthenticatedStructures.organization(organization));

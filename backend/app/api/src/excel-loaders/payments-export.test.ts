@@ -1,9 +1,28 @@
 import type { XlsxTransformerColumn } from '@stamhoofd/excel-writer';
 import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { BalanceItem, Organization, Webshop } from '@stamhoofd/models';
-import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    BalanceItemPayment,
+    OrderFactory,
+    OrganizationFactory,
+    Payment,
+    UserFactory,
+    WebshopFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BalanceItemType, ExcelExportType, LimitedFilteredRequest, OrderStatus, PaymentMethod, PaymentStatus, PaymentType, Permissions, Platform, SortItemDirection } from '@stamhoofd/structures';
+import {
+    BalanceItemType,
+    ExcelExportType,
+    LimitedFilteredRequest,
+    OrderStatus,
+    PaymentMethod,
+    PaymentStatus,
+    PaymentType,
+    Permissions,
+    Platform,
+    SortItemDirection,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
@@ -17,7 +36,8 @@ describe('ExcelLoader.Payments order numbers', () => {
     let webshop: Webshop;
 
     const paymentsLoader = () => ExportToExcelEndpoint.loaders.get(ExcelExportType.Payments)!;
-    const balanceItemPaymentsLoader = () => ExportToExcelEndpoint.loaders.get(ExcelExportType.BalanceItemPayments)!;
+    const balanceItemPaymentsLoader = () =>
+        ExportToExcelEndpoint.loaders.get(ExcelExportType.BalanceItemPayments)!;
 
     beforeEach(async () => {
         TestUtils.setEnvironment('userMode', 'platform');
@@ -26,7 +46,11 @@ describe('ExcelLoader.Payments order numbers', () => {
     });
 
     async function createOrderBalanceItem(options: { number: number; status?: OrderStatus }) {
-        const order = await new OrderFactory({ webshop, number: options.number, status: options.status }).create();
+        const order = await new OrderFactory({
+            webshop,
+            number: options.number,
+            status: options.status,
+        }).create();
         const balanceItem = await new BalanceItemFactory({
             organizationId: organization.id,
             orderId: order.id,
@@ -61,7 +85,7 @@ describe('ExcelLoader.Payments order numbers', () => {
     }
 
     function getColumn<T>(columns: XlsxTransformerColumn<T>[], columnId: string) {
-        const column = columns.find(c => isXlsxTransformerConcreteColumn(c) && c.id === columnId);
+        const column = columns.find((c) => isXlsxTransformerConcreteColumn(c) && c.id === columnId);
         if (!column || !isXlsxTransformerConcreteColumn(column)) {
             throw new Error('Column ' + columnId + ' not found');
         }
@@ -78,7 +102,10 @@ describe('ExcelLoader.Payments order numbers', () => {
 
     test('names the orders a payment paid for on both sheets', async () => {
         const live = await createOrderBalanceItem({ number: 123 });
-        const deleted = await createOrderBalanceItem({ number: 1638492047163, status: OrderStatus.Deleted });
+        const deleted = await createOrderBalanceItem({
+            number: 1638492047163,
+            status: OrderStatus.Deleted,
+        });
         const other = await new BalanceItemFactory({
             organizationId: organization.id,
             amount: 1,
@@ -91,7 +118,10 @@ describe('ExcelLoader.Payments order numbers', () => {
 
         const request = new LimitedFilteredRequest({
             limit: 10,
-            sort: [{ key: 'createdAt', order: SortItemDirection.ASC }, { key: 'id', order: SortItemDirection.ASC }],
+            sort: [
+                { key: 'createdAt', order: SortItemDirection.ASC },
+                { key: 'id', order: SortItemDirection.ASC },
+            ],
         });
 
         const response = await fetchAsAdmin(() => paymentsLoader().fetch(request));
@@ -100,24 +130,30 @@ describe('ExcelLoader.Payments order numbers', () => {
         const paymentSheet = sheets[0];
         const rowSheet = sheets[1];
 
-        const byId = new Map(results.map(payment => [payment.id, payment]));
-        const orderNumbers = getColumn<PaymentGeneralWithStripeAccount>(paymentSheet.columns, 'orderNumbers');
+        const byId = new Map(results.map((payment) => [payment.id, payment]));
+        const orderNumbers = getColumn<PaymentGeneralWithStripeAccount>(
+            paymentSheet.columns,
+            'orderNumbers',
+        );
         expect(orderNumbers.getValue(byId.get(livePayment.id)!).value).toBe(123);
         expect(orderNumbers.getValue(byId.get(deletedPayment.id)!).value).toBe('Verwijderd');
 
         const orderNumber = getColumn<PaymentWithItem>(rowSheet.columns, 'orderNumber');
         const liveRows = rowSheet.transform!(byId.get(livePayment.id)!) as PaymentWithItem[];
-        const liveValues = liveRows.map(row => orderNumber.getValue(row).value);
+        const liveValues = liveRows.map((row) => orderNumber.getValue(row).value);
         expect(liveValues).toHaveLength(2);
         expect(liveValues).toEqual(expect.arrayContaining(['', 123]));
 
         const deletedRows = rowSheet.transform!(byId.get(deletedPayment.id)!) as PaymentWithItem[];
-        expect(deletedRows.map(row => orderNumber.getValue(row).value)).toEqual(['Verwijderd']);
+        expect(deletedRows.map((row) => orderNumber.getValue(row).value)).toEqual(['Verwijderd']);
     });
 
     test('names the order of a balance item payment row', async () => {
         const live = await createOrderBalanceItem({ number: 123 });
-        const deleted = await createOrderBalanceItem({ number: 1638492047163, status: OrderStatus.Deleted });
+        const deleted = await createOrderBalanceItem({
+            number: 1638492047163,
+            status: OrderStatus.Deleted,
+        });
         await createPayment([live.balanceItem, deleted.balanceItem]);
 
         const request = new LimitedFilteredRequest({
@@ -127,9 +163,17 @@ describe('ExcelLoader.Payments order numbers', () => {
 
         const response = await fetchAsAdmin(() => balanceItemPaymentsLoader().fetch(request));
         const rows = response.results as PaymentWithItem[];
-        const orderNumber = getColumn<PaymentWithItem>(balanceItemPaymentsLoader().getSheets(Platform.create({}))[0].columns, 'orderNumber');
+        const orderNumber = getColumn<PaymentWithItem>(
+            balanceItemPaymentsLoader().getSheets(Platform.create({}))[0].columns,
+            'orderNumber',
+        );
 
-        const byBalanceItem = new Map(rows.map(row => [row.balanceItemPayment.balanceItem.id, orderNumber.getValue(row).value]));
+        const byBalanceItem = new Map(
+            rows.map((row) => [
+                row.balanceItemPayment.balanceItem.id,
+                orderNumber.getValue(row).value,
+            ]),
+        );
         expect(byBalanceItem.get(live.balanceItem.id)).toBe(123);
         expect(byBalanceItem.get(deleted.balanceItem.id)).toBe('Verwijderd');
     });

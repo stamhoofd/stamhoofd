@@ -6,7 +6,7 @@ export class GoogleTranslateHelper {
     static getDomainFromTranslateDomain(domain: string): string {
         if (this.isGoogleTranslateDomain(domain)) {
             // Strip it out
-            let cleaned = domain.substr(0, domain.length - ('.translate.goog').length);
+            let cleaned = domain.substr(0, domain.length - '.translate.goog'.length);
 
             // Replace dashes with points
             cleaned = cleaned.replace(/-/g, '.');

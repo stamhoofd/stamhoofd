@@ -15,24 +15,31 @@ export type ResolveTranslationModelOptions = {
 };
 
 /** Either a ready-to-use model, or a reason it is unavailable so the caller can skip gracefully. */
-export type TranslationModelResolution
-    = | { model: TranslationModel }
-        | { unavailable: string };
+export type TranslationModelResolution = { model: TranslationModel } | { unavailable: string };
 
 /**
  * Picks the configured translation backend. Returns `{ unavailable }` (rather than throwing)
  * when the provider's API key is missing, so release-note generation degrades gracefully to
  * the English-only notes.
  */
-export async function resolveTranslationModel(options: ResolveTranslationModelOptions = {}): Promise<TranslationModelResolution> {
-    const provider = (options.provider ?? process.env.RELEASE_NOTES_AI_PROVIDER ?? DEFAULT_TRANSLATION_PROVIDER).toLowerCase();
+export async function resolveTranslationModel(
+    options: ResolveTranslationModelOptions = {},
+): Promise<TranslationModelResolution> {
+    const provider = (
+        options.provider ??
+        process.env.RELEASE_NOTES_AI_PROVIDER ??
+        DEFAULT_TRANSLATION_PROVIDER
+    ).toLowerCase();
     const model = options.model ?? process.env.RELEASE_NOTES_AI_MODEL;
 
     if (provider === 'openai') {
         if (!process.env.OPENAI_API_KEY) {
-            process.env.OPENAI_API_KEY = await read1PasswordCli('op://DevOps Development/OpenAI/token', {
-                optional: false,
-            });
+            process.env.OPENAI_API_KEY = await read1PasswordCli(
+                'op://DevOps Development/OpenAI/token',
+                {
+                    optional: false,
+                },
+            );
         }
         return { model: new OpenAITranslationModel(model ?? DEFAULT_OPENAI_MODEL) };
     }
@@ -44,5 +51,7 @@ export async function resolveTranslationModel(options: ResolveTranslationModelOp
         return { model: new ClaudeTranslationModel(model ?? DEFAULT_CLAUDE_MODEL) };
     }
 
-    return { unavailable: `Unknown translation provider "${provider}" (expected "openai" or "claude")` };
+    return {
+        unavailable: `Unknown translation provider "${provider}" (expected "openai" or "claude")`,
+    };
 }

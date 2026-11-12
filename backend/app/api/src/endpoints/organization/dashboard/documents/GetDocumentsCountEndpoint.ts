@@ -31,14 +31,13 @@ export class GetDocumentsCountEndpoint extends Endpoint<Params, Query, Body, Res
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canManageDocuments(organization.id)) {
+        if (!(await Context.auth.canManageDocuments(organization.id))) {
             throw Context.auth.error();
         }
 
         const query = await GetDocumentsEndpoint.buildQuery(request.query);
 
-        const count = await query
-            .count();
+        const count = await query.count();
 
         return new Response(
             CountResponse.create({

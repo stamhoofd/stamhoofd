@@ -3,11 +3,17 @@ import { FilterWrapperMarker, unwrapFilterRecursively } from './StamhoofdFilter.
 
 describe('unwrapFilterRecursively', () => {
     const wrap: WrapperFilter = { groupId: FilterWrapperMarker };
-    const nestedWrap: WrapperFilter = { registrations: { $elemMatch: { groupId: FilterWrapperMarker } } };
+    const nestedWrap: WrapperFilter = {
+        registrations: { $elemMatch: { groupId: FilterWrapperMarker } },
+    };
 
     describe('Matches conjunctions', () => {
         test('Matches the root object', () => {
-            expect(unwrapFilterRecursively({ groupId: 'a' }, wrap)).toStrictEqual({ match: true, markerValue: 'a', leftOver: undefined });
+            expect(unwrapFilterRecursively({ groupId: 'a' }, wrap)).toStrictEqual({
+                match: true,
+                markerValue: 'a',
+                leftOver: undefined,
+            });
         });
 
         test('Keeps leftover keys of the root object', () => {
@@ -24,19 +30,28 @@ describe('unwrapFilterRecursively', () => {
         });
 
         test('Matches an item of an $and array', () => {
-            const result = unwrapFilterRecursively({ $and: [{ firstName: 'John' }, { groupId: 'a' }] }, wrap);
+            const result = unwrapFilterRecursively(
+                { $and: [{ firstName: 'John' }, { groupId: 'a' }] },
+                wrap,
+            );
             expect(result.match).toBe(true);
             expect(result.markerValue).toBe('a');
         });
 
         test('Matches an $and nested in an array nested in an $and', () => {
-            const result = unwrapFilterRecursively({ $and: [[{ $and: [{ groupId: { $in: ['a', 'b'] } }] }]] }, wrap);
+            const result = unwrapFilterRecursively(
+                { $and: [[{ $and: [{ groupId: { $in: ['a', 'b'] } }] }]] },
+                wrap,
+            );
             expect(result.match).toBe(true);
             expect(result.markerValue).toEqual({ $in: ['a', 'b'] });
         });
 
         test('Matches the $and key even when other keys are present at the root', () => {
-            const result = unwrapFilterRecursively({ $or: [{ firstName: 'John' }], $and: [{ groupId: 'a' }] }, wrap);
+            const result = unwrapFilterRecursively(
+                { $or: [{ firstName: 'John' }], $and: [{ groupId: 'a' }] },
+                wrap,
+            );
             expect(result.match).toBe(true);
             expect(result.markerValue).toBe('a');
         });
@@ -48,7 +63,10 @@ describe('unwrapFilterRecursively', () => {
         });
 
         test('Matches a nested wrapper', () => {
-            const result = unwrapFilterRecursively([{ registrations: { $elemMatch: { groupId: 'a' } } }], nestedWrap);
+            const result = unwrapFilterRecursively(
+                [{ registrations: { $elemMatch: { groupId: 'a' } } }],
+                nestedWrap,
+            );
             expect(result.match).toBe(true);
             expect(result.markerValue).toBe('a');
         });
@@ -95,8 +113,19 @@ describe('unwrapFilterRecursively', () => {
         });
 
         test('Does not match a nested wrapper with leftover keys inside the nested object', () => {
-            noMatch({ registrations: { $elemMatch: { groupId: 'a' }, $not: { $elemMatch: { groupId: 'b' } } } }, nestedWrap);
-            noMatch({ registrations: { $elemMatch: { groupId: 'a', $or: [{ groupId: 'b' }] } } }, nestedWrap);
+            noMatch(
+                {
+                    registrations: {
+                        $elemMatch: { groupId: 'a' },
+                        $not: { $elemMatch: { groupId: 'b' } },
+                    },
+                },
+                nestedWrap,
+            );
+            noMatch(
+                { registrations: { $elemMatch: { groupId: 'a', $or: [{ groupId: 'b' }] } } },
+                nestedWrap,
+            );
         });
 
         test('Does not match a nested wrapper when the key is missing or shaped differently', () => {

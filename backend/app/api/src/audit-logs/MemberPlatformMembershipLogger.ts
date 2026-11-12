@@ -36,23 +36,33 @@ export const MemberPlatformMembershipLogger = new ModelLogger(MemberPlatformMemb
     },
 
     generateDescription(event, options) {
-        return Formatter.capitalizeFirstLetter(Formatter.dateRange(event.model.startDate, event.model.endDate));
+        return Formatter.capitalizeFirstLetter(
+            Formatter.dateRange(event.model.startDate, event.model.endDate),
+        );
     },
 
     createReplacements(model, options) {
-        const name = options.data.platform.config.membershipTypes.find(r => r.id === model.membershipTypeId)?.name;
+        const name = options.data.platform.config.membershipTypes.find(
+            (r) => r.id === model.membershipTypeId,
+        )?.name;
 
         const map = new Map([
-            ['pm', AuditLogReplacement.create({
-                id: model.membershipTypeId,
-                value: name,
-                type: AuditLogReplacementType.PlatformMembershipType,
-            })],
-            ['m', AuditLogReplacement.create({
-                id: options.data.member.id,
-                value: options.data.member.details.name,
-                type: AuditLogReplacementType.Member,
-            })],
+            [
+                'pm',
+                AuditLogReplacement.create({
+                    id: model.membershipTypeId,
+                    value: name,
+                    type: AuditLogReplacementType.PlatformMembershipType,
+                }),
+            ],
+            [
+                'm',
+                AuditLogReplacement.create({
+                    id: options.data.member.id,
+                    value: options.data.member.details.name,
+                    type: AuditLogReplacementType.Member,
+                }),
+            ],
         ]);
 
         return map;

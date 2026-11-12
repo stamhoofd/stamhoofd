@@ -52,16 +52,18 @@ export async function listBackups(context: CliContext): Promise<BackupInfo[]> {
     }
 
     const backups = await Promise.all(
-        entries.filter(entry => entry.isDirectory()).map(async (entry): Promise<BackupInfo> => {
-            const backupDir = path.join(dir, entry.name);
-            const stats = await fs.stat(backupDir);
-            return {
-                name: entry.name,
-                path: backupDir,
-                createdAt: stats.birthtime,
-                sizeBytes: await directorySize(backupDir),
-            };
-        }),
+        entries
+            .filter((entry) => entry.isDirectory())
+            .map(async (entry): Promise<BackupInfo> => {
+                const backupDir = path.join(dir, entry.name);
+                const stats = await fs.stat(backupDir);
+                return {
+                    name: entry.name,
+                    path: backupDir,
+                    createdAt: stats.birthtime,
+                    sizeBytes: await directorySize(backupDir),
+                };
+            }),
     );
 
     return backups.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -69,7 +71,12 @@ export async function listBackups(context: CliContext): Promise<BackupInfo[]> {
 
 const customBackupNameValue = '__stamhoofd_custom_backup_name__';
 
-export async function resolveBackupOption(options: { context: CliContext; flag: string | undefined; message: string; customInput?: boolean }): Promise<string> {
+export async function resolveBackupOption(options: {
+    context: CliContext;
+    flag: string | undefined;
+    message: string;
+    customInput?: boolean;
+}): Promise<string> {
     if (options.flag) {
         return options.flag;
     }
@@ -82,8 +89,10 @@ export async function resolveBackupOption(options: { context: CliContext; flag: 
     const selected = await select({
         message: options.message,
         choices: [
-            ...backups.map(backup => ({ name: backup.name, value: backup.name })),
-            ...(options.customInput ? [{ name: 'Enter a custom backup name...', value: customBackupNameValue }] : []),
+            ...backups.map((backup) => ({ name: backup.name, value: backup.name })),
+            ...(options.customInput
+                ? [{ name: 'Enter a custom backup name...', value: customBackupNameValue }]
+                : []),
         ],
     });
 
@@ -93,7 +102,9 @@ export async function resolveBackupOption(options: { context: CliContext; flag: 
 
     return await input({
         message: 'Enter the backup name',
-        validate: value => isValidBackupName(value.trim()) || 'Use letters, numbers, dashes, underscores, or dots.',
+        validate: (value) =>
+            isValidBackupName(value.trim()) ||
+            'Use letters, numbers, dashes, underscores, or dots.',
     });
 }
 
@@ -110,10 +121,14 @@ export async function createBackup(context: CliContext, name: string): Promise<v
     try {
         await fs.rm(dir, { recursive: true, force: true });
         await fs.mkdir(dir, { recursive: true });
-        await step(`Backing up MySQL data to "${name}"`, () => docker.copyVolumeToDirectory(mysqlDataVolume, dir, mysqlImage, context.verbose));
+        await step(`Backing up MySQL data to "${name}"`, () =>
+            docker.copyVolumeToDirectory(mysqlDataVolume, dir, mysqlImage, context.verbose),
+        );
     } finally {
         if (status.running) {
-            await step(`Starting ${mysqlService.name}`, () => mysqlService.start(context, undefined));
+            await step(`Starting ${mysqlService.name}`, () =>
+                mysqlService.start(context, undefined),
+            );
         }
     }
 }
@@ -127,7 +142,9 @@ export async function restoreBackup(context: CliContext, name: string): Promise<
         await docker.removeVolume(mysqlDataVolume, context.verbose);
         await docker.createVolume(mysqlDataVolume, context.verbose);
     });
-    await step(`Restoring MySQL data from "${name}"`, () => docker.copyDirectoryToVolume(dir, mysqlDataVolume, mysqlImage, context.verbose));
+    await step(`Restoring MySQL data from "${name}"`, () =>
+        docker.copyDirectoryToVolume(dir, mysqlDataVolume, mysqlImage, context.verbose),
+    );
     await step(`Starting ${mysqlService.name}`, () => mysqlService.start(context, undefined));
 }
 
@@ -135,7 +152,7 @@ export async function renameBackup(context: CliContext, from: string, to: string
     const fromDir = backupPath(context, from);
     const toDir = backupPath(context, to);
 
-    if (!await pathExists(fromDir)) {
+    if (!(await pathExists(fromDir))) {
         throw new Error(`No backup named "${from}" found.`);
     }
     if (await pathExists(toDir)) {
@@ -147,7 +164,7 @@ export async function renameBackup(context: CliContext, from: string, to: string
 
 export async function removeBackup(context: CliContext, name: string): Promise<void> {
     const dir = backupPath(context, name);
-    if (!await pathExists(dir)) {
+    if (!(await pathExists(dir))) {
         throw new Error(`No backup named "${name}" found.`);
     }
     await fs.rm(dir, { recursive: true, force: true });

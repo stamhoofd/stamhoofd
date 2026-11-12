@@ -1,7 +1,12 @@
 import { Request } from '@node/endpoints';
 import { OrganizationFactory, STPackageFactory } from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
-import { OrganizationPackagesStatus, STPackage, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
+import {
+    OrganizationPackagesStatus,
+    STPackage,
+    STPackageBundle,
+    STPackageBundleHelper,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initAdmin, initPlatformAdmin } from '../../../../tests/init/index.js';
@@ -43,15 +48,15 @@ describe('Endpoint.PatchPackagesEndpoint', () => {
             const request = Request.patch({
                 path: baseUrl,
                 host: organization.getApiHost(),
-                body: OrganizationPackagesStatus.patch({
-
-                }),
+                body: OrganizationPackagesStatus.patch({}),
                 headers: {
                     authorization: 'Bearer ' + adminToken.accessToken,
                 },
             });
 
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         });
     });
 
@@ -102,10 +107,12 @@ describe('Endpoint.PatchPackagesEndpoint', () => {
         const patch = OrganizationPackagesStatus.patch({});
         const removeAt = new Date();
         removeAt.setMilliseconds(0);
-        patch.packages.addPatch(STPackage.patch({
-            id: package1.id,
-            removeAt,
-        }));
+        patch.packages.addPatch(
+            STPackage.patch({
+                id: package1.id,
+                removeAt,
+            }),
+        );
 
         // Try to request all members at organization
         const request = Request.patch({

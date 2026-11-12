@@ -1,7 +1,16 @@
 import { StringCompare } from '@stamhoofd/utility';
 
-import type { FilterCompiler, FilterCompilerSelector, FilterDefinitions, RequiredFilterCompiler } from '@stamhoofd/filters/FilterCompilers';
-import { assertFilterCompareValue, compileFilter, filterDefinitionsToSelector } from '@stamhoofd/filters/FilterCompilers';
+import type {
+    FilterCompiler,
+    FilterCompilerSelector,
+    FilterDefinitions,
+    RequiredFilterCompiler,
+} from '@stamhoofd/filters/FilterCompilers';
+import {
+    assertFilterCompareValue,
+    compileFilter,
+    filterDefinitionsToSelector,
+} from '@stamhoofd/filters/FilterCompilers';
 import type { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 
 export type InMemoryFilterRunner = (object: any) => boolean;
@@ -11,7 +20,10 @@ export type InMemoryFilterCompiler = FilterCompiler<InMemoryFilterRunner>;
 export type InMemoryFilterDefinitions = FilterDefinitions<InMemoryFilterRunner>;
 export type InMemoryFilterCompilerSelector = FilterCompilerSelector<InMemoryFilterRunner>;
 
-function $andInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterCompilerSelector): InMemoryFilterRunner {
+function $andInMemoryFilterCompiler(
+    filter: StamhoofdFilter,
+    filters: InMemoryFilterCompilerSelector,
+): InMemoryFilterRunner {
     const runners = compileInMemoryFilter(filter, filters);
     return (object) => {
         for (const runner of runners) {
@@ -23,7 +35,10 @@ function $andInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFi
     };
 }
 
-function $orInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterCompilerSelector): InMemoryFilterRunner {
+function $orInMemoryFilterCompiler(
+    filter: StamhoofdFilter,
+    filters: InMemoryFilterCompilerSelector,
+): InMemoryFilterRunner {
     const runners = compileInMemoryFilter(filter, filters);
     return (object) => {
         for (const runner of runners) {
@@ -35,7 +50,10 @@ function $orInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFil
     };
 }
 
-function $notInMemoryFilterCompiler(filter: StamhoofdFilter, filters: InMemoryFilterCompilerSelector): InMemoryFilterRunner {
+function $notInMemoryFilterCompiler(
+    filter: StamhoofdFilter,
+    filters: InMemoryFilterCompilerSelector,
+): InMemoryFilterRunner {
     const andRunner = $andInMemoryFilterCompiler(filter, filters);
     return (object) => {
         return !andRunner(object);
@@ -107,7 +125,9 @@ function $equalsInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterR
     };
 }
 
-function invertFilterCompiler(compiler: InMemoryRequiredFilterCompiler): InMemoryRequiredFilterCompiler {
+function invertFilterCompiler(
+    compiler: InMemoryRequiredFilterCompiler,
+): InMemoryRequiredFilterCompiler {
     return (filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector) => {
         const runner = compiler(filter, compilers);
         return (val) => {
@@ -189,7 +209,10 @@ function $inInMemoryFilterCompiler(filter: StamhoofdFilter): InMemoryFilterRunne
     };
 }
 
-function $elemMatchInMemoryFilterCompiler(filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector): InMemoryFilterRunner {
+function $elemMatchInMemoryFilterCompiler(
+    filter: StamhoofdFilter,
+    compilers: InMemoryFilterCompilerSelector,
+): InMemoryFilterRunner {
     const runner = $andInMemoryFilterCompiler(filter, compilers);
     return (val) => {
         if (val === undefined) {
@@ -212,7 +235,10 @@ function $elemMatchInMemoryFilterCompiler(filter: StamhoofdFilter, compilers: In
     };
 }
 
-function $lengthInMemoryFilterCompiler(filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector): InMemoryFilterRunner {
+function $lengthInMemoryFilterCompiler(
+    filter: StamhoofdFilter,
+    compilers: InMemoryFilterCompilerSelector,
+): InMemoryFilterRunner {
     const runner = $andInMemoryFilterCompiler(filter, compilers);
 
     return (val) => {
@@ -308,11 +334,21 @@ function normalizeTextForEquality(val: string | number | null): string | number 
     return typeof val === 'string' ? StringCompare.normalizeForEquality(val) : val;
 }
 
-export function createInMemoryFilterCompiler(path: string | string[], overrideFilterDefinitions?: InMemoryFilterDefinitions | InMemoryFilterCompilerSelector): InMemoryFilterCompiler {
+export function createInMemoryFilterCompiler(
+    path: string | string[],
+    overrideFilterDefinitions?: InMemoryFilterDefinitions | InMemoryFilterCompilerSelector,
+): InMemoryFilterCompiler {
     const splitted = Array.isArray(path) ? path : path.split('.');
 
     return (filter: StamhoofdFilter, compilers: InMemoryFilterCompilerSelector) => {
-        const runner = $andInMemoryFilterCompiler(filter, overrideFilterDefinitions ? (typeof overrideFilterDefinitions === 'function' ? overrideFilterDefinitions : filterDefinitionsToSelector(overrideFilterDefinitions)) : filterDefinitionsToSelector(baseInMemoryFilterCompilers));
+        const runner = $andInMemoryFilterCompiler(
+            filter,
+            overrideFilterDefinitions
+                ? typeof overrideFilterDefinitions === 'function'
+                    ? overrideFilterDefinitions
+                    : filterDefinitionsToSelector(overrideFilterDefinitions)
+                : filterDefinitionsToSelector(baseInMemoryFilterCompilers),
+        );
 
         return (object) => {
             const value = objectPathValue(object, splitted);
@@ -325,7 +361,9 @@ export function createInMemoryFilterCompiler(path: string | string[], overrideFi
     };
 }
 
-export function createInMemoryWildcardCompilerSelector(overrideFilterDefinitions?: InMemoryFilterDefinitions | InMemoryFilterCompilerSelector): InMemoryFilterCompilerSelector {
+export function createInMemoryWildcardCompilerSelector(
+    overrideFilterDefinitions?: InMemoryFilterDefinitions | InMemoryFilterCompilerSelector,
+): InMemoryFilterCompilerSelector {
     return (filter, parentCompiler, key: string) => {
         // Every key will match on this compiler
         const compiler = createInMemoryFilterCompiler(key, overrideFilterDefinitions);
@@ -351,7 +389,10 @@ export const baseInMemoryFilterCompilers: InMemoryFilterDefinitions = new Map([
 
 const compileInMemoryFilter = compileFilter<InMemoryFilterRunner>;
 
-export const compileToInMemoryFilter = (filter: StamhoofdFilter, filters: InMemoryFilterDefinitions) => {
+export const compileToInMemoryFilter = (
+    filter: StamhoofdFilter,
+    filters: InMemoryFilterDefinitions,
+) => {
     if (filter === null) {
         return () => true;
     }

@@ -1,4 +1,13 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    AnyDecoder,
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 
 import { PaymentMethod, PaymentMethodHelper } from './PaymentMethod.js';
@@ -234,11 +243,20 @@ export class StripeAccount extends AutoEncoder {
     meta: StripeMetaData;
 
     get missingData() {
-        return requirementsToString([...this.meta.requirements.past_due, ...this.meta.future_requirements.past_due, ...this.meta.requirements.currently_due, ...this.meta.requirements.eventually_due, ...this.meta.future_requirements.currently_due, ...this.meta.future_requirements.eventually_due]);
+        return requirementsToString([
+            ...this.meta.requirements.past_due,
+            ...this.meta.future_requirements.past_due,
+            ...this.meta.requirements.currently_due,
+            ...this.meta.requirements.eventually_due,
+            ...this.meta.future_requirements.currently_due,
+            ...this.meta.future_requirements.eventually_due,
+        ]);
     }
 
     get canDelete() {
-        return !this.meta.charges_enabled || !this.meta.payouts_enabled || !this.meta.details_submitted;
+        return (
+            !this.meta.charges_enabled || !this.meta.payouts_enabled || !this.meta.details_submitted
+        );
     }
 
     get warning(): { text: string; type: 'warning' | 'error' } | undefined {
@@ -247,28 +265,44 @@ export class StripeAccount extends AutoEncoder {
             const m = $t('%Zg4');
 
             return {
-                text: $t('%Zq7', { date: Formatter.date(new Date(this.meta.requirements.current_deadline * 1000)) })
-                    + (missing
-                        ? `${m} ${missing}`
-                        : '' + '.'),
+                text:
+                    $t('%Zq7', {
+                        date: Formatter.date(
+                            new Date(this.meta.requirements.current_deadline * 1000),
+                        ),
+                    }) + (missing ? `${m} ${missing}` : '' + '.'),
                 type: 'error',
             };
         }
 
         if (this.meta.charges_enabled && this.meta.paymentMethods.length < 3) {
-            const missing = [PaymentMethod.CreditCard, PaymentMethod.Bancontact, PaymentMethod.iDEAL].filter(m => !this.meta.paymentMethods.includes(m));
-            const text = Formatter.joinLast(missing.map(m => PaymentMethodHelper.getName(m)), ', ', ' ' + $t('%M1') + ' ');
+            const missing = [
+                PaymentMethod.CreditCard,
+                PaymentMethod.Bancontact,
+                PaymentMethod.iDEAL,
+            ].filter((m) => !this.meta.paymentMethods.includes(m));
+            const text = Formatter.joinLast(
+                missing.map((m) => PaymentMethodHelper.getName(m)),
+                ', ',
+                ' ' + $t('%M1') + ' ',
+            );
             const missingText = this.missingData;
             const m = $t('%Zg4');
 
             if (missing.length === 1) {
                 return {
-                    text: $t('%nh', { method: text }) + ' ' + (missingText ? (' ' + m + ' ' + missingText + '.') : ''),
+                    text:
+                        $t('%nh', { method: text }) +
+                        ' ' +
+                        (missingText ? ' ' + m + ' ' + missingText + '.' : ''),
                     type: 'error',
                 };
             }
             return {
-                text: $t('%ni', { methods: text }) + ' ' + (missingText ? (' ' + m + ' ' + missingText + '.') : ''),
+                text:
+                    $t('%ni', { methods: text }) +
+                    ' ' +
+                    (missingText ? ' ' + m + ' ' + missingText + '.' : ''),
                 type: 'error',
             };
         }
@@ -279,18 +313,19 @@ export class StripeAccount extends AutoEncoder {
             const m = $t('%Zg4');
 
             return {
-                text: $t('%Zq7',
-                    { date: Formatter.date(d) },
-                )
-                + (missing
-                    ? `${m} ${missing}`
-                    : '.'),
+                text: $t('%Zq7', { date: Formatter.date(d) }) + (missing ? `${m} ${missing}` : '.'),
                 // Error if needed within one month
                 type: d < new Date(Date.now() + 24 * 60 * 60 * 1000 * 30) ? 'error' : 'warning',
             };
         }
 
-        if (this.meta.details_submitted && (this.meta.requirements.currently_due.length || this.meta.requirements.eventually_due.length || this.meta.future_requirements.currently_due.length || this.meta.future_requirements.eventually_due.length)) {
+        if (
+            this.meta.details_submitted &&
+            (this.meta.requirements.currently_due.length ||
+                this.meta.requirements.eventually_due.length ||
+                this.meta.future_requirements.currently_due.length ||
+                this.meta.future_requirements.eventually_due.length)
+        ) {
             // Try to convert to readable text
             const missing = this.missingData;
             return {

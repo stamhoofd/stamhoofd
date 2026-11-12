@@ -8,7 +8,10 @@ import { localIpv4Host } from '../config/shared-service-config.js';
  * unrelated server, a leftover process, an e2e run started from a checkout with its own generated
  * directory), so port bookkeeping always combines the manifests with this probe.
  */
-export async function isPortAvailable(port: number, host: string = localIpv4Host): Promise<boolean> {
+export async function isPortAvailable(
+    port: number,
+    host: string = localIpv4Host,
+): Promise<boolean> {
     return await new Promise((resolve, reject) => {
         const server = net.createServer();
 
@@ -35,7 +38,11 @@ export async function isPortAvailable(port: number, host: string = localIpv4Host
  * taken on the host we probed, while a server we want to talk to has to accept the connection. Used
  * to tell "your MySQL is not running" apart from "your MySQL is running elsewhere".
  */
-export async function isPortListening(port: number, host: string = localIpv4Host, timeoutMs = 1000): Promise<boolean> {
+export async function isPortListening(
+    port: number,
+    host: string = localIpv4Host,
+    timeoutMs = 1000,
+): Promise<boolean> {
     return await new Promise((resolve) => {
         const socket = new net.Socket();
 
@@ -54,7 +61,12 @@ export async function isPortListening(port: number, host: string = localIpv4Host
 /**
  * The subset of `ports` that is already in use, in the order they were passed in.
  */
-export async function findBusyPorts(ports: number[], host: string = localIpv4Host): Promise<number[]> {
-    const results = await Promise.all(ports.map(async port => ({ port, available: await isPortAvailable(port, host) })));
-    return results.filter(result => !result.available).map(result => result.port);
+export async function findBusyPorts(
+    ports: number[],
+    host: string = localIpv4Host,
+): Promise<number[]> {
+    const results = await Promise.all(
+        ports.map(async (port) => ({ port, available: await isPortAvailable(port, host) })),
+    );
+    return results.filter((result) => !result.available).map((result) => result.port);
 }

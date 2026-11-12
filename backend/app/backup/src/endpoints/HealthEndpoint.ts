@@ -71,9 +71,7 @@ export class HealthEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
             }
         }
 
-        const response = new Response(
-            health,
-        );
+        const response = new Response(health);
 
         if (health.status === 'error') {
             response.status = 503;

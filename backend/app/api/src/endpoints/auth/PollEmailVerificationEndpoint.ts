@@ -28,11 +28,18 @@ export class PollEmailVerificationEndpoint extends Endpoint<Params, Query, Body,
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOptionalOrganizationScope({ willAuthenticate: false });
-        const valid = await EmailVerificationCode.poll(organization?.id ?? null, request.body.token);
+        const organization = await Context.setOptionalOrganizationScope({
+            willAuthenticate: false,
+        });
+        const valid = await EmailVerificationCode.poll(
+            organization?.id ?? null,
+            request.body.token,
+        );
 
-        return new Response(PollEmailVerificationResponse.create({
-            valid,
-        }));
+        return new Response(
+            PollEmailVerificationResponse.create({
+                valid,
+            }),
+        );
     }
 }

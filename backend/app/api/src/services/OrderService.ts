@@ -2,7 +2,16 @@ import { I18n } from '@stamhoofd/backend-i18n';
 import type { Organization, Payment, Ticket } from '@stamhoofd/models';
 import { Order, Webshop, WebshopCounter } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
-import { EmailTemplateType, OrderStatus, PaymentMethod, Recipient, Replacement, WebshopPreview, WebshopStatus, WebshopTicketType } from '@stamhoofd/structures';
+import {
+    EmailTemplateType,
+    OrderStatus,
+    PaymentMethod,
+    Recipient,
+    Replacement,
+    WebshopPreview,
+    WebshopStatus,
+    WebshopTicketType,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 /**
@@ -17,13 +26,21 @@ export class OrderService {
     /**
      * Only call this once! Make sure you use the queues correctly
      */
-    static async markPaid(order: Order, payment: Payment | null, organization: Organization, knownWebshop?: Webshop) {
+    static async markPaid(
+        order: Order,
+        payment: Payment | null,
+        organization: Organization,
+        knownWebshop?: Webshop,
+    ) {
         if (!order.id) {
             await order.save();
         }
         console.log('Marking order ' + order.id + ' as paid');
 
-        const webshop = (knownWebshop ?? (await Webshop.getByID(order.webshopId)))?.setRelation(Webshop.organization, organization);
+        const webshop = (knownWebshop ?? (await Webshop.getByID(order.webshopId)))?.setRelation(
+            Webshop.organization,
+            organization,
+        );
         if (!webshop) {
             console.error('Missing webshop for order ' + order.id);
             return;
@@ -34,7 +51,9 @@ export class OrderService {
         }
 
         const loadedOrder = order.setRelation(Order.webshop, webshop);
-        const { tickets, didCreateTickets } = await loadedOrder.updateTickets({ hasPaidPayment: true });
+        const { tickets, didCreateTickets } = await loadedOrder.updateTickets({
+            hasPaidPayment: true,
+        });
 
         // Needs to happen before validation, because we can include the tickets in the validation that way
         if (order.validAt === null) {
@@ -86,7 +105,11 @@ export class OrderService {
         if (payment && payment.method === PaymentMethod.Transfer) {
             // Only now we can update the transfer description, since we need the order number as a reference
             payment.transferSettings = order.getTransferSettings({ shouldThrowIfNoIban: true });
-            payment.generateDescription(organization, order.number.toString(), order.getTransferReplacements());
+            payment.generateDescription(
+                organization,
+                order.number.toString(),
+                order.getTransferReplacements(),
+            );
             await payment.save();
         }
 
@@ -127,7 +150,9 @@ export class OrderService {
                             type: EmailTemplateType.TicketsConfirmationTransfer,
                         });
                     } else {
-                        console.error('Unexpected missing tickets for order where tickets are expected');
+                        console.error(
+                            'Unexpected missing tickets for order where tickets are expected',
+                        );
                     }
                 }
             }
@@ -136,7 +161,14 @@ export class OrderService {
         if (webshop.privateMeta.notificationEmails) {
             const i18n = organization.i18n;
 
-            const webshopDashboardUrl = 'https://' + (STAMHOOFD.domains.dashboard ?? 'stamhoofd.app') + '/' + i18n.locale + '/webshops/' + Formatter.slug(webshop.meta.name) + '/orders';
+            const webshopDashboardUrl =
+                'https://' +
+                (STAMHOOFD.domains.dashboard ?? 'stamhoofd.app') +
+                '/' +
+                i18n.locale +
+                '/webshops/' +
+                Formatter.slug(webshop.meta.name) +
+                '/orders';
 
             // Send an email to all these notification emails
             for (const email of webshop.privateMeta.notificationEmails) {
@@ -162,7 +194,9 @@ export class OrderService {
         const hasTickets = order.webshop.meta.hasTickets;
 
         await this.sendEmailTemplate(order, {
-            type: hasTickets ? EmailTemplateType.TicketsReceivedTransfer : EmailTemplateType.OrderReceivedTransfer,
+            type: hasTickets
+                ? EmailTemplateType.TicketsReceivedTransfer
+                : EmailTemplateType.OrderReceivedTransfer,
         });
     }
 
@@ -172,10 +206,13 @@ export class OrderService {
         });
     }
 
-    static async sendEmailTemplate(order: OrderWithWebshop, data: {
-        type: EmailTemplateType;
-        to?: Recipient;
-    }) {
+    static async sendEmailTemplate(
+        order: OrderWithWebshop,
+        data: {
+            type: EmailTemplateType;
+            to?: Recipient;
+        },
+    ) {
         // Never send an email for archived webshops
         if (order.webshop.meta.status === WebshopStatus.Archived) {
             return;
@@ -196,7 +233,9 @@ export class OrderService {
                 recipient.firstName = null;
                 recipient.lastName = null;
                 recipient.language = order.webshop.meta.defaultLanguage;
-                recipient.replacements = recipient.replacements.filter(r => !['firstName', 'lastName'].includes(r.token));
+                recipient.replacements = recipient.replacements.filter(
+                    (r) => !['firstName', 'lastName'].includes(r.token),
+                );
                 data.to.merge(recipient);
                 recipient = data.to;
             }

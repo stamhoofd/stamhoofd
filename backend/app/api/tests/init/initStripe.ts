@@ -13,7 +13,11 @@ export async function initStripe({ organization }: { organization: Organization 
         stripeMocker.stop();
     });
 
-    organization.meta.registrationPaymentConfiguration.paymentMethods.push(PaymentMethod.Bancontact, PaymentMethod.CreditCard, PaymentMethod.iDEAL);
+    organization.meta.registrationPaymentConfiguration.paymentMethods.push(
+        PaymentMethod.Bancontact,
+        PaymentMethod.CreditCard,
+        PaymentMethod.iDEAL,
+    );
     organization.privateMeta.registrationPaymentConfiguration.stripeAccountId = stripeAccount.id;
     await organization.save();
 

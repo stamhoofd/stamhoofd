@@ -15,13 +15,15 @@ export async function resumeEmails() {
     for (const email of emails) {
         console.log('Resuming email that has sending status on boot', email.id);
 
-        const user = email.userId ? (await User.getByID(email.userId)) : await User.getSystem();
+        const user = email.userId ? await User.getByID(email.userId) : await User.getSystem();
         if (!user) {
             console.warn('Cannot retry sending email because user not found', email.id);
             continue;
         }
 
-        const organization = email.organizationId ? (await Organization.getByID(email.organizationId)) : null;
+        const organization = email.organizationId
+            ? await Organization.getByID(email.organizationId)
+            : null;
         if (organization === undefined) {
             console.warn('Cannot retry sending email because organization not found', email.id);
             continue;

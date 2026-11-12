@@ -3,7 +3,12 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { Platform, User } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../../helpers/EmailBuilder.js';
-import { EmailTemplateType, ForgotPasswordRequest, LoginMethod, Recipient } from '@stamhoofd/structures';
+import {
+    EmailTemplateType,
+    ForgotPasswordRequest,
+    LoginMethod,
+    Recipient,
+} from '@stamhoofd/structures';
 
 import { SimpleError } from '@common/errors';
 import { Context } from '../../helpers/Context.js';
@@ -31,7 +36,9 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
     }
 
     async handle(request: DecodedRequest<Params, Query, Body>) {
-        const organization = await Context.setOptionalOrganizationScope({ willAuthenticate: false });
+        const organization = await Context.setOptionalOrganizationScope({
+            willAuthenticate: false,
+        });
 
         if (STAMHOOFD.userMode === 'platform') {
             const platform = await Platform.getSharedPrivateStruct();
@@ -55,7 +62,9 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
             }
         }
 
-        const user = await User.getForAuthentication(organization?.id ?? null, request.body.email, { allowWithoutAccount: true });
+        const user = await User.getForAuthentication(organization?.id ?? null, request.body.email, {
+            allowWithoutAccount: true,
+        });
 
         if (!user) {
             // Create e-mail builder

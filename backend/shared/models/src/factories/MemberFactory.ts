@@ -31,11 +31,14 @@ class Options {
 
 export class MemberFactory extends Factory<Options, MemberWithUsersRegistrationsAndGroups> {
     async create(): Promise<MemberWithUsersRegistrationsAndGroups> {
-        const organization = this.options.organization
-            ?? (STAMHOOFD.userMode === 'organization' ? (await new OrganizationFactory({}).create()) : null);
+        const organization =
+            this.options.organization ??
+            (STAMHOOFD.userMode === 'organization'
+                ? await new OrganizationFactory({}).create()
+                : null);
 
         const memberDetails = this.options.details?.clone() ?? MemberDetails.create({});
-        const minAge = (this.options.minAge ?? 6);
+        const minAge = this.options.minAge ?? 6;
         const maxAge = this.options.maxAge ?? 18;
 
         if (this.options.firstName) {
@@ -58,8 +61,16 @@ export class MemberFactory extends Factory<Options, MemberWithUsersRegistrations
             memberDetails.birthDay = birthDate.toJSDate();
         }
 
-        if (this.options.generateData === true || (this.options.generateData === undefined && this.options.details === undefined)) {
-            memberDetails.gender = Math.random() >= 0.05 ? (Math.random() >= 0.5 ? Gender.Male : Gender.Female) : Gender.Other;
+        if (
+            this.options.generateData === true ||
+            (this.options.generateData === undefined && this.options.details === undefined)
+        ) {
+            memberDetails.gender =
+                Math.random() >= 0.05
+                    ? Math.random() >= 0.5
+                        ? Gender.Male
+                        : Gender.Female
+                    : Gender.Other;
 
             if (!memberDetails.firstName) {
                 memberDetails.firstName = this.randomFirstName(memberDetails.gender);
@@ -67,8 +78,8 @@ export class MemberFactory extends Factory<Options, MemberWithUsersRegistrations
 
             if (!memberDetails.birthDay) {
                 memberDetails.birthDay = new Date(
-                    new Date().getFullYear()
-                        - (minAge + Math.floor(Math.random() * (maxAge - minAge + 1))),
+                    new Date().getFullYear() -
+                        (minAge + Math.floor(Math.random() * (maxAge - minAge + 1))),
                     Math.floor(Math.random() * 12), // 11 = 12
                     Math.floor(Math.random() * 31),
                 );
@@ -78,18 +89,18 @@ export class MemberFactory extends Factory<Options, MemberWithUsersRegistrations
             memberDetails.address = null;
 
             if (memberDetails.age! >= 14) {
-                memberDetails.phone
-                    = '+32 47'
-                        + Math.floor(Math.random() * 10)
-                        + ' '
-                        + Math.floor(Math.random() * 10)
-                        + Math.floor(Math.random() * 10)
-                        + ' '
-                        + Math.floor(Math.random() * 10)
-                        + Math.floor(Math.random() * 10)
-                        + ' '
-                        + Math.floor(Math.random() * 10)
-                        + Math.floor(Math.random() * 10);
+                memberDetails.phone =
+                    '+32 47' +
+                    Math.floor(Math.random() * 10) +
+                    ' ' +
+                    Math.floor(Math.random() * 10) +
+                    Math.floor(Math.random() * 10) +
+                    ' ' +
+                    Math.floor(Math.random() * 10) +
+                    Math.floor(Math.random() * 10) +
+                    ' ' +
+                    Math.floor(Math.random() * 10) +
+                    Math.floor(Math.random() * 10);
             }
 
             let parentFactory = new ParentFactory({});
@@ -119,11 +130,15 @@ export class MemberFactory extends Factory<Options, MemberWithUsersRegistrations
             // Sort
             if (!memberDetails.lastName) {
                 if (memberDetails.parents.length == 2 && Math.random() >= 0.9) {
-                    memberDetails.lastName = memberDetails.parents[0].lastName + '-' + memberDetails.parents[1].lastName;
+                    memberDetails.lastName =
+                        memberDetails.parents[0].lastName + '-' + memberDetails.parents[1].lastName;
                 } else {
                     if (memberDetails.parents[0].type == ParentType.Father) {
                         memberDetails.lastName = memberDetails.parents[0].lastName;
-                    } else if (memberDetails.parents[1] && memberDetails.parents[1].type == ParentType.Father) {
+                    } else if (
+                        memberDetails.parents[1] &&
+                        memberDetails.parents[1].type == ParentType.Father
+                    ) {
                         memberDetails.lastName = memberDetails.parents[1].lastName;
                     } else {
                         memberDetails.lastName = memberDetails.parents[0].lastName;
@@ -132,7 +147,9 @@ export class MemberFactory extends Factory<Options, MemberWithUsersRegistrations
             }
 
             if (memberDetails.age! >= 16) {
-                memberDetails.email = Formatter.slugEmail(memberDetails.firstName + '-' + memberDetails.lastName) + '@geen-email.com';
+                memberDetails.email =
+                    Formatter.slugEmail(memberDetails.firstName + '-' + memberDetails.lastName) +
+                    '@geen-email.com';
             }
 
             const emergencyContactFactory = new EmergencyContactFactory({});

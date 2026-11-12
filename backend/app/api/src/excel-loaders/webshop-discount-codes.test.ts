@@ -1,11 +1,23 @@
 import { Database } from '@node/database';
 import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { Organization, Webshop } from '@stamhoofd/models';
-import { OrganizationFactory, UserFactory, WebshopDiscountCode, WebshopFactory } from '@stamhoofd/models';
+import {
+    OrganizationFactory,
+    UserFactory,
+    WebshopDiscountCode,
+    WebshopFactory,
+} from '@stamhoofd/models';
 import type { IPaginatedResponse, PrivateDiscountCode } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { ExcelExportType, LimitedFilteredRequest, Permissions, Platform, ResourcePermissions, SortItemDirection } from '@stamhoofd/structures';
+import {
+    ExcelExportType,
+    LimitedFilteredRequest,
+    Permissions,
+    Platform,
+    ResourcePermissions,
+    SortItemDirection,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
@@ -26,7 +38,13 @@ describe('ExcelLoader.WebshopDiscountCodes', () => {
         webshop = await new WebshopFactory({ organizationId: organization.id }).create();
     });
 
-    async function createDiscountCode(data: { code: string; email?: string | null; description?: string; maximumUsage?: number | null; webshop?: Webshop }) {
+    async function createDiscountCode(data: {
+        code: string;
+        email?: string | null;
+        description?: string;
+        maximumUsage?: number | null;
+        webshop?: Webshop;
+    }) {
         const model = new WebshopDiscountCode();
         model.organizationId = (data.webshop ?? webshop).organizationId;
         model.webshopId = (data.webshop ?? webshop).id;
@@ -39,7 +57,9 @@ describe('ExcelLoader.WebshopDiscountCodes', () => {
     }
 
     function getColumnValue(row: PrivateDiscountCode, columnId: string) {
-        const column = loader().getSheets(Platform.create({}))[0].columns.find(c => isXlsxTransformerConcreteColumn(c) && c.id === columnId);
+        const column = loader()
+            .getSheets(Platform.create({}))[0]
+            .columns.find((c) => isXlsxTransformerConcreteColumn(c) && c.id === columnId);
         if (!column || !isXlsxTransformerConcreteColumn(column)) {
             throw new Error('Column ' + columnId + ' not found');
         }
@@ -47,7 +67,12 @@ describe('ExcelLoader.WebshopDiscountCodes', () => {
     }
 
     test('exports code, email, description and maximum usage of the managed webshops only', async () => {
-        await createDiscountCode({ code: 'SPONSOR', email: 'sponsor@example.com', description: 'Hoofdsponsor', maximumUsage: 5 });
+        await createDiscountCode({
+            code: 'SPONSOR',
+            email: 'sponsor@example.com',
+            description: 'Hoofdsponsor',
+            maximumUsage: 5,
+        });
         await createDiscountCode({ code: 'OPEN', email: null, maximumUsage: null });
 
         const otherWebshop = await new WebshopFactory({ organizationId: organization.id }).create();
@@ -58,9 +83,15 @@ describe('ExcelLoader.WebshopDiscountCodes', () => {
             permissions: Permissions.create({
                 level: PermissionLevel.None,
                 resources: new Map([
-                    [PermissionsResourceType.Webshops, new Map([
-                        [webshop.id, ResourcePermissions.create({ level: PermissionLevel.Full })],
-                    ])],
+                    [
+                        PermissionsResourceType.Webshops,
+                        new Map([
+                            [
+                                webshop.id,
+                                ResourcePermissions.create({ level: PermissionLevel.Full }),
+                            ],
+                        ]),
+                    ],
                 ]),
             }),
         }).create();
@@ -71,9 +102,11 @@ describe('ExcelLoader.WebshopDiscountCodes', () => {
             limit: 10,
             sort: [{ key: 'code', order: SortItemDirection.ASC }],
         });
-        const response = await ContextInstance.startForUser(user, organization, () => loader().fetch(request));
+        const response = await ContextInstance.startForUser(user, organization, () =>
+            loader().fetch(request),
+        );
         const results = response.results as PrivateDiscountCode[];
-        expect(results.map(code => code.code)).toEqual(['OPEN', 'SPONSOR']);
+        expect(results.map((code) => code.code)).toEqual(['OPEN', 'SPONSOR']);
 
         const [open, sponsor] = results;
         expect(getColumnValue(sponsor, 'code')).toBe('SPONSOR');
@@ -94,8 +127,11 @@ describe('ExcelLoader.WebshopDiscountCodes', () => {
         });
         while (next) {
             const current = next;
-            const page: IPaginatedResponse<unknown[], LimitedFilteredRequest> = await ContextInstance.startForUser(user, organization, () => loader().fetch(current));
-            seen.push(...(page.results as PrivateDiscountCode[]).map(code => code.code));
+            const page: IPaginatedResponse<unknown[], LimitedFilteredRequest> =
+                await ContextInstance.startForUser(user, organization, () =>
+                    loader().fetch(current),
+                );
+            seen.push(...(page.results as PrivateDiscountCode[]).map((code) => code.code));
             next = page.next;
         }
         expect(seen).toEqual(['OPEN', 'SPONSOR']);

@@ -15,7 +15,11 @@ export class ServiceFeeHelper {
      * Organization that is invoicing
      */
     static async getInvoicingOrganization() {
-        if (this.#cachedOrganization && this.#cachedOrganizationDate && this.#cachedOrganizationDate > new Date(Date.now() - CACHE_TIMEOUT)) {
+        if (
+            this.#cachedOrganization &&
+            this.#cachedOrganizationDate &&
+            this.#cachedOrganizationDate > new Date(Date.now() - CACHE_TIMEOUT)
+        ) {
             return this.#cachedOrganization;
         }
         const platform = await Platform.getShared();
@@ -46,26 +50,42 @@ export class ServiceFeeHelper {
 
         const customer = organization.defaultCompanies[0];
 
-        if (VATService.isVATExcempt({
-            sellingOrganization: invoicingOrganization,
-            company: customer,
-        })) {
+        if (
+            VATService.isVATExcempt({
+                sellingOrganization: invoicingOrganization,
+                company: customer,
+            })
+        ) {
             return 0;
         }
 
         return 21;
     }
 
-    static async setServiceFee(payment: Payment, organization: Organization, type: 'webshop' | 'members' | 'tickets' | 'system', itemPrices: number[]): Promise<void> {
+    static async setServiceFee(
+        payment: Payment,
+        organization: Organization,
+        type: 'webshop' | 'members' | 'tickets' | 'system',
+        itemPrices: number[],
+    ): Promise<void> {
         if (type === 'system') {
             return;
         }
 
-        function calculateFee(price: number, minimumFee: number | null, maximumFee: number | null, fixed: number, percentageTimes100: number) {
+        function calculateFee(
+            price: number,
+            minimumFee: number | null,
+            maximumFee: number | null,
+            fixed: number,
+            percentageTimes100: number,
+        ) {
             if (price === 0 && !minimumFee) {
                 return 0;
             }
-            let fee = Math.round((fixed + Math.max(100, price * percentageTimes100 / 100 / 100)) / 100) * 100; // Round to 2 decimals, minimum 1 cent
+            let fee =
+                Math.round(
+                    (fixed + Math.max(100, (price * percentageTimes100) / 100 / 100)) / 100,
+                ) * 100; // Round to 2 decimals, minimum 1 cent
             if (minimumFee !== null && fee < minimumFee) {
                 fee = minimumFee;
             }
@@ -79,19 +99,19 @@ export class ServiceFeeHelper {
 
         // Calculate service fee if organization has a package with service fees
         if (organization) {
-            const packageStatus = type === 'webshop' || type === 'tickets' ? organization.meta.packages.packages.get(STPackageType.Webshops) : organization.meta.packages.packages.get(STPackageType.Members);
+            const packageStatus =
+                type === 'webshop' || type === 'tickets'
+                    ? organization.meta.packages.packages.get(STPackageType.Webshops)
+                    : organization.meta.packages.packages.get(STPackageType.Members);
             const fees = packageStatus?.activeServiceFees;
 
             console.log('Service fee settings for payment', payment.id, type, 'are', fees);
 
             if (fees && (fees.fixed > 0 || fees.percentage > 0)) {
                 serviceFee = itemPrices.reduce((total, price) => {
-                    return total + calculateFee(
-                        price,
-                        fees.minimum,
-                        fees.maximum,
-                        fees.fixed,
-                        fees.percentage,
+                    return (
+                        total +
+                        calculateFee(price, fees.minimum, fees.maximum, fees.fixed, fees.percentage)
                     );
                 }, 0);
             }
@@ -108,7 +128,7 @@ export class ServiceFeeHelper {
             } else {
                 // don't charge VAT (we'll add the VAT to the invoice)
             }
-            serviceFee = serviceFee * (100 + vat) / 100;
+            serviceFee = (serviceFee * (100 + vat)) / 100;
         }
 
         // Round service fee to 2 decimal places
@@ -134,7 +154,10 @@ export class ServiceFeeHelper {
         organization: Organization;
         stripeAccount?: StripeAccount | null | undefined;
     }) {
-        if (payment.provider !== PaymentProvider.Stripe && payment.provider !== PaymentProvider.Buckaroo) {
+        if (
+            payment.provider !== PaymentProvider.Stripe &&
+            payment.provider !== PaymentProvider.Buckaroo
+        ) {
             return;
         }
 
@@ -157,7 +180,11 @@ export class ServiceFeeHelper {
         const vat = await this.getVATPercentage(organization);
 
         function calculateFee(fixed: number, percentageTimes100: number) {
-            return STMath.round(STMath.round(fixed + Math.max(1, totalPrice * percentageTimes100 / 100 / 100)) * (100 + vat) / 100); // € 0,21 + 0,2%
+            return STMath.round(
+                (STMath.round(fixed + Math.max(1, (totalPrice * percentageTimes100) / 100 / 100)) *
+                    (100 + vat)) /
+                    100,
+            ); // € 0,21 + 0,2%
         }
 
         if (payment.method === PaymentMethod.iDEAL) {
@@ -173,7 +200,13 @@ export class ServiceFeeHelper {
         if (payment.provider === PaymentProvider.Buckaroo) {
             // We'll need to charge
             payment.transferFeeManual = payment.transferFee;
-            console.log('Transfer fee for payment', payment.id, 'is', payment.transferFee, '(manually charged)');
+            console.log(
+                'Transfer fee for payment',
+                payment.id,
+                'is',
+                payment.transferFee,
+                '(manually charged)',
+            );
         } else {
             console.log('Transfer fee for payment', payment.id, 'is', payment.transferFee);
         }

@@ -1,8 +1,20 @@
 import type { XlsxTransformerColumn, XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
-import type { LimitedFilteredRequest, PlatformMember, Platform as PlatformStruct } from '@stamhoofd/structures';
-import { ExcelExportType, Gender, GroupType, LanguageHelper, MembershipStatus, PlatformFamily, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
+import type {
+    LimitedFilteredRequest,
+    PlatformMember,
+    Platform as PlatformStruct,
+} from '@stamhoofd/structures';
+import {
+    ExcelExportType,
+    Gender,
+    GroupType,
+    LanguageHelper,
+    MembershipStatus,
+    PlatformFamily,
+    UnencodeablePaginatedResponse,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint.js';
@@ -10,7 +22,9 @@ import { AuthenticatedStructures } from '../helpers/AuthenticatedStructures.js';
 import { Context } from '../helpers/Context.js';
 import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHelper.js';
 
-export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerColumn<PlatformMember>[] => [
+export const getBaseMemberColumns = (
+    platform: PlatformStruct,
+): XlsxTransformerColumn<PlatformMember>[] => [
     {
         id: 'id',
         name: $t('%d'),
@@ -71,9 +85,9 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
         getValue: ({ patchedMember: object }: PlatformMember) => {
             const gender = object.details.gender;
 
-            return ({
+            return {
                 value: formatGender(gender),
-            });
+            };
         },
     },
     {
@@ -141,7 +155,9 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
         name: $t('%wG'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
-            value: XlsxTransformerColumnHelper.formatBoolean(object.details.hasFinancialSupportOrActiveUitpas),
+            value: XlsxTransformerColumnHelper.formatBoolean(
+                object.details.hasFinancialSupportOrActiveUitpas,
+            ),
         }),
     },
     {
@@ -175,7 +191,9 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
         name: $t('%wA'),
         width: 40,
         getValue: (member: PlatformMember) => ({
-            value: member.getPrimaryOrganization({ periodId: platform.period.id })?.name ?? Context.i18n.$t('%5D'),
+            value:
+                member.getPrimaryOrganization({ periodId: platform.period.id })?.name ??
+                Context.i18n.$t('%5D'),
         }),
     },
     {
@@ -183,7 +201,9 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
         name: $t('%1O1'),
         width: 30,
         getValue: (member: PlatformMember) => ({
-            value: member.getPrimaryOrganization({ periodId: platform.period.id })?.uri ?? Context.i18n.$t('%5D'),
+            value:
+                member.getPrimaryOrganization({ periodId: platform.period.id })?.uri ??
+                Context.i18n.$t('%5D'),
         }),
     },
     {
@@ -191,8 +211,16 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
         name: $t('%1KQ'),
         width: 40,
         getValue: (member: PlatformMember) => {
-            const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
-            const str = Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t('%M1') + ' ') || Context.i18n.$t('%5D');
+            const organizations = member.filterOrganizations({
+                currentPeriod: true,
+                types: [GroupType.Membership],
+            });
+            const str =
+                Formatter.joinLast(
+                    organizations.map((o) => o.name).sort(),
+                    ', ',
+                    ' ' + $t('%M1') + ' ',
+                ) || Context.i18n.$t('%5D');
 
             return {
                 value: str,
@@ -204,8 +232,16 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
         name: $t('%1KR'),
         width: 30,
         getValue: (member: PlatformMember) => {
-            const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
-            const str = Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t('%M1') + ' ') || Context.i18n.$t('%5D');
+            const organizations = member.filterOrganizations({
+                currentPeriod: true,
+                types: [GroupType.Membership],
+            });
+            const str =
+                Formatter.joinLast(
+                    organizations.map((o) => o.uri).sort(),
+                    ', ',
+                    ' ' + $t('%M1') + ' ',
+                ) || Context.i18n.$t('%5D');
 
             return {
                 value: str,
@@ -222,7 +258,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
         width: 40,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             // One contact per line so the cell stays readable, and wrap the text so all lines are visible
-            value: object.details.emergencyContacts.map(c => c.toString()).join('\n'),
+            value: object.details.emergencyContacts.map((c) => c.toString()).join('\n'),
             style: {
                 alignment: {
                     wrapText: true,
@@ -251,7 +287,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     ...XlsxTransformerColumnHelper.createColumnsForAddresses<PlatformMember>({
         matchIdStart: 'unverifiedAddresses',
-        getAddresses: object => object.patchedMember.details.unverifiedAddresses,
+        getAddresses: (object) => object.patchedMember.details.unverifiedAddresses,
         limit: 2,
     }),
     {
@@ -259,14 +295,15 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
         name: $t('%wN'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
-            value: object.details.unverifiedAddresses.map(a => a.toString()).join('; '),
+            value: object.details.unverifiedAddresses.map((a) => a.toString()).join('; '),
         }),
     },
 
     // Dynamic records
     XlsxTransformerColumnHelper.createRecordAnswersColumns({
         matchId: 'recordAnswers',
-        getRecordAnswers: ({ patchedMember: object }: PlatformMember) => object.details.recordAnswers,
+        getRecordAnswers: ({ patchedMember: object }: PlatformMember) =>
+            object.details.recordAnswers,
         getRecordCategories: () => {
             const organization = Context.organization;
 
@@ -279,7 +316,9 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
 ];
 
 // Assign to a typed variable to assure we have correct type checking in place
-const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember, PlatformMember> => ({
+const getSheet = (
+    platform: PlatformStruct,
+): XlsxTransformerSheet<PlatformMember, PlatformMember> => ({
     id: 'members',
     name: $t('%1EH'),
     columns: [
@@ -289,8 +328,19 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
             name: $t('%wH'),
             width: 40,
             getValue: (member: PlatformMember) => {
-                const groups = member.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership], organizationId: Context.organization?.id });
-                const str = Formatter.joinLast(Formatter.uniqueArray(groups.map(o => o.group.settings.name.toString())).sort(), ', ', ' ' + $t('%M1') + ' ') || Context.i18n.$t('%5D');
+                const groups = member.filterRegistrations({
+                    currentPeriod: true,
+                    types: [GroupType.Membership],
+                    organizationId: Context.organization?.id,
+                });
+                const str =
+                    Formatter.joinLast(
+                        Formatter.uniqueArray(
+                            groups.map((o) => o.group.settings.name.toString()),
+                        ).sort(),
+                        ', ',
+                        ' ' + $t('%M1') + ' ',
+                    ) || Context.i18n.$t('%5D');
 
                 return {
                     value: str,
@@ -302,10 +352,26 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
             name: $t('%wI'),
             width: 40,
             getValue: (member: PlatformMember) => {
-                const groups = member.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership], organizationId: Context.organization?.id });
-                const defaultAgeGroupIds = Formatter.uniqueArray(groups.filter(o => o.group.defaultAgeGroupId));
-                const defaultAgeGroups = defaultAgeGroupIds.map(o => platform.config.defaultAgeGroups.find(g => g.id === o.group.defaultAgeGroupId)?.name ?? $t('%wJ'));
-                const str = Formatter.joinLast(Formatter.uniqueArray(defaultAgeGroups).sort(), ', ', ' ' + $t('%M1') + ' ') || Context.i18n.$t('%5D');
+                const groups = member.filterRegistrations({
+                    currentPeriod: true,
+                    types: [GroupType.Membership],
+                    organizationId: Context.organization?.id,
+                });
+                const defaultAgeGroupIds = Formatter.uniqueArray(
+                    groups.filter((o) => o.group.defaultAgeGroupId),
+                );
+                const defaultAgeGroups = defaultAgeGroupIds.map(
+                    (o) =>
+                        platform.config.defaultAgeGroups.find(
+                            (g) => g.id === o.group.defaultAgeGroupId,
+                        )?.name ?? $t('%wJ'),
+                );
+                const str =
+                    Formatter.joinLast(
+                        Formatter.uniqueArray(defaultAgeGroups).sort(),
+                        ', ',
+                        ' ' + $t('%M1') + ' ',
+                    ) || Context.i18n.$t('%5D');
 
                 return {
                     value: str,
@@ -318,7 +384,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
             width: 30,
             getValue: (v) => {
                 return {
-                    value: v.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0) / 1_0000,
+                    value: v.member.balances.reduce((sum, r) => sum + r.amountOpen, 0) / 1_0000,
                     style: {
                         numberFormat: {
                             id: XlsxBuiltInNumberFormat.Currency2DecimalWithRed,
@@ -326,13 +392,12 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
                     },
                 };
             },
-
         },
         {
             id: 'createdAt',
             name: $t('%1Jc'),
             width: 20,
-            getValue: v => ({
+            getValue: (v) => ({
                 value: v.member.createdAt,
                 style: {
                     numberFormat: {
@@ -345,7 +410,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
         // Group categories
         XlsxTransformerColumnHelper.createGroupCategoryColumns<PlatformMember>({
             matchId: 'groupCategory',
-            getMember: member => member,
+            getMember: (member) => member,
         }),
 
         // Registration records
@@ -411,7 +476,11 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
                                                 value: '',
                                             };
                                         }
-                                        const options = registration.options.filter(o => o.optionMenu.id === menuId && o.option.id === optionId);
+                                        const options = registration.options.filter(
+                                            (o) =>
+                                                o.optionMenu.id === menuId &&
+                                                o.option.id === optionId,
+                                        );
 
                                         if (!options.length) {
                                             return {
@@ -420,14 +489,21 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
                                         }
 
                                         return {
-                                            style: options.length === 1 && returnAmount
-                                                ? {
-                                                        numberFormat: {
-                                                            id: XlsxBuiltInNumberFormat.Number,
-                                                        },
-                                                    }
-                                                : {},
-                                            value: options.map(option => returnAmount ? option.amount : option.option.name).join(', '),
+                                            style:
+                                                options.length === 1 && returnAmount
+                                                    ? {
+                                                          numberFormat: {
+                                                              id: XlsxBuiltInNumberFormat.Number,
+                                                          },
+                                                      }
+                                                    : {},
+                                            value: options
+                                                .map((option) =>
+                                                    returnAmount
+                                                        ? option.amount
+                                                        : option.option.name,
+                                                )
+                                                .join(', '),
                                         };
                                     },
                                 },
@@ -447,7 +523,9 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
                                             value: '',
                                         };
                                     }
-                                    const options = registration.options.filter(o => o.optionMenu.id === menuId);
+                                    const options = registration.options.filter(
+                                        (o) => o.optionMenu.id === menuId,
+                                    );
 
                                     if (!options.length) {
                                         return {
@@ -456,7 +534,14 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
                                     }
 
                                     return {
-                                        value: options.map(option => (option.amount > 1 ? `${option.amount}x ` : '') + option.option.name).join(', '),
+                                        value: options
+                                            .map(
+                                                (option) =>
+                                                    (option.amount > 1
+                                                        ? `${option.amount}x `
+                                                        : '') + option.option.name,
+                                            )
+                                            .join(', '),
                                     };
                                 },
                             },
@@ -483,7 +568,9 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
                                     }
 
                                     return {
-                                        value: registration.recordAnswers.get(recordId)?.excelValues[0]?.value ?? '',
+                                        value:
+                                            registration.recordAnswers.get(recordId)?.excelValues[0]
+                                                ?.value ?? '',
                                     };
                                 },
                             },
@@ -503,22 +590,25 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Members, {
 
         return new UnencodeablePaginatedResponse({
             results: PlatformFamily.createSingles(result.results, {
-                contextOrganization: Context.organization ? (await AuthenticatedStructures.organization(Context.organization)) : null,
+                contextOrganization: Context.organization
+                    ? await AuthenticatedStructures.organization(Context.organization)
+                    : null,
                 platform: await Platform.getSharedStruct(),
             }),
             next: result.next,
         });
     },
-    getSheets: platform => [
-        getSheet(platform),
-    ],
+    getSheets: (platform) => [getSheet(platform)],
 });
 
 function formatGender(gender: Gender): string {
     switch (gender) {
-        case Gender.Male: return $t('%XK');
-        case Gender.Female: return $t('%XM');
-        default: return $t('%1JG');
+        case Gender.Male:
+            return $t('%XK');
+        case Gender.Female:
+            return $t('%XM');
+        default:
+            return $t('%1JG');
     }
 }
 

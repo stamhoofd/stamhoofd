@@ -37,7 +37,8 @@ export class MailchimpTags {
     static async forScope(organization: Organization | null) {
         const platform = await Platform.getShared();
         const language = organization?.language ?? platform.language ?? I18n.defaultLanguage;
-        const country = organization?.address.country ?? STAMHOOFD.fixedCountry ?? I18n.defaultCountry;
+        const country =
+            organization?.address.country ?? STAMHOOFD.fixedCountry ?? I18n.defaultCountry;
         return new MailchimpTags(new I18n(language, country), platform.config.name);
     }
 
@@ -76,7 +77,13 @@ export class MailchimpTags {
      * Responsibility of the platform, optionally limited to the default age group the member holds it for
      */
     responsibility(name: string, ageGroup: string | null = null) {
-        return limit(this.prefix + this.i18n.$t('%H2') + ' – ' + name + (ageGroup ? ' ' + this.i18n.$t('%wR') + ' ' + ageGroup : ''));
+        return limit(
+            this.prefix +
+                this.i18n.$t('%H2') +
+                ' – ' +
+                name +
+                (ageGroup ? ' ' + this.i18n.$t('%wR') + ' ' + ageGroup : ''),
+        );
     }
 
     webshop(name: string) {
@@ -96,7 +103,7 @@ export class MailchimpTags {
     }
 
     isManaged(tag: string) {
-        return this.managedPrefixes.some(prefix => tag.startsWith(prefix));
+        return this.managedPrefixes.some((prefix) => tag.startsWith(prefix));
     }
 
     /**
@@ -105,7 +112,9 @@ export class MailchimpTags {
     isOrderTag(tag: string) {
         const customer = this.i18n.$t('%ZwU');
         const webshop = this.i18n.$t('%1AV') + ' – ';
-        return this.managedPrefixes.some(prefix => tag === prefix + customer || tag.startsWith(prefix + webshop));
+        return this.managedPrefixes.some(
+            (prefix) => tag === prefix + customer || tag.startsWith(prefix + webshop),
+        );
     }
 
     isMemberTag(tag: string) {

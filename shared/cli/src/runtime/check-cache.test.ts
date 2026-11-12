@@ -6,7 +6,9 @@ const root = new URL('../../../../', import.meta.url);
 
 function readJson(relativePath: string) {
     const text = readFileSync(new URL(relativePath, root), 'utf8');
-    return relativePath.endsWith('.jsonc') ? ts.parseConfigFileTextToJson(relativePath, text).config : JSON.parse(text);
+    return relativePath.endsWith('.jsonc')
+        ? ts.parseConfigFileTextToJson(relativePath, text).config
+        : JSON.parse(text);
 }
 
 const typecheckPackages = [
@@ -22,17 +24,22 @@ const typecheckPackages = [
 ];
 
 const frontendPackages = readdirSync(new URL('frontend/shared/', root))
-    .filter(name => readJson(`frontend/shared/${name}/package.json`).scripts?.typecheck)
-    .map(name => `frontend/shared/${name}`);
+    .filter((name) => readJson(`frontend/shared/${name}/package.json`).scripts?.typecheck)
+    .map((name) => `frontend/shared/${name}`);
 
 describe('check cache configuration', () => {
-    it.each(frontendPackages)('%s caches incremental source-only checks without runtime builds', (packagePath) => {
-        const { scripts } = readJson(`${packagePath}/package.json`);
-        expect(scripts.typecheck).toBe('vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo');
-        expect(scripts.lint).toBe('eslint --quiet');
-        expect(scripts.build).toBeUndefined();
-        expect(scripts['build:types']).toBeUndefined();
-    });
+    it.each(frontendPackages)(
+        '%s caches incremental source-only checks without runtime builds',
+        (packagePath) => {
+            const { scripts } = readJson(`${packagePath}/package.json`);
+            expect(scripts.typecheck).toBe(
+                'vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo',
+            );
+            expect(scripts.lint).toBe('eslint --quiet');
+            expect(scripts.build).toBeUndefined();
+            expect(scripts['build:types']).toBeUndefined();
+        },
+    );
 
     it('keeps runtime CLI builds from regenerating dependency declarations', () => {
         expect(readJson('shared/cli/tsconfig.build.json').references ?? []).toEqual([]);
@@ -43,7 +50,12 @@ describe('check cache configuration', () => {
 
         expect(tasks['check-inputs']).toEqual({ dependsOn: ['^check-inputs'] });
         expect(tasks.typecheck).toEqual({
-            dependsOn: ['build:types', 'check-inputs', '@stamhoofd/components#build:types', '@stamhoofd/components#check-inputs'],
+            dependsOn: [
+                'build:types',
+                'check-inputs',
+                '@stamhoofd/components#build:types',
+                '@stamhoofd/components#check-inputs',
+            ],
             cache: true,
             outputs: ['.cache/typecheck*.tsbuildinfo'],
         });
@@ -51,42 +63,64 @@ describe('check cache configuration', () => {
             dependsOn: ['^build:types'],
             outputs: ['dist-types/**', '.cache/types*.tsbuildinfo'],
         });
-        expect(globalDependencies).toEqual(expect.arrayContaining([
-            'tsconfig*.json',
-            'frontend/tsconfig*.json',
-            'frontend/*.d.ts',
-            'backend/*.d.ts',
-            'shared/*.d.ts',
-        ]));
+        expect(globalDependencies).toEqual(
+            expect.arrayContaining([
+                'tsconfig*.json',
+                'frontend/tsconfig*.json',
+                'frontend/*.d.ts',
+                'backend/*.d.ts',
+                'shared/*.d.ts',
+            ]),
+        );
     });
 
-    it.each(typecheckPackages)('%s checks production in build:types and tests without emitting', (packagePath) => {
-        const { scripts } = readJson(`${packagePath}/package.json`);
-        expect(scripts['build:types']).toMatch(/^tsc --project tsconfig.types.json/);
-        expect(scripts.typecheck).toBe('tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo');
-        expect(readJson(`${packagePath}/tsconfig.test.json`).references).toEqual([{ path: './tsconfig.types.json' }]);
-    });
+    it.each(typecheckPackages)(
+        '%s checks production in build:types and tests without emitting',
+        (packagePath) => {
+            const { scripts } = readJson(`${packagePath}/package.json`);
+            expect(scripts['build:types']).toMatch(/^tsc --project tsconfig.types.json/);
+            expect(scripts.typecheck).toBe(
+                'tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo',
+            );
+            expect(readJson(`${packagePath}/tsconfig.test.json`).references).toEqual([
+                { path: './tsconfig.types.json' },
+            ]);
+        },
+    );
 
     it('invalidates typed lint checks for dependency types, shared rules, and inherited configs', () => {
         const { tasks, globalDependencies } = readJson('turbo.jsonc');
 
         expect(tasks.lint).toEqual({
             inputs: ['$TURBO_DEFAULT$', '$TURBO_ROOT$/oxlint.config.mts'],
-            dependsOn: ['build:types', 'check-inputs', 'eslint-plugin-stamhoofd#check-inputs', 'oxlint-plugin-stamhoofd#check-inputs', '@stamhoofd/components#build:types', '@stamhoofd/components#check-inputs'],
+            dependsOn: [
+                'build:types',
+                'check-inputs',
+                'eslint-plugin-stamhoofd#check-inputs',
+                'oxlint-plugin-stamhoofd#check-inputs',
+                '@stamhoofd/components#build:types',
+                '@stamhoofd/components#check-inputs',
+            ],
             cache: true,
             outputs: [],
             env: ['NODE_ENV'],
         });
-        expect(globalDependencies).toEqual(expect.arrayContaining([
-            'eslint.config.js',
-            'frontend/eslint.config.js',
-            'backend/eslint.config.js',
-        ]));
-        expect(readJson('package.json').scripts.lint).toBe('pnpm exec turbo run lint --continue=always');
+        expect(globalDependencies).toEqual(
+            expect.arrayContaining([
+                'eslint.config.js',
+                'frontend/eslint.config.js',
+                'backend/eslint.config.js',
+            ]),
+        );
+        expect(readJson('package.json').scripts.lint).toBe(
+            'pnpm exec turbo run lint --continue=always',
+        );
     });
 
     it('keeps root checks on direct Turbo entrypoints', () => {
         expect(readJson('package.json').scripts.typecheck).toBe('pnpm exec turbo run typecheck');
-        expect(readJson('package.json').scripts.lint).toBe('pnpm exec turbo run lint --continue=always');
+        expect(readJson('package.json').scripts.lint).toBe(
+            'pnpm exec turbo run lint --continue=always',
+        );
     });
 });

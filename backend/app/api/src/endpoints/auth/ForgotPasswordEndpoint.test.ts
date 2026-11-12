@@ -1,6 +1,11 @@
 import { Request } from '@node/endpoints';
 import { EmailMocker } from '@stamhoofd/email';
-import { EmailTemplateFactory, OrganizationFactory, PasswordToken, UserFactory } from '@stamhoofd/models';
+import {
+    EmailTemplateFactory,
+    OrganizationFactory,
+    PasswordToken,
+    UserFactory,
+} from '@stamhoofd/models';
 import { EmailContent, EmailTemplateType } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 
@@ -12,7 +17,9 @@ const endpoint = new ForgotPasswordEndpoint();
 describe('Endpoint.ForgotPassword', () => {
     beforeEach(async () => {
         await new EmailTemplateFactory({ type: EmailTemplateType.ForgotPassword }).create();
-        await new EmailTemplateFactory({ type: EmailTemplateType.ForgotPasswordButNoAccount }).create();
+        await new EmailTemplateFactory({
+            type: EmailTemplateType.ForgotPasswordButNoAccount,
+        }).create();
     });
 
     function request(host: string, email: string) {
@@ -21,9 +28,15 @@ describe('Endpoint.ForgotPassword', () => {
 
     test('the recovery link is emailed to the stored address, not the one that was typed', async () => {
         const organization = await new OrganizationFactory({}).create();
-        const user = await new UserFactory({ organization, password: 'test-password-1234' }).create();
+        const user = await new UserFactory({
+            organization,
+            password: 'test-password-1234',
+        }).create();
 
-        await testServer.test(endpoint, request(organization.getApiHost(), user.email.toUpperCase()));
+        await testServer.test(
+            endpoint,
+            request(organization.getApiHost(), user.email.toUpperCase()),
+        );
 
         const emails = await EmailMocker.transactional.getSucceededEmails();
         expect(emails).toHaveLength(1);
@@ -52,10 +65,22 @@ describe('Endpoint.ForgotPassword', () => {
             subject: 'Dutch subject',
             html: '<p>Dutch {{resetUrl}}</p>',
             language: Language.Dutch,
-            translations: new Map([[Language.French, EmailContent.create({ subject: 'French subject', html: '<p>French {{resetUrl}}</p>', text: 'French' })]]),
+            translations: new Map([
+                [
+                    Language.French,
+                    EmailContent.create({
+                        subject: 'French subject',
+                        html: '<p>French {{resetUrl}}</p>',
+                        text: 'French',
+                    }),
+                ],
+            ]),
         }).create();
 
-        const user = await new UserFactory({ organization, password: 'test-password-1234' }).create();
+        const user = await new UserFactory({
+            organization,
+            password: 'test-password-1234',
+        }).create();
         user.language = Language.French;
         await user.save();
 

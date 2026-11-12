@@ -40,7 +40,12 @@ describe('buildInstance', () => {
 
     it('allows explicit name and port overrides', () => {
         vi.stubEnv('STAMHOOFD_PORT_OFFSET', '4200');
-        const instance = buildInstance({ env: 'stamhoofd', workspace: 'main', primary: true, overrideName: 'Custom Name' });
+        const instance = buildInstance({
+            env: 'stamhoofd',
+            workspace: 'main',
+            primary: true,
+            overrideName: 'Custom Name',
+        });
 
         expect(instance.name).toBe('custom-name');
         expect(instance.portOffset).toBe(4200);
@@ -73,7 +78,9 @@ describe('resolvePortOffset', () => {
         const occupied = await occupyPort(buildPorts(context).webApp);
         vi.stubEnv('STAMHOOFD_PORT_OFFSET', String(freeTestPortOffset));
 
-        await expect(resolvePortOffset(context)).rejects.toThrow(new RegExp(`Configured port offset ${freeTestPortOffset} is unavailable`));
+        await expect(resolvePortOffset(context)).rejects.toThrow(
+            new RegExp(`Configured port offset ${freeTestPortOffset} is unavailable`),
+        );
 
         vi.unstubAllEnvs();
         await occupied.close();
@@ -93,10 +100,13 @@ describe('resolvePortOffset', () => {
         await occupied.close();
     });
 
-    it.skipIf(process.platform !== 'darwin')('reports an actual OS-level bind denial separately from occupied ports', async () => {
-        const context = testContext(freeTestPortOffset);
-        const moduleUrl = new URL('../../dist/context/port-allocation.js', import.meta.url).href;
-        const script = `
+    it.skipIf(process.platform !== 'darwin')(
+        'reports an actual OS-level bind denial separately from occupied ports',
+        async () => {
+            const context = testContext(freeTestPortOffset);
+            const moduleUrl = new URL('../../dist/context/port-allocation.js', import.meta.url)
+                .href;
+            const script = `
             const { resolvePortOffset } = await import(process.argv[1]);
             try {
                 await resolvePortOffset(JSON.parse(process.argv[2]));
@@ -105,20 +115,21 @@ describe('resolvePortOffset', () => {
                 console.log(error instanceof Error ? error.message : String(error));
             }
         `;
-        const { stdout } = await execFileAsync('/usr/bin/sandbox-exec', [
-            '-p',
-            '(version 1) (allow default) (deny network-bind)',
-            process.execPath,
-            '--input-type=module',
-            '--eval',
-            script,
-            moduleUrl,
-            JSON.stringify(context),
-        ]);
+            const { stdout } = await execFileAsync('/usr/bin/sandbox-exec', [
+                '-p',
+                '(version 1) (allow default) (deny network-bind)',
+                process.execPath,
+                '--input-type=module',
+                '--eval',
+                script,
+                moduleUrl,
+                JSON.stringify(context),
+            ]);
 
-        expect(stdout).toMatch(/permission to open development ports/i);
-        expect(stdout).not.toMatch(/free development port range/i);
-    });
+            expect(stdout).toMatch(/permission to open development ports/i);
+            expect(stdout).not.toMatch(/free development port range/i);
+        },
+    );
 });
 
 function testContext(portOffset: number): CliContext {
@@ -147,8 +158,9 @@ async function occupyPort(port: number): Promise<{ close: () => Promise<void> }>
     });
 
     return {
-        close: async () => await new Promise<void>((resolve, reject) => {
-            server.close(error => error ? reject(error) : resolve());
-        }),
+        close: async () =>
+            await new Promise<void>((resolve, reject) => {
+                server.close((error) => (error ? reject(error) : resolve()));
+            }),
     };
 }

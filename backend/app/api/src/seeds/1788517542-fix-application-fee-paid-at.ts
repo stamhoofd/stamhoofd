@@ -26,7 +26,12 @@ export default new Migration(async () => {
         query: Payment.select()
             .where('method', PaymentMethod.AccountDeductions)
             .where('status', PaymentStatus.Succeeded)
-            .where(new SQLWhereLike(SQL.column(Payment.table, 'reference'), scalarToSQLExpression(FEE_PAYMENT_REFERENCE_PREFIX + '%'))),
+            .where(
+                new SQLWhereLike(
+                    SQL.column(Payment.table, 'reference'),
+                    scalarToSQLExpression(FEE_PAYMENT_REFERENCE_PREFIX + '%'),
+                ),
+            ),
         batchSize: 100,
         batchAction: async (payments: Payment[]) => {
             const { balanceItemPayments, balanceItems } = await Payment.loadBalanceItems(payments);
@@ -39,9 +44,15 @@ export default new Migration(async () => {
                     continue;
                 }
 
-                const itemIds = balanceItemPayments.filter(b => b.paymentId === payment.id).map(b => b.balanceItemId);
+                const itemIds = balanceItemPayments
+                    .filter((b) => b.paymentId === payment.id)
+                    .map((b) => b.balanceItemId);
                 if (itemIds.length < 1 || itemIds.length > 2) {
-                    console.warn('Unexpected number of balance items, skipping', payment.id, itemIds.length);
+                    console.warn(
+                        'Unexpected number of balance items, skipping',
+                        payment.id,
+                        itemIds.length,
+                    );
                     skipped++;
                     continue;
                 }
@@ -55,7 +66,7 @@ export default new Migration(async () => {
                     changed = true;
                 }
 
-                for (const item of balanceItems.filter(i => itemIds.includes(i.id))) {
+                for (const item of balanceItems.filter((i) => itemIds.includes(i.id))) {
                     if (item.paidAt === null || item.paidAt.getTime() === paidAt.getTime()) {
                         continue;
                     }
@@ -75,11 +86,15 @@ export default new Migration(async () => {
         },
     });
 
-    console.log(`Finished fixing paidAt of application fee payments: ${fixed} fixed, ${skipped} skipped of ${result.total} payments.`);
+    console.log(
+        `Finished fixing paidAt of application fee payments: ${fixed} fixed, ${skipped} skipped of ${result.total} payments.`,
+    );
 });
 
 function parseDay(reference: string | null): Date | null {
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(reference?.slice(FEE_PAYMENT_REFERENCE_PREFIX.length) ?? '');
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(
+        reference?.slice(FEE_PAYMENT_REFERENCE_PREFIX.length) ?? '',
+    );
     if (!match) {
         return null;
     }

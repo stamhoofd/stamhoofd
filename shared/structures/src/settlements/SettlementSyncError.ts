@@ -18,7 +18,10 @@ export class SettlementSyncError extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
     transactionId: string | null = null;
 
-    static fromError(error: unknown, { transactionId = null }: { transactionId?: string | null } = {}): SettlementSyncError {
+    static fromError(
+        error: unknown,
+        { transactionId = null }: { transactionId?: string | null } = {},
+    ): SettlementSyncError {
         return SettlementSyncError.create({
             code: isSimpleError(error) ? error.code : null,
             message: error instanceof Error ? error.message : String(error),

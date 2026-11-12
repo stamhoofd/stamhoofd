@@ -1,8 +1,20 @@
 import type { Organization } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemPayment, Invoice, OrganizationFactory, Payment } from '@stamhoofd/models';
+import {
+    BalanceItem,
+    BalanceItemPayment,
+    Invoice,
+    OrganizationFactory,
+    Payment,
+} from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import type { Settlement } from '@stamhoofd/models/models/Settlement.js';
-import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/structures';
+import {
+    BalanceItemStatus,
+    BalanceItemType,
+    PaymentMethod,
+    PaymentProvider,
+    PaymentStatus,
+} from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { SettlementChargeType } from '@stamhoofd/structures/settlements/SettlementChargeType.js';
 import { SettlementSyncError } from '@stamhoofd/structures/settlements/SettlementSyncError.js';
@@ -99,7 +111,13 @@ describe('SettlementExporter', () => {
         const { organization, settlement } = await createSettledPayment();
         await SettlementService.finishSync(settlement, {
             transactionCount: 3,
-            errors: [SettlementSyncError.create({ code: 'payment_not_found', message: 'No payment found', transactionId: 'txn_1' })],
+            errors: [
+                SettlementSyncError.create({
+                    code: 'payment_not_found',
+                    message: 'No payment found',
+                    transactionId: 'txn_1',
+                }),
+            ],
         });
 
         const exporter = new SettlementExporter({
@@ -118,10 +136,16 @@ describe('SettlementExporter', () => {
 
     describe('formatSyncErrors', () => {
         test('one line per error, with its code and transaction', () => {
-            expect(SettlementExporter.formatSyncErrors([
-                SettlementSyncError.create({ code: 'payment_not_found', message: 'No payment found', transactionId: 'txn_1' }),
-                SettlementSyncError.create({ message: 'Something broke' }),
-            ])).toBe('payment_not_found (txn_1): No payment found\nerror: Something broke');
+            expect(
+                SettlementExporter.formatSyncErrors([
+                    SettlementSyncError.create({
+                        code: 'payment_not_found',
+                        message: 'No payment found',
+                        transactionId: 'txn_1',
+                    }),
+                    SettlementSyncError.create({ message: 'Something broke' }),
+                ]),
+            ).toBe('payment_not_found (txn_1): No payment found\nerror: Something broke');
         });
 
         test('no stored errors is an empty cell', () => {
@@ -129,7 +153,7 @@ describe('SettlementExporter', () => {
         });
     });
 
-    test('a platform payout is included in its owning organization\'s export', async () => {
+    test("a platform payout is included in its owning organization's export", async () => {
         // The platform's own payouts belong to the membership organization: there is no separate
         // platform-only mode, scoping to that organization is the platform export
         const owner = await new OrganizationFactory({}).create();
@@ -252,7 +276,13 @@ describe('SettlementExporter', () => {
          * The fee as the sync stores it: a deduction charge on the payer's payout with the
          * application fee row that says what we received for it.
          */
-        const addFeeCharge = async (organization: Organization, settlement: Settlement | null, payment: Payment | null, providerInvoiceId: string | null, { amount = 1_00_00, occurredAt = new Date(2026, 0, 15) } = {}) => {
+        const addFeeCharge = async (
+            organization: Organization,
+            settlement: Settlement | null,
+            payment: Payment | null,
+            providerInvoiceId: string | null,
+            { amount = 1_00_00, occurredAt = new Date(2026, 0, 15) } = {},
+        ) => {
             const externalId = 'fee_' + uuidv4();
             const charge = await SettlementService.upsertCharge({
                 type: SettlementChargeType.ApplicationFeeService,
@@ -283,7 +313,12 @@ describe('SettlementExporter', () => {
          * The invoice that bills those fees: one balance item for them, paid by one deduction
          * payment, invoiced next to whatever else the organization owed.
          */
-        const billFees = async (organization: Organization, fees: ApplicationFee[], number: string, { billed, otherTotal = 0 }: { billed?: number; otherTotal?: number } = {}) => {
+        const billFees = async (
+            organization: Organization,
+            fees: ApplicationFee[],
+            number: string,
+            { billed, otherTotal = 0 }: { billed?: number; otherTotal?: number } = {},
+        ) => {
             const total = billed ?? fees.reduce((sum, fee) => sum + fee.amount, 0);
 
             const balanceItem = new BalanceItem();
@@ -341,7 +376,9 @@ describe('SettlementExporter', () => {
         const buildStatus = async (organization: Organization, invoiceNumber: string) => {
             const exporter = createExporter(organization);
             await exporter.build();
-            const totals = exporter.getProviderInvoiceTotals().find(t => t.invoiceId === invoiceNumber)!;
+            const totals = exporter
+                .getProviderInvoiceTotals()
+                .find((t) => t.invoiceId === invoiceNumber)!;
             return await exporter.getProviderInvoiceStatus(totals);
         };
 
@@ -351,28 +388,43 @@ describe('SettlementExporter', () => {
             const fee = await addFeeCharge(organization, settlement, payment, number);
             await billFees(organization, [fee], number, { otherTotal: 250_00_00 });
 
-            expect(await buildStatus(organization, number)).toMatchObject({ check: '✓', outsideExport: 0 });
+            expect(await buildStatus(organization, number)).toMatchObject({
+                check: '✓',
+                outsideExport: 0,
+            });
         });
 
         test('an invoice that bills less than was charged does not match', async () => {
             const { organization, payment, settlement } = await createSettledPayment();
             const number = uuidv4();
-            const fee = await addFeeCharge(organization, settlement, payment, number, { amount: 1_00_00 });
+            const fee = await addFeeCharge(organization, settlement, payment, number, {
+                amount: 1_00_00,
+            });
             await billFees(organization, [fee], number, { billed: 60_00 });
 
-            expect(await buildStatus(organization, number)).toMatchObject({ check: 'Nog niet (volledig) gefactureerd' });
+            expect(await buildStatus(organization, number)).toMatchObject({
+                check: 'Nog niet (volledig) gefactureerd',
+            });
         });
 
         test('charges outside the exported range still count towards the invoice', async () => {
             const { organization, payment, settlement } = await createSettledPayment();
             const number = uuidv4();
-            const inRange = await addFeeCharge(organization, settlement, payment, number, { amount: 1_00_00 });
+            const inRange = await addFeeCharge(organization, settlement, payment, number, {
+                amount: 1_00_00,
+            });
 
             // A charge of the same invoice in a month this export doesn't cover
-            const outside = await addFeeCharge(organization, null, null, number, { amount: 40_00, occurredAt: new Date(2026, 5, 15) });
+            const outside = await addFeeCharge(organization, null, null, number, {
+                amount: 40_00,
+                occurredAt: new Date(2026, 5, 15),
+            });
             await billFees(organization, [inRange, outside], number);
 
-            expect(await buildStatus(organization, number)).toMatchObject({ check: '✓', outsideExport: 40_00 });
+            expect(await buildStatus(organization, number)).toMatchObject({
+                check: '✓',
+                outsideExport: 40_00,
+            });
         });
 
         test('fees without an invoice number are not billed yet', async () => {
@@ -381,7 +433,9 @@ describe('SettlementExporter', () => {
 
             const exporter = createExporter(organization);
             await exporter.build();
-            const totals = exporter.getProviderInvoiceTotals().find(t => t.isSellingOrganization)!;
+            const totals = exporter
+                .getProviderInvoiceTotals()
+                .find((t) => t.isSellingOrganization)!;
 
             expect(await exporter.getProviderInvoiceStatus(totals)).toMatchObject({
                 check: 'Nog niet (volledig) gefactureerd',
@@ -389,35 +443,57 @@ describe('SettlementExporter', () => {
             });
         });
 
-        test('the provider\'s own invoices carry no verdict', async () => {
+        test("the provider's own invoices carry no verdict", async () => {
             const { organization } = await createSettledPayment();
             const exporter = createExporter(organization);
             await exporter.build();
-            const totals = exporter.getProviderInvoiceTotals().find(t => t.invoiceId === 'inv_123')!;
+            const totals = exporter
+                .getProviderInvoiceTotals()
+                .find((t) => t.invoiceId === 'inv_123')!;
 
             expect((await exporter.getProviderInvoiceStatus(totals)).check).toBe('');
         });
     });
 
     describe('getSettlementCheck', () => {
-        const check = (settlement: { amount: number; pendingFees?: number; uncollectibleFees?: number }, rows: { linesTotal: number; chargesTotal: number }) => {
-            return SettlementExporter.getSettlementCheck({ pendingFees: 0, uncollectibleFees: 0, ...settlement } as Settlement, rows);
+        const check = (
+            settlement: { amount: number; pendingFees?: number; uncollectibleFees?: number },
+            rows: { linesTotal: number; chargesTotal: number },
+        ) => {
+            return SettlementExporter.getSettlementCheck(
+                { pendingFees: 0, uncollectibleFees: 0, ...settlement } as Settlement,
+                rows,
+            );
         };
 
         test('a payout its rows fully explain is approved', () => {
-            expect(check({ amount: 49_70_00 }, { linesTotal: 50_00_00, chargesTotal: -30_00 })).toBe('✓');
+            expect(
+                check({ amount: 49_70_00 }, { linesTotal: 50_00_00, chargesTotal: -30_00 }),
+            ).toBe('✓');
         });
 
         test('a difference the stored rows do not cover is missing data', () => {
-            expect(check({ amount: 49_70_00 }, { linesTotal: 50_00_00, chargesTotal: 0 })).toBe('Ontbrekende gegevens');
+            expect(check({ amount: 49_70_00 }, { linesTotal: 50_00_00, chargesTotal: 0 })).toBe(
+                'Ontbrekende gegevens',
+            );
         });
 
         test('fees still waiting for their invoice explain the rest, and say so', () => {
-            expect(check({ amount: 50_00_00, pendingFees: 30_00 }, { linesTotal: 49_70_00, chargesTotal: 0 })).toBe('Kosten nog niet gefactureerd');
+            expect(
+                check(
+                    { amount: 50_00_00, pendingFees: 30_00 },
+                    { linesTotal: 49_70_00, chargesTotal: 0 },
+                ),
+            ).toBe('Kosten nog niet gefactureerd');
         });
 
         test('fees that will never be invoiced explain the rest without waiting for one', () => {
-            expect(check({ amount: 50_00_00, uncollectibleFees: 30_00 }, { linesTotal: 49_70_00, chargesTotal: 0 })).toBe('✓');
+            expect(
+                check(
+                    { amount: 50_00_00, uncollectibleFees: 30_00 },
+                    { linesTotal: 49_70_00, chargesTotal: 0 },
+                ),
+            ).toBe('✓');
         });
     });
 });

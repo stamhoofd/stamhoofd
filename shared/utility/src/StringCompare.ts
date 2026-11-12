@@ -9,7 +9,11 @@ export class StringCompare {
      * That collation also treats a few letters without a separate accent (like ø) as their base letter.
      */
     static normalize(text: string): string {
-        return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[øđłħðŀ]/g, letter => baseLetters[letter]);
+        return text
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[øđłħðŀ]/g, (letter) => baseLetters[letter]);
     }
 
     /**
@@ -17,7 +21,7 @@ export class StringCompare {
      * two letters. MySQL only does this for equality, not for LIKE.
      */
     static normalizeForEquality(text: string): string {
-        return this.normalize(text).replace(/[æßœĳﬁ]/g, letter => expandedLetters[letter]);
+        return this.normalize(text).replace(/[æßœĳﬁ]/g, (letter) => expandedLetters[letter]);
     }
 
     /**
@@ -25,8 +29,18 @@ export class StringCompare {
      * Returns zero if no match is found or if minimum percentage is not met
      */
     static contains(haystack: string, needle: string): boolean {
-        haystack = haystack.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/, ' ').trim();
-        needle = needle.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/, ' ').trim();
+        haystack = haystack
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/, ' ')
+            .trim();
+        needle = needle
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/, ' ')
+            .trim();
 
         return haystack.includes(needle);
     }
@@ -35,17 +49,35 @@ export class StringCompare {
      * Return the search score = percentage (floating point) that matches.
      * Returns zero if no match is found or if minimum percentage is not met
      */
-    static searchScore(haystack: string, needle: string, minimumPercentage: number | null = 10, minimumChars: number | null = 2): number {
+    static searchScore(
+        haystack: string,
+        needle: string,
+        minimumPercentage: number | null = 10,
+        minimumChars: number | null = 2,
+    ): number {
         if (haystack.length === 0) {
             return 0;
         }
 
-        haystack = haystack.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/, ' ').trim();
-        needle = needle.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/, ' ').trim();
+        haystack = haystack
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/, ' ')
+            .trim();
+        needle = needle
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/, ' ')
+            .trim();
 
         const overlap = this.compare(needle, haystack);
 
-        if ((minimumChars === null || overlap > minimumChars) && (minimumPercentage === null || overlap >= haystack.length * minimumPercentage / 100)) {
+        if (
+            (minimumChars === null || overlap > minimumChars) &&
+            (minimumPercentage === null || overlap >= (haystack.length * minimumPercentage) / 100)
+        ) {
             return overlap;
         }
         return 0;
@@ -81,15 +113,35 @@ export class StringCompare {
 
     static matchCount(original: string, compareWith: string): number {
         // remove special chars + lowercase
-        original = original.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/, ' ').trim();
-        compareWith = compareWith.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/, ' ').trim();
+        original = original
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/, ' ')
+            .trim();
+        compareWith = compareWith
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/, ' ')
+            .trim();
         return this.compare(original, compareWith);
     }
 
     static typoCount(original: string, compareWith: string): number {
         // remove special chars + lowercase
-        original = original.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/, ' ').trim();
-        compareWith = compareWith.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/, ' ').trim();
+        original = original
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/, ' ')
+            .trim();
+        compareWith = compareWith
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\s+/, ' ')
+            .trim();
         return Math.max(original.length, compareWith.length) - this.compare(original, compareWith);
     }
 

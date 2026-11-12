@@ -1,6 +1,11 @@
 import type { CliContext } from '../context/create-context.js';
 import type { RouteManifest, RouteManifestInput } from './manifest-store.js';
-import { listActiveRouteManifests, pruneStaleRouteManifests, removeRouteManifest, writeRouteManifest } from './manifest-store.js';
+import {
+    listActiveRouteManifests,
+    pruneStaleRouteManifests,
+    removeRouteManifest,
+    writeRouteManifest,
+} from './manifest-store.js';
 import { findBusyPorts } from './port-probe.js';
 
 export type RouteManifestConflict = {
@@ -28,7 +33,10 @@ const settleMs = 250;
  * The active manifests whose reserved ports overlap the ports of `candidate`. Manifests with the
  * same name are ignored: that one is the candidate itself (a previous attempt of this same run).
  */
-export async function findRouteManifestConflicts(context: CliContext, candidate: RouteManifestInput): Promise<RouteManifestConflict[]> {
+export async function findRouteManifestConflicts(
+    context: CliContext,
+    candidate: RouteManifestInput,
+): Promise<RouteManifestConflict[]> {
     const wanted = new Set(candidate.reservedPorts ?? []);
     if (wanted.size === 0) {
         return [];
@@ -36,9 +44,12 @@ export async function findRouteManifestConflicts(context: CliContext, candidate:
 
     const manifests = await listActiveRouteManifests(context);
     return manifests
-        .filter(manifest => manifest.name !== candidate.name)
-        .map(manifest => ({ manifest, ports: (manifest.reservedPorts ?? []).filter(port => wanted.has(port)) }))
-        .filter(conflict => conflict.ports.length > 0);
+        .filter((manifest) => manifest.name !== candidate.name)
+        .map((manifest) => ({
+            manifest,
+            ports: (manifest.reservedPorts ?? []).filter((port) => wanted.has(port)),
+        }))
+        .filter((conflict) => conflict.ports.length > 0);
 }
 
 /**
@@ -50,7 +61,10 @@ export async function findRouteManifestConflicts(context: CliContext, candidate:
  * written first and verified afterwards, so two processes that pick the same free range at the
  * same time do not both keep it: the one that started later removes its manifest and moves on.
  */
-export async function reserveRouteManifest(context: CliContext, options: ReserveRouteManifestOptions): Promise<RouteManifest> {
+export async function reserveRouteManifest(
+    context: CliContext,
+    options: ReserveRouteManifestOptions,
+): Promise<RouteManifest> {
     const blocked: string[] = [];
 
     // Manifests of crashed runs would keep their ports claimed forever.
@@ -59,7 +73,9 @@ export async function reserveRouteManifest(context: CliContext, options: Reserve
     for (let attempt = 0; ; attempt += 1) {
         const candidate = options.buildManifest(attempt);
         if (!candidate) {
-            throw new Error(`Could not reserve a free port range${blocked.length === 0 ? '' : `. Tried ${blocked.length} ranges: ${describeBlocked(blocked)}`}`);
+            throw new Error(
+                `Could not reserve a free port range${blocked.length === 0 ? '' : `. Tried ${blocked.length} ranges: ${describeBlocked(blocked)}`}`,
+            );
         }
 
         const blockedBy = await describeBlockers(context, candidate);
@@ -69,10 +85,11 @@ export async function reserveRouteManifest(context: CliContext, options: Reserve
         }
 
         const written = await writeRouteManifest(context, candidate);
-        await new Promise(resolve => setTimeout(resolve, settleMs));
+        await new Promise((resolve) => setTimeout(resolve, settleMs));
 
-        const lostAgainst = (await findRouteManifestConflicts(context, candidate))
-            .filter(conflict => losesRaceAgainst(candidate, conflict.manifest));
+        const lostAgainst = (await findRouteManifestConflicts(context, candidate)).filter(
+            (conflict) => losesRaceAgainst(candidate, conflict.manifest),
+        );
 
         if (lostAgainst.length === 0) {
             return written;
@@ -80,14 +97,19 @@ export async function reserveRouteManifest(context: CliContext, options: Reserve
 
         // Another process claimed (part of) this range at the same time and started first.
         await removeRouteManifest(context, candidate.name);
-        blocked.push(`${describePorts(lostAgainst.flatMap(conflict => conflict.ports))} claimed by ${lostAgainst.map(conflict => conflict.manifest.name).join(', ')}`);
+        blocked.push(
+            `${describePorts(lostAgainst.flatMap((conflict) => conflict.ports))} claimed by ${lostAgainst.map((conflict) => conflict.manifest.name).join(', ')}`,
+        );
     }
 }
 
-async function describeBlockers(context: CliContext, candidate: RouteManifestInput): Promise<string | undefined> {
+async function describeBlockers(
+    context: CliContext,
+    candidate: RouteManifestInput,
+): Promise<string | undefined> {
     const conflicts = await findRouteManifestConflicts(context, candidate);
     if (conflicts.length > 0) {
-        return `${describePorts(conflicts.flatMap(conflict => conflict.ports))} reserved by ${conflicts.map(conflict => conflict.manifest.name).join(', ')}`;
+        return `${describePorts(conflicts.flatMap((conflict) => conflict.ports))} reserved by ${conflicts.map((conflict) => conflict.manifest.name).join(', ')}`;
     }
 
     const busy = await findBusyPorts(candidate.reservedPorts ?? []);

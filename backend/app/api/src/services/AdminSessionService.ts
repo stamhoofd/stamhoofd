@@ -25,9 +25,15 @@ export class AdminSessionService {
      *
      * Returns the number of ended sessions.
      */
-    static async signOutOrganizationAdmins(organizationId: string, keepAccessToken: string | null): Promise<number> {
+    static async signOutOrganizationAdmins(
+        organizationId: string,
+        keepAccessToken: string | null,
+    ): Promise<number> {
         const admins = await User.getAdmins(organizationId);
-        return await SessionService.deleteForUsers({ userIds: admins.map(a => a.id), keepAccessToken });
+        return await SessionService.deleteForUsers({
+            userIds: admins.map((a) => a.id),
+            keepAccessToken,
+        });
     }
 
     /**
@@ -38,6 +44,9 @@ export class AdminSessionService {
      */
     static async signOutPlatformAdmins(keepAccessToken: string | null): Promise<number> {
         const admins = await User.getPlatformAdmins();
-        return await SessionService.deleteForUsers({ userIds: admins.map(a => a.id), keepAccessToken });
+        return await SessionService.deleteForUsers({
+            userIds: admins.map((a) => a.id),
+            keepAccessToken,
+        });
     }
 }

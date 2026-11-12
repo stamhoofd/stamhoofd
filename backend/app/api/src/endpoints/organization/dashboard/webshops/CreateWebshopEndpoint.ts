@@ -5,7 +5,12 @@ import { SimpleError, SimpleErrors } from '@common/errors';
 import { Webshop } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { PrivateWebshop, ResourcePermissions, Version, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import {
+    PrivateWebshop,
+    ResourcePermissions,
+    Version,
+    WebshopPrivateMetaData,
+} from '@stamhoofd/structures';
 import { Formatter, isReservedWebshopPathSegment } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -41,7 +46,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         const { user } = await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.canCreateWebshops(organization.id)) {
+        if (!(await Context.auth.canCreateWebshops(organization.id))) {
             throw Context.auth.error($t('%FH'));
         }
         Context.assertNotImpersonating(); // authorId would be wrong
@@ -55,7 +60,10 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         webshop.meta.domainActive = false;
 
         // Only Stamhoofd staff can disable service fees (also prevents copying the setting when duplicating a webshop)
-        if (webshop.meta.noServiceFees && !(user.email.endsWith('@stamhoofd.be') || user.email.endsWith('@stamhoofd.nl'))) {
+        if (
+            webshop.meta.noServiceFees &&
+            !(user.email.endsWith('@stamhoofd.be') || user.email.endsWith('@stamhoofd.nl'))
+        ) {
             webshop.meta.noServiceFees = false;
         }
         webshop.privateMeta = request.body.privateMeta;
@@ -90,7 +98,9 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             }
 
             if (counters.size > 0) {
-                const maxDomain = [...counters.entries()].reduce((a, e) => e[1] > a[1] ? e : a)[0];
+                const maxDomain = [...counters.entries()].reduce((a, e) =>
+                    e[1] > a[1] ? e : a,
+                )[0];
                 console.log('Choosing default domain for new webshop: ', maxDomain);
 
                 webshop.domain = maxDomain;
@@ -113,7 +123,10 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                 }
 
                 const knownWebshops = await Webshop.getByDomainOnly(cleaned);
-                if (knownWebshops.find(k => k.meta.domainActive) && !knownWebshops.find(w => w.organizationId === organization.id)) {
+                if (
+                    knownWebshops.find((k) => k.meta.domainActive) &&
+                    !knownWebshops.find((w) => w.organizationId === organization.id)
+                ) {
                     throw new SimpleError({
                         code: 'domain_already_used',
                         message: 'This domain is already used by another organization',
@@ -134,11 +147,17 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             }
         }
 
-        webshop.uri = request.body.uri.length > 0 ? Formatter.slug(request.body.uri) : Formatter.slug(webshop.meta.name);
+        webshop.uri =
+            request.body.uri.length > 0
+                ? Formatter.slug(request.body.uri)
+                : Formatter.slug(webshop.meta.name);
 
         // Check if this uri is inique
         let original = webshop.uri;
-        const possibleSuffixes = [new Date().getFullYear().toString(), Formatter.slug(organization.uri)];
+        const possibleSuffixes = [
+            new Date().getFullYear().toString(),
+            Formatter.slug(organization.uri),
+        ];
 
         // Remove possible suffices from original
         for (const suffix of possibleSuffixes) {
@@ -148,7 +167,11 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         }
 
         let tried = 0;
-        while (webshop.uri.length > 100 || isReservedWebshopPathSegment(webshop.uri) || await Webshop.getByURI(webshop.uri) !== undefined) {
+        while (
+            webshop.uri.length > 100 ||
+            isReservedWebshopPathSegment(webshop.uri) ||
+            (await Webshop.getByURI(webshop.uri)) !== undefined
+        ) {
             console.log('Webshop already exists', webshop.uri);
 
             let suffix = '';
@@ -175,9 +198,11 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             }
         }
 
-        if (!await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+        if (!(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full))) {
             // Create a temporary permission role for this user
-            const organizationPermissions = user.permissions?.organizationPermissions?.get(organization.id);
+            const organizationPermissions = user.permissions?.organizationPermissions?.get(
+                organization.id,
+            );
             if (!organizationPermissions) {
                 throw new Error('Unexpected missing permissions');
             }
@@ -185,17 +210,33 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                 resourceName: webshop.meta.name,
                 level: PermissionLevel.Full,
             });
-            const patch = resourcePermissions.createInsertPatch(PermissionsResourceType.Webshops, webshop.id, organizationPermissions);
-            user.permissions!.organizationPermissions.set(organization.id, organizationPermissions.patch(patch));
-            console.log('Automatically granted author full permissions to resource', 'webshop', webshop.id, 'user', user.id, 'patch', patch.encode({ version: Version }));
+            const patch = resourcePermissions.createInsertPatch(
+                PermissionsResourceType.Webshops,
+                webshop.id,
+                organizationPermissions,
+            );
+            user.permissions!.organizationPermissions.set(
+                organization.id,
+                organizationPermissions.patch(patch),
+            );
+            console.log(
+                'Automatically granted author full permissions to resource',
+                'webshop',
+                webshop.id,
+                'user',
+                user.id,
+                'patch',
+                patch.encode({ version: Version }),
+            );
             await user.save();
         }
 
         // Verify if we have full access
-        if (!await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full)) {
+        if (!(await Context.auth.canAccessWebshop(webshop, PermissionLevel.Full))) {
             throw new SimpleError({
                 code: 'missing_permissions',
-                message: 'You cannot create a webshop without having full permissions on the created webshop',
+                message:
+                    'You cannot create a webshop without having full permissions on the created webshop',
                 human: $t('%FJ'),
             });
         }
@@ -218,7 +259,10 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         const original = webshop.domainUri ? webshop.domainUri + '-' : '';
         const possibleSuffixes = [new Date().getFullYear().toString()];
         let tried = 0;
-        while ((webshop.domainUri && isReservedWebshopPathSegment(webshop.domainUri)) || await Webshop.getByDomain(webshop.domain, webshop.domainUri) !== undefined) {
+        while (
+            (webshop.domainUri && isReservedWebshopPathSegment(webshop.domainUri)) ||
+            (await Webshop.getByDomain(webshop.domain, webshop.domainUri)) !== undefined
+        ) {
             console.log('Webshop already exists', webshop.domainUri);
 
             if (tried < possibleSuffixes.length) {

@@ -1,8 +1,19 @@
 import { Request } from '@node/endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import {
+    GroupFactory,
+    OrganizationFactory,
+    OrganizationRegistrationPeriodFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
-import { BundleDiscountGroupPriceSettings, GroupPrice, GroupType, LimitedFilteredRequest } from '@stamhoofd/structures';
+import {
+    BundleDiscountGroupPriceSettings,
+    GroupPrice,
+    GroupType,
+    LimitedFilteredRequest,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initAdmin, initBundleDiscount, initPlatformAdmin } from '../../../../tests/init/index.js';
@@ -18,7 +29,15 @@ describe('Endpoint.GetGroupsEndpoint', () => {
     let registrationPeriod1: RegistrationPeriod;
     let registrationPeriod2: RegistrationPeriod;
 
-    const get = async ({ organization, token, filter }: { organization?: Organization; token: Token; filter?: StamhoofdFilter }) => {
+    const get = async ({
+        organization,
+        token,
+        filter,
+    }: {
+        organization?: Organization;
+        token: Token;
+        filter?: StamhoofdFilter;
+    }) => {
         const request = Request.get({
             path: baseUrl,
             host: organization?.getApiHost() ?? '',
@@ -53,8 +72,7 @@ describe('Endpoint.GetGroupsEndpoint', () => {
     });
 
     const initOrganization = async (registrationPeriod: RegistrationPeriod) => {
-        const organization = await new OrganizationFactory({ period: registrationPeriod })
-            .create();
+        const organization = await new OrganizationFactory({ period: registrationPeriod }).create();
 
         const organizationRegistrationPeriod = await new OrganizationRegistrationPeriodFactory({
             organization,
@@ -65,7 +83,8 @@ describe('Endpoint.GetGroupsEndpoint', () => {
     };
 
     async function initTest() {
-        const { organization, organizationRegistrationPeriod } = await initOrganization(registrationPeriod1);
+        const { organization, organizationRegistrationPeriod } =
+            await initOrganization(registrationPeriod1);
         const { organization: otherOrganization } = await initOrganization(registrationPeriod1);
 
         const user = await new UserFactory({ organization }).create();
@@ -92,7 +111,15 @@ describe('Endpoint.GetGroupsEndpoint', () => {
             type: GroupType.Membership,
         }).create();
 
-        return { organizationRegistrationPeriod, organization, token, waitingList, event, group, otherGroup };
+        return {
+            organizationRegistrationPeriod,
+            organization,
+            token,
+            waitingList,
+            event,
+            group,
+            otherGroup,
+        };
     }
 
     it('Can return all groups for an organization', async () => {
@@ -137,7 +164,9 @@ describe('Endpoint.GetGroupsEndpoint', () => {
     it('Cannot return all groups to a normal admin', async () => {
         const { organization } = await initTest();
         const { adminToken } = await initAdmin({ organization });
-        await expect(get({ token: adminToken })).rejects.toThrow(STExpect.simpleError({ code: 'permission_denied' }));
+        await expect(get({ token: adminToken })).rejects.toThrow(
+            STExpect.simpleError({ code: 'permission_denied' }),
+        );
     });
 
     it('Can return a group by ID for an organization', async () => {
@@ -157,22 +186,32 @@ describe('Endpoint.GetGroupsEndpoint', () => {
     });
 
     it('Can return a group by bundle discount id', async () => {
-        const { organizationRegistrationPeriod, organization, token, group, event } = await initTest();
-        const bundleDiscount = await initBundleDiscount({ organizationRegistrationPeriod, discount: {} });
+        const { organizationRegistrationPeriod, organization, token, group, event } =
+            await initTest();
+        const bundleDiscount = await initBundleDiscount({
+            organizationRegistrationPeriod,
+            discount: {},
+        });
 
         // Add a price to event with a bundle discount
         const eventGroupPriceAdded = GroupPrice.create({
             bundleDiscounts: new Map([
-                [bundleDiscount.id, BundleDiscountGroupPriceSettings.create({ name: bundleDiscount.name })],
+                [
+                    bundleDiscount.id,
+                    BundleDiscountGroupPriceSettings.create({ name: bundleDiscount.name }),
+                ],
             ]),
         });
         event.settings.prices.push(eventGroupPriceAdded);
         await event.save();
 
         // Set the main group price to the group
-        group.settings.prices[0].bundleDiscounts.set(bundleDiscount.id, BundleDiscountGroupPriceSettings.create({
-            name: bundleDiscount.name,
-        }));
+        group.settings.prices[0].bundleDiscounts.set(
+            bundleDiscount.id,
+            BundleDiscountGroupPriceSettings.create({
+                name: bundleDiscount.name,
+            }),
+        );
         await group.save();
 
         const result = await get({
@@ -197,8 +236,12 @@ describe('Endpoint.GetGroupsEndpoint', () => {
     });
 
     it('Safely escapes ids', async () => {
-        const { organizationRegistrationPeriod, organization, token, group, event } = await initTest();
-        const bundleDiscount = await initBundleDiscount({ organizationRegistrationPeriod, discount: {} });
+        const { organizationRegistrationPeriod, organization, token, group, event } =
+            await initTest();
+        const bundleDiscount = await initBundleDiscount({
+            organizationRegistrationPeriod,
+            discount: {},
+        });
         const id = `This Id. contains "[10] and .**' inside of it... \\"\\'"'`;
         const differentId = `This Id. contains "[10] and .**' inside of it... "\\'"'`;
 
@@ -212,9 +255,12 @@ describe('Endpoint.GetGroupsEndpoint', () => {
         await event.save();
 
         // Set the main group price to the group
-        group.settings.prices[0].bundleDiscounts.set(differentId, BundleDiscountGroupPriceSettings.create({
-            name: bundleDiscount.name,
-        }));
+        group.settings.prices[0].bundleDiscounts.set(
+            differentId,
+            BundleDiscountGroupPriceSettings.create({
+                name: bundleDiscount.name,
+            }),
+        );
         await group.save();
 
         const result = await get({

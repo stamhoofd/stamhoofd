@@ -1,5 +1,10 @@
 import { column } from '@node/database';
-import { EmailRecipient as EmailRecipientStruct, Recipient, Replacement, TinyMember } from '@stamhoofd/structures';
+import {
+    EmailRecipient as EmailRecipientStruct,
+    Recipient,
+    Replacement,
+    TinyMember,
+} from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,7 +18,9 @@ export class EmailRecipient extends QueryableModel {
     static table = 'email_recipients';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             return value ?? uuidv4();
         },
     })
@@ -137,7 +144,8 @@ export class EmailRecipient extends QueryableModel {
     sentAt: Date | null = null;
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -149,7 +157,8 @@ export class EmailRecipient extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;
@@ -163,7 +172,7 @@ export class EmailRecipient extends QueryableModel {
      * It is regenerated when sending, so it never needs to be stored.
      */
     static removeUnstoredReplacements(replacements: Replacement[]) {
-        return replacements.filter(r => r.token !== 'loginDetails');
+        return replacements.filter((r) => r.token !== 'loginDetails');
     }
 
     async getStructure() {
@@ -175,13 +184,15 @@ export class EmailRecipient extends QueryableModel {
     }
 
     static async getStructures(models: EmailRecipient[]) {
-        const memberIds = Formatter.uniqueArray(models.map(m => m.memberId).filter(m => m) as string[]);
+        const memberIds = Formatter.uniqueArray(
+            models.map((m) => m.memberId).filter((m) => m) as string[],
+        );
         const members = await Member.getByIDs(...memberIds);
         return models.map((m) => {
             const struct = EmailRecipientStruct.create(m);
 
             if (m.memberId) {
-                const member = members.find(me => me.id === m.memberId);
+                const member = members.find((me) => me.id === m.memberId);
                 if (member) {
                     struct.member = TinyMember.create(member);
                 }

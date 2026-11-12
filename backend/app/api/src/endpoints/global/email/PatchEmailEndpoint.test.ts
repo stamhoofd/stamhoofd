@@ -2,11 +2,32 @@ import type { AutoEncoderPatchType } from '@common/encoding';
 import { PatchMap } from '@common/encoding';
 import { Request } from '@node/endpoints';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
-import { Email, EmailRecipient, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import {
+    Email,
+    EmailRecipient,
+    GroupFactory,
+    MemberFactory,
+    OrganizationFactory,
+    RegistrationFactory,
+    RegistrationPeriodFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { EmailContent, EmailRecipientFilter, EmailRecipientSubfilter, EmailStatus, Email as EmailStruct, OrganizationEmail, Parent, Permissions, ResourcePermissions, UserPermissions, Version } from '@stamhoofd/structures';
+import {
+    EmailContent,
+    EmailRecipientFilter,
+    EmailRecipientSubfilter,
+    EmailStatus,
+    Email as EmailStruct,
+    OrganizationEmail,
+    Parent,
+    Permissions,
+    ResourcePermissions,
+    UserPermissions,
+    Version,
+} from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
@@ -38,9 +59,18 @@ describe('Endpoint.PatchEmailEndpoint', () => {
     let token2: Token;
     let user2: User;
 
-    const patchEmail = async (email: AutoEncoderPatchType<EmailStruct>, token: Token, organization?: Organization) => {
+    const patchEmail = async (
+        email: AutoEncoderPatchType<EmailStruct>,
+        token: Token,
+        organization?: Organization,
+    ) => {
         const id = email.id;
-        const request = Request.buildJson('PATCH', `${baseUrl}/${id}`, organization?.getApiHost(), email);
+        const request = Request.buildJson(
+            'PATCH',
+            `${baseUrl}/${id}`,
+            organization?.getApiHost(),
+            email,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return await testServer.test(endpoint, request);
     };
@@ -57,8 +87,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             endDate: new Date(2023, 11, 31),
         }).create();
 
-        organization = await new OrganizationFactory({ period })
-            .create();
+        organization = await new OrganizationFactory({ period }).create();
 
         sender = OrganizationEmail.create({
             email: 'groepsleiding@voorbeeld.com',
@@ -78,15 +107,22 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             permissions: Permissions.create({
                 level: PermissionLevel.None,
                 resources: new Map([
-                    [PermissionsResourceType.Senders, new Map([[sender.id, ResourcePermissions.create({
-                        resourceName: sender.name!,
-                        level: PermissionLevel.None,
-                        accessRights: [AccessRight.SendMessages],
-                    })]])],
+                    [
+                        PermissionsResourceType.Senders,
+                        new Map([
+                            [
+                                sender.id,
+                                ResourcePermissions.create({
+                                    resourceName: sender.name!,
+                                    level: PermissionLevel.None,
+                                    accessRights: [AccessRight.SendMessages],
+                                }),
+                            ],
+                        ]),
+                    ],
                 ]),
             }),
-        })
-            .create();
+        }).create();
 
         token = await SessionService.createSession(user);
 
@@ -95,15 +131,22 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             permissions: Permissions.create({
                 level: PermissionLevel.None,
                 resources: new Map([
-                    [PermissionsResourceType.Senders, new Map([[sender2.id, ResourcePermissions.create({
-                        resourceName: sender.name!,
-                        level: PermissionLevel.Write,
-                        accessRights: [AccessRight.SendMessages],
-                    })]])],
+                    [
+                        PermissionsResourceType.Senders,
+                        new Map([
+                            [
+                                sender2.id,
+                                ResourcePermissions.create({
+                                    resourceName: sender.name!,
+                                    level: PermissionLevel.Write,
+                                    accessRights: [AccessRight.SendMessages],
+                                }),
+                            ],
+                        ]),
+                    ],
                 ]),
             }),
-        })
-            .create();
+        }).create();
 
         token2 = await SessionService.createSession(user2);
     });
@@ -155,9 +198,9 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             senderId: 'invalid-sender-id',
         });
 
-        await expect(patchEmail(body, token, organization))
-            .rejects
-            .toThrow(STExpect.errorWithCode('invalid_sender'));
+        await expect(patchEmail(body, token, organization)).rejects.toThrow(
+            STExpect.errorWithCode('invalid_sender'),
+        );
     });
 
     test('Should throw when patching other users email without sender id', async () => {
@@ -206,9 +249,9 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             subject: 'new subject',
         });
 
-        await expect(patchEmail(body, token, organization))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(patchEmail(body, token, organization)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     test('Should throw when patching other users email even when matching sender', async () => {
@@ -258,9 +301,9 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             subject: 'new subject',
         });
 
-        await expect(patchEmail(body, token, organization))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(patchEmail(body, token, organization)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     test('Should not throw when patching other users email when having write access to sender', async () => {
@@ -359,9 +402,9 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             senderId: sender2.id,
         });
 
-        await expect(patchEmail(body, token, organization))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(patchEmail(body, token, organization)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     test('Should throw when sending if no permission for sender', async () => {
@@ -411,9 +454,9 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             status: EmailStatus.Sending,
         });
 
-        await expect(patchEmail(body, token, organization))
-            .rejects
-            .toThrow(STExpect.errorWithCode('permission_denied'));
+        await expect(patchEmail(body, token, organization)).rejects.toThrow(
+            STExpect.errorWithCode('permission_denied'),
+        );
     });
 
     test('Should throw error if no unsubscribe button in email html', async () => {
@@ -455,11 +498,15 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
         await email.save();
 
-        const body = EmailStruct.patch({ id: email.id, senderId: sender.id, status: EmailStatus.Sending });
+        const body = EmailStruct.patch({
+            id: email.id,
+            senderId: sender.id,
+            status: EmailStatus.Sending,
+        });
 
-        await expect(patchEmail(body, token, organization))
-            .rejects
-            .toThrow(STExpect.errorWithCode('missing_unsubscribe_button'));
+        await expect(patchEmail(body, token, organization)).rejects.toThrow(
+            STExpect.errorWithCode('missing_unsubscribe_button'),
+        );
     });
 
     test('Should throw error if no unsubscribe button in email text', async () => {
@@ -501,11 +548,15 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
         await email.save();
 
-        const body = EmailStruct.patch({ id: email.id, senderId: sender.id, status: EmailStatus.Sending });
+        const body = EmailStruct.patch({
+            id: email.id,
+            senderId: sender.id,
+            status: EmailStatus.Sending,
+        });
 
-        await expect(patchEmail(body, token, organization))
-            .rejects
-            .toThrow(STExpect.errorWithCode('missing_unsubscribe_button'));
+        await expect(patchEmail(body, token, organization)).rejects.toThrow(
+            STExpect.errorWithCode('missing_unsubscribe_button'),
+        );
     });
 
     test('Can send an email', async () => {
@@ -566,21 +617,40 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
         // Get existing organization permissions
         // Create new organization permissions if they don't exist
-        user.permissions.organizationPermissions.set(organization.id, Permissions.create({
-            level: PermissionLevel.None,
-            resources: new Map([
-                [PermissionsResourceType.Senders, new Map([[sender.id, ResourcePermissions.create({
-                    resourceName: sender.name!,
-                    level: PermissionLevel.None,
-                    accessRights: [AccessRight.SendMessages],
-                })]])],
-                [PermissionsResourceType.Groups, new Map([[testGroup.id, ResourcePermissions.create({
-                    resourceName: testGroup.settings.name.toString(),
-                    level: PermissionLevel.Read, // Need at least Read access to access group members through registrations
-                    accessRights: [],
-                })]])],
-            ]),
-        }));
+        user.permissions.organizationPermissions.set(
+            organization.id,
+            Permissions.create({
+                level: PermissionLevel.None,
+                resources: new Map([
+                    [
+                        PermissionsResourceType.Senders,
+                        new Map([
+                            [
+                                sender.id,
+                                ResourcePermissions.create({
+                                    resourceName: sender.name!,
+                                    level: PermissionLevel.None,
+                                    accessRights: [AccessRight.SendMessages],
+                                }),
+                            ],
+                        ]),
+                    ],
+                    [
+                        PermissionsResourceType.Groups,
+                        new Map([
+                            [
+                                testGroup.id,
+                                ResourcePermissions.create({
+                                    resourceName: testGroup.settings.name.toString(),
+                                    level: PermissionLevel.Read, // Need at least Read access to access group members through registrations
+                                    accessRights: [],
+                                }),
+                            ],
+                        ]),
+                    ],
+                ]),
+            }),
+        );
         await user.save();
 
         // Create test users - one with email and one without
@@ -626,7 +696,8 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         const email = new Email();
         email.subject = 'Test Email with Replacements {{firstName}}';
         email.status = EmailStatus.Draft;
-        email.text = 'Hello {{firstName}} {{lastName}}, this is a test email. {{unsubscribeUrl}} {{loginDetails}}';
+        email.text =
+            'Hello {{firstName}} {{lastName}}, this is a test email. {{unsubscribeUrl}} {{loginDetails}}';
         email.html = `<!DOCTYPE html>
         <html>
         <head>
@@ -679,41 +750,43 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         await email.refresh();
 
         // Check that EmailRecipient records were created correctly
-        const recipients = await EmailRecipient.select()
-            .where('emailId', email.id)
-            .fetch();
+        const recipients = await EmailRecipient.select().where('emailId', email.id).fetch();
 
         expect(recipients).toHaveLength(3);
 
         // Two recipients with null email for both members
-        const recipientsWithoutEmail = recipients.filter(r => r.email === null);
+        const recipientsWithoutEmail = recipients.filter((r) => r.email === null);
         expect(recipientsWithoutEmail).toHaveLength(2);
 
         // Check one extra recipient with the email = memberWithEmail's email
-        const recipientWithEmail = recipients.find(r => r.email === userWithEmail.email);
+        const recipientWithEmail = recipients.find((r) => r.email === userWithEmail.email);
         expect(recipientWithEmail).toBeDefined();
         expect(recipientWithEmail?.memberId).toBe(memberWithEmail.id);
 
         for (const recipient of recipients) {
             // Check {{greeting}} replacement
-            const greeting = recipient.replacements.find(r => r.token === 'greeting');
+            const greeting = recipient.replacements.find((r) => r.token === 'greeting');
             expect(greeting).toBeDefined();
             expect(greeting?.value).toEqual('Dag ' + recipient.firstName + ',');
 
             // loginDetails contains security codes and is only generated when sending
-            expect(recipient.replacements.find(r => r.token === 'loginDetails')).toBeUndefined();
+            expect(recipient.replacements.find((r) => r.token === 'loginDetails')).toBeUndefined();
 
-            const balanceTable = recipient.replacements.find(r => r.token === 'balanceTable');
+            const balanceTable = recipient.replacements.find((r) => r.token === 'balanceTable');
             expect(balanceTable).toBeDefined();
             expect(balanceTable?.html).toMatch($t('%hX'));
 
             // Outstanding balance
-            const outstandingBalance = recipient.replacements.find(r => r.token === 'outstandingBalance');
+            const outstandingBalance = recipient.replacements.find(
+                (r) => r.token === 'outstandingBalance',
+            );
             expect(outstandingBalance).toBeDefined();
             expect(outstandingBalance?.value).toBe(Formatter.price(0));
 
             // firstNameMember
-            const firstNameMember = recipient.replacements.find(r => r.token === 'firstNameMember');
+            const firstNameMember = recipient.replacements.find(
+                (r) => r.token === 'firstNameMember',
+            );
             expect(firstNameMember).toBeDefined();
             if (recipient.memberId === memberWithEmail.id) {
                 expect(firstNameMember?.value).toBe(memberWithEmail.details.firstName);
@@ -724,7 +797,7 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             }
 
             // Check lastNameMember is not present, because it is not used in the html
-            const lastNameMember = recipient.replacements.find(r => r.token === 'lastNameMember');
+            const lastNameMember = recipient.replacements.find((r) => r.token === 'lastNameMember');
             expect(lastNameMember).toBeUndefined();
         }
 
@@ -733,9 +806,11 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             expect(email.status).toBe(EmailStatus.Sent);
         });
         const sentEmails = await EmailMocker.getSucceededEmails();
-        const sentEmail = sentEmails.find(e => e.to.includes(userWithEmail.email));
+        const sentEmail = sentEmails.find((e) => e.to.includes(userWithEmail.email));
         expect(sentEmail).toBeDefined();
-        expect(sentEmail?.html).toContain(`<strong>${Formatter.escapeHtml(userWithEmail.email)}</strong>`);
+        expect(sentEmail?.html).toContain(
+            `<strong>${Formatter.escapeHtml(userWithEmail.email)}</strong>`,
+        );
     });
 
     test('Should merge identical emails', async () => {
@@ -755,42 +830,65 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
         // Get existing organization permissions
         // Create new organization permissions if they don't exist
-        user.permissions.organizationPermissions.set(organization.id, Permissions.create({
-            level: PermissionLevel.None,
-            resources: new Map([
-                [PermissionsResourceType.Senders, new Map([[sender.id, ResourcePermissions.create({
-                    resourceName: sender.name!,
-                    level: PermissionLevel.None,
-                    accessRights: [AccessRight.SendMessages],
-                })]])],
-                [PermissionsResourceType.Groups, new Map([[testGroup.id, ResourcePermissions.create({
-                    resourceName: testGroup.settings.name.toString(),
-                    level: PermissionLevel.Read, // Need at least Read access to access group members through registrations
-                    accessRights: [],
-                })]])],
-            ]),
-        }));
+        user.permissions.organizationPermissions.set(
+            organization.id,
+            Permissions.create({
+                level: PermissionLevel.None,
+                resources: new Map([
+                    [
+                        PermissionsResourceType.Senders,
+                        new Map([
+                            [
+                                sender.id,
+                                ResourcePermissions.create({
+                                    resourceName: sender.name!,
+                                    level: PermissionLevel.None,
+                                    accessRights: [AccessRight.SendMessages],
+                                }),
+                            ],
+                        ]),
+                    ],
+                    [
+                        PermissionsResourceType.Groups,
+                        new Map([
+                            [
+                                testGroup.id,
+                                ResourcePermissions.create({
+                                    resourceName: testGroup.settings.name.toString(),
+                                    level: PermissionLevel.Read, // Need at least Read access to access group members through registrations
+                                    accessRights: [],
+                                }),
+                            ],
+                        ]),
+                    ],
+                ]),
+            }),
+        );
         await user.save();
 
         const member1 = await new MemberFactory({
             organization,
         }).create();
-        member1.details.parents = [Parent.create({
-            firstName: 'Identical',
-            lastName: 'Email',
-            email: 'identical-email@test.com',
-        })];
+        member1.details.parents = [
+            Parent.create({
+                firstName: 'Identical',
+                lastName: 'Email',
+                email: 'identical-email@test.com',
+            }),
+        ];
 
         await member1.save();
 
         const member2 = await new MemberFactory({
             organization,
         }).create();
-        member2.details.parents = [Parent.create({
-            firstName: 'Identical',
-            lastName: 'Email',
-            email: 'identical-email@test.com',
-        })];
+        member2.details.parents = [
+            Parent.create({
+                firstName: 'Identical',
+                lastName: 'Email',
+                email: 'identical-email@test.com',
+            }),
+        ];
         await member2.save();
 
         await new RegistrationFactory({
@@ -806,7 +904,8 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         const email = new Email();
         email.subject = 'Test Email with Replacements {{firstName}}';
         email.status = EmailStatus.Draft;
-        email.text = 'Hello {{firstName}} {{lastName}}, this is a test email. {{unsubscribeUrl}} {{loginDetails}}';
+        email.text =
+            'Hello {{firstName}} {{lastName}}, this is a test email. {{unsubscribeUrl}} {{loginDetails}}';
         email.html = `<!DOCTYPE html>
         <html>
         <head>
@@ -858,25 +957,27 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         expect(email.status).toBe(EmailStatus.Sent);
 
         // Check that EmailRecipient records were created correctly
-        const recipients = await EmailRecipient.select()
-            .where('emailId', email.id)
-            .fetch();
+        const recipients = await EmailRecipient.select().where('emailId', email.id).fetch();
 
         expect(recipients).toHaveLength(2);
 
         // No recipients with null, because we only targeted parents
-        const recipientsWithoutEmail = recipients.filter(r => r.email === null);
+        const recipientsWithoutEmail = recipients.filter((r) => r.email === null);
         expect(recipientsWithoutEmail).toHaveLength(0);
 
-        const recipientsWithEmail = recipients.filter(r => r.email === 'identical-email@test.com');
+        const recipientsWithEmail = recipients.filter(
+            (r) => r.email === 'identical-email@test.com',
+        );
         expect(recipientsWithEmail).toHaveLength(2);
 
         // Check sentAt, only one
-        const sentRecipients = recipients.filter(r => r.sentAt !== null);
+        const sentRecipients = recipients.filter((r) => r.sentAt !== null);
         expect(sentRecipients).toHaveLength(1);
 
         // Check one with duplicateOfId set
-        const duplicateRecipients = recipientsWithEmail.filter(r => r.duplicateOfRecipientId !== null);
+        const duplicateRecipients = recipientsWithEmail.filter(
+            (r) => r.duplicateOfRecipientId !== null,
+        );
         expect(duplicateRecipients).toHaveLength(1);
         expect(duplicateRecipients[0].duplicateOfRecipientId).toBe(sentRecipients[0].id);
 
@@ -901,52 +1002,77 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
         // Get existing organization permissions
         // Create new organization permissions if they don't exist
-        user.permissions.organizationPermissions.set(organization.id, Permissions.create({
-            level: PermissionLevel.None,
-            resources: new Map([
-                [PermissionsResourceType.Senders, new Map([[sender.id, ResourcePermissions.create({
-                    resourceName: sender.name!,
-                    level: PermissionLevel.None,
-                    accessRights: [AccessRight.SendMessages],
-                })]])],
-                [PermissionsResourceType.Groups, new Map([[testGroup.id, ResourcePermissions.create({
-                    resourceName: testGroup.settings.name.toString(),
-                    level: PermissionLevel.Read, // Need at least Read access to access group members through registrations
-                    accessRights: [],
-                })]])],
-            ]),
-        }));
+        user.permissions.organizationPermissions.set(
+            organization.id,
+            Permissions.create({
+                level: PermissionLevel.None,
+                resources: new Map([
+                    [
+                        PermissionsResourceType.Senders,
+                        new Map([
+                            [
+                                sender.id,
+                                ResourcePermissions.create({
+                                    resourceName: sender.name!,
+                                    level: PermissionLevel.None,
+                                    accessRights: [AccessRight.SendMessages],
+                                }),
+                            ],
+                        ]),
+                    ],
+                    [
+                        PermissionsResourceType.Groups,
+                        new Map([
+                            [
+                                testGroup.id,
+                                ResourcePermissions.create({
+                                    resourceName: testGroup.settings.name.toString(),
+                                    level: PermissionLevel.Read, // Need at least Read access to access group members through registrations
+                                    accessRights: [],
+                                }),
+                            ],
+                        ]),
+                    ],
+                ]),
+            }),
+        );
         await user.save();
 
         const member1 = await new MemberFactory({
             organization,
         }).create();
-        member1.details.parents = [Parent.create({
-            firstName: 'Identical',
-            lastName: 'Email',
-            email: 'identical-email@test.com',
-        })];
+        member1.details.parents = [
+            Parent.create({
+                firstName: 'Identical',
+                lastName: 'Email',
+                email: 'identical-email@test.com',
+            }),
+        ];
 
         await member1.save();
 
         const member2 = await new MemberFactory({
             organization,
         }).create();
-        member2.details.parents = [Parent.create({
-            firstName: 'Identical',
-            lastName: 'Email',
-            email: 'identical-email@test.com',
-        })];
+        member2.details.parents = [
+            Parent.create({
+                firstName: 'Identical',
+                lastName: 'Email',
+                email: 'identical-email@test.com',
+            }),
+        ];
         await member2.save();
 
         const member3 = await new MemberFactory({
             organization,
         }).create();
-        member3.details.parents = [Parent.create({
-            firstName: 'Identical',
-            lastName: 'Email',
-            email: 'identical-email@test.com',
-        })];
+        member3.details.parents = [
+            Parent.create({
+                firstName: 'Identical',
+                lastName: 'Email',
+                email: 'identical-email@test.com',
+            }),
+        ];
         await member3.save();
 
         await new RegistrationFactory({
@@ -967,7 +1093,8 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         const email = new Email();
         email.subject = 'Test Email with Replacements {{firstName}}';
         email.status = EmailStatus.Draft;
-        email.text = 'Hello {{firstName}} {{lastName}}, this is a test email. {{unsubscribeUrl}} {{loginDetails}}';
+        email.text =
+            'Hello {{firstName}} {{lastName}}, this is a test email. {{unsubscribeUrl}} {{loginDetails}}';
         email.html = `<!DOCTYPE html>
         <html>
         <head>
@@ -1019,25 +1146,27 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         expect(email.status).toBe(EmailStatus.Sent);
 
         // Check that EmailRecipient records were created correctly
-        const recipients = await EmailRecipient.select()
-            .where('emailId', email.id)
-            .fetch();
+        const recipients = await EmailRecipient.select().where('emailId', email.id).fetch();
 
         expect(recipients).toHaveLength(3);
 
         // No recipients with null, because we only targeted parents
-        const recipientsWithoutEmail = recipients.filter(r => r.email === null);
+        const recipientsWithoutEmail = recipients.filter((r) => r.email === null);
         expect(recipientsWithoutEmail).toHaveLength(0);
 
-        const recipientsWithEmail = recipients.filter(r => r.email === 'identical-email@test.com');
+        const recipientsWithEmail = recipients.filter(
+            (r) => r.email === 'identical-email@test.com',
+        );
         expect(recipientsWithEmail).toHaveLength(3);
 
         // Check sentAt, only one
-        const sentRecipients = recipients.filter(r => r.sentAt !== null);
+        const sentRecipients = recipients.filter((r) => r.sentAt !== null);
         expect(sentRecipients).toHaveLength(1);
 
         // Check one with duplicateOfId set
-        const duplicateRecipients = recipientsWithEmail.filter(r => r.duplicateOfRecipientId !== null);
+        const duplicateRecipients = recipientsWithEmail.filter(
+            (r) => r.duplicateOfRecipientId !== null,
+        );
         expect(duplicateRecipients).toHaveLength(2);
         expect(duplicateRecipients[0].duplicateOfRecipientId).toBe(sentRecipients[0].id);
         expect(duplicateRecipients[1].duplicateOfRecipientId).toBe(sentRecipients[0].id);
@@ -1063,42 +1192,65 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
         // Get existing organization permissions
         // Create new organization permissions if they don't exist
-        user.permissions.organizationPermissions.set(organization.id, Permissions.create({
-            level: PermissionLevel.None,
-            resources: new Map([
-                [PermissionsResourceType.Senders, new Map([[sender.id, ResourcePermissions.create({
-                    resourceName: sender.name!,
-                    level: PermissionLevel.None,
-                    accessRights: [AccessRight.SendMessages],
-                })]])],
-                [PermissionsResourceType.Groups, new Map([[testGroup.id, ResourcePermissions.create({
-                    resourceName: testGroup.settings.name.toString(),
-                    level: PermissionLevel.Read, // Need at least Read access to access group members through registrations
-                    accessRights: [],
-                })]])],
-            ]),
-        }));
+        user.permissions.organizationPermissions.set(
+            organization.id,
+            Permissions.create({
+                level: PermissionLevel.None,
+                resources: new Map([
+                    [
+                        PermissionsResourceType.Senders,
+                        new Map([
+                            [
+                                sender.id,
+                                ResourcePermissions.create({
+                                    resourceName: sender.name!,
+                                    level: PermissionLevel.None,
+                                    accessRights: [AccessRight.SendMessages],
+                                }),
+                            ],
+                        ]),
+                    ],
+                    [
+                        PermissionsResourceType.Groups,
+                        new Map([
+                            [
+                                testGroup.id,
+                                ResourcePermissions.create({
+                                    resourceName: testGroup.settings.name.toString(),
+                                    level: PermissionLevel.Read, // Need at least Read access to access group members through registrations
+                                    accessRights: [],
+                                }),
+                            ],
+                        ]),
+                    ],
+                ]),
+            }),
+        );
         await user.save();
 
         const member1 = await new MemberFactory({
             organization,
         }).create();
-        member1.details.parents = [Parent.create({
-            firstName: 'Identical',
-            lastName: 'Email',
-            email: 'identical-email@test.com',
-        })];
+        member1.details.parents = [
+            Parent.create({
+                firstName: 'Identical',
+                lastName: 'Email',
+                email: 'identical-email@test.com',
+            }),
+        ];
 
         await member1.save();
 
         const member2 = await new MemberFactory({
             organization,
         }).create();
-        member2.details.parents = [Parent.create({
-            firstName: 'Identical',
-            lastName: 'Email',
-            email: 'identical-email@test.com',
-        })];
+        member2.details.parents = [
+            Parent.create({
+                firstName: 'Identical',
+                lastName: 'Email',
+                email: 'identical-email@test.com',
+            }),
+        ];
         await member2.save();
 
         await new RegistrationFactory({
@@ -1114,7 +1266,8 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         const email = new Email();
         email.subject = 'Test Email with Replacements {{firstName}}';
         email.status = EmailStatus.Draft;
-        email.text = 'Hello {{firstName}} {{lastName}}, this is a test email. {{unsubscribeUrl}} {{loginDetails}}';
+        email.text =
+            'Hello {{firstName}} {{lastName}}, this is a test email. {{unsubscribeUrl}} {{loginDetails}}';
         email.html = `<!DOCTYPE html>
         <html>
         <head>
@@ -1167,25 +1320,27 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         expect(email.status).toBe(EmailStatus.Sent);
 
         // Check that EmailRecipient records were created correctly
-        const recipients = await EmailRecipient.select()
-            .where('emailId', email.id)
-            .fetch();
+        const recipients = await EmailRecipient.select().where('emailId', email.id).fetch();
 
         expect(recipients).toHaveLength(2);
 
         // No recipients with null, because we only targeted parents
-        const recipientsWithoutEmail = recipients.filter(r => r.email === null);
+        const recipientsWithoutEmail = recipients.filter((r) => r.email === null);
         expect(recipientsWithoutEmail).toHaveLength(0);
 
-        const recipientsWithEmail = recipients.filter(r => r.email === 'identical-email@test.com');
+        const recipientsWithEmail = recipients.filter(
+            (r) => r.email === 'identical-email@test.com',
+        );
         expect(recipientsWithEmail).toHaveLength(2);
 
         // Check sentAt, only one
-        const sentRecipients = recipients.filter(r => r.sentAt !== null);
+        const sentRecipients = recipients.filter((r) => r.sentAt !== null);
         expect(sentRecipients).toHaveLength(2);
 
         // Check one with duplicateOfId set
-        const duplicateRecipients = recipientsWithEmail.filter(r => r.duplicateOfRecipientId !== null);
+        const duplicateRecipients = recipientsWithEmail.filter(
+            (r) => r.duplicateOfRecipientId !== null,
+        );
         expect(duplicateRecipients).toHaveLength(0);
 
         // Check only one email is sent
@@ -1194,8 +1349,12 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         // Check content of each email is correct for each member. One should contain member1.firstName, other member2.firstName
         const sentEmails = await EmailMocker.getSucceededEmails();
         expect(sentEmails).toHaveLength(2);
-        const emailWithMember1FirstName = sentEmails.find(e => e.html?.includes(member1.details.firstName!));
-        const emailWithMember2FirstName = sentEmails.find(e => e.html?.includes(member2.details.firstName!));
+        const emailWithMember1FirstName = sentEmails.find((e) =>
+            e.html?.includes(member1.details.firstName!),
+        );
+        const emailWithMember2FirstName = sentEmails.find((e) =>
+            e.html?.includes(member2.details.firstName!),
+        );
         expect(emailWithMember1FirstName).toBeDefined();
         expect(emailWithMember2FirstName).toBeDefined();
 
@@ -1246,7 +1405,16 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
             const body = EmailStruct.patch({
                 id: email.id,
-                translations: new PatchMap([[Language.French, EmailContent.create({ subject: 'Sujet français', html: '<p>Français</p>', text: 'Français' })]]),
+                translations: new PatchMap([
+                    [
+                        Language.French,
+                        EmailContent.create({
+                            subject: 'Sujet français',
+                            html: '<p>Français</p>',
+                            text: 'Français',
+                        }),
+                    ],
+                ]),
             });
 
             const response = await patchEmail(body, token, organization);
@@ -1282,7 +1450,14 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         test('removing the default language applies the move-over patch atomically', async () => {
             const email = await createDraftEmail({ language: Language.Dutch });
             email.translations = new Map([
-                [Language.French, EmailContent.create({ subject: 'Sujet français', html: '<p>Français</p>', text: 'Français' })],
+                [
+                    Language.French,
+                    EmailContent.create({
+                        subject: 'Sujet français',
+                        html: '<p>Français</p>',
+                        text: 'Français',
+                    }),
+                ],
             ]);
             await email.save();
 
@@ -1347,12 +1522,14 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
             const body = EmailStruct.patch({
                 id: email.id,
-                translations: new PatchMap([[Language.French, EmailContent.create({ subject: 'Sujet français' })]]),
+                translations: new PatchMap([
+                    [Language.French, EmailContent.create({ subject: 'Sujet français' })],
+                ]),
             });
 
-            await expect(patchEmail(body, token, organization))
-                .rejects
-                .toThrow(STExpect.errorWithCode('invalid_translations'));
+            await expect(patchEmail(body, token, organization)).rejects.toThrow(
+                STExpect.errorWithCode('invalid_translations'),
+            );
         });
 
         test('rejects a translation for the default language itself', async () => {
@@ -1360,12 +1537,14 @@ describe('Endpoint.PatchEmailEndpoint', () => {
 
             const body = EmailStruct.patch({
                 id: email.id,
-                translations: new PatchMap([[Language.Dutch, EmailContent.create({ subject: 'Nederlands onderwerp' })]]),
+                translations: new PatchMap([
+                    [Language.Dutch, EmailContent.create({ subject: 'Nederlands onderwerp' })],
+                ]),
             });
 
-            await expect(patchEmail(body, token, organization))
-                .rejects
-                .toThrow(STExpect.errorWithCode('invalid_translations'));
+            await expect(patchEmail(body, token, organization)).rejects.toThrow(
+                STExpect.errorWithCode('invalid_translations'),
+            );
         });
 
         test('rejects clearing the default language while translations remain', async () => {
@@ -1380,9 +1559,9 @@ describe('Endpoint.PatchEmailEndpoint', () => {
                 language: null,
             });
 
-            await expect(patchEmail(body, token, organization))
-                .rejects
-                .toThrow(STExpect.errorWithCode('invalid_translations'));
+            await expect(patchEmail(body, token, organization)).rejects.toThrow(
+                STExpect.errorWithCode('invalid_translations'),
+            );
         });
 
         const createSendableEmail = async () => {
@@ -1390,7 +1569,8 @@ describe('Endpoint.PatchEmailEndpoint', () => {
             email.subject = 'Default subject';
             email.status = EmailStatus.Draft;
             email.text = 'Default text {{unsubscribeUrl}}';
-            email.html = '<!DOCTYPE html><html><body><p>Default html</p>{{unsubscribeUrl}}</body></html>';
+            email.html =
+                '<!DOCTYPE html><html><body><p>Default html</p>{{unsubscribeUrl}}</body></html>';
             email.json = {};
             email.language = Language.Dutch;
             email.userId = user.id;
@@ -1402,33 +1582,39 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         test('cannot send an email with an incomplete translation', async () => {
             const email = await createSendableEmail();
             email.translations = new Map([
-                [Language.French, EmailContent.create({ subject: 'Sujet français', text: '', html: '' })],
+                [
+                    Language.French,
+                    EmailContent.create({ subject: 'Sujet français', text: '', html: '' }),
+                ],
             ]);
             await email.save();
 
             const body = EmailStruct.patch({ id: email.id, status: EmailStatus.Sending });
 
-            await expect(patchEmail(body, token, organization))
-                .rejects
-                .toThrow(STExpect.errorWithCode('invalid_field'));
+            await expect(patchEmail(body, token, organization)).rejects.toThrow(
+                STExpect.errorWithCode('invalid_field'),
+            );
         });
 
         test('cannot send an email when a translation misses the unsubscribe button', async () => {
             const email = await createSendableEmail();
             email.translations = new Map([
-                [Language.French, EmailContent.create({
-                    subject: 'Sujet français',
-                    text: 'Texte français',
-                    html: '<!DOCTYPE html><html><body><p>Français</p></body></html>',
-                })],
+                [
+                    Language.French,
+                    EmailContent.create({
+                        subject: 'Sujet français',
+                        text: 'Texte français',
+                        html: '<!DOCTYPE html><html><body><p>Français</p></body></html>',
+                    }),
+                ],
             ]);
             await email.save();
 
             const body = EmailStruct.patch({ id: email.id, status: EmailStatus.Sending });
 
-            await expect(patchEmail(body, token, organization))
-                .rejects
-                .toThrow(STExpect.errorWithCode('missing_unsubscribe_button'));
+            await expect(patchEmail(body, token, organization)).rejects.toThrow(
+                STExpect.errorWithCode('missing_unsubscribe_button'),
+            );
         });
     });
 
@@ -1438,7 +1624,9 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         const dutchGreeting = 'Dag';
         const frenchGreeting = 'Bonjour';
 
-        const createDraftEmail = async (options: { language?: Language; translations?: Map<Language, EmailContent> } = {}) => {
+        const createDraftEmail = async (
+            options: { language?: Language; translations?: Map<Language, EmailContent> } = {},
+        ) => {
             const email = new Email();
             email.subject = 'Default subject';
             email.status = EmailStatus.Draft;
@@ -1455,39 +1643,64 @@ describe('Endpoint.PatchEmailEndpoint', () => {
         };
 
         const greetingOf = (recipient: { replacements: { token: string; value: string }[] }) => {
-            return recipient.replacements.find(r => r.token === 'greeting')?.value;
+            return recipient.replacements.find((r) => r.token === 'greeting')?.value;
         };
 
         test('the same example recipient is returned with replacements in every supported language', async () => {
             TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French] });
             const email = await createDraftEmail();
 
-            const response = await patchEmail(EmailStruct.patch({ id: email.id }), token, organization);
+            const response = await patchEmail(
+                EmailStruct.patch({ id: email.id }),
+                token,
+                organization,
+            );
             const preview = response.body;
 
             // The deprecated single example recipient is still returned
             expect(preview.exampleRecipient).not.toBeNull();
-            expect(greetingOf(preview.exampleRecipient!)).toBe(`${dutchGreeting} ${preview.exampleRecipient!.firstName},`);
+            expect(greetingOf(preview.exampleRecipient!)).toBe(
+                `${dutchGreeting} ${preview.exampleRecipient!.firstName},`,
+            );
         });
 
         test('every language the email has content for is included when it is supported', async () => {
-            TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.French, Language.English] });
+            TestUtils.setEnvironment('locales', {
+                BE: [Language.Dutch, Language.French, Language.English],
+            });
             const email = await createDraftEmail({
                 language: Language.Dutch,
-                translations: new Map([[Language.English, EmailContent.create({ subject: 'English subject', html: '<p>English</p>', text: 'English' })]]),
+                translations: new Map([
+                    [
+                        Language.English,
+                        EmailContent.create({
+                            subject: 'English subject',
+                            html: '<p>English</p>',
+                            text: 'English',
+                        }),
+                    ],
+                ]),
             });
 
-            const response = await patchEmail(EmailStruct.patch({ id: email.id }), token, organization);
+            const response = await patchEmail(
+                EmailStruct.patch({ id: email.id }),
+                token,
+                organization,
+            );
             const preview = response.body;
 
-            expect([...preview.exampleRecipients.keys()].sort()).toEqual([Language.Dutch, Language.English].sort());
+            expect([...preview.exampleRecipients.keys()].sort()).toEqual(
+                [Language.Dutch, Language.English].sort(),
+            );
             const english = preview.exampleRecipients.get(Language.English)!;
             expect(english.language).toBe(Language.English);
 
             // The exact English text is machine-generated and can change between locale builds:
             // assert it was generated in its own language (not in one of the other languages)
             expect(greetingOf(english)).toBeDefined();
-            expect(greetingOf(english)).not.toBe(greetingOf(preview.exampleRecipients.get(Language.Dutch)!));
+            expect(greetingOf(english)).not.toBe(
+                greetingOf(preview.exampleRecipients.get(Language.Dutch)!),
+            );
         });
     });
 });

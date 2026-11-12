@@ -7,7 +7,14 @@ describe('$not', () => {
     it('is not null via $neq', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: true,
+                }),
+            ],
         ]);
 
         await test({
@@ -27,7 +34,14 @@ describe('$not', () => {
     it('is not null via $not', async () => {
         const filters = new Map([
             ...baseSQLFilterCompilers,
-            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
+            [
+                'name',
+                createColumnFilter({
+                    expression: SQL.column('name'),
+                    type: SQLValueType.String,
+                    nullable: true,
+                }),
+            ],
         ]);
 
         await test({
@@ -35,7 +49,6 @@ describe('$not', () => {
                 $not: {
                     name: null,
                 },
-
             },
             filters,
             query: {

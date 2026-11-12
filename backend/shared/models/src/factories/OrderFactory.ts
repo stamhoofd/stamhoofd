@@ -30,21 +30,23 @@ export class OrderFactory extends Factory<Options, Order> {
     async create(): Promise<Order> {
         const webshop = this.options.webshop;
 
-        const data = this.options.data ?? OrderData.create({
-            customer: Customer.create({
-                firstName: this.options.firstName ?? 'John',
-                lastName: this.options.lastName ?? 'Doe',
-                email: this.options.email ?? 'john.doe@example.com',
-            }),
-            cart: Cart.create({}),
-            paymentMethod: this.options.paymentMethod ?? PaymentMethod.Unknown,
-        });
+        const data =
+            this.options.data ??
+            OrderData.create({
+                customer: Customer.create({
+                    firstName: this.options.firstName ?? 'John',
+                    lastName: this.options.lastName ?? 'Doe',
+                    email: this.options.email ?? 'john.doe@example.com',
+                }),
+                cart: Cart.create({}),
+                paymentMethod: this.options.paymentMethod ?? PaymentMethod.Unknown,
+            });
 
         const order = new Order();
         order.organizationId = webshop.organizationId;
         order.webshopId = webshop.id;
         order.data = data;
-        order.number = this.options.number ?? await WebshopCounter.getNextNumber(webshop);
+        order.number = this.options.number ?? (await WebshopCounter.getNextNumber(webshop));
         order.status = this.options.status ?? OrderStatus.Created;
         order.validAt = new Date();
         await order.save();
@@ -52,7 +54,10 @@ export class OrderFactory extends Factory<Options, Order> {
         if (this.options.updatedAt) {
             const forced = new Date(this.options.updatedAt);
             forced.setMilliseconds(0);
-            await Database.update('UPDATE `webshop_orders` SET `updatedAt` = ? WHERE `id` = ?', [forced, order.id]);
+            await Database.update('UPDATE `webshop_orders` SET `updatedAt` = ? WHERE `id` = ?', [
+                forced,
+                order.id,
+            ]);
             order.updatedAt = forced;
         }
 

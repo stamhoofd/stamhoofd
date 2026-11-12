@@ -38,9 +38,11 @@ describe('Endpoint.GetUser', () => {
         replacementRequest.headers.authorization = 'Bearer ' + replacement.accessToken;
         await testServer.test(endpoint, replacementRequest);
 
-        await expect(testServer.test(endpoint, originalRequest)).rejects.toThrow(STExpect.simpleError({
-            code: 'invalid_access_token',
-        }));
+        await expect(testServer.test(endpoint, originalRequest)).rejects.toThrow(
+            STExpect.simpleError({
+                code: 'invalid_access_token',
+            }),
+        );
     });
 
     test('Two-factor authentication is reported on the user and on the accounts of a member', async () => {
@@ -57,8 +59,10 @@ describe('Endpoint.GetUser', () => {
         expect(response.body.hasTwoFactor).toBe(true);
 
         // The same flag is what MemberAccountBox shows for every account of a member.
-        const member = response.body.members.members.find(m => m.users.some(u => u.id === user.id));
-        expect(member?.users.find(u => u.id === user.id)?.hasTwoFactor).toBe(true);
+        const member = response.body.members.members.find((m) =>
+            m.users.some((u) => u.id === user.id),
+        );
+        expect(member?.users.find((u) => u.id === user.id)?.hasTwoFactor).toBe(true);
     });
 
     test('A user without a second factor is not reported as having two-factor authentication', async () => {
@@ -125,9 +129,11 @@ describe('Endpoint.GetUser', () => {
         const r = Request.buildJson('GET', '/v1/user');
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
-        await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.simpleError({
-            code: 'invalid_access_token',
-        }));
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(
+            STExpect.simpleError({
+                code: 'invalid_access_token',
+            }),
+        );
     });
 
     test('Cannot request details of an API user by token with wrong organization scope', async () => {
@@ -139,8 +145,10 @@ describe('Endpoint.GetUser', () => {
         const r = Request.buildJson('GET', '/v1/user', wrongOrganization.getApiHost());
         r.headers.authorization = 'Bearer ' + token.accessToken;
 
-        await expect(testServer.test(endpoint, r)).rejects.toThrow(STExpect.simpleError({
-            code: 'invalid_access_token',
-        }));
+        await expect(testServer.test(endpoint, r)).rejects.toThrow(
+            STExpect.simpleError({
+                code: 'invalid_access_token',
+            }),
+        );
     });
 });

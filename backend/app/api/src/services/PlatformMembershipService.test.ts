@@ -1,5 +1,18 @@
-import { MemberFactory, MemberPlatformMembership, OrganizationFactory, Platform, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { PlatformMembershipType, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, PlatformMembershipTypeConfigPrice, ReduceablePrice } from '@stamhoofd/structures';
+import {
+    MemberFactory,
+    MemberPlatformMembership,
+    OrganizationFactory,
+    Platform,
+    RegistrationFactory,
+    RegistrationPeriodFactory,
+} from '@stamhoofd/models';
+import {
+    PlatformMembershipType,
+    PlatformMembershipTypeBehaviour,
+    PlatformMembershipTypeConfig,
+    PlatformMembershipTypeConfigPrice,
+    ReduceablePrice,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import { PlatformMembershipService } from './PlatformMembershipService.js';
@@ -9,7 +22,9 @@ describe('PlatformMembershipService.calculatePrice', () => {
 
     beforeEach(() => {
         TestUtils.setEnvironment('userMode', 'platform');
-        vitest.useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] }).setSystemTime(new Date(2024, 4, 1, 0, 0, 0, 0));
+        vitest
+            .useFakeTimers({ shouldAdvanceTime: true, toFake: ['Date'] })
+            .setSystemTime(new Date(2024, 4, 1, 0, 0, 0, 0));
     });
 
     afterEach(() => {
@@ -27,11 +42,14 @@ describe('PlatformMembershipService.calculatePrice', () => {
             name: 'Days membership',
             behaviour: PlatformMembershipTypeBehaviour.Days,
             periods: new Map([
-                [period.id, PlatformMembershipTypeConfig.create({
-                    startDate: period.startDate,
-                    endDate: period.endDate,
-                    maximumDays,
-                })],
+                [
+                    period.id,
+                    PlatformMembershipTypeConfig.create({
+                        startDate: period.startDate,
+                        endDate: period.endDate,
+                        maximumDays,
+                    }),
+                ],
             ]),
         });
 
@@ -73,16 +91,21 @@ describe('PlatformMembershipService.calculatePrice', () => {
             name: 'Period membership',
             behaviour: PlatformMembershipTypeBehaviour.Period,
             periods: new Map([
-                [period.id, PlatformMembershipTypeConfig.create({
-                    startDate: period.startDate,
-                    endDate: period.endDate,
-                    trialDays: options.trialDays ?? 0,
-                    prices: [
-                        PlatformMembershipTypeConfigPrice.create({
-                            prices: new Map([['', ReduceablePrice.create({ price: membershipPrice })]]),
-                        }),
-                    ],
-                })],
+                [
+                    period.id,
+                    PlatformMembershipTypeConfig.create({
+                        startDate: period.startDate,
+                        endDate: period.endDate,
+                        trialDays: options.trialDays ?? 0,
+                        prices: [
+                            PlatformMembershipTypeConfigPrice.create({
+                                prices: new Map([
+                                    ['', ReduceablePrice.create({ price: membershipPrice })],
+                                ]),
+                            }),
+                        ],
+                    }),
+                ],
             ]),
         });
 
@@ -107,7 +130,9 @@ describe('PlatformMembershipService.calculatePrice', () => {
         membership.startDate = new Date(2024, 4, 1, 0, 0, 0, 0);
         membership.endDate = new Date(2024, 4, 2, 0, 0, 0, 0);
 
-        await expect(PlatformMembershipService.calculatePrice(membership, member)).resolves.toBeUndefined();
+        await expect(
+            PlatformMembershipService.calculatePrice(membership, member),
+        ).resolves.toBeUndefined();
         expect(membership.maximumFreeAmount).toBe(2);
     });
 
@@ -116,7 +141,9 @@ describe('PlatformMembershipService.calculatePrice', () => {
         membership.startDate = new Date(2024, 4, 1, 0, 0, 0, 0);
         membership.endDate = new Date(2024, 4, 3, 0, 0, 0, 0);
 
-        await expect(PlatformMembershipService.calculatePrice(membership, member)).rejects.toMatchObject({
+        await expect(
+            PlatformMembershipService.calculatePrice(membership, member),
+        ).rejects.toMatchObject({
             code: 'invalid_field',
             field: 'endDate',
         });
@@ -125,7 +152,9 @@ describe('PlatformMembershipService.calculatePrice', () => {
     test('calculates the configured price of a period membership', async () => {
         const { member, membership } = await setupPeriodMembership();
 
-        await expect(PlatformMembershipService.calculatePrice(membership, member)).resolves.toBeUndefined();
+        await expect(
+            PlatformMembershipService.calculatePrice(membership, member),
+        ).resolves.toBeUndefined();
 
         expect(membership.price).toBe(membershipPrice);
         expect(membership.priceWithoutDiscount).toBe(membershipPrice);
@@ -140,7 +169,9 @@ describe('PlatformMembershipService.calculatePrice', () => {
         membership.price = 1_00;
         membership.priceWithoutDiscount = 2_00;
 
-        await expect(PlatformMembershipService.calculatePrice(membership, member)).resolves.toBeUndefined();
+        await expect(
+            PlatformMembershipService.calculatePrice(membership, member),
+        ).resolves.toBeUndefined();
 
         expect(membership.price).toBe(1_00);
         expect(membership.priceWithoutDiscount).toBe(2_00);
@@ -150,7 +181,9 @@ describe('PlatformMembershipService.calculatePrice', () => {
         const { member, membership } = await setupPeriodMembership();
         membership.membershipTypeId = 'unknown-membership-type';
 
-        await expect(PlatformMembershipService.calculatePrice(membership, member)).rejects.toMatchObject({
+        await expect(
+            PlatformMembershipService.calculatePrice(membership, member),
+        ).rejects.toMatchObject({
             code: 'invalid_membership_type',
         });
 
@@ -163,14 +196,18 @@ describe('PlatformMembershipService.calculatePrice', () => {
         const { member, membership, organization } = await setupPeriodMembership({ trialDays: 14 });
 
         // Without a registration that had a trial, the member is not eligible for a trial
-        await expect(PlatformMembershipService.calculatePrice(membership, member)).resolves.toBeUndefined();
+        await expect(
+            PlatformMembershipService.calculatePrice(membership, member),
+        ).resolves.toBeUndefined();
         expect(membership.trialUntil).toBeNull();
 
         const registration = await new RegistrationFactory({ member, organization }).create();
         registration.trialUntil = new Date(2024, 4, 20, 12, 0, 0, 0);
         await registration.save();
 
-        await expect(PlatformMembershipService.calculatePrice(membership, member)).resolves.toBeUndefined();
+        await expect(
+            PlatformMembershipService.calculatePrice(membership, member),
+        ).resolves.toBeUndefined();
 
         // The trial ends trialDays after the start date of the membership
         expect(membership.trialUntil).not.toBeNull();

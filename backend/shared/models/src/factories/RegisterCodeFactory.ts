@@ -2,9 +2,11 @@ import { Factory } from '@node/database';
 
 import { RegisterCode } from '../models/index.js';
 
-type OrganizationOptions = {
-    organizationId: string;
-} | { organization: { id: string } };
+type OrganizationOptions =
+    | {
+          organizationId: string;
+      }
+    | { organization: { id: string } };
 
 type Options = OrganizationOptions & {
     value?: number;
@@ -14,8 +16,11 @@ type Options = OrganizationOptions & {
 export class RegisterCodeFactory extends Factory<Options, RegisterCode> {
     async create(): Promise<RegisterCode> {
         const code = new RegisterCode();
-        code.organizationId = 'organizationId' in this.options ? this.options.organizationId : this.options.organization.id;
-        code.value = this.options.value ?? (25 * 100);
+        code.organizationId =
+            'organizationId' in this.options
+                ? this.options.organizationId
+                : this.options.organization.id;
+        code.value = this.options.value ?? 25 * 100;
         code.description = this.options.description ?? 'Test code';
 
         await code.generateCode();

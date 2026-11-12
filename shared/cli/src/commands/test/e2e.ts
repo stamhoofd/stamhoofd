@@ -7,7 +7,8 @@ import { RunVerbosity } from '../../runtime/command-runner.js';
 
 export default class TestE2e extends BaseCommand {
     static summary = 'Run Playwright browser tests';
-    static description = 'Use this when you changed user-facing flows and want to validate the app in a real browser environment.';
+    static description =
+        'Use this when you changed user-facing flows and want to validate the app in a real browser environment.';
     static examples = [
         'stam test e2e',
         'stam test e2e --grep @billing',
@@ -23,15 +24,33 @@ export default class TestE2e extends BaseCommand {
 
     static flags = {
         ...this.verbosityFlags(RunVerbosity.Command),
-        'ci': ciFlag,
-        'clear': Flags.boolean({ default: false, description: 'Clear the persistent e2e database before running tests' }),
-        'extra': Flags.boolean({ default: false, description: 'Include Playwright tests tagged @extra' }),
-        'grep': Flags.string({ char: 'g', description: 'Only run tests matching this pattern/tag (passed to playwright --grep)' }),
-        'local-db': Flags.boolean({ allowNo: true, description: `Connect to the MySQL already running on 127.0.0.1 instead of starting an e2e MySQL container (port ${e2eMysqlPortVariable}, default ${defaultLocalMysqlPort})` }),
-        'skip-build': Flags.boolean({ default: false, description: 'Skip build:shared, the API test pre-build, and the frontend build (only test files changed)' }),
-        'ui': Flags.boolean({ default: false, description: 'Run Playwright in UI mode' }),
-        'workers': Flags.integer({ description: 'Number of Playwright workers' }),
-        'shard': Flags.string({ description: 'Run one shard of the suite (1-based index/total, e.g. 1/4)' }),
+        ci: ciFlag,
+        clear: Flags.boolean({
+            default: false,
+            description: 'Clear the persistent e2e database before running tests',
+        }),
+        extra: Flags.boolean({
+            default: false,
+            description: 'Include Playwright tests tagged @extra',
+        }),
+        grep: Flags.string({
+            char: 'g',
+            description: 'Only run tests matching this pattern/tag (passed to playwright --grep)',
+        }),
+        'local-db': Flags.boolean({
+            allowNo: true,
+            description: `Connect to the MySQL already running on 127.0.0.1 instead of starting an e2e MySQL container (port ${e2eMysqlPortVariable}, default ${defaultLocalMysqlPort})`,
+        }),
+        'skip-build': Flags.boolean({
+            default: false,
+            description:
+                'Skip build:shared, the API test pre-build, and the frontend build (only test files changed)',
+        }),
+        ui: Flags.boolean({ default: false, description: 'Run Playwright in UI mode' }),
+        workers: Flags.integer({ description: 'Number of Playwright workers' }),
+        shard: Flags.string({
+            description: 'Run one shard of the suite (1-based index/total, e.g. 1/4)',
+        }),
     };
 
     async run(): Promise<void> {
@@ -42,11 +61,26 @@ export default class TestE2e extends BaseCommand {
         }
         if (flags.shard !== undefined) {
             const [index, total] = flags.shard.split('/').map(Number);
-            if (!/^[1-9]\d*\/[1-9]\d*$/.test(flags.shard) || !Number.isSafeInteger(index) || !Number.isSafeInteger(total) || index > total) {
+            if (
+                !/^[1-9]\d*\/[1-9]\d*$/.test(flags.shard) ||
+                !Number.isSafeInteger(index) ||
+                !Number.isSafeInteger(total) ||
+                index > total
+            ) {
                 throw new Error('--shard must be index/total with 1 <= index <= total (e.g. 1/4)');
             }
         }
         const { context } = await this.parseWithContext(TestE2e, parsed);
-        await testE2e(context, { ci: flags.ci, clear: flags.clear, extra: flags.extra, grep: flags.grep, localDb: flags['local-db'], skipBuild: flags['skip-build'], ui: flags.ui, workers: flags.workers, shard: flags.shard });
+        await testE2e(context, {
+            ci: flags.ci,
+            clear: flags.clear,
+            extra: flags.extra,
+            grep: flags.grep,
+            localDb: flags['local-db'],
+            skipBuild: flags['skip-build'],
+            ui: flags.ui,
+            workers: flags.workers,
+            shard: flags.shard,
+        });
     }
 }

@@ -31,12 +31,16 @@ function testFilter(filter: StamhoofdFilter, objects: any[], doNotMatch: any[]) 
     const compiled = compileToInMemoryFilter(filter, privateOrderWithTicketsFilterCompilers);
     for (const object of objects) {
         if (compiled(object) !== true) {
-            expect.fail(`Object ${JSON.stringify(object)} did not match filter ${JSON.stringify(filter)}`);
+            expect.fail(
+                `Object ${JSON.stringify(object)} did not match filter ${JSON.stringify(filter)}`,
+            );
         }
     }
     for (const object of doNotMatch) {
         if (compiled(object) !== false) {
-            expect.fail(`Object ${JSON.stringify(object)} matched filter ${JSON.stringify(filter)}, but should not have`);
+            expect.fail(
+                `Object ${JSON.stringify(object)} matched filter ${JSON.stringify(filter)}, but should not have`,
+            );
         }
     }
 }
@@ -46,9 +50,7 @@ describe('privateOrderWithTicketsFilterCompilers', () => {
         it('supports filtering on the payment method', () => {
             testFilter(
                 { paymentMethod: { $eq: 'Transfer' } },
-                [
-                    makeOrder({ data: { ...makeOrder().data, paymentMethod: 'Transfer' } }),
-                ],
+                [makeOrder({ data: { ...makeOrder().data, paymentMethod: 'Transfer' } })],
                 [
                     makeOrder({ data: { ...makeOrder().data, paymentMethod: 'Bancontact' } }),
                     makeOrder(),
@@ -67,11 +69,17 @@ describe('privateOrderWithTicketsFilterCompilers', () => {
                 },
                 [
                     makeOrder({ data: { ...makeOrder().data, paymentMethod: 'Transfer' } }),
-                    makeOrder({ id: 'order-2', data: { ...makeOrder().data, paymentMethod: 'Bancontact' } }),
+                    makeOrder({
+                        id: 'order-2',
+                        data: { ...makeOrder().data, paymentMethod: 'Bancontact' },
+                    }),
                 ],
                 [
                     makeOrder({ data: { ...makeOrder().data, paymentMethod: 'Bancontact' } }),
-                    makeOrder({ id: 'order-0', data: { ...makeOrder().data, paymentMethod: 'Bancontact' } }),
+                    makeOrder({
+                        id: 'order-0',
+                        data: { ...makeOrder().data, paymentMethod: 'Bancontact' },
+                    }),
                 ],
             );
         });
@@ -88,10 +96,20 @@ describe('privateOrderWithTicketsFilterCompilers', () => {
                     },
                 },
                 [
-                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { selected: true } } } }),
+                    makeOrder({
+                        data: {
+                            ...makeOrder().data,
+                            recordAnswers: { 'record-id-1': { selected: true } },
+                        },
+                    }),
                 ],
                 [
-                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { selected: false } } } }),
+                    makeOrder({
+                        data: {
+                            ...makeOrder().data,
+                            recordAnswers: { 'record-id-1': { selected: false } },
+                        },
+                    }),
                     makeOrder({ data: { ...makeOrder().data, recordAnswers: {} } }),
                 ],
             );
@@ -107,10 +125,20 @@ describe('privateOrderWithTicketsFilterCompilers', () => {
                     },
                 },
                 [
-                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { value: 'say hello world' } } } }),
+                    makeOrder({
+                        data: {
+                            ...makeOrder().data,
+                            recordAnswers: { 'record-id-1': { value: 'say hello world' } },
+                        },
+                    }),
                 ],
                 [
-                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { value: 'goodbye' } } } }),
+                    makeOrder({
+                        data: {
+                            ...makeOrder().data,
+                            recordAnswers: { 'record-id-1': { value: 'goodbye' } },
+                        },
+                    }),
                     makeOrder({ data: { ...makeOrder().data, recordAnswers: {} } }),
                 ],
             );
@@ -130,11 +158,30 @@ describe('privateOrderWithTicketsFilterCompilers', () => {
                     },
                 },
                 [
-                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { dateValue: new Date(2023, 5, 10, 14, 30, 15) } } } }),
+                    makeOrder({
+                        data: {
+                            ...makeOrder().data,
+                            recordAnswers: {
+                                'record-id-1': { dateValue: new Date(2023, 5, 10, 14, 30, 15) },
+                            },
+                        },
+                    }),
                 ],
                 [
-                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { dateValue: new Date(2023, 5, 11, 14, 30, 15) } } } }),
-                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { dateValue: null } } } }),
+                    makeOrder({
+                        data: {
+                            ...makeOrder().data,
+                            recordAnswers: {
+                                'record-id-1': { dateValue: new Date(2023, 5, 11, 14, 30, 15) },
+                            },
+                        },
+                    }),
+                    makeOrder({
+                        data: {
+                            ...makeOrder().data,
+                            recordAnswers: { 'record-id-1': { dateValue: null } },
+                        },
+                    }),
                     makeOrder({ data: { ...makeOrder().data, recordAnswers: {} } }),
                 ],
             );
@@ -152,10 +199,24 @@ describe('privateOrderWithTicketsFilterCompilers', () => {
                     },
                 },
                 [
-                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { selectedChoice: { id: 'choice-a' } } } } }),
+                    makeOrder({
+                        data: {
+                            ...makeOrder().data,
+                            recordAnswers: {
+                                'record-id-1': { selectedChoice: { id: 'choice-a' } },
+                            },
+                        },
+                    }),
                 ],
                 [
-                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { selectedChoice: { id: 'choice-b' } } } } }),
+                    makeOrder({
+                        data: {
+                            ...makeOrder().data,
+                            recordAnswers: {
+                                'record-id-1': { selectedChoice: { id: 'choice-b' } },
+                            },
+                        },
+                    }),
                     makeOrder({ data: { ...makeOrder().data, recordAnswers: {} } }),
                 ],
             );
@@ -173,11 +234,34 @@ describe('privateOrderWithTicketsFilterCompilers', () => {
                     },
                 },
                 [
-                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { selectedChoices: [{ id: 'choice-a' }, { id: 'choice-b' }] } } } }),
-                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { selectedChoices: [{ id: 'choice-a' }] } } } }),
+                    makeOrder({
+                        data: {
+                            ...makeOrder().data,
+                            recordAnswers: {
+                                'record-id-1': {
+                                    selectedChoices: [{ id: 'choice-a' }, { id: 'choice-b' }],
+                                },
+                            },
+                        },
+                    }),
+                    makeOrder({
+                        data: {
+                            ...makeOrder().data,
+                            recordAnswers: {
+                                'record-id-1': { selectedChoices: [{ id: 'choice-a' }] },
+                            },
+                        },
+                    }),
                 ],
                 [
-                    makeOrder({ data: { ...makeOrder().data, recordAnswers: { 'record-id-1': { selectedChoices: [{ id: 'choice-b' }] } } } }),
+                    makeOrder({
+                        data: {
+                            ...makeOrder().data,
+                            recordAnswers: {
+                                'record-id-1': { selectedChoices: [{ id: 'choice-b' }] },
+                            },
+                        },
+                    }),
                     makeOrder({ data: { ...makeOrder().data, recordAnswers: {} } }),
                 ],
             );

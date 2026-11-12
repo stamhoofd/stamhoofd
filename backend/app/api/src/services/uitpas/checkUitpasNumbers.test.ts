@@ -17,17 +17,25 @@ describe('checkUitpasNumbers', () => {
      * input's field. Checking the aggregate's error entry verifies that callers can
      * associate the failure with the submitted number, not just catch a rejection.
      */
-    it.each(['NONE', 'EXPIRED', 'UNKNOWN'] as const)('rejects a %s social tariff', async (status) => {
-        const uitpasNumber = '0900000031618';
-        vi.spyOn(PassholderEndpoints.prototype, 'getPassByUitpasNumber').mockResolvedValue({
-            uitpasNumber,
-            socialTariff: { status },
-        });
+    it.each(['NONE', 'EXPIRED', 'UNKNOWN'] as const)(
+        'rejects a %s social tariff',
+        async (status) => {
+            const uitpasNumber = '0900000031618';
+            vi.spyOn(PassholderEndpoints.prototype, 'getPassByUitpasNumber').mockResolvedValue({
+                uitpasNumber,
+                socialTariff: { status },
+            });
 
-        await expect(checkUitpasNumbers('test-token', [uitpasNumber])).rejects.toMatchObject({
-            errors: [STExpect.simpleError({ code: 'non_active_social_tariff', field: 'uitpasNumbers.0' })],
-        });
-    });
+            await expect(checkUitpasNumbers('test-token', [uitpasNumber])).rejects.toMatchObject({
+                errors: [
+                    STExpect.simpleError({
+                        code: 'non_active_social_tariff',
+                        field: 'uitpasNumbers.0',
+                    }),
+                ],
+            });
+        },
+    );
 
     /**
      * Positive control: an active tariff completes without a result or validation

@@ -12,9 +12,7 @@ export class RecordCategoryFactory extends Factory<Options, RecordCategory> {
     async create(): Promise<RecordCategory> {
         const records: RecordSettings[] = [];
         for (const record of this.options.records) {
-            records.push(
-                await new RecordFactory(record).create(),
-            );
+            records.push(await new RecordFactory(record).create());
         }
 
         return RecordCategory.create({

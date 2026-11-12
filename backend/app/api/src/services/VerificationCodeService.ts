@@ -9,12 +9,32 @@ import { EmailTemplateType, getAppHost, Recipient, Replacement } from '@stamhoof
  * and verified on the model.
  */
 export class VerificationCodeService {
-    static getEmailVerificationUrl(code: EmailVerificationCode, user: User, organization: Organization | null, i18n: I18n) {
+    static getEmailVerificationUrl(
+        code: EmailVerificationCode,
+        user: User,
+        organization: Organization | null,
+        i18n: I18n,
+    ) {
         const host = getAppHost('verify-email', organization, !!user.permissions, i18n);
-        return 'https://' + host + '?code=' + encodeURIComponent(code.code) + '&token=' + encodeURIComponent(code.token) + '&email=' + encodeURIComponent(code.email);
+        return (
+            'https://' +
+            host +
+            '?code=' +
+            encodeURIComponent(code.code) +
+            '&token=' +
+            encodeURIComponent(code.token) +
+            '&email=' +
+            encodeURIComponent(code.email)
+        );
     }
 
-    static async send(code: EmailVerificationCode, user: User, organization: Organization | null, i18n: I18n, withCode = true) {
+    static async send(
+        code: EmailVerificationCode,
+        user: User,
+        organization: Organization | null,
+        i18n: I18n,
+        withCode = true,
+    ) {
         const url = this.getEmailVerificationUrl(code, user, organization, i18n);
 
         const name = organization?.name ?? (await Platform.getSharedPrivateStruct()).config.name;
@@ -68,15 +88,18 @@ export class VerificationCodeService {
     }
 
     static async resend(organization: Organization | null, token: string, i18n: I18n) {
-        const verificationCodes = await EmailVerificationCode.where({
-            token,
-            organizationId: organization
-                ? {
-                        sign: 'IN',
-                        value: [organization.id, null],
-                    }
-                : null,
-        }, { limit: 1 });
+        const verificationCodes = await EmailVerificationCode.where(
+            {
+                token,
+                organizationId: organization
+                    ? {
+                          sign: 'IN',
+                          value: [organization.id, null],
+                      }
+                    : null,
+            },
+            { limit: 1 },
+        );
 
         if (verificationCodes.length == 0) {
             console.log("Can't resend code, no coded found for token", token);
@@ -92,7 +115,9 @@ export class VerificationCodeService {
             return;
         }
 
-        const user = verificationCode.userId ? await User.getByID(verificationCode.userId) : undefined;
+        const user = verificationCode.userId
+            ? await User.getByID(verificationCode.userId)
+            : undefined;
         if (!user) {
             return;
         }

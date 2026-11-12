@@ -167,7 +167,9 @@ export class Request {
                             } else {
                                 throw new SimpleError({
                                     code: 'invalid_query',
-                                    message: 'Invalid query parameter with non-integer number value ' + value.toString(),
+                                    message:
+                                        'Invalid query parameter with non-integer number value ' +
+                                        value.toString(),
                                     human: 'Er ging iets mis bij het omvormen van dit verzoek',
                                 });
                             }
@@ -183,7 +185,9 @@ export class Request {
                                     } else {
                                         throw new SimpleError({
                                             code: 'invalid_query',
-                                            message: 'Invalid query parameter with non-integer number value in array ' + v.toString(),
+                                            message:
+                                                'Invalid query parameter with non-integer number value in array ' +
+                                                v.toString(),
                                             human: 'Er ging iets mis bij het omvormen van dit verzoek',
                                         });
                                     }
@@ -192,7 +196,8 @@ export class Request {
                                 } else {
                                     throw new SimpleError({
                                         code: 'invalid_query',
-                                        message: 'Invalid query parameter with non-string array value',
+                                        message:
+                                            'Invalid query parameter with non-string array value',
                                         human: 'Er ging iets mis bij het omvormen van dit verzoek',
                                     });
                                 }
@@ -213,7 +218,7 @@ export class Request {
                 } else {
                     throw new SimpleError({
                         code: 'invalid_query',
-                        message: 'Invalid query parameter of type ' + (typeof query),
+                        message: 'Invalid query parameter of type ' + typeof query,
                         human: 'Er ging iets mis bij het omvormen van dit verzoek',
                     });
                 }
@@ -284,11 +289,15 @@ export class Request {
         const remoteAddress = this.request?.socket.remoteAddress;
         const forwardedFor = this.headers['x-forwarded-for'];
 
-        if (typeof forwardedFor === 'string'
-            && remoteAddress !== undefined
-            && Request.trustedProxyAddresses.has(remoteAddress)
+        if (
+            typeof forwardedFor === 'string' &&
+            remoteAddress !== undefined &&
+            Request.trustedProxyAddresses.has(remoteAddress)
         ) {
-            const hops = forwardedFor.split(',').map(ip => ip.trim()).filter(ip => ip.length > 0);
+            const hops = forwardedFor
+                .split(',')
+                .map((ip) => ip.trim())
+                .filter((ip) => ip.length > 0);
             if (hops.length > 0) {
                 return hops;
             }

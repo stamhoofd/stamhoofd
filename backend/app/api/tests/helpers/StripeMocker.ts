@@ -40,7 +40,9 @@ export class StripeMocker {
 
     start() {
         if (!STAMHOOFD.STRIPE_SECRET_KEY || !STAMHOOFD.STRIPE_SECRET_KEY.startsWith('sk_test_')) {
-            throw new Error('Invalid STRIPE_SECRET_KEY. Even in test mode it should start with sk_test_');
+            throw new Error(
+                'Invalid STRIPE_SECRET_KEY. Even in test mode it should start with sk_test_',
+            );
         }
 
         const mocker = this;
@@ -50,7 +52,8 @@ export class StripeMocker {
             // A regular function: nock exposes the intercepted request (and its Stripe-Account
             // header) on `this`
             .reply(function (uri) {
-                const stripeAccount = (this.req.headers['stripe-account'] as string | undefined) ?? null;
+                const stripeAccount =
+                    (this.req.headers['stripe-account'] as string | undefined) ?? null;
                 return mocker.#handleGet(uri, stripeAccount);
             });
 
@@ -70,10 +73,13 @@ export class StripeMocker {
 
                 if (resource === 'payment_methods') {
                     // Ignore: this is just creating a saved payment method for Bancontact/iDEAL
-                    return [200, {
-                        object: 'payment_method',
-                        id: this.createId('pm'),
-                    }];
+                    return [
+                        200,
+                        {
+                            object: 'payment_method',
+                            id: this.createId('pm'),
+                        },
+                    ];
                 }
 
                 if (resource === 'payment_intents') {
@@ -136,7 +142,7 @@ export class StripeMocker {
         let page = data;
 
         if (query.starting_after) {
-            const index = page.findIndex(item => item.id === query.starting_after);
+            const index = page.findIndex((item) => item.id === query.starting_after);
             page = index === -1 ? [] : page.slice(index + 1);
         }
 
@@ -147,39 +153,41 @@ export class StripeMocker {
     }
 
     #listPayouts(id: string | undefined, query: Record<string, any>, stripeAccount: string | null) {
-        let data = this.payouts.filter(p => (p.stripeAccount ?? null) === stripeAccount);
+        let data = this.payouts.filter((p) => (p.stripeAccount ?? null) === stripeAccount);
 
         if (id) {
-            const payout = data.find(p => p.id === id);
+            const payout = data.find((p) => p.id === id);
             return payout ? [200, payout] : [404];
         }
 
         if (query.status) {
-            data = data.filter(p => p.status === query.status);
+            data = data.filter((p) => p.status === query.status);
         }
         if (query.arrival_date?.gte !== undefined) {
-            data = data.filter(p => p.arrival_date >= query.arrival_date.gte);
+            data = data.filter((p) => p.arrival_date >= query.arrival_date.gte);
         }
         if (query.arrival_date?.lte !== undefined) {
-            data = data.filter(p => p.arrival_date <= query.arrival_date.lte);
+            data = data.filter((p) => p.arrival_date <= query.arrival_date.lte);
         }
         return this.#list(data, '/v1/payouts', query);
     }
 
     #listBalanceTransactions(query: Record<string, any>, stripeAccount: string | null) {
-        let data = this.balanceTransactions.filter(t => (t.stripeAccount ?? null) === stripeAccount);
+        let data = this.balanceTransactions.filter(
+            (t) => (t.stripeAccount ?? null) === stripeAccount,
+        );
 
         if (query.payout) {
-            data = data.filter(t => t.payout === query.payout);
+            data = data.filter((t) => t.payout === query.payout);
         }
         if (query.type) {
-            data = data.filter(t => t.type === query.type);
+            data = data.filter((t) => t.type === query.type);
         }
         if (query.created?.gte !== undefined) {
-            data = data.filter(t => t.created >= query.created.gte);
+            data = data.filter((t) => t.created >= query.created.gte);
         }
         if (query.created?.lte !== undefined) {
-            data = data.filter(t => t.created <= query.created.lte);
+            data = data.filter((t) => t.created <= query.created.lte);
         }
         return this.#list(data, '/v1/balance_transactions', query);
     }
@@ -188,7 +196,7 @@ export class StripeMocker {
         let data = this.checkoutSessions;
 
         if (query.payment_intent) {
-            data = data.filter(s => s.payment_intent === query.payment_intent);
+            data = data.filter((s) => s.payment_intent === query.payment_intent);
         }
         return this.#list(data, '/v1/checkout/sessions', query);
     }
@@ -196,7 +204,15 @@ export class StripeMocker {
     /**
      * Amounts are in Stripe cents, like the real API.
      */
-    createPayout(data: { amount: number; arrivalDate: Date; status?: string; statementDescriptor?: string; stripeAccount?: string | null } & Record<string, any>): StripeObject {
+    createPayout(
+        data: {
+            amount: number;
+            arrivalDate: Date;
+            status?: string;
+            statementDescriptor?: string;
+            stripeAccount?: string | null;
+        } & Record<string, any>,
+    ): StripeObject {
         const { arrivalDate, statementDescriptor, stripeAccount, ...rest } = data;
         const payout: StripeObject = {
             id: this.createId('po'),
@@ -221,7 +237,17 @@ export class StripeMocker {
      * connected account (null = platform account). Sources are served exactly as passed, so tests
      * control the expansions.
      */
-    createBalanceTransaction(data: { type: string; amount: number; created: Date; payout?: string | null; stripeAccount?: string | null; fee?: number; source?: unknown } & Record<string, any>): StripeObject {
+    createBalanceTransaction(
+        data: {
+            type: string;
+            amount: number;
+            created: Date;
+            payout?: string | null;
+            stripeAccount?: string | null;
+            fee?: number;
+            source?: unknown;
+        } & Record<string, any>,
+    ): StripeObject {
         const { created, payout, stripeAccount, ...rest } = data;
         const feeDetails = (rest.fee_details ?? []) as { amount: number }[];
 
@@ -247,7 +273,14 @@ export class StripeMocker {
      * An expanded ApplicationFee object, used as the source of application_fee transactions and as
      * charge.application_fee expansions.
      */
-    createApplicationFee(data: { amount: number; account: string; originatingTransaction?: StripeObject | null; charge?: StripeObject | null } & Record<string, any>): StripeObject {
+    createApplicationFee(
+        data: {
+            amount: number;
+            account: string;
+            originatingTransaction?: StripeObject | null;
+            charge?: StripeObject | null;
+        } & Record<string, any>,
+    ): StripeObject {
         const { account, originatingTransaction, charge, ...rest } = data;
         return {
             id: this.createId('fee'),
@@ -283,7 +316,7 @@ export class StripeMocker {
     }
 
     #getPaymentIntent(id: string) {
-        const intent = this.paymentIntents.find(i => i.id === id);
+        const intent = this.paymentIntents.find((i) => i.id === id);
         if (!intent) {
             return [404];
         }
@@ -291,7 +324,7 @@ export class StripeMocker {
     }
 
     #getCharge(id: string) {
-        const intent = this.charges.find(i => i.id === id);
+        const intent = this.charges.find((i) => i.id === id);
         if (!intent) {
             return [404];
         }
@@ -361,7 +394,9 @@ export class StripeMocker {
         const endpoint = new StripeWebookEndpoint();
 
         const r = Request.buildJson('POST', '/stripe/webhooks', undefined, payload);
-        const secret = payload.account ? STAMHOOFD.STRIPE_CONNECT_ENDPOINT_SECRET : STAMHOOFD.STRIPE_ENDPOINT_SECRET;
+        const secret = payload.account
+            ? STAMHOOFD.STRIPE_CONNECT_ENDPOINT_SECRET
+            : STAMHOOFD.STRIPE_ENDPOINT_SECRET;
 
         if (!secret) {
             throw new Error('No stripe secret set in env');
@@ -401,7 +436,10 @@ export class StripeMocker {
         });
     }
 
-    async createStripeAccount(organizationId: string, type: 'express' | 'standard' = 'express'): Promise<StripeAccount> {
+    async createStripeAccount(
+        organizationId: string,
+        type: 'express' | 'standard' = 'express',
+    ): Promise<StripeAccount> {
         const account = new StripeAccount();
         account.organizationId = organizationId;
         account.accountId = this.createId('acct');
@@ -446,9 +484,7 @@ const defaultBlobData = {
                 account_holder_name: null,
                 account_holder_type: null,
                 account_type: null,
-                available_payout_methods: [
-                    'standard',
-                ],
+                available_payout_methods: ['standard'],
                 bank_name: 'KBC BANK NV',
                 country: 'BE',
                 currency: 'eur',

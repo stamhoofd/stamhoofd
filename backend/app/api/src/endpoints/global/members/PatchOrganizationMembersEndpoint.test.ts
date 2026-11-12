@@ -3,12 +3,54 @@ import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray, PatchMap } from '@common/encoding';
 import type { Endpoint } from '@node/endpoints';
 import { Request } from '@node/endpoints';
-import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberResponsibilityRecordFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, User, UserFactory } from '@stamhoofd/models';
+import {
+    GroupFactory,
+    Member,
+    MemberFactory,
+    MemberPlatformMembership,
+    MemberResponsibilityRecord,
+    MemberResponsibilityRecordFactory,
+    OrganizationFactory,
+    OrganizationTagFactory,
+    Platform,
+    RegistrationFactory,
+    RegistrationPeriodFactory,
+    User,
+    UserFactory,
+} from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { Address, EmergencyContact, MemberDetails, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibility, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, PermissionRoleForResponsibility, Permissions, PermissionsResourceKey, PlatformMembershipType, PlatformMembershipTypeConfig, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
+import {
+    Address,
+    EmergencyContact,
+    MemberDetails,
+    MemberPlatformMembership as MemberPlatformMembershipStruct,
+    MemberResponsibility,
+    MemberResponsibilityRecord as MemberResponsibilityRecordStruct,
+    MemberWithRegistrationsBlob,
+    OrganizationMetaData,
+    OrganizationRecordsConfiguration,
+    Parent,
+    ParentType,
+    PermissionRoleForResponsibility,
+    Permissions,
+    PermissionsResourceKey,
+    PlatformMembershipType,
+    PlatformMembershipTypeConfig,
+    RecordCategory,
+    RecordSettings,
+    RecordTextAnswer,
+    ResourcePermissions,
+    ReviewTime,
+    ReviewTimes,
+    TranslatedString,
+    UitpasNumberDetails,
+    UitpasSocialTariff,
+    UitpasSocialTariffStatus,
+    Version,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -42,7 +84,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
     describe('Duplicate members', () => {
         test('The security code should be a requirement in userMode platform', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
                 organization, // since we are in platform mode, this will only set the permissions for this organization
@@ -70,25 +112,28 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('known_member_missing_rights'),
+            );
         });
 
         test('Should throw if duplicate member without rights in userMode organization - put', async () => {
             TestUtils.setEnvironment('userMode', 'organization');
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
 
             const resources = new Map();
 
             // Give read permission to the group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    'id-does-not-matter',
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        'id-does-not-matter',
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                ]),
             );
 
             const user = await new UserFactory({
@@ -120,14 +165,14 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('known_member_missing_rights'),
+            );
         });
 
         test('Should throw if duplicate member without rights in userMode organization - patch', async () => {
             TestUtils.setEnvironment('userMode', 'organization');
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
 
             const resources = new Map();
 
@@ -137,12 +182,15 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             // Give read permission to the group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                ]),
             );
 
             const user = await new UserFactory({
@@ -195,26 +243,29 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('known_member_missing_rights'),
+            );
         });
 
         test('Should be able to create duplicate from another organization in userMode organization', async () => {
             TestUtils.setEnvironment('userMode', 'organization');
-            const organization = await new OrganizationFactory({ }).create();
-            const otherOrganization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
+            const otherOrganization = await new OrganizationFactory({}).create();
 
             const resources = new Map();
 
             // Give read permission to the group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    'id-does-not-matter',
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        'id-does-not-matter',
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                ]),
             );
 
             const user = await new UserFactory({
@@ -267,8 +318,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(member.details.alternativeEmails).toHaveLength(0);
         });
 
-        test('A security code is required when user it\'s email is not listed on an existing member', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+        test("A security code is required when user it's email is not listed on an existing member", async () => {
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
                 organization,
@@ -296,13 +347,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('known_member_missing_rights'),
+            );
         });
 
-        test('No security code is required when user it\'s email is listed on a member without responsibilities', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+        test("No security code is required when user it's email is listed on a member without responsibilities", async () => {
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
                 organization,
@@ -337,7 +388,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
         });
 
         test('A security code is always required if the user has a responsibility', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
                 organization,
@@ -367,13 +418,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('known_member_missing_rights'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('known_member_missing_rights'),
+            );
         });
 
         test('A duplicate member with existing registrations returns those registrations after a merge', async () => {
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
                 organization, // since we are in platform mode, this will only set the permissions for this organization
@@ -404,16 +455,17 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             console.error(existingMember.details.parents);
             console.error(existingMember.details.parents[0].encode({ version: Version }));
             console.error(
-                MemberDetails.decodeField(
-                    existingMember.details.encode({ version: Version }),
-                    { version: Version },
-                ),
+                MemberDetails.decodeField(existingMember.details.encode({ version: Version }), {
+                    version: Version,
+                }),
             );
 
-            console.error(
-            );
+            console.error();
 
-            const rawData = await SQL.select().from('members').where('id', existingMember.id).fetch();
+            const rawData = await SQL.select()
+                .from('members')
+                .where('id', existingMember.id)
+                .fetch();
             console.error(rawData);
 
             await existingMember.refresh();
@@ -471,7 +523,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             TestUtils.setEnvironment('userMode', 'platform');
             await UniqueMemberNumberService.check();
 
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
                 organization,
@@ -504,16 +556,16 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
 
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('invalid_field'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('invalid_field'),
+            );
         });
 
         test('Creating a member with duplicate member number does not invalid_field in organization mode', async () => {
             TestUtils.setEnvironment('userMode', 'organization');
             await UniqueMemberNumberService.check();
 
-            const organization = await new OrganizationFactory({ }).create();
+            const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({
                 permissions: Permissions.create({ level: PermissionLevel.Full }),
                 organization,
@@ -560,16 +612,25 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
 
             // The admin is also a user manager of this member
-            const member = await new MemberFactory({ organization, firstName, lastName, birthDay, generateData: false, user: admin }).create();
+            const member = await new MemberFactory({
+                organization,
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                user: admin,
+            }).create();
             await new RegistrationFactory({ member, organization }).create();
 
             const token = await SessionService.createSession(admin);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ memberNumber: 'LID-200' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ memberNumber: 'LID-200' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -615,10 +676,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const token = await SessionService.createSession(admin);
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ language: Language.French }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ language: Language.French }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -655,10 +718,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const token = await SessionService.createSession(admin);
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ firstName: 'Changed' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ firstName: 'Changed' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -707,7 +772,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('not_found'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('not_found'),
+            );
         });
 
         test('An admin can edit members registered in its own organization', async () => {
@@ -768,12 +835,15 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             // Give read permission to the group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                ]),
             );
 
             const user = await new UserFactory({
@@ -840,12 +910,15 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             // Give read permission to the group
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                ]),
             );
 
             const user = await new UserFactory({
@@ -890,9 +963,11 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     authorization: 'Bearer ' + token.accessToken,
                 },
             });
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.simpleError({
-                code: 'not_found',
-            }));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.simpleError({
+                    code: 'not_found',
+                }),
+            );
 
             await member.refresh();
 
@@ -913,12 +988,15 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
 
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                ]),
             );
 
             const user = await new UserFactory({
@@ -946,33 +1024,47 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             // No birthday, so the duplicate check is skipped
             const arr: Body = new PatchableArray();
-            arr.addPut(MemberWithRegistrationsBlob.create({
-                id: victim.id,
-                details: MemberDetails.create({
-                    firstName: 'x',
-                    lastName: 'y',
+            arr.addPut(
+                MemberWithRegistrationsBlob.create({
+                    id: victim.id,
+                    details: MemberDetails.create({
+                        firstName: 'x',
+                        lastName: 'y',
+                    }),
                 }),
-            }));
+            );
 
             const putRequest = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             putRequest.headers.authorization = 'Bearer ' + token.accessToken;
-            const putError = await testServer.test(endpoint, putRequest).then(() => null, (e: unknown) => e);
+            const putError = await testServer.test(endpoint, putRequest).then(
+                () => null,
+                (e: unknown) => e,
+            );
             expect(putError).not.toBeNull();
 
             // The access assertions below guard the vulnerability, whatever error the PUT produced
             expect(hasTemporaryMemberAccess(user.id, victim.id, PermissionLevel.Read)).toBe(false);
 
             const patchArr: Body = new PatchableArray();
-            patchArr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: victim.id,
-                details: MemberDetails.patch({
-                    email: 'attacker@example.com',
+            patchArr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: victim.id,
+                    details: MemberDetails.patch({
+                        email: 'attacker@example.com',
+                    }),
                 }),
-            }));
+            );
 
-            const patchRequest = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), patchArr);
+            const patchRequest = Request.buildJson(
+                'PATCH',
+                baseUrl,
+                organization.getApiHost(),
+                patchArr,
+            );
             patchRequest.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, patchRequest)).rejects.toThrow(STExpect.errorWithCode('not_found'));
+            await expect(testServer.test(endpoint, patchRequest)).rejects.toThrow(
+                STExpect.errorWithCode('not_found'),
+            );
 
             await victim.refresh();
             expect(victim.details.firstName).toEqual(firstName);
@@ -990,12 +1082,15 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
 
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({
-                        level: PermissionLevel.Write,
-                    }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([
+                    [
+                        group.id,
+                        ResourcePermissions.create({
+                            level: PermissionLevel.Write,
+                        }),
+                    ],
+                ]),
             );
 
             const user = await new UserFactory({
@@ -1026,14 +1121,21 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             // The member has no registrations yet, so only the temporary access can grant this
             const patchArr: Body = new PatchableArray();
-            patchArr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: memberId,
-                details: MemberDetails.patch({
-                    firstName: 'Changed',
+            patchArr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: memberId,
+                    details: MemberDetails.patch({
+                        firstName: 'Changed',
+                    }),
                 }),
-            }));
+            );
 
-            const patchRequest = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), patchArr);
+            const patchRequest = Request.buildJson(
+                'PATCH',
+                baseUrl,
+                organization.getApiHost(),
+                patchArr,
+            );
             patchRequest.headers.authorization = 'Bearer ' + token.accessToken;
             const patchResponse = await testServer.test(endpoint, patchRequest);
             expect(patchResponse.body.members[0].details.firstName).toBe('Changed');
@@ -1087,9 +1189,15 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     level: PermissionLevel.None,
                     resources: new Map([
                         // All Tags
-                        [PermissionsResourceType.OrganizationTags, new Map(
-                            [[PermissionsResourceKey.All, ResourcePermissions.create({ level: PermissionLevel.Full })]],
-                        )],
+                        [
+                            PermissionsResourceType.OrganizationTags,
+                            new Map([
+                                [
+                                    PermissionsResourceKey.All,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ]),
+                        ],
                     ]),
                 }),
             }).create();
@@ -1133,10 +1241,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const group = await new GroupFactory({ organization }).create();
             const resources = new Map();
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({ level: PermissionLevel.Write }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([[group.id, ResourcePermissions.create({ level: PermissionLevel.Write })]]),
             );
 
             const user = await new UserFactory({
@@ -1144,22 +1250,29 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+            }).create();
             await new RegistrationFactory({ member, group }).create();
 
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ firstName: 'Michael' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ firstName: 'Michael' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.errorWithCode('not_allowed'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('not_allowed'),
+            );
         });
 
         test('A full admin can drastically change the name and birth date of a member', async () => {
@@ -1170,19 +1283,30 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+            }).create();
             await new RegistrationFactory({ member, organization }).create();
 
             const token = await SessionService.createSession(user);
 
             const base = member.details.birthDay!;
-            const newBirthDay = new Date(base.getFullYear() + 5, base.getMonth() + 4, base.getDate() + 6);
+            const newBirthDay = new Date(
+                base.getFullYear() + 5,
+                base.getMonth() + 4,
+                base.getDate() + 6,
+            );
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ firstName: 'Michael', birthDay: newBirthDay }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ firstName: 'Michael', birthDay: newBirthDay }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1190,12 +1314,18 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             expect(response.status).toBe(200);
             expect(response.body.members[0].details.firstName).toBe('Michael');
-            expect(response.body.members[0].details.birthDay?.getFullYear()).toBe(base.getFullYear() + 5);
+            expect(response.body.members[0].details.birthDay?.getFullYear()).toBe(
+                base.getFullYear() + 5,
+            );
         });
     });
 
     describe('Email changes', () => {
-        const addResponsibility = async (member: Member, level: PermissionLevel, organizationId: string | undefined = undefined) => {
+        const addResponsibility = async (
+            member: Member,
+            level: PermissionLevel,
+            organizationId: string | undefined = undefined,
+        ) => {
             await new MemberResponsibilityRecordFactory({
                 member,
                 responsibility: MemberResponsibility.create({
@@ -1216,10 +1346,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const group = await new GroupFactory({ organization }).create();
             const resources = new Map();
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({ level: PermissionLevel.None }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([[group.id, ResourcePermissions.create({ level: PermissionLevel.None })]]),
             );
 
             const user = await new UserFactory({
@@ -1232,26 +1360,34 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                user: memberUser,
+            }).create();
             await new RegistrationFactory({ member, group }).create();
             await addResponsibility(member, PermissionLevel.Full, organization.id);
 
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.simpleError({
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.simpleError({
                     code: 'permission_denied',
                     statusCode: 403,
-                }));
+                }),
+            );
         });
 
         test('A non-full admin cannot change the phone number of a member with a function', async () => {
@@ -1264,23 +1400,30 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+            }).create();
             await new RegistrationFactory({ member, group }).create();
             await addResponsibility(member, PermissionLevel.Full, organization.id);
 
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ phone: '+32412345678' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ phone: '+32412345678' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }),
+            );
 
             await member.refresh();
             expect(member.details.phone).toBeNull();
@@ -1296,17 +1439,26 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ details: MemberDetails.create({ firstName, lastName, birthDay: new Date(1993, 3, 5), phone: '+32412345678' }) }).create();
+            const member = await new MemberFactory({
+                details: MemberDetails.create({
+                    firstName,
+                    lastName,
+                    birthDay: new Date(1993, 3, 5),
+                    phone: '+32412345678',
+                }),
+            }).create();
             await new RegistrationFactory({ member, group }).create();
             await addResponsibility(member, PermissionLevel.Full, organization.id);
 
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ phone: '+32 412 34 56 78' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ phone: '+32 412 34 56 78' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1323,16 +1475,23 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+            }).create();
             await new RegistrationFactory({ member, group }).create();
 
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ phone: '+32412345678' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ phone: '+32412345678' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1349,17 +1508,24 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+            }).create();
             await new RegistrationFactory({ member, group }).create();
             await addResponsibility(member, PermissionLevel.Full, organization.id);
 
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ phone: '+32412345678' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ phone: '+32412345678' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1373,10 +1539,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const group = await new GroupFactory({ organization }).create();
             const resources = new Map();
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({ level: PermissionLevel.None }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([[group.id, ResourcePermissions.create({ level: PermissionLevel.None })]]),
             );
 
             const user = await new UserFactory({
@@ -1389,26 +1553,34 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                user: memberUser,
+            }).create();
             await new RegistrationFactory({ member, group }).create();
             await addResponsibility(member, PermissionLevel.Full, organization.id);
 
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ email: '' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ email: '' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.simpleError({
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.simpleError({
                     code: 'permission_denied',
                     statusCode: 403,
-                }));
+                }),
+            );
         });
 
         test('A non-full platform admin cannot change the email of a member with with global permissions', async () => {
@@ -1426,25 +1598,33 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                user: memberUser,
+            }).create();
             await addResponsibility(member, PermissionLevel.Full, organization.id);
 
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request))
-                .rejects
-                .toThrow(STExpect.simpleError({
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.simpleError({
                     code: 'permission_denied',
                     statusCode: 403,
-                }));
+                }),
+            );
         });
 
         test('A full admin can change the email of a member with a function', async () => {
@@ -1453,10 +1633,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const group = await new GroupFactory({ organization }).create();
             const resources = new Map();
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({ level: PermissionLevel.Write }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([[group.id, ResourcePermissions.create({ level: PermissionLevel.Write })]]),
             );
 
             const user = await new UserFactory({
@@ -1469,17 +1647,25 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                user: memberUser,
+            }).create();
             await new RegistrationFactory({ member, group }).create();
             await addResponsibility(member, PermissionLevel.Write, organization.id);
 
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1503,17 +1689,25 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                user: memberUser,
+            }).create();
             await new RegistrationFactory({ member, group }).create();
             await addResponsibility(member, PermissionLevel.Write, organization.id);
 
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ email: 'test@stamhoofd.be' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1528,10 +1722,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const group = await new GroupFactory({ organization }).create();
             const resources = new Map();
             resources.set(
-                PermissionsResourceType.Groups, new Map([[
-                    group.id,
-                    ResourcePermissions.create({ level: PermissionLevel.Write }),
-                ]]),
+                PermissionsResourceType.Groups,
+                new Map([[group.id, ResourcePermissions.create({ level: PermissionLevel.Write })]]),
             );
 
             const user = await new UserFactory({
@@ -1544,17 +1736,25 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false, user: memberUser }).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+                user: memberUser,
+            }).create();
             await new RegistrationFactory({ member, group }).create();
             await addResponsibility(member, PermissionLevel.Full, organization.id);
 
             const token = await SessionService.createSession(user);
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ alternativeEmails: new PatchableArray() }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ alternativeEmails: new PatchableArray() }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1577,7 +1777,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 organization,
             }).create();
 
-            const member = await new MemberFactory({ firstName, lastName, birthDay, generateData: false }).create();
+            const member = await new MemberFactory({
+                firstName,
+                lastName,
+                birthDay,
+                generateData: false,
+            }).create();
             member.details.securityCode = 'ABCD1234WXYZ5678';
             await member.save();
             await new RegistrationFactory({ member, group }).create();
@@ -1586,10 +1791,20 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const patchAddress = async (admin: User) => {
                 const token = await SessionService.createSession(admin);
                 const arr: Body = new PatchableArray();
-                arr.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    details: MemberDetails.patch({ address: Address.create({ street: 'Kerkstraat', number: '1', postalCode: '9000', city: 'Gent', country: Country.Belgium }) }),
-                }));
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            address: Address.create({
+                                street: 'Kerkstraat',
+                                number: '1',
+                                postalCode: '9000',
+                                city: 'Gent',
+                                country: Country.Belgium,
+                            }),
+                        }),
+                    }),
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1613,18 +1828,26 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
 
             const member = await new MemberFactory({
-                details: MemberDetails.create({ firstName, lastName, unverifiedEmails: ['old@example.com'] }),
+                details: MemberDetails.create({
+                    firstName,
+                    lastName,
+                    unverifiedEmails: ['old@example.com'],
+                }),
             }).create();
             await new RegistrationFactory({ member, group }).create();
             await addResponsibility(member, PermissionLevel.Full, organization.id);
 
-            const patchUnverifiedEmails = async (unverifiedEmails: PatchableArray<string, string, string>) => {
+            const patchUnverifiedEmails = async (
+                unverifiedEmails: PatchableArray<string, string, string>,
+            ) => {
                 const token = await SessionService.createSession(admin);
                 const arr: Body = new PatchableArray();
-                arr.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    details: MemberDetails.patch({ unverifiedEmails }),
-                }));
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({ unverifiedEmails }),
+                    }),
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1633,9 +1856,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const add = new PatchableArray<string, string, string>();
             add.addPut('attacker@example.com');
-            await expect(patchUnverifiedEmails(add))
-                .rejects
-                .toThrow(STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }));
+            await expect(patchUnverifiedEmails(add)).rejects.toThrow(
+                STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }),
+            );
 
             const remove = new PatchableArray<string, string, string>();
             remove.addDelete('old@example.com');
@@ -1659,7 +1882,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
                 const member = await new MemberFactory({
                     birthDay,
-                    details: MemberDetails.create({ firstName, lastName, email: 'original@example.com', securityCode: 'ABCD1234WXYZ5678' }),
+                    details: MemberDetails.create({
+                        firstName,
+                        lastName,
+                        email: 'original@example.com',
+                        securityCode: 'ABCD1234WXYZ5678',
+                    }),
                 }).create();
                 await new RegistrationFactory({ member, group }).create();
                 await addResponsibility(member, PermissionLevel.Full, organization.id);
@@ -1667,11 +1895,23 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 const createDuplicate = async (details: Partial<MemberDetails>) => {
                     const token = await SessionService.createSession(admin);
                     const arr: Body = new PatchableArray();
-                    arr.addPut(MemberWithRegistrationsBlob.create({
-                        details: MemberDetails.create({ firstName, lastName, birthDay: member.details.birthDay, ...details }),
-                    }));
+                    arr.addPut(
+                        MemberWithRegistrationsBlob.create({
+                            details: MemberDetails.create({
+                                firstName,
+                                lastName,
+                                birthDay: member.details.birthDay,
+                                ...details,
+                            }),
+                        }),
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
                     return await testServer.test(endpoint, request);
                 };
@@ -1681,53 +1921,106 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             test.each([
                 ['an email', { email: 'attacker@example.com' }],
-                ['a parent email', { parents: [Parent.create({ firstName: 'Eve', lastName: 'Doe', email: 'attacker@example.com' })] }],
+                [
+                    'a parent email',
+                    {
+                        parents: [
+                            Parent.create({
+                                firstName: 'Eve',
+                                lastName: 'Doe',
+                                email: 'attacker@example.com',
+                            }),
+                        ],
+                    },
+                ],
                 ['an unverified email', { unverifiedEmails: ['attacker@example.com'] }],
                 ['a phone number', { phone: '+32412345678' }],
-                ['a parent phone number', { parents: [Parent.create({ firstName: 'Eve', lastName: 'Doe', phone: '+32412345678' })] }],
-            ])('A non-full admin cannot add %s to a member with a function by creating a duplicate', async (_, details) => {
-                const { member, createDuplicate } = await setup();
+                [
+                    'a parent phone number',
+                    {
+                        parents: [
+                            Parent.create({
+                                firstName: 'Eve',
+                                lastName: 'Doe',
+                                phone: '+32412345678',
+                            }),
+                        ],
+                    },
+                ],
+            ])(
+                'A non-full admin cannot add %s to a member with a function by creating a duplicate',
+                async (_, details) => {
+                    const { member, createDuplicate } = await setup();
 
-                await expect(createDuplicate(details))
-                    .rejects
-                    .toThrow(STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }));
+                    await expect(createDuplicate(details)).rejects.toThrow(
+                        STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }),
+                    );
 
-                await member.refresh();
-                expect(member.details.email).toBe('original@example.com');
-                expect(member.details.alternativeEmails).toEqual([]);
-                expect(member.details.parents).toEqual([]);
-                expect(member.details.unverifiedEmails).toEqual([]);
-                expect(member.details.phone).toBeNull();
-            });
+                    await member.refresh();
+                    expect(member.details.email).toBe('original@example.com');
+                    expect(member.details.alternativeEmails).toEqual([]);
+                    expect(member.details.parents).toEqual([]);
+                    expect(member.details.unverifiedEmails).toEqual([]);
+                    expect(member.details.phone).toBeNull();
+                },
+            );
 
             test('A non-full admin can only keep a parent email without access of a member with a function when creating a duplicate', async () => {
                 const { member, createDuplicate } = await setup();
 
                 // Adult member, so parents do not have access by default
-                member.details.parents = [Parent.create({ firstName: 'Linda', lastName: 'Doe', email: 'parent@example.com' })];
+                member.details.parents = [
+                    Parent.create({
+                        firstName: 'Linda',
+                        lastName: 'Doe',
+                        email: 'parent@example.com',
+                    }),
+                ];
                 await member.save();
                 expect(member.details.calculatedParentsHaveAccess).toBe(false);
 
-                await expect(createDuplicate({ email: 'parent@example.com' }))
-                    .rejects
-                    .toThrow(STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }));
+                await expect(createDuplicate({ email: 'parent@example.com' })).rejects.toThrow(
+                    STExpect.simpleError({ code: 'permission_denied', statusCode: 403 }),
+                );
 
                 await member.refresh();
                 expect(member.details.email).toBe('original@example.com');
 
-                const sameParent = await createDuplicate({ parents: [Parent.create({ firstName: 'Linda', lastName: 'Doe', email: 'parent@example.com' })] });
+                const sameParent = await createDuplicate({
+                    parents: [
+                        Parent.create({
+                            firstName: 'Linda',
+                            lastName: 'Doe',
+                            email: 'parent@example.com',
+                        }),
+                    ],
+                });
                 expect(sameParent.body.members[0].id).toBe(member.id);
             });
 
             test('A non-full admin can create a duplicate of a member with a function without new contact details, or with its security code', async () => {
                 const { member, createDuplicate } = await setup();
 
-                const address = Address.create({ street: 'Kerkstraat', number: '1', postalCode: '9000', city: 'Gent', country: Country.Belgium });
-                const withoutNewContactDetails = await createDuplicate({ email: 'original@example.com', address });
+                const address = Address.create({
+                    street: 'Kerkstraat',
+                    number: '1',
+                    postalCode: '9000',
+                    city: 'Gent',
+                    country: Country.Belgium,
+                });
+                const withoutNewContactDetails = await createDuplicate({
+                    email: 'original@example.com',
+                    address,
+                });
                 expect(withoutNewContactDetails.body.members[0].id).toBe(member.id);
-                expect(withoutNewContactDetails.body.members[0].details.address?.street).toBe('Kerkstraat');
+                expect(withoutNewContactDetails.body.members[0].details.address?.street).toBe(
+                    'Kerkstraat',
+                );
 
-                const withSecurityCode = await createDuplicate({ email: 'new@example.com', securityCode: 'ABCD1234WXYZ5678' });
+                const withSecurityCode = await createDuplicate({
+                    email: 'new@example.com',
+                    securityCode: 'ABCD1234WXYZ5678',
+                });
                 expect(withSecurityCode.body.members[0].id).toBe(member.id);
                 expect(withSecurityCode.body.members[0].details.email).toBe('new@example.com');
             });
@@ -1743,7 +2036,11 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     organization,
                 }).create();
 
-                const parent = Parent.create({ firstName: 'Linda', lastName: 'Doe', email: 'linda@example.com' });
+                const parent = Parent.create({
+                    firstName: 'Linda',
+                    lastName: 'Doe',
+                    email: 'linda@example.com',
+                });
                 const member = await new MemberFactory({
                     details: MemberDetails.create({ firstName, lastName, parents: [parent] }),
                 }).create();
@@ -1753,12 +2050,19 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 const patchParents = async (parents: PatchableArrayAutoEncoder<Parent>) => {
                     const token = await SessionService.createSession(admin);
                     const arr: Body = new PatchableArray();
-                    arr.addPatch(MemberWithRegistrationsBlob.patch({
-                        id: member.id,
-                        details: MemberDetails.patch({ parents }),
-                    }));
+                    arr.addPatch(
+                        MemberWithRegistrationsBlob.patch({
+                            id: member.id,
+                            details: MemberDetails.patch({ parents }),
+                        }),
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
                     return await testServer.test(endpoint, request);
                 };
@@ -1767,30 +2071,59 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             };
 
             test.each([
-                ['changing the email of a parent', (parent: Parent) => Parent.patch({ id: parent.id, email: 'attacker@example.com' })],
-                ['adding an alternative email to a parent', (parent: Parent) => Parent.patch({ id: parent.id, alternativeEmails: ['attacker@example.com'] as any })],
-                ['adding a parent with an email', () => Parent.create({ firstName: 'Eve', lastName: 'Doe', email: 'attacker@example.com' })],
-                ['changing the phone of a parent', (parent: Parent) => Parent.patch({ id: parent.id, phone: '+32412345678' })],
-                ['adding a parent with a phone', () => Parent.create({ firstName: 'Eve', lastName: 'Doe', phone: '+32412345678' })],
-            ])('A non-full admin cannot change parent contact details of a member with a function: %s', async (_, change) => {
-                const { member, parent, patchParents } = await setup();
+                [
+                    'changing the email of a parent',
+                    (parent: Parent) =>
+                        Parent.patch({ id: parent.id, email: 'attacker@example.com' }),
+                ],
+                [
+                    'adding an alternative email to a parent',
+                    (parent: Parent) =>
+                        Parent.patch({
+                            id: parent.id,
+                            alternativeEmails: ['attacker@example.com'] as any,
+                        }),
+                ],
+                [
+                    'adding a parent with an email',
+                    () =>
+                        Parent.create({
+                            firstName: 'Eve',
+                            lastName: 'Doe',
+                            email: 'attacker@example.com',
+                        }),
+                ],
+                [
+                    'changing the phone of a parent',
+                    (parent: Parent) => Parent.patch({ id: parent.id, phone: '+32412345678' }),
+                ],
+                [
+                    'adding a parent with a phone',
+                    () =>
+                        Parent.create({ firstName: 'Eve', lastName: 'Doe', phone: '+32412345678' }),
+                ],
+            ])(
+                'A non-full admin cannot change parent contact details of a member with a function: %s',
+                async (_, change) => {
+                    const { member, parent, patchParents } = await setup();
 
-                const parents = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-                const parentChange = change(parent);
-                if (parentChange instanceof Parent) {
-                    parents.addPut(parentChange);
-                } else {
-                    parents.addPatch(parentChange);
-                }
+                    const parents = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+                    const parentChange = change(parent);
+                    if (parentChange instanceof Parent) {
+                        parents.addPut(parentChange);
+                    } else {
+                        parents.addPatch(parentChange);
+                    }
 
-                await expect(patchParents(parents))
-                    .rejects
-                    .toThrow(STExpect.simpleError({ code: 'permission_denied' }));
+                    await expect(patchParents(parents)).rejects.toThrow(
+                        STExpect.simpleError({ code: 'permission_denied' }),
+                    );
 
-                await member.refresh();
-                expect(member.details.getParentEmails()).toEqual(['linda@example.com']);
-                expect(member.details.getPhoneNumbersForVerification()).toEqual([]);
-            });
+                    await member.refresh();
+                    expect(member.details.getParentEmails()).toEqual(['linda@example.com']);
+                    expect(member.details.getPhoneNumbersForVerification()).toEqual([]);
+                },
+            );
 
             test('A non-full admin can change other parent data of a member with a function', async () => {
                 const { member, parent, patchParents } = await setup();
@@ -1815,30 +2148,50 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 }).create();
 
                 const familyUser = await new UserFactory({}).create();
-                const parent = Parent.create({ firstName: 'Linda', lastName: 'Doe', email: 'linda@example.com' });
+                const parent = Parent.create({
+                    firstName: 'Linda',
+                    lastName: 'Doe',
+                    email: 'linda@example.com',
+                });
 
                 const member = await new MemberFactory({
                     user: familyUser,
-                    details: MemberDetails.create({ firstName: 'John', lastName: 'Doe', parents: [parent] }),
+                    details: MemberDetails.create({
+                        firstName: 'John',
+                        lastName: 'Doe',
+                        parents: [parent],
+                    }),
                 }).create();
                 await new RegistrationFactory({ member, group }).create();
 
                 const memberWithFunction = await new MemberFactory({
                     user: familyUser,
-                    details: MemberDetails.create({ firstName: 'Jane', lastName: 'Doe', parents: [parent.clone()] }),
+                    details: MemberDetails.create({
+                        firstName: 'Jane',
+                        lastName: 'Doe',
+                        parents: [parent.clone()],
+                    }),
                 }).create();
                 await new RegistrationFactory({ member: memberWithFunction, group }).create();
                 await addResponsibility(memberWithFunction, PermissionLevel.Full, organization.id);
 
                 const token = await SessionService.createSession(admin);
                 const parents = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-                parents.addPatch(Parent.patch({ id: parent.id, email: 'attacker@example.com', phone: '+32412345678' }));
+                parents.addPatch(
+                    Parent.patch({
+                        id: parent.id,
+                        email: 'attacker@example.com',
+                        phone: '+32412345678',
+                    }),
+                );
 
                 const arr: Body = new PatchableArray();
-                arr.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    details: MemberDetails.patch({ parents }),
-                }));
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({ parents }),
+                    }),
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1863,17 +2216,30 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 }).create();
 
                 const familyUser = await new UserFactory({}).create();
-                const parent = Parent.create({ firstName: 'Linda', lastName: 'Doe', email: 'linda@example.com', phone: '+32470000000' });
+                const parent = Parent.create({
+                    firstName: 'Linda',
+                    lastName: 'Doe',
+                    email: 'linda@example.com',
+                    phone: '+32470000000',
+                });
 
                 const member = await new MemberFactory({
                     user: familyUser,
-                    details: MemberDetails.create({ firstName: 'John', lastName: 'Doe', parents: [parent] }),
+                    details: MemberDetails.create({
+                        firstName: 'John',
+                        lastName: 'Doe',
+                        parents: [parent],
+                    }),
                 }).create();
                 await new RegistrationFactory({ member, group }).create();
 
                 const memberWithFunction = await new MemberFactory({
                     user: familyUser,
-                    details: MemberDetails.create({ firstName: 'Jane', lastName: 'Doe', parents: [parent.clone()] }),
+                    details: MemberDetails.create({
+                        firstName: 'Jane',
+                        lastName: 'Doe',
+                        parents: [parent.clone()],
+                    }),
                 }).create();
                 await new RegistrationFactory({ member: memberWithFunction, group }).create();
                 await addResponsibility(memberWithFunction, PermissionLevel.Full, organization.id);
@@ -1883,10 +2249,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 parents.addPatch(Parent.patch({ id: parent.id, phone: '+32412345678' }));
 
                 const arr: Body = new PatchableArray();
-                arr.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    details: MemberDetails.patch({ parents }),
-                }));
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({ parents }),
+                    }),
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -1898,7 +2266,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
                 await memberWithFunction.refresh();
                 expect(memberWithFunction.details.parents[0].phone).toBe('+32470000000');
-                expect(memberWithFunction.details.getPhoneNumbersForVerification()).toEqual(['+32470000000']);
+                expect(memberWithFunction.details.getPhoneNumbersForVerification()).toEqual([
+                    '+32470000000',
+                ]);
             });
         });
     });
@@ -1912,9 +2282,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordCategory = RecordCategory.create({
                 name: TranslatedString.create('Medische fiche'),
-                records: [
-                    commentsRecord,
-                ],
+                records: [commentsRecord],
             });
             const organization = await new OrganizationFactory({
                 meta: OrganizationMetaData.create({
@@ -1946,10 +2314,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
-            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
-                settings: commentsRecord,
-                value: 'Some comments',
-            }));
+            recordAnswers.set(
+                commentsRecord.id,
+                RecordTextAnswer.create({
+                    settings: commentsRecord,
+                    value: 'Some comments',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -1981,9 +2352,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordCategory = RecordCategory.create({
                 name: TranslatedString.create('Medische fiche'),
-                records: [
-                    commentsRecord,
-                ],
+                records: [commentsRecord],
             });
             const organization = await new OrganizationFactory({
                 meta: OrganizationMetaData.create({
@@ -2015,13 +2384,16 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
-            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
-                settings: RecordSettings.create({
-                    id: 'malicious',
-                    name: TranslatedString.create('Opmerkingen'),
+            recordAnswers.set(
+                commentsRecord.id,
+                RecordTextAnswer.create({
+                    settings: RecordSettings.create({
+                        id: 'malicious',
+                        name: TranslatedString.create('Opmerkingen'),
+                    }),
+                    value: 'Some comments',
                 }),
-                value: 'Some comments',
-            }));
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -2037,7 +2409,10 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await expect(testServer.test(endpoint, request)).rejects.toThrow(
                 STExpect.simpleError({
                     code: 'invalid_field',
-                    field: 'changes.0.patch.details.recordAnswers.' + commentsRecord.id + '.settings.id',
+                    field:
+                        'changes.0.patch.details.recordAnswers.' +
+                        commentsRecord.id +
+                        '.settings.id',
                     message: 'Expected record settings id to match map key',
                 }),
             );
@@ -2053,9 +2428,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordCategory = RecordCategory.create({
                 name: TranslatedString.create('Medische fiche'),
-                records: [
-                    commentsRecord,
-                ],
+                records: [commentsRecord],
             });
             const organization = await new OrganizationFactory({
                 meta: OrganizationMetaData.create({
@@ -2087,9 +2460,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
-            recordAnswers.set(commentsRecord.id, RecordTextAnswer.patch({
-                value: 'Some comments',
-            }));
+            recordAnswers.set(
+                commentsRecord.id,
+                RecordTextAnswer.patch({
+                    value: 'Some comments',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -2117,9 +2493,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordCategory = RecordCategory.create({
                 name: TranslatedString.create('Medische fiche'),
-                records: [
-                    commentsRecord,
-                ],
+                records: [commentsRecord],
             });
             const organization = await new OrganizationFactory({
                 meta: OrganizationMetaData.create({
@@ -2135,12 +2509,24 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
                     resources: new Map([
-                        [PermissionsResourceType.RecordCategories, new Map([
-                            [recordCategory.id, ResourcePermissions.create({ level: PermissionLevel.Read })],
-                        ])],
-                        [PermissionsResourceType.Groups, new Map([
-                            [group.id, ResourcePermissions.create({ level: PermissionLevel.Full })],
-                        ])],
+                        [
+                            PermissionsResourceType.RecordCategories,
+                            new Map([
+                                [
+                                    recordCategory.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Read }),
+                                ],
+                            ]),
+                        ],
+                        [
+                            PermissionsResourceType.Groups,
+                            new Map([
+                                [
+                                    group.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ]),
+                        ],
                     ]),
                 }),
                 organization, // since we are in platform mode, this will only set the permissions for this organization
@@ -2163,10 +2549,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
-            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
-                settings: commentsRecord,
-                value: 'Some comments',
-            }));
+            recordAnswers.set(
+                commentsRecord.id,
+                RecordTextAnswer.create({
+                    settings: commentsRecord,
+                    value: 'Some comments',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -2179,7 +2568,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         });
 
         test('An admin without record category permission cannot set the records in that category', async () => {
@@ -2189,9 +2580,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordCategory = RecordCategory.create({
                 name: TranslatedString.create('Medische fiche'),
-                records: [
-                    commentsRecord,
-                ],
+                records: [commentsRecord],
             });
             const organization = await new OrganizationFactory({
                 meta: OrganizationMetaData.create({
@@ -2207,9 +2596,15 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
                     resources: new Map([
-                        [PermissionsResourceType.Groups, new Map([
-                            [group.id, ResourcePermissions.create({ level: PermissionLevel.Full })],
-                        ])],
+                        [
+                            PermissionsResourceType.Groups,
+                            new Map([
+                                [
+                                    group.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ]),
+                        ],
                     ]),
                 }),
                 organization, // since we are in platform mode, this will only set the permissions for this organization
@@ -2232,10 +2627,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
-            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
-                settings: commentsRecord,
-                value: 'Some comments',
-            }));
+            recordAnswers.set(
+                commentsRecord.id,
+                RecordTextAnswer.create({
+                    settings: commentsRecord,
+                    value: 'Some comments',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -2248,7 +2646,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
-            await expect(testServer.test(endpoint, request)).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
+            await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                STExpect.errorWithCode('permission_denied'),
+            );
         });
 
         test('An admin can set records of the platform', async () => {
@@ -2258,9 +2658,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordCategory = RecordCategory.create({
                 name: TranslatedString.create('Medische fiche'),
-                records: [
-                    commentsRecord,
-                ],
+                records: [commentsRecord],
             });
 
             const platform = await Platform.getForEditing();
@@ -2274,12 +2672,24 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 permissions: Permissions.create({
                     level: PermissionLevel.None,
                     resources: new Map([
-                        [PermissionsResourceType.RecordCategories, new Map([
-                            [recordCategory.id, ResourcePermissions.create({ level: PermissionLevel.Write })],
-                        ])],
-                        [PermissionsResourceType.Groups, new Map([
-                            [group.id, ResourcePermissions.create({ level: PermissionLevel.Full })],
-                        ])],
+                        [
+                            PermissionsResourceType.RecordCategories,
+                            new Map([
+                                [
+                                    recordCategory.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Write }),
+                                ],
+                            ]),
+                        ],
+                        [
+                            PermissionsResourceType.Groups,
+                            new Map([
+                                [
+                                    group.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ]),
+                        ],
                     ]),
                 }),
                 organization, // since we are in platform mode, this will only set the permissions for this organization
@@ -2302,10 +2712,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
-            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
-                settings: commentsRecord,
-                value: 'Some comments',
-            }));
+            recordAnswers.set(
+                commentsRecord.id,
+                RecordTextAnswer.create({
+                    settings: commentsRecord,
+                    value: 'Some comments',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -2336,9 +2749,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordCategory = RecordCategory.create({
                 name: TranslatedString.create('Medische fiche'),
-                records: [
-                    commentsRecord,
-                ],
+                records: [commentsRecord],
             });
 
             const platform = await Platform.getForEditing();
@@ -2355,9 +2766,15 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 globalPermissions: Permissions.create({
                     level: PermissionLevel.None,
                     resources: new Map([
-                        [PermissionsResourceType.OrganizationTags, new Map([
-                            [tag.id, ResourcePermissions.create({ level: PermissionLevel.Full })],
-                        ])],
+                        [
+                            PermissionsResourceType.OrganizationTags,
+                            new Map([
+                                [
+                                    tag.id,
+                                    ResourcePermissions.create({ level: PermissionLevel.Full }),
+                                ],
+                            ]),
+                        ],
                     ]),
                 }),
                 organization, // since we are in platform mode, this will only set the permissions for this organization
@@ -2380,10 +2797,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const recordAnswers = new PatchMap() as PatchAnswers;
 
-            recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
-                settings: commentsRecord,
-                value: 'Some comments',
-            }));
+            recordAnswers.set(
+                commentsRecord.id,
+                RecordTextAnswer.create({
+                    settings: commentsRecord,
+                    value: 'Some comments',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -2409,7 +2829,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
     });
 
     describe('Responsibilities', () => {
-        test('Can\'t add the same responsibility more than once in the same request', async () => {
+        test("Can't add the same responsibility more than once in the same request", async () => {
             const organization = await new OrganizationFactory({}).create();
             const responsibility = MemberResponsibility.create({ name: 'Bestuurslid' });
             organization.privateMeta.responsibilities.push(responsibility);
@@ -2423,7 +2843,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const member = await new MemberFactory({}).create();
             await new RegistrationFactory({ member, organization }).create();
 
-            const responsibilities: PatchableArrayAutoEncoder<MemberResponsibilityRecordStruct> = new PatchableArray();
+            const responsibilities: PatchableArrayAutoEncoder<MemberResponsibilityRecordStruct> =
+                new PatchableArray();
             const put = MemberResponsibilityRecordStruct.create({
                 memberId: member.id,
                 organizationId: organization.id,
@@ -2433,10 +2854,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             responsibilities.addPut(put.clone());
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                responsibilities,
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    responsibilities,
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -2446,7 +2869,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(await MemberResponsibilityRecord.where({ memberId: member.id })).toHaveLength(1);
         });
 
-        test('Can\'t add an already existing responsibility', async () => {
+        test("Can't add an already existing responsibility", async () => {
             const organization = await new OrganizationFactory({}).create();
             const responsibility = MemberResponsibility.create({ name: 'Bestuurslid' });
             organization.privateMeta.responsibilities.push(responsibility);
@@ -2466,18 +2889,23 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             existingResponsibility.responsibilityId = responsibility.id;
             await existingResponsibility.save();
 
-            const responsibilities: PatchableArrayAutoEncoder<MemberResponsibilityRecordStruct> = new PatchableArray();
-            responsibilities.addPut(MemberResponsibilityRecordStruct.create({
-                memberId: member.id,
-                organizationId: organization.id,
-                responsibilityId: responsibility.id,
-            }));
+            const responsibilities: PatchableArrayAutoEncoder<MemberResponsibilityRecordStruct> =
+                new PatchableArray();
+            responsibilities.addPut(
+                MemberResponsibilityRecordStruct.create({
+                    memberId: member.id,
+                    organizationId: organization.id,
+                    responsibilityId: responsibility.id,
+                }),
+            );
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                responsibilities,
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    responsibilities,
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -2819,10 +3247,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 id: outOfDateParent.id, // the oldest parent id is use
                 createdAt: outOfDateParent.createdAt,
                 email: 'changed@example.com',
-                alternativeEmails: [
-                    'linda@work.com',
-                    'linda+oldest@work.com',
-                ],
+                alternativeEmails: ['linda@work.com', 'linda+oldest@work.com'],
             });
 
             expect(member1.details.parents).toEqual([expectedParent]);
@@ -3053,10 +3478,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const token = await SessionService.createSession(admin);
 
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-            nonEmtpyArray.addPatch(Parent.patch({
-                id: parent1.id,
-                // no changes
-            }));
+            nonEmtpyArray.addPatch(
+                Parent.patch({
+                    id: parent1.id,
+                    // no changes
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -3085,10 +3512,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 ...parent3,
                 id: parent1.id, // the oldest parent id is use
                 createdAt: parent1.createdAt,
-                alternativeEmails: [
-                    'linda@work2.com',
-                    'linda@work.com',
-                ],
+                alternativeEmails: ['linda@work2.com', 'linda@work.com'],
             });
 
             expect(member1.details.parents).toEqual([expectedParent]);
@@ -3195,10 +3619,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
             const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-            nonEmtpyArray.addPatch(Parent.patch({
-                id: parent1.id,
-                // no changes
-            }));
+            nonEmtpyArray.addPatch(
+                Parent.patch({
+                    id: parent1.id,
+                    // no changes
+                }),
+            );
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
                 id: member1.id,
@@ -3333,10 +3759,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
             const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-            nonEmtpyArray.addPatch(Parent.patch({
-                id: parent1.id,
-                // no changes
-            }));
+            nonEmtpyArray.addPatch(
+                Parent.patch({
+                    id: parent1.id,
+                    // no changes
+                }),
+            );
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
                 id: member2.id,
@@ -3523,12 +3951,14 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
             const token = await SessionService.createSession(admin);
             const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-            nonEmtpyArray.addPatch(Parent.patch({
-                id: latestParent.id,
-                firstName: 'Linda2',
-                lastName: 'Doe2',
-                // Note that 'by accident' the frontend did not pass the updatedAt value correctly - this should still work as expected
-            }));
+            nonEmtpyArray.addPatch(
+                Parent.patch({
+                    id: latestParent.id,
+                    firstName: 'Linda2',
+                    lastName: 'Doe2',
+                    // Note that 'by accident' the frontend did not pass the updatedAt value correctly - this should still work as expected
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -3562,7 +3992,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             expect(member2.details.parents).toEqual([expectedParent]);
         });
 
-        test('Updating isMemberTaxDependent for one parent doesn\'t change it for the whole family', async () => {
+        test("Updating isMemberTaxDependent for one parent doesn't change it for the whole family", async () => {
             const user = await new UserFactory({}).create();
 
             const parent1 = Parent.create({
@@ -3647,11 +4077,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await member3.refresh();
 
             // Check all parents equal
-            const expectedParent = (isMemberTaxDependent: boolean | null = null) => Parent.create({
-                ...parent1,
-                isMemberTaxDependent,
-                updatedAt: d,
-            });
+            const expectedParent = (isMemberTaxDependent: boolean | null = null) =>
+                Parent.create({
+                    ...parent1,
+                    isMemberTaxDependent,
+                    updatedAt: d,
+                });
 
             expect(member1.details.parents).toEqual([expectedParent(true)]);
             expect(member2.details.parents).toEqual([expectedParent()]);
@@ -3708,12 +4139,14 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             parentsPatch.addPatch(Parent.patch({ id: father.id, isMemberTaxDependent: true }));
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: bram.id,
-                details: MemberDetails.patch({
-                    parents: parentsPatch,
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: bram.id,
+                    details: MemberDetails.patch({
+                        parents: parentsPatch,
+                    }),
                 }),
-            }));
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -3723,9 +4156,16 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await anna.refresh();
             await bram.refresh();
 
-            const taxDependency = (details: MemberDetails) => details.parents.map(p => [p.firstName, p.isMemberTaxDependent]);
-            expect(taxDependency(bram.details)).toEqual([['Linda', false], ['Jef', true]]);
-            expect(taxDependency(anna.details)).toEqual([['Linda', true], ['Jef', null]]);
+            const taxDependency = (details: MemberDetails) =>
+                details.parents.map((p) => [p.firstName, p.isMemberTaxDependent]);
+            expect(taxDependency(bram.details)).toEqual([
+                ['Linda', false],
+                ['Jef', true],
+            ]);
+            expect(taxDependency(anna.details)).toEqual([
+                ['Linda', true],
+                ['Jef', null],
+            ]);
         });
 
         // The dashboard flow: the debtor of the first child is chosen and saved, then the one of the sibling
@@ -3766,18 +4206,31 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
             const token = await SessionService.createSession(admin);
 
-            const choose = async (member: Member, debtor: Parent, other: Parent, nationalRegisterNumber: string) => {
+            const choose = async (
+                member: Member,
+                debtor: Parent,
+                other: Parent,
+                nationalRegisterNumber: string,
+            ) => {
                 const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
                 parentsPatch.addPatch(Parent.patch({ id: other.id, isMemberTaxDependent: false }));
-                parentsPatch.addPatch(Parent.patch({ id: debtor.id, isMemberTaxDependent: true, nationalRegisterNumber }));
+                parentsPatch.addPatch(
+                    Parent.patch({
+                        id: debtor.id,
+                        isMemberTaxDependent: true,
+                        nationalRegisterNumber,
+                    }),
+                );
 
                 const arr: Body = new PatchableArray();
-                arr.addPatch(MemberWithRegistrationsBlob.patch({
-                    id: member.id,
-                    details: MemberDetails.patch({
-                        parents: parentsPatch,
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({
+                            parents: parentsPatch,
+                        }),
                     }),
-                }));
+                );
 
                 const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
                 request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -3791,12 +4244,23 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await anna.refresh();
             await bram.refresh();
 
-            const taxDependency = (details: MemberDetails) => details.parents.map(p => [p.firstName, p.isMemberTaxDependent, p.nationalRegisterNumber]);
-            expect(taxDependency(anna.details)).toEqual([['Linda', true, '93042012345'], ['Jef', false, '93042017297']]);
-            expect(taxDependency(bram.details)).toEqual([['Linda', false, '93042012345'], ['Jef', true, '93042017297']]);
+            const taxDependency = (details: MemberDetails) =>
+                details.parents.map((p) => [
+                    p.firstName,
+                    p.isMemberTaxDependent,
+                    p.nationalRegisterNumber,
+                ]);
+            expect(taxDependency(anna.details)).toEqual([
+                ['Linda', true, '93042012345'],
+                ['Jef', false, '93042017297'],
+            ]);
+            expect(taxDependency(bram.details)).toEqual([
+                ['Linda', false, '93042012345'],
+                ['Jef', true, '93042017297'],
+            ]);
         });
 
-        test('Updating isMemberTaxDependent for another parent doesn\'t change it for the whole family', async () => {
+        test("Updating isMemberTaxDependent for another parent doesn't change it for the whole family", async () => {
             const user = await new UserFactory({}).create();
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -3886,17 +4350,28 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await member2.refresh();
 
             // Check all parents equal
-            const expectedParent = (parent: Parent, isMemberTaxDependent: boolean | null = null, updatedAt: Date | null = null) => Parent.create({
-                ...parent,
-                isMemberTaxDependent,
-                updatedAt: updatedAt ? updatedAt : parent.updatedAt,
-            });
+            const expectedParent = (
+                parent: Parent,
+                isMemberTaxDependent: boolean | null = null,
+                updatedAt: Date | null = null,
+            ) =>
+                Parent.create({
+                    ...parent,
+                    isMemberTaxDependent,
+                    updatedAt: updatedAt ? updatedAt : parent.updatedAt,
+                });
 
             expect(member1.details.parents).toHaveLength(2);
-            expect(member1.details.parents).toEqual([expectedParent(parent1, true, d), expectedParent(parent2)]);
+            expect(member1.details.parents).toEqual([
+                expectedParent(parent1, true, d),
+                expectedParent(parent2),
+            ]);
 
             expect(member2.details.parents).toHaveLength(2);
-            expect(member2.details.parents).toEqual([expectedParent(parent1, null, d), expectedParent(parent2)]);
+            expect(member2.details.parents).toEqual([
+                expectedParent(parent1, null, d),
+                expectedParent(parent2),
+            ]);
 
             // Now change isMemberTaxDependent for member2 with parent2
             arr = new PatchableArray();
@@ -3929,10 +4404,16 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await member2.refresh();
 
             expect(member1.details.parents).toHaveLength(2);
-            expect(member1.details.parents).toEqual([expectedParent(parent1, true, d), expectedParent(parent2, null, d)]);
+            expect(member1.details.parents).toEqual([
+                expectedParent(parent1, true, d),
+                expectedParent(parent2, null, d),
+            ]);
 
             expect(member2.details.parents).toHaveLength(2);
-            expect(member2.details.parents).toEqual([expectedParent(parent1, null, d), expectedParent(parent2, true, d)]);
+            expect(member2.details.parents).toEqual([
+                expectedParent(parent1, null, d),
+                expectedParent(parent2, true, d),
+            ]);
         });
 
         test.each([
@@ -3945,267 +4426,295 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             [null, true],
             [null, false],
             [null, null],
-        ])('Adding member to family doesn\'t copy isMemberTaxDependent (%s : %s)', async (isOriginalTaxDependent, isNewTaxDependent) => {
-            const user = await new UserFactory({}).create();
-            const admin = await new UserFactory({
-                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
-            }).create();
-            const token = await SessionService.createSession(admin);
+        ])(
+            "Adding member to family doesn't copy isMemberTaxDependent (%s : %s)",
+            async (isOriginalTaxDependent, isNewTaxDependent) => {
+                const user = await new UserFactory({}).create();
+                const admin = await new UserFactory({
+                    globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+                }).create();
+                const token = await SessionService.createSession(admin);
 
-            const parent1 = Parent.create({
-                firstName: 'Linda',
-                lastName: 'Doe',
-                email: 'linda@example.com',
-                alternativeEmails: ['linda@work.com'],
-                isMemberTaxDependent: isOriginalTaxDependent,
-                phone: '+32412345678',
-                address: Address.create({
-                    street: 'Main street 1',
-                    postalCode: '1000',
-                    city: 'Brussels',
-                    country: Country.Belgium,
-                }),
-                nationalRegisterNumber: '93042012345',
-                updatedAt: new Date(0),
-                type: ParentType.Mother,
-            });
-
-            const member1 = await new MemberFactory({
-                user,
-                details: MemberDetails.create({
-                    firstName: 'John',
+                const parent1 = Parent.create({
+                    firstName: 'Linda',
                     lastName: 'Doe',
-                    parents: [parent1],
-                }),
-            }).create();
-
-            const member2 = await new MemberFactory({
-                user,
-                details: MemberDetails.create({
-                    firstName: 'Jane',
-                    lastName: 'Doe',
-                }),
-            }).create();
-
-            const arr: Body = new PatchableArray();
-            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-            const createdParent = Parent.create({
-                firstName: 'Linda',
-                lastName: 'Doe',
-                updatedAt: new Date(0),
-                email: 'linda@example.com',
-                phone: '+32412345678',
-                isMemberTaxDependent: isNewTaxDependent,
-            });
-            parentsPatch.addPut(createdParent);
-
-            const patch = MemberWithRegistrationsBlob.patch({
-                id: member2.id,
-                details: MemberDetails.patch({
-                    parents: parentsPatch,
-                }),
-            });
-            arr.addPatch(patch);
-
-            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
-            request.headers.authorization = 'Bearer ' + token.accessToken;
-            const response = await testServer.test(endpoint, request);
-
-            // Check returned
-            expect(response.status).toBe(200);
-            expect(response.body.members.length).toBe(1);
-
-            // Load parents again
-            await member1.refresh();
-            await member2.refresh();
-
-            // Check all parents equal
-            const expectedParent = (parent: Parent, isMemberTaxDependent: boolean | null = null) => Parent.create({
-                ...parent,
-                isMemberTaxDependent,
-            });
-
-            expect(member1.details.parents).toHaveLength(1);
-            expect(member1.details.parents).toEqual([expectedParent(parent1, isOriginalTaxDependent)]);
-
-            expect(member2.details.parents).toHaveLength(1);
-            expect(member2.details.parents).toEqual([expectedParent(parent1, isNewTaxDependent)]);
-        });
-
-        test.each([
-            [true, true],
-            [true, false],
-            [true, null],
-            [false, true],
-            [false, false],
-            [false, null],
-            [null, true],
-            [null, false],
-            [null, null],
-        ])('Merging families keeps original isMemberTaxDependent (%s : %s)', async (parent1TaxDependent, parent2TaxDepentent) => {
-            const user = await new UserFactory({}).create();
-
-            const parent1 = Parent.create({
-                firstName: 'Linda',
-                lastName: 'Doe',
-                email: 'linda@example.com',
-                phone: '+32412345678',
-                isMemberTaxDependent: parent1TaxDependent,
-                createdAt: new Date(0),
-            });
-            const parent2 = Parent.create({
-                firstName: 'Linda',
-                lastName: 'Doe',
-                email: 'peter@example.com',
-                phone: '+32412345678',
-                isMemberTaxDependent: parent2TaxDepentent,
-                createdAt: new Date(1000),
-            });
-
-            const member1 = await new MemberFactory({
-                user,
-                details: MemberDetails.create({
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    parents: [parent1],
-                    reviewTimes: ReviewTimes.create({
-                        times: [
-                            ReviewTime.create({
-                                name: 'parents',
-                                reviewedAt: new Date(0),
-                            }),
-                        ],
-                    }),
-                }),
-            }).create();
-
-            const member2 = await new MemberFactory({
-                user,
-                details: MemberDetails.create({
-                    firstName: 'Jane',
-                    lastName: 'Doe',
-                    parents: [parent2],
-                    reviewTimes: ReviewTimes.create({
-                        times: [
-                            ReviewTime.create({
-                                name: 'parents',
-                                reviewedAt: new Date(1000),
-                            }),
-                        ],
-                    }),
-                }),
-            }).create();
-
-            const admin = await new UserFactory({
-                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
-            }).create();
-            const token = await SessionService.createSession(admin);
-
-            const arr: Body = new PatchableArray();
-            const d = new Date();
-            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-            parentsPatch.addPatch(
-                Parent.patch({
-                    id: parent2.id,
                     email: 'linda@example.com',
-                    updatedAt: d,
-                }),
-            );
+                    alternativeEmails: ['linda@work.com'],
+                    isMemberTaxDependent: isOriginalTaxDependent,
+                    phone: '+32412345678',
+                    address: Address.create({
+                        street: 'Main street 1',
+                        postalCode: '1000',
+                        city: 'Brussels',
+                        country: Country.Belgium,
+                    }),
+                    nationalRegisterNumber: '93042012345',
+                    updatedAt: new Date(0),
+                    type: ParentType.Mother,
+                });
 
-            const patch = MemberWithRegistrationsBlob.patch({
-                id: member2.id,
-                details: MemberDetails.patch({
-                    parents: parentsPatch,
-                }),
-            });
-            arr.addPatch(patch);
+                const member1 = await new MemberFactory({
+                    user,
+                    details: MemberDetails.create({
+                        firstName: 'John',
+                        lastName: 'Doe',
+                        parents: [parent1],
+                    }),
+                }).create();
 
-            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
-            request.headers.authorization = 'Bearer ' + token.accessToken;
-            const response = await testServer.test(endpoint, request);
+                const member2 = await new MemberFactory({
+                    user,
+                    details: MemberDetails.create({
+                        firstName: 'Jane',
+                        lastName: 'Doe',
+                    }),
+                }).create();
 
-            // Check returned
-            expect(response.status).toBe(200);
-            expect(response.body.members.length).toBe(1);
+                const arr: Body = new PatchableArray();
+                const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+                const createdParent = Parent.create({
+                    firstName: 'Linda',
+                    lastName: 'Doe',
+                    updatedAt: new Date(0),
+                    email: 'linda@example.com',
+                    phone: '+32412345678',
+                    isMemberTaxDependent: isNewTaxDependent,
+                });
+                parentsPatch.addPut(createdParent);
 
-            // Load parents again
-            await member1.refresh();
-            await member2.refresh();
+                const patch = MemberWithRegistrationsBlob.patch({
+                    id: member2.id,
+                    details: MemberDetails.patch({
+                        parents: parentsPatch,
+                    }),
+                });
+                arr.addPatch(patch);
 
-            // Check all parents equal
-            const expectedParent = (isMemberTaxDependent: boolean | null = null) => Parent.create({
-                ...parent1,
-                id: parent1.id,
-                isMemberTaxDependent,
-                updatedAt: d,
-            });
+                const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                const response = await testServer.test(endpoint, request);
 
-            expect(member1.details.parents).toEqual([expectedParent(parent1TaxDependent)]);
-            expect(member2.details.parents).toEqual([expectedParent(parent2TaxDepentent)]);
-        });
+                // Check returned
+                expect(response.status).toBe(200);
+                expect(response.body.members.length).toBe(1);
+
+                // Load parents again
+                await member1.refresh();
+                await member2.refresh();
+
+                // Check all parents equal
+                const expectedParent = (
+                    parent: Parent,
+                    isMemberTaxDependent: boolean | null = null,
+                ) =>
+                    Parent.create({
+                        ...parent,
+                        isMemberTaxDependent,
+                    });
+
+                expect(member1.details.parents).toHaveLength(1);
+                expect(member1.details.parents).toEqual([
+                    expectedParent(parent1, isOriginalTaxDependent),
+                ]);
+
+                expect(member2.details.parents).toHaveLength(1);
+                expect(member2.details.parents).toEqual([
+                    expectedParent(parent1, isNewTaxDependent),
+                ]);
+            },
+        );
+
+        test.each([
+            [true, true],
+            [true, false],
+            [true, null],
+            [false, true],
+            [false, false],
+            [false, null],
+            [null, true],
+            [null, false],
+            [null, null],
+        ])(
+            'Merging families keeps original isMemberTaxDependent (%s : %s)',
+            async (parent1TaxDependent, parent2TaxDepentent) => {
+                const user = await new UserFactory({}).create();
+
+                const parent1 = Parent.create({
+                    firstName: 'Linda',
+                    lastName: 'Doe',
+                    email: 'linda@example.com',
+                    phone: '+32412345678',
+                    isMemberTaxDependent: parent1TaxDependent,
+                    createdAt: new Date(0),
+                });
+                const parent2 = Parent.create({
+                    firstName: 'Linda',
+                    lastName: 'Doe',
+                    email: 'peter@example.com',
+                    phone: '+32412345678',
+                    isMemberTaxDependent: parent2TaxDepentent,
+                    createdAt: new Date(1000),
+                });
+
+                const member1 = await new MemberFactory({
+                    user,
+                    details: MemberDetails.create({
+                        firstName: 'John',
+                        lastName: 'Doe',
+                        parents: [parent1],
+                        reviewTimes: ReviewTimes.create({
+                            times: [
+                                ReviewTime.create({
+                                    name: 'parents',
+                                    reviewedAt: new Date(0),
+                                }),
+                            ],
+                        }),
+                    }),
+                }).create();
+
+                const member2 = await new MemberFactory({
+                    user,
+                    details: MemberDetails.create({
+                        firstName: 'Jane',
+                        lastName: 'Doe',
+                        parents: [parent2],
+                        reviewTimes: ReviewTimes.create({
+                            times: [
+                                ReviewTime.create({
+                                    name: 'parents',
+                                    reviewedAt: new Date(1000),
+                                }),
+                            ],
+                        }),
+                    }),
+                }).create();
+
+                const admin = await new UserFactory({
+                    globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+                }).create();
+                const token = await SessionService.createSession(admin);
+
+                const arr: Body = new PatchableArray();
+                const d = new Date();
+                const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+                parentsPatch.addPatch(
+                    Parent.patch({
+                        id: parent2.id,
+                        email: 'linda@example.com',
+                        updatedAt: d,
+                    }),
+                );
+
+                const patch = MemberWithRegistrationsBlob.patch({
+                    id: member2.id,
+                    details: MemberDetails.patch({
+                        parents: parentsPatch,
+                    }),
+                });
+                arr.addPatch(patch);
+
+                const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+                const response = await testServer.test(endpoint, request);
+
+                // Check returned
+                expect(response.status).toBe(200);
+                expect(response.body.members.length).toBe(1);
+
+                // Load parents again
+                await member1.refresh();
+                await member2.refresh();
+
+                // Check all parents equal
+                const expectedParent = (isMemberTaxDependent: boolean | null = null) =>
+                    Parent.create({
+                        ...parent1,
+                        id: parent1.id,
+                        isMemberTaxDependent,
+                        updatedAt: d,
+                    });
+
+                expect(member1.details.parents).toEqual([expectedParent(parent1TaxDependent)]);
+                expect(member2.details.parents).toEqual([expectedParent(parent2TaxDepentent)]);
+            },
+        );
 
         test.each([
             [2, false],
             [3, true],
-        ])('Marking %s parents as isMemberTaxDependent throws: %s', async (taxDependentCount, shouldThrow) => {
-            const user = await new UserFactory({}).create();
-            const admin = await new UserFactory({
-                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
-            }).create();
-            const token = await SessionService.createSession(admin);
+        ])(
+            'Marking %s parents as isMemberTaxDependent throws: %s',
+            async (taxDependentCount, shouldThrow) => {
+                const user = await new UserFactory({}).create();
+                const admin = await new UserFactory({
+                    globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+                }).create();
+                const token = await SessionService.createSession(admin);
 
-            const parents = ['Linda', 'John', 'Ann'].map(firstName => Parent.create({
-                firstName,
-                lastName: 'Doe',
-                email: firstName.toLowerCase() + '@example.com',
-                updatedAt: new Date(0),
-            }));
-
-            const member = await new MemberFactory({
-                user,
-                details: MemberDetails.create({
-                    firstName: 'Child',
-                    lastName: 'Doe',
-                    parents,
-                }),
-            }).create();
-
-            const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-            for (const parent of parents.slice(0, taxDependentCount)) {
-                parentsPatch.addPatch(Parent.patch({
-                    id: parent.id,
-                    isMemberTaxDependent: true,
-                }));
-            }
-
-            const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ parents: parentsPatch }),
-            }));
-
-            const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
-            request.headers.authorization = 'Bearer ' + token.accessToken;
-
-            if (shouldThrow) {
-                await expect(testServer.test(endpoint, request)).rejects.toThrow(
-                    STExpect.simpleError({
-                        code: 'invalid_field',
-                        field: 'parents',
+                const parents = ['Linda', 'John', 'Ann'].map((firstName) =>
+                    Parent.create({
+                        firstName,
+                        lastName: 'Doe',
+                        email: firstName.toLowerCase() + '@example.com',
+                        updatedAt: new Date(0),
                     }),
                 );
 
+                const member = await new MemberFactory({
+                    user,
+                    details: MemberDetails.create({
+                        firstName: 'Child',
+                        lastName: 'Doe',
+                        parents,
+                    }),
+                }).create();
+
+                const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
+                for (const parent of parents.slice(0, taxDependentCount)) {
+                    parentsPatch.addPatch(
+                        Parent.patch({
+                            id: parent.id,
+                            isMemberTaxDependent: true,
+                        }),
+                    );
+                }
+
+                const arr: Body = new PatchableArray();
+                arr.addPatch(
+                    MemberWithRegistrationsBlob.patch({
+                        id: member.id,
+                        details: MemberDetails.patch({ parents: parentsPatch }),
+                    }),
+                );
+
+                const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
+                request.headers.authorization = 'Bearer ' + token.accessToken;
+
+                if (shouldThrow) {
+                    await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                        STExpect.simpleError({
+                            code: 'invalid_field',
+                            field: 'parents',
+                        }),
+                    );
+
+                    await member.refresh();
+                    expect(
+                        member.details.parents.filter((p) => p.isMemberTaxDependent === true),
+                    ).toHaveLength(0);
+                    return;
+                }
+
+                const response = await testServer.test(endpoint, request);
+                expect(response.status).toBe(200);
+
                 await member.refresh();
-                expect(member.details.parents.filter(p => p.isMemberTaxDependent === true)).toHaveLength(0);
-                return;
-            }
-
-            const response = await testServer.test(endpoint, request);
-            expect(response.status).toBe(200);
-
-            await member.refresh();
-            expect(member.details.parents.filter(p => p.isMemberTaxDependent === true)).toHaveLength(taxDependentCount);
-        });
+                expect(
+                    member.details.parents.filter((p) => p.isMemberTaxDependent === true),
+                ).toHaveLength(taxDependentCount);
+            },
+        );
 
         test('A member that already has too many isMemberTaxDependent parents can still be changed', async () => {
             const user = await new UserFactory({}).create();
@@ -4215,13 +4724,15 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const token = await SessionService.createSession(admin);
 
             // Data that predates the limit
-            const parents = ['Linda', 'John', 'Ann'].map(firstName => Parent.create({
-                firstName,
-                lastName: 'Doe',
-                email: firstName.toLowerCase() + '@example.com',
-                isMemberTaxDependent: true,
-                updatedAt: new Date(0),
-            }));
+            const parents = ['Linda', 'John', 'Ann'].map((firstName) =>
+                Parent.create({
+                    firstName,
+                    lastName: 'Doe',
+                    email: firstName.toLowerCase() + '@example.com',
+                    isMemberTaxDependent: true,
+                    updatedAt: new Date(0),
+                }),
+            );
 
             const member = await new MemberFactory({
                 user,
@@ -4233,10 +4744,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ phone: '+32412345678' }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ phone: '+32412345678' }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -4245,7 +4758,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             await member.refresh();
             expect(member.details.phone).toBe('+32412345678');
-            expect(member.details.parents.filter(p => p.isMemberTaxDependent === true)).toHaveLength(3);
+            expect(
+                member.details.parents.filter((p) => p.isMemberTaxDependent === true),
+            ).toHaveLength(3);
         });
 
         test('A member that already has too many isMemberTaxDependent parents cannot get another one', async () => {
@@ -4255,13 +4770,15 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
             const token = await SessionService.createSession(admin);
 
-            const parents = ['Linda', 'John', 'Ann', 'Bob'].map(firstName => Parent.create({
-                firstName,
-                lastName: 'Doe',
-                email: firstName.toLowerCase() + '@example.com',
-                isMemberTaxDependent: firstName !== 'Bob',
-                updatedAt: new Date(0),
-            }));
+            const parents = ['Linda', 'John', 'Ann', 'Bob'].map((firstName) =>
+                Parent.create({
+                    firstName,
+                    lastName: 'Doe',
+                    email: firstName.toLowerCase() + '@example.com',
+                    isMemberTaxDependent: firstName !== 'Bob',
+                    updatedAt: new Date(0),
+                }),
+            );
 
             const member = await new MemberFactory({
                 user,
@@ -4273,16 +4790,20 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             }).create();
 
             const parentsPatch = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
-            parentsPatch.addPatch(Parent.patch({
-                id: parents[3].id,
-                isMemberTaxDependent: true,
-            }));
+            parentsPatch.addPatch(
+                Parent.patch({
+                    id: parents[3].id,
+                    isMemberTaxDependent: true,
+                }),
+            );
 
             const arr: Body = new PatchableArray();
-            arr.addPatch(MemberWithRegistrationsBlob.patch({
-                id: member.id,
-                details: MemberDetails.patch({ parents: parentsPatch }),
-            }));
+            arr.addPatch(
+                MemberWithRegistrationsBlob.patch({
+                    id: member.id,
+                    details: MemberDetails.patch({ parents: parentsPatch }),
+                }),
+            );
 
             const request = Request.buildJson('PATCH', baseUrl, undefined, arr);
             request.headers.authorization = 'Bearer ' + token.accessToken;
@@ -4294,7 +4815,9 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             );
 
             await member.refresh();
-            expect(member.details.parents.filter(p => p.isMemberTaxDependent === true)).toHaveLength(3);
+            expect(
+                member.details.parents.filter((p) => p.isMemberTaxDependent === true),
+            ).toHaveLength(3);
         });
     });
 
@@ -4379,11 +4902,14 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
             const token = await SessionService.createSession(admin);
-            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
-            nonEmtpyArray.addPatch(EmergencyContact.patch({
-                id: contact1.id,
-                // no changes
-            }));
+            const nonEmtpyArray =
+                new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray.addPatch(
+                EmergencyContact.patch({
+                    id: contact1.id,
+                    // no changes
+                }),
+            );
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
                 id: member1.id,
@@ -4497,11 +5023,14 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
             const token = await SessionService.createSession(admin);
-            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
-            nonEmtpyArray.addPatch(EmergencyContact.patch({
-                id: contact1.id,
-                // no changes
-            }));
+            const nonEmtpyArray =
+                new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray.addPatch(
+                EmergencyContact.patch({
+                    id: contact1.id,
+                    // no changes
+                }),
+            );
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
                 id: member2.id,
@@ -4574,11 +5103,14 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
             const token = await SessionService.createSession(admin);
-            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
-            nonEmtpyArray.addPut(EmergencyContact.create({
-                name: 'Linda Doe',
-                title: 'Oma',
-            }));
+            const nonEmtpyArray =
+                new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray.addPut(
+                EmergencyContact.create({
+                    name: 'Linda Doe',
+                    title: 'Oma',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -4658,7 +5190,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
             const token = await SessionService.createSession(admin);
-            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            const nonEmtpyArray =
+                new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addPut(oldVersionContact);
 
             const arr: Body = new PatchableArray();
@@ -4728,12 +5261,15 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
             const token = await SessionService.createSession(admin);
-            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
-            nonEmtpyArray.addPatch(EmergencyContact.patch({
-                id: contact1.id,
-                name: 'Linda2 Doe2',
-                // Note that 'by accident' the frontend did not pass the updatedAt value correctly - this should still work as expected
-            }));
+            const nonEmtpyArray =
+                new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray.addPatch(
+                EmergencyContact.patch({
+                    id: contact1.id,
+                    name: 'Linda2 Doe2',
+                    // Note that 'by accident' the frontend did not pass the updatedAt value correctly - this should still work as expected
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -4803,14 +5339,17 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
             const token = await SessionService.createSession(admin);
-            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            const nonEmtpyArray =
+                new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             const d = new Date();
-            nonEmtpyArray.addPatch(EmergencyContact.patch({
-                id: contact1.id,
-                name: 'Linda2 Doe2',
-                title: 'Changed',
-                updatedAt: d,
-            }));
+            nonEmtpyArray.addPatch(
+                EmergencyContact.patch({
+                    id: contact1.id,
+                    name: 'Linda2 Doe2',
+                    title: 'Changed',
+                    updatedAt: d,
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -4858,9 +5397,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 details: MemberDetails.create({
                     firstName: 'John',
                     lastName: 'Doe',
-                    emergencyContacts: [
-                        existing,
-                    ],
+                    emergencyContacts: [existing],
                 }),
             }).create();
 
@@ -4874,7 +5411,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
             const token = await SessionService.createSession(admin);
-            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            const nonEmtpyArray =
+                new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addPut(newContact);
 
             const arr: Body = new PatchableArray();
@@ -4898,13 +5436,10 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             await member1.refresh();
 
             // Check the new contact is added
-            expect(member1.details.emergencyContacts).toEqual([
-                existing,
-                newContact,
-            ]);
+            expect(member1.details.emergencyContacts).toEqual([existing, newContact]);
         });
 
-        test('Updating an existing emergency contact\'s details works correctly', async () => {
+        test("Updating an existing emergency contact's details works correctly", async () => {
             const user = await new UserFactory({}).create();
 
             const contact1 = EmergencyContact.create({
@@ -4932,7 +5467,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
             const token = await SessionService.createSession(admin);
-            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            const nonEmtpyArray =
+                new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addPatch(updatedContact);
 
             const arr: Body = new PatchableArray();
@@ -4987,7 +5523,8 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
             const token = await SessionService.createSession(admin);
-            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            const nonEmtpyArray =
+                new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
             nonEmtpyArray.addDelete(contact1.id);
 
             const arr: Body = new PatchableArray();
@@ -5053,17 +5590,23 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
             const token = await SessionService.createSession(admin);
-            const nonEmtpyArray1 = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
-            nonEmtpyArray1.addPatch(EmergencyContact.patch({
-                id: contact1.id,
-                phone: '+32412345680',
-            }));
+            const nonEmtpyArray1 =
+                new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray1.addPatch(
+                EmergencyContact.patch({
+                    id: contact1.id,
+                    phone: '+32412345680',
+                }),
+            );
 
-            const nonEmtpyArray2 = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
-            nonEmtpyArray2.addPatch(EmergencyContact.patch({
-                id: contact2.id,
-                phone: '+32412345681',
-            }));
+            const nonEmtpyArray2 =
+                new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray2.addPatch(
+                EmergencyContact.patch({
+                    id: contact2.id,
+                    phone: '+32412345681',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch1 = MemberWithRegistrationsBlob.patch({
@@ -5147,11 +5690,14 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
             }).create();
             const token = await SessionService.createSession(admin);
-            const nonEmtpyArray = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
-            nonEmtpyArray.addPatch(EmergencyContact.patch({
-                id: contact1.id,
-                phone: '+32412345679',
-            }));
+            const nonEmtpyArray =
+                new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
+            nonEmtpyArray.addPatch(
+                EmergencyContact.patch({
+                    id: contact1.id,
+                    phone: '+32412345679',
+                }),
+            );
 
             const arr: Body = new PatchableArray();
             const patch = MemberWithRegistrationsBlob.patch({
@@ -5193,7 +5739,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 test('Should not set socialTariff from request', async () => {
                     initUitpasApi();
 
-                    const organization = await new OrganizationFactory({ }).create();
+                    const organization = await new OrganizationFactory({}).create();
 
                     const user = await new UserFactory({
                         permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -5223,16 +5769,27 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
                     arr.addPut(member);
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
 
                     const result = await testServer.test(endpoint, request);
 
                     expect(result.status).toBe(200);
                     expect(result.body.members.length).toBe(1);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toBe(UitpasSocialTariffStatus.Active);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toBe(new Date(2050, 0, 1).getTime());
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt?.getTime()).not.toBe(new Date(2040, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                    ).toBe(UitpasSocialTariffStatus.Active);
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime(),
+                    ).not.toBe(new Date(2050, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt?.getTime(),
+                    ).not.toBe(new Date(2040, 0, 1).getTime());
                 });
             });
 
@@ -5240,7 +5797,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 test('Should update socialTariff if uitpasNumber changes', async () => {
                     initUitpasApi();
 
-                    const organization = await new OrganizationFactory({ }).create();
+                    const organization = await new OrganizationFactory({}).create();
 
                     const user = await new UserFactory({
                         permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -5272,33 +5829,48 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     // patch uitpas number
                     const arr: Body = new PatchableArray();
 
-                    arr.addPatch(MemberWithRegistrationsBlob.patch({
-                        id: member.id,
-                        details: MemberDetails.patch({
-                            uitpasNumberDetails: UitpasNumberDetails.patch({
-                                // active
-                                uitpasNumber: '0900011354819',
+                    arr.addPatch(
+                        MemberWithRegistrationsBlob.patch({
+                            id: member.id,
+                            details: MemberDetails.patch({
+                                uitpasNumberDetails: UitpasNumberDetails.patch({
+                                    // active
+                                    uitpasNumber: '0900011354819',
+                                }),
                             }),
                         }),
-                    }));
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
 
                     const result = await testServer.test(endpoint, request);
 
                     expect(result.status).toBe(200);
                     expect(result.body.members.length).toBe(1);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354819');
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2030, 0, 1).getTime());
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate).toBeInstanceOf(Date);
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.uitpasNumber,
+                    ).toEqual('0900011354819');
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                    ).toEqual(UitpasSocialTariffStatus.Active);
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                    ).not.toEqual(new Date(2030, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate,
+                    ).toBeInstanceOf(Date);
                 });
 
                 test('Should throw if invalid uitpas number', async () => {
                     initUitpasApi();
 
-                    const organization = await new OrganizationFactory({ }).create();
+                    const organization = await new OrganizationFactory({}).create();
 
                     const user = await new UserFactory({
                         permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -5330,29 +5902,36 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     // patch uitpas number
                     const arr: Body = new PatchableArray();
 
-                    arr.addPatch(MemberWithRegistrationsBlob.patch({
-                        id: member.id,
-                        details: MemberDetails.patch({
-                            uitpasNumberDetails: UitpasNumberDetails.patch({
-                                // invalid (too short)
-                                uitpasNumber: '094',
+                    arr.addPatch(
+                        MemberWithRegistrationsBlob.patch({
+                            id: member.id,
+                            details: MemberDetails.patch({
+                                uitpasNumberDetails: UitpasNumberDetails.patch({
+                                    // invalid (too short)
+                                    uitpasNumber: '094',
+                                }),
                             }),
                         }),
-                    }));
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
 
-                    await expect(testServer.test(endpoint, request))
-                        .rejects
-                        .toThrow(STExpect.errorWithCode('invalid_uitpas_number'));
+                    await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                        STExpect.errorWithCode('invalid_uitpas_number'),
+                    );
                 });
 
                 describe('unknown uitpas number', () => {
                     test('Should throw if number changed', async () => {
                         initUitpasApi();
 
-                        const organization = await new OrganizationFactory({ }).create();
+                        const organization = await new OrganizationFactory({}).create();
 
                         const user = await new UserFactory({
                             permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -5384,28 +5963,37 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         // patch uitpas number
                         const arr: Body = new PatchableArray();
 
-                        arr.addPatch(MemberWithRegistrationsBlob.patch({
-                            id: member.id,
-                            details: MemberDetails.patch({
-                                uitpasNumberDetails: UitpasNumberDetails.patch({
-                                    // unknown number
-                                    uitpasNumber: '0900000095999',
+                        arr.addPatch(
+                            MemberWithRegistrationsBlob.patch({
+                                id: member.id,
+                                details: MemberDetails.patch({
+                                    uitpasNumberDetails: UitpasNumberDetails.patch({
+                                        // unknown number
+                                        uitpasNumber: '0900000095999',
+                                    }),
                                 }),
                             }),
-                        }));
+                        );
 
-                        const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                        const request = Request.buildJson(
+                            'PATCH',
+                            baseUrl,
+                            organization.getApiHost(),
+                            arr,
+                        );
                         request.headers.authorization = 'Bearer ' + token.accessToken;
 
-                        await expect(testServer.test(endpoint, request))
-                            .rejects
-                            .toThrow(STExpect.errorWithCode('https://api.publiq.be/probs/uitpas/pass-not-found'));
+                        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                            STExpect.errorWithCode(
+                                'https://api.publiq.be/probs/uitpas/pass-not-found',
+                            ),
+                        );
                     });
 
                     test('Should throw and set status to unknown if number did not change', async () => {
                         initUitpasApi();
 
-                        const organization = await new OrganizationFactory({ }).create();
+                        const organization = await new OrganizationFactory({}).create();
 
                         const user = await new UserFactory({
                             permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -5437,28 +6025,45 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         // patch uitpas number
                         const arr: Body = new PatchableArray();
 
-                        arr.addPatch(MemberWithRegistrationsBlob.patch({
-                            id: member.id,
-                            details: MemberDetails.patch({
-                                uitpasNumberDetails: UitpasNumberDetails.patch({
-                                    // same unknown number
-                                    uitpasNumber: '0900000095999',
+                        arr.addPatch(
+                            MemberWithRegistrationsBlob.patch({
+                                id: member.id,
+                                details: MemberDetails.patch({
+                                    uitpasNumberDetails: UitpasNumberDetails.patch({
+                                        // same unknown number
+                                        uitpasNumber: '0900000095999',
+                                    }),
                                 }),
                             }),
-                        }));
+                        );
 
-                        const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                        const request = Request.buildJson(
+                            'PATCH',
+                            baseUrl,
+                            organization.getApiHost(),
+                            arr,
+                        );
                         request.headers.authorization = 'Bearer ' + token.accessToken;
 
-                        await expect(testServer.test(endpoint, request))
-                            .rejects
-                            .toThrow(STExpect.errorWithCode('https://api.publiq.be/probs/uitpas/pass-not-found'));
+                        await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                            STExpect.errorWithCode(
+                                'https://api.publiq.be/probs/uitpas/pass-not-found',
+                            ),
+                        );
 
                         const updatedMember = await Member.getByID(member.id);
-                        expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000095999');
-                        expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Unknown);
-                        expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2030, 0, 1).getTime());
-                        expect(updatedMember!.details.uitpasNumberDetails?.socialTariff?.endDate).toBeNull();
+                        expect(updatedMember!.details.uitpasNumberDetails?.uitpasNumber).toEqual(
+                            '0900000095999',
+                        );
+                        expect(
+                            updatedMember!.details.uitpasNumberDetails?.socialTariff?.status,
+                        ).toEqual(UitpasSocialTariffStatus.Unknown);
+                        expect(
+                            updatedMember!.details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                        ).not.toEqual(new Date(2030, 0, 1).getTime());
+                        expect(
+                            updatedMember!.details.uitpasNumberDetails?.socialTariff?.endDate,
+                        ).toBeNull();
                     });
                 });
 
@@ -5466,7 +6071,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     test('Only patch social tariff', async () => {
                         initUitpasApi();
 
-                        const organization = await new OrganizationFactory({ }).create();
+                        const organization = await new OrganizationFactory({}).create();
 
                         const user = await new UserFactory({
                             permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -5497,35 +6102,50 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         // patch uitpas number
                         const arr: Body = new PatchableArray();
 
-                        arr.addPatch(MemberWithRegistrationsBlob.patch({
-                            id: member.id,
-                            details: MemberDetails.patch({
-                                uitpasNumberDetails: UitpasNumberDetails.patch({
-                                    socialTariff: UitpasSocialTariff.create({
-                                        status: UitpasSocialTariffStatus.Active,
-                                        endDate: new Date(2050, 0, 1),
-                                        updatedAt: new Date(2040, 0, 1),
+                        arr.addPatch(
+                            MemberWithRegistrationsBlob.patch({
+                                id: member.id,
+                                details: MemberDetails.patch({
+                                    uitpasNumberDetails: UitpasNumberDetails.patch({
+                                        socialTariff: UitpasSocialTariff.create({
+                                            status: UitpasSocialTariffStatus.Active,
+                                            endDate: new Date(2050, 0, 1),
+                                            updatedAt: new Date(2040, 0, 1),
+                                        }),
                                     }),
                                 }),
                             }),
-                        }));
+                        );
 
-                        const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                        const request = Request.buildJson(
+                            'PATCH',
+                            baseUrl,
+                            organization.getApiHost(),
+                            arr,
+                        );
                         request.headers.authorization = 'Bearer ' + token.accessToken;
 
                         const result = await testServer.test(endpoint, request);
 
                         expect(result.status).toBe(200);
                         expect(result.body.members.length).toBe(1);
-                        expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.None);
-                        expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).toEqual(new Date(2000, 0, 1).getTime());
-                        expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate).toBeNull();
+                        expect(
+                            result.body.members[0].details.uitpasNumberDetails?.socialTariff
+                                ?.status,
+                        ).toEqual(UitpasSocialTariffStatus.None);
+                        expect(
+                            result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                        ).toEqual(new Date(2000, 0, 1).getTime());
+                        expect(
+                            result.body.members[0].details.uitpasNumberDetails?.socialTariff
+                                ?.endDate,
+                        ).toBeNull();
                     });
 
                     test('New uitpas number', async () => {
                         initUitpasApi();
 
-                        const organization = await new OrganizationFactory({ }).create();
+                        const organization = await new OrganizationFactory({}).create();
 
                         const user = await new UserFactory({
                             permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -5555,38 +6175,54 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         // patch uitpas number
                         const arr: Body = new PatchableArray();
 
-                        arr.addPatch(MemberWithRegistrationsBlob.patch({
-                            id: member.id,
-                            details: MemberDetails.patch({
-                                uitpasNumberDetails: UitpasNumberDetails.patch({
-                                    // expired
-                                    uitpasNumber: '0900000031618',
-                                    socialTariff: UitpasSocialTariff.create({
-                                        status: UitpasSocialTariffStatus.Active,
-                                        endDate: new Date(2050, 0, 1),
-                                        updatedAt: new Date(2040, 0, 1),
+                        arr.addPatch(
+                            MemberWithRegistrationsBlob.patch({
+                                id: member.id,
+                                details: MemberDetails.patch({
+                                    uitpasNumberDetails: UitpasNumberDetails.patch({
+                                        // expired
+                                        uitpasNumber: '0900000031618',
+                                        socialTariff: UitpasSocialTariff.create({
+                                            status: UitpasSocialTariffStatus.Active,
+                                            endDate: new Date(2050, 0, 1),
+                                            updatedAt: new Date(2040, 0, 1),
+                                        }),
                                     }),
                                 }),
                             }),
-                        }));
+                        );
 
-                        const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                        const request = Request.buildJson(
+                            'PATCH',
+                            baseUrl,
+                            organization.getApiHost(),
+                            arr,
+                        );
                         request.headers.authorization = 'Bearer ' + token.accessToken;
 
                         const result = await testServer.test(endpoint, request);
 
                         expect(result.status).toBe(200);
                         expect(result.body.members.length).toBe(1);
-                        expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000031618');
-                        expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Expired);
-                        expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2040, 0, 1).getTime());
-                        expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toEqual(new Date(2050, 0, 1).getTime());
+                        expect(
+                            result.body.members[0].details.uitpasNumberDetails?.uitpasNumber,
+                        ).toEqual('0900000031618');
+                        expect(
+                            result.body.members[0].details.uitpasNumberDetails?.socialTariff
+                                ?.status,
+                        ).toEqual(UitpasSocialTariffStatus.Expired);
+                        expect(
+                            result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                        ).not.toEqual(new Date(2040, 0, 1).getTime());
+                        expect(
+                            result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime(),
+                        ).not.toEqual(new Date(2050, 0, 1).getTime());
                     });
 
                     test('Same uitpas number', async () => {
                         initUitpasApi();
 
-                        const organization = await new OrganizationFactory({ }).create();
+                        const organization = await new OrganizationFactory({}).create();
 
                         const user = await new UserFactory({
                             permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -5618,33 +6254,51 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                         // patch uitpas number
                         const arr: Body = new PatchableArray();
 
-                        arr.addPatch(MemberWithRegistrationsBlob.patch({
-                            id: member.id,
-                            details: MemberDetails.patch({
-                                uitpasNumberDetails: UitpasNumberDetails.patch({
-                                    // expired
-                                    uitpasNumber: '0900000031618',
-                                    socialTariff: UitpasSocialTariff.create({
-                                        status: UitpasSocialTariffStatus.Active,
-                                        endDate: new Date(2050, 0, 1),
-                                        updatedAt: new Date(2040, 0, 1),
+                        arr.addPatch(
+                            MemberWithRegistrationsBlob.patch({
+                                id: member.id,
+                                details: MemberDetails.patch({
+                                    uitpasNumberDetails: UitpasNumberDetails.patch({
+                                        // expired
+                                        uitpasNumber: '0900000031618',
+                                        socialTariff: UitpasSocialTariff.create({
+                                            status: UitpasSocialTariffStatus.Active,
+                                            endDate: new Date(2050, 0, 1),
+                                            updatedAt: new Date(2040, 0, 1),
+                                        }),
                                     }),
                                 }),
                             }),
-                        }));
+                        );
 
-                        const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                        const request = Request.buildJson(
+                            'PATCH',
+                            baseUrl,
+                            organization.getApiHost(),
+                            arr,
+                        );
                         request.headers.authorization = 'Bearer ' + token.accessToken;
 
                         const result = await testServer.test(endpoint, request);
 
                         expect(result.status).toBe(200);
                         expect(result.body.members.length).toBe(1);
-                        expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900000031618');
-                        expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Expired);
-                        expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2000, 0, 1).getTime());
-                        expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2040, 0, 1).getTime());
-                        expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toEqual(new Date(2050, 0, 1).getTime());
+                        expect(
+                            result.body.members[0].details.uitpasNumberDetails?.uitpasNumber,
+                        ).toEqual('0900000031618');
+                        expect(
+                            result.body.members[0].details.uitpasNumberDetails?.socialTariff
+                                ?.status,
+                        ).toEqual(UitpasSocialTariffStatus.Expired);
+                        expect(
+                            result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                        ).not.toEqual(new Date(2000, 0, 1).getTime());
+                        expect(
+                            result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                        ).not.toEqual(new Date(2040, 0, 1).getTime());
+                        expect(
+                            result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime(),
+                        ).not.toEqual(new Date(2050, 0, 1).getTime());
                     });
                 });
 
@@ -5652,7 +6306,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     const mocker = initUitpasApi();
                     mocker.forceFailure();
 
-                    const organization = await new OrganizationFactory({ }).create();
+                    const organization = await new OrganizationFactory({}).create();
 
                     const user = await new UserFactory({
                         permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -5685,31 +6339,46 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     // patch uitpas number
                     const arr: Body = new PatchableArray();
 
-                    arr.addPatch(MemberWithRegistrationsBlob.patch({
-                        id: member.id,
-                        details: MemberDetails.patch({
-                            uitpasNumberDetails: UitpasNumberDetails.patch({
-                                // same number
-                                uitpasNumber: '0900011354819',
+                    arr.addPatch(
+                        MemberWithRegistrationsBlob.patch({
+                            id: member.id,
+                            details: MemberDetails.patch({
+                                uitpasNumberDetails: UitpasNumberDetails.patch({
+                                    // same number
+                                    uitpasNumber: '0900011354819',
+                                }),
                             }),
                         }),
-                    }));
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
 
                     const result = await testServer.test(endpoint, request);
 
                     expect(result.status).toBe(200);
                     expect(result.body.members.length).toBe(1);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.uitpasNumber).toEqual('0900011354819');
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).toEqual(new Date(2000, 0, 1).getTime());
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).toEqual(new Date(2050, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.uitpasNumber,
+                    ).toEqual('0900011354819');
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                    ).toEqual(UitpasSocialTariffStatus.Active);
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                    ).toEqual(new Date(2000, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime(),
+                    ).toEqual(new Date(2050, 0, 1).getTime());
                 });
 
                 test('Should remove memberDetails if member details null', async () => {
-                    const organization = await new OrganizationFactory({ }).create();
+                    const organization = await new OrganizationFactory({}).create();
 
                     const user = await new UserFactory({
                         permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -5741,14 +6410,21 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     // patch uitpas number
                     const arr: Body = new PatchableArray();
 
-                    arr.addPatch(MemberWithRegistrationsBlob.patch({
-                        id: member.id,
-                        details: MemberDetails.patch({
-                            uitpasNumberDetails: null,
+                    arr.addPatch(
+                        MemberWithRegistrationsBlob.patch({
+                            id: member.id,
+                            details: MemberDetails.patch({
+                                uitpasNumberDetails: null,
+                            }),
                         }),
-                    }));
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
 
                     const result = await testServer.test(endpoint, request);
@@ -5760,7 +6436,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
                 test('Should update social tariff if uitpas review changed', async () => {
                     initUitpasApi();
-                    const organization = await new OrganizationFactory({ }).create();
+                    const organization = await new OrganizationFactory({}).create();
 
                     const user = await new UserFactory({
                         permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -5800,28 +6476,41 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     const timesClone = member.details.reviewTimes.clone();
                     timesClone.markReviewed('uitpasNumber', new Date(2020, 0, 2));
 
-                    arr.addPatch(MemberWithRegistrationsBlob.patch({
-                        id: member.id,
-                        details: MemberDetails.patch({
-                            reviewTimes: timesClone,
+                    arr.addPatch(
+                        MemberWithRegistrationsBlob.patch({
+                            id: member.id,
+                            details: MemberDetails.patch({
+                                reviewTimes: timesClone,
+                            }),
                         }),
-                    }));
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
 
                     const result = await testServer.test(endpoint, request);
 
                     expect(result.status).toBe(200);
                     expect(result.body.members.length).toBe(1);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Expired);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime()).not.toEqual(new Date(2020, 0, 1).getTime());
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime()).not.toEqual(new Date(2050, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                    ).toEqual(UitpasSocialTariffStatus.Expired);
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.updatedAt.getTime(),
+                    ).not.toEqual(new Date(2020, 0, 1).getTime());
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.endDate?.getTime(),
+                    ).not.toEqual(new Date(2050, 0, 1).getTime());
                 });
 
                 test('Should update social tariff if uitpas review patched with same date', async () => {
                     initUitpasApi();
-                    const organization = await new OrganizationFactory({ }).create();
+                    const organization = await new OrganizationFactory({}).create();
 
                     const user = await new UserFactory({
                         permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -5861,21 +6550,30 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     const timesClone = member.details.reviewTimes.clone();
                     timesClone.markReviewed('uitpasNumber', new Date(2020, 0, 1));
 
-                    arr.addPatch(MemberWithRegistrationsBlob.patch({
-                        id: member.id,
-                        details: MemberDetails.patch({
-                            reviewTimes: timesClone,
+                    arr.addPatch(
+                        MemberWithRegistrationsBlob.patch({
+                            id: member.id,
+                            details: MemberDetails.patch({
+                                reviewTimes: timesClone,
+                            }),
                         }),
-                    }));
+                    );
 
-                    const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+                    const request = Request.buildJson(
+                        'PATCH',
+                        baseUrl,
+                        organization.getApiHost(),
+                        arr,
+                    );
                     request.headers.authorization = 'Bearer ' + token.accessToken;
 
                     const result = await testServer.test(endpoint, request);
 
                     expect(result.status).toBe(200);
                     expect(result.body.members.length).toBe(1);
-                    expect(result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status).toEqual(UitpasSocialTariffStatus.Active);
+                    expect(
+                        result.body.members[0].details.uitpasNumberDetails?.socialTariff?.status,
+                    ).toEqual(UitpasSocialTariffStatus.Active);
                 });
             });
         });
@@ -5883,10 +6581,22 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
     describe('Overlapping and incompatible platform memberships', () => {
         // Two non-overlapping halves of the same period (werkjaar).
-        const firstHalf = { startDate: new Date(2024, 0, 1, 0, 0, 0, 0), endDate: new Date(2024, 5, 30, 23, 59, 59, 0) };
-        const secondHalf = { startDate: new Date(2024, 6, 1, 0, 0, 0, 0), endDate: new Date(2024, 11, 31, 23, 59, 59, 0) };
+        const firstHalf = {
+            startDate: new Date(2024, 0, 1, 0, 0, 0, 0),
+            endDate: new Date(2024, 5, 30, 23, 59, 59, 0),
+        };
+        const secondHalf = {
+            startDate: new Date(2024, 6, 1, 0, 0, 0, 0),
+            endDate: new Date(2024, 11, 31, 23, 59, 59, 0),
+        };
 
-        async function setup({ incompatibleWithB = false, existingRange, putRange, existingLocked = false, existingGenerated = false }: {
+        async function setup({
+            incompatibleWithB = false,
+            existingRange,
+            putRange,
+            existingLocked = false,
+            existingGenerated = false,
+        }: {
             incompatibleWithB?: boolean;
             existingRange?: { startDate: Date; endDate: Date };
             putRange?: { startDate: Date; endDate: Date };
@@ -5903,10 +6613,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             const typeB = PlatformMembershipType.create({
                 name: 'Type B',
                 periods: new Map([
-                    [period.id, PlatformMembershipTypeConfig.create({
-                        startDate: period.startDate,
-                        endDate: period.endDate,
-                    })],
+                    [
+                        period.id,
+                        PlatformMembershipTypeConfig.create({
+                            startDate: period.startDate,
+                            endDate: period.endDate,
+                        }),
+                    ],
                 ]),
             });
 
@@ -5914,10 +6627,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                 name: 'Type A',
                 incompatibleMembershipTypeIds: incompatibleWithB ? [typeB.id] : [],
                 periods: new Map([
-                    [period.id, PlatformMembershipTypeConfig.create({
-                        startDate: period.startDate,
-                        endDate: period.endDate,
-                    })],
+                    [
+                        period.id,
+                        PlatformMembershipTypeConfig.create({
+                            startDate: period.startDate,
+                            endDate: period.endDate,
+                        }),
+                    ],
                 ]),
             });
 
@@ -5950,14 +6666,16 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
             const arr: Body = new PatchableArray();
             const memberPatch = MemberWithRegistrationsBlob.patch({ id: member.id });
-            memberPatch.platformMemberships.addPut(MemberPlatformMembershipStruct.create({
-                memberId: member.id,
-                membershipTypeId: typeA.id,
-                organizationId: organization.id,
-                periodId: period.id,
-                startDate: putRange?.startDate ?? period.startDate,
-                endDate: putRange?.endDate ?? period.endDate,
-            }));
+            memberPatch.platformMemberships.addPut(
+                MemberPlatformMembershipStruct.create({
+                    memberId: member.id,
+                    membershipTypeId: typeA.id,
+                    organizationId: organization.id,
+                    periodId: period.id,
+                    startDate: putRange?.startDate ?? period.startDate,
+                    endDate: putRange?.endDate ?? period.endDate,
+                }),
+            );
             arr.addPatch(memberPatch);
 
             const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
@@ -5978,11 +6696,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             test('Blocks an overlapping membership of an incompatible type', async () => {
                 const { typeA, member, request } = await setup({ incompatibleWithB: true });
 
-                await expect(testServer.test(endpoint, request)).rejects.toThrow(expect.objectContaining({
-                    code: 'invalid_field',
-                    field: 'membershipTypeId',
-                    message: 'Overlapping membership type',
-                }));
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    expect.objectContaining({
+                        code: 'invalid_field',
+                        field: 'membershipTypeId',
+                        message: 'Overlapping membership type',
+                    }),
+                );
 
                 // The overlapping membership was not created
                 expect((await getTypeAMemberships(member.id, typeA.id)).length).toBe(0);
@@ -5991,11 +6711,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             test('Blocks an overlapping membership even when the type is not marked incompatible', async () => {
                 const { typeA, member, request } = await setup({ incompatibleWithB: false });
 
-                await expect(testServer.test(endpoint, request)).rejects.toThrow(expect.objectContaining({
-                    code: 'invalid_field',
-                    field: 'membershipTypeId',
-                    message: 'Overlapping membership type',
-                }));
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    expect.objectContaining({
+                        code: 'invalid_field',
+                        field: 'membershipTypeId',
+                        message: 'Overlapping membership type',
+                    }),
+                );
 
                 // The overlapping membership was not created
                 expect((await getTypeAMemberships(member.id, typeA.id)).length).toBe(0);
@@ -6010,11 +6732,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     putRange: secondHalf,
                 });
 
-                await expect(testServer.test(endpoint, request)).rejects.toThrow(expect.objectContaining({
-                    code: 'invalid_field',
-                    field: 'membershipTypeId',
-                    message: 'Incompatible membership type',
-                }));
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    expect.objectContaining({
+                        code: 'invalid_field',
+                        field: 'membershipTypeId',
+                        message: 'Incompatible membership type',
+                    }),
+                );
 
                 // The incompatible membership was not created
                 expect((await getTypeAMemberships(member.id, typeA.id)).length).toBe(0);
@@ -6041,11 +6765,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     existingLocked: true,
                 });
 
-                await expect(testServer.test(endpoint, request)).rejects.toThrow(expect.objectContaining({
-                    code: 'invalid_field',
-                    field: 'membershipTypeId',
-                    message: 'Incompatible locked membership type',
-                }));
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    expect.objectContaining({
+                        code: 'invalid_field',
+                        field: 'membershipTypeId',
+                        message: 'Incompatible locked membership type',
+                    }),
+                );
 
                 expect((await getTypeAMemberships(member.id, typeA.id)).length).toBe(0);
             });
@@ -6058,11 +6784,13 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
                     existingGenerated: true,
                 });
 
-                await expect(testServer.test(endpoint, request)).rejects.toThrow(expect.objectContaining({
-                    code: 'invalid_field',
-                    field: 'membershipTypeId',
-                    message: 'Incompatible generated membership type',
-                }));
+                await expect(testServer.test(endpoint, request)).rejects.toThrow(
+                    expect.objectContaining({
+                        code: 'invalid_field',
+                        field: 'membershipTypeId',
+                        message: 'Incompatible generated membership type',
+                    }),
+                );
 
                 expect((await getTypeAMemberships(member.id, typeA.id)).length).toBe(0);
             });

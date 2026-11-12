@@ -7,14 +7,20 @@ type StaticSocialTariffReponse = {
     }>;
 };
 
-function assertsIsStaticSocialTariffResponse(json: unknown): asserts json is StaticSocialTariffReponse {
+function assertsIsStaticSocialTariffResponse(
+    json: unknown,
+): asserts json is StaticSocialTariffReponse {
     if (
-        typeof json !== 'object'
-        || json === null
-        || !('available' in json)
-        || !Array.isArray(json.available)
-        || !json.available.every(
-            (item: unknown) => typeof item === 'object' && item !== null && 'price' in item && typeof item.price === 'number',
+        typeof json !== 'object' ||
+        json === null ||
+        !('available' in json) ||
+        !Array.isArray(json.available) ||
+        !json.available.every(
+            (item: unknown) =>
+                typeof item === 'object' &&
+                item !== null &&
+                'price' in item &&
+                typeof item.price === 'number',
         )
     ) {
         console.error('Invalid response when getting static UiTPAS social tariff:', json);
@@ -26,7 +32,11 @@ function assertsIsStaticSocialTariffResponse(json: unknown): asserts json is Sta
     }
 }
 
-export async function getSocialTariffForEvent(access_token: string, basePrice: number, uitpasEventUrl: string) {
+export async function getSocialTariffForEvent(
+    access_token: string,
+    basePrice: number,
+    uitpasEventUrl: string,
+) {
     const baseUrl = `${STAMHOOFD.UITPAS_API_URL}/tariffs/static`;
     const params = new URLSearchParams();
     params.append('regularPrice', (basePrice / 10_000).toFixed(2));
@@ -84,7 +94,14 @@ export async function getSocialTariffForEvent(access_token: string, basePrice: n
         });
     }
     if (json.available.length > 1) {
-        console.warn('Multiple social tariffs available for event', eventId, '(used ', json.available[0].price, ' as base price. All options:', json.available);
+        console.warn(
+            'Multiple social tariffs available for event',
+            eventId,
+            '(used ',
+            json.available[0].price,
+            ' as base price. All options:',
+            json.available,
+        );
     }
     return Math.round(json.available[0].price * 100) * 100;
 }

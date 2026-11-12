@@ -29,13 +29,13 @@ export class GetOrganizationAdminsEndpoint extends Endpoint<Params, Query, Body,
         await Context.authenticate();
 
         // Fast throw first (more in depth checking for patches later)
-        if (!await Context.auth.hasFullAccess(organization.id)) {
+        if (!(await Context.auth.hasFullAccess(organization.id))) {
             throw Context.auth.error();
         }
 
         // Get all admins
         const admins = await User.getAdmins(organization.id);
-        const users = admins.map(user => user.getStructure());
+        const users = admins.map((user) => user.getStructure());
         await TwoFactorHelper.fillTwoFactorStatus(users);
 
         return new Response(

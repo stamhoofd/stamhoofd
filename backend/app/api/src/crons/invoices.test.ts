@@ -1,8 +1,20 @@
 import type { BalanceItem, Organization } from '@stamhoofd/models';
-import { BalanceItemFactory, BalanceItemPayment, Invoice, OrganizationFactory, Payment } from '@stamhoofd/models';
+import {
+    BalanceItemFactory,
+    BalanceItemPayment,
+    Invoice,
+    OrganizationFactory,
+    Payment,
+} from '@stamhoofd/models';
 import { EmailMocker } from '@stamhoofd/email';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
-import { Company, PaymentCustomer, PaymentMethod, PaymentStatus, PaymentType } from '@stamhoofd/structures';
+import {
+    Company,
+    PaymentCustomer,
+    PaymentMethod,
+    PaymentStatus,
+    PaymentType,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { createInvoicesFor } from './invoices.js';
 
@@ -32,13 +44,31 @@ describe('Cron.invoices', () => {
         await organization.save();
 
         const payingOrganization = await new OrganizationFactory({}).create();
-        const customer = PaymentCustomer.create({ company: Company.create({ name: 'Paying club' }) });
+        const customer = PaymentCustomer.create({
+            company: Company.create({ name: 'Paying club' }),
+        });
         const balanceItem = await createBalanceItem(organization, unitPrice);
 
         return { organization, payingOrganization, customer, balanceItem };
     };
 
-    const createPayment = async ({ organization, payingOrganization, customer, balanceItem, price, paidAt, type = PaymentType.Payment }: { organization: Organization; payingOrganization: Organization; customer: PaymentCustomer; balanceItem: BalanceItem; price: number; paidAt: Date; type?: PaymentType }) => {
+    const createPayment = async ({
+        organization,
+        payingOrganization,
+        customer,
+        balanceItem,
+        price,
+        paidAt,
+        type = PaymentType.Payment,
+    }: {
+        organization: Organization;
+        payingOrganization: Organization;
+        customer: PaymentCustomer;
+        balanceItem: BalanceItem;
+        price: number;
+        paidAt: Date;
+        type?: PaymentType;
+    }) => {
         const payment = new Payment();
         payment.organizationId = organization.id;
         payment.payingOrganizationId = payingOrganization.id;
@@ -62,9 +92,23 @@ describe('Cron.invoices', () => {
 
     test('all payments before the current month are invoiced together', async () => {
         const context = await init();
-        const current = await createPayment({ ...context, price: 10_0000, paidAt: startOfMonth().toJSDate() });
-        const last = await createPayment({ ...context, balanceItem: await createBalanceItem(context.organization, 10_0000), price: 10_0000, paidAt: startOfMonth().minus({ second: 1 }).toJSDate() });
-        const old = await createPayment({ ...context, balanceItem: await createBalanceItem(context.organization, 10_0000), price: 10_0000, paidAt: startOfMonth().minus({ month: 6 }).toJSDate() });
+        const current = await createPayment({
+            ...context,
+            price: 10_0000,
+            paidAt: startOfMonth().toJSDate(),
+        });
+        const last = await createPayment({
+            ...context,
+            balanceItem: await createBalanceItem(context.organization, 10_0000),
+            price: 10_0000,
+            paidAt: startOfMonth().minus({ second: 1 }).toJSDate(),
+        });
+        const old = await createPayment({
+            ...context,
+            balanceItem: await createBalanceItem(context.organization, 10_0000),
+            price: 10_0000,
+            paidAt: startOfMonth().minus({ month: 6 }).toJSDate(),
+        });
 
         await createInvoicesFor(context.organization);
 
@@ -90,7 +134,12 @@ describe('Cron.invoices', () => {
 
     test('a refund on its own is booked with a credit note', async () => {
         const context = await init({ unitPrice: -10_0000 });
-        const refund = await createPayment({ ...context, price: -10_0000, paidAt: lastMonth(), type: PaymentType.Refund });
+        const refund = await createPayment({
+            ...context,
+            price: -10_0000,
+            paidAt: lastMonth(),
+            type: PaymentType.Refund,
+        });
 
         await createInvoicesFor(context.organization);
 
@@ -105,7 +154,13 @@ describe('Cron.invoices', () => {
         const context = await init();
         const refundedItem = await createBalanceItem(context.organization, -10_0000);
         const payment = await createPayment({ ...context, price: 10_0000, paidAt: lastMonth() });
-        const refund = await createPayment({ ...context, balanceItem: refundedItem, price: -10_0000, paidAt: lastMonth(), type: PaymentType.Refund });
+        const refund = await createPayment({
+            ...context,
+            balanceItem: refundedItem,
+            price: -10_0000,
+            paidAt: lastMonth(),
+            type: PaymentType.Refund,
+        });
 
         const emailsBefore = (await EmailMocker.transactional.getSucceededEmails()).length;
         await createInvoicesFor(context.organization);
@@ -113,14 +168,22 @@ describe('Cron.invoices', () => {
         // Goods moved, so this needs a zero invoice, which is not supported yet
         expect((await Payment.getByID(payment.id))!.invoiceId).toBeNull();
         expect((await Payment.getByID(refund.id))!.invoiceId).toBeNull();
-        expect((await Invoice.select().where('organizationId', context.organization.id).fetch()).length).toBe(0);
+        expect(
+            (await Invoice.select().where('organizationId', context.organization.id).fetch())
+                .length,
+        ).toBe(0);
         expect((await EmailMocker.transactional.getSucceededEmails()).length).toBe(emailsBefore);
     });
 
     test('a payment and its refund are booked with a zero receipt instead of an invoice and a credit note', async () => {
         const context = await init();
         const payment = await createPayment({ ...context, price: 10_0000, paidAt: lastMonth() });
-        const refund = await createPayment({ ...context, price: -10_0000, paidAt: lastMonth(), type: PaymentType.Refund });
+        const refund = await createPayment({
+            ...context,
+            price: -10_0000,
+            paidAt: lastMonth(),
+            type: PaymentType.Refund,
+        });
 
         await createInvoicesFor(context.organization);
 

@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import { localFilesAccessKey, localFilesSecretKey, localIpv4Host, maildevPassword, maildevUsername } from './shared-service-config.js';
+import {
+    localFilesAccessKey,
+    localFilesSecretKey,
+    localIpv4Host,
+    maildevPassword,
+    maildevUsername,
+} from './shared-service-config.js';
 import type { CliContext } from '../context/create-context.js';
 import { buildDevelopmentConfig } from './development-config.js';
 import { BackendApp } from '@stamhoofd/types/BackendApp';
@@ -41,44 +47,50 @@ describe('buildDevelopmentConfig', () => {
     });
 
     it('uses environment domains for primary non-Stamhoofd configs', () => {
-        const config = buildDevelopmentConfig(context({
-            env: 'keeo',
-            instance: {
-                name: 'stamhoofd-keeo',
-                prefix: '',
-                primary: true,
-                portOffset: 100,
-            },
-        }));
+        const config = buildDevelopmentConfig(
+            context({
+                env: 'keeo',
+                instance: {
+                    name: 'stamhoofd-keeo',
+                    prefix: '',
+                    primary: true,
+                    portOffset: 100,
+                },
+            }),
+        );
 
         expect(config.domains.dashboard).toBe('dashboard.keeo.stamhoofd');
         expect(config.domains.api).toBe('api.keeo.stamhoofd');
     });
 
     it('uses workspace domains for secondary Stamhoofd configs', () => {
-        const config = buildDevelopmentConfig(context({
-            instance: {
-                name: 'stamhoofd-feature',
-                prefix: 'feature',
-                primary: false,
-                portOffset: 1200,
-            },
-        }));
+        const config = buildDevelopmentConfig(
+            context({
+                instance: {
+                    name: 'stamhoofd-feature',
+                    prefix: 'feature',
+                    primary: false,
+                    portOffset: 1200,
+                },
+            }),
+        );
 
         expect(config.domains.dashboard).toBe('dashboard.feature.stamhoofd');
         expect(config.domains.api).toBe('api.feature.stamhoofd');
     });
 
     it('isolates secondary environment configs by prefix and name', () => {
-        const config = buildDevelopmentConfig(context({
-            env: 'keeo',
-            instance: {
-                name: 'stamhoofd-feature-keeo',
-                prefix: 'feature',
-                primary: false,
-                portOffset: 1200,
-            },
-        }));
+        const config = buildDevelopmentConfig(
+            context({
+                env: 'keeo',
+                instance: {
+                    name: 'stamhoofd-feature-keeo',
+                    prefix: 'feature',
+                    primary: false,
+                    portOffset: 1200,
+                },
+            }),
+        );
 
         expect(config.domains.dashboard).toBe('dashboard.keeo.feature.stamhoofd');
         expect(config.domains.api).toBe('api.keeo.feature.stamhoofd');
@@ -91,21 +103,25 @@ describe('buildDevelopmentConfig', () => {
 
     // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
     it.skip('assigns the resolved frontend port to web apps', () => {
-        const config = buildDevelopmentConfig(context({
-            env: 'keeo',
-            instance: {
-                name: 'stamhoofd-feature-keeo',
-                prefix: 'feature',
-                primary: false,
-                portOffset: 1200,
-            },
-        }), { frontend: FrontendApp.WebApp });
+        const config = buildDevelopmentConfig(
+            context({
+                env: 'keeo',
+                instance: {
+                    name: 'stamhoofd-feature-keeo',
+                    prefix: 'feature',
+                    primary: false,
+                    portOffset: 1200,
+                },
+            }),
+            { frontend: FrontendApp.WebApp },
+        );
 
         expect(config.appEnv.PORT).toBe(9280);
     });
 
     it('gives every environment its own platform statistics database', () => {
-        const databaseFor = (env: string) => buildDevelopmentConfig(context({ env })).databases.platformStatistics;
+        const databaseFor = (env: string) =>
+            buildDevelopmentConfig(context({ env })).databases.platformStatistics;
 
         expect(databaseFor('stamhoofd')).toBe('statistics-development');
         expect(databaseFor('keeo')).toBe('statistics-keeo');
@@ -115,25 +131,32 @@ describe('buildDevelopmentConfig', () => {
     });
 
     it('keeps the platform statistics database of a secondary instance separate', () => {
-        const config = buildDevelopmentConfig(context({
-            env: 'keeo',
-            instance: {
-                name: 'keeo-feature',
-                prefix: 'feature',
-                primary: false,
-                portOffset: 1200,
-            },
-        }));
+        const config = buildDevelopmentConfig(
+            context({
+                env: 'keeo',
+                instance: {
+                    name: 'keeo-feature',
+                    prefix: 'feature',
+                    primary: false,
+                    portOffset: 1200,
+                },
+            }),
+        );
 
         expect(config.databases.platformStatistics).toBe('statistics-keeo-keeo-feature');
         expect(config.databases.main).toBe(config.backendEnv.DB_DATABASE);
     });
 
     it('gives the syncer both databases, which it moves rows between', () => {
-        const config = buildDevelopmentConfig(context({ env: 'ravot' }), { backend: BackendApp.StatisticsSyncer });
+        const config = buildDevelopmentConfig(context({ env: 'ravot' }), {
+            backend: BackendApp.StatisticsSyncer,
+        });
 
         expect(config.appEnv).toHaveProperty('statisticsDatabase.DB_DATABASE', 'statistics-ravot');
-        expect(config.appEnv).toHaveProperty('stamhoofdDatabase.DB_DATABASE', config.backendEnv.DB_DATABASE);
+        expect(config.appEnv).toHaveProperty(
+            'stamhoofdDatabase.DB_DATABASE',
+            config.backendEnv.DB_DATABASE,
+        );
         // Both sit on the one development MySQL, so the syncer reaches them the same way.
         const port = Number.parseInt(config.backendEnv.DB_PORT!, 10);
         expect(config.appEnv).toHaveProperty('statisticsDatabase.DB_PORT', port);

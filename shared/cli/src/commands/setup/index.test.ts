@@ -2,8 +2,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Parser } from '@oclif/core';
 import Setup, { SetupAction } from './index.js';
 import { confirm } from '../../runtime/ux.js';
-import { runSetup, setupCaddy, setupCert, setupDns, setupPrivilegedPortRedirects } from '../../workflows/setup-machine.js';
-import { checkNodeVersion, printNodeVersionStatus, setupNodeVersion } from '../../workflows/setup-node.js';
+import {
+    runSetup,
+    setupCaddy,
+    setupCert,
+    setupDns,
+    setupPrivilegedPortRedirects,
+} from '../../workflows/setup-machine.js';
+import {
+    checkNodeVersion,
+    printNodeVersionStatus,
+    setupNodeVersion,
+} from '../../workflows/setup-node.js';
 import { setupPackageManager } from '../../workflows/setup-package-manager.js';
 import { setupShellShortcut } from '../../workflows/setup-shell.js';
 import { setupVcs } from '../../workflows/setup-vcs.js';
@@ -51,12 +61,16 @@ describe('Setup command', () => {
     it('runs the full setup flow without an action', async () => {
         const command = createCommand({
             args: { action: undefined },
-            flags: { 'yes': false, 'dry-run': false, 'verbose': false },
+            flags: { yes: false, 'dry-run': false, verbose: false },
         });
 
         await command.run();
 
-        expect(runSetup).toHaveBeenCalledWith({ context: 'setup', rootDir: '/repo', verbose: false });
+        expect(runSetup).toHaveBeenCalledWith({
+            context: 'setup',
+            rootDir: '/repo',
+            verbose: false,
+        });
         expect(setupDns).not.toHaveBeenCalled();
         expect(setupCert).not.toHaveBeenCalled();
     });
@@ -64,7 +78,7 @@ describe('Setup command', () => {
     it('runs dns setup directly', async () => {
         const command = createCommand({
             args: { action: SetupAction.Dns },
-            flags: { 'yes': true, 'dry-run': true, 'verbose': true },
+            flags: { yes: true, 'dry-run': true, verbose: true },
         });
 
         await command.run();
@@ -76,21 +90,41 @@ describe('Setup command', () => {
     it.each([
         [SetupAction.PrivilegedPorts, setupPrivilegedPortRedirects],
         [SetupAction.Caddy, setupCaddy],
-    ] as const)('parses and dispatches %s with confirmation and preview flags', async (action, repair) => {
-        for (const enabled of [false, true]) {
-            const parsed = await Parser.parse([action, ...(enabled ? ['--yes', '--dry-run'] : [])], { args: Setup.args, flags: Setup.flags });
-            const command = createCommand({ args: { action: parsed.args.action as SetupAction }, flags: { 'yes': parsed.flags.yes, 'dry-run': parsed.flags['dry-run'], 'verbose': false } });
-            await command.run();
-            expect(repair).toHaveBeenLastCalledWith({ yes: enabled, dryRun: enabled });
-        }
-        expect(runSetup).not.toHaveBeenCalled();
-        expect(setupDns).not.toHaveBeenCalled();
-    });
+    ] as const)(
+        'parses and dispatches %s with confirmation and preview flags',
+        async (action, repair) => {
+            for (const enabled of [false, true]) {
+                const parsed = await Parser.parse(
+                    [action, ...(enabled ? ['--yes', '--dry-run'] : [])],
+                    { args: Setup.args, flags: Setup.flags },
+                );
+                const command = createCommand({
+                    args: { action: parsed.args.action as SetupAction },
+                    flags: {
+                        yes: parsed.flags.yes,
+                        'dry-run': parsed.flags['dry-run'],
+                        verbose: false,
+                    },
+                });
+                await command.run();
+                expect(repair).toHaveBeenLastCalledWith({ yes: enabled, dryRun: enabled });
+            }
+            expect(runSetup).not.toHaveBeenCalled();
+            expect(setupDns).not.toHaveBeenCalled();
+        },
+    );
 
     it('runs vcs setup without creating development context', async () => {
-        const command = createCommand({ args: { action: SetupAction.Vcs }, flags: { 'yes': true, 'dry-run': true, 'verbose': true } });
+        const command = createCommand({
+            args: { action: SetupAction.Vcs },
+            flags: { yes: true, 'dry-run': true, verbose: true },
+        });
         await command.run();
-        expect(setupVcs).toHaveBeenCalledWith(expect.any(String), { yes: true, dryRun: true, verbosity: RunVerbosity.Output });
+        expect(setupVcs).toHaveBeenCalledWith(expect.any(String), {
+            yes: true,
+            dryRun: true,
+            verbosity: RunVerbosity.Output,
+        });
         expect((command as any).createContext).not.toHaveBeenCalled();
         expect(runSetup).not.toHaveBeenCalled();
     });
@@ -98,19 +132,22 @@ describe('Setup command', () => {
     it('runs cert setup directly', async () => {
         const command = createCommand({
             args: { action: SetupAction.Cert },
-            flags: { 'yes': true, 'dry-run': true, 'verbose': false },
+            flags: { yes: true, 'dry-run': true, verbose: false },
         });
 
         await command.run();
 
-        expect(setupCert).toHaveBeenCalledWith({ context: 'setup', rootDir: '/repo', verbose: false }, { yes: true, dryRun: true });
+        expect(setupCert).toHaveBeenCalledWith(
+            { context: 'setup', rootDir: '/repo', verbose: false },
+            { yes: true, dryRun: true },
+        );
         expect(runSetup).not.toHaveBeenCalled();
     });
 
     it('installs the shell shortcut directly', async () => {
         const command = createCommand({
             args: { action: SetupAction.Shortcut },
-            flags: { 'yes': false, 'dry-run': true, 'verbose': false },
+            flags: { yes: false, 'dry-run': true, verbose: false },
         });
 
         await command.run();
@@ -122,7 +159,7 @@ describe('Setup command', () => {
     it('installs the configured Node.js version directly', async () => {
         const command = createCommand({
             args: { action: SetupAction.Node },
-            flags: { 'yes': false, 'dry-run': false, 'verbose': true },
+            flags: { yes: false, 'dry-run': false, verbose: true },
         });
 
         await command.run();
@@ -134,7 +171,7 @@ describe('Setup command', () => {
     it('repairs pnpm directly before creating the full setup context', async () => {
         const command = createCommand({
             args: { action: SetupAction.Pnpm },
-            flags: { 'yes': false, 'dry-run': true, 'verbose': true },
+            flags: { yes: false, 'dry-run': true, verbose: true },
         });
 
         await command.run();
@@ -154,7 +191,7 @@ describe('Setup command', () => {
         vi.mocked(confirm).mockResolvedValue(true);
         const command = createCommand({
             args: { action: undefined },
-            flags: { 'yes': false, 'dry-run': false, 'verbose': true },
+            flags: { yes: false, 'dry-run': false, verbose: true },
         });
 
         await command.run();
@@ -167,10 +204,17 @@ describe('Setup command', () => {
     });
 });
 
-function createCommand(parseResult: { args: { action: SetupAction | undefined }; flags: { 'yes': boolean; 'dry-run': boolean; 'verbose': boolean } }): Setup {
+function createCommand(parseResult: {
+    args: { action: SetupAction | undefined };
+    flags: { yes: boolean; 'dry-run': boolean; verbose: boolean };
+}): Setup {
     const command = new Setup([], {} as any);
     (command as any).config = {};
     (command as any).parse = vi.fn(async () => parseResult);
-    (command as any).createContext = vi.fn(async (flags: { verbose?: boolean }) => ({ context: 'setup', rootDir: '/repo', verbose: flags.verbose ?? false }));
+    (command as any).createContext = vi.fn(async (flags: { verbose?: boolean }) => ({
+        context: 'setup',
+        rootDir: '/repo',
+        verbose: flags.verbose ?? false,
+    }));
     return command;
 }

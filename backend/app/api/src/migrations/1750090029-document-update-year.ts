@@ -26,11 +26,11 @@ export async function migrateDocumentYears() {
         action: async (document: DocumentTemplate) => {
             // check
             if (!document.year) {
-            // by default use the year before creation
+                // by default use the year before creation
                 let year: number = document.createdAt.getFullYear() - 1;
 
                 const groups = document.privateSettings.groups;
-                const groupIds: string[] = [...new Set(groups.map(g => g.group.id))];
+                const groupIds: string[] = [...new Set(groups.map((g) => g.group.id))];
 
                 if (groupIds.length > 0) {
                     const query = Group.select().where(SQL.where('id', groupIds));
@@ -40,7 +40,7 @@ export async function migrateDocumentYears() {
                     const yearMap = new Map<number, number>();
 
                     for (const group of groups) {
-                        const model = groupModels.find(g => g.id === group.group.id);
+                        const model = groupModels.find((g) => g.id === group.group.id);
                         if (!model) {
                             continue;
                         }
@@ -83,21 +83,36 @@ export async function migrateDocumentYears() {
                 const creationYear = Formatter.luxon(document.createdAt).year;
                 if (creationYear < year) {
                     // This should never log: if this logs we should fix the migration
-                    console.error('FIXME: Unexpected document year ' + year + ' which is larger than creation year ' + creationYear + ' for ' + document.id);
+                    console.error(
+                        'FIXME: Unexpected document year ' +
+                            year +
+                            ' which is larger than creation year ' +
+                            creationYear +
+                            ' for ' +
+                            document.id,
+                    );
                     year = creationYear;
                 }
 
                 document.year = year;
-                if (await document.save({
-                    forceSave: true,
-                    skipMarkSaved: true,
-                    skipSendEvents: true,
-                })) {
+                if (
+                    await document.save({
+                        forceSave: true,
+                        skipMarkSaved: true,
+                        skipSendEvents: true,
+                    })
+                ) {
                     realUpdate += 1;
                 }
             }
         },
     });
 
-    console.log('Migrated ' + realUpdate + ' document templates of ' + result.total + ' looped document templates');
-};
+    console.log(
+        'Migrated ' +
+            realUpdate +
+            ' document templates of ' +
+            result.total +
+            ' looped document templates',
+    );
+}

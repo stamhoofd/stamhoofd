@@ -1,8 +1,25 @@
-import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@common/encoding';
+import {
+    AnyDecoder,
+    ArrayDecoder,
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    EnumDecoder,
+    field,
+    IntegerDecoder,
+    MapDecoder,
+    StringDecoder,
+} from '@common/encoding';
 import { SimpleErrors } from '@common/errors';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
-import { EmailAttachment, Recipient, replaceEmailHtml, replaceEmailText, Replacement } from '../endpoints/EmailRequest.js';
+import {
+    EmailAttachment,
+    Recipient,
+    replaceEmailHtml,
+    replaceEmailText,
+    Replacement,
+} from '../endpoints/EmailRequest.js';
 import { EmailContent, getEmailContentForLanguage } from './EmailContent.js';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
@@ -223,7 +240,9 @@ export class Email extends AutoEncoder {
      */
     getHtmlFor(recipient: EmailRecipient | null) {
         const content = this.getContentForLanguage(recipient?.language ?? null);
-        const replacements = (recipient?.replacements || []).map(r => Replacement.create({ ...r, html: r.getHtmlForWebDisplay() }));
+        const replacements = (recipient?.replacements || []).map((r) =>
+            Replacement.create({ ...r, html: r.getHtmlForWebDisplay() }),
+        );
         return replaceEmailHtml(content.html, replacements);
     }
 
@@ -244,7 +263,14 @@ export class Email extends AutoEncoder {
         // Dag {{firstName}},
         // Beste,
 
-        const stripStrings = ['{{greeting}}', 'Dag {{firstName}},', 'Beste,', 'Beste {{firstName}},', 'Geachte,', 'Hallo,'];
+        const stripStrings = [
+            '{{greeting}}',
+            'Dag {{firstName}},',
+            'Beste,',
+            'Beste {{firstName}},',
+            'Geachte,',
+            'Hallo,',
+        ];
 
         if (content.subject) {
             stripStrings.push(content.subject);
@@ -382,7 +408,15 @@ export class EmailRecipient extends AutoEncoder {
         }).getDefaultReplacements();
     }
 
-    getReplacements(organization: { meta: OrganizationMetaData; privateMeta: OrganizationPrivateMetaData | null; name: string; registerUrl: string } | null, platform: Platform) {
+    getReplacements(
+        organization: {
+            meta: OrganizationMetaData;
+            privateMeta: OrganizationPrivateMetaData | null;
+            name: string;
+            registerUrl: string;
+        } | null,
+        platform: Platform,
+    ) {
         return [
             ...this.replacements,
             ...this.getDefaultReplacements(),
@@ -411,11 +445,19 @@ export function isSoftEmailRecipientError(error: SimpleErrors) {
 
 export function bounceErrorToHuman(message: string) {
     message = message.toLowerCase();
-    if (message.startsWith('smtp; 554 4.4.7') || message.includes('storage') || message.includes('quota') || message.match(/inbox.*?full/)) {
+    if (
+        message.startsWith('smtp; 554 4.4.7') ||
+        message.includes('storage') ||
+        message.includes('quota') ||
+        message.match(/inbox.*?full/)
+    ) {
         return $t('%1GI');
     }
 
-    if (message.includes('failed to establish connection') || message.includes('connection timed out')) {
+    if (
+        message.includes('failed to establish connection') ||
+        message.includes('connection timed out')
+    ) {
         return $t('%1GJ');
     }
 
@@ -427,7 +469,12 @@ export function bounceErrorToHuman(message: string) {
         return $t('%1GL');
     }
 
-    if (message.includes('recipient address rejected: access denied') || message.includes('user does not exist') || message.includes('user unknown') || message.includes('the email account that you tried to reach does not exist')) {
+    if (
+        message.includes('recipient address rejected: access denied') ||
+        message.includes('user does not exist') ||
+        message.includes('user unknown') ||
+        message.includes('the email account that you tried to reach does not exist')
+    ) {
         return $t('%1GM');
     }
 }

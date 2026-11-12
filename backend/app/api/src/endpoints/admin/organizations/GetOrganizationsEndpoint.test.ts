@@ -1,8 +1,26 @@
 import { Request } from '@node/endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
-import { DocumentTemplateFactory, OrganizationFactory, STPackageFactory, UserFactory } from '@stamhoofd/models';
+import {
+    DocumentTemplateFactory,
+    OrganizationFactory,
+    STPackageFactory,
+    UserFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { DocumentStatus, LimitedFilteredRequest, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, Permissions, RecordCategory, RecordSettings, RecordType, STPackageBundle, TranslatedString, UmbrellaOrganization } from '@stamhoofd/structures';
+import {
+    DocumentStatus,
+    LimitedFilteredRequest,
+    OrganizationMetaData,
+    OrganizationRecordsConfiguration,
+    OrganizationType,
+    Permissions,
+    RecordCategory,
+    RecordSettings,
+    RecordType,
+    STPackageBundle,
+    TranslatedString,
+    UmbrellaOrganization,
+} from '@stamhoofd/structures';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -37,7 +55,7 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
             },
         });
         const response = await testServer.test(endpoint, request);
-        return response.body.results.map(o => o.id);
+        return response.body.results.map((o) => o.id);
     };
 
     const filter = async (filter: StamhoofdFilter, token: Token): Promise<string[]> => {
@@ -53,11 +71,14 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
             },
         });
         const response = await testServer.test(endpoint, request);
-        return response.body.results.map(o => o.id);
+        return response.body.results.map((o) => o.id);
     };
 
     // Creates an admin (user with permissions) for the given organization
-    const createAdmin = async (organization: Organization, data: { firstName?: string; lastName?: string; email?: string }) => {
+    const createAdmin = async (
+        organization: Organization,
+        data: { firstName?: string; lastName?: string; email?: string },
+    ) => {
         return await new UserFactory({
             organization,
             permissions: Permissions.create({ level: PermissionLevel.Full }),
@@ -67,14 +88,16 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
 
     test('Searches organizations by name', async () => {
         const { adminToken } = await initPlatformAdmin();
-        const organization = await new OrganizationFactory({ name: 'Bombilcious Tennis Club' }).create();
+        const organization = await new OrganizationFactory({
+            name: 'Bombilcious Tennis Club',
+        }).create();
 
         expect(await search('Bombilcious Tennis Club', adminToken)).toContain(organization.id);
     });
 
     test('Searches organizations by uri', async () => {
         const { adminToken } = await initPlatformAdmin();
-        const organization = await new OrganizationFactory({ }).create();
+        const organization = await new OrganizationFactory({}).create();
 
         expect(await search(organization.uri, adminToken)).toContain(organization.id);
     });
@@ -92,7 +115,11 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         const organization = await new OrganizationFactory({ name: 'Memberonly Club' }).create();
 
         // A regular user (no permissions) linked to the organization
-        await new UserFactory({ organization, firstName: 'Solitary', lastName: 'Pangolin' }).create();
+        await new UserFactory({
+            organization,
+            firstName: 'Solitary',
+            lastName: 'Pangolin',
+        }).create();
 
         expect(await search('Solitary Pangolin', adminToken)).not.toContain(organization.id);
     });
@@ -108,7 +135,9 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
     test('Does search the organization name when the search contains an @', async () => {
         const { adminToken } = await initPlatformAdmin();
         // The organization name itself contains an @, but there is no admin with a matching email
-        const organization = await new OrganizationFactory({ name: 'weird@orgname-test.com' }).create();
+        const organization = await new OrganizationFactory({
+            name: 'weird@orgname-test.com',
+        }).create();
 
         expect(await search('weird@orgname-test.com', adminToken)).toContain(organization.id);
     });
@@ -116,7 +145,9 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
     test('Does not match admins of other organizations by email', async () => {
         const { adminToken } = await initPlatformAdmin();
         const organization = await new OrganizationFactory({ name: 'Owner Club' }).create();
-        const otherOrganization = await new OrganizationFactory({ name: 'Bystander Club' }).create();
+        const otherOrganization = await new OrganizationFactory({
+            name: 'Bystander Club',
+        }).create();
         await createAdmin(organization, { email: 'unique-owner@admin-search-test.com' });
 
         const results = await search('unique-owner@admin-search-test.com', adminToken);
@@ -127,21 +158,34 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
     test('Filters organizations by active package type', async () => {
         const { adminToken } = await initPlatformAdmin();
 
-        const membersOrg = await new OrganizationFactory({ name: 'Packaged Members Club' }).create();
-        await new STPackageFactory({ organization: membersOrg, bundle: STPackageBundle.Members }).create();
+        const membersOrg = await new OrganizationFactory({
+            name: 'Packaged Members Club',
+        }).create();
+        await new STPackageFactory({
+            organization: membersOrg,
+            bundle: STPackageBundle.Members,
+        }).create();
 
-        const webshopsOrg = await new OrganizationFactory({ name: 'Packaged Webshops Club' }).create();
-        await new STPackageFactory({ organization: webshopsOrg, bundle: STPackageBundle.Webshops }).create();
+        const webshopsOrg = await new OrganizationFactory({
+            name: 'Packaged Webshops Club',
+        }).create();
+        await new STPackageFactory({
+            organization: webshopsOrg,
+            bundle: STPackageBundle.Webshops,
+        }).create();
 
-        const results = await filter({
-            packages: {
-                $elemMatch: {
-                    type: {
-                        $in: ['Members'],
+        const results = await filter(
+            {
+                packages: {
+                    $elemMatch: {
+                        type: {
+                            $in: ['Members'],
+                        },
                     },
                 },
             },
-        }, adminToken);
+            adminToken,
+        );
 
         expect(results).toContain(membersOrg.id);
         expect(results).not.toContain(webshopsOrg.id);
@@ -158,21 +202,27 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
             removeAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
         }).create();
 
-        const results = await filter({
-            packages: {
-                $elemMatch: {
-                    type: {
-                        $in: ['Members'],
+        const results = await filter(
+            {
+                packages: {
+                    $elemMatch: {
+                        type: {
+                            $in: ['Members'],
+                        },
                     },
                 },
             },
-        }, adminToken);
+            adminToken,
+        );
 
         expect(results).not.toContain(expiredOrg.id);
     });
 
     // Creates an organization with a specific type and/or umbrella organization
-    const createOrganizationWithMeta = async (name: string, metaPatch: { type?: OrganizationType; umbrellaOrganization?: UmbrellaOrganization | null }) => {
+    const createOrganizationWithMeta = async (
+        name: string,
+        metaPatch: { type?: OrganizationType; umbrellaOrganization?: UmbrellaOrganization | null },
+    ) => {
         const meta = OrganizationMetaData.create({
             type: metaPatch.type ?? OrganizationType.Other,
             umbrellaOrganization: metaPatch.umbrellaOrganization ?? null,
@@ -185,8 +235,12 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
 
     test('Filters organizations by type', async () => {
         const { adminToken } = await initPlatformAdmin();
-        const youthOrg = await createOrganizationWithMeta('Youthful Club', { type: OrganizationType.Youth });
-        const sportOrg = await createOrganizationWithMeta('Sporty Club', { type: OrganizationType.Sport });
+        const youthOrg = await createOrganizationWithMeta('Youthful Club', {
+            type: OrganizationType.Youth,
+        });
+        const sportOrg = await createOrganizationWithMeta('Sporty Club', {
+            type: OrganizationType.Sport,
+        });
 
         const results = await filter({ type: { $in: [OrganizationType.Youth] } }, adminToken);
         expect(results).toContain(youthOrg.id);
@@ -195,10 +249,17 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
 
     test('Filters organizations by umbrella organization', async () => {
         const { adminToken } = await initPlatformAdmin();
-        const scoutsOrg = await createOrganizationWithMeta('Scouts Club', { umbrellaOrganization: UmbrellaOrganization.ScoutsEnGidsenVlaanderen });
-        const otherOrg = await createOrganizationWithMeta('No Umbrella Club', { umbrellaOrganization: null });
+        const scoutsOrg = await createOrganizationWithMeta('Scouts Club', {
+            umbrellaOrganization: UmbrellaOrganization.ScoutsEnGidsenVlaanderen,
+        });
+        const otherOrg = await createOrganizationWithMeta('No Umbrella Club', {
+            umbrellaOrganization: null,
+        });
 
-        const results = await filter({ umbrellaOrganization: { $in: [UmbrellaOrganization.ScoutsEnGidsenVlaanderen] } }, adminToken);
+        const results = await filter(
+            { umbrellaOrganization: { $in: [UmbrellaOrganization.ScoutsEnGidsenVlaanderen] } },
+            adminToken,
+        );
         expect(results).toContain(scoutsOrg.id);
         expect(results).not.toContain(otherOrg.id);
     });
@@ -209,7 +270,9 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         const org = await new OrganizationFactory({ name: 'Belgian Club' }).create();
 
         expect(await filter({ country: { $in: [Country.Belgium] } }, adminToken)).toContain(org.id);
-        expect(await filter({ country: { $in: [Country.Netherlands] } }, adminToken)).not.toContain(org.id);
+        expect(await filter({ country: { $in: [Country.Netherlands] } }, adminToken)).not.toContain(
+            org.id,
+        );
     });
 
     test('Filters organizations by street', async () => {
@@ -218,7 +281,9 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         const org = await new OrganizationFactory({ name: 'Streeted Club' }).create();
 
         expect(await filter({ street: { $contains: 'Demostraat' } }, adminToken)).toContain(org.id);
-        expect(await filter({ street: { $contains: 'Nonexistentstreet' } }, adminToken)).not.toContain(org.id);
+        expect(
+            await filter({ street: { $contains: 'Nonexistentstreet' } }, adminToken),
+        ).not.toContain(org.id);
     });
 
     test('Filters organizations by creation date', async () => {
@@ -233,7 +298,10 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
     });
 
     // Creates an organization with the given record categories (questionnaires) in its records configuration
-    const createOrganizationWithRecordCategories = async (name: string, recordCategories: RecordCategory[]) => {
+    const createOrganizationWithRecordCategories = async (
+        name: string,
+        recordCategories: RecordCategory[],
+    ) => {
         const meta = OrganizationMetaData.create({
             type: OrganizationType.Other,
             umbrellaOrganization: null,
@@ -257,12 +325,14 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
     test('Filters organizations by record category name', async () => {
         const { adminToken } = await initPlatformAdmin();
 
-        const medicalOrg = await createOrganizationWithRecordCategories('Medical Questionnaire Club', [
-            RecordCategory.create({ name: TranslatedString.create('Medische fiche') }),
-        ]);
-        const consentOrg = await createOrganizationWithRecordCategories('Consent Questionnaire Club', [
-            RecordCategory.create({ name: TranslatedString.create('Toestemmingen') }),
-        ]);
+        const medicalOrg = await createOrganizationWithRecordCategories(
+            'Medical Questionnaire Club',
+            [RecordCategory.create({ name: TranslatedString.create('Medische fiche') })],
+        );
+        const consentOrg = await createOrganizationWithRecordCategories(
+            'Consent Questionnaire Club',
+            [RecordCategory.create({ name: TranslatedString.create('Toestemmingen') })],
+        );
 
         const results = await filter({ recordCategoryName: { $contains: 'Medische' } }, adminToken);
         expect(results).toContain(medicalOrg.id);
@@ -273,14 +343,24 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         const { adminToken } = await initPlatformAdmin();
 
         // A name that is stored as a multi-language object (not a plain string)
-        const org = await createOrganizationWithRecordCategories('Multilingual Questionnaire Club', [
-            RecordCategory.create({
-                name: TranslatedString.create({ nl: 'Gezondheidsvragen', en: 'Health questions' }),
-            }),
-        ]);
+        const org = await createOrganizationWithRecordCategories(
+            'Multilingual Questionnaire Club',
+            [
+                RecordCategory.create({
+                    name: TranslatedString.create({
+                        nl: 'Gezondheidsvragen',
+                        en: 'Health questions',
+                    }),
+                }),
+            ],
+        );
 
-        expect(await filter({ recordCategoryName: { $contains: 'Gezondheidsvragen' } }, adminToken)).toContain(org.id);
-        expect(await filter({ recordCategoryName: { $contains: 'Health questions' } }, adminToken)).toContain(org.id);
+        expect(
+            await filter({ recordCategoryName: { $contains: 'Gezondheidsvragen' } }, adminToken),
+        ).toContain(org.id);
+        expect(
+            await filter({ recordCategoryName: { $contains: 'Health questions' } }, adminToken),
+        ).toContain(org.id);
     });
 
     test('Does not match a record name or child category name when filtering on record category name', async () => {
@@ -299,11 +379,17 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         ]);
 
         // The top-level questionnaire name matches
-        expect(await filter({ recordCategoryName: { $contains: 'Algemeen' } }, adminToken)).toContain(org.id);
+        expect(
+            await filter({ recordCategoryName: { $contains: 'Algemeen' } }, adminToken),
+        ).toContain(org.id);
         // A child category name is not a questionnaire
-        expect(await filter({ recordCategoryName: { $contains: 'Subcategorie' } }, adminToken)).not.toContain(org.id);
+        expect(
+            await filter({ recordCategoryName: { $contains: 'Subcategorie' } }, adminToken),
+        ).not.toContain(org.id);
         // A record name is not a questionnaire
-        expect(await filter({ recordCategoryName: { $contains: 'Bloedgroep' } }, adminToken)).not.toContain(org.id);
+        expect(
+            await filter({ recordCategoryName: { $contains: 'Bloedgroep' } }, adminToken),
+        ).not.toContain(org.id);
     });
 
     test('Filters organizations by a record name in a top-level record categories', async () => {
@@ -391,7 +477,10 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
             }),
         ]);
 
-        const results = await filter({ recordChildCategoryName: { $contains: 'Medische subcategorie' } }, adminToken);
+        const results = await filter(
+            { recordChildCategoryName: { $contains: 'Medische subcategorie' } },
+            adminToken,
+        );
         expect(results).toContain(org.id);
         expect(results).not.toContain(otherOrg.id);
     });
@@ -412,51 +501,72 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         ]);
 
         // The child category name matches
-        expect(await filter({ recordChildCategoryName: { $contains: 'Onderliggende naam' } }, adminToken)).toContain(org.id);
+        expect(
+            await filter(
+                { recordChildCategoryName: { $contains: 'Onderliggende naam' } },
+                adminToken,
+            ),
+        ).toContain(org.id);
         // A top-level questionnaire name is not a child category
-        expect(await filter({ recordChildCategoryName: { $contains: 'Bovenliggende naam' } }, adminToken)).not.toContain(org.id);
+        expect(
+            await filter(
+                { recordChildCategoryName: { $contains: 'Bovenliggende naam' } },
+                adminToken,
+            ),
+        ).not.toContain(org.id);
         // A record name is not a child category
-        expect(await filter({ recordChildCategoryName: { $contains: 'Vraagnaam' } }, adminToken)).not.toContain(org.id);
+        expect(
+            await filter({ recordChildCategoryName: { $contains: 'Vraagnaam' } }, adminToken),
+        ).not.toContain(org.id);
     });
 
     test('Filters organizations by a child category name nested in deep child categories', async () => {
         const { adminToken } = await initPlatformAdmin();
 
         // Category -> child -> child -> child, with the matching child category at the deepest level
-        const org = await createOrganizationWithRecordCategories('Deeply Nested Child Category Club', [
-            RecordCategory.create({
-                name: TranslatedString.create('Niveau 0'),
-                childCategories: [
-                    RecordCategory.create({
-                        name: TranslatedString.create('Niveau 1'),
-                        childCategories: [
-                            RecordCategory.create({
-                                name: TranslatedString.create('Niveau 2'),
-                                childCategories: [
-                                    RecordCategory.create({
-                                        name: TranslatedString.create('Diepe subcategorie'),
-                                        records: [createTextRecord('Diepe vraag')],
-                                    }),
-                                ],
-                            }),
-                        ],
-                    }),
-                ],
-            }),
-        ]);
+        const org = await createOrganizationWithRecordCategories(
+            'Deeply Nested Child Category Club',
+            [
+                RecordCategory.create({
+                    name: TranslatedString.create('Niveau 0'),
+                    childCategories: [
+                        RecordCategory.create({
+                            name: TranslatedString.create('Niveau 1'),
+                            childCategories: [
+                                RecordCategory.create({
+                                    name: TranslatedString.create('Niveau 2'),
+                                    childCategories: [
+                                        RecordCategory.create({
+                                            name: TranslatedString.create('Diepe subcategorie'),
+                                            records: [createTextRecord('Diepe vraag')],
+                                        }),
+                                    ],
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+            ],
+        );
 
-        const noMatchOrg = await createOrganizationWithRecordCategories('Shallow Child Category Club', [
-            RecordCategory.create({
-                name: TranslatedString.create('Niveau 0'),
-                childCategories: [
-                    RecordCategory.create({
-                        name: TranslatedString.create('Oppervlakkige subcategorie'),
-                    }),
-                ],
-            }),
-        ]);
+        const noMatchOrg = await createOrganizationWithRecordCategories(
+            'Shallow Child Category Club',
+            [
+                RecordCategory.create({
+                    name: TranslatedString.create('Niveau 0'),
+                    childCategories: [
+                        RecordCategory.create({
+                            name: TranslatedString.create('Oppervlakkige subcategorie'),
+                        }),
+                    ],
+                }),
+            ],
+        );
 
-        const results = await filter({ recordChildCategoryName: { $contains: 'Diepe subcategorie' } }, adminToken);
+        const results = await filter(
+            { recordChildCategoryName: { $contains: 'Diepe subcategorie' } },
+            adminToken,
+        );
         expect(results).toContain(org.id);
         expect(results).not.toContain(noMatchOrg.id);
     });
@@ -465,12 +575,25 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         const { adminToken } = await initPlatformAdmin();
 
         const fiscalOrg = await new OrganizationFactory({ name: 'Fiscal Document Club' }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: fiscalOrg.id, type: 'fiscal' }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: fiscalOrg.id,
+            type: 'fiscal',
+        }).create();
 
-        const participationOrg = await new OrganizationFactory({ name: 'Participation Document Club' }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: participationOrg.id, type: 'participation' }).create();
+        const participationOrg = await new OrganizationFactory({
+            name: 'Participation Document Club',
+        }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: participationOrg.id,
+            type: 'participation',
+        }).create();
 
-        const results = await filter({ documentTemplates: { $elemMatch: { type: { $in: ['fiscal'] } } } }, adminToken);
+        const results = await filter(
+            { documentTemplates: { $elemMatch: { type: { $in: ['fiscal'] } } } },
+            adminToken,
+        );
         expect(results).toContain(fiscalOrg.id);
         expect(results).not.toContain(participationOrg.id);
     });
@@ -479,12 +602,23 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         const { adminToken } = await initPlatformAdmin();
 
         const org2024 = await new OrganizationFactory({ name: 'Document Year 2024 Club' }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: org2024.id, year: 2024 }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: org2024.id,
+            year: 2024,
+        }).create();
 
         const org2023 = await new OrganizationFactory({ name: 'Document Year 2023 Club' }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: org2023.id, year: 2023 }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: org2023.id,
+            year: 2023,
+        }).create();
 
-        const results = await filter({ documentTemplates: { $elemMatch: { year: { $eq: 2024 } } } }, adminToken);
+        const results = await filter(
+            { documentTemplates: { $elemMatch: { year: { $eq: 2024 } } } },
+            adminToken,
+        );
         expect(results).toContain(org2024.id);
         expect(results).not.toContain(org2023.id);
     });
@@ -492,13 +626,26 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
     test('Filters organizations by document template status', async () => {
         const { adminToken } = await initPlatformAdmin();
 
-        const publishedOrg = await new OrganizationFactory({ name: 'Published Document Club' }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: publishedOrg.id, status: DocumentStatus.Published }).create();
+        const publishedOrg = await new OrganizationFactory({
+            name: 'Published Document Club',
+        }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: publishedOrg.id,
+            status: DocumentStatus.Published,
+        }).create();
 
         const draftOrg = await new OrganizationFactory({ name: 'Draft Document Club' }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: draftOrg.id, status: DocumentStatus.Draft }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: draftOrg.id,
+            status: DocumentStatus.Draft,
+        }).create();
 
-        const results = await filter({ documentTemplates: { $elemMatch: { status: { $in: [DocumentStatus.Published] } } } }, adminToken);
+        const results = await filter(
+            { documentTemplates: { $elemMatch: { status: { $in: [DocumentStatus.Published] } } } },
+            adminToken,
+        );
         expect(results).toContain(publishedOrg.id);
         expect(results).not.toContain(draftOrg.id);
     });
@@ -507,12 +654,25 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         const { adminToken } = await initPlatformAdmin();
 
         const lockedOrg = await new OrganizationFactory({ name: 'Locked Document Club' }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: lockedOrg.id, isLocked: true }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: lockedOrg.id,
+            isLocked: true,
+        }).create();
 
-        const unlockedOrg = await new OrganizationFactory({ name: 'Unlocked Document Club' }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: unlockedOrg.id, isLocked: false }).create();
+        const unlockedOrg = await new OrganizationFactory({
+            name: 'Unlocked Document Club',
+        }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: unlockedOrg.id,
+            isLocked: false,
+        }).create();
 
-        const results = await filter({ documentTemplates: { $elemMatch: { isLocked: { $eq: true } } } }, adminToken);
+        const results = await filter(
+            { documentTemplates: { $elemMatch: { isLocked: { $eq: true } } } },
+            adminToken,
+        );
         expect(results).toContain(lockedOrg.id);
         expect(results).not.toContain(unlockedOrg.id);
     });
@@ -520,13 +680,28 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
     test('Filters organizations by document template updatesEnabled', async () => {
         const { adminToken } = await initPlatformAdmin();
 
-        const noUpdatesOrg = await new OrganizationFactory({ name: 'No Updates Document Club' }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: noUpdatesOrg.id, updatesEnabled: false }).create();
+        const noUpdatesOrg = await new OrganizationFactory({
+            name: 'No Updates Document Club',
+        }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: noUpdatesOrg.id,
+            updatesEnabled: false,
+        }).create();
 
-        const updatesOrg = await new OrganizationFactory({ name: 'Updates Document Club' }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: updatesOrg.id, updatesEnabled: true }).create();
+        const updatesOrg = await new OrganizationFactory({
+            name: 'Updates Document Club',
+        }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: updatesOrg.id,
+            updatesEnabled: true,
+        }).create();
 
-        const results = await filter({ documentTemplates: { $elemMatch: { updatesEnabled: { $eq: false } } } }, adminToken);
+        const results = await filter(
+            { documentTemplates: { $elemMatch: { updatesEnabled: { $eq: false } } } },
+            adminToken,
+        );
         expect(results).toContain(noUpdatesOrg.id);
         expect(results).not.toContain(updatesOrg.id);
     });
@@ -535,21 +710,42 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         const { adminToken } = await initPlatformAdmin();
 
         const matchOrg = await new OrganizationFactory({ name: 'Matching Document Club' }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: matchOrg.id, type: 'fiscal', year: 2025, status: DocumentStatus.Published }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: matchOrg.id,
+            type: 'fiscal',
+            year: 2025,
+            status: DocumentStatus.Published,
+        }).create();
 
         // Same org, but the conditions are split over two different templates: should not match a single-template $elemMatch
         const splitOrg = await new OrganizationFactory({ name: 'Split Document Club' }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: splitOrg.id, type: 'fiscal', year: 2020, status: DocumentStatus.Published }).create();
-        await new DocumentTemplateFactory({ groups: [], organizationId: splitOrg.id, type: 'participation', year: 2025, status: DocumentStatus.Published }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: splitOrg.id,
+            type: 'fiscal',
+            year: 2020,
+            status: DocumentStatus.Published,
+        }).create();
+        await new DocumentTemplateFactory({
+            groups: [],
+            organizationId: splitOrg.id,
+            type: 'participation',
+            year: 2025,
+            status: DocumentStatus.Published,
+        }).create();
 
-        const results = await filter({
-            documentTemplates: {
-                $elemMatch: {
-                    type: { $in: ['fiscal'] },
-                    year: { $eq: 2025 },
+        const results = await filter(
+            {
+                documentTemplates: {
+                    $elemMatch: {
+                        type: { $in: ['fiscal'] },
+                        year: { $eq: 2025 },
+                    },
                 },
             },
-        }, adminToken);
+            adminToken,
+        );
         expect(results).toContain(matchOrg.id);
         expect(results).not.toContain(splitOrg.id);
     });

@@ -1,5 +1,12 @@
 import type { GetEmailIdentityCommandOutput } from '@aws-sdk/client-sesv2';
-import { CreateEmailIdentityCommand, DeleteEmailIdentityCommand, GetEmailIdentityCommand, PutEmailIdentityFeedbackAttributesCommand, PutEmailIdentityMailFromAttributesCommand, SESv2Client } from '@aws-sdk/client-sesv2';
+import {
+    CreateEmailIdentityCommand,
+    DeleteEmailIdentityCommand,
+    GetEmailIdentityCommand,
+    PutEmailIdentityFeedbackAttributesCommand,
+    PutEmailIdentityMailFromAttributesCommand,
+    SESv2Client,
+} from '@aws-sdk/client-sesv2';
 import type { Organization } from '@stamhoofd/models';
 import { validateDNSRecords } from '@stamhoofd/models/helpers/DNSValidator.js';
 import { DNSRecordStatus, EmailTemplateType } from '@stamhoofd/structures';
@@ -19,9 +26,14 @@ export class OrganizationDNSService {
         const { allValid } = await validateDNSRecords(organization.privateMeta.dnsRecords);
 
         if (organization.registerDomain ?? organization.privateMeta.pendingRegisterDomain) {
-            const registerDomainRecord = (organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain) + '.';
-            const records = organization.privateMeta.dnsRecords.filter(r => r.name === registerDomainRecord);
-            const areRegisterDomainRecordsValid = records.length === 0 || records.every(r => r.status === DNSRecordStatus.Valid);
+            const registerDomainRecord =
+                (organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain) +
+                '.';
+            const records = organization.privateMeta.dnsRecords.filter(
+                (r) => r.name === registerDomainRecord,
+            );
+            const areRegisterDomainRecordsValid =
+                records.length === 0 || records.every((r) => r.status === DNSRecordStatus.Valid);
 
             if (areRegisterDomainRecordsValid) {
                 // We can setup the register domain if needed
@@ -29,16 +41,27 @@ export class OrganizationDNSService {
                     organization.registerDomain = organization.privateMeta.pendingRegisterDomain;
                     organization.privateMeta.pendingRegisterDomain = null;
 
-                    console.log('Did set register domain for ' + organization.id + ' to ' + organization.registerDomain);
+                    console.log(
+                        'Did set register domain for ' +
+                            organization.id +
+                            ' to ' +
+                            organization.registerDomain,
+                    );
                 }
             } else {
                 // Clear register domain
                 if (organization.registerDomain) {
                     // We need to clear it, to prevent sending e-mails with invalid links
-                    organization.privateMeta.pendingRegisterDomain = organization.privateMeta.pendingRegisterDomain ?? organization.registerDomain;
+                    organization.privateMeta.pendingRegisterDomain =
+                        organization.privateMeta.pendingRegisterDomain ??
+                        organization.registerDomain;
                     organization.registerDomain = null;
 
-                    console.log('Cleared register domain for ' + organization.id + ' because of invalid non txt records');
+                    console.log(
+                        'Cleared register domain for ' +
+                            organization.id +
+                            ' because of invalid non txt records',
+                    );
                 }
             }
         }
@@ -63,13 +86,20 @@ export class OrganizationDNSService {
             await organization.save();
 
             if (wasUnstable && !organization.serverMeta.isDNSUnstable) {
-                console.warn('DNS settings became stable for ' + organization.name + ' ' + organization.id);
+                console.warn(
+                    'DNS settings became stable for ' + organization.name + ' ' + organization.id,
+                );
 
                 await OrganizationEmailService.sendEmailTemplate(organization, {
                     type: EmailTemplateType.OrganizationStableDNS,
                     bcc: true,
                 });
-            } else if (!wasActive && organization.privateMeta.mailDomainActive && (!didSendDomainSetupMail || didSendWarning) && !organization.serverMeta.isDNSUnstable) {
+            } else if (
+                !wasActive &&
+                organization.privateMeta.mailDomainActive &&
+                (!didSendDomainSetupMail || didSendWarning) &&
+                !organization.serverMeta.isDNSUnstable
+            ) {
                 organization.serverMeta.didSendDomainSetupMail = true;
                 await organization.save();
 
@@ -86,7 +116,9 @@ export class OrganizationDNSService {
         } else {
             // DNS settings gone broken
             if (organization.privateMeta.mailDomain) {
-                organization.privateMeta.pendingMailDomain = organization.privateMeta.pendingMailDomain ?? organization.privateMeta.mailDomain;
+                organization.privateMeta.pendingMailDomain =
+                    organization.privateMeta.pendingMailDomain ??
+                    organization.privateMeta.mailDomain;
                 organization.privateMeta.mailDomain = null;
             }
 
@@ -102,13 +134,19 @@ export class OrganizationDNSService {
 
             if (!wasDNSUnstable && organization.serverMeta.isDNSUnstable) {
                 // DNS became instable
-                console.warn('DNS settings became instable for ' + organization.name + ' ' + organization.id);
+                console.warn(
+                    'DNS settings became instable for ' + organization.name + ' ' + organization.id,
+                );
 
                 await OrganizationEmailService.sendEmailTemplate(organization, {
                     type: EmailTemplateType.OrganizationUnstableDNS,
                     bcc: true,
                 });
-            } else if (!organization.serverMeta.isDNSUnstable && organization.serverMeta.didSendDomainSetupMail && organization.serverMeta.DNSRecordWarningCount == 0) {
+            } else if (
+                !organization.serverMeta.isDNSUnstable &&
+                organization.serverMeta.didSendDomainSetupMail &&
+                organization.serverMeta.DNSRecordWarningCount == 0
+            ) {
                 organization.serverMeta.DNSRecordWarningCount += 1;
                 await organization.save();
 
@@ -148,7 +186,13 @@ export class OrganizationDNSService {
             const result = await client.send(cmd);
 
             if (result.VerifiedForSendingStatus === true) {
-                console.log('Cant delete AWS mail idenitiy @' + organization.id + ' for ' + mailDomain + ': already validated and might be in use by other organizations');
+                console.log(
+                    'Cant delete AWS mail idenitiy @' +
+                        organization.id +
+                        ' for ' +
+                        mailDomain +
+                        ': already validated and might be in use by other organizations',
+                );
                 return;
             }
 
@@ -159,9 +203,19 @@ export class OrganizationDNSService {
             });
 
             await client.send(deleteCmd);
-            console.log('Deleted AWS mail idenitiy @' + organization.id + ' for ' + organization.privateMeta.mailDomain);
+            console.log(
+                'Deleted AWS mail idenitiy @' +
+                    organization.id +
+                    ' for ' +
+                    organization.privateMeta.mailDomain,
+            );
         } catch (e) {
-            console.error('Could not delete AWS email identitiy @' + organization.id + ' for ' + organization.privateMeta.mailDomain);
+            console.error(
+                'Could not delete AWS email identitiy @' +
+                    organization.id +
+                    ' for ' +
+                    organization.privateMeta.mailDomain,
+            );
             console.error(e);
         }
     }
@@ -175,8 +229,18 @@ export class OrganizationDNSService {
         }
 
         // Protect specific domain names
-        if (['stamhoofd.be', 'stamhoofd.nl', 'stamhoofd.shop', 'stamhoofd.app', 'stamhoofd.email'].includes(organization.privateMeta.mailDomain)) {
-            console.error('Tried to validate AWS mail identity with protected domains @' + organization.id);
+        if (
+            [
+                'stamhoofd.be',
+                'stamhoofd.nl',
+                'stamhoofd.shop',
+                'stamhoofd.app',
+                'stamhoofd.email',
+            ].includes(organization.privateMeta.mailDomain)
+        ) {
+            console.error(
+                'Tried to validate AWS mail identity with protected domains @' + organization.id,
+            );
             organization.privateMeta.mailDomainActive = false;
             return;
         }
@@ -201,12 +265,22 @@ export class OrganizationDNSService {
             existing = await client.send(cmd);
             exists = true;
 
-            console.log('AWS mail idenitiy exists already: just checking the verification status in AWS @' + organization.id);
+            console.log(
+                'AWS mail idenitiy exists already: just checking the verification status in AWS @' +
+                    organization.id,
+            );
 
             if (existing.ConfigurationSetName !== expectedConfigurationSetName) {
                 // Not allowed to use this identity
                 organization.privateMeta.mailDomainActive = false;
-                console.error('Organization is not allowed to use email identity ' + organization.privateMeta.mailDomain + ' @' + organization.id + ', got ' + existing.ConfigurationSetName);
+                console.error(
+                    'Organization is not allowed to use email identity ' +
+                        organization.privateMeta.mailDomain +
+                        ' @' +
+                        organization.id +
+                        ', got ' +
+                        existing.ConfigurationSetName,
+                );
                 return;
             }
 
@@ -216,8 +290,14 @@ export class OrganizationDNSService {
                 console.error('Not validated @' + organization.id);
             }
 
-            if (existing.VerifiedForSendingStatus !== true && existing.DkimAttributes?.Status === 'FAILED') {
-                console.error('AWS failed to verify DKIM records. Triggering a forced recheck @' + organization.id);
+            if (
+                existing.VerifiedForSendingStatus !== true &&
+                existing.DkimAttributes?.Status === 'FAILED'
+            ) {
+                console.error(
+                    'AWS failed to verify DKIM records. Triggering a forced recheck @' +
+                        organization.id,
+                );
 
                 const deleteCmd = new DeleteEmailIdentityCommand({
                     EmailIdentity: organization.privateMeta.mailDomain,
@@ -266,9 +346,21 @@ export class OrganizationDNSService {
             await client.send(putFeedbackCmd);
         }
 
-        if (organization.privateMeta.mailFromDomain && (!exists || (existing && (!existing.MailFromAttributes || existing.MailFromAttributes.MailFromDomain !== organization.privateMeta.mailFromDomain)))) {
+        if (
+            organization.privateMeta.mailFromDomain &&
+            (!exists ||
+                (existing &&
+                    (!existing.MailFromAttributes ||
+                        existing.MailFromAttributes.MailFromDomain !==
+                            organization.privateMeta.mailFromDomain)))
+        ) {
             // Also set a from domain, to fix SPF
-            console.log('Setting mail from domain: ' + organization.privateMeta.mailFromDomain + ' for ' + organization.id);
+            console.log(
+                'Setting mail from domain: ' +
+                    organization.privateMeta.mailFromDomain +
+                    ' for ' +
+                    organization.id,
+            );
 
             const cmd = new PutEmailIdentityMailFromAttributesCommand({
                 EmailIdentity: organization.privateMeta.mailDomain,

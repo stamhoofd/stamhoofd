@@ -1,5 +1,15 @@
-import { BalanceItem, MemberPlatformMembership, Registration, RegistrationPeriod } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
+import {
+    BalanceItem,
+    MemberPlatformMembership,
+    Registration,
+    RegistrationPeriod,
+} from '@stamhoofd/models';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemType,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SeedTools } from './SeedTools.js';
 
@@ -28,9 +38,9 @@ class PeriodRelationCache {
         const period = await RegistrationPeriod.getByID(periodId);
         const relation = period
             ? BalanceItemRelation.create({
-                    id: period.id,
-                    name: new TranslatedString(period.getBaseStructure().name),
-                })
+                  id: period.id,
+                  name: new TranslatedString(period.getBaseStructure().name),
+              })
             : null;
 
         this.cache.set(periodId, relation);
@@ -45,9 +55,11 @@ async function backfillRegistrationBalanceItems(cache: PeriodRelationCache): Pro
         batchSize: 100,
         query: BalanceItem.select().whereNot('registrationId', null),
         batchAction: async (items: BalanceItem[]) => {
-            const registrationIds = Formatter.uniqueArray(items.map(i => i.registrationId!).filter(id => !!id));
+            const registrationIds = Formatter.uniqueArray(
+                items.map((i) => i.registrationId!).filter((id) => !!id),
+            );
             const registrations = await Registration.getByIDs(...registrationIds);
-            const registrationMap = new Map(registrations.map(r => [r.id, r]));
+            const registrationMap = new Map(registrations.map((r) => [r.id, r]));
 
             for (const item of items) {
                 // Never overwrite a relation that is already set.
@@ -82,12 +94,14 @@ async function backfillPlatformMembershipBalanceItems(cache: PeriodRelationCache
         batchSize: 100,
         query: BalanceItem.select().where('type', BalanceItemType.PlatformMembership),
         batchAction: async (items: BalanceItem[]) => {
-            const balanceItemIds = items.map(i => i.id);
+            const balanceItemIds = items.map((i) => i.id);
             const memberships = await MemberPlatformMembership.select()
                 .where('balanceItemId', balanceItemIds)
                 .limit(balanceItemIds.length)
                 .fetch();
-            const membershipByBalanceItemId = new Map(memberships.filter(m => m.balanceItemId).map(m => [m.balanceItemId!, m]));
+            const membershipByBalanceItemId = new Map(
+                memberships.filter((m) => m.balanceItemId).map((m) => [m.balanceItemId!, m]),
+            );
 
             for (const item of items) {
                 if (item.relations.has(BalanceItemRelationType.RegistrationPeriod)) {
@@ -114,12 +128,17 @@ async function backfillPlatformMembershipBalanceItems(cache: PeriodRelationCache
     return updated;
 }
 
-export async function backfillRegistrationPeriodRelations(): Promise<{ registrations: number; memberships: number }> {
+export async function backfillRegistrationPeriodRelations(): Promise<{
+    registrations: number;
+    memberships: number;
+}> {
     const cache = new PeriodRelationCache();
     const registrations = await backfillRegistrationBalanceItems(cache);
     const memberships = await backfillPlatformMembershipBalanceItems(cache);
 
-    console.log(`[RegistrationPeriodRelationBackfiller] Updated ${registrations} registration balance items and ${memberships} platform membership balance items`);
+    console.log(
+        `[RegistrationPeriodRelationBackfiller] Updated ${registrations} registration balance items and ${memberships} platform membership balance items`,
+    );
 
     return { registrations, memberships };
 }

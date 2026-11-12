@@ -15,27 +15,34 @@ describe('streamForBreakdown', () => {
             requests.push(request);
 
             const start = (request.pageFilter as { id: { $gt: number } } | null)?.id.$gt ?? 0;
-            const results = Array.from({ length: Math.min(request.limit, Math.max(0, totalObjects - start)) }, (_, index) => start + index);
+            const results = Array.from(
+                { length: Math.min(request.limit, Math.max(0, totalObjects - start)) },
+                (_, index) => start + index,
+            );
             const end = start + results.length;
 
             return Promise.resolve({
                 results,
-                next: end < totalObjects
-                    ? new LimitedFilteredRequest({
-                            filter: request.filter,
-                            search: request.search,
-                            sort: request.sort,
-                            limit: request.limit,
-                            pageFilter: { id: { $gt: end } },
-                        })
-                    : undefined,
+                next:
+                    end < totalObjects
+                        ? new LimitedFilteredRequest({
+                              filter: request.filter,
+                              search: request.search,
+                              sort: request.sort,
+                              limit: request.limit,
+                              pageFilter: { id: { $gt: end } },
+                          })
+                        : undefined,
             });
         };
 
         return { fetch, requests };
     };
 
-    const stream = async (totalObjects: number, selection: { filter?: StamhoofdFilter; search?: string | null } = {}) => {
+    const stream = async (
+        totalObjects: number,
+        selection: { filter?: StamhoofdFilter; search?: string | null } = {},
+    ) => {
         const { fetch, requests } = createFetcher(totalObjects);
         const handled: number[] = [];
         const countRequests: { filter: StamhoofdFilter; search: string | null }[] = [];
@@ -65,7 +72,7 @@ describe('streamForBreakdown', () => {
 
         // Read in pages, sorted so the pages line up
         expect(requests.length).toBeGreaterThan(1);
-        expect(requests[0].sort.map(s => s.key)).toEqual(['id']);
+        expect(requests[0].sort.map((s) => s.key)).toEqual(['id']);
     });
 
     test('the selection is read exactly as it was asked for', async () => {
@@ -87,20 +94,24 @@ describe('streamForBreakdown', () => {
     });
 
     test('a selection that is too large to break down asks the user to narrow it down', async () => {
-        await expect(stream(MAX_BREAKDOWN_OBJECTS + 1)).rejects.toThrow('Too many objects to break down');
+        await expect(stream(MAX_BREAKDOWN_OBJECTS + 1)).rejects.toThrow(
+            'Too many objects to break down',
+        );
     });
 
     test('a selection that is too large is refused before it is read', async () => {
         const { fetch, requests } = createFetcher(MAX_BREAKDOWN_OBJECTS + 1);
 
-        await expect(streamForBreakdown<number>({
-            userId: uuidv4(),
-            filter: null,
-            search: null,
-            count: () => Promise.resolve(MAX_BREAKDOWN_OBJECTS + 1),
-            fetch,
-            handle: () => {},
-        })).rejects.toThrow('Too many objects to break down');
+        await expect(
+            streamForBreakdown<number>({
+                userId: uuidv4(),
+                filter: null,
+                search: null,
+                count: () => Promise.resolve(MAX_BREAKDOWN_OBJECTS + 1),
+                fetch,
+                handle: () => {},
+            }),
+        ).rejects.toThrow('Too many objects to break down');
 
         expect(requests).toHaveLength(0);
     });

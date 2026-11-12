@@ -4,8 +4,18 @@ import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { CachedBalance } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, DetailedReceivableBalance, ReceivableBalance as ReceivableBalanceStruct, StamhoofdFilter } from '@stamhoofd/structures';
-import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    DetailedReceivableBalance,
+    ReceivableBalance as ReceivableBalanceStruct,
+    StamhoofdFilter,
+} from '@stamhoofd/structures';
+import {
+    assertSort,
+    getSortFilter,
+    LimitedFilteredRequest,
+    PaginatedResponse,
+} from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
@@ -44,7 +54,7 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
             throw Context.auth.error();
         }
 
-        if (!await Context.auth.canManageFinances(organization.id)) {
+        if (!(await Context.auth.canManageFinances(organization.id))) {
             throw Context.auth.error();
         }
 
@@ -52,8 +62,7 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
             organizationId: organization.id,
         };
 
-        const query = CachedBalance
-            .select();
+        const query = CachedBalance.select();
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
@@ -71,10 +80,7 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
                     {
                         organizations: {
                             $elemMatch: {
-                                $or: [
-                                    { name: { $contains: q.search } },
-                                    { uri: q.search },
-                                ],
+                                $or: [{ name: { $contains: q.search } }, { uri: q.search }],
                             },
                         },
                     },
@@ -153,11 +159,16 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
     }
 
     static async buildDetailedData(requestQuery: LimitedFilteredRequest) {
-        const organization = Context.organization ?? await Context.setOrganizationScope({ willAuthenticate: false });
+        const organization =
+            Context.organization ??
+            (await Context.setOrganizationScope({ willAuthenticate: false }));
         const { data, next } = await GetReceivableBalancesEndpoint.buildDataHelper(requestQuery);
 
         return new PaginatedResponse<DetailedReceivableBalance[], LimitedFilteredRequest>({
-            results: await AuthenticatedStructures.detailedReceivableBalances(organization.id, data),
+            results: await AuthenticatedStructures.detailedReceivableBalances(
+                organization.id,
+                data,
+            ),
             next,
         });
     }
@@ -184,8 +195,6 @@ export class GetReceivableBalancesEndpoint extends Endpoint<Params, Query, Body,
             });
         }
 
-        return new Response(
-            await GetReceivableBalancesEndpoint.buildData(request.query),
-        );
+        return new Response(await GetReceivableBalancesEndpoint.buildData(request.query));
     }
 }

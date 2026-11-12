@@ -1,8 +1,20 @@
 import { SimpleError } from '@common/errors';
-import type { StamhoofdCompareValue, StamhoofdFilter, StamhoofdMagicFilter, StamhoofdMagicRelationFilter } from './StamhoofdFilter.js';
+import type {
+    StamhoofdCompareValue,
+    StamhoofdFilter,
+    StamhoofdMagicFilter,
+    StamhoofdMagicRelationFilter,
+} from './StamhoofdFilter.js';
 
 function wrapPlainFilter(filter: StamhoofdFilter): Exclude<StamhoofdFilter, StamhoofdCompareValue> {
-    if (typeof filter === 'string' || typeof filter === 'number' || typeof filter === 'boolean' || filter === null || filter === undefined || filter instanceof Date) {
+    if (
+        typeof filter === 'string' ||
+        typeof filter === 'number' ||
+        typeof filter === 'boolean' ||
+        filter === null ||
+        filter === undefined ||
+        filter instanceof Date
+    ) {
         return {
             $eq: filter,
         };
@@ -18,11 +30,21 @@ function wrapPlainFilter(filter: StamhoofdFilter): Exclude<StamhoofdFilter, Stam
     return filter;
 }
 
-export type FilterCompiler<Runner> = (filter: StamhoofdFilter, parentCompiler: FilterCompiler<Runner>, key: string) => Runner | undefined;
-export type RequiredFilterCompiler<Runner> = (filter: StamhoofdFilter, parentCompiler: FilterCompiler<Runner>) => Runner;
+export type FilterCompiler<Runner> = (
+    filter: StamhoofdFilter,
+    parentCompiler: FilterCompiler<Runner>,
+    key: string,
+) => Runner | undefined;
+export type RequiredFilterCompiler<Runner> = (
+    filter: StamhoofdFilter,
+    parentCompiler: FilterCompiler<Runner>,
+) => Runner;
 
 /** Registry of exact filter keys and nested namespaces, without inherited keys. */
-export type FilterDefinitions<Runner> = Map<string, FilterCompiler<Runner> | FilterDefinitions<Runner>>;
+export type FilterDefinitions<Runner> = Map<
+    string,
+    FilterCompiler<Runner> | FilterDefinitions<Runner>
+>;
 
 /**
  * @deprecated
@@ -36,7 +58,9 @@ export const filterDefinitionsToSelector = filterDefinitionsToCompiler;
  * The fallback only handles non-operator keys without a dot; a compiler returning
  * undefined remains an exact match and does not trigger fallback resolution.
  */
-export function filterDefinitionsToCompiler<Runner>(definitions: FilterDefinitions<Runner>): FilterCompiler<Runner> {
+export function filterDefinitionsToCompiler<Runner>(
+    definitions: FilterDefinitions<Runner>,
+): FilterCompiler<Runner> {
     return (filter: StamhoofdFilter, parentCompiler: FilterCompiler<Runner>, key: string) => {
         let k = definitions.get(key);
 
@@ -79,7 +103,10 @@ export function filterDefinitionsToCompiler<Runner>(definitions: FilterDefinitio
     };
 }
 
-export function compileFilter<Runner>(filter: StamhoofdFilter, parentCompiler: FilterCompiler<Runner>): Runner[] {
+export function compileFilter<Runner>(
+    filter: StamhoofdFilter,
+    parentCompiler: FilterCompiler<Runner>,
+): Runner[] {
     if (filter === undefined) {
         return [];
     }
@@ -109,9 +136,7 @@ export function compileFilter<Runner>(filter: StamhoofdFilter, parentCompiler: F
                     message: 'Unknown filter ' + key,
                 });
             }
-            runners.push(
-                runner,
-            );
+            runners.push(runner);
         }
     }
     return runners;
@@ -120,12 +145,15 @@ export function compileFilter<Runner>(filter: StamhoofdFilter, parentCompiler: F
 export function getMagicValue(value: StamhoofdMagicFilter): StamhoofdCompareValue {
     const specialValue = value['$'];
     switch (specialValue) {
-        case '$now': return value;
-        case '$rel': return getMagicRelationValue(value);
-        default: throw new SimpleError({
-            code: 'unknown_filter',
-            message: 'Unknown magic filter ' + specialValue,
-        });
+        case '$now':
+            return value;
+        case '$rel':
+            return getMagicRelationValue(value);
+        default:
+            throw new SimpleError({
+                code: 'unknown_filter',
+                message: 'Unknown magic filter ' + specialValue,
+            });
     }
 }
 

@@ -3,7 +3,11 @@ import { isPatchableArray, patchObject } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { Organization, Platform, RegistrationPeriod } from '@stamhoofd/models';
-import type { EventNotificationType, MemberResponsibility, PlatformPremiseType } from '@stamhoofd/structures';
+import type {
+    EventNotificationType,
+    MemberResponsibility,
+    PlatformPremiseType,
+} from '@stamhoofd/structures';
 import { Platform as PlatformStruct, PlatformConfig } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -23,15 +27,8 @@ type Query = undefined;
 type Body = AutoEncoderPatchType<PlatformStruct>;
 type ResponseBody = PlatformStruct;
 
-export class PatchPlatformEndpoint extends Endpoint<
-    Params,
-    Query,
-    Body,
-    ResponseBody
-> {
-    bodyDecoder = PlatformStruct.patchType() as Decoder<
-        AutoEncoderPatchType<PlatformStruct>
-    >;
+export class PatchPlatformEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    bodyDecoder = PlatformStruct.patchType() as Decoder<AutoEncoderPatchType<PlatformStruct>>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
@@ -89,7 +86,8 @@ export class PatchPlatformEndpoint extends Endpoint<
                     throw Context.auth.error();
                 }
 
-                platform.privateConfig.requireTwoFactor = request.body.privateConfig.requireTwoFactor;
+                platform.privateConfig.requireTwoFactor =
+                    request.body.privateConfig.requireTwoFactor;
             }
         }
 
@@ -112,17 +110,24 @@ export class PatchPlatformEndpoint extends Endpoint<
 
                 RecordAnswerHelper.throwIfPatchOrPutIsInvalid(
                     platform.config.organizationLevelRecordsConfiguration.recordCategories,
-                    request.body.config.organizationLevelRecordsConfiguration.recordCategories);
+                    request.body.config.organizationLevelRecordsConfiguration.recordCategories,
+                );
             }
 
             if (request.body.config.recordsConfiguration) {
                 RecordAnswerHelper.throwIfPatchOrPutIsInvalid(
                     platform.config.recordsConfiguration.recordCategories,
-                    request.body.config.recordsConfiguration.recordCategories);
+                    request.body.config.recordsConfiguration.recordCategories,
+                );
             }
 
             if (request.body.config.eventNotificationTypes) {
-                RecordAnswerHelper.throwIfPatchOrPutsAreInvalid<'recordCategories', string, EventNotificationType, AutoEncoderPatchType<EventNotificationType>>(
+                RecordAnswerHelper.throwIfPatchOrPutsAreInvalid<
+                    'recordCategories',
+                    string,
+                    EventNotificationType,
+                    AutoEncoderPatchType<EventNotificationType>
+                >(
                     platform.config.eventNotificationTypes,
                     request.body.config.eventNotificationTypes,
                     'recordCategories',
@@ -139,21 +144,25 @@ export class PatchPlatformEndpoint extends Endpoint<
                     platform.config = patchObject(platform.config, newConfig);
                     const currentConfig: PlatformConfig = platform.config;
 
-                    shouldUpdateSetupSteps = shouldUpdateSetupSteps || this.shouldUpdateSetupSteps(
-                        currentConfig,
-                        newConfig,
-                        oldConfig,
-                    );
+                    shouldUpdateSetupSteps =
+                        shouldUpdateSetupSteps ||
+                        this.shouldUpdateSetupSteps(currentConfig, newConfig, oldConfig);
                 } else {
                     platform.config = patchObject(platform.config, newConfig);
                 }
             }
 
             if (newConfig.responsibilityEmailDomains !== undefined) {
-                const domains = platform.config.responsibilityEmailDomains.map(d => PlatformConfig.normalizeEmailDomain(d)).filter(d => d.length > 0);
+                const domains = platform.config.responsibilityEmailDomains
+                    .map((d) => PlatformConfig.normalizeEmailDomain(d))
+                    .filter((d) => d.length > 0);
 
                 for (const domain of domains) {
-                    if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/.test(domain)) {
+                    if (
+                        !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/.test(
+                            domain,
+                        )
+                    ) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid domain name: ' + domain,
@@ -170,10 +179,15 @@ export class PatchPlatformEndpoint extends Endpoint<
                 previewPlatform.config = platform.config.clone();
                 previewPlatform.config.responsibilityEmailDomains = uniqueDomains;
 
-                if (!Context.auth.user.permissions?.forPlatform(previewPlatform, Context.auth.user.email)?.hasFullAccess()) {
+                if (
+                    !Context.auth.user.permissions
+                        ?.forPlatform(previewPlatform, Context.auth.user.email)
+                        ?.hasFullAccess()
+                ) {
                     throw new SimpleError({
                         code: 'locked_out',
-                        message: 'The email domain of the current user is not in the list, which would remove their platform access',
+                        message:
+                            'The email domain of the current user is not in the list, which would remove their platform access',
                         human: $t('%Zxx'),
                         field: 'config.responsibilityEmailDomains',
                     });
@@ -182,7 +196,11 @@ export class PatchPlatformEndpoint extends Endpoint<
                 platform.config.responsibilityEmailDomains = uniqueDomains;
             }
 
-            if (newConfig.tags && isPatchableArray(newConfig.tags) && newConfig.tags.changes.length > 0) {
+            if (
+                newConfig.tags &&
+                isPatchableArray(newConfig.tags) &&
+                newConfig.tags.changes.length > 0
+            ) {
                 let newTags = (platform.config as PlatformConfig).tags;
                 newTags = TagHelper.getCleanedUpTags(newTags);
                 platform.config.tags = newTags;
@@ -196,11 +214,19 @@ export class PatchPlatformEndpoint extends Endpoint<
                 shouldUpdateTags = true;
             }
 
-            if (newConfig.membershipTypes && isPatchableArray(newConfig.membershipTypes) && newConfig.membershipTypes.changes.length > 0) {
+            if (
+                newConfig.membershipTypes &&
+                isPatchableArray(newConfig.membershipTypes) &&
+                newConfig.membershipTypes.changes.length > 0
+            ) {
                 shouldUpdateMemberships = true;
             }
 
-            if (newConfig.defaultAgeGroups && isPatchableArray(newConfig.defaultAgeGroups) && newConfig.defaultAgeGroups.changes.length > 0) {
+            if (
+                newConfig.defaultAgeGroups &&
+                isPatchableArray(newConfig.defaultAgeGroups) &&
+                newConfig.defaultAgeGroups.changes.length > 0
+            ) {
                 for (const d of newConfig.defaultAgeGroups.getPatches()) {
                     if (d.defaultMembershipTypeId !== undefined) {
                         shouldUpdateMemberships = true;
@@ -213,13 +239,8 @@ export class PatchPlatformEndpoint extends Endpoint<
             }
         }
 
-        if (
-            request.body.period
-            && request.body.period.id !== platform.periodId
-        ) {
-            const period = await RegistrationPeriod.getByID(
-                request.body.period.id,
-            );
+        if (request.body.period && request.body.period.id !== platform.periodId) {
+            const period = await RegistrationPeriod.getByID(request.body.period.id);
             if (!period || period.organizationId) {
                 throw new SimpleError({
                     code: 'invalid_period',
@@ -246,7 +267,9 @@ export class PatchPlatformEndpoint extends Endpoint<
             }
 
             if (request.body.membershipOrganizationId) {
-                const organization = await Organization.getByID(request.body.membershipOrganizationId);
+                const organization = await Organization.getByID(
+                    request.body.membershipOrganizationId,
+                );
                 if (!organization) {
                     throw new SimpleError({
                         code: 'invalid_organization',
@@ -265,7 +288,9 @@ export class PatchPlatformEndpoint extends Endpoint<
             }
 
             if (request.body.membershipOrganizationId) {
-                const organization = await Organization.getByID(request.body.membershipOrganizationId);
+                const organization = await Organization.getByID(
+                    request.body.membershipOrganizationId,
+                );
                 if (!organization) {
                     throw new SimpleError({
                         code: 'invalid_organization',
@@ -304,7 +329,9 @@ export class PatchPlatformEndpoint extends Endpoint<
             PeriodHelper.moveAllOrganizationsToPeriod(shouldMoveToPeriod).catch(console.error);
         } else if (shouldUpdateSetupSteps) {
             // Do not call this right away when moving to a period, because this needs to happen AFTER moving to the period
-            SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod().catch(console.error);
+            SetupStepUpdater.updateSetupStepsForAllOrganizationsInCurrentPeriod().catch(
+                console.error,
+            );
         }
 
         if (shouldUpdateUserPermissions) {
@@ -321,26 +348,19 @@ export class PatchPlatformEndpoint extends Endpoint<
     ): boolean {
         let shouldUpdate = false;
         const premiseTypes: PlatformPremiseType[] = currentConfig.premiseTypes;
-        const responsibilities: MemberResponsibility[]
-            = currentConfig.responsibilities;
+        const responsibilities: MemberResponsibility[] = currentConfig.responsibilities;
 
         if (
-            newConfig.premiseTypes
-            && this.shouldUpdateSetupStepPremise(
-                premiseTypes,
-                oldConfig.premiseTypes,
-            )
+            newConfig.premiseTypes &&
+            this.shouldUpdateSetupStepPremise(premiseTypes, oldConfig.premiseTypes)
         ) {
             shouldUpdate = true;
         }
 
         if (
-            !shouldUpdate
-            && newConfig.responsibilities
-            && this.shouldUpdateSetupStepFunctions(
-                responsibilities,
-                oldConfig.responsibilities,
-            )
+            !shouldUpdate &&
+            newConfig.responsibilities &&
+            this.shouldUpdateSetupStepFunctions(responsibilities, oldConfig.responsibilities)
         ) {
             shouldUpdate = true;
         }
@@ -364,14 +384,11 @@ export class PatchPlatformEndpoint extends Endpoint<
 
         for (const premiseType of newPremiseTypes) {
             const id = premiseType.id;
-            const oldVersion = oldPremiseTypes.find(x => x.id === id);
+            const oldVersion = oldPremiseTypes.find((x) => x.id === id);
 
             // if premise type is not new
             if (oldVersion) {
-                if (
-                    oldVersion.min !== premiseType.min
-                    || oldVersion.max !== premiseType.max
-                ) {
+                if (oldVersion.min !== premiseType.min || oldVersion.max !== premiseType.max) {
                     return true;
                 }
                 continue;
@@ -387,7 +404,7 @@ export class PatchPlatformEndpoint extends Endpoint<
             const id = oldPremiseType.id;
 
             // if premise type is removed
-            if (!newPremiseTypes.some(x => x.id === id)) {
+            if (!newPremiseTypes.some((x) => x.id === id)) {
                 if (oldPremiseType.min || oldPremiseType.max) {
                     return true;
                 }
@@ -401,15 +418,14 @@ export class PatchPlatformEndpoint extends Endpoint<
     ) {
         for (const responsibility of newResponsibilities) {
             const id = responsibility.id;
-            const oldVersion = oldResponsibilities.find(x => x.id === id);
+            const oldVersion = oldResponsibilities.find((x) => x.id === id);
 
             // if responsibility is not new
             if (oldVersion) {
                 // if restrictions changed
                 if (
-                    oldVersion.minimumMembers
-                    !== responsibility.minimumMembers
-                    || oldVersion.maximumMembers !== responsibility.maximumMembers
+                    oldVersion.minimumMembers !== responsibility.minimumMembers ||
+                    oldVersion.maximumMembers !== responsibility.maximumMembers
                 ) {
                     return true;
                 }
@@ -417,10 +433,7 @@ export class PatchPlatformEndpoint extends Endpoint<
             }
 
             // if responsibility is new
-            if (
-                responsibility.minimumMembers
-                || responsibility.maximumMembers
-            ) {
+            if (responsibility.minimumMembers || responsibility.maximumMembers) {
                 return true;
             }
         }
@@ -429,12 +442,9 @@ export class PatchPlatformEndpoint extends Endpoint<
             const id = oldResponsibility.id;
 
             // if responsibility is removed
-            if (!newResponsibilities.some(x => x.id === id)) {
+            if (!newResponsibilities.some((x) => x.id === id)) {
                 // if responsibility had restrictions
-                if (
-                    oldResponsibility.minimumMembers
-                    || oldResponsibility.maximumMembers
-                ) {
+                if (oldResponsibility.minimumMembers || oldResponsibility.maximumMembers) {
                     return true;
                 }
             }

@@ -22,7 +22,11 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/document-templates/@id/xml', { id: String });
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/organization/document-templates/@id/xml',
+            { id: String },
+        );
 
         if (params) {
             return [true, params as Params];
@@ -34,19 +38,23 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canManageDocuments(organization.id)) {
+        if (!(await Context.auth.canManageDocuments(organization.id))) {
             throw Context.auth.error();
         }
 
         const template = await DocumentTemplate.getByID(request.params.id);
-        if (!template || !await Context.auth.canAccessDocumentTemplate(template)) {
+        if (!template || !(await Context.auth.canAccessDocumentTemplate(template))) {
             throw Context.auth.notFoundOrNoAccess($t('%EK'));
         }
 
-        if (template.privateSettings.templateDefinition.type === 'fiscal' && !new FiscalDocumentYearHelper().isXmlExportSupported(template.year)) {
+        if (
+            template.privateSettings.templateDefinition.type === 'fiscal' &&
+            !new FiscalDocumentYearHelper().isXmlExportSupported(template.year)
+        ) {
             throw new SimpleError({
                 code: 'xml_export_not_supported',
-                message: 'Fiscal documents from income year 2026 onwards can no longer be exported as XML',
+                message:
+                    'Fiscal documents from income year 2026 onwards can no longer be exported as XML',
                 human: $t('%ZzJ'),
             });
         }
@@ -56,7 +64,8 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
         if (!xml) {
             throw new SimpleError({
                 code: 'failed_generating',
-                message: 'Er ging iets mis bij het aanmaken van het document. Probeer later opieuw en neem contact met ons op als het probleem blijft herhalen.',
+                message:
+                    'Er ging iets mis bij het aanmaken van het document. Probeer later opieuw en neem contact met ons op als het probleem blijft herhalen.',
             });
         }
 

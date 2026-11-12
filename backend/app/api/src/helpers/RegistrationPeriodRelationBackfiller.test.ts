@@ -1,6 +1,21 @@
 import type { RegistrationPeriod } from '@stamhoofd/models';
-import { BalanceItem, BalanceItemFactory, GroupFactory, MemberFactory, MemberPlatformMembership, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
+import {
+    BalanceItem,
+    BalanceItemFactory,
+    GroupFactory,
+    MemberFactory,
+    MemberPlatformMembership,
+    OrganizationFactory,
+    OrganizationRegistrationPeriodFactory,
+    RegistrationFactory,
+    RegistrationPeriodFactory,
+} from '@stamhoofd/models';
+import {
+    BalanceItemRelation,
+    BalanceItemRelationType,
+    BalanceItemType,
+    TranslatedString,
+} from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { backfillRegistrationPeriodRelations } from './RegistrationPeriodRelationBackfiller.js';
@@ -45,8 +60,12 @@ describe('helper.RegistrationPeriodRelationBackfiller', () => {
         await backfillRegistrationPeriodRelations();
 
         const updated = await BalanceItem.getByID(balanceItem.id);
-        expect(updated?.relations.get(BalanceItemRelationType.RegistrationPeriod)).toMatchObject({ id: period.id });
-        expect(updated?.relations.get(BalanceItemRelationType.RegistrationPeriod)?.name.toString()).toBe('Werkjaar 2024-2025');
+        expect(updated?.relations.get(BalanceItemRelationType.RegistrationPeriod)).toMatchObject({
+            id: period.id,
+        });
+        expect(
+            updated?.relations.get(BalanceItemRelationType.RegistrationPeriod)?.name.toString(),
+        ).toBe('Werkjaar 2024-2025');
     });
 
     it('fills the registration period relation for platform membership balance items', async () => {
@@ -74,8 +93,12 @@ describe('helper.RegistrationPeriodRelationBackfiller', () => {
         await backfillRegistrationPeriodRelations();
 
         const updated = await BalanceItem.getByID(balanceItem.id);
-        expect(updated?.relations.get(BalanceItemRelationType.RegistrationPeriod)).toMatchObject({ id: period.id });
-        expect(updated?.relations.get(BalanceItemRelationType.RegistrationPeriod)?.name.toString()).toBe('Werkjaar 2024-2025');
+        expect(updated?.relations.get(BalanceItemRelationType.RegistrationPeriod)).toMatchObject({
+            id: period.id,
+        });
+        expect(
+            updated?.relations.get(BalanceItemRelationType.RegistrationPeriod)?.name.toString(),
+        ).toBe('Werkjaar 2024-2025');
     });
 
     it('does not overwrite an existing registration period relation', async () => {
@@ -89,7 +112,10 @@ describe('helper.RegistrationPeriodRelationBackfiller', () => {
         const existingRelations = new Map([
             [
                 BalanceItemRelationType.RegistrationPeriod,
-                BalanceItemRelation.create({ id: period.id, name: new TranslatedString('Custom period name') }),
+                BalanceItemRelation.create({
+                    id: period.id,
+                    name: new TranslatedString('Custom period name'),
+                }),
             ],
         ]);
 
@@ -106,6 +132,8 @@ describe('helper.RegistrationPeriodRelationBackfiller', () => {
         await backfillRegistrationPeriodRelations();
 
         const updated = await BalanceItem.getByID(balanceItem.id);
-        expect(updated?.relations.get(BalanceItemRelationType.RegistrationPeriod)?.name.toString()).toBe('Custom period name');
+        expect(
+            updated?.relations.get(BalanceItemRelationType.RegistrationPeriod)?.name.toString(),
+        ).toBe('Custom period name');
     });
 });

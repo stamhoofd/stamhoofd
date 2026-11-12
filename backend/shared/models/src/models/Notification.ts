@@ -13,7 +13,9 @@ export class Notification extends QueryableModel {
     static table = 'notifications';
 
     @column({
-        primary: true, type: 'string', beforeSave(value) {
+        primary: true,
+        type: 'string',
+        beforeSave(value) {
             // uuidv7 keeps ids sortable by creation time
             return value ?? uuidv7();
         },
@@ -51,7 +53,8 @@ export class Notification extends QueryableModel {
     groupResources: NamedObject[] = [];
 
     @column({
-        type: 'datetime', beforeSave(old?: any) {
+        type: 'datetime',
+        beforeSave(old?: any) {
             if (old !== undefined) {
                 return old;
             }
@@ -63,7 +66,8 @@ export class Notification extends QueryableModel {
     createdAt: Date;
 
     @column({
-        type: 'datetime', beforeSave() {
+        type: 'datetime',
+        beforeSave() {
             const date = new Date();
             date.setMilliseconds(0);
             return date;

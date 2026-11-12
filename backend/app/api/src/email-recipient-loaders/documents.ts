@@ -9,7 +9,9 @@ async function fetch(query: LimitedFilteredRequest) {
     const result = await GetDocumentsEndpoint.buildData(query);
 
     const recipients: EmailRecipient[] = [];
-    const memberIds = new Set(result.results.map(doc => doc.memberId).filter(id => id !== null)); // silently skip null memberIds
+    const memberIds = new Set(
+        result.results.map((doc) => doc.memberId).filter((id) => id !== null),
+    ); // silently skip null memberIds
 
     const members = await Member.getByIdsWithUsers(...memberIds);
     for (const member of members) {
@@ -51,6 +53,6 @@ async function count(request: LimitedFilteredRequest) {
     const query = await GetDocumentsEndpoint.buildQuery(request);
     const uniqueMemberIds = await query.count(SQL.distinct(SQL.column('memberId')));
     return uniqueMemberIds;
-};
+}
 
 Email.recipientLoaders.set(EmailRecipientFilterType.Documents, { fetch, count });

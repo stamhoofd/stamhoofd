@@ -14,7 +14,7 @@ export class EventPeriodHelper {
     }
 
     static isInAnyPeriod(event: EventDataForPeriod, periods: RegistrationPeriodBase[]): boolean {
-        return periods.some(period => this.isInPeriod(event, period));
+        return periods.some((period) => this.isInPeriod(event, period));
     }
 
     /**

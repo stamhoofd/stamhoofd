@@ -8,24 +8,33 @@ import { simpleParser } from 'mailparser';
 import { OrganizationAdminService } from '../services/OrganizationAdminService.js';
 
 export class ForwardHandler {
-    static async handle(content: any, receipt: {
-        recipients: string[];
-        spamVerdict: { status: 'PASS' | string };
-        virusVerdict: { status: 'PASS' | string };
-        spfVerdict: { status: 'PASS' | string };
-        dkimVerdict: { status: 'PASS' | string };
-        dmarcVerdict: { status: 'PASS' | string };
-    },
+    static async handle(
+        content: any,
+        receipt: {
+            recipients: string[];
+            spamVerdict: { status: 'PASS' | string };
+            virusVerdict: { status: 'PASS' | string };
+            spfVerdict: { status: 'PASS' | string };
+            dkimVerdict: { status: 'PASS' | string };
+            dmarcVerdict: { status: 'PASS' | string };
+        },
     ) {
         const recipients = receipt.recipients;
         const email: string | undefined = recipients[0];
-        const organization: Organization | undefined = email ? await Organization.getByEmail(email) : undefined;
+        const organization: Organization | undefined = email
+            ? await Organization.getByEmail(email)
+            : undefined;
 
         const parsed = await simpleParser(content);
         const from = parsed.from?.value[0]?.address;
 
         if (from && from.endsWith('amazonses.com') && organization) {
-            console.log('Bounce e-mails from AWS SES for organizations are not forwarded. Received from ' + from + ', to ' + email);
+            console.log(
+                'Bounce e-mails from AWS SES for organizations are not forwarded. Received from ' +
+                    from +
+                    ', to ' +
+                    email,
+            );
             return;
         }
 
@@ -37,7 +46,12 @@ export class ForwardHandler {
                 const model = await EmailAddress.getByID(id);
 
                 if (model) {
-                    console.log('[Unsubscribe] Received an unsubscribe request for ' + model.email + ' from ' + from);
+                    console.log(
+                        '[Unsubscribe] Received an unsubscribe request for ' +
+                            model.email +
+                            ' from ' +
+                            from,
+                    );
                     if (model.unsubscribedAll) {
                         // Ignore
                         return;
@@ -45,22 +59,42 @@ export class ForwardHandler {
                     model.unsubscribedAll = true;
                     await model.save();
                 } else {
-                    console.error('[Unsubscribe] Received an unsubscribe request for unknown ID ' + id + ' from ' + from);
+                    console.error(
+                        '[Unsubscribe] Received an unsubscribe request for unknown ID ' +
+                            id +
+                            ' from ' +
+                            from,
+                    );
 
                     // Forward
                     return {
                         from: Email.getWebmasterFromEmail(),
                         to: [Email.getWebmasterToEmail()],
                         subject: 'E-mail unsubscribe mislukt',
-                        text: 'Beste,\n\nEr werd een unsubscribe gemeld op ' + email + ' die niet kon worden verwerkt. Gelieve dit na te kijken.\n\nStamhoofd',
+                        text:
+                            'Beste,\n\nEr werd een unsubscribe gemeld op ' +
+                            email +
+                            ' die niet kon worden verwerkt. Gelieve dit na te kijken.\n\nStamhoofd',
                     };
                 }
                 return;
             }
         }
 
-        if (receipt.spamVerdict.status !== 'PASS' || receipt.virusVerdict.status !== 'PASS' || !(receipt.spfVerdict.status == 'PASS' || receipt.dkimVerdict.status == 'PASS')) {
-            console.error('Received spam or virus e-mail. Ignoring', 'to', recipients, 'from', email, 'subject', parsed.subject);
+        if (
+            receipt.spamVerdict.status !== 'PASS' ||
+            receipt.virusVerdict.status !== 'PASS' ||
+            !(receipt.spfVerdict.status == 'PASS' || receipt.dkimVerdict.status == 'PASS')
+        ) {
+            console.error(
+                'Received spam or virus e-mail. Ignoring',
+                'to',
+                recipients,
+                'from',
+                email,
+                'subject',
+                parsed.subject,
+            );
             return;
         }
 
@@ -68,7 +102,8 @@ export class ForwardHandler {
         let defaultEmail: EmailInterfaceRecipient[] = [Email.getWebmasterToEmail()];
         let organizationEmails: EmailInterfaceRecipient[] = [];
         const platform = await Platform.getShared();
-        const extraDescription = $t('%Fq') + ' ' + email + $t('%Fr') + ' ' + platform.config.name + ' ' + $t('%Fs');
+        const extraDescription =
+            $t('%Fq') + ' ' + email + $t('%Fr') + ' ' + platform.config.name + ' ' + $t('%Fs');
 
         function doBounce() {
             if (!from) {
@@ -84,12 +119,15 @@ export class ForwardHandler {
             return {
                 from: email
                     ? {
-                            email,
-                        }
+                          email,
+                      }
                     : Email.getWebmasterToEmail(),
                 to: [{ email: from }],
                 subject: 'Ongeldig e-mailadres',
-                text: 'Beste,\n\nDe vereniging die je probeert te bereiken via ' + email + ' is helaas niet bereikbaar via dit e-mailadres. Dit e-mailadres wordt enkel gebruikt voor het versturen van automatische e-mails in naam van een vereniging. Probeer de vereniging te contacteren via een ander e-mailadres.\n\nBedankt.',
+                text:
+                    'Beste,\n\nDe vereniging die je probeert te bereiken via ' +
+                    email +
+                    ' is helaas niet bereikbaar via dit e-mailadres. Dit e-mailadres wordt enkel gebruikt voor het versturen van automatische e-mails in naam van een vereniging. Probeer de vereniging te contacteren via een ander e-mailadres.\n\nBedankt.',
             };
         }
 
@@ -119,23 +157,32 @@ export class ForwardHandler {
 
             if (body !== -1) {
                 const endTag = parsed.html.indexOf('>', body);
-                html = parsed.html.substring(0, endTag + 1) + '<p><i>' + Formatter.escapeHtml(extraDescription) + '<br><br></i></p>' + parsed.html.substring(endTag + 1);
+                html =
+                    parsed.html.substring(0, endTag + 1) +
+                    '<p><i>' +
+                    Formatter.escapeHtml(extraDescription) +
+                    '<br><br></i></p>' +
+                    parsed.html.substring(endTag + 1);
             } else {
-                html = '<p><i>' + Formatter.escapeHtml(extraDescription) + '<br><br></i></p>' + parsed.html;
+                html =
+                    '<p><i>' +
+                    Formatter.escapeHtml(extraDescription) +
+                    '<br><br></i></p>' +
+                    parsed.html;
             }
         }
 
         const options: EmailInterface = {
             from: email
                 ? {
-                        email,
-                    }
+                      email,
+                  }
                 : Email.getWebmasterToEmail(),
             to: defaultEmail,
             replyTo: parsed.from?.text
                 ? {
-                        email: parsed.from?.text,
-                    }
+                      email: parsed.from?.text,
+                  }
                 : undefined,
             subject: parsed.subject ?? 'Doorgestuurd bericht',
             text: parsed.text ? extraDescription + '\n\n' + parsed.text : undefined,
@@ -145,11 +192,13 @@ export class ForwardHandler {
                     // Already done inline in html
                     return [];
                 }
-                return [{
-                    filename: a.filename ?? '',
-                    content: a.content.toString('utf-8'),
-                    contentType: a.contentType,
-                }];
+                return [
+                    {
+                        filename: a.filename ?? '',
+                        content: a.content.toString('utf-8'),
+                        contentType: a.contentType,
+                    },
+                ];
             }),
         };
 

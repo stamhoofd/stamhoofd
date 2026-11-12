@@ -2,7 +2,14 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import type { CountFilteredRequest, EmailPreview, StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { assertSort, EmailStatus, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse } from '@stamhoofd/structures';
+import {
+    assertSort,
+    EmailStatus,
+    getSortFilter,
+    LimitedFilteredRequest,
+    mergeFilters,
+    PaginatedResponse,
+} from '@stamhoofd/structures';
 
 import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
@@ -49,14 +56,19 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
 
         const canReadAllEmails = await Context.auth.canReadAllEmails(organization ?? null);
 
-        if (organization || Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Full) !== 'all') {
+        if (
+            organization ||
+            Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Full) !== 'all'
+        ) {
             scopeFilter = {
                 organizationId: organization?.id ?? null,
             };
         }
 
         if (!canReadAllEmails) {
-            const senders = organization ? organization.privateMeta.emails : (await Platform.getShared()).privateConfig.emails;
+            const senders = organization
+                ? organization.privateMeta.emails
+                : (await Platform.getShared()).privateConfig.emails;
             const ids: string[] = [];
             for (const sender of senders) {
                 if (await Context.auth.canReadAllEmails(organization ?? null, sender.id)) {
@@ -64,9 +76,11 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
                 }
             }
 
-            const filters: StamhoofdFilter[] = [{
-                userId: user.id,
-            }];
+            const filters: StamhoofdFilter[] = [
+                {
+                    userId: user.id,
+                },
+            ];
 
             if (ids.length !== 0) {
                 filters.push({
@@ -79,26 +93,31 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
                 });
             }
 
-            scopeFilter = mergeFilters([scopeFilter, {
-                $or: filters,
-            }]);
+            scopeFilter = mergeFilters([
+                scopeFilter,
+                {
+                    $or: filters,
+                },
+            ]);
         } else {
-            scopeFilter = mergeFilters([scopeFilter, {
-                $or: [
-                    {
-                        status: {
-                            $neq: EmailStatus.Draft,
+            scopeFilter = mergeFilters([
+                scopeFilter,
+                {
+                    $or: [
+                        {
+                            status: {
+                                $neq: EmailStatus.Draft,
+                            },
                         },
-                    },
-                    {
-                        userId: user.id,
-                    },
-                ],
-            }]);
+                        {
+                            userId: user.id,
+                        },
+                    ],
+                },
+            ]);
         }
 
-        const query = Email.select()
-            .where('deletedAt', null);
+        const query = Email.select().where('deletedAt', null);
 
         if (scopeFilter) {
             query.where(await compileToSQLFilter(scopeFilter, filterCompilers));
@@ -160,7 +179,11 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
         }
 
         return new PaginatedResponse<EmailPreview[], LimitedFilteredRequest>({
-            results: await Promise.all(emails.map(email => EmailPreviewService.getPreviewStructure(email, { allLanguages: true }))),
+            results: await Promise.all(
+                emails.map((email) =>
+                    EmailPreviewService.getPreviewStructure(email, { allLanguages: true }),
+                ),
+            ),
             next,
         });
     }
@@ -169,7 +192,7 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
         const organization = await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canReadEmails(organization)) {
+        if (!(await Context.auth.canReadEmails(organization))) {
             // This is a first fast check, we'll limit it later in the scope query
             throw Context.auth.error();
         }
@@ -192,8 +215,6 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
             });
         }
 
-        return new Response(
-            await GetAdminEmailsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetAdminEmailsEndpoint.buildData(request.query));
     }
 }

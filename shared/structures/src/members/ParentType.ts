@@ -34,6 +34,13 @@ export class ParentTypeHelper {
     }
 
     static getPublicTypes(): ParentType[] {
-        return [ParentType.Mother, ParentType.Father, ParentType.Stepmother, ParentType.Stepfather, ParentType.FosterParent, ParentType.Other];
+        return [
+            ParentType.Mother,
+            ParentType.Father,
+            ParentType.Stepmother,
+            ParentType.Stepfather,
+            ParentType.FosterParent,
+            ParentType.Other,
+        ];
     }
 }

@@ -1,4 +1,11 @@
-import { AutoEncoder, BooleanDecoder, DateDecoder, IntegerDecoder, StringDecoder, field } from '@common/encoding';
+import {
+    AutoEncoder,
+    BooleanDecoder,
+    DateDecoder,
+    IntegerDecoder,
+    StringDecoder,
+    field,
+} from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
@@ -35,12 +42,22 @@ export class MemberPlatformMembership extends AutoEncoder {
 
     @field({ decoder: IntegerDecoder })
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
-    @field({ decoder: IntegerDecoder, nullable: true, version: 421, downgrade: (newValue: number | null) => newValue ?? 0 })
+    @field({
+        decoder: IntegerDecoder,
+        nullable: true,
+        version: 421,
+        downgrade: (newValue: number | null) => newValue ?? 0,
+    })
     price: number | null = 0; // null is used to hide the price if user lacks permission
 
     @field({ decoder: IntegerDecoder })
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
-    @field({ decoder: IntegerDecoder, nullable: true, version: 421, downgrade: (newValue: number | null) => newValue ?? 0 })
+    @field({
+        decoder: IntegerDecoder,
+        nullable: true,
+        version: 421,
+        downgrade: (newValue: number | null) => newValue ?? 0,
+    })
     priceWithoutDiscount: number | null = 0; // null is used to hide the price if user lacks permission
 
     @field({ decoder: IntegerDecoder, version: 336 })
@@ -64,6 +81,9 @@ export class MemberPlatformMembership extends AutoEncoder {
     }
 
     get isTrial() {
-        return this.trialUntil !== null && (this.trialUntil > new Date() || this.endDate <= this.trialUntil);
+        return (
+            this.trialUntil !== null &&
+            (this.trialUntil > new Date() || this.endDate <= this.trialUntil)
+        );
     }
 }

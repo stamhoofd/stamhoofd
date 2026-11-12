@@ -6,7 +6,8 @@ export class MemberUser extends QueryableModel {
 
     // Columns
     @column({
-        primary: true, type: 'integer',
+        primary: true,
+        type: 'integer',
     })
     id!: number;
 

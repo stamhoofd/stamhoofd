@@ -44,7 +44,10 @@ const start = async () => {
     process.on('SIGINT', handler);
 
     // Create database if not exists
-    const query = 'CREATE DATABASE IF NOT EXISTS `' + STAMHOOFD.DB_DATABASE + '` DEFAULT CHARACTER SET = `utf8mb4` DEFAULT COLLATE = `utf8mb4_0900_ai_ci`';
+    const query =
+        'CREATE DATABASE IF NOT EXISTS `' +
+        STAMHOOFD.DB_DATABASE +
+        '` DEFAULT CHARACTER SET = `utf8mb4` DEFAULT COLLATE = `utf8mb4_0900_ai_ci`';
 
     // Create a non-focused datbase instance to run the query without selecting a database
     const globalDatabase = new DatabaseInstance({
@@ -55,10 +58,10 @@ const start = async () => {
         await globalDatabase.statement(query);
 
         // External migrations
-        if (!await Migration.runAll(path.dirname(modelsPath) + '/migrations')) {
+        if (!(await Migration.runAll(path.dirname(modelsPath) + '/migrations'))) {
             throw new Error('Migrations failed');
         }
-        if (!await Migration.runAll(path.dirname(emailPath) + '/../migrations')) {
+        if (!(await Migration.runAll(path.dirname(emailPath) + '/../migrations'))) {
             throw new Error('Email migrations failed');
         }
 
@@ -66,7 +69,7 @@ const start = async () => {
         await I18n.load();
         GlobalHelper.loadGlobalTranslateFunction();
 
-        if (!await Migration.runAll(import.meta.dirname + '/migrations')) {
+        if (!(await Migration.runAll(import.meta.dirname + '/migrations'))) {
             throw new Error('Internal migrations failed');
         }
 
@@ -86,9 +89,8 @@ const start = async () => {
 
 /** Manual and production migrations stay verbose; test callers can opt out of successful output. */
 export async function run({ verbose = true }: { verbose?: boolean } = {}) {
-    await withMigrationOutput(start, verbose)
-        .catch((error) => {
-            console.error('unhandledRejection', error);
-            process.exit(1);
-        });
+    await withMigrationOutput(start, verbose).catch((error) => {
+        console.error('unhandledRejection', error);
+        process.exit(1);
+    });
 }

@@ -4,9 +4,21 @@ import { Database } from '@node/database';
 import { Request } from '@node/endpoints';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
 import type { Token } from '@stamhoofd/models';
-import { OrganizationFactory, UserFactory, WebshopDiscountCode, WebshopFactory } from '@stamhoofd/models';
+import {
+    OrganizationFactory,
+    UserFactory,
+    WebshopDiscountCode,
+    WebshopFactory,
+} from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { CountFilteredRequest, DiscountCode, LimitedFilteredRequest, Permissions, PrivateDiscountCode, SortItemDirection } from '@stamhoofd/structures';
+import {
+    CountFilteredRequest,
+    DiscountCode,
+    LimitedFilteredRequest,
+    Permissions,
+    PrivateDiscountCode,
+    SortItemDirection,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -19,7 +31,7 @@ import { PatchWebshopDiscountCodesEndpoint } from './PatchDiscountCodesEndpoint.
 /** Mutate the encoded PUT so the invalid value bypasses the client-side decoder. */
 function setEmailOnEncodedCode(encoded: unknown, code: string, email: string) {
     if (Array.isArray(encoded)) {
-        encoded.forEach(item => setEmailOnEncodedCode(item, code, email));
+        encoded.forEach((item) => setEmailOnEncodedCode(item, code, email));
         return;
     }
     if (encoded && typeof encoded === 'object') {
@@ -28,7 +40,7 @@ function setEmailOnEncodedCode(encoded: unknown, code: string, email: string) {
             record.email = email;
             return;
         }
-        Object.values(record).forEach(value => setEmailOnEncodedCode(value, code, email));
+        Object.values(record).forEach((value) => setEmailOnEncodedCode(value, code, email));
     }
 }
 
@@ -54,7 +66,10 @@ describe('Endpoint.WebshopDiscountCodes', () => {
             }),
         }).create();
         token = await SessionService.createSession(user);
-        webshop = await new WebshopFactory({ organizationId: organization.id, name: 'Discount codes test webshop' }).create();
+        webshop = await new WebshopFactory({
+            organizationId: organization.id,
+            name: 'Discount codes test webshop',
+        }).create();
     });
 
     async function createDiscountCode(data: {
@@ -81,36 +96,54 @@ describe('Endpoint.WebshopDiscountCodes', () => {
     async function createManyDiscountCodes(amount: number) {
         const batchSize = 50;
         for (let start = 0; start < amount; start += batchSize) {
-            await Promise.all(Array.from({ length: Math.min(batchSize, amount - start) }, (_, index) => createDiscountCode({
-                code: 'CAP-' + String(start + index).padStart(4, '0'),
-            })));
+            await Promise.all(
+                Array.from({ length: Math.min(batchSize, amount - start) }, (_, index) =>
+                    createDiscountCode({
+                        code: 'CAP-' + String(start + index).padStart(4, '0'),
+                    }),
+                ),
+            );
         }
     }
 
-    function get(query: LimitedFilteredRequest, options: { webshopId?: string; accessToken?: string } = {}) {
-        return testServer.test(getEndpoint, Request.get({
-            path: `/webshop/${options.webshopId ?? webshop.id}/discount-codes`,
-            host: organization.getApiHost(),
-            query,
-            headers: {
-                authorization: 'Bearer ' + (options.accessToken ?? token.accessToken),
-            },
-        }));
+    function get(
+        query: LimitedFilteredRequest,
+        options: { webshopId?: string; accessToken?: string } = {},
+    ) {
+        return testServer.test(
+            getEndpoint,
+            Request.get({
+                path: `/webshop/${options.webshopId ?? webshop.id}/discount-codes`,
+                host: organization.getApiHost(),
+                query,
+                headers: {
+                    authorization: 'Bearer ' + (options.accessToken ?? token.accessToken),
+                },
+            }),
+        );
     }
 
     function count(query: CountFilteredRequest, options: { accessToken?: string } = {}) {
-        return testServer.test(countEndpoint, Request.get({
-            path: `/webshop/${webshop.id}/discount-codes/count`,
-            host: organization.getApiHost(),
-            query,
-            headers: {
-                authorization: 'Bearer ' + (options.accessToken ?? token.accessToken),
-            },
-        }));
+        return testServer.test(
+            countEndpoint,
+            Request.get({
+                path: `/webshop/${webshop.id}/discount-codes/count`,
+                host: organization.getApiHost(),
+                query,
+                headers: {
+                    authorization: 'Bearer ' + (options.accessToken ?? token.accessToken),
+                },
+            }),
+        );
     }
 
     function patch(body: PatchableArrayAutoEncoder<PrivateDiscountCode>) {
-        const request = Request.buildJson('PATCH', `/webshop/${webshop.id}/discount-codes`, organization.getApiHost(), body);
+        const request = Request.buildJson(
+            'PATCH',
+            `/webshop/${webshop.id}/discount-codes`,
+            organization.getApiHost(),
+            body,
+        );
         request.headers.authorization = 'Bearer ' + token.accessToken;
         return testServer.test(patchEndpoint, request);
     }
@@ -141,38 +174,54 @@ describe('Endpoint.WebshopDiscountCodes', () => {
             usageCount: 3,
         });
 
-        const firstPage = await get(new LimitedFilteredRequest({
-            limit: 2,
-            sort: [{ key: 'code', order: SortItemDirection.ASC }],
-        }));
-        expect(firstPage.body.results.map((code: DiscountCode) => code.code)).toEqual(['ALPHA', 'BETA']);
+        const firstPage = await get(
+            new LimitedFilteredRequest({
+                limit: 2,
+                sort: [{ key: 'code', order: SortItemDirection.ASC }],
+            }),
+        );
+        expect(firstPage.body.results.map((code: DiscountCode) => code.code)).toEqual([
+            'ALPHA',
+            'BETA',
+        ]);
         expect(firstPage.body.next).toBeDefined();
 
         const secondPage = await get(firstPage.body.next!);
         expect(secondPage.body.results.map((code: DiscountCode) => code.code)).toEqual(['GAMMA']);
 
-        const emailFilterResponse = await get(new LimitedFilteredRequest({
-            filter: {
-                email: {
-                    $in: ['alpha@example.com', 'beta@example.com'],
+        const emailFilterResponse = await get(
+            new LimitedFilteredRequest({
+                filter: {
+                    email: {
+                        $in: ['alpha@example.com', 'beta@example.com'],
+                    },
                 },
-            },
-            limit: 10,
-            sort: [{ key: 'code', order: SortItemDirection.ASC }],
-        }));
-        expect(emailFilterResponse.body.results.map((code: DiscountCode) => code.id)).toEqual([alpha.id, beta.id]);
+                limit: 10,
+                sort: [{ key: 'code', order: SortItemDirection.ASC }],
+            }),
+        );
+        expect(emailFilterResponse.body.results.map((code: DiscountCode) => code.id)).toEqual([
+            alpha.id,
+            beta.id,
+        ]);
 
-        const searchResponse = await get(new LimitedFilteredRequest({
-            search: 'sponsor',
-            limit: 10,
-        }));
-        expect(searchResponse.body.results.map((code: DiscountCode) => code.id)).toEqual([alpha.id]);
+        const searchResponse = await get(
+            new LimitedFilteredRequest({
+                search: 'sponsor',
+                limit: 10,
+            }),
+        );
+        expect(searchResponse.body.results.map((code: DiscountCode) => code.id)).toEqual([
+            alpha.id,
+        ]);
 
-        const countResponse = await count(new CountFilteredRequest({
-            filter: {
-                usageCount: 3,
-            },
-        }));
+        const countResponse = await count(
+            new CountFilteredRequest({
+                filter: {
+                    usageCount: 3,
+                },
+            }),
+        );
         expect(countResponse.body.count).toBe(2);
     });
 
@@ -204,22 +253,24 @@ describe('Endpoint.WebshopDiscountCodes', () => {
 
     test('does not return codes of a webshop of another organization', async () => {
         const otherOrganization = await new OrganizationFactory({}).create();
-        const otherWebshop = await new WebshopFactory({ organizationId: otherOrganization.id }).create();
+        const otherWebshop = await new WebshopFactory({
+            organizationId: otherOrganization.id,
+        }).create();
         await createDiscountCode({
             organizationId: otherOrganization.id,
             webshopId: otherWebshop.id,
             code: 'OTHER',
         });
 
-        await expect(get(new LimitedFilteredRequest({ limit: 10 }), { webshopId: otherWebshop.id }))
-            .rejects
-            .toThrow(STExpect.errorWithCode('not_found'));
+        await expect(
+            get(new LimitedFilteredRequest({ limit: 10 }), { webshopId: otherWebshop.id }),
+        ).rejects.toThrow(STExpect.errorWithCode('not_found'));
     });
 
     test('rejects a page size above the limit', async () => {
-        await expect(get(new LimitedFilteredRequest({ limit: 101 })))
-            .rejects
-            .toThrow(STExpect.errorWithCode('invalid_field'));
+        await expect(get(new LimitedFilteredRequest({ limit: 101 }))).rejects.toThrow(
+            STExpect.errorWithCode('invalid_field'),
+        );
     });
 
     test('rejects an empty code', async () => {
@@ -233,7 +284,7 @@ describe('Endpoint.WebshopDiscountCodes', () => {
         await expect(patch(patchBody)).rejects.toThrow(STExpect.errorWithCode('invalid_field'));
 
         const codes = await WebshopDiscountCode.where({ webshopId: webshop.id });
-        expect(codes.map(code => code.code)).toEqual(['EXISTING']);
+        expect(codes.map((code) => code.code)).toEqual(['EXISTING']);
     });
 
     test('refuses a batch with a duplicate code before writing anything', async () => {
@@ -245,13 +296,14 @@ describe('Endpoint.WebshopDiscountCodes', () => {
         withinBatch.addPut(PrivateDiscountCode.create({ code: 'new-1' }));
         await expect(patch(withinBatch)).rejects.toThrow(STExpect.errorWithCode('used_code'));
 
-        const againstExisting: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
+        const againstExisting: PatchableArrayAutoEncoder<PrivateDiscountCode> =
+            new PatchableArray();
         againstExisting.addPut(PrivateDiscountCode.create({ code: 'NEW-3' }));
         againstExisting.addPut(PrivateDiscountCode.create({ code: 'EXISTING' }));
         await expect(patch(againstExisting)).rejects.toThrow(STExpect.errorWithCode('used_code'));
 
         const codes = await WebshopDiscountCode.where({ webshopId: webshop.id });
-        expect(codes.map(code => code.code)).toEqual(['EXISTING']);
+        expect(codes.map((code) => code.code)).toEqual(['EXISTING']);
     });
 
     test('requires full access to the webshop', async () => {
@@ -265,21 +317,25 @@ describe('Endpoint.WebshopDiscountCodes', () => {
         }).create();
         const readOnlyToken = await SessionService.createSession(readOnlyUser);
 
-        await expect(get(new LimitedFilteredRequest({ limit: 10 }), { accessToken: readOnlyToken.accessToken }))
-            .rejects
-            .toThrow(STExpect.errorWithCode('not_found'));
+        await expect(
+            get(new LimitedFilteredRequest({ limit: 10 }), {
+                accessToken: readOnlyToken.accessToken,
+            }),
+        ).rejects.toThrow(STExpect.errorWithCode('not_found'));
 
-        await expect(count(new CountFilteredRequest({}), { accessToken: readOnlyToken.accessToken }))
-            .rejects
-            .toThrow(STExpect.errorWithCode('not_found'));
+        await expect(
+            count(new CountFilteredRequest({}), { accessToken: readOnlyToken.accessToken }),
+        ).rejects.toThrow(STExpect.errorWithCode('not_found'));
     });
 
     test('stores the email of a discount code and rejects invalid email addresses', async () => {
         const putBody: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
-        putBody.addPut(PrivateDiscountCode.create({
-            code: 'WITH-EMAIL',
-            email: 'sponsor@example.com',
-        }));
+        putBody.addPut(
+            PrivateDiscountCode.create({
+                code: 'WITH-EMAIL',
+                email: 'sponsor@example.com',
+            }),
+        );
         const putResponse = await patch(putBody);
         expect(putResponse.body[0].email).toBe('sponsor@example.com');
 
@@ -287,25 +343,34 @@ describe('Endpoint.WebshopDiscountCodes', () => {
         expect(created?.email).toBe('sponsor@example.com');
 
         const clearBody: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
-        clearBody.addPatch(PrivateDiscountCode.patch({
-            id: putResponse.body[0].id,
-            email: null,
-        }));
+        clearBody.addPatch(
+            PrivateDiscountCode.patch({
+                id: putResponse.body[0].id,
+                email: null,
+            }),
+        );
         const clearResponse = await patch(clearBody);
         expect(clearResponse.body[0].email).toBeNull();
 
         const invalidBody: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
-        invalidBody.addPut(PrivateDiscountCode.create({
-            code: 'INVALID-EMAIL',
-        }));
+        invalidBody.addPut(
+            PrivateDiscountCode.create({
+                code: 'INVALID-EMAIL',
+            }),
+        );
         const encoded = invalidBody.encode({ version: 1000 });
         setEmailOnEncodedCode(encoded, 'INVALID-EMAIL', 'not-an-email');
-        const invalidRequest = Request.buildJson('PATCH', `/webshop/${webshop.id}/discount-codes`, organization.getApiHost(), encoded);
+        const invalidRequest = Request.buildJson(
+            'PATCH',
+            `/webshop/${webshop.id}/discount-codes`,
+            organization.getApiHost(),
+            encoded,
+        );
         invalidRequest.headers.authorization = 'Bearer ' + token.accessToken;
 
-        await expect(testServer.test(patchEndpoint, invalidRequest))
-            .rejects
-            .toThrow(STExpect.errorWithCode('invalid_field'));
+        await expect(testServer.test(patchEndpoint, invalidRequest)).rejects.toThrow(
+            STExpect.errorWithCode('invalid_field'),
+        );
     });
 
     test('rejects PUTs that would push a webshop past the discount code cap, while allowing patches', async () => {
@@ -313,23 +378,27 @@ describe('Endpoint.WebshopDiscountCodes', () => {
         const existing = (await WebshopDiscountCode.where({ webshopId: webshop.id }))[0];
 
         const patchOnlyBody: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
-        patchOnlyBody.addPatch(PrivateDiscountCode.patch({
-            id: existing.id,
-            description: 'updated without increasing the count',
-        }));
+        patchOnlyBody.addPatch(
+            PrivateDiscountCode.patch({
+                id: existing.id,
+                description: 'updated without increasing the count',
+            }),
+        );
 
         const patchOnlyResponse = await patch(patchOnlyBody);
         expect(patchOnlyResponse.status).toBe(200);
         expect(patchOnlyResponse.body[0].description).toBe('updated without increasing the count');
 
         const putBody: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
-        putBody.addPut(PrivateDiscountCode.create({
-            id: uuidv4(),
-            code: 'ONE-TOO-MANY',
-        }));
+        putBody.addPut(
+            PrivateDiscountCode.create({
+                id: uuidv4(),
+                code: 'ONE-TOO-MANY',
+            }),
+        );
 
-        await expect(patch(putBody))
-            .rejects
-            .toThrow(STExpect.errorWithCode('too_many_discount_codes'));
+        await expect(patch(putBody)).rejects.toThrow(
+            STExpect.errorWithCode('too_many_discount_codes'),
+        );
     });
 });

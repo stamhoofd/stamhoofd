@@ -5,9 +5,20 @@ import { SimpleError } from '@common/errors';
 import { Group, Platform, RegistrationInvitation } from '@stamhoofd/models';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
-import type { CountFilteredRequest, RegistrationInvitation as RegistrationInvitationStruct, StamhoofdFilter, StamhoofdKeyFilter } from '@stamhoofd/structures';
+import type {
+    CountFilteredRequest,
+    RegistrationInvitation as RegistrationInvitationStruct,
+    StamhoofdFilter,
+    StamhoofdKeyFilter,
+} from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponse, assertSort } from '@stamhoofd/structures';
+import {
+    GroupStatus,
+    GroupType,
+    LimitedFilteredRequest,
+    PaginatedResponse,
+    assertSort,
+} from '@stamhoofd/structures';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
@@ -25,7 +36,12 @@ type ResponseBody = PaginatedResponse<RegistrationInvitationStruct[], LimitedFil
 const sorters: SQLSortDefinitions<RegistrationInvitation> = registrationInvitationSorters;
 const filterCompilers: SQLFilterDefinitions = registrationInvitationFilterCompilers;
 
-export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+export class GetRegistrationInvitationsEndpoint extends Endpoint<
+    Params,
+    Query,
+    Body,
+    ResponseBody
+> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
 
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -41,12 +57,18 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
         return [false];
     }
 
-    static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest, permissionLevel: PermissionLevel = PermissionLevel.Read) {
+    static async buildQuery(
+        q: CountFilteredRequest | LimitedFilteredRequest,
+        permissionLevel: PermissionLevel = PermissionLevel.Read,
+    ) {
         const organization = Context.organization;
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         // First do a quick validation of the groups, so that prevents the backend from having to add a scope filter
-        if (!Context.auth.canAccessAllPlatformMembers(permissionLevel) && !await validateGroupFilter({ filter: q.filter, permissionLevel, key: null })) {
+        if (
+            !Context.auth.canAccessAllPlatformMembers(permissionLevel) &&
+            !(await validateGroupFilter({ filter: q.filter, permissionLevel, key: null }))
+        ) {
             if (!organization) {
                 const tags = Context.auth.getPlatformAccessibleOrganizationTags(permissionLevel);
                 if (tags !== 'all' && tags.length === 0) {
@@ -69,7 +91,6 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
                                     $in: tags,
                                 },
                             },
-
                         },
                     };
                 }
@@ -79,21 +100,34 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
                 // Add organization scope filter.
                 // Grants that cover a whole period or the whole organization never reach archived
                 // groups: canAccessGroup only allows those with full access.
-                const canAccessArchivedGroups = await Context.auth.canAccessArchivedGroups(organization.id);
-                const groupStateFilter: StamhoofdKeyFilter = canAccessArchivedGroups ? {} : { status: { $neq: GroupStatus.Archived } };
+                const canAccessArchivedGroups = await Context.auth.canAccessArchivedGroups(
+                    organization.id,
+                );
+                const groupStateFilter: StamhoofdKeyFilter = canAccessArchivedGroups
+                    ? {}
+                    : { status: { $neq: GroupStatus.Archived } };
 
-                if (await Context.auth.canAccessAllMembersInEveryPeriod(organization.id, permissionLevel)) {
+                if (
+                    await Context.auth.canAccessAllMembersInEveryPeriod(
+                        organization.id,
+                        permissionLevel,
+                    )
+                ) {
                     scopeFilter = canAccessArchivedGroups
                         ? { organizationId: organization.id }
                         : {
-                                organizationId: organization.id,
-                                group: {
-                                    $elemMatch: groupStateFilter,
-                                },
-                            };
+                              organizationId: organization.id,
+                              group: {
+                                  $elemMatch: groupStateFilter,
+                              },
+                          };
                 } else {
                     const filters: StamhoofdFilter[] = [];
-                    const canAccessCurrentPeriod = await Context.auth.canAccessAllMembersInCurrentPeriod(organization.id, permissionLevel);
+                    const canAccessCurrentPeriod =
+                        await Context.auth.canAccessAllMembersInCurrentPeriod(
+                            organization.id,
+                            permissionLevel,
+                        );
 
                     if (canAccessCurrentPeriod) {
                         filters.push({
@@ -110,7 +144,10 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
                     // Check which groups we have access to and filter on those. These are added
                     // next to the current period filter, not instead of it: a role can hold a
                     // grant on a group of a period the organization already left.
-                    const groups = await Group.getAll(organization.id, null, true, [GroupType.Membership, GroupType.EventRegistration]);
+                    const groups = await Group.getAll(organization.id, null, true, [
+                        GroupType.Membership,
+                        GroupType.EventRegistration,
+                    ]);
                     Context.auth.cacheGroups(groups);
                     const groupIds: string[] = [];
 
@@ -134,7 +171,8 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
 
                     if (filters.length === 0) {
                         throw Context.auth.error({
-                            message: 'You must filter on a group of the organization you are trying to access',
+                            message:
+                                'You must filter on a group of the organization you are trying to access',
                             human: $t('%15g'),
                         });
                     }
@@ -179,8 +217,14 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
         return query;
     }
 
-    static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
-        const query = await GetRegistrationInvitationsEndpoint.buildQuery(requestQuery, permissionLevel);
+    static async buildData(
+        requestQuery: LimitedFilteredRequest,
+        permissionLevel = PermissionLevel.Read,
+    ) {
+        const query = await GetRegistrationInvitationsEndpoint.buildQuery(
+            requestQuery,
+            permissionLevel,
+        );
         let data: RegistrationInvitation[];
 
         try {
@@ -230,8 +274,6 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
             });
         }
 
-        return new Response(
-            await GetRegistrationInvitationsEndpoint.buildData(request.query),
-        );
+        return new Response(await GetRegistrationInvitationsEndpoint.buildData(request.query));
     }
 }

@@ -1,82 +1,118 @@
 import { SimpleError } from '@common/errors';
 import { MemberPlatformMembership } from '@stamhoofd/models';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
-import { baseSQLFilterCompilers, createColumnFilter, createJoinedRelationFilter, SQL, SQLValueType } from '@stamhoofd/sql';
+import {
+    baseSQLFilterCompilers,
+    createColumnFilter,
+    createJoinedRelationFilter,
+    SQL,
+    SQLValueType,
+} from '@stamhoofd/sql';
 import { Context } from '../helpers/Context.js';
 import { memberFilterCompilers } from './members.js';
 import { organizationFilterCompilers } from './organizations.js';
 
-const organizationJoin = SQL.join(SQL.table('organizations')).where(SQL.column('organizations', 'id'), SQL.column(MemberPlatformMembership.table, 'organizationId'));
-const memberJoin = SQL.join(SQL.table('members')).where(SQL.column('members', 'id'), SQL.column(MemberPlatformMembership.table, 'memberId'));
+const organizationJoin = SQL.join(SQL.table('organizations')).where(
+    SQL.column('organizations', 'id'),
+    SQL.column(MemberPlatformMembership.table, 'organizationId'),
+);
+const memberJoin = SQL.join(SQL.table('members')).where(
+    SQL.column('members', 'id'),
+    SQL.column(MemberPlatformMembership.table, 'memberId'),
+);
 
 export const platformMembershipFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    ['id', createColumnFilter({
-        expression: SQL.column(MemberPlatformMembership.table, 'id'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['membershipTypeId', createColumnFilter({
-        expression: SQL.column(MemberPlatformMembership.table, 'membershipTypeId'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['organizationId', createColumnFilter({
-        expression: SQL.column(MemberPlatformMembership.table, 'organizationId'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['periodId', createColumnFilter({
-        expression: SQL.column(MemberPlatformMembership.table, 'periodId'),
-        type: SQLValueType.String,
-        nullable: false,
-    })],
-    ['startDate', createColumnFilter({
-        expression: SQL.column(MemberPlatformMembership.table, 'startDate'),
-        type: SQLValueType.Datetime,
-        nullable: false,
-    })],
-    ['endDate', createColumnFilter({
-        expression: SQL.column(MemberPlatformMembership.table, 'endDate'),
-        type: SQLValueType.Datetime,
-        nullable: false,
-    })],
-    ['trialUntil', createColumnFilter({
-        expression: SQL.column(MemberPlatformMembership.table, 'trialUntil'),
-        type: SQLValueType.Datetime,
-        nullable: true,
-    })],
-    ['createdAt', createColumnFilter({
-        expression: SQL.column(MemberPlatformMembership.table, 'createdAt'),
-        type: SQLValueType.Datetime,
-        nullable: true,
-    })],
-    ['freeAmount', createColumnFilter({
-        expression: SQL.column(MemberPlatformMembership.table, 'freeAmount'),
-        type: SQLValueType.Number,
-        nullable: false,
-    })],
-    ['price', createColumnFilter({
-        expression: SQL.column(MemberPlatformMembership.table, 'price'),
-        type: SQLValueType.Number,
-        nullable: false,
-        checkPermission: async () => {
-            if (!await Context.auth.hasFinancialScopeAccess()) {
-                throw new SimpleError({
-                    code: 'permission_denied',
-                    message: 'No permissions to filter on the price of a platform membership',
-                    human: $t('%G2'),
-                    statusCode: 400,
-                });
-            }
-        },
-    })],
-    ['organization', createJoinedRelationFilter(
-        organizationJoin,
-        organizationFilterCompilers,
-    )],
-    ['member', createJoinedRelationFilter(
-        memberJoin,
-        memberFilterCompilers(),
-    )],
+    [
+        'id',
+        createColumnFilter({
+            expression: SQL.column(MemberPlatformMembership.table, 'id'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'membershipTypeId',
+        createColumnFilter({
+            expression: SQL.column(MemberPlatformMembership.table, 'membershipTypeId'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'organizationId',
+        createColumnFilter({
+            expression: SQL.column(MemberPlatformMembership.table, 'organizationId'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'periodId',
+        createColumnFilter({
+            expression: SQL.column(MemberPlatformMembership.table, 'periodId'),
+            type: SQLValueType.String,
+            nullable: false,
+        }),
+    ],
+    [
+        'startDate',
+        createColumnFilter({
+            expression: SQL.column(MemberPlatformMembership.table, 'startDate'),
+            type: SQLValueType.Datetime,
+            nullable: false,
+        }),
+    ],
+    [
+        'endDate',
+        createColumnFilter({
+            expression: SQL.column(MemberPlatformMembership.table, 'endDate'),
+            type: SQLValueType.Datetime,
+            nullable: false,
+        }),
+    ],
+    [
+        'trialUntil',
+        createColumnFilter({
+            expression: SQL.column(MemberPlatformMembership.table, 'trialUntil'),
+            type: SQLValueType.Datetime,
+            nullable: true,
+        }),
+    ],
+    [
+        'createdAt',
+        createColumnFilter({
+            expression: SQL.column(MemberPlatformMembership.table, 'createdAt'),
+            type: SQLValueType.Datetime,
+            nullable: true,
+        }),
+    ],
+    [
+        'freeAmount',
+        createColumnFilter({
+            expression: SQL.column(MemberPlatformMembership.table, 'freeAmount'),
+            type: SQLValueType.Number,
+            nullable: false,
+        }),
+    ],
+    [
+        'price',
+        createColumnFilter({
+            expression: SQL.column(MemberPlatformMembership.table, 'price'),
+            type: SQLValueType.Number,
+            nullable: false,
+            checkPermission: async () => {
+                if (!(await Context.auth.hasFinancialScopeAccess())) {
+                    throw new SimpleError({
+                        code: 'permission_denied',
+                        message: 'No permissions to filter on the price of a platform membership',
+                        human: $t('%G2'),
+                        statusCode: 400,
+                    });
+                }
+            },
+        }),
+    ],
+    ['organization', createJoinedRelationFilter(organizationJoin, organizationFilterCompilers)],
+    ['member', createJoinedRelationFilter(memberJoin, memberFilterCompilers())],
 ]);

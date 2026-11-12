@@ -20,14 +20,24 @@ type ResponseBody = DocumentTemplatePrivate[];
  */
 
 export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
-    bodyDecoder = new PatchableArrayDecoder(DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>, DocumentTemplatePrivate.patchType() as Decoder<AutoEncoderPatchType<DocumentTemplatePrivate>>, StringDecoder);
+    bodyDecoder = new PatchableArrayDecoder(
+        DocumentTemplatePrivate as Decoder<DocumentTemplatePrivate>,
+        DocumentTemplatePrivate.patchType() as Decoder<
+            AutoEncoderPatchType<DocumentTemplatePrivate>
+        >,
+        StringDecoder,
+    );
 
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'PATCH') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/organization/document-templates', {});
+        const params = Endpoint.parseParameters(
+            request.url,
+            '/organization/document-templates',
+            {},
+        );
 
         if (params) {
             return [true, params as Params];
@@ -39,7 +49,7 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
         const organization = await Context.setOrganizationScope();
         await Context.authenticate();
 
-        if (!await Context.auth.canManageDocuments(organization.id, PermissionLevel.Write)) {
+        if (!(await Context.auth.canManageDocuments(organization.id, PermissionLevel.Write))) {
             throw Context.auth.error();
         }
 
@@ -69,7 +79,10 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
 
         for (const patch of request.body.getPatches()) {
             const template = await DocumentTemplate.getByID(patch.id);
-            if (!template || !await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
+            if (
+                !template ||
+                !(await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full))
+            ) {
                 throw Context.auth.notFoundOrNoAccess($t('%EP'));
             }
 
@@ -83,7 +96,10 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
                 const patchType = patch.privateSettings.templateDefinition?.type;
 
                 // only check if type has changed and new type is fiscal
-                shouldCheckIfAlreadyHasFiscalDocument = patchType !== undefined && template.privateSettings.templateDefinition.type !== patchType && patchType === 'fiscal';
+                shouldCheckIfAlreadyHasFiscalDocument =
+                    patchType !== undefined &&
+                    template.privateSettings.templateDefinition.type !== patchType &&
+                    patchType === 'fiscal';
 
                 template.privateSettings.patchOrPut(patch.privateSettings);
             }
@@ -134,7 +150,10 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
 
         for (const id of request.body.getDeletes()) {
             const template = await DocumentTemplate.getByID(id);
-            if (!template || !await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
+            if (
+                !template ||
+                !(await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full))
+            ) {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Template not found',
@@ -145,20 +164,24 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
             await template.delete();
         }
 
-        return new Response(
-            updatedTemplates,
-        );
+        return new Response(updatedTemplates);
     }
 
-    private async throwErrorIfAddMoreThanOneFiscalDocumentInYear(template: DocumentTemplate): Promise<void> {
+    private async throwErrorIfAddMoreThanOneFiscalDocumentInYear(
+        template: DocumentTemplate,
+    ): Promise<void> {
         if (template.privateSettings.templateDefinition.type !== 'fiscal') {
             return;
         }
 
-        let query = SQL.select().from(SQL.table(DocumentTemplate.table))
+        let query = SQL.select()
+            .from(SQL.table(DocumentTemplate.table))
             .where(SQL.column('organizationId'), template.organizationId)
             .where(SQL.column('year'), template.year)
-            .where(SQL.jsonExtract(SQL.column('privateSettings'), '$.value.templateDefinition.type'), 'fiscal');
+            .where(
+                SQL.jsonExtract(SQL.column('privateSettings'), '$.value.templateDefinition.type'),
+                'fiscal',
+            );
 
         // id is not set if put
         if (template.id) {
