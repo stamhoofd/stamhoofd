@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
  * Root postinstall hook for native mobile dependency upgrades. The committed
  * native-dependencies.json records a successful refresh so unchanged installs
  * can run without Xcode. CI uses --check to reject stale state without modifying it.
+ * The root hook skips backend deployments where the mobile workspace is absent.
  * Production-only installs skip the hook; explicit checks still require all dependencies.
  *
  * @typedef {object} NativeDependencyState

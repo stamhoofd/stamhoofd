@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -34,6 +35,40 @@ afterEach(() => {
 });
 
 describe('native dependency install hook', () => {
+    function runPostinstall(directory: string) {
+        const postinstall = JSON.parse(readFileSync(new URL('../../../../package.json', import.meta.url), 'utf8')).scripts.postinstall;
+        // eslint-disable-next-line node-security/no-dynamic-command-string -- Exercise the trusted repository lifecycle command with its actual shell semantics.
+        return spawnSync('sh', ['-c', postinstall], { cwd: directory, encoding: 'utf8' });
+    }
+
+    it('skips backend-only deployments without the mobile workspace', () => {
+        const directory = mkdtempSync(join(tmpdir(), 'native-dependencies-'));
+        directories.push(directory);
+
+        const result = runPostinstall(directory);
+
+        expect(result.stderr).toBe('');
+        expect(result.status).toBe(0);
+    });
+
+    it.each([0, 42])('runs the mobile hook and preserves its exit status (%s)', (status) => {
+        const directory = fixture();
+        write(directory, 'scripts/update-native-dependencies.mjs', `console.log('mobile hook'); process.exitCode = ${status};`);
+
+        const result = runPostinstall(resolve(directory, '../../..'));
+
+        expect(result.stdout).toBe('mobile hook\n');
+        expect(result.status).toBe(status);
+    });
+
+    it('fails if the mobile workspace exists but its hook is missing', () => {
+        const directory = fixture();
+        const result = runPostinstall(resolve(directory, '../../..'));
+
+        expect(result.status).not.toBe(0);
+        expect(result.stderr).toContain('MODULE_NOT_FOUND');
+    });
+
     it('skips production-only installs without reading missing devDependencies or writing native state', () => {
         const directory = fixture();
         write(directory, 'package.json', { devDependencies: { '@capacitor/cli': '8.6.0' } });
