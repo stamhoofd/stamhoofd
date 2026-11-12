@@ -17,7 +17,7 @@
         "@stamhoofd/scss": "workspace:*",
         "docus": "5.15.0",
         "better-sqlite3": "12.11.1",
-        "nuxt": "4.6.3"
+        "nuxt": "4.6.4"
     },
     "devDependencies": {
         "@node/dev-tools": "workspace:*",

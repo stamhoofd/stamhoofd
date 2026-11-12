@@ -19,8 +19,8 @@
         "@node/dev-tools": "workspace:*"
     },
     "devDependencies": {
-        "@nuxt/schema": "4.6.3",
-        "nitropack": "2.13.5",
+        "@nuxt/schema": "4.6.4",
+        "nitropack": "2.13.6",
         "h3": "1.15.11"
     }
 }
