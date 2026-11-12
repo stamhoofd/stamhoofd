@@ -7,6 +7,7 @@ import { AuditLogReplacementDependencies, registerAuditLogEnum } from '../AuditL
 import { LanguageHelper } from '../Language.js';
 import { BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getVATExcemptReasonName, VATExcemptReason } from '../BalanceItem.js';
 import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
+import { DataRetentionCategory, getDataRetentionCategoryName } from '../DataRetention.js';
 import { DocumentStatus, DocumentStatusHelper } from '../Document.js';
 import { EmailTemplate, EmailTemplateType } from '../email/EmailTemplate.js';
 import { EventNotificationStatus, EventNotificationStatusHelper } from '../EventNotificationStatus.js';
@@ -40,6 +41,7 @@ registerAuditLogEnum('EmailTemplateType', EmailTemplateType, EmailTemplate.getTy
 registerAuditLogEnum('EventNotificationStatus', EventNotificationStatus, EventNotificationStatusHelper.getName);
 registerAuditLogEnum('Language', Language, LanguageHelper.getName);
 registerAuditLogEnum('MFAMethodType', MFAMethodType, getMFAMethodTypeName);
+registerAuditLogEnum('DataRetentionCategory', DataRetentionCategory, getDataRetentionCategoryName);
 registerAuditLogEnum('BalanceItemStatus', BalanceItemStatus, getBalanceItemStatusName);
 registerAuditLogEnum('BalanceItemType', BalanceItemType, getBalanceItemTypeName);
 registerAuditLogEnum('BalanceItemRelationType', BalanceItemRelationType, getBalanceItemRelationTypeName);

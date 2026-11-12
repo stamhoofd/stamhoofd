@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, NumberDecoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, NumberDecoder } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
 
 export enum DataRetentionCategory {
@@ -29,6 +29,41 @@ export const DATA_RETENTION_MAXIMUM_MONTHS = 20 * 12;
 export const DATA_RETENTION_MINIMUM_PROTECTED_PERIODS = 1;
 export const DATA_RETENTION_MAXIMUM_PROTECTED_PERIODS = 20;
 export const DATA_RETENTION_DEFAULT_PROTECTED_PERIODS = 2;
+export const DATA_RETENTION_WAITING_DAYS = 30;
+
+export function getDataRetentionCategoryName(category: DataRetentionCategory): string {
+    switch (category) {
+        case DataRetentionCategory.Members:
+            return $t('Leden');
+        case DataRetentionCategory.SensitiveData:
+            return $t('Gevoelige gegevens');
+        case DataRetentionCategory.Documents:
+            return $t('Documenten');
+        case DataRetentionCategory.Accounts:
+            return $t('Accounts');
+        case DataRetentionCategory.Orders:
+            return $t('Bestellingen');
+        case DataRetentionCategory.Emails:
+            return $t('E-mails');
+        case DataRetentionCategory.AuditLogs:
+            return $t('Logboek');
+    }
+}
+
+export function isDataRetentionCategory(value: string): value is DataRetentionCategory {
+    return (Object.values(DataRetentionCategory) as string[]).includes(value);
+}
+
+/**
+ * Within a platform, an organization cannot set a term for accounts: they are shared between organizations.
+ */
+export function getDataRetentionCategories({ isOrganizationWithinPlatform }: { isOrganizationWithinPlatform: boolean }): DataRetentionCategory[] {
+    const categories = Object.values(DataRetentionCategory);
+    if (isOrganizationWithinPlatform) {
+        return categories.filter(category => category !== DataRetentionCategory.Accounts);
+    }
+    return categories;
+}
 
 /**
  * Uses NumberDecoder instead of IntegerDecoder because IntegerDecoder reads a string such as '3abc' as 3.
@@ -119,6 +154,29 @@ export class DataRetentionTerms extends AutoEncoder {
 
         errors.throwIfNotEmpty();
     }
+
+    isSameAs(other: DataRetentionTerms): boolean {
+        return this.anonymizeAfterMonths === other.anonymizeAfterMonths
+            && this.deleteAfterMonths === other.deleteAfterMonths
+            && this.protectedPeriods === other.protectedPeriods;
+    }
+
+    /**
+     * Used in audit logs, so it describes the values as they were saved.
+     */
+    getDescription(): string {
+        const parts: string[] = [];
+        if (this.anonymizeAfterMonths !== null) {
+            parts.push($t('anonimiseren na {months} maanden', { months: this.anonymizeAfterMonths }));
+        }
+        if (this.deleteAfterMonths !== null) {
+            parts.push($t('verwijderen na {months} maanden', { months: this.deleteAfterMonths }));
+        }
+        if (this.protectedPeriods !== null) {
+            parts.push($t('laatste {periods} werkjaren beschermd', { periods: this.protectedPeriods }));
+        }
+        return parts.length > 0 ? parts.join(', ') : $t('geen termijn');
+    }
 }
 
 export class DataRetentionPolicy extends AutoEncoder {
@@ -156,6 +214,31 @@ export class DataRetentionPolicy extends AutoEncoder {
             }),
         });
     }
+}
+
+/**
+ * What an administrator can see and change. The frontend combines both levels with resolveDataRetentionTerms.
+ */
+export class DataRetentionSettings extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(DataRetentionPolicy) })
+    policies: DataRetentionPolicy[] = [];
+
+    /**
+     * Only for an organization within a platform.
+     */
+    @field({ decoder: new ArrayDecoder(DataRetentionPolicy) })
+    platformPolicies: DataRetentionPolicy[] = [];
+}
+
+/**
+ * Replaces all terms of one category, for the level of the request.
+ */
+export class DataRetentionPolicyUpdate extends AutoEncoder {
+    @field({ decoder: new EnumDecoder(DataRetentionCategory) })
+    category: DataRetentionCategory;
+
+    @field({ decoder: DataRetentionTerms })
+    terms: DataRetentionTerms;
 }
 
 export type ResolvedDataRetentionTerms = {
