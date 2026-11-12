@@ -2,6 +2,21 @@
 
 `eslint-plugin-stamhoofd` exports base, backend, frontend, and shared flat configurations.
 
+## Formatting
+
+`pnpm stam check format` uses the syntax-only runner in `bin/format.mjs`. It retains
+each file's effective configuration but runs only rules whose metadata declares
+`type: 'layout'`, with TypeScript project services disabled. `--fix` applies layout
+fixes only. Remaining warnings and syntax errors fail the command; correctness
+checks belong to `stam check lint`.
+
+Formatting uses one process and a separate content-based ESLint cache, including a
+fingerprint of the local rule implementations. Semantic linting does not use this
+per-file cache because imported types can affect unchanged files.
+
+`@stylistic/indent-binary-ops` is disabled in all presets because it conflicts with
+`@stylistic/indent` on TypeScript unions (upstream issue #676). Keep `indent` enabled.
+
 ## Security diagnostics
 
 All configurations include the upstream recommended presets from `eslint-plugin-secure-coding`, `eslint-plugin-node-security`, and `eslint-plugin-no-unsanitized`, without overriding their severities. Unicorn is limited to `unicorn/no-unsafe-json-serialization`; its broad recommended preset is not enabled. Rules apply globally because browser packages also contain Node scripts and shared libraries can manipulate the DOM. The DOM rules do not check Vue `v-html` expressions.

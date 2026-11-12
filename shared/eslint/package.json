@@ -5,6 +5,7 @@
     "main": "./src/index.js",
     "sideEffects": false,
     "files": [
+        "bin",
         "src"
     ],
     "scripts": {

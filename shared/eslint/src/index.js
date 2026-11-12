@@ -118,6 +118,8 @@ const baseRules = [
     }),
     {
         rules: {
+            // Conflicts with indent on TypeScript unions: eslint-stylistic/eslint-stylistic#676.
+            '@stylistic/indent-binary-ops': 'off',
             '@stylistic/quotes': ['warn', 'single', { allowTemplateLiterals: 'avoidEscape', avoidEscape: true }],
         },
     },

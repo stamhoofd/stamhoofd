@@ -25,14 +25,10 @@ describe('check format', () => {
         expect(createContext).toHaveBeenCalledWith({ env: 'stamhoofd', instanceName: undefined, verbose: false });
         expect(run).toHaveBeenCalledWith('pnpm', ['exec', 'oxfmt', mode], { cwd: '/repo', verbosity: RunVerbosity.Output });
         expect(run).toHaveBeenCalledWith(
-            'pnpm',
+            'node',
             [
-                'exec',
-                'eslint',
-                '**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,vue}',
-                '--concurrency',
-                'auto',
-                ...(mode === '--write' ? ['--fix', '--fix-type', 'layout'] : []),
+                '/repo/shared/eslint/bin/format.mjs',
+                ...(mode === '--write' ? ['--fix'] : []),
             ],
             { cwd: '/repo', verbosity: RunVerbosity.Output },
         );

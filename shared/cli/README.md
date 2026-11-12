@@ -493,6 +493,15 @@ Use `stam check typecheck mobile` or `stam check lint mobile` for a package in `
 
 Use `stam check lint --fix` to automatically fix lint problems, optionally with a package target or `--filter`. Fix mode forwards `--fix` to ESLint and disables Turbo caching so source edits are always applied. `stam check all --fix` enables this for its lint step. `stam check format --fix` applies formatting with Oxfmt and ESLint. Typechecking has no automatic-fix mode.
 
+Formatting runs only ESLint layout rules, with TypeScript project services and worker
+threads disabled. It retains each file's normal formatting settings, including Vue
+template rules, without running semantic, security, or import-graph checks. Both
+check and fix mode fail on remaining formatting warnings or syntax errors. Run
+`stam check lint` separately for correctness checks. The isolated content-based cache
+in `.cache/eslint-format` is invalidated by configuration and local plugin changes;
+it is not shared with type-aware linting. `indent-binary-ops` is disabled because it
+conflicts with `indent` on TypeScript unions.
+
 Typecheck scripts use incremental compilation with package-local `.cache/typecheck.tsbuildinfo` metadata. Turbo caches this separately from declaration and runtime metadata, so cache misses after edits can reuse previous compiler work without writing JavaScript or declarations. Cache hits restore missing metadata without starting the compiler. Compiler contexts remain separate for production, tests, and each frontend package; test globals are not merged into application checking.
 
 The scriptless `check-inputs` task propagates transitive source fingerprints without running dependency checks. Checks also prepare declarations and fingerprint components and its dependencies because shared Vue ambient declarations import them implicitly. Shared TypeScript configurations and ambient declarations are global cache inputs. Lint uses type-aware rules, so it tracks dependency source and declarations too. It additionally fingerprints `eslint-plugin-stamhoofd` and its dependencies; inherited root, frontend, and backend ESLint configurations are global cache inputs. ESLint's per-file cache is not enabled because changes to imported types can affect unchanged files. Only successful checks are cached; failures always run again. A failure in any package fails the root command. Direct package scripts bypass Turbo's prerequisites and check cache.
