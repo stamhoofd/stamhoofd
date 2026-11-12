@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/cli",
-    "version": "2.158.0",
+    "version": "2.159.0",
     "type": "module",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
@@ -35,20 +35,20 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@node/dev-tools": "workspace:*",
-        "@node/terminal": "workspace:*",
-        "@node/opentelemetry-process": "workspace:*",
-        "@node/opentelemetry-terminal": "workspace:*",
-        "@common/opentelemetry-decorators": "workspace:*",
-        "@opentelemetry/api": "1.10.0",
-        "@opentelemetry/sdk-node": "0.300.0",
-        "@opentelemetry/sdk-trace": "3.0.0",
-        "@opentelemetry/exporter-trace-otlp-http": "0.300.0",
         "@anthropic-ai/sdk": "0.137.0",
         "@aws-sdk/client-s3": "3.1160.0",
+        "@common/opentelemetry-decorators": "workspace:*",
         "@inquirer/prompts": "7.10.1",
+        "@node/dev-tools": "workspace:*",
+        "@node/opentelemetry-process": "workspace:*",
+        "@node/opentelemetry-terminal": "workspace:*",
+        "@node/terminal": "workspace:*",
         "@oclif/core": "4.14.0",
         "@oclif/plugin-autocomplete": "3.3.0",
+        "@opentelemetry/api": "1.10.0",
+        "@opentelemetry/exporter-trace-otlp-http": "0.300.0",
+        "@opentelemetry/sdk-node": "0.300.0",
+        "@opentelemetry/sdk-trace": "3.0.0",
         "@stamhoofd/metabase": "workspace:*",
         "@stamhoofd/stdsync": "workspace:*",
         "@stamhoofd/types": "workspace:*",
@@ -68,7 +68,9 @@
         "commands": "./dist/commands",
         "helpClass": "./dist/help.js",
         "topicSeparator": " ",
-        "plugins": ["@oclif/plugin-autocomplete"],
+        "plugins": [
+            "@oclif/plugin-autocomplete"
+        ],
         "theme": {
             "sectionHeader": "cyan",
             "command": "cyan",

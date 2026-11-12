@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend-statistics-syncer",
-    "version": "2.158.0",
+    "version": "2.159.0",
     "type": "module",
     "main": "./dist/index.js",
     "exports": {
@@ -30,11 +30,11 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@node/observability": "workspace:*",
         "@common/encoding": "workspace:*",
         "@common/errors": "workspace:*",
         "@node/database": "workspace:*",
         "@node/logging": "workspace:*",
+        "@node/observability": "workspace:*",
         "@stamhoofd/backend-env": "workspace:*",
         "@stamhoofd/crons": "workspace:*",
         "@stamhoofd/logging": "workspace:*",

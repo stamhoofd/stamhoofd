@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/backend",
-    "version": "2.158.0",
+    "version": "2.159.0",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist-types/index.d.ts",
@@ -63,7 +63,6 @@
         "test:reset": "pnpm run build:full && pnpm run test"
     },
     "dependencies": {
-        "@node/observability": "workspace:*",
         "@aws-sdk/client-s3": "3.1160.0",
         "@aws-sdk/client-ses": "3.1160.0",
         "@aws-sdk/client-sesv2": "3.1160.0",
@@ -75,6 +74,7 @@
         "@node/database": "workspace:*",
         "@node/endpoints": "workspace:*",
         "@node/logging": "workspace:*",
+        "@node/observability": "workspace:*",
         "@simplewebauthn/server": "13.3.3",
         "@stamhoofd/backend-env": "workspace:*",
         "@stamhoofd/backend-i18n": "workspace:*",

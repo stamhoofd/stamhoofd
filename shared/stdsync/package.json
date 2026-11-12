@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/stdsync",
-    "version": "2.158.0",
+    "version": "2.159.0",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist-types/index.d.ts",
@@ -22,7 +22,9 @@
         "lint": "eslint . --quiet",
         "test": "vitest run"
     },
-    "dependencies": { "@node/terminal": "workspace:*" },
+    "dependencies": {
+        "@node/terminal": "workspace:*"
+    },
     "devDependencies": {
         "vitest": "4.1.12"
     },
