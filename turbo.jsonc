@@ -208,10 +208,12 @@
             "persistent": true,
         },
         "lint": {
+            "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/oxlint.config.mts"],
             "dependsOn": [
                 "build:types",
                 "check-inputs",
                 "eslint-plugin-stamhoofd#check-inputs",
+                "oxlint-plugin-stamhoofd#check-inputs",
                 "@stamhoofd/components#build:types",
                 "@stamhoofd/components#check-inputs",
             ],

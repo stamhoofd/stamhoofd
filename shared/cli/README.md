@@ -392,7 +392,7 @@ The CLI uses an always-on local sampler; remote export remains opt-in.
 | Tests        | `pnpm stam test coverage`              | Run package coverage with isolated MySQL.                                      |
 | Tests        | `pnpm stam test e2e`                   | Run Playwright tests.                                                          |
 | Tests        | `pnpm stam test all --ci`              | Run unit and E2E tests in CI mode.                                             |
-| Checks       | `pnpm stam check lint`                 | Run ESLint across the monorepo.                                                |
+| Checks       | `pnpm stam check lint`                 | Run each package's owning linter across the monorepo.                          |
 | Checks       | `pnpm stam check typecheck`            | Run TypeScript checks across the monorepo.                                     |
 | Checks       | `pnpm stam check all`                  | Run build, lint, typecheck, unit tests, and E2E tests.                         |
 | Release      | `pnpm stam release bump-structures`    | Replace `...NextVersion` by the next structures version and bump `Version.ts`. |
@@ -491,7 +491,14 @@ The root and `stam check` lint and typecheck commands use Turbo to select all pa
 
 Use `stam check typecheck mobile` or `stam check lint mobile` for a package in `@stamhoofd`; fully scoped names work too. Repeat `--filter <selector>` for native Turbo selectors, including other scopes, unscoped packages, paths, or dependency selections. Filtering changes only the selected checks, not their declaration prerequisites or cache keys. For example, `stam check lint --filter './backend/shared/*'` checks backend libraries and `stam check typecheck --filter i18n-uuid` checks the translation tooling's production declarations.
 
-Use `stam check lint --fix` to automatically fix lint problems, optionally with a package target or `--filter`. Fix mode forwards `--fix` to ESLint and disables Turbo caching so source edits are always applied. `stam check all --fix` enables this for its lint step. `stam check format --fix` applies formatting with Oxfmt and ESLint. Typechecking has no automatic-fix mode.
+Use `stam check lint --fix` to automatically fix lint problems, optionally with a package target or `--filter`. Fix mode forwards `--fix` to the package's linter and disables Turbo caching so source edits are always applied. `stam check all --fix` enables this for its lint step. `stam check format --fix` applies formatting with Oxfmt and ESLint. Typechecking has no automatic-fix mode.
+
+Source files have exclusive tool ownership by package: ESLint, or Oxfmt/Oxlint.
+The package allowlist and migration instructions are documented in
+[the shared Oxlint guide](../oxlint/README.md). Unlisted packages retain ESLint;
+formatting does not transfer Vue files to Oxfmt. The mobile Capacitor input and
+generated native-dependency record are excluded from formatting because byte-level
+hashes participate in native refresh validation.
 
 Formatting runs only ESLint layout rules, with TypeScript project services and worker
 threads disabled. It retains each file's normal formatting settings, including Vue
@@ -504,7 +511,7 @@ conflicts with `indent` on TypeScript unions.
 
 Typecheck scripts use incremental compilation with package-local `.cache/typecheck.tsbuildinfo` metadata. Turbo caches this separately from declaration and runtime metadata, so cache misses after edits can reuse previous compiler work without writing JavaScript or declarations. Cache hits restore missing metadata without starting the compiler. Compiler contexts remain separate for production, tests, and each frontend package; test globals are not merged into application checking.
 
-The scriptless `check-inputs` task propagates transitive source fingerprints without running dependency checks. Checks also prepare declarations and fingerprint components and its dependencies because shared Vue ambient declarations import them implicitly. Shared TypeScript configurations and ambient declarations are global cache inputs. Lint uses type-aware rules, so it tracks dependency source and declarations too. It additionally fingerprints `eslint-plugin-stamhoofd` and its dependencies; inherited root, frontend, and backend ESLint configurations are global cache inputs. ESLint's per-file cache is not enabled because changes to imported types can affect unchanged files. Only successful checks are cached; failures always run again. A failure in any package fails the root command. Direct package scripts bypass Turbo's prerequisites and check cache.
+The scriptless `check-inputs` task propagates transitive source fingerprints without running dependency checks. Checks also prepare declarations and fingerprint components and its dependencies because shared Vue ambient declarations import them implicitly. Shared TypeScript configurations and ambient declarations are global cache inputs. Lint uses type-aware rules, so it tracks dependency source and declarations too. It additionally fingerprints `eslint-plugin-stamhoofd`, `oxlint-plugin-stamhoofd`, and their dependencies; inherited root, frontend, and backend ESLint configurations are global cache inputs. The root Oxlint configuration is a lint-task input, so changing it does not invalidate declaration or runtime builds. Semantic linting does not use a per-file cache because changes to imported types can affect unchanged files. Only successful checks are cached; failures always run again. A failure in any package fails the root command. Direct package scripts bypass Turbo's prerequisites and check cache.
 
 Lint scripts include `--quiet` themselves, keeping the existing repo-wide errors-only behavior consistent with direct package scripts. The root lint command uses Turbo's `--continue=always` so every package runs even after another task fails; the command still exits nonzero if any task fails. Lint fingerprints `NODE_ENV` because it controls environment-sensitive rules. Without `--fix`, the root command does not forward arguments through Turbo, so lint and typechecking share declaration cache keys. To include warnings when debugging a package, run `pnpm --filter <package> exec eslint .` directly.
 

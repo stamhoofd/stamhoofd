@@ -7,7 +7,7 @@ import { TestUtils } from '@stamhoofd/test-utils';
 import type { IncomingMessage } from 'node:http';
 import { Readable } from 'node:stream';
 // The root pins the same sharp used by models; intercept rendering without allocating large images.
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line import-js/no-extraneous-dependencies
 import sharp from 'sharp';
 import { promises as fs } from 'node:fs';
 import { tmpdir } from 'node:os';

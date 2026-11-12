@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest';
-// eslint-disable-next-line import/no-relative-packages -- Exercise the owning adapter without adding a reverse workspace dependency.
+// eslint-disable-next-line import-js/no-relative-packages -- Exercise the owning adapter without adding a reverse workspace dependency.
 import ProgressReporter from '../../../../tests/playwright/src/reporters/progress.js';
 import { openTestEventChannel } from './test-events.js';
 import type { TestProgress } from './test-events.js';

@@ -24,7 +24,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint . --quiet",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
     },
@@ -34,6 +34,7 @@
         "luxon": "3.7.2"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@types/luxon": "3.7.6",
         "vitest": "4.1.12"

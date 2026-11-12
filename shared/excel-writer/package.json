@@ -26,7 +26,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint --quiet"
+        "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
         "@common/errors": "workspace:*",
@@ -35,6 +35,7 @@
         "uuid": "14.0.3"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@types/archiver": "6.0.4",
         "@types/luxon": "3.7.6"

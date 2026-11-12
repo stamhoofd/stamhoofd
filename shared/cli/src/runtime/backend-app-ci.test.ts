@@ -8,7 +8,7 @@ const checkShards = aggregate.split('              run: |\n')[1].replace(/^ {18}
 
 describe('backend app CI aggregation', () => {
     it('preserves the required check name and evaluates failed or skipped shards', () => {
-        expect(aggregate).toContain('name: "Backend App Tests"');
+        expect(aggregate).toMatch(/name: ['"]Backend App Tests['"]/);
         expect(aggregate).toContain('needs: [job_setup, job_test_backend_app_shards]');
         expect(aggregate).toContain('!cancelled()');
         expect(aggregate).toContain("needs.job_setup.outputs.changed_backend_apps == 'true'");

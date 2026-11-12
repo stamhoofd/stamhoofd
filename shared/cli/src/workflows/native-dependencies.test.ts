@@ -3,7 +3,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSyn
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-// eslint-disable-next-line import/no-relative-packages -- Exercise the install hook without adding a reverse workspace dependency.
+// eslint-disable-next-line import-js/no-relative-packages -- Exercise the install hook without adding a reverse workspace dependency.
 import { updateNativeDependencies } from '../../../../frontend/app/mobile/scripts/update-native-dependencies.mjs';
 
 const directories: string[] = [];

@@ -13,7 +13,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint --quiet"
+        "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
         "@common/errors": "workspace:*",
@@ -22,6 +22,7 @@
         "@stamhoofd/structures": "workspace:*"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "@stamhoofd/types": "workspace:*"
     },
     "license": "UNLICENCED",

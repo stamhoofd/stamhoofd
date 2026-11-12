@@ -4,7 +4,7 @@ import { fixFlag } from '../../command-flags.js';
 import { lint } from '../../runtime/monorepo-runner.js';
 
 export default class CheckLint extends BaseCommand {
-    static summary = 'Run ESLint';
+    static summary = 'Run package linters';
     static description = 'Use this when you want fast feedback on style and lint rules without running the full validation suite.';
     static examples = [
         'stam check lint',

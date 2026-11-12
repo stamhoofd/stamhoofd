@@ -31,13 +31,21 @@ describe('formatting without semantic linting', () => {
         await rm(cwd, { recursive: true, force: true });
     });
 
-    it('formats TypeScript without a project, without fixing semantic problems', async () => {
-        const file = path.join(cwd, 'example.ts');
+    it.each(['ts', 'tsx', 'mts', 'cts'])('formats %s without a project, without fixing semantic problems', async (extension) => {
+        const file = path.join(cwd, `example.${extension}`);
         await writeFile(file, 'const name: number = "Ada"\n');
         const result = await run(cwd, true);
         expect(result.code, result.stdout + result.stderr).toBe(0);
         expect(await readFile(file, 'utf8')).toBe('const name: number = \'Ada\';\n');
         expect((await run(cwd)).code).toBe(0);
+    }, 15_000);
+
+    it('formats JSX without requiring a project', async () => {
+        const file = path.join(cwd, 'example.jsx');
+        await writeFile(file, 'const view=<div/>\n');
+        const result = await run(cwd, true);
+        expect(result.code, result.stdout + result.stderr).toBe(0);
+        expect(await readFile(file, 'utf8')).toContain('const view = <div');
     });
 
     it('formats Vue templates and embedded TypeScript without a project', async () => {

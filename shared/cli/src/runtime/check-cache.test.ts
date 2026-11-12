@@ -1,10 +1,12 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import ts from 'typescript';
 
 const root = new URL('../../../../', import.meta.url);
 
 function readJson(relativePath: string) {
-    return JSON.parse(readFileSync(new URL(relativePath, root), 'utf8'));
+    const text = readFileSync(new URL(relativePath, root), 'utf8');
+    return relativePath.endsWith('.jsonc') ? ts.parseConfigFileTextToJson(relativePath, text).config : JSON.parse(text);
 }
 
 const typecheckPackages = [
@@ -69,7 +71,8 @@ describe('check cache configuration', () => {
         const { tasks, globalDependencies } = readJson('turbo.jsonc');
 
         expect(tasks.lint).toEqual({
-            dependsOn: ['build:types', 'check-inputs', 'eslint-plugin-stamhoofd#check-inputs', '@stamhoofd/components#build:types', '@stamhoofd/components#check-inputs'],
+            inputs: ['$TURBO_DEFAULT$', '$TURBO_ROOT$/oxlint.config.mts'],
+            dependsOn: ['build:types', 'check-inputs', 'eslint-plugin-stamhoofd#check-inputs', 'oxlint-plugin-stamhoofd#check-inputs', '@stamhoofd/components#build:types', '@stamhoofd/components#check-inputs'],
             cache: true,
             outputs: [],
             env: ['NODE_ENV'],

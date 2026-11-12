@@ -22,7 +22,7 @@
         "build": "tsc --build tsconfig.build.json && mkdir -p ./dist/src/migrations && rsync --delete --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/migrations/ ./dist/src/migrations/",
         "build:full": "pnpm run clear && pnpm run build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo .cache/*.tsbuildinfo",
-        "lint": "eslint --quiet",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
         "migrations": "pnpm run build:full && node ./dist/migrations.js",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
@@ -47,6 +47,7 @@
         "mysql2": "3.24.6"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@types/node": "22.20.4",
         "vitest": "4.1.12"

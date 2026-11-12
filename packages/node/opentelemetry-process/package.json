@@ -14,7 +14,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint . --quiet",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
         "test": "vitest run",
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
     },
@@ -24,6 +24,7 @@
         "tslib": "2.8.1"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
     }

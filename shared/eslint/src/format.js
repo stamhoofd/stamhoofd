@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ESLint } from 'eslint';
 import { builtinRules } from 'eslint/use-at-your-own-risk';
+import tseslint from 'typescript-eslint';
 import plugin from './index.js';
 
 const rules = new Map(builtinRules);
@@ -34,10 +35,20 @@ export function createFormattingESLint({ cwd, fix = false }) {
         cacheLocation: path.join(cwd, '.cache/eslint-format'),
         cacheStrategy: 'content',
         ruleFilter: ({ ruleId }) => rules.get(ruleId)?.meta?.type === 'layout',
-        overrideConfig: {
-            languageOptions: { parserOptions: { projectService: false, project: null } },
-            linterOptions: { reportUnusedDisableDirectives: 'off' },
-            settings: { stamhoofdFormatVersion: version },
-        },
+        overrideConfig: [
+            {
+                languageOptions: { parserOptions: { projectService: false, project: null } },
+                linterOptions: { reportUnusedDisableDirectives: 'off' },
+                settings: { stamhoofdFormatVersion: version },
+            },
+            {
+                files: ['**/*.{tsx,mts,cts}'],
+                languageOptions: { parser: tseslint.parser },
+            },
+            {
+                files: ['**/*.jsx'],
+                languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } },
+            },
+        ],
     });
 }

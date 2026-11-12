@@ -11,7 +11,7 @@
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest run",
         "test:coverage": "vitest run --coverage",
-        "lint": "eslint . --quiet"
+        "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "exports": {
         ".": {
@@ -24,6 +24,7 @@
         "tslib": "2.8.1"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
     }

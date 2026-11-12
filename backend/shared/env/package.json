@@ -12,7 +12,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint --quiet"
+        "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
         "@node/logging": "workspace:*",
@@ -21,6 +21,7 @@
         "chalk": "5.6.2"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "@stamhoofd/cli": "workspace:*"
     },
     "peerDependencies": {

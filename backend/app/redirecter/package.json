@@ -16,7 +16,7 @@
         "build": "tsc --build tsconfig.build.json && pnpm run copy-assets",
         "build:full": "rm -rf ./dist && rm -f *.tsbuildinfo .cache/*.tsbuildinfo && pnpm run build",
         "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/",
-        "lint": "eslint --quiet",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
         "start": "pnpm run build && node ./dist/index.js",
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest",
@@ -34,6 +34,7 @@
         "mysql2": "3.24.6"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@types/node": "22.20.4",
         "nock": "14.0.17",

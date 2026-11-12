@@ -35,7 +35,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint --quiet",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
@@ -49,6 +49,7 @@
         "uuid": "14.0.3"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "@stamhoofd/excel-writer": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "vitest": "4.1.12"

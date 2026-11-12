@@ -25,7 +25,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint --quiet",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
         "test": "vitest"
     },
     "dependencies": {
@@ -36,6 +36,7 @@
         "access": "public"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "vitest": "4.1.12"
     }

@@ -19,13 +19,14 @@
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
         "example": "pnpm run build && node examples/live-output.mjs",
-        "lint": "eslint . --quiet",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
         "test": "vitest run"
     },
     "dependencies": {
         "@node/terminal": "workspace:*"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
     },
     "publishConfig": {

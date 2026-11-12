@@ -29,7 +29,7 @@
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest run",
         "test:coverage": "vitest run --coverage",
-        "lint": "eslint . --quiet"
+        "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
         "@node/logging": "workspace:*",
@@ -38,6 +38,7 @@
         "tslib": "2.8.1"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "@common/errors": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",

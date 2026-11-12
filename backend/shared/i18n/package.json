@@ -24,7 +24,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint --quiet"
+        "lint": "oxlint . --quiet --type-aware --threads 2"
     },
     "dependencies": {
         "@node/endpoints": "workspace:*",
@@ -32,6 +32,9 @@
         "@stamhoofd/locales": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*"
+    },
+    "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

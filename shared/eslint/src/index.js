@@ -22,6 +22,7 @@ import hrOnOwnLine from './rules/hr-on-own-line.js';
 import noPackageSelfImport from './rules/no-package-self-import.js';
 import noTRouteUrl from './rules/no-t-route-url.js';
 import preferDefineRoute from './rules/prefer-define-route.js';
+import { eslintOwnership } from './ownership.js';
 
 const rules = {
     'async-component-with-properties': asyncComponentWithProperties,
@@ -36,6 +37,7 @@ const stamhoofdPlugin = {
 };
 
 const baseRules = [
+    eslintOwnership,
     ...defaultRules,
     regexpPlugin.configs.recommended,
     securityPlugin.configs.recommended,

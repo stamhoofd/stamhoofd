@@ -12,7 +12,7 @@
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint . --quiet",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
         "typecheck": "tsc --project tsconfig.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest run"
     },
@@ -26,6 +26,7 @@
         "@opentelemetry/exporter-logs-otlp-proto": "0.300.0"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
     }
 }

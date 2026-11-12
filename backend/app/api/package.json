@@ -54,7 +54,7 @@
         "build:playwright:pre": "pnpm run build:types && pnpm run build && tsc --build tsconfig.test.build.json",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo .cache/*.tsbuildinfo",
         "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/src/",
-        "lint": "eslint --quiet",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
         "migrations": "pnpm run build:full && node ./dist/migrations.js",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
@@ -116,6 +116,7 @@
         "uuid": "14.0.3"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@types/cookie": "0.6.0",
         "@types/formidable": "3.5.1",

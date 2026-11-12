@@ -34,7 +34,7 @@
     "scripts": {
         "build:types": "tsc --project tsconfig.types.json",
         "build": "tsc --build tsconfig.build.json && mkdir -p ./dist/migrations && rsync --delete --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/migrations/ ./dist/migrations/ && rsync -r --checksum ./src/assets/ ./dist/assets/",
-        "lint": "eslint --quiet",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
         "test": "vitest",
         "test:coverage": "vitest --coverage"
@@ -61,6 +61,7 @@
         "uuid": "14.0.3"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "@stamhoofd/email": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@types/luxon": "3.7.6",

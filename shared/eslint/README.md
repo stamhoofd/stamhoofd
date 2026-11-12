@@ -2,6 +2,10 @@
 
 `eslint-plugin-stamhoofd` exports base, backend, frontend, and shared flat configurations.
 
+The presets exclude whole Oxc-owned packages through `src/ownership.js`, including
+when invoked from nested package directories. See the
+[shared Oxlint guide](../oxlint/README.md) for policy reuse and package migration.
+
 ## Formatting
 
 `pnpm stam check format` uses the syntax-only runner in `bin/format.mjs`. It retains

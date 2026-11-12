@@ -16,7 +16,7 @@
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
-        "lint": "eslint . --quiet",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
         "test": "vitest run"
     },
     "dependencies": {
@@ -24,6 +24,7 @@
         "tslib": "2.8.1"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "@opentelemetry/sdk-node": "0.300.0",
         "@opentelemetry/sdk-trace": "3.0.0",
         "vitest": "4.1.12",

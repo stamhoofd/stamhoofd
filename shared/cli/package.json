@@ -30,7 +30,7 @@
     "scripts": {
         "build": "rm -rf dist .cache/build.tsbuildinfo && tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
-        "lint": "eslint . --quiet",
+        "lint": "oxlint . --quiet --type-aware --threads 2",
         "test": "vitest run",
         "test:coverage": "vitest --coverage"
     },
@@ -59,6 +59,7 @@
         "typescript": "6.0.3"
     },
     "devDependencies": {
+        "oxlint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
     },
     "license": "UNLICENSED",
