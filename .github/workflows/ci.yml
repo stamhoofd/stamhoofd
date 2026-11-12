@@ -522,9 +522,8 @@ jobs:
               with:
                   path: .turbo/cache
                   key: ${{ steps.turbo-cache.outputs.cache-primary-key }}
-            # Temporarily disabled until everything is formatted.
-            # - name: Check formatting
-            #   run: pnpm stam check format
+            - name: Check formatting
+              run: pnpm stam check format
 
     job_test_components_vitest:
         name: 'Components Browser Tests'
