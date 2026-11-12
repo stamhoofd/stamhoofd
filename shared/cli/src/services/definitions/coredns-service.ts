@@ -11,6 +11,12 @@ type CorednsPrepared = {
     corefile: string;
 };
 
+/**
+ * The authority section of a no-data answer: the zone's SOA, as RFC 2308 requires, so a resolver
+ * can conclude the record is absent instead of retrying the query.
+ */
+const soaAuthority = '        authority "{{ .Zone }} 60 IN SOA ns.dns.{{ .Zone }} hostmaster.{{ .Zone }} (1 60 60 60 60)"\n';
+
 export class CorednsService extends SharedDockerService<CorednsPrepared> {
     static readonly container = corednsContainer;
 
@@ -33,9 +39,15 @@ export class CorednsService extends SharedDockerService<CorednsPrepared> {
         await fs.chmod(path.dirname(corefile), 0o755);
 
         if (process.env.PUBLIC_IP) {
-            await fs.writeFile(corefile, `${domain} {\n    log\n    template IN A {\n        answer "{{ .Name }} 300 IN A ${process.env.PUBLIC_IP}"\n    }\n\n}\n. {\n    forward . 8.8.8.8 9.9.9.9\n}\n`, { mode: 0o644 });
+            // PUBLIC_IP is IPv4-only, so the zone can only answer A. Every other type still needs
+            // an answer: without the catch-all they fall through to no plugin and SERVFAIL, and a
+            // resolver that queries A and AAAA in parallel (Android does) fails the whole lookup
+            // on that SERVFAIL instead of using the A record. The catch-all carries the zone SOA
+            // because RFC 2308 wants one in a no-data answer: an empty NOERROR without it leaves a
+            // strict resolver unable to conclude the record is absent, so it retries instead.
+            await fs.writeFile(corefile, `${domain} {\n    log\n    template IN A {\n        answer "{{ .Name }} 300 IN A ${process.env.PUBLIC_IP}"\n    }\n    template IN ANY {\n        rcode NOERROR\n${soaAuthority}    }\n}\n. {\n    forward . 8.8.8.8 9.9.9.9\n}\n`, { mode: 0o644 });
         } else {
-            await fs.writeFile(corefile, `${domain} {\n    log\n    template IN A {\n        answer "{{ .Name }} 300 IN A ${localIpv4Host}"\n    }\n    template IN AAAA {\n        answer "{{ .Name }} 300 IN AAAA ${localIpv6Host}"\n    }\n}\n. {\n    forward . 8.8.8.8 9.9.9.9\n}\n`, { mode: 0o644 });
+            await fs.writeFile(corefile, `${domain} {\n    log\n    template IN A {\n        answer "{{ .Name }} 300 IN A ${localIpv4Host}"\n    }\n    template IN AAAA {\n        answer "{{ .Name }} 300 IN AAAA ${localIpv6Host}"\n    }\n    template IN ANY {\n        rcode NOERROR\n${soaAuthority}    }\n}\n. {\n    forward . 8.8.8.8 9.9.9.9\n}\n`, { mode: 0o644 });
         }
         await fs.chmod(corefile, 0o644);
         return { corefile };
