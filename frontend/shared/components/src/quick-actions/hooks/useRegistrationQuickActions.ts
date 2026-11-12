@@ -5,7 +5,7 @@ import type { MemberManager } from '@stamhoofd/frontend-application/MemberManage
 import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Group, MemberRegistrationInvitation, Organization, PlatformFamily, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
-import { Event, getActivePeriodIds, GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, SortItemDirection, WebshopStatus } from '@stamhoofd/structures';
+import { Event, getActivePeriodIds, GroupStatus, GroupType, JudicialRecordStatus, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, SortItemDirection, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onActivated, onMounted, ref } from 'vue';
@@ -27,6 +27,7 @@ import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';
 import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warning.svg';
 import missingDataSvg from '@stamhoofd/assets/images/illustrations/missing-data.svg';
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
+import privacyPolicySvg from '@stamhoofd/assets/images/illustrations/privacy-policy.svg';
 
 import EventIcon from '../../events/components/EventIcon.vue';
 import { useVisibilityChange } from '../../hooks/useVisibilityChange.js';
@@ -59,7 +60,7 @@ export function useRegistrationQuickActions(): QuickActions {
     }
 
     async function checkAllMemberData(member: PlatformMember) {
-        await editMember(member, { title: $t(`%uC`) });
+        await editMember(member, { title: $t('%uC') });
     }
 
     const activeMembers = computed(() => memberManager.family.members.filter(m => m.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership] }).length > 0));
@@ -79,6 +80,18 @@ export function useRegistrationQuickActions(): QuickActions {
         }
 
         return [];
+    }));
+
+    /**
+     * The members of this family that have to have an extract from the judicial record checked. The
+     * same question the dashboard answers in their member detail, asked here for the family: a
+     * responsibility they hold asks for an extract, and they are old enough for it to be required.
+     *
+     * Nothing is stored about a delivery yet, so the action stays on the portal after a member
+     * delivered one. It disappears once the status of the extract itself lands.
+     */
+    const membersNeedingJudicialRecord = computed(() => activeMembers.value.filter((member) => {
+        return member.judicialRecord.status === JudicialRecordStatus.Required;
     }));
 
     const membersWithoutMissingData = computed(() => activeMembers.value.filter((member) => {
@@ -105,7 +118,7 @@ export function useRegistrationQuickActions(): QuickActions {
         try {
             const response = await context.value.authenticatedServer.request({
                 method: 'GET',
-                path: `/user/payable-balance`,
+                path: '/user/payable-balance',
                 decoder: PayableBalanceCollection as Decoder<PayableBalanceCollection>,
                 shouldRetry: true,
                 owner,
@@ -143,8 +156,8 @@ export function useRegistrationQuickActions(): QuickActions {
             if (!checkout.value.cart.isEmpty) {
                 arr.push({
                     illustration: cartSvg,
-                    title: $t(`%hv`),
-                    description: checkout.value.cart.price > 0 ? $t(`%hw`) : $t(`%hx`),
+                    title: $t('%hv'),
+                    description: checkout.value.cart.price > 0 ? $t('%hw') : $t('%hx'),
                     action: openCart,
                 });
             }
@@ -157,8 +170,8 @@ export function useRegistrationQuickActions(): QuickActions {
 
                 arr.push({
                     illustration: outstandingAmountSvg,
-                    title: $t(`%hy`) + ' ' + organizationStatus.organization.name,
-                    description: $t(`%hz`) + ' ' + Formatter.price(open) + ' ' + $t(`%i0`) + ' ' + organizationStatus.organization.name + '',
+                    title: $t('%hy') + ' ' + organizationStatus.organization.name,
+                    description: $t('%hz') + ' ' + Formatter.price(open) + ' ' + $t('%i0') + ' ' + organizationStatus.organization.name + '',
                     rightText: Formatter.price(open),
                     rightTextClass: 'style-price',
                     action: async () => {
@@ -167,11 +180,23 @@ export function useRegistrationQuickActions(): QuickActions {
                 });
             }
 
+            for (const member of membersNeedingJudicialRecord.value) {
+                arr.push({
+                    illustration: privacyPolicySvg,
+                    prefix: $t('Verplicht voor jouw functie'),
+                    title: $t('Upload het uittreksel uit het strafregister van {member}', { member: member.patchedMember.firstName }),
+                    description: $t('Wie met minderjarigen werkt, moet om de 3 jaar een uittreksel (model 596.2) laten controleren'),
+                    // Through the route, like the payments action above, so the flow has the same
+                    // url here as it does when a member arrives on it from an e-mail
+                    action: () => $navigate('judicialRecord', { params: { id: member.id } }),
+                });
+            }
+
             for (const member of membersWithMissingData.value) {
                 arr.push({
                     illustration: missingDataSvg,
-                    title: $t(`%14A`, { member: member.member.patchedMember.firstName }),
-                    description: $t(`%14B`, { member: member.member.patchedMember.firstName }),
+                    title: $t('%14A', { member: member.member.patchedMember.firstName }),
+                    description: $t('%14B', { member: member.member.patchedMember.firstName }),
                     action: () => fillInMemberMissingData(member.member),
                 });
             }
@@ -180,8 +205,8 @@ export function useRegistrationQuickActions(): QuickActions {
                 // Het e-mailadres van dit account is niet toegevoegd bij
                 arr.push({
                     illustration: emailWarningSvg,
-                    title: $t(`%14C`, { member: member.patchedMember.firstName }),
-                    description: $t(`%14I`, {
+                    title: $t('%14C', { member: member.patchedMember.firstName }),
+                    description: $t('%14I', {
                         email: user.value?.email ?? '',
                         member: member.patchedMember.details.firstName,
                     }),
@@ -218,7 +243,7 @@ export function useRegistrationQuickActions(): QuickActions {
                     continue;
                 }
 
-                const groupsText = Formatter.joinLast(invitationData.map(i => i.invitation.group.name.toString()), ', ', ' ' + $t(`%M1`) + ' ');
+                const groupsText = Formatter.joinLast(invitationData.map(i => i.invitation.group.name.toString()), ', ', ' ' + $t('%M1') + ' ');
 
                 const invitationDataForIcon = invitationData.find(({ group }) => group.squareImage !== null) ?? invitationData[0];
 
