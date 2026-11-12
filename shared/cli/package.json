@@ -45,7 +45,7 @@
         "@opentelemetry/sdk-trace": "3.0.0",
         "@opentelemetry/exporter-trace-otlp-http": "0.300.0",
         "@anthropic-ai/sdk": "0.137.0",
-        "@aws-sdk/client-s3": "3.1160.0",
+        "@aws-sdk/client-s3": "3.1162.0",
         "@inquirer/prompts": "7.10.1",
         "@oclif/core": "4.14.0",
         "@oclif/plugin-autocomplete": "3.3.0",
