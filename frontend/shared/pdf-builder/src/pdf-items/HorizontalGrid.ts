@@ -83,8 +83,7 @@ export class HorizontalGrid implements PdfItem {
 
             if (item instanceof VerticalStack && item.isAllowedToSplit) {
                 totalItems += item.size;
-            }
-            else {
+            } else {
                 totalItems++;
             }
         }
@@ -224,13 +223,11 @@ export class HorizontalGrid implements PdfItem {
 
                 if (isLastItemInGrid) {
                     goToNextRow(rowTop + heightOfHighestItemOnRow);
-                }
-                else if (currentColumn === 0) {
+                } else if (currentColumn === 0) {
                     if (didCurrentRowOverflow) {
                         // do not go to next page immediatetely because ony needed if there is another item
                         shouldGoToNextPage = true;
-                    }
-                    else {
+                    } else {
                         const nextRowTop = rowTop + this.rowGap + heightOfHighestItemOnRow;
 
                         // if next row is below the bottom of the page, go to next page
@@ -242,8 +239,7 @@ export class HorizontalGrid implements PdfItem {
                             goToNextRow(nextRowTop);
                         }
                     }
-                }
-                else {
+                } else {
                     setX(originalX + (currentColumn * (this.columnGap + columnWidth)));
                 }
             }
@@ -304,8 +300,7 @@ export class HorizontalGrid implements PdfItem {
 
             if (newY > originalY) {
                 totalHeight += newY - originalY;
-            }
-            else {
+            } else {
                 totalHeight += newY - docWrapper.safeMargins.top;
             }
 
@@ -379,13 +374,11 @@ export class HorizontalGrid implements PdfItem {
 
                 if (isLastItemInGrid) {
                     goToNextRow(rowTop + heightOfHighestItemOnRow);
-                }
-                else if (currentColumn === 0) {
+                } else if (currentColumn === 0) {
                     if (didCurrentRowOverflow) {
                         // do not go to next page immediatetely because ony needed if there is another item
                         shouldGoToNextPage = true;
-                    }
-                    else {
+                    } else {
                         const nextRowTop = rowTop + this.rowGap + heightOfHighestItemOnRow;
 
                         // if next row is below the bottom of the page, go to next page
@@ -397,8 +390,7 @@ export class HorizontalGrid implements PdfItem {
                             goToNextRow(nextRowTop);
                         }
                     }
-                }
-                else {
+                } else {
                     setX(originalX + (currentColumn * (this.columnGap + columnWidth)));
                 }
             }

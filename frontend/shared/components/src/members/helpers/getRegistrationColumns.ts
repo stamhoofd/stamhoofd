@@ -18,7 +18,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
             name: '#',
             getValue: registration => registration.member.member.details.memberNumber ?? '',
             getStyle: val => val ? '' : 'gray',
-            format: val => val ? val : $t(`%1FW`),
+            format: val => val ? val : $t('%1FW'),
             minimumWidth: 100,
             recommendedWidth: 150,
             grow: true,
@@ -28,7 +28,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
 
         new Column<ObjectType, string>({
             id: 'member.name',
-            name: $t(`%1Os`),
+            name: $t('%1Os'),
             getValue: registration => registration.member.member.name,
             minimumWidth: 100,
             recommendedWidth: 200,
@@ -37,7 +37,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
 
         new Column<ObjectType, Date | null>({
             id: 'member.birthDay',
-            name: $t(`%17w`),
+            name: $t('%17w'),
             getValue: registration => registration.member.member.details.birthDay,
             format: date => date ? Formatter.dateNumber(date, true) : '',
             minimumWidth: 50,
@@ -46,9 +46,9 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
         }),
         new Column<ObjectType, number | null>({
             id: 'member.age',
-            name: $t(`%9S`),
+            name: $t('%9S'),
             getValue: registration => registration.member.member.details.age,
-            format: (age, width) => age ? (width <= 60 ? Formatter.integer(age) : (Formatter.integer(age) + ' ' + $t(`%Hp`))) : $t(`%15v`),
+            format: (age, width) => age ? (width <= 60 ? Formatter.integer(age) : (Formatter.integer(age) + ' ' + $t('%Hp'))) : $t('%15v'),
             minimumWidth: 50,
             recommendedWidth: 120,
             enabled: false,
@@ -71,7 +71,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
         isPlatform
             ? new Column<ObjectType, { status: MembershipStatus; hasFutureMembership: boolean }>({
                     id: 'member.membership',
-                    name: $t(`%1Ny`),
+                    name: $t('%1Ny'),
                     getValue: (registration) => {
                         return {
                             status: registration.member.membershipStatus,
@@ -81,15 +81,15 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                     format: ({ status }) => {
                         switch (status) {
                             case MembershipStatus.Trial:
-                                return $t(`%1IH`);
+                                return $t('%1IH');
                             case MembershipStatus.Active:
-                                return $t(`%1H0`);
+                                return $t('%1H0');
                             case MembershipStatus.Expiring:
-                                return $t(`%7F`);
+                                return $t('%7F');
                             case MembershipStatus.Temporary:
-                                return $t(`%zU`);
+                                return $t('%zU');
                             case MembershipStatus.Inactive:
-                                return $t(`%zV`);
+                                return $t('%zV');
                         }
                     },
                     getStyle: ({ status, hasFutureMembership }) => {
@@ -149,12 +149,12 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                 })
             : null,
         new Column<ObjectType, string[]>({
-            name: $t(`%7D`),
+            name: $t('%7D'),
             allowSorting: false,
             getValue: registration => registration.member.getResponsibilities({ organization: organization ?? undefined }).map(l => l.getName(registration.member, false)),
             format: (list) => {
                 if (list.length === 0) {
-                    return $t(`%1FW`);
+                    return $t('%1FW');
                 }
                 return list.join(', ');
             },
@@ -164,12 +164,12 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
             enabled: false,
         }),
         new Column<ObjectType, string[]>({
-            name: $t(`%1o`),
+            name: $t('%1o'),
             allowSorting: false,
             getValue: registration => registration.member.patchedMember.users.filter(u => u.hasAccount).map(u => u.email),
             format: (accounts) => {
                 if (accounts.length === 0) {
-                    return $t(`%zW`);
+                    return $t('%zW');
                 }
                 return accounts.join(', ');
             },
@@ -209,7 +209,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                     },
                     format: (value) => {
                         if (value === null) {
-                            return $t(`%1FW`);
+                            return $t('%1FW');
                         }
                         return value.option.allowAmount || value.amount > 1 ? (value.amount + 'x ' + value.option.name) : value.option.name;
                     },
@@ -236,7 +236,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                         },
                         format: (answer) => {
                             if (answer === null) {
-                                return $t(`%zX`);
+                                return $t('%zX');
                             }
                             return answer.stringValue;
                         },
@@ -266,7 +266,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
 
                     return registration.getMissingData(scope);
                 },
-                format: prices => Formatter.capitalizeFirstLetter(Formatter.joinLast(prices, ', ', ' ' + $t(`%M1`) + ' ') || $t('%1FW')),
+                format: prices => Formatter.capitalizeFirstLetter(Formatter.joinLast(prices, ', ', ' ' + $t('%M1') + ' ') || $t('%1FW')),
                 getStyle: prices => prices.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
@@ -343,7 +343,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                 name: $t('%1KQ'),
                 description: $t('%1Jj'),
                 getValue: registration => registration.member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
-                format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`%M1`) + ' ') || $t('%5D'),
+                format: organizations => Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t('%M1') + ' ') || $t('%5D'),
                 getStyle: organizations => organizations.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
@@ -358,7 +358,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                 name: $t('%1KR'),
                 description: $t('%1Jk'),
                 getValue: registration => registration.member.filterOrganizations({ periodId: filterPeriodId, types: [GroupType.Membership] }),
-                format: organizations => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`%M1`) + ' ') || $t('%1FW'),
+                format: organizations => Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t('%M1') + ' ') || $t('%1FW'),
                 getStyle: organizations => organizations.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
@@ -377,11 +377,11 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                 getValue: (registration) => {
                     if (registration.payingOrganizationId) {
                         const organization = registration.member.organizations.find(o => o.id === registration.payingOrganizationId);
-                        return organization ? organization.name : $t(`%Gr`);
+                        return organization ? organization.name : $t('%Gr');
                     }
                     return null;
                 },
-                format: organizationName => organizationName || $t(`%18s`),
+                format: organizationName => organizationName || $t('%18s'),
                 getStyle: organizationName => organizationName === null ? 'gray' : '',
                 minimumWidth: 100,
                 recommendedWidth: 300,
@@ -394,7 +394,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
         allColumns.push(
             new Column<ObjectType, Date | null>({
                 id: 'trialUntil',
-                name: $t(`%1IH`),
+                name: $t('%1IH'),
                 allowSorting: true,
                 getValue: (registration) => {
                     if (registration.trialUntil && registration.trialUntil > new Date()) {
@@ -404,9 +404,9 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                 },
                 format: (v, width) => {
                     if (!v) {
-                        return $t(`%1FW`);
+                        return $t('%1FW');
                     }
-                    return $t(`%ze`) + ' ' + (width < 200 ? Formatter.dateNumber(v) : Formatter.date(v));
+                    return $t('%ze') + ' ' + (width < 200 ? Formatter.dateNumber(v) : Formatter.date(v));
                 },
                 getStyle: v => v === null ? 'gray' : 'secundary',
                 minimumWidth: 80,
@@ -418,7 +418,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
     allColumns.push(
         new Column<ObjectType, Date | null>({
             id: 'startDate',
-            name: $t(`%1Of`),
+            name: $t('%1Of'),
             allowSorting: true,
             getValue: (registration) => {
                 const startDate = registration.startDate;
@@ -428,7 +428,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
 
                 return new Date(startDate.getTime());
             },
-            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`%Gr`),
+            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t('%Gr'),
             getStyle: v => v === null ? 'gray' : '',
             minimumWidth: 80,
             recommendedWidth: 200,
@@ -439,7 +439,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
     allColumns.push(
         new Column<ObjectType, Date | null>({
             id: 'endDate',
-            name: $t(`%1P8`),
+            name: $t('%1P8'),
             allowSorting: true,
             getValue: (registration) => {
                 const endDate = registration.endDate;
@@ -449,7 +449,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
 
                 return new Date(endDate.getTime());
             },
-            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`%Gr`),
+            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t('%Gr'),
             getStyle: v => v === null ? 'gray' : '',
             minimumWidth: 80,
             recommendedWidth: 200,
@@ -474,7 +474,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                     if (v.length === 0) {
                         return $t('%1QP');
                     }
-                    return Formatter.joinLast(v.sort(), ', ', ' ' + $t(`%M1`) + ' ');
+                    return Formatter.joinLast(v.sort(), ', ', ' ' + $t('%M1') + ' ');
                 },
                 getStyle: v => v.length === 0 ? 'gray' : '',
                 minimumWidth: 100,
@@ -486,10 +486,10 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
     allColumns.push(
         new Column<ObjectType, Date | null>({
             id: 'registeredAt',
-            name: waitingList ? $t(`%zf`) : $t(`%zg`),
+            name: waitingList ? $t('%zf') : $t('%zg'),
             allowSorting: true,
             getValue: registration => registration.registeredAt,
-            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t(`%Gr`),
+            format: (v, width) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : $t('%Gr'),
             getStyle: v => v === null ? 'gray' : '',
             minimumWidth: 80,
             recommendedWidth: 220,
@@ -514,7 +514,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
         allColumns.push(
             new Column<ObjectType, number>({
                 id: 'registrationCachedBalance.price',
-                name: $t(`%1IP`),
+                name: $t('%1IP'),
                 allowSorting: true,
                 getValue: (registration) => {
                     return registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPaid + r.amountPending), 0);
@@ -524,7 +524,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                         return Formatter.price(outstandingBalance);
                     }
                     if (outstandingBalance <= 0) {
-                        return $t(`%1Mn`);
+                        return $t('%1Mn');
                     }
                     return Formatter.price(outstandingBalance);
                 },
@@ -538,7 +538,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
         allColumns.push(
             new Column<ObjectType, number>({
                 id: 'registrationCachedBalance.toPay',
-                name: $t(`%m0`),
+                name: $t('%m0'),
                 description: $t('%183'),
                 allowSorting: true,
                 getValue: (registration) => {
@@ -549,7 +549,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                         return Formatter.price(outstandingBalance);
                     }
                     if (outstandingBalance <= 0) {
-                        return $t(`%1OD`);
+                        return $t('%1OD');
                     }
                     return Formatter.price(outstandingBalance);
                 },
@@ -565,7 +565,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
         allColumns.push(
             new Column<ObjectType, number>({
                 id: 'memberCachedBalance.amountOpen',
-                name: $t(`%76`),
+                name: $t('%76'),
                 description: $t('%184'),
                 allowSorting: true,
                 getValue: v => v.member.member.balances.reduce((sum, r) => sum + (r.amountOpen), 0),
@@ -585,7 +585,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
             new Column<ObjectType, Group[]>({
                 id: 'category',
                 allowSorting: false,
-                name: waitingList ? $t(`%1IQ`) : (category.settings.name || $t('%1EI')),
+                name: waitingList ? $t('%1IQ') : (category.settings.name || $t('%1EI')),
                 getValue: (registration) => {
                     if (!category) {
                         return [];
@@ -597,7 +597,7 @@ export function getRegistrationColumns({ platform, organization, dateRange, grou
                 },
                 format: (groups) => {
                     if (groups.length === 0) {
-                        return $t(`%1FW`);
+                        return $t('%1FW');
                     }
                     return groups.map(g => g.settings.name).join(', ');
                 },

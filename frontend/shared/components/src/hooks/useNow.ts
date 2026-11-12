@@ -5,7 +5,6 @@ import { useVisibilityChange } from './useVisibilityChange.js';
 const now = ref(new Date());
 
 export function useNow() {
-
     onActivated(() => {
         now.value = new Date();
     });

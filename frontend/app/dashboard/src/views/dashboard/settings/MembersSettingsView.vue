@@ -318,7 +318,7 @@ defineRoutes([
                                         financialSupport: isNew ? FinancialSupportSettings.create({}).patch(patch) : patch,
                                     }),
                                 }));
-                                Toast.success($t(`%HU`)).show();
+                                Toast.success($t('%HU')).show();
                             },
                         };
                     },
@@ -338,7 +338,7 @@ defineRoutes([
                                         dataPermission: isNew ? DataPermissionsSettings.create({}).patch(patch) : patch,
                                     }),
                                 }));
-                                Toast.success($t(`%HU`)).show();
+                                Toast.success($t('%HU')).show();
                             },
                         };
                     },

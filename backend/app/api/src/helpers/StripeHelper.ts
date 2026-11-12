@@ -227,7 +227,7 @@ export class StripeHelper {
         if (!stripeAccount) {
             throw new SimpleError({
                 code: '',
-                message: $t(`%w3`, { method: PaymentMethodHelper.getName(payment.method) }),
+                message: $t('%w3', { method: PaymentMethodHelper.getName(payment.method) }),
             });
         }
 
@@ -237,7 +237,7 @@ export class StripeHelper {
             throw new SimpleError({
                 code: 'minimum_amount',
                 message: 'The minimum amount for an online payment is € 0,50',
-                human: $t(`%wl`),
+                human: $t('%wl'),
             });
         }
 
@@ -260,7 +260,7 @@ export class StripeHelper {
             const paymentMethod = await stripe.paymentMethods.create({
                 type: payment.method.toLowerCase() as 'bancontact' | 'ideal',
                 billing_details: {
-                    name: payment.customer?.dynamicName || (customer.name.length > 2 ? customer.name : $t(`%Gr`)),
+                    name: payment.customer?.dynamicName || (customer.name.length > 2 ? customer.name : $t('%Gr')),
                     email: payment.customer?.dynamicEmail || customer.email,
                     address: payment.customer?.company?.address
                         ? {
@@ -299,7 +299,7 @@ export class StripeHelper {
                 console.error('Stripe payment intent status is not requires_action', paymentIntent);
                 throw new SimpleError({
                     code: 'invalid_status',
-                    message: $t(`%wm`) + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t(`%wn`),
+                    message: $t('%wm') + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t('%wn'),
                 });
             }
 
@@ -366,7 +366,7 @@ export class StripeHelper {
                 console.error('Stripe session has no url', session);
                 throw new SimpleError({
                     code: 'invalid_status',
-                    message: $t(`%wm`) + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t(`%wn`),
+                    message: $t('%wm') + ' ' + PaymentMethodHelper.getName(payment.method) + ' ' + $t('%wn'),
                 });
             }
             paymentUrl = session.url;

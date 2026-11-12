@@ -91,86 +91,86 @@ export class EditorSmartVariable extends AutoEncoder {
         const variables = [
             EditorSmartVariable.create({
                 id: 'greeting',
-                name: $t(`%oZ`),
+                name: $t('%oZ'),
             }),
             EditorSmartVariable.create({
                 id: 'firstName',
-                name: $t(`%1MT`),
-                deleteMessage: $t(`%oa`),
+                name: $t('%1MT'),
+                deleteMessage: $t('%oa'),
             }),
             EditorSmartVariable.create({
                 id: 'lastName',
-                name: $t(`%1MU`),
-                deleteMessage: $t(`%ob`),
+                name: $t('%1MU'),
+                deleteMessage: $t('%ob'),
             }),
             EditorSmartVariable.create({
                 id: 'email',
-                name: $t(`%oc`),
+                name: $t('%oc'),
             }),
             EditorSmartVariable.create({
                 id: 'fromAddress',
-                name: $t(`%od`),
+                name: $t('%od'),
             }),
             EditorSmartVariable.create({
                 id: 'fromName',
-                name: $t(`%oe`),
+                name: $t('%oe'),
             }),
             EditorSmartVariable.create({
                 id: 'firstNameMember',
-                name: $t(`%of`),
-                deleteMessage: $t(`%og`),
+                name: $t('%of'),
+                deleteMessage: $t('%og'),
             }),
             EditorSmartVariable.create({
                 id: 'lastNameMember',
-                name: $t(`%oh`),
-                deleteMessage: $t(`%oi`),
+                name: $t('%oh'),
+                deleteMessage: $t('%oi'),
             }),
             EditorSmartVariable.create({
                 id: 'requesterEmail',
-                name: $t(`%ZbJ`),
+                name: $t('%ZbJ'),
             }),
             EditorSmartVariable.create({
                 id: 'securityCode',
-                name: $t(`%wE`),
-                deleteMessage: $t(`%Zb7`),
+                name: $t('%wE'),
+                deleteMessage: $t('%Zb7'),
             }),
             EditorSmartVariable.create({
                 id: 'inviterName',
-                name: $t(`%oj`),
+                name: $t('%oj'),
             }),
             EditorSmartVariable.create({
                 id: 'platformOrOrganizationName',
-                name: $t(`%ok`),
+                name: $t('%ok'),
             }),
             EditorSmartVariable.create({
                 id: 'platformName',
-                name: $t(`%1Uw`),
+                name: $t('%1Uw'),
             }),
             EditorSmartVariable.create({
                 id: 'payingOrganizationName',
-                name: $t(`%1dH`),
+                name: $t('%1dH'),
             }),
             EditorSmartVariable.create({
                 id: 'outstandingBalance',
-                name: $t(`%76`),
-                deleteMessage: $t(`%ol`),
+                name: $t('%76'),
+                deleteMessage: $t('%ol'),
             }),
             EditorSmartVariable.create({
                 id: 'registerUrl',
-                name: $t(`%om`),
+                name: $t('%om'),
             }),
             EditorSmartVariable.create({
                 id: 'resetUrl',
-                name: $t(`%on`),
+                name: $t('%on'),
             }),
             EditorSmartVariable.create({
                 id: 'confirmEmailCode',
-                name: $t(`%oo`),
+                name: $t('%oo'),
             }),
             EditorSmartVariable.create({
                 id: 'loginDetails',
-                name: $t(`%op`),
-                hint: $t(`%oq`),
+                name: $t('%op'),
+                hint: $t('%oq'),
             }),
 
             EditorSmartVariable.create({
@@ -181,129 +181,129 @@ export class EditorSmartVariable extends AutoEncoder {
 
             EditorSmartVariable.create({
                 id: 'groupName',
-                name: $t(`%CX`),
+                name: $t('%CX'),
             }),
             EditorSmartVariable.create({
                 id: 'mailDomain',
-                name: $t(`%os`),
+                name: $t('%os'),
             }),
         ];
 
         // if (this.orders.length > 0) {
         variables.push(EditorSmartVariable.create({
             id: 'nr',
-            name: $t(`%xA`),
+            name: $t('%xA'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'invoiceNumber',
-            name: $t(`%1YZ`),
+            name: $t('%1YZ'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderPrice',
-            name: $t(`%ot`),
+            name: $t('%ot'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderPrice',
-            name: $t(`%ot`),
+            name: $t('%ot'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderStatus',
-            name: $t(`%ou`),
+            name: $t('%ou'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderTime',
-            name: $t(`%1GD`),
+            name: $t('%1GD'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderDate',
-            name: $t(`%cC`),
+            name: $t('%cC'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderMethod',
-            name: $t(`%ov`),
+            name: $t('%ov'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderLocation',
-            name: $t(`%ow`),
+            name: $t('%ow'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'paymentMethod',
-            name: $t(`%M7`),
+            name: $t('%M7'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'priceToPay',
-            name: $t(`%hF`),
+            name: $t('%hF'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'totalPrice',
-            name: $t(`%hF`),
+            name: $t('%hF'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'pricePaid',
-            name: $t(`%Ml`),
+            name: $t('%Ml'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'transferDescription',
-            name: $t(`%ox`),
+            name: $t('%ox'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'transferBankAccount',
-            name: $t(`%oy`),
+            name: $t('%oy'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'transferBankCreditor',
-            name: $t(`%oz`),
+            name: $t('%oz'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderTable',
-            name: $t(`%p0`),
+            name: $t('%p0'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'overviewTable',
-            name: $t(`%1N1`),
+            name: $t('%1N1'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'balanceTable',
-            name: $t(`%p1`),
+            name: $t('%p1'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'orderDetailsTable',
-            name: $t(`%p2`),
+            name: $t('%p2'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'paymentTable',
-            name: $t(`%p3`),
+            name: $t('%p3'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'paymentData',
-            name: $t(`%1N2`),
+            name: $t('%1N2'),
             description: $t('%1Mz'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'overviewContext',
-            name: $t(`%p4`),
+            name: $t('%p4'),
             description: $t('%1N0'),
         }));
 
@@ -319,32 +319,32 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(EditorSmartVariable.create({
             id: 'objectName',
-            name: $t(`%p5`),
+            name: $t('%p5'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'webshopName',
-            name: $t(`%p6`),
+            name: $t('%p6'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'discountCode',
-            name: $t(`%1MX`),
+            name: $t('%1MX'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'validUntil',
-            name: $t(`%K4`),
+            name: $t('%K4'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'validUntilDate',
-            name: $t(`%p7`),
+            name: $t('%p7'),
         }));
 
         variables.push(EditorSmartVariable.create({
             id: 'packageName',
-            name: $t(`%p8`),
+            name: $t('%p8'),
         }));
 
         variables.push(EditorSmartVariable.create({

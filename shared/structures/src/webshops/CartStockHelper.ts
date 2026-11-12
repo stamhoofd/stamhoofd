@@ -157,7 +157,7 @@ export class CartStockHelper {
             stock: remainingStock,
             remaining: admin ? null : remaining,
             text: remainingStock === 0 ? $t('%1DZ', { 'product-price-name': productPrice.name }) : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? $t(`%12p`) : (remaining === 0 ? $t(`%zD`) : (remaining < showStockBelow ? $t('%1H4', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
+            shortText: remainingStock === 0 ? $t('%12p') : (remaining === 0 ? $t('%zD') : (remaining < showStockBelow ? $t('%1H4', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
         };
     }
 
@@ -233,7 +233,7 @@ export class CartStockHelper {
             stock: remainingStock,
             remaining: admin ? null : remaining,
             text: remainingStock === 0 ? `${Formatter.capitalizeFirstLetter(option.name)} is uitverkocht` : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
-            shortText: remainingStock === 0 ? $t(`%12p`) : (remaining === 0 ? $t(`%zD`) : (remaining < showStockBelow ? $t('%1H4', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
+            shortText: remainingStock === 0 ? $t('%12p') : (remaining === 0 ? $t('%zD') : (remaining < showStockBelow ? $t('%1H4', { 'x-items': product.getRemainingStockText(remaining) }) : null)),
         };
     }
 
@@ -289,7 +289,7 @@ export class CartStockHelper {
         return {
             stock: remainingStock,
             remaining,
-            text: remainingStock === 0 ? $t(`%sP`) : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
+            text: remainingStock === 0 ? $t('%sP') : (remaining < showStockBelow || (amount && remaining <= amount) ? text : null),
         };
     }
 
@@ -371,8 +371,8 @@ export class CartStockHelper {
             return {
                 stock: 1,
                 remaining: 0,
-                text: $t(`%sQ`),
-                shortText: $t(`%zD`),
+                text: $t('%sQ'),
+                shortText: $t('%zD'),
             };
         }
 

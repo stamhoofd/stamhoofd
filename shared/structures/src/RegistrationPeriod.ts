@@ -124,7 +124,7 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
             }
 
             if (tree.categories.length == 0 && tree.groups.length > 0) {
-                tree.settings.name = $t(`%aT`);
+                tree.settings.name = $t('%aT');
                 return GroupCategoryTree.create({
                     settings: GroupCategorySettings.create({
                         name: '',

@@ -135,8 +135,7 @@ function onLoad() {
             iframeDoc?.addEventListener('click', (e) => {
                 e.preventDefault(); // block link navigation
             });
-        }
-        else if (iframeDoc) {
+        } else if (iframeDoc) {
             for (const a of iframeDoc.querySelectorAll('a')) {
                 a.setAttribute('target', '_blank');
             }

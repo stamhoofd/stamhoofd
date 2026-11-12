@@ -90,7 +90,7 @@ export class Platform extends QueryableModel {
         throw new SimpleError({
             code: 'only_platform',
             message: 'Period id should only be used if userMode is platform',
-            human: $t(`%1AD`),
+            human: $t('%1AD'),
         });
     }
 
@@ -176,8 +176,7 @@ export class Platform extends QueryableModel {
 
                 if (STAMHOOFD.userMode === 'platform') {
                     model.periodId = (await RegistrationPeriod.all())[0].id;
-                }
-                else {
+                } else {
                     const period = await RegistrationPeriod.select().where('organizationId', null).first(true);
                     model.periodId = period.id;
                 }

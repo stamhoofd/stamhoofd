@@ -9,25 +9,27 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import type { MemberSharedStepOptions } from './MemberSharedStepOptions';
 
 export class MemberEmergencyContactsStep implements EditMemberStep {
-    options: MemberSharedStepOptions
+    options: MemberSharedStepOptions;
 
     constructor(options: MemberSharedStepOptions) {
-        this.options = options
+        this.options = options;
     }
 
     getName(manager: MemberStepManager) {
-        return $t(`%f1`)
+        return $t('%f1');
     }
 
-    isEnabled(manager: MemberStepManager) {    
-        const member = manager.member
+    isEnabled(manager: MemberStepManager) {
+        const member = manager.member;
         const details = member.patchedMember.details;
 
         if (!member.isPropertyEnabled('emergencyContacts', {
-            checkPermissions: manager.context.user ? {
-                level: PermissionLevel.Write,
-                user: manager.context.user
-            } : undefined
+            checkPermissions: manager.context.user
+                ? {
+                        level: PermissionLevel.Write,
+                        user: manager.context.user,
+                    }
+                : undefined,
         })) {
             return false;
         }
@@ -47,14 +49,14 @@ export class MemberEmergencyContactsStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return AsyncComponent(() => import('#members/MemberStepView.vue'), {
-            title: $t(`%f1`),
+            title: $t('%f1'),
             member: manager.member,
             component: markRaw(EditEmergencyContactsBox),
-            saveText: $t(`%16p`),
+            saveText: $t('%16p'),
             markReviewed: ['emergencyContacts'],
             saveHandler: async (navigate: NavigationActions) => {
-                await manager.saveHandler(this, navigate)
-            }
-        })
+                await manager.saveHandler(this, navigate);
+            },
+        });
     }
 }

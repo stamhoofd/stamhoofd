@@ -32,7 +32,7 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import type { Address} from '@stamhoofd/structures';
+import type { Address } from '@stamhoofd/structures';
 import { ValidatedAddress } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
@@ -79,8 +79,7 @@ async function goNext() {
 
     try {
         await props.continueCheckout(navigationActions);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
     }

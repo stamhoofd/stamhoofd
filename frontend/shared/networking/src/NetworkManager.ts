@@ -1,5 +1,5 @@
 import type { SimpleErrors } from '@common/errors';
-import type { Request, RequestMiddleware} from '@common/networking';
+import type { Request, RequestMiddleware } from '@common/networking';
 import { Server } from '@common/networking';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';
 import { Version } from '@stamhoofd/structures';
@@ -66,15 +66,14 @@ export class NetworkManagerStatic implements RequestMiddleware {
 
         if ((request as any).retryCount > 1 && !this.networkErrorToast) {
             // Only on second try
-            this.networkErrorToast = new Toast($t(`%ks`), 'spinner').setHide(null).show();
+            this.networkErrorToast = new Toast($t('%ks'), 'spinner').setHide(null).show();
         }
 
         if (navigator.onLine) {
             // Normal timeout behaviour: browser probably doesn't know about network issues, so we need to 'poll'
             await sleep(Math.min(((request as any).retryCount ?? 0) * 1000, 10 * 1000));
             return Promise.resolve(true);
-        }
-        else {
+        } else {
             // Wait for network or 10 seconds (the fastest one)
             await waitForNetworkOnline(10000);
             return Promise.resolve(true);
@@ -96,8 +95,7 @@ export class NetworkManagerStatic implements RequestMiddleware {
             if (error.hasCode('client_update_required')) {
                 getNetworkingConfiguration().onClientUpdateRequired(error);
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
 

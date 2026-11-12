@@ -112,15 +112,14 @@ export class MailchimpClient {
                 response = await fetch(url, {
                     method,
                     headers: {
-                        'Authorization': 'Basic ' + Buffer.from('stamhoofd:' + this.apiKey).toString('base64'),
-                        'Accept': 'application/json',
+                        Authorization: 'Basic ' + Buffer.from('stamhoofd:' + this.apiKey).toString('base64'),
+                        Accept: 'application/json',
                         ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
                     },
                     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
                     signal: AbortSignal.timeout(60_000),
                 });
-            }
-            catch (e) {
+            } catch (e) {
                 if (attempt < MAX_RETRIES) {
                     await sleep(MailchimpClient.retryDelay * 2 ** attempt);
                     continue;
@@ -142,8 +141,7 @@ export class MailchimpClient {
             let json: unknown = null;
             try {
                 json = text ? JSON.parse(text) : null;
-            }
-            catch {
+            } catch {
                 // Not JSON
             }
 
@@ -275,8 +273,7 @@ export class MailchimpClient {
                 const item = items[index++];
                 try {
                     await handler(item);
-                }
-                catch (e) {
+                } catch (e) {
                     // Stop the other workers
                     failed = true;
                     throw e;

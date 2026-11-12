@@ -40,7 +40,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                 throw new SimpleError({
                     code: 'not_supported',
                     message: 'This platform does not support password login',
-                    human: $t(`%D7`),
+                    human: $t('%D7'),
                     statusCode: 400,
                 });
             }
@@ -50,7 +50,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                 throw new SimpleError({
                     code: 'not_supported',
                     message: 'This platform does not support password login',
-                    human: $t(`%D7`),
+                    human: $t('%D7'),
                     statusCode: 400,
                 });
             }
@@ -77,7 +77,7 @@ export class SignupEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
                 throw new SimpleError({
                     code: 'unexpected_error',
                     message: 'Something went wrong',
-                    human: $t(`%DM`),
+                    human: $t('%DM'),
                     statusCode: 500,
                 });
             }

@@ -100,7 +100,7 @@ export class GetBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'timeout',
                     message: 'Query took too long',
-                    human: $t(`%Cv`),
+                    human: $t('%Cv'),
                 });
             }
             throw error;

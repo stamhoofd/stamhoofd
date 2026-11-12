@@ -375,7 +375,7 @@ export class RegisterCheckout {
             throw new SimpleError({
                 code: 'forbidden',
                 message: 'Permission denied: you are not allowed to delete registrations',
-                human: $t(`%qr`),
+                human: $t('%qr'),
             });
         }
 
@@ -393,7 +393,7 @@ export class RegisterCheckout {
                 throw new SimpleError({
                     code: 'negative_price',
                     message: 'Total price cannot be negative',
-                    human: $t(`%17E`),
+                    human: $t('%17E'),
                 });
             }
         }
@@ -462,7 +462,7 @@ export class RegisterCheckout {
         if (this.showDiscountsSeparately && this.cart.balanceItemDiscountsPrice !== 0) {
             subtotal -= this.cart.balanceItemDiscountsPrice;
             all.push({
-                name: $t(`%1Xl`),
+                name: $t('%1Xl'),
                 price: this.cart.balanceItemDiscountsPrice,
                 action: options?.balanceItemDiscountsAction,
             });
@@ -470,26 +470,26 @@ export class RegisterCheckout {
 
         all.push(...[
             {
-                name: $t(`%17F`),
+                name: $t('%17F'),
                 price: -this.cart.refund,
             },
             {
-                name: $t(`%qs`),
+                name: $t('%qs'),
                 price: this.administrationFee,
             },
             {
-                name: $t(`%Ot`),
+                name: $t('%Ot'),
                 price: this.freeContribution,
             },
             {
-                name: $t(`%17G`),
+                name: $t('%17G'),
                 price: this.cart.cancellationFees,
             },
         ].filter(a => a.price !== 0));
 
         if (all.length > 0 && subtotal !== 0) {
             all.unshift({
-                name: $t(`%xJ`),
+                name: $t('%xJ'),
                 price: subtotal,
             });
         }
@@ -499,7 +499,7 @@ export class RegisterCheckout {
         if (totalLater !== 0) {
             all.push(
                 {
-                    name: $t(`%10Z`),
+                    name: $t('%10Z'),
                     price: totalLater,
                 },
             );
@@ -512,7 +512,7 @@ export class RegisterCheckout {
             });
         } else {
             all.push({
-                name: this.cart.priceDueLater ? $t(`%10c`) : $t(`%xL`),
+                name: this.cart.priceDueLater ? $t('%10c') : $t('%xL'),
                 price: this.totalPrice,
             });
         }

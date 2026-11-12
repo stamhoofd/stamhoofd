@@ -132,7 +132,7 @@ const hasOtherOnlinePaymentMethodBesidesBancontact = computed(() => {
 
 function getName(paymentMethod: PaymentMethod): string {
     switch (paymentMethod) {
-        case PaymentMethod.Transfer: return $t(`%12j`);
+        case PaymentMethod.Transfer: return $t('%12j');
     }
     return PaymentMethodHelper.getNameCapitalized(paymentMethod, props.context);
 }
@@ -143,13 +143,13 @@ function getDescription(paymentMethod: PaymentMethod): string {
             if (paymentMethods.value.includes(PaymentMethod.Bancontact)) {
                 return '';
             }
-            return $t(`%12l`);
+            return $t('%12l');
         }
-        case PaymentMethod.Transfer: return $t(`%12m`);
+        case PaymentMethod.Transfer: return $t('%12m');
         case PaymentMethod.Bancontact: return props.country === Country.Belgium ? $t('%1Ou') : '';
-        case PaymentMethod.iDEAL: return props.country === Country.Netherlands ? $t(`%12n`) : '';
+        case PaymentMethod.iDEAL: return props.country === Country.Netherlands ? $t('%12n') : '';
         case PaymentMethod.Unknown: return '';
-        case PaymentMethod.DirectDebit: return $t(`%12o`);
+        case PaymentMethod.DirectDebit: return $t('%12o');
         case PaymentMethod.CreditCard: return '';
         case PaymentMethod.PointOfSale: return '';
         case PaymentMethod.AccountDeductions: return '';

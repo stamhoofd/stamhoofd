@@ -13,7 +13,6 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-
         <STList>
             <STPackageRow v-for="pack of model.packages" :key="pack.id" :pack="pack" />
         </STList>
@@ -48,7 +47,7 @@ const props = withDefaults(
         model: OrganizationCheckoutViewModel;
         saveHandler: (navigate: NavigationActions) => Promise<void>;
     }>(), {
-    }
+    },
 );
 
 const errors = useErrors();
@@ -71,11 +70,9 @@ async function goNext() {
 
         // todo: validate and modify checkout
         await props.saveHandler(navigate);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         loading.value = false;
     }
 }

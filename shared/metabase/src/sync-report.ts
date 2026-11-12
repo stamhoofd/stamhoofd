@@ -74,7 +74,7 @@ export function cardName(card: ReportCard, tab: ReportTab): string {
 /** Metabase lays a dashboard out on a 24 column grid. */
 const gridWidth = 24;
 
-const widths: Record<ReportCard['size'], number> = { full: 24, 'two-thirds': 16, half: 12, third: 8, quarter: 6, sixth: 4 };
+const widths: Record<ReportCard['size'], number> = { 'full': 24, 'two-thirds': 16, 'half': 12, 'third': 8, 'quarter': 6, 'sixth': 4 };
 
 /**
  * Extra rows for the band the rotated labels sit in.
@@ -84,9 +84,9 @@ const widths: Record<ReportCard['size'], number> = { full: 24, 'two-thirds': 16,
  * do with how wide the card is, so this is added on top rather than scaled.
  */
 const xLabelRows: Record<NonNullable<ReportCard['xLabels']>, number> = {
-    show: 0,
-    hide: 0,
-    compact: 0,
+    'show': 0,
+    'hide': 0,
+    'compact': 0,
     'rotate-45': 4,
     'rotate-90': 6,
 };
@@ -240,10 +240,10 @@ export function buildTemplateTags(card: ReportCard, snippetIds: Map<string, numb
 
         const name = snippetTagName(snippet);
         tags[name] = {
-            id: templateTagId(card.key, name),
+            'id': templateTagId(card.key, name),
             name,
             'display-name': snippet,
-            type: 'snippet',
+            'type': 'snippet',
             'snippet-name': snippet,
             'snippet-id': snippetId,
         };
@@ -254,10 +254,10 @@ export function buildTemplateTags(card: ReportCard, snippetIds: Map<string, numb
         const fallback = card.defaults.get(parameter);
 
         tags[parameter] = {
-            id: templateTagId(card.key, parameter),
-            name: parameter,
+            'id': templateTagId(card.key, parameter),
+            'name': parameter,
             'display-name': filter?.title ?? parameter,
-            type: fallback !== undefined ? 'number' : filter?.type === 'boolean' ? 'boolean' : 'text',
+            'type': fallback !== undefined ? 'number' : filter?.type === 'boolean' ? 'boolean' : 'text',
             ...(filter?.type === 'boolean' ? { default: filter.start } : {}),
             ...(fallback !== undefined ? { default: fallback } : {}),
             ...(required.includes(parameter) ? { required: true } : {}),
@@ -459,9 +459,9 @@ export function chartColors(colors: string[], count = chartColorCount): string[]
  * How the report describes its x-axis labels, in what Metabase calls them.
  */
 const xAxisLabels: Record<string, boolean | string> = {
-    show: true,
-    hide: false,
-    compact: 'compact',
+    'show': true,
+    'hide': false,
+    'compact': 'compact',
     'rotate-45': 'rotate-45',
     'rotate-90': 'rotate-90',
 };
@@ -777,8 +777,7 @@ export function groupByDashboard(tabs: ReportTab[], dashboardName: string): { na
 
         if (dashboard) {
             dashboard.tabs.push(tab);
-        }
-        else {
+        } else {
             dashboards.push({ name, tabs: [tab] });
         }
     }
@@ -977,8 +976,7 @@ async function readOrderedValues(api: MetabaseApi, filterCardIds: Map<string, nu
 
         try {
             values.set(filter.valuesFrom, await api.runCardValues(cardId));
-        }
-        catch {
+        } catch {
             continue;
         }
     }

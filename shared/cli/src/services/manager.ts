@@ -132,8 +132,7 @@ export async function printServicesStatus<TOptions>(context: CliContext, service
         try {
             const status = await service.status(context);
             rows[index].update(formatServiceTableRow(serviceStatusToTableRow(status, 'Run stam services up')));
-        }
-        catch (error) {
+        } catch (error) {
             rows[index].update(formatServiceTableRow({
                 name: service.name,
                 status: ServiceTableRowStatus.Failed,
@@ -184,8 +183,7 @@ async function runServicesInteractive<T, TOptions>(services: ReadonlyArray<Servi
                 });
                 rows[index].update(formatServiceTableRows([result.row])[0]);
                 return result.value;
-            }
-            catch (error) {
+            } catch (error) {
                 rows[index].update(formatServiceTableRows([{
                     name: service.name,
                     status: ServiceTableRowStatus.Failed,
@@ -208,8 +206,7 @@ async function runServicesInteractive<T, TOptions>(services: ReadonlyArray<Servi
 
             return result.value;
         });
-    }
-    finally {
+    } finally {
         await liveTable.wait();
         printServiceFailureLogs(rejectedReason);
     }

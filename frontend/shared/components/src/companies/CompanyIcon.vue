@@ -9,9 +9,9 @@ import type { Company } from '@stamhoofd/structures/Company.js';
 withDefaults(
     defineProps<{
         company: Company;
-        isDefault?: boolean
+        isDefault?: boolean;
     }>(), {
-        isDefault: false
-    }
-)
+        isDefault: false,
+    },
+);
 </script>

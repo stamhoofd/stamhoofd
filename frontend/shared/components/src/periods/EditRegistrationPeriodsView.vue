@@ -10,7 +10,8 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="isPlatform && sortedPeriods.length && currentPeriod.id !== sortedPeriods[0].id && (sortedPeriods[0].startDate.getTime() - new Date().getTime()) < 1000 * 60 * 60 * 24 * 30 * 2">
-            <hr><h2>{{ $t('%IU') }} {{ sortedPeriods[0].nameShort }}</h2>
+            <hr>
+            <h2>{{ $t('%IU') }} {{ sortedPeriods[0].nameShort }}</h2>
             <p>
                 {{ $t("%AD") }}
             </p>
@@ -30,7 +31,8 @@
                 </button>
             </p>
 
-            <hr><h2>{{ $t('%3i') }}</h2>
+            <hr>
+            <h2>{{ $t('%3i') }}</h2>
         </template>
 
         <STList>
@@ -160,7 +162,7 @@ async function showContextMenu(event: MouseEvent, period: RegistrationPeriod) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`%IV`),
+                name: $t('%IV'),
                 disabled: currentPeriod.value.id === period.id,
                 action: async () => {
                     await setCurrent(period);
@@ -208,7 +210,7 @@ async function save() {
                 await patchPlatform(platformPatch.value, { shouldRetry: false });
             }
 
-            new Toast($t(`%HA`), 'success green').show();
+            new Toast($t('%HA'), 'success green').show();
 
             if (changedPeriod) {
                 new Toast($t('%8P'), 'info').setHide(20 * 1000).show();
@@ -222,7 +224,7 @@ async function save() {
                 }
             }
 
-            new Toast($t(`%HA`), 'success green').show();
+            new Toast($t('%HA'), 'success green').show();
         }
 
         await pop({ force: true });

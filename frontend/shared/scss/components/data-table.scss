@@ -15,7 +15,8 @@
     position: relative;
     z-index: 0;
 
-    td, th {
+    td,
+    th {
         word-wrap: break-word;
         min-width: 150px;
     }
@@ -23,7 +24,6 @@
     thead {
         text-align: left;
         font-weight: 600;
-            
 
         th {
             background: $color-background;
@@ -49,7 +49,7 @@
             }
 
             &::after {
-                content: "";
+                content: '';
                 position: sticky;
                 top: 0;
                 background: $color-background;
@@ -143,7 +143,7 @@
                 padding: 0;
                 padding-left: 40px - 10px;
                 padding-left: calc(var(--st-horizontal-padding, 40px) - 10px);
-                
+
                 .checkbox {
                     margin: 0;
                     padding: 10px;

@@ -43,8 +43,7 @@ const errorBox = ref<ErrorBox | null>(null);
 watch(isSelectAll, (isSelectAll) => {
     if (isSelectAll) {
         props.filter.selectedOptions = [...props.filter.builder.multipleChoiceOptions];
-    }
-    else {
+    } else {
         props.filter.selectedOptions = [];
     }
 });
@@ -64,8 +63,7 @@ function setOptionSelected(option: MultipleChoiceUIFilterOption, selected: boole
         if (index !== -1) {
             props.filter.selectedOptions.splice(index, 1);
         }
-    }
-    else {
+    } else {
         props.filter.selectedOptions.push(option);
     }
 }

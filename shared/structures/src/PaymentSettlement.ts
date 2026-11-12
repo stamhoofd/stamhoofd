@@ -124,20 +124,20 @@ export function getPaymentSettlement(payment: SettleablePayment): PaymentSettlem
         return payment.settlement
             ? getSettledGroup(payment.provider, payment.settlement)
             : new PaymentSettlementGroup({
-                id: 'not-settled',
-                name: $t('%Zjn'),
-                description: $t('%Zjd'),
-                icon: 'bank',
-                asideIcon: 'clock',
-                filter: {
-                    $and: [
-                        { status: PaymentStatus.Succeeded },
-                        { method: { $neq: PaymentMethod.AccountDeductions } },
-                        { provider: { $in: SETTLING_PAYMENT_PROVIDERS } },
-                        { settlement: { settledAt: null } },
-                    ],
-                },
-            });
+                    id: 'not-settled',
+                    name: $t('%Zjn'),
+                    description: $t('%Zjd'),
+                    icon: 'bank',
+                    asideIcon: 'clock',
+                    filter: {
+                        $and: [
+                            { status: PaymentStatus.Succeeded },
+                            { method: { $neq: PaymentMethod.AccountDeductions } },
+                            { provider: { $in: SETTLING_PAYMENT_PROVIDERS } },
+                            { settlement: { settledAt: null } },
+                        ],
+                    },
+                });
     }
 
     if (isOnlinePayment(payment)) {

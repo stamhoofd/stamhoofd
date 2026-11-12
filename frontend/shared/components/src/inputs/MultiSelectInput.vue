@@ -43,7 +43,7 @@ const props = withDefaults(defineProps<{
     choices: { value: T; label: string; categories?: string[] }[];
     placeholder?: string;
 }>(), {
-    placeholder: () => $t(`%1Fq`),
+    placeholder: () => $t('%1Fq'),
 });
 
 const draggableValues = computed({

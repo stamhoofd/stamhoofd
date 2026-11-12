@@ -48,12 +48,12 @@ export enum OrderStatus {
 export class OrderStatusHelper {
     static getName(status: OrderStatus): string {
         switch (status) {
-            case OrderStatus.Created: return $t(`%1IY`);
-            case OrderStatus.Prepared: return $t(`%t7`);
-            case OrderStatus.Collect: return $t(`%t8`);
-            case OrderStatus.Completed: return $t(`%Gt`);
-            case OrderStatus.Canceled: return $t(`%gg`);
-            case OrderStatus.Deleted: return $t(`%1FX`);
+            case OrderStatus.Created: return $t('%1IY');
+            case OrderStatus.Prepared: return $t('%t7');
+            case OrderStatus.Collect: return $t('%t8');
+            case OrderStatus.Completed: return $t('%Gt');
+            case OrderStatus.Canceled: return $t('%gg');
+            case OrderStatus.Deleted: return $t('%1FX');
         }
     }
 
@@ -95,7 +95,7 @@ export class OrderData extends Checkout {
             return this.checkoutMethod.name;
         }
 
-        return this.address?.shortString() ?? $t(`%Gr`);
+        return this.address?.shortString() ?? $t('%Gr');
     }
 
     /**
@@ -246,7 +246,7 @@ export class Order extends AutoEncoder {
     }
 
     getDetailsHTMLTable(webshop: WebshopPreview): string {
-        let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
+        let str = '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
 
         const data: { title: string; value: string; html?: string }[] = [
             {
@@ -256,14 +256,14 @@ export class Order extends AutoEncoder {
             {
                 title: ((order) => {
                     if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-                        return $t(`%Uq`);
+                        return $t('%Uq');
                     }
 
                     if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
-                        return $t(`%8a`);
+                        return $t('%8a');
                     }
 
-                    return $t(`%Us`);
+                    return $t('%Us');
                 })(this),
                 value: ((order) => {
                     if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
@@ -281,7 +281,7 @@ export class Order extends AutoEncoder {
                 (this.data.checkoutMethod?.type === CheckoutMethodType.Takeout || this.data.checkoutMethod?.type === CheckoutMethodType.OnSite) && ((this.data.checkoutMethod as any)?.address)
                     ? [
                             {
-                                title: $t(`%Cn`),
+                                title: $t('%Cn'),
                                 value: ((order) => {
                                     return (order.data.checkoutMethod as WebshopTakeoutMethod)?.address?.shortString() ?? '';
                                 })(this),
@@ -290,21 +290,21 @@ export class Order extends AutoEncoder {
                     : []
             ),
             {
-                title: $t(`%7R`),
+                title: $t('%7R'),
                 value: Formatter.capitalizeFirstLetter(this.data.timeSlot?.dateString() ?? ''),
             },
             {
-                title: $t(`%1GD`),
+                title: $t('%1GD'),
                 value: this.data.timeSlot?.timeRangeString() ?? '',
             },
             {
-                title: $t(`%1Os`),
+                title: $t('%1Os'),
                 value: this.data.customer.name,
             },
             ...(this.data.customer.phone
                 ? [
                         {
-                            title: $t(`%18Z`),
+                            title: $t('%18Z'),
                             value: this.data.customer.phone,
                         },
                     ]
@@ -336,7 +336,7 @@ export class Order extends AutoEncoder {
                 (this.data.paymentMethod !== PaymentMethod.Unknown)
                     ? [
                             {
-                                title: $t(`%M7`),
+                                title: $t('%M7'),
                                 value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.data.paymentMethod)),
                             },
                         ]

@@ -42,7 +42,7 @@ export async function migrateUitpasStatusOfAllMembers() {
         console.log('Continue from member with id ', idOfLastUpdatedMember);
         query = query.where('id', '>', idOfLastUpdatedMember);
     }
-    console.log(`Start updating uitpas status members.`);
+    console.log('Start updating uitpas status members.');
 
     let c = 0;
 

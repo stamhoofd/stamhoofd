@@ -384,14 +384,14 @@ export class LoadedPermissions {
     getDescription() {
         const stack: string[] = [];
         if (this.level === PermissionLevel.Read) {
-            stack.push($t(`%m7`));
+            stack.push($t('%m7'));
         }
         if (this.level === PermissionLevel.Write) {
-            stack.push($t(`%m8`));
+            stack.push($t('%m8'));
         }
         if (this.level === PermissionLevel.Full) {
-            stack.push($t(`%m9`));
-            return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t(`%M1`) + ' '));
+            stack.push($t('%m9'));
+            return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t('%M1') + ' '));
         }
 
         for (const right of this.accessRights) {
@@ -401,9 +401,9 @@ export class LoadedPermissions {
         stack.push(...ResourcePermissions.getMapDescription(this.resources));
 
         if (stack.length === 0) {
-            return $t(`%8v`);
+            return $t('%8v');
         }
 
-        return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t(`%M1`) + ' '));
+        return Formatter.capitalizeFirstLetter(Formatter.joinLast(stack, ', ', ' ' + $t('%M1') + ' '));
     }
 }

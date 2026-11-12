@@ -26,18 +26,18 @@ class FileCache {
     }
 
     hasFile(file: string) {
-        this.loadIfNeeded()
+        this.loadIfNeeded();
         return this.cache.has(file) || this.doubtCache.has(file);
     }
 
     addFile(file: string) {
-        this.loadIfNeeded()
+        this.loadIfNeeded();
         this.cache.add(file);
         this.writeCache();
     }
 
     doubtFile(file: string) {
-        this.loadIfNeeded()
+        this.loadIfNeeded();
         this.doubtCache.add(file);
         this.writeDoubtCache();
     }
@@ -48,13 +48,13 @@ class FileCache {
     }
 
     private writeCache() {
-        this.loadIfNeeded()
+        this.loadIfNeeded();
         const newContent = [...this.cache].join(separator);
         fs.writeFileSync(cachePath, newContent);
     }
 
     private writeDoubtCache() {
-        this.loadIfNeeded()
+        this.loadIfNeeded();
         const newContent = [...this.doubtCache].join(separator);
         fs.writeFileSync(doubtCachePath, newContent);
     }

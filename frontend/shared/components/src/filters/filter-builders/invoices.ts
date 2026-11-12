@@ -10,7 +10,7 @@ import { simpleBooleanFilterFactory } from './helpers';
 export function getInvoicesUIFilterBuilders() {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: $t(`%1YZ`),
+            name: $t('%1YZ'),
             key: 'number',
         }),
         simpleBooleanFilterFactory({
@@ -22,22 +22,22 @@ export function getInvoicesUIFilterBuilders() {
             filterIfTrue: { isReceipt: true },
         }),
         new DateFilterBuilder({
-            name: $t(`%1J6`),
+            name: $t('%1J6'),
             key: 'invoicedAt',
             nullable: true,
         }),
         new NumberFilterBuilder({
-            name: $t(`%1JC`),
+            name: $t('%1JC'),
             type: NumberFilterFormat.Currency,
             key: 'totalWithVAT',
         }),
         new NumberFilterBuilder({
-            name: $t(`%1JD`),
+            name: $t('%1JD'),
             type: NumberFilterFormat.Currency,
             key: 'totalWithoutVAT',
         }),
         new DateFilterBuilder({
-            name: $t(`%1Jc`),
+            name: $t('%1Jc'),
             key: 'createdAt',
         }),
         getCustomerUIFilterBuilders()[0],

@@ -9,7 +9,8 @@
         <TInput v-model="name" :placeholder="$t(`%Sk`)" error-fields="name" :error-box="errorBox" :title="$t(`%1Os`)" />
         <TTextarea v-model="description" :placeholder="$t(`%14p`)" error-fields="description" :error-box="errorBox" class="max" :title="$t(`%6o`)" />
 
-        <hr><h2>{{ $t('%zJ') }}</h2>
+        <hr>
+        <h2>{{ $t('%zJ') }}</h2>
         <p>{{ $t('%iP') }}</p>
 
         <STList>
@@ -82,7 +83,8 @@
             </STList>
         </STInputBox>
         <div v-if="!isNew" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%iX') }}
             </h2>
 
@@ -124,7 +126,7 @@ const errorBox = ref<ErrorBox | null>(null);
 const validator = new Validator();
 const patchChoice = shallowRef<AutoEncoderPatchType<RecordChoice>>(RecordChoice.patch({ id: props.choice.id }));
 const patchedChoice = computed(() => props.choice.patch(patchChoice.value));
-const title = computed(() => props.isNew ? $t(`%10x`) : $t(`%10y`));
+const title = computed(() => props.isNew ? $t('%10x') : $t('%10y'));
 const name = computed({
     get: () => patchedChoice.value.name,
     set: (name: TranslatedString) => patchChoice.value = patchChoice.value.patch({ name }),
@@ -199,7 +201,7 @@ async function save() {
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
         title: name.value.toString() ? $t('%ZmM', { name: name.value.toString() }) : $t('Deze optie verwijderen?'),
-        confirmText: $t(`%CJ`),
+        confirmText: $t('%CJ'),
         description: $t('%ZmE'),
         availabilityDelay: 2_000,
     })) {
@@ -221,7 +223,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 }
 
 defineExpose({ shouldNavigateAway });

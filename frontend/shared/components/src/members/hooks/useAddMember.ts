@@ -34,7 +34,7 @@ export function useAddMember() {
 
         const component = new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('#members/MemberStepView.vue'), {
-                title: $t(`%g5`),
+                title: $t('%g5'),
                 saveText: $t('%16p'),
                 member,
                 component: markRaw(EditMemberGeneralBox),

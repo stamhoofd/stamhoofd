@@ -185,7 +185,7 @@ export class AdminPermissionChecker {
     }
 
     error(humanOrData?: string | { message: string; human?: string }): SimpleError {
-        const human = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.human ?? $t(`%Fg`));
+        const human = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.human ?? $t('%Fg'));
         const message = typeof humanOrData === 'string' ? humanOrData : (humanOrData?.message ?? 'You do not have permissions for this action');
 
         return new SimpleError({
@@ -204,7 +204,7 @@ export class AdminPermissionChecker {
         return new SimpleError({
             code: 'not_found',
             message: 'Resource not found or no access',
-            human: message ?? $t(`%Fh`),
+            human: message ?? $t('%Fh'),
             statusCode: 404,
         });
     }

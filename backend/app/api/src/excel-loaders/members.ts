@@ -13,7 +13,7 @@ import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHel
 export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerColumn<PlatformMember>[] => [
     {
         id: 'id',
-        name: $t(`%d`),
+        name: $t('%d'),
         width: 40,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.id,
@@ -21,7 +21,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'memberNumber',
-        name: $t(`%cH`),
+        name: $t('%cH'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.memberNumber,
@@ -29,7 +29,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'firstName',
-        name: $t(`%1MT`),
+        name: $t('%1MT'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.firstName,
@@ -37,7 +37,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'lastName',
-        name: $t(`%1MU`),
+        name: $t('%1MU'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.lastName,
@@ -45,7 +45,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'birthDay',
-        name: $t(`%17w`),
+        name: $t('%17w'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.birthDay,
@@ -58,7 +58,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'age',
-        name: $t(`%9S`),
+        name: $t('%9S'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.age,
@@ -66,7 +66,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'gender',
-        name: $t(`%19i`),
+        name: $t('%19i'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => {
             const gender = object.details.gender;
@@ -86,7 +86,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'phone',
-        name: $t(`%wD`),
+        name: $t('%wD'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.phone,
@@ -94,7 +94,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'email',
-        name: $t(`%1FK`),
+        name: $t('%1FK'),
         width: 40,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.email,
@@ -121,7 +121,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     }),
     {
         id: 'securityCode',
-        name: $t(`%wE`),
+        name: $t('%wE'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.securityCode,
@@ -129,7 +129,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'uitpasNumber',
-        name: $t(`%wF`),
+        name: $t('%wF'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.uitpasNumberDetails?.uitpasNumber ?? null,
@@ -138,7 +138,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     {
         id: 'requiresFinancialSupport',
         // todo: use correct term
-        name: $t(`%wG`),
+        name: $t('%wG'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: XlsxTransformerColumnHelper.formatBoolean(object.details.hasFinancialSupportOrActiveUitpas),
@@ -146,7 +146,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'notes',
-        name: $t(`%Ve`),
+        name: $t('%Ve'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.notes,
@@ -154,7 +154,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'nationalRegisterNumber',
-        name: $t(`%wK`),
+        name: $t('%wK'),
         width: 30,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.nationalRegisterNumber?.toString() ?? '',
@@ -162,7 +162,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'membership',
-        name: $t(`%1Ny`),
+        name: $t('%1Ny'),
         width: 20,
         getValue: (member: PlatformMember) => {
             return {
@@ -172,7 +172,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'organization',
-        name: $t(`%wA`),
+        name: $t('%wA'),
         width: 40,
         getValue: (member: PlatformMember) => ({
             value: member.getPrimaryOrganization({ periodId: platform.period.id })?.name ?? Context.i18n.$t('%5D'),
@@ -180,7 +180,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'uri',
-        name: $t(`%1O1`),
+        name: $t('%1O1'),
         width: 30,
         getValue: (member: PlatformMember) => ({
             value: member.getPrimaryOrganization({ periodId: platform.period.id })?.uri ?? Context.i18n.$t('%5D'),
@@ -192,7 +192,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
         width: 40,
         getValue: (member: PlatformMember) => {
             const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
-            const str = Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t(`%M1`) + ' ') || Context.i18n.$t('%5D');
+            const str = Formatter.joinLast(organizations.map(o => o.name).sort(), ', ', ' ' + $t('%M1') + ' ') || Context.i18n.$t('%5D');
 
             return {
                 value: str,
@@ -205,7 +205,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
         width: 30,
         getValue: (member: PlatformMember) => {
             const organizations = member.filterOrganizations({ currentPeriod: true, types: [GroupType.Membership] });
-            const str = Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t(`%M1`) + ' ') || Context.i18n.$t('%5D');
+            const str = Formatter.joinLast(organizations.map(o => o.uri).sort(), ', ', ' ' + $t('%M1') + ' ') || Context.i18n.$t('%5D');
 
             return {
                 value: str,
@@ -218,7 +218,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     // emergency contacts
     {
         id: 'emergencyContacts',
-        name: $t(`%ZeJ`),
+        name: $t('%ZeJ'),
         width: 40,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             // One contact per line so the cell stays readable, and wrap the text so all lines are visible
@@ -235,7 +235,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     // unverified data
     {
         id: 'unverifiedPhones',
-        name: $t(`%wL`),
+        name: $t('%wL'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.unverifiedPhones.join(', '),
@@ -243,7 +243,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     },
     {
         id: 'unverifiedEmails',
-        name: $t(`%wM`),
+        name: $t('%wM'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.unverifiedEmails.join(', '),
@@ -256,7 +256,7 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
     }),
     {
         id: 'unverifiedAddresses',
-        name: $t(`%wN`),
+        name: $t('%wN'),
         width: 20,
         getValue: ({ patchedMember: object }: PlatformMember) => ({
             value: object.details.unverifiedAddresses.map(a => a.toString()).join('; '),
@@ -281,16 +281,16 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
 // Assign to a typed variable to assure we have correct type checking in place
 const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember, PlatformMember> => ({
     id: 'members',
-    name: $t(`%1EH`),
+    name: $t('%1EH'),
     columns: [
         ...getBaseMemberColumns(platform),
         {
             id: 'group',
-            name: $t(`%wH`),
+            name: $t('%wH'),
             width: 40,
             getValue: (member: PlatformMember) => {
                 const groups = member.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership], organizationId: Context.organization?.id });
-                const str = Formatter.joinLast(Formatter.uniqueArray(groups.map(o => o.group.settings.name.toString())).sort(), ', ', ' ' + $t(`%M1`) + ' ') || Context.i18n.$t('%5D');
+                const str = Formatter.joinLast(Formatter.uniqueArray(groups.map(o => o.group.settings.name.toString())).sort(), ', ', ' ' + $t('%M1') + ' ') || Context.i18n.$t('%5D');
 
                 return {
                     value: str,
@@ -299,13 +299,13 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
         },
         {
             id: 'defaultAgeGroup',
-            name: $t(`%wI`),
+            name: $t('%wI'),
             width: 40,
             getValue: (member: PlatformMember) => {
                 const groups = member.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership], organizationId: Context.organization?.id });
                 const defaultAgeGroupIds = Formatter.uniqueArray(groups.filter(o => o.group.defaultAgeGroupId));
-                const defaultAgeGroups = defaultAgeGroupIds.map(o => platform.config.defaultAgeGroups.find(g => g.id === o.group.defaultAgeGroupId)?.name ?? $t(`%wJ`));
-                const str = Formatter.joinLast(Formatter.uniqueArray(defaultAgeGroups).sort(), ', ', ' ' + $t(`%M1`) + ' ') || Context.i18n.$t('%5D');
+                const defaultAgeGroups = defaultAgeGroupIds.map(o => platform.config.defaultAgeGroups.find(g => g.id === o.group.defaultAgeGroupId)?.name ?? $t('%wJ'));
+                const str = Formatter.joinLast(Formatter.uniqueArray(defaultAgeGroups).sort(), ', ', ' ' + $t('%M1') + ' ') || Context.i18n.$t('%5D');
 
                 return {
                     value: str,
@@ -314,7 +314,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
         },
         {
             id: 'outstandingBalance',
-            name: $t(`%76`),
+            name: $t('%76'),
             width: 30,
             getValue: (v) => {
                 return {
@@ -369,7 +369,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
                         return [
                             {
                                 id: `groups.${groupId}.${recordName}`,
-                                name: $t(`%62`),
+                                name: $t('%62'),
                                 width: 30,
                                 getValue: (member: PlatformMember) => {
                                     const registration = getRegistration(member);
@@ -402,7 +402,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
                             return [
                                 {
                                     id: `groups.${groupId}.${recordName}.${menuId}.${optionId}${returnAmount ? '.amount' : ''}`,
-                                    name: $t(`%wO`),
+                                    name: $t('%wO'),
                                     width: 30,
                                     getValue: (member: PlatformMember) => {
                                         const registration = getRegistration(member);
@@ -438,7 +438,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<PlatformMember
                         return [
                             {
                                 id: `groups.${groupId}.${recordName}.${menuId}`,
-                                name: $t(`%Tb`),
+                                name: $t('%Tb'),
                                 width: 30,
                                 getValue: (member: PlatformMember) => {
                                     const registration = getRegistration(member);
@@ -516,23 +516,23 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.Members, {
 
 function formatGender(gender: Gender): string {
     switch (gender) {
-        case Gender.Male: return $t(`%XK`);
-        case Gender.Female: return $t(`%XM`);
-        default: return $t(`%1JG`);
+        case Gender.Male: return $t('%XK');
+        case Gender.Female: return $t('%XM');
+        default: return $t('%1JG');
     }
 }
 
 function formatMembershipStatus(status: MembershipStatus): string {
     switch (status) {
         case MembershipStatus.Trial:
-            return $t(`%1IH`);
+            return $t('%1IH');
         case MembershipStatus.Active:
-            return $t(`%1H0`);
+            return $t('%1H0');
         case MembershipStatus.Expiring:
-            return $t(`%7F`);
+            return $t('%7F');
         case MembershipStatus.Temporary:
-            return $t(`%zU`);
+            return $t('%zU');
         case MembershipStatus.Inactive:
-            return $t(`%zV`);
+            return $t('%zV');
     }
 }

@@ -26,8 +26,7 @@ export async function autoTranslate(args: Partial<AutoTranslateOptions>) {
     promptLogger.initialize(path.join(globals.I18NUUID_ROOT, '.development/i18n-uuid'));
     try {
         await autoTranslator.start();
-    }
-    finally {
+    } finally {
         await promptLogger.close();
     }
 }

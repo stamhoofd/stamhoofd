@@ -10,6 +10,7 @@ export default class DbRemove extends BaseCommand {
         'stam db remove --from stamhoofd-development-backup',
         'stam db rm --env keeo',
     ];
+
     static flags = {
         ...BaseCommand.instanceFlags,
         from: Flags.string({ description: 'Database name to remove' }),

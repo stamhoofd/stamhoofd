@@ -10,7 +10,8 @@
         <STErrorsDefault :error-box="errors.errorBox" />
         <ProductsSelectorBox :product-selector="productSelector" :webshop="webshop" :validator="errors.validator" @patch="patchProductSelector" />
 
-        <hr><h2>{{ $t('%176') }}</h2>
+        <hr>
+        <h2>{{ $t('%176') }}</h2>
         <p v-if="discounts.length > 1">
             {{ $t("%SW") }}
         </p>
@@ -48,7 +49,8 @@
             </button>
         </p>
 
-        <hr><h2>{{ $t('%SO') }}</h2>
+        <hr>
+        <h2>{{ $t('%SO') }}</h2>
 
         <STList>
             <STListItem :selectable="true" element-name="label" class="left-center">
@@ -90,7 +92,8 @@
             </STListItem>
         </STList>
 
-        <hr><h2>{{ $t('%SV') }}</h2>
+        <hr>
+        <h2>{{ $t('%SV') }}</h2>
         <p>{{ $t("%SX") }}</p>
 
         <STInputBox error-fields="cartLabel" :error-box="errors.errorBox" :title="$t(`%2R`)">
@@ -106,7 +109,8 @@
         </Checkbox>
 
         <div v-if="!isNew" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%SJ') }}
             </h2>
 

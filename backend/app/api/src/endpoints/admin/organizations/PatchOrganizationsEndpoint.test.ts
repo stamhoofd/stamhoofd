@@ -20,7 +20,7 @@ import { initMembershipOrganization } from '../../../../tests/init/initMembershi
 import { SessionService } from '../../../services/SessionService.js';
 import { PatchOrganizationsEndpoint } from './PatchOrganizationsEndpoint.js';
 
-const baseUrl = `/admin/organizations`;
+const baseUrl = '/admin/organizations';
 const endpoint = new PatchOrganizationsEndpoint();
 
 describe('Endpoint.PatchOrganizationsEndpoint', () => {
@@ -321,8 +321,7 @@ describe('Endpoint.PatchOrganizationsEndpoint', () => {
             try {
                 const admin = await createAdmin({ accessRights: [AccessRight.EventWrite], tagId: PermissionsResourceKey.All });
                 await expect(createOrganization(admin, [])).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
-            }
-            finally {
+            } finally {
                 await setPlatformTags([provinceTag, managedTag, managedChildTag, otherTag, unrelatedTag]);
             }
         });

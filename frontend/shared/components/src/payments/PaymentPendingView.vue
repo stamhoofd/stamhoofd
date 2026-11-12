@@ -80,7 +80,7 @@ onMounted(() => {
 });
 
 function retry() {
-    if (confirm($t(`%12i`))) {
+    if (confirm($t('%12i'))) {
         if (navigationController.value!.components.length > 1) {
             navigationActions.pop()?.catch(console.error);
         } else {

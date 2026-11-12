@@ -10,14 +10,16 @@
         </STInputBox>
 
         <div class="container">
-            <hr><h2>{{ adminRolesTitle }}</h2>
+            <hr>
+            <h2>{{ adminRolesTitle }}</h2>
             <p>{{ apiUserRolesDescription }}</p>
 
             <EditUserPermissionsBox :user="patched" @patch:user="addPatch($event)" />
         </div>
 
         <div class="container">
-            <hr><h2>{{ $t('%r') }}</h2>
+            <hr>
+            <h2>{{ $t('%r') }}</h2>
             <p>{{ $t('%Jo') }}</p>
 
             <STList>
@@ -93,7 +95,6 @@ import { useFreshAction } from '@stamhoofd/components/auth/useFreshAction.ts';
 import { ApiUser, ApiUserRateLimits, ApiUserWithToken, UserMeta } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
-
 const errors = useErrors();
 const saving = ref(false);
 const deleting = ref(false);
@@ -114,9 +115,9 @@ const { adminRolesTitle, apiUserRolesDescription } = useAdminLabels();
 
 const title = computed(() => {
     if (props.isNew) {
-        return $t(`%Jy`);
+        return $t('%Jy');
     }
-    return $t(`%Jz`);
+    return $t('%Jz');
 });
 
 const name = computed({
@@ -145,7 +146,7 @@ async function save() {
     if ((name.value?.length ?? 0) < 2) {
         errorGroup.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%11M`),
+            message: $t('%11M'),
             field: 'name',
         }));
     }

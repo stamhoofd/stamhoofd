@@ -20,8 +20,7 @@ describe('TransferSettings replacements', () => {
         const random = vi.spyOn(Math, 'random').mockReturnValue(0);
         try {
             expect(TransferSettings.generateOGM(new Map([['prefix', '1234']]))).toBe('+++000/1234/00063+++');
-        }
-        finally {
+        } finally {
             random.mockRestore();
         }
     });

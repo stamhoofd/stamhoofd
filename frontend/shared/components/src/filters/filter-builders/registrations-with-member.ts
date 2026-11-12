@@ -106,7 +106,7 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({
         } else {
             all.push(new NumberFilterBuilder({
                 key: 'memberCachedBalance.amountOpen',
-                name: $t(`%76`),
+                name: $t('%76'),
                 type: NumberFilterFormat.Currency,
             }));
         }
@@ -159,11 +159,11 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({
 
             const groupFilters: UIFilterBuilder[] = [
                 new StringFilterBuilder({
-                    name: $t(`%1Os`),
+                    name: $t('%1Os'),
                     key: 'name',
                 }),
                 new MultipleChoiceFilterBuilder({
-                    name: $t(`%1A`),
+                    name: $t('%1A'),
                     options: Object.values(GroupStatus)
                         // filter out deprecated status
                         .filter(status => status !== GroupStatus.Archived)
@@ -192,10 +192,10 @@ export function useAdvancedRegistrationWithMemberUIFilterBuilders({
 
             if (isPlatform) {
                 groupFilters.push(new MultipleChoiceFilterBuilder({
-                    name: $t(`%wI`),
+                    name: $t('%wI'),
                     options: [
                         ...$platform.value.config.defaultAgeGroups.filter(defaultAgeGroup => organization.value !== null ? defaultAgeGroup.isEnabledForTags(allTags) : true).map(g => new MultipleChoiceUIFilterOption(g.name, g.id)),
-                        new MultipleChoiceUIFilterOption($t(`%1FW`), null),
+                        new MultipleChoiceUIFilterOption($t('%1FW'), null),
                     ],
                     wrapper: {
                         defaultAgeGroupId: {

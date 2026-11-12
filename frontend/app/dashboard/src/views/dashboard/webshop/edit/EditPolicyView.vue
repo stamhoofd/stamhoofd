@@ -116,8 +116,7 @@ async function save() {
         }
         props.saveHandler(patch.value);
         pop({ force: true })?.catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }

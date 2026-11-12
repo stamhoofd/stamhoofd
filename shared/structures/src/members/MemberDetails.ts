@@ -534,8 +534,8 @@ export class MemberDetails extends AutoEncoder {
             if (age) {
                 if (group.settings.minAge && age < group.settings.minAge) {
                     return {
-                        message: $t(`%qX`),
-                        description: $t(`%15K`, {
+                        message: $t('%qX'),
+                        description: $t('%15K', {
                             'firstName': this.firstName,
                             'born-in-after-1995': group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
                         }),
@@ -544,8 +544,8 @@ export class MemberDetails extends AutoEncoder {
 
                 if (group.settings.maxAge && age > group.settings.maxAge) {
                     return {
-                        message: $t(`%qY`),
-                        description: $t(`%a0A`, {
+                        message: $t('%qY'),
+                        description: $t('%a0A', {
                             'firstName': this.firstName,
                             'born-in-after-1995': group.settings.getAgeGenderDescription({ includeAge: true }) ?? '',
                         }),
@@ -556,8 +556,8 @@ export class MemberDetails extends AutoEncoder {
 
         if ((this.gender === Gender.Male && group.settings.genderType === GroupGenderType.OnlyFemale) || (this.gender === Gender.Female && group.settings.genderType === GroupGenderType.OnlyMale)) {
             return {
-                message: $t(`%15I`, { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
-                description: $t(`%15J`, { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
+                message: $t('%15I', { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
+                description: $t('%15J', { gender: group.settings.getAgeGenderDescription({ includeGender: true })! }),
             };
         }
 

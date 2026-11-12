@@ -2,7 +2,7 @@ import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { assertFilterCompareValue } from '@stamhoofd/filters/FilterCompilers';
 import { scalarToSQLExpression, SQLLower, SQLNull } from '../../SQLExpressions.js';
 import { SQLJsonContains, SQLJsonSearch, SQLJsonValue } from '../../SQLJsonExpressions.js';
-import type { SQLWhere} from '../../SQLWhere.js';
+import type { SQLWhere } from '../../SQLWhere.js';
 import { SQLWhereEqual, SQLWhereLike, SQLWhereOr, SQLWhereSign } from '../../SQLWhere.js';
 import type { SQLCurrentColumn, SQLSyncFilterRunner } from '../SQLFilterTypes.js';
 import { SQLValueType } from '../SQLFilterTypes.js';
@@ -36,8 +36,7 @@ export function $equalsSQLFilterCompiler(filter: StamhoofdFilter): SQLSyncFilter
                     SQLWhereSign.NotEqual,
                     new SQLNull(),
                 );
-            }
-            else {
+            } else {
                 where = new SQLJsonContains(
                     column.expression,
                     scalarToSQLExpression(JSON.stringify(value)),

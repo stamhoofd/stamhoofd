@@ -116,7 +116,8 @@
 
         <template v-if="!isNew">
             <!-- availability -->
-            <hr><h2>{{ $t('%1CP') }}</h2>
+            <hr>
+            <h2>{{ $t('%1CP') }}</h2>
 
             <Checkbox v-model="hasStatusClosed">
                 {{ $t('%CZ') }}
@@ -145,7 +146,8 @@
 
             <!-- numbering -->
             <div class="container">
-                <hr><h2>{{ $t('%Qb') }}</h2>
+                <hr>
+                <h2>{{ $t('%Qb') }}</h2>
 
                 <STList>
                     <STListItem :selectable="true" element-name="label" class="left-center">
@@ -180,7 +182,8 @@
             </div>
 
             <div v-if="isStamhoofd" class="container">
-                <hr><h2>{{ $t('%NU') }}</h2>
+                <hr>
+                <h2>{{ $t('%NU') }}</h2>
 
                 <Checkbox v-model="noServiceFees">
                     {{ $t('%ZrL') }}
@@ -190,14 +193,16 @@
 
         <!-- payment methods -->
         <div v-if="stripeAccountObject || hasPayconiq || hasMollieOrBuckaroo" class="container">
-            <hr><h2>{{ $t('%O7') }}</h2>
+            <hr>
+            <h2>{{ $t('%O7') }}</h2>
             <p>{{ $t('%Qf') }} <a class="inline-link" :href="$domains.getDocs('betaalmethodes-voor-webshops-instellen')" target="_blank">{{ $t('%OH') }}</a>.</p>
 
             <EditPaymentMethodsBox type="webshop" :organization="organization" :config="config" :private-config="privateConfig" :validator="errors.validator" @patch:config="patchConfig($event)" @patch:private-config="patchPrivateConfig($event)" />
         </div>
 
         <div v-if="getFeatureFlag('webshop-auth')" class="container">
-            <hr><h2>{{ $t('%Qg') }}</h2>
+            <hr>
+            <h2>{{ $t('%Qg') }}</h2>
             <p>
                 {{ $t('%Qh') }}
             </p>

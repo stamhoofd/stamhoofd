@@ -1,24 +1,26 @@
- // Define colors, but still allow overrides for dark modes
- $color-gray-4-original: #5e5e5e;
- $color-gray-4: var(--color-gray-4, $color-gray-4-original);
+// Define colors, but still allow overrides for dark modes
+$color-gray-4-original: #5e5e5e;
+$color-gray-4: var(--color-gray-4, $color-gray-4-original);
 
- $color-gray-2-original: #dcdcdc;
- $color-gray-2: var(--color-gray-2, $color-gray-2-original);
+$color-gray-2-original: #dcdcdc;
+$color-gray-2: var(--color-gray-2, $color-gray-2-original);
 
- $color-border-original: $color-gray-2; 
- $color-border: var(--color-border, $color-border-original);
+$color-border-original: $color-gray-2;
+$color-border: var(--color-border, $color-border-original);
 
- $color-gray-text: $color-gray-4;
+$color-gray-text: $color-gray-4;
 
- $color-error: #f0153d;
- $color-primary: #0053ff;
- $color-discount: #ff4747;
+$color-error: #f0153d;
+$color-primary: #0053ff;
+$color-discount: #ff4747;
 
-@mixin email-content($element: "body") {
+@mixin email-content($element: 'body') {
     #{$element} {
         color: #000716;
         color: var(--color-dark, #000716);
-        font-family: -apple-system-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        font-family:
+            -apple-system-body, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+            Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
         font-size: 12pt;
         line-height: 1.4;
     }
@@ -35,7 +37,11 @@
         font-size: 10pt;
 
         a {
-            &, &:link, &:visited, &:active, &:hover {
+            &,
+            &:link,
+            &:visited,
+            &:active,
+            &:hover {
                 text-decoration: underline;
                 color: $color-gray-4;
             }
@@ -85,10 +91,10 @@
         padding: 0;
     }
 
-    ol, ul {
+    ol,
+    ul {
         list-style-position: outside;
         padding-left: 30px;
-
     }
 
     hr {
@@ -109,7 +115,7 @@
         // The display flex style, doesn't render the carret correctly on an empty node
         display: inline-block !important;
         line-height: 42px;
-        font-size: 16px; 
+        font-size: 16px;
         font-weight: bold;
         text-box-trim: none; // Breaks line height trick
 
@@ -124,7 +130,11 @@
     }
 
     a {
-        &, &:link, &:visited, &:active, &:hover {
+        &,
+        &:link,
+        &:visited,
+        &:active,
+        &:hover {
             text-decoration: underline;
             color: blue;
         }
@@ -134,7 +144,8 @@
         width: 100%;
         border-collapse: collapse;
 
-        th, td {
+        th,
+        td {
             text-align: left;
             padding: 10px 10px 10px 0;
             border-bottom: 1px solid $color-border;
@@ -163,8 +174,6 @@
             opacity: 0.8;
             font-size: 11pt;
         }
-
-        
     }
 
     .style-inline-code {
@@ -177,12 +186,12 @@
     .style-code-large {
         font-family: monospace;
         white-space: pre-wrap;
-        font-size:16pt;
-        letter-spacing:2px;
-        background:#f2f2f2;
-        padding:6px 10px;
-        border-radius:6px;
-        display:inline-block;
+        font-size: 16pt;
+        letter-spacing: 2px;
+        background: #f2f2f2;
+        padding: 6px 10px;
+        border-radius: 6px;
+        display: inline-block;
     }
 
     .email-style-description-small {
@@ -199,7 +208,7 @@
         font-weight: 500;
 
         + p {
-        padding-top: 3px; 
+            padding-top: 3px;
         }
     }
 
@@ -215,7 +224,6 @@
             color: $color-error;
         }
     }
-
 
     .email-style-price-base {
         font-size: 15px;
@@ -254,5 +262,4 @@
     .pre-wrap {
         white-space: pre-wrap;
     }
-
 }

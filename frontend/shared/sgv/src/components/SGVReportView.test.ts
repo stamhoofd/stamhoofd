@@ -10,7 +10,6 @@ import { SGVSyncReport } from '../SGVSyncReport.ts';
 import SGVReportView from './SGVReportView.vue';
 
 describe('SGVReportView', () => {
-
     function createMember(name: string) {
         const [firstName, lastName] = name.split(' ');
         return MemberWithRegistrationsBlob.create({

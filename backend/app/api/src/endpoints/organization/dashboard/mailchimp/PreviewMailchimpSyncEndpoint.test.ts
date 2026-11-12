@@ -82,8 +82,7 @@ describe('Endpoint.PreviewMailchimpSync', () => {
             const { adminToken } = await initPlatformAdmin();
             await expect(mailchimpRequest(endpoint, 'POST', '/mailchimp/syncs/preview', STAMHOOFD.domains.api, adminToken, MailchimpSyncRequest.create({ full: true }).encode({ version: Version })))
                 .rejects.toThrow(STExpect.simpleError({ code: 'not_available', message: 'A preview is only available for an organization' }));
-        }
-        finally {
+        } finally {
             const editing = await Platform.getForEditing();
             editing.config.featureFlags = editing.config.featureFlags.filter(f => f !== 'mailchimp');
             await editing.save();

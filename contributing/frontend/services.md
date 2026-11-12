@@ -2,16 +2,16 @@
 
 The networking package is being split without changing storage formats, authentication behavior, locale precedence, or review timing. Consumers import services from their owners; presentation and transport dependencies are configured explicitly at startup.
 
-| Owner | Responsibilities |
-| --- | --- |
-| `@stamhoofd/networking` | Transport configuration, middleware, retries and connectivity |
-| `@stamhoofd/frontend-storage` | Storage contracts and browser adapters; native bootstrap replaces adapters |
-| `@stamhoofd/frontend-platform` | Platform metadata and native capability contracts |
-| `@stamhoofd/frontend-session` | Session state, authentication middleware, tokens, permissions and platform loading |
-| `@stamhoofd/frontend-application` | Session preparation and login orchestration, locale/theme coordination, review policy and domain managers |
-| `@stamhoofd/frontend-i18n` | Translation loading and locale handling |
-| `@stamhoofd/frontend-notifications` | Reactive toast handles, factories, error formatting and delivery |
-| `@stamhoofd/components` | Concrete presentation and Vue lifecycle hooks |
+| Owner                               | Responsibilities                                                                                          |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `@stamhoofd/networking`             | Transport configuration, middleware, retries and connectivity                                             |
+| `@stamhoofd/frontend-storage`       | Storage contracts and browser adapters; native bootstrap replaces adapters                                |
+| `@stamhoofd/frontend-platform`      | Platform metadata and native capability contracts                                                         |
+| `@stamhoofd/frontend-session`       | Session state, authentication middleware, tokens, permissions and platform loading                        |
+| `@stamhoofd/frontend-application`   | Session preparation and login orchestration, locale/theme coordination, review policy and domain managers |
+| `@stamhoofd/frontend-i18n`          | Translation loading and locale handling                                                                   |
+| `@stamhoofd/frontend-notifications` | Reactive toast handles, factories, error formatting and delivery                                          |
+| `@stamhoofd/components`             | Concrete presentation and Vue lifecycle hooks                                                             |
 
 Application services may use sessions, networking, storage, platform capabilities and localization. Those lower layers must not import application services or components. Concrete presentation callbacks are installed by application bootstrap before requests or authentication flows start.
 

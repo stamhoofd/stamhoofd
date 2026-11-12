@@ -1,7 +1,8 @@
 <template>
     <div v-if="shouldShow">
         <div class="hover-box container">
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t('%f0') }}</div>
             </h2>
             <p>{{ $t('%g4') }}</p>
@@ -69,7 +70,7 @@ function addressToLines(address: Address): string[] {
 async function deletePhone(phone: string) {
     await deleteFromMemberDetails({
         valueToDelete: phone,
-        confirmMessage: $t(`%10L`, { phone }),
+        confirmMessage: $t('%10L', { phone }),
         key: 'unverifiedPhones',
     });
 }
@@ -77,7 +78,7 @@ async function deletePhone(phone: string) {
 async function deleteEmail(email: string) {
     await deleteFromMemberDetails({
         valueToDelete: email,
-        confirmMessage: $t(`%10M`, { email }),
+        confirmMessage: $t('%10M', { email }),
         key: 'unverifiedEmails',
     });
 }
@@ -85,7 +86,7 @@ async function deleteEmail(email: string) {
 async function deleteAddress(address: Address) {
     await deleteFromMemberDetails({
         valueToDelete: address,
-        confirmMessage: $t(`%10N`, { address: address.toString() }),
+        confirmMessage: $t('%10N', { address: address.toString() }),
         key: 'unverifiedAddresses',
     });
 }
@@ -93,7 +94,7 @@ async function deleteAddress(address: Address) {
 async function deleteFromMemberDetails<T extends string | number | (AutoEncoder & { id: string })>({ valueToDelete, key, confirmMessage, confirmButtonText }: { valueToDelete: T; confirmMessage: string; confirmButtonText?: string; key: keyof MemberDetails }) {
     const isConfirm = await CenteredMessage.confirm({
         title: confirmMessage,
-        confirmText: confirmButtonText ?? $t(`%CJ`),
+        confirmText: confirmButtonText ?? $t('%CJ'),
         destructive: true,
         availabilityDelay: 2_000,
     });
@@ -107,8 +108,7 @@ async function deleteFromMemberDetails<T extends string | number | (AutoEncoder 
             const arrayPatch = new PatchableArray<typeof valueToDelete, typeof valueToDelete, typeof valueToDelete>();
             arrayPatch.addDelete(valueToDelete);
             detailsPatch = arrayPatch;
-        }
-        else {
+        } else {
             const arrayPatch = new PatchableArray() as PatchableArrayAutoEncoder<AutoEncoder & { id: string }>;
             arrayPatch.addDelete(valueToDelete.id);
             detailsPatch = arrayPatch;
@@ -121,8 +121,7 @@ async function deleteFromMemberDetails<T extends string | number | (AutoEncoder 
 
         try {
             await platformFamilyManager.isolatedPatch([member], membersPatch);
-        }
-        catch (error) {
+        } catch (error) {
             Toast.fromError(error).show();
         }
     }

@@ -48,7 +48,8 @@
         </STInputBox>
 
         <div v-if="defaultEnabled && (hasFilters || (allowChildCategories && patchedCategory.getAllRecords().length > 1))" class="container">
-            <hr><h2>{{ $t('%iK') }}</h2>
+            <hr>
+            <h2>{{ $t('%iK') }}</h2>
             <p v-if="!hasFilters">
                 {{ $t('%iL') }}
             </p>

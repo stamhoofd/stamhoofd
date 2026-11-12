@@ -13,7 +13,7 @@ import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchEventsEndpoint } from './PatchEventsEndpoint.js';
 import { SessionService } from '../../../services/SessionService.js';
 
-const baseUrl = `/events`;
+const baseUrl = '/events';
 const endpoint = new PatchEventsEndpoint();
 type EndpointType = typeof endpoint;
 type Body = EndpointType extends Endpoint<any, any, infer B, any> ? B : never;

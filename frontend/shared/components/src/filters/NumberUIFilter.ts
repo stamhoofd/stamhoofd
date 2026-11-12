@@ -69,12 +69,12 @@ export class NumberUIFilter extends UIFilter<NumberFilterBuilder> implements Num
 
     get combinationWord(): string {
         switch (this.mode) {
-            case UINumberFilterMode.GreaterThan: return $t(`%bE`);
-            case UINumberFilterMode.GreaterThanOrEqual: return $t(`%1ad`);
-            case UINumberFilterMode.LessThan: return $t(`%bF`);
-            case UINumberFilterMode.LessThanOrEqual: return $t(`%1cL`);
-            case UINumberFilterMode.Equals: return $t(`%bG`);
-            case UINumberFilterMode.NotEquals: return $t(`%bH`);
+            case UINumberFilterMode.GreaterThan: return $t('%bE');
+            case UINumberFilterMode.GreaterThanOrEqual: return $t('%1ad');
+            case UINumberFilterMode.LessThan: return $t('%bF');
+            case UINumberFilterMode.LessThanOrEqual: return $t('%1cL');
+            case UINumberFilterMode.Equals: return $t('%bG');
+            case UINumberFilterMode.NotEquals: return $t('%bH');
         }
     }
 

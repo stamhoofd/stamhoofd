@@ -20,8 +20,7 @@ export class XlsxFileWriter {
             await this.writeStreamWriter.ready;
             await this.writeStreamWriter.close();
             this.writeStreamWriter = undefined;
-        }
-        else {
+        } else {
             await this.writeStream.close();
         }
     }
@@ -36,8 +35,7 @@ export class XlsxFileWriter {
             await this.writeStreamWriter.ready;
             await this.writeStreamWriter.close();
             this.writeStreamWriter = undefined;
-        }
-        else {
+        } else {
             await this.writeStream.close();
         }
     }

@@ -16,7 +16,8 @@
             <textarea v-model="description" class="input" type="text" :placeholder="$t('%5r')" autocomplete="off" />
         </STInputBox>
 
-        <hr><h2>{{ $t('%4R') }}</h2>
+        <hr>
+        <h2>{{ $t('%4R') }}</h2>
 
         <p class="style-description-small">
             {{ $t('%I0') }}
@@ -69,8 +70,7 @@ const save = async () => {
         }
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -98,8 +98,7 @@ const doDelete = async () => {
     try {
         await props.deleteHandler();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

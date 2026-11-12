@@ -1,7 +1,7 @@
 import { Database } from '@node/database';
 import type { SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
 import { isSQLExpression, joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
-import type { SQLAssignment, SQLScalarValue} from './SQLExpressions.js';
+import type { SQLAssignment, SQLScalarValue } from './SQLExpressions.js';
 import { scalarToSQLExpression, SQLAlias, SQLColumnExpression, SQLTableExpression } from './SQLExpressions.js';
 import { SQLLogger } from './SQLLogger.js';
 
@@ -107,7 +107,7 @@ export class SQLInsert implements SQLExpression {
         return joinSQLQuery(query, ' ');
     }
 
-    async insert(): Promise<{ insertId: any;affectedRows: number }> {
+    async insert(): Promise<{ insertId: any; affectedRows: number }> {
         const { query, params } = normalizeSQLQuery(this.getSQL());
         const result = await SQLLogger.log(Database.insert(query, params), query, params);
         return result[0];

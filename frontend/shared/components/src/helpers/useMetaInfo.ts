@@ -1,4 +1,4 @@
-import type { ComputedRef, Ref} from 'vue';
+import type { ComputedRef, Ref } from 'vue';
 import { isRef, watch } from 'vue';
 
 export interface MetaTag {
@@ -59,8 +59,7 @@ export function useMetaInfo({ title, meta, options }: {
                         }
 
                         isVisible = true;
-                    }
-                    else {
+                    } else {
                         metaElement.removeAttribute(key);
 
                         if (isVisible) {
@@ -70,8 +69,7 @@ export function useMetaInfo({ title, meta, options }: {
                         isVisible = false;
                     }
                 });
-            }
-            else if (data.content !== undefined) {
+            } else if (data.content !== undefined) {
                 metaElementsToAdd.push(metaElement);
             }
         }
@@ -129,8 +127,7 @@ function addMetaElementsToHead(elements: HTMLMetaElement[], options: { key: Meta
 
     if (options.isReplaceOnly) {
         elements.forEach(el => replaceMetaTag(key, el));
-    }
-    else {
+    } else {
         const toRemove = head.querySelectorAll(`meta[${key}]`);
         // remove all existing meta tags with key
         toRemove.forEach(el => head.removeChild(el));

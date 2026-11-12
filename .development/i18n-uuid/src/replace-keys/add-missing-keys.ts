@@ -45,8 +45,7 @@ export async function addMissingKeys(onProgress?: ProgressCallback): Promise<num
                 console.warn(
                     `Found missing translation for key ${key}. Replace the 'todo' in ${filePath} manually.`,
                 );
-            }
-            else {
+            } else {
                 const uuid = uuidv4();
                 replacedKeys.set(key, uuid);
             }

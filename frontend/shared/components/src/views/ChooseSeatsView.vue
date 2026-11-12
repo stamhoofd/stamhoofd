@@ -15,7 +15,8 @@
             <STErrorsDefault :error-box="errorBox" />
 
             <div v-for="(seatingPlanSection, index) of seatingPlan.sections" :key="seatingPlanSection.id" class="container">
-                <hr v-if="index > 0"><h2 v-if="seatingPlan.sections.length > 1 && seatingPlanSection.name">
+                <hr v-if="index > 0">
+                <h2 v-if="seatingPlan.sections.length > 1 && seatingPlanSection.name">
                     {{ seatingPlanSection.name }}
                 </h2>
 
@@ -122,7 +123,7 @@ function save() {
             setSeats(adjusted);
             errorBox.value = new ErrorBox(new SimpleError({
                 code: 'adjusted',
-                message: $t(`%12b`),
+                message: $t('%12b'),
             }));
             return;
         }

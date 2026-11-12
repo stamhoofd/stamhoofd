@@ -1,5 +1,5 @@
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request} from '@node/endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { backup } from '../helpers/backup.js';

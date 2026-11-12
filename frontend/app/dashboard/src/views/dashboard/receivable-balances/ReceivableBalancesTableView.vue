@@ -278,7 +278,7 @@ async function markAsPaid(items: ReceivableBalance[]) {
                     availabilityDelay: 1_000,
                 },
                 {
-                    text: $t(`%1Lh`),
+                    text: $t('%1Lh'),
                     type: 'secundary',
                     value: false,
                 },

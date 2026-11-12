@@ -19,7 +19,7 @@ export class XlsxColumnFilterer<T> {
                 throw new SimpleError({
                     code: 'invalid_sheet',
                     message: 'Invalid sheet ' + id,
-                    human: $t(`%l1`, { sheet: id }),
+                    human: $t('%l1', { sheet: id }),
                     statusCode: 400,
                 });
             }
@@ -47,8 +47,7 @@ export class XlsxColumnFilterer<T> {
                             found = true;
                             break;
                         }
-                    }
-                    else {
+                    } else {
                         const matched = column.match(id);
                         if (matched !== undefined) {
                             if (category !== undefined) {
@@ -61,12 +60,10 @@ export class XlsxColumnFilterer<T> {
                                 for (const m of matched) {
                                     if (matched.length === 1) {
                                         m.name = name || m.name;
-                                    }
-                                    else {
+                                    } else {
                                         if (!m.name) {
                                             m.name = name || m.name;
-                                        }
-                                        else {
+                                        } else {
                                             if (m.name === name) {
                                                 // ignore
                                                 continue;
@@ -80,16 +77,14 @@ export class XlsxColumnFilterer<T> {
 
                                                 // Never create a category if it was not set
                                                 m.name = name + ' ' + m.name;
-                                            }
-                                            else {
+                                            } else {
                                                 if (m.category.trim().length > 0) {
                                                     if (name === m.defaultCategory) {
                                                         // No real added value of repating this if we can't add it cleanly
                                                         continue;
                                                     }
                                                     m.category = m.category.trim() + (' → ' + name);
-                                                }
-                                                else {
+                                                } else {
                                                     m.category = name;
                                                 }
                                                 m.name = m.name ?? '';
@@ -109,7 +104,7 @@ export class XlsxColumnFilterer<T> {
                     throw new SimpleError({
                         code: 'invalid_column',
                         message: 'Invalid column ' + id,
-                        human: $t(`%l2`, { column: id }),
+                        human: $t('%l2', { column: id }),
                         statusCode: 400,
                     });
                 }
@@ -128,7 +123,7 @@ export class XlsxColumnFilterer<T> {
             throw new SimpleError({
                 code: 'no_columns',
                 message: 'No columns selected',
-                human: $t(`%l3`),
+                human: $t('%l3'),
                 statusCode: 400,
             });
         }

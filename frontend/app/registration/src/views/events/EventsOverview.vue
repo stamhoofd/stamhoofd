@@ -23,7 +23,8 @@
             </div>
 
             <div v-for="group of groupedEvents" :key="group.title" class="container">
-                <hr><h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
+                <hr>
+                <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
                     <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="$navigate(Routes.Event, {properties: {event}})" />
@@ -124,7 +125,7 @@ defineRoute({
                 event: events.results[0],
             };
         }
-        Toast.error($t(`%yc`)).show();
+        Toast.error($t('%yc')).show();
         throw new Error('Event not found');
     },
 

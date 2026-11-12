@@ -273,7 +273,7 @@ export class CheckoutStepsManager {
                             // Force a save if nothing changed (to fix timeSlot + updated data)
                             await this.goNext(id, navigate);
                         },
-                        saveText: $t(`%16p`),
+                        saveText: $t('%16p'),
                     });
                 },
                 validate: (checkout, webshop) => {
@@ -448,7 +448,7 @@ export class CheckoutStepsManager {
         if (!nextStep) {
             throw new SimpleError({
                 code: 'missing_config',
-                message: $t(`%Xt`),
+                message: $t('%Xt'),
             });
         }
 

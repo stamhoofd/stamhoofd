@@ -434,7 +434,7 @@ describe('buildVisualizationSettings', () => {
         const settings = buildVisualizationSettings(card({ display: 'combo', dimensions: ['Werkjaar', 'Geslacht'], metrics: ['Aantal leden', 'GTP index'] }));
 
         expect(settings['series_settings']).toMatchObject({
-            Man: { color: columnPalettes.get('Geslacht')!.Man },
+            'Man': { color: columnPalettes.get('Geslacht')!.Man },
             'Aantal leden': { display: 'bar' },
             'GTP index': { display: 'line' },
         });
@@ -443,9 +443,9 @@ describe('buildVisualizationSettings', () => {
 
 describe('buildTemplateTags', () => {
     it('declares a tag for every parameter the query uses', () => {
-        const tags = buildTemplateTags(card({ parameters: ['werkjaar'] }), new Map(), []) as Record<string, { name: string; type: string; 'display-name': string }>;
+        const tags = buildTemplateTags(card({ parameters: ['werkjaar'] }), new Map(), []) as Record<string, { 'name': string; 'type': string; 'display-name': string }>;
 
-        expect(tags.werkjaar).toMatchObject({ name: 'werkjaar', type: 'text', 'display-name': 'Werkjaar' });
+        expect(tags.werkjaar).toMatchObject({ 'name': 'werkjaar', 'type': 'text', 'display-name': 'Werkjaar' });
     });
 
     it('marks the werkjaar tag as required when its tab requires it', () => {
@@ -458,10 +458,10 @@ describe('buildTemplateTags', () => {
         const tags = buildTemplateTags(card({ parameters: ['platformleden_opnemen'] }), new Map(), []) as Record<string, unknown>;
 
         expect(tags.platformleden_opnemen).toMatchObject({
-            name: 'platformleden_opnemen',
-            type: 'boolean',
+            'name': 'platformleden_opnemen',
+            'type': 'boolean',
             'display-name': 'Leden van de koepelorganisatie opnemen',
-            default: false,
+            'default': false,
         });
     });
 
@@ -481,7 +481,7 @@ describe('buildTemplateTags', () => {
         const tags = buildTemplateTags(card({ snippets: ['facts', 'leeftijdsgroepen'] }), new Map([['facts', 7], ['leeftijdsgroepen', 9]]), []) as Record<string, unknown>;
 
         expect(Object.keys(tags)).toEqual(['snippet: facts', 'snippet: leeftijdsgroepen']);
-        expect(tags['snippet: leeftijdsgroepen']).toMatchObject({ name: 'snippet: leeftijdsgroepen', type: 'snippet', 'snippet-name': 'leeftijdsgroepen', 'snippet-id': 9 });
+        expect(tags['snippet: leeftijdsgroepen']).toMatchObject({ 'name': 'snippet: leeftijdsgroepen', 'type': 'snippet', 'snippet-name': 'leeftijdsgroepen', 'snippet-id': 9 });
     });
 
     /** A tag pointing at no snippet is a parameter Metabase cannot find, halfway through the report. */

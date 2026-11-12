@@ -12,7 +12,7 @@ import { initSMSApi } from '../../../../tests/init/index.js';
 import { memberPhoneLookupLimiter, memberSecurityCodeSendLimiter, SendMemberSecurityCodeEndpoint, smsOrganizationLimiter, userSecurityCodeSendLimiter } from './SendMemberSecurityCodeEndpoint.js';
 import { SessionService } from '../../../services/SessionService.js';
 
-const baseUrl = `/members/security-code`;
+const baseUrl = '/members/security-code';
 const endpoint = new SendMemberSecurityCodeEndpoint();
 
 const securityCode = 'ABCD1234WXYZ5678';

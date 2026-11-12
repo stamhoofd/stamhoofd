@@ -30,10 +30,14 @@ in a TTY; redirected output receives ordinary progress lines instead. The origin
 operation label is retained for completion output:
 
 ```ts
-await withSpan('files.scan', async () => {
-    log('info', '25/100 files', { 'operation.progress': true });
-    // Await the remaining work here.
-}, { label: 'Scanning files' });
+await withSpan(
+    'files.scan',
+    async () => {
+        log('info', '25/100 files', { 'operation.progress': true });
+        // Await the remaining work here.
+    },
+    { label: 'Scanning files' },
+);
 ```
 
 ```text

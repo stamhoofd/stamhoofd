@@ -9,7 +9,7 @@ export function toIncludeSameMembers<E = unknown>(actual: unknown, expected: rea
     const { printReceived, printExpected, matcherHint } = this.utils;
 
     const pass
-    = Array.isArray(actual)
+        = Array.isArray(actual)
         && Array.isArray(expected)
         && predicate((a, b) => this.equals(a, b, this.customTesters), actual, expected);
 

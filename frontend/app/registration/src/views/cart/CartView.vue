@@ -64,12 +64,12 @@ const cart = computed(() => checkout.value.cart);
 const errors = useErrors();
 const context = useContext();
 const navigate = useNavigationActions();
-const owner = useRequestOwner(undefined, {cancelOnDeactivated: true});
+const owner = useRequestOwner(undefined, { cancelOnDeactivated: true });
 const loading = ref(false);
 
 const showDiscountsSeparately = computed(() => checkout.value.showDiscountsSeparately);
-const visibleBalanceItems = computed(() => showDiscountsSeparately.value ? cart.value.balanceItems.filter(b => b.price >= 0) : cart.value.balanceItems)
-const loadingBalances = computed(() => checkout.value.balanceItems === null)
+const visibleBalanceItems = computed(() => showDiscountsSeparately.value ? cart.value.balanceItems.filter(b => b.price >= 0) : cart.value.balanceItems);
+const loadingBalances = computed(() => checkout.value.balanceItems === null);
 
 onMounted(() => {
     checkout.value.updatePrices();
@@ -77,16 +77,14 @@ onMounted(() => {
     try {
         errors.errorBox = null;
         checkout.value.validate({});
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 });
 onActivated(() => {
-    memberManager.updateBalances(checkout.value, {owner}).catch(console.error)
+    memberManager.updateBalances(checkout.value, { owner }).catch(console.error);
     checkout.value.updatePrices();
 });
-
 
 async function goToCheckout() {
     if (loading.value) {
@@ -103,11 +101,9 @@ async function goToCheckout() {
             context: context.value,
             displayOptions: { action: 'present', modalDisplayStyle: 'popup' },
         }, navigate);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         loading.value = false;
     }
 }
@@ -119,12 +115,11 @@ async function showDiscountSheet(event: MouseEvent) {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: AsyncComponent(() => import('@stamhoofd/components/members/components/group/BalanceItemCartItemDiscountsSheet.vue'), {
-                    items: cart.value.balanceItemDiscounts
+                    items: cart.value.balanceItemDiscounts,
                 }),
             }),
         ],
     }, { minimumHeight: 185, width: 500 });
 }
-
 
 </script>

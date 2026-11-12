@@ -24,8 +24,7 @@ async function loginAs({ page, user }: { page: Page; user: User }) {
     await page.addInitScript(({ organizationId, tokenString }) => {
         if (organizationId) {
             window.localStorage.setItem('token-' + organizationId, tokenString);
-        }
-        else {
+        } else {
             window.localStorage.setItem('token-platform', tokenString);
         }
     }, { organizationId, tokenString });

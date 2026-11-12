@@ -1,4 +1,3 @@
-
 import type { ComponentWithProperties } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
@@ -16,7 +15,7 @@ export class MemberUitpasStep implements EditMemberStep {
     }
 
     getName(_manager: MemberStepManager) {
-        return $t(`%14`);
+        return $t('%14');
     }
 
     isEnabled(manager: MemberStepManager) {
@@ -38,8 +37,7 @@ export class MemberUitpasStep implements EditMemberStep {
             if (details.reviewTimes.isOutdated('uitpasNumber', this.options.outdatedTime)) {
                 return true;
             }
-        }
-        else {
+        } else {
             // Also ask if never answered the question
             if (details.uitpasNumberDetails === null && !details.reviewTimes.isReviewed('uitpasNumber')) {
                 return true;
@@ -51,10 +49,10 @@ export class MemberUitpasStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return AsyncComponent(() => import('#members/MemberStepView.vue'), {
-            title: $t(`%14`),
+            title: $t('%14'),
             member: manager.member,
             component: markRaw(EditMemberUitpasBox),
-            saveText: $t(`%16p`),
+            saveText: $t('%16p'),
             markReviewed: ['uitpasNumber'],
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

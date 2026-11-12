@@ -1,4 +1,3 @@
-
 import type { ComponentWithProperties } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
@@ -59,7 +58,7 @@ export class MemberFinancialSupportStep implements EditMemberStep {
             title: this.getName(manager),
             member: manager.member,
             component: markRaw(EditMemberFinancialSupportBox),
-            saveText: $t(`%16p`),
+            saveText: $t('%16p'),
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);
             },

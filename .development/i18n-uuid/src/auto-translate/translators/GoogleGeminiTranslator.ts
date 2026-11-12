@@ -1,6 +1,6 @@
 import type {
     GenerativeModel,
-    Schema} from '@google/generative-ai';
+    Schema } from '@google/generative-ai';
 import {
     GoogleGenerativeAI,
     SchemaType,

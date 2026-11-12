@@ -7,11 +7,11 @@ import { Formatter } from '@stamhoofd/utility';
 export class XlsxTransformerColumnHelper {
     static formatBoolean(value: boolean | undefined | null): string {
         if (value === true) {
-            return $t(`%wo`);
+            return $t('%wo');
         }
 
         if (value === false) {
-            return $t(`%18s`);
+            return $t('%18s');
         }
 
         return '';
@@ -45,7 +45,7 @@ export class XlsxTransformerColumnHelper {
         return [
             {
                 id: getId('name'),
-                name: getName($t(`%1Os`)),
+                name: getName($t('%1Os')),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getContact(member)?.name ?? '',
@@ -53,7 +53,7 @@ export class XlsxTransformerColumnHelper {
             },
             {
                 id: getId('title'),
-                name: getName($t(`%f5`)),
+                name: getName($t('%f5')),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getContact(member)?.title ?? '',
@@ -61,7 +61,7 @@ export class XlsxTransformerColumnHelper {
             },
             {
                 id: getId('phone'),
-                name: getName($t(`%wD`)),
+                name: getName($t('%wD')),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getContact(member)?.phone ?? '',
@@ -97,7 +97,7 @@ export class XlsxTransformerColumnHelper {
         return [
             {
                 id: getId('type'),
-                name: getName($t(`%1B`)),
+                name: getName($t('%1B')),
                 width: 20,
                 getValue: (member: PlatformMember) => {
                     const parent = getParent(member);
@@ -109,7 +109,7 @@ export class XlsxTransformerColumnHelper {
             },
             {
                 id: getId('firstName'),
-                name: getName($t(`%1MT`)),
+                name: getName($t('%1MT')),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getParent(member)?.firstName ?? '',
@@ -117,7 +117,7 @@ export class XlsxTransformerColumnHelper {
             },
             {
                 id: getId('lastName'),
-                name: getName($t(`%1MU`)),
+                name: getName($t('%1MU')),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getParent(member)?.lastName ?? '',
@@ -125,7 +125,7 @@ export class XlsxTransformerColumnHelper {
             },
             {
                 id: getId('phone'),
-                name: getName($t(`%wD`)),
+                name: getName($t('%wD')),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getParent(member)?.phone ?? '',
@@ -133,7 +133,7 @@ export class XlsxTransformerColumnHelper {
             },
             {
                 id: getId('email'),
-                name: getName($t(`%1FK`)),
+                name: getName($t('%1FK')),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getParent(member)?.email ?? '',
@@ -141,7 +141,7 @@ export class XlsxTransformerColumnHelper {
             },
             {
                 id: getId('nationalRegisterNumber'),
-                name: getName($t(`%wK`)),
+                name: getName($t('%wK')),
                 width: 20,
                 getValue: (member: PlatformMember) => ({
                     value: getParent(member)?.nationalRegisterNumber?.toString() ?? '',
@@ -163,8 +163,8 @@ export class XlsxTransformerColumnHelper {
                     return [
                         {
                             id: getId('street'),
-                            name: `Straat`,
-                            defaultCategory: $t(`%Cn`), // Ignore this name
+                            name: 'Straat',
+                            defaultCategory: $t('%Cn'), // Ignore this name
                             width: 40,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -175,8 +175,8 @@ export class XlsxTransformerColumnHelper {
                         },
                         {
                             id: getId('number'),
-                            name: $t(`%cH`),
-                            defaultCategory: $t(`%Cn`), // Ignore this name
+                            name: $t('%cH'),
+                            defaultCategory: $t('%Cn'), // Ignore this name
                             width: 20,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -187,8 +187,8 @@ export class XlsxTransformerColumnHelper {
                         },
                         {
                             id: getId('postalCode'),
-                            name: $t(`%c`),
-                            defaultCategory: $t(`%Cn`), // Ignore this name
+                            name: $t('%c'),
+                            defaultCategory: $t('%Cn'), // Ignore this name
                             width: 20,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -199,8 +199,8 @@ export class XlsxTransformerColumnHelper {
                         },
                         {
                             id: getId('city'),
-                            name: $t(`%wp`),
-                            defaultCategory: $t(`%Cn`), // Ignore this name
+                            name: $t('%wp'),
+                            defaultCategory: $t('%Cn'), // Ignore this name
                             width: 20,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -211,8 +211,8 @@ export class XlsxTransformerColumnHelper {
                         },
                         {
                             id: getId('country'),
-                            name: $t(`%Cp`),
-                            defaultCategory: $t(`%Cn`), // Ignore this name
+                            name: $t('%Cp'),
+                            defaultCategory: $t('%Cn'), // Ignore this name
                             width: 20,
                             getValue: (object: T) => {
                                 const address = getAddress(object);
@@ -310,7 +310,7 @@ export class XlsxTransformerColumnHelper {
                 return [
                     {
                         id: `${matchId}.${categoryId}`,
-                        name: $t(`%M2`),
+                        name: $t('%M2'),
                         width: 40,
                         getValue: (object: T) => {
                             const member = getMember(object);

@@ -595,7 +595,7 @@ async function save() {
             });
         }
 
-        new Toast($t(`%HA`), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
         await pop({ force: true });
     } catch (e) {
         errors.errorBox = new ErrorBox(e);

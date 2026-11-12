@@ -227,7 +227,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing subject',
-                human: $t(`%wu`),
+                human: $t('%wu'),
             });
         }
 
@@ -235,7 +235,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing text',
-                human: $t(`%wv`),
+                human: $t('%wv'),
             });
         }
 
@@ -243,7 +243,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing html',
-                human: $t(`%wv`),
+                human: $t('%wv'),
             });
         }
 
@@ -261,7 +261,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Missing from',
-                human: $t(`%ww`),
+                human: $t('%ww'),
             });
         }
 
@@ -269,7 +269,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_recipients',
                 message: 'Failed to build recipients (count)',
-                human: $t(`%1EE`) + ' ' + this.recipientsErrors.getHuman(),
+                human: $t('%1EE') + ' ' + this.recipientsErrors.getHuman(),
             });
         }
 
@@ -277,7 +277,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'invalid_state',
                 message: 'Email is deleted',
-                human: $t(`%1EF`),
+                human: $t('%1EF'),
             });
         }
 
@@ -302,7 +302,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'missing_unsubscribe_button',
                     message: 'Missing unsubscribe button',
-                    human: $t(`%DS`),
+                    human: $t('%DS'),
                     field: 'html',
                 });
             }
@@ -313,7 +313,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'missing_unsubscribe_button',
                     message: 'Missing unsubscribe button in translation ' + language,
-                    human: $t(`%DS`),
+                    human: $t('%DS'),
                     field: 'translations',
                 });
             }
@@ -325,7 +325,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'missing_unsubscribe_button',
                     message: 'Missing unsubscribe button',
-                    human: $t(`%DS`),
+                    human: $t('%DS'),
                     field: 'text',
                 });
             }
@@ -342,7 +342,7 @@ export class Email extends QueryableModel {
             throw new SimpleError({
                 code: 'too_big_attachments',
                 message: 'Too big attachments',
-                human: $t(`%wx`),
+                human: $t('%wx'),
                 field: 'attachments',
             });
         }
@@ -363,7 +363,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'content_type_not_supported',
                     message: 'Content-Type not supported',
-                    human: $t(`%wy`),
+                    human: $t('%wy'),
                     field: 'attachments',
                 });
             }
@@ -496,7 +496,7 @@ export class Email extends QueryableModel {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Email not found',
-                    human: $t(`%wz`),
+                    human: $t('%wz'),
                 });
             }
             const c = await callback(upToDate, options);

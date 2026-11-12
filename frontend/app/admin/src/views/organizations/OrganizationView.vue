@@ -112,7 +112,8 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('%6u') }}</h2>
+            <hr>
+            <h2>{{ $t('%6u') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem v-if="!$isPlatform" :selectable="true" class="left-center right-stack" @click="navigate(Routes.Invoices)">
@@ -194,11 +195,13 @@
             <ViewOrganizationRecordCategoriesBox :organization="organization" />
 
             <div v-if="setupSteps.steps.size" class="container">
-                <hr><h2>{{ $t('%6Z') }}</h2>
+                <hr>
+                <h2>{{ $t('%6Z') }}</h2>
                 <SetupStepRows :steps="setupSteps" list-type="review" />
             </div>
 
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%31') }}
             </h2>
 
@@ -292,7 +295,7 @@ const title = computed(() => {
 });
 
 const tagStringList = computed(() => {
-    return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? $t(`%15v`)).join(', ');
+    return props.organization.meta.tags.map(id => platform.value.config.tags.find(t => t.id === id)?.name ?? $t('%15v')).join(', ');
 });
 
 const setupSteps = computed(() => props.organization.period.setupSteps);

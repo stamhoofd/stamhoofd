@@ -516,7 +516,7 @@ export class RegisterItem implements ObjectWithRecords {
                 new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: $t(`%13o`, { group: this.group.settings.name }),
+                    human: $t('%13o', { group: this.group.settings.name }),
                 }),
             );
         } else {
@@ -526,7 +526,7 @@ export class RegisterItem implements ObjectWithRecords {
                     new SimpleError({
                         code: 'product_unavailable',
                         message: 'Product unavailable',
-                        human: $t(`%14J`, {
+                        human: $t('%14J', {
                             group: this.group.settings.name,
                         }),
                         meta: { recoverable: true },
@@ -547,7 +547,7 @@ export class RegisterItem implements ObjectWithRecords {
                 errors.addError(new SimpleError({
                     code: 'option_menu_unavailable',
                     message: 'Option menu unavailable',
-                    human: $t(`%14K`, {
+                    human: $t('%14K', {
                         group: this.group.settings.name,
                     }),
                     meta: { recoverable: true },
@@ -567,7 +567,7 @@ export class RegisterItem implements ObjectWithRecords {
                 errors.addError(new SimpleError({
                     code: 'option_unavailable',
                     message: 'Option unavailable',
-                    human: $t(`%14K`, {
+                    human: $t('%14K', {
                         group: this.group.settings.name,
                     }),
                     meta: { recoverable: true },
@@ -585,7 +585,7 @@ export class RegisterItem implements ObjectWithRecords {
                 new SimpleError({
                     code: 'missing_menu',
                     message: "Missing menu's " + remainingMenus.filter(m => !m.multipleChoice).map(m => m.name).join(', '),
-                    human: $t(`%13p`, { group: this.group.settings.name }),
+                    human: $t('%13p', { group: this.group.settings.name }),
                     meta: { recoverable: true },
                 }),
             );
@@ -775,7 +775,7 @@ export class RegisterItem implements ObjectWithRecords {
 
         if (this.replaceRegistrations.length > 0) {
             for (const { registration } of this.replaceRegistrations) {
-                descriptions.push($t(`%13q`) + ' ' + registration.group.settings.name);
+                descriptions.push($t('%13q') + ' ' + registration.group.settings.name);
             }
         }
 
@@ -1103,7 +1103,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_end_date',
                     message: 'Invalid end date',
-                    human: $t(`%1Il`),
+                    human: $t('%1Il'),
                     field: 'customEndDate',
                 });
             }
@@ -1112,7 +1112,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_end_date',
                     message: 'Invalid end date',
-                    human: $t(`%1Im`),
+                    human: $t('%1Im'),
                     field: 'customEndDate',
                 });
             }
@@ -1121,7 +1121,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_end_date',
                     message: 'Invalid end date',
-                    human: $t(`%1In`),
+                    human: $t('%1In'),
                     field: 'customEndDate',
                 });
             }
@@ -1132,7 +1132,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_start_date',
                     message: 'Invalid start date',
-                    human: $t(`%13r`),
+                    human: $t('%13r'),
                     field: 'customStartDate',
                 });
             }
@@ -1141,7 +1141,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_start_date',
                     message: 'Invalid start date',
-                    human: $t(`%13s`),
+                    human: $t('%13s'),
                     field: 'customStartDate',
                 });
             }
@@ -1151,7 +1151,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'multiple_organizations',
                 message: 'Cannot add items of multiple organizations to the checkout',
-                human: $t(`%13t`, { group: this.group.settings.name }),
+                human: $t('%13t', { group: this.group.settings.name }),
                 meta: { recoverable: true },
             });
         }
@@ -1161,7 +1161,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_waiting_list',
                 message: 'No waiting list',
-                human: $t(`%13u`),
+                human: $t('%13u'),
             });
         }
 
@@ -1169,7 +1169,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'as_organization_disabled',
                 message: 'allowRegistrationsByOrganization disabled',
-                human: $t(`%13v`) + ' ' + this.group.settings.name,
+                human: $t('%13v') + ' ' + this.group.settings.name,
             });
         }
 
@@ -1179,7 +1179,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Invalid member in replaceRegistration',
-                    human: $t(`%13w`),
+                    human: $t('%13w'),
                     field: 'replaceRegistrations',
                 });
             }
@@ -1188,7 +1188,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Invalid organization in replaceRegistration',
-                    human: $t(`%13x`),
+                    human: $t('%13x'),
                     field: 'replaceRegistrations',
                 });
             }
@@ -1197,7 +1197,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_move',
                     message: 'Not allowed to move registrations',
-                    human: $t(`%13y`),
+                    human: $t('%13y'),
                     field: 'replaceRegistrations',
                 });
             }
@@ -1210,7 +1210,7 @@ export class RegisterItem implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'already_registered',
                 message: 'Already registered',
-                human: $t(`%14L`, {
+                human: $t('%14L', {
                     member: this.member.member.firstName,
                     group: this.group.settings.name,
                 }),
@@ -1224,13 +1224,13 @@ export class RegisterItem implements ObjectWithRecords {
                 code: 'maximum_reached',
                 message: 'Maximum reached',
                 human: (categoryMaximum.category.settings.maximumRegistrations ?? 1) === 1
-                    ? $t(`%1NT`, {
+                    ? $t('%1NT', {
                             otherGroup: Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('%M1') + ' '),
                             group: this.group.settings.name,
                             member: this.member.patchedMember.name,
                             category: categoryMaximum.category.settings.name,
                         })
-                    : $t(`%1NU`, {
+                    : $t('%1NU', {
                             'group-a-and-group-b': Formatter.joinLast(categoryMaximum.groups.map(group => group.settings.name.toString()), ', ', ' ' + $t('%M1') + ' '),
                             'count': categoryMaximum.category.settings.maximumRegistrations ?? 2,
                             'group': this.group.settings.name,
@@ -1251,7 +1251,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'not_yet_open',
                         message: 'Not yet open',
-                        human: $t(`%13z`, { group: this.group.settings.name }),
+                        human: $t('%13z', { group: this.group.settings.name }),
                     });
                 }
 
@@ -1259,7 +1259,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'closed',
                         message: 'Closed',
-                        human: $t(`%140`, { group: this.group.settings.name }),
+                        human: $t('%140', { group: this.group.settings.name }),
                     });
                 }
             }
@@ -1271,7 +1271,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'not_matching',
                         message: 'Not matching: memberDetails',
-                        human: error?.description ?? $t(`%14M`, {
+                        human: error?.description ?? $t('%14M', {
                             member: this.member.patchedMember.name,
                         }),
                     });
@@ -1314,13 +1314,13 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'not_matching',
                         message: 'Not matching: requireOrganizationIds',
-                        human: $t(`%1Kw`, { member: this.member.patchedMember.firstName, organization: organizations[0].name }),
+                        human: $t('%1Kw', { member: this.member.patchedMember.firstName, organization: organizations[0].name }),
                     });
                 }
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requireOrganizationIds',
-                    human: $t(`%141`, { member: this.member.patchedMember.firstName }),
+                    human: $t('%141', { member: this.member.patchedMember.firstName }),
                 });
             }
 
@@ -1328,7 +1328,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requireOrganizationIds',
-                    human: $t(`%14N`, {
+                    human: $t('%14N', {
                         member: this.member.patchedMember.name,
                     }),
                 });
@@ -1338,7 +1338,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requirePlatformMembershipOn',
-                    human: $t(`%142`, { member: this.member.patchedMember.name }),
+                    human: $t('%142', { member: this.member.patchedMember.name }),
                 });
             }
 
@@ -1346,7 +1346,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'not_matching',
                     message: 'Not matching: requirePlatformMembershipOnRegistrationDate',
-                    human: $t(`%143`, { member: this.member.patchedMember.name }),
+                    human: $t('%143', { member: this.member.patchedMember.name }),
                 });
             }
 
@@ -1358,9 +1358,9 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'pre_registrations',
                         message: 'Pre registrations',
-                        human: $t(`%14O`, {
+                        human: $t('%14O', {
                             group: this.group.settings.name,
-                        }) + (this.group.settings.priorityForFamily ? ' ' + $t(`%144`) : '') + '.',
+                        }) + (this.group.settings.priorityForFamily ? ' ' + $t('%144') : '') + '.',
                     });
                 }
             }
@@ -1373,7 +1373,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'waiting_list_required',
                         message: 'Waiting list required',
-                        human: $t(`%145`),
+                        human: $t('%145'),
                         meta: { recoverable: true },
                     });
                 }
@@ -1382,7 +1382,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'waiting_list_required',
                         message: 'Waiting list required',
-                        human: $t(`%146`),
+                        human: $t('%146'),
                         meta: { recoverable: true },
                     });
                 }
@@ -1392,7 +1392,7 @@ export class RegisterItem implements ObjectWithRecords {
                         throw new SimpleError({
                             code: 'waiting_list_required',
                             message: 'Waiting list required',
-                            human: $t(`%14P`, {
+                            human: $t('%14P', {
                                 group: this.group.settings.name,
                             }),
                             meta: { recoverable: true },
@@ -1405,7 +1405,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'invalid_price',
                     message: 'GroupPrice is not valid for this date',
-                    human: $t(`%1Ct`),
+                    human: $t('%1Ct'),
                     meta: { recoverable: true },
                 });
             }
@@ -1415,7 +1415,7 @@ export class RegisterItem implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'maximum_reached',
                     message: 'Maximum reached',
-                    human: $t(`%147`, { group: this.group.settings.name }),
+                    human: $t('%147', { group: this.group.settings.name }),
                     meta: { recoverable: true },
                 });
             }
@@ -1427,7 +1427,7 @@ export class RegisterItem implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'stock_empty',
                         message: 'Stock empty',
-                        human: $t(`%148`, { name: this.groupPrice.name }),
+                        human: $t('%148', { name: this.groupPrice.name }),
                         meta: { recoverable: true },
                     });
                 }
@@ -1439,7 +1439,7 @@ export class RegisterItem implements ObjectWithRecords {
                             code: 'stock_empty',
                             message: 'Stock empty',
                             human: remaining === 0
-                                ? $t(`%149`, { name: option.option.name })
+                                ? $t('%149', { name: option.option.name })
                                 : remaining > 1
                                     ? $t('%13n', { count: remaining.toString(), name: option.option.name })
                                     : $t('%Zfz', { name: option.option.name }),
@@ -1452,7 +1452,7 @@ export class RegisterItem implements ObjectWithRecords {
                         throw new SimpleError({
                             code: 'option_max',
                             message: 'Option maximum exceeded',
-                            human: $t(`%14Q`, {
+                            human: $t('%14Q', {
                                 name: option.option.name,
                             }),
                         });

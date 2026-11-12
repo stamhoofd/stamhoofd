@@ -40,18 +40,18 @@ export class PassholderEndpoints {
                 throw new SimpleError({
                     statusCode: 408,
                     code: 'uitpas_timeout',
-                    message: `Timeout when retrieving pass by UiTPAS number`,
+                    message: 'Timeout when retrieving pass by UiTPAS number',
                     human: $t(
-                        `We konden UiTPAS niet bereiken om jouw UiTPAS-nummer te valideren. Probeer het later opnieuw.`,
+                        'We konden UiTPAS niet bereiken om jouw UiTPAS-nummer te valideren. Probeer het later opnieuw.',
                     ),
                 });
             }
 
             throw new SimpleError({
                 code: 'uitpas_unreachable_retrieving_pass_by_uitpas_number',
-                message: `Network issue when retrieving pass by UiTPAS number`,
+                message: 'Network issue when retrieving pass by UiTPAS number',
                 human: $t(
-                    `We konden UiTPAS niet bereiken om jouw UiTPAS-nummer te valideren. Probeer het later opnieuw.`,
+                    'We konden UiTPAS niet bereiken om jouw UiTPAS-nummer te valideren. Probeer het later opnieuw.',
                 ),
             });
         }
@@ -171,7 +171,7 @@ function assertValidGetPassResponse(json: unknown): asserts json is GetPassRespo
         throw new SimpleError({
             code: 'invalid_response_retrieving_pass_by_uitpas_number',
             message: `Invalid response when retrieving pass by UiTPAS  number: ${error.message}`,
-            human: $t(`%1BQ`),
+            human: $t('%1BQ'),
         });
     }
 }

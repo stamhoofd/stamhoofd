@@ -318,7 +318,7 @@ function changedFile(event: any) {
     const reader = new FileReader();
     reader.onload = (e: any) => {
         if (!e.target || !e.target.result) {
-            new CenteredMessage($t(`%1A2`)).addCloseButton().show();
+            new CenteredMessage($t('%1A2')).addCloseButton().show();
             return;
         }
 
@@ -518,7 +518,7 @@ async function importData(sheet: XLSX.WorkSheet, columns: MatchedColumn[], resul
             }
 
             if (!column.matcher) {
-                throw new Error($t(`%1A3`, { column: column.name }));
+                throw new Error($t('%1A3', { column: column.name }));
             }
 
             const valueCell = sheet[XLSX.utils.encode_cell({ r: row, c: column.index })] as XLSX.CellObject;

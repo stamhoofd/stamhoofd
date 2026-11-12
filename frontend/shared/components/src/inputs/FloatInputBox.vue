@@ -74,7 +74,7 @@ const props = withDefaults(defineProps<{
     disabled: false,
     required: true,
     fractionDigits: 2,
-    roundFractionDigits: null
+    roundFractionDigits: null,
 
 });
 const numberInput = useNumberInput(computed(() => props));

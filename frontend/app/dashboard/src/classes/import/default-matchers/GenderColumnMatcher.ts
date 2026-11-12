@@ -31,7 +31,7 @@ export class GenderColumnMatcher implements ColumnMatcher {
         if (!cell) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18F`),
+                message: $t('%18F'),
             });
         }
 
@@ -41,17 +41,14 @@ export class GenderColumnMatcher implements ColumnMatcher {
 
         if (value === getGenderName(Gender.Male).toLowerCase() || value.includes('jongen') || value.includes('boy') || (value.startsWith('m') && !value.includes('meisje'))) {
             gender = Gender.Male;
-        }
-        else if (value === getGenderName(Gender.Female).toLowerCase() || value.startsWith('v') || value.startsWith('f') || value.includes('meisje') || value.includes('girl')) {
+        } else if (value === getGenderName(Gender.Female).toLowerCase() || value.startsWith('v') || value.startsWith('f') || value.includes('meisje') || value.includes('girl')) {
             gender = Gender.Female;
-        }
-        else if (value === getGenderName(Gender.Other).toLowerCase() || value === 'x') {
+        } else if (value === getGenderName(Gender.Other).toLowerCase() || value === 'x') {
             gender = Gender.Other;
-        }
-        else if (value !== '') {
+        } else if (value !== '') {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18R`, { gender: value }),
+                message: $t('%18R', { gender: value }),
             });
         }
 

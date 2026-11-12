@@ -53,7 +53,8 @@
             </button>
         </p>
 
-        <hr><h2>{{ $t('%16X') }}</h2>
+        <hr>
+        <h2>{{ $t('%16X') }}</h2>
 
         <STList class="illustration-list">
             <STListItem :selectable="true" class="left-center" element-name="label">
@@ -79,7 +80,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, Decoder} from '@common/encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { ObjectData, VersionBoxDecoder } from '@common/encoding';
 import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
@@ -97,7 +98,6 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { PrivateWebshop, Product, SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSeat, SeatingPlanSection, SeatType, WebshopMetaData } from '@stamhoofd/structures';
 import { sleep, Sorter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
-
 
 const props = defineProps<{
     product: Product;
@@ -414,13 +414,11 @@ async function importSeatingPlan(event: InputEvent & any) {
             ],
             modalDisplayStyle: 'popup',
         }).catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         const message = $t('%4A');
         new Toast(message, 'error red');
-    }
-    finally {
+    } finally {
         importingSeatingPlan.value = false;
     }
 

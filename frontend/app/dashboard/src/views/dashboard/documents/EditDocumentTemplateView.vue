@@ -33,14 +33,16 @@
             </STInputBox>
 
             <div v-for="category of fieldCategories.filter(c => c.filterRecords(patchedDocument).filter(record => isDocumentFieldEditable(record)).length > 0)" :key="category.id" class="container">
-                <hr><h2>{{ category.name }}</h2>
+                <hr>
+                <h2>{{ category.name }}</h2>
                 <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
                 <RecordAnswerInput v-for="record of category.filterRecords(patchedDocument).filter(record => isDocumentFieldEditable(record))" :key="record.id" :record="record" :answers="recordAnswers" :validator="errors.validator" :mark-reviewed="true" @patch="patchAnswers" />
             </div>
 
             <div v-for="category of documentFieldCategories" :key="category.id" class="container">
-                <hr><h2>{{ $t('%Kr') }} {{ category.name }}</h2>
+                <hr>
+                <h2>{{ $t('%Kr') }} {{ category.name }}</h2>
                 <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
                 <p class="info-box">
@@ -50,7 +52,8 @@
                 <MultiSelectInput v-for="field of category.getAllRecords().filter(r => isDocumentFieldEditable(r))" :key="field.id" class="max" :title="field.name" :error-fields="field.id" :error-box="errors.errorBox" :model-value="getLinkedFields(field)" :choices="getLinkedFieldsChoices(field)" :placeholder="$t(`%L1`)" @update:model-value="setLinkedFields(field, $event)" />
             </div>
 
-            <hr><h2>{{ $t('%1EI') }}</h2>
+            <hr>
+            <h2>{{ $t('%1EI') }}</h2>
             <p>{{ $t('%Ks') }}</p>
 
             <STList v-if="patchedDocument.privateSettings.groups.length">
@@ -73,27 +76,31 @@
             </p>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMaxAge">
-                <hr><h2>{{ $t('%Ku') }}</h2>
+                <hr>
+                <h2>{{ $t('%Ku') }}</h2>
 
                 <NumberInputBox v-model="maxAge" error-fields="maxAge" :error-box="errors.errorBox" :title="$t(`%L2`)" :required="false" suffix="jaar" :placeholder="$t(`%1FW`)" :validator="errors.validator" />
             </template>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPrice">
-                <hr><h2>{{ $t('%1JL') }}</h2>
+                <hr>
+                <h2>{{ $t('%1JL') }}</h2>
                 <Checkbox v-model="nonZeroPriceOnly">
                     {{ $t('%Kv') }}
                 </Checkbox>
             </template>
 
             <template v-if="patchedDocument.privateSettings.templateDefinition.allowChangingMinPricePaid">
-                <hr><h2>{{ $t('%1OD') }}</h2>
+                <hr>
+                <h2>{{ $t('%1OD') }}</h2>
                 <Checkbox v-model="paidOnly">
                     {{ $t('%Kx') }}
                 </Checkbox>
             </template>
 
             <template v-if="auth.hasPlatformFullAccess()">
-                <hr><h2>{{ $t('%HQ') }}</h2>
+                <hr>
+                <h2>{{ $t('%HQ') }}</h2>
 
                 <STList>
                     <CheckboxListItem v-model="useCustomHtml" :label="$t(`%L3`)" :description="$t(`%L4`)">

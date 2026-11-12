@@ -63,7 +63,7 @@ const props = defineProps<{
     saveHandler: (p: AutoEncoderPatchType<PlatformPolicy>) => Promise<void>;
     deleteHandler: (() => Promise<void>) | null;
 }>();
-const title = computed(() => props.isNew ? $t(`%IO`) : $t(`%IP`));
+const title = computed(() => props.isNew ? $t('%IO') : $t('%IP'));
 const pop = usePop();
 
 const { patched, addPatch, hasChanges, patch } = usePatch(props.policy);
@@ -77,15 +77,14 @@ const save = async () => {
         if (name.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%56`),
+                message: $t('%56'),
                 field: 'name',
             });
         }
 
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -102,7 +101,7 @@ const doDelete = async () => {
 
     if (!await CenteredMessage.confirm({
         title: $t('%Zn2', { name: props.policy.name }),
-        confirmText: $t(`%CJ`),
+        confirmText: $t('%CJ'),
         description: $t('%Zmc'),
         availabilityDelay: 2_000,
     })) {
@@ -113,8 +112,7 @@ const doDelete = async () => {
     try {
         await props.deleteHandler();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

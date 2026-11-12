@@ -1,1 +1,13 @@
-{"appId":"com.stamhoofd.stamhoofd","appName":"Stamhoofd","webDir":"dist","loggingBehavior":"debug","plugins":{"Keyboard":{"resize":"none","resizeOnFullScreen":false},"SystemBars":{"insetsHandling":"disable"},"PushNotifications":{"presentationOptions":["badge","sound","alert"]},"CapacitorUpdater":{"autoUpdate":false}},"server":{"hostname":"stamhoofd.app","androidScheme":"https"}}
+{
+    "appId": "com.stamhoofd.stamhoofd",
+    "appName": "Stamhoofd",
+    "webDir": "dist",
+    "loggingBehavior": "debug",
+    "plugins": {
+        "Keyboard": { "resize": "none", "resizeOnFullScreen": false },
+        "SystemBars": { "insetsHandling": "disable" },
+        "PushNotifications": { "presentationOptions": ["badge", "sound", "alert"] },
+        "CapacitorUpdater": { "autoUpdate": false }
+    },
+    "server": { "hostname": "stamhoofd.app", "androidScheme": "https" }
+}

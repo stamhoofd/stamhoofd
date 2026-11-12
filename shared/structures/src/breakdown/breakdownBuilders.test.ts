@@ -402,7 +402,6 @@ describe('Breakdown builders', () => {
                     { stripeAccountId: 'acct_1' },
                 ],
             });
-
         });
 
         test('payments of a deleted Stripe account stay grouped together', () => {

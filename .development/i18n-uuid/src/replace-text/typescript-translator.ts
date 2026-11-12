@@ -168,7 +168,7 @@ export class TypescriptTranslator {
         }
 
         this.logContext(part, translatedPart, processedParts, unprocessedPart);
-        const result = await promptYesNoOrDoubt(chalk.yellow(`> Accept (press [y] or [enter])?`));
+        const result = await promptYesNoOrDoubt(chalk.yellow('> Accept (press [y] or [enter])?'));
 
         if (result === YesNoOrDoubt.Yes) {
             return true;

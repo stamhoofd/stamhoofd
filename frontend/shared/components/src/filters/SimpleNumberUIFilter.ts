@@ -5,7 +5,7 @@ import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { NumberFilterFormat } from './NumberFilterFormat';
 
-import type { UIFilterBuilder} from './UIFilter';
+import type { UIFilterBuilder } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
 
 export class SimpleNumberUIFilter extends UIFilter<SimpleNumberFilterBuilder> {
@@ -63,7 +63,7 @@ export class SimpleNumberFilterBuilder implements UIFilterBuilder<SimpleNumberUI
     type = NumberFilterFormat.Number;
     defaultValue = 0;
 
-    constructor(data: { name: string; type?: NumberFilterFormat;wrapper: WrapperFilter; defaultValue?: number }) {
+    constructor(data: { name: string; type?: NumberFilterFormat; wrapper: WrapperFilter; defaultValue?: number }) {
         if (data.defaultValue !== undefined) {
             this.defaultValue = data.defaultValue;
         }

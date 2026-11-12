@@ -25,14 +25,12 @@ export class ModelCache<M extends Model> {
         for (const column of copy.static.columns.values()) {
             try {
                 this[column.name] = structuredClone(model[column.name]);
-            }
-            catch (e) {
+            } catch (e) {
                 console.log('Error on clone', copy.static.name, column.name, e);
                 // structured clone error
                 if (model[column.name] instanceof AutoEncoder) {
                     this[column.name] = model[column.name].clone();
-                }
-                else {
+                } else {
                     this[column.name] = model[column.name];
                 }
             }

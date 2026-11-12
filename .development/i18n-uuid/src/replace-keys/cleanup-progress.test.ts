@@ -57,7 +57,7 @@ it('handles a large unused-key set across many source files', async () => {
 
 it('keeps unchanged files and reserved metadata untouched', async () => {
     vi.mocked(getTranslationsWithPath).mockReturnValue(new Map([
-        ['nl.json', entries({ '%1': 'Save', replacements: 'reserved', extends: 'reserved', 'consistent-words': 'reserved' })],
+        ['nl.json', entries({ '%1': 'Save', 'replacements': 'reserved', 'extends': 'reserved', 'consistent-words': 'reserved' })],
         ['fr.json', entries({ '%2': 'Supprimer' })],
     ]));
     expect(await unusedKeys()).toBe(1);
@@ -79,8 +79,8 @@ afterEach(() => vi.restoreAllMocks());
 
 it('merges only identical language maps into the smallest numeric key regardless of insertion order', async () => {
     vi.mocked(getTranslationsWithPath).mockReturnValue(new Map([
-        ['nl.json', entries({ '%10': 'Save', '%z': 'Save', '%2': 'Save', '%3': 'Save', '%4': 'Save', literal: 'Save' })],
-        ['fr.json', entries({ '%10': 'Enregistrer', '%z': 'Enregistrer', '%2': 'Enregistrer', '%3': 'Different', literal: 'Enregistrer' })],
+        ['nl.json', entries({ '%10': 'Save', '%z': 'Save', '%2': 'Save', '%3': 'Save', '%4': 'Save', 'literal': 'Save' })],
+        ['fr.json', entries({ '%10': 'Enregistrer', '%z': 'Enregistrer', '%2': 'Enregistrer', '%3': 'Different', 'literal': 'Enregistrer' })],
     ]));
     vi.mocked(fs.readFileSync).mockReturnValue("$t('%10') $t('%z') $t('%2') $t('%3') $t('%4') $t('literal')");
     expect(await mergeDuplicates()).toBe(2);

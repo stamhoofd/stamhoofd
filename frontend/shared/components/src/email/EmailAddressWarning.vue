@@ -16,7 +16,6 @@ import { useAuth } from '../hooks/useAuth';
 import { useEmailInformation } from '../hooks/useEmailInformation';
 import { useEmailWarning } from '../hooks/useEmailWarning';
 
-
 const props = withDefaults(defineProps<{
     email: string | null;
     copyable?: boolean;

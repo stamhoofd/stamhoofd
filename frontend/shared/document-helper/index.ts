@@ -47,8 +47,7 @@ export async function getDocumentPdfBlob($context: SessionContext, document: Doc
             responseType: 'blob',
         });
         return cachedResponse.data as Blob;
-    }
-    catch (e) {
+    } catch (e) {
         if (Request.isAbortError(e)) {
             throw e;
         }
@@ -95,13 +94,11 @@ export async function downloadDocument($context: SessionContext, document: Docum
         const blob = await getDocumentPdfBlob($context, document, owner);
         const filename = Formatter.fileSlug(document.data.name + ' - ' + document.data.description) + '.pdf';
         await AppManager.shared.downloadFile(blob, filename);
-    }
-    catch (e) {
+    } catch (e) {
         if (!Request.isAbortError(e)) {
             Toast.fromError(e).show();
-        }
-        else {
-            new Toast($t(`%12x`), 'info').show();
+        } else {
+            new Toast($t('%12x'), 'info').show();
         }
     }
 }
@@ -114,7 +111,7 @@ export async function downloadDocuments($context: SessionContext, documents: Doc
 
     let pendingToast: Toast | null = null;
     try {
-        pendingToast = new Toast($t(`%12y`), 'spinner').setProgress(0).setHide(null).show();
+        pendingToast = new Toast($t('%12y'), 'spinner').setProgress(0).setHide(null).show();
         const JSZip = (await import(/* webpackChunkName: "jszip" */ 'jszip')).default;
         const zip = new JSZip();
 
@@ -132,18 +129,16 @@ export async function downloadDocuments($context: SessionContext, documents: Doc
         await Promise.all(promises);
 
         pendingToast?.hide();
-        pendingToast = new Toast($t(`%12z`), 'spinner').setHide(null).show();
+        pendingToast = new Toast($t('%12z'), 'spinner').setHide(null).show();
         const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
-        await AppManager.shared.downloadFile(blob, $t(`%130`));
+        await AppManager.shared.downloadFile(blob, $t('%130'));
         pendingToast?.hide();
-    }
-    catch (e) {
+    } catch (e) {
         pendingToast?.hide();
         if (!Request.isAbortError(e)) {
             Toast.fromError(e).show();
-        }
-        else {
-            new Toast($t(`%12x`), 'info').show();
+        } else {
+            new Toast($t('%12x'), 'info').show();
         }
     }
 }

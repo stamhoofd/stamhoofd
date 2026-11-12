@@ -57,7 +57,7 @@ const props = withDefaults(
         description?: string;
         selectOrganization: (organization: Organization, navigation: NavigationActions) => Promise<void> | void;
     }>(), {
-        title: () => $t(`%KC`),
+        title: () => $t('%KC'),
         description: '',
     },
 );

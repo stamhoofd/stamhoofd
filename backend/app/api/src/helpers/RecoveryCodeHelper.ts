@@ -71,8 +71,7 @@ export const RecoveryCodeHelper = {
                         .update();
                     return result.changedRows === 1;
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 // Ignore malformed hash, keep checking
             }
         }

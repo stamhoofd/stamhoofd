@@ -94,7 +94,7 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errorBox.value = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%yr`),
+                message: $t('%yr'),
                 field: 'color',
             }));
         }
@@ -110,7 +110,7 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errorBox.value = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%ys`),
+                message: $t('%ys'),
                 field: 'color',
             }));
         }

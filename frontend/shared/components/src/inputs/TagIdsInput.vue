@@ -68,8 +68,7 @@ const options = computed(() => {
 
     if (isEnabledOperator !== undefined) {
         result = tags.value.map(tag => ({ tag, isEnabled: isEnabledOperator(tag), isLocked: false }));
-    }
-    else {
+    } else {
         result = tags.value.map(tag => ({ tag, isEnabled: true, isLocked: false }));
     }
 
@@ -109,8 +108,7 @@ watch(enabledOptions, (options) => {
     if (options.length === 1) {
         if (model.value === null) {
             model.value = [options[0]];
-        }
-        else if (model.value.length === 0) {
+        } else if (model.value.length === 0) {
             model.value.push(options[0]);
         }
     }
@@ -121,8 +119,7 @@ const allTags = computed({
     set: (allTags) => {
         if (allTags) {
             model.value = null;
-        }
-        else {
+        } else {
             model.value = (lastCachedValue.value ?? []).slice();
         }
     },
@@ -138,8 +135,7 @@ function setTagValue(tag: string, value: boolean) {
     }
     if (value) {
         model.value = [...model.value.filter(t => t !== tag), tag];
-    }
-    else {
+    } else {
         model.value = model.value.filter(t => t !== tag);
     }
 }

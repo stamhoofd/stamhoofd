@@ -28,8 +28,7 @@ test.describe('Content-Security-Policy allows blob workers @csp', () => {
                     worker.onmessage = e => resolve(`reply ${e.data}`);
                     worker.onerror = () => resolve('worker error');
                     worker.postMessage(21);
-                }
-                catch (e) {
+                } catch (e) {
                     resolve(`blocked: ${(e as Error).message}`);
                 }
                 setTimeout(() => resolve('timeout'), 5_000);

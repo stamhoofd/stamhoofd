@@ -30,7 +30,8 @@
 
             <template v-if="shouldFilter && !isLoading && (ticketProducts.length > 1 || disabledProducts.length)">
                 <div v-for="category of categories" :key="category.id" class="container">
-                    <hr v-if="categories.length > 1"><h2 v-if="categories.length > 1">
+                    <hr v-if="categories.length > 1">
+                    <h2 v-if="categories.length > 1">
                         {{ category.name }}
                     </h2>
                     <STList>

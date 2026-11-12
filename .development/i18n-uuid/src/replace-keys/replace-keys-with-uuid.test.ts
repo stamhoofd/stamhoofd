@@ -27,7 +27,7 @@ describe('replace-keys-with-uuid', () => {
         });
 
         test('ignores other helpers and plain text', () => {
-            const content = `{{formatPrice total}} {{t "not a translation"}} $translate("x")`;
+            const content = '{{formatPrice total}} {{t "not a translation"}} $translate("x")';
             expect(findTranslationKeyUsages(content).size).toBe(0);
         });
     });
@@ -50,8 +50,8 @@ describe('replace-keys-with-uuid', () => {
         });
 
         test('replaces every occurrence', () => {
-            const content = `{{$t "Factuur"}} and {{$t "Factuur"}}`;
-            expect(replaceOccurrencesInContent(content, replacedKeys)).toBe(`{{$t "%1"}} and {{$t "%1"}}`);
+            const content = '{{$t "Factuur"}} and {{$t "Factuur"}}';
+            expect(replaceOccurrencesInContent(content, replacedKeys)).toBe('{{$t "%1"}} and {{$t "%1"}}');
         });
     });
 });

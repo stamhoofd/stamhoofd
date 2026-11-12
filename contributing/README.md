@@ -18,7 +18,6 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 ## Encoding & decoding
 
-
 > One of the most important concepts in our code base. Start here.
 
 [Encoding & decoding (structures)](../packages/common/encoding/README.md#encoding--decoding-structures)
@@ -30,7 +29,6 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 [Versioning data](../packages/common/encoding/docs/versioning.md)
 
 ## Frontend guides
-
 
 [Views and navigation (Vue App Navigation)](../packages/browser/navigation/docs/getting-started.md)
 
@@ -47,7 +45,6 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 [Frontend service ownership](frontend/services.md)
 
 ## Backend guides
-
 
 [Writing endpoints](../packages/node/endpoints/docs/endpoints.md)
 

@@ -20,18 +20,17 @@
         > h1 {
             @extend %style-title-1;
 
-            .split-view-controller[data-has-detail="true"] > .master & {
+            .split-view-controller[data-has-detail='true'] > .master & {
                 @extend %style-title-2-larger;
             }
         }
-
-
 
         .footer {
             margin-top: auto;
         }
 
-        .menu-button, .st-menu-item {
+        .menu-button,
+        .st-menu-item {
             --block-width: 20px;
             // Firefox fix
             --block-aside-scale: 0.7;
@@ -82,7 +81,9 @@
 
             --saved-color-current-background: var(--color-current-background);
             --saved-color-current-background-shade: var(--color-current-background-shade);
-            --saved-color-current-background-shade-darker: var(--color-current-background-shade-darker);
+            --saved-color-current-background-shade-darker: var(
+                --color-current-background-shade-darker
+            );
 
             @media (pointer: fine) {
                 &:hover {
@@ -93,7 +94,10 @@
                 }
             }
 
-            .split-view-controller[data-has-detail="true"] > .master &.selected, &.active, &.open-context-menu, &:active  {
+            .split-view-controller[data-has-detail='true'] > .master &.selected,
+            &.active,
+            &.open-context-menu,
+            &:active {
                 background-color: $color-background-shade-darker-darker;
                 color: $color-darkest;
 
@@ -105,7 +109,9 @@
             > * {
                 --color-current-background: var(--saved-color-current-background);
                 --color-current-background-shade: var(--saved-color-current-background-shade);
-                --color-current-background-shade-darker: var(--saved-color-current-background-shade-darker);
+                --color-current-background-shade-darker: var(
+                    --saved-color-current-background-shade-darker
+                );
             }
 
             &.cta {
@@ -190,7 +196,6 @@
             }
         }
 
-
         > .block {
             margin: 5px 0;
         }
@@ -206,7 +211,7 @@
                 z-index: 100;
                 padding: 15px;
                 margin: 0px -10px;
-                border-radius: 15px;;
+                border-radius: 15px;
                 box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
                 border: 1px solid rgba(0, 0, 0, 0.08);
                 position: sticky;
@@ -214,7 +219,6 @@
             }
 
             > .title {
-
             }
 
             > .items {

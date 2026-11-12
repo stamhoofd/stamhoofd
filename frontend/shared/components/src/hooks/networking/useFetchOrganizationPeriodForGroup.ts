@@ -2,7 +2,7 @@ import type { Decoder } from '@common/encoding';
 import { ArrayDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { useContext } from '../useContext';
-import type { Group} from '@stamhoofd/structures';
+import type { Group } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, OrganizationRegistrationPeriod, PaginatedResponseDecoder, SortItemDirection } from '@stamhoofd/structures';
 import { useRequestOwner } from './useRequestOwner';
 

@@ -1,6 +1,7 @@
 <template>
     <div v-if="securityCode" class="hover-box container">
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <div>{{ $t('%wE') }}</div>
             <div v-if="shouldShowResetSecurityCode">
                 <button type="button" class="button icon retry hover-show" @click="renewSecurityCode" />

@@ -25,15 +25,15 @@ import { useSetupStepTranslations } from '#hooks/useSetupStepTranslations.ts';
 import { computed } from 'vue';
 import type { ReviewCheckboxData } from './useReview';
 
-const props = defineProps<{data: ReviewCheckboxData}>();
+const props = defineProps<{ data: ReviewCheckboxData }>();
 const $review = computed(() => props.data.step?.review);
 const setupStepTranslations = useSetupStepTranslations();
-const {getDescription} = useSetupStepReviewDescription();
+const { getDescription } = useSetupStepReviewDescription();
 
 const checkboxTitle = computed(() => setupStepTranslations.getReviewCheckboxTitle(props.data.type));
 
 const value = computed({
     get: () => props.data.checkboxValue,
-    set: value => props.data.setValue(value)
-})
+    set: value => props.data.setValue(value),
+});
 </script>

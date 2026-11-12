@@ -16,7 +16,8 @@
             <AddressInput v-model="address" :title="$t('%Cn')" :validator="errors.validator" :required="true" :link-country-to-locale="true" error-fields="address" />
 
             <div v-if="platformPremiseTypes.length || originalPremiseTypeIds.size" class="container">
-                <hr><h2>{{ $t('%1B') }}</h2>
+                <hr>
+                <h2>{{ $t('%1B') }}</h2>
                 <STList>
                     <STListItem v-for="premiseType of platformPremiseTypes" :key="premiseType.id" :selectable="true" element-name="label" class="hover-box">
                         <template #left>
@@ -133,8 +134,7 @@ function selectUnkownType(isSelected: boolean) {
 
     if (isSelected) {
         premiseTypeIds.value = knownTypeIds.concat(unknownTypeIds);
-    }
-    else {
+    } else {
         premiseTypeIds.value = knownTypeIds;
     }
 
@@ -148,12 +148,10 @@ function selectPremiseType(isSelected: boolean, premiseType: PlatformPremiseType
     if (isSelected) {
         if (premiseTypeIds.value.includes(premiseTypeId)) {
             console.error(`${premiseType.name} is already selected`);
-        }
-        else {
+        } else {
             premiseTypeIds.value = [...premiseTypeIds.value, premiseTypeId];
         }
-    }
-    else {
+    } else {
         premiseTypeIds.value = premiseTypeIds.value.filter(id => id !== premiseTypeId);
     }
 

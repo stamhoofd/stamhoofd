@@ -1,6 +1,5 @@
-@use "../base/variables" as *;
-@use "../base/text-styles" as *;
-
+@use '../base/variables' as *;
+@use '../base/text-styles' as *;
 
 .split-view-controller {
     --split-view-width: 280px;
@@ -13,7 +12,7 @@
     overflow: hidden;
     overflow: clip;
 
-    >.master {
+    > .master {
         flex-shrink: 0;
         flex-grow: 0;
         position: sticky;
@@ -41,7 +40,7 @@
         overscroll-behavior: contain;
     }
 
-    >.detail {
+    > .detail {
         background: var(--color-current-background);
         overflow: hidden;
         overflow: clip;
@@ -54,9 +53,11 @@
         }
     }
 
-    &[data-has-detail="true"] {
+    &[data-has-detail='true'] {
         display: grid;
-        grid-template-columns: calc(var(--split-view-width, 320px) + var(--st-safe-area-left, 0px)) 1fr !important;
+        grid-template-columns: calc(
+                var(--split-view-width, 320px) + var(--st-safe-area-left, 0px)
+            ) 1fr !important;
 
         & > .master {
             min-width: 0;
@@ -71,8 +72,8 @@
         }
     }
 
-    &[data-has-detail="true"] {
-        >.master {
+    &[data-has-detail='true'] {
+        > .master {
             border-right: $border-width-thin solid $color-border-lighter;
             background: $color-background-shade;
             --color-current-background: #{$color-background-shade};
@@ -97,15 +98,18 @@
     z-index: 10000;
     visibility: visible;
     opacity: 1;
-    transition: background-color 0.3s, opacity 0.3s, visibility step-start 0.3s;
+    transition:
+        background-color 0.3s,
+        opacity 0.3s,
+        visibility step-start 0.3s;
 
-    ~.side-view {
+    ~ .side-view {
         background-color: rgba(black, 0.4);
     }
 
     // Improve performance
 
-    &>div {
+    & > div {
         position: fixed;
         right: 0;
         top: 0;
@@ -132,17 +136,22 @@
         transform: translate3d(0, 0, 0);
 
         // Push down
-        transition: transform 0.3s, border-radius 0.3s;
+        transition:
+            transform 0.3s,
+            border-radius 0.3s;
         transform-origin: 0% 50%;
     }
 
     &.push-down-full {
-        transition: background-color 0.3s, opacity 0.3s, visibility step-end 0.3s;
+        transition:
+            background-color 0.3s,
+            opacity 0.3s,
+            visibility step-end 0.3s;
         visibility: hidden;
         opacity: 0;
         background-color: rgba(black, 0.6);
 
-        &>div {
+        & > div {
             transform: scale(0.9, 0.9) translate3d(-15px, 0, 0);
             border-radius: 5px;
         }
@@ -151,7 +160,7 @@
     &.push-down {
         background-color: rgba(black, 0.6);
 
-        &>div {
+        & > div {
             transform: scale(0.95, 0.95) translate3d(-10px, 0, 0);
             border-radius: 5px;
         }
@@ -159,10 +168,10 @@
 
     &.show-enter-active,
     &.show-leave-active,
-    &[data-extended-enter="true"] {
+    &[data-extended-enter='true'] {
         position: fixed;
 
-        &>div {
+        & > div {
             transition: transform 0.3s;
         }
     }
@@ -170,11 +179,10 @@
     &.show-enter-from,
     &.show-leave-to
 
-    /* .show-leave-active below version 2.1.8 */
-        {
+    /* .show-leave-active below version 2.1.8 */ {
         background-color: rgba(black, 0);
 
-        &>div {
+        & > div {
             transform: translate(100%, 0);
         }
     }
@@ -192,7 +200,7 @@
         background: rgba(8, 8, 8, 0.7);
     }
 
-    &>div {
+    & > div {
         max-width: 400px;
         overscroll-behavior: contain;
 

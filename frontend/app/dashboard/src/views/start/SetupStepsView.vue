@@ -9,7 +9,8 @@
                 </button>
             </p>
             <div v-else key="steps" class="container">
-                <hr><h2>{{ $t('%A') }}</h2>
+                <hr>
+                <h2>{{ $t('%A') }}</h2>
                 <p>{{ $t('%C') }} <a :href="$domains.getDocs('vlagmoment')" class="inline-link" target="_blank">{{ $t('%19t') }}</a></p>
                 <SetupStepRows :steps="$setupSteps" list-type="todo" @select="onClickStep" />
             </div>

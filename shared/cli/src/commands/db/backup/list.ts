@@ -8,6 +8,7 @@ export default class DbBackupList extends BaseCommand {
     static examples = [
         'stam db backup list',
     ];
+
     static flags = {
         ...BaseCommand.instanceFlags,
     };

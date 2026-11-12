@@ -199,11 +199,11 @@ export class CheckoutMethodTypeHelper {
     static getName(type: CheckoutMethodType): string {
         switch (type) {
             case CheckoutMethodType.OnSite:
-                return $t(`%VY`);
+                return $t('%VY');
             case CheckoutMethodType.Takeout:
-                return $t(`%xG`);
+                return $t('%xG');
             case CheckoutMethodType.Delivery:
-                return $t(`%tI`);
+                return $t('%tI');
         }
     }
 }
@@ -893,7 +893,7 @@ export class WebshopPrivateMetaData extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_configuration',
                 message: 'Missing configuration for webshop domain',
-                human: $t(`%tJ`),
+                human: $t('%tJ'),
                 statusCode: 500,
             });
         }

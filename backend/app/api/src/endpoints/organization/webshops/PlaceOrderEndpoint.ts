@@ -71,7 +71,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Webshop not found',
-                    human: $t(`%FX`),
+                    human: $t('%FX'),
                 });
             }
 
@@ -94,7 +94,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'too_many_emails_period',
                         message: 'Too many e-mails limited',
-                        human: $t(`%w6`),
+                        human: $t('%w6'),
                         field: 'recipients',
                     });
                 }
@@ -109,7 +109,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'duplicate_codes',
                     message: 'Duplicate usage of discount codes',
-                    human: $t(`%w7`),
+                    human: $t('%w7'),
                     field: 'cart.discountCodes',
                 });
             }
@@ -121,7 +121,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                     throw new SimpleError({
                         code: 'invalid_code',
                         message: 'Invalid discount code',
-                        human: $t(`%w8`),
+                        human: $t('%w8'),
                         field: 'cart.discountCodes',
                     });
                 }
@@ -300,14 +300,14 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         if (!mollieService) {
                             throw new SimpleError({
                                 code: '',
-                                message: $t(`%w3`, { method: PaymentMethodHelper.getName(payment.method) }),
+                                message: $t('%w3', { method: PaymentMethodHelper.getName(payment.method) }),
                             });
                         }
                         const profileId = await mollieService.getProfileId(webshop.getHost());
                         if (!profileId) {
                             throw new SimpleError({
                                 code: '',
-                                message: $t(`%w4`, { method: PaymentMethodHelper.getName(payment.method) }),
+                                message: $t('%w4', { method: PaymentMethodHelper.getName(payment.method) }),
                             });
                         }
                         const molliePayment = await mollieService.client.payments.create({
@@ -352,7 +352,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         if ((payment.status as any) === PaymentStatus.Failed) {
                             throw new SimpleError({
                                 code: 'payment_failed',
-                                message: $t(`%w3`, {
+                                message: $t('%w3', {
                                     method: PaymentMethodHelper.getName(payment.method),
                                 }),
                             });

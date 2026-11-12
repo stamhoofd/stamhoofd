@@ -6,10 +6,5 @@
         "customConditions": ["@stamhoofd/source"]
     },
     "extends": "../../tsconfig.base.json",
-    "include": [
-        "./src",
-        "./stamhoofd.d.ts",
-        "./playwright.config.ts",
-        "./merge.config.ts"
-    ]
+    "include": ["./src", "./stamhoofd.d.ts", "./playwright.config.ts", "./merge.config.ts"]
 }

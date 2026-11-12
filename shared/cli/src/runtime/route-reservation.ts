@@ -119,7 +119,7 @@ function losesRaceAgainst(candidate: RouteManifestInput, other: RouteManifest): 
  */
 function describeBlocked(blocked: string[]): string {
     const shown = blocked.slice(0, 3);
-    return `${shown.join('; ')}${blocked.length > shown.length ? `; ...` : ''}`;
+    return `${shown.join('; ')}${blocked.length > shown.length ? '; ...' : ''}`;
 }
 
 function describePorts(ports: number[]): string {

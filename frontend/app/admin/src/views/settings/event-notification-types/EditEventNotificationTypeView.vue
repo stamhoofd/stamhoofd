@@ -20,14 +20,16 @@
             <EventTypeIdsInput v-model="eventTypeIds" />
         </STInputBox>
 
-        <hr><h2>{{ $t('%8i') }}</h2>
+        <hr>
+        <h2>{{ $t('%8i') }}</h2>
         <p>
             {{ $t('%Hv') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('%Hw') }}</a> {{ $t('%Hx') }}
         </p>
 
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addPatch({recordCategories: $event})" />
 
-        <hr><h2>{{ $t('%v') }}</h2>
+        <hr>
+        <h2>{{ $t('%v') }}</h2>
         <p>{{ $t('%Hy') }}</p>
 
         <STList v-if="patched.deadlines.length">
@@ -42,14 +44,16 @@
         </p>
 
         <div class="container">
-            <hr><h2>{{ $t('%AY') }}</h2>
+            <hr>
+            <h2>{{ $t('%AY') }}</h2>
             <p>{{ $t('%AZ') }}</p>
 
             <MultipleChoiceInput v-model="contactResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false" />
         </div>
 
         <div class="container">
-            <hr><h2>{{ $t('%Aa') }}</h2>
+            <hr>
+            <h2>{{ $t('%Aa') }}</h2>
             <p>{{ $t('%Ab') }}</p>
         </div>
     </SaveView>
@@ -76,7 +80,6 @@ import type { EventNotificationType, RecordCategory } from '@stamhoofd/structure
 import { Address, BaseOrganization, EventNotification, EventNotificationDeadline } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EventNotificationDeadlineRow from './components/EventNotificationDeadlineRow.vue';
-
 
 const errors = useErrors();
 const saving = ref(false);
@@ -107,8 +110,7 @@ const save = async () => {
     try {
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -136,8 +138,7 @@ const doDelete = async () => {
     try {
         await props.deleteHandler();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

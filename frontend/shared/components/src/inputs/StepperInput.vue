@@ -31,7 +31,7 @@ const step = (add: number) => {
     const v = constrain(model.value + add);
 
     if (v === model.value && add !== 0) {
-        Toast.warning(add > 0 ? $t(`%zD`) : $t(`%zE`)).show();
+        Toast.warning(add > 0 ? $t('%zD') : $t('%zE')).show();
         return;
     }
     model.value = v;

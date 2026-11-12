@@ -1,6 +1,6 @@
 import type {
     Group,
-    Organization} from '@stamhoofd/models';
+    Organization } from '@stamhoofd/models';
 import {
     MemberFactory,
     RegistrationFactory,

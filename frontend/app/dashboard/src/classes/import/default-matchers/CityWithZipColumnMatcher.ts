@@ -71,14 +71,13 @@ export class CityWithZipColumnMatcher extends SharedMemberDetailsMatcher impleme
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'City and zipcode expected',
-                    human: $t(`%18Q`),
+                    human: $t('%18Q'),
                 });
             }
             // TODO! order!
             city = match[1];
             postalCode = match[4];
-        }
-        else {
+        } else {
             postalCode = match[1];
             city = match[4];
         }

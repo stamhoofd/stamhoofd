@@ -4,21 +4,20 @@
     </div>
 </template>
 
-
 <script lang="ts" setup>
 import { nextTick, ref, watch } from 'vue';
 import { ViewportHelper } from '../ViewportHelper';
 
 const props = withDefaults(
     defineProps<{
-        visible?: boolean
+        visible?: boolean;
     }>(),
     {
-        visible: false
-    }
+        visible: false,
+    },
 );
 
-const el = ref<HTMLElement|null>(null);
+const el = ref<HTMLElement | null>(null);
 
 // Scroll to the container if it becomes visible
 watch(() => props.visible, async (newValue, oldValue) => {
@@ -27,18 +26,18 @@ watch(() => props.visible, async (newValue, oldValue) => {
     // Need a small delay because of the ImageComponent component which needs to calculate the width of the image after initial render
     setTimeout(() => {
         if (newValue && !oldValue) {
-            console.log("Scrolling to element", el.value);
+            console.log('Scrolling to element', el.value);
             const element = el.value;
             if (element) {
                 ViewportHelper.scrollIntoView(element).catch(console.error);
 
                 // Focus
                 setTimeout(() => {
-                    const firstInputElement: HTMLInputElement|null = element.querySelector("input, textarea");
+                    const firstInputElement: HTMLInputElement | null = element.querySelector('input, textarea');
                     if (firstInputElement && firstInputElement.type !== 'file') {
                         firstInputElement.focus();
                     }
-                }, 200)
+                }, 200);
             }
         }
     }, 25);

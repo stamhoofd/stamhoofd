@@ -139,7 +139,7 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
         // Count total request
         const context = ContextInstance.optional;
         if (context) {
-            context.timers.set(`Column.to`, (context.timers.get(`Column.to`) ?? 0) + elapsedTimeMs);
+            context.timers.set('Column.to', (context.timers.get('Column.to') ?? 0) + elapsedTimeMs);
         }
         return result;
     };
@@ -158,7 +158,7 @@ export function loadTimers({ routerServer }: { routerServer: RouterServer }) {
         // Count total request
         const context = ContextInstance.optional;
         if (context) {
-            context.timers.set(`Column.from`, (context.timers.get(`Column.from`) ?? 0) + elapsedTimeMs);
+            context.timers.set('Column.from', (context.timers.get('Column.from') ?? 0) + elapsedTimeMs);
         }
         return result;
     };

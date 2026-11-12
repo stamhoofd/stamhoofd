@@ -31,8 +31,6 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import type { Category } from '@stamhoofd/structures';
 import { PrivateWebshop } from '@stamhoofd/structures';
 
-
-
 const props = defineProps<{ category: Category; webshop: PrivateWebshop }>();
 const present = usePresent();
 const emits = defineEmits<{ (e: 'patch', patch: AutoEncoderPatchType<PrivateWebshop>): void; (e: 'move-up'): void; (e: 'move-down'): void; (e: 'delete'): void }>();

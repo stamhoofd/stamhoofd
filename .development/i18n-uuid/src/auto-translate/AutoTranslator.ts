@@ -258,13 +258,11 @@ export class AutoTranslator {
                         translation: translationOfOriginal,
                         variant: missingTranslation,
                     });
-                }
-                else {
+                } else {
                     simpleTranslations.set(uuid, missingTranslation);
                 }
             }
-        }
-        else {
+        } else {
             simpleTranslations = missingTranslations;
         }
 

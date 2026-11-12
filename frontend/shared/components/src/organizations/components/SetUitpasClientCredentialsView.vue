@@ -85,13 +85,11 @@ onMounted(async () => {
         clientId.value = response.data.clientId;
         if (clientId.value === '') {
             clientSecret.value = '';
-        }
-        else {
+        } else {
             clientSecret.value = UitpasClientIdAndSecret.placeholderClientSecret;
         }
         originalClientSecret = clientSecret.value;
-    }
-    catch (e) {
+    } catch (e) {
         if (!Request.isAbortError(e)) {
             Toast.fromError(e).show();
         }
@@ -155,22 +153,19 @@ async function save() {
             errors.errorBox = new ErrorBox(error);
             isSaveLoading.value = false;
             return; // do not close the modal
-        }
-        else {
+        } else {
             if (organization.value) {
                 organization.value.meta.uitpasClientCredentialsStatus = newStatus;
             }
             if (props.onFixed && newStatus === UitpasClientCredentialsStatus.Ok) {
                 await props.onFixed(navigationActions);
-            }
-            else {
+            } else {
                 new Toast(UitpasClientCredentialsStatusHelper.getName(newStatus), UitpasClientCredentialsStatusHelper.getIcon(newStatus)).show();
                 await pop({ force: true });
             }
             isSaveLoading.value = false;
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         isSaveLoading.value = false;
         if (!Request.isAbortError(e)) {

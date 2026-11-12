@@ -160,8 +160,7 @@ describe('PlatformMember.needsTaxCertificate', () => {
 
             if (pending) {
                 family.pendingRegisterItems.push(item);
-            }
-            else {
+            } else {
                 family.checkout.cart.items.push(item);
             }
 

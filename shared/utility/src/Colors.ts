@@ -42,8 +42,7 @@ export class Colors {
         let h, s, l = (max + min) / 2;
         if (max === min) {
             h = s = 0; // achromatic
-        }
-        else {
+        } else {
             const d = max - min;
             s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
             switch (max) {
@@ -89,28 +88,23 @@ export class Colors {
             r = c;
             g = x;
             b = 0;
-        }
-        else if (60 <= h && h < 120) {
+        } else if (60 <= h && h < 120) {
             r = x;
             g = c;
             b = 0;
-        }
-        else if (120 <= h && h < 180) {
+        } else if (120 <= h && h < 180) {
             r = 0;
             g = c;
             b = x;
-        }
-        else if (180 <= h && h < 240) {
+        } else if (180 <= h && h < 240) {
             r = 0;
             g = x;
             b = c;
-        }
-        else if (240 <= h && h < 300) {
+        } else if (240 <= h && h < 300) {
             r = x;
             g = 0;
             b = c;
-        }
-        else if (300 <= h && h < 360) {
+        } else if (300 <= h && h < 360) {
             r = c;
             g = 0;
             b = x;
@@ -173,17 +167,17 @@ export class Colors {
 
         // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
         const R
-        = color.r <= 0.03928
-            ? color.r / 12.92
-            : Math.pow((color.r + 0.055) / 1.055, 2.4);
+            = color.r <= 0.03928
+                ? color.r / 12.92
+                : Math.pow((color.r + 0.055) / 1.055, 2.4);
         const G
-        = color.g <= 0.03928
-            ? color.g / 12.92
-            : Math.pow((color.g + 0.055) / 1.055, 2.4);
+            = color.g <= 0.03928
+                ? color.g / 12.92
+                : Math.pow((color.g + 0.055) / 1.055, 2.4);
         const B
-        = color.b <= 0.03928
-            ? color.b / 12.92
-            : Math.pow((color.b + 0.055) / 1.055, 2.4);
+            = color.b <= 0.03928
+                ? color.b / 12.92
+                : Math.pow((color.b + 0.055) / 1.055, 2.4);
 
         const L = 0.2126 * R + 0.7152 * G + 0.0722 * B;
 
@@ -209,8 +203,7 @@ export class Colors {
             const whiteContrast = this.getAPCAContrast(rgb, { r: 255, g: 255, b: 255 });
 
             return blackContrast > whiteContrast ? '#000' : '#fff';
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             return '#fff';
         }

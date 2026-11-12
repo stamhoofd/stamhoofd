@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@node/endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { Country } from '@stamhoofd/types/Country';
 import { Geolocator } from '../classes/Geolocator.js';
@@ -22,7 +22,7 @@ export class RedirectEndpoint extends Endpoint<Params, Query, Body, ResponseBody
 
         if (country === Country.Belgium) {
             const url = 'https://www.stamhoofd.be' + path;
-            const response = new Response($t(`%G3`) + ' ' + url);
+            const response = new Response($t('%G3') + ' ' + url);
             response.status = 302;
             response.headers['Location'] = url;
 
@@ -32,7 +32,7 @@ export class RedirectEndpoint extends Endpoint<Params, Query, Body, ResponseBody
         }
 
         const url = 'https://www.stamhoofd.nl' + path;
-        const response = new Response($t(`%G3`) + ' ' + url);
+        const response = new Response($t('%G3') + ' ' + url);
         response.status = 302;
         response.headers['Location'] = url;
 

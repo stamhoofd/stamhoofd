@@ -13,6 +13,6 @@ const props = defineProps<{
     item: DetailedPayableBalance;
 }>();
 
-const organization = useRequiredOrganization()
+const organization = useRequiredOrganization();
 const auth = useAuth();
 </script>

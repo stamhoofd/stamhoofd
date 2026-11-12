@@ -19,7 +19,8 @@
                 </STListItem>
             </STList>
 
-            <hr><SeatSelectionBox v-if="seatingPlan && seatingPlanSection" :allow-changes="false" :seating-plan="seatingPlan" :seating-plan-section="seatingPlanSection" :seats="seats" :reserved-seats="reservedSeats" :highlight-seats="highlightSeats" />
+            <hr>
+            <SeatSelectionBox v-if="seatingPlan && seatingPlanSection" :allow-changes="false" :seating-plan="seatingPlan" :seating-plan-section="seatingPlanSection" :seats="seats" :reserved-seats="reservedSeats" :highlight-seats="highlightSeats" />
         </main>
     </div>
 </template>

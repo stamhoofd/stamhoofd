@@ -56,12 +56,11 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
         let phoneNumber: PhoneNumber | undefined = undefined;
         try {
             phoneNumber = libphonenumber.parsePhoneNumber(phoneRaw, I18nController.shared?.countryCode ?? Country.Belgium);
-        }
-        catch (e: any) {
+        } catch (e: any) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: e.message || 'Invalid phone',
-                human: $t(`%18a`),
+                human: $t('%18a'),
                 field: 'phone',
             });
         }
@@ -78,8 +77,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
                             field: 'phone',
                         });
                     }
-                }
-                catch (e: any) {
+                } catch (e: any) {
                     if (isSimpleError(e) || isSimpleErrors(e)) {
                         throw e;
                     }
@@ -87,7 +85,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: e.message || 'Invalid phone',
-                        human: $t(`%18a`),
+                        human: $t('%18a'),
                         field: 'phone',
                     });
                 }
@@ -106,8 +104,7 @@ export class PhoneColumnMatcher extends SharedMemberDetailsMatcher implements Co
             importResult.addPatch({
                 phone: v,
             });
-        }
-        else if (this.category === MemberDetailsMatcherCategory.Parent1 as string || this.category === MemberDetailsMatcherCategory.Parent2 as string) {
+        } else if (this.category === MemberDetailsMatcherCategory.Parent1 as string || this.category === MemberDetailsMatcherCategory.Parent2 as string) {
             ColumnMatcherHelper.patchParent(importResult, this.category as (MemberDetailsMatcherCategory.Parent1 | MemberDetailsMatcherCategory.Parent2), {
                 phone: v,
             });

@@ -12,8 +12,8 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import type { NavigationActions } from '../../types/NavigationActions';
 
 export function useLoadOrganization() {
-    const context = useContext()
-    const owner = useRequestOwner()
+    const context = useContext();
+    const owner = useRequestOwner();
 
     async function loadOrganization(id: string) {
         const response = await context.value.getOptionalAuthenticatedServerForOrganization(id).request({
@@ -24,10 +24,10 @@ export function useLoadOrganization() {
             owner,
         });
 
-        return response.data
+        return response.data;
     }
 
-    return loadOrganization
+    return loadOrganization;
 }
 
 export function useExternalOrganization(organizationId: Ref<string | null>, organizationHint?: Organization | null | Ref<Organization | null>) {
@@ -101,8 +101,7 @@ export function useExternalOrganization(organizationId: Ref<string | null>, orga
             if (response.data.id === organizationId.value) {
                 loadedOrganization.value = response.data;
             }
-        }
-        catch (e) {
+        } catch (e) {
             if (loadingCount !== currentCount) {
                 // Ignore
                 return;

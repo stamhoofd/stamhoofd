@@ -88,8 +88,7 @@ describe('reserveRouteManifest', () => {
             });
 
             expect(reserved.reservedPorts).toEqual([taken.port + 1000]);
-        }
-        finally {
+        } finally {
             await taken.close();
         }
     });

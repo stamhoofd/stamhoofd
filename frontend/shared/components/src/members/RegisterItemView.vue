@@ -66,7 +66,8 @@
         </div>
 
         <div v-if="item.canHaveTrial || trial" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 <span>{{ $t('%1IH') }}</span>
                 <span class="style-tag">{{ Formatter.days(item.group.settings.trialDays) }}</span>
             </h2>
@@ -103,7 +104,8 @@
         </div>
 
         <div v-for="menu in item.getFilteredOptionMenus()" :key="menu.id" class="container">
-            <hr><h2>{{ menu.name }}</h2>
+            <hr>
+            <h2>{{ menu.name }}</h2>
             <p v-if="menu.description" class="pre-wrap style-description-block">
                 {{ menu.description }}
             </p>
@@ -144,7 +146,8 @@
         </div>
 
         <div v-for="category in categories.filter(c => c.isEnabled(item))" :key="category.id" class="container">
-            <hr><FillRecordCategoryBox :category="category" :value="item" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
+            <hr>
+            <FillRecordCategoryBox :category="category" :value="item" :validator="errors.validator" :level="2" :all-optional="false" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
         </div>
 
         <div v-if="cachedPriceBreakdown" class="pricing-box max">
@@ -327,15 +330,15 @@ function getPeriodString(groupPrice: GroupPrice): string | null {
     const endDate = groupPrice.endDate;
 
     if (startDate && endDate) {
-        return $t(`%1CS`, { range: Formatter.dateRange(startDate, endDate) });
+        return $t('%1CS', { range: Formatter.dateRange(startDate, endDate) });
     }
 
     if (startDate) {
-        return $t(`%1CL`, { date: Formatter.startDate(startDate) });
+        return $t('%1CL', { date: Formatter.startDate(startDate) });
     }
 
     if (endDate) {
-        return $t(`%1CM`, { date: Formatter.endDate(endDate) });
+        return $t('%1CM', { date: Formatter.endDate(endDate) });
     }
 
     return null;

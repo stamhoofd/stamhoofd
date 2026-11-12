@@ -98,8 +98,7 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         if (!context.organization) {
             // Administration panel: register as organizing organization
             member.family.checkout.asOrganizationId = item.organization.id;
-        }
-        else {
+        } else {
             member.family.checkout.asOrganizationId = context.organization.id;
         }
     }
@@ -114,13 +113,11 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         // (we only do when members are filling things in)
         // Otherwise admins will have to review all the steps every time.
         steps.push(...getAllMemberSteps(member, item, admin ? { outdatedTime: null } : undefined));
-    }
-    else {
+    } else {
         if (item.replaceRegistrations.length > 0) {
             // By default never send emails for moves or edits
             member.family.checkout.sendConfirmationEmail = false;
-        }
-        else {
+        } else {
             member.family.checkout.sendConfirmationEmail = item.group.privateSettings?.sendConfirmationEmailForManualRegistrations ?? false;
         }
     }
@@ -137,7 +134,7 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
         member.family.pendingRegisterItems = [];
 
         if (!member.family.checkout.cart.contains(item)) {
-            Toast.error($t(`%ec`)).show();
+            Toast.error($t('%ec')).show();
             return;
         }
 
@@ -150,19 +147,16 @@ export async function checkoutRegisterItem({ item: originalItem, admin, context,
                     context,
                     displayOptions: { action: 'show' },
                 }, navigate);
-            }
-            catch (e) {
+            } catch (e) {
                 Toast.fromError(e).show();
                 return;
             }
-        }
-        else {
+        } else {
             if (!admin) {
                 if (item.group.type === GroupType.WaitingList) {
-                    Toast.warning($t(`%ed`)).setIcon('clock').show();
-                }
-                else {
-                    Toast.success($t(`%ee`)).setIcon('basket').show();
+                    Toast.warning($t('%ed')).setIcon('clock').show();
+                } else {
+                    Toast.success($t('%ee')).setIcon('basket').show();
                 }
                 await GlobalEventBus.sendEvent('selectTabById', 'cart');
             }
@@ -187,8 +181,7 @@ export async function getDefaultItem({ group, member, groupOrganization, context
     if (!groupOrganization) {
         try {
             groupOrganization = await loadGroupOrganization(context, group.organizationId, owner);
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
             return;
         }
@@ -325,8 +318,7 @@ export async function openOrganizationCart({ organization, checkout, context, na
     if (!context.organization) {
         // Administration panel: register as organizing organization
         checkout.asOrganizationId = groupOrganization.id;
-    }
-    else {
+    } else {
         checkout.asOrganizationId = context.organization.id;
     }
 
@@ -428,7 +420,7 @@ export function useChooseOrganizationMembersForGroup() {
 // ----------------------------
 // --------- Flow 4 -----------
 
-export async function chooseGroupForMember({ member, navigate, context, displayOptions, startCheckoutFlow, admin, defaultOrganization }: { admin?: boolean; member: PlatformMember; navigate: NavigationActions; context: SessionContext; displayOptions?: DisplayOptions; startCheckoutFlow?: boolean, defaultOrganization?: Organization }) {
+export async function chooseGroupForMember({ member, navigate, context, displayOptions, startCheckoutFlow, admin, defaultOrganization }: { admin?: boolean; member: PlatformMember; navigate: NavigationActions; context: SessionContext; displayOptions?: DisplayOptions; startCheckoutFlow?: boolean; defaultOrganization?: Organization }) {
     await runDisplayOptions({
         components: [
             new ComponentWithProperties(NavigationController, {
@@ -458,7 +450,7 @@ export function useChooseGroupForMember() {
     const context = useContext();
     const app = useAppContext();
 
-    return async ({ member, displayOptions, customNavigate, startCheckoutFlow, defaultOrganization}: { member: PlatformMember; displayOptions?: DisplayOptions; customNavigate?: NavigationActions; startCheckoutFlow?: boolean; defaultOrganization?: Organization }) => {
+    return async ({ member, displayOptions, customNavigate, startCheckoutFlow, defaultOrganization }: { member: PlatformMember; displayOptions?: DisplayOptions; customNavigate?: NavigationActions; startCheckoutFlow?: boolean; defaultOrganization?: Organization }) => {
         if (app !== 'registration') {
             member.family.checkout.clear();
         }
@@ -470,7 +462,7 @@ export function useChooseGroupForMember() {
             context: context.value,
             displayOptions,
             startCheckoutFlow: startCheckoutFlow ?? (app !== 'registration'),
-            defaultOrganization
+            defaultOrganization,
         });
     };
 }

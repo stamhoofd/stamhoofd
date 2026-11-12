@@ -11,68 +11,68 @@ export function getSelectableColumns(organization: Organization | null = null, f
     const columns: SelectableColumn[] = [
         new SelectableColumn({
             id: 'id',
-            name: $t(`%1P2`),
-            description: $t(`%1O2`),
+            name: $t('%1P2'),
+            description: $t('%1O2'),
             enabled: true,
         }),
         new SelectableColumn({
             id: 'type',
-            name: $t(`%1LP`),
+            name: $t('%1LP'),
             enabled: true,
         }),
         new SelectableColumn({
             id: 'periodId',
-            name: $t(`%7Z`),
+            name: $t('%7Z'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'startDate',
-            name: $t(`%1Of`),
+            name: $t('%1Of'),
             enabled: true,
         }),
         new SelectableColumn({
             id: 'endDate',
-            name: $t(`%1P8`),
+            name: $t('%1P8'),
             enabled: true,
         }),
         ...(financialAccess
             ? [
                     new SelectableColumn({
                         id: 'price',
-                        name: $t(`%1IP`),
+                        name: $t('%1IP'),
                         enabled: true,
                     }),
                     new SelectableColumn({
                         id: 'priceWithoutDiscount',
-                        name: $t(`%1Nm`),
+                        name: $t('%1Nm'),
                         enabled: false,
                     }),
                 ]
             : []),
         new SelectableColumn({
             id: 'trialUntil',
-            name: $t(`%1PU`),
+            name: $t('%1PU'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'freeAmount',
-            name: $t(`%1Oo`),
+            name: $t('%1Oo'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'createdAt',
-            name: $t(`%1Jc`),
+            name: $t('%1Jc'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'expireDate',
-            name: $t(`%1J7`),
+            name: $t('%1J7'),
             enabled: false,
         }),
 
         new SelectableColumn({
             id: 'balanceItem.createdAt',
-            name: $t(`%1OM`),
+            name: $t('%1OM'),
             category: balanceItemCategory,
             enabled: true,
         }),
@@ -81,19 +81,19 @@ export function getSelectableColumns(organization: Organization | null = null, f
             ? [
                     new SelectableColumn({
                         id: 'balanceItem.priceOpen',
-                        name: $t(`%1Ni`),
+                        name: $t('%1Ni'),
                         category: balanceItemCategory,
                         enabled: true,
                     }),
                     new SelectableColumn({
                         id: 'balanceItem.pricePaid',
-                        name: $t(`%1OD`),
+                        name: $t('%1OD'),
                         category: balanceItemCategory,
                         enabled: true,
                     }),
                     new SelectableColumn({
                         id: 'balanceItem.pricePending',
-                        name: $t(`%1OL`),
+                        name: $t('%1OL'),
                         category: balanceItemCategory,
                         enabled: true,
                     }),
@@ -103,25 +103,25 @@ export function getSelectableColumns(organization: Organization | null = null, f
         // member
         new SelectableColumn({
             id: 'member.memberNumber',
-            name: $t(`%19j`),
+            name: $t('%19j'),
             category: memberCategory,
             enabled: true,
         }),
         new SelectableColumn({
             id: 'member.firstName',
-            name: $t(`%1MT`),
+            name: $t('%1MT'),
             category: memberCategory,
             enabled: true,
         }),
         new SelectableColumn({
             id: 'member.lastName',
-            name: $t(`%1MU`),
+            name: $t('%1MU'),
             category: memberCategory,
             enabled: true,
         }),
         new SelectableColumn({
             id: 'member.birthDay',
-            name: $t(`%17w`),
+            name: $t('%17w'),
             category: memberCategory,
             enabled: true,
         }),
@@ -130,13 +130,13 @@ export function getSelectableColumns(organization: Organization | null = null, f
             : [
                     new SelectableColumn({
                         id: 'organization.name',
-                        name: $t(`%1Os`),
+                        name: $t('%1Os'),
                         category: organizationCategory,
                         enabled: true,
                     }),
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: $t(`%1O1`),
+                        name: $t('%1O1'),
                         category: organizationCategory,
                         enabled: true,
                     }),
@@ -151,7 +151,7 @@ export function getSelectableWorkbook(organization: Organization | null = null, 
         sheets: [
             new SelectableSheet({
                 id: 'platform-memberships',
-                name: $t(`%1Nt`),
+                name: $t('%1Nt'),
                 columns: getSelectableColumns(organization, financialAccess),
             }),
         ],

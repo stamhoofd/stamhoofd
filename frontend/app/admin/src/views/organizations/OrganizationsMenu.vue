@@ -18,7 +18,8 @@
                 </button>
             </div>
 
-            <hr><div v-for="(tag, index) in rootTags" :key="tag.id" class="container">
+            <hr>
+            <div v-for="(tag, index) in rootTags" :key="tag.id" class="container">
                 <div class="grouped">
                     <button type="button" class="button menu-button" :class="{ selected: checkRoute(Routes.Tag, {properties: {tag}}) }" @click="navigateToTag(tag)">
                         <span v-if="tag.type === OrganizationTagType.Tag" class="icon label" />
@@ -156,7 +157,7 @@ function tagIdsToTags(tagIds: string[]): OrganizationTag[] {
 }
 
 function getTagById(id: string): OrganizationTag {
-    return tags.value.find(t => t.id === id) ?? OrganizationTag.create({ id, name: $t(`%Gp`) });
+    return tags.value.find(t => t.id === id) ?? OrganizationTag.create({ id, name: $t('%Gp') });
 }
 
 async function navigateToTag(tag: OrganizationTag) {

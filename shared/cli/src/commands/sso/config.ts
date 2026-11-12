@@ -10,6 +10,7 @@ export default class SsoConfig extends BaseCommand {
         'stam sso config',
         'stam sso config "https://keeo.api.stamhoofd/openid/callback"',
     ];
+
     static args = { redirectUri: Args.string({ required: false }) };
     static flags = BaseCommand.instanceFlags;
 

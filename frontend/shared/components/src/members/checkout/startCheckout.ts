@@ -208,58 +208,58 @@ function fallback(registrations: RegistrationWithTinyMember[], checkout: Registe
     const names = Formatter.uniqueArray(registrations.filter(r => r.group.type !== GroupType.WaitingList).map(r => r.member.firstName ?? '?'));
     const waitingListNames = Formatter.uniqueArray(registrations.filter(r => r.group.type === GroupType.WaitingList).map(r => r.member.firstName ?? '?'));
 
-    const t = $t(`%1cZ`);
+    const t = $t('%1cZ');
     let d = '';
 
     if (names.length + waitingListNames.length === 0) {
         if (checkout.cart.deleteRegistrations.length >= 1) {
             const names = Formatter.uniqueArray(checkout.cart.deleteRegistrations.map(r => r.registration.member.patchedMember.firstName));
             if (names.length === 1) {
-                d += $t(`%ZdQ`, {
+                d += $t('%ZdQ', {
                     name: names.join('') + waitingListNames.join(''),
                     group: checkout.cart.deleteRegistrations.map(r => r.registration.group.settings.name).join(', '),
                 });
             } else {
-                d += $t(`%ZdI`, {
+                d += $t('%ZdI', {
                     jamesAndAnna: Formatter.joinLastLimited(names, {
                         separator: ', ',
                         lastSeparator: ' ' + $t('%M1') + ' ',
                         maxLength: 70,
                         maxCount: 2,
                         textIfOverflow(notIncludedCount) {
-                            return notIncludedCount + ' ' + $t(`%zn`);
+                            return notIncludedCount + ' ' + $t('%zn');
                         },
                     }),
                 });
             }
         }
     } else if (names.length + waitingListNames.length === 1) {
-        d += $t(`%Zdk`, {
+        d += $t('%Zdk', {
             name: names.join('') + waitingListNames.join(''),
             group: registrations[0].group.settings.name,
         });
     } else {
         if (names.length > 0) {
             if (names.length > 3) {
-                d += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' ' + $t(`%zn`)], ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zo`);
+                d += Formatter.joinLast([...names.slice(0, 2), (names.length - 2) + ' ' + $t('%zn')], ', ', ' ' + $t('%M1') + ' ') + ' ' + $t('%zo');
             } else if (names.length > 1) {
-                d += Formatter.joinLast(names, ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zo`);
+                d += Formatter.joinLast(names, ', ', ' ' + $t('%M1') + ' ') + ' ' + $t('%zo');
             } else {
-                d += names.join('') + ' ' + $t(`%zp`);
+                d += names.join('') + ' ' + $t('%zp');
             }
         }
 
         if (waitingListNames.length > 0) {
             if (names.length > 0) {
-                d += ' ' + $t(`%M1`) + ' ';
+                d += ' ' + $t('%M1') + ' ';
             }
 
             if (waitingListNames.length > 3) {
-                d += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' ' + $t(`%zn`)], ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zq`);
+                d += Formatter.joinLast([...waitingListNames.slice(0, 2), (waitingListNames.length - 2) + ' ' + $t('%zn')], ', ', ' ' + $t('%M1') + ' ') + ' ' + $t('%zq');
             } else if (waitingListNames.length > 1) {
-                d += Formatter.joinLast(waitingListNames, ', ', ' ' + $t(`%M1`) + ' ') + ' ' + $t(`%zq`);
+                d += Formatter.joinLast(waitingListNames, ', ', ' ' + $t('%M1') + ' ') + ' ' + $t('%zq');
             } else {
-                d += waitingListNames.join('') + ' ' + $t(`%zr`);
+                d += waitingListNames.join('') + ' ' + $t('%zr');
             }
         }
     }

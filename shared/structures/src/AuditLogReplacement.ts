@@ -314,19 +314,19 @@ export class AuditLogReplacement extends AutoEncoder {
         }
 
         if (this.type === AuditLogReplacementType.Html) {
-            return this.description || $t(`%lZ`);
+            return this.description || $t('%lZ');
         }
 
         if (this.type === AuditLogReplacementType.LongText) {
-            return this.description || $t(`%lZ`);
+            return this.description || $t('%lZ');
         }
 
         if (this.type === AuditLogReplacementType.Image) {
-            return $t(`%la`);
+            return $t('%la');
         }
 
         if (this.type === AuditLogReplacementType.File) {
-            return $t(`%yU`);
+            return $t('%yU');
         }
         return this.value;
     }

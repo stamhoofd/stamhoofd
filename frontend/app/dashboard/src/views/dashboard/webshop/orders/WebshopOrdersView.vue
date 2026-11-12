@@ -109,7 +109,7 @@ const actions = computed(() => {
 
     if (STAMHOOFD.environment === 'development') {
         results.push(new InMemoryTableAction({
-            name: $t(`%1M8`),
+            name: $t('%1M8'),
             icon: 'retry',
             priority: 10,
             groupIndex: 4,

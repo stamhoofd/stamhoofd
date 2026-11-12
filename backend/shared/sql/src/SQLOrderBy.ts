@@ -1,4 +1,4 @@
-import type { SQLExpression, SQLExpressionOptions, SQLQuery} from './SQLExpression.js';
+import type { SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery } from './SQLExpression.js';
 import { SQLColumnExpression } from './SQLExpressions.js';
 
@@ -23,8 +23,7 @@ export function Orderable<Sup extends Constructor<object>>(Base: Sup) {
 
             if (me._orderBy) {
                 me._orderBy.add(o);
-            }
-            else {
+            } else {
                 me._orderBy = o;
             }
 

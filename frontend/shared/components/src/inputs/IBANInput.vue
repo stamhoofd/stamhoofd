@@ -26,7 +26,7 @@ const props = withDefaults(defineProps<{
     validator: null,
     required: true,
     placeholder: null,
-    autocomplete: () => $t(`%16`),
+    autocomplete: () => $t('%16'),
 });
 
 const ibanRaw = ref(model.value ?? '');
@@ -62,28 +62,26 @@ async function validate() {
                 ibanRaw.value = 'BE42631299159354';
                 errorBox.value = new ErrorBox(new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`%z0`),
+                    message: $t('%z0'),
                     field: 'iban',
                 }));
                 return false;
             }
             errorBox.value = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%z1`),
+                message: $t('%z1'),
                 field: 'iban',
             }));
-        }
-        else {
+        } else {
             errorBox.value = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%z2`) + ' ' + ibanRaw.value,
+                message: $t('%z2') + ' ' + ibanRaw.value,
                 field: 'iban',
             }));
         }
 
         return false;
-    }
-    else {
+    } else {
         ibanRaw.value = ibantools.friendlyFormatIBAN(iban) ?? iban;
         model.value = ibanRaw.value;
         errorBox.value = null;

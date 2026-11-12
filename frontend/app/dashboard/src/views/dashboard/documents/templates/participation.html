@@ -10,7 +10,7 @@
             html {
                 padding: 0;
                 margin: 0;
-                font-family: Arial, "Helvetica Neue", sans-serif;
+                font-family: Arial, 'Helvetica Neue', sans-serif;
                 line-height: normal;
                 font-size: 13px;
                 overflow-wrap: break-word;
@@ -110,12 +110,12 @@
             }
 
             .checklist::before {
-                content: "□";
+                content: '□';
                 position: absolute;
                 left: 5.5px;
             }
             .checklist.selected::before {
-                content: "■";
+                content: '■';
             }
 
             table {
@@ -157,7 +157,7 @@
                 position: relative;
             }
             img::before {
-                content: "";
+                content: '';
                 width: 100%;
                 height: 100%;
                 background-color: white;
@@ -213,7 +213,7 @@
 
             .logo-container {
                 padding-right: 20px;
-                
+
                 img {
                     height: 60px;
                     width: 100%;
@@ -248,8 +248,8 @@
                     <p class="subtitle">{{ group.name }}</p>
                     {{/if}} {{#if registration.showDate}}
                     <p class="subtitle">
-                        {{ formatDate registration.startDate }} tot {{
-                        formatDate registration.endDate }}
+                        {{ formatDate registration.startDate }} tot {{ formatDate
+                        registration.endDate }}
                     </p>
                     {{else}}
                     <p class="subtitle">{{ formatDate created_at }}</p>
@@ -281,10 +281,8 @@
                         <tr>
                             <td>Adres</td>
                             <td>
-                                {{member.address.street}}
-                                {{member.address.number}},
-                                {{member.address.postalCode}}
-                                {{member.address.city}}
+                                {{member.address.street}} {{member.address.number}},
+                                {{member.address.postalCode}} {{member.address.city}}
                             </td>
                         </tr>
                         {{/if}} {{#if member.email}}
@@ -295,8 +293,8 @@
                         {{/if}} {{#if registration.showGroup}}
                         <tr>
                             <td>
-                                {{#if (eq group.type 'EventRegistration') }}
-                                Activiteit {{else}} Groep {{/if}}
+                                {{#if (eq group.type 'EventRegistration') }} Activiteit {{else}}
+                                Groep {{/if}}
                             </td>
                             <td>{{ group.name }}</td>
                         </tr>
@@ -304,37 +302,31 @@
                         <tr>
                             <td>Datum</td>
                             <td>
-                                {{ formatDate registration.startDate }} tot {{
-                                formatDate registration.endDate }}
+                                {{ formatDate registration.startDate }} tot {{ formatDate
+                                registration.endDate }}
                             </td>
                         </tr>
                         {{#if (eq group.type 'EventRegistration') }}
                         <tr>
                             <td>Aantal dagen</td>
-                            <td>
-                                {{ days registration.startDate
-                                registration.endDate }}
-                            </td>
+                            <td>{{ days registration.startDate registration.endDate }}</td>
                         </tr>
                         {{/if}} {{/if}} {{#if registration.price}}
                         <tr>
                             <td>Bedrag</td>
                             <td>{{ formatPrice registration.price }}</td>
                         </tr>
-                        {{/if}} {{#if (and registration.showDayPrice (coalesce
-                        registration.price registration.priceOriginal 0)) }}
+                        {{/if}} {{#if (and registration.showDayPrice (coalesce registration.price
+                        registration.priceOriginal 0)) }}
                         <tr>
                             <td>Bedrag per dag</td>
                             <td>
-                                {{ formatPrice (div (coalesce
-                                registration.price registration.priceOriginal 0)
-                                (coalesce registration.days (days
-                                registration.startDate registration.endDate)))
-                                round=true }}
+                                {{ formatPrice (div (coalesce registration.price
+                                registration.priceOriginal 0) (coalesce registration.days (days
+                                registration.startDate registration.endDate))) round=true }}
                             </td>
                         </tr>
-                        {{/if}} {{#if (and registration.showPaidAt
-                        registration.paidAt) }}
+                        {{/if}} {{#if (and registration.showPaidAt registration.paidAt) }}
                         <tr>
                             <td>Betaald op</td>
                             <td>{{ formatDate registration.paidAt }}</td>
@@ -359,10 +351,8 @@
                         <tr>
                             <td>Adres</td>
                             <td>
-                                {{organization.address.street}}
-                                {{organization.address.number}},
-                                {{organization.address.postalCode}}
-                                {{organization.address.city}}
+                                {{organization.address.street}} {{organization.address.number}},
+                                {{organization.address.postalCode}} {{organization.address.city}}
                             </td>
                         </tr>
                     </tbody>
@@ -373,8 +363,8 @@
                 {{/if}}
 
                 <p class="avoid">
-                    Opgemaakt op {{ formatDate created_at }}. {{#if
-                    signature.name}}Ondertekend door {{signature.name}}.{{/if}}
+                    Opgemaakt op {{ formatDate created_at }}. {{#if signature.name}}Ondertekend door
+                    {{signature.name}}.{{/if}}
                 </p>
 
                 {{#if signature.image}}
@@ -389,12 +379,7 @@
             </div>
             <footer>
                 <div class="barcode-container">
-                    <img
-                        src="{{datamatrix id}}"
-                        alt=""
-                        class="barcode"
-                        height="50"
-                    />
+                    <img src="{{datamatrix id}}" alt="" class="barcode" height="50" />
                 </div>
                 <p class="document-id">{{id}}</p>
             </footer>

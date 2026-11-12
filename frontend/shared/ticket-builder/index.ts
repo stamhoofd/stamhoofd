@@ -304,9 +304,9 @@ export class TicketBuilder {
             }
         } else {
             if (!dryRun) {
-                this.document.text($t(`%x3`) + this.order.number, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
+                this.document.text($t('%x3') + this.order.number, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
             }
-            height += this.document.heightOfString($t(`%x3`) + this.order.number, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
+            height += this.document.heightOfString($t('%x3') + this.order.number, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
 
             if (!dryRun) {
                 this.document.text(this.order.data.customer.name, PAGE_MARGIN, y + height, { align: 'left', width: COLUMN_MAX_WIDTH - 5 * MM, lineGap: 2, paragraphGap: 2 });
@@ -516,7 +516,7 @@ export class TicketBuilder {
         height = Math.max(height, qrHeight - expectedHeight);
 
         if (!dryRun) {
-            this.document.text($t(`%131`) + ' ', PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN * 2, lineGap: 2, paragraphGap: 2, continued: true });
+            this.document.text($t('%131') + ' ', PAGE_MARGIN, y + height, { align: 'left', width: PAGE_WIDTH - PAGE_MARGIN * 2, lineGap: 2, paragraphGap: 2, continued: true });
             this.document.font('Metropolis-SemiBold');
             this.document.fillColor(COLOR_PRIMARY);
             this.document.text('Stamhoofd', { continued: false, link: I18nController.shared.countryCode === Country.Netherlands ? 'https://www.stamhoofd.nl' : 'https://www.stamhoofd.be' });

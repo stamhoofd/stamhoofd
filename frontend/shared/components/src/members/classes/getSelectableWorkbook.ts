@@ -29,35 +29,35 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         // member
         new SelectableColumn({
             id: 'id',
-            name: $t(`%d`),
-            description: $t(`%ev`),
+            name: $t('%d'),
+            description: $t('%ev'),
             enabled: false,
         }),
         // todo: only if platform?
         new SelectableColumn({
             id: 'memberNumber',
-            name: $t(`%19j`),
+            name: $t('%19j'),
         }),
         new SelectableColumn({
             id: 'firstName',
-            name: $t(`%1MT`),
+            name: $t('%1MT'),
         }),
         new SelectableColumn({
             id: 'lastName',
-            name: $t(`%1MU`),
+            name: $t('%1MU'),
         }),
         new SelectableColumn({
             id: 'birthDay',
-            name: $t(`%17w`),
+            name: $t('%17w'),
         }),
         new SelectableColumn({
             id: 'age',
-            name: $t(`%9S`),
+            name: $t('%9S'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'gender',
-            name: $t(`%19i`),
+            name: $t('%19i'),
         }),
         new SelectableColumn({
             id: 'language',
@@ -66,23 +66,23 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         }),
         new SelectableColumn({
             id: 'phone',
-            name: $t(`%wD`),
+            name: $t('%wD'),
         }),
         new SelectableColumn({
             id: 'email',
-            name: $t(`%1FK`),
+            name: $t('%1FK'),
         }),
         new SelectableColumn({
             id: 'address',
-            name: $t(`%Cn`),
-            description: $t(`%ew`),
+            name: $t('%Cn'),
+            description: $t('%ew'),
         }),
         ...(STAMHOOFD.userMode === 'platform'
             ? [new SelectableColumn({
                     id: 'securityCode',
-                    name: $t(`%wE`),
+                    name: $t('%wE'),
                     enabled: false,
-                    description: $t(`%ex`),
+                    description: $t('%ex'),
                 })]
             : []),
         returnNullIfNoAccessRight(new SelectableColumn({
@@ -92,16 +92,16 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         }), [AccessRight.MemberReadFinancialData]),
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'uitpasNumber',
-            name: $t(`%wF`),
+            name: $t('%wF'),
         }), [AccessRight.MemberReadFinancialData]),
         new SelectableColumn({
             id: 'notes',
-            name: $t(`%Ve`),
+            name: $t('%Ve'),
             enabled: false,
         }),
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'nationalRegisterNumber',
-            name: $t(`%wK`),
+            name: $t('%wK'),
         }), [AccessRight.MemberManageNRN]),
 
         // group
@@ -110,12 +110,12 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             ? [
                     new SelectableColumn({
                         id: 'organization',
-                        name: $t(`%ey`),
+                        name: $t('%ey'),
                         enabled: false,
                     }),
                     new SelectableColumn({
                         id: 'uri',
-                        name: $t(`%1O1`),
+                        name: $t('%1O1'),
                         enabled: false,
                     }),
                     new SelectableColumn({
@@ -135,20 +135,20 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         ...(platform.config.defaultAgeGroups.length > 0
             ? [new SelectableColumn({
                     id: 'defaultAgeGroup',
-                    name: $t(`%wI`),
+                    name: $t('%wI'),
                     enabled: false,
                 })]
             : []),
         new SelectableColumn({
             id: 'group',
-            name: $t(`%wH`),
+            name: $t('%wH'),
             enabled: false,
         }),
         // will always be 0 if organization is null
         organization !== null
             ? returnNullIfNoAccessRight(new SelectableColumn({
                     id: 'outstandingBalance',
-                    name: $t(`%76`),
+                    name: $t('%76'),
                     description: $t('%184'),
                     enabled: false,
                 }), [AccessRight.MemberReadFinancialData])
@@ -168,44 +168,44 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             return [
                 new SelectableColumn({
                     id: getId('type'),
-                    name: $t(`%1B`),
+                    name: $t('%1B'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('firstName'),
-                    name: $t(`%1MT`),
+                    name: $t('%1MT'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('lastName'),
-                    name: $t(`%1MU`),
+                    name: $t('%1MU'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('phone'),
-                    name: $t(`%wD`),
+                    name: $t('%wD'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('email'),
-                    name: $t(`%1FK`),
+                    name: $t('%1FK'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('address'),
-                    name: $t(`%Cn`),
+                    name: $t('%Cn'),
                     category,
                     enabled,
 
                 }),
                 returnNullIfNoAccessRight(new SelectableColumn({
                     id: getId('nationalRegisterNumber'),
-                    name: $t(`%wK`),
+                    name: $t('%wK'),
                     category,
                     enabled,
                 }), [AccessRight.MemberManageNRN]),
@@ -215,8 +215,8 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         // emergency contacts
         new SelectableColumn({
             id: 'emergencyContacts',
-            name: $t(`%ZeJ`),
-            description: $t(`%ZeT`),
+            name: $t('%ZeJ'),
+            description: $t('%ZeT'),
             enabled: true,
         }),
         ...[1, 2].flatMap((contactNumber, contactIndex) => {
@@ -227,19 +227,19 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             return [
                 new SelectableColumn({
                     id: getId('name'),
-                    name: $t(`%1Os`),
+                    name: $t('%1Os'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('title'),
-                    name: $t(`%f5`),
+                    name: $t('%f5'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('phone'),
-                    name: $t(`%wD`),
+                    name: $t('%wD'),
                     category,
                     enabled,
                 }),
@@ -249,21 +249,21 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
         // unverified data
         new SelectableColumn({
             id: 'unverifiedPhones',
-            name: $t(`%ez`),
-            category: $t(`%f0`),
+            name: $t('%ez'),
+            category: $t('%f0'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'unverifiedEmails',
-            name: $t(`%vG`),
-            category: $t(`%f0`),
+            name: $t('%vG'),
+            category: $t('%f0'),
             enabled: false,
         }),
         ...[1, 2].map((number, index) => {
             return new SelectableColumn({
                 id: `unverifiedAddresses.${index}`,
                 name: `Adres ${number}`,
-                category: $t(`%f0`),
+                category: $t('%f0'),
                 enabled: false,
             });
         }),
@@ -287,7 +287,7 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
                     .map(category => new SelectableColumn({
                         id: `groupCategory.${category.id}`,
                         name: category.settings.name,
-                        category: $t(`%Ztf`, { periodName: organization.period.period.nameShort }),
+                        category: $t('%Ztf', { periodName: organization.period.period.nameShort }),
                         enabled: false,
                     }))
             : []),
@@ -304,7 +304,7 @@ export function getSelectableGroupColumns(groups: Group[] = []) {
             groupColumns.push(
                 new SelectableColumn({
                     id: `groups.${group.id}.price`,
-                    name: $t(`%62`),
+                    name: $t('%62'),
                     category: group.settings.name.toString(),
                 }),
             );
@@ -361,7 +361,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         sheets: [
             new SelectableSheet({
                 id: 'members',
-                name: $t(`%1EH`),
+                name: $t('%1EH'),
                 columns: getAllSelectableColumns({ platform, organization, groups, auth }),
             }),
         ],

@@ -57,11 +57,10 @@ import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ReviewCheckbox from '@stamhoofd/components/ReviewCheckbox.vue';
 import { useReview } from '@stamhoofd/components/useReview.ts';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
-import type { PlatformPremiseType} from '@stamhoofd/structures';
+import type { PlatformPremiseType } from '@stamhoofd/structures';
 import { Organization, OrganizationPrivateMetaData, Premise, SetupStepType } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import PremiseRow from './PremiseRow.vue';
-
 
 type PremiseLimitationWarning = { id: string; message: string };
 
@@ -163,8 +162,7 @@ function updatePremiseLimitationWarnings() {
             const countDiff = count - max;
             const message = `Verwijder ${countDiff} ${countDiff === 1 ? 'lokaal' : 'lokalen'} van soort "${name}".`;
             warnings.push({ id, message });
-        }
-        else if (min !== null && count < min) {
+        } else if (min !== null && count < min) {
             const countDiff = min - count;
             const message = `Voeg ${countDiff} ${countDiff === 1 ? 'lokaal' : 'lokalen'} van soort "${name}" toe.`;
             warnings.push({ id, message });
@@ -197,8 +195,7 @@ async function save() {
 
         new Toast('De wijzigingen zijn opgeslagen', 'success green').show();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

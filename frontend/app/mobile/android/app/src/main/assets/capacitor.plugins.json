@@ -1,46 +1,46 @@
 [
-	{
-		"pkg": "@capacitor-community/in-app-review",
-		"classpath": "com.getcapacitor.community.inappreview.InAppReviewPlugin"
-	},
-	{
-		"pkg": "@capacitor/app",
-		"classpath": "com.capacitorjs.plugins.app.AppPlugin"
-	},
-	{
-		"pkg": "@capacitor/app-launcher",
-		"classpath": "com.capacitorjs.plugins.applauncher.AppLauncherPlugin"
-	},
-	{
-		"pkg": "@capacitor/device",
-		"classpath": "com.capacitorjs.plugins.device.DevicePlugin"
-	},
-	{
-		"pkg": "@capacitor/filesystem",
-		"classpath": "com.capacitorjs.plugins.filesystem.FilesystemPlugin"
-	},
-	{
-		"pkg": "@capacitor/haptics",
-		"classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin"
-	},
-	{
-		"pkg": "@capacitor/keyboard",
-		"classpath": "com.capacitorjs.plugins.keyboard.KeyboardPlugin"
-	},
-	{
-		"pkg": "@capacitor/preferences",
-		"classpath": "com.capacitorjs.plugins.preferences.PreferencesPlugin"
-	},
-	{
-		"pkg": "@capacitor/share",
-		"classpath": "com.capacitorjs.plugins.share.SharePlugin"
-	},
-	{
-		"pkg": "@capacitor/status-bar",
-		"classpath": "com.capacitorjs.plugins.statusbar.StatusBarPlugin"
-	},
-	{
-		"pkg": "@capgo/capacitor-updater",
-		"classpath": "ee.forgr.capacitor_updater.CapacitorUpdaterPlugin"
-	}
+    {
+        "pkg": "@capacitor-community/in-app-review",
+        "classpath": "com.getcapacitor.community.inappreview.InAppReviewPlugin"
+    },
+    {
+        "pkg": "@capacitor/app",
+        "classpath": "com.capacitorjs.plugins.app.AppPlugin"
+    },
+    {
+        "pkg": "@capacitor/app-launcher",
+        "classpath": "com.capacitorjs.plugins.applauncher.AppLauncherPlugin"
+    },
+    {
+        "pkg": "@capacitor/device",
+        "classpath": "com.capacitorjs.plugins.device.DevicePlugin"
+    },
+    {
+        "pkg": "@capacitor/filesystem",
+        "classpath": "com.capacitorjs.plugins.filesystem.FilesystemPlugin"
+    },
+    {
+        "pkg": "@capacitor/haptics",
+        "classpath": "com.capacitorjs.plugins.haptics.HapticsPlugin"
+    },
+    {
+        "pkg": "@capacitor/keyboard",
+        "classpath": "com.capacitorjs.plugins.keyboard.KeyboardPlugin"
+    },
+    {
+        "pkg": "@capacitor/preferences",
+        "classpath": "com.capacitorjs.plugins.preferences.PreferencesPlugin"
+    },
+    {
+        "pkg": "@capacitor/share",
+        "classpath": "com.capacitorjs.plugins.share.SharePlugin"
+    },
+    {
+        "pkg": "@capacitor/status-bar",
+        "classpath": "com.capacitorjs.plugins.statusbar.StatusBarPlugin"
+    },
+    {
+        "pkg": "@capgo/capacitor-updater",
+        "classpath": "ee.forgr.capacitor_updater.CapacitorUpdaterPlugin"
+    }
 ]

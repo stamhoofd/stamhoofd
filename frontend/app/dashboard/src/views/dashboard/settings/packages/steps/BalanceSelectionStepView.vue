@@ -69,8 +69,8 @@ import STGridItem from '@stamhoofd/components/layout/STGridItem.vue';
 import BalanceItemIcon from '@stamhoofd/components/payments/BalanceItemIcon.vue';
 import BalanceItemTitleBox from '@stamhoofd/components/payments/BalanceItemTitleBox.vue';
 import PriceBreakdownBox from '@stamhoofd/components/views/PriceBreakdownBox.vue';
-import { BalanceItemStatus  } from '@stamhoofd/structures';
-import type {PriceBreakdown, BalanceItem} from '@stamhoofd/structures';
+import { BalanceItemStatus } from '@stamhoofd/structures';
+import type { PriceBreakdown, BalanceItem } from '@stamhoofd/structures';
 import { computed, onActivated, onMounted, ref } from 'vue';
 import { useLoadPayableBalance } from '../../hooks/useLoadPayableBalance';
 import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
@@ -79,7 +79,6 @@ import { Formatter } from '@stamhoofd/utility';
 import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { SimpleError } from '@common/errors';
-
 
 const props = defineProps<{
     model: OrganizationCheckoutViewModel;
@@ -93,24 +92,24 @@ const title = computed(() => {
         if (props.model.checkout.purchases.empty) {
             return {
                 title: $t('%1Sk'),
-                description: $t('%1TP')
-            }
+                description: $t('%1TP'),
+            };
         }
         return {
             title: $t('%1UQ'),
             description: $t('%1Sn'),
-        }
+        };
     } else {
         return {
-            title:  $t('%1QO'),
-            description: $t('%1S6')
-        }
+            title: $t('%1QO'),
+            description: $t('%1S6'),
+        };
     }
-})
+});
 
 // todo: update balances exempt status based on invoice settings of the model
 
-const canSelect = computed(() => props.model.payBalanceMode === PayBalanceMode.Optional || props.model.payBalanceMode === PayBalanceMode.Recommended)
+const canSelect = computed(() => props.model.payBalanceMode === PayBalanceMode.Optional || props.model.payBalanceMode === PayBalanceMode.Recommended);
 const canCustomize = false;
 
 const filteredBalanceItems = computed(() => {
@@ -122,7 +121,7 @@ const discounts = computed(() => {
 });
 
 function isItemSelected(item: BalanceItem) {
-    return props.model.checkout.balances.has(item.id)
+    return props.model.checkout.balances.has(item.id);
 }
 
 function setItemSelected(item: BalanceItem, selected: boolean) {
@@ -130,9 +129,9 @@ function setItemSelected(item: BalanceItem, selected: boolean) {
         return;
     }
     if (!selected) {
-        props.model.checkout.balances.delete(item.id)
+        props.model.checkout.balances.delete(item.id);
     } else {
-        props.model.checkout.balances.set(item.id, item.priceOpen)
+        props.model.checkout.balances.set(item.id, item.priceOpen);
     }
 }
 
@@ -143,18 +142,18 @@ function getItemValue(item: BalanceItem) {
 function setItemValue(item: BalanceItem, price: number) {
     setItemSelected(item, true);
     if (item.priceOpen >= 0 && price > item.priceOpen) {
-        price = item.priceOpen
+        price = item.priceOpen;
     }
     if (item.priceOpen >= 0 && price < 0) {
-        price = 0
+        price = 0;
     }
 
     if (item.priceOpen < 0 && price < item.priceOpen) {
-        price = item.priceOpen
+        price = item.priceOpen;
     }
 
     if (item.priceOpen < 0 && price > 0) {
-        price = 0
+        price = 0;
     }
 
     props.model.checkout.balances.set(item.id, price);
@@ -162,59 +161,59 @@ function setItemValue(item: BalanceItem, price: number) {
 
 function clean() {
     if (props.model.payBalanceMode === PayBalanceMode.None) {
-        props.model.checkout.balances.clear()
+        props.model.checkout.balances.clear();
         return;
     }
 
     if (props.model.payBalanceMode === PayBalanceMode.Required) {
-        props.model.checkout.balances.clear()
+        props.model.checkout.balances.clear();
 
         for (const item of props.model.payableBalance.payableBalanceItems) {
-            props.model.checkout.balances.set(item.id, item.priceOpen)
+            props.model.checkout.balances.set(item.id, item.priceOpen);
         }
         return;
     }
 
     for (const [id, val] of props.model.checkout.balances) {
-        const f = props.model.payableBalance.payableBalanceItems.find(b => b.id === id)
+        const f = props.model.payableBalance.payableBalanceItems.find(b => b.id === id);
         if (!f || f.priceOpen <= 0 || val < 0) {
-            props.model.checkout.balances.delete(id)
+            props.model.checkout.balances.delete(id);
         } else {
             if (val > f.priceOpen) {
-                props.model.checkout.balances.set(id, f.priceOpen)
+                props.model.checkout.balances.set(id, f.priceOpen);
             }
         }
     }
 }
 
-const loadPayableBalance = useLoadPayableBalance()
+const loadPayableBalance = useLoadPayableBalance();
 async function reloadPayableBalance() {
     try {
-        const data = await loadPayableBalance(props.model.sellingOrganization.id)
-        props.model.payableBalance.deepSet(data)
-        clean()
+        const data = await loadPayableBalance(props.model.sellingOrganization.id);
+        props.model.payableBalance.deepSet(data);
+        clean();
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }
 
 onMounted(() => {
-    clean()
+    clean();
 
     if (props.model.payBalanceMode === PayBalanceMode.Recommended) {
-        props.model.checkout.balances.clear()
+        props.model.checkout.balances.clear();
 
         for (const item of props.model.payableBalance.filteredBalanceItems) {
-            props.model.checkout.balances.set(item.id, item.priceOpen)
+            props.model.checkout.balances.set(item.id, item.priceOpen);
         }
     }
 
-    reloadPayableBalance().catch(console.error)
+    reloadPayableBalance().catch(console.error);
 });
 
 onActivated(() => {
-    clean()
-    reloadPayableBalance().catch(console.error)
+    clean();
+    reloadPayableBalance().catch(console.error);
 });
 
 const total = computed(() => {
@@ -222,43 +221,43 @@ const total = computed(() => {
 });
 
 const maximumPayable = computed(() => {
-    return filteredBalanceItems.value.reduce((a, b) => a + b.priceOpen, 0)
-})
+    return filteredBalanceItems.value.reduce((a, b) => a + b.priceOpen, 0);
+});
 const totalAvailableDiscount = computed(() => {
-    return discounts.value.reduce((a, b) => a + b.priceOpen, 0)
-})
+    return discounts.value.reduce((a, b) => a + b.priceOpen, 0);
+});
 const maximumUsableDiscount = computed(() => {
     if (-totalAvailableDiscount.value < total.value) {
-        return totalAvailableDiscount.value
+        return totalAvailableDiscount.value;
     }
-    return -total.value
-})
+    return -total.value;
+});
 
 const priceBreakdown = computed(() => {
     const b: PriceBreakdown = [];
 
     if (totalAvailableDiscount.value !== 0) {
         b.push({
-            name: $t(`%1Xl`),
+            name: $t('%1Xl'),
             price: maximumUsableDiscount.value,
-            description: -totalAvailableDiscount.value > maximumUsableDiscount.value ? $t('%1d1', {price: Formatter.price(-totalAvailableDiscount.value)}) : '',
+            description: -totalAvailableDiscount.value > maximumUsableDiscount.value ? $t('%1d1', { price: Formatter.price(-totalAvailableDiscount.value) }) : '',
             action: {
                 icon: 'info-circle',
-                handler: showDiscountSheet
-            }
-        })
+                handler: showDiscountSheet,
+            },
+        });
     }
 
     if (b.length) {
         b.unshift({
-            name: $t(`%xJ`),
+            name: $t('%xJ'),
             price: total.value,
-        })
+        });
     }
     return [
         ...b,
         {
-            name: $t(`%xL`),
+            name: $t('%xL'),
             price: Math.max(0, total.value + maximumUsableDiscount.value),
         },
     ];
@@ -271,13 +270,12 @@ async function showDiscountSheet(event: MouseEvent) {
         components: [
             new ComponentWithProperties(NavigationController, {
                 root: AsyncComponent(() => import('@stamhoofd/components/payments/components/DiscountsSheet.vue'), {
-                    items: discounts.value
+                    items: discounts.value,
                 }),
             }),
         ],
     }, { minimumHeight: 185, width: 500 });
 }
-
 
 const loading = ref(false);
 const navigate = useNavigationActions();
@@ -287,7 +285,7 @@ async function goNext() {
         return;
     }
 
-    clean()
+    clean();
     loading.value = true;
     errors.errorBox = null;
 
@@ -299,19 +297,16 @@ async function goNext() {
             throw new SimpleError({
                 code: 'empty_cart',
                 message: 'Cart is empty',
-                human: $t('%1Zo')
-            })
+                human: $t('%1Zo'),
+            });
         }
 
         await props.saveHandler(navigate);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         loading.value = false;
     }
 }
-
 
 </script>

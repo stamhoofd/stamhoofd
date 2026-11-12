@@ -56,8 +56,7 @@ test('the context menu opens logs for the selected object through the supplied c
         expect(item.action).not.toBeNull();
         await item.action!.call(item);
         expect(openLogs).toHaveBeenCalledExactlyOnceWith('selected-object');
-    }
-    finally {
+    } finally {
         wrapper.unmount();
     }
 });
@@ -69,8 +68,7 @@ test('keeps custom actor rendering alongside the original audit description', ()
     try {
         expect(wrapper.text()).toContain('Audit entry');
         expect(wrapper.text()).toContain('Custom actor: Original user');
-    }
-    finally {
+    } finally {
         wrapper.unmount();
     }
 });
@@ -85,8 +83,7 @@ test.each([
         await wrapper.trigger('contextmenu');
         expect(show).not.toHaveBeenCalled();
         expect(openLogs).not.toHaveBeenCalled();
-    }
-    finally {
+    } finally {
         wrapper.unmount();
     }
 });

@@ -33,7 +33,6 @@ import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/Con
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import type { Product, ProductPrice } from '@stamhoofd/structures';
 
-
 import { useDeleteProductPrice } from '../hooks/useDeleteProductPrice';
 
 const props = defineProps<{ productPrice: ProductPrice; product: Product }>();

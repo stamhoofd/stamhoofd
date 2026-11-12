@@ -39,7 +39,7 @@ export class DocumentActionBuilder {
 
         actions.push(
             new InMemoryTableAction({
-                name: $t(`%1B7`),
+                name: $t('%1B7'),
                 icon: 'download',
                 priority: 5,
                 groupIndex: 2,
@@ -51,7 +51,7 @@ export class DocumentActionBuilder {
             }),
 
             new AsyncTableAction({
-                name: $t(`%1GW`),
+                name: $t('%1GW'),
                 icon: 'send',
                 priority: 6,
                 groupIndex: 2,
@@ -61,7 +61,7 @@ export class DocumentActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`%1Bm`),
+                name: $t('%1Bm'),
                 icon: 'edit',
                 priority: 0,
                 groupIndex: 1,
@@ -76,7 +76,7 @@ export class DocumentActionBuilder {
         if (!this.template.isLocked) {
             actions.push(
                 new InMemoryTableAction({
-                    name: $t(`%KK`),
+                    name: $t('%KK'),
                     icon: 'copy',
                     priority: 1,
                     groupIndex: 2,
@@ -92,7 +92,7 @@ export class DocumentActionBuilder {
 
         if (!this.template.isLocked) {
             actions.push(new InMemoryTableAction({
-                name: $t(`%CJ`),
+                name: $t('%CJ'),
                 icon: 'trash',
                 destructive: true,
                 priority: 1,
@@ -105,7 +105,7 @@ export class DocumentActionBuilder {
             }));
 
             actions.push(new InMemoryTableAction({
-                name: $t(`%KL`),
+                name: $t('%KL'),
                 icon: 'undo',
                 priority: 1,
                 groupIndex: 3,
@@ -132,7 +132,7 @@ export class DocumentActionBuilder {
             options: [
                 {
                     id: 'accounts',
-                    name: $t(`%L8`),
+                    name: $t('%L8'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.Documents,
@@ -186,7 +186,7 @@ export class DocumentActionBuilder {
 
         if (!(await CenteredMessage.confirm({
             title,
-            confirmText: $t(`%CJ`),
+            confirmText: $t('%CJ'),
             availabilityDelay: 2_000,
         }))) {
             return;
@@ -213,14 +213,14 @@ export class DocumentActionBuilder {
                     originalDocument.deepSet(d);
                 }
             }
-            new Toast(documents.length === 1 ? $t(`%KN`) : $t('%KF', { count: documents.length.toString() }), 'success').show();
+            new Toast(documents.length === 1 ? $t('%KN') : $t('%KF', { count: documents.length.toString() }), 'success').show();
         } catch (e) {
             Toast.fromError(e).show();
         }
     }
 
     async undoDocuments(documents: DocumentStruct[]) {
-        if (!(await CenteredMessage.confirm(documents.length > 1 ? $t('%KG', { count: documents.length.toString() }) : $t(`%KO`), $t(`%KL`)))) {
+        if (!(await CenteredMessage.confirm(documents.length > 1 ? $t('%KG', { count: documents.length.toString() }) : $t('%KO'), $t('%KL')))) {
             return;
         }
         try {
@@ -245,7 +245,7 @@ export class DocumentActionBuilder {
                     originalDocument.deepSet(d);
                 }
             }
-            new Toast(documents.length === 1 ? $t(`%KP`) : $t('%KH', { count: documents.length.toString() }), 'success').show();
+            new Toast(documents.length === 1 ? $t('%KP') : $t('%KH', { count: documents.length.toString() }), 'success').show();
         } catch (e) {
             Toast.fromError(e).show();
         }
@@ -257,7 +257,7 @@ export class DocumentActionBuilder {
             return;
         }
 
-        if (!(await CenteredMessage.confirm($t(`%KQ`), $t(`%KK`), $t(`%KR`)))) {
+        if (!(await CenteredMessage.confirm($t('%KQ'), $t('%KK'), $t('%KR')))) {
             return;
         }
         try {
@@ -296,7 +296,7 @@ export class DocumentActionBuilder {
         // Filter invalid documents
         const invalidDocuments = documents.filter(d => d.status === DocumentStatus.MissingData);
         if (invalidDocuments.length > 0) {
-            new Toast(`${invalidDocuments.length} ${invalidDocuments.length === 1 ? $t(`%KS`) : $t(`%KT`)}`, invalidDocuments.length === documents.length ? 'error red' : 'warning yellow').show();
+            new Toast(`${invalidDocuments.length} ${invalidDocuments.length === 1 ? $t('%KS') : $t('%KT')}`, invalidDocuments.length === documents.length ? 'error red' : 'warning yellow').show();
         }
         const validDocuments = documents.filter(d => d.status !== DocumentStatus.MissingData);
         if (validDocuments.length) {
@@ -305,7 +305,7 @@ export class DocumentActionBuilder {
     }
 
     async resetDocuments(documents: DocumentStruct[]) {
-        if (!(await CenteredMessage.confirm(documents.length == 1 ? $t(`%KU`) : $t(`%KV`), $t(`%KW`)))) {
+        if (!(await CenteredMessage.confirm(documents.length == 1 ? $t('%KU') : $t('%KV'), $t('%KW')))) {
             return;
         }
         try {

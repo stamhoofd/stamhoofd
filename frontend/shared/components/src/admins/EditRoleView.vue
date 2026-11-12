@@ -300,9 +300,9 @@ const canDelete = !props.isNew && !!props.deleteHandler;
 
 const title = computed(() => {
     if (props.role instanceof PermissionRoleForResponsibility) {
-        return $t(`%uN`) + ' ' + props.role.name;
+        return $t('%uN') + ' ' + props.role.name;
     }
-    return props.isNew ? $t(`%uO`) : props.role.name;
+    return props.isNew ? $t('%uO') : props.role.name;
 });
 
 const { sortedAdmins, loading, getUnloadedPermissions } = useAdmins();
@@ -502,7 +502,7 @@ const save = async () => {
         if (!isForResponsibility && name.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%uP`),
+                message: $t('%uP'),
                 field: 'name',
             });
         }
@@ -524,8 +524,8 @@ const doDelete = async () => {
     }
 
     if (!await CenteredMessage.confirm({
-        title: patched.value.name ? $t('%Zmp', { name: patched.value.name }) : $t(`%uQ`),
-        confirmText: $t(`%CJ`),
+        title: patched.value.name ? $t('%Zmp', { name: patched.value.name }) : $t('%uQ'),
+        confirmText: $t('%CJ'),
         description: $t('%ZnR'),
         destructive: true,
         availabilityDelay: 2_000,
@@ -583,8 +583,8 @@ const shouldNavigateAway = async () => {
         return true;
     }
     return await CenteredMessage.confirm({
-        title: $t(`%A0`),
-        confirmText: $t(`%4X`),
+        title: $t('%A0'),
+        confirmText: $t('%4X'),
     });
 };
 

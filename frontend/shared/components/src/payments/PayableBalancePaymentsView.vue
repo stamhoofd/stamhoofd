@@ -26,11 +26,10 @@ const props = defineProps<{
     item: DetailedPayableBalance;
 }>();
 
-const title = $t('%1JH')
+const title = $t('%1JH');
 
 const succeededPayments = computed(() => {
     return props.item.payments.filter(p => !p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
 });
-
 
 </script>

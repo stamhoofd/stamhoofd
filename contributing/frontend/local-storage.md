@@ -13,10 +13,10 @@ import { VersionBox, Version, EncodeMedium } from '@stamhoofd/structures';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 
 await Storage.secure.setItem(
-	'user', 
-	JSON.stringify(
-		new VersionBox(this.user).encode({ version: Version, medium: EncodeMedium.Database })
-	)
+    'user',
+    JSON.stringify(
+        new VersionBox(this.user).encode({ version: Version, medium: EncodeMedium.Database }),
+    ),
 );
 ```
 
@@ -28,11 +28,12 @@ if (json) {
     try {
         const parsed = JSON.parse(json);
         const decoder = new VersionBoxDecoder(UserWithMembers as Decoder<UserWithMembers>);
-        this.user = new ObjectData(parsed, { version: 0, medium: EncodeMedium.Database }).decode(decoder).data;
+        this.user = new ObjectData(parsed, { version: 0, medium: EncodeMedium.Database }).decode(
+            decoder,
+        ).data;
         return;
-    }
-    catch (e) {
-		    // Do something with the error
+    } catch (e) {
+        // Do something with the error
         console.error(e);
     }
 }

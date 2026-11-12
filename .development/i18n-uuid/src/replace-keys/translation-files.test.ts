@@ -11,7 +11,7 @@ vi.mock('../shared/get-files-to-search.js', () => ({ getFilesToSearch: () => [],
 afterEach(() => vi.restoreAllMocks());
 
 it('round-trips locale text, nested entries and reserved metadata through maps', () => {
-    const locale = { extends: ['nl'], replacements: { lid: 'member' }, nested: { greeting: 'Hallo' }, '%2': 'Dag' };
+    const locale = { 'extends': ['nl'], 'replacements': { lid: 'member' }, 'nested': { greeting: 'Hallo' }, '%2': 'Dag' };
     vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify(locale));
     const write = vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
 

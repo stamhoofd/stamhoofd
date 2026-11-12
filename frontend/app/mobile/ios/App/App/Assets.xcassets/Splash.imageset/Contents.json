@@ -1,56 +1,56 @@
 {
-  "images": [
-    {
-      "filename": "Default@1x~universal~anyany.png",
-      "idiom": "universal",
-      "scale": "1x"
-    },
-    {
-      "filename": "Default@2x~universal~anyany.png",
-      "idiom": "universal",
-      "scale": "2x"
-    },
-    {
-      "filename": "Default@3x~universal~anyany.png",
-      "idiom": "universal",
-      "scale": "3x"
-    },
-    {
-      "appearances": [
+    "images": [
         {
-          "appearance": "luminosity",
-          "value": "dark"
-        }
-      ],
-      "idiom": "universal",
-      "scale": "1x",
-      "filename": "Default@1x~universal~anyany-dark.png"
-    },
-    {
-      "appearances": [
+            "filename": "Default@1x~universal~anyany.png",
+            "idiom": "universal",
+            "scale": "1x"
+        },
         {
-          "appearance": "luminosity",
-          "value": "dark"
-        }
-      ],
-      "idiom": "universal",
-      "scale": "2x",
-      "filename": "Default@2x~universal~anyany-dark.png"
-    },
-    {
-      "appearances": [
+            "filename": "Default@2x~universal~anyany.png",
+            "idiom": "universal",
+            "scale": "2x"
+        },
         {
-          "appearance": "luminosity",
-          "value": "dark"
+            "filename": "Default@3x~universal~anyany.png",
+            "idiom": "universal",
+            "scale": "3x"
+        },
+        {
+            "appearances": [
+                {
+                    "appearance": "luminosity",
+                    "value": "dark"
+                }
+            ],
+            "idiom": "universal",
+            "scale": "1x",
+            "filename": "Default@1x~universal~anyany-dark.png"
+        },
+        {
+            "appearances": [
+                {
+                    "appearance": "luminosity",
+                    "value": "dark"
+                }
+            ],
+            "idiom": "universal",
+            "scale": "2x",
+            "filename": "Default@2x~universal~anyany-dark.png"
+        },
+        {
+            "appearances": [
+                {
+                    "appearance": "luminosity",
+                    "value": "dark"
+                }
+            ],
+            "idiom": "universal",
+            "scale": "3x",
+            "filename": "Default@3x~universal~anyany-dark.png"
         }
-      ],
-      "idiom": "universal",
-      "scale": "3x",
-      "filename": "Default@3x~universal~anyany-dark.png"
+    ],
+    "info": {
+        "author": "xcode",
+        "version": 1
     }
-  ],
-  "info": {
-    "author": "xcode",
-    "version": 1
-  }
 }

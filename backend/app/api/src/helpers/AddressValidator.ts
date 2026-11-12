@@ -23,7 +23,7 @@ export class AddressValidatorStatic {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postal code format (NL)',
-                    human: $t(`%Fb`),
+                    human: $t('%Fb'),
                     field: 'postalCode',
                 });
             }
@@ -33,7 +33,7 @@ export class AddressValidatorStatic {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postal code format (NL)',
-                    human: $t(`%Fb`),
+                    human: $t('%Fb'),
                     field: 'postalCode',
                 });
             }
@@ -53,7 +53,7 @@ export class AddressValidatorStatic {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Postal code is required',
-                    human: $t(`%Fc`),
+                    human: $t('%Fc'),
                     field: 'postalCode',
                 });
             }
@@ -76,7 +76,7 @@ export class AddressValidatorStatic {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid postal code or city',
-                human: $t(`%Fd`),
+                human: $t('%Fd'),
                 field: 'postalCode',
             });
         }
@@ -128,7 +128,7 @@ export class AddressValidatorStatic {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid street',
-                            human: $t(`%Fe`),
+                            human: $t('%Fe'),
                             field: 'street',
                         });
                     }

@@ -3,7 +3,6 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { FilterWrapperMarker, unwrapFilter, unwrapFilterByPath } from '@stamhoofd/structures';
 
-
 import { StringFilterMode } from './StringFilterMode';
 import type { StyledDescriptionChoice, UIFilterBuilder, UIFilterUnwrapper, UIFilterWrapper } from './UIFilter';
 import { UIFilter, unwrapFilterForBuilder } from './UIFilter';
@@ -156,12 +155,12 @@ export class StringUIFilter extends UIFilter<StringFilterBuilder> {
 
     private createCominationWord(mode: StringFilterMode) {
         switch (mode) {
-            case StringFilterMode.Contains: return $t(`%bb`);
-            case StringFilterMode.NotContains: return $t(`%bc`);
-            case StringFilterMode.Equals: return $t(`%bG`);
-            case StringFilterMode.NotEquals: return $t(`%bH`);
-            case StringFilterMode.Empty: return $t(`%bd`);
-            case StringFilterMode.NotEmpty: return $t(`%be`);
+            case StringFilterMode.Contains: return $t('%bb');
+            case StringFilterMode.NotContains: return $t('%bc');
+            case StringFilterMode.Equals: return $t('%bG');
+            case StringFilterMode.NotEquals: return $t('%bH');
+            case StringFilterMode.Empty: return $t('%bd');
+            case StringFilterMode.NotEmpty: return $t('%be');
         }
     }
 }

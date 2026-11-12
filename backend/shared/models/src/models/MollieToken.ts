@@ -14,14 +14,14 @@ function sleep(ms: number) {
 }
 
 export class MollieError extends Error {
-    body: PlainObject
+    body: PlainObject;
 }
 
 export class MollieToken extends QueryableModel {
     static table = 'mollie_tokens';
 
     get id() {
-        return this.organizationId
+        return this.organizationId;
     }
 
     @column({ primary: true, type: 'string' })
@@ -137,8 +137,7 @@ export class MollieToken extends QueryableModel {
             let jsonData: string;
             if (type == 'json') {
                 jsonData = JSON.stringify(data);
-            }
-            else {
+            } else {
                 jsonData = this.objectToQueryString(data as Record<string, string>);
             }
 
@@ -193,8 +192,7 @@ export class MollieToken extends QueryableModel {
                             let json: any;
                             try {
                                 json = JSON.parse(body);
-                            }
-                            catch (error) {
+                            } catch (error) {
                                 console.error(error);
 
                                 // invalid json
@@ -207,8 +205,7 @@ export class MollieToken extends QueryableModel {
                                     console.error(response.statusCode + ' ' + body);
                                     reject(new Error(body));
                                     return;
-                                }
-                                else {
+                                } else {
                                     // something wrong: throw parse error
                                     reject(error);
                                     return;
@@ -224,8 +221,7 @@ export class MollieToken extends QueryableModel {
                             }
 
                             resolve(json);
-                        }
-                        catch (error) {
+                        } catch (error) {
                             if (this.verbose) {
                                 console.error(error);
                             }
@@ -281,8 +277,8 @@ export class MollieToken extends QueryableModel {
             if (e instanceof MollieError) {
                 if (e.body && typeof e.body === 'object' && 'error' in e.body && e.body.error === 'invalid_grant') {
                     // Refresh token not valid.
-                    console.error('Deleting Mollie Token because invalid refresh token')
-                    await this.delete()
+                    console.error('Deleting Mollie Token because invalid refresh token');
+                    await this.delete();
 
                     // Still throw
                     throw e;
@@ -290,7 +286,6 @@ export class MollieToken extends QueryableModel {
             }
             throw e;
         }
-        
     }
 
     /**
@@ -302,8 +297,7 @@ export class MollieToken extends QueryableModel {
                 token_type_hint: 'refresh_token',
                 token: this.refreshToken,
             }, 'urlencoded');
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Failed to revoke token', this.organizationId, e);
         }
         await this.delete();

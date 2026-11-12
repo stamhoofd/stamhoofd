@@ -48,11 +48,11 @@ const policies = computed(() => {
 
         return [
             PlatformPolicy.create({
-                name: $t(`%v3`),
+                name: $t('%v3'),
                 url,
                 checkbox: true,
                 richText: RichText.create({
-                    html: $t(`%v4`) + ' <a href="' + Formatter.escapeHtml(url) + `" target="_blank">` + $t(`%Jh`) + `</a>.`,
+                    html: $t('%v4') + ' <a href="' + Formatter.escapeHtml(url) + '" target="_blank">' + $t('%Jh') + '</a>.',
                 }),
             }),
         ];
@@ -79,7 +79,7 @@ useValidation(props.validator, () => {
         if (!isAccepted(policy)) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'read_privacy',
-                message: $t(`%v5`),
+                message: $t('%v5'),
             }));
             return false;
         }

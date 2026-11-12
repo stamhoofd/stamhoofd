@@ -104,7 +104,7 @@ export class PaidColumnMatcher implements ColumnMatcher {
         if (b === null) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18W`, { value }),
+                message: $t('%18W', { value }),
             });
         }
 

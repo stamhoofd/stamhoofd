@@ -3,9 +3,9 @@ import type { Organization } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { ref, watch } from 'vue';
 
-export type EventPeriodProblem =
+export type EventPeriodProblem
     /** No registration period covers the start date at all */
-    | { type: 'missing-period' }
+    = | { type: 'missing-period' }
     /** The organizer never started the period that covers the start date */
     | { type: 'period-not-started'; periodName: string };
 
@@ -71,8 +71,7 @@ export function useEventPeriodProblem(organization: Ref<Organization | null>, st
             if (count === checkCount) {
                 problem.value = result;
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
 
             if (count === checkCount) {

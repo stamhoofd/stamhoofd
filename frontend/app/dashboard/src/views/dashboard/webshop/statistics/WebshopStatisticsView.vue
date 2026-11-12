@@ -7,11 +7,13 @@
                 {{ $t('%Pa') }}
             </h1>
 
-            <hr><div class="graph-grid">
+            <hr>
+            <div class="graph-grid">
                 <GraphView :configurations="graphConfigurations" />
             </div>
 
-            <hr><div class="stats-grid">
+            <hr>
+            <div class="stats-grid">
                 <STInputBox :title="$t(`%1JX`)">
                     <p class="style-statistic">
                         <span data-testid="statistics-orders-count">
@@ -47,7 +49,8 @@
             </div>
 
             <div v-for="category of totalByCategory" :key="category.name" class="container">
-                <hr><h2>{{ totalByCategory.length > 1 ? category.name : 'Per productcombinatie' }}</h2>
+                <hr>
+                <h2>{{ totalByCategory.length > 1 ? category.name : 'Per productcombinatie' }}</h2>
 
                 <STList>
                     <STListItem v-for="(info, index) in category.products" :key="index" class="right-small" data-testid="statistics-product-row">
@@ -66,7 +69,8 @@
                 </STList>
             </div>
 
-            <hr><h2>{{ $t('%J') }}</h2>
+            <hr>
+            <h2>{{ $t('%J') }}</h2>
             <p>{{ $t('%Vj') }}</p>
         </main>
     </div>

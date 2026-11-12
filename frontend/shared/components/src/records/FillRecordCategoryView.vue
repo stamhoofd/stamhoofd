@@ -7,13 +7,13 @@
 <script setup lang="ts" generic="T extends ObjectWithRecords">
 import { PatchMap, patchObject } from '@common/encoding';
 import type { ObjectWithRecords, PatchAnswers, RecordCategory } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { CenteredMessage } from '../overlays/CenteredMessage';
-import type { NavigationActions} from '../types/NavigationActions';
+import type { NavigationActions } from '../types/NavigationActions';
 import { useNavigationActions } from '../types/NavigationActions';
 import FillRecordCategoryBox from './components/FillRecordCategoryBox.vue';
 
@@ -29,7 +29,7 @@ const props = withDefaults(
          */
         isPreview?: boolean;
     }>(), {
-        saveText: () => $t(`%1Op`),
+        saveText: () => $t('%1Op'),
         forceMarkReviewed: null,
         isPreview: false,
     },
@@ -64,8 +64,7 @@ async function save() {
 
         await props.saveHandler(patch.value, navigate);
         patch.value = new PatchMap() as PatchAnswers;
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
@@ -79,7 +78,7 @@ async function shouldNavigateAway() {
     if (props.isPreview || (!hasChanges.value && !loading.value)) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 }
 
 defineExpose({

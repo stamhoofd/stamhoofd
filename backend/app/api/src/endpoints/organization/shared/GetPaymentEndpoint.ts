@@ -37,7 +37,7 @@ export class GetPaymentEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Payment not found',
-                human: $t(`%FW`),
+                human: $t('%FW'),
             });
         }
 

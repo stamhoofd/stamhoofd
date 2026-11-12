@@ -37,7 +37,8 @@
         </p>
 
         <div v-if="STAMHOOFD.userMode === 'organization'" class="container">
-            <hr><h2>{{ $t('%NE') }}</h2>
+            <hr>
+            <h2>{{ $t('%NE') }}</h2>
 
             <p>{{ $t('%OG') }} <a class="inline-link" :href="$domains.getDocs('domeinnaam-koppelen')" target="_blank">{{ $t('%OH') }}</a>.</p>
 
@@ -114,8 +115,6 @@ import { useOrganizationManager } from '@stamhoofd/frontend-application/Organiza
 import type { Image } from '@stamhoofd/structures';
 import { Organization, OrganizationMetaData, ResolutionFit, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { computed, ref, shallowRef } from 'vue';
-
-
 
 const baseOrganization = useRequiredOrganization();
 const organizationManager = useOrganizationManager();

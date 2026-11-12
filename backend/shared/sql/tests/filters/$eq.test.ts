@@ -1,7 +1,7 @@
 import { baseSQLFilterCompilers, createColumnFilter } from '../../src/filters/SQLFilter.js';
 import { SQLValueType } from '../../src/filters/SQLFilterTypes.js';
 import { SQL } from '../../src/SQL.js';
-import type { TableDefinition} from '../utils/index.js';
+import type { TableDefinition } from '../utils/index.js';
 import { test, testError, testMatch, testMultiple, testMultipleErrors } from '../utils/index.js';
 
 describe('$eq', () => {
@@ -418,8 +418,7 @@ describe('$eq', () => {
                     ],
                 },
             });
-        }
-        finally {
+        } finally {
             vitest.useRealTimers();
         }
     });

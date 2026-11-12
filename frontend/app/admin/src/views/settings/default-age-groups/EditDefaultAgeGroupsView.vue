@@ -39,7 +39,6 @@ import { DefaultAgeGroup, Platform, PlatformConfig } from '@stamhoofd/structures
 import { computed, ref } from 'vue';
 import DefaultAgeGroupRow from './components/DefaultAgeGroupRow.vue';
 
-
 const patchPlatform = usePatchPlatform();
 const platform = usePlatform();
 const errors = useErrors();
@@ -115,8 +114,7 @@ async function save() {
         }));
         new Toast($t('%HA'), 'success green').show();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

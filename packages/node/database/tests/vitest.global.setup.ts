@@ -10,7 +10,7 @@ function getDirname(): string {
     // @ts-ignore
     if (typeof import.meta !== 'undefined' && import.meta.url) {
         // @ts-ignore
-            return import.meta.dirname;
+        return import.meta.dirname;
     }
     throw new Error('Cannot determine __dirname');
 }

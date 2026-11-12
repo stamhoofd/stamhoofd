@@ -66,7 +66,7 @@ const { title, description } = (() => {
         };
     }
 
-    let t = $t(`%1Tf`);
+    let t = $t('%1Tf');
     if (props.payment.status !== PaymentStatus.Succeeded && (props.payment.method === PaymentMethod.DirectDebit || props.payment.method === PaymentMethod.CreditCard)) {
         t = $t('%kK');
     }

@@ -27,22 +27,22 @@ import { useValidation } from '../errors/useValidation';
 import STInputBox from '../inputs/STInputBox.vue';
 import { Toast } from '../overlays/Toast';
 
-const props = 
-    defineProps<{
-        title: string,
-        description: string,
-        confirmationTitle: string,
-        confirmationPlaceholder: string,
-        confirmationCode: string,
-        checkboxText: string
-        onDelete: () => Promise<boolean>
+const props
+    = defineProps<{
+        title: string;
+        description: string;
+        confirmationTitle: string;
+        confirmationPlaceholder: string;
+        confirmationCode: string;
+        checkboxText: string;
+        onDelete: () => Promise<boolean>;
     }>();
 
 const pop = usePop();
 const errors = useErrors();
 
-const deleteText = $t(`%CJ`);
-const cancelText = $t(`%1Lh`);
+const deleteText = $t('%CJ');
+const cancelText = $t('%1Lh');
 const confirmationCodeInput = ref('');
 const isConfirm = ref(false);
 const disabled = computed(() => confirmationCodeInput.value.toLowerCase() !== props.confirmationCode.toLowerCase());
@@ -53,15 +53,15 @@ useValidation(errors.validator, () => {
 
     if (!isConfirm.value) {
         se.addError(new SimpleError({
-            code: "invalid_field",
-            message: $t(`%12c`),
-            field: "isConfirm"
-        }))
+            code: 'invalid_field',
+            message: $t('%12c'),
+            field: 'isConfirm',
+        }));
     }
 
     if (se.errors.length > 0) {
-        errors.errorBox = new ErrorBox(se)
-        return false
+        errors.errorBox = new ErrorBox(se);
+        return false;
     }
 
     errors.errorBox = null;

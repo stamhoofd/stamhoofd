@@ -15,10 +15,10 @@ import { computed } from 'vue';
 const props = withDefaults(
     defineProps<{
         group: Group;
-        organization?: Organization|null; // Optionally use organization logo if no other is available
+        organization?: Organization | null; // Optionally use organization logo if no other is available
     }>(), {
-        organization: null
-    }
+        organization: null,
+    },
 );
 
 const image = computed(() => props.group.settings.squarePhoto ?? props.group.settings.coverPhoto);

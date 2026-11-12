@@ -11,7 +11,7 @@
 
         <div class="split-inputs">
             <PriceInputBox v-model="fixedDiscount" error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%SK`)" :validator="errors.validator" :min="0" :required="true" :placeholder="$t(`%JN`)" />
-                
+
             <PermyriadInputBox v-model="percentageDiscount" error-fields="administrationFee.fixed" :error-box="errors.errorBox" :title="$t(`%2I`)" :required="true" :placeholder="$t(`%2I`)" :validator="errors.validator" />
         </div>
 
@@ -19,7 +19,8 @@
             {{ $t('%SB') }}
         </p>
 
-        <hr><h2>
+        <hr>
+        <h2>
             {{ $t('%SC') }}
         </h2>
         <p>{{ $t('%SD') }}</p>
@@ -49,7 +50,8 @@
             </button>
         </p>
 
-        <hr><h2>
+        <hr>
+        <h2>
             {{ $t('%SE') }}
         </h2>
         <p>{{ $t('%SF') }}</p>
@@ -92,7 +94,8 @@
         </STList>
 
         <div v-if="!isNew" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%SJ') }}
             </h2>
 
@@ -123,8 +126,6 @@ import { Discount, DiscountRequirement, GeneralDiscount, ProductDiscountSettings
 import PermyriadInputBox from '@stamhoofd/components/inputs/PermyriadInputBox.vue';
 import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import { computed } from 'vue';
-
-
 
 const props = defineProps<{
     discount: Discount;

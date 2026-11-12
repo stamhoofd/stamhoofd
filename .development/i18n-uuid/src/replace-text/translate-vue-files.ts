@@ -4,7 +4,7 @@ import { getFilesToSearch } from '../shared/get-files-to-search.js';
 import { eslintFormatter } from './eslint-formatter.js';
 import { fileCache } from './FileCache.js';
 import { getChangedFiles } from './git-helper.js';
-import type { TranslateVueFileOptions} from './translate-vue-template.js';
+import type { TranslateVueFileOptions } from './translate-vue-template.js';
 import { getVueTemplateMatchCount, translateVueTemplate } from './translate-vue-template.js';
 import type { TypescriptTranslatorOptions } from './typescript-translator.js';
 import { getTotalMatchCount, translateTypescript } from './typescript-translator.js';
@@ -34,8 +34,7 @@ export async function translateVueFiles(options: TranslateVueFilesOptions = {}) 
     if (options.replaceChangesOnly) {
         const changedFiles = getChangedFiles('vue', { compare: options.commitsToCompare });
         filesToLoop = files.filter(filePath => changedFiles.has(filePath));
-    }
-    else {
+    } else {
         filesToLoop = files;
     }
 

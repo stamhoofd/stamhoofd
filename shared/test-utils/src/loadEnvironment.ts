@@ -1,4 +1,4 @@
-import testEnv from './env.json' with {type: 'json'};
+import testEnv from './env.json' with { type: 'json' };
 
 export function getGlobalObject() {
     let globalObject: any = null;

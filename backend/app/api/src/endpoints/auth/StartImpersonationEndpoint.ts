@@ -46,7 +46,7 @@ export class StartImpersonationEndpoint extends Endpoint<Params, Query, Body, Re
             // exist.
             throw Context.auth.error({
                 message: 'Not allowed to impersonate this user',
-                human: $t(`%ZmB`),
+                human: $t('%ZmB'),
             });
         }
 

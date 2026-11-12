@@ -4,7 +4,8 @@
         <form class="search-box input-icon-container icon search small gray" @submit.prevent>
             <input ref="input" v-model="$searchString" :autofocus="true" class="input" name="search" inputmode="search" type="search" enterkeyhint="search" autocorrect="off" autocomplete="off" :spellcheck="false" autocapitalize="off" :placeholder="$t(`%gH`)">
         </form>
-        <hr><STList>
+        <hr>
+        <STList>
             <STListItem v-for="tag in $searchResult" :key="tag.id" :selectable="true" @click="toggleSelect(tag)">
                 <template #left>
                     <Checkbox :model-value="isSelected(tag)" @click.stop.prevent="toggleSelect(tag)" />
@@ -22,7 +23,8 @@
 
         <TransitionFade>
             <div v-if="$selectedOutsideSearch.length" class="container">
-                <hr><h2>{{ $t('%gG') }}</h2>
+                <hr>
+                <h2>{{ $t('%gG') }}</h2>
                 <STList :draggable="false">
                     <STListItem v-for="tag in $selectedOutsideSearch" :key="tag.id" :selectable="true" @click="toggleSelect(tag)">
                         <template #left>
@@ -57,7 +59,7 @@ const props = withDefaults(
         onAdd: (
             allTags: OrganizationTag[],
             addedTags: OrganizationTag[],
-            deletedTags: OrganizationTag[]
+            deletedTags: OrganizationTag[],
         ) => void;
     }>(),
     {
@@ -69,10 +71,10 @@ const props = withDefaults(
 
 const platform = usePlatform();
 
-const title = $t(`%10U`);
+const title = $t('%10U');
 const $saveText = computed(() => {
-    if (!props.tagIds.length) return $t(`%10V`);
-    return $t(`%10W`);
+    if (!props.tagIds.length) return $t('%10V');
+    return $t('%10W');
 });
 
 const hasChanges = computed(() => {
@@ -133,11 +135,11 @@ async function save() {
     const deletedTags = initialSelection.filter(tag => !allTags.includes(tag));
 
     if (deletedTags.length) {
-        let confirmText = $t(`%10X`);
+        let confirmText = $t('%10X');
 
         if (allTags.length) {
             const selectionCount = allTags.length;
-            const selectionText = selectionCount === 1 ? $t(`%10Y`) : `Er zijn ${selectionCount} tags geselecteerd.`;
+            const selectionText = selectionCount === 1 ? $t('%10Y') : `Er zijn ${selectionCount} tags geselecteerd.`;
             const deletedTagsString = Formatter.joinLastLimited(deletedTags.map(t => t.name), {
                 separator: ', ',
                 lastSeparator: ' ' + $t('%M1') + ' ',
@@ -150,7 +152,7 @@ async function save() {
 
         const isConfirm = await CenteredMessage.confirm({
             title: confirmText,
-            confirmText: $t(`%wo`),
+            confirmText: $t('%wo'),
             availabilityDelay: 2_000,
         });
         if (!isConfirm) return false;

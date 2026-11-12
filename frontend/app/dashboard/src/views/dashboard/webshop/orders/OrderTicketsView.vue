@@ -53,7 +53,7 @@ async function downloadAllTickets() {
     const TicketBuilder = (await import(
         /* webpackChunkName: "TicketBuilder" */
         /* webpackPrefetch: true */
-        '@stamhoofd/ticket-builder'
+        '@stamhoofd/ticket-builder',
     )).TicketBuilder;
 
     const builder = new TicketBuilder(tickets.value, webshop.value, organization.value!, order.value);

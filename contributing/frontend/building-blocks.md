@@ -24,9 +24,7 @@ Add `.full-width` to the view or its \<main\> when the content needs all availab
         <STNavigationBar :title="$t('My View')" />
 
         <main>
-            <h1>
-                {{ $t('My View') }}
-            </h1>
+            <h1>{{ $t('My View') }}</h1>
             <!-- ... -->
         </main>
     </div>
@@ -101,9 +99,7 @@ You can add buttons in the #right slot. The `navigation` class should be added t
 ```html
 <STNavigationBar :title="title">
     <template #right>
-        <button class="button navigation highlight" type="submit">
-            Save
-        </button>
+        <button class="button navigation highlight" type="submit">Save</button>
     </template>
 </STNavigationBar>
 ```
@@ -112,28 +108,20 @@ You can add buttons in the #right slot. The `navigation` class should be added t
 
 ## STList and STListItem
 
-*Please also read source at `frontend/shared/components/src/layout`*
+_Please also read source at `frontend/shared/components/src/layout`_
 
 These important components are used very often. They render multiple items in a list, and put lines between them, in accordance with our design system.
 
 ```html
- <STList>
+<STList>
     <STListItem>
-        <h3 class="style-title-list">
-            My list title
-        </h3>
-        <p class="style-description-small">
-            My description
-        </p>
+        <h3 class="style-title-list">My list title</h3>
+        <p class="style-description-small">My description</p>
     </STListItem>
-    
+
     <STListItem>
-        <h3 class="style-title-list">
-            My list title
-        </h3>
-        <p class="style-description-small">
-            My description
-        </p>
+        <h3 class="style-title-list">My list title</h3>
+        <p class="style-description-small">My description</p>
     </STListItem>
 </STList>
 ```
@@ -143,27 +131,23 @@ These important components are used very often. They render multiple items in a 
 Icon containers are mostly used for secondary actions that can’t be added in the navigation bar. E.g. adding a new balance item, closing a webshop…
 
 ```html
-  <STList>
-      <STListItem :selectable="true" element-name="button" @click="createBalanceItem">
-          <template #left>
-              <IconContainer icon="box">
-                  <template #aside>
-                      <span class="icon add small primary" />
-                  </template>
-              </IconContainer>
-          </template>
-          <h3 class="style-title-list">
-              Title
-          </h3>
-          <p class="style-description-small">
-              Description
-          </p>
+<STList>
+    <STListItem :selectable="true" element-name="button" @click="createBalanceItem">
+        <template #left>
+            <IconContainer icon="box">
+                <template #aside>
+                    <span class="icon add small primary" />
+                </template>
+            </IconContainer>
+        </template>
+        <h3 class="style-title-list">Title</h3>
+        <p class="style-description-small">Description</p>
 
-          <template #right>
-              <span class="icon arrow-right-small gray" />
-          </template>
-      </STListItem>
-  </STList>
+        <template #right>
+            <span class="icon arrow-right-small gray" />
+        </template>
+    </STListItem>
+</STList>
 ```
 
 **With illustrations:**
@@ -171,21 +155,17 @@ Icon containers are mostly used for secondary actions that can’t be added in t
 Illustrations in lists are only used in setting overviews.
 
 ```html
- <STList class="illustration-list">
-		 <STListItem :selectable="true" class="left-center">
-          <template #left>
-              <img src="@stamhoofd/assets/images/illustrations/group.svg">
-          </template>
-          <h2 class="style-title-list">
-              Title
-          </h2>
-          <p class="style-description">
-              Description
-          </p>
-          <template #right>
-              <span class="icon arrow-right-small gray" />
-          </template>
-      </STListItem>
+<STList class="illustration-list">
+    <STListItem :selectable="true" class="left-center">
+        <template #left>
+            <img src="@stamhoofd/assets/images/illustrations/group.svg" />
+        </template>
+        <h2 class="style-title-list">Title</h2>
+        <p class="style-description">Description</p>
+        <template #right>
+            <span class="icon arrow-right-small gray" />
+        </template>
+    </STListItem>
 </STList>
 ```
 
@@ -195,31 +175,27 @@ Items can be made draggable. Add a drag icon to the right side of your list item
 
 ```html
 <template>
-		<STList v-model="draggableTypes" :draggable="true">
-		    <template #item="{item: type}">
-		        <STListItem :selectable="true" class="right-stack">
-				        <h2 class="style-title-list">
-				            {{ type.title }}
-				        </h2>
-				        <p class="style-description-small">
-				            {{ type.description }}
-				        </p>
-				
-				        <template #right>
-				            <span class="button icon drag gray" @click.stop @contextmenu.stop />
-				            <span class="icon arrow-right-small gray" />
-				        </template>
-				    </STListItem>
-		    </template>
-		</STList>
+    <STList v-model="draggableTypes" :draggable="true">
+        <template #item="{item: type}">
+            <STListItem :selectable="true" class="right-stack">
+                <h2 class="style-title-list">{{ type.title }}</h2>
+                <p class="style-description-small">{{ type.description }}</p>
+
+                <template #right>
+                    <span class="button icon drag gray" @click.stop @contextmenu.stop />
+                    <span class="icon arrow-right-small gray" />
+                </template>
+            </STListItem>
+        </template>
+    </STList>
 </template>
 
 <script lang="ts" setup>
-...
-// You can use a helper hook such as useDraggableArray or useDraggableArrayIds
-// this is a computed property that maps the v-model and patches the array for you
-const { patched, addArrayPatch } = usePatchArray(originalTypes);
-const draggableTypes = useDraggableArray(() => patched.value, addArrayPatch);
+    ...
+    // You can use a helper hook such as useDraggableArray or useDraggableArrayIds
+    // this is a computed property that maps the v-model and patches the array for you
+    const { patched, addArrayPatch } = usePatchArray(originalTypes);
+    const draggableTypes = useDraggableArray(() => patched.value, addArrayPatch);
 </script>
 ```
 
@@ -255,7 +231,7 @@ The icon names are wrapped to css classes automatically.
 <span class="icon bank" />
 ```
 
-*All icons can be found in `frontend/shared/assets/images/icons`*
+_All icons can be found in `frontend/shared/assets/images/icons`_
 
 > You need to restart `yarn dev:*` after adjusting icons in the icons folder
 
@@ -263,7 +239,7 @@ The icon names are wrapped to css classes automatically.
 
 ## Text styles
 
-*Source in `frontend/shared/scss/base/text-styles.scss`*
+_Source in `frontend/shared/scss/base/text-styles.scss`_
 
 Standard classes for styling texts.
 
@@ -282,15 +258,13 @@ Always wrap every child in a \ when adding icons to buttons.
 For primary call-to-actions (CTA). A view should only have one primary button.
 
 ```html
-<button class="button primary">
-		Just text
-</button>
+<button class="button primary">Just text</button>
 ```
 
 ```html
 <button class="button primary">
-		<span class="icon add" />
-		<span>Just text</span>
+    <span class="icon add" />
+    <span>Just text</span>
 </button>
 ```
 
@@ -299,15 +273,13 @@ For primary call-to-actions (CTA). A view should only have one primary button.
 For secondary actions
 
 ```html
-<button class="button secundary">
-		Just text
-</button>
+<button class="button secundary">Just text</button>
 ```
 
 ```html
 <button class="button secundary">
-		<span class="icon add" />
-		<span>Just text</span>
+    <span class="icon add" />
+    <span>Just text</span>
 </button>
 ```
 
@@ -316,38 +288,30 @@ For secondary actions
 Smaller, inline buttons
 
 ```html
-<button class="button text">
-		Just text
-</button>
+<button class="button text">Just text</button>
 ```
 
 ```html
 <button class="button text">
-		<span class="icon add" />
-		<span>Just text</span>
+    <span class="icon add" />
+    <span>Just text</span>
 </button>
 ```
 
 ## Errors, warnings and info boxes
 
-*Source: `frontend/shared/scss/components/errors.scss`*
+_Source: `frontend/shared/scss/components/errors.scss`_
 
 ```html
-<p class="info-box">
-		This is an info box
-</p>
+<p class="info-box">This is an info box</p>
 ```
 
 ```html
-<p class="warning-box">
-		This is a warning box
-</p>
+<p class="warning-box">This is a warning box</p>
 ```
 
 ```html
-<p class="error-box">
-		This is an error box
-</p>
+<p class="error-box">This is an error box</p>
 ```
 
 ## Inputs

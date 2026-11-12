@@ -221,8 +221,7 @@ describe('service manager', () => {
 
             expect(rows[0][2]).toHaveLength(49);
             expect(rows[0][2]).toMatch(/…$/);
-        }
-        finally {
+        } finally {
             Object.defineProperty(process.stdout, 'columns', { configurable: true, value: originalColumns });
         }
     });
@@ -253,8 +252,7 @@ describe('service manager', () => {
             expect(rows[0][2]).toBe('last log line');
             expect(messages.join('\n')).toContain('Logs for CoreDNS:');
             expect(messages.join('\n')).toContain('first line\nlast log line');
-        }
-        finally {
+        } finally {
             console.log = original;
         }
     });

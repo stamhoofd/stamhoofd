@@ -24,7 +24,7 @@ export function getProductPriceText(product: Product, webshop: Webshop, { admin 
             if (webshop.isAllFree) {
                 return '';
             }
-            return $t(`%1Mn`);
+            return $t('%1Mn');
         }
         return Formatter.price(priceRanges[0]);
     }

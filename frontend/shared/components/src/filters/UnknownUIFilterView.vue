@@ -4,17 +4,16 @@
     </code>
 </template>
 
-
 <script lang="ts" setup>
 import type { UnknownUIFilterData } from './UnknownUIFilterData';
 
 const props = defineProps<{
-    filter: UnknownUIFilterData
-}>()
+    filter: UnknownUIFilterData;
+}>();
 
 const encodedJson = JSON.stringify(
     props.filter.value,
     null,
-    4
-)
+    4,
+);
 </script>

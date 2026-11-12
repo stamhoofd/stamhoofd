@@ -10,7 +10,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { SessionService } from '../../../services/SessionService.js';
 import { vi } from 'vitest';
 
-const baseUrl = `/email`;
+const baseUrl = '/email';
 
 describe('Endpoint.getAdminEmails', () => {
     const endpoint = new GetAdminEmailsEndpoint();

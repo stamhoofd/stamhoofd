@@ -36,7 +36,7 @@ export class MemberNumberService {
                     throw new SimpleError({
                         code: 'assign_member_number',
                         message: error.message,
-                        human: $t(`%Fw`),
+                        human: $t('%Fw'),
                     });
                 }
             }
@@ -60,7 +60,7 @@ export class MemberNumberService {
             throw new SimpleError({
                 code: 'assign_member_number',
                 message: 'Missing birthDay',
-                human: $t(`%Fx`),
+                human: $t('%Fx'),
             });
         }
 
@@ -122,7 +122,7 @@ export class MemberNumberService {
                     throw new SimpleError({
                         code: 'assign_member_number',
                         message: `Duplicate member numbers (last try: ${memberNumber}, tries: ${tries})`,
-                        human: $t(`%Fy`),
+                        human: $t('%Fy'),
                     });
                 }
             } else {

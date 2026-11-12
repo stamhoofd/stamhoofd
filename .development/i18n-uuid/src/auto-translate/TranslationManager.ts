@@ -29,8 +29,7 @@ export class TranslationManager implements TranslationProvider {
             execFile('pnpm', ['--dir', globals.I18NUUID_LOCALES_ROOT, 'run', 'build'], (error) => {
                 if (error) {
                     reject(error);
-                }
-                else {
+                } else {
                     resolve();
                 }
             });

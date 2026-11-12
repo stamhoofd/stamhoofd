@@ -56,5 +56,5 @@ export class MatchedColumn {
 }
 
 function isBaseMatcher(matcher: object): matcher is BaseColumnMatcher {
-    return 'setBaseValue' in matcher && typeof matcher.setBaseValue === 'function'
+    return 'setBaseValue' in matcher && typeof matcher.setBaseValue === 'function';
 }

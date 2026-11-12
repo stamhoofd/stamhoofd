@@ -73,7 +73,7 @@ export class PatchEventNotificationsEndpoint extends Endpoint<Params, Query, Bod
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid event',
-                        human: $t(`%DU`),
+                        human: $t('%DU'),
                         field: 'events',
                     });
                 }

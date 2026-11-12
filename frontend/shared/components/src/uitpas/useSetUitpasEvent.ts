@@ -46,8 +46,8 @@ function assertIsEventResponse(json: unknown): asserts json is EventResponse {
         console.error('Invalid event response', json);
         throw new SimpleError({
             code: 'invalid_event_response',
-            message: `Invalid event response`,
-            human: $t(`%1CB`),
+            message: 'Invalid event response',
+            human: $t('%1CB'),
         });
     }
 }
@@ -59,24 +59,24 @@ export function useSetUitpasEvent(patchedProduct: Ref<Product>, addProductPatch:
         const response = await fetch(eventUrl).catch(() => {
             throw new SimpleError({
                 code: 'fetch_error_getting_uitpas_event_details',
-                message: `Error fetching Uitpas event details`,
-                human: $t(`%1CB`),
+                message: 'Error fetching Uitpas event details',
+                human: $t('%1CB'),
             });
         });
 
         if (!response.ok) {
             throw new SimpleError({
                 code: 'invalid_response_getting_uitpas_event_details',
-                message: `Invalid response when getting Uitpas event details`,
-                human: $t(`%1CB`),
+                message: 'Invalid response when getting Uitpas event details',
+                human: $t('%1CB'),
             });
         }
         const json = await response.json().catch(() => {
         // Handle JSON parsing errors
             throw new SimpleError({
                 code: 'json_parsing_error_getting_uitpas_event_details',
-                message: `Error parsing JSON when getting Uitpas event details`,
-                human: $t(`%1CB`),
+                message: 'Error parsing JSON when getting Uitpas event details',
+                human: $t('%1CB'),
             });
         });
 

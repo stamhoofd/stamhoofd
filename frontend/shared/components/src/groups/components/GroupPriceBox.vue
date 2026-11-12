@@ -7,7 +7,8 @@
         <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :default-membership-type-id="defaultMembershipTypeId" :start-date="startDate ?? undefined" :external-organization="externalOrganization" />
 
         <template v-if="!isSingle">
-            <hr><h2>{{ $t("%1CP") }}</h2>
+            <hr>
+            <h2>{{ $t("%1CP") }}</h2>
         </template>
 
         <STList>
@@ -166,7 +167,7 @@ useValidation(errors.validator, () => {
     if (startDate.value && endDate.value && startDate.value >= endDate.value) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'start_date_after_end_date',
-            message: $t(`%1CQ`),
+            message: $t('%1CQ'),
         }));
 
         return false;
@@ -226,8 +227,7 @@ const hasStartDate = computed({
                             millisecond: 0,
                         }).toJSDate(),
             });
-        }
-        else {
+        } else {
             addPatch({ startDate: null });
         }
     },
@@ -255,8 +255,7 @@ const hasEndDate = computed({
                             millisecond: 999,
                         }).toJSDate(),
             });
-        }
-        else {
+        } else {
             addPatch({ endDate: null });
         }
     },
@@ -280,8 +279,7 @@ function setBundleDiscountSelected(bundleDiscount: BundleDiscount, selected: boo
                 name: bundleDiscount.name,
             }),
         );
-    }
-    else {
+    } else {
         patch.bundleDiscounts.set(
             bundleDiscount.id,
             null,
@@ -314,8 +312,7 @@ function setOverrideBundleDiscountSelected(bundleDiscount: BundleDiscount, selec
                 customDiscounts: bundleDiscount.discounts.map(d => d.clone()),
             }),
         );
-    }
-    else {
+    } else {
         patch.bundleDiscounts.set(
             bundleDiscount.id,
             BundleDiscountGroupPriceSettings.create({

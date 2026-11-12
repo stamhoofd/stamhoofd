@@ -1,62 +1,45 @@
-@font-face {
-font-family: "{{fontName}}";
-font-display: block;
-src: {{{src}}};
-}
-
-/** @preserve SHADOW-DOM */
-/*! @preserve SHADOW-DOM */
-
-.icon:before, .icon-base:before, .icon.stroke:after {
-font-family: {{fontName}} !important;
-font-style: normal;
-font-weight: normal !important;
-}
+@font-face { font-family: "{{fontName}}"; font-display: block; src:
+{{{src}}}; } /** @preserve SHADOW-DOM */ /*! @preserve SHADOW-DOM */ .icon:before,
+.icon-base:before, .icon.stroke:after { font-family:
+{{fontName}}
+!important; font-style: normal; font-weight: normal !important; }
 
 {{#each box_icons}}
-.{{@key}}-box:before {
-content: "\\{{this}}";
-}
+    .{{@key}}-box:before { content: "\\{{this}}"; }
 {{/each}}
 
 {{#each codepoints}}
-.icon.{{@key}}:before, .icon-base.{{@key}}:before, .icon.stroke.{{@key}}:after {
-content: "\\{{this}}";
-}
+    .icon.{{@key}}:before, .icon-base.{{@key}}:before, .icon.stroke.{{@key}}:after { content: "\\{{this}}";
+    }
 {{/each}}
 
 {{#each android_icons}}
-body.web-android .icon.{{@key}}:before, body.native-android .icon.{{@key}}:before, 
-body.web-android .icon-base.{{@key}}:before, body.native-android .icon-base.{{@key}}:before {
-content: "\\{{this}}";
-}
+    body.web-android .icon.{{@key}}:before, body.native-android .icon.{{@key}}:before,
+    body.web-android .icon-base.{{@key}}:before, body.native-android .icon-base.{{@key}}:before {
+    content: "\\{{this}}"; }
 {{/each}}
 
 {{#each ios_icons}}
-body.web-iOS .icon.{{@key}}:before, body.native-iOS .icon.{{@key}}:before,
-body.web-iOS .icon-base.{{@key}}:before, body.native-iOS .icon-base.{{@key}}:before {
-content: "\\{{this}}";
-}
+    body.web-iOS .icon.{{@key}}:before, body.native-iOS .icon.{{@key}}:before, body.web-iOS
+    .icon-base.{{@key}}:before, body.native-iOS .icon-base.{{@key}}:before { content: "\\{{this}}";
+    }
 {{/each}}
 
 {{#each apple_icons}}
-body.web-iOS .icon.{{@key}}:before, body.native-iOS .icon.{{@key}}:before, body.web-macOS .icon.{{@key}}:before,
-body.web-iOS .icon-base.{{@key}}:before, body.native-iOS .icon-base.{{@key}}:before, body.web-macOS .icon-base.{{@key}}:before {
-content: "\\{{this}}";
-}
+    body.web-iOS .icon.{{@key}}:before, body.native-iOS .icon.{{@key}}:before, body.web-macOS .icon.{{@key}}:before,
+    body.web-iOS .icon-base.{{@key}}:before, body.native-iOS .icon-base.{{@key}}:before,
+    body.web-macOS .icon-base.{{@key}}:before { content: "\\{{this}}"; }
 {{/each}}
 
 {{#each circle_icons}}
-body.native-iOS .st-navigation-bar .button.icon.{{@key}}:before, body.web-iOS .st-navigation-bar .button.icon.{{@key}}:before,
-body.native-android .st-navigation-bar .button.icon.{{@key}}.highlight:before, body.web-android .st-navigation-bar .button.icon.{{@key}}.highlight:before {
-content: "\\{{this}}";
-}
+    body.native-iOS .st-navigation-bar .button.icon.{{@key}}:before, body.web-iOS .st-navigation-bar
+    .button.icon.{{@key}}:before, body.native-android .st-navigation-bar .button.icon.{{@key}}.highlight:before,
+    body.web-android .st-navigation-bar .button.icon.{{@key}}.highlight:before { content: "\\{{this}}";
+    }
 {{/each}}
 
 {{#each bold_icons}}
-.icon.tiny.{{@key}}:before,.icon.text-size.{{@key}}:before,
-.icon-base.tiny.{{@key}}:before,.icon-base.text-size.{{@key}}:before,
-.icon.stroke.tiny.{{@key}}:after,.icon.stroke.text-size.{{@key}}:after {
-content: "\\{{this}}";
-}
+    .icon.tiny.{{@key}}:before,.icon.text-size.{{@key}}:before, .icon-base.tiny.{{@key}}:before,.icon-base.text-size.{{@key}}:before,
+    .icon.stroke.tiny.{{@key}}:after,.icon.stroke.text-size.{{@key}}:after { content: "\\{{this}}";
+    }
 {{/each}}

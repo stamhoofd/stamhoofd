@@ -56,8 +56,8 @@ function assertIsEventsResponse(json: unknown): asserts json is EventsResponse {
         console.error('Invalid events response', json);
         throw new SimpleError({
             code: 'invalid_events_response',
-            message: `Invalid events response`,
-            human: $t(`%1BY`),
+            message: 'Invalid events response',
+            human: $t('%1BY'),
         });
     }
 }
@@ -68,8 +68,8 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
     if (!clientId) {
         throw new SimpleError({
             code: 'no_client_id_for_uitpas_events',
-            message: `No client ID configured for Uitpas events`,
-            human: $t(`%1BZ`),
+            message: 'No client ID configured for Uitpas events',
+            human: $t('%1BZ'),
         });
     }
     const baseUrl = STAMHOOFD.UITPAS_API_URL?.includes('test') ? 'https://search-test.uitdatabank.be/events' : 'https://search.uitdatabank.be/events';
@@ -96,9 +96,9 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
         // Handle network errors
         throw new SimpleError({
             code: 'uitpas_unreachable_searching_events',
-            message: `Network issue when searching for UiTPAS events`,
+            message: 'Network issue when searching for UiTPAS events',
             human: $t(
-                `We konden UiTPAS niet bereiken om UiTPAS-evenementen op te zoeken. Probeer het later opnieuw.`,
+                'We konden UiTPAS niet bereiken om UiTPAS-evenementen op te zoeken. Probeer het later opnieuw.',
             ),
         });
     });
@@ -106,17 +106,17 @@ export async function searchUitpasEvents(clientId: string, uitpasOrganizerId: st
         console.error('Unsuccessful response when searching for UiTPAS events', response);
         throw new SimpleError({
             code: 'unsuccessful_response_searching_uitpas_events',
-            message: `Unsuccessful response when searching for UiTPAS events`,
-            human: $t(`%18C`),
+            message: 'Unsuccessful response when searching for UiTPAS events',
+            human: $t('%18C'),
         });
     }
     const json = await response.json().catch(() => {
         // Handle JSON parsing errors
         throw new SimpleError({
             code: 'invalid_json_searching_uitpas_events',
-            message: `Invalid json when searching for UiTPAS events`,
+            message: 'Invalid json when searching for UiTPAS events',
             human: $t(
-                `Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.`,
+                'Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.',
             ),
         });
     });

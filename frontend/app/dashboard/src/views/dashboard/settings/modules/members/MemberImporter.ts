@@ -4,7 +4,7 @@ import { SimpleError, SimpleErrors } from '@common/errors';
 import type { PlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager.ts';
 import { startSilentRegister } from '@stamhoofd/components/members/checkout/startCheckout.ts';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
-import type { BalanceItem, Group, Organization, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, Registration} from '@stamhoofd/structures';
+import type { BalanceItem, Group, Organization, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, Registration } from '@stamhoofd/structures';
 import { BalanceItemPaymentDetailed, DetailedReceivableBalance, GroupPrice, GroupType, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import type { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
@@ -70,7 +70,7 @@ export class MemberImporter {
         if (!allowMembersWithoutRegistration && importMemberResults.find(m => !m.isExisting && (m.importRegistrationResult.group === null && m.importRegistrationResult.autoAssignedGroup === null))) {
             throw new SimpleError({
                 code: 'no_group',
-                message: $t(`%1AE`),
+                message: $t('%1AE'),
             });
         }
 
@@ -85,18 +85,15 @@ export class MemberImporter {
                 await this.importRegistration(importResult, importContext);
                 await this.importPayment(importResult, importContext);
                 await sleep(100);
-            }
-            catch (e: any) {
+            } catch (e: any) {
                 console.error(e);
                 let base: string;
 
                 if (importResult.isRegistrationImported) {
                     base = $t('%1AA');
-                }
-                else if (importResult.isMemberImported) {
+                } else if (importResult.isMemberImported) {
                     base = $t('%1AB');
-                }
-                else {
+                } else {
                     base = $t('%1AC');
                 }
 
@@ -156,8 +153,7 @@ export class MemberImporter {
             if (group.waitingList) {
                 group = group.waitingList;
             }
-        }
-        else {
+        } else {
             const isReducedPrice = member.patchedDetails.shouldApplyReducedPrice;
             groupPrice = this.getGroupPrice(group, {
                 priceValue: member.importRegistrationResult.price === null ? undefined : member.importRegistrationResult.price,
@@ -226,8 +222,7 @@ export class MemberImporter {
             }
 
             return error.human ?? error.message;
-        }
-        else if (error instanceof SimpleErrors) {
+        } else if (error instanceof SimpleErrors) {
             const messages = error.errors.map(e => this.getErrorMessage(e));
             return messages.join(' ');
         }
@@ -327,14 +322,12 @@ export class MemberImporter {
 
                 payments.addPut(payment);
             }
-        }
-        else {
+        } else {
             let isPaid = false;
 
             if (importResult.importRegistrationResult.paid !== null) {
                 isPaid = importResult.importRegistrationResult.paid;
-            }
-            else if (importContext.paid !== null) {
+            } else if (importContext.paid !== null) {
                 isPaid = importContext.paid;
             }
 
@@ -432,8 +425,7 @@ export class MemberImporter {
                         if (price.price.reducedPrice !== priceValue) {
                             continue;
                         }
-                    }
-                    else if (price.price.price !== priceValue) {
+                    } else if (price.price.price !== priceValue) {
                         continue;
                     }
 
@@ -487,7 +479,7 @@ export class MemberImporter {
 
         throw new SimpleError({
             code: 'no_registration',
-            message: $t(`%1AF`, { name: platformMember.member.name }),
+            message: $t('%1AF', { name: platformMember.member.name }),
         });
     }
 }
@@ -502,8 +494,7 @@ function getExistingFamilies(importMemberResults: ImportMemberResult[]) {
 
             if (result.has(uuid)) {
                 continue;
-            }
-            else {
+            } else {
                 result.set(uuid, existingFamily);
             }
         }
@@ -524,8 +515,7 @@ function regroupNewMembersInFamilies(importMemberResults: ImportMemberResult[]) 
             if (family) {
                 throw new Error('Not implemented');
                 // family.add(newPlatformMember);
-            }
-            else {
+            } else {
                 const family = newPlatformMember.family;
                 if (!existingFamilies.includes(family)) {
                     existingFamilies.push(family);

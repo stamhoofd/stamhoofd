@@ -83,8 +83,7 @@ describe('HTML PDF multipart cleanup', () => {
         const result = endpoint.handle(decoded!);
         if (mode === 'success') {
             expect((await result).status).toBe(200);
-        }
-        else {
+        } else {
             await expect(result).rejects.toThrow();
         }
         expect(uploads.length).toBeGreaterThan(0);

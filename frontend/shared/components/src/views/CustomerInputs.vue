@@ -69,9 +69,9 @@ const props = withDefaults(defineProps<{
     emailPlaceholder?: string;
     emailDescription?: string | null;
 }>(), {
-    nameTitle: () => $t(`%Uy`),
+    nameTitle: () => $t('%Uy'),
     enableAutocomplete: true,
-    emailPlaceholder: () => $t(`%1FK`),
+    emailPlaceholder: () => $t('%1FK'),
     emailDescription: null,
 });
 

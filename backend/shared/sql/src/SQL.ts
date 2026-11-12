@@ -33,7 +33,7 @@ class StaticSQL {
     }
 
     scalar(value: SQLScalarValue): SQLScalar {
-        return new SQLScalar(value)
+        return new SQLScalar(value);
     }
 
     jsonOverlaps(jsonDoc1: SQLExpression, jsonDoc2: SQLExpression): SQLJsonOverlaps {
@@ -52,7 +52,7 @@ class StaticSQL {
         return new SQLJsonType(column);
     }
 
-    cast(expression: SQLExpression, as = 'CHAR'): SQLCast{
+    cast(expression: SQLExpression, as = 'CHAR'): SQLCast {
         return new SQLCast(expression, as);
     }
 

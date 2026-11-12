@@ -2,22 +2,22 @@
 
 Everything that configures Metabase: the ledenstatistieken report and the API client that writes it.
 
-| | |
-|---|---|
-| `report/*.sql` | The report, one file per tab, as queries on the platform statistics database |
-| `src/report.ts` | Reads those files. Knows nothing about Metabase |
-| `src/api.ts` | Minimal client for the Metabase HTTP API |
-| `src/sync-report.ts` | Says the report in Metabase's vocabulary and writes it |
-| `src/naming.ts` | What things are called in Metabase, so every caller agrees |
+|                      |                                                                              |
+| -------------------- | ---------------------------------------------------------------------------- |
+| `report/*.sql`       | The report, one file per tab, as queries on the platform statistics database |
+| `src/report.ts`      | Reads those files. Knows nothing about Metabase                              |
+| `src/api.ts`         | Minimal client for the Metabase HTTP API                                     |
+| `src/sync-report.ts` | Says the report in Metabase's vocabulary and writes it                       |
+| `src/naming.ts`      | What things are called in Metabase, so every caller agrees                   |
 
 ## What the report counts
 
 Two fragments decide that, and every card opens on one of them:
 
-| | |
-|---|---|
-| `includes/all-non-platform-registrations.sql` | one row per registration: who was registered where, in which leeftijdsgroep, in which year |
-| `includes/deduplicated-non-platform-registrations.sql` | that narrowed to one row per member per eenheid, carrying what they are |
+|                                                        |                                                                                            |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `includes/all-non-platform-registrations.sql`          | one row per registration: who was registered where, in which leeftijdsgroep, in which year |
+| `includes/deduplicated-non-platform-registrations.sql` | that narrowed to one row per member per eenheid, carrying what they are                    |
 
 Each fragment is a complete query. It states its own dependencies -- `deduplicated-non-platform-registrations` opens a `WITH` on
 `all-non-platform-registrations`, which opens one on `all-registrations` -- so whoever reads one
@@ -104,12 +104,12 @@ the GTP index weighs leeftijdsgroepen for keeo and the age of a lid for ravot, w
 half. A statistics database holds one platform, so which variant a card gets is decided while the
 report is loaded — `loadReport(env)` takes the environment, the same name the data source carries.
 
-| | |
-|---|---|
+|                                 |                                                    |
+| ------------------------------- | -------------------------------------------------- |
 | `report/includes/<env>/gtp.sql` | what `@include gtp` expands to in that environment |
-| `-- description@ravot:` | what a card's `-- description:` says there |
-| `-- except: keeo` | the tab or card is not written there at all |
-| `-- only: keeo` | the card is written there and nowhere else |
+| `-- description@ravot:`         | what a card's `-- description:` says there         |
+| `-- except: keeo`               | the tab or card is not written there at all        |
+| `-- only: keeo`                 | the card is written there and nowhere else         |
 
 A card names the first two and keeps saying `@include gtp`, which is what keeps one report from
 quietly becoming two. An override of a name no fragment carries is refused rather than ignored:
@@ -124,11 +124,11 @@ leeftijdsgroepenvergelijking of the nationale page, each of which stood beside a
 Where the figure is worth reading without the split, it is drawn two ways rather than dropped. A card
 cannot be two shapes, so it is two cards, and `only` is what keeps them from both being written:
 
-| | drawn everywhere but keeo | drawn there |
-|---|---|---|
-| de leeftijdsverdeling van een eenheid | `eenheid-leeftijd-en-geslacht` | `eenheid-leden-per-leeftijd` |
-| de ULDK-tabel en haar totalen | `uldk`, `uldk-totaal` | `uldk-zonder-geslacht`, `uldk-zonder-geslacht-totaal` |
-| het deelnemerstabblad van de koepel | `deelnemers-bovenlokaal` | `deelnemers-bovenlokaal-werk-en-projectgroepen` |
+|                                       | drawn everywhere but keeo      | drawn there                                           |
+| ------------------------------------- | ------------------------------ | ----------------------------------------------------- |
+| de leeftijdsverdeling van een eenheid | `eenheid-leeftijd-en-geslacht` | `eenheid-leden-per-leeftijd`                          |
+| de ULDK-tabel en haar totalen         | `uldk`, `uldk-totaal`          | `uldk-zonder-geslacht`, `uldk-zonder-geslacht-totaal` |
+| het deelnemerstabblad van de koepel   | `deelnemers-bovenlokaal`       | `deelnemers-bovenlokaal-werk-en-projectgroepen`       |
 
 `except: keeo` on the first and `only: keeo` on the second, which is the whole of the pairing:
 `except` on both would hand a platform naming neither of them both shapes of one figure. The ULDK
@@ -224,11 +224,11 @@ under systemd on a server (`yarn metabase install` in the separate devops projec
 calls either way. That is why this package holds no install logic and no credentials: a caller passes the
 base URL, the credentials and the data source to write against.
 
-| | Local | Server |
-|---|---|---|
-| Written by | `stam platform-report dashboards` | `yarn metabase report -s keeo/keeo-metabase-001` in the separate devops project |
-| Authenticates with | the admin account the CLI created | an api key from 1Password |
-| Data source | registered by the CLI | added once by hand, looked up by name |
+|                    | Local                             | Server                                                                          |
+| ------------------ | --------------------------------- | ------------------------------------------------------------------------------- |
+| Written by         | `stam platform-report dashboards` | `yarn metabase report -s keeo/keeo-metabase-001` in the separate devops project |
+| Authenticates with | the admin account the CLI created | an api key from 1Password                                                       |
+| Data source        | registered by the CLI             | added once by hand, looked up by name                                           |
 
 Nothing this writes carries the name of a platform: the collection is `Ledenstatistieken` and holds
 the dashboards `Ledenstatistieken` and `Aanlevering ...`, whichever platform they count. A server

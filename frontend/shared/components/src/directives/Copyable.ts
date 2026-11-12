@@ -38,7 +38,7 @@ const helper = {
         const rect = el.getBoundingClientRect();
 
         const displayedComponent = new ComponentWithProperties(Tooltip, {
-            text: $t(`%a7`),
+            text: $t('%a7'),
             icon: '',
             x: rect.left,
             y: rect.top + el.offsetHeight + 5,

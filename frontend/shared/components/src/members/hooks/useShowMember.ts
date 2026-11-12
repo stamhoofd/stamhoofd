@@ -6,7 +6,6 @@ import { useMembersObjectFetcher } from '#fetchers/useMembersObjectFetcher.ts';
 import { useMemberViewLoaders } from '#members/memberViewLoaders.ts';
 import { Toast } from '../../overlays/Toast';
 
-
 export function useShowMember() {
     const memberFetcher = useMembersObjectFetcher();
     const present = usePresent();
@@ -23,7 +22,7 @@ export function useShowMember() {
                         limit: 1,
                     }));
                     if (members.results.length === 0) {
-                        Toast.error($t(`%yX`)).show();
+                        Toast.error($t('%yX')).show();
                         throw new Error('Member not found');
                     }
                     return AsyncComponent(memberViewLoaders.member, {

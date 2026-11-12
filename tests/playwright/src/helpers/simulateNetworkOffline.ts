@@ -8,7 +8,7 @@ export async function simulateNetworkOffline(page: Page) {
 
         const allowedRoutes = [
             // should still be able to set the frontend-environment for tests
-            '/frontend-environment'
+            '/frontend-environment',
         ];
 
         const shouldAllow = allowedRoutes.some(path => url.includes(path));

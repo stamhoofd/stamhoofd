@@ -30,7 +30,8 @@
             <WYSIWYGTextInput v-model="description" :placeholder="$t('%7Q')" />
         </STInputBox>
 
-        <hr><h2>{{ $t('%7R') }}</h2>
+        <hr>
+        <h2>{{ $t('%7R') }}</h2>
 
         <Checkbox v-if="!type || (type.maximumDays !== 1 && (type.minimumDays ?? 1) <= 1)" v-model="multipleDays">
             {{ $t('%7S') }}
@@ -55,7 +56,8 @@
             {{ periodProblemText }}
         </p>
 
-        <hr><h2>{{ $t('%1CP') }}</h2>
+        <hr>
+        <h2>{{ $t('%1CP') }}</h2>
 
         <STList>
             <STListItem v-if="canSetNationalActivity || isNationalActivity" :selectable="true" element-name="label">
@@ -96,7 +98,8 @@
         </STList>
 
         <template v-if="canSetNationalActivity && externalOrganization">
-            <hr><h2>{{ $t('%16T') }}</h2>
+            <hr>
+            <h2>{{ $t('%16T') }}</h2>
             <p>{{ $t('%16U') }}</p>
 
             <STList>
@@ -117,7 +120,8 @@
         </template>
 
         <JumpToContainer :visible="isNationalActivity && organizationTagIds !== null">
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t('%ae') }}</div>
                 <div>
                     <button v-if="!hasTagRestrictions" type="button" class="button icon trash" @click="deleteTagRestriction" />
@@ -129,7 +133,8 @@
         </JumpToContainer>
 
         <JumpToContainer :visible="defaultAgeGroupIds !== null">
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t('%3M') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="deleteDefaultAgeGroupRestriction" />
@@ -142,7 +147,8 @@
         </JumpToContainer>
 
         <JumpToContainer :visible="groups !== null">
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t('%P4') }}</div>
                 <div>
                     <button v-if="!hasGroupRestrictions" type="button" class="button icon trash" @click="deleteGroupsRestriction" />
@@ -158,7 +164,8 @@
         </JumpToContainer>
 
         <JumpToContainer :visible="!!location">
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t('%8a') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="deleteLocation" />
@@ -173,7 +180,8 @@
         </JumpToContainer>
 
         <JumpToContainer :visible="!!coverPhoto">
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t('%7M') }}</div>
                 <div>
                     <button v-if="coverPhoto" type="button" class="button text only-icon-smartphone" @click="coverPhoto = null">
@@ -207,7 +215,8 @@
             </p>
         </JumpToContainer>
 
-        <hr><STList>
+        <hr>
+        <STList>
             <STListItem v-if="defaultAgeGroupIds === null && isNationalActivity" :selectable="true" element-name="button" @click="addDefaultAgeGroupRestriction">
                 <template #left>
                     <span class="icon add gray" />
@@ -328,7 +337,7 @@ const props = withDefaults(
 
 const errors = useErrors();
 const { hasChanges, patched, addPatch, patch } = usePatch(props.event);
-const title = computed(() => props.isNew ? $t(`%vO`) : $t(`%vP`));
+const title = computed(() => props.isNew ? $t('%vO') : $t('%vP'));
 const saving = ref(false);
 const deleting = ref(false);
 const forceShowAge = ref(props.event.meta.minAge !== null || props.event.meta.maxAge !== null);
@@ -576,7 +585,7 @@ const isNationalActivity = computed({
             const organizationId = props.event.organizationId || organization.value?.id;
 
             if (!organizationId) {
-                chooseOrganizer($t(`%16W`), canSelectOrganization).catch(console.error);
+                chooseOrganizer($t('%16W'), canSelectOrganization).catch(console.error);
                 return;
             }
             addPatch({
@@ -740,7 +749,7 @@ async function save() {
             if (!location.value) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`%vQ`),
+                    message: $t('%vQ'),
                     field: 'event_required',
                 });
             }
@@ -749,7 +758,7 @@ async function save() {
         if (patched.value.meta.groups !== null && patched.value.meta.groups?.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%vR`),
+                message: $t('%vR'),
             });
         }
         // #endregion

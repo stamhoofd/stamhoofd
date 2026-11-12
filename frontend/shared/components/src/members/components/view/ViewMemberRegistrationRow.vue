@@ -109,7 +109,7 @@ const defaultAgeGroup = computed(() => {
     }
 
     if (!group.value.defaultAgeGroupId) {
-        return $t(`%10I`);
+        return $t('%10I');
     }
     return platform.value.config.defaultAgeGroups.find(ag => ag.id === group.value.defaultAgeGroupId)?.name;
 });

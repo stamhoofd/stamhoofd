@@ -36,7 +36,8 @@
                 </STListItem>
             </STList>
 
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t('%TJ') }}</div>
                 <div>
                     <button class="button text only-icon-smartphone" type="button" @click="addOption">
@@ -191,7 +192,7 @@ async function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`%xU`),
+                name: $t('%xU'),
                 icon: 'settings',
                 action: () => {
                     editOptionMenu();
@@ -200,7 +201,7 @@ async function showContextMenu(event: MouseEvent) {
             }),
 
             new ContextMenuItem({
-                name: $t(`%CJ`),
+                name: $t('%CJ'),
                 icon: 'trash',
                 destructive: true,
                 action: async () => {
@@ -220,7 +221,7 @@ async function showContextMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`%yn`),
+                name: $t('%yn'),
                 icon: 'arrow-up',
                 disabled: !canMoveUp.value,
                 action: async () => {
@@ -229,7 +230,7 @@ async function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%yo`),
+                name: $t('%yo'),
                 icon: 'arrow-down',
                 disabled: !canMoveDown.value,
                 action: async () => {

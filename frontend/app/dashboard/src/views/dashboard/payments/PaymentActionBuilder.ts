@@ -185,7 +185,7 @@ export class PaymentActionBuilder {
 
     private getEmailAction() {
         return new AsyncTableAction({
-            name: $t(`%1GW`),
+            name: $t('%1GW'),
             icon: 'send',
             priority: 12,
             groupIndex: 3,
@@ -329,7 +329,7 @@ export class PaymentActionBuilder {
                 options: [
                     {
                         id: 'all',
-                        name: $t(`%1Lo`),
+                        name: $t('%1Lo'),
                         value: [
                             EmailRecipientSubfilter.create({
                                 type: EmailRecipientFilterType.Payment,
@@ -406,7 +406,7 @@ export class PaymentActionBuilder {
                     options: [
                         {
                             id: 'all',
-                            name: $t(`%1TH`),
+                            name: $t('%1TH'),
                             value: [
                                 EmailRecipientSubfilter.create({
                                     type: EmailRecipientFilterType.PaymentOrganization,
@@ -436,7 +436,7 @@ export class PaymentActionBuilder {
                         },
                         {
                             id: 'none',
-                            name: $t(`%1QL`),
+                            name: $t('%1QL'),
                             value: [],
                         },
                     ],
@@ -451,7 +451,7 @@ export class PaymentActionBuilder {
                 options: [
                     {
                         id: 'all',
-                        name: $t(`%1Lp`),
+                        name: $t('%1Lp'),
                         value: [
                             EmailRecipientSubfilter.create({
                                 type: EmailRecipientFilterType.Payment,
@@ -481,7 +481,7 @@ export class PaymentActionBuilder {
                     },
                     {
                         id: 'none',
-                        name: $t(`%1Lq`),
+                        name: $t('%1Lq'),
                         value: [],
                     },
                 ],

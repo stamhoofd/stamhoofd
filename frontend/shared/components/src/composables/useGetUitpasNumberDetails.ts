@@ -28,8 +28,7 @@ export function useGetUitpasNumberDetails() {
             });
 
             return result.data;
-        }
-        catch (e) {
+        } catch (e) {
             if (!Request.isAbortError(e)) {
                 throw e;
             }

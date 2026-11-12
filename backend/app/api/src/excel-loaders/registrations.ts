@@ -17,7 +17,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
     columns: [
         {
             id: 'id',
-            name: $t(`%d`),
+            name: $t('%d'),
             width: 40,
             getValue: (registration: PlatformRegistration) => ({
                 value: registration.id,
@@ -25,7 +25,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
         },
         {
             id: 'priceName',
-            name: $t(`%62`),
+            name: $t('%62'),
             width: 30,
             getValue: (registration: PlatformRegistration) => {
                 return {
@@ -35,7 +35,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
         },
         {
             id: 'price',
-            name: $t(`%62`),
+            name: $t('%62'),
             width: 30,
             getValue: (registration: PlatformRegistration) => {
                 return {
@@ -51,7 +51,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
         {
             id: 'toPay',
             width: 30,
-            name: $t(`%m0`),
+            name: $t('%m0'),
             getValue: (registration: PlatformRegistration) => {
                 return {
                     value: registration.balances.reduce((sum, r) => sum + (r.amountOpen + r.amountPending), 0) / 1_0000,
@@ -66,7 +66,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
         },
         {
             id: 'outstandingBalance',
-            name: $t(`%76`),
+            name: $t('%76'),
             width: 30,
             getValue: (v) => {
                 return {
@@ -82,7 +82,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
         },
         {
             id: 'registeredAt',
-            name: $t(`%zg`),
+            name: $t('%zg'),
             width: 20,
             getValue: (registration: PlatformRegistration) => ({
                 value: registration.registeredAt,
@@ -95,7 +95,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
         },
         {
             id: 'startDate',
-            name: $t(`%1Of`),
+            name: $t('%1Of'),
             width: 20,
             getValue: (registration: PlatformRegistration) => ({
                 value: registration.startDate,
@@ -108,7 +108,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
         },
         {
             id: 'endDate',
-            name: $t(`%1P8`),
+            name: $t('%1P8'),
             width: 20,
             getValue: (registration: PlatformRegistration) => ({
                 value: registration.endDate,
@@ -163,9 +163,9 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
 
                 if (registration.payingOrganizationId) {
                     const organization = registration.member.organizations.find(o => o.id === registration.payingOrganizationId);
-                    value = organization ? organization.name : $t(`%Gr`);
+                    value = organization ? organization.name : $t('%Gr');
                 } else {
-                    value = $t(`%18s`);
+                    value = $t('%18s');
                 }
 
                 return ({
@@ -175,7 +175,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
         },
         {
             id: 'trialUntil',
-            name: $t(`%1IH`),
+            name: $t('%1IH'),
             width: 40,
             getValue: (registration: PlatformRegistration) => {
                 let value: Date | null = null;
@@ -214,7 +214,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
 
                     return [{
                         id: `optionMenu.${menuId}.${optionId}${returnAmount ? '.amount' : ''}`,
-                        name: $t(`%wO`),
+                        name: $t('%wO'),
                         width: 30,
                         getValue: (registration: PlatformRegistration) => {
                             const options = registration.options.filter(o => o.optionMenu.id === menuId && o.option.id === optionId);
@@ -242,7 +242,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
                 return [
                     {
                         id: `optionMenu.${menuId}`,
-                        name: $t(`%Tb`),
+                        name: $t('%Tb'),
                         width: 30,
                         getValue: (registration: PlatformRegistration) => {
                             const options = registration.options.filter(o => o.optionMenu.id === menuId);
@@ -301,7 +301,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
         })),
         {
             id: 'group',
-            name: $t(`%wH`),
+            name: $t('%wH'),
             width: 40,
             getValue: (registration: PlatformRegistration) => {
                 return {
@@ -311,7 +311,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
         },
         {
             id: 'defaultAgeGroup',
-            name: $t(`%wI`),
+            name: $t('%wI'),
             width: 40,
             getValue: (registration: PlatformRegistration) => {
                 const defaultAgeGroupId = registration.group.defaultAgeGroupId;
@@ -321,7 +321,7 @@ export const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<Platfor
                     };
                 }
                 return {
-                    value: platform.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId)?.name ?? $t(`%wJ`),
+                    value: platform.config.defaultAgeGroups.find(g => g.id === defaultAgeGroupId)?.name ?? $t('%wJ'),
                 };
             },
         },

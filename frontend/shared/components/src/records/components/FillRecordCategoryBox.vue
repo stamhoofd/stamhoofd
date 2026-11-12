@@ -34,7 +34,8 @@
 
         <RecordAnswerInput v-for="record of filteredWriteableRecords" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
         <div v-for="(childCategory, index) of childCategories" :key="childCategory.id" class="container">
-            <hr v-if="index > 0 || hasRoot"><h2>{{ level <= 1 || hideTitle ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
+            <hr v-if="index > 0 || hasRoot">
+            <h2>{{ level <= 1 || hideTitle ? childCategory.name : (category.name + ': ' + childCategory.name) }}</h2>
             <p v-if="childCategory.description.length" class="style-description pre-wrap style-wysiwyg" v-html="linkText(childCategory.description.toString())" />
 
             <RecordAnswerInput v-for="record of childCategory.filterRecords(props.value, filterOptions)" :key="record.id" :record="record" :answers="answers" :validator="validator" :all-optional="isOptional" :mark-reviewed="markReviewed" @patch="addPatch" />
@@ -215,13 +216,12 @@ function clearReviewed() {
             continue;
         }
         patch.set(record.id, answer.patch({
-            reviewedAt: null
+            reviewedAt: null,
         }));
     }
 
     addPatch(patch);
 }
-
 
 const hasAnswers = computed(() => {
     for (const record of deepFilteredWriteableRecords.value) {

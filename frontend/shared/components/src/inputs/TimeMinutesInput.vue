@@ -32,7 +32,6 @@ const props = withDefaults(defineProps<{
 });
 
 const model = defineModel<number | null>({ default: null, set: (value: number | null) => {
-
     // prevent emitting null if required
     if (props.required && value === null) {
         return model.value;
@@ -47,7 +46,7 @@ watch(model, (value) => {
     if (value === null) {
         return;
     }
-    
+
     timeRawCache.value = formatMinutes(value);
 });
 
@@ -87,15 +86,14 @@ function validate(): boolean {
     if (!regex.test(timeValue)) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%zF`),
+            message: $t('%zF'),
             field: 'time',
         }));
         if (model.value !== null) {
             model.value = null;
         }
         return false;
-    }
-    else {
+    } else {
         const split = timeValue.split(':');
         let hours = parseInt(split[0]);
         let minutes = parseInt(split[1] ?? '0');

@@ -6,7 +6,8 @@
                 <span>{{ $t('%jy') }}</span>
             </button>
         </p>
-        <hr v-if="isEnteringDiscountCode"><form v-if="isEnteringDiscountCode" data-submit-last-field @submit.prevent="addEnteredCode">
+        <hr v-if="isEnteringDiscountCode">
+        <form v-if="isEnteringDiscountCode" data-submit-last-field @submit.prevent="addEnteredCode">
             <STInputBox error-fields="code" :error-box="errorBox" class="max" :title="$t(`%1MX`)">
                 <div class="input-with-buttons">
                     <div>
@@ -64,7 +65,7 @@ async function addEnteredCode() {
             errorBox.value = new ErrorBox(new SimpleError({
                 code: 'invalid_code',
                 field: 'code',
-                message: $t(`%12O`),
+                message: $t('%12O'),
             }));
         }
     } catch (e) {

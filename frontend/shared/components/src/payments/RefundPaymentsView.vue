@@ -219,8 +219,7 @@ async function refund() {
             for (const created of response.data) {
                 GlobalEventBus.sendEvent('paymentPatch', created).catch(console.error);
             }
-        }
-        catch (e) {
+        } catch (e) {
             const message = isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : (e as Error).message;
             failures.addError(new SimpleError({
                 code: 'refund_failed',

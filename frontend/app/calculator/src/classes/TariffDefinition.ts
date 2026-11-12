@@ -1,6 +1,6 @@
 import { SimpleError } from '@common/errors';
 import type { CalculationInput } from './CalculationInput';
-import type { CalculationLine, CalculationRemark} from './CalculationOutput';
+import type { CalculationLine, CalculationRemark } from './CalculationOutput';
 import { CalculationGroup, CalculationOutput, FixedPriceCalculationLine, VolumePercentageCalculationLine } from './CalculationOutput';
 import { ModuleType } from './ModuleType';
 import { calculatePaymentMethodUsage, getPaymentMethodName, PaymentMethod } from './PaymentMethod';
@@ -124,7 +124,7 @@ export class Tier {
         if (!input.withVAT) {
             return price;
         }
-        return Math.round(price * 1.21 /100) * 100; // 21% VAT
+        return Math.round(price * 1.21 / 100) * 100; // 21% VAT
     }
 
     calculate(input: CalculationInput): CalculationOutput {
@@ -257,8 +257,7 @@ export class Tier {
                     output.serviceFees.lines.push(
                         z,
                     );
-                }
-                else if (this.fees.maxPerUnit && z.totalPrice / product.amount > this.fees.maxPerUnit) {
+                } else if (this.fees.maxPerUnit && z.totalPrice / product.amount > this.fees.maxPerUnit) {
                     const z = new FixedPriceCalculationLine({
                         title: 'Servicekosten op volume',
                         description: this.fees.maxPerUnit ? 'Maximum kost per stuk' : 'Maximum per bestelling',
@@ -268,8 +267,7 @@ export class Tier {
                     output.serviceFees.lines.push(
                         z,
                     );
-                }
-                else if (this.fees.minPerUnit && z.totalPrice / product.amount < this.fees.minPerUnit) {
+                } else if (this.fees.minPerUnit && z.totalPrice / product.amount < this.fees.minPerUnit) {
                     const z = new FixedPriceCalculationLine({
                         title: 'Servicekosten op volume',
                         description: 'Minimum kost per stuk',
@@ -279,8 +277,7 @@ export class Tier {
                     output.serviceFees.lines.push(
                         z,
                     );
-                }
-                else {
+                } else {
                     output.serviceFees.lines.push(
                         z,
                     );
@@ -320,7 +317,7 @@ export class Tier {
                 if (fee.isInflated) {
                     remarks.push({
                         id: 'inflated-transaction-fees',
-                        text: `Sommige transactiekosten zijn hoger dan de standaard prijzen van betaalproviders, hier zit dus verborgen marge op.`,
+                        text: 'Sommige transactiekosten zijn hoger dan de standaard prijzen van betaalproviders, hier zit dus verborgen marge op.',
                         type: 'warning',
                     });
                 }
@@ -408,8 +405,7 @@ export class Tiers {
                     if (cheapestTier === null || calculation.totalPrice < cheapestTier.price) {
                         cheapestTier = { tier, price: calculation.totalPrice };
                     }
-                }
-                catch (e) {
+                } catch (e) {
                     // If the calculation fails, we skip this tier
                     console.error('Failed to calculate tier', tier, 'for input', input, e);
                 }

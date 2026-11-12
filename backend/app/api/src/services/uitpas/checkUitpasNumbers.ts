@@ -9,7 +9,7 @@ export function throwIfInvalidUitpasNumber(uitpasNumber: string) {
             code: 'invalid_uitpas_number',
             message: `Invalid UiTPAS number: ${uitpasNumber}`,
             human: $t(
-                `Het opgegeven UiTPAS-nummer is ongeldig. Controleer het nummer en probeer het opnieuw.`,
+                'Het opgegeven UiTPAS-nummer is ongeldig. Controleer het nummer en probeer het opnieuw.',
             ),
         });
     }
@@ -35,7 +35,7 @@ export async function checkUitpasNumbers(access_token: string, uitpasNumbers: st
                     code: 'non_active_social_tariff',
                     message: `UiTPAS social tariff is not ACTIVE but ${result.socialTariff.status}`,
                     human: $t(
-                        `Het opgegeven UiTPAS-nummer heeft geen actief kansentarief. Neem contact op met de UiTPAS-organisatie voor meer informatie.`,
+                        'Het opgegeven UiTPAS-nummer heeft geen actief kansentarief. Neem contact op met de UiTPAS-organisatie voor meer informatie.',
                     ),
                 });
             }

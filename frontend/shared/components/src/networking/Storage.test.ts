@@ -21,7 +21,7 @@ describe('storage adapters', () => {
     });
 
     test('localization reads a replacement adapter installed by bootstrap', async () => {
-        const values: Record<string, string> = { language: Language.French, 'i18n-version': '2' };
+        const values: Record<string, string> = { 'language': Language.French, 'i18n-version': '2' };
         Storage.keyValue = {
             getItem: vi.fn(async (key: string) => values[key] ?? null),
             setItem: vi.fn(async () => {}),

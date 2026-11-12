@@ -60,6 +60,7 @@ Before you start fixing a bug, it is a good practice to write a failing test. Th
 #### ✅ Write tests
 
 Try to test your work as much as possible. This avoids large bugs in the future.
+
 - Prefer to add at least one end-to-end test for the happy-path of the feature you are building. Also add a failure path.
 - Write tests for critical paths or complex features that can easily be broken by other people that don’t have all the context. By having a test, we know when something is broken, you can add the right context in the test.
 - Write unit tests for more complex classes, mostly for library type of classes and building blocks.

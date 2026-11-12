@@ -1,6 +1,7 @@
 <template>
     <div class="hover-box container">
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <div>{{ emergencyContact.title || emergencyContact.name }}</div>
         </h2>
 

@@ -73,7 +73,7 @@ const defaultAgeGroupIdsDescription = computed(() => {
     if (props.responsibility.defaultAgeGroupIds === null) {
         return '';
     }
-    return $t(`%124`);
+    return $t('%124');
 });
 
 const mergedRole = computed(() => {

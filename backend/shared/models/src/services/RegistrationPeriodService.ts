@@ -8,8 +8,7 @@ export class RegistrationPeriodService {
         if (existingReference) {
             if (!existingReference.existsInDatabase) {
                 allPeriods.push(existingReference);
-            }
-            else {
+            } else {
                 const index = allPeriods.findIndex(p => p.id === existingReference.id);
                 if (index !== -1) {
                     allPeriods[index] = existingReference;

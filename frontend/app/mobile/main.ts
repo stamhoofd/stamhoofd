@@ -53,7 +53,7 @@ if (Capacitor.getPlatform() === 'ios' || Capacitor.getPlatform() === 'android') 
     }
 
     // Force set margin of navigation bar (disable jumping when scrolling which is only needed on webistes)
-    document.documentElement.style.setProperty('--navigation-bar-margin', `0px`);
+    document.documentElement.style.setProperty('--navigation-bar-margin', '0px');
 
     // note: for this to work on android, android:windowSoftInputMode="adjustNothing" is needed in the activity (manifest)
     // kick off the polyfill!
@@ -238,7 +238,7 @@ function isError(e: any): e is Error {
 AppManager.shared.downloadFile = async (data: Blob | File | URL, filename: string) => {
     const { publicStorage } = await Filesystem.checkPermissions();
     if (!publicStorage) {
-        throw new Error($t(`%Ww`));
+        throw new Error($t('%Ww'));
     }
 
     // TODO: automatically encode data to base64 in case of buffer

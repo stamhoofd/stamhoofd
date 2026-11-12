@@ -135,7 +135,6 @@ function membersRequest(organization: Organization, session: TokenStruct) {
     return bearer(Request.buildJson('GET', '/user/members', organization.getApiHost()), session);
 }
 
-
 async function markSensitive(member: Awaited<ReturnType<MemberFactory['create']>>) {
     member.details.nationalRegisterNumber = '123454123';
     member.details.requiresFinancialSupport = BooleanStatus.create({ value: true });

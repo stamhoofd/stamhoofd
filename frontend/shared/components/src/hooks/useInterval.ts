@@ -15,8 +15,7 @@ export function useInterval(method: (data: { stop: () => void }) => unknown, ms:
         running.value = true;
         try {
             await method(data);
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error in useInterval', e);
         }
         running.value = false;

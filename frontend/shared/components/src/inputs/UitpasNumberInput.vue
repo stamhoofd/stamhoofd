@@ -136,8 +136,7 @@ function validate(final = true, silent = false) {
             }));
         }
         return false;
-    }
-    else {
+    } else {
         if (model.value !== unformatted) {
             model.value = unformatted;
         }

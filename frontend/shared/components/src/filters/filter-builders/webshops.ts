@@ -28,15 +28,15 @@ export function useGetWebshopUIFilterBuilders() {
                     new MultipleChoiceUIFilterOption(getWebshopStatusName(WebshopStatus.Archived), WebshopStatus.Archived),
                 ],
                 wrapper: {
-                    status: {$in: FilterWrapperMarker}
+                    status: { $in: FilterWrapperMarker },
                 },
                 additionalUnwrappers: [{
-                    status: FilterWrapperMarker
-                }]
+                    status: FilterWrapperMarker,
+                }],
             }),
 
             new GroupUIFilterBuilder({
-                name: $t(`%1PI`),
+                name: $t('%1PI'),
                 builders: getOrganizationUIFilterBuilders().slice(1),
                 wrapper: {
                     organization: {

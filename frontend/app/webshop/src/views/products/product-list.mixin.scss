@@ -1,5 +1,5 @@
-@use "@stamhoofd/scss/base/variables.scss" as *;
-@use "@stamhoofd/scss/base/text-styles.scss" as *;
+@use '@stamhoofd/scss/base/variables.scss' as *;
+@use '@stamhoofd/scss/base/text-styles.scss' as *;
 
 // The boxed lists of products on the webshop page itself (BulkProductList and SingleProductList)
 @mixin product-list {

@@ -3,7 +3,7 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { RegisterCheckout } from '@stamhoofd/structures';
 import type { NavigationActions } from '../../../types/NavigationActions';
 
-import type {ViewStep, ViewStepNavigation} from '#steps/ViewStep.ts';
+import type { ViewStep, ViewStepNavigation } from '#steps/ViewStep.ts';
 
 export class FreeContributionStep implements ViewStep {
     checkout: RegisterCheckout;

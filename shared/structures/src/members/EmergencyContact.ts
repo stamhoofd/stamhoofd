@@ -97,12 +97,10 @@ export class EmergencyContact extends AutoEncoder {
         if (separatorIndex !== -1) {
             title = rest.substring(0, separatorIndex).trim();
             name = rest.substring(separatorIndex + 2).trim();
-        }
-        else if (rest.length > 0) {
+        } else if (rest.length > 0) {
             if (phone === null && this.looksLikePhone(rest)) {
                 phone = rest;
-            }
-            else {
+            } else {
                 name = rest;
             }
         }

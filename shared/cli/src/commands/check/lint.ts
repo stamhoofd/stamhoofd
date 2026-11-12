@@ -13,6 +13,7 @@ export default class CheckLint extends BaseCommand {
         'stam check lint --filter "./backend/shared/*"',
         'stam check lint --quiet',
     ];
+
     static args = {
         target: Args.string({ description: 'Package in @stamhoofd, such as mobile, or a fully scoped package name', required: false }),
     };

@@ -1,4 +1,4 @@
-import type { PushOptions} from '@browser/navigation';
+import type { PushOptions } from '@browser/navigation';
 import { usePresent } from '@browser/navigation';
 
 export type PositionableSheetOptions = {
@@ -51,12 +51,10 @@ function calculateModalPosition(event: MouseEvent, options?: PositionableSheetOp
                 const offsetBounds = offsetParent.getBoundingClientRect();
                 left -= offsetBounds.left;
                 top -= offsetBounds.top;
-            }
-            else {
+            } else {
                 top += window.scrollY;
             }
-        }
-        else {
+        } else {
             top += window.scrollY;
         }
     }

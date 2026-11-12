@@ -12,35 +12,35 @@ export function getSelectableWorkbook(_platform: Platform) {
         sheets: [
             new SelectableSheet({
                 id: 'organizations',
-                name: $t(`%wP`),
+                name: $t('%wP'),
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: $t(`%d`),
-                        description: $t(`%H0`),
+                        name: $t('%d'),
+                        description: $t('%H0'),
                         enabled: false,
                     }),
 
                     // todo: only if platform?
                     new SelectableColumn({
                         id: 'uri',
-                        name: $t(`%1O1`),
-                        description: $t(`%H1`),
+                        name: $t('%1O1'),
+                        description: $t('%H1'),
                     }),
 
                     new SelectableColumn({
                         id: 'name',
-                        name: $t(`%1Os`),
+                        name: $t('%1Os'),
                     }),
 
                     new SelectableColumn({
                         id: 'tags',
-                        name: $t(`%3G`),
+                        name: $t('%3G'),
                     }),
 
                     new SelectableColumn({
                         id: 'address',
-                        name: $t(`%Cn`),
+                        name: $t('%Cn'),
                     }),
                     new SelectableColumn({
                         id: 'website',
@@ -61,87 +61,87 @@ export function getSelectableWorkbook(_platform: Platform) {
 
             new SelectableSheet({
                 id: 'responsibilities',
-                name: $t(`%7D`),
+                name: $t('%7D'),
                 columns: [
                     new SelectableColumn({
                         id: 'organization.id',
-                        name: $t(`%d`),
-                        description: $t(`%H0`),
+                        name: $t('%d'),
+                        description: $t('%H0'),
                         enabled: false,
                     }),
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: $t(`%1O1`),
-                        description: $t(`%H1`),
+                        name: $t('%1O1'),
+                        description: $t('%H1'),
                     }),
 
                     new SelectableColumn({
                         id: 'organization.name',
-                        name: $t(`%CX`),
+                        name: $t('%CX'),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.name',
-                        name: $t(`%H2`),
+                        name: $t('%H2'),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.firstName',
-                        name: $t(`%1MT`),
+                        name: $t('%1MT'),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.lastName',
-                        name: $t(`%1MU`),
+                        name: $t('%1MU'),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.email',
-                        name: $t(`%2e`),
+                        name: $t('%2e'),
                     }),
 
                     new SelectableColumn({
                         id: 'responsibility.member.address',
-                        name: $t(`%Cn`),
+                        name: $t('%Cn'),
                     }),
                 ],
             }),
             new SelectableSheet({
                 id: 'premises',
-                name: $t(`%6c`),
+                name: $t('%6c'),
                 columns: [
                     new SelectableColumn({
                         id: 'organization.id',
-                        name: $t(`%d`),
-                        description: $t(`%H0`),
+                        name: $t('%d'),
+                        description: $t('%H0'),
                         enabled: false,
                     }),
 
                     new SelectableColumn({
                         id: 'organization.uri',
-                        name: $t(`%1O1`),
-                        description: $t(`%H1`),
+                        name: $t('%1O1'),
+                        description: $t('%H1'),
                     }),
 
                     new SelectableColumn({
                         id: 'organization.name',
-                        name: $t(`%CX`),
+                        name: $t('%CX'),
                     }),
 
                     new SelectableColumn({
                         id: 'premise.name',
-                        name: $t(`%H3`),
+                        name: $t('%H3'),
                     }),
 
                     new SelectableColumn({
                         id: 'premise.type',
-                        name: $t(`%1i`),
+                        name: $t('%1i'),
                     }),
 
                     new SelectableColumn({
                         id: 'premise.address',
-                        name: $t(`%Cn`),
+                        name: $t('%Cn'),
                     }),
                 ],
             }),

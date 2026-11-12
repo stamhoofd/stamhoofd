@@ -4,8 +4,8 @@ import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useReque
 import { DetailedPayableBalance } from '@stamhoofd/structures';
 
 export function useLoadPayableBalance() {
-        const context = useContext();
-    const owner = useRequestOwner()
+    const context = useContext();
+    const owner = useRequestOwner();
 
     // Fetch balance
     async function loadPayableBalance(sellingOrganizationId: string) {
@@ -20,5 +20,5 @@ export function useLoadPayableBalance() {
         return response.data;
     }
 
-    return loadPayableBalance
+    return loadPayableBalance;
 }

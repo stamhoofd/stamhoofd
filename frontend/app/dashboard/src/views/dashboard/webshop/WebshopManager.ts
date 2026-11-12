@@ -89,8 +89,7 @@ export class WebshopManager {
                 await fetch((progress) => {
                     part.progress = progress;
                 });
-            }
-            finally {
+            } finally {
                 part.isRunning = false;
             }
         };
@@ -158,8 +157,7 @@ export class WebshopManager {
     async updateWebshop(webshop: PrivateWebshop) {
         if (this.webshop) {
             this.webshop.deepSet(webshop);
-        }
-        else {
+        } else {
             this.webshop = webshop;
         }
 
@@ -170,8 +168,7 @@ export class WebshopManager {
 
         try {
             await this.saveToDatabase(webshop);
-        }
-        catch (e) {
+        } catch (e) {
             // could fail in some unsupported browsers
             console.error(e);
         }
@@ -234,8 +231,7 @@ export class WebshopManager {
                 if (webshop) {
                     if (this.webshop) {
                         this.webshop.set(webshop);
-                    }
-                    else {
+                    } else {
                         this.webshop = webshop;
                     }
 
@@ -245,8 +241,7 @@ export class WebshopManager {
                     }
                     return webshop;
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 // Possible no database support
                 console.error(e);
 
@@ -283,8 +278,7 @@ export class WebshopManager {
         return this.webshopFetchPromise.then((webshop: PrivateWebshop) => {
             if (this.webshop) {
                 this.webshop.set(webshop);
-            }
-            else {
+            } else {
                 this.webshop = webshop;
             }
             return webshop;
@@ -325,8 +319,7 @@ export class WebshopManager {
 
                 try {
                     order = decoder.decode(new ObjectData(rawOrder, { version: Version, medium: EncodeMedium.Database }));
-                }
-                catch (e) {
+                } catch (e) {
                     // force fetch all again
                     this.orders.apiClient.clearLastFetchedOrder().catch(console.error);
                     throw e;
@@ -363,8 +356,7 @@ export class WebshopManager {
 
             try {
                 order = decoder.decode(new ObjectData(rawOrder, { version: Version, medium: EncodeMedium.Database }));
-            }
-            catch (e) {
+            } catch (e) {
                 // force fetch all again
                 this.orders.apiClient.clearLastFetchedOrder().catch(console.error);
                 throw e;

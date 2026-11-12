@@ -145,7 +145,7 @@ const props = defineProps<{
 
 const title = $t('%3y');
 const loading = ref(false);
-const saveText = $t(`%SN`);
+const saveText = $t('%SN');
 const organization = useOrganization();
 const platform = usePlatform();
 const now = new Date();
@@ -241,7 +241,7 @@ async function save() {
                     new SimpleError({
                         code: 'invalid_field',
                         field: 'startDate',
-                        message: $t(`%10E`),
+                        message: $t('%10E'),
                     }),
                 );
             }
@@ -253,7 +253,7 @@ async function save() {
                     new SimpleError({
                         code: 'invalid_field',
                         field: 'endDate',
-                        message: $t(`%Dc`),
+                        message: $t('%Dc'),
                     }),
                 );
             }
@@ -263,7 +263,7 @@ async function save() {
                     new SimpleError({
                         code: 'invalid_field',
                         field: 'startDate',
-                        message: $t(`%15A`, {
+                        message: $t('%15A', {
                             date: Formatter.date(periodConfig.startDate),
                         }),
                     }),
@@ -275,7 +275,7 @@ async function save() {
                     new SimpleError({
                         code: 'invalid_field',
                         field: 'startDate',
-                        message: $t(`%15B`, {
+                        message: $t('%15B', {
                             date: Formatter.date(periodConfig.endDate),
                         }),
                     }),
@@ -308,7 +308,7 @@ async function save() {
                     new SimpleError({
                         code: 'invalid_field',
                         field: 'startDate',
-                        message: $t(`%15A`, {
+                        message: $t('%15A', {
                             date: Formatter.date(periodConfig.startDate),
                         }),
                     }),
@@ -320,7 +320,7 @@ async function save() {
                     new SimpleError({
                         code: 'invalid_field',
                         field: 'startDate',
-                        message: $t(`%15B`, {
+                        message: $t('%15B', {
                             date: Formatter.date(periodConfig.endDate),
                         }),
                     }),
@@ -364,7 +364,7 @@ async function save() {
 
         await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
-        Toast.success($t(`%10F`)).show();
+        Toast.success($t('%10F')).show();
         await pop({ force: true });
     } catch (e) {
         errors.errorBox = new ErrorBox(e);
@@ -405,7 +405,7 @@ function getTypePriceNormalPrice(type: PlatformMembershipType) {
 function getPriceForDate(type: PlatformMembershipType, date: Date) {
     const periodConfig = type.periods.get(props.period.id);
     if (!periodConfig) {
-        return $t(`%10G`);
+        return $t('%10G');
     }
 
     if (
@@ -418,7 +418,7 @@ function getPriceForDate(type: PlatformMembershipType, date: Date) {
     const priceConfig = periodConfig.getPriceConfigForDate(date);
 
     if (type.behaviour === PlatformMembershipTypeBehaviour.Days) {
-        return Formatter.price(priceConfig.pricePerDay) + ' ' + $t(`%I8`);
+        return Formatter.price(priceConfig.pricePerDay) + ' ' + $t('%I8');
     }
 
     const tagIds = selectedOrganization.value?.meta.tags ?? [];

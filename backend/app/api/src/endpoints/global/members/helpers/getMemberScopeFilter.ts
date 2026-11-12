@@ -100,7 +100,7 @@ export async function getMemberScopeFilter(permissionLevel: PermissionLevel = Pe
     if (filters.length === 0) {
         throw Context.auth.error({
             message: 'You must filter on a group of the organization you are trying to access',
-            human: $t(`%15d`),
+            human: $t('%15d'),
         });
     }
 

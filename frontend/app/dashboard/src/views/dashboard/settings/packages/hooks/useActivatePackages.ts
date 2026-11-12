@@ -4,10 +4,10 @@ import { useCheckoutOrganizationCheckout } from './useCheckoutOrganizationChecko
 
 export function useActivatePackages() {
     const doCheckout = useCheckoutOrganizationCheckout();
-    const platform = usePlatform()
+    const platform = usePlatform();
 
-    async function activatePackages(checkout: OrganizationCheckout, options?: {shouldRetry?: boolean, owner?: any}) {
-        return await doCheckout(platform.value.membershipOrganizationId!, checkout, options)
+    async function activatePackages(checkout: OrganizationCheckout, options?: { shouldRetry?: boolean; owner?: any }) {
+        return await doCheckout(platform.value.membershipOrganizationId!, checkout, options);
     }
 
     return activatePackages;

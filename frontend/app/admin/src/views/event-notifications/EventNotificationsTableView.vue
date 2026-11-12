@@ -198,7 +198,7 @@ async function openMail(selection: TableActionSelection<EventNotification>) {
         throw new SimpleError({
             code: 'not_implemented',
             message: 'Not implemented',
-            human: $t(`%Ga`),
+            human: $t('%Ga'),
         });
     }
 
@@ -234,7 +234,7 @@ async function exportToExcel(selection: TableActionSelection<ObjectType>) {
 }
 
 actions.push(new AsyncTableAction({
-    name: $t(`%Gb`),
+    name: $t('%Gb'),
     icon: 'send',
     priority: 12,
     groupIndex: 3,
@@ -245,7 +245,7 @@ actions.push(new AsyncTableAction({
 
 actions.push(
     new AsyncTableAction({
-        name: $t(`%Gc`),
+        name: $t('%Gc'),
         icon: 'download',
         priority: 11,
         groupIndex: 3,

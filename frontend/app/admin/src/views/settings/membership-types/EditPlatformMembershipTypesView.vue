@@ -38,7 +38,6 @@ import { Platform, PlatformConfig, PlatformMembershipType } from '@stamhoofd/str
 import { computed, ref } from 'vue';
 import PlatformMembershipTypeRow from './components/PlatformMembershipTypeRow.vue';
 
-
 const patchPlatform = usePatchPlatform();
 const platform = usePlatform();
 const errors = useErrors();
@@ -112,10 +111,9 @@ async function save() {
                 membershipTypes: patch.value,
             }),
         }));
-        new Toast($t(`%HA`), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

@@ -11,17 +11,17 @@ import type { Platform } from '../Platform.js';
 export function uuidToName(uuid: string, platform: Platform) {
     // Look up in UUID library list
     const objectLists
-     = [
-         platform.config.premiseTypes,
-         platform.config.eventTypes,
-         platform.config.defaultAgeGroups,
-         platform.config.tags,
-         platform.config.recordsConfiguration.recordCategories,
-         platform.config.membershipTypes,
-         platform.config.responsibilities,
-         platform.privateConfig?.roles ?? [],
+        = [
+            platform.config.premiseTypes,
+            platform.config.eventTypes,
+            platform.config.defaultAgeGroups,
+            platform.config.tags,
+            platform.config.recordsConfiguration.recordCategories,
+            platform.config.membershipTypes,
+            platform.config.responsibilities,
+            platform.privateConfig?.roles ?? [],
 
-     ];
+        ];
 
     for (const list of objectLists) {
         for (const object of list) {

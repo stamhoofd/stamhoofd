@@ -89,10 +89,10 @@ async function copy() {
 
     try {
         await navigator.clipboard.writeText(link.value);
-        Toast.success($t(`%Zmk`)).show();
+        Toast.success($t('%Zmk')).show();
     } catch (e) {
         console.error(e);
-        Toast.error($t(`%Zmh`)).show();
+        Toast.error($t('%Zmh')).show();
     }
 }
 </script>

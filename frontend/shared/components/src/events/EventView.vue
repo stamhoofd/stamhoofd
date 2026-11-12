@@ -22,7 +22,8 @@
                 <EventInfoTable :event="event" :family="memberManager.family" :hide-group-status="hideGroupStatus" />
 
                 <template v-if="!$isMobile && canRegister">
-                    <hr><p class="style-button-bar right-align">
+                    <hr>
+                    <p class="style-button-bar right-align">
                         <button class="button primary" type="button" :disabled="!!differentOrganization" @click="openGroup">
                             <span>{{ $t('%XE') }}</span>
                             <span class="icon arrow-right" />
@@ -31,7 +32,8 @@
                 </template>
 
                 <template v-if="!$isMobile && webshop && webshopOrganization && !webshop.isClosed()">
-                    <hr><p class="style-button-bar right-align">
+                    <hr>
+                    <p class="style-button-bar right-align">
                         <a class="button primary" :href="'https://' + webshop.getUrl(webshopOrganization)" target="_blank">
                             <span v-if="webshop.hasTickets" class="icon ticket" />
                             <span v-if="webshop.hasTickets">{{ $t('%1AU') }}</span>
@@ -231,14 +233,14 @@ const levelPrefix = computed(() => {
             const tagNames = platform.value?.config.tags.filter(t => props.event.meta.organizationTagIds?.includes(t.id)).map(t => t.name);
             prefixes.push(...tagNames);
         } else {
-            prefixes.push($t(`%XF`));
+            prefixes.push($t('%XF'));
         }
     } else {
         // Name of the organization
         prefixes.push(groupOrganization.value?.name ?? props.event.organizationId);
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`%M1`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t('%M1') + ' ');
 });
 
 const chooseFamilyMembersForGroup = useChooseFamilyMembersForGroup();

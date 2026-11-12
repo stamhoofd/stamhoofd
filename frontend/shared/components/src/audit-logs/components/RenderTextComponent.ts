@@ -179,7 +179,7 @@ export function renderAny(obj: unknown, customRenderers?: AuditLogCustomRenderer
                         'overflow': 'hidden',
                     },
                 }),
-                obj.value || $t(`%la`),
+                obj.value || $t('%la'),
             ]);
         }
 
@@ -190,7 +190,7 @@ export function renderAny(obj: unknown, customRenderers?: AuditLogCustomRenderer
                 href: obj.id,
                 target: '_blank',
             }, [
-                obj.value || $t(`%yU`),
+                obj.value || $t('%yU'),
             ]);
         }
 
@@ -207,7 +207,7 @@ export function renderAny(obj: unknown, customRenderers?: AuditLogCustomRenderer
             if (obj.value.length < 200 && !obj.value.includes('\n')) {
                 return () => obj.value;
             }
-            const style = `padding: 0; margin: 0; font-size: 15px; line-height: 1.5; font-family: "Metropolis", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";`;
+            const style = 'padding: 0; margin: 0; font-size: 15px; line-height: 1.5; font-family: "Metropolis", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";';
             const showHtml = useShowHtml();
             return () => h('button', {
                 class: 'style-inline-resource button simple',

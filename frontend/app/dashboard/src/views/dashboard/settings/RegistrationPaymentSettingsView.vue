@@ -14,12 +14,12 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <EditPaymentMethodsBox
-            type="registration" 
-            :config="organization.meta.registrationPaymentConfiguration" 
-            :private-config="organization.privateMeta?.registrationPaymentConfiguration ?? PrivatePaymentConfiguration.create({})" 
-            :validator="errors.validator" 
-            @patch:config="addPatch({meta: OrganizationMetaData.patch({registrationPaymentConfiguration: $event})})" 
-            @patch:private-config="addPatch({privateMeta: OrganizationPrivateMetaData.patch({registrationPaymentConfiguration: $event})})" 
+            type="registration"
+            :config="organization.meta.registrationPaymentConfiguration"
+            :private-config="organization.privateMeta?.registrationPaymentConfiguration ?? PrivatePaymentConfiguration.create({})"
+            :validator="errors.validator"
+            @patch:config="addPatch({meta: OrganizationMetaData.patch({registrationPaymentConfiguration: $event})})"
+            @patch:private-config="addPatch({privateMeta: OrganizationPrivateMetaData.patch({registrationPaymentConfiguration: $event})})"
         />
     </SaveView>
 </template>
@@ -43,22 +43,22 @@ import { ref } from 'vue';
 import EditPaymentMethodsBox from '../../../components/EditPaymentMethodsBox.vue';
 
 const props = withDefaults(defineProps<{
-    isReview?: boolean
+    isReview?: boolean;
 }>(), {
     isReview: false,
 });
 
-const errors = useErrors()
+const errors = useErrors();
 const saving = ref(false);
 const setupTranslations = useSetupStepTranslations();
 const review = useReview(SetupStepType.Payment);
 const hasReviewChanges = review.hasChanges;
-const patchOrganization = usePatchOrganization()
-const dismiss = useDismiss()
+const patchOrganization = usePatchOrganization();
+const dismiss = useDismiss();
 
 const title = props.isReview ? setupTranslations.getReviewTitle(SetupStepType.Payment) : $t('%41');
-const original = useRequiredOrganization()
-const {patched: organization, patch, addPatch, hasChanges, reset} = usePatch(original)
+const original = useRequiredOrganization();
+const { patched: organization, patch, addPatch, hasChanges, reset } = usePatch(original);
 
 async function save() {
     if (saving.value) {
@@ -75,7 +75,7 @@ async function save() {
 
         if (hasChanges.value) {
             await patchOrganization(patch.value);
-            reset()
+            reset();
         }
 
         if (hasReviewChanges.value) {
@@ -84,8 +84,7 @@ async function save() {
 
         new Toast($t('%HA'), 'success green').show();
         await dismiss({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     } finally {
         saving.value = false;

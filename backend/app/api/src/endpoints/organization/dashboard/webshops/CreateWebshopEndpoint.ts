@@ -42,7 +42,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
 
         // Fast throw first (more in depth checking for patches later)
         if (!await Context.auth.canCreateWebshops(organization.id)) {
-            throw Context.auth.error($t(`%FH`));
+            throw Context.auth.error($t('%FH'));
         }
         Context.assertNotImpersonating(); // authorId would be wrong
 
@@ -107,7 +107,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid domain',
-                        human: $t(`%FN`),
+                        human: $t('%FN'),
                         field: 'customUrl',
                     });
                 }
@@ -117,7 +117,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'domain_already_used',
                         message: 'This domain is already used by another organization',
-                        human: $t(`%FM`),
+                        human: $t('%FM'),
                         statusCode: 400,
                     });
                 }
@@ -169,7 +169,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'failed_to_generate_unique_uri',
                     message: 'Failed to generate unique uri',
-                    human: $t(`%FI`),
+                    human: $t('%FI'),
                     statusCode: 500,
                 });
             }
@@ -196,7 +196,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             throw new SimpleError({
                 code: 'missing_permissions',
                 message: 'You cannot create a webshop without having full permissions on the created webshop',
-                human: $t(`%FJ`),
+                human: $t('%FJ'),
             });
         }
 
@@ -237,7 +237,7 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'failed_to_generate_unique_domainUri',
                     message: 'Failed to generate unique domainUri',
-                    human: $t(`%FI`),
+                    human: $t('%FI'),
                     statusCode: 500,
                 });
             }

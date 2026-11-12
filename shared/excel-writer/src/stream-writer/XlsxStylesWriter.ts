@@ -1,4 +1,4 @@
-import type { CellAlignmentOptions, CellStyleRequest, FontOptions, NumberFormatOptions} from '../interfaces.js';
+import type { CellAlignmentOptions, CellStyleRequest, FontOptions, NumberFormatOptions } from '../interfaces.js';
 import { XlsxBuiltInNumberFormat } from '../interfaces.js';
 import { escapeXml } from './escapeXml.js';
 import { XlsxFileWriter } from './XlsxFileWriter.js';
@@ -120,9 +120,9 @@ export class XlsxStylesWriter extends XlsxFileWriter {
     }
 
     async close() {
-        await this.write(`<?xml version="1.0" encoding="UTF-8"?>`);
+        await this.write('<?xml version="1.0" encoding="UTF-8"?>');
 
-        await this.write(`<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">`);
+        await this.write('<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">');
 
         await this.write(`<numFmts count="${this.numberFormats.length}">`);
 
@@ -130,37 +130,37 @@ export class XlsxStylesWriter extends XlsxFileWriter {
             await this.write(`<numFmt numFmtId="${escapeXml(format.id.toString())}" formatCode="${escapeXml(format.formatCode)}" />`);
         }
 
-        await this.write(`</numFmts>`);
+        await this.write('</numFmts>');
 
         await this.write(`<fonts count="${this.fonts.length}">`);
 
         for (const font of this.fonts) {
-            await this.write(`<font>`);
-            await this.write(`<name val="Aptos Narrow" />`);
+            await this.write('<font>');
+            await this.write('<name val="Aptos Narrow" />');
 
             if (font.size) {
                 await this.write(`<sz val="${escapeXml(font.size.toString())}" />`);
             }
             if (font.bold) {
-                await this.write(`<b />`);
+                await this.write('<b />');
             }
-            await this.write(`</font>`);
+            await this.write('</font>');
         }
 
-        await this.write(`</fonts>`);
+        await this.write('</fonts>');
 
-        await this.write(`<fills count="2">`);
-        await this.write(`<fill><patternFill patternType="none" /></fill>`);
-        await this.write(`<fill><patternFill patternType="gray125" /></fill>`);
-        await this.write(`</fills>`);
+        await this.write('<fills count="2">');
+        await this.write('<fill><patternFill patternType="none" /></fill>');
+        await this.write('<fill><patternFill patternType="gray125" /></fill>');
+        await this.write('</fills>');
 
-        await this.write(`<borders count="1">`);
-        await this.write(`<border><left /><right /><top /><bottom /><diagonal /></border>`);
-        await this.write(`</borders>`);
+        await this.write('<borders count="1">');
+        await this.write('<border><left /><right /><top /><bottom /><diagonal /></border>');
+        await this.write('</borders>');
 
-        await this.write(`<cellStyleXfs count="1">`);
-        await this.write(`<xf numFmtId="0" fontId="0" fillId="0" borderId="0" />`);
-        await this.write(`</cellStyleXfs>`);
+        await this.write('<cellStyleXfs count="1">');
+        await this.write('<xf numFmtId="0" fontId="0" fillId="0" borderId="0" />');
+        await this.write('</cellStyleXfs>');
 
         await this.write(`<cellXfs count="${this.cellStyles.length}">`);
 
@@ -169,7 +169,7 @@ export class XlsxStylesWriter extends XlsxFileWriter {
 
             if (style.alignment) {
                 await this.write(`<xf ${attrs}>`);
-                await this.write(`<alignment`);
+                await this.write('<alignment');
                 if (style.alignment.horizontal) {
                     await this.write(` horizontal="${style.alignment.horizontal}"`);
                 }
@@ -177,26 +177,25 @@ export class XlsxStylesWriter extends XlsxFileWriter {
                     await this.write(` vertical="${style.alignment.vertical}"`);
                 }
                 if (style.alignment.wrapText) {
-                    await this.write(` wrapText="1"`);
+                    await this.write(' wrapText="1"');
                 }
-                await this.write(` />`);
-                await this.write(`</xf>`);
-            }
-            else {
+                await this.write(' />');
+                await this.write('</xf>');
+            } else {
                 await this.write(`<xf ${attrs} />`);
             }
         }
 
-        await this.write(`</cellXfs>`);
+        await this.write('</cellXfs>');
 
-        await this.write(`<cellStyles count="1">`);
-        await this.write(`<cellStyle name="Normal" xfId="0" builtinId="0" />`);
-        await this.write(`</cellStyles>`);
+        await this.write('<cellStyles count="1">');
+        await this.write('<cellStyle name="Normal" xfId="0" builtinId="0" />');
+        await this.write('</cellStyles>');
 
-        await this.write(`<dxfs count="0" />`);
-        await this.write(`<tableStyles count="0" />`);
+        await this.write('<dxfs count="0" />');
+        await this.write('<tableStyles count="0" />');
 
-        await this.write(`</styleSheet>`);
+        await this.write('</styleSheet>');
 
         await super.close();
     }

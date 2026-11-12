@@ -120,8 +120,7 @@ async function loadResources() {
             return;
         }
         resources.value = result;
-    }
-    catch (e) {
+    } catch (e) {
         if (count !== loadCount) {
             return;
         }
@@ -161,8 +160,8 @@ const shouldNavigateAway = async () => {
         return true;
     }
     return await CenteredMessage.confirm({
-        title: $t(`%A0`),
-        confirmText: $t(`%4X`),
+        title: $t('%A0'),
+        confirmText: $t('%4X'),
     });
 };
 

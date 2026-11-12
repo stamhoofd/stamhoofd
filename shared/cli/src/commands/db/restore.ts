@@ -10,6 +10,7 @@ export default class DbRestore extends BaseCommand {
         'stam db restore',
         'stam db restore --name before-migration',
     ];
+
     static flags = {
         ...BaseCommand.instanceFlags,
         name: Flags.string({ description: 'Name of the backup to restore' }),

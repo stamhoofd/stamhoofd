@@ -43,7 +43,8 @@
                         </p>
 
                         <section v-if="!isCanceled && hasTickets && (isPaid || !isTransfer)" id="tickets" class="container" data-testid="tickets-section">
-                            <hr><h2 class="style-with-button">
+                            <hr>
+                            <h2 class="style-with-button">
                                 <div v-if="singleTicket">
                                     {{ $t('%YC') }}
                                 </div>
@@ -80,11 +81,13 @@
                                 </STList>
                             </template>
 
-                            <hr><h2>{{ $t('%YI') }}</h2>
+                            <hr>
+                            <h2>{{ $t('%YI') }}</h2>
                         </section>
 
                         <template v-else-if="hasTickets">
-                            <hr><h2 v-if="singleTicket">
+                            <hr>
+                            <h2 v-if="singleTicket">
                                 {{ $t('%YC') }}
                             </h2>
                             <h2 v-else>
@@ -112,7 +115,8 @@
                                 <span v-else>{{ $t('%YQ') }}</span>
                             </a>
 
-                            <hr><h2>{{ $t('%YI') }}</h2>
+                            <hr>
+                            <h2>{{ $t('%YI') }}</h2>
                         </template>
                         <p v-else-if="!isCanceled && !isPaid && isTransfer" class="warning-box">
                             {{ $t('%ZkU') }}
@@ -324,7 +328,8 @@
                         <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="order.data" />
 
                         <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
-                            <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
+                            <hr>
+                            <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
                                 {{ $t('%Vf') }}
                             </h2>
                             <h2 v-else-if="order.data.checkoutMethod.type === 'OnSite'">
@@ -338,7 +343,8 @@
                         </div>
 
                         <template v-if="!hasTickets || hasSingleTicket || !isPaid">
-                            <hr><p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
+                            <hr>
+                            <p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
                                 <span>{{ $t('%1MX') }} <span class="style-discount-code">{{ code.code }}</span></span>
                             </p>
 
@@ -346,7 +352,8 @@
                                 <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="false" />
                             </STList>
 
-                            <hr><PriceBreakdownBox :price-breakdown="order.data.priceBreakown" />
+                            <hr>
+                            <PriceBreakdownBox :price-breakdown="order.data.priceBreakown" />
                         </template>
                     </main>
                     <STToolbar v-if="!isCanceled && ((canShare && !hasTickets) || (!isPaid && isTransfer))" :sticky="false">

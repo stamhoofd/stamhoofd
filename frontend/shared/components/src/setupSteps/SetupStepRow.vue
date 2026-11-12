@@ -29,7 +29,7 @@ import { useSetupStepTranslations } from '#hooks/useSetupStepTranslations.ts';
 import IconContainer from '#icons/IconContainer.vue';
 import ProgressIcon from '#icons/ProgressIcon.vue';
 import STListItem from '#layout/STListItem.vue';
-import type { SetupStep} from '@stamhoofd/structures';
+import type { SetupStep } from '@stamhoofd/structures';
 import { SetupStepType } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

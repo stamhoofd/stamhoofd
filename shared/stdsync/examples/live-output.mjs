@@ -30,8 +30,7 @@ if (!process.stdout.isTTY) {
             }
             await sleep(250);
         }
-    }
-    finally {
+    } finally {
         output.done();
     }
 

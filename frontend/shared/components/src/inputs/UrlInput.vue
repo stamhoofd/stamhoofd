@@ -92,8 +92,7 @@ function validate(final: boolean, silent = false) {
                 // Remove trailing slash on root domains (because ugly)
                 autoCorrected = autoCorrected.substring(0, autoCorrected.length - 1);
             }
-        }
-        catch (e) {
+        } catch (e) {
             throw new SimpleError({
                 code: 'invalid_field',
                 field: 'url',
@@ -112,8 +111,7 @@ function validate(final: boolean, silent = false) {
             errorBox.value = null;
         }
         return true;
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         if (!silent) {
             if (isSimpleError(e) || isSimpleErrors(e)) {

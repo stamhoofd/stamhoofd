@@ -1,7 +1,7 @@
 import { ComponentWithProperties, NavigationController } from '@browser/navigation';
-import type { DisplayOptions, NavigationActions} from '../types/NavigationActions';
+import type { DisplayOptions, NavigationActions } from '../types/NavigationActions';
 import { glueNavigationActions, runDisplayOptions } from '../types/NavigationActions';
-import type {ViewStep, ViewStepNavigation} from './ViewStep';
+import type { ViewStep, ViewStepNavigation } from './ViewStep';
 
 export class ViewStepsManager implements ViewStepNavigation {
     steps: ViewStep[] = [];
@@ -27,7 +27,7 @@ export class ViewStepsManager implements ViewStepNavigation {
      */
     async saveHandler(currentStep: ViewStep | null, navigate: NavigationActions, skipping = false) {
         const nextStep = skipping ? null : this.getNextStep(currentStep);
-        console.log('next step', nextStep)
+        console.log('next step', nextStep);
         if (nextStep) {
             if (currentStep === null) {
                 return await runDisplayOptions({
@@ -43,12 +43,11 @@ export class ViewStepsManager implements ViewStepNavigation {
                     await nextStep.getComponent(this),
                 ],
             });
-        }
-        else {
+        } else {
             // Assure that if the next step uses navigate.show, while the displayoptions are 'present', and we never presented
             // any view, we map the navigate show to something like present to match the display options
             const gluedNavigate = glueNavigationActions(currentStep !== null, navigate, this.displayOptions);
-            console.log('no next step', navigate, gluedNavigate, navigate === gluedNavigate)
+            console.log('no next step', navigate, gluedNavigate, navigate === gluedNavigate);
 
             await this.finishHandler(gluedNavigate);
         }

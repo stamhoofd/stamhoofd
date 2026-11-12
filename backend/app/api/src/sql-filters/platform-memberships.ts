@@ -65,7 +65,7 @@ export const platformMembershipFilterCompilers: SQLFilterDefinitions = new Map([
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'No permissions to filter on the price of a platform membership',
-                    human: $t(`%G2`),
+                    human: $t('%G2'),
                     statusCode: 400,
                 });
             }

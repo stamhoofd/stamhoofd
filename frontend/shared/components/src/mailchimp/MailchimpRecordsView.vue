@@ -29,7 +29,8 @@
         </STList>
 
         <div v-for="group of filteredGroups" :key="group.title" class="container">
-            <hr><h2>{{ group.title }}</h2>
+            <hr>
+            <h2>{{ group.title }}</h2>
             <STList>
                 <STListItem v-for="record of group.records" :key="record.id" :selectable="!record.sensitive" :disabled="record.sensitive" element-name="label">
                     <template #left>
@@ -141,8 +142,7 @@ async function save() {
     const patch = MailchimpSettings.patch({});
     if (props.mode === 'newsletter') {
         patch.newsletterRecordId = selectedRecordId.value;
-    }
-    else {
+    } else {
         replaceIds(patch.tagRecordIds, settings.value?.tagRecordIds ?? [], selectedRecordIds.value);
     }
 
@@ -157,8 +157,7 @@ async function save() {
         });
         setSettings(response.data);
         await dismiss({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;

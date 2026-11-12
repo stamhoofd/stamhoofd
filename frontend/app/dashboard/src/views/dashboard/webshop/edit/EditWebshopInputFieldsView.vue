@@ -16,7 +16,7 @@
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
-import type { WebshopField} from '@stamhoofd/structures';
+import type { WebshopField } from '@stamhoofd/structures';
 import { PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';

@@ -98,7 +98,7 @@ export function useGlobalRoutes() {
                             });
                         } else {
                             await navigationActions.dismiss({ force: true });
-                            new CenteredMessage($t(`%Je`), $t(`%Jf`)).addCloseButton().show();
+                            new CenteredMessage($t('%Je'), $t('%Jf')).addCloseButton().show();
                         }
                     },
                 }));
@@ -127,7 +127,7 @@ export function useGlobalRoutes() {
 }
 
 async function unsubscribe(id: string, token: string, type: 'all' | 'marketing', platform: Platform) {
-    const toast = new Toast($t(`%Ib`), 'spinner').setHide(null).show();
+    const toast = new Toast($t('%Ib'), 'spinner').setHide(null).show();
 
     try {
         const response = await NetworkManager.server.request({
@@ -147,13 +147,13 @@ async function unsubscribe(id: string, token: string, type: 'all' | 'marketing',
         const fieldName = type === 'all' ? 'unsubscribedAll' : 'unsubscribedMarketing';
 
         if (details[fieldName]) {
-            if (!await CenteredMessage.confirm($t(`%Ic`), $t(`%Id`), $t(`%Ie`, { name: details.organization?.name ?? platform.config.name, email: details.email, complaintEmail: $t('%W') }))) {
+            if (!await CenteredMessage.confirm($t('%Ic'), $t('%Id'), $t('%Ie', { name: details.organization?.name ?? platform.config.name, email: details.email, complaintEmail: $t('%W') }))) {
                 return;
             }
 
             doUnsubscribe = false;
         } else {
-            if (!await CenteredMessage.confirm($t(`%If`), $t(`%Ig`), $t(`%Ih`, { name: details.organization?.name ?? platform.config.name, email: details.email }))) {
+            if (!await CenteredMessage.confirm($t('%If'), $t('%Ig'), $t('%Ih', { name: details.organization?.name ?? platform.config.name, email: details.email }))) {
                 return;
             }
             toast.show();
@@ -171,9 +171,9 @@ async function unsubscribe(id: string, token: string, type: 'all' | 'marketing',
         toast.hide();
 
         if (doUnsubscribe) {
-            new Toast($t(`%Ii`), 'success').setHide(15 * 1000).show();
+            new Toast($t('%Ii'), 'success').setHide(15 * 1000).show();
         } else {
-            new Toast($t(`%Ij`), 'success').setHide(15 * 1000).show();
+            new Toast($t('%Ij'), 'success').setHide(15 * 1000).show();
         }
     } catch (e) {
         console.error(e);

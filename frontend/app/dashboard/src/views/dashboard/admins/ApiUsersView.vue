@@ -28,7 +28,8 @@
                     </STListItem>
                 </STList>
 
-                <hr><h2>{{ $t('%K2') }}</h2>
+                <hr>
+                <h2>{{ $t('%K2') }}</h2>
 
                 <p v-if="apiUsers.length === 0" class="info-box">
                     {{ $t('%K3') }}
@@ -80,8 +81,6 @@ import { ApiUser, Permissions, UserPermissions } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 
-
-
 const context = useContext();
 const organization = useRequiredOrganization();
 const present = usePresent();
@@ -117,7 +116,7 @@ function permissionList(user: ApiUser) {
     const list: string[] = [];
     const permissions = user.permissions?.organizationPermissions.get(organization.value.id);
     if (permissions?.level === PermissionLevel.Full) {
-        list.push($t(`%uG`));
+        list.push($t('%uG'));
     }
 
     for (const role of permissions?.roles ?? []) {

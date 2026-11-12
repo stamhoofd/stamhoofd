@@ -55,14 +55,14 @@ export class VersionMiddleware implements RequestMiddleware, ResponseMiddleware 
                     code: 'client_update_required',
                     statusCode: 400,
                     message: 'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
-                    human: $t(`%G8`),
+                    human: $t('%G8'),
                 });
             } else {
                 throw new SimpleError({
                     code: 'client_update_required',
                     statusCode: 400,
                     message: 'Er is een noodzakelijke update beschikbaar. Update de app en probeer opnieuw!',
-                    human: $t(`%G9`),
+                    human: $t('%G9'),
                 });
             }
         }

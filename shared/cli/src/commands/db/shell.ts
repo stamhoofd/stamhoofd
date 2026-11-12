@@ -8,6 +8,7 @@ export default class DbShell extends BaseCommand {
         'stam db shell --env keeo',
         'stam db shell --name feature-payments',
     ];
+
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {

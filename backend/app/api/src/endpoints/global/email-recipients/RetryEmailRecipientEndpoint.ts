@@ -42,7 +42,7 @@ export class RetryEmailRecipientEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Email recipient not found',
-                human: $t(`%1GZ`),
+                human: $t('%1GZ'),
                 statusCode: 404,
             });
         }
@@ -52,7 +52,7 @@ export class RetryEmailRecipientEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Email not found',
-                human: $t(`%DR`),
+                human: $t('%DR'),
                 statusCode: 404,
             });
         }
@@ -73,7 +73,7 @@ export class RetryEmailRecipientEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'already_sent',
                 message: 'Cant retry email recipient that is already sent',
-                human: $t(`%1Ga`),
+                human: $t('%1Ga'),
                 statusCode: 400,
             });
         }

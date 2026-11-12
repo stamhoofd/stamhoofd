@@ -126,18 +126,18 @@ export class ResourcePermissions extends AutoEncoder {
         const resourceDescription = (resource: ResourceLike) => {
             const accessRights = resource.accessRights.map(a => AccessRightHelper.getDescription(a));
             if (resource.level === PermissionLevel.None) {
-                return Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' ');
+                return Formatter.joinLast(accessRights, ', ', ' ' + $t('%M1') + ' ');
             }
 
-            let prefix = $t(`%nD`);
+            let prefix = $t('%nD');
 
             if (resource.level === PermissionLevel.Write) {
-                prefix = $t(`%Rw`);
+                prefix = $t('%Rw');
             } else if (resource.level === PermissionLevel.Full) {
-                prefix = $t(`%m9`);
+                prefix = $t('%m9');
             }
 
-            return prefix + (accessRights.length > 0 ? ' ' + $t(`%nE`) + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' ') : '');
+            return prefix + (accessRights.length > 0 ? ' ' + $t('%nE') + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t('%M1') + ' ') : '');
         };
 
         for (const [type, resources] of map) {
@@ -155,21 +155,21 @@ export class ResourcePermissions extends AutoEncoder {
                 allDescriptions.push(resourceDescription(all));
 
                 if (all.level === PermissionLevel.None) {
-                    stack.push($t(`%nF`) + ' ' + name + ': ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' '));
+                    stack.push($t('%nF') + ' ' + name + ': ' + Formatter.joinLast(accessRights, ', ', ' ' + $t('%M1') + ' '));
                     continue;
                 }
 
-                let prefix = $t(`%nF`) + ' ';
-                let suffix = ' ' + $t(`%nD`);
+                let prefix = $t('%nF') + ' ';
+                let suffix = ' ' + $t('%nD');
 
                 if (all.level === PermissionLevel.Write) {
-                    suffix = ' ' + $t(`%Rw`);
+                    suffix = ' ' + $t('%Rw');
                 } else if (all.level === PermissionLevel.Full) {
-                    prefix = $t(`%nG`) + ' ';
+                    prefix = $t('%nG') + ' ';
                     suffix = '';
                 }
 
-                stack.push(prefix + name + suffix + (accessRights.length > 0 ? ' ' + $t(`%nE`) + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t(`%M1`) + ' ') : ''));
+                stack.push(prefix + name + suffix + (accessRights.length > 0 ? ' ' + $t('%nE') + ' ' + Formatter.joinLast(accessRights, ', ', ' ' + $t('%M1') + ' ') : ''));
             }
 
             const countsPer = new Map<string, { count: number; firstName: string | null }>();

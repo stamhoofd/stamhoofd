@@ -30,7 +30,8 @@
                 <slot name="list" />
             </STList>
 
-            <hr class="mail-hr"><div class="editor-container">
+            <hr class="mail-hr">
+            <div class="editor-container">
                 <editor-content v-color="primaryColor" :editor="editor" class="editor-content" />
                 <footer>
                     <slot name="footer" />
@@ -72,7 +73,8 @@
             <template #right>
                 <div class="editor-button-bar">
                     <button v-tooltip="$t('%a9')" class="button icon text-style" :class="{ 'enabled': showTextStyles }" type="button" @mousedown.stop @click.prevent="showTextStyles = !showTextStyles" />
-                    <hr><button v-if="smartVariables.length > 0" v-tooltip="$t('%aA')" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.stop />
+                    <hr>
+                    <button v-if="smartVariables.length > 0" v-tooltip="$t('%aA')" class="button icon wand" type="button" @click.prevent="showSmartVariableMenu" @mousedown.stop />
                     <button v-tooltip="$t('%aB')" class="button icon hr" type="button" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
                     <button v-tooltip="$t('%aC')" class="button icon link" type="button" :class="{ 'enabled': editor.isActive('link') }" @click.prevent="openLinkEditor()" @mousedown.stop />
                     <UploadButton :resolutions="imageResolutions" @update:model-value="insertImage" @mousedown.stop>
@@ -172,10 +174,10 @@ const props = withDefaults(
         loading: false,
         disabled: false,
         title: '',
-        saveText: () => $t(`%1Op`),
+        saveText: () => $t('%1Op'),
         saveIcon: null,
         saveIconMobile: null,
-        cancelText: () => $t(`%1Lh`),
+        cancelText: () => $t('%1Lh'),
         replacements: () => [],
         emailBlock: false,
     },
@@ -267,7 +269,7 @@ async function openLinkEditor() {
         return;
     }
     if (!editor.value.isActive('link') && editor.value.state.selection.empty) {
-        new Toast($t(`%v8`), 'info').show();
+        new Toast($t('%v8'), 'info').show();
         return;
     }
     editLink.value = editor.value.getAttributes('link')?.href ?? '';
@@ -315,7 +317,7 @@ async function saveLink() {
     }
 
     if (!isValidHttpUrl(cleanedUrl)) {
-        Toast.error($t(`%zK`)).show();
+        Toast.error($t('%zK')).show();
         return;
     }
 
@@ -359,7 +361,7 @@ async function openTextStyles(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`%v9`),
+                name: $t('%v9'),
                 icon: 'bold',
                 selected: editor.value.isActive('bold'),
                 action: () => {
@@ -368,7 +370,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%vA`),
+                name: $t('%vA'),
                 icon: 'italic',
                 selected: editor.value.isActive('italic'),
                 action: () => {
@@ -377,7 +379,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%vB`),
+                name: $t('%vB'),
                 icon: 'underline',
                 selected: editor.value.isActive('underline'),
                 action: () => {
@@ -388,7 +390,7 @@ async function openTextStyles(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`%vC`),
+                name: $t('%vC'),
                 icon: 'h1',
                 selected: editor.value.isActive('heading', { level: 1 }),
                 action: () => {
@@ -397,7 +399,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%aJ`),
+                name: $t('%aJ'),
                 icon: 'h2',
                 selected: editor.value.isActive('heading', { level: 2 }),
                 action: () => {
@@ -406,7 +408,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%vD`),
+                name: $t('%vD'),
                 icon: 'h3',
                 selected: editor.value.isActive('heading', { level: 3 }),
                 action: () => {
@@ -415,7 +417,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%vE`),
+                name: $t('%vE'),
                 icon: 'info-circle',
                 selected: editor.value.isActive('descriptiveText'),
                 action: () => {
@@ -426,7 +428,7 @@ async function openTextStyles(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`%aL`),
+                name: $t('%aL'),
                 icon: 'ul',
                 selected: editor.value.isActive('bulletList'),
                 action: () => {
@@ -435,7 +437,7 @@ async function openTextStyles(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%vF`),
+                name: $t('%vF'),
                 icon: 'ol',
                 selected: editor.value.isActive('orderedList'),
                 action: () => {

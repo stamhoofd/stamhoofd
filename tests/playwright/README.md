@@ -33,6 +33,7 @@ CI produces a mergeable Playwright blob report alongside the console output. Eac
 Keep downloaded failure artifacts in separate subdirectories under `tests/playwright/test-results`. The trace publisher searches recursively, so one aggregation job can publish all trace links and post a single PR comment without shards overwriting each other's output.
 
 ## Todo
+
 Set a fixed time. The tests should be predictable. Now the current time in tests will change depending on the date the test is run.
 
 ## Authentication
@@ -50,12 +51,12 @@ The user can be reset by calling `WorkerData.resetUser`, or `WorkderData.resetDa
 
 ## Ports and domains (running several e2e runs at once)
 
-Every worker gets a *slot*: its API/dashboard/registration/webshop ports (`6000`, `6100`, `6200`,
+Every worker gets a _slot_: its API/dashboard/registration/webshop ports (`6000`, `6100`, `6200`,
 `6300` + slot) and its domains (`playwright-<service>-<slot>.stamhoofd`) are all derived from it.
 
 A run does not start at slot 0 but reserves a block of consecutive slots, one per worker, in the
 global setup: `CaddyService.reserveRouteManifest` walks through the blocks and takes the first one
-that no other route manifest reserves *and* whose ports can all be bound. The block it settled on
+that no other route manifest reserves _and_ whose ports can all be bound. The block it settled on
 is written to a route manifest (`playwright-<instance>-<pid>`) that the CLI merges into the shared
 Caddy config, and passed to the workers through `PLAYWRIGHT_SLOT_OFFSET`. So a run started from
 another worktree, or while `stam dev` is running, gets its own ports, domains and SSO server

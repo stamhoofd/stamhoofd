@@ -70,7 +70,7 @@ export abstract class Translator implements ITranslator {
     ): string {
         const consistentWordsText
             = consistentWords && consistentWords.size > 0
-                ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n`
+                ? '\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n'
                 + JSON.stringify(Object.fromEntries(consistentWords), undefined, '  ')
                 + '\n'
                 : '';
@@ -102,7 +102,7 @@ Translate the above values of the JSON array from ${originalLocal} to ${targetLo
     ): string {
         const consistentWordsText
             = consistentWords && consistentWords.size > 0
-                ? `\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n`
+                ? '\n- Make sure certain words are translated consistently, most often we use the following words, so try to keep the following translations in sentences if the context makes sense: \n'
                 + JSON.stringify(Object.fromEntries(consistentWords), undefined, '  ')
                 + '.\n'
                 : '';

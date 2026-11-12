@@ -43,7 +43,8 @@
                             <LoginMethodButton v-if="ssoConfig" :config="ssoConfig" :provider="LoginProviderType.SSO" :fallback-text="!passwordConfig ? $t('%Qg') : $t('%Zk')" tabindex="-1" @click="startSSO(LoginProviderType.SSO)" />
                         </div>
 
-                        <hr><p class="style-description-small">
+                        <hr>
+                        <p class="style-description-small">
                             {{ $t('%Zl') }}
                         </p>
 
@@ -241,7 +242,7 @@ async function submit() {
             // await Storage.keyValue.setItem('next_url_load', '/login/34541097-44dd-4c68-885e-de4f42abae4c')
             await AppManager.shared.checkUpdates({
                 // Always load the staging build
-                customText: $t(`%v1`),
+                customText: $t('%v1'),
                 visibleDownload: true,
                 installAutomatically: true,
                 force: true,

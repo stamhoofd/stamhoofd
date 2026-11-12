@@ -59,7 +59,7 @@ export class XlsxSheetWriter extends XlsxFileWriter {
 
     async writeHeader(columnCount = 0) {
         await this.write('<?xml version="1.0" encoding="UTF-8"?>\n');
-        await this.write(`<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">`);
+        await this.write('<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">');
 
         // Sadly <cols> must be before <sheetData> - so we cant calculate the best widths on the fly
         await this.write('<cols>');
@@ -143,8 +143,7 @@ export class XlsxSheetWriter extends XlsxFileWriter {
                 if (isNaN(cell.value) || !isFinite(cell.value)) {
                     type = CellType.Error;
                     str = '#VALUE!';
-                }
-                else {
+                } else {
                     str = cell.value.toString();
                 }
                 break;

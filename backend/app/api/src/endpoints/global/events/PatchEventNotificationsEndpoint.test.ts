@@ -14,7 +14,7 @@ import { AuditLogService } from '../../../services/AuditLogService.js';
 import { PatchEventNotificationsEndpoint } from './PatchEventNotificationsEndpoint.js';
 import { SessionService } from '../../../services/SessionService.js';
 
-const baseUrl = `/event-notifications`;
+const baseUrl = '/event-notifications';
 const endpoint = new PatchEventNotificationsEndpoint();
 type EndpointType = typeof endpoint;
 type Body = EndpointType extends Endpoint<any, any, infer B, any> ? B : never;

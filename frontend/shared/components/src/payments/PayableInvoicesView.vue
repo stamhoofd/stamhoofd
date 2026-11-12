@@ -25,8 +25,8 @@ import { ArrayDecoder } from '@common/encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { DetailedPayableBalance } from '@stamhoofd/structures';
 import { Invoice } from '@stamhoofd/structures';
-import { onMounted, ref  } from 'vue';
-import type {Ref} from 'vue';
+import { onMounted, ref } from 'vue';
+import type { Ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
 import { useContext } from '#hooks/useContext.ts';
@@ -37,15 +37,15 @@ const props = defineProps<{
     item: DetailedPayableBalance;
 }>();
 
-const title = $t('%1JA')
-const invoices = ref(null) as Ref<null | Invoice[]>
+const title = $t('%1JA');
+const invoices = ref(null) as Ref<null | Invoice[]>;
 const context = useContext();
 const owner = useRequestOwner();
-const errors = useErrors()
+const errors = useErrors();
 
 onMounted(() => {
-    loadInvoices().catch(console.error)
-})
+    loadInvoices().catch(console.error);
+});
 
 // Fetch balance
 async function loadInvoices() {

@@ -56,7 +56,7 @@ const draggablePolicies = useDraggableArray(() => patched.value.config.privacy.p
 });
 const saving = ref(false);
 
-const title = $t(`%IS`);
+const title = $t('%IS');
 
 async function addPolicy() {
     const privacyPatch = PrivacySettings.patch({});
@@ -127,7 +127,7 @@ async function save() {
             return;
         }
         await patchPlatform(patch.value);
-        new Toast($t(`%HA`), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
         await pop({ force: true });
     } catch (e) {
         errors.errorBox = new ErrorBox(e);

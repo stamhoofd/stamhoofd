@@ -270,8 +270,7 @@ async function loadGroups() {
             shouldRetry: true,
         });
         groups.value = response.data.results;
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
         return;
     }
@@ -344,8 +343,7 @@ async function save() {
             await props.saveHandler(patch.value);
             await pop({ force: true });
         }
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -370,8 +368,7 @@ async function doDelete() {
         deletePatch.bundleDiscounts.addDelete(props.id);
         await props.saveHandler(OrganizationRegistrationPeriod.patch({ settings: deletePatch }));
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

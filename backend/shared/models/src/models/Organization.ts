@@ -271,7 +271,7 @@ export class Organization extends QueryableModel {
             throw new SimpleError({
                 code: 'archived',
                 message: 'This organization is archived',
-                human: $t(`%x4`),
+                human: $t('%x4'),
             });
         }
         return organization;
@@ -401,7 +401,7 @@ export class Organization extends QueryableModel {
             throw new SimpleError({
                 code: 'payment_provider_not_configured',
                 message: 'Payment provider not configured for ' + method,
-                human: $t(`%x5`),
+                human: $t('%x5'),
             });
         }
 

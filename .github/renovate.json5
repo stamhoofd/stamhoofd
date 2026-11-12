@@ -1,99 +1,93 @@
 {
-  $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  enabled: false,
+    $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+    enabled: false,
 
-  extends: [
-    "config:best-practices",
-    ":semanticCommitsDisabled"
-  ],
+    extends: ['config:best-practices', ':semanticCommitsDisabled'],
 
-  schedule: ["before 6am on monday"],
-  timezone: "Europe/Brussels",
+    schedule: ['before 6am on monday'],
+    timezone: 'Europe/Brussels',
 
-  prConcurrentLimit: 10,
-  prHourlyLimit: 0,
+    prConcurrentLimit: 10,
+    prHourlyLimit: 0,
 
-  dependencyDashboard: true,
+    dependencyDashboard: true,
 
-  // Pin to exact versions; keeps the many workspace package.json files consistent.
-  rangeStrategy: "pin",
+    // Pin to exact versions; keeps the many workspace package.json files consistent.
+    rangeStrategy: 'pin',
 
-  // Auto-merge pushes the update to a renovate/* branch and merges (squashed)
-  // once its required CI checks pass — CI runs on renovate/** for this reason.
-  automergeType: "branch",
-  automergeStrategy: "squash",
-  platformAutomerge: true,
+    // Auto-merge pushes the update to a renovate/* branch and merges (squashed)
+    // once its required CI checks pass — CI runs on renovate/** for this reason.
+    automergeType: 'branch',
+    automergeStrategy: 'squash',
+    platformAutomerge: true,
 
-  // Skip yanked / hotfixed releases by waiting 4 days, enforced strictly.
-  minimumReleaseAge: "4 days",
-  internalChecksFilter: "strict",
+    // Skip yanked / hotfixed releases by waiting 4 days, enforced strictly.
+    minimumReleaseAge: '4 days',
+    internalChecksFilter: 'strict',
 
-  prCreation: "not-pending",
-  // Keep dependency branches aligned with newly added workspace manifests.
-  rebaseWhen: "behind-base-branch",
+    prCreation: 'not-pending',
+    // Keep dependency branches aligned with newly added workspace manifests.
+    rebaseWhen: 'behind-base-branch',
 
-  postUpdateOptions: ["pnpmDedupe"],
+    postUpdateOptions: ['pnpmDedupe'],
 
-  lockFileMaintenance: {
-    enabled: true,
-    automerge: true,
-    schedule: ["before 6am on monday"],
-  },
-
-  packageRules: [
-    {
-      // The native android/ios projects (gradle deps like androidx.*, cordova)
-      // are managed by Capacitor, not hand-maintained — don't let Renovate bump
-      // them independently.
-      description: "Don't update native dependencies of the android/ios packages",
-      matchFileNames: [
-        "frontend/app/mobile/android/**",
-        "frontend/app/mobile/ios/**",
-      ],
-      enabled: false,
+    lockFileMaintenance: {
+        enabled: true,
+        automerge: true,
+        schedule: ['before 6am on monday'],
     },
-    {
-      description: "Preserve Node.js engine compatibility ranges",
-      matchDepTypes: ["engines"],
-      rangeStrategy: "widen",
-    },
-    {
-      description: "Auto-merge patch updates",
-      matchUpdateTypes: ["patch", "pin", "digest"],
-      // Skip 0.x: patch/minor bumps there can be breaking.
-      matchCurrentVersion: "!/^0/",
-      groupName: "patch dependencies",
-      automerge: true,
-    },
-    {
-      description: "Auto-merge dev dependency minor updates",
-      matchDepTypes: ["devDependencies"],
-      matchUpdateTypes: ["minor"],
-      // Skip 0.x: minor bumps there can be breaking.
-      matchCurrentVersion: "!/^0/",
-      groupName: "dev-dependencies",
-      automerge: true,
-    },
-    {
-      description: "Auto-merge production minor updates",
-      matchDepTypes: ["dependencies"],
-      matchUpdateTypes: ["minor"],
-      // Skip 0.x: minor bumps there can be breaking.
-      matchCurrentVersion: "!/^0/",
-      groupName: "production-minor",
-      automerge: true,
-    },
-    {
-      // Everything excluded from auto-merge above (major bumps, and any update on
-      // a 0.x package) still gets a normal PR — just held back for manual review.
-      description: "Require manual review for major updates",
-      matchUpdateTypes: ["major"],
-      automerge: false,
-    },
-    {
-      description: "Require manual review for 0.x updates",
-      matchCurrentVersion: "/^0/",
-      automerge: false,
-    },
-  ],
+
+    packageRules: [
+        {
+            // The native android/ios projects (gradle deps like androidx.*, cordova)
+            // are managed by Capacitor, not hand-maintained — don't let Renovate bump
+            // them independently.
+            description: "Don't update native dependencies of the android/ios packages",
+            matchFileNames: ['frontend/app/mobile/android/**', 'frontend/app/mobile/ios/**'],
+            enabled: false,
+        },
+        {
+            description: 'Preserve Node.js engine compatibility ranges',
+            matchDepTypes: ['engines'],
+            rangeStrategy: 'widen',
+        },
+        {
+            description: 'Auto-merge patch updates',
+            matchUpdateTypes: ['patch', 'pin', 'digest'],
+            // Skip 0.x: patch/minor bumps there can be breaking.
+            matchCurrentVersion: '!/^0/',
+            groupName: 'patch dependencies',
+            automerge: true,
+        },
+        {
+            description: 'Auto-merge dev dependency minor updates',
+            matchDepTypes: ['devDependencies'],
+            matchUpdateTypes: ['minor'],
+            // Skip 0.x: minor bumps there can be breaking.
+            matchCurrentVersion: '!/^0/',
+            groupName: 'dev-dependencies',
+            automerge: true,
+        },
+        {
+            description: 'Auto-merge production minor updates',
+            matchDepTypes: ['dependencies'],
+            matchUpdateTypes: ['minor'],
+            // Skip 0.x: minor bumps there can be breaking.
+            matchCurrentVersion: '!/^0/',
+            groupName: 'production-minor',
+            automerge: true,
+        },
+        {
+            // Everything excluded from auto-merge above (major bumps, and any update on
+            // a 0.x package) still gets a normal PR — just held back for manual review.
+            description: 'Require manual review for major updates',
+            matchUpdateTypes: ['major'],
+            automerge: false,
+        },
+        {
+            description: 'Require manual review for 0.x updates',
+            matchCurrentVersion: '/^0/',
+            automerge: false,
+        },
+    ],
 }

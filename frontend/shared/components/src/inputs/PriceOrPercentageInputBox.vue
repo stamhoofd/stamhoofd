@@ -24,7 +24,7 @@ import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import FloatInputBox from './FloatInputBox.vue';
 
 const props = withDefaults(defineProps<{
-     title?: string;
+    title?: string;
     errorFields?: string;
     class?: string | null;
     validator: Validator | null;
@@ -46,7 +46,7 @@ const props = withDefaults(defineProps<{
     required: true,
 });
 
-const model = defineModel<number | null>({default: null});
+const model = defineModel<number | null>({ default: null });
 
 const type = defineModel<'percentage' | 'price'>('type', {
     required: true,

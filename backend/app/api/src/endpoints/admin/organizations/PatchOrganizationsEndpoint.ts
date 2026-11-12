@@ -50,7 +50,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
 
         for (const id of request.body.getDeletes()) {
             if (!Context.auth.hasPlatformFullAccess()) {
-                throw Context.auth.error($t(`%Cw`));
+                throw Context.auth.error($t('%Cw'));
             }
 
             const organization = await Organization.getByID(id);
@@ -62,7 +62,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'cannot_delete_membership_organization',
                     message: 'Cannot delete membership organization',
-                    human: $t(`%Cx`),
+                    human: $t('%Cx'),
                 });
             }
 
@@ -129,7 +129,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Should not be empty',
-                        human: $t(`%Cz`),
+                        human: $t('%Cz'),
                         field: 'organization.name',
                     });
                 }
@@ -137,7 +137,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Field is too short',
-                    human: $t(`%D0`),
+                    human: $t('%D0'),
                     field: 'organization.name',
                 });
             }
@@ -148,7 +148,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Field is too long',
-                    human: $t(`%D1`),
+                    human: $t('%D1'),
                     field: 'organization.name',
                 });
             }
@@ -157,7 +157,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Field is too short',
-                    human: $t(`%EX`),
+                    human: $t('%EX'),
                     field: 'uri',
                 });
             }
@@ -167,7 +167,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'name_taken',
                     message: 'An organization with the same name already exists',
-                    human: $t(`%D2`),
+                    human: $t('%D2'),
                     field: 'name',
                 });
             }
@@ -178,7 +178,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
                 throw new SimpleError({
                     code: 'name_taken',
                     message: 'An organization with the same name already exists',
-                    human: $t(`%D3`),
+                    human: $t('%D3'),
                     field: 'name',
                 });
             }
@@ -192,8 +192,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             organization.uri = uri;
             if (Context.auth.hasPlatformFullAccess()) {
                 organization.meta = put.meta;
-            }
-            else {
+            } else {
                 organization.meta.tags = put.meta.tags;
             }
             organization.address = put.address;
@@ -213,8 +212,7 @@ export class PatchOrganizationsEndpoint extends Endpoint<Params, Query, Body, Re
             if (put.privateMeta) {
                 if (Context.auth.hasPlatformFullAccess()) {
                     organization.privateMeta = put.privateMeta;
-                }
-                else {
+                } else {
                     organization.privateMeta.recordAnswers = put.privateMeta.recordAnswers;
                 }
             }

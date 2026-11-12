@@ -1,6 +1,6 @@
 import type { Organization, User } from '@stamhoofd/models';
 import type {
-    Permissions} from '@stamhoofd/structures';
+    Permissions } from '@stamhoofd/structures';
 import {
     UserPermissions,
 } from '@stamhoofd/structures';

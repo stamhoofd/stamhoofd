@@ -52,7 +52,7 @@ export class RecordAnswer extends AutoEncoder {
     }
 
     get stringValue() {
-        return $t(`%Gr`);
+        return $t('%Gr');
     }
 
     get objectValue(): string | number | boolean | null | Date | object {
@@ -196,7 +196,7 @@ class PatchRecordAnswerMapDecoderStatic extends PatchMapDecoder<string, RecordAn
                 const field = addPropertyField(container.currentField, key);
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: `Patching record answers is not allowed. You should put each answer.`,
+                    message: 'Patching record answers is not allowed. You should put each answer.',
                     field: field,
                 });
             }
@@ -205,7 +205,7 @@ class PatchRecordAnswerMapDecoderStatic extends PatchMapDecoder<string, RecordAn
                 const field = addPropertyField(container.currentField, key + '.settings.id');
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: `Expected record settings id to match map key`,
+                    message: 'Expected record settings id to match map key',
                     field: field,
                 });
             }
@@ -238,7 +238,7 @@ class RecordAnswerMapDecoderStatic extends MapDecoder<string, RecordAnswer> {
                 } else {
                     throw new SimpleError({
                         code: 'invalid_field',
-                        message: `Expected record settings id to match map key`,
+                        message: 'Expected record settings id to match map key',
                         field: field,
                     });
                 }
@@ -277,7 +277,7 @@ export class RecordTextAnswer extends RecordAnswer {
         if (this.settings.required && (this.value === null || this.value.length === 0)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%qt`),
+                message: $t('%qt'),
                 field: 'input',
             });
         }
@@ -286,7 +286,7 @@ export class RecordTextAnswer extends RecordAnswer {
             if (!DataValidator.verifyBelgianNationalNumber(this.value)) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`%1RF`, { number: this.value }),
+                    message: $t('%1RF', { number: this.value }),
                     field: 'input',
                 });
             }
@@ -320,7 +320,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
     }
 
     get stringValue() {
-        return this.selected ? $t(`%BM`) : $t(`%BN`);
+        return this.selected ? $t('%BM') : $t('%BN');
     }
 
     get objectValue() {
@@ -329,7 +329,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
 
     get excelValues() {
         return [{
-            value: this.selected ? (this.comments ? this.comments : $t(`%wo`)) : $t(`%18s`),
+            value: this.selected ? (this.comments ? this.comments : $t('%wo')) : $t('%18s'),
             format: null,
         }];
     }
@@ -338,7 +338,7 @@ export class RecordCheckboxAnswer extends RecordAnswer {
         if (this.settings.required && !this.selected) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%qv`),
+                message: $t('%qv'),
                 field: 'input',
             });
         }
@@ -390,7 +390,7 @@ export class RecordMultipleChoiceAnswer extends RecordAnswer {
         if (this.settings.required && this.selectedChoices.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%qw`),
+                message: $t('%qw'),
                 field: 'input',
             });
         }
@@ -448,7 +448,7 @@ export class RecordChooseOneAnswer extends RecordAnswer {
         if (this.settings.required && this.selectedChoice === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%qx`),
+                message: $t('%qx'),
                 field: 'input',
             });
         }
@@ -475,7 +475,7 @@ export class RecordAddressAnswer extends RecordAnswer {
         if (this.settings.required && this.address === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%yw`),
+                message: $t('%yw'),
                 field: 'input',
             });
         }
@@ -527,7 +527,7 @@ export class RecordDateAnswer extends RecordAnswer {
         if (this.settings.required && this.dateValue === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%yw`),
+                message: $t('%yw'),
                 field: 'input',
             });
         }
@@ -565,7 +565,7 @@ export class RecordIntegerAnswer extends RecordAnswer {
         if (this.settings.required && (this.value === null)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%qt`),
+                message: $t('%qt'),
                 field: 'input',
             });
         }
@@ -604,7 +604,7 @@ export class RecordPriceAnswer extends RecordAnswer {
         if (this.settings.required && (this.value === null)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%qt`),
+                message: $t('%qt'),
                 field: 'input',
             });
         }
@@ -631,7 +631,7 @@ export class RecordImageAnswer extends RecordAnswer {
         if (this.settings.required && this.image === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%yw`),
+                message: $t('%yw'),
                 field: 'input',
             });
         }
@@ -662,7 +662,7 @@ export class RecordFileAnswer extends RecordAnswer {
         if (this.settings.required && this.file === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%yw`),
+                message: $t('%yw'),
                 field: 'input',
             });
         }

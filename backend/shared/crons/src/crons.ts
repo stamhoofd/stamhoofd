@@ -91,17 +91,17 @@ function areCronsRunning(): string | false {
 
 async function crons(options: { allowReadOnly: boolean; allowBeforeSeeds: boolean }) {
     if (STAMHOOFD.CRONS_DISABLED) {
-        console.error(new StyledText(`[CRONS] `).addClass('crons', 'tag'), new StyledText('Crons are disabled. Make sure to enable them in the environment variables.').addClass('error'));
+        console.error(new StyledText('[CRONS] ').addClass('crons', 'tag'), new StyledText('Crons are disabled. Make sure to enable them in the environment variables.').addClass('error'));
         return;
     }
 
     if (!options.allowReadOnly && await checkReadOnly()) {
-        console.error(new StyledText(`[CRONS] `).addClass('crons', 'tag'), new StyledText('MySQL is in read-only mode: crons are disabled.').addClass('error'));
+        console.error(new StyledText('[CRONS] ').addClass('crons', 'tag'), new StyledText('MySQL is in read-only mode: crons are disabled.').addClass('error'));
         return;
     }
 
     if (!options.allowBeforeSeeds && areSeedsNotFinished) {
-        console.error(new StyledText(`[CRONS] `).addClass('crons', 'tag'), new StyledText('Not all seeds are finished: crons are disabled.').addClass('error'));
+        console.error(new StyledText('[CRONS] ').addClass('crons', 'tag'), new StyledText('Not all seeds are finished: crons are disabled.').addClass('error'));
         return;
     }
 
@@ -127,7 +127,7 @@ async function crons(options: { allowReadOnly: boolean; allowBeforeSeeds: boolea
             await sleep(10 * 1000);
 
             if (!options.allowReadOnly && await checkReadOnly()) {
-                console.error(new StyledText(`[CRONS] `).addClass('crons', 'tag'), new StyledText('MySQL is in read-only mode: crons are interrupted.').addClass('error'));
+                console.error(new StyledText('[CRONS] ').addClass('crons', 'tag'), new StyledText('MySQL is in read-only mode: crons are interrupted.').addClass('error'));
                 return;
             }
         }

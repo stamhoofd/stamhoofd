@@ -35,8 +35,7 @@ watch(() => props.loading, (val, oldVal) => {
         setTimeout(() => {
             delayLoading.value = false;
         }, 500);
-    }
-    else if (val) {
+    } else if (val) {
         delayLoading.value = true;
     }
 });

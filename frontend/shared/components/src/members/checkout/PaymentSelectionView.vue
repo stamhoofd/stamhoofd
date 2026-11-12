@@ -93,11 +93,9 @@ async function goNext() {
 
     try {
         await props.saveHandler(navigate);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         loading.value = false;
     }
 }

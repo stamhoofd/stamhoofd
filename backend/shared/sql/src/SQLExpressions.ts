@@ -615,9 +615,9 @@ export class SQLSubQuery implements SQLExpression {
 
     getSQL(options?: SQLExpressionOptions): SQLQuery {
         return joinSQLQuery([
-            `(`,
+            '(',
             this.select.getSQL(options),
-            `)`,
+            ')',
         ]);
     }
 }

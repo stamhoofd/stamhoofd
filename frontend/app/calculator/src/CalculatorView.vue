@@ -186,8 +186,7 @@ const minimumPersons = computed(() => {
 const result = computed(() => {
     try {
         return tariffDef.calculate(input.value);
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error calculating tariff:', error);
         return null;
     }

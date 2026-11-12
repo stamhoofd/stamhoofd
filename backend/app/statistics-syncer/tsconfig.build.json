@@ -5,14 +5,6 @@
         "rootDir": ".",
         "outDir": "dist"
     },
-    "include": [
-        "./index.ts",
-        "./migrations.ts",
-        "./src",
-        "./stamhoofd.d.ts"
-    ],
-    "exclude": [
-        "./src/**/*.spec.ts",
-        "./src/**/*.test.ts"
-    ]
+    "include": ["./index.ts", "./migrations.ts", "./src", "./stamhoofd.d.ts"],
+    "exclude": ["./src/**/*.spec.ts", "./src/**/*.test.ts"]
 }

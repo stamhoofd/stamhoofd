@@ -14,11 +14,11 @@
 <script lang="ts" setup>
 
 defineProps<{
-    label?: string,
-    value?: string,
-    labelClass?: string,
-    valueClass?: string,
-    emphasizeLabel?: boolean
+    label?: string;
+    value?: string;
+    labelClass?: string;
+    valueClass?: string;
+    emphasizeLabel?: boolean;
 }>();
 </script>
 

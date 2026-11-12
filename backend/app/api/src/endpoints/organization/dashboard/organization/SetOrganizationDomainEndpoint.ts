@@ -59,7 +59,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 throw new SimpleError({
                     code: 'invalid_domain',
                     message: 'registerDomain is invalid',
-                    human: $t(`%Ec`),
+                    human: $t('%Ec'),
                     field: 'registerDomain',
                 });
             }
@@ -68,7 +68,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                 throw new SimpleError({
                     code: 'invalid_domain',
                     message: 'mailDomain is invalid',
-                    human: $t(`%Ed`),
+                    human: $t('%Ed'),
                     field: 'mailDomain',
                 });
             }
@@ -165,7 +165,7 @@ export class SetOrganizationDomainEndpoint extends Endpoint<Params, Query, Body,
                     type: DNSRecordType.TXT,
                     name: '_dmarc.' + organization.privateMeta.pendingMailDomain + '.',
                     value: 'v=DMARC1; p=quarantine; pct=100; sp=quarantine; aspf=r; adkim=r;',
-                    description: $t(`%Ee`),
+                    description: $t('%Ee'),
                     optional: true,
                 }));
             } else {

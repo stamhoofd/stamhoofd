@@ -100,7 +100,8 @@
         <PriceBreakdownBox :price-breakdown="patchedBalanceItem.priceBreakown" />
 
         <template v-if="patchedBalanceItem.relations.size === 0 && family && family.members.length >= (originalMemberId ? 2 : 1)">
-            <hr><h2>{{ $t('%1PM') }}</h2>
+            <hr>
+            <h2>{{ $t('%1PM') }}</h2>
             <p>{{ $t('%gk') }}</p>
 
             <p v-if="!memberId" class="warning-box">
@@ -137,7 +138,8 @@
         </template>
 
         <template v-if="!isNew && hasPaymentsRelation(patchedBalanceItem)">
-            <hr><h2>{{ $t('%1JH') }}</h2>
+            <hr>
+            <h2>{{ $t('%1JH') }}</h2>
             <p>{{ $t('%gm') }}</p>
 
             <p v-if="patchedBalanceItem.payments.length === 0" class="info-box">
@@ -149,7 +151,8 @@
             </STList>
 
             <template v-if="invoices.length > 0">
-                <hr><h2>{{ $t('%1JA') }}</h2>
+                <hr>
+                <h2>{{ $t('%1JA') }}</h2>
                 <p>{{ $t('%Za7') }}</p>
 
                 <STList>
@@ -251,9 +254,9 @@ loadInvoices().catch(console.error);
 
 const title = computed(() => {
     if (patchedBalanceItem.value.price < 0) {
-        return props.isNew ? $t(`%10d`) : $t(`%10e`);
+        return props.isNew ? $t('%10d') : $t('%10e');
     }
-    return props.isNew ? $t(`%1Mj`) : $t(`%1Mk`);
+    return props.isNew ? $t('%1Mj') : $t('%1Mk');
 });
 
 const sortedPayments = computed(() => {
@@ -496,7 +499,7 @@ async function markDue() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm($t(`%1Ju`), $t(`%1Jv`), $t(`%1Jw`)))) {
+    if (!(await CenteredMessage.confirm($t('%1Ju'), $t('%1Jv'), $t('%1Jw')))) {
         return;
     }
     if (loading.value) {
@@ -522,7 +525,7 @@ async function doCancel() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm($t(`%1Jx`), $t(`%1Jy`), $t(`%1Jz`)))) {
+    if (!(await CenteredMessage.confirm($t('%1Jx'), $t('%1Jy'), $t('%1Jz')))) {
         return;
     }
     if (loading.value) {
@@ -549,8 +552,8 @@ async function doDelete() {
     }
     if (!(await CenteredMessage.confirm({
         title: $t('%ZnF', { name: balanceItem.value.itemTitle }),
-        confirmText: $t(`%CJ`),
-        description: $t(`%1Fc`),
+        confirmText: $t('%CJ'),
+        description: $t('%1Fc'),
         availabilityDelay: 2_000,
     }))) {
         return;

@@ -14,11 +14,11 @@ export enum MFAMethodType {
 export function getMFAMethodTypeName(method: MFAMethodType): string {
     switch (method) {
         case MFAMethodType.TOTP:
-            return $t(`%ZgY`);
+            return $t('%ZgY');
         case MFAMethodType.Passkey:
-            return $t(`%Zhp`);
+            return $t('%Zhp');
         case MFAMethodType.RecoveryCode:
-            return $t(`%ZhI`);
+            return $t('%ZhI');
     }
 }
 

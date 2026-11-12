@@ -1,7 +1,6 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 
-
 export function useShowHtml() {
     const present = usePresent();
 
@@ -9,7 +8,7 @@ export function useShowHtml() {
         const component = new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('../SafeHtmlView.vue'), {
                 html,
-                title: $t(`%yV`),
+                title: $t('%yV'),
             }),
         });
 

@@ -11,7 +11,8 @@
 
             <STErrorsDefault :error-box="errors.errorBox" />
 
-            <hr><h2>{{ $t('%ZvU') }}</h2>
+            <hr>
+            <h2>{{ $t('%ZvU') }}</h2>
             <STCardGroup>
                 <STCard :selectable="true" :title="$t('%Zu2')" :description="settings ? $t(`%ZvN`, { account: settings.accountName, dataCenter: settings.dataCenter }) : $t('%Zuu')" data-testid="mailchimp-api-key" @click="openApiKey">
                     <template #left>
@@ -41,7 +42,8 @@
             </STCardGroup>
 
             <template v-if="settings?.audienceId && membersPackage">
-                <hr><h2>{{ $t('%1EH') }}</h2>
+                <hr>
+                <h2>{{ $t('%1EH') }}</h2>
                 <p>
                     {{ isPlatform ? $t('%Zxo', { platform: platform.config.name }) : $t('%Zvu') }}
                     <a :href="$domains.getDocs('mailchimp-leden')" class="inline-link" target="_blank" rel="noopener">{{ $t('%19t') }}</a>
@@ -90,7 +92,8 @@
             </template>
 
             <template v-if="settings?.audienceId && !isPlatform">
-                <hr><h2>{{ $t('%Zva') }}</h2>
+                <hr>
+                <h2>{{ $t('%Zva') }}</h2>
                 <STCard :title="$t('%ZxE')">
                     <template #left>
                         <IconContainer icon="basket" class="gray" />
@@ -103,7 +106,8 @@
             </template>
 
             <template v-if="syncs.length">
-                <hr><h2>{{ $t('%Zuk') }}</h2>
+                <hr>
+                <h2>{{ $t('%Zuk') }}</h2>
                 <STList>
                     <STListItem v-for="sync of syncs" :key="sync.id" :selectable="true" @click="openSync(sync)">
                         <template #left>
@@ -127,7 +131,8 @@
             </template>
 
             <template v-if="settings">
-                <hr><h2>{{ $t('%Zuv') }}</h2>
+                <hr>
+                <h2>{{ $t('%Zuv') }}</h2>
                 <p>{{ $t('%Zv0') }}</p>
                 <button class="button secundary danger" type="button" @click="disconnect">
                     <span class="icon trash" />
@@ -235,8 +240,7 @@ async function loadSyncs() {
             owner,
         });
         syncs.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         if (!Request.isAbortError(e)) {
             console.error(e);
         }
@@ -329,8 +333,7 @@ async function disconnect() {
         setSettings(null);
         syncs.value = [];
         Toast.success($t('%ZvV')).show();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }

@@ -73,8 +73,7 @@ async function save() {
         setSettings(response.data);
         Toast.success($t('%ZvX')).show();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;

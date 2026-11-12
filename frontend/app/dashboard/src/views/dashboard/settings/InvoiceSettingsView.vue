@@ -5,7 +5,7 @@
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
-        
+
         <STList>
             <CheckboxListItem v-model="useResetMonth" :label="$t('%1R0')">
                 <div v-if="resetMonth !== null" class="option">
@@ -104,7 +104,7 @@ const saving = ref(false);
 const organization = useRequiredOrganization();
 const dismiss = useDismiss();
 
-const patchOrganization = usePatchOrganization()
+const patchOrganization = usePatchOrganization();
 const { patched: patchedOrganization, patch: organizationPatch, hasChanges, addPatch, reset: resetPatch } = usePatch(organization);
 
 const resolutions = [
@@ -113,11 +113,11 @@ const resolutions = [
         width: 2480,
         fit: ResolutionFit.Outside,
     }),
-]
+];
 
 function resetTextForMonth(index: number) {
-    const d = Formatter.luxon().set({month: index, day: 1});
-    return Formatter.date(d.toJSDate(), false)
+    const d = Formatter.luxon().set({ month: index, day: 1 });
+    return Formatter.date(d.toJSDate(), false);
 }
 
 const emailCount = computed(() => forwardEmailHandlers.value.length);
@@ -128,11 +128,11 @@ const forwardOnlyVAT = computed({
         addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 invoiceSettings: OrganizationInvoiceSettings.patch({
-                    forwardOnlyVAT
-                })
-            })
-        })
-    }
+                    forwardOnlyVAT,
+                }),
+            }),
+        });
+    },
 });
 
 const background = computed({
@@ -141,11 +141,11 @@ const background = computed({
         addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 invoiceSettings: OrganizationInvoiceSettings.patch({
-                    background
-                })
-            })
-        })
-    }
+                    background,
+                }),
+            }),
+        });
+    },
 });
 
 const secondBackground = computed({
@@ -154,11 +154,11 @@ const secondBackground = computed({
         addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 invoiceSettings: OrganizationInvoiceSettings.patch({
-                    secondBackground
-                })
-            })
-        })
-    }
+                    secondBackground,
+                }),
+            }),
+        });
+    },
 });
 
 const forwardEmailHandlers = computed(() => patchedOrganization.value.privateMeta?.invoiceSettings.forwardEmailHandlers ?? []);
@@ -173,10 +173,10 @@ function setEmail(n: number, email: string) {
     addPatch({
         privateMeta: OrganizationPrivateMetaData.patch({
             invoiceSettings: OrganizationInvoiceSettings.patch({
-                forwardEmailHandlers: _forwardEmailHandlers as any
-            })
-        })
-    })
+                forwardEmailHandlers: _forwardEmailHandlers as any,
+            }),
+        }),
+    });
 }
 
 function deleteEmail(n: number) {
@@ -185,10 +185,10 @@ function deleteEmail(n: number) {
     addPatch({
         privateMeta: OrganizationPrivateMetaData.patch({
             invoiceSettings: OrganizationInvoiceSettings.patch({
-                forwardEmailHandlers: _forwardEmailHandlers as any
-            })
-        })
-    })
+                forwardEmailHandlers: _forwardEmailHandlers as any,
+            }),
+        }),
+    });
 }
 
 function addEmail(str: string) {
@@ -197,10 +197,10 @@ function addEmail(str: string) {
     addPatch({
         privateMeta: OrganizationPrivateMetaData.patch({
             invoiceSettings: OrganizationInvoiceSettings.patch({
-                forwardEmailHandlers: _forwardEmailHandlers as any
-            })
-        })
-    })
+                forwardEmailHandlers: _forwardEmailHandlers as any,
+            }),
+        }),
+    });
 }
 
 const resetMonth = computed({
@@ -209,11 +209,11 @@ const resetMonth = computed({
         addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 invoiceSettings: OrganizationInvoiceSettings.patch({
-                    resetMonth
-                })
-            })
-        })
-    }
+                    resetMonth,
+                }),
+            }),
+        });
+    },
 });
 
 const useResetMonth = computed({
@@ -229,8 +229,8 @@ const useResetMonth = computed({
         } else {
             resetMonth.value = null;
         }
-    }
-})
+    },
+});
 
 const padZeroLength = computed({
     get: () => patchedOrganization.value.privateMeta?.invoiceSettings.padZeroLength ?? 1,
@@ -238,13 +238,12 @@ const padZeroLength = computed({
         addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 invoiceSettings: OrganizationInvoiceSettings.patch({
-                    padZeroLength
-                })
-            })
-        })
-    }
+                    padZeroLength,
+                }),
+            }),
+        });
+    },
 });
-
 
 const prefixYear = computed({
     get: () => patchedOrganization.value.privateMeta?.invoiceSettings.prefixYear ?? false,
@@ -252,11 +251,11 @@ const prefixYear = computed({
         addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 invoiceSettings: OrganizationInvoiceSettings.patch({
-                    prefixYear
-                })
-            })
-        })
-    }
+                    prefixYear,
+                }),
+            }),
+        });
+    },
 });
 
 const fixedPrefix = computed({
@@ -265,11 +264,11 @@ const fixedPrefix = computed({
         addPatch({
             privateMeta: OrganizationPrivateMetaData.patch({
                 invoiceSettings: OrganizationInvoiceSettings.patch({
-                    fixedPrefix
-                })
-            })
-        })
-    }
+                    fixedPrefix,
+                }),
+            }),
+        });
+    },
 });
 
 async function save() {
@@ -283,8 +282,7 @@ async function save() {
 
     if (simpleErrors.errors.length > 0) {
         errors.errorBox = new ErrorBox(errors);
-    }
-    else {
+    } else {
         errors.errorBox = null;
         valid = true;
     }
@@ -301,8 +299,7 @@ async function save() {
         resetPatch();
         Toast.success($t('%HA')).show();
         dismiss({ force: true }).catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -314,8 +311,8 @@ async function shouldNavigateAway() {
         return true;
     }
     return await CenteredMessage.confirm({
-        title: $t('%A0'), 
-        confirmText: $t('%4X')
+        title: $t('%A0'),
+        confirmText: $t('%4X'),
     });
 }
 

@@ -58,12 +58,10 @@ async function save() {
         await saveModel(patch.value);
         if (props.saveHandler) {
             await props.saveHandler(navigationActions);
-        }
-        else {
+        } else {
             await pop({ force: true });
         }
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

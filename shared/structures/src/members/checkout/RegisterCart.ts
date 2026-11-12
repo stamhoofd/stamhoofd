@@ -294,7 +294,7 @@ export class RegisterCart {
                     errors.addError(new SimpleError({
                         code: 'duplicate_register_item',
                         message: 'duplicate register item',
-                        human: $t(`%qo`),
+                        human: $t('%qo'),
                     }));
                 }
             } catch (e) {
@@ -319,7 +319,7 @@ export class RegisterCart {
                 errors.addError(new SimpleError({
                     code: 'invalid_organization',
                     message: 'Invalid organization in balanceItems',
-                    human: $t(`%qp`),
+                    human: $t('%qp'),
                     field: 'balanceItems',
                 }));
                 continue;
@@ -348,7 +348,7 @@ export class RegisterCart {
                 errors.addError(new SimpleError({
                     code: 'invalid_organization',
                     message: 'Invalid organization in deleteRegistrations',
-                    human: $t(`%qq`),
+                    human: $t('%qq'),
                     field: 'deleteRegistrations',
                 }));
                 continue;

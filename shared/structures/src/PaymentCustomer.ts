@@ -33,14 +33,14 @@ export class PaymentCustomer extends AutoEncoder {
 
     get dynamicName() {
         if (this.company) {
-            return this.company.name || this.company.companyNumber || $t(`%ma`);
+            return this.company.name || this.company.companyNumber || $t('%ma');
         }
 
         if (this.firstName && this.lastName) {
             return `${this.firstName} ${this.lastName}`;
         }
 
-        return this.firstName || this.lastName || this.email || this.phone || $t(`%mb`);
+        return this.firstName || this.lastName || this.email || this.phone || $t('%mb');
     }
 
     get dynamicEmail() {

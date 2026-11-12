@@ -110,22 +110,22 @@ export function getBalanceItemTypeVATType(type: BalanceItemType): 'services' | '
 
 export function getBalanceItemStatusName(type: BalanceItemStatus): string {
     switch (type) {
-        case BalanceItemStatus.Hidden: return $t(`%UC`);
-        case BalanceItemStatus.Due: return $t(`%lb`);
-        case BalanceItemStatus.Canceled: return $t(`%gg`);
+        case BalanceItemStatus.Hidden: return $t('%UC');
+        case BalanceItemStatus.Due: return $t('%lb');
+        case BalanceItemStatus.Canceled: return $t('%gg');
     }
 }
 
 export function getBalanceItemTypeName(type: BalanceItemType): string {
     switch (type) {
-        case BalanceItemType.Registration: return $t(`%lc`);
-        case BalanceItemType.AdministrationFee: return $t(`%xK`);
-        case BalanceItemType.FreeContribution: return $t(`%Ot`);
-        case BalanceItemType.Order: return $t(`%ld`);
-        case BalanceItemType.Other: return $t(`%1JG`);
-        case BalanceItemType.PlatformMembership: return $t(`%1Ny`);
-        case BalanceItemType.CancellationFee: return $t(`%17G`);
-        case BalanceItemType.RegistrationBundleDiscount: return $t(`%16L`);
+        case BalanceItemType.Registration: return $t('%lc');
+        case BalanceItemType.AdministrationFee: return $t('%xK');
+        case BalanceItemType.FreeContribution: return $t('%Ot');
+        case BalanceItemType.Order: return $t('%ld');
+        case BalanceItemType.Other: return $t('%1JG');
+        case BalanceItemType.PlatformMembership: return $t('%1Ny');
+        case BalanceItemType.CancellationFee: return $t('%17G');
+        case BalanceItemType.RegistrationBundleDiscount: return $t('%16L');
         case BalanceItemType.STPackage: return $t('%1Ms');
         case BalanceItemType.ServiceFee: return $t('%1UX');
         case BalanceItemType.TransferFee: return $t('%wZ');
@@ -168,35 +168,35 @@ export enum BalanceItemRelationType {
 
 export function getBalanceItemRelationTypeName(type: BalanceItemRelationType): string {
     switch (type) {
-        case BalanceItemRelationType.Webshop: return $t(`%2N`);
-        case BalanceItemRelationType.Group: return $t(`%lc`);
-        case BalanceItemRelationType.GroupPrice: return $t(`%62`);
-        case BalanceItemRelationType.GroupOptionMenu: return $t(`%Tb`);
-        case BalanceItemRelationType.GroupOption: return $t(`%TE`);
-        case BalanceItemRelationType.Member: return $t(`%1PM`);
+        case BalanceItemRelationType.Webshop: return $t('%2N');
+        case BalanceItemRelationType.Group: return $t('%lc');
+        case BalanceItemRelationType.GroupPrice: return $t('%62');
+        case BalanceItemRelationType.GroupOptionMenu: return $t('%Tb');
+        case BalanceItemRelationType.GroupOption: return $t('%TE');
+        case BalanceItemRelationType.Member: return $t('%1PM');
         case BalanceItemRelationType.MembershipType: return $t('%Zd6');
         case BalanceItemRelationType.RegistrationPeriod: return $t('%7Z');
-        case BalanceItemRelationType.Discount: return $t(`%176`);
-        case BalanceItemRelationType.STPackage: return $t(`%1Ms`);
-        case BalanceItemRelationType.STPricingType: return $t(`%1YH`);
-        case BalanceItemRelationType.PaymentProvider: return $t(`%wX`);
+        case BalanceItemRelationType.Discount: return $t('%176');
+        case BalanceItemRelationType.STPackage: return $t('%1Ms');
+        case BalanceItemRelationType.STPricingType: return $t('%1YH');
+        case BalanceItemRelationType.PaymentProvider: return $t('%wX');
     }
 }
 
 export function getBalanceItemRelationTypeDescription(type: BalanceItemRelationType): string {
     switch (type) {
-        case BalanceItemRelationType.Webshop: return $t(`%le`);
-        case BalanceItemRelationType.Group: return $t(`%lf`);
-        case BalanceItemRelationType.GroupPrice: return $t(`%lg`);
-        case BalanceItemRelationType.GroupOptionMenu: return $t(`%lh`);
-        case BalanceItemRelationType.GroupOption: return $t(`%li`);
-        case BalanceItemRelationType.Member: return $t(`%lj`);
+        case BalanceItemRelationType.Webshop: return $t('%le');
+        case BalanceItemRelationType.Group: return $t('%lf');
+        case BalanceItemRelationType.GroupPrice: return $t('%lg');
+        case BalanceItemRelationType.GroupOptionMenu: return $t('%lh');
+        case BalanceItemRelationType.GroupOption: return $t('%li');
+        case BalanceItemRelationType.Member: return $t('%lj');
         case BalanceItemRelationType.MembershipType: return $t('%Zd5');
         case BalanceItemRelationType.RegistrationPeriod: return $t('%Zbp');
-        case BalanceItemRelationType.Discount: return $t(`%177`);
-        case BalanceItemRelationType.STPackage: return $t(`%1Mv`);
-        case BalanceItemRelationType.STPricingType: return $t(`%1Xo`);
-        case BalanceItemRelationType.PaymentProvider: return $t(`%1bJ`);
+        case BalanceItemRelationType.Discount: return $t('%177');
+        case BalanceItemRelationType.STPackage: return $t('%1Mv');
+        case BalanceItemRelationType.STPricingType: return $t('%1Xo');
+        case BalanceItemRelationType.PaymentProvider: return $t('%1bJ');
     }
 }
 
@@ -778,10 +778,10 @@ export class BalanceItem extends AutoEncoder {
         switch (this.type) {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
-                const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t(`%lk`);
+                const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t('%lk');
 
                 if (option) {
-                    return $t(`%ll`) + ' ' + group;
+                    return $t('%ll') + ' ' + group;
                 }
 
                 const member = this.relations.get(BalanceItemRelationType.Member);
@@ -789,7 +789,7 @@ export class BalanceItem extends AutoEncoder {
                     return $t('%1Mt', { name: member.name, group });
                 }
 
-                return $t(`%lm`) + ' ' + group;
+                return $t('%lm') + ' ' + group;
             }
 
             case BalanceItemType.RegistrationBundleDiscount: {
@@ -803,18 +803,18 @@ export class BalanceItem extends AutoEncoder {
 
                 if (group) {
                     if (option) {
-                        return $t(`%ln`) + ' ' + group;
+                        return $t('%ln') + ' ' + group;
                     }
 
-                    return $t(`%lo`) + ' ' + group;
+                    return $t('%lo') + ' ' + group;
                 }
-                return $t(`%lp`);
+                return $t('%lp');
             }
-            case BalanceItemType.AdministrationFee: return $t(`%lq`);
-            case BalanceItemType.FreeContribution: return $t(`%lr`);
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`%ls`);
+            case BalanceItemType.AdministrationFee: return $t('%lq');
+            case BalanceItemType.FreeContribution: return $t('%lr');
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t('%ls');
             case BalanceItemType.Other: return this.name;
-            case BalanceItemType.PlatformMembership: return $t(`%lt`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t(`%lu`);
+            case BalanceItemType.PlatformMembership: return $t('%lt') + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name || $t('%lu');
             case BalanceItemType.STPackage: return this.itemTitle;
             case BalanceItemType.ServiceFee: return $t('%1dA');
             case BalanceItemType.TransferFee: return $t('%1Wb');
@@ -828,18 +828,18 @@ export class BalanceItem extends AutoEncoder {
     get category(): string {
         switch (this.type) {
             case BalanceItemType.Registration: {
-                return this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? $t(`%lv`);
+                return this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? $t('%lv');
             }
             case BalanceItemType.RegistrationBundleDiscount: {
                 const discount = this.relations.get(BalanceItemRelationType.Discount);
                 return discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
             }
-            case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`%lw`);
-            case BalanceItemType.AdministrationFee: return $t(`%lq`);
-            case BalanceItemType.FreeContribution: return $t(`%lr`);
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? $t(`%ls`);
+            case BalanceItemType.CancellationFee: return this.relations.get(BalanceItemRelationType.Group)?.name.toString() ?? this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t('%lw');
+            case BalanceItemType.AdministrationFee: return $t('%lq');
+            case BalanceItemType.FreeContribution: return $t('%lr');
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() ?? $t('%ls');
             case BalanceItemType.Other: return this.name;
-            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t(`%BV`);
+            case BalanceItemType.PlatformMembership: return this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() ?? $t('%BV');
             case BalanceItemType.STPackage: return $t('%1Mu');
             case BalanceItemType.ServiceFee: return $t('%1dA');
             case BalanceItemType.TransferFee: return $t('%1Wb');
@@ -978,8 +978,8 @@ export class BalanceItem extends AutoEncoder {
             case BalanceItemType.Registration: {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 if (option) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`%lk`);
-                    return $t(`%lx`) + ' ' + group;
+                    const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t('%lk');
+                    return $t('%lx') + ' ' + group;
                 }
                 break;
             }
@@ -1000,11 +1000,11 @@ export class BalanceItem extends AutoEncoder {
     get priceBreakown(): PriceBreakdown {
         const all = [
             {
-                name: $t(`%ly`),
+                name: $t('%ly'),
                 price: this.pricePaid,
             },
             {
-                name: $t(`%1OL`),
+                name: $t('%1OL'),
                 price: this.pricePending,
             },
         ].filter(a => a.price !== 0);
@@ -1012,19 +1012,19 @@ export class BalanceItem extends AutoEncoder {
         if (this.VATPercentage) {
             // Add VAT
             all.unshift({
-                name: $t(`%1I8`),
+                name: $t('%1I8'),
                 price: this.priceWithoutVAT,
             }, {
-                name: $t(`%1I9`),
+                name: $t('%1I9'),
                 price: this.VAT,
             },
             {
-                name: $t(`%1IA`),
+                name: $t('%1IA'),
                 price: this.priceWithVAT,
             });
         } else if (all.length > 0) {
             all.unshift({
-                name: $t(`%lz`),
+                name: $t('%lz'),
                 price: this.priceWithVAT,
             });
         }
@@ -1032,7 +1032,7 @@ export class BalanceItem extends AutoEncoder {
         return [
             ...all,
             {
-                name: this.priceOpen < 0 ? $t(`%10b`) : $t(`%m0`),
+                name: this.priceOpen < 0 ? $t('%10b') : $t('%m0'),
                 price: Math.abs(this.priceOpen),
             },
         ];
@@ -1075,11 +1075,11 @@ export class BalanceItem extends AutoEncoder {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 if (option) {
                     const optionMenu = this.relations.get(BalanceItemRelationType.GroupOptionMenu);
-                    return (optionMenu?.name ?? $t(`%Gr`)) + ': ' + option.name;
+                    return (optionMenu?.name ?? $t('%Gr')) + ': ' + option.name;
                 }
-                const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t(`%lk`);
+                const group = this.relations.get(BalanceItemRelationType.Group)?.name || $t('%lk');
                 const price = this.relations.get(BalanceItemRelationType.GroupPrice)?.name.toString();
-                return $t(`%m1`) + ' ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
+                return $t('%m1') + ' ' + group + (price && price !== 'Standaardtarief' ? ' (' + price + ')' : '');
             }
             case BalanceItemType.RegistrationBundleDiscount: {
                 const discount = this.relations.get(BalanceItemRelationType.Discount);
@@ -1090,14 +1090,14 @@ export class BalanceItem extends AutoEncoder {
                 }
                 return discount?.name.toString() || getBalanceItemTypeName(BalanceItemType.RegistrationBundleDiscount);
             }
-            case BalanceItemType.CancellationFee: return $t(`%17G`);
+            case BalanceItemType.CancellationFee: return $t('%17G');
             case BalanceItemType.AdministrationFee: {
-                return this.name || $t(`%xK`);
+                return this.name || $t('%xK');
             }
-            case BalanceItemType.FreeContribution: return $t(`%Ot`);
-            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t(`%m2`);
+            case BalanceItemType.FreeContribution: return $t('%Ot');
+            case BalanceItemType.Order: return this.relations.get(BalanceItemRelationType.Webshop)?.name.toString() || $t('%m2');
             case BalanceItemType.Other: return this.name;
-            case BalanceItemType.PlatformMembership: return $t(`%m3`) + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() || $t(`%m4`);
+            case BalanceItemType.PlatformMembership: return $t('%m3') + ' ' + this.relations.get(BalanceItemRelationType.MembershipType)?.name.toString() || $t('%m4');
             case BalanceItemType.STPackage: {
                 const pack = this.relations.get(BalanceItemRelationType.STPackage);
                 return pack?.name.toString() || getBalanceItemTypeName(BalanceItemType.STPackage);
@@ -1107,14 +1107,14 @@ export class BalanceItem extends AutoEncoder {
                     return $t('%1UX');
                 }
                 const day = getFeeDay(this.startDate, this.endDate);
-                return day ? $t(`%1cJ`, { date: day }) : $t(`%1Z1`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) });
+                return day ? $t('%1cJ', { date: day }) : $t('%1Z1', { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) });
             }
             case BalanceItemType.TransferFee: {
                 if (!this.startDate || !this.endDate) {
                     return $t('%wZ');
                 }
                 const day = getFeeDay(this.startDate, this.endDate);
-                return day ? $t(`%1Yq`, { date: day }) : $t(`%1bd`, { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) });
+                return day ? $t('%1Yq', { date: day }) : $t('%1bd', { startDate: Formatter.startDate(this.startDate, false, true), endDate: Formatter.endDate(this.endDate, false, true) });
             }
         }
         return this.name;
@@ -1129,8 +1129,8 @@ export class BalanceItem extends AutoEncoder {
                 const option = this.relations.get(BalanceItemRelationType.GroupOption);
                 const descriptions: string[] = [];
                 if (option) {
-                    const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t(`%lk`);
-                    descriptions.push($t(`%lx`) + ' ' + group);
+                    const group = this.relations.get(BalanceItemRelationType.Group)?.name.toString() || $t('%lk');
+                    descriptions.push($t('%lx') + ' ' + group);
                 }
                 const member = this.relations.get(BalanceItemRelationType.Member);
                 if (member) {
@@ -1150,7 +1150,7 @@ export class BalanceItem extends AutoEncoder {
                 }
                 const group = this.relations.get(BalanceItemRelationType.Group);
                 if (group) {
-                    descriptions.push($t(`%m1`) + ' ' + group.name);
+                    descriptions.push($t('%m1') + ' ' + group.name);
                 }
                 const period = this.relations.get(BalanceItemRelationType.RegistrationPeriod);
                 if (period) {
@@ -1186,8 +1186,8 @@ export class BalanceItem extends AutoEncoder {
                 const base = this.startDate && this.endDate
                     ? (
                             Formatter.dateIso(this.startDate) !== Formatter.dateIso(this.endDate)
-                                ? $t(`%1c2`, { startDate: Formatter.date(this.startDate), endDate: Formatter.date(this.endDate) })
-                                : $t(`%Zg1`, { date: Formatter.date(this.startDate) }))
+                                ? $t('%1c2', { startDate: Formatter.date(this.startDate), endDate: Formatter.date(this.endDate) })
+                                : $t('%Zg1', { date: Formatter.date(this.startDate) }))
                     : null;
 
                 if (base) {
@@ -1238,7 +1238,7 @@ export class BalanceItem extends AutoEncoder {
         }
 
         let str = '';
-        str += `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
+        str += '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
 
         for (const item of grouped) {
             let prefix = '';
@@ -1254,12 +1254,12 @@ export class BalanceItem extends AutoEncoder {
                     prefixClass = 'error';
                 }
             } else if (item.status === BalanceItemStatus.Canceled) {
-                prefix = $t(`%gg`);
+                prefix = $t('%gg');
                 prefixClass = 'error';
             } else if (item.priceOpen < 0 && item.pricePaid > item.payablePriceWithVAT && item.pricePaid > 0) {
-                prefix = $t(`%gh`);
+                prefix = $t('%gh');
             } else if (item.priceOpen < 0) {
-                prefix = $t(`%10a`);
+                prefix = $t('%10a');
             }
 
             if (!item.isDue) {
@@ -1270,26 +1270,26 @@ export class BalanceItem extends AutoEncoder {
 
             if (item.payablePriceWithVAT === item.amount * item.unitPrice) {
                 if (description) {
-                    description += `\n`;
+                    description += '\n';
                 }
                 description += `${Formatter.escapeHtml(Formatter.float(item.amount))} x ${Formatter.escapeHtml(Formatter.price(item.unitPrice))}`;
             } else {
                 if (description) {
-                    description += `\n`;
+                    description += '\n';
                 }
                 description += `<span class="email-style-discount-old-price">${Formatter.escapeHtml(Formatter.float(item.amount))} x ${Formatter.escapeHtml(Formatter.price(item.unitPrice))}</span><span class="email-style-discount-price">${Formatter.escapeHtml(Formatter.price(item.payablePriceWithVAT))}</span>`;
             }
 
             if (item.pricePaid !== 0 && item.pricePaid !== (item.amount * item.unitPrice)) {
                 if (description) {
-                    description += `\n`;
+                    description += '\n';
                 }
                 description += `Betaald: ${Formatter.price(item.pricePaid)}`;
             }
 
             if (item.pricePending !== 0) {
                 if (description) {
-                    description += `\n`;
+                    description += '\n';
                 }
                 description += `In verwerking: ${Formatter.price(item.pricePending)}`;
             }

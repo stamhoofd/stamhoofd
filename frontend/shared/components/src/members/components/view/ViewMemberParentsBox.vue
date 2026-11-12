@@ -9,11 +9,11 @@ import type { PlatformMember } from '@stamhoofd/structures';
 import ViewMemberParentBox from './ViewMemberParentBox.vue';
 
 defineOptions({
-    inheritAttrs: false
-})
+    inheritAttrs: false,
+});
 
 defineProps<{
-    member: PlatformMember
-}>()
+    member: PlatformMember;
+}>();
 
 </script>

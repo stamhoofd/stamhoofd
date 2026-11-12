@@ -1,6 +1,6 @@
-@use "../base/variables" as *;
-@use "../base/text-styles" as *;
-@use "./modal.scss" as *;
+@use '../base/variables' as *;
+@use '../base/text-styles' as *;
+@use './modal.scss' as *;
 
 .modal-dynamic-size {
     @extend .modal;
@@ -11,17 +11,21 @@
     --frozen-height: 150px;
 
     .navigation-controller {
-        transition: height 0.25s cubic-bezier(0.4, 0.0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+        transition:
+            height 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+            width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         will-change: height, width;
     }
 
-
     > div:first-child {
-        transition: transform 0.3s, opacity 0.3s;
+        transition:
+            transform 0.3s,
+            opacity 0.3s;
         will-change: transform, opacity;
         max-height: var(--popup-height);
 
-        .st-view:not(.st-view .st-view), .payconiq-banner-view {
+        .st-view:not(.st-view .st-view),
+        .payconiq-banner-view {
             contain: content;
             // We set explicit widths on all views inside a sheet, so we can animate width changes
             width: min(100vw, var(--st-sheet-width, 400px));
@@ -51,7 +55,7 @@
 
     &.show-enter-from.animated,
     &.show-leave-to {
-        &>div {
+        & > div {
             transform: translate(-50%, 30vh);
         }
     }
@@ -67,10 +71,19 @@
         left: 50%;
         top: 50%;
 
-        transform: translate(-50%, -50%) translate(0, calc(var(--popup-padding-top-outside, 0px) / 2 - var(--popup-padding-bottom-outside, 0px) / 2));
+        transform: translate(-50%, -50%)
+            translate(
+                0,
+                calc(
+                    var(--popup-padding-top-outside, 0px) / 2 -
+                        var(--popup-padding-bottom-outside, 0px) / 2
+                )
+            );
         transform-origin: 50% 50%;
 
-        box-shadow: 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+        box-shadow:
+            0px 10px 60px 0px $color-overlay-shadow,
+            0px 15px 30px 0px $color-overlay-shadow;
     }
 }
 
@@ -83,12 +96,9 @@
     // --sheet-position-right: 0px;
 
     // We use an intermediate value to allow customisation of the calculation without needing the dependency
-    --popup-padding-top-full: max(
-        var(--popup-padding-top-raw), 
-        var(--sheet-position-top, 0px)
-    );
+    --popup-padding-top-full: max(var(--popup-padding-top-raw), var(--sheet-position-top, 0px));
     --popup-padding-bottom-full: max(
-        var(--popup-padding-bottom-raw), 
+        var(--popup-padding-bottom-raw),
         var(--sheet-position-bottom, 0px)
     );
 
@@ -109,7 +119,9 @@
 
         & > div:first-child {
             // Decelerated easing
-            transition: transform 0.2s cubic-bezier(0.0, 0.0, 0.2, 1), opacity 0.2s;
+            transition:
+                transform 0.2s cubic-bezier(0, 0, 0.2, 1),
+                opacity 0.2s;
         }
     }
 
@@ -120,13 +132,15 @@
 
         & > div:first-child {
             // Accelerated easing
-            transition: transform 0.2s cubic-bezier(0.4, 0.0, 1, 1), opacity 0.2s;
+            transition:
+                transform 0.2s cubic-bezier(0.4, 0, 1, 1),
+                opacity 0.2s;
         }
     }
 
     > div:first-child {
         background: $color-background;
-        
+
         --color-current-background: #{$color-background};
         --color-current-background-shade: #{$color-background-shade};
 

@@ -8,14 +8,16 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div v-for="{title: groupTitle, roles: groupRoles} in groupedResponsibilites" :key="groupTitle" class="container">
-            <hr><h2>{{ groupTitle }}</h2>
+            <hr>
+            <h2>{{ groupTitle }}</h2>
 
             <STList>
                 <ResourcePermissionRow v-for="{role, inheritedRole, patch} in groupRoles" :key="role.id" :role="role" :inherited-roles="inheritedRole ? [inheritedRole] : []" :resource="resource" :configurable-access-rights="configurableAccessRights" type="role" @patch:role="patch" />
             </STList>
         </div>
 
-        <hr><h2>{{ adminRolesTitle }}</h2>
+        <hr>
+        <h2>{{ adminRolesTitle }}</h2>
         <p>{{ resourceAdminRolesDescription }}</p>
 
         <p v-if="roles.length === 0" class="info-box">
@@ -50,7 +52,7 @@ withDefaults(
         resource: { id: string; name: string; type: PermissionsResourceType };
         configurableAccessRights?: AccessRight[] | null;
     }>(), {
-        title: () => $t(`%Ld`),
+        title: () => $t('%Ld'),
         description: '',
         configurableAccessRights: null,
     });
@@ -103,14 +105,14 @@ const groupedResponsibilites = computed(() => {
 
     if (groupedPlatformResponsibilities.length > 0) {
         groups.push({
-            title: organization.value === null ? '' : $t(`%uM`),
+            title: organization.value === null ? '' : $t('%uM'),
             roles: groupedPlatformResponsibilities,
         });
     }
 
     if (groupedOrganizationResponsibilities.length > 0) {
         groups.push({
-            title: groupedPlatformResponsibilities.length > 0 ? $t(`%109`) : $t('%7D'),
+            title: groupedPlatformResponsibilities.length > 0 ? $t('%109') : $t('%7D'),
             roles: groupedOrganizationResponsibilities,
         });
     }
@@ -166,7 +168,7 @@ function patchResponsibilityRole(patch: AutoEncoderPatchType<PermissionRoleForRe
 
 const save = async () => {
     await rawSave(async () => {
-        new Toast($t(`%HA`), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
         await pop({ force: true });
     });
 };

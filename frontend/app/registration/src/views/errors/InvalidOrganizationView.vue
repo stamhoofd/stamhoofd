@@ -12,7 +12,8 @@
             <STErrorsDefault :error-box="errorBox" />
 
             <div class="legal-footer">
-                <hr class="style-hr"><div>
+                <hr class="style-hr">
+                <div>
                     <aside>
                         <a :href="'https://'+$domains.marketing" class="inline-link secundary" target="_blank">
                             {{ $t('%5X') }}

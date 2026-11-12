@@ -18,7 +18,7 @@ export class UniqueUserService {
     static async check() {
         await logger.setContext({
             prefixes: [
-                new StyledText(`[UniqueUserService] `).addClass('unique-user-service', 'tag'),
+                new StyledText('[UniqueUserService] ').addClass('unique-user-service', 'tag'),
             ],
             tags: ['unique-user-service'],
         }, async () => {

@@ -64,8 +64,8 @@ const details = computed(() => props.member.patchedMember.details);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
-const saveText = ref($t(`%1Op`));
-const title = computed(() => !props.isNew ? `${patched.value.name || $t(`%zw`)} bewerken` : $t(`%zx`));
+const saveText = ref($t('%1Op'));
+const title = computed(() => !props.isNew ? `${patched.value.name || $t('%zw')} bewerken` : $t('%zx'));
 
 const name = computed({
     get: () => patched.value.name,
@@ -92,7 +92,7 @@ async function save() {
         if (name.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%zy`),
+                message: $t('%zy'),
                 field: 'name',
             }));
         }
@@ -100,7 +100,7 @@ async function save() {
         if (contactTitle.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%zz`),
+                message: $t('%zz'),
                 field: 'title',
             }));
         }
@@ -124,28 +124,25 @@ async function save() {
             const minorMembers = props.member.family.members.filter(m => m.id !== props.member.id);
 
             if (minorMembers.length > 0 && !await CenteredMessage.confirm(
-                $t(`%100`),
-                $t(`%101`),
-                $t(`%152`, { memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`%M1`) + ' ') }),
-                $t(`%zT`),
+                $t('%100'),
+                $t('%101'),
+                $t('%152', { memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t('%M1') + ' ') }),
+                $t('%zT'),
                 false)
             ) {
                 props.member.addEmergencyContact(patched.value);
-            }
-            else {
+            } else {
                 props.member.addEmergencyContact(patched.value);
                 for (const member of minorMembers) {
                     member.addEmergencyContact(patched.value);
                 }
             }
-        }
-        else {
+        } else {
             props.member.patchEmergencyContact(patch.value);
         }
 
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading.value = false;
@@ -155,7 +152,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 }
 
 defineExpose({

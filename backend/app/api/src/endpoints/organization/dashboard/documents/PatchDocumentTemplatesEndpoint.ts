@@ -70,7 +70,7 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
         for (const patch of request.body.getPatches()) {
             const template = await DocumentTemplate.getByID(patch.id);
             if (!template || !await Context.auth.canAccessDocumentTemplate(template, PermissionLevel.Full)) {
-                throw Context.auth.notFoundOrNoAccess($t(`%EP`));
+                throw Context.auth.notFoundOrNoAccess($t('%EP'));
             }
 
             let shouldCheckIfAlreadyHasFiscalDocument = false;
@@ -138,7 +138,7 @@ export class PatchDocumentTemplatesEndpoint extends Endpoint<Params, Query, Body
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Template not found',
-                    human: $t(`%EQ`),
+                    human: $t('%EQ'),
                 });
             }
 

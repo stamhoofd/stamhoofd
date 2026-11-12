@@ -129,7 +129,7 @@ useValidation(errors.validator, () => {
     if (parents.value.length === 0 && isPropertyRequired('parents')) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%107`),
+            message: $t('%107'),
             field: 'parents',
         }));
     }

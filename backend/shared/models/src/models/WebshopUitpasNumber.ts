@@ -62,8 +62,7 @@ export class WebshopUitpasNumber extends QueryableModel {
 
         if (uitpasEventUrl) {
             query = query.andWhere(SQL.where('productId', productId).or('uitpasEventUrl', uitpasEventUrl));
-        }
-        else {
+        } else {
             query = query.andWhere('productId', productId);
         }
 

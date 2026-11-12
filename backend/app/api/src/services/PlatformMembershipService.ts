@@ -482,7 +482,7 @@ export class PlatformMembershipService {
             throw new SimpleError({
                 code: 'invalid_membership_type',
                 message: 'Unknown membership type',
-                human: $t(`%GM`),
+                human: $t('%GM'),
             });
         }
 
@@ -492,7 +492,7 @@ export class PlatformMembershipService {
             throw new SimpleError({
                 code: 'period_unavailable',
                 message: 'Membership not available for this period',
-                human: $t(`%GN`),
+                human: $t('%GN'),
             });
         }
 
@@ -595,7 +595,7 @@ export class PlatformMembershipService {
             throw new SimpleError({
                 code: 'invalid_membership_type',
                 message: 'Unknown membership type',
-                human: $t(`%GM`),
+                human: $t('%GM'),
             });
         }
 
@@ -605,7 +605,7 @@ export class PlatformMembershipService {
             throw new SimpleError({
                 code: 'period_unavailable',
                 message: 'Membership not available for this period',
-                human: $t(`%GN`),
+                human: $t('%GN'),
             });
         }
 
@@ -615,7 +615,7 @@ export class PlatformMembershipService {
                 // todo
                 code: 'not_found',
                 message: 'Organization not found',
-                human: $t(`%GO`),
+                human: $t('%GO'),
             });
         }
 

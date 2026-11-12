@@ -59,7 +59,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         const editUser = request.body.id === user.id ? user : await User.getByID(request.body.id);
 
         if (!editUser || !await Context.auth.canAccessUser(editUser, PermissionLevel.Write) || editUser.isApiUser) {
-            throw Context.auth.notFoundOrNoAccess($t(`%DE`));
+            throw Context.auth.notFoundOrNoAccess($t('%DE'));
         }
 
         if (await Context.auth.canEditUserName(editUser)) {
@@ -101,7 +101,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             if (!await Context.auth.canAccessUser(editUser, PermissionLevel.Full)) {
                 throw new SimpleError({
                     code: 'permission_denied',
-                    message: $t(`%DF`),
+                    message: $t('%DF'),
                 });
             }
 
@@ -119,7 +119,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     if (editUser.id === user.id && (!editUser.permissions || !editUser.permissions.forOrganization(organization, platform, editUser.email, { inheritFromPlatform: false })?.hasFullAccess()) && STAMHOOFD.environment !== 'development') {
                         throw new SimpleError({
                             code: 'permission_denied',
-                            message: $t(`%DG`),
+                            message: $t('%DG'),
                         });
                     }
                 } else {
@@ -141,7 +141,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     if (editUser.id === user.id && !editUser.permissions?.forPlatform(platform, editUser.email)?.hasFullAccess() && STAMHOOFD.environment !== 'development') {
                         throw new SimpleError({
                             code: 'permission_denied',
-                            message: $t(`%DG`),
+                            message: $t('%DG'),
                         });
                     }
                 }
@@ -164,7 +164,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                             throw new SimpleError({
                                 code: 'invalid_request',
                                 message: 'You cannot remove the last login provider',
-                                human: $t(`%DH`),
+                                human: $t('%DH'),
                                 statusCode: 400,
                             });
                         }
@@ -187,7 +187,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     throw new SimpleError({
                         code: 'not_supported',
                         message: 'This platform does not support password login',
-                        human: $t(`%D7`),
+                        human: $t('%D7'),
                         statusCode: 400,
                     });
                 }
@@ -196,7 +196,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     throw new SimpleError({
                         code: 'not_supported',
                         message: 'Login method not supported',
-                        human: $t(`%DD`),
+                        human: $t('%DD'),
                         statusCode: 400,
                     });
                 }
@@ -217,7 +217,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                     throw new SimpleError({
                         code: 'invalid_request',
                         message: 'You cannot remove the last login provider',
-                        human: $t(`%DI`),
+                        human: $t('%DI'),
                         statusCode: 400,
                     });
                 }
@@ -242,7 +242,7 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 throw new SimpleError({
                     code: 'verify_email_link',
                     message: 'Your email address needs verification via the link in the email',
-                    human: $t(`%DJ`),
+                    human: $t('%DJ'),
                     statusCode: 403,
                 });
             }

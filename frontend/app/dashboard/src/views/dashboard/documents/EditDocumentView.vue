@@ -15,7 +15,8 @@
         </STInputBox>
 
         <div v-for="category of fieldCategories" :key="category.id" class="container">
-            <hr><h2>{{ category.name }}</h2>
+            <hr>
+            <h2>{{ category.name }}</h2>
             <p v-if="category.description" class="style-description pre-wrap" v-text="category.description" />
 
             <!-- todo: should records be filtered? -->
@@ -38,9 +39,9 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
-import type { DocumentTemplatePrivate, PatchAnswers} from '@stamhoofd/structures';
+import type { DocumentTemplatePrivate, PatchAnswers } from '@stamhoofd/structures';
 import { Document, DocumentData, RecordCategory } from '@stamhoofd/structures';
-import type { ComputedRef} from 'vue';
+import type { ComputedRef } from 'vue';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{
@@ -123,8 +124,7 @@ async function save() {
 
         if (props.isNew) {
             patch.addPut(patchedDocument.value);
-        }
-        else {
+        } else {
             patchDocument.value.id = patchedDocument.value.id;
             patch.addPatch(patchDocument.value);
         }
@@ -145,8 +145,7 @@ async function save() {
         }
 
         dismiss({ force: true }).catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
     }

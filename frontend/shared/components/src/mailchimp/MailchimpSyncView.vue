@@ -22,47 +22,47 @@
 
         <STCard v-if="preview" data-testid="mailchimp-sync-preview">
             <STList>
-            <STListItem>
-                <template #left>
-                    <span class="icon email" />
-                </template>
-                <h3 class="style-title-list">
-                    {{ $t('%ZvJ', { count: preview.contacts.toString() }) }}
-                </h3>
-            </STListItem>
-            <STListItem v-if="preview.withoutConsent">
-                <template #left>
-                    <span class="icon warning gray" />
-                </template>
-                <h3 class="style-title-list">
-                    {{ $t('%ZxK', { count: preview.withoutConsent.toString() }) }}
-                </h3>
-                <p class="style-description-small">
-                    {{ request.full ? $t('%Zx5') : $t('%Zxb') }}
-                </p>
-            </STListItem>
-            <STListItem v-if="preview.unsubscribed">
-                <template #left>
-                    <span class="icon warning gray" />
-                </template>
-                <h3 class="style-title-list">
-                    {{ $t('%ZwB', { count: preview.unsubscribed.toString() }) }}
-                </h3>
-                <p class="style-description-small">
-                    {{ $t('%Zx5') }}
-                </p>
-            </STListItem>
-            <STListItem v-if="preview.blocked">
-                <template #left>
-                    <span class="icon warning gray" />
-                </template>
-                <h3 class="style-title-list">
-                    {{ $t('%ZxU', { count: preview.blocked.toString() }) }}
-                </h3>
-                <p class="style-description-small">
-                    {{ $t('%Zwv') }}
-                </p>
-            </STListItem>
+                <STListItem>
+                    <template #left>
+                        <span class="icon email" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('%ZvJ', { count: preview.contacts.toString() }) }}
+                    </h3>
+                </STListItem>
+                <STListItem v-if="preview.withoutConsent">
+                    <template #left>
+                        <span class="icon warning gray" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('%ZxK', { count: preview.withoutConsent.toString() }) }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ request.full ? $t('%Zx5') : $t('%Zxb') }}
+                    </p>
+                </STListItem>
+                <STListItem v-if="preview.unsubscribed">
+                    <template #left>
+                        <span class="icon warning gray" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('%ZwB', { count: preview.unsubscribed.toString() }) }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('%Zx5') }}
+                    </p>
+                </STListItem>
+                <STListItem v-if="preview.blocked">
+                    <template #left>
+                        <span class="icon warning gray" />
+                    </template>
+                    <h3 class="style-title-list">
+                        {{ $t('%ZxU', { count: preview.blocked.toString() }) }}
+                    </h3>
+                    <p class="style-description-small">
+                        {{ $t('%Zwv') }}
+                    </p>
+                </STListItem>
             </STList>
         </STCard>
 
@@ -70,7 +70,8 @@
             {{ $t('%ZvF', { platform: platform.config.name }) }}
         </p>
 
-        <hr><h2>{{ $t('%Zf3') }}</h2>
+        <hr>
+        <h2>{{ $t('%Zf3') }}</h2>
         <STList>
             <STListItem v-if="needsConsent" :selectable="true" element-name="label" data-testid="mailchimp-confirm-consent">
                 <template #left>
@@ -185,8 +186,7 @@ onMounted(async () => {
             shouldRetry: false,
         });
         preview.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         if (!Request.isAbortError(e)) {
             errors.errorBox = new ErrorBox(e);
         }
@@ -214,8 +214,7 @@ async function start() {
             replace: 1,
             force: true,
         });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;

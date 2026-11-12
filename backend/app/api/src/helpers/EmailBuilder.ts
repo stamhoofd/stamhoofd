@@ -343,7 +343,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                         new SimpleError({
                             code: 'email_skipped_hard_bounce',
                             message: 'Recipient has hard bounced',
-                            human: $t(`%ws`),
+                            human: $t('%ws'),
                         }),
                     );
                 }
@@ -357,7 +357,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
                         new SimpleError({
                             code: 'email_skipped_spam',
                             message: 'Recipient has marked as spam',
-                            human: $t(`%wt`),
+                            human: $t('%wt'),
                         }),
                     );
                 }

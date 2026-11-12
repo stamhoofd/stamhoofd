@@ -3,7 +3,7 @@ import { ArrayDecoder } from '@common/encoding';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import { EmailInformation } from '@stamhoofd/structures';
 import { Formatter, throttle } from '@stamhoofd/utility';
-import type { ComputedRef, Ref} from 'vue';
+import type { ComputedRef, Ref } from 'vue';
 import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, unref, watch } from 'vue';
 import { useAppContext } from '../context/appContext';
 import { getInvalidEmailDescription } from '../helpers/getInvalidEmailDescription';
@@ -149,8 +149,7 @@ class EmailInformationManager {
                 decoder: new ArrayDecoder(EmailInformation as Decoder<EmailInformation>),
             });
             return response.data;
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
 

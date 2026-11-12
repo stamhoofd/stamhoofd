@@ -20,8 +20,7 @@ export async function promptYesNoOrDoubt(message: string): Promise<YesNoOrDoubt>
     try {
         const answer = await rl.question(message + ' ');
         return answerToResult(answer);
-    }
-    finally {
+    } finally {
         rl.close();
         rl.removeAllListeners();
     }

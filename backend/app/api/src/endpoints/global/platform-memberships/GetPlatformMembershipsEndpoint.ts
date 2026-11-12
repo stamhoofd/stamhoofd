@@ -78,7 +78,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'No permissions to sort on the price of a platform membership',
-                    human: $t(`%G2`),
+                    human: $t('%G2'),
                     statusCode: 400,
                 });
             }
@@ -128,7 +128,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
                 throw new SimpleError({
                     code: 'timeout',
                     message: 'Query took too long',
-                    human: $t(`%Cv`),
+                    human: $t('%Cv'),
                 });
             }
             throw error;
@@ -151,7 +151,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Member not found',
-                    human: $t(`%1Nz`),
+                    human: $t('%1Nz'),
                     statusCode: 404,
                 });
             }
@@ -161,7 +161,7 @@ export class GetPlatformMembershipsEndpoint extends Endpoint<Params, Query, Body
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Organization not found',
-                    human: $t(`%1OX`),
+                    human: $t('%1OX'),
                     statusCode: 404,
                 });
             }

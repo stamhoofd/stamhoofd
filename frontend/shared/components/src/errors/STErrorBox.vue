@@ -32,11 +32,11 @@ const errorBoxElement = useTemplateRef('error-box');
 
 const errorMessage = computed(() => {
     if (isModuleImportError(props.error)) {
-        return $t(`%ge`);
+        return $t('%ge');
     }
 
     if (Request.isNetworkError(props.error)) {
-        return $t(`%ge`);
+        return $t('%ge');
     }
     return props.error.getHuman();
 });

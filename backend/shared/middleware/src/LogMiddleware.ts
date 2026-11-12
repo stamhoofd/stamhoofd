@@ -95,7 +95,7 @@ function requestOneLiner(request: Request): (StyledText | string)[] {
 export function requestPrefix(request: Request, ...classes: string[]): (StyledText | string)[] {
     if ((request as any)._uniqueIndex === undefined) {
         return [
-            new StyledText(`[UNKNOWN REQUEST] `).addClass('request', 'tag', ...classes),
+            new StyledText('[UNKNOWN REQUEST] ').addClass('request', 'tag', ...classes),
         ];
     }
     return [

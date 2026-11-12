@@ -50,7 +50,7 @@ export class STPackageBundleHelper {
             throw new SimpleError({
                 code: 'not_allowed',
                 message: 'Not allowed',
-                human: $t(`%x7`),
+                human: $t('%x7'),
             });
         }
 
@@ -93,16 +93,16 @@ export class STPackageBundleHelper {
 
     static getTitle(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return $t(`%Om`);
-            case STPackageBundle.Webshops: return $t(`%1Hk`);
+            case STPackageBundle.Members: return $t('%Om');
+            case STPackageBundle.Webshops: return $t('%1Hk');
         }
         return '?';
     }
 
     static getDescription(bundle: STPackageBundle): string {
         switch (bundle) {
-            case STPackageBundle.Members: return $t(`%1Hn`);
-            case STPackageBundle.Webshops: return $t(`%1Ho`);
+            case STPackageBundle.Members: return $t('%1Hn');
+            case STPackageBundle.Webshops: return $t('%1Ho');
         }
         return '?';
     }

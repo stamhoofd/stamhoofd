@@ -1,4 +1,3 @@
-
 import type { ComponentWithProperties } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { RecordCategory, RegisterItem } from '@stamhoofd/structures';
@@ -57,7 +56,7 @@ export class MemberRecordCategoryStep implements EditMemberStep {
             title: recordCategory.name,
             member: manager.member,
             component: markRaw(EditMemberRecordCategoryBox),
-            saveText: $t(`%16p`),
+            saveText: $t('%16p'),
             category: recordCategory,
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

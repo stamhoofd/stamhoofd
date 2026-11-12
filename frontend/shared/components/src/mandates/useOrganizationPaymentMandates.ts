@@ -13,41 +13,41 @@ import { useGlobalEventListener } from '../hooks/useGlobalEventListener';
  */
 export function useOrganizationPaymentMandates({
     payingOrganizationId = null,
-    sellingOrganizationId, 
-    errors
+    sellingOrganizationId,
+    errors,
 }: {
-    payingOrganizationId?: string | null
-    sellingOrganizationId: string
+    payingOrganizationId?: string | null;
+    sellingOrganizationId: string;
     errors: { errorBox: ErrorBox | null };
 }) {
     const context = useContext();
-    const owner = useRequestOwner()
+    const owner = useRequestOwner();
     const loading = ref(true);
-    const mandates = ref<PaymentMandate[] | null>(null)
+    const mandates = ref<PaymentMandate[] | null>(null);
     const updatingMandates = reactive(new Set<string>());
 
     // Reload after payment succeeded (mandates might have changed)
     useGlobalEventListener('payment-succeeded', async () => {
-        load().catch(console.error)
-    })
+        load().catch(console.error);
+    });
 
     // Load on create
-    load().catch(console.error)
-    
+    load().catch(console.error);
+
     async function load() {
         try {
             const response = await (payingOrganizationId ? context.value.getAuthenticatedServerForOrganization(payingOrganizationId) : context.value.authenticatedServer).request({
                 method: 'GET',
-                path: '/billing/'+encodeURIComponent(sellingOrganizationId)+'/mandates',
+                path: '/billing/' + encodeURIComponent(sellingOrganizationId) + '/mandates',
                 shouldRetry: true,
                 owner,
-                decoder: new ArrayDecoder(PaymentMandate as Decoder<PaymentMandate>) 
+                decoder: new ArrayDecoder(PaymentMandate as Decoder<PaymentMandate>),
             });
 
             mandates.value = response.data;
         } catch (e) {
-            errors.errorBox = new ErrorBox(e)
-            mandates.value = []
+            errors.errorBox = new ErrorBox(e);
+            mandates.value = [];
         }
         loading.value = false;
     }
@@ -56,25 +56,25 @@ export function useOrganizationPaymentMandates({
         if (updatingMandates.has(mandateId)) {
             return;
         }
-        updatingMandates.add(mandateId)
+        updatingMandates.add(mandateId);
 
         try {
             await (payingOrganizationId ? context.value.getAuthenticatedServerForOrganization(payingOrganizationId) : context.value.authenticatedServer).request({
                 method: 'DELETE',
-                path: '/billing/'+encodeURIComponent(sellingOrganizationId)+'/mandates/' + encodeURIComponent(mandateId),
+                path: '/billing/' + encodeURIComponent(sellingOrganizationId) + '/mandates/' + encodeURIComponent(mandateId),
                 shouldRetry: false,
                 owner,
             });
 
             if (mandates.value) {
-                mandates.value = mandates.value.filter(m => m.id !== mandateId)
+                mandates.value = mandates.value.filter(m => m.id !== mandateId);
             }
 
-            Toast.success($t('%1Sw')).show()
+            Toast.success($t('%1Sw')).show();
         } catch (e) {
-            Toast.fromError(e).show()
+            Toast.fromError(e).show();
         } finally {
-            updatingMandates.delete(mandateId)
+            updatingMandates.delete(mandateId);
         }
     }
 
@@ -83,40 +83,40 @@ export function useOrganizationPaymentMandates({
         if (updatingMandates.has(mandateId)) {
             return;
         }
-        updatingMandates.add(mandateId)
+        updatingMandates.add(mandateId);
 
         try {
             const arr = new PatchableArray();
-            arr.addPatch(patch)
+            arr.addPatch(patch);
 
             const response = await (payingOrganizationId ? context.value.getAuthenticatedServerForOrganization(payingOrganizationId) : context.value.authenticatedServer).request({
                 method: 'PATCH',
-                path: '/billing/'+encodeURIComponent(sellingOrganizationId)+'/mandates',
+                path: '/billing/' + encodeURIComponent(sellingOrganizationId) + '/mandates',
                 body: arr,
                 shouldRetry: false,
                 owner,
-                decoder: new ArrayDecoder(PaymentMandate as Decoder<PaymentMandate>) 
+                decoder: new ArrayDecoder(PaymentMandate as Decoder<PaymentMandate>),
             });
 
             if (mandates.value) {
-                deepSetArray(mandates.value, response.data, {keepMissing: false})
+                deepSetArray(mandates.value, response.data, { keepMissing: false });
             } else {
                 mandates.value = response.data;
             }
 
-            Toast.success(successMessage).show()
+            Toast.success(successMessage).show();
         } catch (e) {
-            Toast.fromError(e).show()
+            Toast.fromError(e).show();
         } finally {
-            updatingMandates.delete(mandateId)
+            updatingMandates.delete(mandateId);
         }
     }
 
     async function setDefaultMandate(mandateId: string) {
         await patchMandate(PaymentMandate.patch({
             id: mandateId,
-            isDefault: true
-        }), $t('%1QZ'))
+            isDefault: true,
+        }), $t('%1QZ'));
     }
 
     /**
@@ -125,8 +125,8 @@ export function useOrganizationPaymentMandates({
     async function setMandateBlocked(mandateId: string, blocked: boolean) {
         await patchMandate(PaymentMandate.patch({
             id: mandateId,
-            blockedAt: blocked ? new Date() : null
-        }), blocked ? $t('%Zqr') : $t('%Zql'))
+            blockedAt: blocked ? new Date() : null,
+        }), blocked ? $t('%Zqr') : $t('%Zql'));
     }
 
     return {
@@ -135,6 +135,6 @@ export function useOrganizationPaymentMandates({
         setDefaultMandate,
         setMandateBlocked,
         updatingMandates,
-        mandates
+        mandates,
     };
 }

@@ -14,7 +14,8 @@
             <textarea v-model="description" class="input" type="text" autocomplete="off" enterkeyhint="next" :placeholder="$t(`%H5`)" />
         </STInputBox>
         <div class="container">
-            <hr><h2>{{ $t('%6y') }}</h2>
+            <hr>
+            <h2>{{ $t('%6y') }}</h2>
             <p class="style-description">
                 {{ $t('%6z') }}
             </p>
@@ -32,7 +33,8 @@
         </div>
 
         <div v-if="!isNew" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%71') }}
             </h2>
             <p v-if="!isEmpty" class="style-description">
@@ -63,7 +65,6 @@ import type { Ref } from 'vue';
 import { computed, ref, resolveComponent } from 'vue';
 import TagRow from './components/TagRow.vue';
 
-
 defineOptions({ name: 'EditOrganizationTagView' });
 
 const errors = useErrors();
@@ -79,7 +80,7 @@ const props = defineProps<{
     saveHandler: (patch: PatchableArrayAutoEncoder<OrganizationTag>) => Promise<void>;
 }>();
 
-const title = computed(() => props.isNew ? $t(`%H6`) : Formatter.capitalizeFirstLetter($t('%7Y', { tagType: getOrganizationTagTypeName(props.tag.type) })));
+const title = computed(() => props.isNew ? $t('%H6') : Formatter.capitalizeFirstLetter($t('%7Y', { tagType: getOrganizationTagTypeName(props.tag.type) })));
 const pop = usePop();
 
 const patch = ref(new PatchableArray()) as Ref<PatchableArrayAutoEncoder<OrganizationTag>>;
@@ -88,7 +89,7 @@ if (props.isNew) {
 }
 
 const allPatchedTags = computed(() => patch.value.applyTo(props.allTags) as OrganizationTag[]);
-const patched = computed(() => getPatchedTag(props.tag.id) ?? OrganizationTag.create({ name: $t(`%Gp`) }));
+const patched = computed(() => getPatchedTag(props.tag.id) ?? OrganizationTag.create({ name: $t('%Gp') }));
 
 const hasChanges = computed(() => patch.value.changes.length > 0);
 
@@ -119,7 +120,7 @@ const save = async () => {
         if (name.value.length === 0) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%56`),
+                message: $t('%56'),
                 field: 'name',
             });
         }
@@ -127,8 +128,7 @@ const save = async () => {
         await props.saveHandler(patch.value);
 
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -141,7 +141,7 @@ const doDelete = async () => {
 
     if (!await CenteredMessage.confirm({
         title: $t('%Zn2', { name: props.tag.name }),
-        confirmText: $t(`%CJ`),
+        confirmText: $t('%CJ'),
         description: $t('%Zn1'),
         availabilityDelay: 2_000,
     })) {
@@ -154,8 +154,7 @@ const doDelete = async () => {
         addDeleteRecursive(props.tag.id);
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -231,7 +230,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

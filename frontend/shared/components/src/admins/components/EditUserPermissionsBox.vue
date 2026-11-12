@@ -82,8 +82,7 @@ const setRole = (role: PermissionRole, enable: boolean) => {
             return;
         }
         p.roles.addPut(role);
-    }
-    else {
+    } else {
         p.roles.addDelete(role.id);
     }
     addPermissionsPatch(p);

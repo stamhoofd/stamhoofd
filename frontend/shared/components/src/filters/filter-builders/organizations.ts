@@ -14,19 +14,19 @@ import type { UIFilterBuilder, UIFilterBuilders } from '../UIFilter';
 const getOrganizationMemberUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: $t(`%1Os`),
+            name: $t('%1Os'),
             key: 'name',
         }),
         new StringFilterBuilder({
-            name: $t(`%1MT`),
+            name: $t('%1MT'),
             key: 'firstName',
         }),
         new StringFilterBuilder({
-            name: $t(`%1MU`),
+            name: $t('%1MU'),
             key: 'lastName',
         }),
         new StringFilterBuilder({
-            name: $t(`%1FK`),
+            name: $t('%1FK'),
             key: 'email',
         }),
     ];
@@ -37,19 +37,19 @@ const getOrganizationMemberUIFilterBuilders: () => UIFilterBuilders = () => {
 const getOrganizationAdminUIFilterBuilders: () => UIFilterBuilders = () => {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
-            name: $t(`%1Os`),
+            name: $t('%1Os'),
             key: 'name',
         }),
         new StringFilterBuilder({
-            name: $t(`%1MT`),
+            name: $t('%1MT'),
             key: 'firstName',
         }),
         new StringFilterBuilder({
-            name: $t(`%1MU`),
+            name: $t('%1MU'),
             key: 'lastName',
         }),
         new StringFilterBuilder({
-            name: $t(`%1FK`),
+            name: $t('%1FK'),
             key: 'email',
         }),
     ];
@@ -100,27 +100,27 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
         const user = _user.value;
         const all = [
             new StringFilterBuilder({
-                name: $t(`%1Os`),
+                name: $t('%1Os'),
                 key: 'name',
             }),
 
             new StringFilterBuilder({
-                name: $t(`%Co`),
+                name: $t('%Co'),
                 key: 'street',
             }),
 
             new StringFilterBuilder({
-                name: $t(`%1PP`),
+                name: $t('%1PP'),
                 key: 'city',
             }),
 
             new StringFilterBuilder({
-                name: $t(`%c5`),
+                name: $t('%c5'),
                 key: 'postalCode',
             }),
 
             new MultipleChoiceFilterBuilder({
-                name: $t(`%Cp`),
+                name: $t('%Cp'),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
                 },
@@ -138,12 +138,12 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             }),
 
             new DateFilterBuilder({
-                name: $t(`%1Jc`),
+                name: $t('%1Jc'),
                 key: 'createdAt',
             }),
 
             ifNotBase(new GroupUIFilterBuilder({
-                name: $t(`%1EH`),
+                name: $t('%1EH'),
                 description: $t('%7f'),
                 builders: getOrganizationMemberUIFilterBuilders(),
                 wrapper: {
@@ -153,7 +153,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
                 },
             })),
             ifNotPlatform(ifNotBase(new GroupUIFilterBuilder({
-                name: $t(`%K5`),
+                name: $t('%K5'),
                 description: $t('%1dr'),
                 builders: getOrganizationAdminUIFilterBuilders(),
                 wrapper: {
@@ -163,10 +163,10 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
                 },
             }))),
             new MultipleChoiceFilterBuilder({
-                name: $t(`%1H0`),
+                name: $t('%1H0'),
                 options: [
-                    new MultipleChoiceUIFilterOption($t(`%1H0`), 1),
-                    new MultipleChoiceUIFilterOption($t(`%7G`), 0),
+                    new MultipleChoiceUIFilterOption($t('%1H0'), 1),
+                    new MultipleChoiceUIFilterOption($t('%7G'), 0),
                 ],
                 wrapper: {
                     active: {
@@ -176,7 +176,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             }),
 
             ifNotPlatform(ifNotBase(new MultipleChoiceFilterBuilder({
-                name: $t(`%1Qj`),
+                name: $t('%1Qj'),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
                 },
@@ -200,7 +200,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             }))),
 
             ifNotPlatform(new MultipleChoiceFilterBuilder({
-                name: $t(`%1LP`),
+                name: $t('%1LP'),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
                 },
@@ -213,7 +213,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             })),
 
             ifNotPlatform(new MultipleChoiceFilterBuilder({
-                name: $t(`%ZZd`),
+                name: $t('%ZZd'),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
                 },
@@ -226,7 +226,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
             })),
 
             ifPlatform(ifNotBase(new MultipleChoiceFilterBuilder({
-                name: $t(`%c6`),
+                name: $t('%c6'),
                 multipleChoiceConfiguration: {
                     isSubjectPlural: true,
                     mode: MultipleChoiceUIFilterMode.And,
@@ -307,7 +307,7 @@ export function useGetOrganizationUIFilterBuilders(options: { onlyBaseFilters?: 
                 },
             }))),
             ifNotBase(new GroupUIFilterBuilder({
-                name: $t(`%1Ke`),
+                name: $t('%1Ke'),
                 description: $t('%1CI'),
                 builders: getOrganizationCompanyFilterBuilders(),
                 wrapper: {

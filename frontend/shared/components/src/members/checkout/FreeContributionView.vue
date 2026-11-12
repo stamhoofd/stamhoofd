@@ -99,8 +99,7 @@ watchEffect(() => {
 async function goNext() {
     try {
         await props.saveHandler(navigate);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }

@@ -89,8 +89,7 @@ const selectedCustomerModel = computed({
 
         if (v) {
             addPatch(v);
-        }
-        else {
+        } else {
             manualSet = true;
         }
     },
@@ -113,8 +112,7 @@ watch(() => props.customers, () => {
     if (v && !manualSet) {
         // alter without calling patch
         selectedCustomer.value = props.customers.find(c => c.equals(v)) ?? null;
-    }
-    else if (!v && !manualSet && props.customers.length) {
+    } else if (!v && !manualSet && props.customers.length) {
         selectedCustomerModel.value = props.customers[0];
     }
 }, { immediate: true });

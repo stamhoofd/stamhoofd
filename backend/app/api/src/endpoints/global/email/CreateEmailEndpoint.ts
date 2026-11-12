@@ -119,7 +119,7 @@ export class CreateEmailEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_sender',
                     message: 'Sender not found',
-                    human: $t(`%1Cx`),
+                    human: $t('%1Cx'),
                     statusCode: 400,
                 });
             }

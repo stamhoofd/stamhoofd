@@ -74,7 +74,7 @@ export class EmailSendService {
                     throw new SimpleError({
                         code: 'attachment_not_found',
                         message: 'Attachment not found',
-                        human: $t(`%181`),
+                        human: $t('%181'),
                     });
                 }
 
@@ -87,7 +87,7 @@ export class EmailSendService {
                     throw new SimpleError({
                         code: 'attachment_not_found',
                         message: 'Attachment not found',
-                        human: $t(`%181`),
+                        human: $t('%181'),
                     });
                 }
 
@@ -228,7 +228,7 @@ export class EmailSendService {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Missing from',
-                            human: $t(`%ww`),
+                            human: $t('%ww'),
                         });
                     }
 
@@ -256,7 +256,7 @@ export class EmailSendService {
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'Email not found',
-                            human: $t(`%wz`),
+                            human: $t('%wz'),
                         });
                     }
                     upToDate.copyFrom(c);
@@ -265,7 +265,7 @@ export class EmailSendService {
                         throw new SimpleError({
                             code: 'recipients_not_created',
                             message: 'Failed to create recipients',
-                            human: $t(`%x0`),
+                            human: $t('%x0'),
                         });
                     }
 
@@ -434,7 +434,7 @@ export class EmailSendService {
                             new SimpleError({
                                 code: 'no_recipients',
                                 message: 'No recipients',
-                                human: $t(`%1EG`),
+                                human: $t('%1EG'),
                             }),
                         );
                     } else {
@@ -476,7 +476,7 @@ export class EmailSendService {
                 throw new SimpleError({
                     code: 'organization_not_found',
                     message: 'Organization not found',
-                    human: $t(`%1NV`),
+                    human: $t('%1NV'),
                 });
             }
             const platform = await Platform.getSharedPrivateStruct();

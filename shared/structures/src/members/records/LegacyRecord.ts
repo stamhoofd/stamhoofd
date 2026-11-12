@@ -28,7 +28,7 @@ class TrimEnumDecoder<E extends { [key: number]: string | number }> implements D
             } catch (e2) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: `Expected a number or string for enum: ` + Object.values(this.enum).join(', '),
+                    message: 'Expected a number or string for enum: ' + Object.values(this.enum).join(', '),
                     field: data.currentField,
                 });
             }

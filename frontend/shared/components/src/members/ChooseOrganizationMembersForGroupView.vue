@@ -48,7 +48,8 @@
         </p>
 
         <div v-if="isOnlyDeleting && hasPaidRegistrationDelete" class="container">
-            <hr><h2>{{ $t('%8q') }}</h2>
+            <hr>
+            <h2>{{ $t('%8q') }}</h2>
             <p>{{ $t('%8x') }}</p>
 
             <p v-if="hadPaidByOrganization" class="info-box">
@@ -173,7 +174,7 @@ async function addMember() {
             const isExistingMember = member.patchedMember.details.oldIds.length > 0;
 
             if (isExistingMember) {
-                Toast.warning($t(`%16q`, { name: member.patchedMember.name })).show();
+                Toast.warning($t('%16q', { name: member.patchedMember.name })).show();
             }
 
             // Make sure record questions for this item are included in the edit dialog;

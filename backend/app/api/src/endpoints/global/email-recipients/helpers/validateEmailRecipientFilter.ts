@@ -12,8 +12,8 @@ export async function validateEmailRecipientFilter({ filter, permissionLevel }: 
     };
 
     const unwrapped = unwrapFilterRecursively(filter, requiredFilter);
-        if (!unwrapped.match) {
-            return false;
+    if (!unwrapped.match) {
+        return false;
     }
 
     const emailIds = typeof unwrapped.markerValue === 'string'
@@ -57,7 +57,7 @@ export async function validateEmailRecipientFilter({ filter, permissionLevel }: 
         if (!await Context.auth.canAccessEmail(email, permissionLevel)) {
             throw Context.auth.error({
                 message: 'You do not have access to this email',
-                human: $t(`%1E2`),
+                human: $t('%1E2'),
             });
         }
     }

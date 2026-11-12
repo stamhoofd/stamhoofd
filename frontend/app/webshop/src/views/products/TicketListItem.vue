@@ -24,7 +24,7 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@brow
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import type { Order, Organization, TicketPublic, Webshop} from '@stamhoofd/structures';
+import type { Order, Organization, TicketPublic, Webshop } from '@stamhoofd/structures';
 import { WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';

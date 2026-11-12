@@ -8,6 +8,7 @@ export default class SsoLogs extends BaseCommand {
         'stam sso logs',
         'stam sso logs --env keeo',
     ];
+
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {

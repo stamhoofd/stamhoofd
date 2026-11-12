@@ -43,7 +43,8 @@
         </Checkbox>
 
         <div v-if="type === RecordType.MultipleChoice || type === RecordType.ChooseOne" class="container">
-            <hr><h2 class="style-with-button with-list">
+            <hr>
+            <h2 class="style-with-button with-list">
                 <div>{{ $t('%ic') }}</div>
                 <div>
                     <button class="button text" type="button" @click="addChoice">
@@ -64,7 +65,8 @@
             </p>
         </div>
 
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <div>{{ $t('%6o') }}</div>
             <div>
                 <button class="button text" type="button" @click="openPreview">
@@ -93,7 +95,8 @@
         </p>
 
         <template v-if="showExternalPermissionLevel">
-            <hr><h2>{{ $t('%ij') }}</h2>
+            <hr>
+            <h2>{{ $t('%ij') }}</h2>
             <p>{{ $t('%ik') }}</p>
             <STList>
                 <STListItem :selectable="true" element-name="label">
@@ -124,7 +127,8 @@
         </template>
 
         <template v-if="canAddWarning">
-            <hr><h2>{{ $t('%zJ') }}</h2>
+            <hr>
+            <h2>{{ $t('%zJ') }}</h2>
             <p>{{ $t('%in') }}</p>
 
             <STList>
@@ -199,7 +203,8 @@
         </template>
 
         <template v-if="settings.dataPermission">
-            <hr><h2>{{ $t('%vY') }}</h2>
+            <hr>
+            <h2>{{ $t('%vY') }}</h2>
             <p>
                 {{ $t('%i1') }} <a :href="$domains.getDocs('toestemming-gegevens-verzamelen')" class="inline-link" target="_blank" rel="noopener">
                     {{ $t('%i2') }}
@@ -212,7 +217,8 @@
         </template>
 
         <div v-if="hasFilters" class="container">
-            <hr><h2>{{ $t('%iK') }}</h2>
+            <hr>
+            <h2>{{ $t('%iK') }}</h2>
 
             <PropertyFilterInput v-model="filter" :allow-optional="false" :builder="filterBuilder" />
         </div>

@@ -67,8 +67,7 @@ async function save() {
     try {
         await props.saveHandler(value.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;

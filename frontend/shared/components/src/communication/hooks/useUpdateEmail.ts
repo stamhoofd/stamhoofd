@@ -4,7 +4,7 @@ import { Toast } from '#overlays/Toast.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { EmailPreview } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { isRef, ref, unref } from 'vue';
 
 export function useUpdateEmail(email: EmailPreview | Ref<EmailPreview>) {
@@ -33,8 +33,7 @@ export function useUpdateEmail(email: EmailPreview | Ref<EmailPreview>) {
             if (isRef(email)) {
                 email.value = model;
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             if (!Request.isNetworkError(e)) {
                 Toast.fromError(e).setHide(2000).show();

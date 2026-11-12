@@ -82,8 +82,7 @@ export default new Migration(async () => {
 
             gemeente.city = city;
             citiesByNameAndProvince.set(cityKey(city.name, city.provinceId), city);
-        }
-        else {
+        } else {
             gemeente.city = found;
 
             // Also add postal code already
@@ -114,8 +113,7 @@ export default new Migration(async () => {
             // console.log('Assigning ' + gemeente.gemeente + ' to ' + city.name);
             gemeente.city.parentCityId = city.id;
             parentCityUpdates.set(gemeente.city.id, city.id);
-        }
-        else {
+        } else {
             // console.log('Assigning ' + gemeente.gemeente + ' to ' + hoofd.name);
             gemeente.city.parentCityId = hoofd.id;
             parentCityUpdates.set(gemeente.city.id, hoofd.id);

@@ -32,27 +32,27 @@ Webpack is used for bundling all the files.
 
 Single file components are used. These group the HTML, TypeScript/JavaScript and SCSS related to the same Vue component in a single file. [Check the official documentation](https://vuejs.org/v2/guide/single-file-components.html).
 
--   `app/dashboard/src/**/*.vue`: Components used by the dashboard app (stamhoofd.app)
--   `app/registration/src/**/*.vue`: Components used by the registration app
--   `shared/components/src/**/*.vue`: Components used by both the registration app and the dashboard app
+- `app/dashboard/src/**/*.vue`: Components used by the dashboard app (stamhoofd.app)
+- `app/registration/src/**/*.vue`: Components used by the registration app
+- `shared/components/src/**/*.vue`: Components used by both the registration app and the dashboard app
 
 ### Styling with SCSS
 
 You can add styles on multiple places, but be careful where:
 
--   `shared/scss/`
-    -   Variables
-    -   Styling used in multiple components
-    -   Reused styles that have dedicated components
--   `shared/components/`
-    -   Styles of a shared component, not used outside the component
--   `app/{dashboard or registration}/components/`
-    -   Styles of a local component, not used outside the component
-    -   Global styles specific to the app
-    -   Local margins and paddings (try to keep too specific margin and paddings out of shared styles)
--   `app/{dashboard or registration}/src/App.vue`
-    -   Inserting the shared styles from the shared scss folders
-    -   Global styles specific to the service
+- `shared/scss/`
+    - Variables
+    - Styling used in multiple components
+    - Reused styles that have dedicated components
+- `shared/components/`
+    - Styles of a shared component, not used outside the component
+- `app/{dashboard or registration}/components/`
+    - Styles of a local component, not used outside the component
+    - Global styles specific to the app
+    - Local margins and paddings (try to keep too specific margin and paddings out of shared styles)
+- `app/{dashboard or registration}/src/App.vue`
+    - Inserting the shared styles from the shared scss folders
+    - Global styles specific to the service
 
 [SASS modules (@use)](https://sass-lang.com/documentation/at-rules/use) are used over imports, since imports will get removed from SASS in the future.
 

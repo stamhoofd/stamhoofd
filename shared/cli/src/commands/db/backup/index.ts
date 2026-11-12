@@ -10,6 +10,7 @@ export default class DbBackup extends BaseCommand {
         'stam db backup',
         'stam db backup --name before-migration',
     ];
+
     static flags = {
         ...BaseCommand.instanceFlags,
         name: Flags.string({ description: 'Name for this backup (defaults to a timestamp-based name)' }),

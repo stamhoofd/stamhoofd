@@ -111,8 +111,7 @@ export class QueueHandler {
         try {
             next.resolve(await next.handler({}));
             // console.log("[QUEUE] ("+(q.runCount-1)+"/"+q.parallel+") Resolved "+queue+" ("+q.items.length+" remaining)")
-        }
-        catch (e) {
+        } catch (e) {
             next.reject(e);
             console.log('[QUEUE] (' + (q.runCount - 1) + '/' + q.parallel + ') Rejected ' + queue + ' (' + q.items.length + ' remaining)');
             console.error(e);

@@ -83,17 +83,17 @@ export const getAppName = (app: AppType) => {
     switch (app) {
         case 'dashboard': return STAMHOOFD.userMode === 'organization' || !!STAMHOOFD.singleOrganization ? $t('%6v') : $t('%44');
         case 'registration': return $t('%2g');
-        case 'admin': return $t(`%IW`);
-        case 'webshop': return $t(`%2N`);
+        case 'admin': return $t('%IW');
+        case 'webshop': return $t('%2N');
     }
     return STAMHOOFD.platformName;
 };
 
 export const getAppNameDescription = (app: AppType) => {
     switch (app) {
-        case 'dashboard': return $t(`%1ZJ`);
-        case 'registration': return $t(`%a5`);
-        case 'admin': return $t(`%a6`);
+        case 'dashboard': return $t('%1ZJ');
+        case 'registration': return $t('%a5');
+        case 'admin': return $t('%a6');
     }
     return null;
 };

@@ -4,7 +4,8 @@
             {{ $t('%1T') }}
         </h1>
 
-        <hr><h2>{{ $t('%a0') }}</h2>
+        <hr>
+        <h2>{{ $t('%a0') }}</h2>
         <STList>
             <STListItem v-for="r in availableChannels" :key="r.url" :selectable="true" element-name="label">
                 <template #left>
@@ -49,10 +50,10 @@ const availableChannels = ref<{ name: string; url: string }[]>([]);
 
 onMounted(() => {
     availableChannels.value = [
-        { name: $t(`%v6`), url: STAMHOOFD.APP_UPDATE_SERVER_URL },
-        { name: $t(`%1N`), url: STAMHOOFD.APP_UPDATE_PRODUCTION_SERVER_URL },
-        { name: $t(`%24`), url: STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL },
-        { name: $t(`%2F`), url: STAMHOOFD.APP_UPDATE_DEVELOPMENT_SERVER_URL },
+        { name: $t('%v6'), url: STAMHOOFD.APP_UPDATE_SERVER_URL },
+        { name: $t('%1N'), url: STAMHOOFD.APP_UPDATE_PRODUCTION_SERVER_URL },
+        { name: $t('%24'), url: STAMHOOFD.APP_UPDATE_STAGING_SERVER_URL },
+        { name: $t('%2F'), url: STAMHOOFD.APP_UPDATE_DEVELOPMENT_SERVER_URL },
     ].filter((channel): channel is { name: string; url: string } => channel.url !== undefined);
 
     Storage.keyValue.getItem('UPDATE_SERVER').then((value) => {
@@ -94,7 +95,7 @@ async function save() {
 
     try {
         await saveChannel();
-        new Toast($t(`%54`), 'success').show();
+        new Toast($t('%54'), 'success').show();
         await dismiss({ force: true });
     } catch (e) {
         Toast.fromError(e as Error).show();

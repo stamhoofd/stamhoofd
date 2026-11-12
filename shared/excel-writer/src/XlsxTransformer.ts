@@ -42,8 +42,7 @@ export class XlsxTransformer<T> {
                     const lastCategory = categories[categories.length - 1];
                     if (lastCategory && lastCategory.name === (col.category ?? '')) {
                         lastCategory.columns.push(col);
-                    }
-                    else {
+                    } else {
                         // Create new category
                         categories.push({
                             name: col.category ?? '',

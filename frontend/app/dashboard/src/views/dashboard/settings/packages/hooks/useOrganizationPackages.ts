@@ -5,11 +5,11 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import { OrganizationPackagesStatus } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { onMounted, ref } from 'vue';
 
 let sharedState: null | {
-    organizationId: string
+    organizationId: string;
     loading: Ref<boolean>;
     packages: Ref<OrganizationPackagesStatus | null>;
     pendingLoad: Promise<OrganizationPackagesStatus | undefined> | null;
@@ -19,7 +19,7 @@ export function useOrganizationPackages(options?: {
     errors?: { errorBox: ErrorBox | null };
     onMounted?: boolean;
 }) {
-    const organization = useRequiredOrganization()
+    const organization = useRequiredOrganization();
     if (sharedState?.organizationId !== organization.value.id) {
         sharedState = null;
     }
@@ -63,7 +63,7 @@ export function useOrganizationPackages(options?: {
             if (sharedState) {
                 sharedState.pendingLoad = null;
             }
-            return p
+            return p;
         });
     }
 
@@ -85,12 +85,10 @@ export function useOrganizationPackages(options?: {
 
             packages.value = response.data;
             return response.data;
-        }
-        catch (e) {
+        } catch (e) {
             if (options?.errors) {
                 options.errors.errorBox = new ErrorBox(e);
-            }
-            else {
+            } else {
                 throw e;
             }
         } finally {
@@ -105,8 +103,8 @@ export function useOrganizationPackages(options?: {
     }
 
     useGlobalEventListener('payment-succeeded', async () => {
-        await reloadIfSet()
-    })
+        await reloadIfSet();
+    });
 
     return {
         loading,

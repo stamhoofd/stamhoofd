@@ -8,7 +8,7 @@ import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewM
 export class PaymentCustomerStep implements ViewStep {
     model: OrganizationCheckoutViewModel;
 
-    constructor({model}: { model: OrganizationCheckoutViewModel;}) {
+    constructor({ model }: { model: OrganizationCheckoutViewModel }) {
         this.model = model;
     }
 

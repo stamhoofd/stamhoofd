@@ -39,7 +39,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { computed } from 'vue';
 
-
 const props = withDefaults(defineProps<{
     product: Product;
     category?: Category | null;

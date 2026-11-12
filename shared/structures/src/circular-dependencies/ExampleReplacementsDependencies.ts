@@ -54,20 +54,20 @@ function fillReplacements(replacements: Replacement[]) {
                 endTime: 13 * 60,
             }),
             checkoutMethod: WebshopTakeoutMethod.create({
-                name: $t(`%13P`),
+                name: $t('%13P'),
                 address: Address.create({
-                    street: $t(`%IE`),
+                    street: $t('%IE'),
                     number: '12',
                     postalCode: '9000',
-                    city: $t(`%13R`),
+                    city: $t('%13R'),
                     country: Country.Belgium,
                 }),
             }),
             address: ValidatedAddress.create({
-                street: $t(`%IE`),
+                street: $t('%IE'),
                 number: '12',
                 postalCode: '9000',
-                city: $t(`%13R`),
+                city: $t('%13R'),
                 country: Country.Belgium,
                 cityId: '',
                 parentCityId: null,
@@ -77,7 +77,7 @@ function fillReplacements(replacements: Replacement[]) {
                 items: [
                     CartItem.create({
                         product: Product.create({
-                            name: $t(`%13S`),
+                            name: $t('%13S'),
                         }),
                         productPrice: ProductPrice.create({
                             price: 550_00,
@@ -91,7 +91,7 @@ function fillReplacements(replacements: Replacement[]) {
                     }),
                     CartItem.create({
                         product: Product.create({
-                            name: $t(`%13T`),
+                            name: $t('%13T'),
                         }),
                         productPrice: ProductPrice.create({
                             price: 400_00,
@@ -124,11 +124,11 @@ function fillReplacements(replacements: Replacement[]) {
     }));
 
     const balance1 = BalanceItem.create({
-        name: $t(`%13U`),
+        name: $t('%13U'),
         unitPrice: 1234_00,
     });
     const balance2 = BalanceItem.create({
-        name: $t(`%13V`),
+        name: $t('%13V'),
         unitPrice: 1234_00,
         amount: 2,
     });
@@ -137,7 +137,7 @@ function fillReplacements(replacements: Replacement[]) {
         method: PaymentMethod.Transfer,
         status: PaymentStatus.Pending,
         iban: 'BE1234 1234 1234',
-        ibanName: $t(`%ID`),
+        ibanName: $t('%ID'),
         customer: PaymentCustomer.create({
             firstName: $t('%58').split(' ')[0],
             lastName: $t('%58').split(' ').slice(1).join(' '),

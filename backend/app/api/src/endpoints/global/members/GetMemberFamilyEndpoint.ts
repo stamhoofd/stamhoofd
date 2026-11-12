@@ -56,7 +56,7 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
 
                 // Check access to this member (this will automatically give access to the family)
                 if (!await Context.auth.canAccessMember(member)) {
-                    throw Context.auth.error($t(`%Dh`));
+                    throw Context.auth.error($t('%Dh'));
                 }
                 validatedMembers.push(member);
                 continue;
@@ -68,7 +68,7 @@ export class GetMemberFamilyEndpoint extends Endpoint<Params, Query, Body, Respo
         }
 
         if (!foundMember) {
-            throw Context.auth.error($t(`%Dh`));
+            throw Context.auth.error($t('%Dh'));
         }
 
         return new Response(

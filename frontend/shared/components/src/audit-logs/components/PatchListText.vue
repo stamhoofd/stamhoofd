@@ -6,10 +6,10 @@
 </template>
 
 <script setup lang="ts">
-import type { AuditLogPatchItem} from '@stamhoofd/structures';
+import type { AuditLogPatchItem } from '@stamhoofd/structures';
 import { AuditLogPatchItemType, AuditLogReplacementType } from '@stamhoofd/structures';
 import { h } from 'vue';
-import type { AuditLogCustomRenderers, Renderable} from './RenderTextComponent';
+import type { AuditLogCustomRenderers, Renderable } from './RenderTextComponent';
 import { renderAny, RenderTextComponent } from './RenderTextComponent';
 
 const props = defineProps<{
@@ -42,19 +42,19 @@ function getRenderText(item: AuditLogPatchItem): any[] {
     ];
 
     if (item.type === AuditLogPatchItemType.Added) {
-        text.push(' ' + $t(`%uf`));
+        text.push(' ' + $t('%uf'));
     }
 
     if (item.type === AuditLogPatchItemType.Removed) {
-        text.push(' ' + $t(`%ug`));
+        text.push(' ' + $t('%ug'));
     }
 
     if (item.type === AuditLogPatchItemType.Changed) {
-        text.push(' ' + $t(`%uh`));
+        text.push(' ' + $t('%uh'));
     }
 
     if (item.type === AuditLogPatchItemType.Reordered) {
-        text.push(' ' + $t(`%ui`));
+        text.push(' ' + $t('%ui'));
     }
 
     if ((item.oldValue && (item.oldValue.toString() || item.oldValue.type !== AuditLogReplacementType.Uuid)) || (item.value && (item.value.toString() || item.value.type !== AuditLogReplacementType.Uuid))) {
@@ -74,10 +74,9 @@ function getRenderText(item: AuditLogPatchItem): any[] {
         if (hasValue) {
             text.push(new TextWithClass(item.value, 'style-value-new', props.customRenderers));
         }
-    }
-    else {
+    } else {
         if (!item.type) {
-            text.push(' ' + $t(`%uh`));
+            text.push(' ' + $t('%uh'));
         }
     }
 

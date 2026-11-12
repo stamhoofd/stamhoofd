@@ -50,8 +50,7 @@ export function useVisibilityChange(
             if (result instanceof Promise) {
                 result.catch(console.error);
             }
-        }
-        else {
+        } else {
             console.log('[useVisibilityChange] hidden');
             if (onHide) {
                 const result = onHide();

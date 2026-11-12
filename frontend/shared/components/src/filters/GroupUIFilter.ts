@@ -103,18 +103,18 @@ export class GroupUIFilter extends UIFilter<GroupUIFilterBuilder> {
         if (this.builder.wrapper) {
             const prefix: typeof flattened = [];
             prefix.push({
-                text: $t(`%bN`) + ' ',
+                text: $t('%bN') + ' ',
                 style: 'gray',
                 choices: [
                     {
                         id: 'false',
-                        text: $t(`%bN`),
+                        text: $t('%bN'),
                         action: () => this.isInverted = false,
                         isSelected: () => this.isInverted === false,
                     },
                     {
                         id: 'true',
-                        text: $t(`%bO`),
+                        text: $t('%bO'),
                         action: () => this.isInverted = true,
                         isSelected: () => this.isInverted === true,
                     },
@@ -127,7 +127,7 @@ export class GroupUIFilter extends UIFilter<GroupUIFilterBuilder> {
             });
 
             prefix.push({
-                text: ' ' + $t(`%bP`) + ' ',
+                text: ' ' + $t('%bP') + ' ',
                 style: 'gray',
             });
 
@@ -140,7 +140,7 @@ export class GroupUIFilter extends UIFilter<GroupUIFilterBuilder> {
 
 export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
     builders: UIFilterBuilder[] = [];
-    name = $t(`%bQ`);
+    name = $t('%bQ');
     description = '';
     wrapFilter?: UIFilterWrapper | null;
     wrapper?: WrapperFilter;
@@ -167,8 +167,7 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
         const result = unwrapFilterForBuilder(this, filter);
         if (!result.match) {
             filter = [];
-        }
-        else {
+        } else {
             filter = result.markerValue ?? [];
         }
 

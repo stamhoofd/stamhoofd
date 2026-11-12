@@ -40,7 +40,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
                 throw new SimpleError({
                     code: 'not_supported',
                     message: 'This platform does not support password login',
-                    human: $t(`%D7`),
+                    human: $t('%D7'),
                     statusCode: 400,
                 });
             }
@@ -49,7 +49,7 @@ export class ForgotPasswordEndpoint extends Endpoint<Params, Query, Body, Respon
                 throw new SimpleError({
                     code: 'not_supported',
                     message: 'Login method not supported',
-                    human: $t(`%DD`),
+                    human: $t('%DD'),
                     statusCode: 400,
                 });
             }

@@ -109,8 +109,7 @@ function updateUitpasNumber(value: string | null) {
 
     if (value === null) {
         model.value = null;
-    }
-    else {
+    } else {
         model.value = UitpasNumberDetails.create({ uitpasNumber: value, socialTariff: defaultStatus });
     }
 }
@@ -176,8 +175,7 @@ async function checkStatus() {
         cacheDetails(uitpasNumberDetails);
 
         isLoading.value = false;
-    }
-    catch (e) {
+    } catch (e) {
         if (Request.isAbortError(e)) {
             // Canceled, so ignore
             return;

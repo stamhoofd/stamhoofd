@@ -360,7 +360,7 @@ export class StripeMocker {
         const stripe = StripeHelper.getInstance();
         const endpoint = new StripeWebookEndpoint();
 
-        const r = Request.buildJson('POST', `/stripe/webhooks`, undefined, payload);
+        const r = Request.buildJson('POST', '/stripe/webhooks', undefined, payload);
         const secret = payload.account ? STAMHOOFD.STRIPE_CONNECT_ENDPOINT_SECRET : STAMHOOFD.STRIPE_ENDPOINT_SECRET;
 
         if (!secret) {

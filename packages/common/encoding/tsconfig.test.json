@@ -8,9 +8,5 @@
             "path": "./tsconfig.types.json"
         }
     ],
-    "include": [
-        "src/**/*.test.ts",
-        "src/**/*.spec.ts",
-        "tests/**/*.ts"
-    ]
+    "include": ["src/**/*.test.ts", "src/**/*.spec.ts", "tests/**/*.ts"]
 }

@@ -25,7 +25,8 @@
             </span>
         </p>
 
-        <hr><h2>{{ $t('%P1') }}</h2>
+        <hr>
+        <h2>{{ $t('%P1') }}</h2>
 
         <STInputBox error-fields="provider" :error-box="errorBox" :title="$t('%wX')">
             <Dropdown v-model="provider">

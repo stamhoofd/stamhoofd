@@ -10,7 +10,7 @@ export function errorToSimpleErrors(e: unknown) {
             new SimpleError({
                 code: 'unknown_error',
                 message: ((typeof e === 'object' && e !== null && 'message' in e && typeof e.message === 'string') ? e.message : 'Unknown error'),
-                human: $t(`%1ED`),
+                human: $t('%1ED'),
             }),
         );
     }

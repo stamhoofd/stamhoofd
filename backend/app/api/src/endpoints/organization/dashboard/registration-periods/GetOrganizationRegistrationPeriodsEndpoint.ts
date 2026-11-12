@@ -118,7 +118,7 @@ export class GetOrganizationRegistrationPeriodsEndpoint extends Endpoint<Params,
                 code: 'client_update_required',
                 statusCode: 400,
                 message: 'Er is een noodzakelijke update beschikbaar. Herlaad de pagina en wis indien nodig de cache van jouw browser.',
-                human: $t(`%G8`),
+                human: $t('%G8'),
             });
         }
 

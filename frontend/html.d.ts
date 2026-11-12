@@ -1,8 +1,8 @@
-declare module "*.html" {
+declare module '*.html' {
     const value: any;
     export default value;
 }
-declare module "*.xml" {
+declare module '*.xml' {
     const value: any;
     export default value;
 }

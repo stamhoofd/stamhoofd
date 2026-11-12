@@ -10,11 +10,11 @@ import { XlsxTransformerColumnHelper } from '../helpers/XlsxTransformerColumnHel
 // Assign to a typed variable to assure we have correct type checking in place
 const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotification, EventNotification> => ({
     id: 'event-notifications',
-    name: $t(`%1FR`),
+    name: $t('%1FR'),
     columns: [
         {
             id: 'id',
-            name: $t(`%d`),
+            name: $t('%d'),
             width: 40,
             getValue: (notification: EventNotification) => ({
                 value: notification.id,
@@ -22,7 +22,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
         },
         {
             id: 'name',
-            name: $t(`%w9`),
+            name: $t('%w9'),
             width: 40,
             getValue: (notification: EventNotification) => ({
                 value: notification.events.map(e => e.name).join(', '),
@@ -30,7 +30,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
         },
         {
             id: 'organization.name',
-            name: $t(`%wA`),
+            name: $t('%wA'),
             width: 40,
             getValue: (notification: EventNotification) => ({
                 value: notification.organization.name,
@@ -38,7 +38,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
         },
         {
             id: 'organization.uri',
-            name: $t(`%1O1`),
+            name: $t('%1O1'),
             width: 30,
             getValue: (notification: EventNotification) => ({
                 value: notification.organization.uri,
@@ -46,7 +46,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
         },
         {
             id: 'status',
-            name: $t(`%1A`),
+            name: $t('%1A'),
             width: 30,
             getValue: (notification: EventNotification) => ({
                 value: Formatter.capitalizeFirstLetter(EventNotificationStatusHelper.getName(notification.status)),
@@ -54,7 +54,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
         },
         {
             id: 'feedbackText',
-            name: $t(`%YT`),
+            name: $t('%YT'),
             width: 80,
             getValue: (notification: EventNotification) => ({
                 value: notification.status !== EventNotificationStatus.Accepted ? notification.feedbackText : null,
@@ -67,7 +67,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
         },
         {
             id: 'startDate',
-            name: $t(`%1Of`),
+            name: $t('%1Of'),
             width: 20,
             getValue: (notification: EventNotification) => ({
                 value: notification.startDate,
@@ -80,7 +80,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
         },
         {
             id: 'endDate',
-            name: $t(`%1P8`),
+            name: $t('%1P8'),
             width: 20,
             getValue: (notification: EventNotification) => ({
                 value: notification.endDate,
@@ -93,7 +93,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
         },
         {
             id: 'submittedAt',
-            name: $t(`%Aw`),
+            name: $t('%Aw'),
             width: 20,
             getValue: (notification: EventNotification) => ({
                 value: notification.submittedAt,
@@ -106,7 +106,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
         },
         {
             id: 'submittedBy',
-            name: $t(`%wC`),
+            name: $t('%wC'),
             width: 40,
             getValue: (notification: EventNotification) => ({
                 value: notification.submittedBy?.name ?? '',

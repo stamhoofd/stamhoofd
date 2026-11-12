@@ -45,8 +45,8 @@ function assertisSuccessResponse(json: unknown): asserts json is SuccessResponse
         console.error('Invalid register ticket sale response', json);
         throw new SimpleError({
             code: 'invalid_register_ticket_sale_response',
-            message: `Invalid register ticket sale response`,
-            human: $t(`%1BX`),
+            message: 'Invalid register ticket sale response',
+            human: $t('%1BX'),
         });
     }
 }
@@ -69,7 +69,7 @@ export async function registerTicketSales(access_token: string, registerTicketSa
             throw new SimpleError({
                 code: 'invalid_uitpas_event_url',
                 message: `Invalid UiTPAS event URL: ${ticketSale.uitpasEventUrl}`,
-                human: $t(`%1BS`),
+                human: $t('%1BS'),
             });
         }
 
@@ -96,9 +96,9 @@ export async function registerTicketSales(access_token: string, registerTicketSa
         // Handle network errors
         throw new SimpleError({
             code: 'uitpas_unreachable_registering_ticket_sales',
-            message: `Network issue when registering UiTPAS ticket sales`,
+            message: 'Network issue when registering UiTPAS ticket sales',
             human: $t(
-                `We konden UiTPAS niet bereiken om de ticket verkoop te registreren bij UiTPAS. Probeer het later opnieuw.`,
+                'We konden UiTPAS niet bereiken om de ticket verkoop te registreren bij UiTPAS. Probeer het later opnieuw.',
             ),
         });
     });
@@ -107,8 +107,8 @@ export async function registerTicketSales(access_token: string, registerTicketSa
         console.error('Unsuccessful response when registering ticket sales', json);
         throw new SimpleError({
             code: 'unsuccessful_response_registering_ticket_sales',
-            message: `Unsuccessful response when registering UiTPAS ticket sales`,
-            human: $t(`%18C`),
+            message: 'Unsuccessful response when registering UiTPAS ticket sales',
+            human: $t('%18C'),
         });
     }
     const json = await response.json().catch(() => {});
@@ -116,8 +116,8 @@ export async function registerTicketSales(access_token: string, registerTicketSa
         console.error('Invalid response when registering ticket sales', json);
         throw new SimpleError({
             code: 'invalid_response_registering_ticket_sales',
-            message: `Invalid response when registering ticket sales`,
-            human: $t(`%1BX`),
+            message: 'Invalid response when registering ticket sales',
+            human: $t('%1BX'),
         });
     }
     const now = new Date();

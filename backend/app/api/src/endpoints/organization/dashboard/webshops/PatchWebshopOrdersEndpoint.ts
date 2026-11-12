@@ -285,7 +285,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                             throw new SimpleError({
                                 code: 'duplicate_codes',
                                 message: 'Duplicate usage of discount codes',
-                                human: $t(`%w7`),
+                                human: $t('%w7'),
                                 field: 'cart.discountCodes',
                             });
                         }

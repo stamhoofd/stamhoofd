@@ -64,23 +64,23 @@ onMounted(() => {
 });
 
 function attach() {
-    document.addEventListener("mousemove", mouseMove, {
+    document.addEventListener('mousemove', mouseMove, {
         passive: false,
     });
-    document.addEventListener("touchmove", mouseMove, {
+    document.addEventListener('touchmove', mouseMove, {
         passive: false,
     });
 
-    document.addEventListener("mouseup", mouseUp, { passive: false });
-    document.addEventListener("touchend", mouseUp, { passive: false });
+    document.addEventListener('mouseup', mouseUp, { passive: false });
+    document.addEventListener('touchend', mouseUp, { passive: false });
 }
 
 function detach() {
-    document.removeEventListener("mousemove", mouseMove);
-    document.removeEventListener("touchmove", mouseMove);
+    document.removeEventListener('mousemove', mouseMove);
+    document.removeEventListener('touchmove', mouseMove);
 
-    document.removeEventListener("mouseup", mouseUp);
-    document.removeEventListener("touchend", mouseUp);
+    document.removeEventListener('mouseup', mouseUp);
+    document.removeEventListener('touchend', mouseUp);
 }
 
 function delayedSelect(event: Event) {
@@ -95,12 +95,12 @@ function delayedSelect(event: Event) {
     const handler = (event: Event) => {
         // Safari deselects the text on mouse up, we need to prevent this
         event.preventDefault();
-        document.removeEventListener("mouseup", handler);
+        document.removeEventListener('mouseup', handler);
         return false;
     };
 
     // Safari fix
-    document.addEventListener("mouseup", handler);
+    document.addEventListener('mouseup', handler);
 }
 
 function getEventX(event: any) {
@@ -110,8 +110,7 @@ function getEventX(event: any) {
         for (const touch of touches) {
             x = touch.pageX;
         }
-    }
-    else {
+    } else {
         x = event.pageX;
     }
     return x;
@@ -167,8 +166,7 @@ function updateSlider() {
     if (_value > max.value) {
         if (softBounds) {
             max.value = _value;
-        }
-        else {
+        } else {
             _value = max.value;
         }
     }
@@ -177,8 +175,7 @@ function updateSlider() {
         if (softBounds) {
             model.value = Math.max(0, _value);
             min.value = _value;
-        }
-        else {
+        } else {
             _value = min.value;
         }
     }
@@ -215,8 +212,7 @@ function mouseMove(event: Event) {
     const newValue = Math.round(percentage * (max.value - min.value)) + min.value;
     if (round) {
         internalValue.value = Math.round(newValue / round) * round;
-    }
-    else {
+    } else {
         internalValue.value = newValue;
     }
 

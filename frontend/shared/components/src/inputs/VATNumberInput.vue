@@ -9,10 +9,10 @@ import { SimpleError } from '@common/errors';
 import { Country } from '@stamhoofd/types/Country';
 import { ref, watch } from 'vue';
 
-import { ErrorBox } from "../errors/ErrorBox";
+import { ErrorBox } from '../errors/ErrorBox';
 import { useValidation } from '../errors/useValidation';
-import type { Validator } from "../errors/Validator";
-import STInputBox from "./STInputBox.vue";
+import type { Validator } from '../errors/Validator';
+import STInputBox from './STInputBox.vue';
 
 const model = defineModel<string | null>({ default: null });
 
@@ -27,8 +27,8 @@ const props = withDefaults(defineProps<{
     title: '',
     validator: null,
     required: true,
-    placeholder: () => $t(`%zG`),
-    autocomplete: () => $t(`%yv`),
+    placeholder: () => $t('%zG'),
+    autocomplete: () => $t('%yv'),
 });
 
 const VATNumberRaw = ref(model.value ?? '');
@@ -47,7 +47,7 @@ watch(model, (val) => {
 });
 
 async function validate() {
-    VATNumberRaw.value = VATNumberRaw.value.trim().toUpperCase().replace(/\s/g, " "); // replacement is needed because some apps use non breaking spaces when copying
+    VATNumberRaw.value = VATNumberRaw.value.trim().toUpperCase().replace(/\s/g, ' '); // replacement is needed because some apps use non breaking spaces when copying
 
     if (!props.required && VATNumberRaw.value.length === 0) {
         errorBox.value = null;
@@ -57,9 +57,9 @@ async function validate() {
 
     if (props.required && VATNumberRaw.value.length === 0) {
         errorBox.value = new ErrorBox(new SimpleError({
-            "code": "invalid_field",
-            "message": $t(`%zH`),
-            "field": "VATNumber",
+            code: 'invalid_field',
+            message: $t('%zH'),
+            field: 'VATNumber',
         }));
         return false;
     }
@@ -74,13 +74,12 @@ async function validate() {
 
     if (!result.isValid) {
         errorBox.value = new ErrorBox(new SimpleError({
-            "code": "invalid_field",
-            "message": $t(`%zI`) + ' ' + VATNumberRaw.value,
-            "field": "VATNumber",
+            code: 'invalid_field',
+            message: $t('%zI') + ' ' + VATNumberRaw.value,
+            field: 'VATNumber',
         }));
         return false;
-    }
-    else {
+    } else {
         VATNumberRaw.value = result.value ?? VATNumberRaw.value;
         model.value = VATNumberRaw.value;
         errorBox.value = null;

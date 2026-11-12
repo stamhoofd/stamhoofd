@@ -33,7 +33,8 @@
         </template>
 
         <div v-if="!isNew" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%Si') }}
             </h2>
 

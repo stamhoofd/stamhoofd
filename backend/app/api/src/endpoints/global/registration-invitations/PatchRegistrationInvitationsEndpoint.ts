@@ -106,7 +106,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
             const group = await Group.getByID(invitation.groupId);
 
             if (!group || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
-                throw Context.auth.error($t(`%1UN`));
+                throw Context.auth.error($t('%1UN'));
             }
 
             await invitation.delete();
@@ -118,7 +118,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
                 code: 'duplicate_entry',
                 statusCode: 409,
                 message: 'Duplicate entry',
-                human: puts.length === 1 ? $t(`%1RS`) : $t(`%1RP`),
+                human: puts.length === 1 ? $t('%1RS') : $t('%1RP'),
             });
         }
 
@@ -137,7 +137,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
         const group = await Group.getByID(invitation.groupId);
 
         if (!group || (organizationId !== null && group.organizationId !== organizationId) || !await Context.auth.canAccessGroup(group, PermissionLevel.Write)) {
-            throw Context.auth.error($t(`%1ST`));
+            throw Context.auth.error($t('%1ST'));
         }
 
         // cannot invite for waiting list
@@ -157,7 +157,7 @@ export class PatchRegistrationInvitationsEndpoint extends Endpoint<Params, Query
             // read access is suficient
             || !await Context.auth.canAccessMember(member, PermissionLevel.Read)
         ) {
-            throw Context.auth.error($t(`%1Qv`));
+            throw Context.auth.error($t('%1Qv'));
         }
 
         // cannot invite if already registered

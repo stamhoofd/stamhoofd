@@ -22,7 +22,8 @@
                 </p>
 
                 <div v-for="section of sections" :key="section.id" class="container">
-                    <hr><h2>{{ section.name }}</h2>
+                    <hr>
+                    <h2>{{ section.name }}</h2>
 
                     <div>
                         <SeatSelectionBox v-if="seatingPlan && section" :seating-plan="seatingPlan" :seating-plan-section="section" :reserved-seats="reservedSeats" :seats="highlightedSeats" :highlight-seats="scannedSeats" :on-click-seat="onClickSeat" :on-hover-seat="onHoverSeat" :admin="true" />
@@ -54,7 +55,6 @@ import { computed, onBeforeUnmount, ref } from 'vue';
 
 import type { WebshopManager } from '../WebshopManager';
 import { createTicketPresenter } from '../tickets/createTicketPresenter';
-
 
 const props = defineProps<{
     webshopManager: WebshopManager;
@@ -241,8 +241,7 @@ function onClickSeat(seat: ReservedSeat) {
     // Check if this seat is reserved in the product
     if (selectedProduct.value?.reservedSeats.find(r => r.equals(seat))) {
         new Toast('Deze plaats is gereserveerd, maar de bestelling is nog niet bevestigd. Dit kan voorkomen als de besteller nog aan het afrekenen is.', 'info').show();
-    }
-    else {
+    } else {
         new Toast('Er is nog geen bestelling gekoppeld aan deze plaats.', 'info').show();
     }
 }
@@ -291,8 +290,7 @@ async function loadOrders() {
             orders.value = loadedOrders;
             isLoadingOrders.value = false;
         }
-    }
-    catch (e) {
+    } catch (e) {
         // Database error. We can ignore this and simply move on.
         console.error(e);
     }
@@ -312,8 +310,7 @@ async function refresh(reset = false) {
             orders.value = [];
         }
         await props.webshopManager.orders.fetchAllUpdated({ isFetchAll: reset });
-    }
-    catch (e) {
+    } catch (e) {
         // Fetching failed
         Toast.fromError(e).show();
     }
@@ -322,8 +319,7 @@ async function refresh(reset = false) {
     if (hasTickets.value) {
         try {
             await props.webshopManager.tickets.fetchAllUpdated();
-        }
-        catch (e) {
+        } catch (e) {
             // Fetching failed
             Toast.fromError(e).show();
         }
@@ -366,8 +362,7 @@ function openOrder(order: PrivateOrderWithTickets) {
 
     if (isMobile) {
         show(component).catch(console.error);
-    }
-    else {
+    } else {
         component.modalDisplayStyle = 'popup';
         present(component).catch(console.error);
     }

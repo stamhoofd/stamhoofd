@@ -9,7 +9,8 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <template v-if="twoFactorEnabled || requireTwoFactor">
-            <hr><h2>{{ $t('%Zhg') }}</h2>
+            <hr>
+            <h2>{{ $t('%Zhg') }}</h2>
 
             <STList>
                 <STListItem :selectable="true" element-name="label">
@@ -183,7 +184,8 @@
         </STList>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%NU') }}
             </h2>
 
@@ -275,13 +277,15 @@
                 </template>
             </STList>
 
-            <hr><button class="button text" type="button" @click="applyDiscountCode">
+            <hr>
+            <button class="button text" type="button" @click="applyDiscountCode">
                 <span class="icon gift" /><span>{{ $t('%NX') }}</span>
             </button>
         </div>
 
         <div v-if="hasPlatformFullAccess" key="platform-settings" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%Zk7') }}
             </h2>
 

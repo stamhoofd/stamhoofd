@@ -10,7 +10,7 @@ import { GetGroupsEndpoint } from './GetGroupsEndpoint.js';
 import { Database } from '@node/database';
 import { SessionService } from '../../../services/SessionService.js';
 
-const baseUrl = `/groups`;
+const baseUrl = '/groups';
 
 describe('Endpoint.GetGroupsEndpoint', () => {
     const endpoint = new GetGroupsEndpoint();

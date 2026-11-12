@@ -16,46 +16,46 @@ type OrderLineRow = {
  */
 const columnCategories = {
     get order() {
-        return $t(`%W6`);
+        return $t('%W6');
     },
     get customer() {
-        return $t(`%1J1`);
+        return $t('%1J1');
     },
     get questions() {
-        return $t(`%ZeZ`);
+        return $t('%ZeZ');
     },
     get item() {
-        return $t(`%Sc`);
+        return $t('%Sc');
     },
     get participant() {
         return $t('%Zzm');
     },
     get checkout() {
-        return $t(`%Zeq`);
+        return $t('%Zeq');
     },
     get price() {
-        return $t(`%1IP`);
+        return $t('%1IP');
     },
     get payment() {
-        return $t(`%ZfL`);
+        return $t('%ZfL');
     },
     get orderedItems() {
-        return $t(`%Zf8`);
+        return $t('%Zf8');
     },
     get ticket() {
-        return $t(`%Zee`);
+        return $t('%Zee');
     },
     get scanning() {
-        return $t(`%lF`);
+        return $t('%lF');
     },
     get qrCode() {
-        return $t(`%Zf9`);
+        return $t('%Zf9');
     },
     get priceChoices() {
-        return $t(`%Sd`);
+        return $t('%Sd');
     },
     get options() {
-        return $t(`%Zf3`);
+        return $t('%Zf3');
     },
 };
 
@@ -138,10 +138,10 @@ function groupColumnsByCategory<R>(groups: SelectableXlsxTransformerColumn<R>[])
 
 function getCheckoutTypeString(order: PrivateOrder): string {
     if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-        return $t(`%xG`);
+        return $t('%xG');
     }
     if (order.data.checkoutMethod?.type === CheckoutMethodType.Delivery) {
-        return $t(`%xH`, { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
+        return $t('%xH', { name: order.data.checkoutMethod.name.length > 0 ? '(' + order.data.checkoutMethod.name + ')' : '' });
     }
     return '/';
 }
@@ -164,7 +164,7 @@ function getOrderDetailGroups<R>(getOrder: (row: R) => PrivateOrder): Selectable
     return [
         singleColumnGroup<R>({
             id: 'number',
-            name: $t(`%xA`),
+            name: $t('%xA'),
             category: columnCategories.order,
             getValue: row => ({
                 value: getOrder(row).number ?? 0,
@@ -173,7 +173,7 @@ function getOrderDetailGroups<R>(getOrder: (row: R) => PrivateOrder): Selectable
         }),
         singleColumnGroup<R>({
             id: 'createdAt',
-            name: $t(`%cB`),
+            name: $t('%cB'),
             category: columnCategories.order,
             getValue: row => ({
                 value: getOrder(row).createdAt,
@@ -186,31 +186,31 @@ function getOrderDetailGroups<R>(getOrder: (row: R) => PrivateOrder): Selectable
         }),
         singleColumnGroup<R>({
             id: 'customer.firstName',
-            name: $t(`%1MT`),
+            name: $t('%1MT'),
             category: columnCategories.customer,
             getValue: row => ({ value: getOrder(row).data.customer.firstName }),
         }),
         singleColumnGroup<R>({
             id: 'customer.lastName',
-            name: $t(`%1MU`),
+            name: $t('%1MU'),
             category: columnCategories.customer,
             getValue: row => ({ value: getOrder(row).data.customer.lastName }),
         }),
         singleColumnGroup<R>({
             id: 'customer.email',
-            name: $t(`%xB`),
+            name: $t('%xB'),
             category: columnCategories.customer,
             getValue: row => ({ value: getOrder(row).data.customer.email }),
         }),
         singleColumnGroup<R>({
             id: 'customer.phone',
-            name: $t(`%18Z`),
+            name: $t('%18Z'),
             category: columnCategories.customer,
             getValue: row => ({ value: getOrder(row).data.customer.phone }),
         }),
         singleColumnGroup<R>({
             id: 'customer.birthDay',
-            name: $t(`%17w`),
+            name: $t('%17w'),
             category: columnCategories.customer,
             getValue: (row) => {
                 const birthDay = getOrder(row).data.customer.birthDay;
@@ -229,7 +229,7 @@ function getOrderDetailGroups<R>(getOrder: (row: R) => PrivateOrder): Selectable
         }),
         singleColumnGroup<R>({
             id: 'customer.gender',
-            name: $t(`%Zd4`),
+            name: $t('%Zd4'),
             category: columnCategories.customer,
             getValue: (row) => {
                 const gender = getOrder(row).data.customer.gender;
@@ -238,8 +238,8 @@ function getOrderDetailGroups<R>(getOrder: (row: R) => PrivateOrder): Selectable
         }),
         singleColumnGroup<R>({
             id: 'customer.address',
-            name: $t(`%Zew`),
-            description: $t(`%Zei`),
+            name: $t('%Zew'),
+            description: $t('%Zei'),
             category: columnCategories.customer,
             getValue: row => ({ value: getOrder(row).data.customer.address?.toString() ?? '' }),
         }),
@@ -339,11 +339,11 @@ function getCartItemOptionGroups(webshop: Webshop, orders: PrivateOrder[]): Sele
 
     const addProduct = (product: Product) => {
         if (product.prices.length > 1) {
-            addName($t(`%x8`));
+            addName($t('%x8'));
         }
 
         if ((product.type === ProductType.Ticket || product.type === ProductType.Voucher) && product.dateRange) {
-            addName($t(`%x9`));
+            addName($t('%x9'));
         }
 
         for (const menu of product.optionMenus) {
@@ -378,12 +378,12 @@ function getCartItemOptionValue(item: CartItem, slug: string): string {
     let value = '';
 
     // Product price choice
-    if (item.product.prices.length > 1 && Formatter.slug($t(`%x8`)) === slug) {
+    if (item.product.prices.length > 1 && Formatter.slug($t('%x8')) === slug) {
         value = item.productPrice.name;
     }
 
     // Ticket date/time
-    if ((item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) && item.product.dateRange && Formatter.slug($t(`%x9`)) === slug) {
+    if ((item.product.type === ProductType.Ticket || item.product.type === ProductType.Voucher) && item.product.dateRange && Formatter.slug($t('%x9')) === slug) {
         value = item.product.dateRange.toString();
     }
 
@@ -422,13 +422,13 @@ function getCartItemCustomerGroups(webshop: Webshop, orders: PrivateOrder[]): Se
     });
 
     const groups: SelectableXlsxTransformerColumn<OrderLineRow>[] = [
-        customerColumn('firstName', $t(`%1MT`), item => ({ value: item.customer!.firstName })),
-        customerColumn('lastName', $t(`%1MU`), item => ({ value: item.customer!.lastName })),
-        customerColumn('email', $t(`%1FK`), item => ({ value: item.customer!.email })),
-        customerColumn('phone', $t(`%2k`), item => ({ value: item.customer!.phone })),
-        customerColumn('birthDay', $t(`%17w`), item => item.customer!.birthDay ? { value: item.customer!.birthDay, style: { numberFormat: { formatCode: 'dd/mm/yyyy' } } } : { value: '' }),
-        customerColumn('gender', $t(`%Zd4`), item => ({ value: item.customer!.gender === Gender.Other ? '' : getGenderName(item.customer!.gender) })),
-        customerColumn('address', $t(`%Cn`), item => ({ value: item.customer!.address?.toString() ?? '' })),
+        customerColumn('firstName', $t('%1MT'), item => ({ value: item.customer!.firstName })),
+        customerColumn('lastName', $t('%1MU'), item => ({ value: item.customer!.lastName })),
+        customerColumn('email', $t('%1FK'), item => ({ value: item.customer!.email })),
+        customerColumn('phone', $t('%2k'), item => ({ value: item.customer!.phone })),
+        customerColumn('birthDay', $t('%17w'), item => item.customer!.birthDay ? { value: item.customer!.birthDay, style: { numberFormat: { formatCode: 'dd/mm/yyyy' } } } : { value: '' }),
+        customerColumn('gender', $t('%Zd4'), item => ({ value: item.customer!.gender === Gender.Other ? '' : getGenderName(item.customer!.gender) })),
+        customerColumn('address', $t('%Cn'), item => ({ value: item.customer!.address?.toString() ?? '' })),
     ];
 
     // Files and images cannot be represented in a spreadsheet cell
@@ -548,29 +548,29 @@ function getItemAmountGroups(webshop: Webshop, orders: PrivateOrder[]): Selectab
 function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXlsxTransformerSheet<PrivateOrderWithTickets, OrderLineRow> {
     return {
         id: 'orderLines',
-        name: $t(`%xP`),
-        description: $t(`%ZfB`),
+        name: $t('%xP'),
+        description: $t('%ZfB'),
         transform: orders => orders.flatMap(order => order.data.cart.items.map(item => ({ order, item }))),
         expandableColumns: [
             ...getOrderDetailGroups<OrderLineRow>(row => row.order),
             ...getAnswerGroups<OrderLineRow>(webshop, orders, row => row.order),
             singleColumnGroup<OrderLineRow>({
                 id: 'comments',
-                name: $t(`%Ve`),
-                description: $t(`%Zem`),
+                name: $t('%Ve'),
+                description: $t('%Zem'),
                 category: columnCategories.order,
                 getValue: row => ({ value: row.order.data.comments }),
             }),
             singleColumnGroup<OrderLineRow>({
                 id: 'product',
-                name: $t(`%Sc`),
+                name: $t('%Sc'),
                 category: columnCategories.item,
                 getValue: row => ({ value: row.item.product.name }),
             }),
             singleColumnGroup<OrderLineRow>({
                 id: 'amount',
-                name: $t(`%M4`),
-                description: $t(`%Zf1`),
+                name: $t('%M4'),
+                description: $t('%Zf1'),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: row.item.amount,
@@ -579,8 +579,8 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
             }),
             singleColumnGroup<OrderLineRow>({
                 id: 'unitPrice',
-                name: $t(`%xC`),
-                description: $t(`%ZfX`),
+                name: $t('%xC'),
+                description: $t('%ZfX'),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: (row.item.getUnitPrice(row.order.data.cart) ?? 0) / 10000,
@@ -589,8 +589,8 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
             }),
             singleColumnGroup<OrderLineRow>({
                 id: 'extraPrice',
-                name: $t(`%xD`),
-                description: $t(`%Zez`),
+                name: $t('%xD'),
+                description: $t('%Zez'),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: (row.item.getPartialExtraPrice(row.order.data.cart) ?? 0) / 10000,
@@ -599,8 +599,8 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
             }),
             singleColumnGroup<OrderLineRow>({
                 id: 'discount',
-                name: $t(`%176`),
-                description: $t(`%ZfT`),
+                name: $t('%176'),
+                description: $t('%ZfT'),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: (row.item.getPriceWithDiscounts() - row.item.getPriceWithoutDiscounts()) / 10000,
@@ -609,8 +609,8 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
             }),
             singleColumnGroup<OrderLineRow>({
                 id: 'price',
-                name: $t(`%1IP`),
-                description: $t(`%ZfN`),
+                name: $t('%1IP'),
+                description: $t('%ZfN'),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: (row.item.getPriceWithDiscounts() ?? 0) / 10000,
@@ -621,7 +621,7 @@ function getOrderLinesSheet(webshop: Webshop, orders: PrivateOrder[]): Selectabl
             ...getCartItemCustomerGroups(webshop, orders),
             singleColumnGroup<OrderLineRow>({
                 id: 'seats',
-                name: $t(`%sB`),
+                name: $t('%sB'),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: row.item.seats.slice().sort(ReservedSeat.sort).map(s => s.getNameString(webshop, row.item.product)).join(', '),
@@ -637,21 +637,21 @@ function getCheckoutDetailGroups<R>(getOrder: (row: R) => PrivateOrder): Selecta
     return [
         singleColumnGroup<R>({
             id: 'checkoutMethod',
-            name: $t(`%xE`),
+            name: $t('%xE'),
             category: columnCategories.checkout,
             getValue: row => ({ value: getCheckoutTypeString(getOrder(row)) }),
         }),
         singleColumnGroup<R>({
             id: 'checkoutAddress',
-            name: $t(`%xF`),
-            description: $t(`%Zeg`),
+            name: $t('%xF'),
+            description: $t('%Zeg'),
             category: columnCategories.checkout,
             getValue: row => ({ value: getCheckoutAddressString(getOrder(row)) }),
         }),
         singleColumnGroup<R>({
             id: 'timeSlotDate',
-            name: $t(`%7R`),
-            description: $t(`%ZfI`),
+            name: $t('%7R'),
+            description: $t('%ZfI'),
             category: columnCategories.checkout,
             getValue: (row) => {
                 const timeSlot = getOrder(row).data.timeSlot;
@@ -660,7 +660,7 @@ function getCheckoutDetailGroups<R>(getOrder: (row: R) => PrivateOrder): Selecta
         }),
         singleColumnGroup<R>({
             id: 'timeSlotTime',
-            name: $t(`%1GD`),
+            name: $t('%1GD'),
             category: columnCategories.checkout,
             getValue: (row) => {
                 const timeSlot = getOrder(row).data.timeSlot;
@@ -674,28 +674,28 @@ function getOrderStatusGroups<R>(getOrder: (row: R) => PrivateOrder): Selectable
     return [
         singleColumnGroup<R>({
             id: 'paymentMethod',
-            name: $t(`%M7`),
+            name: $t('%M7'),
             category: columnCategories.payment,
             getValue: row => ({ value: PaymentMethodHelper.getNameCapitalized(getOrder(row).data.paymentMethod) }),
         }),
         singleColumnGroup<R>({
             id: 'paid',
-            name: $t(`%1OD`),
-            description: $t(`%ZeX`),
+            name: $t('%1OD'),
+            description: $t('%ZeX'),
             category: columnCategories.payment,
-            getValue: row => ({ value: getOrder(row).openBalance <= 0 ? $t(`%1OD`) : $t(`%xI`) }),
+            getValue: row => ({ value: getOrder(row).openBalance <= 0 ? $t('%1OD') : $t('%xI') }),
         }),
         singleColumnGroup<R>({
             id: 'status',
-            name: $t(`%1A`),
-            description: $t(`%ZfE`),
+            name: $t('%1A'),
+            description: $t('%ZfE'),
             category: columnCategories.payment,
             getValue: row => ({ value: OrderStatusHelper.getName(getOrder(row).status) }),
         }),
         singleColumnGroup<R>({
             id: 'discountCodes',
-            name: $t(`%1MX`),
-            description: $t(`%Zf2`),
+            name: $t('%1MX'),
+            description: $t('%Zf2'),
             category: columnCategories.payment,
             getValue: row => ({ value: getOrder(row).data.discountCodes.map(d => d.code).join(', ') }),
         }),
@@ -708,24 +708,24 @@ function getOrderStatusGroups<R>(getOrder: (row: R) => PrivateOrder): Selectable
 function getOrdersSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXlsxTransformerSheet<PrivateOrderWithTickets, PrivateOrder> {
     return {
         id: 'orders',
-        name: $t(`%xQ`),
-        description: $t(`%Zf0`),
+        name: $t('%xQ'),
+        description: $t('%Zf0'),
         transform: orders => orders,
         expandableColumns: [
             ...getOrderDetailGroups<PrivateOrder>(order => order),
             ...getAnswerGroups<PrivateOrder>(webshop, orders, order => order),
             singleColumnGroup<PrivateOrder>({
                 id: 'comments',
-                name: $t(`%Ve`),
-                description: $t(`%Zem`),
+                name: $t('%Ve'),
+                description: $t('%Zem'),
                 category: columnCategories.order,
                 getValue: order => ({ value: order.data.comments }),
             }),
             ...getCheckoutDetailGroups<PrivateOrder>(order => order),
             singleColumnGroup<PrivateOrder>({
                 id: 'subtotal',
-                name: $t(`%xJ`),
-                description: $t(`%Zey`),
+                name: $t('%xJ'),
+                description: $t('%Zey'),
                 category: columnCategories.price,
                 getValue: order => ({
                     value: order.data.cart.priceWithDiscounts / 10000,
@@ -734,8 +734,8 @@ function getOrdersSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXls
             }),
             singleColumnGroup<PrivateOrder>({
                 id: 'discount',
-                name: $t(`%176`),
-                description: $t(`%Zf5`),
+                name: $t('%176'),
+                description: $t('%Zf5'),
                 category: columnCategories.price,
                 getValue: order => ({
                     value: (order.data.appliedPercentageDiscount + order.data.fixedDiscount) / 10000,
@@ -744,7 +744,7 @@ function getOrdersSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXls
             }),
             singleColumnGroup<PrivateOrder>({
                 id: 'deliveryPrice',
-                name: $t(`%Sn`),
+                name: $t('%Sn'),
                 category: columnCategories.price,
                 getValue: order => ({
                     value: order.data.deliveryPrice / 10000,
@@ -753,7 +753,7 @@ function getOrdersSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXls
             }),
             singleColumnGroup<PrivateOrder>({
                 id: 'administrationFee',
-                name: $t(`%xK`),
+                name: $t('%xK'),
                 category: columnCategories.price,
                 getValue: order => ({
                     value: order.data.administrationFee / 10000,
@@ -762,8 +762,8 @@ function getOrdersSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXls
             }),
             singleColumnGroup<PrivateOrder>({
                 id: 'totalPrice',
-                name: $t(`%xL`),
-                description: $t(`%ZfC`),
+                name: $t('%xL'),
+                description: $t('%ZfC'),
                 category: columnCategories.price,
                 getValue: order => ({
                     value: order.data.totalPrice / 10000,
@@ -787,9 +787,9 @@ type TicketRow = {
 function getTicketsSheet(webshop: Webshop, organization: Organization): SelectableXlsxTransformerSheet<PrivateOrderWithTickets, TicketRow> {
     return {
         id: 'tickets',
-        name: $t(`%1AU`),
-        description: $t(`%Zeu`),
-        warning: $t(`%Zfa`),
+        name: $t('%1AU'),
+        description: $t('%Zeu'),
+        warning: $t('%Zfa'),
         transform: orders => orders.flatMap(order =>
             order.tickets
                 .filter(ticket => !ticket.deletedAt)
@@ -800,7 +800,7 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): Selectab
         expandableColumns: [
             singleColumnGroup<TicketRow>({
                 id: 'number',
-                name: $t(`%xA`),
+                name: $t('%xA'),
                 category: columnCategories.order,
                 getValue: row => ({
                     value: row.order.number ?? 0,
@@ -809,14 +809,14 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): Selectab
             }),
             singleColumnGroup<TicketRow>({
                 id: 'product',
-                name: $t(`%Sc`),
+                name: $t('%Sc'),
                 category: columnCategories.ticket,
                 getValue: row => ({ value: row.ticket.getTitle() }),
             }),
             singleColumnGroup<TicketRow>({
                 id: 'description',
-                name: $t(`%6o`),
-                description: $t(`%Zf6`),
+                name: $t('%6o'),
+                description: $t('%Zf6'),
                 category: columnCategories.ticket,
                 getValue: (row) => {
                     if (row.ticket.isSingle) {
@@ -828,14 +828,14 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): Selectab
             }),
             singleColumnGroup<TicketRow>({
                 id: 'indexText',
-                name: $t(`%cH`),
-                description: $t(`%Zes`),
+                name: $t('%cH'),
+                description: $t('%Zes'),
                 category: columnCategories.ticket,
                 getValue: row => ({ value: row.ticket.getIndexText() ?? '' }),
             }),
             singleColumnGroup<TicketRow>({
                 id: 'seat',
-                name: $t(`%sA`),
+                name: $t('%sA'),
                 category: columnCategories.ticket,
                 getValue: (row) => {
                     const product = row.ticket.items[0]?.product;
@@ -844,7 +844,7 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): Selectab
             }),
             singleColumnGroup<TicketRow>({
                 id: 'ticketDate',
-                name: $t(`%x9`),
+                name: $t('%x9'),
                 category: columnCategories.ticket,
                 getValue: (row) => {
                     const dateRange = row.ticket.isSingle ? row.ticket.items[0].product.dateRange : null;
@@ -853,7 +853,7 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): Selectab
             }),
             singleColumnGroup<TicketRow>({
                 id: 'price',
-                name: $t(`%1IP`),
+                name: $t('%1IP'),
                 category: columnCategories.ticket,
                 getValue: row => ({
                     value: row.ticket.getPrice(row.order) / 10000,
@@ -862,26 +862,26 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): Selectab
             }),
             singleColumnGroup<TicketRow>({
                 id: 'customer.firstName',
-                name: $t(`%1MT`),
+                name: $t('%1MT'),
                 category: columnCategories.customer,
                 getValue: row => ({ value: row.order.data.customer.firstName }),
             }),
             singleColumnGroup<TicketRow>({
                 id: 'customer.lastName',
-                name: $t(`%1MU`),
+                name: $t('%1MU'),
                 category: columnCategories.customer,
                 getValue: row => ({ value: row.order.data.customer.lastName }),
             }),
             singleColumnGroup<TicketRow>({
                 id: 'customer.email',
-                name: $t(`%xB`),
+                name: $t('%xB'),
                 category: columnCategories.customer,
                 getValue: row => ({ value: row.order.data.customer.email }),
             }),
             singleColumnGroup<TicketRow>({
                 id: 'scannedAt',
-                name: $t(`%ZeW`),
-                description: $t(`%ZfS`),
+                name: $t('%ZeW'),
+                description: $t('%ZfS'),
                 category: columnCategories.scanning,
                 getValue: (row) => {
                     if (!row.ticket.scannedAt) {
@@ -899,21 +899,21 @@ function getTicketsSheet(webshop: Webshop, organization: Organization): Selectab
             }),
             singleColumnGroup<TicketRow>({
                 id: 'scannedBy',
-                name: $t(`%Vx`),
+                name: $t('%Vx'),
                 category: columnCategories.scanning,
                 getValue: row => ({ value: row.ticket.scannedBy ?? '' }),
             }),
             singleColumnGroup<TicketRow>({
                 id: 'secret',
-                name: $t(`%Zf4`),
-                description: $t(`%Zep`),
+                name: $t('%Zf4'),
+                description: $t('%Zep'),
                 category: columnCategories.qrCode,
                 getValue: row => ({ value: row.ticket.secret }),
             }),
             singleColumnGroup<TicketRow>({
                 id: 'url',
-                name: $t(`%Zel`),
-                description: $t(`%ZfG`),
+                name: $t('%Zel'),
+                description: $t('%ZfG'),
                 category: columnCategories.qrCode,
                 getValue: row => ({ value: 'https://' + webshop.getUrl(organization) + '/tickets/' + row.ticket.secret }),
             }),
@@ -955,23 +955,23 @@ function getProductTotalRows(orders: PrivateOrder[]): ProductTotalRow[] {
 function getProductsSheet(): SelectableXlsxTransformerSheet<PrivateOrderWithTickets, ProductTotalRow> {
     return {
         id: 'products',
-        name: $t(`%15p`),
-        description: $t(`%ZfK`),
+        name: $t('%15p'),
+        description: $t('%ZfK'),
         transform: orders => getProductTotalRows(orders),
         expandableColumns: [
             singleColumnGroup<ProductTotalRow>({
                 id: 'product',
-                name: $t(`%Sc`),
+                name: $t('%Sc'),
                 getValue: row => ({ value: row.name }),
             }),
             singleColumnGroup<ProductTotalRow>({
                 id: 'variant',
-                name: $t(`%1y`),
+                name: $t('%1y'),
                 getValue: row => ({ value: row.variant }),
             }),
             singleColumnGroup<ProductTotalRow>({
                 id: 'amount',
-                name: $t(`%M4`),
+                name: $t('%M4'),
                 getValue: row => ({
                     value: row.amount,
                     style: integerStyle(),
@@ -1084,26 +1084,26 @@ function getOptionsSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXl
 
     return {
         id: 'options',
-        name: $t(`%xR`),
-        description: $t(`%Zen`),
+        name: $t('%xR'),
+        description: $t('%Zen'),
         transform: orders => getOptionTotalRows(webshop, orders),
         expandableColumns: [
             singleColumnGroup<OptionTotalRow>({
                 id: 'product',
-                name: $t(`%Sc`),
+                name: $t('%Sc'),
                 category: columnCategories.item,
                 getValue: row => ({ value: row.name }),
             }),
             singleColumnGroup<OptionTotalRow>({
                 id: 'date',
-                name: $t(`%7R`),
+                name: $t('%7R'),
                 category: columnCategories.item,
                 getValue: row => ({ value: row.date }),
             }),
             singleColumnGroup<OptionTotalRow>({
                 id: 'total',
-                name: $t(`%xL`),
-                description: $t(`%ZfF`),
+                name: $t('%xL'),
+                description: $t('%ZfF'),
                 category: columnCategories.item,
                 getValue: row => ({
                     value: row.amount,
@@ -1113,7 +1113,7 @@ function getOptionsSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXl
             ...[...productPriceNames.entries()].map(([slug, name]) => singleColumnGroup<OptionTotalRow>({
                 id: `price.${slug}`,
                 name,
-                description: $t(`%ZfA`),
+                description: $t('%ZfA'),
                 category: columnCategories.priceChoices,
                 getValue: row => ({
                     value: row.productPriceCounts.get(slug) ?? 0,
@@ -1123,7 +1123,7 @@ function getOptionsSheet(webshop: Webshop, orders: PrivateOrder[]): SelectableXl
             ...[...optionNames.entries()].map(([slug, name]) => singleColumnGroup<OptionTotalRow>({
                 id: `option.${slug}`,
                 name,
-                description: $t(`%ZfO`),
+                description: $t('%ZfO'),
                 category: columnCategories.options,
                 getValue: row => ({
                     value: row.optionCounts.get(slug) ?? 0,

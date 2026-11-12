@@ -24,15 +24,12 @@ export function useGoToUitpasConfiguration(patchedProduct: Ref<Product>, addProd
         if (hasEvent && !isOk) {
             // fix this in settings
             await goToUitpasSettings(onFixed);
-        }
-        else if ((!hasEvent && hasOtherUitpasPrices) || (hasEvent && isOk)) {
+        } else if ((!hasEvent && hasOtherUitpasPrices) || (hasEvent && isOk)) {
             // correctly configured or previously decided for non-official flow
             await onFixed();
-        }
-        else if (!hasEvent && isOk && !hasOtherUitpasPrices) {
+        } else if (!hasEvent && isOk && !hasOtherUitpasPrices) {
             await goToUitpasEventSearch(true, onFixed);
-        }
-        else { // !hasUrl && !isOk && !hasOtherUitpasPrices
+        } else { // !hasUrl && !isOk && !hasOtherUitpasPrices
             // ask for non-official or offcial flow
             const useNonOfficial = await CenteredMessage.confirm(
                 $t('%1C5'),

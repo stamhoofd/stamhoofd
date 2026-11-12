@@ -53,7 +53,7 @@ export class EmailColumnMatcher extends SharedMemberDetailsMatcher implements Co
         if (!DataValidator.isEmailValid(email)) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%1Mi`),
+                message: $t('%1Mi'),
             });
         }
 
@@ -61,8 +61,7 @@ export class EmailColumnMatcher extends SharedMemberDetailsMatcher implements Co
             importResult.addPatch({
                 email,
             });
-        }
-        else if (this.category === MemberDetailsMatcherCategory.Parent1 as string || this.category === MemberDetailsMatcherCategory.Parent2 as string) {
+        } else if (this.category === MemberDetailsMatcherCategory.Parent1 as string || this.category === MemberDetailsMatcherCategory.Parent2 as string) {
             ColumnMatcherHelper.patchParent(importResult, this.category as (MemberDetailsMatcherCategory.Parent1 | MemberDetailsMatcherCategory.Parent2), {
                 email,
             });

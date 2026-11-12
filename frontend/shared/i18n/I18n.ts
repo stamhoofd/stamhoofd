@@ -29,8 +29,7 @@ export class I18n {
             if (typeof (element) !== 'string') {
                 const map2 = this.loadRecursive(element, (prefix ? prefix + '.' : '') + key);
                 map2.forEach((val, key) => map.set(key, val));
-            }
-            else {
+            } else {
                 map.set((prefix ? prefix + '.' : '') + key, element);
             }
         }
@@ -69,8 +68,7 @@ export class I18n {
         this.messages = messages;
         try {
             return fn();
-        }
-        finally {
+        } finally {
             this.locale = previous.locale;
             this.language = previous.language;
             this.messages = previous.messages;
@@ -85,8 +83,7 @@ export class I18n {
         // Merge maps
         if (existing) {
             loaded.forEach((val, key) => existing.set(key, val));
-        }
-        else {
+        } else {
             this.loadedLocales.set(locale, loaded);
         }
     }

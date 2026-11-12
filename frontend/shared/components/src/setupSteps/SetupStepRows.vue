@@ -14,11 +14,11 @@ import { computed } from 'vue';
 import SetupStepRow from './SetupStepRow.vue';
 
 const props = defineProps<{
-    steps: SetupSteps,
-    listType: 'review' | 'todo'
+    steps: SetupSteps;
+    listType: 'review' | 'todo';
 }>();
 
-const emits = defineEmits<{(e: 'select', setupStepType: SetupStepType): void}>();
+const emits = defineEmits<{ (e: 'select', setupStepType: SetupStepType): void }>();
 
 const $steps = computed(() => props.steps.getAll() ?? []);
 const $stepsByPriority = computed(() => [...$steps.value].sort((a, b) => b.step.priority - a.step.priority));

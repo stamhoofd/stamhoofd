@@ -513,11 +513,11 @@ export class BalanceItem extends QueryableModel {
         let secondWhere = '';
 
         if (balanceItemIds !== 'all') {
-            firstWhere = ` AND balanceItemId IN (?)`;
+            firstWhere = ' AND balanceItemId IN (?)';
             params.push(balanceItemIds);
             params.push(balanceItemIds);
 
-            secondWhere = `WHERE balance_items.id IN (?)`;
+            secondWhere = 'WHERE balance_items.id IN (?)';
             params.push(balanceItemIds);
         }
 
@@ -573,11 +573,11 @@ export class BalanceItem extends QueryableModel {
         let secondWhere = '';
 
         if (balanceItemIds !== 'all') {
-            firstWhere = ` AND balanceItemId IN (?)`;
+            firstWhere = ' AND balanceItemId IN (?)';
             params.push(balanceItemIds);
             params.push(balanceItemIds);
 
-            secondWhere = `WHERE balance_items.id IN (?)`;
+            secondWhere = 'WHERE balance_items.id IN (?)';
             params.push(balanceItemIds);
         }
 

@@ -111,21 +111,21 @@ const passwordChanged = ref(false);
 const verificationEmailSent = ref(false);
 
 const loadingSession = computed(() => !session.value?.user || loadingToken.value);
-const title = computed(() => hasAccount.value ? $t(`%oM`) : $t(`%ur`));
+const title = computed(() => hasAccount.value ? $t('%oM') : $t('%ur'));
 const allowNameChange = computed(() => !hasAccount.value || session.value?.user?.permissions !== null);
 const description = computed(() => {
     if (organization.value) {
         return hasAccount.value
-            ? $t(`%1AZ`, { organizationName: organization.value.name })
-            : $t(`%1Aa`, { organizationName: organization.value.name });
+            ? $t('%1AZ', { organizationName: organization.value.name })
+            : $t('%1Aa', { organizationName: organization.value.name });
     }
-    return hasAccount.value ? $t(`%us`) : $t(`%ut`);
+    return hasAccount.value ? $t('%us') : $t('%ut');
 });
-const buttonText = computed(() => hasAccount.value ? $t(`%uu`) : $t(`%ur`));
+const buttonText = computed(() => hasAccount.value ? $t('%uu') : $t('%ur'));
 
 onMounted(() => {
     if (!props.token) {
-        new Toast($t(`%EF`), 'error red').show();
+        new Toast($t('%EF'), 'error red').show();
         dismiss({ force: true }).catch(console.error);
         return;
     }
@@ -173,7 +173,7 @@ async function trade() {
         loadingToken.value = false;
     } catch (e) {
         errorBox.value = new ErrorBox(e);
-        new Toast($t(`%uv`), 'error red').show();
+        new Toast($t('%uv'), 'error red').show();
         dismiss({ force: true }).catch(console.error);
     }
 }
@@ -255,10 +255,10 @@ async function submit() {
         try {
             const errors = new SimpleErrors();
             if (firstName.value.length < 2) {
-                errors.addError(new SimpleError({ code: 'invalid_field', message: $t(`%uw`), field: 'firstName' }));
+                errors.addError(new SimpleError({ code: 'invalid_field', message: $t('%uw'), field: 'firstName' }));
             }
             if (lastName.value.length < 2) {
-                errors.addError(new SimpleError({ code: 'invalid_field', message: $t(`%ux`), field: 'lastName' }));
+                errors.addError(new SimpleError({ code: 'invalid_field', message: $t('%ux'), field: 'lastName' }));
             }
             errors.throwIfNotEmpty();
         } catch (e) {
@@ -269,13 +269,13 @@ async function submit() {
 
     const valid = await validator.validate();
     if (password.value !== passwordRepeat.value) {
-        errorBox.value = new ErrorBox(new SimpleError({ code: '', message: $t(`%12T`) }));
+        errorBox.value = new ErrorBox(new SimpleError({ code: '', message: $t('%12T') }));
         return;
     }
 
     const minChars = 8;
     if (password.value.length < minChars) {
-        errorBox.value = new ErrorBox(new SimpleError({ code: '', message: $t(`%14k`, { count: minChars }) }));
+        errorBox.value = new ErrorBox(new SimpleError({ code: '', message: $t('%14k', { count: minChars }) }));
         return;
     }
     if (!valid) {
@@ -330,9 +330,9 @@ async function finish() {
     await SessionManager.prepareSessionForUsage(session.value);
 
     if (hasAccount.value) {
-        new Toast($t(`%12U`), 'success green').show();
+        new Toast($t('%12U'), 'success green').show();
     } else {
-        new Toast($t(`%uy`), 'success green').show();
+        new Toast($t('%uy'), 'success green').show();
     }
 
     if (verificationEmailSent.value) {

@@ -43,6 +43,7 @@ export class StreetNumberColumnMatcher extends SharedMemberDetailsMatcher implem
         }
         return true;
     }
+
     setValue(cell: XLSX.CellObject | undefined, importResult: ImportMemberResult) {
         if (!cell) {
             return;

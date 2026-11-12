@@ -1,40 +1,40 @@
 name: Auto-ready on label
 
 on:
-  pull_request:
-    types: [labeled]
+    pull_request:
+        types: [labeled]
 
 jobs:
-  check_and_ready:
-    name: 'Mark ready if CI already passed'
-    runs-on: ubuntu-latest
-    if: github.event.label.name == 'ready if CI succeeds'
-    permissions:
-      contents: write
-      pull-requests: write
-      actions: read
-    steps:
-      - name: Check if CI passed and mark ready
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          SHA: ${{ github.event.pull_request.head.sha }}
-          REPO: ${{ github.repository }}
-        run: |
-          STATUS=$(gh api "repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$SHA&status=completed&per_page=1" \
-            --jq '.workflow_runs[0].conclusion // empty')
+    check_and_ready:
+        name: 'Mark ready if CI already passed'
+        runs-on: ubuntu-latest
+        if: github.event.label.name == 'ready if CI succeeds'
+        permissions:
+            contents: write
+            pull-requests: write
+            actions: read
+        steps:
+            - name: Check if CI passed and mark ready
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+                  SHA: ${{ github.event.pull_request.head.sha }}
+                  REPO: ${{ github.repository }}
+              run: |
+                  STATUS=$(gh api "repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$SHA&status=completed&per_page=1" \
+                    --jq '.workflow_runs[0].conclusion // empty')
 
-          if [ "$STATUS" != "success" ]; then
-            echo "CI has not passed yet for $SHA (conclusion: ${STATUS:-none}). Will convert when CI completes."
-            exit 0
-          fi
+                  if [ "$STATUS" != "success" ]; then
+                    echo "CI has not passed yet for $SHA (conclusion: ${STATUS:-none}). Will convert when CI completes."
+                    exit 0
+                  fi
 
-          # CI already passed. Convert to ready-for-review if still a draft, and
-          # drop the label either way so it doesn't linger.
-          IS_DRAFT=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json isDraft --jq '.isDraft')
-          if [ "$IS_DRAFT" = "true" ]; then
-            gh pr ready "$PR_NUMBER" --repo "$REPO" || true
-            echo "CI already passed — marked PR #$PR_NUMBER as ready for review"
-          fi
-          gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "ready if CI succeeds" || true
-          echo "Removed the label from PR #$PR_NUMBER"
+                  # CI already passed. Convert to ready-for-review if still a draft, and
+                  # drop the label either way so it doesn't linger.
+                  IS_DRAFT=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json isDraft --jq '.isDraft')
+                  if [ "$IS_DRAFT" = "true" ]; then
+                    gh pr ready "$PR_NUMBER" --repo "$REPO" || true
+                    echo "CI already passed — marked PR #$PR_NUMBER as ready for review"
+                  fi
+                  gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "ready if CI succeeds" || true
+                  echo "Removed the label from PR #$PR_NUMBER"

@@ -224,7 +224,7 @@ export class SSOService {
             throw new SimpleError({
                 code: 'invalid_user',
                 message: 'User not allowed to use this login method',
-                human: $t(`%Fz`),
+                human: $t('%Fz'),
                 statusCode: 400,
             });
         }
@@ -520,7 +520,7 @@ export class SSOService {
 
             return response;
         } catch (e) {
-            const message = (isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t(`%G0`));
+            const message = (isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t('%G0'));
             console.error('Error in openID callback', e);
             return SSOServiceWithSession.getErrorRedirectResponse(session, message);
         }
@@ -662,7 +662,7 @@ export class SSOServiceWithSession {
                     throw new SimpleError({
                         code: 'invalid_user',
                         message: 'User not found: please log in with the same email address as the user you are trying to link',
-                        human: $t(`%G1`),
+                        human: $t('%G1'),
                         statusCode: 404,
                     });
                 }
@@ -735,7 +735,7 @@ export class SSOServiceWithSession {
                         throw new SimpleError({
                             code: 'error',
                             message: 'Could not generate token',
-                            human: $t(`%D6`),
+                            human: $t('%D6'),
                             statusCode: 500,
                         });
                     }
@@ -789,7 +789,7 @@ export class SSOServiceWithSession {
 
             return response;
         } catch (e) {
-            const message = (isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t(`%G0`));
+            const message = (isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t('%G0'));
             console.error('Error in openID callback', e);
             return SSOServiceWithSession.getErrorRedirectResponse(session, message);
         }

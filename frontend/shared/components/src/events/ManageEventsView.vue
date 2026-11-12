@@ -43,7 +43,8 @@
             </template>
 
             <div v-for="(group, index) of groupedEvents" :key="group.title" class="container">
-                <hr v-if="index > 0"><h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
+                <hr v-if="index > 0">
+                <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
                     <EventRow v-for="event of group.events" :key="event.id" :event="event" @click="onClickEvent(event)" />
@@ -107,7 +108,7 @@ const selectedUIFilter = ref(createDefaultUIFilter()) as Ref<null | UIFilter>;
 const yearLabels = computed(() => {
     return years.value.map((y) => {
         if (y === null) {
-            return $t(`%yb`);
+            return $t('%yb');
         }
         return y.toString();
     });
@@ -144,7 +145,7 @@ defineRoute({
                 onSaveDuplicate: onSaveDuplicateEvent,
             };
         }
-        Toast.error($t(`%yc`)).show();
+        Toast.error($t('%yc')).show();
         throw new Error('Event not found');
     },
 
@@ -215,7 +216,7 @@ const eventSuggestions = computed(() => {
             suggestions.push(
                 Event.create({
                     id: '',
-                    name: $t(`%yd`),
+                    name: $t('%yd'),
                     startDate: pointer.toJSDate(),
                     endDate: pointer.toJSDate(),
                 }),
@@ -256,9 +257,9 @@ function blurFocus() {
 async function addEvent(template?: Event) {
     if (eventTypes.value.length === 0) {
         if (auth.hasFullPlatformAccess()) {
-            Toast.error($t(`%ZgA`)).show();
+            Toast.error($t('%ZgA')).show();
         } else {
-            Toast.error($t(`%ye`)).show();
+            Toast.error($t('%ye')).show();
         }
         return;
     }

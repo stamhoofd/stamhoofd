@@ -34,9 +34,9 @@ export class SetupStep extends AutoEncoder {
     transformForDiff() {
         if (this.isDone) {
             if (this.review) {
-                return $t(`%nK`) + ' ' + Formatter.dateNumber(this.review.date);
+                return $t('%nK') + ' ' + Formatter.dateNumber(this.review.date);
             }
-            return $t(`%Gt`);
+            return $t('%Gt');
         }
 
         return this.finishedSteps + '/' + this.totalSteps;

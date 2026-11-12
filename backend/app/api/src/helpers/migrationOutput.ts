@@ -23,8 +23,7 @@ export async function withMigrationOutput(run: () => Promise<void>, verbose: boo
         write: (message) => {
             if (scope.getStore()) {
                 output += message;
-            }
-            else {
+            } else {
                 stdout.write(message);
             }
         },
@@ -42,12 +41,10 @@ export async function withMigrationOutput(run: () => Promise<void>, verbose: boo
 
     try {
         await scope.run(true, run);
-    }
-    catch (error) {
+    } catch (error) {
         flush();
         throw error;
-    }
-    finally {
+    } finally {
         logger.stdout = stdout;
         logger.stderr = stderr;
     }

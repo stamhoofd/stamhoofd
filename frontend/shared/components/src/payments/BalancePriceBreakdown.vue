@@ -45,7 +45,7 @@ const priceBreakdown = computed((): PriceBreakdown => {
 
     const all: PriceBreakdown = [
         {
-            name: $t(`%1Xl`),
+            name: $t('%1Xl'),
             price: discountBalance.priceOpen, // only relevant shown
             action: {
                 icon: 'info-circle',
@@ -53,11 +53,11 @@ const priceBreakdown = computed((): PriceBreakdown => {
             },
         },
         {
-            name: paid >= 0 ? $t(`%ly`) : $t('%1Yy'),
+            name: paid >= 0 ? $t('%ly') : $t('%1Yy'),
             price: -paid, // don't include discounts here
         },
         {
-            name: $t(`%1OL`),
+            name: $t('%1OL'),
             price: -(balance.pricePending + laterBalance.pricePending - discountBalance.pricePending), // don't include discounts here
         },
     ].filter(a => a.price !== 0);
@@ -66,7 +66,7 @@ const priceBreakdown = computed((): PriceBreakdown => {
 
     if (all.length > 0) {
         all.unshift({
-            name: vatBreakdown.value.length > 0 ? $t(`%1KL`) : $t(`%lz`),
+            name: vatBreakdown.value.length > 0 ? $t('%1KL') : $t('%lz'),
             price: totalWithVAT,
         });
     }
@@ -77,10 +77,10 @@ const priceBreakdown = computed((): PriceBreakdown => {
         const single = vatBreakdown.value.length === 1 ? vatBreakdown.value[0] : null;
 
         all.unshift({
-            name: $t(`%1KK`),
+            name: $t('%1KK'),
             price: totalWithVAT - totalVAT.value,
         }, {
-            name: $t(`%1JE`) + (single ? ' (' + Formatter.percentage(single.VATPercentage * 100) + ')' : ''),
+            name: $t('%1JE') + (single ? ' (' + Formatter.percentage(single.VATPercentage * 100) + ')' : ''),
             description: single?.VATExcempt ? getVATExcemptInvoiceNote(single.VATExcempt) : undefined,
             price: totalVAT.value,
             action: single ? undefined : { icon: 'info-circle', handler: showVATDetails },
@@ -89,7 +89,7 @@ const priceBreakdown = computed((): PriceBreakdown => {
 
     if (laterBalance.priceOpen > 0) {
         all.push({
-            name: $t(`%10Z`),
+            name: $t('%10Z'),
             price: laterBalance.priceOpen,
         });
     }
@@ -97,7 +97,7 @@ const priceBreakdown = computed((): PriceBreakdown => {
     return [
         ...all,
         {
-            name: balance.priceOpen < 0 ? (isPayable ? $t(`%m0`) : $t(`%10b`)) : (laterBalance.priceOpen !== 0 ? $t(`%10c`) : $t(`%m0`)),
+            name: balance.priceOpen < 0 ? (isPayable ? $t('%m0') : $t('%10b')) : (laterBalance.priceOpen !== 0 ? $t('%10c') : $t('%m0')),
             price: balance.priceOpen < 0 && isPayable ? 0 : Math.abs(balance.priceOpen),
         },
     ];

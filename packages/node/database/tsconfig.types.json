@@ -1,8 +1,5 @@
 {
-    "extends": [
-        "./tsconfig.build.json",
-        "../../../tsconfig.types.json"
-    ],
+    "extends": ["./tsconfig.build.json", "../../../tsconfig.types.json"],
     "compilerOptions": {
         "outDir": "dist-types",
         "tsBuildInfoFile": ".cache/types.tsbuildinfo"

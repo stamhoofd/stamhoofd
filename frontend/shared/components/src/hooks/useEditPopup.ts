@@ -5,7 +5,7 @@ import { ErrorBox } from '#errors/ErrorBox.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { useErrors } from '#errors/useErrors.ts';
 import { usePatch } from '#hooks/usePatch.ts';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { readonly, ref } from 'vue';
 
 export function useEditPopup<T extends AutoEncoder>({ errors, saveHandler, deleteHandler, toPatch }: { errors: ReturnType<typeof useErrors>; saveHandler: (patch: AutoEncoderPatchType<T>) => Promise<void>; deleteHandler: (() => Promise<void>) | null; toPatch: T | Ref<T> }) {
@@ -30,8 +30,7 @@ export function useEditPopup<T extends AutoEncoder>({ errors, saveHandler, delet
         try {
             await saveHandler(patch.value);
             await pop({ force: true });
-        }
-        catch (e) {
+        } catch (e) {
             errors.errorBox = new ErrorBox(e);
         }
         saving.value = false;
@@ -57,8 +56,7 @@ export function useEditPopup<T extends AutoEncoder>({ errors, saveHandler, delet
         try {
             await deleteHandler();
             await pop({ force: true });
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
         }
 

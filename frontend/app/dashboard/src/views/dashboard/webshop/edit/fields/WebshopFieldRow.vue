@@ -19,8 +19,6 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import type { WebshopField } from '@stamhoofd/structures';
 
-
-
 const props = defineProps<{
     field: WebshopField;
 }>();

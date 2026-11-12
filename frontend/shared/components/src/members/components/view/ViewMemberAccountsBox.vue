@@ -1,6 +1,7 @@
 <template>
     <div v-if="member.patchedMember.users.length > 0" class="hover-box container">
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <span class="icon-spacer">{{ $t('%1a') }}</span>
             <a v-if="!$isTouch && app !== 'registration'" class="button icon gray help" target="_blank" :href="$domains.getDocs('leden-beheren-met-meerdere-ouders')" />
         </h2>
@@ -63,8 +64,7 @@ async function deleteUser(user: User) {
         const arr = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
         arr.addPatch(patch);
         await platformFamilyManager.isolatedPatch([props.member], arr);
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 

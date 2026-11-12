@@ -59,7 +59,7 @@ async function submit() {
 }
 
 const shouldNavigateAway = async () => {
-    return await CenteredMessage.confirm($t(`%Zb4`), $t(`%ZbI`));
+    return await CenteredMessage.confirm($t('%Zb4'), $t('%ZbI'));
 };
 
 defineExpose({

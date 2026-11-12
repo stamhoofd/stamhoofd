@@ -53,7 +53,7 @@ import { computed } from 'vue';
 
 const memberManager = useMemberManager();
 const members = computed(() => memberManager.family.members);
-const title = $t(`%XR`);
+const title = $t('%XR');
 const user = useUser();
 
 const isAcceptingNewMembers = computed(() => memberManager.isAcceptingNewMembers);

@@ -40,7 +40,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Permission denied',
-                    human: $t(`%FW`),
+                    human: $t('%FW'),
                 });
             }
         }
@@ -886,7 +886,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'organization_not_found',
                     message: 'Organization not found',
-                    human: $t(`%we`),
+                    human: $t('%we'),
                 });
             }
 
@@ -926,7 +926,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Permission denied',
-                    human: $t(`%wf`),
+                    human: $t('%wf'),
                 });
             }
         }
@@ -961,7 +961,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Permission denied',
-                    human: $t(`%wg`),
+                    human: $t('%wg'),
                 });
             }
         }
@@ -994,7 +994,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message: 'Permission denied',
-                    human: $t(`%wh`),
+                    human: $t('%wh'),
                 });
             }
         }
@@ -1247,12 +1247,12 @@ export class AuthenticatedStructures {
                     if (user.permissions?.forPlatform(platform, user.email)) {
                         userStruct = NamedObject.create({
                             id: '',
-                            name: $t(`%wi`) + ' ' + platform.config.name,
+                            name: $t('%wi') + ' ' + platform.config.name,
                         });
                     } else {
                         userStruct = NamedObject.create({
                             id: '',
-                            name: $t(`%Gr`),
+                            name: $t('%Gr'),
                         });
                     }
                 } else {
@@ -1270,7 +1270,7 @@ export class AuthenticatedStructures {
                 const org = organizations.find(o => o.id === log.organizationId);
                 replacements.set('org', AuditLogReplacement.create({
                     id: log.organizationId,
-                    value: org?.name ?? $t(`%wj`),
+                    value: org?.name ?? $t('%wj'),
                     type: AuditLogReplacementType.Organization,
                 }));
             }
@@ -1327,7 +1327,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'group_not_found',
                     message: 'Group not found',
-                    human: $t(`%1SM`),
+                    human: $t('%1SM'),
                 });
             }
 
@@ -1365,7 +1365,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'member_not_found',
                     message: 'Member not found',
-                    human: $t(`%EO`),
+                    human: $t('%EO'),
                 });
             }
 
@@ -1374,7 +1374,7 @@ export class AuthenticatedStructures {
                 throw new SimpleError({
                     code: 'group_not_found',
                     message: 'Group not found',
-                    human: $t(`%1SM`),
+                    human: $t('%1SM'),
                 });
             }
 

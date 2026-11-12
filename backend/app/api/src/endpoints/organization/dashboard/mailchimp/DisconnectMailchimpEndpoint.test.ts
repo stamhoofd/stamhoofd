@@ -41,8 +41,7 @@ describe('Endpoint.DisconnectMailchimp', () => {
         try {
             await expect(mailchimpRequest(endpoint, 'DELETE', '/mailchimp/connect', context.host, context.token))
                 .rejects.toThrow(STExpect.simpleError({ code: 'sync_running' }));
-        }
-        finally {
+        } finally {
             release();
             await running;
         }

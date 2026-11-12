@@ -28,8 +28,7 @@ afterEach(() => {
     for (const [stream, descriptor] of [[process.stdin, stdinTTY], [process.stdout, stdoutTTY]] as const) {
         if (descriptor) {
             Object.defineProperty(stream, 'isTTY', descriptor);
-        }
-        else {
+        } else {
             Reflect.deleteProperty(stream, 'isTTY');
         }
     }

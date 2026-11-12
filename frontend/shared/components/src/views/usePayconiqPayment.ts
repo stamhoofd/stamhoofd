@@ -45,11 +45,11 @@ export function usePayconiqPayment(props: PayconiqPaymentProps) {
 
     usePreventLeave(() => {
         // This message is not visible on most browsers
-        return $t(`%12e`);
+        return $t('%12e');
     });
 
     async function shouldNavigateAway() {
-        if (await CenteredMessage.confirm($t(`%12e`), $t(`%12f`))) {
+        if (await CenteredMessage.confirm($t('%12e'), $t('%12f'))) {
             cancel();
             return true;
         }

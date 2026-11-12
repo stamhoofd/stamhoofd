@@ -1,7 +1,8 @@
 <template>
     <LoadingBoxTransition v-if="actions.length || loading" :error-box="errorBox">
         <div v-if="actions.length && !loading" key="view" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%ht') }}
             </h2>
 
@@ -55,7 +56,7 @@ const props = withDefaults(defineProps<{
      */
     maxActionsToShow?: number;
 }>(), {
-    maxActionsToShow: 20
+    maxActionsToShow: 20,
 });
 
 const actions = computed(() => unref(props.quickActions.actions));

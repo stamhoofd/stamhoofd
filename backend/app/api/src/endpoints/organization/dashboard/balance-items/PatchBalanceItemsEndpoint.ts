@@ -78,13 +78,13 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 if (put.payingOrganizationId) {
                     // Not allowed if not full admin
                     if (!Context.auth.hasPlatformFullAccess()) {
-                        throw Context.auth.error($t(`%Ef`));
+                        throw Context.auth.error($t('%Ef'));
                     }
                     if (put.payingOrganizationId === model.organizationId) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'payingOrganizationId cannot be the same as organizationId',
-                            human: $t(`%Eg`),
+                            human: $t('%Eg'),
                             field: 'payingOrganizationId',
                         });
                     }
@@ -96,7 +96,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_price',
                         message: 'Cannot create negative balance in the future',
-                        human: $t(`%Eh`),
+                        human: $t('%Eh'),
                     });
                 }
 
@@ -104,7 +104,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'createdAt cannot be in the future',
-                        human: $t(`%Ei`),
+                        human: $t('%Ei'),
                         field: 'createdAt',
                     });
                 }
@@ -134,13 +134,13 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                 if (patch.payingOrganizationId !== undefined) {
                     // Not allowed if not full admin
                     if (!Context.auth.hasPlatformFullAccess()) {
-                        throw Context.auth.error($t(`%Ef`));
+                        throw Context.auth.error($t('%Ef'));
                     }
                     if (patch.payingOrganizationId === model.organizationId) {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'payingOrganizationId cannot be the same as organizationId',
-                            human: $t(`%Eg`),
+                            human: $t('%Eg'),
                             field: 'payingOrganizationId',
                         });
                     }
@@ -162,7 +162,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                             throw new SimpleError({
                                 code: 'invalid_field',
                                 message: 'No user or member provided',
-                                human: $t(`%Ej`),
+                                human: $t('%Ej'),
                                 field: 'memberId',
                             });
                         }
@@ -179,7 +179,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'createdAt cannot be in the future',
-                            human: $t(`%Ei`),
+                            human: $t('%Ei'),
                             field: 'createdAt',
                         });
                     }
@@ -213,7 +213,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     throw new SimpleError({
                         code: 'invalid_price',
                         message: 'Cannot create negative balance in the future',
-                        human: $t(`%Eh`),
+                        human: $t('%Eh'),
                         field: 'dueAt',
                     });
                 }
@@ -269,7 +269,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'No permission to link balance items to this member',
-                human: $t(`%Ek`),
+                human: $t('%Ek'),
                 field: 'memberId',
             });
         }
@@ -283,7 +283,7 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'No permission to link balance items to this user',
-                human: $t(`%El`),
+                human: $t('%El'),
                 field: 'userId',
             });
         }

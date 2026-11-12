@@ -12,8 +12,7 @@ export function isBase62(str: string) {
     try {
         decodeBase62(str);
         return true;
-    }
-    catch (e) {
+    } catch (e) {
         return false;
     }
 }

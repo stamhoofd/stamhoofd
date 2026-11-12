@@ -12,7 +12,7 @@ import { ColorHelper } from '../ColorHelper';
 /** Install concrete frontend service adapters before requests or authentication flows start. */
 export function configureFrontendServices() {
     configureApplicationPresentation({
-        setPrimaryColor: color => { ColorHelper.setColor(color); },
+        setPrimaryColor: (color) => { ColorHelper.setColor(color); },
     });
     configureSessionPresentation({
         confirm: options => CenteredMessage.confirm(options),
@@ -34,8 +34,7 @@ export function configureFrontendServices() {
                 const url = new URL(window.location.href);
                 url.searchParams.set('forceClientUpdate', new Date().getTime() + '');
                 window.location.href = url.toString();
-            }
-            else {
+            } else {
                 AppManager.shared.checkUpdates({
                     visibleCheck: 'text',
                     visibleDownload: true,
@@ -45,12 +44,11 @@ export function configureFrontendServices() {
         },
         onNewerVersion(latestVersion) {
             if (AppManager.shared.isNative) {
-                new Toast($t(`%kt`), 'yellow download').setHide(null).show();
+                new Toast($t('%kt'), 'yellow download').setHide(null).show();
                 AppManager.shared.checkUpdates({ checkTimeout: 20 * 1000 }).catch(console.error);
-            }
-            else {
+            } else {
                 console.info('Received latest version: ', latestVersion, 'got', Version);
-                new Toast($t(`%ku`), 'yellow download').setHide(null).show();
+                new Toast($t('%ku'), 'yellow download').setHide(null).show();
             }
         },
     });

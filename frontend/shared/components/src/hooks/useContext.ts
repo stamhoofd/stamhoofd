@@ -1,5 +1,5 @@
-import type {SessionContext} from '@stamhoofd/frontend-session/SessionContext';
-import type { Ref} from 'vue';
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
+import type { Ref } from 'vue';
 import { inject, toRef } from 'vue';
 
 /** Inject the session context during setup; requires an ancestor providing `$context` (no runtime missing-context guard). */

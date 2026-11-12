@@ -77,7 +77,7 @@ export class InvoiceXMlService {
             }
         }
 
-        let ubl = ``;
+        let ubl = '';
 
         function esc(a: string) {
             return Formatter.escapeHtml(a);
@@ -102,16 +102,16 @@ export class InvoiceXMlService {
 
         if (type === 'Invoice') {
             ubl += `<cbc:DueDate>${esc(Formatter.dateIso(new Date(date.getTime() + 1000 * 60 * 60 * 24 * 30)))}</cbc:DueDate>`;
-            ubl += `<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>`;
+            ubl += '<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>';
         } else {
-            ubl += `<cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>`;
+            ubl += '<cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>';
         }
 
         if (invoice.comments) {
             ubl += `<cbc:Note>${esc(invoice.comments)}</cbc:Note>`;
         }
 
-        ubl += `<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>`;
+        ubl += '<cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>';
         ubl += `<cbc:BuyerReference>${esc(invoice.organizationId ?? invoice.id)}</cbc:BuyerReference>`;
 
         // Attachments
@@ -150,7 +150,7 @@ export class InvoiceXMlService {
                                 <cbc:ID>VAT</cbc:ID>
                             </cac:TaxScheme>
                         </cac:PartyTaxScheme>`
-                            : ``
+                            : ''
                     }
                     <cac:PartyLegalEntity>
                         <cbc:RegistrationName>${esc(seller.name)}</cbc:RegistrationName>
@@ -162,7 +162,7 @@ export class InvoiceXMlService {
                         <cac:Contact>
                             <cbc:ElectronicMail>${esc(seller.administrationEmail)}</cbc:ElectronicMail>
                         </cac:Contact>`
-                            : ``
+                            : ''
                     }
                 </cac:Party>
             </cac:AccountingSupplierParty>`;
@@ -207,7 +207,7 @@ export class InvoiceXMlService {
                                 <cbc:ID>VAT</cbc:ID>
                             </cac:TaxScheme>
                         </cac:PartyTaxScheme>`
-                            : ``
+                            : ''
                     }
                     <cac:PartyLegalEntity>
                         <cbc:RegistrationName>${esc(company.name)}</cbc:RegistrationName>
@@ -219,7 +219,7 @@ export class InvoiceXMlService {
                         <cac:Contact>
                             <cbc:ElectronicMail>${esc(customerEmail)}</cbc:ElectronicMail>
                         </cac:Contact>`
-                            : ``
+                            : ''
                     }
                 </cac:Party>
             </cac:AccountingCustomerParty>`;
@@ -274,8 +274,8 @@ export class InvoiceXMlService {
                         <cac:TaxCategory>
                             <cbc:ID>${esc(c.peppolCategoryCode)}</cbc:ID>
                             <cbc:Percent>${esc(c.VATPercentage.toFixed(2))}</cbc:Percent>
-                            ${c.VATExcempt ? `<cbc:TaxExemptionReasonCode>${esc(getVATExcemptInvoiceNote(c.VATExcempt))}</cbc:TaxExemptionReasonCode>` : ``}
-                            ${c.VATExcempt ? `<cbc:TaxExemptionReason>${esc(getVATExcemptInvoiceNote(c.VATExcempt))}</cbc:TaxExemptionReason>` : ``}
+                            ${c.VATExcempt ? `<cbc:TaxExemptionReasonCode>${esc(getVATExcemptInvoiceNote(c.VATExcempt))}</cbc:TaxExemptionReasonCode>` : ''}
+                            ${c.VATExcempt ? `<cbc:TaxExemptionReason>${esc(getVATExcemptInvoiceNote(c.VATExcempt))}</cbc:TaxExemptionReason>` : ''}
                             <cac:TaxScheme>
                                 <cbc:ID>VAT</cbc:ID>
                             </cac:TaxScheme>
@@ -284,7 +284,7 @@ export class InvoiceXMlService {
             }
         }
 
-        ubl += `</cac:TaxTotal>`;
+        ubl += '</cac:TaxTotal>';
 
         // Totals
         // Since sometimes we have invoices that start with a given paid amount, and prices inclusive VAT, we can have rounding issues.

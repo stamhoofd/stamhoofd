@@ -129,7 +129,8 @@
                 </STList>
 
                 <template v-if="hasFullPermissions">
-                    <hr><h2>{{ $t('%xU') }}</h2>
+                    <hr>
+                    <h2>{{ $t('%xU') }}</h2>
 
                     <STList class="illustration-list">
                         <STListItem :selectable="true" class="left-center" @click="editGeneral(true)">
@@ -591,11 +592,11 @@ function checkCanCreateEvent(group: Group) {
 
 async function convertToEvent() {
     if (!organization.value) {
-        console.error(`Cannot create an event witout an organization.`);
+        console.error('Cannot create an event witout an organization.');
         return;
     }
 
-    if (!await CenteredMessage.confirm($t(`%1NL`), $t('%1NG'), $t(`%1NM`))) {
+    if (!await CenteredMessage.confirm($t('%1NL'), $t('%1NG'), $t('%1NM'))) {
         return;
     }
 
@@ -659,7 +660,7 @@ async function createEventFromGroup(group: Group, organization: Organization) {
     if (group.settings.preventGroupIds.length) {
         throw new SimpleError({
             code: 'unsupported',
-            message: $t(`%1ZO`),
+            message: $t('%1ZO'),
         });
     }
 

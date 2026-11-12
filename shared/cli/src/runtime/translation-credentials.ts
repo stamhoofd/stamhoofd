@@ -22,8 +22,7 @@ export async function resolveTranslationApiKey(provider: Exclude<TranslatorType,
     let localEnvironment: NodeJS.Dict<string> = {};
     try {
         localEnvironment = parseEnv(await fs.readFile(path.join(getProjectPath(), '.development/i18n-uuid/.env'), 'utf8'));
-    }
-    catch (error) {
+    } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
             throw error;
         }

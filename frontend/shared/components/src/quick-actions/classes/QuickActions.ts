@@ -1,4 +1,4 @@
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, unref } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
 

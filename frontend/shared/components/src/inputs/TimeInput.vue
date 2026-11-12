@@ -69,8 +69,7 @@ function validate() {
             field: 'time',
         }));
         return false;
-    }
-    else {
+    } else {
         const split = timeValue.split(':');
         let hour = parseInt(split[0]);
         let minute = parseInt(split[1] ?? '0');
@@ -86,7 +85,7 @@ function validate() {
         if (hour > 24 || minute > 60) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%zF`),
+                message: $t('%zF'),
                 field: 'time',
             }));
             return false;

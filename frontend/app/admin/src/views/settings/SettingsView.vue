@@ -451,7 +451,7 @@ defineRoutes([
                             }),
                         }),
                     );
-                    Toast.success($t(`%HU`)).show();
+                    Toast.success($t('%HU')).show();
                 },
             };
         },
@@ -480,7 +480,7 @@ defineRoutes([
                             }),
                         }),
                     );
-                    Toast.success($t(`%HU`)).show();
+                    Toast.success($t('%HU')).show();
                 },
             };
         },
@@ -510,7 +510,7 @@ defineRoutes([
                             }),
                         }),
                     );
-                    Toast.success($t(`%HU`)).show();
+                    Toast.success($t('%HU')).show();
                 },
             };
         },
@@ -595,7 +595,7 @@ defineRoutes([
                         }),
                     );
 
-                    Toast.success($t(`%HU`)).show();
+                    Toast.success($t('%HU')).show();
                 },
             };
         },

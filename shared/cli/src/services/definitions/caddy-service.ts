@@ -44,8 +44,7 @@ async function withConfigLock<T>(context: CliContext, handler: () => Promise<T>)
     configLockDepth += 1;
     try {
         return await withFileLock(path.join(sharedDir(context), 'caddy-config.lock'), handler);
-    }
-    finally {
+    } finally {
         configLockDepth -= 1;
     }
 }

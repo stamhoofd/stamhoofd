@@ -24,8 +24,8 @@ function assertIsOrganizersResponse(json: unknown): asserts json is OrganizersRe
         console.error('Invalid response when searching for UiTPAS organizers:', json);
         throw new SimpleError({
             code: 'invalid_response_searching_uitpas_organizers',
-            message: `Invalid response when searching for UiTPAS organizers`,
-            human: $t(`%1Ba`),
+            message: 'Invalid response when searching for UiTPAS organizers',
+            human: $t('%1Ba'),
         });
     }
 }
@@ -36,8 +36,8 @@ export async function searchUitpasOrganizers(access_token: string, name: string)
     if (name === '') {
         throw new SimpleError({
             code: 'empty_uitpas_organizer_name',
-            message: `Empty name when searching for UiTPAS organizers`,
-            human: $t(`%1Bb`),
+            message: 'Empty name when searching for UiTPAS organizers',
+            human: $t('%1Bb'),
         });
     }
     const baseUrl = `${STAMHOOFD.UITPAS_API_URL}/organizers`;
@@ -56,9 +56,9 @@ export async function searchUitpasOrganizers(access_token: string, name: string)
         // Handle network errors
         throw new SimpleError({
             code: 'uitpas_unreachable_searching_organizers',
-            message: `Network issue when searching for UiTPAS organizers`,
+            message: 'Network issue when searching for UiTPAS organizers',
             human: $t(
-                `We konden UiTPAS niet bereiken om UiTPAS-organisaties op te zoeken. Probeer het later opnieuw.`,
+                'We konden UiTPAS niet bereiken om UiTPAS-organisaties op te zoeken. Probeer het later opnieuw.',
             ),
         });
     });
@@ -66,17 +66,17 @@ export async function searchUitpasOrganizers(access_token: string, name: string)
         console.log(response.status, response.statusText, await response.text());
         throw new SimpleError({
             code: 'unsuccessful_response_searching_uitpas_organizers',
-            message: `Unsuccessful response when searching for UiTPAS organizers`,
-            human: $t(`%18C`),
+            message: 'Unsuccessful response when searching for UiTPAS organizers',
+            human: $t('%18C'),
         });
     }
     const json = await response.json().catch(() => {
         // Handle JSON parsing errors
         throw new SimpleError({
             code: 'invalid_json_searching_uitpas_organizers',
-            message: `Invalid json when searching for UiTPAS organizers`,
+            message: 'Invalid json when searching for UiTPAS organizers',
             human: $t(
-                `Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.`,
+                'Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.',
             ),
         });
     });

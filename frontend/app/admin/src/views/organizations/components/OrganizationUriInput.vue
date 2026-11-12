@@ -152,8 +152,7 @@ async function doCheckAvailable() {
             shouldRetry: true,
             owner,
         });
-    }
-    catch (e) {
+    } catch (e) {
         if (initialCheckCount !== checkCount) {
             return false;
         }

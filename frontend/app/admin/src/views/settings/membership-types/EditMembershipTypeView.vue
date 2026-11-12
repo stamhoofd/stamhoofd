@@ -26,7 +26,8 @@
             <textarea v-model="description" class="input" type="text" :placeholder="$t('%14p')" autocomplete="off" />
         </STInputBox>
 
-        <hr><h2>{{ $t('%8I') }}</h2>
+        <hr>
+        <h2>{{ $t('%8I') }}</h2>
         <p>{{ $t('%8J') }}</p>
 
         <p v-if="sortedPeriods.length === 0" class="info-box">
@@ -43,7 +44,8 @@
             </button>
         </p>
 
-        <hr><h2>{{ $t('%Zd8') }}</h2>
+        <hr>
+        <h2>{{ $t('%Zd8') }}</h2>
         <p>{{ $t('%Zcw') }}</p>
 
         <p v-if="otherMembershipTypes.length === 0" class="info-box">
@@ -55,7 +57,8 @@
             :items="otherMembershipTypes.map(t => ({ name: t.name, value: t.id }))"
         />
 
-        <hr><h2>{{ $t("%1CP") }}</h2>
+        <hr>
+        <h2>{{ $t("%1CP") }}</h2>
 
         <Checkbox v-model="requiredTagIdsEnabled">
             {{ $t("%84") }}
@@ -66,7 +69,8 @@
         </Checkbox>
 
         <JumpToContainer :visible="requiredTagIds !== null">
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t("%86") }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="() => requiredTagIds = null" />
@@ -78,7 +82,8 @@
         </JumpToContainer>
 
         <JumpToContainer :visible="requiredDefaultAgeGroupIds !== null">
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t("%87") }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="() => requiredDefaultAgeGroupIds = null" />

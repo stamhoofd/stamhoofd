@@ -53,7 +53,7 @@ function getReplacements() {
      * and the corresponding buttons to shared/structures/src/email/EditorSmartButton.ts
      */
     const htmlPlaceholder = `<p class="description">${$t('%13W')}</p>`;
-    const textPlaceholder = $t(`%13X`);
+    const textPlaceholder = $t('%13X');
 
     const exampleBalanceItem = BalanceItem.create({
         name: $t('%Ze8'),
@@ -70,27 +70,27 @@ function getReplacements() {
     return {
         greeting: Replacement.create({
             token: 'greeting',
-            value: $t(`%13Y`),
+            value: $t('%13Y'),
         }),
         firstName: Replacement.create({
             token: 'firstName',
-            value: $t(`%13Z`),
+            value: $t('%13Z'),
         }),
         lastName: Replacement.create({
             token: 'lastName',
-            value: $t(`%2c`),
+            value: $t('%2c'),
         }),
         email: Replacement.create({
             token: 'email',
-            value: $t(`%13a`),
+            value: $t('%13a'),
         }),
         fromAddress: Replacement.create({
             token: 'fromAddress',
-            value: $t(`%13b`),
+            value: $t('%13b'),
         }),
         fromName: Replacement.create({
             token: 'fromName',
-            value: $t(`%13c`),
+            value: $t('%13c'),
         }),
         paymentUrl: Replacement.create({
             token: 'paymentUrl',
@@ -109,11 +109,11 @@ function getReplacements() {
         }),
         objectName: Replacement.create({
             token: 'objectName',
-            value: $t(`%13d`),
+            value: $t('%13d'),
         }),
         resetUrl: Replacement.create({
             token: 'resetUrl',
-            value: $t(`%13e`),
+            value: $t('%13e'),
         }),
         confirmEmailUrl: Replacement.create({
             token: 'confirmEmailUrl',
@@ -153,7 +153,7 @@ function getReplacements() {
         }),
         submitterName: Replacement.create({
             token: 'submitterName',
-            value: $t(`%13f`),
+            value: $t('%13f'),
         }),
         eventName: Replacement.create({
             token: 'eventName',
@@ -165,7 +165,7 @@ function getReplacements() {
         }),
         inviterName: Replacement.create({
             token: 'inviterName',
-            value: $t(`%13g`),
+            value: $t('%13g'),
         }),
         validUntil: Replacement.create({
             token: 'validUntil',
@@ -177,15 +177,15 @@ function getReplacements() {
         }),
         firstNameMember: Replacement.create({
             token: 'firstNameMember',
-            value: $t(`%13h`),
+            value: $t('%13h'),
         }),
         lastNameMember: Replacement.create({
             token: 'lastNameMember',
-            value: $t(`%13i`),
+            value: $t('%13i'),
         }),
         requesterEmail: Replacement.create({
             token: 'requesterEmail',
-            value: $t(`%ZbK`),
+            value: $t('%ZbK'),
         }),
         securityCode: Replacement.create({
             token: 'securityCode',
@@ -205,7 +205,7 @@ function getReplacements() {
         }),
         registerUrl: Replacement.create({
             token: 'registerUrl',
-            value: $t(`%13j`),
+            value: $t('%13j'),
         }),
         groupName: Replacement.create({
             token: 'groupName',
@@ -227,19 +227,19 @@ function getReplacements() {
         loginDetails: Replacement.create({
             token: 'loginDetails',
             html: `<p class="description"><em>${$t('%1EA', {
-                email: '<strong>' + $t(`%13a`) + '</strong>' },
+                email: '<strong>' + $t('%13a') + '</strong>' },
             )} ${$t('%1EC', {
-                firstName: $t(`%13h`),
-                securityCode: `<span class="style-inline-code">xxxx-xxxx-xxxx-xxxx</span>`,
+                firstName: $t('%13h'),
+                securityCode: '<span class="style-inline-code">xxxx-xxxx-xxxx-xxxx</span>',
             })}</em></p>`,
         }),
         mailDomain: Replacement.create({
             token: 'mailDomain',
-            value: $t(`%13k`),
+            value: $t('%13k'),
         }),
         paymentMethod: Replacement.create({
             token: 'paymentMethod',
-            value: $t(`%1S`),
+            value: $t('%1S'),
         }),
         priceToPay: Replacement.create({
             token: 'priceToPay',
@@ -267,11 +267,11 @@ function getReplacements() {
         }),
         overviewContext: Replacement.create({
             token: 'overviewContext',
-            value: $t(`%13l`),
+            value: $t('%13l'),
         }),
         memberNames: Replacement.create({
             token: 'memberNames',
-            value: $t(`%13m`),
+            value: $t('%13m'),
         }),
         overviewTable: Replacement.create({
             token: 'overviewTable',
@@ -344,7 +344,7 @@ function getReplacements() {
 
         errors: Replacement.create({
             token: 'errors',
-            html: '<p>' + Formatter.escapeHtml($t(`%1Su`)) + '</p><p>' + Formatter.escapeHtml($t(`%1Rl`)) + '</p>',
+            html: '<p>' + Formatter.escapeHtml($t('%1Su')) + '</p><p>' + Formatter.escapeHtml($t('%1Rl')) + '</p>',
         }),
 
     };

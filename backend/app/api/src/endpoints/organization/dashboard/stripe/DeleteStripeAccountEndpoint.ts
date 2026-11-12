@@ -41,7 +41,7 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         // Search account in database
         const model = await StripeAccount.getByID(request.params.id);
         if (!model || model.organizationId !== organization.id || model.status !== 'active') {
-            throw Context.auth.notFoundOrNoAccess($t(`%FC`));
+            throw Context.auth.notFoundOrNoAccess($t('%FC'));
         }
 
         if (STAMHOOFD.STRIPE_ACCOUNT_ID && model.accountId === STAMHOOFD.STRIPE_ACCOUNT_ID) {

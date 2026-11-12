@@ -91,8 +91,7 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                 if (props.savedHandler) {
                     try {
                         await props.savedHandler(response.data);
-                    }
-                    catch (e) {
+                    } catch (e) {
                         afterThrow = e as Error;
                     }
                 }
@@ -108,9 +107,9 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                 await GlobalEventBus.sendEvent('new-webshop', response.data);
                 new Toast(
                     response.data.meta.ticketType === WebshopTicketType.Tickets
-                        ? $t(`%Ui`)
-                        : $t(`%Uj`)
-                    , 'success green').show();
+                        ? $t('%Ui')
+                        : $t('%Uj'),
+                    'success green').show();
 
                 if (afterThrow) {
                     webshopManager.value = manager;
@@ -120,8 +119,7 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                     originalWebshop.deepSet(response.data);
                     throw afterThrow;
                 }
-            }
-            else {
+            } else {
                 await webshopManager.value!.patchWebshop(patch.value);
 
                 if (afterSave) {
@@ -132,13 +130,12 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                 if (props.savedHandler && webshopManager.value!.webshop) {
                     try {
                         await props.savedHandler(webshopManager.value!.webshop as PrivateWebshop);
-                    }
-                    catch (e) {
+                    } catch (e) {
                         afterThrow = e as Error;
                     }
                 }
 
-                new Toast($t(`%Uk`), 'success green').show();
+                new Toast($t('%Uk'), 'success green').show();
 
                 // Clear the patch
                 reset();
@@ -155,8 +152,7 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
                 // Pop instead of dismiss: this view is not always presented as a popup
                 await pop({ force: true });
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             errors.errorBox = new ErrorBox(e);
         }

@@ -81,8 +81,8 @@ function getUitpasTicketSales(order: Order): UitpasTicketSale[] {
             if (!baseProductPrice) {
                 throw new SimpleError({
                     code: 'missing_uitpas_base_product_price',
-                    message: `Missing UiTPAS base product price`,
-                    human: $t(`%1DP`),
+                    message: 'Missing UiTPAS base product price',
+                    human: $t('%1DP'),
                 });
             }
             const label = makeBaseProductPriceLabel(item.product, baseProductPrice);
@@ -411,8 +411,8 @@ export class UitpasService {
                 if (!basePrice) {
                     throw new SimpleError({
                         code: 'missing_uitpas_base_product_price',
-                        message: `Missing UiTPAS base product price`,
-                        human: $t(`%1DP`),
+                        message: 'Missing UiTPAS base product price',
+                        human: $t('%1DP'),
                     });
                 }
 

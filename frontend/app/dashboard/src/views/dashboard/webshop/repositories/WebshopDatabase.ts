@@ -27,8 +27,7 @@ export class WebshopDatabase {
         try {
             await this.get();
             return true;
-        }
-        catch {
+        } catch {
             return false;
         }
     }
@@ -64,7 +63,7 @@ export class WebshopDatabase {
 
             DBOpenRequest.onblocked = function (e) {
                 console.log('DB open blocked', e);
-                new Toast($t(`%PW`), 'error red').setHide(15 * 1000).show();
+                new Toast($t('%PW'), 'error red').setHide(15 * 1000).show();
             };
 
             DBOpenRequest.onerror = (event) => {
@@ -199,8 +198,7 @@ export class WebshopDatabase {
             await deletePromise;
             this.isDeleting = false;
             return true;
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             this.isDeleting = false;
             return false;
@@ -264,16 +262,15 @@ function initOrdersStore({ oldVersion, database, transaction }: { oldVersion: nu
         // typescript will show an error if an index is missing
         const indexes: Record<OrderIndexedDBIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }>
         // auto generate indexes for generated indexes
-                = Object.fromEntries(Object.values(OrderIndexedDBIndex).map((index) => {
-                    return [index, { unique: false, keyPath: `indexes.${index}` }];
-                })) as Record<OrderIndexedDBIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }>
+            = Object.fromEntries(Object.values(OrderIndexedDBIndex).map((index) => {
+                return [index, { unique: false, keyPath: `indexes.${index}` }];
+            })) as Record<OrderIndexedDBIndex, IDBIndexParameters & { keyPath: string | Iterable<string> }>
             ;
 
         Object.entries(indexes).forEach(([index, options]) => {
             newStore.createIndex(index, options.keyPath ?? index, options);
         });
-    }
-    else if (transaction) {
+    } else if (transaction) {
         const storeToClear = transaction.objectStore(storeName);
         storeToClear.clear();
     }
@@ -284,8 +281,7 @@ function initWebshopSettingsStore({ oldVersion, database, transaction }: { oldVe
 
     if (oldVersion < 1) {
         database.createObjectStore(storeName, { });
-    }
-    else if (transaction) {
+    } else if (transaction) {
         const storeToClear = transaction.objectStore(storeName);
         storeToClear.clear();
     }
@@ -306,8 +302,7 @@ function initWebshopTicketsStore({ oldVersion, database, transaction }: { oldVer
 
         // create indexes
         newStore.createIndex('orderId', 'orderId', { unique: false });
-    }
-    else if (transaction) {
+    } else if (transaction) {
         const storeToClear = transaction.objectStore(storeName);
         storeToClear.clear();
     }
@@ -318,8 +313,7 @@ function initWebshopTicketPatchesStore({ oldVersion, database, transaction }: { 
 
     if (oldVersion < 1) {
         database.createObjectStore(storeName, { keyPath: 'secret' });
-    }
-    else if (transaction) {
+    } else if (transaction) {
         const storeToClear = transaction.objectStore(storeName);
         storeToClear.clear();
     }

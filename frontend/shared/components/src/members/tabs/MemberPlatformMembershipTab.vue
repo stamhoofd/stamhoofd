@@ -7,7 +7,8 @@
                 </p>
 
                 <div v-for="period of filteredPeriods" :key="period.id" class="container">
-                    <hr><h2>{{ period.name }}</h2>
+                    <hr>
+                    <h2>{{ period.name }}</h2>
                     <p v-if="getMembershipsForPeriod(period.id).length === 0" class="warning-box">
                         {{ $t('%80', {werkjaar: period.name}) }}
                     </p>
@@ -174,7 +175,7 @@ function getMembershipsForPeriod(periodId: string) {
 }
 
 function getOrganizationName(membership: MemberPlatformMembership) {
-    return props.member.organizations.find(o => o.id === membership.organizationId)?.name ?? $t(`%wS`);
+    return props.member.organizations.find(o => o.id === membership.organizationId)?.name ?? $t('%wS');
 }
 
 async function addMembership(period: RegistrationPeriod) {
@@ -235,7 +236,7 @@ async function deleteMembership(membership: MemberPlatformMembership) {
 
     if (!await CenteredMessage.confirm({
         title: $t('%Zmy', { name: getMembershipType(membership).name }),
-        confirmText: $t(`%55`),
+        confirmText: $t('%55'),
         destructive: true,
         availabilityDelay: 2_000,
     })) {
@@ -257,7 +258,7 @@ async function deleteMembership(membership: MemberPlatformMembership) {
 
         await platformFamilyManager.isolatedPatch([props.member], patch, false);
 
-        Toast.success($t(`%10P`)).show();
+        Toast.success($t('%10P')).show();
     } catch (e) {
         Toast.fromError(e).show();
     }
@@ -301,7 +302,7 @@ async function unlockMembership(membership: MemberPlatformMembership) {
 function getMembershipType(membership: MemberPlatformMembership) {
     return platform.value.config.membershipTypes.find(t => t.id === membership.membershipTypeId) ?? PlatformMembershipType.create({
         id: membership.membershipTypeId,
-        name: $t(`%Gr`),
+        name: $t('%Gr'),
     });
 }
 </script>

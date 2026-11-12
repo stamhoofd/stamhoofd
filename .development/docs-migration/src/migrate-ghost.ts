@@ -850,7 +850,7 @@ async function main(): Promise<void> {
     const unknown = [...unhandledCards].filter(c => !known.has(c));
 
     console.log();
-    console.log(`✔ Migration complete.`);
+    console.log('✔ Migration complete.');
     console.log(`  Written:  ${written} post(s) in ${parsed.length} section(s) -> ${contentDir}`);
     console.log(`  Uploads:  ${countDownloaded('images')} image(s), ${countDownloaded('media')} video/audio, ${countDownloaded('files')} file(s) -> ${publicDir}`);
     console.log(`  Skipped:  ${skipped} (drafts/non-posts)`);

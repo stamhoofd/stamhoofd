@@ -24,18 +24,18 @@ export enum STPackageType {
 export class STPackageTypeHelper {
     static getName(type: STPackageType): string {
         switch (type) {
-            case STPackageType.LegacyMembers: return $t(`%oF`);
+            case STPackageType.LegacyMembers: return $t('%oF');
             case STPackageType.Members: {
-                return $t(`%Om`);
+                return $t('%Om');
             }
             case STPackageType.Webshops: {
-                return $t(`%1Hk`);
+                return $t('%1Hk');
             }
             case STPackageType.SingleWebshop: {
-                return $t(`%oG`);
+                return $t('%oG');
             }
-            case STPackageType.TrialMembers: return $t(`%1Hl`);
-            case STPackageType.TrialWebshops: return $t(`%1Hm`);
+            case STPackageType.TrialMembers: return $t('%1Hl');
+            case STPackageType.TrialWebshops: return $t('%1Hm');
         }
     }
 
@@ -213,16 +213,16 @@ export class STPackageMeta extends AutoEncoder {
 
         if (this.unitPrice) {
             if (this.pricingType === STPricingType.PerMember) {
-                strs.push($t(`%1T2`, { price: Formatter.price(this.unitPrice) }));
+                strs.push($t('%1T2', { price: Formatter.price(this.unitPrice) }));
             } else if (this.pricingType === STPricingType.PerYear) {
-                strs.push($t(`%1RJ`, { price: Formatter.price(this.unitPrice) }));
+                strs.push($t('%1RJ', { price: Formatter.price(this.unitPrice) }));
             } else if (this.pricingType === STPricingType.Fixed) {
-                strs.push($t(`%1RX`, { amount: Formatter.integer(this.minimumAmount), price: Formatter.price(this.unitPrice) }));
+                strs.push($t('%1RX', { amount: Formatter.integer(this.minimumAmount), price: Formatter.price(this.unitPrice) }));
             }
 
             if (this.minimumAmount) {
                 if (this.pricingType !== STPricingType.Fixed) {
-                    strs.push($t(`%1Ta`, { amount: Formatter.integer(this.minimumAmount) }));
+                    strs.push($t('%1Ta', { amount: Formatter.integer(this.minimumAmount) }));
                 }
             }
         }
@@ -252,7 +252,7 @@ export class STPackageMeta extends AutoEncoder {
         }
 
         if (this.serviceFeePercentage && this.serviceFeeFixed) {
-            strs.push(Formatter.percentage(this.serviceFeePercentage) + ` + ` + Formatter.price(this.serviceFeeFixed) + ' ' + suffix + (minimumSuffix ? (', ' + minimumSuffix) : '') + (maximumSuffix ? (', ' + maximumSuffix) : ''));
+            strs.push(Formatter.percentage(this.serviceFeePercentage) + ' + ' + Formatter.price(this.serviceFeeFixed) + ' ' + suffix + (minimumSuffix ? (', ' + minimumSuffix) : '') + (maximumSuffix ? (', ' + maximumSuffix) : ''));
         } else if (this.serviceFeeFixed) {
             strs.push((Formatter.price(this.serviceFeeFixed) + ' ' + suffix + (minimumSuffix ? (', ' + minimumSuffix) : '') + (maximumSuffix ? (', ' + maximumSuffix) : '')));
         } else if (this.serviceFeePercentage) {
@@ -260,7 +260,7 @@ export class STPackageMeta extends AutoEncoder {
         }
 
         if (strs.length === 0) {
-            strs.push($t(`%1Mn`));
+            strs.push($t('%1Mn'));
         }
 
         return strs.join('\n');

@@ -127,8 +127,7 @@ export class OrganizationRegistrationPeriod extends QueryableModel {
             if (this.settings.categories.length !== beforeCount) {
                 console.log('Deleted ' + (beforeCount - this.settings.categories.length) + ' categories from organizaton period ' + this.id);
                 await this.save();
-            }
-            else {
+            } else {
                 if (shouldSave) {
                     await this.save();
                 }

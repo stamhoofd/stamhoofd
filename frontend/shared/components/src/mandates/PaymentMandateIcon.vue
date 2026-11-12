@@ -24,5 +24,5 @@ import { PaymentMandateStatus, PaymentMandateType } from '@stamhoofd/structures/
 
 defineProps<{
     mandate: PaymentMandate;
-}>()
+}>();
 </script>

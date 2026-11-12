@@ -132,7 +132,7 @@ const errors = useErrors();
 const pop = usePop();
 
 const title = computed(() => {
-    return props.isNew ? $t(`%1Pt`) : $t(`%1Pp`);
+    return props.isNew ? $t('%1Pt') : $t('%1Pp');
 });
 
 const type = computed({
@@ -375,7 +375,7 @@ async function doDelete() {
     if (loading.value) {
         return;
     }
-    if (!(await CenteredMessage.confirm($t(`%1Pm`), $t(`%CJ`), $t(`%1Fc`)))) {
+    if (!(await CenteredMessage.confirm($t('%1Pm'), $t('%CJ'), $t('%1Fc')))) {
         return;
     }
     if (loading.value) {

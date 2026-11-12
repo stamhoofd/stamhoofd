@@ -112,7 +112,7 @@ export class STPackage extends QueryableModel {
             throw new SimpleError({
                 code: 'not_allowed',
                 message: 'Not allowed',
-                human: $t(`%x7`),
+                human: $t('%x7'),
             });
         }
 

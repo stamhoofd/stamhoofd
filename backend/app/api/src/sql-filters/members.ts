@@ -544,8 +544,8 @@ export const memberFilterCompilers = (organizationId: string | null = null): SQL
                                 code: 'permission_denied',
                                 message: 'No permissions to filter on record ' + key,
                                 human: result.record
-                                    ? $t(`%1Bc`, { recordName: result.record.name })
-                                    : $t(`%Zg6`),
+                                    ? $t('%1Bc', { recordName: result.record.name })
+                                    : $t('%Zg6'),
                                 statusCode: 400,
                             });
                         }
@@ -620,7 +620,7 @@ async function throwIfNoNRNReadAccess() {
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'No permissions for national registration number support filter.',
-                human: $t(`%G2`),
+                human: $t('%G2'),
                 statusCode: 400,
             });
         }
@@ -632,7 +632,7 @@ async function throwIfNoNRNReadAccess() {
         throw new SimpleError({
             code: 'permission_denied',
             message: 'No permissions for national registration number support filter (organization scope).',
-            human: $t(`%G2`),
+            human: $t('%G2'),
             statusCode: 400,
         });
     }

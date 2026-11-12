@@ -1,7 +1,8 @@
 <template>
     <template v-if="enabledActions.length">
         <template v-if="title">
-            <hr><h2>{{ title }}</h2>
+            <hr>
+            <h2>{{ title }}</h2>
         </template>
 
         <STList>

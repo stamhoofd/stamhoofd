@@ -3,6 +3,7 @@
 ### Basic concept
 
 The webshops are designed so that they don’t require a lot of network requests to the server. this makes sure there isn’t too much strain on our server when there are a lot of people wanting to buy tickets.
+
 - The webshop cart is stored in memory and local storage.
 - The webshop cart is validated in the frontend, using data passed by the backend. This validation happens on the Cart/Checkout structures ([Encoding & decoding (structures)](https://github.com/SimonBackx/simple-encoding/blob/master/README.md#encoding--decoding-structures)), so the backend can perform the exact same validation.
 - Also the calculation of the prices happen in the frontend. The frontend does pass the calculated price to the backend - the backend does its own calculation and compares if the price is the same. If the price matches, the order can continue (if the cart is valid). Otherwise there might be a price change and the frontend will need to reload its data to recalculate the prices properly.

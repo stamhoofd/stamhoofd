@@ -71,8 +71,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                 this.isWaitingForInternet = true;
                 try {
                     await this.loadFromInternet();
-                }
-                finally {
+                } finally {
                     this.isWaitingForInternet = false;
                 }
                 return;
@@ -104,13 +103,11 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
 
                 await manager.syncAll();
                 this.lastInternetLoad = Date.now();
-            }
-            catch (e) {
+            } catch (e) {
                 if (Request.isNetworkError(e)) {
                     console.warn('Failed to fetch new orders from the network', e);
                     this.isOffline = true;
-                }
-                else {
+                } else {
                     throw e;
                 }
             }
@@ -175,8 +172,7 @@ export function useOrdersObjectFetcher(manager: WebshopManager, overrides?: Part
                     ids: sortedIds,
                     signal: options?.signal,
                 });
-            }
-            else {
+            } else {
                 await manager.streamOrdersWithPatchedTickets({
                     callback: (order) => {
                         results.push(order);

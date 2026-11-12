@@ -55,7 +55,7 @@ export function useDashboardQuickActions(): QuickActions {
         try {
             const response = await context.value.authenticatedServer.request({
                 method: 'GET',
-                path: `/organization/payable-balance`,
+                path: '/organization/payable-balance',
                 decoder: PayableBalanceCollection as Decoder<PayableBalanceCollection>,
                 shouldRetry: true,
                 owner,
@@ -105,7 +105,7 @@ export function useDashboardQuickActions(): QuickActions {
 
                 arr.push({
                     illustration: outstandingAmountSvg,
-                    title: $t(`%hu`) + ' ' + organizationStatus.organization.name,
+                    title: $t('%hu') + ' ' + organizationStatus.organization.name,
                     description: $t('%14H', {
                         price: Formatter.price(open),
                         name: organizationStatus.organization.name,

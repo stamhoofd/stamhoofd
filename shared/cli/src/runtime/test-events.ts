@@ -58,7 +58,7 @@ function isTestEvent(value: unknown, session: string): value is TestEvent {
     const record = value as Record<string, unknown>;
     const counters = ['completed', 'passed', 'failed', 'skipped', 'todo', 'flaky', 'pending', 'sequence'];
     return record.version === 1 && record.session === session && typeof record.finished === 'boolean'
-        && counters.every(key => {
+        && counters.every((key) => {
             // eslint-disable-next-line security/detect-object-injection -- Only fixed protocol counter names are inspected.
             const count = record[key];
             return typeof count === 'number' && Number.isSafeInteger(count) && count >= 0;

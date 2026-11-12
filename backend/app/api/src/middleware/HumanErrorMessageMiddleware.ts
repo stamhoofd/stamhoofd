@@ -19,12 +19,10 @@ export const HumanErrorMessageMiddleware: RequestMiddleware = {
     async wrapRun<T>(run: () => Promise<T>, _request: Request): Promise<T> {
         try {
             return await run();
-        }
-        catch (error) {
+        } catch (error) {
             if (isSimpleError(error)) {
                 addHumanMessage(error);
-            }
-            else if (isSimpleErrors(error)) {
+            } else if (isSimpleErrors(error)) {
                 error.errors.forEach(addHumanMessage);
             }
             throw error;

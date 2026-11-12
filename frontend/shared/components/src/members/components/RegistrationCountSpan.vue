@@ -23,7 +23,7 @@ watch(() => JSON.stringify(props.filter), async () => {
         filter: mergeFilters([
             props.filter,
             {
-                deactivatedAt: null
+                deactivatedAt: null,
             },
         ]),
     }));

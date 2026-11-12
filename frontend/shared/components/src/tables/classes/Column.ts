@@ -94,11 +94,9 @@ export class Column<T, ValueType> {
     doCompare(a: T, b: T): number {
         if (this.compare) {
             return this.compare(this.getValue(a), this.getValue(b));
-        }
-        else if (this.compareObjects) {
+        } else if (this.compareObjects) {
             return this.compareObjects(a, b);
-        }
-        else {
+        } else {
             return 0;
         }
     }

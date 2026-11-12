@@ -128,7 +128,7 @@ export class MemberResponsibilityRecord extends MemberResponsibilityRecordBase {
     getName(member: PlatformMember, includeOrganization = true) {
         let allResponsibilities = member.family.platform.config.responsibilities;
 
-        let suffix = (this.group ? ' ' + $t(`%wR`) + ' ' + this.group.settings.name : '');
+        let suffix = (this.group ? ' ' + $t('%wR') + ' ' + this.group.settings.name : '');
 
         if (this.organizationId) {
             const organization = member.family.getOrganization(this.organizationId);
@@ -137,11 +137,11 @@ export class MemberResponsibilityRecord extends MemberResponsibilityRecordBase {
             }
 
             if (organization && includeOrganization) {
-                suffix += ' ' + $t(`%i0`) + ' ' + organization.name;
+                suffix += ' ' + $t('%i0') + ' ' + organization.name;
             }
         }
 
         const responsibility = allResponsibilities.find(r => r.id == this.responsibilityId);
-        return (responsibility ? responsibility.name : $t(`%qZ`)) + suffix;
+        return (responsibility ? responsibility.name : $t('%qZ')) + suffix;
     }
 }

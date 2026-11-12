@@ -1,8 +1,8 @@
 // I18n.ts
 import { computed, defineComponent, h } from 'vue';
 
-type ParsedPart =
-    | { type: 'text'; content: string }
+type ParsedPart
+    = | { type: 'text'; content: string }
     | { type: 'slot'; tag: string; content: string };
 
 function parseTranslation(input: string): ParsedPart[] {

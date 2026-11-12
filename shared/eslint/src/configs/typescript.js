@@ -30,11 +30,11 @@ export default {
 
         '@typescript-eslint/no-redundant-type-constituents': 'off', // Weird behaviour and reduces code readability
         '@typescript-eslint/ban-ts-comment': 'off',
-        
+
         // Make sure imports that are only used as a type are transferred into type imports
         '@typescript-eslint/consistent-type-imports': 'warn',
 
         // TypeScript leaves in "import {type Test} from './test.ts'" as "import {} from './test.ts'", while it removes "import type {Test} from './test.ts'" when verbatimModuleSyntax is enabled. To avoid not removing it, we prefer top level
-        'import/consistent-type-specifier-style': ['warn', 'prefer-top-level'], 
+        'import/consistent-type-specifier-style': ['warn', 'prefer-top-level'],
     },
 };

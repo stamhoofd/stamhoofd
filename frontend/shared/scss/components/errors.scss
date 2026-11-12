@@ -7,7 +7,7 @@
     color: $color-error-dark;
 
     &::before,
-        .inline-link {
+    .inline-link {
         color: $color-error;
     }
 }
@@ -36,7 +36,7 @@
     color: $color-dark;
 
     &::before,
-        .inline-link {
+    .inline-link {
         color: $color-primary;
     }
 }
@@ -55,7 +55,8 @@
     background: $color-success-background;
     color: $color-success-dark;
 
-    &::before, .inline-link {
+    &::before,
+    .inline-link {
         color: $color-success;
     }
 }
@@ -70,11 +71,10 @@
     }
 }
 
-
 .loading-box {
     background: $color-primary-background;
     color: $color-dark;
-    
+
     > .spinner-container {
         position: absolute;
         color: $color-primary;
@@ -84,7 +84,13 @@
     }
 }
 
-.error-box, .success-box, .info-box, .warning-box, .loading-box, .discount-box, .secundary-box {
+.error-box,
+.success-box,
+.info-box,
+.warning-box,
+.loading-box,
+.discount-box,
+.secundary-box {
     border-radius: $border-radius;
     font-size: 14px;
     line-height: 1.5;
@@ -117,7 +123,11 @@
     margin: 15px 0;
     position: relative;
 
-    &:link, &:visited, &:active, &:hover, &:focus {
+    &:link,
+    &:visited,
+    &:active,
+    &:hover,
+    &:focus {
         text-decoration: none;
     }
 
@@ -125,7 +135,12 @@
         margin-top: 5px;
     }
 
-    +.error-box, +.success-box, +.info-box, +.warning-box, +.loading-box, +.discount-box  {
+    + .error-box,
+    + .success-box,
+    + .info-box,
+    + .warning-box,
+    + .loading-box,
+    + .discount-box {
         margin-top: -7px;
     }
 
@@ -137,18 +152,19 @@
         &.text {
             color: inherit;
 
-            &:disabled, &.disabled {
+            &:disabled,
+            &.disabled {
                 opacity: 0.4;
             }
         }
     }
 
-    @media (max-width: 400px){
+    @media (max-width: 400px) {
         flex-direction: column;
         align-items: flex-start;
     }
 
-    @media (min-width: 401px){
+    @media (min-width: 401px) {
         > .button {
             flex-shrink: 0;
             margin: -15px 0;
@@ -159,12 +175,17 @@
     }
 }
 
-.error-box, .success-box, .info-box, .warning-box, .discount-box, .secundary-box {
+.error-box,
+.success-box,
+.info-box,
+.warning-box,
+.discount-box,
+.secundary-box {
     @extend .icon-base;
 
     &::before {
         position: absolute;
-        
+
         width: 20px;
         height: 20px;
         font-size: 20px;

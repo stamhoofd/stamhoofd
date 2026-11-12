@@ -76,7 +76,8 @@
                         </EventInfoTable>
 
                         <div v-if="canWriteEvent" class="container">
-                            <hr><h2>
+                            <hr>
+                            <h2>
                                 {{ $t('%xU') }}
                             </h2>
 
@@ -458,7 +459,7 @@ const levelPrefix = computed(() => {
             const tagNames = platform.value?.config.tags.filter(t => props.event.meta.organizationTagIds?.includes(t.id)).map(t => t.name);
             prefixes.push(...tagNames);
         } else {
-            prefixes.push($t(`%XF`));
+            prefixes.push($t('%XF'));
         }
     } else {
         if (eventOrganization.value?.id === organization.value?.id) {
@@ -469,7 +470,7 @@ const levelPrefix = computed(() => {
         }
     }
 
-    const base = Formatter.joinLast(prefixes, ', ', ' ' + $t(`%M1`) + ' ');
+    const base = Formatter.joinLast(prefixes, ', ', ' ' + $t('%M1') + ' ');
 
     if (groupOrganization.value && props.event.organizationId === null) {
         return `${base} (via ${groupOrganization.value.name})`;
@@ -758,7 +759,7 @@ async function unlinkWebshop() {
 async function linkWebshop(event: MouseEvent) {
     const org = eventOrganization.value ?? organization.value;
     if (!org) {
-        Toast.warning($t(`%1CE`)).show();
+        Toast.warning($t('%1CE')).show();
         return;
     }
 
@@ -851,8 +852,7 @@ async function createGroup() {
             Toast.error(eventPeriodProblemText(problem)).setHide(20 * 1000).show();
             return;
         }
-    }
-    catch (e) {
+    } catch (e) {
         // Best effort: let the backend refuse it instead
         console.error(e);
     }
@@ -891,7 +891,7 @@ async function addMembers() {
     }
 
     if (!organization.value) {
-        Toast.warning($t(`%ya`)).show();
+        Toast.warning($t('%ya')).show();
         return;
     }
 
@@ -918,7 +918,7 @@ async function loadEvent(event: Event): Promise<Event> {
     if (events.results.length === 1) {
         return events.results[0];
     }
-    Toast.error($t(`%yc`)).show();
+    Toast.error($t('%yc')).show();
     throw new Error('Event not found');
 }
 function duplicateEvent() {

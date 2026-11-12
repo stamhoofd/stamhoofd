@@ -54,7 +54,7 @@ async function submit() {
     if (password.value !== passwordRepeat.value) {
         errorBox.value = new ErrorBox(new SimpleError({
             code: '',
-            message: $t(`%12T`),
+            message: $t('%12T'),
         }));
         return;
     }
@@ -62,7 +62,7 @@ async function submit() {
     if (password.value.length < 8) {
         errorBox.value = new ErrorBox(new SimpleError({
             code: '',
-            message: $t(`%v2`),
+            message: $t('%v2'),
         }));
         return;
     }
@@ -73,7 +73,7 @@ async function submit() {
         // only a successful password change dismisses this view and shows success.
         await runFresh(() => LoginHelper.changePassword(context.value, password.value));
         await dismiss({ force: true });
-        new Toast($t(`%12U`), 'success').show();
+        new Toast($t('%12U'), 'success').show();
     } catch (e) {
         loading.value = false;
         errorBox.value = new ErrorBox(e);

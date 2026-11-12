@@ -111,11 +111,11 @@ export function getPermissionResourceTypeName(type: PermissionsResourceType, plu
     switch (type) {
         case PermissionsResourceType.Webshops: return plural ? 'webshops' : 'webshop';
         case PermissionsResourceType.Events: return plural ? $t('%Zsr') : $t('%Zt1');
-        case PermissionsResourceType.Groups: return plural ? $t(`%n1`) : $t(`%14Z`);
-        case PermissionsResourceType.GroupCategories: return plural ? $t(`%15H`) : $t(`%n2`);
-        case PermissionsResourceType.OrganizationTags: return plural ? $t(`%2C`) : $t(`%2T`);
-        case PermissionsResourceType.RecordCategories: return plural ? $t(`%n3`) : $t(`%n4`);
-        case PermissionsResourceType.Senders: return plural ? $t(`%1DI`) : $t(`%1DJ`);
+        case PermissionsResourceType.Groups: return plural ? $t('%n1') : $t('%14Z');
+        case PermissionsResourceType.GroupCategories: return plural ? $t('%15H') : $t('%n2');
+        case PermissionsResourceType.OrganizationTags: return plural ? $t('%2C') : $t('%2T');
+        case PermissionsResourceType.RecordCategories: return plural ? $t('%n3') : $t('%n4');
+        case PermissionsResourceType.Senders: return plural ? $t('%1DI') : $t('%1DJ');
     }
 }
 

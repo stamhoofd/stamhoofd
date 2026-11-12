@@ -24,7 +24,8 @@
             <hr>
 
             <div v-for="(group, index) of groupedEmails" :key="group.title" class="container">
-                <hr v-if="index > 0"><h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
+                <hr v-if="index > 0">
+                <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
                     <EmailRow v-for="email of group.emails" :key="email.id" :email="email" @click="onClickEmail(email)" />
@@ -62,7 +63,6 @@ import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
 import EmailRow from './components/EmailRow.vue';
-
 
 type ObjectType = EmailWithRecipients;
 
@@ -103,7 +103,7 @@ defineRoute({
                 email: events.results[0],
             };
         }
-        Toast.error($t(`%1D0`)).show();
+        Toast.error($t('%1D0')).show();
         throw new Error('Email not found');
     },
 
@@ -249,25 +249,25 @@ const dateRangeSuggestions = buildSuggestions();
 function buildSuggestions() {
     const r = [
         new DateRangeSuggestion({
-            name: $t(`%uT`),
+            name: $t('%uT'),
             startDate: Formatter.luxon().startOf('day').toJSDate(),
             endDate: Formatter.luxon().endOf('day').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: $t(`%uU`),
+            name: $t('%uU'),
             startDate: Formatter.luxon().minus({ day: 1 }).startOf('day').toJSDate(),
             endDate: Formatter.luxon().minus({ day: 1 }).endOf('day').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: $t(`%uV`),
+            name: $t('%uV'),
             startDate: Formatter.luxon().startOf('week').toJSDate(),
             endDate: Formatter.luxon().endOf('week').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: $t(`%uW`),
+            name: $t('%uW'),
             startDate: Formatter.luxon().minus({ day: 7 }).startOf('week').toJSDate(),
             endDate: Formatter.luxon().minus({ day: 7 }).endOf('week').toJSDate(),
         }),

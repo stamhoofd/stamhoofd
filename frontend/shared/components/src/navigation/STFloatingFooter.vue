@@ -19,7 +19,7 @@
     &.no-sticky {
         position: static;
     }
-    
+
     >div {
         padding: 0 var(--st-horizontal-padding, 40px);
 

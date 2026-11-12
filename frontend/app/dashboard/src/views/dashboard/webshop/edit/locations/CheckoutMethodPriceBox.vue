@@ -25,7 +25,7 @@ import { computed } from 'vue';
 
 const props = defineProps<{
     checkoutMethodPrice: CheckoutMethodPrice;
-    validator: Validator | null,
+    validator: Validator | null;
     errorBox: ErrorBox | null;
 }>();
 

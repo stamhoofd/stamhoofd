@@ -1,5 +1,5 @@
 import type { AutoEncoder, NonScalarIdentifiable, AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed } from 'vue';
 import { usePatchableArray } from './usePatchableArray';
 

@@ -193,7 +193,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'timeout',
                     message: 'Query took too long',
-                    human: $t(`%Cv`),
+                    human: $t('%Cv'),
                 });
             }
             throw error;

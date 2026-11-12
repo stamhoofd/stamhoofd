@@ -125,7 +125,7 @@ const allColumns: Column<ObjectType, any>[] = [
     }),
     new Column<ObjectType, Date | null>({
         id: 'birthDay',
-        name: $t(`%17w`),
+        name: $t('%17w'),
         getValue: invitation => invitation.member.birthDay,
         format: date => date ? Formatter.dateNumber(date, true) : '',
         minimumWidth: 50,

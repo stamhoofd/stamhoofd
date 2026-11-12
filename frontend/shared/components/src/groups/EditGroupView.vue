@@ -1654,7 +1654,7 @@ async function addWaitingList() {
         eventId: patchedGroup.value.eventId,
         type: GroupType.WaitingList,
         settings: GroupSettings.create({
-            name: TranslatedString.create($t(`%yh`) + ' ' + patchedGroup.value.settings.name.toString()),
+            name: TranslatedString.create($t('%yh') + ' ' + patchedGroup.value.settings.name.toString()),
             registrationStartDate: patchedGroup.value.settings.registrationStartDate ? new Date(patchedGroup.value.settings.registrationStartDate) : null,
             registrationEndDate: patchedGroup.value.settings.registrationEndDate ? new Date(patchedGroup.value.settings.registrationEndDate) : null,
         }),
@@ -1732,15 +1732,15 @@ async function editWaitingList(waitingList: Group) {
 const genderTypes = [
     {
         value: GroupGenderType.Mixed,
-        name: $t(`%yi`),
+        name: $t('%yi'),
     },
     {
         value: GroupGenderType.OnlyFemale,
-        name: $t(`%yj`),
+        name: $t('%yj'),
     },
     {
         value: GroupGenderType.OnlyMale,
-        name: $t(`%yk`),
+        name: $t('%yk'),
     },
 ];
 
@@ -1781,7 +1781,7 @@ function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
     }
 
     if (!ageGroup.defaultMembershipTypeId) {
-        text = text + ' ' + $t(`%yl`);
+        text = text + ' ' + $t('%yl');
     }
 
     return text;
@@ -1798,8 +1798,8 @@ const recordEditorSettings = computed(() => {
     const exampleMember = new PlatformMember({
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
-                firstName: $t(`%ID`),
-                lastName: $t(`%1PM`),
+                firstName: $t('%ID'),
+                lastName: $t('%1PM'),
                 dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),
             }),

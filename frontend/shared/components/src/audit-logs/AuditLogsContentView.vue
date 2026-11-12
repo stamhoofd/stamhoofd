@@ -37,8 +37,10 @@
                 </div>
             </div>
 
-            <hr><div v-for="(group, index) of groupedLogs" :key="group.title" class="container">
-                <hr v-if="index > 0"><h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
+            <hr>
+            <div v-for="(group, index) of groupedLogs" :key="group.title" class="container">
+                <hr v-if="index > 0">
+                <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
                 <STList>
                     <AuditLogRow v-for="log of group.logs" :key="log.id" :log="log" :custom-renderers="customRenderers" :open-logs="openLogs" />
@@ -56,10 +58,10 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import DateSelection from '#inputs/DateSelection.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { useVisibilityChange } from '#hooks/useVisibilityChange.ts';
-import type { AuditLog} from '@stamhoofd/structures';
+import type { AuditLog } from '@stamhoofd/structures';
 import { isEmptyFilter, mergeFilters } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onActivated, ref, watch } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import { useAuditLogsObjectFetcher } from '#fetchers/useAuditLogsObjectFetcher.ts';
@@ -163,8 +165,7 @@ function groupLogs(logs: AuditLog[]) {
         const group = queue[queue.length - 1];
         if (group && group.title === title) {
             group.logs.push(log);
-        }
-        else {
+        } else {
             queue.push({ title, logs: [log] });
         }
     }
@@ -188,25 +189,25 @@ const dateRangeSuggestions = buildSuggestions();
 function buildSuggestions() {
     const r = [
         new DateRangeSuggestion({
-            name: $t(`%uT`),
+            name: $t('%uT'),
             startDate: Formatter.luxon().startOf('day').toJSDate(),
             endDate: Formatter.luxon().endOf('day').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: $t(`%uU`),
+            name: $t('%uU'),
             startDate: Formatter.luxon().minus({ day: 1 }).startOf('day').toJSDate(),
             endDate: Formatter.luxon().minus({ day: 1 }).endOf('day').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: $t(`%uV`),
+            name: $t('%uV'),
             startDate: Formatter.luxon().startOf('week').toJSDate(),
             endDate: Formatter.luxon().endOf('week').toJSDate(),
         }),
 
         new DateRangeSuggestion({
-            name: $t(`%uW`),
+            name: $t('%uW'),
             startDate: Formatter.luxon().minus({ day: 7 }).startOf('week').toJSDate(),
             endDate: Formatter.luxon().minus({ day: 7 }).endOf('week').toJSDate(),
         }),

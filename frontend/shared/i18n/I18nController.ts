@@ -586,7 +586,7 @@ export class I18nController {
         // Add default locale
         if (this.defaultCountryCode && this.defaultLanguage) {
             links.push({
-                hid: `i18n-alt-default`,
+                hid: 'i18n-alt-default',
                 rel: 'alternate',
                 href: hostProtocol + this.transformUrlForLocale(path, this.defaultLanguage, this.defaultCountryCode, addPrefix),
                 hreflang: 'x-default',
@@ -617,7 +617,7 @@ export class I18nController {
                 redirected = true;
             }
             meta.push({
-                hid: `prerender-status-code`,
+                hid: 'prerender-status-code',
                 name: 'prerender-status-code',
                 content: redirected ? '302' : '200',
             });
@@ -625,7 +625,7 @@ export class I18nController {
             if (redirected) {
             // Don't use canonical host (for now)
                 meta.push({
-                    hid: `prerender-header`,
+                    hid: 'prerender-header',
                     name: 'prerender-header',
                     content: 'Location: ' + url.getHostWithProtocol() + currentPath,
                 });

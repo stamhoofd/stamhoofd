@@ -18,7 +18,7 @@ import { initStripe } from '../init/initStripe.js';
 import { initMembershipOrganization } from '../init/initMembershipOrganization.js';
 import { SessionService } from '../../src/services/SessionService.js';
 
-const baseUrl = `/members/register`;
+const baseUrl = '/members/register';
 
 describe('E2E.Bundle Discounts', () => {
     const endpoint = new RegisterMembersEndpoint();

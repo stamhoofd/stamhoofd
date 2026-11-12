@@ -68,7 +68,7 @@ const levelPrefix = computed(() => {
             const tagNames = platform.value?.config.tags.filter(t => props.event.meta.organizationTagIds?.includes(t.id)).map(t => t.name);
             prefixes.push(...tagNames);
         } else {
-            prefixes.push($t(`%XF`));
+            prefixes.push($t('%XF'));
         }
     } else {
         if (props.event.organizationId === organization.value?.id) {
@@ -81,7 +81,7 @@ const levelPrefix = computed(() => {
         }
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`%M1`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t('%M1') + ' ');
 });
 
 const prefix = computed(() => {
@@ -101,7 +101,7 @@ const prefix = computed(() => {
             prefixes.push(group.name);
         }
     }
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`%M1`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t('%M1') + ' ');
 });
 
 </script>

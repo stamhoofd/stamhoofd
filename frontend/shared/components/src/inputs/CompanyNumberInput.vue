@@ -27,8 +27,8 @@ const props = withDefaults(defineProps<{
     title: '',
     validator: null,
     required: true,
-    placeholder: () => $t(`%yu`),
-    autocomplete: () => $t(`%yv`),
+    placeholder: () => $t('%yu'),
+    autocomplete: () => $t('%yv'),
 });
 
 const companyNumberRaw = ref(model.value ?? '');
@@ -40,9 +40,9 @@ const calculatedTitle = computed(() => {
         return props.title;
     }
     if (props.country === Country.Netherlands) {
-        return $t(`%yt`);
+        return $t('%yt');
     }
-    return $t(`%wa`);
+    return $t('%wa');
 });
 
 if (props.validator) {
@@ -68,12 +68,11 @@ function validate() {
     if (companyNumberRaw.value.length === 0) {
         errorBox.value = new ErrorBox(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%yw`),
+            message: $t('%yw'),
             field: 'companyNumber',
         }));
         return false;
-    }
-    else {
+    } else {
         model.value = companyNumberRaw.value;
         errorBox.value = null;
         return true;

@@ -501,7 +501,7 @@ async function updateBalance() {
     try {
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
-            path: `/organization/payable-balance/detailed`,
+            path: '/organization/payable-balance/detailed',
             decoder: DetailedPayableBalanceCollection as Decoder<DetailedPayableBalanceCollection>,
             shouldRetry: true,
             owner,

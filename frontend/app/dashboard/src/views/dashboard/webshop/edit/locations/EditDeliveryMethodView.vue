@@ -22,11 +22,13 @@
             <p>{{ $t('%Ss') }}</p>
         </EditTimeSlotsSection>
 
-        <hr><h2>{{ $t('%Sn') }}</h2>
+        <hr>
+        <h2>{{ $t('%Sn') }}</h2>
         <CheckoutMethodPriceBox :checkout-method-price="patchedDeliveryMethod.price" :error-box="errors.errorBox" :validator="errors.validator" @patch="patchPrice" />
 
         <div v-if="!isNew" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%St') }}
             </h2>
 

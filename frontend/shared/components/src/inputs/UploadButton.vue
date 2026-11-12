@@ -62,7 +62,7 @@ function changedFile(event: Event) {
     if (file.size > 5 * 1024 * 1024) {
         const error = new SimpleError({
             code: 'file_too_large',
-            message: $t(`%z3`),
+            message: $t('%z3'),
         });
         Toast.fromError(error).setHide(null).show();
         return;

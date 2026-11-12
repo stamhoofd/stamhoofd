@@ -51,7 +51,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Webshop not found',
-                human: $t(`%FX`),
+                human: $t('%FX'),
             });
         }
 
@@ -66,7 +66,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Ticket not found',
-                    human: $t(`%FZ`),
+                    human: $t('%FZ'),
                 });
             }
 
@@ -76,7 +76,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Ticket not found',
-                    human: $t(`%FZ`),
+                    human: $t('%FZ'),
                 });
             }
 
@@ -93,7 +93,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'Ticket not found',
-                            human: $t(`%FZ`),
+                            human: $t('%FZ'),
                         });
                     }
 
@@ -135,7 +135,7 @@ export class GetTicketsEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Ticket not found',
-                    human: $t(`%FZ`),
+                    human: $t('%FZ'),
                 });
             }
 

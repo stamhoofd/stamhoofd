@@ -45,14 +45,16 @@
                 {{ $t('%Ix') }} <code v-copyable class="style-inline-code style-copyable" v-text="'{{' + $t('%14R') + '}}'" />
             </p>
 
-            <hr><h2>{{ $t('%Iy') }}</h2>
+            <hr>
+            <h2>{{ $t('%Iy') }}</h2>
             <p>{{ $t('%Iz') }}</p>
 
             <STInputBox title="" error-fields="infoDescription" :error-box="errors.errorBox" class="max">
                 <textarea v-model="infoDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`%JC`)" />
             </STInputBox>
 
-            <hr><h2>{{ $t('%HQ') }}</h2>
+            <hr>
+            <h2>{{ $t('%HQ') }}</h2>
         </template>
 
         <STList>
@@ -225,19 +227,19 @@ const transferTypes = computed(() => {
         {
             value: TransferDescriptionType.Structured,
             name: $t('%2z'),
-            description: $t(`%JF`),
+            description: $t('%JF'),
         },
         {
             value: TransferDescriptionType.Reference,
-            name: props.type === 'registration' ? $t(`%JG`) : $t(`%xA`),
-            description: $t(`%JH`),
+            name: props.type === 'registration' ? $t('%JG') : $t('%xA'),
+            description: $t('%JH'),
         },
         {
             value: TransferDescriptionType.Fixed,
-            name: $t(`%JI`),
+            name: $t('%JI'),
             description: props.type === 'registration'
-                ? $t(`%JJ`)
-                : $t(`%JK`),
+                ? $t('%JJ')
+                : $t('%JK'),
 
         },
     ];

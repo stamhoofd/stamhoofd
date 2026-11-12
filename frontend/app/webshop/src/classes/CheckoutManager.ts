@@ -1,137 +1,135 @@
-import type { Decoder} from '@common/encoding';
-import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding'
+import type { Decoder } from '@common/encoding';
+import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import type { SimpleError, SimpleErrors } from '@common/errors';
-import { Checkout, DiscountCode, Version } from '@stamhoofd/structures'
+import { Checkout, DiscountCode, Version } from '@stamhoofd/structures';
 
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import type { WebshopManager } from './WebshopManager'
+import type { WebshopManager } from './WebshopManager';
 
 /**
  * Convenient access to the organization of the current session
  */
 export class CheckoutManager {
-    private _checkout: Checkout | null = null
+    private _checkout: Checkout | null = null;
 
     /**
      * Cart error from the backend that the bulk details step should show per item after navigating back to it
      */
-    pendingCartError: SimpleError | SimpleErrors | null = null
+    pendingCartError: SimpleError | SimpleErrors | null = null;
 
-    $webshopManager: WebshopManager
+    $webshopManager: WebshopManager;
 
     constructor($webshopManager: WebshopManager) {
-        this.$webshopManager = $webshopManager
+        this.$webshopManager = $webshopManager;
     }
 
     saveCart() {
-        this.saveCheckout()
+        this.saveCheckout();
     }
 
     get checkout() {
         if (!this._checkout) {
-            this._checkout = this.loadCheckout()
+            this._checkout = this.loadCheckout();
         }
-        return this._checkout
+        return this._checkout;
     }
 
     get cart() {
-        return this.checkout.cart
+        return this.checkout.cart;
     }
 
     async validateCodes() {
         if (this.checkout.discountCodes.length === 0) {
-            return
+            return;
         }
         try {
             // Validate code
             const response = await this.$webshopManager.optionalAuthenticatedServer.request({
                 method: 'POST',
-                path: '/webshop/'+this.$webshopManager.webshop.id + '/discount-codes',
+                path: '/webshop/' + this.$webshopManager.webshop.id + '/discount-codes',
                 body: this.checkout.discountCodes.map(c => c.code),
-                decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>)
-            })
+                decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>),
+            });
 
             this.checkout.discountCodes = response.data;
-            this.checkout.update(this.$webshopManager.webshop)
-            this.saveCheckout()
-
+            this.checkout.update(this.$webshopManager.webshop);
+            this.saveCheckout();
         } catch (e) {
             // ignore
         }
     }
 
     async applyCode(code: string) {
-        const toast = new Toast($t(`%NX`), 'spinner').setHide(null).show();
+        const toast = new Toast($t('%NX'), 'spinner').setHide(null).show();
 
         try {
             // Validate code
             const response = await this.$webshopManager.optionalAuthenticatedServer.request({
                 method: 'POST',
-                path: '/webshop/'+this.$webshopManager.webshop.id + '/discount-codes',
+                path: '/webshop/' + this.$webshopManager.webshop.id + '/discount-codes',
                 body: [...this.checkout.discountCodes.map(c => c.code), code],
-                decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>)
-            })
+                decoder: new ArrayDecoder(DiscountCode as Decoder<DiscountCode>),
+            });
 
             this.checkout.discountCodes = response.data;
-            this.checkout.update(this.$webshopManager.webshop)
-            this.saveCheckout()
+            this.checkout.update(this.$webshopManager.webshop);
+            this.saveCheckout();
 
             if (this.checkout.discountCodes.find(c => c.code === code)) {
-                new Toast($t(`%Xd`), 'success primary').setHide(10 * 1000).show();
+                new Toast($t('%Xd'), 'success primary').setHide(10 * 1000).show();
                 return true;
             } else {
-                new Toast($t(`%Xe`) + ' '+code, 'red error').setHide(10 * 1000).show();
+                new Toast($t('%Xe') + ' ' + code, 'red error').setHide(10 * 1000).show();
                 return false;
             }
-            
         } finally {
             toast.hide();
         }
     }
 
     removeCode(discountCode: DiscountCode) {
-        this.checkout.discountCodes = this.checkout.discountCodes.filter(c => c.id !== discountCode.id)
-        this.checkout.update(this.$webshopManager.webshop)
-        this.saveCheckout()
+        this.checkout.discountCodes = this.checkout.discountCodes.filter(c => c.id !== discountCode.id);
+        this.checkout.update(this.$webshopManager.webshop);
+        this.saveCheckout();
     }
 
     loadCheckout() {
         // A preview starts empty and doesn't touch the cart of the visitor
         if (this.$webshopManager.preview) {
-            return new Checkout()
+            return new Checkout();
         }
         try {
-            const json = localStorage.getItem(this.$webshopManager.webshop.id+'-checkout')
+            const json = localStorage.getItem(this.$webshopManager.webshop.id + '-checkout');
             if (json) {
-                const obj = JSON.parse(json)
-                const versionBox = new VersionBoxDecoder(Checkout as Decoder<Checkout>).decode(new ObjectData(obj, { version: Version }))
-                return versionBox.data
+                const obj = JSON.parse(json);
+                const versionBox = new VersionBoxDecoder(Checkout as Decoder<Checkout>).decode(new ObjectData(obj, { version: Version }));
+                return versionBox.data;
             }
         } catch (e) {
-            console.error('Failed to load cart')
-            console.error(e)
+            console.error('Failed to load cart');
+            console.error(e);
         }
-        return new Checkout()
+        return new Checkout();
     }
 
     saveCheckout() {
         try {
-            this.checkout.update(this.$webshopManager.webshop)
+            this.checkout.update(this.$webshopManager.webshop);
             if (this.$webshopManager.preview) {
-                return
+                return;
             }
-            const data = new VersionBox(this.checkout).encode({ version: Version })
-            const json = JSON.stringify(data)
-            localStorage.setItem(this.$webshopManager.webshop.id+'-checkout', json)
+            const data = new VersionBox(this.checkout).encode({ version: Version });
+            const json = JSON.stringify(data);
+            localStorage.setItem(this.$webshopManager.webshop.id + '-checkout', json);
         } catch (e) {
-            console.error('Failed to save cart')
-            console.error(e)
+            console.error('Failed to save cart');
+            console.error(e);
         }
     }
 
     clear() {
-        this.cart.clear()
+        this.cart.clear();
         this.checkout.discountCodes = [];
-        this.saveCheckout()
+        this.saveCheckout();
     }
 }

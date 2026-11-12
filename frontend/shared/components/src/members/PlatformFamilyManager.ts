@@ -1,4 +1,4 @@
-import type { Decoder, PatchableArrayAutoEncoder} from '@common/encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray, patchContainsChanges } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import type { RequestResult } from '@common/networking';
@@ -6,7 +6,7 @@ import { Request } from '@common/networking';
 import { useAppContext } from '#context/appContext.ts';
 import { useContext } from '#hooks/useContext.ts';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
-import type { AppType, PlatformMember, Registration} from '@stamhoofd/structures';
+import type { AppType, PlatformMember, Registration } from '@stamhoofd/structures';
 import { MemberWithRegistrationsBlob, MembersBlob, PlatformFamily, Version } from '@stamhoofd/structures';
 import { onBeforeUnmount, unref } from 'vue';
 import { updateContextFromMembersBlob } from './helpers/updateContextFromMembersBlob';
@@ -107,8 +107,7 @@ export class PlatformFamilyManager {
                 }
                 patches.addPut(member.patchedMember);
                 clearAfter.add(member);
-            }
-            else {
+            } else {
                 if (patchContainsChanges(member.patch, member.member, { version: Version })) {
                     member.patch.id = member.member.id;
                     patches.addPatch(member.patch);
@@ -141,8 +140,7 @@ export class PlatformFamilyManager {
 
                 // Make sure we use local time, so this is never stale
                 response.data.markReceivedFromBackend();
-            }
-            catch (e) {
+            } catch (e) {
                 for (const c of clearAfter.values()) {
                     c.markFailedSave();
                 }
@@ -160,8 +158,7 @@ export class PlatformFamilyManager {
                     c.member.deepSet(updatedMember);
                     c.patch.id = updatedMember.id;
                     c.cacheMap = {};
-                }
-                else {
+                } else {
                     console.error('Patched members but missing in response. This should not happen.', savedMember, c);
                 }
             }

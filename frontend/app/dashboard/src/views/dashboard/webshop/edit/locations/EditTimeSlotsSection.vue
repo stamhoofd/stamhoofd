@@ -1,6 +1,7 @@
 <template>
     <div class="container">
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <div>
                 {{ title }}
             </div>
@@ -46,11 +47,10 @@ import { ComponentWithProperties, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import type { PrivateWebshop} from '@stamhoofd/structures';
+import type { PrivateWebshop } from '@stamhoofd/structures';
 import { WebshopTimeSlot, WebshopTimeSlots } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
-
 
 const props = defineProps<{
     title: string;

@@ -109,7 +109,6 @@ import { GroupUIFilterBuilder } from './GroupUIFilter';
 import type { UIFilter, UIFilterBuilder } from './UIFilter';
 import { filterToString } from './UIFilter';
 
-
 const model = defineModel<PropertyFilter | null>({ required: true });
 const props = withDefaults(defineProps<{
     required?: boolean;

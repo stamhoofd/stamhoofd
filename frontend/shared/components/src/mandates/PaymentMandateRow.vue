@@ -3,7 +3,7 @@
         <template #left>
             <PaymentMandateIcon :mandate="mandate" />
         </template>
-        
+
         <h3 class="style-title-list">
             <span>{{ mandate.name }}</span>
             <span v-if="mandate.isBlocked" class="style-tag error">{{ $t('%O3') }}</span>
@@ -33,7 +33,6 @@
         </template>
     </STGridItem>
 </template>
-
 
 <script lang="ts" setup>
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';

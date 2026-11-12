@@ -353,7 +353,7 @@ export class SQLWhereEqual extends SQLWhere {
             return joinSQLQuery([
                 'NOT (',
                 this.column.getSQL(options),
-                ` <=> `,
+                ' <=> ',
                 this.value.getSQL(options),
                 ')',
             ]);
@@ -531,7 +531,7 @@ export class SQLWhereExists extends SQLWhere {
         return joinSQLQuery([
             `${this.notExists ? 'NOT EXISTS' : 'EXISTS'} (`,
             this.subquery.getSQL(options),
-            `)`,
+            ')',
         ]);
     }
 }

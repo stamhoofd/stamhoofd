@@ -7,9 +7,9 @@
 <script lang="ts" setup>
 import type { Decoder } from '@common/encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
-import type { Payment} from '@stamhoofd/structures';
+import type { Payment } from '@stamhoofd/structures';
 import { PaymentGeneral } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { ref } from 'vue';
 import LoadingViewTransition from '#containers/LoadingViewTransition.vue';
 import { ErrorBox } from '../errors/ErrorBox';
@@ -43,8 +43,7 @@ async function load() {
         });
         props.payment.deepSet(response.data);
         loadedPayment.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }

@@ -469,7 +469,7 @@ export class SessionContext implements RequestMiddleware {
                 search.delete('error');
 
                 // Message not authorized
-                Toast.error($t(`%kv`)).setHide(20000).show();
+                Toast.error($t('%kv')).setHide(20000).show();
             }
         }
 
@@ -521,14 +521,14 @@ export class SessionContext implements RequestMiddleware {
         UrlHelper.initial.url.hash = hash.toString();
 
         if (this.hasToken()) {
-            Toast.error($t(`%Zm9`)).setHide(30000).show();
+            Toast.error($t('%Zm9')).setHide(30000).show();
             return;
         }
 
         if (!await getSessionPresentation().confirm({
-            title: $t(`%ZnG`),
-            confirmText: $t(`%ZmZ`),
-            description: $t(`%ZmW`),
+            title: $t('%ZnG'),
+            confirmText: $t('%ZmZ'),
+            description: $t('%ZmW'),
         })) {
             return;
         }
@@ -560,7 +560,7 @@ export class SessionContext implements RequestMiddleware {
             await Storage.secure.setItem('oid-state', spaState);
         } catch (e) {
             console.error('Could not save state in local storage');
-            Toast.error($t(`%kw`)).setHide(20000).show();
+            Toast.error($t('%kw')).setHide(20000).show();
             return;
         }
 
@@ -885,12 +885,12 @@ export class SessionContext implements RequestMiddleware {
             this.setLoadingError(new SimpleError({
                 code: 'failed',
                 message: 'Something went wrong',
-                human: $t(`%kx`),
+                human: $t('%kx'),
             }));
             throw new SimpleError({
                 code: 'failed',
                 message: 'Something went wrong',
-                human: $t(`%kx`),
+                human: $t('%kx'),
             });
         }
 
@@ -1171,7 +1171,7 @@ export class SessionContext implements RequestMiddleware {
                             throw new SimpleError({
                                 code: 'invalid_refresh_token',
                                 message: 'Invalid refresh token',
-                                human: $t(`%ky`),
+                                human: $t('%ky'),
                             });
                         }
                     }

@@ -40,12 +40,12 @@ const props = defineProps<{
     packages: STPackage[];
 }>();
 
-const sorted = props.packages.slice().sort((a, b) => -Sorter.byDateValue(a.meta.startDate, b.meta.startDate))
-const {isDeactivatingPackage, deactivate} = useDeactivatePackage();
+const sorted = props.packages.slice().sort((a, b) => -Sorter.byDateValue(a.meta.startDate, b.meta.startDate));
+const { isDeactivatingPackage, deactivate } = useDeactivatePackage();
 
 async function deactivatePackage(pack: STPackage) {
     if (!await CenteredMessage.confirm({
-        title: $t('%1Th', {'package-name': pack.meta.name}),
+        title: $t('%1Th', { 'package-name': pack.meta.name }),
         description: $t('%1Fc'),
         confirmText: $t('%1Sa'),
         destructive: true,
@@ -55,7 +55,7 @@ async function deactivatePackage(pack: STPackage) {
         return;
     }
 
-    await deactivate(pack, $t('%1Rk'))
+    await deactivate(pack, $t('%1Rk'));
 }
 
 </script>

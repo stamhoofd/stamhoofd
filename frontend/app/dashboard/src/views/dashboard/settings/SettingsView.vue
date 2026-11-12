@@ -135,7 +135,8 @@
                 </STListItem>
             </STList>
 
-            <hr><h2>{{ $t('%1EO') }}</h2>
+            <hr>
+            <h2>{{ $t('%1EO') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EmailSettings)">
@@ -185,7 +186,8 @@
             </STList>
 
             <template v-if="$feature('sso')">
-                <hr><h2>{{ $t('%HQ') }}</h2>
+                <hr>
+                <h2>{{ $t('%HQ') }}</h2>
                 <STList class="illustration-list">
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.SingleSignOn)">
                         <template #left>
@@ -205,7 +207,8 @@
             </template>
 
             <template v-if="mailchimpFeature || uitpasFeature">
-                <hr><h2>{{ $t('%ZvE') }}</h2>
+                <hr>
+                <h2>{{ $t('%ZvE') }}</h2>
                 <STList class="illustration-list">
                     <STListItem v-if="mailchimpFeature" :selectable="true" class="left-center" data-testid="open-mailchimp-settings" @click="$navigate(Routes.Mailchimp)">
                         <template #left>
@@ -240,7 +243,8 @@
             </template>
 
             <template v-if="!salesDisabled">
-                <hr><h2>{{ $t('%q') }}</h2>
+                <hr>
+                <h2>{{ $t('%q') }}</h2>
                 <STList class="illustration-list">
                     <STListItem v-if="!isPlatform" :selectable="true" class="left-center" data-testid="open-packages-button" @click="$navigate(Routes.Packages)">
                         <template #left>

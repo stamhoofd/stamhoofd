@@ -60,10 +60,10 @@ function getPeriodName(period: RegistrationPeriod) {
     }
 
     if (Formatter.year(period.endDate) === Formatter.year(period.startDate)) {
-        return $t(`%7Z`) + ' ' + Formatter.year(period.startDate);
+        return $t('%7Z') + ' ' + Formatter.year(period.startDate);
     }
 
-    return $t(`%7Z`) + ' ' + Formatter.year(period.startDate) + ' - ' + Formatter.year(period.endDate);
+    return $t('%7Z') + ' ' + Formatter.year(period.startDate) + ' - ' + Formatter.year(period.endDate);
 }
 
 async function getNewGroup(oldGroupId: string, cycle: number, templateId: string) {

@@ -22,7 +22,7 @@ async function checkGroupIdFilterAccess(filter: StamhoofdFilter, permissionLevel
             }
             throw Context.auth.error({
                 message: 'You do not have access to this group',
-                human: $t(`%15f`, { groupName: group.settings.name }),
+                human: $t('%15f', { groupName: group.settings.name }),
             });
         }
     }

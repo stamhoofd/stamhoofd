@@ -143,7 +143,8 @@
             </template>
 
             <div v-if="googleConfig && googleEnabled && usesGoogle && (passwordEnabled || ssoEnabled) && canEditAccount" class="container">
-                <hr><h2>{{ googleConfig.fullName || $t('%15b') }}</h2>
+                <hr>
+                <h2>{{ googleConfig.fullName || $t('%15b') }}</h2>
                 <p>{{ $t('%jq') }}</p>
 
                 <STList>
@@ -167,7 +168,8 @@
             </div>
 
             <div v-if="ssoConfig && ssoEnabled && usesSSO && (passwordEnabled || googleEnabled) && canEditAccount" class="container">
-                <hr><h2>{{ ssoConfig.fullName || 'Single-Sign-On (SSO)' }}</h2>
+                <hr>
+                <h2>{{ ssoConfig.fullName || 'Single-Sign-On (SSO)' }}</h2>
                 <p>{{ $t('%js', {sso: ssoConfig.shortName || 'SSO'}) }}</p>
 
                 <STList>
@@ -191,7 +193,8 @@
             </div>
 
             <div v-if="passwordEnabled && usesPassword && (usesGoogle || usesSSO) && canEditAccount" class="container">
-                <hr><h2>{{ $t('%ju') }}</h2>
+                <hr>
+                <h2>{{ $t('%ju') }}</h2>
                 <p>{{ $t('%jv') }}</p>
 
                 <STList>
@@ -348,7 +351,7 @@ async function save() {
                 $t('%ZtC', { email: email.value }),
             ).addCloseButton().show();
         } else {
-            const toast = new Toast($t(`%HA`), 'success green');
+            const toast = new Toast($t('%HA'), 'success green');
             toast.show();
         }
         await dismiss({ force: true });
@@ -370,16 +373,16 @@ async function deleteRequest() {
     await present({
         components: [
             AsyncComponent(() => import('./DeleteView.vue'), {
-                title: $t(`%12B`),
-                description: $t(`%15a`),
-                confirmationTitle: $t(`%12C`),
-                confirmationPlaceholder: $t(`%12D`),
+                title: $t('%12B'),
+                description: $t('%15a'),
+                confirmationTitle: $t('%12C'),
+                confirmationPlaceholder: $t('%12D'),
                 confirmationCode,
-                checkboxText: $t(`%6P`),
+                checkboxText: $t('%6P'),
                 onDelete: async () => {
                     await $context.value.deleteAccount();
 
-                    Toast.success($t(`%12E`)).show();
+                    Toast.success($t('%12E')).show();
                     await pop({ force: true });
                     return true;
                 },
@@ -406,7 +409,7 @@ async function disconnectProvider(provider: LoginProviderType) {
     }
     disconnecting = true;
 
-    if (await CenteredMessage.confirm($t(`%12F`), $t(`%12G`))) {
+    if (await CenteredMessage.confirm($t('%12F'), $t('%12G'))) {
         const metaPatch = UserMeta.patch({});
         metaPatch.loginProviderIds.set(provider, null);
 
@@ -421,7 +424,7 @@ async function disconnectProvider(provider: LoginProviderType) {
             // If the API requires recent authentication, complete it and retry the
             // provider removal once. Cancellation or failure reaches the error box.
             await runFresh(() => LoginHelper.patchUser($context.value, patch));
-            Toast.success($t(`%12H`)).show();
+            Toast.success($t('%12H')).show();
         } catch (e) {
             errors.errorBox = new ErrorBox(e);
         }
@@ -432,7 +435,7 @@ async function disconnectProvider(provider: LoginProviderType) {
 async function deletePassword() {
     if (await CenteredMessage.confirm({
         title: $t('%ZnH'),
-        confirmText: $t(`%55`),
+        confirmText: $t('%55'),
         destructive: true,
         availabilityDelay: 2_000,
     })) {
@@ -447,7 +450,7 @@ async function deletePassword() {
             // Keep the password until the API accepts the removal, reauthenticating
             // and retrying once if the session is not fresh enough.
             await runFresh(() => LoginHelper.patchUser($context.value, patch));
-            Toast.success($t(`%12J`)).show();
+            Toast.success($t('%12J')).show();
         } catch (e) {
             errors.errorBox = new ErrorBox(e);
         }
@@ -462,7 +465,7 @@ async function connectProvider(provider: LoginProviderType) {
     }
     connecting.value = true;
 
-    if (await CenteredMessage.confirm($t(`%12K`), $t(`%12L`))) {
+    if (await CenteredMessage.confirm($t('%12K'), $t('%12L'))) {
         // This will redirect, so the loading will stay forever
         await $context.value.startSSO({
             providerType: provider,
@@ -472,7 +475,7 @@ async function connectProvider(provider: LoginProviderType) {
 }
 
 async function logout() {
-    if (await CenteredMessage.confirm($t(`%12M`), $t(`%12N`))) {
+    if (await CenteredMessage.confirm($t('%12M'), $t('%12N'))) {
         // Prevent auto sign in via sso
         try {
             sessionStorage.setItem('triedLogin', 'true');

@@ -49,10 +49,9 @@ async function save() {
                 premiseTypes: patch.value,
             }),
         }));
-        new Toast($t(`%HA`), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

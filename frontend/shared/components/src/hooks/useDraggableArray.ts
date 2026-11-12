@@ -19,8 +19,7 @@ export function useDraggableArray<T extends AutoEncoder & NonScalarIdentifiable<
                 // Check if records exists
                 if (original.find(o => o.id === record.id)) {
                     recordsPatch.addMove(record.id, null);
-                }
-                else {
+                } else {
                     // This is a new one (happens when dragging between lists)
                     recordsPatch.addPut(record, null);
                 }
@@ -55,8 +54,7 @@ export function useDraggableArrayIds<T extends AutoEncoder & NonScalarIdentifiab
                 // Check if records exists
                 if (original.find(o => o.id === record.id)) {
                     recordsPatch.addMove(record.id, null);
-                }
-                else {
+                } else {
                     // This is a new one (happens when dragging between lists)
                     recordsPatch.addPut(record.id, null);
                 }

@@ -10,6 +10,7 @@ export default class DbCopy extends BaseCommand {
         'stam db copy --from stamhoofd-development --to stamhoofd-development-backup',
         'stam db cp --env keeo --to stamhoofd-development-keeo-copy',
     ];
+
     static flags = {
         ...BaseCommand.instanceFlags,
         from: Flags.string({ description: 'Database name to copy from' }),

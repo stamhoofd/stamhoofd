@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { useContext } from '#hooks/useContext.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
-import type { Email} from '@stamhoofd/structures';
+import type { Email } from '@stamhoofd/structures';
 import { EmailPreview } from '@stamhoofd/structures';
 
 export function usePatchEmail() {

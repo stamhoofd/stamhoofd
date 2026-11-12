@@ -89,11 +89,11 @@ function getOS(): string {
 
 function helpMe() {
     if (getOS() === 'iOS') {
-        new CenteredMessage($t(`%kI`), $t(`%12g`))
+        new CenteredMessage($t('%kI'), $t('%12g'))
             .addCloseButton()
             .show();
     } else {
-        new CenteredMessage($t(`%kI`), $t(`%12h`)).addCloseButton().show();
+        new CenteredMessage($t('%kI'), $t('%12h')).addCloseButton().show();
     }
 }
 

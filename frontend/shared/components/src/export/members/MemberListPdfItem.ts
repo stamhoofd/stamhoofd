@@ -114,8 +114,7 @@ function memberDetailsVerticalStackFactory(member: PlatformMember, columns: Sele
             }
 
             stringValue = stringValueOrNull;
-        }
-        else {
+        } else {
             stringValue = c.getStringValue(member);
         }
 
@@ -131,8 +130,7 @@ function memberDetailsVerticalStackFactory(member: PlatformMember, columns: Sele
                 result.push(spacing2mm);
                 currentCategory = c.category;
             }
-        }
-        else {
+        } else {
             // add spacing below the end of a category
             if (currentCategory !== undefined) {
                 result.push(spacing2mm);

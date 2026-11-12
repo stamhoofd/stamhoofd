@@ -1,5 +1,5 @@
 import type { Organization } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed } from 'vue';
 import { useContext } from './useContext';
 

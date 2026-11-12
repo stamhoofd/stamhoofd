@@ -30,7 +30,7 @@ export class ManagedToken {
             throw new SimpleError({
                 code: 'invalid_refresh_token',
                 message: 'The session has expired',
-                human: $t(`%ky`),
+                human: $t('%ky'),
             });
         }
 
@@ -70,12 +70,10 @@ export class ManagedToken {
             try {
                 this.refreshPromise = this.doRefresh(server);
                 await this.refreshPromise;
-            }
-            finally {
+            } finally {
                 this.refreshPromise = undefined;
             }
-        }
-        catch (e) {
+        } catch (e) {
             if (shouldRetry && Request.isNetworkError(e)) {
                 const should = shouldRetry();
                 if (!should) {

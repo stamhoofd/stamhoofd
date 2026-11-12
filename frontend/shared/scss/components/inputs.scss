@@ -42,7 +42,6 @@
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     word-break: normal;
 
-
     // On iOS, the time is centered on inputs, this is not what we want
     &::-webkit-date-and-time-value {
         text-align: left;
@@ -87,10 +86,11 @@
     }
 
     &.option {
-        margin-top: 7px
+        margin-top: 7px;
     }
 
-    &:disabled, &.disabled {
+    &:disabled,
+    &.disabled {
         color: $color-gray-1;
         cursor: not-allowed;
 
@@ -115,7 +115,8 @@
         opacity: 1;
     }
 
-    &.error, .input-errors & {
+    &.error,
+    .input-errors & {
         border-color: $color-error-border-shade;
         box-shadow: 0 0 0 1px $color-error-border-shade;
 
@@ -145,16 +146,22 @@ textarea.input {
     padding: 12px 15px;
     // 3 lines height
     line-height: calc(#{$input-height} - 18px - 2 * #{$border-width});
-    height: calc(#{$input-height} + 4px + 10px + (#{$input-height} - 18px - 2 * #{$border-width}) * 4);
+    height: calc(
+        #{$input-height} + 4px + 10px + (#{$input-height} - 18px - 2 * #{$border-width}) * 4
+    );
 
     resize: none;
 
     &.large {
-        height: calc(#{$input-height} + 4px + 10px + (#{$input-height} - 18px - 2 * #{$border-width}) * 8);
+        height: calc(
+            #{$input-height} + 4px + 10px + (#{$input-height} - 18px - 2 * #{$border-width}) * 8
+        );
     }
 
     &.small {
-        height: calc(#{$input-height} + 4px + 10px + (#{$input-height} - 18px - 2 * #{$border-width}) * 3);
+        height: calc(
+            #{$input-height} + 4px + 10px + (#{$input-height} - 18px - 2 * #{$border-width}) * 3
+        );
     }
 }
 
@@ -232,7 +239,7 @@ select.input {
             left: 12px;
         }
     }
-  
+
     &.right {
         > * {
             padding-right: 35px;
@@ -312,7 +319,7 @@ select.input {
     color: $color-dark;
     padding: 15px;
     width: 100%;
-    
+
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
@@ -322,7 +329,7 @@ select.input {
         display: flex;
         flex-direction: row;
         align-items: center;
-        
+
         cursor: pointer;
         touch-action: manipulation;
         user-select: none;
@@ -348,7 +355,6 @@ select.input {
         color: $color-dark;
         background: $color-background;
     }
-
 }
 
 .illustration-radio-container {
@@ -357,15 +363,14 @@ select.input {
 
     // Default for when container queries are not supported
     grid-template-columns: 1fr 1fr 1fr;
-    &:has(> :last-child:nth-child(2)) { /* 2 elements */
+    &:has(> :last-child:nth-child(2)) {
+        /* 2 elements */
         grid-template-columns: 1fr 1fr;
     }
 
     @media (max-width: 350px) {
         // Default for when container queries are not supported
         grid-template-columns: 1fr 1fr;
-
-       
     }
 
     @container st-view (min-width: 0px) {
@@ -384,7 +389,8 @@ select.input {
     @container st-view (min-width: 330px) {
         grid-template-columns: repeat(3, 1fr);
 
-        &:has(> :last-child:nth-child(2)) { /* 2 elements */
+        &:has(> :last-child:nth-child(2)) {
+            /* 2 elements */
             grid-template-columns: 1fr 1fr;
         }
     }
@@ -393,7 +399,8 @@ select.input {
         // Default for when container queries are not supported
         grid-template-columns: 1fr 1fr 1fr;
 
-        &:has(> :last-child:nth-child(2)) { /* 2 elements */
+        &:has(> :last-child:nth-child(2)) {
+            /* 2 elements */
             grid-template-columns: 1fr 1fr;
         }
 
@@ -414,7 +421,8 @@ select.input {
         @container st-view (min-width: 570px) {
             grid-template-columns: repeat(3, 1fr);
 
-            &:has(> :last-child:nth-child(2)) { /* 2 elements */
+            &:has(> :last-child:nth-child(2)) {
+                /* 2 elements */
                 grid-template-columns: 1fr 1fr;
             }
         }
@@ -435,11 +443,14 @@ select.input {
     gap: 5px;
     text-align: center;
     cursor: pointer;
-    transition: transform 0.2s ease, border-color 0.2s ease, outline-color 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        outline-color 0.2s ease;
     outline-offset: -0.1px;
     outline: 1.1px solid transparent;
 
-    >div:first-child {
+    > div:first-child {
         position: absolute;
         right: 10px;
         top: 10px;
@@ -450,12 +461,12 @@ select.input {
         outline-color: $color-primary;
     }
 
-    >h3 {
+    > h3 {
         @extend %style-label;
         padding: 0 10px;
     }
 
-    >p {
+    > p {
         @extend %style-description-small;
         padding: 0 7px;
     }
@@ -466,11 +477,11 @@ select.input {
             height: 38px;
         }
 
-        >h3 {
+        > h3 {
             font-size: 14px;
         }
 
-        >p {
+        > p {
             font-size: 11px;
             padding: 0 5px;
         }
@@ -525,7 +536,8 @@ select.input {
         background: $color-background-shade;
     }
 
-    &:active, &.active {
+    &:active,
+    &.active {
         background: $color-background-shade-darker;
     }
 

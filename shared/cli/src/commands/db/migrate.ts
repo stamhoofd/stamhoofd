@@ -11,6 +11,7 @@ export default class DbMigrate extends BaseCommand {
         'stam db migrate --env keeo',
         'stam db migrate --name feature-payments',
     ];
+
     static flags = { env: BaseCommand.environmentFlags.env, name: BaseCommand.instanceFlags.name, ...this.verbosityFlags() };
 
     async run(): Promise<void> {

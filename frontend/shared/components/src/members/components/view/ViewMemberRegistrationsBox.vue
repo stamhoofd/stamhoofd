@@ -1,6 +1,7 @@
 <template>
     <article class="container">
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <button v-long-press="(e: any) => switchCycle(e)" type="button" class="button" @click.prevent="switchCycle" @contextmenu.prevent="switchCycle">
                 {{ visibleRegistrationsTitle }}
                 <span class="icon arrow-down-small" />
@@ -177,7 +178,7 @@ async function editRegistration(registration: Registration, event: MouseEvent) {
     const actions = await builder.getActions({ selectedOrganizationRegistrationPeriod });
 
     if (actions.filter(a => a.enabled()).length === 0) {
-        Toast.warning($t(`%10J`)).show();
+        Toast.warning($t('%10J')).show();
         return;
     }
 

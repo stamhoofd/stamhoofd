@@ -77,8 +77,7 @@ async function save() {
         });
         setSettings(response.data);
         await dismiss({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;

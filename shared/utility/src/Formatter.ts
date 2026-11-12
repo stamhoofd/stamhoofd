@@ -117,8 +117,8 @@ export class Formatter {
         }
 
         // todo translation
-        const monthNames = [$t(`%tO`), $t(`%tP`), $t(`%tQ`), $t(`%tR`), $t(`%tS`), $t(`%tT`),
-            $t(`%tU`), $t(`%tV`), $t(`%tW`), $t(`%tX`), $t(`%tY`), $t(`%tZ`),
+        const monthNames = [$t('%tO'), $t('%tP'), $t('%tQ'), $t('%tR'), $t('%tS'), $t('%tT'),
+            $t('%tU'), $t('%tV'), $t('%tW'), $t('%tX'), $t('%tY'), $t('%tZ'),
         ];
         return monthNames[index - 1];
     }
@@ -138,7 +138,7 @@ export class Formatter {
         }
 
         // todo translation
-        const monthNames = [$t(`%ta`), $t(`%tb`), $t(`%tc`), $t(`%td`), $t(`%te`), $t(`%tf`), $t(`%tg`)];
+        const monthNames = [$t('%ta'), $t('%tb'), $t('%tc'), $t('%td'), $t('%te'), $t('%tf'), $t('%tg')];
 
         const datetime = DateTime.fromJSDate(date).setZone(this.timezone);
         return monthNames[datetime.weekday - 1];
@@ -172,16 +172,16 @@ export class Formatter {
 
         if (weeks > 0 && dividable === 0) {
             if (weeks === 1) {
-                return $t(`%1Y`);
+                return $t('%1Y');
             }
-            return weeks + ' ' + $t(`%th`);
+            return weeks + ' ' + $t('%th');
         }
 
         if (days === 1) {
-            return $t(`%ti`);
+            return $t('%ti');
         }
 
-        return $t(`%tj`, { days: days.toString() });
+        return $t('%tj', { days: days.toString() });
     }
 
     static relativeTime(date: Date, options?: { days?: boolean; hours?: boolean }) {
@@ -201,9 +201,9 @@ export class Formatter {
                 return this.dateTime(date, true, true);
             }
             if (days === 1) {
-                return $t(`%tk`);
+                return $t('%tk');
             }
-            return $t(`%tl`, { days: days.toString() });
+            return $t('%tl', { days: days.toString() });
         }
 
         if (hours > 0) {
@@ -212,27 +212,27 @@ export class Formatter {
             }
 
             if (hours === 1) {
-                return $t(`%tm`);
+                return $t('%tm');
             }
-            return $t(`%tn`, { hours: hours.toString() });
+            return $t('%tn', { hours: hours.toString() });
         }
 
         if (minutes > 0) {
             if (minutes === 1) {
-                return $t(`%to`);
+                return $t('%to');
             }
-            return $t(`%tp`, { minutes: minutes.toString() });
+            return $t('%tp', { minutes: minutes.toString() });
         }
 
         const seconds = Math.floor(diff / 1000);
         if (seconds > 0) {
             if (seconds === 1) {
-                return $t(`%tq`);
+                return $t('%tq');
             }
-            return $t(`%tr`, { seconds: seconds.toString() });
+            return $t('%tr', { seconds: seconds.toString() });
         }
 
-        return $t(`%ts`);
+        return $t('%ts');
     }
 
     /**
@@ -460,7 +460,7 @@ export class Formatter {
         if (hideZero && this.time(date) === '0:00') {
             return this.date(date, withYear);
         }
-        return this.date(date, withYear) + ' ' + $t(`%tt`) + ' ' + this.time(date);
+        return this.date(date, withYear) + ' ' + $t('%tt') + ' ' + this.time(date);
     }
 
     static integer(value: number): string {

@@ -335,7 +335,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'invalid_access_token',
                 message: 'The access token is invalid',
-                human: $t(`%Fi`),
+                human: $t('%Fi'),
                 statusCode: 401,
             });
         }
@@ -354,7 +354,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'expired_access_token',
                 message: 'The access token is expired',
-                human: $t(`%Fi`),
+                human: $t('%Fi'),
                 statusCode: 401,
             });
         }
@@ -363,7 +363,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'invalid_access_token',
                 message: 'The access token is invalid',
-                human: $t(`%Fi`),
+                human: $t('%Fi'),
                 statusCode: 401,
             });
         }
@@ -377,7 +377,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'not_activated',
                 message: 'This user is not yet activated',
-                human: $t(`%Fj`),
+                human: $t('%Fj'),
                 statusCode: 401,
             });
         }
@@ -417,7 +417,7 @@ export class ContextInstance {
         const invalid = new SimpleError({
             code: 'invalid_access_token',
             message: 'The impersonation is no longer allowed',
-            human: $t(`%Fi`),
+            human: $t('%Fi'),
             statusCode: 401,
         });
 
@@ -477,7 +477,7 @@ export class ContextInstance {
             throw new SimpleError({
                 code: 'not_allowed_while_impersonating',
                 message: 'This action is not allowed while impersonating another user',
-                human: $t(`%Zm0`),
+                human: $t('%Zm0'),
                 statusCode: 403,
             });
         }

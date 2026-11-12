@@ -31,7 +31,8 @@
                 </p>
 
                 <div v-for="category in categoryTree.categories" :key="category.id" class="container">
-                    <hr><h2>{{ category.settings.name }}</h2>
+                    <hr>
+                    <h2>{{ category.settings.name }}</h2>
                     <STList>
                         <STListItem v-for="group in category.groups" :key="group.id" :selectable="true" :disabled="!filterGroup(group)" @click="selectGroup(group)">
                             <template #left>
@@ -53,7 +54,8 @@
                     </STList>
                 </div>
 
-                <hr><h2>{{ $t('%1IZ') }}</h2>
+                <hr>
+                <h2>{{ $t('%1IZ') }}</h2>
                 <Spinner v-if="loadingGroups" />
                 <STList v-else-if="archivedGroups.length">
                     <STListItem v-for="group in archivedGroups" :key="group.id" :selectable="true" @click="selectGroup(group)">
@@ -164,7 +166,7 @@ const activitiesTab = {
 
 const showOnlyActivities = props.documentType === fiscal.type && STAMHOOFD.userMode === 'platform';
 const tabs = ref(showOnlyActivities ? [activitiesTab] : [groupsTab, activitiesTab]);
-const title = showOnlyActivities ? $t('%1IR') : $t(`%1IL`);
+const title = showOnlyActivities ? $t('%1IR') : $t('%1IL');
 
 const selectedTab = ref(tabs.value[0].id);
 

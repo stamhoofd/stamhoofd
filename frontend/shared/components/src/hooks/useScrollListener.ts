@@ -1,4 +1,4 @@
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { onBeforeUnmount, watch } from 'vue';
 
 export function useScrollListener(element: Ref<HTMLElement | null>, listener: () => void) {
@@ -18,8 +18,7 @@ export function useScrollListener(element: Ref<HTMLElement | null>, listener: ()
             cleanup = () => {
                 window.removeEventListener('scroll', handler);
             };
-        }
-        else if (el) {
+        } else if (el) {
             el.addEventListener('scroll', handler, { passive: true });
             cleanup = () => {
                 el.removeEventListener('scroll', handler);

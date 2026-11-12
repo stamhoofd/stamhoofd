@@ -35,7 +35,7 @@ export class RegistrationPeriodBase extends AutoEncoder {
             return this.customName.slice(0, this.customName.length - (this.suffix?.length ?? 0)).trim();
         }
 
-        return $t(`%7Z`);
+        return $t('%7Z');
     }
 
     /**

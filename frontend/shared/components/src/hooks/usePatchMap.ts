@@ -1,6 +1,6 @@
-import type { ConvertArrayToPatchableArray} from '@common/encoding';
+import type { ConvertArrayToPatchableArray } from '@common/encoding';
 import { PatchMap, patchObject } from '@common/encoding';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref, unref } from 'vue';
 
 /** Accumulate map edits over a value or ref; null entries delete keys. `hasChanges` checks patch size, not equality. */

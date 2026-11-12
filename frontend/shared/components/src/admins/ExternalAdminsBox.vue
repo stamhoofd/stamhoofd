@@ -212,11 +212,11 @@ const permissionList = (user: User) => {
     const list: string[] = [];
     const permissions = getPermissions(user);
     if (!permissions) {
-        return $t(`%uF`);
+        return $t('%uF');
     }
 
     if (permissions.hasFullAccess()) {
-        list.push($t(`%uG`));
+        list.push($t('%uG'));
     }
 
     for (const role of getUnloadedPermissions(user)?.roles ?? []) {
@@ -224,7 +224,7 @@ const permissionList = (user: User) => {
     }
 
     if (list.length === 0) {
-        return $t(`%uF`);
+        return $t('%uF');
     }
     return list.join(', ');
 };

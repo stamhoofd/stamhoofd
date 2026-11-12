@@ -86,7 +86,7 @@ useValidation(errors.validator, () => {
     if (isPropertyRequired('emergencyContacts') && emergencyContacts.value.length === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%102`),
+            message: $t('%102'),
             field: 'emergencyContacts',
         }));
     }
@@ -141,8 +141,7 @@ function setContactSelected(contact: EmergencyContact, selected: boolean) {
         patch.addDelete(contact.id); // avoids creating duplicates
         patch.addPut(contact);
         props.member.addDetailsPatch({ emergencyContacts: patch });
-    }
-    else {
+    } else {
         const patch = new PatchableArray() as PatchableArrayAutoEncoder<EmergencyContact>;
         patch.addDelete(contact.id);
         props.member.addDetailsPatch({ emergencyContacts: patch });

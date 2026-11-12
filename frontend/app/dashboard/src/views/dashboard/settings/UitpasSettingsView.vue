@@ -115,7 +115,6 @@ import type { UitpasOrganizerResponse, UitpasEventResponse } from '@stamhoofd/st
 import { OrganizationMetaData, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper } from '@stamhoofd/structures';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 
-
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import ProgressIcon from '@stamhoofd/components/icons/ProgressIcon.vue';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
@@ -177,8 +176,7 @@ const openSearchOrganizer = async () => {
                 await organizationManager.value.patch(patch.value);
                 if (props.onFixedAndEventSelected && uitpasClientCredentialsStatus.value === UitpasClientCredentialsStatus.Ok && uitpasEvent.value) {
                     await props.onFixedAndEventSelected(uitpasEvent.value, navigationActions);
-                }
-                else {
+                } else {
                     await pop({ force: true });
                 }
             },
@@ -211,8 +209,7 @@ const openSearchUitpasEvent = async () => {
                     uitpasEvent.value = event;
                     if (props.onFixedAndEventSelected && uitpasClientCredentialsStatus.value === UitpasClientCredentialsStatus.Ok && event) {
                         await props.onFixedAndEventSelected(event, navigationActions);
-                    }
-                    else {
+                    } else {
                         await navigationActions.pop({ force: true });
                     }
                 },

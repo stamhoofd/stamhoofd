@@ -41,7 +41,7 @@ export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implement
         if (!cell) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18F`),
+                message: $t('%18F'),
             });
         }
 
@@ -51,7 +51,7 @@ export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implement
             if (this.category === MemberDetailsMatcherCategory.Member as string) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: $t(`%18F`),
+                    message: $t('%18F'),
                 });
             }
         }
@@ -73,8 +73,7 @@ export class FirstNameColumnMatcher extends SharedMemberDetailsMatcher implement
             importResult.addPatch({
                 firstName: value,
             });
-        }
-        else if (this.category === MemberDetailsMatcherCategory.Parent1 as string || this.category === MemberDetailsMatcherCategory.Parent2 as string) {
+        } else if (this.category === MemberDetailsMatcherCategory.Parent1 as string || this.category === MemberDetailsMatcherCategory.Parent2 as string) {
             ColumnMatcherHelper.patchParent(importResult, this.category as (MemberDetailsMatcherCategory.Parent1 | MemberDetailsMatcherCategory.Parent2), {
                 firstName: value,
             });

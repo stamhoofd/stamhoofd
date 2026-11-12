@@ -14,7 +14,7 @@ const cachedAdmins = reactive(new Map<string | null, User[]>());
 export function useLoadOrganizationAdmins() {
     const context = useContext();
     const owner = useRequestOwner();
-    
+
     return async function loadAdmins(shouldRetry = true) {
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
@@ -25,13 +25,13 @@ export function useLoadOrganizationAdmins() {
         });
         cachedAdmins.set(context.value.organization?.id ?? null, response.data.users);
         return response.data;
-    }
+    };
 }
 
 export function useLoadPlatformAdmins() {
     const context = useContext();
     const owner = useRequestOwner();
-    
+
     return async function loadAdmins(shouldRetry = true) {
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
@@ -42,9 +42,8 @@ export function useLoadPlatformAdmins() {
         });
         cachedAdmins.set(null, response.data.users);
         return response.data;
-    }
+    };
 }
-
 
 export function useLoadAdmins() {
     const organization = useOrganization();
@@ -53,7 +52,7 @@ export function useLoadAdmins() {
     const loadPlatformAdmins = useLoadPlatformAdmins();
 
     const hasAdmins = computed(() => {
-        return !!cachedAdmins.has(organization.value ? organization.value.id : null)
+        return !!cachedAdmins.has(organization.value ? organization.value.id : null);
     });
 
     const admins = computed(() => {
@@ -76,7 +75,7 @@ export function useLoadAdmins() {
         p.catch(console.error).finally(() => {
             console.log('Finished loading admins, removing reload promise', reloadPromises);
             reloadPromises.delete(id);
-        })
+        });
         return p;
     }
 
@@ -93,8 +92,7 @@ export function useLoadAdmins() {
                     pop({ force: true })?.catch(console.error);
                 }),
             );
-        }
-        else {
+        } else {
             return setReloadPromise(
                 loadPlatformAdmins(shouldRetry).catch((e) => {
                     Toast.fromError(e).show();
@@ -104,5 +102,5 @@ export function useLoadAdmins() {
         }
     }
 
-    return {admins, hasAdmins, loading, load, loadPromise: () => getReloadPromise()};
+    return { admins, hasAdmins, loading, load, loadPromise: () => getReloadPromise() };
 }

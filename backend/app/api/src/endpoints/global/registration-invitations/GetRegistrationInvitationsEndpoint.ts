@@ -135,7 +135,7 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
                     if (filters.length === 0) {
                         throw Context.auth.error({
                             message: 'You must filter on a group of the organization you are trying to access',
-                            human: $t(`%15g`),
+                            human: $t('%15g'),
                         });
                     }
 
@@ -190,7 +190,7 @@ export class GetRegistrationInvitationsEndpoint extends Endpoint<Params, Query, 
                 throw new SimpleError({
                     code: 'timeout',
                     message: 'Query took too long',
-                    human: $t(`%Cv`),
+                    human: $t('%Cv'),
                 });
             }
             throw error;

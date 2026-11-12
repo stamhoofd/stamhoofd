@@ -17,7 +17,7 @@ export class AddressColumnMatcher extends GeneralMemberDetailsMatcher<Address> {
         if (split.length === 1) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18G`, { address: v }),
+                message: $t('%18G', { address: v }),
             });
         }
 
@@ -41,7 +41,7 @@ export class AddressColumnMatcher extends GeneralMemberDetailsMatcher<Address> {
         if (!country) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18H`) + ': ' + countryString,
+                message: $t('%18H') + ': ' + countryString,
                 field: 'country',
             });
         }

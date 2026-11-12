@@ -13,7 +13,7 @@ import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { SessionService } from '../../../services/SessionService.js';
 import { vi } from 'vitest';
 
-const baseUrl = `/email-recipients`;
+const baseUrl = '/email-recipients';
 
 describe('Endpoint.GetEmailRecipients', () => {
     const endpoint = new GetEmailRecipientsEndpoint();
@@ -88,7 +88,7 @@ describe('Endpoint.GetEmailRecipients', () => {
         email.subject = 'test subject';
         email.status = EmailStatus.Draft;
         email.text = 'test email';
-        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.html = '<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>';
         email.json = {};
         email.organizationId = organization.id;
         email.senderId = sender.id;
@@ -125,7 +125,7 @@ describe('Endpoint.GetEmailRecipients', () => {
         email.subject = 'test subject';
         email.status = EmailStatus.Draft;
         email.text = 'test email';
-        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.html = '<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>';
         email.json = {};
         email.organizationId = organization.id;
         email.senderId = sender2.id;
@@ -160,7 +160,7 @@ describe('Endpoint.GetEmailRecipients', () => {
         email.subject = 'test subject';
         email.status = EmailStatus.Draft;
         email.text = 'test email';
-        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.html = '<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>';
         email.json = {};
         email.organizationId = organization.id;
         email.senderId = sender2.id;
@@ -199,7 +199,7 @@ describe('Endpoint.GetEmailRecipients', () => {
         email.subject = 'test subject';
         email.status = EmailStatus.Draft;
         email.text = 'test email';
-        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.html = '<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>';
         email.json = {};
         email.organizationId = organization.id;
         email.senderId = sender2.id;
@@ -241,7 +241,7 @@ describe('Endpoint.GetEmailRecipients', () => {
         email.subject = 'test subject';
         email.status = EmailStatus.Draft;
         email.text = 'test email';
-        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.html = '<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>';
         email.json = {};
         email.organizationId = organization.id;
         email.senderId = sender2.id;
@@ -283,7 +283,7 @@ describe('Endpoint.GetEmailRecipients', () => {
         email.subject = 'test subject';
         email.status = EmailStatus.Draft;
         email.text = 'test email';
-        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.html = '<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>';
         email.json = {};
         email.organizationId = organization.id;
         email.senderId = sender2.id;
@@ -326,7 +326,7 @@ describe('Endpoint.GetEmailRecipients', () => {
         email.subject = 'test subject';
         email.status = EmailStatus.Draft;
         email.text = 'test email';
-        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.html = '<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>';
         email.json = {};
         email.organizationId = organization.id;
         email.senderId = sender2.id;
@@ -366,7 +366,7 @@ describe('Endpoint.GetEmailRecipients', () => {
         email.subject = 'test subject';
         email.status = EmailStatus.Draft;
         email.text = 'test email';
-        email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+        email.html = '<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>';
         email.json = {};
         email.organizationId = organization.id;
         email.senderId = sender.id;
@@ -464,7 +464,7 @@ describe('Endpoint.GetEmailRecipients', () => {
             email.subject = 'test subject';
             email.status = EmailStatus.Draft;
             email.text = 'test email';
-            email.html = `<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>`;
+            email.html = '<p style="margin: 0; padding: 0; line-height: 1.4;">test email</p>';
             email.json = {};
             email.organizationId = organization.id;
             email.senderId = senderId;

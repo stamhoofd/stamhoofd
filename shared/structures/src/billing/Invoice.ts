@@ -307,11 +307,11 @@ export class Invoice extends AutoEncoder {
     getPriceBreakdown(options?: { vatAction?: PriceBreakdownAction }): PriceBreakdown {
         return [
             {
-                name: $t(`%1KK`),
+                name: $t('%1KK'),
                 price: this.totalWithoutVAT,
             },
             {
-                name: $t(`%1JE`) + (this.VATTotal.length === 1 ? ' (' + Formatter.percentage(this.VATTotal[0].VATPercentage * 100) + ')' : ''),
+                name: $t('%1JE') + (this.VATTotal.length === 1 ? ' (' + Formatter.percentage(this.VATTotal[0].VATPercentage * 100) + ')' : ''),
                 description: this.VATTotal.length === 1 && this.VATTotal[0].VATExcempt ? getVATExcemptInvoiceNote(this.VATTotal[0].VATExcempt) : undefined,
                 price: this.VATTotalAmount,
                 action: this.VATTotal.length > 1 ? options?.vatAction : undefined,
@@ -319,13 +319,13 @@ export class Invoice extends AutoEncoder {
             ...(this.payableRoundingAmount !== 0
                 ? [
                         {
-                            name: $t(`%1I6`),
+                            name: $t('%1I6'),
                             price: this.payableRoundingAmount,
                         },
                     ]
                 : []),
             {
-                name: $t(`%1KL`),
+                name: $t('%1KL'),
                 price: this.totalWithVAT,
             },
         ];

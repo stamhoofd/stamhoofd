@@ -1,6 +1,6 @@
 import type { AutoEncoder, AutoEncoderPatchType, NonScalarIdentifiable, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref, unref } from 'vue';
 
 /** Accumulate array operations over a value or ref; `hasChanges` means operations exist, not that the result differs. */

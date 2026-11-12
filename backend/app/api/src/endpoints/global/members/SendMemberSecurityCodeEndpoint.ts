@@ -145,7 +145,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'too_many_requests',
                 message: 'Too many security code requests for this user',
-                human: $t(`%ZbM`),
+                human: $t('%ZbM'),
                 statusCode: 429,
             });
         }
@@ -156,7 +156,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
                 code: 'client_update_required',
                 statusCode: 400,
                 message: 'The name and birth day of the member are required to request a security code',
-                human: $t(`%G8`),
+                human: $t('%G8'),
             });
         }
 
@@ -165,7 +165,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'member_not_found',
                 message: 'No member found for the given details',
-                human: $t(`%ZbF`),
+                human: $t('%ZbF'),
                 statusCode: 404,
             });
         }
@@ -222,7 +222,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'no_email',
                 message: 'No email address is known for this member',
-                human: $t(`%Zb1`),
+                human: $t('%Zb1'),
                 statusCode: 400,
             });
         }
@@ -272,7 +272,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'no_phone',
                 message: 'No phone number is known for this member',
-                human: $t(`%Zal`),
+                human: $t('%Zal'),
                 statusCode: 400,
             });
         }
@@ -290,7 +290,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
                 throw new SimpleError({
                     code: 'too_many_requests',
                     message: 'Too many phone number lookups for this member',
-                    human: $t(`%ZbL`),
+                    human: $t('%ZbL'),
                     statusCode: 429,
                 });
             }
@@ -304,7 +304,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
                 throw new SimpleError({
                     code: 'phone_not_found',
                     message: 'The provided phone number is not linked to this member',
-                    human: $t(`%Zar`),
+                    human: $t('%Zar'),
                     statusCode: 404,
                 });
             }
@@ -326,7 +326,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'too_many_sms',
                 message: 'The daily SMS limit for this organization has been reached',
-                human: $t(`%Zat`),
+                human: $t('%Zat'),
                 statusCode: 429,
             });
         }
@@ -335,13 +335,13 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
         const formattedCode = Formatter.spaceString(code, 4, '-');
 
         let message = Context.user?.name && !Context.auth.hasSomePlatformAccess()
-            ? $t(`%Zav`, {
+            ? $t('%Zav', {
                     organization: organization?.name ?? (await Platform.getShared()).config.name,
                     firstName: member.details.firstName,
                     securityCode: formattedCode,
                     user: Context.user.name,
                 })
-            : $t(`%Zao`, {
+            : $t('%Zao', {
                     organization: organization?.name ?? (await Platform.getShared()).config.name,
                     firstName: member.details.firstName,
                     securityCode: formattedCode,
@@ -349,13 +349,13 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
 
         if (message.length > 160) {
             message = Context.user?.firstName && !Context.auth.hasSomePlatformAccess()
-                ? $t(`%Zaz`, {
+                ? $t('%Zaz', {
                         organization: organization?.name ?? (await Platform.getShared()).config.name,
                         firstName: member.details.firstName,
                         securityCode: formattedCode,
                         user: Context.user.firstName,
                     })
-                : $t(`%Zaq`, {
+                : $t('%Zaq', {
                         organization: organization?.name ?? (await Platform.getShared()).config.name,
                         firstName: member.details.firstName,
                         securityCode: formattedCode,
@@ -364,13 +364,13 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
 
         if (message.length > 160) {
             message = Context.user?.firstName && !Context.auth.hasSomePlatformAccess()
-                ? $t(`%Zb2`, {
+                ? $t('%Zb2', {
                         organization: organization?.name ?? (await Platform.getShared()).config.name,
                         firstName: member.details.firstName,
                         securityCode: formattedCode,
                         user: Context.user.firstName,
                     })
-                : $t(`%Zas`, {
+                : $t('%Zas', {
                         organization: organization?.name ?? (await Platform.getShared()).config.name,
                         firstName: member.details.firstName,
                         securityCode: formattedCode,
@@ -431,7 +431,7 @@ export class SendMemberSecurityCodeEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'too_many_requests',
                 message: 'A security code was already sent for this member recently',
-                human: $t(`%Zaw`),
+                human: $t('%Zaw'),
                 statusCode: 429,
             });
         }

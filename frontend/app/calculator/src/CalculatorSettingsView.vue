@@ -175,8 +175,7 @@ function setPaymentSelected(method: PaymentMethod, selected: boolean) {
         if (!getPaymentSelected(method)) {
             selectedPaymentMethods.value.push(method);
         }
-    }
-    else {
+    } else {
         selectedPaymentMethods.value = selectedPaymentMethods.value.filter(m => m !== method);
     }
 }

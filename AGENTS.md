@@ -5,11 +5,11 @@
 - Read and follow the [development guidelines](contributing/development-guidelines.md) for coding conventions, imports, testing expectations, and validation.
 - Start with the [contributor documentation](contributing/README.md) and read the relevant guide and owning API docstrings before changing code. Reusable library guides are linked there. Do not guess; ask if something is unclear or undocumented.
 - Read the relevant operational documentation:
-  - [Repository structure](README.md#folder-structure) for package ownership and the application stack
-  - [Development CLI](shared/cli/README.md) for commands, app ownership, bootstrap, and troubleshooting
-  - [Build configuration](shared/cli/README.md#development-configuration) for shared-build ordering and application startup
-  - [Backend endpoints](https://github.com/SimonBackx/simple-endpoints/blob/master/docs/endpoints.md) and [Playwright tests](tests/playwright/README.md) when working in those areas
-  - [Translations](contributing/frontend/translations.md) for user-facing text and errors; keep new `$t(...)` strings in Dutch and do not edit `shared/locales/src/nl.json`
+    - [Repository structure](README.md#folder-structure) for package ownership and the application stack
+    - [Development CLI](shared/cli/README.md) for commands, app ownership, bootstrap, and troubleshooting
+    - [Build configuration](shared/cli/README.md#development-configuration) for shared-build ordering and application startup
+    - [Backend endpoints](https://github.com/SimonBackx/simple-endpoints/blob/master/docs/endpoints.md) and [Playwright tests](tests/playwright/README.md) when working in those areas
+    - [Translations](contributing/frontend/translations.md) for user-facing text and errors; keep new `$t(...)` strings in Dutch and do not edit `shared/locales/src/nl.json`
 - Never modify `@stamhoofd/structures` without first reading [Versioning data](https://github.com/SimonBackx/simple-encoding/blob/master/docs/versioning.md).
 
 ## Scope and verification

@@ -21,8 +21,7 @@ async function fileExists(file) {
     try {
         await fs.access(file, fs.constants.F_OK);
         return true;
-    }
-    catch (e) {
+    } catch (e) {
         // ignore
     }
     return false;
@@ -74,8 +73,7 @@ function mergeObjects(into, from, missingOnly = false) {
         if (Object.prototype.hasOwnProperty.call(into, key)) {
             // Merge again
             into[key] = mergeObjects(into[key], from[key], missingOnly);
-        }
-        else {
+        } else {
             into[key] = from[key];
         }
     }
@@ -92,8 +90,7 @@ function replaceValues(object, callback) {
 
         if (typeof object[key] === 'object') {
             replaceValues(object[key], callback);
-        }
-        else {
+        } else {
             object[key] = callback(object[key]);
         }
     }
@@ -256,8 +253,7 @@ for (const country of Object.keys(validLocales)) {
                     console.log(namespace + '/' + locale + ' has changed');
                     await fs.writeFile('./dist/locales/' + namespace + '/' + locale + '.json', data);
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 await fs.writeFile('./dist/locales/' + namespace + '/' + locale + '.json', data);
             }
         }

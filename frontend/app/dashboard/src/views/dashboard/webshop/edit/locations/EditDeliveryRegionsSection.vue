@@ -1,6 +1,7 @@
 <template>
     <div class="container">
-        <hr><h2>{{ $t('%Sy') }}</h2>
+        <hr>
+        <h2>{{ $t('%Sy') }}</h2>
         <p>{{ $t('%Sz') }}</p>
 
         <LoadingButton :loading="loadingSearch" class="edit-regions-search-bar block">
@@ -46,9 +47,9 @@ import { useContext } from '@stamhoofd/components/hooks/useContext.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
-import type { City, Province} from '@stamhoofd/structures';
+import type { City, Province } from '@stamhoofd/structures';
 import { CountryHelper, SearchRegions, WebshopDeliveryMethod } from '@stamhoofd/structures';
-import type { Country } from "@stamhoofd/types/Country";
+import type { Country } from '@stamhoofd/types/Country';
 import { throttle } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
 
@@ -139,8 +140,7 @@ function toggleCity(city: City) {
 
     if (hasCity(city)) {
         p.cities.addDelete(city.id);
-    }
-    else {
+    } else {
         p.cities.addPut(city);
         searchQuery.value = '';
     }
@@ -157,8 +157,7 @@ function toggleProvince(province: Province) {
 
     if (hasProvince(province)) {
         p.provinces.addDelete(province.id);
-    }
-    else {
+    } else {
         p.provinces.addPut(province);
         searchQuery.value = '';
     }
@@ -175,8 +174,7 @@ function toggleCountry(country: Country) {
 
     if (hasCountry(country)) {
         p.countries.addDelete(country);
-    }
-    else {
+    } else {
         p.countries.addPut(country);
         searchQuery.value = '';
     }

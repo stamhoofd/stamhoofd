@@ -199,8 +199,8 @@ export class Recipient extends AutoEncoder {
             Replacement.create({
                 token: 'greeting',
                 value: this.firstName
-                    ? $t(`%qP`, { name: this.firstName })
-                    : $t(`%ZgF`),
+                    ? $t('%qP', { name: this.firstName })
+                    : $t('%ZgF'),
             }),
         ];
     }

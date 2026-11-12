@@ -123,6 +123,6 @@ export async function countAll<T>(objectFetcher: ObjectFetcher<T>, data?: CountF
             filter: objectFetcher.requiredFilter ?? null,
         });
     }
-    
+
     return await objectFetcher.fetchCount(data);
 }

@@ -40,16 +40,16 @@ function contextMenuForTag(t: OrganizationTag, action: (tag: OrganizationTag) =>
         name: t.name,
         childMenu: children.length
             ? new ContextMenu([
-                [
-                    new ContextMenuItem({
-                        name: t.name,
-                        action: () => {
-                            action(t);
-                        },
-                    }),
-                ],
-                children.map(ttt => contextMenuForTag(ttt, action)),
-            ])
+                    [
+                        new ContextMenuItem({
+                            name: t.name,
+                            action: () => {
+                                action(t);
+                            },
+                        }),
+                    ],
+                    children.map(ttt => contextMenuForTag(ttt, action)),
+                ])
             : undefined,
         action: () => {
             action(t);
@@ -63,14 +63,14 @@ function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`%HB`),
+                name: $t('%HB'),
                 childMenu: new ContextMenu([
                     ...(
                         parentTags.length > 0
                             ? [
                                     [
                                         new ContextMenuItem({
-                                            name: $t(`%HC`),
+                                            name: $t('%HC'),
                                             action: () => {
                                                 // Remove self from all these parent tags
                                                 const patch: PatchableArrayAutoEncoder<OrganizationTag> = new PatchableArray();

@@ -13,7 +13,8 @@
         <NumberInputBox v-model="amount" error-fields="amount" :error-box="errors.errorBox" class="max" :title="$t(`%M4`)" :min="1" :stepper="true" :validator="errors.validator" />
 
         <div v-if="!isNew" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%S9') }}
             </h2>
 

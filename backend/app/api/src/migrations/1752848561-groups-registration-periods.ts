@@ -436,7 +436,7 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
         newWaitingList.organizationId = organization.id;
         newWaitingList.periodId = period.id;
         newWaitingList.settings = GroupSettings.create({
-            name: TranslatedString.create($t(`%yh`) + ' ' + newGroup.settings.name.toString()),
+            name: TranslatedString.create($t('%yh') + ' ' + newGroup.settings.name.toString()),
             period: period.getBaseStructure(),
         });
 

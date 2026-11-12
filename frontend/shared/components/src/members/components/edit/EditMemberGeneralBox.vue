@@ -170,14 +170,14 @@ useValidation(errors.validator, () => {
     if (firstName.value.trim().length < 2) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%uH`),
+            message: $t('%uH'),
             field: 'firstName',
         }));
     }
     if (lastName.value.trim().length < 2) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%104`),
+            message: $t('%104'),
             field: 'lastName',
         }));
     }
@@ -190,13 +190,13 @@ useValidation(errors.validator, () => {
             if (isPropertyRequired('phone')) {
                 se.addError(new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`%153`, { firstName: props.member.patchedMember.details.firstName }),
+                    message: $t('%153', { firstName: props.member.patchedMember.details.firstName }),
                     field: 'phone',
                 }));
             } else {
                 se.addError(new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`%1NP`, { firstName: props.member.patchedMember.details.firstName }),
+                    message: $t('%1NP', { firstName: props.member.patchedMember.details.firstName }),
                     field: 'phone',
                 }));
             }
@@ -210,7 +210,7 @@ useValidation(errors.validator, () => {
         if (clone.email === null) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%154`, { firstName: props.member.patchedMember.details.firstName }),
+                message: $t('%154', { firstName: props.member.patchedMember.details.firstName }),
                 field: 'email',
             }));
         }
@@ -228,12 +228,12 @@ useValidation(errors.validator, () => {
 const lidSuffix = computed(() => {
     if (firstName.value.length < 2) {
         if (props.member.patchedMember.details.defaultAge < 24) {
-            return ' ' + $t(`%105`);
+            return ' ' + $t('%105');
         }
         return '';
     }
     if (props.member.patchedMember.details.defaultAge < 24) {
-        return ' ' + $t(`%155`, { name: firstName.value });
+        return ' ' + $t('%155', { name: firstName.value });
     }
     return '';
 });
@@ -317,7 +317,7 @@ function setEmail(index: number, value: string) {
 async function showBirthDayMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [new ContextMenuItem({
-            name: $t(`%106`),
+            name: $t('%106'),
             action: () => addTrackingYear(),
         })],
     ]);

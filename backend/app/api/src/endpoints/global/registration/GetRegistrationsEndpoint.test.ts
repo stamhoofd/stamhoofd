@@ -12,7 +12,7 @@ import { GetRegistrationsCountEndpoint } from './GetRegistrationsCountEndpoint.j
 import { GetRegistrationsEndpoint } from './GetRegistrationsEndpoint.js';
 import { SessionService } from '../../../services/SessionService.js';
 
-const baseUrl = `/registrations`;
+const baseUrl = '/registrations';
 const endpoint = new GetRegistrationsEndpoint();
 
 describe('Endpoint.GetRegistrationsEndpoint', () => {

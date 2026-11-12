@@ -10,7 +10,7 @@ function makeSettings(overrides: Partial<OrganizationInvoiceSettings> = {}): Org
         resetMonth: null,
         prefixYear: false,
         ...overrides,
-    })
+    });
 }
 
 // ─────────────────────────────────────────────

@@ -21,10 +21,10 @@ export enum DocumentStatus {
 export class DocumentStatusHelper {
     static getName(status: DocumentStatus): string {
         switch (status) {
-            case DocumentStatus.Draft: return $t(`%Kn`);
-            case DocumentStatus.MissingData: return $t(`%Ni`);
-            case DocumentStatus.Published: return $t(`%m5`);
-            case DocumentStatus.Deleted: return $t(`%1FX`);
+            case DocumentStatus.Draft: return $t('%Kn');
+            case DocumentStatus.MissingData: return $t('%Ni');
+            case DocumentStatus.Published: return $t('%m5');
+            case DocumentStatus.Deleted: return $t('%1FX');
         }
     }
 
@@ -148,7 +148,7 @@ export class DocumentTemplateGroup extends AutoEncoder implements ObjectWithReco
     id: string;
 
     @field({ decoder: StringDecoder, field: 'groupId' })
-    @field({ decoder: NamedObject, version: 344, upgrade: (old: any) => NamedObject.create({ id: old, name: $t(`%Gr`) }) })
+    @field({ decoder: NamedObject, version: 344, upgrade: (old: any) => NamedObject.create({ id: old, name: $t('%Gr') }) })
     group: NamedObject;
 
     /**

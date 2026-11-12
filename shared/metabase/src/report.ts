@@ -327,8 +327,7 @@ async function readIncludes(directory: string): Promise<Map<string, Include>> {
     let entries: string[];
     try {
         entries = await fs.readdir(directory);
-    }
-    catch (error) {
+    } catch (error) {
         if ((error as { code?: string }).code === 'ENOENT') {
             return new Map();
         }

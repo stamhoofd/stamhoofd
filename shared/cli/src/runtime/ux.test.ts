@@ -38,8 +38,7 @@ describe('ux helpers', () => {
             for (const line of output.split('\n')) {
                 expect(stripVTControlCharacters(line).length).toBeLessThanOrEqual(47);
             }
-        }
-        finally {
+        } finally {
             Object.defineProperty(process.stdout, 'columns', { configurable: true, value: originalColumns });
         }
     });
@@ -61,12 +60,10 @@ describe('ux helpers', () => {
             expect(stripVTControlCharacters(output)).toContain('Scan translation keys');
             expect(stripVTControlCharacters(output)).toContain('Removed 4 entries');
             expect(output).not.toContain('\u001B[2K');
-        }
-        finally {
+        } finally {
             if (descriptor) {
                 Object.defineProperty(process.stderr, 'isTTY', descriptor);
-            }
-            else {
+            } else {
                 Reflect.deleteProperty(process.stderr, 'isTTY');
             }
         }
@@ -148,8 +145,7 @@ describe('ux helpers', () => {
             row.update(['Service', 'running']);
             await table.wait();
             expect(writes.join('')).toContain('podman rm -f stamhoofd-mysql');
-        }
-        finally {
+        } finally {
             Object.defineProperty(process.stdout, 'isTTY', { configurable: true, value: originalIsTTY });
         }
     });

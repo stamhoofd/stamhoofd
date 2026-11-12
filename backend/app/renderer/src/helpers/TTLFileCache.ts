@@ -7,15 +7,15 @@ export class TTLFileCache {
 
     constructor(name: string, ttl: number) {
         if (!STAMHOOFD.CACHE_PATH) {
-            throw new Error('Missing STAMHOOFD.CACHE_PATH')
+            throw new Error('Missing STAMHOOFD.CACHE_PATH');
         }
-        this.cachePath = STAMHOOFD.CACHE_PATH + '/' + Formatter.slug(name)
+        this.cachePath = STAMHOOFD.CACHE_PATH + '/' + Formatter.slug(name);
 
         // Clear on boot
-        this.clear().catch(console.error)
+        this.clear().catch(console.error);
     }
 
-     keyToFilePath(key: string): string {
+    keyToFilePath(key: string): string {
         // Percent-encode every character that isn't safe in a filename.
         // Using encoding rather than replacement ensures the mapping is
         // injective: no two distinct keys ever produce the same filename.
@@ -27,7 +27,6 @@ export class TTLFileCache {
         });
         return path.join(this.cachePath, safeKey);
     }
-
 
     async cacheFile(key: string, contents: string): Promise<void> {
         await fs.mkdir(this.cachePath, { recursive: true });
@@ -54,7 +53,7 @@ export class TTLFileCache {
 
     async clear() {
         try {
-            await fs.rm(this.cachePath, {recursive: true})
+            await fs.rm(this.cachePath, { recursive: true });
         } catch (e) {
             // ignore
         }
@@ -86,7 +85,7 @@ export class TTLFileCache {
                 } catch {
                     // File may have been deleted concurrently — ignore
                 }
-            })
+            }),
         );
     }
 }

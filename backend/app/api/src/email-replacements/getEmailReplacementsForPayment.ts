@@ -249,8 +249,8 @@ function getPaymentContext(payment: PaymentGeneral, { orderMap, webshopMap }: Re
     }
 
     if (registrationMemberNames.size > 0) {
-        const memberNames = Formatter.joinLast([...registrationMemberNames], ', ', ' ' + $t(`%M1`) + ' ');
-        overviewContext.add($t(`%x6`) + ' ' + memberNames);
+        const memberNames = Formatter.joinLast([...registrationMemberNames], ', ', ' ' + $t('%M1') + ' ');
+        overviewContext.add($t('%x6') + ' ' + memberNames);
     }
 
     if (overviewContext.size === 0) {

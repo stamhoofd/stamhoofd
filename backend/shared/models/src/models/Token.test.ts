@@ -53,5 +53,4 @@ describe('Model.Token', () => {
         expect(token.accessToken).toEqual(existingToken);
         expect(token.userId).toEqual(user.id);
     });
-
 });

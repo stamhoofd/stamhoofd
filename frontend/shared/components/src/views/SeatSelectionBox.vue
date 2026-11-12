@@ -229,7 +229,7 @@ function onClick(row: SeatingPlanRow, seat: SeatingPlanSeat) {
     }
 
     if (isOccupied(row, seat)) {
-        new Toast($t(`%12r`), 'error red').show();
+        new Toast($t('%12r'), 'error red').show();
         return;
     }
 
@@ -263,7 +263,7 @@ function onClick(row: SeatingPlanRow, seat: SeatingPlanSeat) {
     const cartReservedSeat = CartReservedSeat.create(addedSeat);
     cartReservedSeat.calculatePrice(props.seatingPlan);
     if (cartReservedSeat.price > 0) {
-        lastPriceToast = new Toast($t(`%12s`) + ' ' + Formatter.price(cartReservedSeat.price), 'info');
+        lastPriceToast = new Toast($t('%12s') + ' ' + Formatter.price(cartReservedSeat.price), 'info');
         lastPriceToast.show();
     }
 }

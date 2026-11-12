@@ -36,5 +36,4 @@ describe('SimpleError', () => {
         expect(isSimpleError(null)).toBe(false);
         expect(isSimpleError(new Error('ordinary error'))).toBe(false);
     });
-
 });

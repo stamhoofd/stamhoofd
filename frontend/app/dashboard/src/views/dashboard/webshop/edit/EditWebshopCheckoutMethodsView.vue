@@ -49,10 +49,8 @@ import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
-import type { CheckoutMethod} from '@stamhoofd/structures';
+import type { CheckoutMethod } from '@stamhoofd/structures';
 import { PrivateWebshop, WebshopDeliveryMethod, WebshopMetaData, WebshopOnSiteMethod, WebshopTakeoutMethod } from '@stamhoofd/structures';
-
-
 
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
@@ -146,8 +144,7 @@ function editCheckoutMethod(checkoutMethod: CheckoutMethod) {
                 },
             }).setDisplayStyle('popup'),
         ).catch(console.error); ;
-    }
-    else {
+    } else {
         present(
             AsyncComponent(() => import('./locations/EditDeliveryMethodView.vue'), {
                 isNew: false,

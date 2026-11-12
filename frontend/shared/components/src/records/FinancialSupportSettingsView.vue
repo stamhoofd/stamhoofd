@@ -21,7 +21,8 @@
             </p>
         </template>
 
-        <hr><h2>{{ $t('%i4') }}</h2>
+        <hr>
+        <h2>{{ $t('%i4') }}</h2>
         <p>{{ $t('%iv') }}</p>
 
         <STInputBox class="max" :title="$t(`%6o`)">
@@ -38,21 +39,24 @@
             {{ $t(`%j7`) }}{{ FinancialSupportSettings.defaultCheckboxLabel }}"
         </p>
 
-        <hr><h2>{{ $t('%ix') }}</h2>
+        <hr>
+        <h2>{{ $t('%ix') }}</h2>
         <p>{{ $t('%iy') }}</p>
 
         <STInputBox class="max" :title="$t(`%JE`)">
             <input v-model="warningText" class="input" :placeholder="inheritedFinancialSupport?.warningText || FinancialSupportSettings.defaultWarningText">
         </STInputBox>
 
-        <hr><h2>{{ $t('%iz') }}</h2>
+        <hr>
+        <h2>{{ $t('%iz') }}</h2>
         <p>{{ $t('%j0') }}</p>
 
         <STInputBox :title="$t(`%j5`)">
             <input v-model="priceName" class="input" :placeholder="inheritedFinancialSupport?.priceName || FinancialSupportSettings.defaultPriceName">
         </STInputBox>
 
-        <hr><h2>{{ $t('%j1') }}</h2>
+        <hr>
+        <h2>{{ $t('%j1') }}</h2>
         <p>{{ $t('%j2') }}</p>
 
         <STList>
@@ -168,8 +172,7 @@ async function save() {
     try {
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -179,7 +182,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

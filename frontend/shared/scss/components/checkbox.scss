@@ -78,7 +78,7 @@ $checkbox-size: 18px;
         align-items: flex-start;
         justify-content: flex-start;
         position: relative;
-        
+
         > div:first-child {
             width: $checkbox-size;
             height: $checkbox-size;
@@ -89,7 +89,10 @@ $checkbox-size: 18px;
             box-shadow: 0px 1px 2px 0px $color-input-shadow;
             background: $color-current-background;
             box-sizing: border-box;
-            transition: background-color 0.2s, border-color 0.2s, transform 0.2s;
+            transition:
+                background-color 0.2s,
+                border-color 0.2s,
+                transform 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -100,10 +103,10 @@ $checkbox-size: 18px;
                 stroke: $color-current-background;
                 transition: stroke-dashoffset 0.4s 0.1s;
             }
-           
+
             ~ div {
                 margin-left: 15px;
-                
+
                 @extend %style-title-list;
 
                 &:empty {
@@ -114,13 +117,13 @@ $checkbox-size: 18px;
         }
     }
 
-    > input[type="checkbox"] + div {
+    > input[type='checkbox'] + div {
         > div:first-child {
             position: relative;
-            
+
             &:after {
                 // For indeterminate state
-                content: "";
+                content: '';
                 opacity: 0;
                 position: absolute;
                 top: 50%;
@@ -135,12 +138,12 @@ $checkbox-size: 18px;
         }
     }
 
-    > input[type="radio"] + div {
+    > input[type='radio'] + div {
         > div:first-child {
             border-radius: 11px;
 
             &::after {
-                content: "";
+                content: '';
                 height: $checkbox-size - $border-width * 2;
                 width: $checkbox-size - $border-width * 2;
                 background: $color-current-background;
@@ -172,7 +175,7 @@ $checkbox-size: 18px;
         }
     }
 
-    > input[type="checkbox"]:indeterminate + div {
+    > input[type='checkbox']:indeterminate + div {
         > div:first-child {
             border: $border-width solid $color-primary;
             background: $color-primary;
@@ -188,7 +191,7 @@ $checkbox-size: 18px;
         }
     }
 
-    > input[type="radio"]:checked + div {
+    > input[type='radio']:checked + div {
         > div:first-child {
             &::after {
                 transform: scale(0.4, 0.4);
@@ -196,7 +199,7 @@ $checkbox-size: 18px;
         }
     }
 
-    > input:disabled + div  {
+    > input:disabled + div {
         cursor: not-allowed;
 
         > div:first-child {
@@ -213,7 +216,7 @@ $checkbox-size: 18px;
         }
     }
 
-    > input:disabled:checked + div  {
+    > input:disabled:checked + div {
         > div:first-child {
             border: $border-width solid $color-border;
             background: $color-border;
@@ -226,7 +229,7 @@ $checkbox-size: 18px;
 
     @media (max-width: 450px) {
         &.long-text {
-            > div  > div:first-child ~ div {
+            > div > div:first-child ~ div {
                 font-size: 13px;
             }
         }
@@ -242,7 +245,19 @@ label.style-label {
 }
 
 // Checkbox: animate both when active and not checked (because you can disable it)
-label:active:not(:has(button:active, select:active, label:active, textarea:active, input:not([type=radio]):not([type=checkbox]):active, .input:active, .st-input-box:active)) .checkbox, .checkbox:active  {
+label:active:not(
+        :has(
+            button:active,
+            select:active,
+            label:active,
+            textarea:active,
+            input:not([type='radio']):not([type='checkbox']):active,
+            .input:active,
+            .st-input-box:active
+        )
+    )
+    .checkbox,
+.checkbox:active {
     > input:not(:disabled) + div {
         > div:first-child {
             transform: scale(0.8, 0.8);
@@ -251,7 +266,19 @@ label:active:not(:has(button:active, select:active, label:active, textarea:activ
 }
 
 // Radio: only shrink if not yet checked
-label:active:not(:has(button:active, select:active, label:active, textarea:active, input:not([type=radio]):not([type=checkbox]):active, .input:active, .st-input-box:active)) .radio, .radio:active  {
+label:active:not(
+        :has(
+            button:active,
+            select:active,
+            label:active,
+            textarea:active,
+            input:not([type='radio']):not([type='checkbox']):active,
+            .input:active,
+            .st-input-box:active
+        )
+    )
+    .radio,
+.radio:active {
     > input:not(:disabled):not(:checked) + div {
         > div:first-child {
             transform: scale(0.8, 0.8);

@@ -238,8 +238,7 @@ function diffArray(oldValue: unknown, value: unknown, key?: AuditLogReplacement)
                 (getDiffName(newItem) || AuditLogReplacement.key('item')).prepend(key),
             ));
             added++;
-        }
-        else {
+        } else {
             // Has been overwritten
             const original = oldValue[originalIndex];
             items.push(...diffUnknown(
@@ -469,8 +468,7 @@ function diffDecoder(decoder: Decoder<any>, oldValue: unknown, value: unknown, k
                     if (enumType) {
                         item.oldValue.type = AuditLogReplacementType.Enum;
                         item.oldValue.id = enumType;
-                    }
-                    else if (!item.oldValue.type) {
+                    } else if (!item.oldValue.type) {
                         item.oldValue.type = AuditLogReplacementType.Key;
                     }
                 }
@@ -478,8 +476,7 @@ function diffDecoder(decoder: Decoder<any>, oldValue: unknown, value: unknown, k
                     if (enumType) {
                         item.value.type = AuditLogReplacementType.Enum;
                         item.value.id = enumType;
-                    }
-                    else if (!item.value.type) {
+                    } else if (!item.value.type) {
                         item.value.type = AuditLogReplacementType.Key;
                     }
                 }
@@ -490,17 +487,14 @@ function diffDecoder(decoder: Decoder<any>, oldValue: unknown, value: unknown, k
                     if (enumType) {
                         lastKeyItem.type = AuditLogReplacementType.Enum;
                         lastKeyItem.id = enumType;
-                    }
-                    else if (!lastKeyItem.type) {
+                    } else if (!lastKeyItem.type) {
                         lastKeyItem.type = AuditLogReplacementType.Key;
                     }
-                }
-                else {
+                } else {
                     if (enumType && (!key || item.key.toKey() !== key.toKey())) {
                         item.key.type = AuditLogReplacementType.Enum;
                         item.key.id = enumType;
-                    }
-                    else if (!item.key.type) {
+                    } else if (!item.key.type) {
                         item.key.type = AuditLogReplacementType.Key;
                     }
                 }

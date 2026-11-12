@@ -34,7 +34,7 @@ export class ImpersonationService {
         if (!await Context.auth.canImpersonate(impersonatedUser)) {
             throw Context.auth.error({
                 message: 'Not allowed to impersonate this user',
-                human: $t(`%ZmJ`),
+                human: $t('%ZmJ'),
             });
         }
 
@@ -61,7 +61,7 @@ export class ImpersonationService {
         const invalid = new SimpleError({
             code: 'invalid_impersonation_ticket',
             message: 'The impersonation link is invalid or expired',
-            human: $t(`%ZnA`),
+            human: $t('%ZnA'),
             statusCode: 400,
         });
 
@@ -113,7 +113,7 @@ export class ImpersonationService {
             await model.consume();
             throw Context.auth.error({
                 message: 'Not allowed to impersonate this user',
-                human: $t(`%ZmB`),
+                human: $t('%ZmB'),
             });
         }
 
@@ -139,7 +139,7 @@ export class ImpersonationService {
             throw new SimpleError({
                 code: 'feature_disabled',
                 message: 'Impersonation is not enabled for this organization',
-                human: $t(`%Zn8`),
+                human: $t('%Zn8'),
                 statusCode: 403,
             });
         }

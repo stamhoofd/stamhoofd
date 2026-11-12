@@ -17,7 +17,8 @@
 
                 <STErrorsDefault :error-box="errors.errorBox" />
 
-                <hr><h2>{{ $t('%Zhz') }}</h2>
+                <hr>
+                <h2>{{ $t('%Zhz') }}</h2>
 
                 <STList>
                     <STListItem v-for="totp of status.totp" :key="totp.id" data-testid="totp-item">
@@ -54,7 +55,8 @@
                 </STList>
 
                 <template v-if="showPasskeySection">
-                    <hr><h2>{{ $t('%ZgI') }}</h2>
+                    <hr>
+                    <h2>{{ $t('%ZgI') }}</h2>
 
                     <p v-if="passkeyBlockedReason === 'domain'" class="info-box" data-testid="passkey-domain-warning">
                         {{ $t('%ZgL', { domain: passkeyDomain }) }}

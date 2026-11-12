@@ -15,7 +15,8 @@
                 </p>
                 <template v-else>
                     <template v-if="membershipOrganization">
-                        <hr><h2>{{ $t('%tx') }} {{ membershipOrganization.name }}</h2>
+                        <hr>
+                        <h2>{{ $t('%tx') }} {{ membershipOrganization.name }}</h2>
 
                         <STList class="illustration-list">
                             <STListItem :selectable="true" class="left-center" element-name="a" :href="'/' + appToUri('dashboard') + '/' + membershipOrganization.uri + '/boekhouding/exporteren'">
@@ -79,7 +80,8 @@
                             </STListItem>
                         </STList>
                     </template>
-                    <hr><h2>
+                    <hr>
+                    <h2>
                         {{ $t('%tv') }}
                     </h2>
                     <p>
@@ -135,7 +137,8 @@
                         {{ $t('%9C') }}
                     </p>
 
-                    <hr><h2>
+                    <hr>
+                    <h2>
                         {{ $t('%9D') }}
                     </h2>
                     <p>
@@ -181,7 +184,8 @@
                     </p>
 
                     <div v-if="summary && summary?.trials.members > 0" class="container">
-                        <hr><h2>{{ $t('%7r') }}</h2>
+                        <hr>
+                        <h2>{{ $t('%7r') }}</h2>
 
                         <div class="style-stats-grid">
                             <STInputBox :title="$t('%M4')">
@@ -223,7 +227,8 @@
                     </div>
 
                     <div v-for="type of platform.config.membershipTypes" :key="type.id" class="container">
-                        <hr><h2>{{ $t('%X') }} "{{ type.name }}"</h2>
+                        <hr>
+                        <h2>{{ $t('%X') }} "{{ type.name }}"</h2>
 
                         <div class="style-stats-grid">
                             <STInputBox :title="$t('%M4')">
@@ -286,7 +291,7 @@ import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { PlatformMembershipType } from '@stamhoofd/structures';
 import { appToUri, ChargeMembershipsSummary, ChargeMembershipsTypeSummary } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, onActivated, ref } from 'vue';
 
 const errors = useErrors();
@@ -328,8 +333,7 @@ async function save() {
         await patchPlatform(patch.value, { shouldRetry: false });
         reset();
         Toast.success($t('%9J')).show();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
     saving.value = false;
@@ -350,8 +354,7 @@ async function reload() {
             shouldRetry: true,
         });
         summary.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     loading = false;
@@ -374,8 +377,7 @@ async function charge() {
         });
         Toast.success($t('%9M')).show();
         await reload();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     charging.value = false;

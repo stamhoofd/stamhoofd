@@ -108,7 +108,7 @@ const title = computed(() => {
         return props.group.settings.name.toString();
     }
 
-    return $t(`%1EI`);
+    return $t('%1EI');
 });
 
 const estimatedRows = computed(() => {
@@ -395,7 +395,7 @@ async function createActions(): Promise<void> {
 
     const results: TableAction<ObjectType>[] = [
         new InMemoryTableAction({
-            name: $t(`%zh`),
+            name: $t('%zh'),
             icon: 'add',
             priority: 0,
             groupIndex: 1,

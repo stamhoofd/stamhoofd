@@ -26,7 +26,8 @@
         overflow-x: clip; // Same as above, but prevent scrolling
     }
 
-    > main hr, > main .container hr {
+    > main hr,
+    > main .container hr {
         height: $border-width-thin;
         background: $color-gray-3;
         border: 0;
@@ -52,7 +53,10 @@
         justify-content: flex-start;
         width: 100%;
         height: 42px;
-        transition: transform 0.2s, background-color 0.2s, color 0.2s;
+        transition:
+            transform 0.2s,
+            background-color 0.2s,
+            color 0.2s;
         text-align: left;
         box-sizing: content-box;
 
@@ -70,7 +74,10 @@
             height: 45px;
         }
 
-        &, &:active, &:visited, &:link {
+        &,
+        &:active,
+        &:visited,
+        &:link {
             text-decoration: none;
         }
 
@@ -112,7 +119,7 @@
             margin-left: -5px;
         }
 
-        >.icon:first-child {
+        > .icon:first-child {
             padding-right: 18px;
         }
 
@@ -131,7 +138,7 @@
                 border-radius: 4px;
             }
 
-            >.icon {
+            > .icon {
                 margin-right: 2px;
             }
         }
@@ -154,7 +161,7 @@
 
         .bubble {
             @extend %style-bubble;
-            
+
             margin-left: auto;
             flex-shrink: 0;
         }
@@ -162,14 +169,14 @@
         .right-icon {
             margin-left: auto;
             flex-shrink: 0;
-            padding-right: 0
+            padding-right: 0;
         }
 
         &.cta {
             color: $color-primary;
         }
 
-        .split-view-controller[data-has-detail="true"] > .master &.selected  {
+        .split-view-controller[data-has-detail='true'] > .master &.selected {
             background-color: $color-background-shade-darker;
             color: $color-dark;
         }
@@ -177,7 +184,8 @@
         &.button {
             cursor: pointer;
 
-            &:active, &.active {
+            &:active,
+            &.active {
                 background-color: $color-gray-3;
 
                 &.cta {

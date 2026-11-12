@@ -10,6 +10,7 @@ export default class ServicesUp extends BaseCommand {
         'stam services up',
         'stam services up -vv',
     ];
+
     static flags = this.verbosityFlags();
 
     async run(): Promise<void> {

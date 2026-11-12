@@ -91,7 +91,7 @@ async function submit() {
         errors.errorBox = new ErrorBox(
             new SimpleError({
                 code: 'password_mismatch',
-                message: $t(`%12T`),
+                message: $t('%12T'),
             }),
         );
         return;
@@ -100,7 +100,7 @@ async function submit() {
     if (password.value.length < 8) {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'password_too_short',
-            message: $t(`%v2`),
+            message: $t('%v2'),
         }));
         return;
     }

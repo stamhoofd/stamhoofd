@@ -1,3 +1,3 @@
 export type MemberSharedStepOptions = {
-    outdatedTime?: number|null // ms
-}
+    outdatedTime?: number | null; // ms
+};

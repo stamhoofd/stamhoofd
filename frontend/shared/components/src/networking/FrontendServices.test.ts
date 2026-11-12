@@ -30,7 +30,7 @@ describe('frontend service composition', () => {
         Storage.keyValue = Storage.secure = {
             getItem: async key => values.get(key) ?? null,
             setItem: async (key, value) => { values.set(key, value); },
-            removeItem: async key => { values.delete(key); },
+            removeItem: async (key) => { values.delete(key); },
         };
         configureFrontendServices();
     });
@@ -85,8 +85,7 @@ describe('frontend service composition', () => {
 
         if (flow === 'login') {
             await LoginHelper.verifyMfaTotp(session, 'mfa-token', '123456');
-        }
-        else {
+        } else {
             await MFAManager.applyEnrollmentResult(session, MFAEnrollmentResult.create({ token }));
         }
 

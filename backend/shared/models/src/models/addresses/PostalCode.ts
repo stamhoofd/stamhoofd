@@ -94,7 +94,7 @@ export class PostalCode extends QueryableModel {
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid city. Suggestions: ' + Formatter.joinLast(cities.map(c => c.name), ', ', ' of ') + '?',
-                            human: $t(`%GS`) + ' ' + Formatter.joinLast(cities.map(c => c.name), ', ', ' ' + $t(`%GT`) + ' ') + '?',
+                            human: $t('%GS') + ' ' + Formatter.joinLast(cities.map(c => c.name), ', ', ' ' + $t('%GT') + ' ') + '?',
                             field: 'city',
                         });
                     }

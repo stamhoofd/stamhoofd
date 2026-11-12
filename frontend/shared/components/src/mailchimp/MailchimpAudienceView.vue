@@ -70,8 +70,7 @@ onMounted(async () => {
         if (!selectedId.value && audiences.value.length === 1) {
             selectedId.value = audiences.value[0].id;
         }
-    }
-    catch (e) {
+    } catch (e) {
         if (!Request.isAbortError(e)) {
             errors.errorBox = new ErrorBox(e);
         }
@@ -96,8 +95,7 @@ async function save() {
         });
         setSettings(response.data);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;

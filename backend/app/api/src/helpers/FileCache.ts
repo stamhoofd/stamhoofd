@@ -61,7 +61,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: $t(`%Fk`),
+                human: $t('%Fk'),
                 statusCode: 400,
             });
         }
@@ -73,7 +73,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: $t(`%Fk`),
+                human: $t('%Fk'),
                 statusCode: 400,
             });
         }
@@ -86,7 +86,7 @@ export class FileCache {
                 throw new SimpleError({
                     code: 'invalid_file',
                     message: 'Invalid file',
-                    human: $t(`%Fl`),
+                    human: $t('%Fl'),
                     statusCode: 400,
                 });
             }
@@ -99,7 +99,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: $t(`%Fm`),
+                human: $t('%Fm'),
                 statusCode: 400,
             });
         }
@@ -111,7 +111,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'invalid_file',
                 message: 'Invalid file',
-                human: $t(`%Fm`),
+                human: $t('%Fm'),
                 statusCode: 400,
             });
         }
@@ -130,7 +130,7 @@ export class FileCache {
             throw new SimpleError({
                 code: 'file_expired',
                 message: 'File expired',
-                human: $t(`%Fo`),
+                human: $t('%Fo'),
                 statusCode: 404,
             });
         }
@@ -145,7 +145,7 @@ export class FileCache {
                 throw new SimpleError({
                     code: 'file_expired',
                     message: 'File expired',
-                    human: $t(`%Fp`),
+                    human: $t('%Fp'),
                     statusCode: 404,
                 });
             }

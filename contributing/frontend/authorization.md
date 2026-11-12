@@ -14,7 +14,7 @@ Is shorthand for:
 const context = useContext();
 
 const hasPermissions = computed(() => {
-		return context.value.auth.canAccessPlatformMember(member);
+    return context.value.auth.canAccessPlatformMember(member);
 });
 ```
 

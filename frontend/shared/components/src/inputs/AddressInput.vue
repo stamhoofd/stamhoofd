@@ -193,8 +193,7 @@ async function isValid(isFinal: boolean, silent = false): Promise<boolean> {
                 country: country.value,
             });
             address.cleanData();
-        }
-        else {
+        } else {
             address = Address.createFromFields(addressLine1.value, postalCode.value, city.value, country.value);
         }
 
@@ -212,15 +211,13 @@ async function isValid(isFinal: boolean, silent = false): Promise<boolean> {
                     updateValues(response.data);
                 }
                 model.value = response.data;
-            }
-            else {
+            } else {
                 if (!hasFocus.value) {
                     updateValues(address);
                 }
                 model.value = address;
             }
-        }
-        else {
+        } else {
             if (!hasFocus.value) {
                 updateValues(address);
             }
@@ -231,16 +228,14 @@ async function isValid(isFinal: boolean, silent = false): Promise<boolean> {
             pendingErrorBox.value = null;
         }
         return true;
-    }
-    catch (e) {
+    } catch (e) {
         if (isSimpleError(e) || isSimpleErrors(e)) {
             e.addNamespace('address');
 
             if (!silent) {
                 if (isFinal) {
                     errorBox.value = new ErrorBox(e);
-                }
-                else {
+                } else {
                     pendingErrorBox.value = new ErrorBox(e);
 
                     setTimeout(() => {

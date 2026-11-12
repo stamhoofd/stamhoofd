@@ -28,7 +28,8 @@
             </button>
 
             <div v-if="hasWarnings" class="hover-box container">
-                <hr><ul class="member-records">
+                <hr>
+                <ul class="member-records">
                     <li v-for="warning in sortedWarnings" :key="warning.id" :class="{ [warning.type]: true }">
                         <span :class="'icon '+warning.icon" />
                         <span class="text">{{ warning.text }}</span>
@@ -41,7 +42,8 @@
                 <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
             </STList>
 
-            <hr><h2>{{ $t('%W4') }}</h2>
+            <hr>
+            <h2>{{ $t('%W4') }}</h2>
 
             <STList>
                 <STListItem v-if="order.totalToPay || !webshop?.isAllFree">
@@ -102,7 +104,8 @@
             </STList>
 
             <template v-if="order.data.checkoutMethod">
-                <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
+                <hr>
+                <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
                     {{ $t('%xG') }}
                 </h2>
                 <h2 v-else-if="order.data.checkoutMethod.type === 'Delivery'">
@@ -189,7 +192,8 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('%zM') }}</h2>
+            <hr>
+            <h2>{{ $t('%zM') }}</h2>
 
             <STList class="info">
                 <STListItem>
@@ -236,7 +240,8 @@
             <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="order.data" />
 
             <div v-if="order.data.comments" class="container">
-                <hr><h2>
+                <hr>
+                <h2>
                     {{ $t('%Ve') }}
                 </h2>
 
@@ -244,7 +249,8 @@
             </div>
 
             <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
-                <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
+                <hr>
+                <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
                     {{ $t('%Vf') }}
                 </h2>
                 <h2 v-else>
@@ -277,7 +283,8 @@
             </p>
 
             <div v-if="hasWarnings" class="hover-box container">
-                <hr><ul class="member-records">
+                <hr>
+                <ul class="member-records">
                     <li v-for="warning in sortedWarnings" :key="warning.id" :class="{ [warning.type]: true }">
                         <span :class="'icon '+warning.icon" />
                         <span class="text">{{ warning.text }}</span>

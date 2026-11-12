@@ -28,8 +28,7 @@ export async function translateTypescriptFiles(options: TranslateTypescriptFiles
     if (options.replaceChangesOnly) {
         const changedFiles = getChangedFiles('ts', { compare: options.commitsToCompare });
         filesToLoop = files.filter(filePath => changedFiles.has(filePath));
-    }
-    else {
+    } else {
         filesToLoop = files;
     }
 

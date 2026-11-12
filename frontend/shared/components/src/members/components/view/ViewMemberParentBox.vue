@@ -1,6 +1,7 @@
 <template>
     <div class="hover-box container">
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <div>{{ ParentTypeHelper.getName(parent.type) }}</div>
         </h2>
 

@@ -6,7 +6,6 @@ console.log('Imported nock: ', !!nock);
 
 import { TestUtils } from '@stamhoofd/test-utils';
 
-
 // Set timezone!
 process.env.TZ = 'UTC';
 

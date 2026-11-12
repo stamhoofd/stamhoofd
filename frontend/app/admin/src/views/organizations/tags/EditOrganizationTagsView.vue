@@ -37,7 +37,6 @@ import { OrganizationTag, Platform, PlatformConfig, TagHelper } from '@stamhoofd
 import { computed, ref } from 'vue';
 import TagRow from './components/TagRow.vue';
 
-
 const patchPlatform = usePatchPlatform();
 const platform = usePlatform();
 const errors = useErrors();
@@ -49,7 +48,7 @@ const originalTags = computed(() => platform.value.config.tags);
 const { patched: tags, patch, addArrayPatch, hasChanges } = usePatchArray(originalTags);
 const saving = ref(false);
 
-const title = $t(`%H9`);
+const title = $t('%H9');
 
 const draggableTags = useDraggableArray(() => TagHelper.getRootTags(tags.value), addArrayPatch);
 
@@ -100,10 +99,9 @@ async function save() {
                 tags: patch.value,
             }),
         }));
-        new Toast($t(`%HA`), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

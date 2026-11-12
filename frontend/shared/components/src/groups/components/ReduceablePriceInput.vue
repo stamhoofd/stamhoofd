@@ -51,7 +51,7 @@ const props = withDefaults(
     {
         errorBox: null,
         min: null,
-        title: () => $t(`%1IP`),
+        title: () => $t('%1IP'),
         group: null,
         defaultMembershipTypeId: null,
         startDate: () => new Date(0),

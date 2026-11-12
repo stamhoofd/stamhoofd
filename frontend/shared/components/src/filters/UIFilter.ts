@@ -194,30 +194,30 @@ export function filterToString(filter: StamhoofdFilter, builder: UIFilterBuilder
     if (uiFilter) {
         return uiFilter.description;
     }
-    return $t(`%bn`);
+    return $t('%bn');
 }
 
 export function propertyFilterToString(filter: PropertyFilter, builder: UIFilterBuilder) {
     if (filter.enabledWhen === null || isEmptyFilter(filter.enabledWhen)) {
         if (filter.requiredWhen === null) {
-            return $t(`%14p`);
+            return $t('%14p');
         }
         if (isEmptyFilter(filter.requiredWhen)) {
-            return $t(`%Qk`);
+            return $t('%Qk');
         }
 
-        return $t(`%bo`) + ' ' + filterToString(filter.requiredWhen, builder) + ' ' + $t(`%bp`);
+        return $t('%bo') + ' ' + filterToString(filter.requiredWhen, builder) + ' ' + $t('%bp');
     }
 
     const enabledDescription = filterToString(filter.enabledWhen, builder);
 
     if (filter.requiredWhen === null) {
-        return $t(`%bq`) + ' ' + enabledDescription + ' ' + $t(`%br`);
+        return $t('%bq') + ' ' + enabledDescription + ' ' + $t('%br');
     }
 
     if (isEmptyFilter(filter.requiredWhen)) {
-        return $t(`%bq`) + ' ' + enabledDescription;
+        return $t('%bq') + ' ' + enabledDescription;
     }
 
-    return $t(`%bq`) + ' ' + enabledDescription + ' ' + $t(`%bs`) + ' ' + filterToString(filter.requiredWhen, builder) + ')';
+    return $t('%bq') + ' ' + enabledDescription + ' ' + $t('%bs') + ' ' + filterToString(filter.requiredWhen, builder) + ')';
 }

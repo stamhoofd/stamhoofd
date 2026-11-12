@@ -24,8 +24,6 @@ import STListItem from '#layout/STListItem.vue';
 import type { RecordChoice, RecordSettings } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
-
-
 const props = defineProps<{
     choice: RecordChoice;
     parentRecord: RecordSettings;
@@ -76,7 +74,7 @@ function moveDown() {
 function showContextMenu(event: TouchEvent | MouseEvent) {
     const menu = new ContextMenu([[
         new ContextMenuItem({
-            name: $t(`%11f`),
+            name: $t('%11f'),
             icon: 'arrow-up',
             action: () => {
                 moveUp();
@@ -84,7 +82,7 @@ function showContextMenu(event: TouchEvent | MouseEvent) {
             },
         }),
         new ContextMenuItem({
-            name: $t(`%11g`),
+            name: $t('%11g'),
             icon: 'arrow-down',
             action: () => {
                 moveDown();

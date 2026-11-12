@@ -10,6 +10,7 @@ export default class DbBackupRemove extends BaseCommand {
         'stam db backup remove --from before-migration',
         'stam db backup rm --from nightly-snapshot',
     ];
+
     static flags = {
         ...BaseCommand.instanceFlags,
         from: Flags.string({ description: 'Backup name to remove' }),

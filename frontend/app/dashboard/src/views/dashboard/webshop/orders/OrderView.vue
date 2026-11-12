@@ -128,7 +128,8 @@
             </button>
 
             <template v-if="order.data.checkoutMethod">
-                <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
+                <hr>
+                <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
                     {{ $t('%xG') }}
                 </h2>
                 <h2 v-else-if="order.data.checkoutMethod.type === 'Delivery'">
@@ -206,7 +207,8 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('%zM') }}</h2>
+            <hr>
+            <h2>{{ $t('%zM') }}</h2>
 
             <STList class="info">
                 <STListItem>
@@ -300,7 +302,8 @@
             <ViewRecordCategoryAnswersBox v-for="category in recordCategories" :key="'category-'+category.id" :category="category" :value="order.data" />
 
             <div v-if="order.data.checkoutMethod && order.data.checkoutMethod.description" class="container">
-                <hr><h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
+                <hr>
+                <h2 v-if="order.data.checkoutMethod.type === 'Takeout'">
                     {{ $t('%Vf') }}
                 </h2>
                 <h2 v-else>
@@ -310,7 +313,8 @@
                 <p class="pre-wrap" v-text="order.data.checkoutMethod.description" />
             </div>
 
-            <hr><p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
+            <hr>
+            <p v-for="code of order.data.discountCodes" :key="code.id" class="discount-box icon label">
                 <span>{{ $t('%1MX') }} <span class="style-discount-code">{{ code.code }}</span></span>
             </p>
 
@@ -318,7 +322,8 @@
                 <CartItemRow v-for="cartItem of order.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="order.data.cart" :webshop="webshop" :editable="false" :admin="true" />
             </STList>
 
-            <hr><PriceBreakdownBox :price-breakdown="order.data.priceBreakown" />
+            <hr>
+            <PriceBreakdownBox :price-breakdown="order.data.priceBreakown" />
         </main>
     </div>
 </template>

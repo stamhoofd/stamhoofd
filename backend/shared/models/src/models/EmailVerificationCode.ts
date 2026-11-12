@@ -200,7 +200,7 @@ export class EmailVerificationCode extends QueryableModel {
             throw new SimpleError({
                 code: 'too_many_attempts',
                 message: 'Too many attempts',
-                human: $t(`%GL`),
+                human: $t('%GL'),
                 statusCode: 429,
             });
         }
@@ -216,7 +216,7 @@ export class EmailVerificationCode extends QueryableModel {
             throw new SimpleError({
                 code: 'too_many_attempts',
                 message: 'Too many attempts',
-                human: $t(`%GL`),
+                human: $t('%GL'),
                 statusCode: 429,
             });
         }
@@ -235,7 +235,7 @@ export class EmailVerificationCode extends QueryableModel {
             throw new SimpleError({
                 code: 'too_many_attempts',
                 message: 'Too many attempts',
-                human: $t(`%GL`),
+                human: $t('%GL'),
                 statusCode: 429,
             });
         }

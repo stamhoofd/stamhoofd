@@ -172,7 +172,7 @@ export class CalculationOutput {
 
                         {
                             title: 'Gemiddelde transactiekost per inschrijving',
-                            description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
+                            description: input.options.country === Country.BE ? 'Gaat naar Stripe, Mollie of Payconiq' : 'Gaat naar Stripe of Mollie',
                             totalPrice: Math.round(this.transactionFees.totalPrice / input.amount / 100) * 100,
                         },
                     ],
@@ -196,7 +196,7 @@ export class CalculationOutput {
 
                     {
                         title: 'Gemiddelde transactiekost per inschrijving',
-                        description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
+                        description: input.options.country === Country.BE ? 'Gaat naar Stripe, Mollie of Payconiq' : 'Gaat naar Stripe of Mollie',
                         totalPrice: Math.round(this.transactionFees.totalPrice / input.persons / 100) * 100,
                     },
                 ],
@@ -222,7 +222,7 @@ export class CalculationOutput {
 
                     {
                         title: 'Gemiddelde transactiekost',
-                        description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
+                        description: input.options.country === Country.BE ? 'Gaat naar Stripe, Mollie of Payconiq' : 'Gaat naar Stripe of Mollie',
                         totalPrice: Math.round(this.transactionFees.totalPrice / input.amount / 100) * 100,
                     },
                 ],
@@ -247,7 +247,7 @@ export class CalculationOutput {
 
                 {
                     title: 'Gemiddelde transactiekost',
-                    description: input.options.country === Country.BE ? `Gaat naar Stripe, Mollie of Payconiq` : `Gaat naar Stripe of Mollie`,
+                    description: input.options.country === Country.BE ? 'Gaat naar Stripe, Mollie of Payconiq' : 'Gaat naar Stripe of Mollie',
                     totalPrice: Math.round(this.transactionFees.totalPrice / input.amount / 100) * 100,
                 },
             ],

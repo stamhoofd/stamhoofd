@@ -16,7 +16,8 @@
         </div>
 
         <div v-for="group of groupedEvents" :key="group.title" class="container">
-            <hr><h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
+            <hr>
+            <h2>{{ Formatter.capitalizeFirstLetter(group.title) }}</h2>
 
             <STList>
                 <EventRow v-for="event of group.events" :key="event.id" :event="event" data-testid="event-button" @click="$emit('select', event)" />

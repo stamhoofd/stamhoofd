@@ -71,7 +71,7 @@ async function showContextMenu(event: MouseEvent, mandateId: string) {
             ...(props.canManage
                 ? [
                         new ContextMenuItem({
-                            name: $t(`%1Tc`),
+                            name: $t('%1Tc'),
                             icon: 'success',
                             disabled: isDefault || mandate?.isBlocked,
                             action: async () => {
@@ -102,7 +102,7 @@ async function showContextMenu(event: MouseEvent, mandateId: string) {
             ...(props.canManage
                 ? [
                         new ContextMenuItem({
-                            name: $t(`%CJ`),
+                            name: $t('%CJ'),
                             icon: 'trash',
                             destructive: true,
                             // Only a platform admin can delete these

@@ -6,15 +6,15 @@ This guide describes API’s you can use in your views. For actual HTML/CSS help
 
 ## Hooks
 
-*Full API: `frontend/shared/components/src/hooks`*
+_Full API: `frontend/shared/components/src/hooks`_
 
-Hooks are helpful small functions that you define in your setup hook of your component (**never use it anywhere else**). They are always prefixed with ‘*use*’.
+Hooks are helpful small functions that you define in your setup hook of your component (**never use it anywhere else**). They are always prefixed with ‘_use_’.
 
 The most commonly used hooks are:
 
 **useOrganization / useRequiredOrganization**
 
-Returns the current organization in scope. In Stamhoofd you can switch between multiple organizations. Some parts of the app have a scoped organization: e.g. the admin panel of a specific organization. Other parts don’t (always) have a scoped organization, such as the *platform portal* or the *member portal* when in platform mode (= Stamhoofd runs with shared members across all organizations).
+Returns the current organization in scope. In Stamhoofd you can switch between multiple organizations. Some parts of the app have a scoped organization: e.g. the admin panel of a specific organization. Other parts don’t (always) have a scoped organization, such as the _platform portal_ or the _member portal_ when in platform mode (= Stamhoofd runs with shared members across all organizations).
 
 The useOrganization hook, returns a **Ref** to the current organization, or null if there isn’t one in scope.
 
@@ -22,7 +22,7 @@ The useOrganization hook, returns a **Ref** to the current organization, or null
 const organization = useOrganization();
 
 function clickButton() {
-		alert(organization?.value.name);
+    alert(organization?.value.name);
 }
 ```
 
@@ -77,13 +77,14 @@ const name = computed({
 
 ## Formatters
 
-*Full API: `shared/utility/src/Formatter.ts`*
+_Full API: `shared/utility/src/Formatter.ts`_
 
 All formatting is defined in the Formatter class. They can be accessed everywhere in the views without having to import (most of them\*).
 
 ```html
 <template>
-		<div>{{ formatPrice(123) }}</div> <!-- € 1,23 -->
+    <div>{{ formatPrice(123) }}</div>
+    <!-- € 1,23 -->
 </template>
 ```
 
@@ -91,7 +92,7 @@ All formatting is defined in the Formatter class. They can be accessed everywher
 import { Formatter } from '@stamhoofd/utility';
 
 const formattedPrice = Formatter.price(123);
-// € 1,23 
+// € 1,23
 ```
 
 All the available formatters are self-documented in the Formatter class.
@@ -102,7 +103,7 @@ All the available formatters are self-documented in the Formatter class.
 
 ## Context Menu’s
 
-*Full API and options: `frontend/shared/components/src/overlays/ContextMenu.ts`*
+_Full API and options: `frontend/shared/components/src/overlays/ContextMenu.ts`_
 
 ![](../assets/view-apis/context-menu.png)
 
@@ -130,7 +131,7 @@ const menu = new ContextMenu([
     [
         new ContextMenuItem({
             name: $t(`Delete this item`),
-            icon: "trash",
+            icon: 'trash',
             action: () => {
                 doDelete();
                 return true;
@@ -138,10 +139,10 @@ const menu = new ContextMenu([
         }),
     ],
 ]);
-await menu.show({ 
-		button: buttonHTMLElement,
-		xPlacement: "right",
-		yPlacement: "bottom"
+await menu.show({
+    button: buttonHTMLElement,
+    xPlacement: 'right',
+    yPlacement: 'bottom',
 });
 ```
 
@@ -181,7 +182,7 @@ const menu = new ContextMenu([
         }),
     ],
 ]);
-await menu.show({ 
+await menu.show({
 		button: buttonHTMLElement,
 		xPlacement: "right",
 		yPlacement: "bottom"
@@ -192,15 +193,12 @@ await menu.show({
 
 ## CenteredMessage
 
-*Full API: `frontend/shared/components/src/overlays/CenteredMessage.ts`*
+_Full API: `frontend/shared/components/src/overlays/CenteredMessage.ts`_
 
 ![](../assets/view-apis/confirmation.png)
 
 ```typescript
-const trueOrFalse = await CenteredMessage.confirm(
-	'Are you sure?', 
-	'Yes, confirm'
-);
+const trueOrFalse = await CenteredMessage.confirm('Are you sure?', 'Yes, confirm');
 ```
 
 ---
@@ -239,7 +237,7 @@ The same API works outside Vue setup without component context. Import `ToastBut
 
 The old `Toast`, `ToastButton`, and `ToastListener` imports from `components/overlays/Toast` are deprecated but continue to work. Only the import path needs to change. Migrate them when touching a caller, rather than changing unrelated files.
 
-*Full API: `frontend/shared/notifications/src/Toast.ts`*
+_Full API: `frontend/shared/notifications/src/Toast.ts`_
 
 ---
 

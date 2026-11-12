@@ -53,24 +53,24 @@ export async function checkPermissionsFor(access_token: string, organizationId: 
         // Handle network errors
         throw new SimpleError({
             code: 'uitpas_unreachable_checking_permissions',
-            message: `Network issue when checking UiTPAS permissions`,
-            human: $t(`%1BP`),
+            message: 'Network issue when checking UiTPAS permissions',
+            human: $t('%1BP'),
         });
     });
     if (!response.ok) {
         console.error(`Unsuccessful response whe n checking UiTPAS permissions for organization with id ${organizationId}:`, response.statusText);
         throw new SimpleError({
             code: 'unsuccessful_response_checking_permissions',
-            message: `Unsuccesful response when checking UiTPAS permissions`,
-            human: $t(`%18C`),
+            message: 'Unsuccesful response when checking UiTPAS permissions',
+            human: $t('%18C'),
         });
     }
     const json = await response.json().catch(() => {
         // Handle JSON parsing errors
         throw new SimpleError({
             code: 'invalid_json_checking_permissions',
-            message: `Invalid json when checking UiTPAS permissions`,
-            human: $t(`%18A`),
+            message: 'Invalid json when checking UiTPAS permissions',
+            human: $t('%18A'),
         });
     });
     assertIsPermissionsResponse(json);

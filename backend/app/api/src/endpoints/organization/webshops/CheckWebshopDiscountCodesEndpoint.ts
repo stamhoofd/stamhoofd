@@ -36,7 +36,7 @@ export class CheckWebshopDiscountCodesEndpoint extends Endpoint<Params, Query, B
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Webshop not found',
-                human: $t(`%FX`),
+                human: $t('%FX'),
             });
         }
 

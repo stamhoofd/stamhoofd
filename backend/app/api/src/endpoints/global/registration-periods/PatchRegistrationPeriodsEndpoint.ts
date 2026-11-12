@@ -46,7 +46,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             throw new SimpleError({
                 code: 'only_platform',
                 message: 'Period id should only be used if userMode is platform',
-                human: $t(`%1AD`),
+                human: $t('%1AD'),
             });
         }
 
@@ -140,7 +140,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'cannot_lock_current_period',
                         message: 'Current registration period cannot be locked',
-                        human: $t(`%EJ`),
+                        human: $t('%EJ'),
                     });
                 }
             }
@@ -169,7 +169,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'cannot_lock_current_period',
                         message: 'Current registration period cannot be locked',
-                        human: $t(`%EJ`),
+                        human: $t('%EJ'),
                     });
                 }
             }
@@ -209,7 +209,7 @@ export class PatchRegistrationPeriodsEndpoint extends Endpoint<Params, Query, Bo
             // Schedule patch of all groups in this period
             PeriodHelper.updateGroupsInPeriod(model).catch(console.error);
 
-            periods.push(model)
+            periods.push(model);
         }
 
         for (const model of deletePeriods) {

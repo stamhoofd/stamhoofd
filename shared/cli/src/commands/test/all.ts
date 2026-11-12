@@ -9,6 +9,7 @@ export default class TestAll extends BaseCommand {
         'stam test all --ci',
         'stam test all --quiet',
     ];
+
     static flags = { ...this.verbosityFlags(), ci: ciFlag };
 
     async run(): Promise<void> {

@@ -12,7 +12,7 @@ import type { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structu
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import { useErrors } from '../errors/useErrors';
-import type { NavigationActions} from '../types/NavigationActions';
+import type { NavigationActions } from '../types/NavigationActions';
 import { useNavigationActions } from '../types/NavigationActions';
 import SelectBalanceItemsList from './SelectBalanceItemsList.vue';
 
@@ -46,8 +46,7 @@ async function save() {
     try {
         errors.errorBox = null;
         await props.saveHandler(navigate, list.value);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }

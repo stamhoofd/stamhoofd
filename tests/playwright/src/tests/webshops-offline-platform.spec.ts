@@ -51,7 +51,7 @@ test.describe('Webshops offline', () => {
 
         organization.meta.recordsConfiguration.financialSupport = true;
         organization.meta.recordsConfiguration.uitpasNumber
-                = new PropertyFilter(null, null);
+            = new PropertyFilter(null, null);
         await organization.save();
 
         period = await new RegistrationPeriodFactory({
@@ -101,7 +101,7 @@ test.describe('Webshops offline', () => {
             await dashboard.openTab(DashboardTab.Webshops);
 
             // open webshop overview
-            await page.getByTestId(`webshop-menu-item`)
+            await page.getByTestId('webshop-menu-item')
                 .filter({ hasText: webshop.meta.name })
                 .click();
 
@@ -136,7 +136,7 @@ test.describe('Webshops offline', () => {
         await test.step('open webshop orders', async () => {
             await dashboard.openTab(DashboardTab.Webshops);
 
-            await page.getByTestId(`webshop-menu-item`)
+            await page.getByTestId('webshop-menu-item')
                 .filter({ hasText: webshop.meta.name })
                 .click();
 

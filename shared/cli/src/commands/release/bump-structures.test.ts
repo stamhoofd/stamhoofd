@@ -15,7 +15,7 @@ describe('ReleaseBumpStructures command', () => {
     it('bumps the structures version at the selected verbosity', async () => {
         const command = new ReleaseBumpStructures([], {} as any);
         (command as any).config = {};
-        (command as any).parseWithContext = vi.fn(async () => ({ context: { rootDir: '/repo', verbosity: RunVerbosity.Output }, flags: { force: true, 'dry-run': false } }));
+        (command as any).parseWithContext = vi.fn(async () => ({ context: { rootDir: '/repo', verbosity: RunVerbosity.Output }, flags: { 'force': true, 'dry-run': false } }));
 
         await command.run();
 

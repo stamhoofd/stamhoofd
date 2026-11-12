@@ -8,10 +8,12 @@
             </h1>
             <p>{{ $t('%jI') }}</p>
 
-            <hr><RecordAnswerInput :record="record" :answers="recordAnswers" :validator="validator" @patch="addPatch" />
+            <hr>
+            <RecordAnswerInput :record="record" :answers="recordAnswers" :validator="validator" @patch="addPatch" />
 
             <div v-if="isDevelopment" class="container">
-                <hr><p class="style-description pre-wrap" v-text="encodedResult" />
+                <hr>
+                <p class="style-description pre-wrap" v-text="encodedResult" />
             </div>
         </main>
 

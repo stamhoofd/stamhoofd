@@ -6,7 +6,8 @@
             <h1>{{ $t('%uC') }}</h1>
 
             <template v-if="members.length > 0">
-                <hr><h2>
+                <hr>
+                <h2>
                     <div>{{ $t('%1EH') }}</div>
                 </h2>
 
@@ -41,7 +42,8 @@
             </p>
 
             <template v-if="parents.length">
-                <hr><h2>{{ $t('%XH') }}</h2>
+                <hr>
+                <h2>{{ $t('%XH') }}</h2>
                 <p>{{ $t('%XI') }}</p>
 
                 <STList class="illustration-list">
@@ -71,7 +73,8 @@
             </template>
 
             <template v-if="addresses.length">
-                <hr><h2>{{ $t('%XJ') }}</h2>
+                <hr>
+                <h2>{{ $t('%XJ') }}</h2>
 
                 <STList class="illustration-list">
                     <STListItem v-for="address in addresses" :key="address.toString()" class="right-stack" :selectable="false">
@@ -114,7 +117,7 @@ const addresses = computed(() => memberManager.family.addresses);
 const editMember = useEditMember();
 
 async function checkAllMemberData(member: PlatformMember) {
-    await editMember(member, { title: $t(`%uC`) });
+    await editMember(member, { title: $t('%uC') });
 }
 
 async function editParent(parent: Parent) {

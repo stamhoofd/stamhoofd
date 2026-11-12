@@ -8,7 +8,7 @@ import { RegistrationInvitation } from '../models/RegistrationInvitation.js';
 class Options {
     group: Group;
     member: Member;
-    organization: Organization
+    organization: Organization;
 }
 
 export class RegistrationInvitationFactory extends Factory<Options, RegistrationInvitation> {

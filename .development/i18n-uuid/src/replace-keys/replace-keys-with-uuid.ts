@@ -68,8 +68,7 @@ async function replaceKeysWithUuidInTranslations(
                 const uuidKey = replacedKeys.get(fullKey)!;
                 setOnResult(uuidKey);
                 continue;
-            }
-            else if (isUuid(key) || isBase62(key)) continue;
+            } else if (isUuid(key) || isBase62(key)) continue;
 
             if (typeof value === 'string') {
                 // For now inject a uuidv4 - we'll replace it with an auto incrementing ID when we loaded all translations into memory

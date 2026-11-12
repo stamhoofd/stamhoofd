@@ -179,8 +179,7 @@ export function useBreakdownView<T extends PaymentBreakdown | BalanceItemBreakdo
             });
 
             breakdown.value = response.data;
-        }
-        catch (e) {
+        } catch (e) {
             errors.errorBox = new ErrorBox(e);
             loadFailed.value = true;
         }
@@ -228,8 +227,7 @@ export function useBreakdownView<T extends PaymentBreakdown | BalanceItemBreakdo
                     }),
                 ],
             });
-        }
-        catch (e) {
+        } catch (e) {
             errors.errorBox = new ErrorBox(e as Error);
         }
 

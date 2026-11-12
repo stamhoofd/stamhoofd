@@ -47,8 +47,7 @@ watch(() => props.errorBox, (val: ErrorBox | ErrorBox[] | null) => {
 
         if (props.errorFields === '*') {
             errorList = errorBox.remaining;
-        }
-        else {
+        } else {
             errorList = errorBox.forFields(props.errorFields.split(','));
         }
 

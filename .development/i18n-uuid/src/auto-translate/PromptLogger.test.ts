@@ -14,16 +14,14 @@ it('writes and flushes logs in the explicitly selected directory', async () => {
             });
             complete('Translated result');
             promptLogger.error('Translation error');
-        }
-        finally {
+        } finally {
             await promptLogger.close();
         }
         const prompts = await fs.readFile(path.join(directory, 'prompts.log'), 'utf8');
         expect(prompts).toContain('Translate this text');
         expect(prompts).toContain('Translated result');
         expect(await fs.readFile(path.join(directory, 'errors.log'), 'utf8')).toContain('Translation error');
-    }
-    finally {
+    } finally {
         await fs.rm(directory, { recursive: true, force: true });
     }
 });

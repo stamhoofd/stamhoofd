@@ -90,7 +90,8 @@
             </STList>
 
             <template v-if="notification.status === EventNotificationStatus.Draft">
-                <hr><h2>{{ $t('%zM') }}</h2>
+                <hr>
+                <h2>{{ $t('%zM') }}</h2>
                 <p>{{ $t('%ai') }}</p>
 
                 <STList>
@@ -131,7 +132,8 @@
             </template>
 
             <div v-if="notification.status === EventNotificationStatus.Pending && isComplete && isReviewer" class="container">
-                <hr><h2>{{ $t('%al') }}</h2>
+                <hr>
+                <h2>{{ $t('%al') }}</h2>
 
                 <STList>
                     <STListItem :selectable="true" element-name="button" @click="doAccept">
@@ -224,7 +226,6 @@ import { ContextMenu } from '#overlays/ContextMenu.ts';
 import { ContextMenuItem } from '#overlays/ContextMenu.ts';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 
-
 import PatchListText from '#audit-logs/components/PatchListText.vue';
 import { useAppContext } from '#context/appContext.ts';
 import { useAuth } from '#hooks/useAuth.ts';
@@ -239,8 +240,6 @@ import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useErrors } from '../errors/useErrors';
 import type { EventNotificationViewModel } from './classes/EventNotificationViewModel';
-
-
 
 const props = withDefaults(
     defineProps<{
@@ -477,8 +476,8 @@ async function showOriginalAnswers() {
 async function doDelete() {
     if (!await CenteredMessage.confirm({
         title: $t('%Zmp', { name: title.value }),
-        confirmText: $t(`%55`),
-        description: $t(`%vT`),
+        confirmText: $t('%55'),
+        description: $t('%vT'),
         destructive: true,
         availabilityDelay: 2_000,
     })) {
@@ -493,7 +492,7 @@ async function doDelete() {
 }
 
 async function doDraft() {
-    if (!await CenteredMessage.confirm($t(`%vU`), $t(`%vV`))) {
+    if (!await CenteredMessage.confirm($t('%vU'), $t('%vV'))) {
         return;
     }
     try {
@@ -509,7 +508,7 @@ async function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`%vW`),
+                name: $t('%vW'),
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
@@ -550,7 +549,7 @@ async function showContextMenu(event: MouseEvent) {
                 ]),
             }),
             new ContextMenuItem({
-                name: $t(`%CJ`),
+                name: $t('%CJ'),
                 icon: 'trash',
                 destructive: true,
                 action: async () => {

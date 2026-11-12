@@ -117,7 +117,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                                     throw new SimpleError({
                                         code: 'domain_already_used',
                                         message: 'This domain is already used by another organization',
-                                        human: $t(`%FM`),
+                                        human: $t('%FM'),
                                         statusCode: 400,
                                     });
                                 }
@@ -133,7 +133,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                             throw new SimpleError({
                                 code: 'invalid_field',
                                 message: 'Invalid domain',
-                                human: $t(`%FN`),
+                                human: $t('%FN'),
                                 field: 'customUrl',
                             });
                         }
@@ -153,7 +153,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'domainUri contains invalid characters',
-                            human: $t(`%FO`),
+                            human: $t('%FO'),
                             field: 'customUrl',
                         });
                     }
@@ -173,7 +173,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                         throw new SimpleError({
                             code: 'invalid_domain',
                             message: 'This domain is already in use',
-                            human: $t(`%FP`) + ' ' + existing.meta.name + $t(`%FQ`),
+                            human: $t('%FP') + ' ' + existing.meta.name + $t('%FQ'),
                         });
                     }
                 } else {
@@ -192,7 +192,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Uri cannot be empty',
-                        human: $t(`%FR`),
+                        human: $t('%FR'),
                         field: 'uri',
                     });
                 }
@@ -201,7 +201,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Uri contains invalid characters',
-                        human: $t(`%FO`),
+                        human: $t('%FO'),
                         field: 'uri',
                     });
                 }
@@ -223,7 +223,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                 throw new SimpleError({
                     code: 'missing_permissions',
                     message: 'You cannot restrict your own permissions',
-                    human: $t(`%FS`),
+                    human: $t('%FS'),
                 });
             }
 
@@ -235,7 +235,7 @@ export class PatchWebshopEndpoint extends Endpoint<Params, Query, Body, Response
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Uri already in use',
-                        human: $t(`%FT`),
+                        human: $t('%FT'),
                         field: 'uri',
                     });
                 }

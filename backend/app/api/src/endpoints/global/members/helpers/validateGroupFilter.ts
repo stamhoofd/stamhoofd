@@ -20,8 +20,8 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
             };
 
     const unwrapped = unwrapFilterRecursively(filter, requiredFilter);
-        if (!unwrapped.match) {
-            return false;
+    if (!unwrapped.match) {
+        return false;
     }
 
     if (unwrapped.markerValue === undefined) {
@@ -42,7 +42,7 @@ export async function validateGroupFilter({ filter, permissionLevel, key }: { fi
             if (permissionLevel !== PermissionLevel.Read || !group.settings.implicitlyAllowViewRegistrations) {
                 throw Context.auth.error({
                     message: 'You do not have access to this group',
-                    human: $t(`%15f`, { groupName: group.settings.name }),
+                    human: $t('%15f', { groupName: group.settings.name }),
                 });
             } else {
                 // Return false so we add additional scope filters (only view overlap)

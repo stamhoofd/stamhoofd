@@ -207,8 +207,8 @@ describe('ForwardHandler', () => {
     });
 
     it('should forward unsubscribe emails to unrecognized id', async () => {
-        const options = await ForwardHandler.handle(`From: bounces@amazonses.com\nSubject: Hello\nTo: unsubscribe+testid@stamhoofd.email\nContent-Type: text/plain\n\nContent hier`, {
-            recipients: [`unsubscribe+testid@stamhoofd.email`],
+        const options = await ForwardHandler.handle('From: bounces@amazonses.com\nSubject: Hello\nTo: unsubscribe+testid@stamhoofd.email\nContent-Type: text/plain\n\nContent hier', {
+            recipients: ['unsubscribe+testid@stamhoofd.email'],
             spamVerdict: { status: 'PASS' },
             virusVerdict: { status: 'PASS' },
             spfVerdict: { status: 'PASS' },

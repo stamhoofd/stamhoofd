@@ -7,7 +7,7 @@ import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetOrganizationRegistrationPeriodsEndpoint } from './GetOrganizationRegistrationPeriodsEndpoint.js';
 import { SessionService } from '../../../../services/SessionService.js';
 
-const baseUrl = `/organization/registration-periods`;
+const baseUrl = '/organization/registration-periods';
 
 describe('Endpoint.GetOrganizationRegistrationPeriods', () => {
     const endpoint = new GetOrganizationRegistrationPeriodsEndpoint();

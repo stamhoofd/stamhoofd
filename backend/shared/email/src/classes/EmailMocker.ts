@@ -36,8 +36,7 @@ export class EmailMocker {
                         throw nextHandler.error;
                     }
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 mocker.failedEmails.push(data);
                 throw e;
             }

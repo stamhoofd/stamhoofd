@@ -23,7 +23,7 @@ export class GroupPrice extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder, defaultValue: () => '' })
-    @field(TranslatedString.field({ version: 370, defaultValue: () => new TranslatedString($t(`%132`)) }))
+    @field(TranslatedString.field({ version: 370, defaultValue: () => new TranslatedString($t('%132')) }))
     name: TranslatedString;
 
     @field({ decoder: ReduceablePrice, defaultValue: () => ReduceablePrice.create({}) })
@@ -850,18 +850,18 @@ export class GroupSettings extends AutoEncoder {
         if (includeAge && this.minYear && this.maxYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += $t(`%133`);
+                    who += $t('%133');
                 } else {
-                    who += $t(`%134`);
+                    who += $t('%134');
                 }
             } else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += $t(`%135`);
+                    who += $t('%135');
                 } else {
-                    who += $t(`%136`);
+                    who += $t('%136');
                 }
             } else {
-                who += $t(`%137`);
+                who += $t('%137');
             }
 
             if (this.minYear === this.maxYear) {
@@ -872,49 +872,49 @@ export class GroupSettings extends AutoEncoder {
         } else if (includeAge && this.maxYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += $t(`%138`);
+                    who += $t('%138');
                 } else {
-                    who += $t(`%139`);
+                    who += $t('%139');
                 }
             } else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += $t(`%13A`);
+                    who += $t('%13A');
                 } else {
-                    who += $t(`%13B`);
+                    who += $t('%13B');
                 }
             } else {
-                who += $t(`%13C`);
+                who += $t('%13C');
             }
             who += ' ' + (this.maxYear);
         } else if (includeAge && this.minYear) {
             if (includeGender && this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += $t(`%13D`);
+                    who += $t('%13D');
                 } else {
-                    who += $t(`%13E`);
+                    who += $t('%13E');
                 }
             } else if (includeGender && this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += $t(`%13F`);
+                    who += $t('%13F');
                 } else {
-                    who += $t(`%13G`);
+                    who += $t('%13G');
                 }
             } else {
-                who += $t(`%13H`);
+                who += $t('%13H');
             }
             who += ' ' + (this.minYear);
         } else if (includeGender) {
             if (this.genderType === GroupGenderType.OnlyMale) {
                 if (this.forAdults) {
-                    who += $t(`%13I`);
+                    who += $t('%13I');
                 } else {
-                    who += $t(`%13J`);
+                    who += $t('%13J');
                 }
             } else if (this.genderType === GroupGenderType.OnlyFemale) {
                 if (this.forAdults) {
-                    who += $t(`%13K`);
+                    who += $t('%13K');
                 } else {
-                    who += $t(`%13L`);
+                    who += $t('%13L');
                 }
             }
         }

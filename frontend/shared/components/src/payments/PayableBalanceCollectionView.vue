@@ -14,7 +14,6 @@
                 <PayableBalanceTable :item="item" @checkout="$emit('checkout', item)" />
             </div>
 
-
             <template v-if="pendingPayments.length > 0">
                 <hr>
                 <h2>{{ $t('%1OL') }}</h2>
@@ -25,7 +24,8 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('%1JH') }}</h2>
+            <hr>
+            <h2>{{ $t('%1JH') }}</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
                 {{ $t('%h7') }}
@@ -64,8 +64,8 @@ const props = withDefaults(
 );
 
 defineEmits<{
-    checkout: [value: DetailedPayableBalance]
-}>()
+    checkout: [value: DetailedPayableBalance];
+}>();
 const owner = useRequestOwner();
 const pendingPayments = computed(() => {
     return props.collection.organizations.flatMap(i => i.payments).filter(p => p.isPending).sort((a, b) => Sorter.byDateValue(a.createdAt, b.createdAt));
@@ -83,8 +83,7 @@ async function updateBalance() {
 
     try {
         await props.reload();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 }

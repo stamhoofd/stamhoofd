@@ -24,8 +24,7 @@ export function useChargeCount(path: string) {
             });
 
             return response.data.count;
-        }
-        catch (error) {
+        } catch (error) {
             console.error(error);
         }
 

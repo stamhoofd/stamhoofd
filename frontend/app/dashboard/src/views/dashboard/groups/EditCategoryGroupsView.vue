@@ -39,7 +39,8 @@
         </p>
 
         <template v-if="categories.length > 0">
-            <hr><h2>{{ $t('%LL') }}</h2>
+            <hr>
+            <h2>{{ $t('%LL') }}</h2>
             <STList v-model="draggableCategories" :draggable="true">
                 <template #item="{item: category}">
                     <GroupCategoryRow :category="category" :periods="patchedPeriods" :period="patchedPeriod" :organization="organization" @patch:periods="addPeriodsArrayPatch" />
@@ -48,7 +49,8 @@
         </template>
 
         <template v-if="groups.length > 0 || categories.length === 0">
-            <hr><h2>{{ $t('%wP') }}</h2>
+            <hr>
+            <h2>{{ $t('%wP') }}</h2>
             <p v-if="categories.length > 0" class="error-box">
                 {{ $t('%LM') }}
             </p>

@@ -628,37 +628,37 @@ export class PlatformRegistration extends Registration {
 
         // Check missing information
         if (!details.phone && member.isPropertyRequired('phone', scope)) {
-            base.push($t(`%zY`));
+            base.push($t('%zY'));
         }
 
         if (!details.email && member.isPropertyRequired('emailAddress', scope)) {
-            base.push($t(`%zZ`));
+            base.push($t('%zZ'));
         }
 
         if (!details.address && member.isPropertyRequired('address', scope)) {
-            base.push($t(`%19P`));
+            base.push($t('%19P'));
         }
 
         if (!details.birthDay && member.isPropertyRequired('birthDay', scope)) {
-            base.push($t(`%za`));
+            base.push($t('%za'));
         }
 
         if (!details.nationalRegisterNumber && member.isPropertyRequired('nationalRegisterNumber', scope)) {
-            base.push($t(`%19Q`));
+            base.push($t('%19Q'));
         } else {
             if (member.isPropertyRequired('parents', scope) && member.isPropertyRequired('parents.nationalRegisterNumber', scope) && !member.hasRequiredParentNationalRegisterNumbers) {
-                base.push($t(`%zb`));
+                base.push($t('%zb'));
             }
         }
 
         if (member.isPropertyRequired('parents', scope)) {
             if (details.parents.length === 0) {
-                base.push($t(`%zc`));
+                base.push($t('%zc'));
             }
         }
 
         if (details.emergencyContacts.length === 0 && member.isPropertyRequired('emergencyContacts', scope)) {
-            base.push($t(`%zd`));
+            base.push($t('%zd'));
         }
 
         const { categories: enabledCategories } = member.getEnabledRecordCategories(scope);
@@ -1473,8 +1473,7 @@ export class PlatformMember implements ObjectWithRecords {
             if (type?.behaviour === PlatformMembershipTypeBehaviour.Days) {
                 rank = Math.max(rank, 1);
                 temporaryStartTime = Math.max(temporaryStartTime, membership.startDate.getTime());
-            }
-            else {
+            } else {
                 rank = 2;
             }
         }

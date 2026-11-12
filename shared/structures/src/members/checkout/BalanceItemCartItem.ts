@@ -27,7 +27,7 @@ export class BalanceItemCartItem extends AutoEncoder {
             if (!found) {
                 throw new SimpleError({
                     code: 'not_found',
-                    message: $t(`%qj`),
+                    message: $t('%qj'),
                 });
             }
             this.item = found;
@@ -38,7 +38,7 @@ export class BalanceItemCartItem extends AutoEncoder {
         if (maxPrice === 0) {
             throw new SimpleError({
                 code: 'not_found',
-                message: $t(`%qk`),
+                message: $t('%qk'),
             });
         }
 

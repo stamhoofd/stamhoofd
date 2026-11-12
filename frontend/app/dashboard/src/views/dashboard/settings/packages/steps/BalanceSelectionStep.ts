@@ -5,11 +5,10 @@ import type { NavigationActions } from '@stamhoofd/components/types/NavigationAc
 import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 import { PayBalanceMode } from '../OrganizationCheckoutViewModel';
 
-
 export class BalanceSelectionStep implements ViewStep {
     model: OrganizationCheckoutViewModel;
 
-    constructor({model}: { model: OrganizationCheckoutViewModel;}) {
+    constructor({ model }: { model: OrganizationCheckoutViewModel }) {
         this.model = model;
     }
 
@@ -18,7 +17,7 @@ export class BalanceSelectionStep implements ViewStep {
             return false;
         }
 
-        return this.model.payableBalance.payableBalanceItems.length > 0 || !!this.model.checkout.balances.size
+        return this.model.payableBalance.payableBalanceItems.length > 0 || !!this.model.checkout.balances.size;
     }
 
     getComponent(navigation: ViewStepNavigation): ComponentWithProperties {

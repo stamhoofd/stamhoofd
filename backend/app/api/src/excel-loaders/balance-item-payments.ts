@@ -41,7 +41,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.BalanceItemPayments, {
     getSheets: () => [
         {
             id: 'balanceItemPayments',
-            name: $t(`%Ly`),
+            name: $t('%Ly'),
             columns: getBalanceItemPaymentColumns(),
         },
     ],
@@ -98,13 +98,12 @@ async function fetchPage(requestQuery: LimitedFilteredRequest): Promise<BalanceI
 
     try {
         return await query.fetch();
-    }
-    catch (error) {
+    } catch (error) {
         if (error.message.includes('ER_QUERY_TIMEOUT')) {
             throw new SimpleError({
                 code: 'timeout',
                 message: 'Query took too long',
-                human: $t(`%Cv`),
+                human: $t('%Cv'),
             });
         }
         throw error;

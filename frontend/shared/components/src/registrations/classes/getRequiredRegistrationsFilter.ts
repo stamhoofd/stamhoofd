@@ -43,8 +43,7 @@ export function useRequiredRegistrationsFilter() {
                 extra.push({
                     member: b,
                 });
-            }
-            else {
+            } else {
                 extra.push(b);
             }
         }

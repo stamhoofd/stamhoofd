@@ -23,8 +23,7 @@ export async function resolveDocsPublishingConfig(rootDir: string, environment?:
     let config: DocsPublishingConfig;
     if (env.STAM_DOCS_REGISTRY !== undefined) {
         config = { registry: env.STAM_DOCS_REGISTRY };
-    }
-    else {
+    } else {
         const provider = await getOptionalDocsPublishingProvider(path.join(rootDir, 'devops'));
         if (!provider) throw new Error('Set STAM_DOCS_REGISTRY to the destination registry host/namespace, or install and build the optional DevOps checkout to use --environment.');
         config = await provider.resolve(environment);

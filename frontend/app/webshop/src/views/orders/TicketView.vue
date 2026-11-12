@@ -22,7 +22,7 @@ import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vu
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
 import { TicketPublic } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { useWebshopManager } from '../../composables/useWebshopManager';
 
@@ -55,8 +55,7 @@ async function downloadTickets() {
         });
         tickets.value = response.data;
         openTicket();
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
     }
 

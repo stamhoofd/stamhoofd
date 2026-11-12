@@ -13,22 +13,22 @@ export function useDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>
 
     const all: UIFilterBuilder<UIFilter>[] = [
         new StringFilterBuilder({
-            name: $t(`%1Os`),
+            name: $t('%1Os'),
             key: 'name',
         }),
         new NumberFilterBuilder({
-            name: $t(`%1Ic`),
+            name: $t('%1Ic'),
             key: 'year',
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t(`%1LP`),
+            name: $t('%1LP'),
             options: [
                 new MultipleChoiceUIFilterOption(
-                    $t(`%xX`),
+                    $t('%xX'),
                     'fiscal',
                 ),
                 new MultipleChoiceUIFilterOption(
-                    $t(`%yB`),
+                    $t('%yB'),
                     'participation',
                 ),
             ],
@@ -39,11 +39,11 @@ export function useDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>
             },
         }),
         new DateFilterBuilder({
-            name: $t(`%1JJ`),
+            name: $t('%1JJ'),
             key: 'createdAt',
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t(`%17`),
+            name: $t('%17'),
             options: Object.values(DocumentStatus)
                 .filter(status => [DocumentStatus.Draft, DocumentStatus.Published].includes(status))
                 .map((status) => {
@@ -59,10 +59,10 @@ export function useDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>
             },
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t(`%ZbW`),
+            name: $t('%ZbW'),
             options: [
-                new MultipleChoiceUIFilterOption($t(`%wo`), 1),
-                new MultipleChoiceUIFilterOption($t(`%18s`), 0),
+                new MultipleChoiceUIFilterOption($t('%wo'), 1),
+                new MultipleChoiceUIFilterOption($t('%18s'), 0),
             ],
             wrapper: {
                 updatesEnabled: {
@@ -75,10 +75,10 @@ export function useDocumentTemplateUIFilterBuilders(): UIFilterBuilder<UIFilter>
     if (app === 'admin') {
         all.push(
             new MultipleChoiceFilterBuilder({
-                name: $t(`%Bb`),
+                name: $t('%Bb'),
                 options: [
-                    new MultipleChoiceUIFilterOption($t(`%wo`), 1),
-                    new MultipleChoiceUIFilterOption($t(`%18s`), 0),
+                    new MultipleChoiceUIFilterOption($t('%wo'), 1),
+                    new MultipleChoiceUIFilterOption($t('%18s'), 0),
                 ],
                 wrapper: {
                     isLocked: {

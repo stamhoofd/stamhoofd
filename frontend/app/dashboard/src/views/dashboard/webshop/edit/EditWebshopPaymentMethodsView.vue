@@ -13,7 +13,7 @@ import type { AutoEncoderPatchType } from '@common/encoding';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
-import type { PaymentConfiguration, PrivatePaymentConfiguration} from '@stamhoofd/structures';
+import type { PaymentConfiguration, PrivatePaymentConfiguration } from '@stamhoofd/structures';
 import { PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
 
 import { computed } from 'vue';

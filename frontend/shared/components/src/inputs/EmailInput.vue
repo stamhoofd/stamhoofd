@@ -89,8 +89,7 @@ function validate(final = true, silent = false) {
 
         if (props.nullable && model.value !== null) {
             model.value = null;
-        }
-        else if (model.value !== '') {
+        } else if (model.value !== '') {
             model.value = '';
         }
         return false;
@@ -100,13 +99,12 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errorBox.value = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: emailRaw.value.length === 0 ? $t(`%yy`) : $t(`%1Mi`) + ' ' + emailRaw.value,
+                message: emailRaw.value.length === 0 ? $t('%yy') : $t('%1Mi') + ' ' + emailRaw.value,
                 field: 'email',
             }));
         }
         return false;
-    }
-    else {
+    } else {
         if (emailRaw.value !== model.value) {
             model.value = emailRaw.value;
         }

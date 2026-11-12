@@ -4,8 +4,8 @@ import { EnumDecoder, MapDecoder } from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { QueryableModel } from '@stamhoofd/sql';
-import type {Invoice} from './Invoice.js';
-import type {BalanceItem} from './BalanceItem.js';
+import type { Invoice } from './Invoice.js';
+import type { BalanceItem } from './BalanceItem.js';
 import type { VATExcemptReason } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType } from '@stamhoofd/structures';
 

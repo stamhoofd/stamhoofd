@@ -5,17 +5,17 @@ import tseslint from 'typescript-eslint';
 export default [
     {
         languageOptions: {
-            //sourceType: 'module',
+            // sourceType: 'module',
             globals: {
                 ...globals.browser,
             },
         },
     },
-    ...pluginVue.configs['flat/recommended'].map(f => {
+    ...pluginVue.configs['flat/recommended'].map((f) => {
         return {
             ...f,
             files: ['*.ts', '**/*.ts', '*.vue', '**/*.vue'],
-        }
+        };
     }),
     {
         files: ['*.ts', '**/*.ts', '*.vue', '**/*.vue'],

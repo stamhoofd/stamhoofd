@@ -1,4 +1,4 @@
-import type { EmailPreview} from '@stamhoofd/structures';
+import type { EmailPreview } from '@stamhoofd/structures';
 import { EmailStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 

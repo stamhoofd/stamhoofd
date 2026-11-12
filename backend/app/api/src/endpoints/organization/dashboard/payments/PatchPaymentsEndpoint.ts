@@ -57,7 +57,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'You need to add at least one balance item payment',
-                    human: $t(`%Em`),
+                    human: $t('%Em'),
                     field: 'balanceItemPayments',
                 });
             }
@@ -73,7 +73,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid payment method',
-                    human: $t(`%En`),
+                    human: $t('%En'),
                     field: 'method',
                 });
             }
@@ -128,7 +128,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Transfer settings are required',
-                        human: $t(`%Eo`),
+                        human: $t('%Eo'),
                         field: 'transferSettings',
                     });
                 }
@@ -139,7 +139,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Transfer description is required',
-                        human: $t(`%Ep`),
+                        human: $t('%Ep'),
                         field: 'transferDescription',
                     });
                 }
@@ -153,7 +153,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
             for (const item of put.balanceItemPayments) {
                 const balanceItem = await BalanceItem.getByID(item.balanceItem.id);
                 if (!balanceItem || balanceItem.organizationId !== organization.id) {
-                    throw Context.auth.notFoundOrNoAccess($t(`%Eq`));
+                    throw Context.auth.notFoundOrNoAccess($t('%Eq'));
                 }
                 balanceItems.push(balanceItem);
 
@@ -171,7 +171,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
 
             // Check permissions
             if (!(await Context.auth.canAccessBalanceItems(balanceItems, PermissionLevel.Write))) {
-                throw Context.auth.error($t(`%Er`));
+                throw Context.auth.error($t('%Er'));
             }
 
             // Check total price
@@ -185,7 +185,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The price should be greater than zero',
-                            human: $t(`%Es`),
+                            human: $t('%Es'),
                             field: 'price',
                         });
                     }
@@ -198,7 +198,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'The price should be smaller than zero',
-                            human: $t(`%Et`),
+                            human: $t('%Et'),
                             field: 'price',
                         });
                     }
@@ -211,7 +211,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Total price should be zero',
-                            human: $t(`%Eu`),
+                            human: $t('%Eu'),
                             field: 'price',
                         });
                     }
@@ -220,7 +220,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'missing_items',
                             message: 'At least two items are required for a reallocation',
-                            human: $t(`%Ev`),
+                            human: $t('%Ev'),
                         });
                     }
                     break;
@@ -254,7 +254,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Payment not found',
-                        human: $t(`%Ew`),
+                        human: $t('%Ew'),
                     });
                 }
 
@@ -263,7 +263,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid payment method',
-                            human: $t(`%Ex`),
+                            human: $t('%Ex'),
                         });
                     }
                 }
@@ -273,7 +273,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid payment method',
-                            human: $t(`%Ex`),
+                            human: $t('%Ex'),
                         });
                     }
                 }
@@ -291,7 +291,7 @@ export class PatchPaymentsEndpoint extends Endpoint<Params, Query, Body, Respons
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid payment method',
-                            human: $t(`%Ey`),
+                            human: $t('%Ey'),
                             field: 'method',
                         });
                     }

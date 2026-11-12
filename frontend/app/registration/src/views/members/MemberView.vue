@@ -50,7 +50,7 @@ const props = defineProps<{
 const editMember = useEditMember();
 
 async function doEdit() {
-    await editMember(props.member, { title: $t(`%XO`) });
+    await editMember(props.member, { title: $t('%XO') });
 }
 
 </script>

@@ -5,7 +5,7 @@ import { getFilesToSearch } from './shared/get-files-to-search.js';
 
 vi.mock('dotenv', () => ({ config: vi.fn() }));
 vi.mock('./shared/get-files-to-search.js', () => ({ getFilesToSearch: vi.fn(() => []) }));
-vi.mock('winston', async importOriginal => {
+vi.mock('winston', async (importOriginal) => {
     const original = await importOriginal<{ default: typeof winston }>();
     return {
         ...original,

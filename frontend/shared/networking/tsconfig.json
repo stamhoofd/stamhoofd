@@ -1,16 +1,7 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "types": [
-            "node",
-            "vitest/globals"
-        ]
+        "types": ["node", "vitest/globals"]
     },
-    "include": [
-        "../../*.d.ts",
-        "*.ts",
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.vue"
-    ]
+    "include": ["../../*.d.ts", "*.ts", "**/*.ts", "**/*.tsx", "**/*.vue"]
 }

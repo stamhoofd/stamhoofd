@@ -44,7 +44,7 @@ async function uitpasErrorToSimpleError(response: Response) {
     return new SimpleError({
         statusCode,
         code: code ?? 'get-uitpas-error',
-        message: message ?? `Error when retrieving pass by UiTPAS number`,
+        message: message ?? 'Error when retrieving pass by UiTPAS number',
         human: human ?? $t('%1Iz'),
     });
 }

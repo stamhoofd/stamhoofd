@@ -33,7 +33,8 @@
             <QuickActionsBox :quick-actions="quickActions" :max-actions-to-show="5" />
 
             <div v-if="members.length > 0" class="container">
-                <hr><h2>
+                <hr>
+                <h2>
                     {{ $t('%1EH') }}
                 </h2>
 
@@ -73,7 +74,8 @@
             </div>
 
             <div v-if="members.length > 0" class="container">
-                <hr><h2>
+                <hr>
+                <h2>
                     {{ $t('%16X') }}
                 </h2>
 
@@ -132,7 +134,8 @@
             </div>
 
             <div v-if="documents.length > 0" class="container">
-                <hr><h2>
+                <hr>
+                <h2>
                     {{ $t('%tw') }}
                 </h2>
                 <STList>
@@ -228,7 +231,7 @@ defineRoute({
                 member,
             };
         }
-        Toast.error($t(`%EO`)).show();
+        Toast.error($t('%EO')).show();
         throw new Error('member not found');
     },
 
@@ -316,7 +319,7 @@ async function onDownloadDocument(document: Document) {
     }
     if (document.status === DocumentStatus.MissingData) {
         const member = members.value.find(m => m.id === document.memberId);
-        new Toast($t(`%Xc`, { name: member?.member.firstName ?? $t(`%15V`) }), 'error red').setHide(20000).show();
+        new Toast($t('%Xc', { name: member?.member.firstName ?? $t('%15V') }), 'error red').setHide(20000).show();
         return;
     }
     downloadingDocuments.value.push(document);

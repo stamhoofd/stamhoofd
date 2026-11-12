@@ -23,7 +23,7 @@ export function useShowPayment() {
                         limit: 1,
                     }));
                     if (payments.results.length === 0) {
-                        Toast.error($t(`%yW`)).show();
+                        Toast.error($t('%yW')).show();
                         throw new Error('Payment not found');
                     }
                     return AsyncComponent(loaders.payment, {

@@ -140,7 +140,7 @@ const isSingle = computed(() => props.webshop.meta.ticketType === WebshopTicketT
 function share() {
     navigator.share({
         title: props.webshop.meta.name + ' - ' + name.value,
-        text: $t(`%12d`),
+        text: $t('%12d'),
         url: qrMessage.value,
     }).catch(e => console.error(e));
 }

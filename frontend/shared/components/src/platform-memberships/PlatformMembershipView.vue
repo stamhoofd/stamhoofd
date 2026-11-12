@@ -17,7 +17,8 @@
                     <PlatformMembershipBox :platform-membership="platformMembership" />
                 </div>
 
-                <hr><h2>{{ $t('%1JH') }}</h2>
+                <hr>
+                <h2>{{ $t('%1JH') }}</h2>
 
                 <p v-if="!sortedPayments.length" class="info-box">
                     {{ $t('%1PE') }}

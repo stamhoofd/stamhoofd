@@ -1,6 +1,7 @@
 <template>
     <div class="container">
-        <hr><template v-if="hasMultiplePrices">
+        <hr>
+        <template v-if="hasMultiplePrices">
             <h2 v-if="showStartDate" class="style-with-button">
                 <div>
                     {{ $t('%I9') }} {{ startDate ? formatDate(startDate) : '?' }}

@@ -9,7 +9,7 @@ import { GetUserEmailsEndpoint } from './GetUserEmailsEndpoint.js';
 import { Formatter } from '@stamhoofd/utility';
 import { SessionService } from '../../../services/SessionService.js';
 
-const baseUrl = `/user/email`;
+const baseUrl = '/user/email';
 
 describe('Endpoint.GetUserEmails', () => {
     const endpoint = new GetUserEmailsEndpoint();

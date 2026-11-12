@@ -109,8 +109,7 @@ export class EmailAddress extends QueryableModel {
                 SQL.where('organizationId', organizationId)
                     .or('organizationId', null),
             );
-        }
-        else {
+        } else {
             query.andWhere(
                 SQL.where('organizationId', null)
                     .or('hardBounce', 1)

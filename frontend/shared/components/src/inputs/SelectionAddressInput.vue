@@ -91,8 +91,7 @@ watch(model, (val) => {
         selectedAddress.value = a;
         editingAddress.value = false;
         customAddress.value = null;
-    }
-    else {
+    } else {
         selectedAddress.value = null;
         editingAddress.value = false;
         customAddress.value = val;
@@ -105,8 +104,7 @@ watch(model, (val) => {
         selectedAddress.value = a;
         editingAddress.value = false;
         customAddress.value = null;
-    }
-    else {
+    } else {
         selectedAddress.value = null;
         editingAddress.value = false;
         customAddress.value = model.value;
@@ -129,8 +127,7 @@ const editAddress = computed<Address | null>({
             selectedAddress.value = address;
             model.value = address;
             editingAddress.value = true;
-        }
-        else {
+        } else {
             model.value = address;
         }
         customAddress.value = address;
@@ -146,8 +143,7 @@ function changeSelected() {
     const a = selectedAddress.value ?? customAddress.value;
     if (a) {
         model.value = a;
-    }
-    else {
+    } else {
         if (!props.required) {
             model.value = null;
         }
@@ -160,8 +156,7 @@ function doEditAddress(address: Address) {
         editingAddress.value = true;
         selectedAddress.value = address;
         customAddress.value = address;
-    }
-    else {
+    } else {
         editingAddress.value = false;
         selectedAddress.value = null;
         customAddress.value = address;
@@ -186,7 +181,7 @@ async function isValid(): Promise<boolean> {
     if (props.required && !customAddress.value) {
         errorBox.value = new ErrorBox(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%zC`),
+            message: $t('%zC'),
             field: 'address',
         }));
         return false;

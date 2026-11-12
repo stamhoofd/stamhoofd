@@ -99,8 +99,7 @@ export class MetabaseService extends SharedDockerService {
         const api = new MetabaseApi(`http://${localIpv4Host}:${buildPorts(context).metabase}`);
         try {
             await api.authenticate(metabaseAdmin);
-        }
-        catch (error) {
+        } catch (error) {
             if (error instanceof MetabaseApiError && error.status === 401) {
                 throw new Error(`Cannot sign in to the local Metabase as ${metabaseAdminEmail}: this instance was set up with a different account. Set METABASE_ADMIN_EMAIL and METABASE_ADMIN_PASSWORD to those credentials, or start over with: stam clean metabase`, { cause: error });
             }
@@ -153,8 +152,7 @@ export class MetabaseService extends SharedDockerService {
                     return;
                 }
                 lastError = `status ${response.status}`;
-            }
-            catch (error) {
+            } catch (error) {
                 lastError = error instanceof Error ? error.message : String(error);
             }
             await new Promise(resolve => setTimeout(resolve, 1_000));

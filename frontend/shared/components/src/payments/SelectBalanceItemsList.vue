@@ -141,7 +141,7 @@ const priceBreakdown = computed(() => {
     if (automaticDiscount.value === 0) {
         list = [
             {
-                name: $t(`%xL`),
+                name: $t('%xL'),
                 price: price,
             },
         ];
@@ -156,7 +156,7 @@ const priceBreakdown = computed(() => {
                 price: -automaticDiscount.value,
             },
             {
-                name: $t(`%xL`),
+                name: $t('%xL'),
                 price: price,
             },
         ];

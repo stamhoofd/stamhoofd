@@ -1,7 +1,7 @@
 import { Database } from '@node/database';
 import type { SQLExpression, SQLExpressionOptions, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';
-import type { SQLDynamicExpression} from './SQLExpressions.js';
+import type { SQLDynamicExpression } from './SQLExpressions.js';
 import { readDynamicSQLExpression, SQLAssignment, SQLColumnExpression, SQLTableExpression } from './SQLExpressions.js';
 import { Whereable } from './SQLWhere.js';
 import { SQLLogger } from './SQLLogger.js';

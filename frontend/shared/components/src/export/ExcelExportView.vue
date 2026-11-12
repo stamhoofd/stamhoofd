@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder} from '@common/encoding';
+import type { Decoder } from '@common/encoding';
 import { ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { usePop } from '@browser/navigation';
 import { ErrorBox } from '#errors/ErrorBox';
@@ -58,7 +58,7 @@ import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
-import type { ExcelExportType, LimitedFilteredRequest} from '@stamhoofd/structures';
+import type { ExcelExportType, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { ExcelExportRequest, ExcelExportResponse, ExcelWorkbookFilter, Version } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { onMounted, ref } from 'vue';
@@ -107,8 +107,7 @@ onMounted(async () => {
                 props.workbook.from(filter.data);
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to load filter', e);
     }
 });
@@ -119,8 +118,7 @@ async function saveFilter() {
 
     try {
         await Storage.keyValue.setItem('excel-filter-' + props.configurationId, JSON.stringify(encoded));
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to save filter', e);
     }
 }
@@ -135,8 +133,7 @@ async function startExport() {
     try {
         await saveFilter();
         await doExport();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -174,7 +171,7 @@ async function doExport() {
         if (response.data.url) {
             const url = new URL(response.data.url);
             if (url.searchParams.has('name')) {
-                title = Formatter.fileSlug(url.searchParams.get('name')!)
+                title = Formatter.fileSlug(url.searchParams.get('name')!);
             }
             new Toast($t('%1B6'), 'download')
                 .setButton(
@@ -187,14 +184,12 @@ async function doExport() {
                 .setHide(null)
                 .setForceButtonClick()
                 .show();
-        }
-        else {
+        } else {
             Toast.success('Je ontvang een e-mail met het bestand als jouw Excel export klaar is').setHide(15000).show();
         }
 
         await pop();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }

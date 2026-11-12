@@ -112,7 +112,7 @@
 <script lang="ts" setup>
 import IconContainer from '@stamhoofd/components/icons/IconContainer.vue';
 import { useBackForward } from '@stamhoofd/components/hooks/useBackForward.ts';
-import type { WebshopWithOrganization} from '@stamhoofd/structures';
+import type { WebshopWithOrganization } from '@stamhoofd/structures';
 import { WebshopStatus, getWebshopStatusName, getWebshopTypeName } from '@stamhoofd/structures';
 import { computed } from 'vue';
 

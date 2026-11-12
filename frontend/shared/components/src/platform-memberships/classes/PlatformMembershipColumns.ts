@@ -26,7 +26,7 @@ export function useGetPlatformMembershipColumns(organization: Organization | nul
     });
 
     const now = new Date();
-    const formatDate = (placeholder = $t(`%Gr`)) => (v: Date | null, width: number) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : placeholder;
+    const formatDate = (placeholder = $t('%Gr')) => (v: Date | null, width: number) => v ? (width < 200 ? (width < 140 ? Formatter.dateNumber(v, false) : Formatter.dateNumber(v, true)) : (width > 240 ? Formatter.dateTime(v) : Formatter.date(v, true))) : placeholder;
     const styleDate = (v: Date | null) => v ? '' : 'gray';
 
     const columns: Column<ObjectType, any>[] = [
@@ -54,7 +54,7 @@ export function useGetPlatformMembershipColumns(organization: Organization | nul
             id: 'member.name',
             name: $t('%19j'),
             getValue: m => m.member.memberNumber ?? '',
-            format: val => val ? val : $t(`%1FW`),
+            format: val => val ? val : $t('%1FW'),
             getStyle: val => val ? 'code' : 'gray',
             minimumWidth: 100,
             recommendedWidth: 200,
@@ -63,7 +63,7 @@ export function useGetPlatformMembershipColumns(organization: Organization | nul
         }),
         new Column<ObjectType, Date | null>({
             id: 'member.birthDay',
-            name: $t(`%17w`),
+            name: $t('%17w'),
             getValue: m => m.member.birthDay,
             format: date => date ? Formatter.dateNumber(date, true) : '',
             minimumWidth: 50,
@@ -137,7 +137,7 @@ export function useGetPlatformMembershipColumns(organization: Organization | nul
         }),
         new Column<ObjectType, Date | null>({
             id: 'expiredDate',
-            description: $t(`%Zg9`),
+            description: $t('%Zg9'),
             name: $t('%1J7'),
             getValue: m => m.expireDate,
             format: formatDate('N.v.t.'),
@@ -171,7 +171,7 @@ export function useGetPlatformMembershipColumns(organization: Organization | nul
         }),
         new Column<ObjectType, Date | null>({
             id: 'trialUntil',
-            name: $t(`%1IH`),
+            name: $t('%1IH'),
             allowSorting: true,
             getValue: m => m.trialUntil,
             format: (value, width) => {
@@ -241,7 +241,7 @@ export function useGetPlatformMembershipColumns(organization: Organization | nul
             }),
             new Column<ObjectType, number | null>({
                 id: 'price',
-                name: $t(`%1IP`),
+                name: $t('%1IP'),
                 allowSorting: true,
                 getValue: m => m.price,
                 format: (price) => {
@@ -249,7 +249,7 @@ export function useGetPlatformMembershipColumns(organization: Organization | nul
                         return '';
                     }
                     if (price === 0) {
-                        return $t(`%1Mn`);
+                        return $t('%1Mn');
                     }
                     return Formatter.price(price);
                 },

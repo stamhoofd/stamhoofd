@@ -63,8 +63,8 @@ const resp = computed(() => {
 });
 
 const name = computed(() => {
-    const suffix = group.value ? ` van ${group.value.settings.name.toString()}` : (props.responsibility.groupId ? ' ' + $t(`%10K`) : '');
-    return (resp.value?.name ?? $t(`%qZ`)) + suffix;
+    const suffix = group.value ? ` van ${group.value.settings.name.toString()}` : (props.responsibility.groupId ? ' ' + $t('%10K') : '');
+    return (resp.value?.name ?? $t('%qZ')) + suffix;
 });
 
 // The date on which this responsibility will be automatically removed (null = it stays).

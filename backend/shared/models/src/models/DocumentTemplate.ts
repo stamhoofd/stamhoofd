@@ -152,7 +152,7 @@ export class DocumentTemplate extends QueryableModel {
             throw new SimpleError({
                 code: 'locked',
                 message: 'Document template is locked',
-                human: $t(`%1Uc`),
+                human: $t('%1Uc'),
             });
         }
 
@@ -606,7 +606,7 @@ export class DocumentTemplate extends QueryableModel {
             throw new SimpleError({
                 code: 'locked',
                 message: 'Document template is locked',
-                human: $t(`%1Uc`),
+                human: $t('%1Uc'),
             });
         }
 

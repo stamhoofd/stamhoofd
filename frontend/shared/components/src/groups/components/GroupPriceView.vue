@@ -88,11 +88,9 @@ async function save() {
         }
         await props.saveHandler(periodPatch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
-    }
-    finally {
+    } finally {
         saving.value = false;
     }
 }
@@ -118,11 +116,9 @@ async function deleteMe() {
             Toast.success($t('%1FX')).show();
         }
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
-    }
-    finally {
+    } finally {
         deleting.value = false;
     }
 }

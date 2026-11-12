@@ -130,7 +130,8 @@
             </template>
 
             <template v-if="canOrder && props.cartItem.productPrice.uitpasBaseProductPriceId !== null">
-                <hr><h2>{{ cartItem.amount < 2 ? $t('%wF') : $t('%1B4') }}</h2>
+                <hr>
+                <h2>{{ cartItem.amount < 2 ? $t('%wF') : $t('%1B4') }}</h2>
                 <div v-for="(value, index) in uitpasNumbers" :key="index">
                     <UitpasNumberInput
                         v-model="uitpasNumbers[index].uitpasNumber"

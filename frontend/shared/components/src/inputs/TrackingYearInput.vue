@@ -1,5 +1,5 @@
 <template>
-    <NumberInputBox :title="$t('%7w')" error-fields="trackingYear" :error-box="errors.errorBox" v-model="trackingYear" :validator="errors.validator" :min="1900" :max="max" >
+    <NumberInputBox :title="$t('%7w')" error-fields="trackingYear" :error-box="errors.errorBox" v-model="trackingYear" :validator="errors.validator" :min="1900" :max="max">
         <template #right>
             <slot name="right" />
         </template>

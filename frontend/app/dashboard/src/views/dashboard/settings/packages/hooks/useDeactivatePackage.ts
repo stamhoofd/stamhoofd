@@ -28,22 +28,19 @@ export function useDeactivatePackageType() {
 
             if (pack) {
                 return await deactivate(pack, message);
-            }
-            else {
+            } else {
                 // Force reload of packages
                 await reload();
                 const pack = packages.value?.packages.find(p => p.meta.type === packageType);
 
                 if (pack) {
                     return await deactivate(pack, message);
-                }
-                else {
+                } else {
                     // Force organization update
                     await context.value.fetchOrganization(false);
                 }
             }
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
         }
         isDeactivatingPackageType.value = null;
@@ -76,12 +73,11 @@ export function useDeactivatePackage() {
             });
             await context.value.fetchOrganization(false);
             await reload();
-            pack.removeAt = new Date()
+            pack.removeAt = new Date();
             pack.meta.canDeactivate = false;
-            updateNow()
+            updateNow();
             Toast.success(message).show();
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
         }
 

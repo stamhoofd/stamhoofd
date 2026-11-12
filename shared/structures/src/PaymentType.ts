@@ -36,19 +36,19 @@ export enum PaymentType {
 export class PaymentTypeHelper {
     static getName(type: PaymentType): string {
         switch (type) {
-            case PaymentType.Payment: return $t(`%14a`);
-            case PaymentType.Refund: return $t(`%mx`);
-            case PaymentType.Chargeback: return $t(`%my`);
-            case PaymentType.Reallocation: return $t(`%mz`);
+            case PaymentType.Payment: return $t('%14a');
+            case PaymentType.Refund: return $t('%mx');
+            case PaymentType.Chargeback: return $t('%my');
+            case PaymentType.Reallocation: return $t('%mz');
         }
     }
 
     static getDescription(type: PaymentType): string {
         switch (type) {
-            case PaymentType.Payment: return $t(`%1IB`);
-            case PaymentType.Refund: return $t(`%1IC`);
-            case PaymentType.Chargeback: return $t(`%1ID`);
-            case PaymentType.Reallocation: return $t(`%1IE`);
+            case PaymentType.Payment: return $t('%1IB');
+            case PaymentType.Refund: return $t('%1IC');
+            case PaymentType.Chargeback: return $t('%1ID');
+            case PaymentType.Reallocation: return $t('%1IE');
         }
     }
 

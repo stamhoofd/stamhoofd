@@ -5,9 +5,9 @@ import { CartReservedSeat } from '@stamhoofd/structures';
 import basex from 'base-x';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import type {Order} from './Order.js';
-import type {Organization} from './Organization.js';
-import type {Webshop} from './Webshop.js';
+import type { Order } from './Order.js';
+import type { Organization } from './Organization.js';
+import type { Webshop } from './Webshop.js';
 
 // Note: 0 and O is removed to prevent typing it in wrong
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZ';

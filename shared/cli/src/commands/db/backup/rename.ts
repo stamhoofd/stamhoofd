@@ -8,6 +8,7 @@ export default class DbBackupRename extends BaseCommand {
     static examples = [
         'stam db backup rename --from before-migration --to before-migration-old',
     ];
+
     static flags = {
         ...BaseCommand.instanceFlags,
         from: Flags.string({ description: 'Backup name to rename from' }),

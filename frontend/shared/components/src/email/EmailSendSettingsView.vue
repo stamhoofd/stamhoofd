@@ -103,17 +103,17 @@ async function save() {
 
     if (props.willSend) {
         const emailRecipientsCount = patchedEmail.value.emailRecipientsCount;
-        let confirmText = $t(`%vI`);
+        let confirmText = $t('%vI');
 
         if (emailRecipientsCount) {
             confirmText = emailRecipientsCount === 1 ? $t('%1Fl') : $t('%1Fm', { count: Formatter.integer(emailRecipientsCount) });
         }
 
         if (!sendAsEmail.value) {
-            confirmText = $t(`%1Fo`);
+            confirmText = $t('%1Fo');
         }
 
-        const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`%1DC`) : $t('%1Fe'));
+        const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t('%1DC') : $t('%1Fe'));
         if (!isConfirm) {
             return;
         }
@@ -128,8 +128,7 @@ async function save() {
                     status: EmailStatus.Queued,
                 }),
             );
-        }
-        else {
+        } else {
             await doPatchEmail(
                 props.editEmail,
                 patch.value.patch({
@@ -141,9 +140,8 @@ async function save() {
 
         if (props.willSend) {
             if (props.editEmail.sendAsEmail) {
-                Toast.success($t(`%vJ`)).show();
-            }
-            else {
+                Toast.success($t('%vJ')).show();
+            } else {
                 Toast.success($t('%1Fn')).show();
             }
             await GlobalEventBus.sendEvent('selectTabById', 'communication');
@@ -152,12 +150,10 @@ async function save() {
             markReviewMoment(context.value.organization);
         }
         await dismiss({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         saving.value = false;
     }
 }

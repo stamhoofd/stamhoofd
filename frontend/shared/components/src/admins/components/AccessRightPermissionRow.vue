@@ -76,8 +76,7 @@ const selected = computed({
             patch.accessRights.addDelete(props.accessRight);
             patch.accessRights.addPut(props.accessRight);
             addPatch(patch);
-        }
-        else {
+        } else {
             // Delete it
             const patch = createPatch();
             patch.accessRights.addDelete(props.accessRight);

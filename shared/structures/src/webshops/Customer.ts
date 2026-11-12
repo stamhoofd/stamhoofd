@@ -46,7 +46,7 @@ export class Customer extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_first_name',
                 message: 'Invalid first name',
-                human: $t(`%sn`),
+                human: $t('%sn'),
                 field: 'customer.firstName',
             });
         }
@@ -55,7 +55,7 @@ export class Customer extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_last_name',
                 message: 'Invalid last name',
-                human: $t(`%so`),
+                human: $t('%so'),
                 field: 'customer.lastName',
             });
         }
@@ -86,7 +86,7 @@ export class Customer extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_birth_day',
                 message: 'Invalid birth day',
-                human: $t(`%yq`),
+                human: $t('%yq'),
                 field: 'customer.birthDay',
             });
         }
@@ -97,7 +97,7 @@ export class Customer extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_address',
                 message: 'Invalid address',
-                human: $t(`%ZdB`),
+                human: $t('%ZdB'),
                 field: 'customer.address',
             });
         }

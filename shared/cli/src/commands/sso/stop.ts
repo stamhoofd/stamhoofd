@@ -8,6 +8,7 @@ export default class SsoStop extends BaseCommand {
         'stam sso stop',
         'stam sso stop --env keeo',
     ];
+
     static flags = BaseCommand.instanceFlags;
 
     async run(): Promise<void> {

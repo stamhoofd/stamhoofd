@@ -29,8 +29,7 @@ async function docker(args, commandTimeout = 120_000) {
 async function status() {
     try {
         return JSON.parse(await readFile(statusPath, 'utf8'));
-    }
-    catch (error) {
+    } catch (error) {
         if (error.code === 'ENOENT') {
             return undefined;
         }
@@ -54,8 +53,7 @@ async function start() {
             child.once('error', reject);
         });
         child.unref();
-    }
-    finally {
+    } finally {
         await log.close();
     }
     console.log(`MySQL is provisioning in the background. Log: ${logPath}`);
@@ -82,8 +80,7 @@ async function provision() {
             try {
                 await exec('docker', ['exec', container, 'mysql', '-h127.0.0.1', '-uroot', '-proot', '-e', 'SELECT 1'], { timeout: 5_000 });
                 break;
-            }
-            catch (error) {
+            } catch (error) {
                 if (Date.now() - startedAt >= timeout) {
                     throw new Error('MySQL did not become ready in time.', { cause: error });
                 }
@@ -91,8 +88,7 @@ async function provision() {
             }
         }
         result = { ready: true, durationMs: Date.now() - startedAt };
-    }
-    catch (error) {
+    } catch (error) {
         console.error(error);
         result = { ready: false, error: error.message, durationMs: Date.now() - startedAt };
     }
@@ -127,8 +123,7 @@ try {
         case 'wait': await wait(); break;
         default: throw new Error('Expected start, provision, or wait.');
     }
-}
-catch (error) {
+} catch (error) {
     console.error(error);
     process.exitCode = 1;
 }

@@ -1,5 +1,5 @@
 import stamhoofdEslint from 'eslint-plugin-stamhoofd';
 
 export default [
-    ...stamhoofdEslint.configs.frontend
+    ...stamhoofdEslint.configs.frontend,
 ];

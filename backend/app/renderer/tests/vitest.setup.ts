@@ -28,5 +28,5 @@ beforeAll(async () => {
     // Override default $t handlers
     TestUtils.loadEnvironment();
 });
-TestUtils.setPermanentEnvironment('CACHE_PATH', import.meta.dirname + '/../.test-cache')
+TestUtils.setPermanentEnvironment('CACHE_PATH', import.meta.dirname + '/../.test-cache');
 TestUtils.setup();

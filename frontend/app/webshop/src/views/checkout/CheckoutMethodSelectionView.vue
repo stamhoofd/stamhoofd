@@ -33,7 +33,7 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import type { CheckoutMethod} from '@stamhoofd/structures';
+import type { CheckoutMethod } from '@stamhoofd/structures';
 import { CheckoutMethodType } from '@stamhoofd/structures';
 
 import { computed, ref } from 'vue';
@@ -93,8 +93,7 @@ async function goNext() {
 
     try {
         await props.continueCheckout(navigationActions);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
     }

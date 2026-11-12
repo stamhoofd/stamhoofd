@@ -38,7 +38,8 @@
             </STListItem>
         </STList>
 
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <div>{{ $t('%TJ') }}</div>
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="addOption">
@@ -51,7 +52,8 @@
         <OptionMenuOptions :option-menu="patchedOptionMenu" @patch="addOptionMenuPatch" />
 
         <div v-if="!isNew" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%TK') }}
             </h2>
 

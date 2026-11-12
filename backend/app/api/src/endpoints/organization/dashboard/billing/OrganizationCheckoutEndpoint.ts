@@ -167,7 +167,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
             if (balanceItemsModels.length !== balanceItemIds.length) {
                 throw new SimpleError({
                     code: 'balance_changed',
-                    message: $t(`%vg`),
+                    message: $t('%vg'),
                 });
             }
 
@@ -180,28 +180,28 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
                 if (!item) {
                     throw new SimpleError({
                         code: 'balance_changed',
-                        message: $t(`%vg`),
+                        message: $t('%vg'),
                     });
                 }
 
                 if (item.priceOpen === 0) {
                     throw new SimpleError({
                         code: 'balance_changed',
-                        message: $t(`%vg`),
+                        message: $t('%vg'),
                     });
                 }
 
                 if (item.priceOpen > 0 && amount < 0 || amount > item.priceOpen) {
                     throw new SimpleError({
                         code: 'balance_changed',
-                        message: $t(`%vg`),
+                        message: $t('%vg'),
                     });
                 }
 
                 if (item.priceOpen < 0 && amount > 0 || amount < item.priceOpen) {
                     throw new SimpleError({
                         code: 'balance_changed',
-                        message: $t(`%vg`),
+                        message: $t('%vg'),
                     });
                 }
                 balanceItems.set(item, amount);

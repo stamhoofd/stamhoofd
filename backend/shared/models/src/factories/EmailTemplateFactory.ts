@@ -36,8 +36,7 @@ export class EmailTemplateFactory extends Factory<Options, EmailTemplate> {
         if (this.options.html || this.options.text) {
             template.html = this.options.html ?? '<p></p>';
             template.text = this.options.text ?? 'Text';
-        }
-        else {
+        } else {
             // Automatically add all replacements in our template email
             for (const replacement of EmailTemplateStruct.getSupportedReplacementsForType(this.options.type)) {
                 template.html += `<p>${replacement.token}: {{${replacement.token}}}</p>`;

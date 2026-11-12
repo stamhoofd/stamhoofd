@@ -71,7 +71,7 @@ export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatc
             if (birthDay && !DataValidator.doesMatchBelgianNationalNumber(value, birthDay)) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`%z6`),
+                    message: $t('%z6'),
 
                 });
             }
@@ -79,8 +79,7 @@ export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatc
             importResult.addPatch({
                 nationalRegisterNumber: DataValidator.formatBelgianNationalNumber(value),
             });
-        }
-        else if (this.category === MemberDetailsMatcherCategory.Parent1 as string || this.category === MemberDetailsMatcherCategory.Parent2 as string) {
+        } else if (this.category === MemberDetailsMatcherCategory.Parent1 as string || this.category === MemberDetailsMatcherCategory.Parent2 as string) {
             ColumnMatcherHelper.patchParent(importResult, this.category as (MemberDetailsMatcherCategory.Parent1 | MemberDetailsMatcherCategory.Parent2), {
                 nationalRegisterNumber: DataValidator.formatBelgianNationalNumber(value),
             });
@@ -111,7 +110,7 @@ export class NationalRegisterNumberColumnMatcher extends SharedMemberDetailsMatc
             if (birthDay && !DataValidator.doesMatchBelgianNationalNumber(value, birthDay)) {
                 throw new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`%z6`),
+                    message: $t('%z6'),
 
                 });
             }

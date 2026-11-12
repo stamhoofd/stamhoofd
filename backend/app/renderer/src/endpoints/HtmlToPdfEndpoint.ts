@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@node/endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { verifyInternalSignature } from '@stamhoofd/backend-env';
@@ -112,8 +112,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 let html;
                 try {
                     html = await fs.readFile(files.html[0].filepath, 'utf8');
-                }
-                catch (e) {
+                } catch (e) {
                     reject(new SimpleError({
                         code: 'invalid_field',
                         message: 'Could not read html',
@@ -148,8 +147,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         let pdf: Uint8Array | null = null;
         try {
             pdf = await this.htmlToPdf(html, { retryCount: 2, startDate: new Date() });
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
         if (!pdf) {
@@ -183,8 +181,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             if (browser.count > 50 || !browser.browser.connected) {
                 try {
                     await browser.browser.close();
-                }
-                catch (e) {
+                } catch (e) {
                     console.error(e);
                 }
                 this.browsers[this.nextBrowserIndex] = { browser: await puppeteer.launch({}), count: 0 };
@@ -197,8 +194,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
     static async clearBrowser(browser: Browser) {
         try {
             await browser.close();
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
         const i = this.browsers.findIndex(b => b?.browser === browser);
@@ -232,8 +228,7 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
 
                 console.log('Rendered document pdf');
                 return pdf;
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Failed to render document pdf', e);
                 return null;
             }

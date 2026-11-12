@@ -61,7 +61,7 @@ function getNoPermissionsView() {
         tabs: [
             new TabBarItem({
                 icon: 'key',
-                name: $t(`%GV`),
+                name: $t('%GV'),
                 component: new ComponentWithProperties(NavigationController, {
                     root: AsyncComponent(() => import('@stamhoofd/components/auth/NoPermissionsView.vue'), {}),
                 }),
@@ -85,14 +85,14 @@ function getRoot() {
     const startTab = new TabBarItem({
         id: 'start',
         icon: 'home',
-        name: $t(`%I`),
+        name: $t('%I'),
         component: startView,
     });
 
     const onboardingTab = new TabBarItem({
         id: 'onboarding',
         icon: 'home',
-        name: $t(`%1XI`),
+        name: $t('%1XI'),
         url: buildTranslatedUrl({ nl: 'onboarding', fr: 'onboarding', en: 'onboarding' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('./views/onboarding/OnboardingStartView.vue'), {}),
@@ -102,7 +102,7 @@ function getRoot() {
     const membersTab = new TabBarItem({
         id: 'members',
         icon: 'group',
-        name: $t(`%1EH`),
+        name: $t('%1EH'),
         url: buildTranslatedUrl({ nl: 'leden', fr: 'membres', en: 'members' }),
         component: new ComponentWithProperties(NavigationController, {
             root: new ComponentWithProperties(SplitViewController, {
@@ -114,7 +114,7 @@ function getRoot() {
     const calendarTab = new TabBarItem({
         id: 'events',
         icon: 'calendar',
-        name: $t(`%uB`),
+        name: $t('%uB'),
         url: buildTranslatedUrl({ nl: 'activiteiten', fr: 'activites', en: 'activities' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('@stamhoofd/components/events/ManageEventsView.vue'), {}),
@@ -148,7 +148,7 @@ function getRoot() {
     const settingsTab = new TabBarItem({
         id: 'settings',
         icon: 'settings',
-        name: $t(`%xU`),
+        name: $t('%xU'),
         url: buildTranslatedUrl({ nl: 'instellingen', fr: 'parametres', en: 'settings' }),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/dashboard/settings/SettingsView.vue'), {}),
@@ -158,7 +158,7 @@ function getRoot() {
     const financesTab = new TabBarItem({
         id: 'finances',
         icon: 'calculator',
-        name: $t(`%tx`),
+        name: $t('%tx'),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/dashboard/settings/FinancesView.vue'), {}),
         }),
@@ -167,7 +167,7 @@ function getRoot() {
     const documentsTab = new TabBarItem({
         id: 'documents',
         icon: 'file-filled',
-        name: $t(`%tw`),
+        name: $t('%tw'),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('./views/dashboard/documents/DocumentTemplatesView.vue'), {}),
         }),
@@ -176,7 +176,7 @@ function getRoot() {
     const auditLogsTab = new TabBarItem({
         id: 'audit-logs',
         icon: 'history',
-        name: $t(`%GY`),
+        name: $t('%GY'),
         component: new ComponentWithProperties(SplitViewController, {
             root: AsyncComponent(() => import('@stamhoofd/components/audit-logs/AuditLogsView.vue'), {}),
         }),
@@ -185,7 +185,7 @@ function getRoot() {
     const communicationTab = new TabBarItem({
         id: 'communication',
         icon: 'email-filled',
-        name: $t(`%1DK`),
+        name: $t('%1DK'),
         url: buildTranslatedUrl({ nl: 'berichten', fr: 'messages', en: 'messages' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('@stamhoofd/components/communication/CommunicationView.vue'), {}),
@@ -199,7 +199,7 @@ function getRoot() {
             new TabBarItem({
                 id: 'whats-new',
                 icon: 'gift',
-                name: $t(`%xV`),
+                name: $t('%xV'),
                 badge: whatsNewBadge,
                 action: async function () {
                     window.open(STAMHOOFD.CHANGELOG_URL![STAMHOOFD.fixedCountry ?? context.value.organization?.address?.country ?? ''] ?? STAMHOOFD.CHANGELOG_URL![''], '_blank');
@@ -215,7 +215,7 @@ function getRoot() {
             new TabBarItem({
                 id: 'documentation',
                 icon: 'book',
-                name: $t(`%xW`),
+                name: $t('%xW'),
                 action: async function () {
                     window.open('https://' + LocalizedDomains.documentation, '_blank');
                 },
@@ -228,7 +228,7 @@ function getRoot() {
             new TabBarItem({
                 id: 'feedback',
                 icon: 'feedback',
-                name: $t(`%18`),
+                name: $t('%18'),
                 action: async function () {
                     await openNolt(context.value, false);
                 },
@@ -239,7 +239,7 @@ function getRoot() {
             new TabBarItem({
                 id: 'feedback',
                 icon: 'feedback',
-                name: $t(`%18`),
+                name: $t('%18'),
                 action: async function () {
                     window.open(STAMHOOFD.FEEDBACK_URL!, '_blank');
                 },
@@ -282,7 +282,7 @@ function getRoot() {
 
             const moreTab = new TabBarItemGroup({
                 icon: 'category',
-                name: $t(`%GZ`),
+                name: $t('%GZ'),
                 items: [
                     ...sharedMoreItems, // need to create a new array, don't pass directly!
                 ],

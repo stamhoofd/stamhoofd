@@ -6,8 +6,7 @@ export function readTranslations(filePath: string): Map<string, unknown> {
 
     try {
         return new Map(Object.entries(JSON.parse(content)));
-    }
-    catch (e) {
+    } catch (e) {
         console.error(chalk.red(e));
         console.error(chalk.red(`file path: ${filePath}`));
         console.error(chalk.red(`content: ${content}`));

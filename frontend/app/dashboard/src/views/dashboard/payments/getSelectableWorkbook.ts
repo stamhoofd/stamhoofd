@@ -19,24 +19,24 @@ export function getSelectableWorkbook() {
         sheets: [
             new SelectableSheet({
                 id: 'payments',
-                name: $t(`%1JH`),
-                description: $t(`%Lv`),
+                name: $t('%1JH'),
+                description: $t('%Lv'),
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: $t(`%d`),
-                        description: $t(`%Lw`),
+                        name: $t('%d'),
+                        description: $t('%Lw'),
                     }),
 
                     new SelectableColumn({
                         id: 'price',
-                        name: $t(`%1IP`),
+                        name: $t('%1IP'),
                     }),
 
                     new SelectableColumn({
                         id: 'description',
-                        name: $t(`%X`),
-                        description: $t(`%Lx`),
+                        name: $t('%X'),
+                        description: $t('%Lx'),
                     }),
 
                     new SelectableColumn({
@@ -57,7 +57,7 @@ export function getSelectableWorkbook() {
 
                 ],
             }),
-            getBalanceItemPaymentSheet({ description: $t(`%Lz`) }),
+            getBalanceItemPaymentSheet({ description: $t('%Lz') }),
         ],
     });
 }
@@ -71,39 +71,39 @@ export function getSelectableWorkbook() {
 export function getBalanceItemPaymentSheet({ description }: { description: string }) {
     return new SelectableSheet({
         id: 'balanceItemPayments',
-        name: $t(`%Ly`),
+        name: $t('%Ly'),
         description,
         columns: [
             new SelectableColumn({
                 id: 'id',
-                name: $t(`%1LS`),
-                description: $t(`%M0`),
+                name: $t('%1LS'),
+                description: $t('%M0'),
                 enabled: false,
             }),
 
             new SelectableColumn({
                 id: 'balanceItem.id',
-                name: $t(`%1LE`),
-                description: $t(`%1Lr`),
+                name: $t('%1LE'),
+                description: $t('%1Lr'),
                 enabled: false,
             }),
 
             new SelectableColumn({
                 id: 'paymentId',
-                name: $t(`%wU`),
-                description: $t(`%Lw`),
+                name: $t('%wU'),
+                description: $t('%Lw'),
             }),
 
             new SelectableColumn({
                 id: 'balanceItem.type',
-                name: $t(`%1B`),
-                description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' ' + $t(`%M1`) + ' '),
+                name: $t('%1B'),
+                description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' ' + $t('%M1') + ' '),
             }),
 
             new SelectableColumn({
                 id: 'balanceItem.category',
-                name: $t(`%M2`),
-                description: $t(`%M3`),
+                name: $t('%M2'),
+                description: $t('%M3'),
             }),
 
             new SelectableColumn({
@@ -113,7 +113,7 @@ export function getBalanceItemPaymentSheet({ description }: { description: strin
 
             new SelectableColumn({
                 id: 'balanceItem.description',
-                name: $t(`%6o`),
+                name: $t('%6o'),
             }),
 
             new SelectableColumn({
@@ -124,12 +124,12 @@ export function getBalanceItemPaymentSheet({ description }: { description: strin
 
             new SelectableColumn({
                 id: 'balanceItem.createdAt',
-                name: $t(`%wV`),
+                name: $t('%wV'),
             }),
 
             new SelectableColumn({
                 id: 'balanceItem.dueAt',
-                name: $t(`%wW`),
+                name: $t('%wW'),
             }),
 
             ...Object.values(BalanceItemRelationType).map(relationType => new SelectableColumn({
@@ -140,20 +140,20 @@ export function getBalanceItemPaymentSheet({ description }: { description: strin
 
             new SelectableColumn({
                 id: 'amount',
-                name: $t(`%M4`),
+                name: $t('%M4'),
             }),
 
             new SelectableColumn({
                 id: 'unitPrice',
-                name: $t(`%6q`),
+                name: $t('%6q'),
             }),
 
             new SelectableColumn({
                 id: 'price',
-                name: $t(`%1IP`),
+                name: $t('%1IP'),
             }),
 
-            ...getGeneralColumns({ category: $t(`%M5`) }),
+            ...getGeneralColumns({ category: $t('%M5') }),
 
             // Facturatiegegevens
             ...getInvoiceColumns(),
@@ -181,31 +181,31 @@ function getGeneralColumns(options?: { category?: string | null }) {
         return [
             new SelectableColumn({
                 id: 'status',
-                name: $t(`%M6`),
+                name: $t('%M6'),
                 ...options,
             }),
 
             new SelectableColumn({
                 id: 'method',
-                name: $t(`%M7`),
+                name: $t('%M7'),
                 ...options,
             }),
 
             new SelectableColumn({
                 id: 'provider',
-                name: $t(`%wX`),
+                name: $t('%wX'),
                 ...options,
             }),
 
             new SelectableColumn({
                 id: 'createdAt',
-                name: $t(`%1JJ`),
+                name: $t('%1JJ'),
                 ...options,
             }),
 
             new SelectableColumn({
                 id: 'paidAt',
-                name: $t(`%wY`),
+                name: $t('%wY'),
                 ...options,
             }),
         ];
@@ -216,27 +216,27 @@ function getSettlementColumns() {
     return [
         new SelectableColumn({
             id: 'settlement.reference',
-            name: $t(`%M8`),
-            description: $t(`%M9`),
-            category: $t(`%MA`),
+            name: $t('%M8'),
+            description: $t('%M9'),
+            category: $t('%MA'),
         }),
         new SelectableColumn({
             id: 'settlement.settledAt',
-            name: $t(`%MB`),
-            description: $t(`%MC`),
-            category: $t(`%MA`),
+            name: $t('%MB'),
+            description: $t('%MC'),
+            category: $t('%MA'),
         }),
         new SelectableColumn({
             id: 'settlement.amount',
-            name: $t(`%MD`),
-            description: $t(`%ME`),
-            category: $t(`%MA`),
+            name: $t('%MD'),
+            description: $t('%ME'),
+            category: $t('%MA'),
         }),
         new SelectableColumn({
             id: 'settlement.check',
             name: $t('%ZkA'),
             description: $t('%Zk1'),
-            category: $t(`%MA`),
+            category: $t('%MA'),
         }),
     ];
 }
@@ -245,44 +245,44 @@ function getPaymentProviderColumns() {
     return [
         new SelectableColumn({
             id: 'transferFee',
-            name: $t(`%wZ`),
-            description: $t(`%MF`),
-            category: $t(`%wX`),
+            name: $t('%wZ'),
+            description: $t('%MF'),
+            category: $t('%wX'),
         }),
         ...(STAMHOOFD.userMode === 'organization'
             ? [
                     new SelectableColumn({
                         id: 'serviceFeeManual',
-                        name: $t(`%1dO`),
+                        name: $t('%1dO'),
                         description: $t('%1Xh'),
-                        category: $t(`%wX`),
+                        category: $t('%wX'),
                     }),
                     new SelectableColumn({
                         id: 'serviceFeePayout',
-                        name: $t(`%1VD`),
+                        name: $t('%1VD'),
                         description: $t('%1Wa'),
-                        category: $t(`%wX`),
+                        category: $t('%wX'),
                     }),
                 ]
             : []),
         new SelectableColumn({
             id: 'stripeAccountId',
-            name: $t(`%1m`),
-            description: $t(`%MG`),
-            category: $t(`%wX`),
+            name: $t('%1m'),
+            description: $t('%MG'),
+            category: $t('%wX'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'iban',
-            name: $t(`%MH`),
-            description: $t(`%MI`),
-            category: $t(`%wX`),
+            name: $t('%MH'),
+            description: $t('%MI'),
+            category: $t('%wX'),
         }),
         new SelectableColumn({
             id: 'ibanName',
-            name: $t(`%MJ`),
-            description: $t(`%MK`),
-            category: $t(`%wX`),
+            name: $t('%MJ'),
+            description: $t('%MK'),
+            category: $t('%wX'),
         }),
     ];
 }
@@ -291,21 +291,21 @@ function getTransferColumns() {
     return [
         new SelectableColumn({
             id: 'transferDescription',
-            name: $t(`%J8`),
-            description: $t(`%ML`),
-            category: $t(`%MM`),
+            name: $t('%J8'),
+            description: $t('%ML'),
+            category: $t('%MM'),
         }),
         new SelectableColumn({
             id: 'transferSettings.creditor',
-            name: $t(`%J5`),
-            description: $t(`%MN`),
-            category: $t(`%MM`),
+            name: $t('%J5'),
+            description: $t('%MN'),
+            category: $t('%MM'),
         }),
         new SelectableColumn({
             id: 'transferSettings.iban',
-            name: $t(`%MO`),
-            description: $t(`%MP`),
-            category: $t(`%MM`),
+            name: $t('%MO'),
+            description: $t('%MP'),
+            category: $t('%MM'),
         }),
     ];
 }
@@ -314,21 +314,21 @@ function getPayingOrganizationColumns() {
     return [
         new SelectableColumn({
             id: 'payingOrganization.id',
-            name: $t(`%MQ`),
-            category: $t(`%MR`),
+            name: $t('%MQ'),
+            category: $t('%MR'),
             enabled: false,
         }),
 
         new SelectableColumn({
             id: 'payingOrganization.uri',
-            name: $t(`%MS`),
-            category: $t(`%MR`),
+            name: $t('%MS'),
+            category: $t('%MR'),
         }),
 
         new SelectableColumn({
             id: 'payingOrganization.name',
-            name: $t(`%MT`),
-            category: $t(`%MR`),
+            name: $t('%MT'),
+            category: $t('%MR'),
         }),
     ];
 }
@@ -337,45 +337,45 @@ function getInvoiceColumns() {
     return [
         new SelectableColumn({
             id: 'customer.name',
-            name: $t(`%1Os`),
-            description: $t(`%MU`),
-            category: $t(`%1Ke`),
+            name: $t('%1Os'),
+            description: $t('%MU'),
+            category: $t('%1Ke'),
         }),
         new SelectableColumn({
             id: 'customer.email',
-            name: $t(`%1FK`),
-            description: $t(`%MV`),
-            category: $t(`%1Ke`),
+            name: $t('%1FK'),
+            description: $t('%MV'),
+            category: $t('%1Ke'),
         }),
 
         new SelectableColumn({
             id: 'customer.company.name',
-            name: $t(`%1JI`),
-            category: $t(`%1Ke`),
+            name: $t('%1JI'),
+            category: $t('%1Ke'),
         }),
 
         new SelectableColumn({
             id: 'customer.company.VATNumber',
-            name: $t(`%1CK`),
-            category: $t(`%1Ke`),
+            name: $t('%1CK'),
+            category: $t('%1Ke'),
         }),
 
         new SelectableColumn({
             id: 'customer.company.companyNumber',
-            name: $t(`%wa`),
-            category: $t(`%1Ke`),
+            name: $t('%wa'),
+            category: $t('%1Ke'),
         }),
 
         new SelectableColumn({
             id: 'customer.company.address',
-            name: $t(`%MW`),
-            category: $t(`%1Ke`),
+            name: $t('%MW'),
+            category: $t('%1Ke'),
         }),
 
         new SelectableColumn({
             id: 'customer.company.administrationEmail',
-            name: $t(`%wb`),
-            category: $t(`%1Ke`),
+            name: $t('%wb'),
+            category: $t('%1Ke'),
         }),
     ];
 }

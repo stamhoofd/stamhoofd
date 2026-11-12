@@ -1,8 +1,8 @@
-import type { Decoder} from '@common/encoding';
+import type { Decoder } from '@common/encoding';
 import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
-import type { BalanceItem, Platform, RegisterCheckout} from '@stamhoofd/structures';
+import type { BalanceItem, Platform, RegisterCheckout } from '@stamhoofd/structures';
 import { DetailedPayableBalanceCollection, Document as DocumentStruct, Group, IDRegisterCheckout, LimitedFilteredRequest, MembersBlob, Organization, PaginatedResponseDecoder, PlatformFamily, Version } from '@stamhoofd/structures';
 import { inject, reactive, watch } from 'vue';
 
@@ -152,20 +152,19 @@ export class MemberManager {
                 this.family.checkout = checkout;
                 this.watchCheckout();
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }
 
-    async updateBalances(checkout: RegisterCheckout, options?: {owner?: any}) {
+    async updateBalances(checkout: RegisterCheckout, options?: { owner?: any }) {
         try {
             let balanceItems: BalanceItem[] = [];
-            console.log('owner', options)
+            console.log('owner', options);
             if (!checkout.cart.isEmpty) {
                 const response = await this.$context.getAuthenticatedServerForOrganization(checkout.singleOrganizationId).request({
                     method: 'GET',
-                    path: `/user/payable-balance/detailed`,
+                    path: '/user/payable-balance/detailed',
                     decoder: DetailedPayableBalanceCollection as Decoder<DetailedPayableBalanceCollection>,
                     shouldRetry: true,
                     owner: options?.owner ?? this,
@@ -174,15 +173,13 @@ export class MemberManager {
 
                 const payableBalanceCollection = response.data;
                 balanceItems = payableBalanceCollection.organizations.flatMap(o => o.balanceItems);
-            }
-            else {
+            } else {
                 console.log('No balance items in cart');
             }
 
             console.log('Applying maximum discount', balanceItems);
             checkout.updateBalances(balanceItems);
-        }
-        catch (e) {
+        } catch (e) {
             // Invalid cehckout
             console.error('Error applying maximum discount', e);
         }
@@ -194,8 +191,7 @@ export class MemberManager {
             const versionBox = new VersionBox(this.family.checkout.convert());
             const encoded = JSON.stringify(versionBox.encode({ version: Version }));
             await Storage.keyValue.setItem(this.storageKey, encoded);
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
         }
     }

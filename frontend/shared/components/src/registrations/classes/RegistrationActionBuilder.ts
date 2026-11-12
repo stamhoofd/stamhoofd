@@ -204,7 +204,7 @@ export class RegistrationActionBuilder {
     private getMemberActions(): TableAction<PlatformRegistration>[] {
         const actions: TableAction<PlatformRegistration>[] = [
             new InMemoryTableAction({
-                name: $t(`%XO`),
+                name: $t('%XO'),
                 icon: 'edit',
                 priority: 2,
                 groupIndex: 1,
@@ -218,7 +218,7 @@ export class RegistrationActionBuilder {
                 },
             }),
             new InMemoryTableAction({
-                name: $t(`%ej`),
+                name: $t('%ej'),
                 icon: 'star',
                 priority: 0,
                 groupIndex: 1,
@@ -232,7 +232,7 @@ export class RegistrationActionBuilder {
                 },
             }),
             new MenuTableAction<PlatformRegistration>({
-                name: $t(`%dh`),
+                name: $t('%dh'),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
@@ -257,7 +257,7 @@ export class RegistrationActionBuilder {
             }
             return this.organizations.map((org) => {
                 return new MenuTableAction({
-                    name: $t(`%eg`) + ' ' + org.name,
+                    name: $t('%eg') + ' ' + org.name,
                     groupIndex: 0,
                     childActions: () => this.getRegisterActions(org),
                 });
@@ -267,7 +267,7 @@ export class RegistrationActionBuilder {
         const getForPeriod = (period: OrganizationRegistrationPeriod, addPeriodDescription = false): TableAction<PlatformRegistration>[] => {
             return [
                 new MenuTableAction({
-                    name: $t(`%eh`),
+                    name: $t('%eh'),
                     groupIndex: 0,
                     description: addPeriodDescription ? period.period.name : undefined,
                     enabled: () => period.waitingLists.length > 0,
@@ -348,7 +348,7 @@ export class RegistrationActionBuilder {
 
     private getUnsubscribeAction(): InMemoryTableAction<PlatformRegistration> | null {
         return new InMemoryTableAction({
-            name: $t(`%zu`),
+            name: $t('%zu'),
             icon: 'no-edit',
             destructive: true,
             priority: 10,
@@ -364,7 +364,7 @@ export class RegistrationActionBuilder {
 
     getChargeAction() {
         return new AsyncTableAction({
-            name: $t(`%Gu`),
+            name: $t('%Gu'),
             icon: 'calculator',
             priority: 13,
             groupIndex: 4,
@@ -392,7 +392,7 @@ export class RegistrationActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`%1KS`),
+                name: $t('%1KS'),
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
@@ -400,7 +400,7 @@ export class RegistrationActionBuilder {
                 handler: async (registations: PlatformRegistration[]) => {
                     const members = getUniqueMembersFromRegistrations(registations);
                     if (members.length > 100) {
-                        Toast.error($t(`%ei`)).show();
+                        Toast.error($t('%ei')).show();
                         return;
                     }
                     await this.present({
@@ -424,7 +424,7 @@ export class RegistrationActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`%1GU`),
+                name: $t('%1GU'),
                 priority: 1,
                 groupIndex: 6,
                 needsSelection: true,
@@ -432,7 +432,7 @@ export class RegistrationActionBuilder {
                 handler: async (registations: PlatformRegistration[]) => {
                     const members = getUniqueMembersFromRegistrations(registations);
                     if (members.length > 100) {
-                        Toast.error($t(`%ei`)).show();
+                        Toast.error($t('%ei')).show();
                         return;
                     }
                     await this.present({
@@ -503,7 +503,7 @@ export class RegistrationActionBuilder {
         const getForPeriod = (period: OrganizationRegistrationPeriod, addPeriodDescription = false): TableAction<PlatformRegistration>[] => {
             return [
                 new MenuTableAction({
-                    name: $t(`%eh`),
+                    name: $t('%eh'),
                     groupIndex: 1,
                     description: addPeriodDescription ? period.period.name : undefined,
                     enabled: () => period.waitingLists.length > 0,
@@ -530,7 +530,7 @@ export class RegistrationActionBuilder {
         };
 
         return new MenuTableAction({
-            name: $t(`%HB`),
+            name: $t('%HB'),
             priority: 1,
             groupIndex: 5,
             needsSelection: true,
@@ -576,7 +576,7 @@ export class RegistrationActionBuilder {
         }
 
         return new InMemoryTableAction({
-            name: $t(`%zt`),
+            name: $t('%zt'),
             priority: 1,
             groupIndex: 1,
             needsSelection: true,
@@ -631,7 +631,7 @@ export class RegistrationActionBuilder {
 
     private getEmailAction() {
         return new AsyncTableAction({
-            name: $t(`%1GW`),
+            name: $t('%1GW'),
             icon: 'send',
             priority: 12,
             groupIndex: 3,
@@ -643,7 +643,7 @@ export class RegistrationActionBuilder {
 
     private getSmsAction() {
         return new InMemoryTableAction({
-            name: $t(`%PI`),
+            name: $t('%PI'),
             icon: 'feedback-line',
             priority: 9,
             groupIndex: 3,
@@ -674,7 +674,7 @@ export class RegistrationActionBuilder {
             options: [
                 {
                     id: 'all',
-                    name: $t(`%L8`),
+                    name: $t('%L8'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.RegistrationMembers,
@@ -685,12 +685,12 @@ export class RegistrationActionBuilder {
                 },
                 {
                     id: 'none',
-                    name: $t(`%el`),
+                    name: $t('%el'),
                     value: [],
                 },
                 {
                     id: 'adults',
-                    name: $t(`%em`),
+                    name: $t('%em'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.RegistrationMembers,
@@ -718,7 +718,7 @@ export class RegistrationActionBuilder {
             options: [
                 {
                     id: 'minors',
-                    name: $t(`%en`),
+                    name: $t('%en'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.RegistrationParents,
@@ -740,7 +740,7 @@ export class RegistrationActionBuilder {
                 },
                 {
                     id: 'all',
-                    name: $t(`%eo`),
+                    name: $t('%eo'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.RegistrationParents,
@@ -751,7 +751,7 @@ export class RegistrationActionBuilder {
                 },
                 {
                     id: 'none',
-                    name: $t(`%ep`),
+                    name: $t('%ep'),
                     value: [],
                 },
             ],
@@ -762,12 +762,12 @@ export class RegistrationActionBuilder {
             options: [
                 {
                     id: 'none',
-                    name: $t(`%eq`),
+                    name: $t('%eq'),
                     value: [],
                 },
                 {
                     id: 'minors',
-                    name: $t(`%er`),
+                    name: $t('%er'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.RegistrationUnverified,
@@ -789,7 +789,7 @@ export class RegistrationActionBuilder {
                 },
                 {
                     id: 'all',
-                    name: $t(`%es`),
+                    name: $t('%es'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.RegistrationUnverified,
@@ -855,7 +855,7 @@ export class RegistrationActionBuilder {
         }
 
         if (filteredOrganizations.length > 1) {
-            Toast.error($t(`%1GV`)).show();
+            Toast.error($t('%1GV')).show();
             return;
         }
 
@@ -1059,7 +1059,7 @@ export class RegistrationActionBuilder {
 
         const actions = [
             new MenuTableAction({
-                name: $t(`%1QU`),
+                name: $t('%1QU'),
                 priority: this.isWaitingList ? 2 : 1,
                 groupIndex: this.isWaitingList ? 2 : 5,
                 needsSelection: true,
@@ -1075,7 +1075,7 @@ export class RegistrationActionBuilder {
 
         if (this.isWaitingList) {
             actions.push(new MenuTableAction({
-                name: $t(`%1RK`),
+                name: $t('%1RK'),
                 priority: 1,
                 groupIndex: 2,
                 needsSelection: true,

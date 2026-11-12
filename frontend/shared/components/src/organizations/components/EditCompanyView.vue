@@ -58,11 +58,9 @@ async function save() {
         }
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         saving.value = false;
     }
 }
@@ -85,11 +83,9 @@ async function deleteMe() {
     try {
         await props.deleteHandler();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         Toast.fromError(e).show();
-    }
-    finally {
+    } finally {
         deleting.value = false;
     }
 }

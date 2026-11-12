@@ -19,17 +19,19 @@
         </Checkbox>
 
         <template v-if="organizationBased && app === 'admin'">
-            <hr><h2>{{ $t('%9V') }}</h2>
+            <hr>
+            <h2>{{ $t('%9V') }}</h2>
 
             <div class="split-inputs">
-                <NumberInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`%jX`)"  v-model="minimumMembers" :required="false" :placeholder="$t(`%1FW`)" :validator="errors.validator" />
+                <NumberInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`%jX`)" v-model="minimumMembers" :required="false" :placeholder="$t(`%1FW`)" :validator="errors.validator" />
 
                 <NumberInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`%jY`)" v-model="maximumMembers" :required="false" :placeholder="$t(`%4a`)" :validator="errors.validator" />
             </div>
         </template>
 
         <JumpToContainer :visible="organizationTagIds !== null">
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t('%wP') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="organizationTagIds = null" />
@@ -41,7 +43,8 @@
         </JumpToContainer>
 
         <JumpToContainer :visible="defaultAgeGroupIds !== null">
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t('%P4') }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="defaultAgeGroupIds = null" />
@@ -52,7 +55,8 @@
 
             <DefaultAgeGroupIdsInput v-model="defaultAgeGroupIds" :validator="errors.validator" :should-select-at-least-one="true" />
 
-            <hr><h2>{{ $t('%jN') }}</h2>
+            <hr>
+            <h2>{{ $t('%jN') }}</h2>
 
             <p>{{ $t('%8Z') }}</p>
 
@@ -96,7 +100,8 @@
         </JumpToContainer>
 
         <template v-if="organizationTagIds === null || defaultAgeGroupIds === null">
-            <hr><STList>
+            <hr>
+            <STList>
                 <template v-if="app === 'admin'">
                     <STListItem v-if="organizationTagIds === null && organizationBased" :selectable="true" element-name="button" @click="organizationTagIds = []">
                         <template #left>
@@ -146,7 +151,8 @@
         </template>
 
         <div v-if="!isNew && deleteHandler" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%3l') }}
             </h2>
 
@@ -226,8 +232,7 @@ const save = async () => {
 
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -255,8 +260,7 @@ const doDelete = async () => {
     try {
         await props.deleteHandler();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -342,8 +346,7 @@ async function editPermissions() {
                         addPatch({
                             permissions: role.patch(patch),
                         });
-                    }
-                    else {
+                    } else {
                         addPatch({
                             permissions: patch,
                         });

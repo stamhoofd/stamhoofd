@@ -147,7 +147,7 @@ const ageGroups = computed(() => {
         }
     }
 
-    return Formatter.joinLast(prefixes, ', ', ' ' + $t(`%GT`) + ' ');
+    return Formatter.joinLast(prefixes, ', ', ' ' + $t('%GT') + ' ');
 });
 
 const chooseFamilyMembersForGroup = useChooseFamilyMembersForGroup();

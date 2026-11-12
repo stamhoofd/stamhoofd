@@ -18,8 +18,7 @@ export class PromiseQueue<T> {
 
         if (this.concurrentItemsCount < this.maxConcurrentItems) {
             this.itemsNext.push(item);
-        }
-        else {
+        } else {
             this.itemsWaiting.push(item);
         }
 

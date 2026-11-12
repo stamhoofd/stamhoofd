@@ -35,7 +35,8 @@
         </STList>
 
         <div v-if="!isNew && !isSingle" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%TP') }}
             </h2>
 

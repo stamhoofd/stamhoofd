@@ -105,7 +105,8 @@
             </div>
 
             <template v-if="pendingPayments.length > 0">
-                <hr><h2>{{ $t('%1OL') }}</h2>
+                <hr>
+                <h2>{{ $t('%1OL') }}</h2>
                 <p>{{ $t('%ha') }}</p>
 
                 <STList>
@@ -113,7 +114,8 @@
                 </STList>
             </template>
 
-            <hr><h2>{{ $t('%1JH') }}</h2>
+            <hr>
+            <h2>{{ $t('%1JH') }}</h2>
 
             <p v-if="succeededPayments.length === 0" class="info-box">
                 {{ $t('%hb') }}

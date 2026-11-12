@@ -14,6 +14,6 @@ export function useChargeReceivableBalances() {
             owner,
             shouldRetry: false,
             timeout: 60_000,
-        })
-    }
+        });
+    };
 }

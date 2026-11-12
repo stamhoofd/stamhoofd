@@ -31,7 +31,7 @@ export async function stopContainer(name: string, verbose = false): Promise<void
 }
 
 export async function tailContainerLogs(name: string): Promise<void> {
-        await docker.run(['logs', '-f', name], { allowFailure: true, verbosity: RunVerbosity.Output });
+    await docker.run(['logs', '-f', name], { allowFailure: true, verbosity: RunVerbosity.Output });
 }
 
 export abstract class DockerService<TOptions = void, TPrepared = void> implements ServiceDefinition<TOptions> {

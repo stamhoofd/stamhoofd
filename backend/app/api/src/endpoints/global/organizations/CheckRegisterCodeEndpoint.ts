@@ -37,7 +37,7 @@ export class CheckRegisterCodeEndpoint extends Endpoint<Params, Query, Body, Res
         throw new SimpleError({
             code: 'invalid_code',
             message: 'Invalid code',
-            human: $t(`%EC`),
+            human: $t('%EC'),
             field: 'registerCode',
         });
     }

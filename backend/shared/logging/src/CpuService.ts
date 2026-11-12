@@ -101,8 +101,7 @@ class StaticCpuService {
         for (const listener of this.sampleListeners) {
             try {
                 listener(five);
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Error in CPU sample listener', e);
             }
         }

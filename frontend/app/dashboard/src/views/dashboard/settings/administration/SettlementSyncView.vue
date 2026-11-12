@@ -15,7 +15,8 @@
             <DateSelection v-model="endDate" :time="{hours: 23, minutes: 59}" />
         </STInputBox>
 
-        <hr><h2>{{ $t('%P1') }}</h2>
+        <hr>
+        <h2>{{ $t('%P1') }}</h2>
         <STList>
             <STListItem :selectable="true" element-name="label">
                 <template #left>
@@ -31,7 +32,8 @@
         </STList>
 
         <div v-if="runningJobs.length" class="container">
-            <hr><h2>{{ $t('%Zc2') }}</h2>
+            <hr>
+            <h2>{{ $t('%Zc2') }}</h2>
             <STList>
                 <STListItem v-for="(runningJob, index) in runningJobs" :key="index">
                     <h3 class="style-title-list">

@@ -44,8 +44,7 @@ async function buildForLanguage(language: Language | null, build: () => Replacem
     try {
         const locale = await controller.loadLocaleForLanguage(language);
         return I18nController.getI18n().runWithLocale(locale, build);
-    }
-    catch (e) {
+    } catch (e) {
         // A language without messages: keep the values in the interface language
         console.error('Failed to load locale for language', language, e);
         return base;

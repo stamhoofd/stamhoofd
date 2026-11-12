@@ -24,8 +24,7 @@ export async function withFileLock<T>(lockPath: string, handler: () => Promise<T
 
     try {
         return await handler();
-    }
-    finally {
+    } finally {
         await fs.rm(lockPath, { force: true }).catch(() => undefined);
     }
 }
@@ -60,8 +59,7 @@ async function writeLock(lockPath: string): Promise<boolean> {
     try {
         await fs.writeFile(lockPath, JSON.stringify(contents), { flag: 'wx' });
         return true;
-    }
-    catch (error) {
+    } catch (error) {
         if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
             return false;
         }
@@ -76,8 +74,7 @@ async function readLock(lockPath: string): Promise<LockFile | undefined> {
             return undefined;
         }
         return { pid: raw.pid, startedAt: raw.startedAt };
-    }
-    catch {
+    } catch {
         return undefined;
     }
 }
@@ -86,8 +83,7 @@ function processIsAlive(pid: number): boolean {
     try {
         process.kill(pid, 0);
         return true;
-    }
-    catch (error) {
+    } catch (error) {
         // EPERM means the process exists but belongs to someone else.
         return (error as NodeJS.ErrnoException).code === 'EPERM';
     }

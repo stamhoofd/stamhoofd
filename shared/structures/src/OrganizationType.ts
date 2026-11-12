@@ -49,19 +49,19 @@ export class OrganizationTypeHelper {
         return [
             {
                 value: OrganizationType.Youth,
-                name: $t(`%mA`),
+                name: $t('%mA'),
             },
             {
                 value: OrganizationType.Football,
-                name: $t(`%mB`),
+                name: $t('%mB'),
             },
             {
                 value: OrganizationType.Tennis,
-                name: $t(`%1l`),
+                name: $t('%1l'),
             },
             {
                 value: OrganizationType.Golf,
-                name: $t(`%27`),
+                name: $t('%27'),
             },
             {
                 value: OrganizationType.Gymnastics,
@@ -69,63 +69,63 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Athletics,
-                name: $t(`%mC`),
+                name: $t('%mC'),
             },
             {
                 value: OrganizationType.Badminton,
-                name: $t(`%1H`),
+                name: $t('%1H'),
             },
             {
                 value: OrganizationType.Hockey,
-                name: $t(`%1w`),
+                name: $t('%1w'),
             },
             {
                 value: OrganizationType.Cycling,
-                name: $t(`%mD`),
+                name: $t('%mD'),
             },
             {
                 value: OrganizationType.Swimming,
-                name: $t(`%mE`),
+                name: $t('%mE'),
             },
             {
                 value: OrganizationType.Dance,
-                name: $t(`%mF`),
+                name: $t('%mF'),
             },
             {
                 value: OrganizationType.Volleyball,
-                name: $t(`%mG`),
+                name: $t('%mG'),
             },
             {
                 value: OrganizationType.Basketball,
-                name: $t(`%mH`),
+                name: $t('%mH'),
             },
             {
                 value: OrganizationType.Judo,
-                name: $t(`%mI`),
+                name: $t('%mI'),
             },
             {
                 value: OrganizationType.Sport,
-                name: $t(`%mJ`),
+                name: $t('%mJ'),
             },
             {
                 value: OrganizationType.Student,
-                name: $t(`%mK`),
+                name: $t('%mK'),
             },
             {
                 value: OrganizationType.HorseRiding,
-                name: $t(`%mL`),
+                name: $t('%mL'),
             },
             {
                 value: OrganizationType.Neighborhood,
-                name: $t(`%mM`),
+                name: $t('%mM'),
             },
             {
                 value: OrganizationType.Nature,
-                name: $t(`%mN`),
+                name: $t('%mN'),
             },
             {
                 value: OrganizationType.Music,
-                name: $t(`%mO`),
+                name: $t('%mO'),
             },
             {
                 value: OrganizationType.Events,
@@ -133,11 +133,11 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Professional,
-                name: $t(`%mP`),
+                name: $t('%mP'),
             },
             {
                 value: OrganizationType.Art,
-                name: $t(`%mQ`),
+                name: $t('%mQ'),
             },
             {
                 value: OrganizationType.Stage,
@@ -145,7 +145,7 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Culture,
-                name: $t(`%1U6`),
+                name: $t('%1U6'),
             },
             // {
             //     value: OrganizationType.LGBTQ,
@@ -153,7 +153,7 @@ export class OrganizationTypeHelper {
             // },
             {
                 value: OrganizationType.Politics,
-                name: $t(`%mS`),
+                name: $t('%mS'),
             },
             // {
             //     value: OrganizationType.Union,
@@ -161,7 +161,7 @@ export class OrganizationTypeHelper {
             // },
             {
                 value: OrganizationType.School,
-                name: $t(`%p`),
+                name: $t('%p'),
             },
             {
                 value: OrganizationType.Kids,
@@ -185,7 +185,7 @@ export class OrganizationTypeHelper {
             },
             {
                 value: OrganizationType.Other,
-                name: $t(`%1JG`),
+                name: $t('%1JG'),
             },
         ];
     }
@@ -195,7 +195,7 @@ export class OrganizationTypeHelper {
             case OrganizationType.Youth:
             case OrganizationType.Student:
             case OrganizationType.Kids:
-                return $t(`%1PF`);
+                return $t('%1PF');
 
             case OrganizationType.Sport:
             case OrganizationType.Football:
@@ -211,7 +211,7 @@ export class OrganizationTypeHelper {
             case OrganizationType.Judo:
             case OrganizationType.HorseRiding:
             case OrganizationType.Gymnastics:
-                return $t(`%1I`);
+                return $t('%1I');
 
             case OrganizationType.Culture:
             case OrganizationType.Art:
@@ -219,7 +219,7 @@ export class OrganizationTypeHelper {
             case OrganizationType.Stage:
             case OrganizationType.Events:
             case OrganizationType.Dance:
-                return $t(`%1U6`);
+                return $t('%1U6');
 
             case OrganizationType.School:
                 return $t('%1OC');
@@ -235,7 +235,7 @@ export class OrganizationTypeHelper {
             case OrganizationType.GoodCause:
             case OrganizationType.City:
             case OrganizationType.Business:
-                return $t(`%mV`);
+                return $t('%mV');
         }
     }
 
@@ -250,7 +250,7 @@ export class OrganizationTypeHelper {
                 return [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: $t(`%mW`),
+                            name: $t('%mW'),
                             maximumRegistrations: 1,
                         }),
                     }),
@@ -261,7 +261,7 @@ export class OrganizationTypeHelper {
                 return [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: $t(`%mX`),
+                            name: $t('%mX'),
                             maximumRegistrations: 1,
                         }),
                     }),
@@ -271,7 +271,7 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`%P4`),
+                        name: $t('%P4'),
                         maximumRegistrations: 1,
                     }),
                 }),
@@ -282,7 +282,7 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`%mY`),
+                        name: $t('%mY'),
                         maximumRegistrations: 1,
                     }),
                 }),
@@ -293,7 +293,7 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`%P4`),
+                        name: $t('%P4'),
                         maximumRegistrations: 1,
                     }),
                 }),
@@ -305,7 +305,7 @@ export class OrganizationTypeHelper {
             // Always need one minimum
             GroupCategory.create({
                 settings: GroupCategorySettings.create({
-                    name: $t(`%P4`),
+                    name: $t('%P4'),
                     maximumRegistrations: 1,
                 }),
             }),
@@ -323,12 +323,12 @@ export class OrganizationTypeHelper {
                 const activities = [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: $t(`%1g`),
+                            name: $t('%1g'),
                         }),
                     }),
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: $t(`%mZ`),
+                            name: $t('%mZ'),
                         }),
                     }),
                 ];
@@ -336,13 +336,13 @@ export class OrganizationTypeHelper {
                 return [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: $t(`%mW`),
+                            name: $t('%mW'),
                             maximumRegistrations: 1,
                         }),
                     }),
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: $t(`%uB`),
+                            name: $t('%uB'),
                         }),
                         categoryIds: activities.map(c => c.id),
                     }),
@@ -354,12 +354,12 @@ export class OrganizationTypeHelper {
                 const activities = [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: $t(`%1g`),
+                            name: $t('%1g'),
                         }),
                     }),
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: $t(`%mZ`),
+                            name: $t('%mZ'),
                         }),
                     }),
                 ];
@@ -367,13 +367,13 @@ export class OrganizationTypeHelper {
                 return [
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: $t(`%mX`),
+                            name: $t('%mX'),
                             maximumRegistrations: 1,
                         }),
                     }),
                     GroupCategory.create({
                         settings: GroupCategorySettings.create({
-                            name: $t(`%uB`),
+                            name: $t('%uB'),
                         }),
                         categoryIds: activities.map(c => c.id),
                     }),
@@ -385,12 +385,12 @@ export class OrganizationTypeHelper {
             const activities = [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`%1g`),
+                        name: $t('%1g'),
                     }),
                 }),
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`%mZ`),
+                        name: $t('%mZ'),
                     }),
                 }),
             ];
@@ -398,13 +398,13 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`%P4`),
+                        name: $t('%P4'),
                         maximumRegistrations: 1,
                     }),
                 }),
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`%uB`),
+                        name: $t('%uB'),
                     }),
                     categoryIds: activities.map(c => c.id),
                 }),
@@ -416,12 +416,12 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`%mY`),
+                        name: $t('%mY'),
                     }),
                 }),
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`%uB`),
+                        name: $t('%uB'),
                     }),
                 }),
             ];
@@ -431,13 +431,13 @@ export class OrganizationTypeHelper {
             return [
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`%P4`),
+                        name: $t('%P4'),
                         maximumRegistrations: 1,
                     }),
                 }),
                 GroupCategory.create({
                     settings: GroupCategorySettings.create({
-                        name: $t(`%uB`),
+                        name: $t('%uB'),
                     }),
                 }),
             ];

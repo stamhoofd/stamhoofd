@@ -28,7 +28,8 @@
             </STListItem>
         </STList>
 
-        <hr><h2>{{ $t('%Ua') }}</h2>
+        <hr>
+        <h2>{{ $t('%Ua') }}</h2>
         <p>{{ $t('%Ub') }}</p>
         <STList>
             <STListItem v-for="category in patchedSeatingPlan.categories" :key="category.id" :selectable="true" element-name="button" @click="editCategory(category)">
@@ -50,7 +51,8 @@
         </STList>
 
         <div v-for="section of patchedSeatingPlan.sections" :key="section.id" class="container">
-            <hr><h2 v-if="patchedSeatingPlan.sections.length > 1" class="style-with-button">
+            <hr>
+            <h2 v-if="patchedSeatingPlan.sections.length > 1" class="style-with-button">
                 <div>{{ section.name||'Zone' }}</div>
                 <div>
                     <button type="button" class="button icon trash" @click="deleteSection(section)" />
@@ -64,7 +66,8 @@
             <EditSeatingPlanSectionBox :seating-plan="patchedSeatingPlan" :seating-plan-section="section" :validator="errors.validator" @patch="addPatch($event)" />
         </div>
 
-        <hr><p>
+        <hr>
+        <p>
             <button class="button text" type="button" @click="addSection">
                 <span class="icon add" />
                 <span>{{ $t('%Uc') }}</span>
@@ -72,7 +75,8 @@
         </p>
 
         <template v-if="!isNew">
-            <hr><h2>{{ $t('%16X') }}</h2>
+            <hr>
+            <h2>{{ $t('%16X') }}</h2>
 
             <STList class="illustration-list">
                 <STListItem :selectable="true" class="left-center" @click="downloadSettings">
@@ -99,7 +103,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType} from '@common/encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { VersionBox } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation';
@@ -116,7 +120,7 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import type { PrivateWebshop} from '@stamhoofd/structures';
+import type { PrivateWebshop } from '@stamhoofd/structures';
 import { SeatingPlan, SeatingPlanCategory, SeatingPlanRow, SeatingPlanSection, Version, WebshopMetaData } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -212,8 +216,7 @@ async function save() {
     try {
         await props.saveHandler(patchWebshop.value);
         pop({ force: true })?.catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -278,12 +281,10 @@ async function downloadSettings() {
         zip.file('plan.json', blob);
         const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
         await AppManager.shared.downloadFile(zipBlob, Formatter.fileSlug(patchedSeatingPlan.value.name) + '.plan');
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         new Toast('Er is iets misgelopen bij het downloaden van het zaalplan. Probeer om alles eerst op te slaan en daarna de pagina te herladen. Als het probleem zich blijft voordoen, neem dan contact met ons op.', 'error red');
-    }
-    finally {
+    } finally {
         downloadingSettings.value = false;
     }
 }

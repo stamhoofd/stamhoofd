@@ -65,46 +65,46 @@ export function getRecordTypeName(type: RecordType) {
     const all = [
         {
             value: RecordType.Text,
-            name: $t(`%111`),
+            name: $t('%111'),
         },
         {
             value: RecordType.Textarea,
-            name: $t(`%112`),
+            name: $t('%112'),
         },
         {
             value: RecordType.Address,
-            name: $t(`%Cn`),
+            name: $t('%Cn'),
         },
         {
             value: RecordType.Email,
-            name: $t(`%1FK`),
+            name: $t('%1FK'),
         },
         {
             value: RecordType.Phone,
-            name: $t(`%wD`),
+            name: $t('%wD'),
         },
         {
             value: RecordType.Date,
-            name: $t(`%7R`),
+            name: $t('%7R'),
         },
         {
             value: RecordType.Checkbox,
-            name: $t(`%115`),
+            name: $t('%115'),
         },
         {
             value: RecordType.ChooseOne,
-            name: $t(`%116`),
+            name: $t('%116'),
         },
         {
             value: RecordType.MultipleChoice,
-            name: $t(`%117`),
+            name: $t('%117'),
         },
         {
             value: RecordType.File,
-            name: $t(`%yU`),
+            name: $t('%yU'),
         },
     ];
-    return all.find(t => t.value === type)?.name ?? $t(`%Gr`);
+    return all.find(t => t.value === type)?.name ?? $t('%Gr');
 }
 
 export enum RecordWarningType {
@@ -274,7 +274,7 @@ export class RecordSettings extends BaseRecordSettings {
     getDiffValue() {
         const type = getRecordTypeName(this.type);
         if (this.required) {
-            return $t(`%Qk`) + ' ' + type;
+            return $t('%Qk') + ' ' + type;
         }
         return type;
     }
@@ -290,7 +290,7 @@ export class RecordSettings extends BaseRecordSettings {
         if (this.required && !answer) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%qt`),
+                message: $t('%qt'),
                 field: this.id,
             });
         }
@@ -299,7 +299,7 @@ export class RecordSettings extends BaseRecordSettings {
             if (answer.settings.type !== this.type) {
                 throw new SimpleError({
                     code: 'field_type_changed',
-                    message: $t(`%1Cu`),
+                    message: $t('%1Cu'),
                     field: this.id,
                 });
             }

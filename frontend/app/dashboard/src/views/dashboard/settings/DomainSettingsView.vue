@@ -43,7 +43,8 @@
             </p>
 
             <template v-if="isStamhoofd">
-                <hr><h2>{{ $t('%HQ') }}</h2>
+                <hr>
+                <h2>{{ $t('%HQ') }}</h2>
 
                 <Checkbox v-model="useDkim1024bit">
                     {{ $t('%NA') }}

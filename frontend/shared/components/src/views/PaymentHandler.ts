@@ -6,8 +6,6 @@ import { PaymentMethod, PaymentProvider, PaymentStatus } from '@stamhoofd/struct
 
 import type { NavigationActions } from '../types/NavigationActions';
 
-
-
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus';
 import { Toast } from '../overlays/Toast';
 
@@ -78,8 +76,7 @@ export class PaymentHandler {
 
         if (payment.method === PaymentMethod.PointOfSale) {
             successHandler(payment, navigate)?.catch(console.error);
-        }
-        else if (payment.method === PaymentMethod.Transfer) {
+        } else if (payment.method === PaymentMethod.Transfer) {
             if (transferHandler) {
                 transferHandler(payment)?.catch(console.error);
             }
@@ -95,8 +92,7 @@ export class PaymentHandler {
                     successHandler(payment, navigate)?.catch(console.error);
                 },
             }));
-        }
-        else if (payment.provider === PaymentProvider.Payconiq && paymentUrl) {
+        } else if (payment.provider === PaymentProvider.Payconiq && paymentUrl) {
             if (!paymentQRCode || this.getOS() == 'android' || this.getOS() == 'iOS') {
                 // we need this view for polling
                 const buttonComponent = AsyncComponent(() => import('./PayconiqButtonView.vue'), {
@@ -107,16 +103,14 @@ export class PaymentHandler {
                         GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
                         if (payment && payment.status == PaymentStatus.Succeeded) {
                             successHandler(payment, navigate)?.catch(console.error); // use component because payconiq closed itself + was a sheet
-                        }
-                        else {
+                        } else {
                             failedHandler(payment)?.catch(console.error);
                         }
                     },
                 }).setDisplayStyle('sheet');
                 await navigate.present(buttonComponent);
                 return;
-            }
-            else {
+            } else {
                 // only on desktop
                 const bannerComponent = AsyncComponent(() => import('./PayconiqBannerView.vue'), {
                     paymentUrl: paymentQRCode,
@@ -126,8 +120,7 @@ export class PaymentHandler {
                         GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
                         if (payment && payment.status == PaymentStatus.Succeeded) {
                             successHandler(payment, navigate)?.catch(console.error); // use component because payconiq closed itself + was a sheet
-                        }
-                        else {
+                        } else {
                             failedHandler(payment)?.catch(console.error);
                         }
                     },
@@ -135,10 +128,9 @@ export class PaymentHandler {
                 await navigate.present(bannerComponent);
                 return;
             }
-        }
-        else if (paymentUrl) {
+        } else if (paymentUrl) {
             window.location.href = paymentUrl;
-        }  else if (payment.method === PaymentMethod.DirectDebit) {
+        } else if (payment.method === PaymentMethod.DirectDebit) {
             // For now we go to DirectDebit
             successHandler(payment, navigate)?.catch(console.error);
         } else if (payment.method === PaymentMethod.Unknown) {
@@ -148,7 +140,7 @@ export class PaymentHandler {
             if (payment.status === PaymentStatus.Succeeded) {
                 successHandler(payment, navigate)?.catch(console.error);
             } else {
-                Toast.fromError($t('%1WW')).show()
+                Toast.fromError($t('%1WW')).show();
             }
         }
     }

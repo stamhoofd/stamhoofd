@@ -26,8 +26,8 @@ description like "Review current diff"). Its prompt must contain:
 
 - The exact scope you resolved (the git command(s) that reproduce the diff, or the branch/range).
 - This instruction, verbatim:
-  > Read `.claude/skills/self-review/methodology.md` and follow it exactly. Review **only**
-  > the changes in the scope below. Do not modify any files.
+    > Read `.claude/skills/self-review/methodology.md` and follow it exactly. Review **only**
+    > the changes in the scope below. Do not modify any files.
 - The scope details.
 
 ## 3. Relay the findings

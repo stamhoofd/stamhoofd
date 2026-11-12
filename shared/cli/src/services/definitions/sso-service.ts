@@ -72,8 +72,7 @@ export class SsoService extends DockerService<SsoStartOptions, SsoPrepared> {
         const args = ['run'];
         if (options.background) {
             args.push('-d');
-        }
-        else {
+        } else {
             args.push('--rm');
         }
         args.push('--name', this.getContainer(context), '-p', `${localIpv4Host}:${this.getPort(context)}:${ssoInternalPort}`, '-e', `KC_BOOTSTRAP_ADMIN_USERNAME=${ssoAdminUser}`, '-e', `KC_BOOTSTRAP_ADMIN_PASSWORD=${ssoAdminPassword}`, '-e', 'KC_HTTP_RELATIVE_PATH=/dex', '-v', `${prepared.importDir}:/opt/keycloak/data/import:ro,Z`, keycloakImage, 'start-dev', '--import-realm', '--hostname', `https://${this.getHostname(context)}/dex`, '--proxy-headers=xforwarded');
@@ -100,8 +99,7 @@ export class SsoService extends DockerService<SsoStartOptions, SsoPrepared> {
                 const response = await fetch(url, { signal: AbortSignal.timeout(2_000) });
                 if (!response.ok) {
                     lastError = `status ${response.status}`;
-                }
-                else {
+                } else {
                     const body = await response.text();
                     const discovered = parseIssuer(body);
                     if (discovered === issuer) {
@@ -111,8 +109,7 @@ export class SsoService extends DockerService<SsoStartOptions, SsoPrepared> {
                         ? `response is not an OpenID discovery document (${body.length} bytes): is Caddy routing ${new URL(issuer).host}?`
                         : `discovery document reports issuer ${discovered}`;
                 }
-            }
-            catch (error) {
+            } catch (error) {
                 lastError = error instanceof Error ? error.message : String(error);
             }
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -158,8 +155,7 @@ function parseIssuer(body: string): string | undefined {
     try {
         const parsed = JSON.parse(body) as { issuer?: unknown };
         return typeof parsed.issuer === 'string' ? parsed.issuer : undefined;
-    }
-    catch {
+    } catch {
         return undefined;
     }
 }

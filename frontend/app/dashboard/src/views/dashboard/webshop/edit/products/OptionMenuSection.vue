@@ -28,7 +28,6 @@ import { Option, OptionMenu, Product, Version } from '@stamhoofd/structures';
 
 import { ref, watch } from 'vue';
 
-
 import OptionMenuOptions from './OptionMenuOptions.vue';
 
 const props = defineProps<{
@@ -113,13 +112,13 @@ function addOption() {
 
 function editOptionMenu() {
     present(AsyncComponent(() => import('./EditOptionMenuView.vue'), {
-            product: props.product,
-            optionMenu: props.optionMenu,
-            isNew: false,
-            saveHandler: (patch: AutoEncoderPatchType<Product>) => {
-                emits('patch', patch);
-                // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
-            } }).setDisplayStyle('popup')).catch(console.error);
+        product: props.product,
+        optionMenu: props.optionMenu,
+        isNew: false,
+        saveHandler: (patch: AutoEncoderPatchType<Product>) => {
+            emits('patch', patch);
+            // TODO: if webshop is saveable: also save it. But maybe that should not happen here but in a special type of emit?
+        } }).setDisplayStyle('popup')).catch(console.error);
 }
 
 function addOptionMenuPatch(patch: AutoEncoderPatchType<OptionMenu>) {

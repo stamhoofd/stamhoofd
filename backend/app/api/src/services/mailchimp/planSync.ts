@@ -267,8 +267,7 @@ export function planSync(
                     archive,
                     markAsRemoved: true,
                 });
-            }
-            else if (isMarked && archive) {
+            } else if (isMarked && archive) {
                 plan.removals.push({
                     email: existing.email,
                     tags: [],

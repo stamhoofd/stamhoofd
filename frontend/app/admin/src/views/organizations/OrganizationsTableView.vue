@@ -146,7 +146,7 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'name',
-        name: $t(`%1Os`),
+        name: $t('%1Os'),
         getValue: organization => organization.name,
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -155,9 +155,9 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, boolean>({
         id: 'status',
-        name: $t(`%1A`),
+        name: $t('%1A'),
         getValue: organization => organization.active,
-        format: active => active ? $t(`%1H0`) : $t(`%7G`),
+        format: active => active ? $t('%1H0') : $t('%7G'),
         getStyle: active => active ? 'success' : 'error',
         minimumWidth: 100,
         recommendedWidth: 200,
@@ -168,14 +168,14 @@ const allColumns: Column<ObjectType, any>[] = [
 
     new Column<ObjectType, string>({
         id: 'city',
-        name: $t(`%1PP`),
+        name: $t('%1PP'),
         getValue: organization => organization.address.city,
         minimumWidth: 100,
         recommendedWidth: 200,
     }),
     new Column<ObjectType, Country>({
         id: 'country',
-        name: $t(`%Cp`),
+        name: $t('%Cp'),
         getValue: organization => organization.address.country,
         format: country => CountryHelper.getName(country),
         minimumWidth: 100,
@@ -189,7 +189,7 @@ const allColumns: Column<ObjectType, any>[] = [
         : [
                 new Column<ObjectType, OrganizationType>({
                     id: 'type',
-                    name: $t(`%1LP`),
+                    name: $t('%1LP'),
                     getValue: organization => organization.meta.type,
                     format: type => OrganizationTypeHelper.getName(type),
                     minimumWidth: 100,
@@ -197,9 +197,9 @@ const allColumns: Column<ObjectType, any>[] = [
                 }),
                 new Column<ObjectType, UmbrellaOrganization | null>({
                     id: 'umbrellaOrganization',
-                    name: $t(`%ZZd`),
+                    name: $t('%ZZd'),
                     getValue: organization => organization.meta.umbrellaOrganization,
-                    format: umbrella => umbrella ? UmbrellaOrganizationHelper.getName(umbrella) : $t(`%1FW`),
+                    format: umbrella => umbrella ? UmbrellaOrganizationHelper.getName(umbrella) : $t('%1FW'),
                     getStyle: umbrella => umbrella ? '' : 'gray',
                     minimumWidth: 100,
                     recommendedWidth: 200,
@@ -208,10 +208,10 @@ const allColumns: Column<ObjectType, any>[] = [
             ]),
     new Column<ObjectType, string[]>({
         id: 'tags',
-        name: $t(`%13`),
+        name: $t('%13'),
         allowSorting: false,
-        getValue: organization => organization.meta.tags.map(t => platform.value.config.tags.find(tt => tt.id === t)?.name ?? $t(`%Gr`)),
-        format: tags => tags.length === 0 ? $t(`%1FW`) : tags.join(', '),
+        getValue: organization => organization.meta.tags.map(t => platform.value.config.tags.find(tt => tt.id === t)?.name ?? $t('%Gr')),
+        format: tags => tags.length === 0 ? $t('%1FW') : tags.join(', '),
         getStyle: tags => tags.length === 0 ? 'gray' : '',
         minimumWidth: 100,
         recommendedWidth: 300,
@@ -223,12 +223,12 @@ const allColumns: Column<ObjectType, any>[] = [
         : [
                 new Column<ObjectType, string[]>({
                     id: 'activePackages',
-                    name: $t(`%ZZl`),
+                    name: $t('%ZZl'),
                     allowSorting: false,
                     getValue: organization => Object.values(STPackageType)
                         .filter(type => organization.meta.packages.isActive(type))
                         .map(type => STPackageTypeHelper.getName(type)),
-                    format: packages => packages.length === 0 ? $t(`%1FW`) : packages.join(', '),
+                    format: packages => packages.length === 0 ? $t('%1FW') : packages.join(', '),
                     getStyle: packages => packages.length === 0 ? 'gray' : '',
                     minimumWidth: 100,
                     recommendedWidth: 250,
@@ -240,16 +240,16 @@ const allColumns: Column<ObjectType, any>[] = [
         ? [
                 new Column<ObjectType, { completed: number; total: number }>({
                     id: 'setupSteps',
-                    name: $t(`%Gs`),
+                    name: $t('%Gs'),
                     allowSorting: false,
                     getValue: organization => organization.period.setupSteps.getProgress(),
                     format: (progress) => {
                         const { completed, total } = progress;
                         if (total === 0) {
-                            return $t(`%1FW`);
+                            return $t('%1FW');
                         }
                         if (completed >= total) {
-                            return $t(`%Gt`);
+                            return $t('%Gt');
                         }
                         return `${progress.completed}/${progress.total}`;
                     },
@@ -270,7 +270,7 @@ const allColumns: Column<ObjectType, any>[] = [
         : []),
     new Column<ObjectType, Date>({
         id: 'createdAt',
-        name: $t(`%1Jc`),
+        name: $t('%1Jc'),
         getValue: organization => organization.createdAt,
         format: (v, width) => width < 200 ? Formatter.dateNumber(v, true) : Formatter.date(v, true),
         minimumWidth: 80,
@@ -658,7 +658,7 @@ if (auth.platformPermissions?.hasAccessRightForSomeResourceOfType(PermissionsRes
 
 if (auth.hasPlatformFullAccess()) {
     actions.push(new AsyncTableAction({
-        name: $t(`%Gb`),
+        name: $t('%Gb'),
         icon: 'send',
         priority: 12,
         groupIndex: 3,
@@ -668,7 +668,7 @@ if (auth.hasPlatformFullAccess()) {
     }));
 
     actions.push(new AsyncTableAction({
-        name: $t(`%Gu`),
+        name: $t('%Gu'),
         icon: 'calculator',
         priority: 13,
         groupIndex: 4,
@@ -679,7 +679,7 @@ if (auth.hasPlatformFullAccess()) {
 
     actions.push(
         new AsyncTableAction({
-            name: $t(`%Gc`),
+            name: $t('%Gc'),
             icon: 'download',
             priority: 11,
             groupIndex: 3,

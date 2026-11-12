@@ -17,7 +17,7 @@ import { DocumentRenderService } from '../../src/services/DocumentRenderService.
 import { initMembershipOrganization } from '../init/initMembershipOrganization.js';
 import { SessionService } from '../../src/services/SessionService.js';
 
-const baseUrl = `/members/register`;
+const baseUrl = '/members/register';
 
 describe('E2E.Documents', () => {
     const endpoint = new RegisterMembersEndpoint();

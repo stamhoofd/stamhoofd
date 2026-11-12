@@ -1,6 +1,7 @@
 <template>
     <div v-if="familyMembers.length > 0" class="hover-box container">
-        <hr><h2>
+        <hr>
+        <h2>
             <template v-if="member.patchedMember.details.defaultAge <= 30 && Math.abs(maxFamilyAge - member.patchedMember.details.defaultAge) <= 14">
                 {{ $t('%fl') }}
             </template>
@@ -33,7 +34,6 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@brow
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { computed } from 'vue';
-
 
 defineOptions({
     inheritAttrs: false,

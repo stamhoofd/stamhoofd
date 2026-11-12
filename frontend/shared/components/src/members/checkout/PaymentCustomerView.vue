@@ -89,8 +89,8 @@ const props = withDefaults(
         saveHandler: (navigate: NavigationActions) => Promise<void>;
     }>(), {
         invoicesEnabled: false,
-        allowNonDefault: true
-    }
+        allowNonDefault: true,
+    },
 );
 
 const errors = useErrors();
@@ -99,19 +99,19 @@ const errors = useErrors();
  * Set when editing a company
  */
 const editCompany = ref<Company | null>(null);
-const patchCompany = ref(Company.patch({}))
+const patchCompany = ref(Company.patch({}));
 function patchCreateCompany(patch: AutoEncoderPatchType<Company>) {
-    patchCompany.value = patchCompany.value.patch(patch)
+    patchCompany.value = patchCompany.value.patch(patch);
 }
 const patchedCompany = computed(() => {
-    return editCompany.value?.patch(patchCompany.value) ?? null
-})
+    return editCompany.value?.patch(patchCompany.value) ?? null;
+});
 
 function updateCreateCompany() {
     if (companies.value.length <= 1) {
         if (editCompany.value === null && companies.value.length === 0) {
             // If there is a single company, don't edit by default.
-            editCompany.value = organization.value?.defaultCompanies[0] ?? Company.create({})
+            editCompany.value = organization.value?.defaultCompanies[0] ?? Company.create({});
         }
     } else {
         editCompany.value = null;
@@ -131,8 +131,8 @@ async function openEditCompany(company: Company) {
                     patch.id = company.id;
                     const meta = OrganizationMetaData.patch({});
                     meta.companies.addPatch(patch);
-                    await patchOrganization(Organization.patch({meta}));
-                }
+                    await patchOrganization(Organization.patch({ meta }));
+                },
             }),
         ],
         modalDisplayStyle: 'popup',
@@ -186,43 +186,43 @@ async function goNext() {
             const existing = companies.value.find(c => c.id === editCompany.value!.id);
 
             // Save this company + set it as the checkout customer
-            const meta = OrganizationMetaData.patch({})
+            const meta = OrganizationMetaData.patch({});
 
             if (existing) {
-                patchCompany.value.id = editCompany.value!.id
+                patchCompany.value.id = editCompany.value!.id;
                 meta.companies.addPatch(patchCompany.value);
             } else if (companies.value.length !== 0) {
-                console.error('Unexpected creation of company in PaymentCustomerView')
-                return
+                console.error('Unexpected creation of company in PaymentCustomerView');
+                return;
             } else {
                 meta.companies.addPut(patchedCompany.value!);
             }
 
-            await patchOrganization(Organization.patch({meta}));
+            await patchOrganization(Organization.patch({ meta }));
             if ((companies.value.length as number) === 1) {
-                selectedCompanyId.value = companies.value[0].id
+                selectedCompanyId.value = companies.value[0].id;
                 editCompany.value = companies.value[0];
-                patchCompany.value = Company.patch({})
+                patchCompany.value = Company.patch({});
             } else {
                 // Stop edit - choose one to continue
                 editCompany.value = null;
                 return;
             }
-        } 
+        }
 
         const customer = buildCustomer();
         if (!customer.company) {
             if (companies.value.length === 0) {
                 throw new SimpleError({
                     code: 'missing_field',
-                    message: $t(`%zj`),
+                    message: $t('%zj'),
                     field: 'company',
                 });
             }
 
             throw new SimpleError({
                 code: 'missing_field',
-                message: $t(`%zk`),
+                message: $t('%zk'),
                 field: 'company',
             });
         }
@@ -230,18 +230,16 @@ async function goNext() {
         if (customer.company.name.length < 2 || !customer.company.address) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%zl`),
+                message: $t('%zl'),
                 field: 'company',
             });
         }
 
         props.checkout.customer = customer;
         await props.saveHandler(navigate);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         loading.value = false;
     }
 }

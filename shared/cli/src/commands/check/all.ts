@@ -11,6 +11,7 @@ export default class CheckAll extends BaseCommand {
         'stam check all --fix',
         'stam check all --env keeo',
     ];
+
     static flags = { env: BaseCommand.environmentFlags.env, fix: fixFlag, ...this.verbosityFlags() };
 
     async run(): Promise<void> {

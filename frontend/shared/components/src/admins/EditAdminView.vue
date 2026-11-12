@@ -50,14 +50,16 @@
 
         <template v-if="getUnloadedPermissions(user)">
             <div v-if="!user.memberId || getUnloadedPermissions(user)" class="container">
-                <hr><h2>{{ adminRolesTitle }}</h2>
+                <hr>
+                <h2>{{ adminRolesTitle }}</h2>
                 <p>{{ adminRolesPersonDescription }}</p>
 
                 <EditUserPermissionsBox :user="patched" @patch:user="(event) => addPatch(event)" />
             </div>
 
             <div v-if="resources.length" class="container">
-                <hr><h2>{{ $t('%Yr') }}</h2>
+                <hr>
+                <h2>{{ $t('%Yr') }}</h2>
                 <p>{{ $t('%Ys') }}</p>
 
                 <STList>
@@ -185,14 +187,14 @@ const save = async () => {
     if ((firstName.value?.length ?? 0) < 2) {
         errors.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%uH`),
+            message: $t('%uH'),
             field: 'firstName',
         }));
     }
     if ((lastName.value?.length ?? 0) < 2) {
         errors.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%104`),
+            message: $t('%104'),
             field: 'lastName',
         }));
     }
@@ -224,7 +226,7 @@ const save = async () => {
                 decoder: UserWithMembers as Decoder<UserWithMembers>,
             });
             user = response.data;
-            new Toast($t(`%14i`, { firstName: user.firstName || user.email }), 'success').setHide(5000).show();
+            new Toast($t('%14i', { firstName: user.firstName || user.email }), 'success').setHide(5000).show();
         } else {
             const response = await $context.value.authenticatedServer.request({
                 method: 'PATCH',
@@ -233,7 +235,7 @@ const save = async () => {
                 decoder: UserWithMembers as Decoder<UserWithMembers>,
             });
             user = response.data;
-            new Toast($t(`%14j`), 'success').setHide(2000).show();
+            new Toast($t('%14j'), 'success').setHide(2000).show();
         }
 
         // Copy all data
@@ -262,7 +264,7 @@ const doDelete = async () => {
 
     if (!await CenteredMessage.confirm({
         title: props.user.name ? $t('%Zn2', { name: props.user.name }) : $t('Deze beheerder verwijderen?'),
-        confirmText: $t(`%CJ`),
+        confirmText: $t('%CJ'),
         availabilityDelay: 2_000,
     })) {
         return false;
@@ -307,7 +309,7 @@ const doDelete = async () => {
 const resendInvite = async () => {
     // We can send a new invite by just recreating the admin (the API will merge with existing admins)
     if (hasChanges.value || props.isNew) {
-        new CenteredMessage($t(`%uJ`), $t(`%uK`)).addCloseButton().show();
+        new CenteredMessage($t('%uJ'), $t('%uK')).addCloseButton().show();
         return;
     }
     if (sendingInvite.value) {
@@ -328,7 +330,7 @@ const resendInvite = async () => {
         props.user.set(response.data);
         didSendInvite.value = true;
 
-        new Toast($t(`%uL`) + ' ' + props.user.email, 'success').setHide(2000).show();
+        new Toast($t('%uL') + ' ' + props.user.email, 'success').setHide(2000).show();
     } catch (e) {
         console.error(e);
         $errors.errorBox = new ErrorBox(e);
@@ -355,7 +357,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

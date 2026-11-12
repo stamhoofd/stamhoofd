@@ -26,7 +26,8 @@
 
         <template v-if="enabled">
             <div v-if="(patched.privateMeta?.emails ?? []).length" class="container">
-                <hr><h2>{{ $t('%1FK') }}</h2>
+                <hr>
+                <h2>{{ $t('%1FK') }}</h2>
                 <p>{{ $t('%Mq') }}</p>
 
                 <STList>
@@ -56,7 +57,8 @@
             </div>
 
             <div class="container">
-                <hr><h2>{{ $t('%HQ') }}</h2>
+                <hr>
+                <h2>{{ $t('%HQ') }}</h2>
                 <p>{{ $t('%91') }}</p>
 
                 <NumberInputBox v-model="minimumDaysBetween" error-fields="price" :error-box="errors.errorBox" :title="$t(`%Mt`)" placeholder="" :suffix="$t('%1N6')" :suffix-singular="$t('%1N7')" :min="1" :stepper="true" :validator="errors.validator" />
@@ -65,7 +67,8 @@
             </div>
 
             <div v-if="$feature('organization-receivable-balances')" class="container">
-                <hr><h2>{{ $t('%92') }}</h2>
+                <hr>
+                <h2>{{ $t('%92') }}</h2>
                 <p>{{ $t('%93') }}</p>
 
                 <MultipleChoiceInput v-model="selectedResponsibilityIds" :items="responsibilities.map(r => ({value: r.id, name: r.name}))" :nullable="false" />
@@ -208,8 +211,7 @@ async function save() {
         });
 
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

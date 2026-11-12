@@ -22,8 +22,7 @@ export class NetworkHelper {
                     return;
                 }
                 lastError = `status ${res.status}`;
-            }
-            catch (error: any) {
+            } catch (error: any) {
                 // ignore connection errors
                 lastError = `${error.name}: ${error.message}${error.cause ? ` (${String(error.cause)})` : ''}`;
             }

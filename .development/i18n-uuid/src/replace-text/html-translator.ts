@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import type { X2jOptions, XmlBuilderOptions} from 'fast-xml-parser';
+import type { X2jOptions, XmlBuilderOptions } from 'fast-xml-parser';
 import { XMLBuilder, XMLParser } from 'fast-xml-parser';
 import { promptYesNoOrDoubt, YesNoOrDoubt } from '../shared/prompt-helper.js';
 import { addChangeMarkers, endChangeMarker, removeChangeMarkers, startChangeMarker } from './git-helper.js';
@@ -79,12 +79,10 @@ export class HtmlTranslator {
             if (htmlWithChangeMarkers === null) {
                 this.shouldCheckChanges = false;
                 this.areCurrentLinesChanged = true;
-            }
-            else {
+            } else {
                 html = htmlWithChangeMarkers;
             }
-        }
-        else {
+        } else {
             this.areCurrentLinesChanged = true;
         }
 
@@ -113,8 +111,7 @@ export class HtmlTranslator {
 
         if (Array.isArray(source)) {
             await this.processArray(parent, source);
-        }
-        else if (typeof source === 'object') {
+        } else if (typeof source === 'object') {
             await this.processRecord(parent, source);
         }
 
@@ -171,8 +168,7 @@ export class HtmlTranslator {
             object.forEach((item) => {
                 this.fixUnpairedTagBug(item, object);
             });
-        }
-        else if (typeof object === 'object') {
+        } else if (typeof object === 'object') {
             for (const [key, value] of Object.entries(object)) {
                 // if unpaired tag element
                 if (unpairedTagsSet.has(key)) {
@@ -197,8 +193,7 @@ export class HtmlTranslator {
                             }
                         }
                     }
-                }
-                else {
+                } else {
                     this.fixUnpairedTagBug(value, object);
                 }
             }
@@ -278,7 +273,7 @@ export class HtmlTranslator {
         }
 
         this.logContext(parent, record, key, part, translatedPart, processedParts, unprocessedPart, transformContext);
-        const result = await promptYesNoOrDoubt(chalk.yellow(`> Accept (press [y] or [enter])?`));
+        const result = await promptYesNoOrDoubt(chalk.yellow('> Accept (press [y] or [enter])?'));
 
         if (result === YesNoOrDoubt.Yes) {
             return true;
@@ -405,8 +400,7 @@ REPLACEMENT:`));
                     if (typeof attributeValue === 'string') {
                         if (isReactive) {
                             value[attributeKey] = await this.replaceTextInTypescript(parent, value, attributeKey, attributeValue);
-                        }
-                        else {
+                        } else {
                             const newValue = await this.replaceTextInNonReactiveAttributeValue(parent, value, attributeKey, attributeValue, attributeName);
                             if (attributeValue !== newValue) {
                                 value[attributeKey] = newValue;

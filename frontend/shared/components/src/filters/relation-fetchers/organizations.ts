@@ -7,8 +7,8 @@ export function useOrganizationsRelationFetcher() {
 
     return new RelationFetcher({
         fetcher,
-        getName: (organization) => organization.name,
-        getValue: (organization) => organization.id,
+        getName: organization => organization.name,
+        getValue: organization => organization.id,
         sort: [{ key: 'name', order: SortItemDirection.ASC }],
-    })
+    });
 }

@@ -56,7 +56,7 @@ export class OrderActionBuilder {
     getTicketStatusActions(): TableAction<PrivateOrderWithTickets>[] {
         return [
             new InMemoryTableAction({
-                name: $t(`%V1`),
+                name: $t('%V1'),
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (orders: PrivateOrderWithTickets[]) => {
@@ -78,7 +78,7 @@ export class OrderActionBuilder {
                 },
             }),
             new InMemoryTableAction({
-                name: $t(`%1MZ`),
+                name: $t('%1MZ'),
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (orders: PrivateOrderWithTickets[]) => {
@@ -105,7 +105,7 @@ export class OrderActionBuilder {
     getPaymentActions(): TableAction<PrivateOrder>[] {
         return [
             new InMemoryTableAction({
-                name: $t(`%1OD`),
+                name: $t('%1OD'),
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (orders: PrivateOrder[]) => {
@@ -113,7 +113,7 @@ export class OrderActionBuilder {
                 },
             }),
             new InMemoryTableAction({
-                name: $t(`%18v`),
+                name: $t('%18v'),
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (orders: PrivateOrder[]) => {
@@ -126,7 +126,7 @@ export class OrderActionBuilder {
     getActions(options?: { includeAdd: boolean }): TableAction<PrivateOrderWithTickets>[] {
         return [
             new InMemoryTableAction({
-                name: $t(`%V2`),
+                name: $t('%V2'),
                 icon: 'add',
                 priority: 1,
                 groupIndex: 2,
@@ -138,7 +138,7 @@ export class OrderActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`%V3`),
+                name: $t('%V3'),
                 enabled: () => this.webshopManager.hasWrite,
                 icon: 'edit',
                 priority: 1,
@@ -151,7 +151,7 @@ export class OrderActionBuilder {
             }),
 
             new MenuTableAction({
-                name: $t(`%vW`),
+                name: $t('%vW'),
                 enabled: () => this.webshopManager.hasWrite,
                 icon: 'flag',
                 priority: 1,
@@ -162,7 +162,7 @@ export class OrderActionBuilder {
             }),
 
             new MenuTableAction({
-                name: $t(`%V4`),
+                name: $t('%V4'),
                 enabled: () => this.webshopManager.hasWrite && this.webshopManager.preview.hasTickets,
                 icon: 'flag',
                 priority: 1,
@@ -173,7 +173,7 @@ export class OrderActionBuilder {
             }),
 
             new MenuTableAction({
-                name: $t(`%V5`),
+                name: $t('%V5'),
                 enabled: () => this.webshopManager.hasWrite,
                 icon: 'card',
                 priority: 0,
@@ -184,7 +184,7 @@ export class OrderActionBuilder {
             }),
 
             new InMemoryTableAction({
-                name: $t(`%V6`),
+                name: $t('%V6'),
                 icon: 'copy',
                 priority: 0,
                 groupIndex: 2,
@@ -195,12 +195,12 @@ export class OrderActionBuilder {
                     const order = orders[0];
                     // copy the link to clipboard
                     await navigator.clipboard.writeText('https://' + this.webshopManager.preview.getUrl(this.organizationManager.organization) + '/order/' + order!.id);
-                    new Toast($t(`%V7`), 'success').show();
+                    new Toast($t('%V7'), 'success').show();
                 },
             }),
 
             new AsyncTableAction({
-                name: $t(`%Gb`),
+                name: $t('%Gb'),
                 enabled: () => this.webshopManager.hasRead,
                 icon: 'send',
                 priority: 10,
@@ -212,7 +212,7 @@ export class OrderActionBuilder {
 
             ...(this.webshopManager.preview.meta.customerSettings.phone !== CustomerFieldRequirement.Disabled
                 ? [new InMemoryTableAction({
-                        name: $t(`%PI`),
+                        name: $t('%PI'),
                         enabled: () => this.webshopManager.hasRead,
                         icon: 'feedback-line',
                         priority: 9,
@@ -225,7 +225,7 @@ export class OrderActionBuilder {
                 : []),
 
             new InMemoryTableAction({
-                name: $t(`%V8`),
+                name: $t('%V8'),
                 enabled: () => this.webshopManager.hasRead,
                 icon: 'download',
                 priority: 8,
@@ -248,7 +248,7 @@ export class OrderActionBuilder {
                 : []),
 
             new InMemoryTableAction({
-                name: $t(`%CJ`),
+                name: $t('%CJ'),
                 icon: 'trash',
                 destructive: true,
                 enabled: () => this.webshopManager.hasWrite,
@@ -311,12 +311,12 @@ export class OrderActionBuilder {
 
         const options: RecipientChooseOneOption[] = [];
 
-        let name = $t(`%V9`);
+        let name = $t('%V9');
 
         if (selection.markedRows.size > 0) {
-            name = $t(`%VA`);
+            name = $t('%VA');
         } else if (!OrderRequiredFilterHelper.isDefault(this.webshopManager.preview.id, selection.filter.filter)) {
-            name = $t(`%VB`);
+            name = $t('%VB');
         }
 
         options.push({
@@ -356,14 +356,14 @@ export class OrderActionBuilder {
         const webshop = this.webshopManager.webshop;
         const organization = this.organizationManager.organization;
         if (!webshop) {
-            new Toast($t(`%17l`), 'error red').show();
+            new Toast($t('%17l'), 'error red').show();
             return;
         }
 
         const hasCanceledOrders = !!orders.find(o => o.status === OrderStatus.Canceled);
         const hasNotCanceled = !!orders.find(o => o.status !== OrderStatus.Canceled);
         if (hasCanceledOrders && hasNotCanceled) {
-            const excludeCanceled = await CenteredMessage.confirm($t(`%VC`), $t(`%VD`), $t(`%VE`), $t(`%VF`), true);
+            const excludeCanceled = await CenteredMessage.confirm($t('%VC'), $t('%VD'), $t('%VE'), $t('%VF'), true);
             if (excludeCanceled) {
                 orders = orders.filter(o => o.status !== OrderStatus.Canceled);
             }
@@ -422,17 +422,17 @@ export class OrderActionBuilder {
             }
 
             if (status === OrderStatus.Deleted) {
-                new Toast(orders.length == 1 ? $t(`%VG`) : $t(`%VH`), 'success').setHide(1500).show();
+                new Toast(orders.length == 1 ? $t('%VG') : $t('%VH'), 'success').setHide(1500).show();
 
                 // Do a slow reload of the webshop stocks
                 if (!wasCanceledOrDeleted) {
                     this.webshopManager.backgroundReloadWebshop();
                 }
             } else {
-                new Toast($t(`%VI`), 'success').setHide(1500).show();
+                new Toast($t('%VI'), 'success').setHide(1500).show();
 
                 if (status == OrderStatus.Canceled) {
-                    new Toast($t(`%VJ`), 'warning yellow').setHide(10 * 1000).show();
+                    new Toast($t('%VJ'), 'warning yellow').setHide(10 * 1000).show();
 
                     // Do a slow reload of the webshop stocks
                     if (!wasCanceledOrDeleted) {
@@ -481,7 +481,7 @@ export class OrderActionBuilder {
         }
 
         if (data.changes.length) {
-            if (willSendEmail && !await CenteredMessage.confirm($t(`%MY`), paid ? $t(`%1JQ`) : $t(`%MZ`), paid ? $t(`%VK`) : undefined)) {
+            if (willSendEmail && !await CenteredMessage.confirm($t('%MY'), paid ? $t('%1JQ') : $t('%MZ'), paid ? $t('%VK') : undefined)) {
                 return;
             }
             const session = this.organizationManager.$context;
@@ -509,12 +509,12 @@ export class OrderActionBuilder {
                 for (const payment of response.data) {
                     GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
                 }
-                new Toast($t(`%Mb`), 'success').setHide(1000).show();
+                new Toast($t('%Mb'), 'success').setHide(1000).show();
             } catch (e) {
                 Toast.fromError(e).show();
             }
         } else {
-            new Toast(paid ? $t(`%Mc`) : orders.length === 1 ? $t(`%VL`) : $t(`%VM`), 'error red').setHide(2000).show();
+            new Toast(paid ? $t('%Mc') : orders.length === 1 ? $t('%VL') : $t('%VM'), 'error red').setHide(2000).show();
         }
     }
 
@@ -522,19 +522,19 @@ export class OrderActionBuilder {
         const isSomePaid = orders.some(order => order.payments.some(payment => payment.status === PaymentStatus.Succeeded));
         if (isSomePaid) {
             const text = orders.length > 1 ? $t('%1Ne') : $t('%1Na');
-            const description = orders.length > 1 ? $t(`%1Nf`) : $t('%1Nd');
-            const isConfirm = await CenteredMessage.confirm(text, $t(`%1Nc`), description, undefined, false);
+            const description = orders.length > 1 ? $t('%1Nf') : $t('%1Nd');
+            const isConfirm = await CenteredMessage.confirm(text, $t('%1Nc'), description, undefined, false);
             if (!isConfirm) {
                 return;
             }
         }
 
         if (!await CenteredMessage.confirm(orders.length === 1
-            ? $t(`%VN`,
+            ? $t('%VN',
                     { number: orders[0].number?.toString() ?? '', customer: orders[0].data.customer.name })
-            : $t(`%1Ng`),
-        $t(`%CJ`),
-        $t(`%1Fc`), undefined, true, $t('%1NZ'))
+            : $t('%1Ng'),
+        $t('%CJ'),
+        $t('%1Fc'), undefined, true, $t('%1NZ'))
         ) {
             return;
         }

@@ -36,15 +36,9 @@
         // TS 6 defaults this to true; pin to keep Vite-handled side-effect imports (css/scss/assets) working.
         "noUncheckedSideEffectImports": false,
         "paths": {
-            "@stamhoofd/components/*": [
-                "./shared/components/src/*"
-            ],
-             "@stamhoofd/components/*.ts": [
-                 "./shared/components/src/*.ts"
-             ],
-            "@stamhoofd/components/*.vue": [
-                "./shared/components/src/*.vue"
-            ],
+            "@stamhoofd/components/*": ["./shared/components/src/*"],
+            "@stamhoofd/components/*.ts": ["./shared/components/src/*.ts"],
+            "@stamhoofd/components/*.vue": ["./shared/components/src/*.vue"],
             // SGV Frontend
             "@stamhoofd/sgv-frontend": ["./shared/sgv/src/index.ts"],
             "@stamhoofd/sgv-frontend/*": ["./shared/sgv/src/*"],
@@ -61,9 +55,7 @@
         // TS 6 defaults `types` to `[]` instead of auto-including every `@types/*` package.
         // List the packages that contribute ambient/global declarations the frontend relies on
         // (e.g. the global `PDFKit` namespace from `@types/pdfkit`, used without an explicit import).
-        "types": [
-            "pdfkit"
-        ],
+        "types": ["pdfkit"],
         // For spec compliance.
         // `true` by default if the `target` is `ES2020` or higher.
         // Explicitly set it to `true` here in case some users want to overwrite the `target`.

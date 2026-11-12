@@ -49,8 +49,7 @@ async function testMatch({ language, rows, doMatch = [], doNotMatch = [] }: { la
                 }
             }
         });
-    }
-    finally {
+    } finally {
         await Database.statement(`DROP TABLE IF EXISTS \`${tableName}\``);
     }
 }

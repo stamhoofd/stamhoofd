@@ -59,7 +59,7 @@ export function useRegistrationQuickActions(): QuickActions {
     }
 
     async function checkAllMemberData(member: PlatformMember) {
-        await editMember(member, { title: $t(`%uC`) });
+        await editMember(member, { title: $t('%uC') });
     }
 
     const activeMembers = computed(() => memberManager.family.members.filter(m => m.filterRegistrations({ currentPeriod: true, types: [GroupType.Membership] }).length > 0));
@@ -105,7 +105,7 @@ export function useRegistrationQuickActions(): QuickActions {
         try {
             const response = await context.value.authenticatedServer.request({
                 method: 'GET',
-                path: `/user/payable-balance`,
+                path: '/user/payable-balance',
                 decoder: PayableBalanceCollection as Decoder<PayableBalanceCollection>,
                 shouldRetry: true,
                 owner,
@@ -143,8 +143,8 @@ export function useRegistrationQuickActions(): QuickActions {
             if (!checkout.value.cart.isEmpty) {
                 arr.push({
                     illustration: cartSvg,
-                    title: $t(`%hv`),
-                    description: checkout.value.cart.price > 0 ? $t(`%hw`) : $t(`%hx`),
+                    title: $t('%hv'),
+                    description: checkout.value.cart.price > 0 ? $t('%hw') : $t('%hx'),
                     action: openCart,
                 });
             }
@@ -157,8 +157,8 @@ export function useRegistrationQuickActions(): QuickActions {
 
                 arr.push({
                     illustration: outstandingAmountSvg,
-                    title: $t(`%hy`) + ' ' + organizationStatus.organization.name,
-                    description: $t(`%hz`) + ' ' + Formatter.price(open) + ' ' + $t(`%i0`) + ' ' + organizationStatus.organization.name + '',
+                    title: $t('%hy') + ' ' + organizationStatus.organization.name,
+                    description: $t('%hz') + ' ' + Formatter.price(open) + ' ' + $t('%i0') + ' ' + organizationStatus.organization.name + '',
                     rightText: Formatter.price(open),
                     rightTextClass: 'style-price',
                     action: async () => {
@@ -170,8 +170,8 @@ export function useRegistrationQuickActions(): QuickActions {
             for (const member of membersWithMissingData.value) {
                 arr.push({
                     illustration: missingDataSvg,
-                    title: $t(`%14A`, { member: member.member.patchedMember.firstName }),
-                    description: $t(`%14B`, { member: member.member.patchedMember.firstName }),
+                    title: $t('%14A', { member: member.member.patchedMember.firstName }),
+                    description: $t('%14B', { member: member.member.patchedMember.firstName }),
                     action: () => fillInMemberMissingData(member.member),
                 });
             }
@@ -180,8 +180,8 @@ export function useRegistrationQuickActions(): QuickActions {
                 // Het e-mailadres van dit account is niet toegevoegd bij
                 arr.push({
                     illustration: emailWarningSvg,
-                    title: $t(`%14C`, { member: member.patchedMember.firstName }),
-                    description: $t(`%14I`, {
+                    title: $t('%14C', { member: member.patchedMember.firstName }),
+                    description: $t('%14I', {
                         email: user.value?.email ?? '',
                         member: member.patchedMember.details.firstName,
                     }),
@@ -218,7 +218,7 @@ export function useRegistrationQuickActions(): QuickActions {
                     continue;
                 }
 
-                const groupsText = Formatter.joinLast(invitationData.map(i => i.invitation.group.name.toString()), ', ', ' ' + $t(`%M1`) + ' ');
+                const groupsText = Formatter.joinLast(invitationData.map(i => i.invitation.group.name.toString()), ', ', ' ' + $t('%M1') + ' ');
 
                 const invitationDataForIcon = invitationData.find(({ group }) => group.squareImage !== null) ?? invitationData[0];
 

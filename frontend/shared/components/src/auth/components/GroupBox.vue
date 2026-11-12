@@ -24,7 +24,6 @@ import type { Group } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import GroupTag from './GroupTag.vue';
 
-
 const props = defineProps<{
     group: Group;
 }>();

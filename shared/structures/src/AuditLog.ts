@@ -146,484 +146,484 @@ export enum AuditLogType {
 export function getAuditLogTypeName(type: AuditLogType): string {
     switch (type) {
         case AuditLogType.MemberEdited:
-            return `Wijzigingen aan gegevens van leden`;
+            return 'Wijzigingen aan gegevens van leden';
         case AuditLogType.MemberAdded:
-            return `Nieuwe leden`;
+            return 'Nieuwe leden';
         case AuditLogType.MemberDeleted:
-            return `Verwijderde leden`;
+            return 'Verwijderde leden';
         case AuditLogType.MemberRegistered:
-            return `Inschrijvingen`;
+            return 'Inschrijvingen';
         case AuditLogType.MemberUnregistered:
-            return `Uitschrijvingen`;
+            return 'Uitschrijvingen';
         case AuditLogType.Unknown:
-            return `Onbekende actie`;
+            return 'Onbekende actie';
         case AuditLogType.PlatformSettingsChanged:
-            return `Wijzigingen aan platforminstellingen`;
+            return 'Wijzigingen aan platforminstellingen';
         case AuditLogType.OrganizationEdited:
-            return `Wijzigingen aan instellingen van een groep`;
+            return 'Wijzigingen aan instellingen van een groep';
         case AuditLogType.OrganizationAdded:
-            return `Nieuwe lokale groepen`;
+            return 'Nieuwe lokale groepen';
         case AuditLogType.OrganizationDeleted:
-            return `Verwijderde lokale groepen`;
+            return 'Verwijderde lokale groepen';
         case AuditLogType.EventEdited:
-            return `Wijzigingen aan activiteiten`;
+            return 'Wijzigingen aan activiteiten';
         case AuditLogType.EventAdded:
-            return `Nieuwe activiteiten`;
+            return 'Nieuwe activiteiten';
         case AuditLogType.EventDeleted:
-            return `Verwijderde activiteiten`;
+            return 'Verwijderde activiteiten';
         case AuditLogType.GroupEdited:
-            return `Wijzigingen aan groepen`;
+            return 'Wijzigingen aan groepen';
         case AuditLogType.GroupAdded:
-            return `Nieuwe groepen`;
+            return 'Nieuwe groepen';
         case AuditLogType.GroupDeleted:
-            return `Verwijderde groepen`;
+            return 'Verwijderde groepen';
         case AuditLogType.WaitingListEdited:
-            return `Wijzigingen aan wachtlijsten`;
+            return 'Wijzigingen aan wachtlijsten';
         case AuditLogType.WaitingListAdded:
-            return `Nieuwe wachtlijsten`;
+            return 'Nieuwe wachtlijsten';
         case AuditLogType.WaitingListDeleted:
-            return `Verwijderde wachtlijsten`;
+            return 'Verwijderde wachtlijsten';
         case AuditLogType.RegistrationPeriodEdited:
-            return `Wijzigingen aan werkjaren`;
+            return 'Wijzigingen aan werkjaren';
         case AuditLogType.RegistrationPeriodAdded:
-            return `Nieuwe werkjaren`;
+            return 'Nieuwe werkjaren';
         case AuditLogType.RegistrationPeriodDeleted:
-            return `Verwijderde werkjaren`;
+            return 'Verwijderde werkjaren';
         case AuditLogType.StripeAccountAdded:
-            return `Stripe account aangemaakt`;
+            return 'Stripe account aangemaakt';
         case AuditLogType.StripeAccountDeleted:
-            return `Stripe account verwijderd`;
+            return 'Stripe account verwijderd';
         case AuditLogType.StripeAccountEdited:
-            return `Stripe account gewijzigd`;
+            return 'Stripe account gewijzigd';
         case AuditLogType.WebshopEdited:
-            return `Wijzigingen aan webshops`;
+            return 'Wijzigingen aan webshops';
         case AuditLogType.WebshopAdded:
-            return `Nieuwe webshops`;
+            return 'Nieuwe webshops';
         case AuditLogType.WebshopDeleted:
-            return `Verwijderde webshops`;
+            return 'Verwijderde webshops';
         case AuditLogType.OrderAdded:
-            return `Nieuwe bestellingen`;
+            return 'Nieuwe bestellingen';
         case AuditLogType.OrderEdited:
-            return `Wijzigingen aan bestellingen`;
+            return 'Wijzigingen aan bestellingen';
         case AuditLogType.OrderDeleted:
-            return `Verwijderde bestellingen`;
+            return 'Verwijderde bestellingen';
         case AuditLogType.PaymentAdded:
-            return `Nieuwe betalingen`;
+            return 'Nieuwe betalingen';
         case AuditLogType.PaymentEdited:
-            return `Wijzigingen aan betalingen`;
+            return 'Wijzigingen aan betalingen';
         case AuditLogType.PaymentDeleted:
-            return `Verwijderde betalingen`;
+            return 'Verwijderde betalingen';
         case AuditLogType.BalanceItemAdded:
-            return `Nieuwe openstaande bedragen`;
+            return 'Nieuwe openstaande bedragen';
         case AuditLogType.BalanceItemEdited:
-            return `Wijzigingen aan openstaande bedragen`;
+            return 'Wijzigingen aan openstaande bedragen';
         case AuditLogType.BalanceItemDeleted:
-            return `Verwijderde openstaande bedragen`;
+            return 'Verwijderde openstaande bedragen';
         case AuditLogType.DocumentTemplateAdded:
-            return `Nieuwe document`;
+            return 'Nieuwe document';
         case AuditLogType.DocumentTemplateEdited:
-            return `Wijzigingen aan documenten`;
+            return 'Wijzigingen aan documenten';
         case AuditLogType.DocumentTemplateDeleted:
-            return `Verwijderde documenten`;
+            return 'Verwijderde documenten';
         case AuditLogType.UserAdded:
-            return `Nieuwe accounts`;
+            return 'Nieuwe accounts';
         case AuditLogType.UserEdited:
-            return `Wijzigingen aan accounts`;
+            return 'Wijzigingen aan accounts';
         case AuditLogType.UserDeleted:
-            return `Verwijderde accounts`;
+            return 'Verwijderde accounts';
 
         case AuditLogType.UserTwoFactorMethodAdded:
-            return $t(`%ZhN`);
+            return $t('%ZhN');
         case AuditLogType.UserTwoFactorMethodDeleted:
-            return $t(`%Zhl`);
+            return $t('%Zhl');
         case AuditLogType.UserRecoveryCodesRegenerated:
-            return $t(`%ZgW`);
+            return $t('%ZgW');
 
         case AuditLogType.UserImpersonated:
-            return $t(`%Zn3`);
+            return $t('%Zn3');
 
         case AuditLogType.MemberResponsibilityRecordAdded:
-            return `Nieuwe toegekende functies`;
+            return 'Nieuwe toegekende functies';
         case AuditLogType.MemberResponsibilityRecordEdited:
-            return `Wijzigingen aan toegekende functies`;
+            return 'Wijzigingen aan toegekende functies';
         case AuditLogType.MemberResponsibilityRecordDeleted:
-            return `Verwijderde functies`;
+            return 'Verwijderde functies';
 
         case AuditLogType.MemberPlatformMembershipAdded:
-            return `Nieuwe aansluitingen`;
+            return 'Nieuwe aansluitingen';
         case AuditLogType.MemberPlatformMembershipEdited:
-            return `Wijzigingen aan aansluitingen`;
+            return 'Wijzigingen aan aansluitingen';
         case AuditLogType.MemberPlatformMembershipDeleted:
-            return `Verwijderde aansluitingen`;
+            return 'Verwijderde aansluitingen';
 
         case AuditLogType.EmailSent:
-            return `Succesvol verzonden e-mails`;
+            return 'Succesvol verzonden e-mails';
         case AuditLogType.EmailSending:
-            return `E-mail gestart met verzenden`;
+            return 'E-mail gestart met verzenden';
         case AuditLogType.EmailPublished:
-            return `Gepubliceerde berichten`;
+            return 'Gepubliceerde berichten';
         case AuditLogType.EmailEdited:
-            return `Wijzigingen aan berichten`;
+            return 'Wijzigingen aan berichten';
         case AuditLogType.EmailDeleted:
-            return `Verwijderde berichten`;
+            return 'Verwijderde berichten';
 
         case AuditLogType.EmailAddressMarkedAsSpam:
-            return `E-mailadressen gemarkeerd als spam`;
+            return 'E-mailadressen gemarkeerd als spam';
         case AuditLogType.EmailAddressHardBounced:
-            return `E-mailadressen die hard gebounced zijn`;
+            return 'E-mailadressen die hard gebounced zijn';
         case AuditLogType.EmailAddressSoftBounced:
-            return `E-mailadressen die soft gebounced zijn`;
+            return 'E-mailadressen die soft gebounced zijn';
         case AuditLogType.EmailAddressUnsubscribed:
-            return `E-mailadressen die zich hebben uitgeschreven`;
+            return 'E-mailadressen die zich hebben uitgeschreven';
 
         case AuditLogType.EmailTemplateAdded:
-            return `Nieuw e-mailsjabloon`;
+            return 'Nieuw e-mailsjabloon';
         case AuditLogType.EmailTemplateEdited:
-            return `Wijzigingen aan e-mailsjablonen`;
+            return 'Wijzigingen aan e-mailsjablonen';
         case AuditLogType.EmailTemplateDeleted:
-            return `Verwijderde E-mailsjablonen`;
+            return 'Verwijderde E-mailsjablonen';
 
         case AuditLogType.EmailAddressFraudComplaint:
-            return `E-mailadressen die een fraudeklacht hebben ingediend`;
+            return 'E-mailadressen die een fraudeklacht hebben ingediend';
 
         case AuditLogType.MemberSecurityCodeUsed:
-            return `Gebruik van beveiligingscodes`;
+            return 'Gebruik van beveiligingscodes';
 
         case AuditLogType.MemberSecurityCodeRequested:
-            return `Aangevraagde beveiligingscodes`;
+            return 'Aangevraagde beveiligingscodes';
 
         case AuditLogType.RegistrationInvitationAdded:
-            return `Nieuwe uitnodigingen`;
+            return 'Nieuwe uitnodigingen';
         case AuditLogType.RegistrationInvitationDeleted:
-            return `Verwijderde uitnodigingen`;
+            return 'Verwijderde uitnodigingen';
         case AuditLogType.EventNotificationAdded:
-            return `Nieuwe kampmeldingen`;
+            return 'Nieuwe kampmeldingen';
         case AuditLogType.EventNotificationEdited:
-            return `Wijzigingen aan kampmeldingen`;
+            return 'Wijzigingen aan kampmeldingen';
         case AuditLogType.EventNotificationDeleted:
-            return `Verwijderde kampmeldingen`;
+            return 'Verwijderde kampmeldingen';
     }
 }
 
 export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?: string] {
     switch (type) {
         case AuditLogType.MemberEdited:
-            return [`user`, `edit stroke`];
+            return ['user', 'edit stroke'];
         case AuditLogType.MemberAdded:
-            return [`user`, 'add green'];
+            return ['user', 'add green'];
         case AuditLogType.MemberDeleted:
-            return [`user`, `trash red stroke`];
+            return ['user', 'trash red stroke'];
         case AuditLogType.MemberRegistered:
-            return [`membership-filled`, `success`];
+            return ['membership-filled', 'success'];
         case AuditLogType.MemberUnregistered:
-            return [`membership-filled`, `canceled red`];
+            return ['membership-filled', 'canceled red'];
         case AuditLogType.PlatformSettingsChanged:
-            return [`flag`, `settings stroke`];
+            return ['flag', 'settings stroke'];
 
         case AuditLogType.OrganizationEdited:
-            return [`flag`];
+            return ['flag'];
         case AuditLogType.OrganizationAdded:
-            return [`flag`, `add green`];
+            return ['flag', 'add green'];
         case AuditLogType.OrganizationDeleted:
-            return [`flag`, `trash red stroke`];
+            return ['flag', 'trash red stroke'];
 
         case AuditLogType.Unknown:
-            return [`history`];
+            return ['history'];
 
         case AuditLogType.EventEdited:
-            return [`calendar`, `edit stroke`];
+            return ['calendar', 'edit stroke'];
         case AuditLogType.EventAdded:
-            return [`calendar`, `add green`];
+            return ['calendar', 'add green'];
         case AuditLogType.EventDeleted:
-            return [`calendar`, `trash red stroke`];
+            return ['calendar', 'trash red stroke'];
 
         case AuditLogType.GroupEdited:
-            return [`group`, `edit stroke`];
+            return ['group', 'edit stroke'];
         case AuditLogType.GroupAdded:
-            return [`group`, `add green`];
+            return ['group', 'add green'];
         case AuditLogType.GroupDeleted:
-            return [`group`, `trash red stroke`];
+            return ['group', 'trash red stroke'];
 
         case AuditLogType.WaitingListEdited:
-            return [`hourglass`, `edit stroke`];
+            return ['hourglass', 'edit stroke'];
         case AuditLogType.WaitingListAdded:
-            return [`hourglass`, `add green`];
+            return ['hourglass', 'add green'];
         case AuditLogType.WaitingListDeleted:
-            return [`hourglass`, `trash red stroke`];
+            return ['hourglass', 'trash red stroke'];
 
         case AuditLogType.RegistrationPeriodEdited:
-            return [`history`, `edit stroke`];
+            return ['history', 'edit stroke'];
         case AuditLogType.RegistrationPeriodAdded:
-            return [`history`, `add green`];
+            return ['history', 'add green'];
         case AuditLogType.RegistrationPeriodDeleted:
-            return [`history`, `trash red stroke`];
+            return ['history', 'trash red stroke'];
 
         case AuditLogType.StripeAccountAdded:
-            return [`stripe`, `add green`];
+            return ['stripe', 'add green'];
         case AuditLogType.StripeAccountDeleted:
-            return [`stripe`, `trash red stroke`];
+            return ['stripe', 'trash red stroke'];
         case AuditLogType.StripeAccountEdited:
-            return [`stripe`, `edit stroke`];
+            return ['stripe', 'edit stroke'];
 
         case AuditLogType.WebshopEdited:
-            return [`basket`, `edit stroke`];
+            return ['basket', 'edit stroke'];
         case AuditLogType.WebshopAdded:
-            return [`basket`, `add green`];
+            return ['basket', 'add green'];
         case AuditLogType.WebshopDeleted:
-            return [`basket`, `trash red stroke`];
+            return ['basket', 'trash red stroke'];
         case AuditLogType.OrderAdded:
-            return [`basket`, `add green`];
+            return ['basket', 'add green'];
         case AuditLogType.OrderEdited:
-            return [`basket`, `edit stroke`];
+            return ['basket', 'edit stroke'];
         case AuditLogType.OrderDeleted:
-            return [`basket`, `trash red stroke`];
+            return ['basket', 'trash red stroke'];
 
         case AuditLogType.PaymentAdded:
-            return [`card`, `add green`];
+            return ['card', 'add green'];
         case AuditLogType.PaymentEdited:
-            return [`card`, `edit stroke`];
+            return ['card', 'edit stroke'];
         case AuditLogType.PaymentDeleted:
-            return [`card`, `trash red stroke`];
+            return ['card', 'trash red stroke'];
 
         case AuditLogType.BalanceItemAdded:
-            return [`calculator`, `add green`];
+            return ['calculator', 'add green'];
         case AuditLogType.BalanceItemEdited:
-            return [`calculator`, `edit stroke`];
+            return ['calculator', 'edit stroke'];
         case AuditLogType.BalanceItemDeleted:
-            return [`calculator`, `trash red stroke`];
+            return ['calculator', 'trash red stroke'];
 
         case AuditLogType.DocumentTemplateAdded:
-            return [`file`, `add green`];
+            return ['file', 'add green'];
         case AuditLogType.DocumentTemplateEdited:
-            return [`file`, `edit stroke`];
+            return ['file', 'edit stroke'];
         case AuditLogType.DocumentTemplateDeleted:
-            return [`file`, `trash red stroke`];
+            return ['file', 'trash red stroke'];
 
         case AuditLogType.UserAdded:
-            return [`user`, `add green`];
+            return ['user', 'add green'];
         case AuditLogType.UserEdited:
-            return [`user`, `edit stroke`];
+            return ['user', 'edit stroke'];
         case AuditLogType.UserDeleted:
-            return [`user`, `trash red stroke`];
+            return ['user', 'trash red stroke'];
 
         case AuditLogType.UserTwoFactorMethodAdded:
-            return [`key`, `add green`];
+            return ['key', 'add green'];
         case AuditLogType.UserTwoFactorMethodDeleted:
-            return [`key`, `trash red stroke`];
+            return ['key', 'trash red stroke'];
         case AuditLogType.UserRecoveryCodesRegenerated:
-            return [`recovery-keys`, `sync stroke`];
+            return ['recovery-keys', 'sync stroke'];
 
         case AuditLogType.UserImpersonated:
-            return [`user`, `eye`];
+            return ['user', 'eye'];
 
         case AuditLogType.MemberResponsibilityRecordAdded:
-            return [`star`, `add green`];
+            return ['star', 'add green'];
         case AuditLogType.MemberResponsibilityRecordEdited:
-            return [`star`, `edit stroke`];
+            return ['star', 'edit stroke'];
         case AuditLogType.MemberResponsibilityRecordDeleted:
-            return [`star`, `trash red stroke`];
+            return ['star', 'trash red stroke'];
 
         case AuditLogType.MemberPlatformMembershipAdded:
-            return [`membership-filled`, `add green`];
+            return ['membership-filled', 'add green'];
         case AuditLogType.MemberPlatformMembershipEdited:
-            return [`membership-filled`, `edit stroke`];
+            return ['membership-filled', 'edit stroke'];
         case AuditLogType.MemberPlatformMembershipDeleted:
-            return [`membership-filled`, `trash red stroke`];
+            return ['membership-filled', 'trash red stroke'];
 
         case AuditLogType.EmailSent:
-            return [`email`, `send primary stroke`];
+            return ['email', 'send primary stroke'];
         case AuditLogType.EmailSending:
-            return [`email`, `clock stroke`];
+            return ['email', 'clock stroke'];
         case AuditLogType.EmailPublished:
-            return [`email`, `earth primary`];
+            return ['email', 'earth primary'];
         case AuditLogType.EmailEdited:
-            return [`email`, `edit stroke`];
+            return ['email', 'edit stroke'];
         case AuditLogType.EmailDeleted:
-            return [`email`, `trash red stroke`];
+            return ['email', 'trash red stroke'];
 
         case AuditLogType.EmailAddressMarkedAsSpam:
-            return [`email`, `error red stroke`];
+            return ['email', 'error red stroke'];
         case AuditLogType.EmailAddressHardBounced:
-            return [`email`, `error red stroke`];
+            return ['email', 'error red stroke'];
         case AuditLogType.EmailAddressSoftBounced:
-            return [`email`, `warning stroke`];
+            return ['email', 'warning stroke'];
         case AuditLogType.EmailAddressUnsubscribed:
-            return [`email`, `disabled red stroke`];
+            return ['email', 'disabled red stroke'];
         case AuditLogType.EmailAddressFraudComplaint:
-            return [`email`, `error red stroke`];
+            return ['email', 'error red stroke'];
 
         case AuditLogType.EmailTemplateAdded:
-            return [`email-template`, `add green`];
+            return ['email-template', 'add green'];
         case AuditLogType.EmailTemplateEdited:
-            return [`email-template`, `edit stroke`];
+            return ['email-template', 'edit stroke'];
         case AuditLogType.EmailTemplateDeleted:
-            return [`email-template`, `trash red stroke`];
+            return ['email-template', 'trash red stroke'];
 
         case AuditLogType.MemberSecurityCodeUsed:
-            return [`key`, `success primary stroke`];
+            return ['key', 'success primary stroke'];
 
         case AuditLogType.MemberSecurityCodeRequested:
-            return [`key`, `send stroke`];
+            return ['key', 'send stroke'];
 
         case AuditLogType.RegistrationInvitationAdded:
-            return [`email`, `add green`];
+            return ['email', 'add green'];
         case AuditLogType.RegistrationInvitationDeleted:
-            return [`email`, `trash red stroke`];
+            return ['email', 'trash red stroke'];
         case AuditLogType.EventNotificationAdded:
-            return [`calendar`, `add green`];
+            return ['calendar', 'add green'];
         case AuditLogType.EventNotificationEdited:
-            return [`calendar`, `edit stroke`];
+            return ['calendar', 'edit stroke'];
         case AuditLogType.EventNotificationDeleted:
-            return [`calendar`, `trash red stroke`];
+            return ['calendar', 'trash red stroke'];
     }
 }
 
 function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
     switch (type) {
         case AuditLogType.MemberAdded:
-            return `{{m}} werd aangemaakt`;
+            return '{{m}} werd aangemaakt';
         case AuditLogType.MemberDeleted:
-            return `{{m}} werd verwijderd`;
+            return '{{m}} werd verwijderd';
         case AuditLogType.MemberEdited:
-            return `De gegevens van {{m}} werden gewijzigd`;
+            return 'De gegevens van {{m}} werden gewijzigd';
         case AuditLogType.MemberRegistered:
-            return `{{m}} werd ingeschreven voor {{g}}{{if org " (" org ")"}}`;
+            return '{{m}} werd ingeschreven voor {{g}}{{if org " (" org ")"}}';
         case AuditLogType.MemberUnregistered:
-            return `{{m}} werd uitgeschreven voor {{g}}{{if org " (" org ")"}}`;
+            return '{{m}} werd uitgeschreven voor {{g}}{{if org " (" org ")"}}';
         case AuditLogType.Unknown:
-            return `Onbekende actie`;
+            return 'Onbekende actie';
         case AuditLogType.PlatformSettingsChanged:
-            return `De platforminstellingen werden gewijzigd`;
+            return 'De platforminstellingen werden gewijzigd';
 
         case AuditLogType.OrganizationEdited:
             return `{{if org 'De instellingen van ' org ' werden gewijzigd'}}{{unless org 'De instellingen werden gewijzigd'}}`;
 
         case AuditLogType.OrganizationAdded:
-            return $t(`%1Mq`);
+            return $t('%1Mq');
 
         case AuditLogType.OrganizationDeleted:
-            return $t(`%1Mr`);
+            return $t('%1Mr');
 
         case AuditLogType.EventEdited:
-            return `De activiteit {{e}}{{if org " (" org ")"}} werd gewijzigd`;
+            return 'De activiteit {{e}}{{if org " (" org ")"}} werd gewijzigd';
 
         case AuditLogType.EventAdded:
-            return `De activiteit {{e}}{{if org " (" org ")"}} werd aangemaakt`;
+            return 'De activiteit {{e}}{{if org " (" org ")"}} werd aangemaakt';
 
         case AuditLogType.EventDeleted:
-            return `De activiteit {{e}}{{if org " (" org ")"}} werd verwijderd`;
+            return 'De activiteit {{e}}{{if org " (" org ")"}} werd verwijderd';
 
         case AuditLogType.GroupEdited:
-            return `De groep {{g}}{{if org " (" org ")"}} werd gewijzigd`;
+            return 'De groep {{g}}{{if org " (" org ")"}} werd gewijzigd';
 
         case AuditLogType.GroupAdded:
-            return `De groep {{g}}{{if org " (" org ")"}} werd aangemaakt`;
+            return 'De groep {{g}}{{if org " (" org ")"}} werd aangemaakt';
 
         case AuditLogType.GroupDeleted:
-            return `De groep {{g}}{{if org " (" org ")"}} werd verwijderd`;
+            return 'De groep {{g}}{{if org " (" org ")"}} werd verwijderd';
 
         case AuditLogType.WaitingListEdited:
-            return `De wachtlijst {{g}}{{if org " (" org ")"}} werd gewijzigd`;
+            return 'De wachtlijst {{g}}{{if org " (" org ")"}} werd gewijzigd';
 
         case AuditLogType.WaitingListAdded:
-            return `De wachtlijst {{g}}{{if org " (" org ")"}} werd aangemaakt`;
+            return 'De wachtlijst {{g}}{{if org " (" org ")"}} werd aangemaakt';
 
         case AuditLogType.WaitingListDeleted:
-            return `De wachtlijst {{g}}{{if org " (" org ")"}} werd verwijderd`;
+            return 'De wachtlijst {{g}}{{if org " (" org ")"}} werd verwijderd';
 
         case AuditLogType.RegistrationPeriodEdited:
-            return `Het werkjaar {{p}} werd gewijzigd`;
+            return 'Het werkjaar {{p}} werd gewijzigd';
 
         case AuditLogType.RegistrationPeriodAdded:
-            return `Het werkjaar {{p}} werd aangemaakt`;
+            return 'Het werkjaar {{p}} werd aangemaakt';
 
         case AuditLogType.RegistrationPeriodDeleted:
-            return `Het werkjaar {{p}} werd verwijderd`;
+            return 'Het werkjaar {{p}} werd verwijderd';
 
         case AuditLogType.StripeAccountAdded:
-            return `Stripe account {{a}}{{if org " (" org ")"}} aangemaakt`;
+            return 'Stripe account {{a}}{{if org " (" org ")"}} aangemaakt';
         case AuditLogType.StripeAccountDeleted:
-            return `Stripe account {{a}}{{if org " (" org ")"}} verwijderd`;
+            return 'Stripe account {{a}}{{if org " (" org ")"}} verwijderd';
         case AuditLogType.StripeAccountEdited:
-            return `Stripe account {{a}}{{if org " (" org ")"}} gewijzigd`;
+            return 'Stripe account {{a}}{{if org " (" org ")"}} gewijzigd';
 
         case AuditLogType.WebshopEdited:
-            return `De webshop {{w}}{{if org " (" org ")"}} werd gewijzigd`;
+            return 'De webshop {{w}}{{if org " (" org ")"}} werd gewijzigd';
         case AuditLogType.WebshopAdded:
-            return `De webshop {{w}}{{if org " (" org ")"}} werd aangemaakt`;
+            return 'De webshop {{w}}{{if org " (" org ")"}} werd aangemaakt';
         case AuditLogType.WebshopDeleted:
-            return `De webshop {{w}}{{if org " (" org ")"}} werd verwijderd`;
+            return 'De webshop {{w}}{{if org " (" org ")"}} werd verwijderd';
 
         case AuditLogType.OrderAdded:
-            return `{{capitalizeFirstLetter o}} werd geplaatst (voor {{w}})`;
+            return '{{capitalizeFirstLetter o}} werd geplaatst (voor {{w}})';
         case AuditLogType.OrderEdited:
-            return `{{capitalizeFirstLetter o}} werd gewijzigd ({{w}})`;
+            return '{{capitalizeFirstLetter o}} werd gewijzigd ({{w}})';
         case AuditLogType.OrderDeleted:
-            return `{{capitalizeFirstLetter o}} werd verwijderd ({{w}})`;
+            return '{{capitalizeFirstLetter o}} werd verwijderd ({{w}})';
 
         case AuditLogType.PaymentAdded:
-            return `{{capitalizeFirstLetter p}} werd aangemaakt`;
+            return '{{capitalizeFirstLetter p}} werd aangemaakt';
         case AuditLogType.PaymentEdited:
-            return `{{capitalizeFirstLetter p}} werd gewijzigd`;
+            return '{{capitalizeFirstLetter p}} werd gewijzigd';
         case AuditLogType.PaymentDeleted:
-            return `{{capitalizeFirstLetter p}} werd verwijderd`;
+            return '{{capitalizeFirstLetter p}} werd verwijderd';
 
         case AuditLogType.BalanceItemAdded:
-            return `Openstaand bedrag {{b}} van {{payer}} werd aangemaakt`;
+            return 'Openstaand bedrag {{b}} van {{payer}} werd aangemaakt';
         case AuditLogType.BalanceItemEdited:
-            return `Openstaand bedrag {{b}} van {{payer}} werd gewijzigd`;
+            return 'Openstaand bedrag {{b}} van {{payer}} werd gewijzigd';
         case AuditLogType.BalanceItemDeleted:
-            return `Openstaand bedrag {{b}} van {{payer}} werd verwijderd`;
+            return 'Openstaand bedrag {{b}} van {{payer}} werd verwijderd';
 
         case AuditLogType.DocumentTemplateAdded:
-            return `Document {{d}}{{if org " (" org ")"}} werd aangemaakt`;
+            return 'Document {{d}}{{if org " (" org ")"}} werd aangemaakt';
         case AuditLogType.DocumentTemplateEdited:
-            return `Document {{d}}{{if org " (" org ")"}} werd gewijzigd`;
+            return 'Document {{d}}{{if org " (" org ")"}} werd gewijzigd';
         case AuditLogType.DocumentTemplateDeleted:
-            return `Document {{d}}{{if org " (" org ")"}} werd verwijderd`;
+            return 'Document {{d}}{{if org " (" org ")"}} werd verwijderd';
 
         case AuditLogType.UserAdded:
-            return `Account {{u}} werd aangemaakt`;
+            return 'Account {{u}} werd aangemaakt';
         case AuditLogType.UserEdited:
-            return `Account {{u}} werd gewijzigd`;
+            return 'Account {{u}} werd gewijzigd';
         case AuditLogType.UserDeleted:
-            return `Account {{u}} werd verwijderd`;
+            return 'Account {{u}} werd verwijderd';
 
         case AuditLogType.UserTwoFactorMethodAdded:
-            return $t(`%Zhy`);
+            return $t('%Zhy');
         case AuditLogType.UserTwoFactorMethodDeleted:
-            return $t(`%Zhb`);
+            return $t('%Zhb');
         case AuditLogType.UserRecoveryCodesRegenerated:
-            return $t(`%ZgU`);
+            return $t('%ZgU');
 
         case AuditLogType.UserImpersonated:
-            return $t(`%Zms`);
+            return $t('%Zms');
 
         case AuditLogType.MemberResponsibilityRecordAdded:
-            return `Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd toegekend aan {{m}}`;
+            return 'Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd toegekend aan {{m}}';
         case AuditLogType.MemberResponsibilityRecordEdited:
-            return `Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd gewijzigd bij {{m}}`;
+            return 'Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd gewijzigd bij {{m}}';
         case AuditLogType.MemberResponsibilityRecordDeleted:
-            return `Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd verwijderd van {{m}}`;
+            return 'Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd verwijderd van {{m}}';
 
         case AuditLogType.MemberPlatformMembershipAdded:
-            return `Aansluiting {{pm}} werd toegevoegd bij {{m}}{{if org " via " org}}`;
+            return 'Aansluiting {{pm}} werd toegevoegd bij {{m}}{{if org " via " org}}';
         case AuditLogType.MemberPlatformMembershipEdited:
-            return `Aansluiting {{pm}} werd gewijzigd bij {{m}}{{if org " via " org}}`;
+            return 'Aansluiting {{pm}} werd gewijzigd bij {{m}}{{if org " via " org}}';
         case AuditLogType.MemberPlatformMembershipDeleted:
-            return `Aansluiting {{pm}} werd verwijderd bij {{m}}{{if org " via " org}}`;
+            return 'Aansluiting {{pm}} werd verwijderd bij {{m}}{{if org " via " org}}';
 
         case AuditLogType.EmailSent:
             return `E-mail {{e}} werd succesvol verzonden aan {{c}} {{ plural c 'ontvanger' 'ontvangers' }}`;
 
         case AuditLogType.EmailPublished:
-            return `Bericht {{e}} werd succesvol gepubliceerd`;
+            return 'Bericht {{e}} werd succesvol gepubliceerd';
 
         case AuditLogType.EmailEdited:
-            return `Bericht {{e}} werd gewijzigd`;
+            return 'Bericht {{e}} werd gewijzigd';
 
         case AuditLogType.EmailDeleted:
-            return `Bericht {{e}} werd verwijderd`;
+            return 'Bericht {{e}} werd verwijderd';
 
         case AuditLogType.EmailSending:
             return `E-mail {{e}} werd ingepland om te verzenden aan {{c}} {{ plural c 'ontvanger' 'ontvangers' }}`;
@@ -641,40 +641,40 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} naar {{e}} is mislukt`;
 
         case AuditLogType.EmailAddressUnsubscribed:
-            return `{{e}} heeft zich uitgeschreven voor e-mails`;
+            return '{{e}} heeft zich uitgeschreven voor e-mails';
 
         case AuditLogType.EmailTemplateAdded:
-            return `E-mailsjabloon {{e}} werd aangemaakt {{if org " voor " org}}`;
+            return 'E-mailsjabloon {{e}} werd aangemaakt {{if org " voor " org}}';
 
         case AuditLogType.EmailTemplateEdited:
-            return `E-mailsjabloon {{e}} werd gewijzigd {{if org " voor " org}}`;
+            return 'E-mailsjabloon {{e}} werd gewijzigd {{if org " voor " org}}';
 
         case AuditLogType.EmailTemplateDeleted:
-            return `E-mailsjabloon {{e}} werd verwijderd {{if org " voor " org}}`;
+            return 'E-mailsjabloon {{e}} werd verwijderd {{if org " voor " org}}';
 
         case AuditLogType.MemberSecurityCodeUsed:
-            return `De beveiligingscode werd gebruikt om toegang te krijgen tot {{m}}`;
+            return 'De beveiligingscode werd gebruikt om toegang te krijgen tot {{m}}';
 
         case AuditLogType.MemberSecurityCodeRequested:
             return `De beveiligingscode van {{m}} werd opgevraagd{{if method ' via ' method}}{{if recipient ' naar ' recipient}}`;
 
         case AuditLogType.RegistrationInvitationAdded:
-            return `{{m}} werd uitgenodigd voor {{g}}{{if org " (" org ")"}}`;
+            return '{{m}} werd uitgenodigd voor {{g}}{{if org " (" org ")"}}';
         case AuditLogType.RegistrationInvitationDeleted:
-            return `De uitnodiging van {{m}} voor {{g}}{{if org " (" org ")"}} werd verwijderd`;
+            return 'De uitnodiging van {{m}} voor {{g}}{{if org " (" org ")"}} werd verwijderd';
         case AuditLogType.EventNotificationAdded:
-            return `De kampmelding {{n}}{{if org " (" org ")"}} werd aangemaakt`;
+            return 'De kampmelding {{n}}{{if org " (" org ")"}} werd aangemaakt';
         case AuditLogType.EventNotificationEdited:
-            return `De kampmelding {{n}}{{if org " (" org ")"}} werd gewijzigd`;
+            return 'De kampmelding {{n}}{{if org " (" org ")"}} werd gewijzigd';
         case AuditLogType.EventNotificationDeleted:
-            return `De kampmelding {{n}}{{if org " (" org ")"}} werd verwijderd`;
+            return 'De kampmelding {{n}}{{if org " (" org ")"}} werd verwijderd';
     }
 }
 
 function getAuditLogTypeDescriptionTemplate(type: AuditLogType): string | undefined {
     switch (type) {
         case AuditLogType.EmailSent:
-            return `{{html}}`;
+            return '{{html}}';
 
         case AuditLogType.EmailAddressMarkedAsSpam:
             return `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}Soms doen mensen dit per ongeluk. Vraag hen dan de e-mail terug als 'geen spam' te markeren.`;

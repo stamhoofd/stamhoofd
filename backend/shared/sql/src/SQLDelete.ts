@@ -53,8 +53,7 @@ export class SQLDelete extends Whereable(EmptyClass) implements SQLExpression {
             const always = this._where.isAlways;
             if (always === false) {
                 throw new Error('Cannot use SQLDelete with a where that is not always true');
-            }
-            else if (always === null) {
+            } else if (always === null) {
                 query.push('WHERE');
                 query.push(this._where.getSQL(options));
             }

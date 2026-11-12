@@ -646,7 +646,7 @@ async function doSend(): Promise<boolean> {
     await waitForSave();
 
     if (savingPatch.value) {
-        Toast.info($t(`%vH`)).show();
+        Toast.info($t('%vH')).show();
         return false;
     }
 
@@ -656,7 +656,7 @@ async function doSend(): Promise<boolean> {
 
     if ((patchedEmail.value?.subject ?? '').trim().length === 0) {
         // The default (untranslated) subject is required, translations are optional
-        Toast.error($t(`%1Ft`)).show();
+        Toast.error($t('%1Ft')).show();
         return false;
     }
 
@@ -690,22 +690,22 @@ async function doSend(): Promise<boolean> {
     }
 
     if (!sendAsEmail.value && !showInMemberPortal.value) {
-        Toast.info($t(`%1Fu`)).show();
+        Toast.info($t('%1Fu')).show();
         return false;
     }
 
     const emailRecipientsCount = email.value.emailRecipientsCount;
-    let confirmText = $t(`%vI`);
+    let confirmText = $t('%vI');
 
     if (emailRecipientsCount) {
         confirmText = emailRecipientsCount === 1 ? $t('%1Fl') : $t('%1Fm', { count: emailRecipientsCount });
     }
 
     if (!sendAsEmail.value) {
-        confirmText = $t(`%1Fo`);
+        confirmText = $t('%1Fo');
     }
 
-    const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t(`%1DC`) : $t('%1Fe'));
+    const isConfirm = await CenteredMessage.confirm(confirmText, sendAsEmail.value ? $t('%1DC') : $t('%1Fe'));
 
     if (!isConfirm) return false;
 
@@ -736,7 +736,7 @@ async function doSend(): Promise<boolean> {
 
         email.value.deepSet(response.data);
         if (email.value.sendAsEmail) {
-            Toast.success($t(`%vJ`)).show();
+            Toast.success($t('%vJ')).show();
         } else {
             Toast.success($t('%1Fn')).show();
         }
@@ -806,7 +806,7 @@ async function showToMenu(event: MouseEvent) {
             const selectedOption = option.options.find(o => o.id === selectedIds[0]);
 
             return [new ContextMenuItem({
-                name: option.name ?? selectedOption?.name ?? $t(`%Gr`),
+                name: option.name ?? selectedOption?.name ?? $t('%Gr'),
                 childMenu: new ContextMenu([
                     getContextMenuForOption(option, j),
                 ]),
@@ -826,7 +826,7 @@ function deleteAttachment(attachment: EmailAttachment) {
 async function appendAttachment(file: File) {
     // Add this file as an attachment
     if (file.size > 9.5 * 1024 * 1024) {
-        const error = $t(`%vK`);
+        const error = $t('%vK');
         Toast.error(error).setHide(20 * 1000).show();
         return;
     }
@@ -837,7 +837,7 @@ async function appendAttachment(file: File) {
     }
 
     if (!file.name) {
-        const error = $t(`%182`);
+        const error = $t('%182');
         Toast.error(error).setHide(20 * 1000).show();
         return;
     }
@@ -848,7 +848,7 @@ async function appendAttachment(file: File) {
 
     // todo
     if (file.name.endsWith('.docx') || file.name.endsWith('.xlsx') || file.name.endsWith('.doc') || file.name.endsWith('.xls')) {
-        const error = $t(`%vL`);
+        const error = $t('%vL');
         Toast.warning(error).setHide(30 * 1000).show();
     }
 
@@ -885,9 +885,9 @@ async function openTemplates() {
                 onSelect: async (template: EmailTemplate) => {
                     if (hasExistingContent) {
                         if (!(await CenteredMessage.confirm(
-                            $t(`%vM`),
-                            $t(`%ko`),
-                            $t(`%vN`),
+                            $t('%vM'),
+                            $t('%ko'),
+                            $t('%vN'),
                         ))) {
                             return false;
                         }
@@ -996,11 +996,11 @@ const shouldNavigateAway = async () => {
             await waitForSave();
 
             if (savingPatch.value) {
-                Toast.info($t(`%1ML`)).show();
+                Toast.info($t('%1ML')).show();
                 return false;
             }
             await patchEmail(false);
-            Toast.success($t(`%1MM`)).show();
+            Toast.success($t('%1MM')).show();
             return true;
         }
         if (option === 'delete') {

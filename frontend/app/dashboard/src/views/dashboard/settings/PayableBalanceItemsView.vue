@@ -20,7 +20,7 @@ import { useStartOrganizationCheckout } from './packages/useStartOrganizationChe
 const props = defineProps<{
     item: DetailedPayableBalance;
 }>();
-const startOrganizationCheckout = useStartOrganizationCheckout()
+const startOrganizationCheckout = useStartOrganizationCheckout();
 
 async function checkout() {
     await startOrganizationCheckout({
@@ -29,9 +29,9 @@ async function checkout() {
         payableBalance: props.item,
         checkout: OrganizationCheckout.create({}),
         displayOptions: {
-            action: 'show'
-        }
-    })
+            action: 'show',
+        },
+    });
 }
 
 </script>

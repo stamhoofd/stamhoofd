@@ -21,7 +21,7 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
             key: 'number',
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t(`%1A`),
+            name: $t('%1A'),
             options: Object.values(OrderStatus)
                 .filter(s => s !== OrderStatus.Deleted)
                 .map((status) => {
@@ -34,18 +34,18 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
             },
         }),
         new StringFilterBuilder({
-            name: $t(`%1Os`),
+            name: $t('%1Os'),
             key: 'name',
         }),
         new StringFilterBuilder({
-            name: $t(`%1FK`),
+            name: $t('%1FK'),
             key: 'email',
         }),
     ];
 
     if (preview.meta.customerSettings.phone !== CustomerFieldRequirement.Disabled) {
         builders.push(new StringFilterBuilder({
-            name: $t(`%wD`),
+            name: $t('%wD'),
             key: 'phone',
         }));
     }
@@ -61,16 +61,16 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
                     $or: [
                         {
                             status: {
-                                $in: [OrderStatus.Canceled, OrderStatus.Deleted]
+                                $in: [OrderStatus.Canceled, OrderStatus.Deleted],
                             },
                         },
                         {
                             amountToPay: {
-                                $lte: 0
-                            }
-                        }
-                    ]
-                }
+                                $lte: 0,
+                            },
+                        },
+                    ],
+                },
             },
             {
                 name: $t('%1Ps'),
@@ -78,31 +78,31 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
                 filter: {
                     status: {
                         $not: {
-                            $in: [OrderStatus.Canceled, OrderStatus.Deleted]
-                        }
+                            $in: [OrderStatus.Canceled, OrderStatus.Deleted],
+                        },
                     },
                     amountToPay: {
-                        $gt: 0
-                    }
-                }
+                        $gt: 0,
+                    },
+                },
             },
             {
                 name: $t('%10b'),
                 value: 2,
                 filter: {
                     amountToPay: {
-                        $lt: 0
-                    }
-                }
-            }
-        ]
-    }))
-    
+                        $lt: 0,
+                    },
+                },
+            },
+        ],
+    }));
+
     builders.push(getPaymentGroupFilterBuilder());
 
     if (preview.meta.checkoutMethods.length > 1) {
         builders.push(new MultipleChoiceFilterBuilder({
-            name: $t(`%1Mf`),
+            name: $t('%1Mf'),
             options: preview.meta.checkoutMethods.map((checkoutMethod) => {
                 const name = Formatter.capitalizeFirstLetter(`${CheckoutMethodTypeHelper.getName(checkoutMethod.type)}: ${checkoutMethod.name}`);
                 return new MultipleChoiceUIFilterOption(name, checkoutMethod.id);
@@ -115,16 +115,16 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
 
     builders.push(
         new DateFilterBuilder({
-            name: $t(`%cB`),
+            name: $t('%cB'),
             key: 'validAt',
         }),
         new NumberFilterBuilder({
-            name: $t(`%1JL`),
+            name: $t('%1JL'),
             key: 'totalPrice',
             type: NumberFilterFormat.Currency,
         }),
         new NumberFilterBuilder({
-            name: $t(`%M4`),
+            name: $t('%M4'),
             key: 'amount',
         }),
     );
@@ -140,7 +140,7 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
     if (dateCount > 1) {
         builders.push(
             new DateFilterBuilder({
-                name: (hasDelivery && nonDeliveryCount > 0) ? $t(`%cC`) : (hasDelivery ? $t(`%cD`) : $t(`%cE`)),
+                name: (hasDelivery && nonDeliveryCount > 0) ? $t('%cC') : (hasDelivery ? $t('%cD') : $t('%cE')),
                 key: 'timeSlotDate',
             }));
     }
@@ -150,14 +150,14 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
         // todo: maybe group
         builders.push(
             new NumberFilterBuilder({
-                name: $t(`%cF`),
+                name: $t('%cF'),
                 key: 'timeSlotEndTime',
                 type: NumberFilterFormat.TimeMinutes,
             }));
 
         builders.push(
             new NumberFilterBuilder({
-                name: $t(`%cG`),
+                name: $t('%cG'),
                 key: 'timeSlotStartTime',
                 type: NumberFilterFormat.TimeMinutes,
             }));
@@ -167,7 +167,7 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
         key: 'code',
         name: $t('%1MX'),
         wrapper: {
-            discountCodes: FilterWrapperMarker
+            discountCodes: FilterWrapperMarker,
         },
     }));
 
@@ -217,7 +217,6 @@ export function getWebshopOrderUIFilterBuilders(preview: PrivateWebshop | Websho
 
     return [groupFilter, ...builders];
 }
-
 
 function getPaymentGroupFilterBuilder() {
     const paymentFilterBuilders: UIFilterBuilders = [

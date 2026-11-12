@@ -6,55 +6,54 @@ import type { UIFilterBuilder } from './UIFilter';
 import { UIFilter } from './UIFilter';
 import type { UnknownUIFilterData } from './UnknownUIFilterData';
 
-
 export class UnknownUIFilter extends UIFilter<UnknownFilterBuilder> implements UnknownUIFilterData {
-    value: UnknownUIFilterData['value']
+    value: UnknownUIFilterData['value'];
 
-    constructor(data: Partial<UnknownUIFilter>, options: {isInverted?: boolean} = {}) {
-        super(data, options)
+    constructor(data: Partial<UnknownUIFilter>, options: { isInverted?: boolean } = {}) {
+        super(data, options);
         Object.assign(this, data);
     }
 
     doBuild(): StamhoofdFilter {
-        return this.value
+        return this.value;
     }
 
     flatten() {
-        return super.flatten()
+        return super.flatten();
     }
 
     getComponent(): ComponentWithProperties {
         return AsyncComponent(() => import('./UnknownUIFilterView.vue'), {
-            filter: this
-        })
+            filter: this,
+        });
     }
 
     get styledDescription() {
         return [
             {
-                text: $t(`%bu`),
-                style: ''
-            }
-        ]
+                text: $t('%bu'),
+                style: '',
+            },
+        ];
     }
 }
 
 export class UnknownFilterBuilder implements UIFilterBuilder<UnknownUIFilter> {
     get name() {
-        return $t(`%bu`);
+        return $t('%bu');
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
         return new UnknownUIFilter({
             builder: this,
-            value: filter
-        })
+            value: filter,
+        });
     }
-    
-    create(options: {isInverted?: boolean} = {}): UnknownUIFilter {
+
+    create(options: { isInverted?: boolean } = {}): UnknownUIFilter {
         return new UnknownUIFilter({
             builder: this,
-            value: {}
-        }, options)
+            value: {},
+        }, options);
     }
 }

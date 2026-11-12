@@ -20,8 +20,8 @@ function assertIsUitpasTokenResponse(json: unknown): asserts json is UitpasToken
         console.error('Invalid response when fetching UiTPAS token:', json);
         throw new SimpleError({
             code: 'invalid_response_fetching_uitpas_token',
-            message: `Invalid response when fetching UiTPAS token`,
-            human: $t(`%18A`),
+            message: 'Invalid response when fetching UiTPAS token',
+            human: $t('%18A'),
         });
     }
 }
@@ -44,8 +44,8 @@ export class UitpasTokenRepository {
             throw new SimpleError({
                 statusCode: 400,
                 code: 'invalid_uitpas_client_credentials',
-                message: `Empty UiTPAS client credentials`,
-                human: $t(`%ZdU`),
+                message: 'Empty UiTPAS client credentials',
+                human: $t('%ZdU'),
             });
         }
 
@@ -120,8 +120,8 @@ export class UitpasTokenRepository {
             // Handle network errors
             throw new SimpleError({
                 code: 'uitpas_unreachable_fetching_uitpas_token',
-                message: `Network issue when fetching UiTPAS  token`,
-                human: $t(`%18B`),
+                message: 'Network issue when fetching UiTPAS  token',
+                human: $t('%18B'),
             });
         });
         if (!response.ok) {
@@ -130,16 +130,16 @@ export class UitpasTokenRepository {
                 throw new SimpleError({
                     statusCode: this.uitpasClientCredential.organizationId === null ? 500 : 400, // Internal, non visible error in case it is a built in credential
                     code: 'invalid_uitpas_client_credentials',
-                    message: `Invalid UiTPAS client credentials`,
-                    human: $t(`%1BK`),
+                    message: 'Invalid UiTPAS client credentials',
+                    human: $t('%1BK'),
                 });
             }
             console.error(`Unsuccessful response when fetching UiTPAS token for organization with id ${this.uitpasClientCredential.organizationId}:`, response.statusText);
             throw new SimpleError({
                 statusCode: this.uitpasClientCredential.organizationId === null ? 500 : 400, // Internal, non visible error in case it is a built in credential
                 code: 'unsuccessful_response_fetching_uitpas_token',
-                message: `Unsuccesful response when fetching UiTPAS token`,
-                human: $t(`%18C`),
+                message: 'Unsuccesful response when fetching UiTPAS token',
+                human: $t('%18C'),
             });
         }
         const json: unknown = await response.json().catch(() => {
@@ -147,8 +147,8 @@ export class UitpasTokenRepository {
             throw new SimpleError({
                 statusCode: this.uitpasClientCredential.organizationId === null ? 500 : 400, // Internal, non visible error in case it is a built in credential
                 code: 'invalid_json_fetching_uitpas_token',
-                message: `Invalid json when fetching UiTPAS token`,
-                human: $t(`%18A`),
+                message: 'Invalid json when fetching UiTPAS token',
+                human: $t('%18A'),
             });
         });
         assertIsUitpasTokenResponse(json);

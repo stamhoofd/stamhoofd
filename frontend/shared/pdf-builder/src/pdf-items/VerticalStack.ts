@@ -69,8 +69,7 @@ export class VerticalStack implements PdfItem {
                 // add the remaining items to the second stack
                 stacks.push(new VerticalStack(this.items.slice(i), this.options));
                 break;
-            }
-            else {
+            } else {
                 itemsInFirstStack.push(item);
                 currentHeight += itemHeight;
             }
@@ -111,8 +110,7 @@ export class VerticalStack implements PdfItem {
             if (currentHeight + itemHeight > maxHeight) {
                 stackItems.push([item]);
                 currentHeight = itemHeight;
-            }
-            else {
+            } else {
                 currentStack.push(item);
                 currentHeight += itemHeight;
             }
@@ -151,8 +149,7 @@ export class VerticalStack implements PdfItem {
         if (this.options.maxWidth !== undefined) {
             if (options?.maxWidth !== undefined) {
                 _options.maxWidth = Math.min(this.options.maxWidth, options.maxWidth);
-            }
-            else {
+            } else {
                 _options.maxWidth = this.options.maxWidth;
             }
         }
@@ -194,8 +191,7 @@ export class VerticalStack implements PdfItem {
 
             if (isMinWidth) {
                 width = item.getMinWidth ? item.getMinWidth(docWrapper) : item.getWidth(docWrapper);
-            }
-            else {
+            } else {
                 width = item.getWidth(docWrapper);
             }
 

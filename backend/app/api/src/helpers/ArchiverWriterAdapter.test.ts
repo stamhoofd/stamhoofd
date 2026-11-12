@@ -49,8 +49,7 @@ it('keeps export data outside a pre-created shared directory and removes private
         expect(await fs.readFile(filePath, 'utf8')).toBe('private export data');
         expect((await fs.stat(path.dirname(filePath))).mode & 0o777).toBe(0o700);
         expect((await fs.stat(filePath)).mode & 0o777).toBe(0o600);
-    }
-    finally {
+    } finally {
         writer.releaseLock();
         await adapter.abort();
     }

@@ -247,7 +247,7 @@ function deselectAllResults() {
 
 function selectAllResults() {
     if (fetcher.hasMoreObjects || !props.checkout.singleOrganization) {
-        Toast.error($t(`%zi`)).show();
+        Toast.error($t('%zi')).show();
         return;
     }
 

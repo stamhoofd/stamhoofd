@@ -24,7 +24,6 @@ export default class Completion extends Command {
         if (flags.standalone) {
             const generated = await fs.readFile(path.join(cache, 'functions', args.shell, args.shell === 'bash' ? 'stam.bash' : '_stam'), 'utf8');
             this.log(standaloneCompletionScript(args.shell, generated));
-        }
-        else this.log(docsEnvironmentCompletionScript(args.shell, cache));
+        } else this.log(docsEnvironmentCompletionScript(args.shell, cache));
     }
 }

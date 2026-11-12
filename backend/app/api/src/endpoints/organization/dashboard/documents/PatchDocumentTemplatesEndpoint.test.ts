@@ -11,7 +11,7 @@ import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { PatchDocumentTemplatesEndpoint } from './PatchDocumentTemplatesEndpoint.js';
 import { SessionService } from '../../../../services/SessionService.js';
 
-const baseUrl = `/organization/document-templates`;
+const baseUrl = '/organization/document-templates';
 const endpoint = new PatchDocumentTemplatesEndpoint();
 type EndpointType = typeof endpoint;
 type Body = EndpointType extends Endpoint<any, any, infer B, any> ? B : never;

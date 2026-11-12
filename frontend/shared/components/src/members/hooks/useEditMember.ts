@@ -4,7 +4,7 @@ import type { PlatformMember } from '@stamhoofd/structures';
 import { markRaw } from 'vue';
 import EditMemberAllBox from '#members/components/edit/EditMemberAllBox.vue';
 
-import type { DisplayOptions, NavigationActions} from '../../types/NavigationActions';
+import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { runDisplayOptions, useNavigationActions } from '../../types/NavigationActions';
 
 export function useEditMember() {

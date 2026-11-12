@@ -1,7 +1,7 @@
 import { SelectableColumn } from '@stamhoofd/frontend-excel-export/SelectableColumn';
 import { SelectableSheet } from '@stamhoofd/frontend-excel-export/SelectableSheet';
 import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableWorkbook';
-import type { Platform} from '@stamhoofd/structures';
+import type { Platform } from '@stamhoofd/structures';
 import { RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableWorkbook(platform: Platform) {
@@ -17,7 +17,7 @@ export function getSelectableWorkbook(platform: Platform) {
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: $t(`%d`),
+                        name: $t('%d'),
                         description: $t('%CW'),
                     }),
 
@@ -58,13 +58,13 @@ export function getSelectableWorkbook(platform: Platform) {
 
                     new SelectableColumn({
                         id: 'submittedAt',
-                        category: $t(`%Gd`),
+                        category: $t('%Gd'),
                         name: $t('%7R'),
                     }),
 
                     new SelectableColumn({
                         id: 'submittedBy',
-                        category: $t(`%Gd`),
+                        category: $t('%Gd'),
                         name: $t('%CY'),
                     }),
 

@@ -5,8 +5,7 @@ export function useArrowUpDown(actions: { up: () => unknown | Promise<void>; dow
         if (key === 'ArrowLeft' || key === 'ArrowUp' || key === 'PageUp') {
             void actions.up();
             return true;
-        }
-        else if (key === 'ArrowRight' || key === 'ArrowDown' || key === 'PageDown') {
+        } else if (key === 'ArrowRight' || key === 'ArrowDown' || key === 'PageDown') {
             void actions.down();
             return true;
         }

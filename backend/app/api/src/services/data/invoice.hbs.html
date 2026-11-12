@@ -1,624 +1,622 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
-
-<head>
-    <meta charset="UTF-8">
-    <title>{{#if invoice.number}}{{#if isReceipt}}{{$t "%ZqH"}}{{else if isRefundReceipt}}{{$t "%ZqP"}}{{else if isCreditNote}}{{$t "%1aE"}}{{else}}{{$t "%1Zw"}}{{/if}}
-        {{invoice.number}}{{else}}{{#if isReceipt}}{{$t "%Zr5"}}{{else if isRefundReceipt}}{{$t "%ZrZ"}}{{else if isCreditNote}}{{$t "%Zrq"}}{{else}}{{$t "%Zs7"}}{{/if}}{{/if}}</title>
-    <style>
-        @font-face {
-            font-family: 'Metropolis';
-            font-weight: 400 500;
-            font-style: normal;
-            font-display: block;            
-            src: url("https://files.stamhoofd.be/fixtures/fonts/clarity-city/WOFF2/ClarityCity-Medium.woff2") format("woff2"),
-                url("https://files.stamhoofd.be/fixtures/fonts/clarity-city/WOFF/ClarityCity-Medium.woff") format("woff");
-        }
-
-        @font-face {
-            font-family: 'Metropolis';
-            font-weight: 600;
-            font-style: normal;
-            font-display: block;
-            src: url("https://files.stamhoofd.be/fixtures/fonts/clarity-city/WOFF2/ClarityCity-SemiBold.woff2") format("woff2"),
-                url("https://files.stamhoofd.be/fixtures/fonts/clarity-city/WOFF/ClarityCity-SemiBold.woff") format("woff");
-        }
-
-        :root {
-            --color-primary: {{colors.primary}};
-            --color-dark: #000716;
-            --color-gray-dark: #5e5e5e;
-            --color-gray: #868686;
-            --color-line: rgba(0, 7, 22, 0.1);
-            --page-margin: 16mm;
-        }
-
-        @page {
-            size: A4;
-            margin: 16mm 0;
-
-            @bottom-left {
-                content: "{{invoice.id}}";
-                font-family: 'Metropolis', system-ui, sans-serif;
-                font-weight: 500;
-                font-size: 8.5pt;
-                color: #868686;
-                text-align: left;
-                z-index: 100;
-                margin-bottom: 32mm;
-                margin-left: 16mm;
-            }
-
-            @bottom-right {
-                content: "{{$t "%ZrI"}} " counter(page);
-                font-family: 'Metropolis', system-ui, sans-serif;
-                font-weight: 500;
-                font-size: 8.5pt;
-                color: #868686;
-                text-align: right;
-                z-index: 100;
-                margin-bottom: 32mm;
-                margin-right: 16mm;
-            }
-        }
-
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-
-        html {
-            margin: 0;
-            padding: 0;
-            overflow: visible;
-        }
-
-        body {
-            margin: 0 0;
-            padding: 0;
-            /*width: 210mm;
-            min-height: 297mm;*/
-            position: relative;
-            font-family: 'Metropolis', system-ui, -apple-system, sans-serif;
-            font-weight: 500;
-            color: var(--color-dark);
-            font-size: 9.9pt;
-            /* ~3.5mm */
-            line-height: 1.4;
-            overflow: visible;
-        }
-
-      
-        .content {
-            position: relative;
-            z-index: 3;
-        }
-
-        /* -------------------------------------------------------------------- */
-        /* Invoice header (page 1 only)                                         */
-        /* -------------------------------------------------------------------- */
-        .invoice-header {
-            padding: 1mm var(--page-margin) 0;
-            position: relative;
-            /* min-height: 90mm; Only needed if we fix the background images */
-        }
-
-        .invoice-header .logo {
-            height: 10mm;
-            max-width: 100%;
-            width: auto;
-            display: block;
-            margin-bottom: 13mm;
-        }
-
-        .header-grid {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 8mm;
-        }
-
-        /* Left column: invoice title + dates */
-        .invoice-info {
-            flex: 0 0 80mm;
-            min-width: 0;
-        }
-
-        .invoice-title-row {
-            display: flex;
-            align-items: baseline;
-            gap: 5mm;
-            margin-bottom: 4mm;
-        }
-
-        .invoice-title-row .label {
-            font-weight: 600;
-            font-size: 12pt;
-            /* ~4.24mm */
-            color: var(--color-dark);
-            flex: 0 0 22mm;
-        }
-
-        .invoice-title-row .number {
-            font-weight: 600;
-            font-size: 12pt;
-            color: var(--color-primary);
-        }
-
-        .date-row {
-            display: flex;
-            gap: 5mm;
-            font-size: 8.5pt;
-            /* ~3mm */
-            color: var(--color-gray-dark);
-            margin-bottom: 1mm;
-        }
-
-        .date-row .label {
-            flex: 0 0 22mm;
-        }
-
-        /* Right column: sender + customer */
-        .sender-customer {
-            flex: 0 0 72mm;
-            min-width: 0;
-        }
-
-        .sender-name,
-        .customer-label {
-            font-weight: 600;
-            font-size: 12pt;
-            color: var(--color-dark);
-            margin-bottom: 3mm;
-        }
-
-        .customer-label {
-            margin-top: 8mm;
-        }
-
-        .sender-details,
-        .customer-details {
-            font-size: 8.5pt;
-            color: var(--color-gray-dark);
-            line-height: 1.5;
-        }
-
-        .sender-details>p,
-        .customer-details>p {
-            white-space: pre-line;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* -------------------------------------------------------------------- */
-        /* Items table                                                          */
-        /* -------------------------------------------------------------------- */
-        .invoice-body {
-            padding: 0 var(--page-margin);
-            margin-top: 8mm;
-            min-height: 11cm;
-        }
-
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-
-        .items-table col.c-num {
-            width: 12mm;
-        }
-
-        .items-table col.c-date {
-            width: 24mm;
-        }
-
-        .items-table col.c-vat {
-            width: 20mm;
-        }
-
-        .items-table col.c-unit {
-            width: 20mm;
-        }
-
-        .items-table col.c-total {
-            width: 20mm;
-        }
-
-        .items-table thead th {
-            font-weight: 600;
-            font-size: 9.9pt;
-            color: var(--color-dark);
-            text-align: left;
-            padding: 0 0 2.5mm 0;
-            vertical-align: top;
-        }
-
-        .items-table thead th.col-total {
-            text-align: right;
-        }
-
-        /* Don't repeat header on subsequent printed pages */
-        .items-table thead {
-            display: table-row-group;
-        }
-
-        .items-table tbody td {
-            padding: 5mm 0;
-            vertical-align: top;
-            font-size: 9.9pt;
-            color: var(--color-dark);
-        }
-
-        .items-table tbody td.col-desc {
-            padding-right: 5mm;
-        }
-
-        .items-table tbody td.col-total {
-            text-align: right;
-        }
-
-        /* Faint separator above each row except the first one in the table.
-Drawing the line on col-desc/col-unit/col-total mirrors the original PDF,
-where the rule starts at x = 28 mm (skipping the # column). */
-        .items-table tbody tr:not(:first-child) td.col-desc,
-        .items-table tbody tr:not(:first-child) td.col-unit,
-        .items-table tbody tr:not(:first-child) td.col-vat,
-        .items-table tbody tr:not(:first-child) td.col-total {
-            border-top: 1px solid var(--color-line);
-        }
-
-        .items-table tbody tr {
-            break-inside: avoid;
-            page-break-inside: avoid;
-        }
-
-        .item-name {
-            color: var(--color-dark);
-        }
-
-        .item-desc {
-            font-size: 8.5pt;
-            color: var(--color-gray-dark);
-            margin-top: 1.5mm;
-            line-height: 1.6;
-        }
-
-        /* -------------------------------------------------------------------- */
-        /* Price footer (last page, after items)                                */
-        /* -------------------------------------------------------------------- */
-        .price-footer {
-            padding: 14mm var(--page-margin) 0;
-            break-inside: avoid;
-            page-break-inside: avoid;
-        }
-
-        .totals-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5mm;
-        }
-
-        .vat-breakdown-container {
-            align-self: end;
-        }
-
-        .totals {
-            margin-left: auto;
-            width: 78mm;
-            display: flex;
-            flex-direction: column;
-            gap: 4mm;
-            display: grid;
-            grid-template-columns: 1fr auto;
-        }
-
-        .totals .row {
-            display: grid;
-            align-items: baseline;
-            gap: 10mm;
-            grid-template-columns: subgrid;
-            grid-column: 1 / -1;
-        }
-
-        .totals .row .label {
-            font-weight: 600;
-            font-size: 9.9pt;
-            text-align: right;
-            text-box-trim: trim-both;
-            flex-grow: 1;
-        }
-
-        .totals .row .value {
-            font-weight: 500;
-            font-size: 9.9pt;
-            text-box-trim: trim-both;
-            flex-shrink: 0;
-            text-align: right;
-        }
-
-        .totals .row.vat-shifted {
-            margin-top: -3mm;
-            margin-bottom: 0;
-        }
-
-        .totals .row.vat-shifted .label {
-            font-size: 7pt;
-            /* ~2.5mm */
-            font-weight: 500;
-            color: var(--color-gray);
-        }
-
-        .vat-breakdown {
-            width: 60mm;
-            border-collapse: collapse;
-            font-size: 8.5pt;
-            color: var(--color-gray-dark);
-        }
-
-        .vat-breakdown thead th {
-            font-weight: 600;
-            text-align: right;
-            padding: 0 0 1.5mm 0;
-            color: var(--color-dark);
-            border-bottom: 1px solid var(--color-line);
-            text-box-trim: trim-both;
-        }
-
-        .vat-breakdown thead th.col-rate {
-            text-align: left;
-        }
-
-        .vat-breakdown tbody td {
-            padding: 2mm 0 0 0;
-            vertical-align: top;
-            text-align: right;
-            text-box-trim: trim-both;
-        }
-
-        .vat-breakdown tbody td.col-rate {
-            text-align: left;
-        }
-
-        .vat-breakdown tbody td.col-amount {
-            padding-left: 4mm;
-        }
-
-        .totals .row.total {
-            
-        }
-
-        .totals .row.total .label {
-            font-size: 13pt;
-            text-box-trim: trim-both;
-        }
-
-        .totals .row.total .value {
-            font-weight: 600;
-            text-box-trim: trim-both;
-        }
-
-        .comments {
-            margin-top: 10mm;
-            font-size: 9.9pt;
-            line-height: 1.5;
-        }
-
-        .comments-label {
-            font-weight: 600;
-            margin-bottom: 1.5mm;
-        }
-
-        .comments-text {
-            margin: 0;
-            color: var(--color-gray-dark);
-            white-space: pre-wrap;
-        }
-
-        /* Messages block (archive notice + payment status) */
-        .messages {
-            margin-top: 14mm;
-            display: flex;
-            flex-direction: column;
-            gap: 5mm;
-        }
-
-        .message {
-            display: flex;
-            gap: 4mm;
-            font-size: 9.9pt;
-            color: var(--color-gray-dark);
-            line-height: 1.5;
-            align-items: center;
-            font-weight: 600;
-            text-box-trim: trim-both;
-        }
-
-        .message .icon {
-            flex: 0 0 16px;
-            width: 16px;
-            height: 16px;
-            fill: var(--color-gray-dark);
-        }
-
-        .not-invoice {
-            margin: 0;
-            font-size: 8.5pt;
-            color: var(--color-gray-dark);
-        }
-
-        .message.paid {
-            color: var(--color-primary);
-        }
-        .message.paid .icon {
-            fill: var(--color-primary);
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="bg-other-pages" aria-hidden="true"></div>
-    <div class="bg-first-page" aria-hidden="true"></div>
-
-    <div class="content">
-
-        {{!-- ============================================================== --}}
-        {{!-- Header: logo, invoice info, sender, customer (page 1 only) --}}
-        {{!-- ============================================================== --}}
-        <header class="invoice-header">
-            <div class="header-grid">
-                <div class="invoice-info">
-                    <img class="logo" src="{{logoUrl}}" alt="Logo">
-
-                    <div class="invoice-title-row">
-                        <span class="label">
+    <head>
+        <meta charset="UTF-8" />
+        <title>
+            {{#if invoice.number}}{{#if isReceipt}}{{$t "%ZqH"}}{{else if isRefundReceipt}}{{$t
+            "%ZqP"}}{{else if isCreditNote}}{{$t "%1aE"}}{{else}}{{$t "%1Zw"}}{{/if}}
+            {{invoice.number}}{{else}}{{#if isReceipt}}{{$t "%Zr5"}}{{else if isRefundReceipt}}{{$t
+            "%ZrZ"}}{{else if isCreditNote}}{{$t "%Zrq"}}{{else}}{{$t "%Zs7"}}{{/if}}{{/if}}
+        </title>
+        <style>
+                    @font-face {
+                        font-family: 'Metropolis';
+                        font-weight: 400 500;
+                        font-style: normal;
+                        font-display: block;
+                        src: url("https://files.stamhoofd.be/fixtures/fonts/clarity-city/WOFF2/ClarityCity-Medium.woff2") format("woff2"),
+                            url("https://files.stamhoofd.be/fixtures/fonts/clarity-city/WOFF/ClarityCity-Medium.woff") format("woff");
+                    }
+
+                    @font-face {
+                        font-family: 'Metropolis';
+                        font-weight: 600;
+                        font-style: normal;
+                        font-display: block;
+                        src: url("https://files.stamhoofd.be/fixtures/fonts/clarity-city/WOFF2/ClarityCity-SemiBold.woff2") format("woff2"),
+                            url("https://files.stamhoofd.be/fixtures/fonts/clarity-city/WOFF/ClarityCity-SemiBold.woff") format("woff");
+                    }
+
+                    :root {
+                        --color-primary: {{colors.primary}};
+                        --color-dark: #000716;
+                        --color-gray-dark: #5e5e5e;
+                        --color-gray: #868686;
+                        --color-line: rgba(0, 7, 22, 0.1);
+                        --page-margin: 16mm;
+                    }
+
+                    @page {
+                        size: A4;
+                        margin: 16mm 0;
+
+                        @bottom-left {
+                            content: "{{invoice.id}}";
+                            font-family: 'Metropolis', system-ui, sans-serif;
+                            font-weight: 500;
+                            font-size: 8.5pt;
+                            color: #868686;
+                            text-align: left;
+                            z-index: 100;
+                            margin-bottom: 32mm;
+                            margin-left: 16mm;
+                        }
+
+                        @bottom-right {
+                            content: "{{$t "%ZrI"}} " counter(page);
+                            font-family: 'Metropolis', system-ui, sans-serif;
+                            font-weight: 500;
+                            font-size: 8.5pt;
+                            color: #868686;
+                            text-align: right;
+                            z-index: 100;
+                            margin-bottom: 32mm;
+                            margin-right: 16mm;
+                        }
+                    }
+
+                    *,
+                    *::before,
+                    *::after {
+                        box-sizing: border-box;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+
+                    html {
+                        margin: 0;
+                        padding: 0;
+                        overflow: visible;
+                    }
+
+                    body {
+                        margin: 0 0;
+                        padding: 0;
+                        /*width: 210mm;
+                        min-height: 297mm;*/
+                        position: relative;
+                        font-family: 'Metropolis', system-ui, -apple-system, sans-serif;
+                        font-weight: 500;
+                        color: var(--color-dark);
+                        font-size: 9.9pt;
+                        /* ~3.5mm */
+                        line-height: 1.4;
+                        overflow: visible;
+                    }
+
+
+                    .content {
+                        position: relative;
+                        z-index: 3;
+                    }
+
+                    /* -------------------------------------------------------------------- */
+                    /* Invoice header (page 1 only)                                         */
+                    /* -------------------------------------------------------------------- */
+                    .invoice-header {
+                        padding: 1mm var(--page-margin) 0;
+                        position: relative;
+                        /* min-height: 90mm; Only needed if we fix the background images */
+                    }
+
+                    .invoice-header .logo {
+                        height: 10mm;
+                        max-width: 100%;
+                        width: auto;
+                        display: block;
+                        margin-bottom: 13mm;
+                    }
+
+                    .header-grid {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        gap: 8mm;
+                    }
+
+                    /* Left column: invoice title + dates */
+                    .invoice-info {
+                        flex: 0 0 80mm;
+                        min-width: 0;
+                    }
+
+                    .invoice-title-row {
+                        display: flex;
+                        align-items: baseline;
+                        gap: 5mm;
+                        margin-bottom: 4mm;
+                    }
+
+                    .invoice-title-row .label {
+                        font-weight: 600;
+                        font-size: 12pt;
+                        /* ~4.24mm */
+                        color: var(--color-dark);
+                        flex: 0 0 22mm;
+                    }
+
+                    .invoice-title-row .number {
+                        font-weight: 600;
+                        font-size: 12pt;
+                        color: var(--color-primary);
+                    }
+
+                    .date-row {
+                        display: flex;
+                        gap: 5mm;
+                        font-size: 8.5pt;
+                        /* ~3mm */
+                        color: var(--color-gray-dark);
+                        margin-bottom: 1mm;
+                    }
+
+                    .date-row .label {
+                        flex: 0 0 22mm;
+                    }
+
+                    /* Right column: sender + customer */
+                    .sender-customer {
+                        flex: 0 0 72mm;
+                        min-width: 0;
+                    }
+
+                    .sender-name,
+                    .customer-label {
+                        font-weight: 600;
+                        font-size: 12pt;
+                        color: var(--color-dark);
+                        margin-bottom: 3mm;
+                    }
+
+                    .customer-label {
+                        margin-top: 8mm;
+                    }
+
+                    .sender-details,
+                    .customer-details {
+                        font-size: 8.5pt;
+                        color: var(--color-gray-dark);
+                        line-height: 1.5;
+                    }
+
+                    .sender-details>p,
+                    .customer-details>p {
+                        white-space: pre-line;
+                        margin: 0;
+                        padding: 0;
+                    }
+
+                    /* -------------------------------------------------------------------- */
+                    /* Items table                                                          */
+                    /* -------------------------------------------------------------------- */
+                    .invoice-body {
+                        padding: 0 var(--page-margin);
+                        margin-top: 8mm;
+                        min-height: 11cm;
+                    }
+
+                    .items-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        table-layout: fixed;
+                    }
+
+                    .items-table col.c-num {
+                        width: 12mm;
+                    }
+
+                    .items-table col.c-date {
+                        width: 24mm;
+                    }
+
+                    .items-table col.c-vat {
+                        width: 20mm;
+                    }
+
+                    .items-table col.c-unit {
+                        width: 20mm;
+                    }
+
+                    .items-table col.c-total {
+                        width: 20mm;
+                    }
+
+                    .items-table thead th {
+                        font-weight: 600;
+                        font-size: 9.9pt;
+                        color: var(--color-dark);
+                        text-align: left;
+                        padding: 0 0 2.5mm 0;
+                        vertical-align: top;
+                    }
+
+                    .items-table thead th.col-total {
+                        text-align: right;
+                    }
+
+                    /* Don't repeat header on subsequent printed pages */
+                    .items-table thead {
+                        display: table-row-group;
+                    }
+
+                    .items-table tbody td {
+                        padding: 5mm 0;
+                        vertical-align: top;
+                        font-size: 9.9pt;
+                        color: var(--color-dark);
+                    }
+
+                    .items-table tbody td.col-desc {
+                        padding-right: 5mm;
+                    }
+
+                    .items-table tbody td.col-total {
+                        text-align: right;
+                    }
+
+                    /* Faint separator above each row except the first one in the table.
+            Drawing the line on col-desc/col-unit/col-total mirrors the original PDF,
+            where the rule starts at x = 28 mm (skipping the # column). */
+                    .items-table tbody tr:not(:first-child) td.col-desc,
+                    .items-table tbody tr:not(:first-child) td.col-unit,
+                    .items-table tbody tr:not(:first-child) td.col-vat,
+                    .items-table tbody tr:not(:first-child) td.col-total {
+                        border-top: 1px solid var(--color-line);
+                    }
+
+                    .items-table tbody tr {
+                        break-inside: avoid;
+                        page-break-inside: avoid;
+                    }
+
+                    .item-name {
+                        color: var(--color-dark);
+                    }
+
+                    .item-desc {
+                        font-size: 8.5pt;
+                        color: var(--color-gray-dark);
+                        margin-top: 1.5mm;
+                        line-height: 1.6;
+                    }
+
+                    /* -------------------------------------------------------------------- */
+                    /* Price footer (last page, after items)                                */
+                    /* -------------------------------------------------------------------- */
+                    .price-footer {
+                        padding: 14mm var(--page-margin) 0;
+                        break-inside: avoid;
+                        page-break-inside: avoid;
+                    }
+
+                    .totals-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 5mm;
+                    }
+
+                    .vat-breakdown-container {
+                        align-self: end;
+                    }
+
+                    .totals {
+                        margin-left: auto;
+                        width: 78mm;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4mm;
+                        display: grid;
+                        grid-template-columns: 1fr auto;
+                    }
+
+                    .totals .row {
+                        display: grid;
+                        align-items: baseline;
+                        gap: 10mm;
+                        grid-template-columns: subgrid;
+                        grid-column: 1 / -1;
+                    }
+
+                    .totals .row .label {
+                        font-weight: 600;
+                        font-size: 9.9pt;
+                        text-align: right;
+                        text-box-trim: trim-both;
+                        flex-grow: 1;
+                    }
+
+                    .totals .row .value {
+                        font-weight: 500;
+                        font-size: 9.9pt;
+                        text-box-trim: trim-both;
+                        flex-shrink: 0;
+                        text-align: right;
+                    }
+
+                    .totals .row.vat-shifted {
+                        margin-top: -3mm;
+                        margin-bottom: 0;
+                    }
+
+                    .totals .row.vat-shifted .label {
+                        font-size: 7pt;
+                        /* ~2.5mm */
+                        font-weight: 500;
+                        color: var(--color-gray);
+                    }
+
+                    .vat-breakdown {
+                        width: 60mm;
+                        border-collapse: collapse;
+                        font-size: 8.5pt;
+                        color: var(--color-gray-dark);
+                    }
+
+                    .vat-breakdown thead th {
+                        font-weight: 600;
+                        text-align: right;
+                        padding: 0 0 1.5mm 0;
+                        color: var(--color-dark);
+                        border-bottom: 1px solid var(--color-line);
+                        text-box-trim: trim-both;
+                    }
+
+                    .vat-breakdown thead th.col-rate {
+                        text-align: left;
+                    }
+
+                    .vat-breakdown tbody td {
+                        padding: 2mm 0 0 0;
+                        vertical-align: top;
+                        text-align: right;
+                        text-box-trim: trim-both;
+                    }
+
+                    .vat-breakdown tbody td.col-rate {
+                        text-align: left;
+                    }
+
+                    .vat-breakdown tbody td.col-amount {
+                        padding-left: 4mm;
+                    }
+
+                    .totals .row.total {
+
+                    }
+
+                    .totals .row.total .label {
+                        font-size: 13pt;
+                        text-box-trim: trim-both;
+                    }
+
+                    .totals .row.total .value {
+                        font-weight: 600;
+                        text-box-trim: trim-both;
+                    }
+
+                    .comments {
+                        margin-top: 10mm;
+                        font-size: 9.9pt;
+                        line-height: 1.5;
+                    }
+
+                    .comments-label {
+                        font-weight: 600;
+                        margin-bottom: 1.5mm;
+                    }
+
+                    .comments-text {
+                        margin: 0;
+                        color: var(--color-gray-dark);
+                        white-space: pre-wrap;
+                    }
+
+                    /* Messages block (archive notice + payment status) */
+                    .messages {
+                        margin-top: 14mm;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 5mm;
+                    }
+
+                    .message {
+                        display: flex;
+                        gap: 4mm;
+                        font-size: 9.9pt;
+                        color: var(--color-gray-dark);
+                        line-height: 1.5;
+                        align-items: center;
+                        font-weight: 600;
+                        text-box-trim: trim-both;
+                    }
+
+                    .message .icon {
+                        flex: 0 0 16px;
+                        width: 16px;
+                        height: 16px;
+                        fill: var(--color-gray-dark);
+                    }
+
+                    .not-invoice {
+                        margin: 0;
+                        font-size: 8.5pt;
+                        color: var(--color-gray-dark);
+                    }
+
+                    .message.paid {
+                        color: var(--color-primary);
+                    }
+                    .message.paid .icon {
+                        fill: var(--color-primary);
+                    }
+        </style>
+    </head>
+
+    <body>
+        <div class="bg-other-pages" aria-hidden="true"></div>
+        <div class="bg-first-page" aria-hidden="true"></div>
+
+        <div class="content">
+            {{!-- ============================================================== --}} {{!-- Header:
+            logo, invoice info, sender, customer (page 1 only) --}} {{!--
+            ============================================================== --}}
+            <header class="invoice-header">
+                <div class="header-grid">
+                    <div class="invoice-info">
+                        <img class="logo" src="{{logoUrl}}" alt="Logo" />
+
+                        <div class="invoice-title-row">
+                            <span class="label">
+                                {{#if invoice.number}} {{#if isReceipt}}{{$t "%ZqH"}}{{else if
+                                isRefundReceipt}}{{$t "%ZqP"}}{{else if isCreditNote}}{{$t
+                                "%1aE"}}{{else}}{{$t "%1Zw"}}{{/if}} {{else}} {{#if isReceipt}}{{$t
+                                "%Zr5"}}{{else if isRefundReceipt}}{{$t "%ZrZ"}}{{else if
+                                isCreditNote}}{{$t "%Zrq"}}{{else}}{{$t "%ZrB"}}{{/if}} {{/if}}
+                            </span>
                             {{#if invoice.number}}
-                            {{#if isReceipt}}{{$t "%ZqH"}}{{else if isRefundReceipt}}{{$t "%ZqP"}}{{else if isCreditNote}}{{$t "%1aE"}}{{else}}{{$t "%1Zw"}}{{/if}}
-                            {{else}}
-                            {{#if isReceipt}}{{$t "%Zr5"}}{{else if isRefundReceipt}}{{$t "%ZrZ"}}{{else if isCreditNote}}{{$t "%Zrq"}}{{else}}{{$t "%ZrB"}}{{/if}}
+                            <span class="number">{{invoice.number}}</span>
                             {{/if}}
-                        </span>
-                        {{#if invoice.number}}
-                        <span class="number">{{invoice.number}}</span>
+                        </div>
+
+                        <div class="date-row">
+                            <span class="label">{{$t "%7R"}}</span>
+                            <span class="value">{{formatDate invoice.meta.date}}</span>
+                        </div>
+
+                        {{#if showDueDate}}
+                        <div class="date-row">
+                            <span class="label">{{$t "%1J7"}}</span>
+                            <span class="value">{{formatDate dueDate}}</span>
+                        </div>
                         {{/if}}
                     </div>
 
-                    <div class="date-row">
-                        <span class="label">{{$t "%7R"}}</span>
-                        <span class="value">{{formatDate invoice.meta.date}}</span>
-                    </div>
+                    <div class="sender-customer">
+                        <div class="sender-name">{{sender.name}}</div>
+                        <div class="sender-details">
+                            <p>{{sender.address}}</p>
+                            <p>{{sender.vatNumber}}</p>
+                        </div>
 
-                    {{#if showDueDate}}
-                    <div class="date-row">
-                        <span class="label">{{$t "%1J7"}}</span>
-                        <span class="value">{{formatDate dueDate}}</span>
-                    </div>
-                    {{/if}}
-                </div>
-
-                <div class="sender-customer">
-                    <div class="sender-name">{{sender.name}}</div>
-                    <div class="sender-details">
-                        <p>{{sender.address}}</p>
-                        <p>{{sender.vatNumber}}</p>
-                    </div>
-
-                    <div class="customer-label">
-                        {{#if invoice.number}}
-                        {{#if isCreditNote}}{{$t "%b7"}}{{else if isReceipt}}{{$t "%b7"}}{{else if isRefundReceipt}}{{$t "%b7"}}{{else}}{{$t "%Zrl"}}{{/if}}
-                        {{else}}
-                        {{$t "%b7"}}
-                        {{/if}}
-                    </div>
-                    <div class="customer-details">
-                        <p>{{invoice.customer.name}}</p>
-                        {{#if invoice.customer.contactName }}
+                        <div class="customer-label">
+                            {{#if invoice.number}} {{#if isCreditNote}}{{$t "%b7"}}{{else if
+                            isReceipt}}{{$t "%b7"}}{{else if isRefundReceipt}}{{$t
+                            "%b7"}}{{else}}{{$t "%Zrl"}}{{/if}} {{else}} {{$t "%b7"}} {{/if}}
+                        </div>
+                        <div class="customer-details">
+                            <p>{{invoice.customer.name}}</p>
+                            {{#if invoice.customer.contactName }}
                             <p>{{ $t "%ZrA"}} {{invoice.customer.contactName}}</p>
-                        {{/if}}
-                        {{#if invoice.customer.address }}
+                            {{/if}} {{#if invoice.customer.address }}
                             <p>{{invoice.customer.address}}</p>
-                        {{/if}}
-                        {{#if invoice.customer.companyNumber}}
+                            {{/if}} {{#if invoice.customer.companyNumber}}
                             <p>{{invoice.customer.companyNumber}}</p>
-                        {{/if}}
-                        {{#if invoice.customer.VATNumber}}
-                            <p>{{#if invoice.customer.companyNumber}}{{$t "%1JE"}}: {{/if}}{{invoice.customer.VATNumber}}</p>
-                        {{/if}}
+                            {{/if}} {{#if invoice.customer.VATNumber}}
+                            <p>
+                                {{#if invoice.customer.companyNumber}}{{$t "%1JE"}}:
+                                {{/if}}{{invoice.customer.VATNumber}}
+                            </p>
+                            {{/if}}
+                        </div>
                     </div>
                 </div>
+            </header>
 
-            </div>
-        </header>
-
-        {{!-- ============================================================== --}}
-        {{!-- Items table — flows naturally across pages --}}
-        {{!-- ============================================================== --}}
-        <main class="invoice-body">
-            {{#if showPayments}}
-            <p class="item-desc">{{$t "%Zs3"}}</p>
-            <table class="items-table">
-                <colgroup>
-                    <col class="c-date">
-                    <col class="c-desc">
-                    <col class="c-total">
-                </colgroup>
-                <thead>
-                    <tr>
-                        <th class="col-date">{{$t "%7R"}}</th>
-                        <th class="col-desc">{{$t "%kP"}}</th>
-                        <th class="col-total">{{$t "%1JL"}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each payments}}
-                    <tr>
-                        <td class="col-date">{{formatDate date}}</td>
-                        <td class="col-desc">
-                            <div class="item-name">{{methodName}}</div>
-                            {{#if transferDescription}}
-                            <div class="item-desc">{{transferDescription}}</div>
-                            {{/if}}
-                        </td>
-                        <td class="col-total">{{formatPrice price}}</td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-            {{else}}
-            <table class="items-table">
-                <colgroup>
-                    <col class="c-num">
-                    <col class="c-desc">
-                    {{#if invoice.meta.hasMultipleVATRates}}
-                    <col class="c-vat">
-                    {{/if}}
-                    <col class="c-unit">
-                    <col class="c-total">
-                </colgroup>
-                <thead>
-                    <tr>
-                        <th class="col-num">#</th>
-                        <th class="col-desc">{{$t "%ZrF"}}</th>
+            {{!-- ============================================================== --}} {{!-- Items
+            table — flows naturally across pages --}} {{!--
+            ============================================================== --}}
+            <main class="invoice-body">
+                {{#if showPayments}}
+                <p class="item-desc">{{$t "%Zs3"}}</p>
+                <table class="items-table">
+                    <colgroup>
+                        <col class="c-date" />
+                        <col class="c-desc" />
+                        <col class="c-total" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th class="col-date">{{$t "%7R"}}</th>
+                            <th class="col-desc">{{$t "%kP"}}</th>
+                            <th class="col-total">{{$t "%1JL"}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each payments}}
+                        <tr>
+                            <td class="col-date">{{formatDate date}}</td>
+                            <td class="col-desc">
+                                <div class="item-name">{{methodName}}</div>
+                                {{#if transferDescription}}
+                                <div class="item-desc">{{transferDescription}}</div>
+                                {{/if}}
+                            </td>
+                            <td class="col-total">{{formatPrice price}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                {{else}}
+                <table class="items-table">
+                    <colgroup>
+                        <col class="c-num" />
+                        <col class="c-desc" />
                         {{#if invoice.meta.hasMultipleVATRates}}
-                        <th class="col-vat">{{$t "%1KU"}}</th>
+                        <col class="c-vat" />
                         {{/if}}
-                        <th class="col-unit">{{$t "%ZrP"}}</th>
-                        <th class="col-total">{{$t "%xL"}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each invoice.meta.items}}
-                    <tr>
-                        <td class="col-num">{{amount}}</td>
-                        <td class="col-desc">
-                            <div class="item-name">{{name}}</div>
-                            {{#if description}}
-                            <div class="item-desc">{{description}}</div>
+                        <col class="c-unit" />
+                        <col class="c-total" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th class="col-num">#</th>
+                            <th class="col-desc">{{$t "%ZrF"}}</th>
+                            {{#if invoice.meta.hasMultipleVATRates}}
+                            <th class="col-vat">{{$t "%1KU"}}</th>
                             {{/if}}
-                        </td>
-                        {{#if @root.invoice.meta.hasMultipleVATRates}}
-                        <td class="col-vat">{{percentageLabel}}</td>
-                        {{/if}}
-                        <td class="col-unit">{{formatPrice unitPriceExclVAT}}</td>
-                        <td class="col-total">{{formatPrice priceExclVAT}}</td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-            {{/if}}
-        </main>
+                            <th class="col-unit">{{$t "%ZrP"}}</th>
+                            <th class="col-total">{{$t "%xL"}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each invoice.meta.items}}
+                        <tr>
+                            <td class="col-num">{{amount}}</td>
+                            <td class="col-desc">
+                                <div class="item-name">{{name}}</div>
+                                {{#if description}}
+                                <div class="item-desc">{{description}}</div>
+                                {{/if}}
+                            </td>
+                            {{#if @root.invoice.meta.hasMultipleVATRates}}
+                            <td class="col-vat">{{percentageLabel}}</td>
+                            {{/if}}
+                            <td class="col-unit">{{formatPrice unitPriceExclVAT}}</td>
+                            <td class="col-total">{{formatPrice priceExclVAT}}</td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+                {{/if}}
+            </main>
 
-        {{!-- ============================================================== --}}
-        {{!-- Price footer (totals + messages) --}}
-        {{!-- ============================================================== --}}
-        <footer class="price-footer">
-            <div class="totals-grid">
-                <div class="vat-breakdown-container">
-                    {{#if invoice.meta.hasMultipleVATRates}}
+            {{!-- ============================================================== --}} {{!-- Price
+            footer (totals + messages) --}} {{!--
+            ============================================================== --}}
+            <footer class="price-footer">
+                <div class="totals-grid">
+                    <div class="vat-breakdown-container">
+                        {{#if invoice.meta.hasMultipleVATRates}}
                         <table class="vat-breakdown">
                             <thead>
                                 <tr>
@@ -630,29 +628,33 @@ where the rule starts at x = 28 mm (skipping the # column). */
                             <tbody>
                                 {{#each invoice.meta.VATTotal}}
                                 <tr>
-                                    <td class="col-rate">{{#if VATExcempt}}{{VATExcemptName}}{{else}}{{percentageLabel}}{{/if}}</td>
+                                    <td class="col-rate">
+                                        {{#if
+                                        VATExcempt}}{{VATExcemptName}}{{else}}{{percentageLabel}}{{/if}}
+                                    </td>
                                     <td class="col-amount">{{formatPrice taxablePrice}}</td>
                                     <td class="col-amount">{{formatPrice VAT}}</td>
                                 </tr>
                                 {{/each}}
                             </tbody>
                         </table>
-                    {{/if}}
-                </div>
-                <div class="totals">
-                    <div class="row">
-                        <span class="label">{{$t "%Zrj"}}</span>
-                        <span class="value">{{formatPrice invoice.meta.priceWithoutVAT}}</span>
+                        {{/if}}
                     </div>
-                    {{#if showPayments}}
-                    {{else if invoice.meta.hasMultipleVATRates}}
+                    <div class="totals">
+                        <div class="row">
+                            <span class="label">{{$t "%Zrj"}}</span>
+                            <span class="value">{{formatPrice invoice.meta.priceWithoutVAT}}</span>
+                        </div>
+                        {{#if showPayments}} {{else if invoice.meta.hasMultipleVATRates}}
                         <div class="row">
                             <span class="label">{{$t "%1JE"}}</span>
                             <span class="value">{{formatPrice invoice.meta.VAT}}</span>
                         </div>
-                    {{else}}
+                        {{else}}
                         <div class="row">
-                            <span class="label">{{$t "%1JE"}} ({{invoice.meta.singleVATRateLabel}})</span>
+                            <span class="label"
+                                >{{$t "%1JE"}} ({{invoice.meta.singleVATRateLabel}})</span
+                            >
                             <span class="value">{{formatPrice invoice.meta.VAT}}</span>
                         </div>
                         {{#if invoice.meta.vatExcemptNote}}
@@ -660,107 +662,102 @@ where the rule starts at x = 28 mm (skipping the # column). */
                             <span class="label">{{invoice.meta.vatExcemptNote}}</span>
                             <span></span>
                         </div>
-                    {{/if}}
-                    {{/if}}
-                    {{#if hasRoundingAmount}}
-                    <div class="row">
-                        <span class="label">{{$t "%ZrJ"}}</span>
-                        <span class="value">{{formatPrice invoice.meta.payableRoundingAmount}}</span>
-                    </div>
-                    {{/if}}
-                    <div class="row total">
-                        <span class="label">{{$t "%1KL"}}</span>
-                        <span class="value">{{formatPrice invoice.meta.totalPrice}}</span>
-                    </div>
-                </div>
-            </div>
-
-            {{#if invoice.comments}}
-            <div class="comments">
-                <div class="comments-label">{{$t "%YT"}}</div>
-                <p class="comments-text">{{invoice.comments}}</p>
-            </div>
-            {{/if}}
-
-            <div class="messages">
-
-                {{!-- Always-visible archive notice (varies by document type) --}}
-                <div class="message archive">
-                    <svg class="icon" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd"
-                            d="M3.67327 2.52862C1.50134 4.01571 1.21296 6.95436 2.11388 8.30055C4.78725 6.67111 6.69703 5.33679 8.70409 3.72095C8.46387 4.06251 8.14127 4.46052 7.74941 4.90029C7.12008 5.60656 6.34856 6.38067 5.54204 7.14116C3.92626 8.66473 2.20363 10.1022 1.26444 10.7931C0.967076 11.0118 0.903352 11.4303 1.12211 11.7276C1.34087 12.025 1.75928 12.0887 2.05665 11.87C2.70394 11.3938 3.67804 10.6022 4.73273 9.68002C9.48876 10.8971 12.1197 6.08032 11.5772 0.148376C9.9992 0.814142 8.7907 0.987292 7.69217 1.14468C6.34654 1.33748 5.16591 1.50664 3.67327 2.52862Z" />
-                    </svg>
-                    <span class="text">
-                        {{#unless invoice.number}}
-                        {{#if isReceipt}}
-                        {{$t "%ZrV"}}
-                        {{else if isRefundReceipt}}
-                        {{$t "%Zr9"}}
-                        {{else}}
-                        {{$t "%Zrs"}}
+                        {{/if}} {{/if}} {{#if hasRoundingAmount}}
+                        <div class="row">
+                            <span class="label">{{$t "%ZrJ"}}</span>
+                            <span class="value"
+                                >{{formatPrice invoice.meta.payableRoundingAmount}}</span
+                            >
+                        </div>
                         {{/if}}
-                        {{else}}
-                        {{#if isReceipt}}
-                        {{$t "%Zrk"}}
-                        {{else if isRefundReceipt}}
-                        {{$t "%Zqw"}}
-                        {{else if isCreditNote}}
-                        {{$t "%ZrU"}}
-                        {{else}}
-                        {{$t "%Zrw"}}
-                        {{/if}}
-                        {{/unless}}
-                    </span>
+                        <div class="row total">
+                            <span class="label">{{$t "%1KL"}}</span>
+                            <span class="value">{{formatPrice invoice.meta.totalPrice}}</span>
+                        </div>
+                    </div>
                 </div>
 
-                {{!-- Payment status messages (mutually exclusive) --}}
-                {{#if showPaidMessage}}
-                <div class="message paid">
-                    <svg class="icon" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd"
-                            d="M6 12C9.31371 12 12 9.31371 12 6C12 2.68629 9.31371 0 6 0C2.68629 0 0 2.68629 0 6C0 9.31371 2.68629 12 6 12ZM8.88815 4.54879C9.08076 4.27914 9.0183 3.90441 8.74865 3.71181C8.479 3.5192 8.10427 3.58165 7.91167 3.8513L5.3881 7.3843L4.07991 5.64005C3.88109 5.37495 3.50501 5.32122 3.23991 5.52005C2.97481 5.71887 2.92109 6.09495 3.11991 6.36005L4.91991 8.76005C5.0347 8.91309 5.21559 9.00223 5.40689 9C5.59818 8.99778 5.77695 8.90446 5.88815 8.74879L8.88815 4.54879Z" />
-                    </svg>
-                    <span class="text">{{#if isReceipt}}{{$t "%Zqx"}}{{else}}{{$t "%Zr3"}}{{/if}} {{payment.methodName}}</span>
+                {{#if invoice.comments}}
+                <div class="comments">
+                    <div class="comments-label">{{$t "%YT"}}</div>
+                    <p class="comments-text">{{invoice.comments}}</p>
                 </div>
                 {{/if}}
 
-                {{#if showTransferMessage}}
-                <div class="message transfer">
-                    <svg class="icon" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd"
-                            d="M1.71429 0.714233C0.767512 0.714233 0 1.48174 0 2.42852V2.85714H12V2.42852C12 1.48175 11.2325 0.714233 10.2857 0.714233H1.71429ZM12 4.57143H0V7.57138C0 8.51815 0.767512 9.28566 1.71429 9.28566H10.2857C11.2325 9.28566 12 8.51815 12 7.57138V4.57143Z" />
-                    </svg>
-                    <span class="text">{{$t "%Zrg"}} {{sender.bankAccount}}<br>{{$t "%Zr7"}} {{payment.transferDescription}}</span>
+                <div class="messages">
+                    {{!-- Always-visible archive notice (varies by document type) --}}
+                    <div class="message archive">
+                        <svg class="icon" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                fill-rule="evenodd"
+                                clip-rule="evenodd"
+                                d="M3.67327 2.52862C1.50134 4.01571 1.21296 6.95436 2.11388 8.30055C4.78725 6.67111 6.69703 5.33679 8.70409 3.72095C8.46387 4.06251 8.14127 4.46052 7.74941 4.90029C7.12008 5.60656 6.34856 6.38067 5.54204 7.14116C3.92626 8.66473 2.20363 10.1022 1.26444 10.7931C0.967076 11.0118 0.903352 11.4303 1.12211 11.7276C1.34087 12.025 1.75928 12.0887 2.05665 11.87C2.70394 11.3938 3.67804 10.6022 4.73273 9.68002C9.48876 10.8971 12.1197 6.08032 11.5772 0.148376C9.9992 0.814142 8.7907 0.987292 7.69217 1.14468C6.34654 1.33748 5.16591 1.50664 3.67327 2.52862Z"
+                            />
+                        </svg>
+                        <span class="text">
+                            {{#unless invoice.number}} {{#if isReceipt}} {{$t "%ZrV"}} {{else if
+                            isRefundReceipt}} {{$t "%Zr9"}} {{else}} {{$t "%Zrs"}} {{/if}} {{else}}
+                            {{#if isReceipt}} {{$t "%Zrk"}} {{else if isRefundReceipt}} {{$t
+                            "%Zqw"}} {{else if isCreditNote}} {{$t "%ZrU"}} {{else}} {{$t "%Zrw"}}
+                            {{/if}} {{/unless}}
+                        </span>
+                    </div>
+
+                    {{!-- Payment status messages (mutually exclusive) --}} {{#if showPaidMessage}}
+                    <div class="message paid">
+                        <svg class="icon" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                fill-rule="evenodd"
+                                clip-rule="evenodd"
+                                d="M6 12C9.31371 12 12 9.31371 12 6C12 2.68629 9.31371 0 6 0C2.68629 0 0 2.68629 0 6C0 9.31371 2.68629 12 6 12ZM8.88815 4.54879C9.08076 4.27914 9.0183 3.90441 8.74865 3.71181C8.479 3.5192 8.10427 3.58165 7.91167 3.8513L5.3881 7.3843L4.07991 5.64005C3.88109 5.37495 3.50501 5.32122 3.23991 5.52005C2.97481 5.71887 2.92109 6.09495 3.11991 6.36005L4.91991 8.76005C5.0347 8.91309 5.21559 9.00223 5.40689 9C5.59818 8.99778 5.77695 8.90446 5.88815 8.74879L8.88815 4.54879Z"
+                            />
+                        </svg>
+                        <span class="text"
+                            >{{#if isReceipt}}{{$t "%Zqx"}}{{else}}{{$t "%Zr3"}}{{/if}}
+                            {{payment.methodName}}</span
+                        >
+                    </div>
+                    {{/if}} {{#if showTransferMessage}}
+                    <div class="message transfer">
+                        <svg class="icon" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                fill-rule="evenodd"
+                                clip-rule="evenodd"
+                                d="M1.71429 0.714233C0.767512 0.714233 0 1.48174 0 2.42852V2.85714H12V2.42852C12 1.48175 11.2325 0.714233 10.2857 0.714233H1.71429ZM12 4.57143H0V7.57138C0 8.51815 0.767512 9.28566 1.71429 9.28566H10.2857C11.2325 9.28566 12 8.51815 12 7.57138V4.57143Z"
+                            />
+                        </svg>
+                        <span class="text"
+                            >{{$t "%Zrg"}} {{sender.bankAccount}}<br />{{$t "%Zr7"}}
+                            {{payment.transferDescription}}</span
+                        >
+                    </div>
+                    {{/if}} {{#if showDirectDebitMessage}}
+                    <div class="message direct-debit">
+                        <svg class="icon" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                fill-rule="evenodd"
+                                clip-rule="evenodd"
+                                d="M1.71429 0.714233C0.767512 0.714233 0 1.48174 0 2.42852V2.85714H12V2.42852C12 1.48175 11.2325 0.714233 10.2857 0.714233H1.71429ZM12 4.57143H0V7.57138C0 8.51815 0.767512 9.28566 1.71429 9.28566H10.2857C11.2325 9.28566 12 8.51815 12 7.57138V4.57143Z"
+                            />
+                        </svg>
+                        <span class="text">{{$t "%Zs9"}}</span>
+                    </div>
+                    {{/if}} {{#if showStripeMessage}}
+                    <div class="message stripe">
+                        <svg class="icon" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                fill-rule="evenodd"
+                                clip-rule="evenodd"
+                                d="M6 12C9.31371 12 12 9.31371 12 6C12 2.68629 9.31371 0 6 0C2.68629 0 0 2.68629 0 6C0 9.31371 2.68629 12 6 12ZM8.88815 4.54879C9.08076 4.27914 9.0183 3.90441 8.74865 3.71181C8.479 3.5192 8.10427 3.58165 7.91167 3.8513L5.3881 7.3843L4.07991 5.64005C3.88109 5.37495 3.50501 5.32122 3.23991 5.52005C2.97481 5.71887 2.92109 6.09495 3.11991 6.36005L4.91991 8.76005C5.0347 8.91309 5.21559 9.00223 5.40689 9C5.59818 8.99778 5.77695 8.90446 5.88815 8.74879L8.88815 4.54879Z"
+                            />
+                        </svg>
+                        <span class="text">{{$t "%ZrW"}}</span>
+                    </div>
+                    {{/if}} {{#if (or isReceipt isRefundReceipt)}}
+                    <p class="not-invoice">{{$t "%Zs1"}}</p>
+                    {{/if}}
                 </div>
-                {{/if}}
-
-                {{#if showDirectDebitMessage}}
-                <div class="message direct-debit">
-                    <svg class="icon" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd"
-                            d="M1.71429 0.714233C0.767512 0.714233 0 1.48174 0 2.42852V2.85714H12V2.42852C12 1.48175 11.2325 0.714233 10.2857 0.714233H1.71429ZM12 4.57143H0V7.57138C0 8.51815 0.767512 9.28566 1.71429 9.28566H10.2857C11.2325 9.28566 12 8.51815 12 7.57138V4.57143Z" />
-                    </svg>
-                    <span class="text">{{$t "%Zs9"}}</span>
-                </div>
-                {{/if}}
-
-                {{#if showStripeMessage}}
-                <div class="message stripe">
-                    <svg class="icon" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd"
-                            d="M6 12C9.31371 12 12 9.31371 12 6C12 2.68629 9.31371 0 6 0C2.68629 0 0 2.68629 0 6C0 9.31371 2.68629 12 6 12ZM8.88815 4.54879C9.08076 4.27914 9.0183 3.90441 8.74865 3.71181C8.479 3.5192 8.10427 3.58165 7.91167 3.8513L5.3881 7.3843L4.07991 5.64005C3.88109 5.37495 3.50501 5.32122 3.23991 5.52005C2.97481 5.71887 2.92109 6.09495 3.11991 6.36005L4.91991 8.76005C5.0347 8.91309 5.21559 9.00223 5.40689 9C5.59818 8.99778 5.77695 8.90446 5.88815 8.74879L8.88815 4.54879Z" />
-                    </svg>
-                    <span class="text">{{$t "%ZrW"}}</span>
-                </div>
-                {{/if}}
-
-                {{#if (or isReceipt isRefundReceipt)}}
-                <p class="not-invoice">{{$t "%Zs1"}}</p>
-                {{/if}}
-            </div>
-        </footer>
-
-    </div>
-</body>
-
+            </footer>
+        </div>
+    </body>
 </html>

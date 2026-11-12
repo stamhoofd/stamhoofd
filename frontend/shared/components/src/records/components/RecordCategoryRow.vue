@@ -72,17 +72,17 @@ function showContextMenu(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`%8k`),
+                name: $t('%8k'),
                 icon: 'settings',
                 action: () => editCategory(),
             }),
             new ContextMenuItem({
-                name: $t(`%10n`),
+                name: $t('%10n'),
                 icon: 'copy',
                 action: () => addCategory(props.category.duplicate()),
             }),
             new ContextMenuItem({
-                name: $t(`%11e`),
+                name: $t('%11e'),
                 icon: 'trash',
                 destructive: true,
                 action: () => deleteCategory(),
@@ -90,7 +90,7 @@ function showContextMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`%11f`),
+                name: $t('%11f'),
                 icon: 'arrow-up',
                 action: () => {
                     up();
@@ -98,7 +98,7 @@ function showContextMenu(event: MouseEvent) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%11g`),
+                name: $t('%11g'),
                 icon: 'arrow-down',
                 action: () => {
                     down();
@@ -108,12 +108,12 @@ function showContextMenu(event: MouseEvent) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`%10q`),
+                name: $t('%10q'),
                 disabled: props.category.childCategories.length !== 0,
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
-                            name: $t(`%10r`),
+                            name: $t('%10r'),
                             disabled: true,
                         }),
                     ],
@@ -123,7 +123,7 @@ function showContextMenu(event: MouseEvent) {
                             disabled: c.id === props.category.id,
                             action: async () => {
                                 // Transform into a root category
-                                if (!await CenteredMessage.confirm($t(`%11h`), $t(`%10t`), $t(`%11i`) + c.name + ').')) {
+                                if (!await CenteredMessage.confirm($t('%11h'), $t('%10t'), $t('%11i') + c.name + ').')) {
                                     return;
                                 }
 
@@ -151,8 +151,8 @@ function showContextMenu(event: MouseEvent) {
 async function deleteCategory() {
     if (!await CenteredMessage.confirm({
         title: props.category.name.toString() ? $t('%Zm2', { name: props.category.name.toString() }) : $t('Deze vragenlijst verwijderen?'),
-        confirmText: $t(`%CJ`),
-        description: $t(`%11j`) + ' ' + $t('%Zmm'),
+        confirmText: $t('%CJ'),
+        description: $t('%11j') + ' ' + $t('%Zmm'),
         availabilityDelay: 2_000,
     })) {
         return;

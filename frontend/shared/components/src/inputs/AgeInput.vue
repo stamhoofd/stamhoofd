@@ -54,7 +54,7 @@ const descriptionText = computed(() => {
     if (!model.value) {
         return '';
     }
-    return $t(`%yp`) + ' ' + ((props.year ?? new Date().getFullYear()) - model.value) + ')';
+    return $t('%yp') + ' ' + ((props.year ?? new Date().getFullYear()) - model.value) + ')';
 });
 
 onMounted(() => {
@@ -68,24 +68,20 @@ watch(valueString, (value: string) => {
         valid.value = true;
         if (props.nullable) {
             internalValue.value = null;
-        }
-        else {
+        } else {
             internalValue.value = Math.max(0, props.min);
         }
-    }
-    else {
+    } else {
         const v = parseInt(value);
         if (isNaN(v)) {
             valid.value = false;
 
             if (props.nullable) {
                 internalValue.value = null;
-            }
-            else {
+            } else {
                 internalValue.value = props.min;
             }
-        }
-        else {
+        } else {
             valid.value = true;
 
             // Remove extra decimals

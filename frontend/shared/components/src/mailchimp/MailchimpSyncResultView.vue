@@ -37,7 +37,8 @@
             </STCardGroup>
 
             <template v-if="sync.result.issues.length">
-                <hr><h2>{{ $t('%ZvZ') }}</h2>
+                <hr>
+                <h2>{{ $t('%ZvZ') }}</h2>
                 <STList>
                     <STListItem v-for="issue of sync.result.issues" :key="issue.email + issue.reason">
                         <h3 class="style-title-list">
@@ -120,8 +121,7 @@ async function reload() {
             owner,
         });
         sync.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         if (!Request.isAbortError(e)) {
             console.error(e);
         }

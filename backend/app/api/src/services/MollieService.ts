@@ -84,7 +84,7 @@ export class MollieService {
                         },
                         profile: {
                             name: this.sellingOrganization.name + ' via Stamhoofd',
-                            description: $t(`%x1`),
+                            description: $t('%x1'),
                             businessCategory: 'SOCIAL_ASSOCIATIONS',
                         },
                     },
@@ -404,7 +404,7 @@ export class MollieService {
         if (!mollieService || !profileId || !method) {
             throw new SimpleError({
                 code: '',
-                message: $t(`%w3`, { method: PaymentMethodHelper.getName(payment.method) }),
+                message: $t('%w3', { method: PaymentMethodHelper.getName(payment.method) }),
             });
         }
 

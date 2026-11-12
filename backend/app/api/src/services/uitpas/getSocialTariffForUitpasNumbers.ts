@@ -33,8 +33,8 @@ function assertsIsSocialTariffResponse(json: unknown): asserts json is SocialTar
         console.error('Invalid response when getting UiTPAS social tariff:', json);
         throw new SimpleError({
             code: 'invalid_response_getting_uitpas_social_tariff',
-            message: `Invalid response when getting UiTPAS social tariff`,
-            human: $t(`%1BU`),
+            message: 'Invalid response when getting UiTPAS social tariff',
+            human: $t('%1BU'),
         });
     }
 }
@@ -60,7 +60,7 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
         throw new SimpleError({
             code: 'invalid_uitpas_event_url',
             message: `Invalid UiTPAS event URL: ${uitpasEventUrl}`,
-            human: $t(`%1BS`),
+            human: $t('%1BS'),
         });
     }
     params.append('eventId', eventId);
@@ -78,9 +78,9 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
         // Handle network errors
         throw new SimpleError({
             code: 'uitpas_unreachable_getting_static_uitpas_social_tariff',
-            message: `Network issue when getting static UiTPAS social tariff`,
+            message: 'Network issue when getting static UiTPAS social tariff',
             human: $t(
-                `We konden UiTPAS niet bereiken om jouw kansentarief op te zoeken. Probeer het later opnieuw.`,
+                'We konden UiTPAS niet bereiken om jouw kansentarief op te zoeken. Probeer het later opnieuw.',
             ),
         });
     });
@@ -108,17 +108,17 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
 
         throw new SimpleError({
             code: 'unsuccessful_and_unexpected_response_retrieving_social_tariff_by_uitpas_number',
-            message: `Unsuccesful response without message when retrieving social tariff by UiTPAS number`,
-            human: $t(`%1BV`),
+            message: 'Unsuccesful response without message when retrieving social tariff by UiTPAS number',
+            human: $t('%1BV'),
         });
     }
     const json = await response.json().catch(() => {
         // Handle JSON parsing errors
         throw new SimpleError({
             code: 'invalid_json_getting_static_uitpas_social_tariff',
-            message: `Invalid json when getting static UiTPAS social tariff`,
+            message: 'Invalid json when getting static UiTPAS social tariff',
             human: $t(
-                `Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.`,
+                'Er is een fout opgetreden bij het communiceren met UiTPAS. Probeer het later opnieuw.',
             ),
         });
     });
@@ -135,7 +135,7 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
         throw new SimpleError({
             code: 'no_social_tariff_available',
             message: `No social tariff available for event ${uitpasEventUrl}`,
-            human: $t(`%1BT`),
+            human: $t('%1BT'),
         });
     }
     if (json.available.length > 1) {
@@ -149,7 +149,7 @@ async function getSocialTariffForUitpasNumber(access_token: string, uitpasNumber
         throw new SimpleError({
             code: 'no_remaining_social_tariff',
             message: `No remaining social tariff for event ${uitpasEventUrl} and UiTPAS number ${uitpasNumber}`,
-            human: $t(`%1BW`),
+            human: $t('%1BW'),
         });
     }
     console.log('Social tariff for UiTPAS number', uitpasNumber, 'with event id', uitpasEventUrl, 'is', json.available[0].price, 'euros');

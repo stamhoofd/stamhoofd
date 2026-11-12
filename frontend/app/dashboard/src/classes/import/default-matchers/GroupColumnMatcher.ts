@@ -36,7 +36,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (!cell) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18S`),
+                message: $t('%18S'),
             });
         }
 
@@ -44,7 +44,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (cell.t !== 's' || typeof cell.v !== 'string' || !cell.v) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18T`),
+                message: $t('%18T'),
             });
         }
 
@@ -63,7 +63,7 @@ export class GroupColumnMatcher implements ColumnMatcher {
         if (!minErrorGroup) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18U`, { group: value }),
+                message: $t('%18U', { group: value }),
             });
         }
     }

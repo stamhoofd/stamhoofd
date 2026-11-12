@@ -82,8 +82,7 @@ export async function compressUuids(onProgress?: ProgressCallback) {
             const k = merge.get(key);
             if (k) {
                 filteredDictionary.set(k, value);
-            }
-            else {
+            } else {
                 filteredDictionary.set(key, value);
             }
         }

@@ -567,8 +567,8 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         all.push(simpleBooleanFilterFactory({
             name: financialSupportSettings.financialSupportSettings.value.title,
             optionNames: {
-                true: $t(`%1H0`),
-                false: $t(`%1Kt`),
+                true: $t('%1H0'),
+                false: $t('%1Kt'),
             },
             filterIfTrue: {
                 $or: [
@@ -587,8 +587,8 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
         all.push(simpleBooleanFilterFactory({
             name: $t('%vY'),
             optionNames: {
-                true: $t(`%1MV`),
-                false: $t(`%1MW`),
+                true: $t('%1MV'),
+                false: $t('%1MW'),
             },
             filterIfTrue: {
                 'details.dataPermissions': true,
@@ -606,8 +606,8 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
     if (currentPeriodId) {
         all.push(
             new GroupUIFilterBuilder({
-                name: $t(`%c0`),
-                description: $t(`%c1`),
+                name: $t('%c0'),
+                description: $t('%c1'),
                 builders: getRegistrationFilters({ periodId: currentPeriodId }).value,
                 wrapper: {
                     registrations: {
@@ -721,8 +721,8 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
 
         all.push(
             new GroupUIFilterBuilder({
-                name: $t(`%c2`),
-                description: $t(`%c3`),
+                name: $t('%c2'),
+                description: $t('%c3'),
                 builders: responsibilitiesFilters,
                 wrapper: {
                     responsibilities: {
@@ -758,7 +758,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
 
         all.push(
             new NumberFilterBuilder({
-                name: $t(`%76`),
+                name: $t('%76'),
                 key: 'memberCachedBalance.amountOpen',
                 type: NumberFilterFormat.Currency,
                 wrapper: {
@@ -864,7 +864,7 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
 
     // missing data
     all.push(simpleMultipleChoiceFilterFactory({
-        name: $t(`%17z`),
+        name: $t('%17z'),
         description: $t('%1MR'),
         filterMode: MultipleChoiceUIFilterMode.Or,
         options: missingDataOptions,
@@ -997,8 +997,8 @@ export function useAdvancedPlatformMembershipUIFilterBuilders(): { loading: Ref<
                 new MultipleChoiceFilterBuilder({
                     name: $t('%1IH'),
                     options: [
-                        new MultipleChoiceUIFilterOption($t(`%by`), true),
-                        new MultipleChoiceUIFilterOption($t(`%bz`), false),
+                        new MultipleChoiceUIFilterOption($t('%by'), true),
+                        new MultipleChoiceUIFilterOption($t('%bz'), false),
                     ],
                     wrapFilter: (f: StamhoofdFilter) => {
                         const choices = Array.isArray(f) ? f : [f];
@@ -1144,7 +1144,7 @@ export const getMemberFilterBuildersForInheritedRecords: () => UIFilterBuilders 
             },
         }),
         new MultipleChoiceFilterBuilder({
-            name: $t(`%17z`),
+            name: $t('%17z'),
             options: [
                 new MultipleChoiceUIFilterOption($t('%17w'), 'birthDay'),
                 new MultipleChoiceUIFilterOption($t('%Cn'), 'address'),
@@ -1202,23 +1202,23 @@ export function getMemberBaseFilters(recordConfiguration?: OrganizationRecordsCo
 
     if (!recordConfiguration || recordConfiguration.birthDay) {
         all.push(new DateFilterBuilder({
-            name: $t(`%17w`),
+            name: $t('%17w'),
             key: 'birthDay',
         }));
 
         all.push(new NumberFilterBuilder({
-            name: $t(`%9S`),
+            name: $t('%9S'),
             key: 'age',
         }));
     }
 
     if (!recordConfiguration || recordConfiguration.gender) {
         all.push(new MultipleChoiceFilterBuilder({
-            name: $t(`%1d`),
+            name: $t('%1d'),
             options: [
-                new MultipleChoiceUIFilterOption($t(`%XM`), Gender.Female),
-                new MultipleChoiceUIFilterOption($t(`%XK`), Gender.Male),
-                new MultipleChoiceUIFilterOption($t(`%1JG`), Gender.Other),
+                new MultipleChoiceUIFilterOption($t('%XM'), Gender.Female),
+                new MultipleChoiceUIFilterOption($t('%XK'), Gender.Male),
+                new MultipleChoiceUIFilterOption($t('%1JG'), Gender.Other),
             ],
             wrapper: {
                 gender: {
@@ -1274,7 +1274,7 @@ export function useMemberWithRegistrationsBlobFilterBuilders() {
         }));
 
         all.push(new MultipleChoiceFilterBuilder({
-            name: $t(`%17z`),
+            name: $t('%17z'),
             options: [
                 new MultipleChoiceUIFilterOption($t('%17w'), 'birthDay'),
                 new MultipleChoiceUIFilterOption($t('%Cn'), 'address'),

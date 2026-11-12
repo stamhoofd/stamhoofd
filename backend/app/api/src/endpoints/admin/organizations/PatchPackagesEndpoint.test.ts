@@ -8,7 +8,7 @@ import { initAdmin, initPlatformAdmin } from '../../../../tests/init/index.js';
 import { initMembershipOrganization } from '../../../../tests/init/initMembershipOrganization.js';
 import { PatchPackagesEndpoint } from './PatchPackagesEndpoint.js';
 
-const baseUrl = `/organization/packages`;
+const baseUrl = '/organization/packages';
 const endpoint = new PatchPackagesEndpoint();
 
 describe('Endpoint.PatchPackagesEndpoint', () => {

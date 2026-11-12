@@ -1,6 +1,6 @@
-import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder} from '@common/encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray, PatchMap } from '@common/encoding';
-import type { PatchAnswers, RecordSettings} from '@stamhoofd/structures';
+import type { PatchAnswers, RecordSettings } from '@stamhoofd/structures';
 import { Address, EmergencyContact, Parent, ParentType, RecordAddressAnswer, RecordAnswer, RecordDateAnswer, RecordTextAnswer } from '@stamhoofd/structures';
 import type { ImportMemberResult } from './ImportMemberResult';
 import { MemberDetailsMatcherCategory } from './MemberDetailsMatcherCategory';
@@ -125,8 +125,7 @@ export class ColumnMatcherHelper {
         const parent = importResult.patchedDetails.parents[0];
         if (parent) {
             return parent;
-        }
-        else {
+        } else {
             const parents = new PatchableArray() as PatchableArrayAutoEncoder<Parent>;
             parents.addPut(Parent.create({
                 type: ParentType.Parent1,

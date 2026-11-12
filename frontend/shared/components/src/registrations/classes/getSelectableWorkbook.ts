@@ -72,33 +72,33 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         new SelectableColumn({
             id: 'member.id',
             name: $t('%1GH'),
-            description: $t(`%ev`),
+            description: $t('%ev'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'member.memberNumber',
-            name: $t(`%19j`),
+            name: $t('%19j'),
         }),
         new SelectableColumn({
             id: 'member.firstName',
-            name: $t(`%1MT`),
+            name: $t('%1MT'),
         }),
         new SelectableColumn({
             id: 'member.lastName',
-            name: $t(`%1MU`),
+            name: $t('%1MU'),
         }),
         new SelectableColumn({
             id: 'member.birthDay',
-            name: $t(`%17w`),
+            name: $t('%17w'),
         }),
         new SelectableColumn({
             id: 'member.age',
-            name: $t(`%9S`),
+            name: $t('%9S'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'member.gender',
-            name: $t(`%19i`),
+            name: $t('%19i'),
             enabled: false,
         }),
         new SelectableColumn({
@@ -108,26 +108,26 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }),
         new SelectableColumn({
             id: 'member.phone',
-            name: $t(`%wD`),
+            name: $t('%wD'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'member.email',
-            name: $t(`%1FK`),
+            name: $t('%1FK'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'member.address',
-            name: $t(`%Cn`),
-            description: $t(`%ew`),
+            name: $t('%Cn'),
+            description: $t('%ew'),
             enabled: false,
         }),
         ...(STAMHOOFD.userMode === 'platform'
             ? [new SelectableColumn({
                     id: 'member.securityCode',
-                    name: $t(`%wE`),
+                    name: $t('%wE'),
                     enabled: false,
-                    description: $t(`%ex`),
+                    description: $t('%ex'),
                 })]
             : []),
         returnNullIfNoAccessRight(new SelectableColumn({
@@ -137,22 +137,22 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         }), [AccessRight.MemberReadFinancialData]),
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'member.uitpasNumber',
-            name: $t(`%wF`),
+            name: $t('%wF'),
             enabled: false,
         }), [AccessRight.MemberReadFinancialData]),
         new SelectableColumn({
             id: 'member.notes',
-            name: $t(`%Ve`),
+            name: $t('%Ve'),
             enabled: false,
         }),
         returnNullIfNoAccessRight(new SelectableColumn({
             id: 'member.nationalRegisterNumber',
-            name: $t(`%wK`),
+            name: $t('%wK'),
             enabled: false,
         }), [AccessRight.MemberManageNRN]),
         new SelectableColumn({
             id: 'member.membership',
-            name: $t(`%1Ny`),
+            name: $t('%1Ny'),
             enabled: false,
         }),
         groups.some(group => group.type === GroupType.EventRegistration && group.settings.allowRegistrationsByOrganization)
@@ -165,7 +165,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         groups.some(group => group.settings.trialDays)
             ? new SelectableColumn({
                     id: 'trialUntil',
-                    name: $t(`%1IH`),
+                    name: $t('%1IH'),
                     enabled: false,
                 })
             : null,
@@ -216,13 +216,13 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     ...(platform.config.defaultAgeGroups.length > 0
                         ? [new SelectableColumn({
                                 id: 'defaultAgeGroup',
-                                name: $t(`%wI`),
+                                name: $t('%wI'),
                                 enabled: false,
                             })]
                         : []),
                     new SelectableColumn({
                         id: 'group',
-                        name: $t(`%wH`),
+                        name: $t('%wH'),
                         enabled: false,
                     }),
                     groups.length === 0 || new Set(groups.map(g => g.type)).size > 1
@@ -238,7 +238,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         organization !== null
             ? returnNullIfNoAccessRight(new SelectableColumn({
                     id: 'outstandingBalance',
-                    name: $t(`%76`),
+                    name: $t('%76'),
                     description: $t('%184'),
                     enabled: false,
                 }), [AccessRight.MemberReadFinancialData])
@@ -246,30 +246,30 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         // price
         new SelectableColumn({
             id: 'priceName',
-            name: $t(`%62`),
+            name: $t('%62'),
         }),
         new SelectableColumn({
             id: 'price',
-            name: $t(`%1IP`),
+            name: $t('%1IP'),
         }),
         new SelectableColumn({
             id: 'toPay',
-            name: $t(`%m0`),
+            name: $t('%m0'),
             description: $t('%183'),
         }),
         new SelectableColumn({
             id: 'registeredAt',
-            name: $t(`%zg`),
+            name: $t('%zg'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'startDate',
-            name: $t(`%1Of`),
+            name: $t('%1Of'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'endDate',
-            name: $t(`%1P8`),
+            name: $t('%1P8'),
             enabled: false,
         }),
         new SelectableColumn({
@@ -280,7 +280,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         // id of registration
         new SelectableColumn({
             id: 'id',
-            name: $t(`%Zbn`),
+            name: $t('%Zbn'),
             description: $t('%174'),
             enabled: false,
         }),
@@ -293,44 +293,44 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             return [
                 new SelectableColumn({
                     id: getId('type'),
-                    name: $t(`%1B`),
+                    name: $t('%1B'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('firstName'),
-                    name: $t(`%1MT`),
+                    name: $t('%1MT'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('lastName'),
-                    name: $t(`%1MU`),
+                    name: $t('%1MU'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('phone'),
-                    name: $t(`%wD`),
+                    name: $t('%wD'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('email'),
-                    name: $t(`%1FK`),
+                    name: $t('%1FK'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('address'),
-                    name: $t(`%Cn`),
+                    name: $t('%Cn'),
                     category,
                     enabled,
 
                 }),
                 returnNullIfNoAccessRight(new SelectableColumn({
                     id: getId('nationalRegisterNumber'),
-                    name: $t(`%wK`),
+                    name: $t('%wK'),
                     category,
                     enabled,
                 }), [AccessRight.MemberManageNRN]),
@@ -340,8 +340,8 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         // emergency contacts
         new SelectableColumn({
             id: 'member.emergencyContacts',
-            name: $t(`%ZeJ`),
-            description: $t(`%ZeT`),
+            name: $t('%ZeJ'),
+            description: $t('%ZeT'),
             enabled: true,
         }),
         ...[1, 2].flatMap((contactNumber, contactIndex) => {
@@ -352,19 +352,19 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             return [
                 new SelectableColumn({
                     id: getId('name'),
-                    name: $t(`%1Os`),
+                    name: $t('%1Os'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('title'),
-                    name: $t(`%f5`),
+                    name: $t('%f5'),
                     category,
                     enabled,
                 }),
                 new SelectableColumn({
                     id: getId('phone'),
-                    name: $t(`%wD`),
+                    name: $t('%wD'),
                     category,
                     enabled,
                 }),
@@ -374,21 +374,21 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         // unverified data
         new SelectableColumn({
             id: 'member.unverifiedPhones',
-            name: $t(`%ez`),
-            category: $t(`%f0`),
+            name: $t('%ez'),
+            category: $t('%f0'),
             enabled: false,
         }),
         new SelectableColumn({
             id: 'member.unverifiedEmails',
-            name: $t(`%vG`),
-            category: $t(`%f0`),
+            name: $t('%vG'),
+            category: $t('%f0'),
             enabled: false,
         }),
         ...[1, 2].map((number, index) => {
             return new SelectableColumn({
                 id: `member.unverifiedAddresses.${index}`,
                 name: `Adres ${number}`,
-                category: $t(`%f0`),
+                category: $t('%f0'),
                 enabled: false,
             });
         }),
@@ -413,7 +413,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
                     .map(category => new SelectableColumn({
                         id: `groupCategory.${category.id}`,
                         name: category.settings.name,
-                        category: $t(`%Ztf`, { periodName: organization.period.period.nameShort }),
+                        category: $t('%Ztf', { periodName: organization.period.period.nameShort }),
                         enabled: false,
                     }))
             : []),
@@ -423,7 +423,7 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
         sheets: [
             new SelectableSheet({
                 id: 'registrations',
-                name: $t(`%1EI`),
+                name: $t('%1EI'),
                 columns: columns.filter(column => column !== null),
             }),
         ],

@@ -7,7 +7,7 @@ import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { initAdmin } from '../../../../../tests/init/index.js';
 import { GetPackagesEndpoint } from './GetPackagesEndpoint.js';
 
-const baseUrl = `/organization/packages`;
+const baseUrl = '/organization/packages';
 const endpoint = new GetPackagesEndpoint();
 
 describe('Endpoint.GetPackagesEndpoint', () => {

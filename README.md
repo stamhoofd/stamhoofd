@@ -73,7 +73,7 @@ Scope: all 52 workspace projects
 Done in 31.6s using pnpm v12.4.2
 ```
 
-*In case `corepack` does not offer to install `pnpm` for you, you can run `corepack install` manually.*
+_In case `corepack` does not offer to install `pnpm` for you, you can run `corepack install` manually._
 
 Facing some further difficulties, you can also try using `.development/install-node.sh` which is a small installer script.
 

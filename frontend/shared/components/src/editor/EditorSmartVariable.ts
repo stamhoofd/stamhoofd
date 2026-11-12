@@ -47,8 +47,7 @@ export const SmartVariableNode = Node.create<SmartVariableNodeOptions>({
 
                                 if ($to.nodeAfter) {
                                     tr.setSelection(TextSelection.create(tr.doc, $to.pos));
-                                }
-                                else {
+                                } else {
                                 // add node after horizontal rule if it’s the end of the document
                                     const node = $to.parent.type.contentMatch.defaultType?.create();
 

@@ -1,7 +1,7 @@
-import type { Decoder } from "@common/encoding";
-import { SessionContext } from "@stamhoofd/frontend-session/SessionContext";
-import { NetworkManager } from "@stamhoofd/networking/NetworkManager";
-import { Organization } from "@stamhoofd/structures";
+import type { Decoder } from '@common/encoding';
+import { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
+import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
+import { Organization } from '@stamhoofd/structures';
 
 export async function idToOrganization(orgId: string) {
     return await fetchOrganization({ path: '/organization', orgId });

@@ -16,7 +16,10 @@
 
     // Only the view's own navigation bar, so nested views don't inherit it
     &:where(.center-navigation-bar, .center-navigation-bar *) > .st-navigation-bar-container {
-        --navigation-bar-horizontal-padding: max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px));
+        --navigation-bar-horizontal-padding: max(
+            var(--st-view-center-padding, 0px),
+            var(--st-horizontal-padding, 40px)
+        );
     }
 
     > main {
@@ -40,12 +43,13 @@
 
 // Only runs while the main element can scroll: the toolbar then overlaps content and shows its border
 @keyframes st-view-toolbar-sticky-border {
-    from, to {
+    from,
+    to {
         border-top-color: $color-border-lighter;
     }
 }
 
-.view > main ,
+.view > main,
 .st-view > main > .box > main {
     @extend %main-text-container;
 }
@@ -53,13 +57,12 @@
 html.modern {
     overflow: hidden;
     overflow: clip; // More modern + disables scrolling
-    
+
     height: 100vh;
     height: 100dvh; // iOS: don't include overlays in height
 }
 
 body.modern {
-
     // on iOS, we don't set overflow: hidden as that prevents scrolling the body. On Android, it doesn't matter, so better to hide overflow
     @supports not (-webkit-touch-callout: none) {
         //overflow: hidden;
@@ -90,8 +93,12 @@ body.modern.web-iOS {
     box-sizing: border-box;
 
     padding: var(--st-vertical-padding, 20px) 0 var(--st-vertical-padding, 20px) 0;
-    padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) 0 calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-bottom, 0px)) 0;
-    padding-bottom: calc(var(--st-vertical-padding, 20px) + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px)));
+    padding: calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-top, 0px)) 0
+        calc(var(--st-vertical-padding, 20px) + var(--st-safe-area-bottom, 0px)) 0;
+    padding-bottom: calc(
+        var(--st-vertical-padding, 20px) +
+            max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px))
+    );
     padding-bottom: 0; //var(--st-safe-area-bottom, 0px);
     padding-top: 0; //var(--st-safe-area-top, 0px);
     contain: strict;
@@ -126,8 +133,16 @@ body.modern.web-iOS {
 
     // Align the toolbar contents with the content column
     > .st-toolbar > div {
-        padding-left: max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-left, 0px));
-        padding-right: max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-right, 0px));
+        padding-left: max(
+            var(--st-view-center-padding, 0px),
+            var(--st-horizontal-padding, 40px),
+            var(--st-safe-area-left, 0px)
+        );
+        padding-right: max(
+            var(--st-view-center-padding, 0px),
+            var(--st-horizontal-padding, 40px),
+            var(--st-safe-area-right, 0px)
+        );
         border-top-color: var(--st-view-toolbar-border-color);
 
         @supports (animation-timeline: scroll()) {
@@ -152,7 +167,12 @@ body.modern.web-iOS {
     // or to its main. All selectors use :where(), so the rules below override each other in source order.
     &:where(:not(.small, :has(> main.small))) {
         @media (min-width: 900px) {
-            @include st-view-centered(max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2)));
+            @include st-view-centered(
+                max(
+                    var(--st-view-horizontal-padding),
+                    calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2)
+                )
+            );
         }
     }
 
@@ -160,7 +180,12 @@ body.modern.web-iOS {
         --st-view-max-width: 400px;
 
         @media (min-width: 500px) {
-            @include st-view-centered(max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2)));
+            @include st-view-centered(
+                max(
+                    var(--st-view-horizontal-padding),
+                    calc((var(--vw, 1vw)*100 - var(--st-view-max-width, 800px)) / 2)
+                )
+            );
         }
     }
 
@@ -169,26 +194,56 @@ body.modern.web-iOS {
 
         @media (min-width: 1300px) {
             --st-view-max-width: 900px;
-            @include st-view-centered(max(var(--st-view-horizontal-padding), calc((var(--vw, 1vw)*100 - var(--split-view-width, 300px) - var(--st-view-max-width, 800px)) / 2)));
+            @include st-view-centered(
+                max(
+                    var(--st-view-horizontal-padding),
+                    calc(
+                        (
+                                var(--vw, 1vw)*100 - var(--split-view-width, 300px) -
+                                    var(--st-view-max-width, 800px)
+                            ) /
+                            2
+                    )
+                )
+            );
         }
     }
 
     // Modals (popup, sheet, positionable sheet) and other contexts that size the view themselves, views inside the main
     // of another (already centered) view, and opted-out views
-    :where(.modal, .modal-full-height, .modal-dynamic-size, .popup, .sheet, .positionable-sheet, .boxed-controller, .split-view-controller[data-has-detail="true"] > .master, .st-view > main) &,
+    :where(
+            .modal,
+            .modal-full-height,
+            .modal-dynamic-size,
+            .popup,
+            .sheet,
+            .positionable-sheet,
+            .boxed-controller,
+            .split-view-controller[data-has-detail='true'] > .master,
+            .st-view > main
+        )
+        &,
     &:where(.full-width, :has(> main.full-width)) {
         @include st-view-not-centered;
     }
-
 
     > main {
         // We fixed the safe area, no need to recorrect it again
         --st-safe-area-top: 0px;
         scroll-timeline: --st-view-main block;
 
-
-        padding: var(--st-navigation-bar-correction, 0px) max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-right, 0px)) 0 max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-left, 0px));
-
+        padding: var(--st-navigation-bar-correction, 0px)
+            max(
+                var(--st-view-center-padding, 0px),
+                var(--st-horizontal-padding, 40px),
+                var(--st-safe-area-right, 0px)
+            )
+            0
+            max(
+                var(--st-view-center-padding, 0px),
+                var(--st-horizontal-padding, 40px),
+                var(--st-safe-area-left, 0px)
+            );
 
         flex-shrink: 1;
         flex-grow: 1;
@@ -197,32 +252,40 @@ body.modern.web-iOS {
         overflow-x: hidden;
         overflow-x: clip;
         -webkit-overflow-scrolling: touch;
-    
+
         // Prevent scrolling outer scroll area's
         overscroll-behavior: contain;
         position: relative;
-    
+
         // z-index bug on chrome 93 causes scrollbar to be below content :/
         //z-index: 0;
-    
+
         // Windows scrollbars
         scrollbar-gutter: stable;
 
-    
         touch-action: auto;
-    
+
         padding-bottom: calc(15px + max(var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
-    
+
         &:first-child {
-            padding-top: calc(var(--st-vertical-padding, 20px) + var(--current-view-safe-area-top, 0px));
-    
+            padding-top: calc(
+                var(--st-vertical-padding, 20px) + var(--current-view-safe-area-top, 0px)
+            );
+
             &.sticky-navigation-bar {
                 padding-top: 0;
             }
         }
-    
+
         &:last-child {
-            padding-bottom: calc(var(--st-vertical-padding, 20px) + max(var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px)));
+            padding-bottom: calc(
+                var(--st-vertical-padding, 20px) +
+                    max(
+                        var(--st-safe-area-bottom, 0px),
+                        var(--keyboard-height, 0px),
+                        var(--bottom-padding, 0px)
+                    )
+            );
         }
 
         // A centered view only lets main grow to the available height, so its toolbar directly follows the content
@@ -246,16 +309,42 @@ body.modern.web-iOS {
 
         > header {
             background: $color-background;
-            margin: 
-                calc(-200px) // Bounce animation
-                calc(-1 * max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-right, 0px)))
-                0 
-                calc(-1 * max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-left, 0px)));
-            padding: 
-                200px 
-                max(20px, max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-right, 0px)))
-                0 
-                max(20px, max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px), var(--st-safe-area-left, 0px)));
+            margin: calc(-200px) // Bounce animation
+                calc(
+                    -1 *
+                        max(
+                            var(--st-view-center-padding, 0px),
+                            var(--st-horizontal-padding, 40px),
+                            var(--st-safe-area-right, 0px)
+                        )
+                )
+                0
+                calc(
+                    -1 *
+                        max(
+                            var(--st-view-center-padding, 0px),
+                            var(--st-horizontal-padding, 40px),
+                            var(--st-safe-area-left, 0px)
+                        )
+                );
+            padding: 200px
+                max(
+                    20px,
+                    max(
+                        var(--st-view-center-padding, 0px),
+                        var(--st-horizontal-padding, 40px),
+                        var(--st-safe-area-right, 0px)
+                    )
+                )
+                0
+                max(
+                    20px,
+                    max(
+                        var(--st-view-center-padding, 0px),
+                        var(--st-horizontal-padding, 40px),
+                        var(--st-safe-area-left, 0px)
+                    )
+                );
             padding-bottom: 15px;
             margin-bottom: 30px;
 
@@ -270,9 +359,9 @@ body.modern.web-iOS {
                 0px 7px 7px 0px rgba(0, 0, 0, 0.015),
                 0px 14px 14px 0px rgba(0, 0, 0, 0.015 - 0.015/4),
                 0px 28px 28px 0px rgba(0, 0, 0, 0.015- 0.015/4- 0.015/4),
-                0 2px 2px 1px rgba(0, 0, 0, 0.03), 0 0px 20px 0 rgba(0, 0, 0, 0.02);
+                0 2px 2px 1px rgba(0, 0, 0, 0.03),
+                0 0px 20px 0 rgba(0, 0, 0, 0.02);
             border-bottom: $border-width solid $color-border;
-            
         }
 
         /**
@@ -285,32 +374,40 @@ body.modern.web-iOS {
 
             --st-view-center-padding: 0px;
             --st-horizontal-padding: calc((100vw - var(--box-width, 900px)) / 2);
-            --st-horizontal-padding: max(var(--st-view-horizontal-padding), calc((100vw - var(--box-width, 900px)) / 2));
+            --st-horizontal-padding: max(
+                var(--st-view-horizontal-padding),
+                calc((100vw - var(--box-width, 900px)) / 2)
+            );
 
             // due to a bug in Safari 16, combining display: flex with children that have a negative margin, we get horizontal scroll errors due to wrong width calculation
             // We can fix this by disabling overflow-x
             overflow-x: hidden;
         }
 
-        >.view {
-            margin: calc(-1 * var(--st-vertical-padding, 20px)) calc(-1 * var(--st-horizontal-padding, 40px));
+        > .view {
+            margin: calc(-1 * var(--st-vertical-padding, 20px))
+                calc(-1 * var(--st-horizontal-padding, 40px));
             padding: var(--st-vertical-padding, 20px) 0;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
 
-            >main {
+            > main {
                 padding: 0 var(--st-horizontal-padding, 15px) 0 var(--st-horizontal-padding, 15px);
             }
         }
 
-        >.gray-shadow {
+        > .gray-shadow {
             background: $color-background-shade;
             margin-top: 0;
             margin-bottom: calc(-1 * var(--st-vertical-padding, 20px));
-            margin-bottom: calc(-1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px));
-            padding-bottom: calc(var(--st-safe-area-bottom, 0px) + var(--st-vertical-padding, 20px));
+            margin-bottom: calc(
+                -1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px)
+            );
+            padding-bottom: calc(
+                var(--st-safe-area-bottom, 0px) + var(--st-vertical-padding, 20px)
+            );
             padding-top: calc(var(--st-vertical-padding, 20px) + 30px);
             position: relative;
             flex-grow: 1;
@@ -320,7 +417,7 @@ body.modern.web-iOS {
             --color-current-background-shade-darker: #{$color-background-shade-darker-darker};
 
             &:before {
-                content: "";
+                content: '';
                 background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.02) 100%);
                 height: 60px;
                 position: absolute;
@@ -330,7 +427,7 @@ body.modern.web-iOS {
             }
         }
 
-        >.white-top {
+        > .white-top {
             background: $color-background;
             margin-bottom: 0;
             flex-grow: 0;
@@ -342,15 +439,17 @@ body.modern.web-iOS {
             --st-safe-area-right: 0px;
         }
 
-        &~* {
+        & ~ * {
             padding-top: 0;
             margin-bottom: -300px;
             z-index: 100;
             position: relative;
 
             // Add some fake bottom padding, so when we animate it, the background stays white
-            >div {
-                padding-bottom: calc(var(--st-safe-area-bottom, 0px) + 300px + var(--default-footer-padding, 0px));
+            > div {
+                padding-bottom: calc(
+                    var(--st-safe-area-bottom, 0px) + 300px + var(--default-footer-padding, 0px)
+                );
             }
 
             transition: transform 0.2s;
@@ -362,7 +461,17 @@ body.modern.web-iOS {
                 // the safe area (which is already inclused in the bottom padding or keyboard height)
                 // is also added in the toolbar's bottom padding
                 // So we need to make sure we don't add it twice
-                transform: translateY(calc(-1 * max(var(--keyboard-height, 0px), var(--bottom-padding, 0px), var(--st-safe-area-bottom, 0px)) + var(--st-safe-area-bottom, 0px)));
+                transform: translateY(
+                    calc(
+                        -1 *
+                            max(
+                                var(--keyboard-height, 0px),
+                                var(--bottom-padding, 0px),
+                                var(--st-safe-area-bottom, 0px)
+                            ) +
+                            var(--st-safe-area-bottom, 0px)
+                    )
+                );
             }
         }
     }
@@ -382,14 +491,12 @@ body.modern.web-iOS {
     }
 
     .box & {
-
-        @media (max-width: 800px),
-        (max-height: 700px) {
-            >main:first-child {
+        @media (max-width: 800px), (max-height: 700px) {
+            > main:first-child {
                 padding-top: 0;
             }
 
-            >main:last-child {
+            > main:last-child {
                 padding-bottom: 0;
             }
         }
@@ -405,7 +512,6 @@ body.modern.web-iOS {
 
     // Box is a container for a different view
     main > .box {
-
         @media (min-width: 801px) and (min-height: 701px) {
             background: $color-background;
             --color-current-background: #{$color-background};
@@ -426,11 +532,10 @@ body.modern.web-iOS {
             // We handled safe areas
             --st-safe-area-top: 0px;
             --st-safe-area-bottom: 0px;
-
         }
     }
 
-    &.background{
+    &.background {
         background: $color-background;
         --color-current-background: #{$color-background};
         --color-current-background-shade: #{$color-background-shade};
@@ -477,7 +582,7 @@ body.modern.web-iOS {
 }
 
 .popup .st-view {
-    >main.limit-width {
+    > main.limit-width {
         --st-horizontal-padding: var(--st-view-horizontal-padding);
         padding: 0;
     }

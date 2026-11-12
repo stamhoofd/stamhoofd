@@ -45,7 +45,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    $t(`%qQ`),
+                    $t('%qQ'),
                 statusCode: 403,
             });
         }
@@ -59,7 +59,7 @@ export class EventPermissionChecker {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Organization not found',
-                    human: $t(`%DY`),
+                    human: $t('%DY'),
                 });
             }
 
@@ -103,7 +103,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    $t(`%qQ`),
+                    $t('%qQ'),
                 statusCode: 403,
             });
         }
@@ -161,7 +161,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    $t(`%qR`),
+                    $t('%qR'),
                 statusCode: 403,
             });
         }
@@ -176,7 +176,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    $t(`%qS`),
+                    $t('%qS'),
                 statusCode: 403,
             });
         }
@@ -196,7 +196,7 @@ export class EventPermissionChecker {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message:
-                            $t(`%qS`),
+                            $t('%qS'),
                     statusCode: 403,
                 });
             }
@@ -212,7 +212,7 @@ export class EventPermissionChecker {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message:
-                            $t(`%qT`),
+                            $t('%qT'),
                         statusCode: 403,
                     });
                 }
@@ -238,7 +238,7 @@ export class EventPermissionChecker {
             throw new SimpleError({
                 code: 'permission_denied',
                 message:
-                    $t(`%qU`),
+                    $t('%qU'),
                 statusCode: 403,
             });
         }
@@ -260,7 +260,7 @@ export class EventPermissionChecker {
                 throw new SimpleError({
                     code: 'permission_denied',
                     message:
-                        $t(`%qV`),
+                        $t('%qV'),
                     statusCode: 403,
                 });
             }
@@ -276,7 +276,7 @@ export class EventPermissionChecker {
                     throw new SimpleError({
                         code: 'permission_denied',
                         message:
-                            $t(`%qW`),
+                            $t('%qW'),
                         statusCode: 403,
                     });
                 }

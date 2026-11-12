@@ -1,4 +1,4 @@
-import { Node } from '@tiptap/core'
+import { Node } from '@tiptap/core';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
@@ -6,12 +6,12 @@ declare module '@tiptap/core' {
             /**
        * Set a heading node
        */
-            setDescriptiveText: () => ReturnType,
+            setDescriptiveText: () => ReturnType;
             /**
        * Toggle a heading node
        */
-            toggleDescriptiveText: () => ReturnType,
-        }
+            toggleDescriptiveText: () => ReturnType;
+        };
     }
 }
 
@@ -27,25 +27,25 @@ export const DescriptiveText = Node.create({
     addCommands() {
         return {
             setDescriptiveText: () => ({ commands }) => {
-                return commands.setNode(this.name, {})
+                return commands.setNode(this.name, {});
             },
             toggleDescriptiveText: () => ({ commands }) => {
-                return commands.toggleNode(this.name, 'paragraph', {})
+                return commands.toggleNode(this.name, 'paragraph', {});
             },
-        }
+        };
     },
 
     parseHTML() {
         return [{
-            tag: `p`,
+            tag: 'p',
             priority: 51, // 50 is default, so check before the normal paragraphs
-            getAttrs: node => {
-                return (node as any)?.getAttribute('class') === 'description' && null
+            getAttrs: (node) => {
+                return (node as any)?.getAttribute('class') === 'description' && null;
             },
-        }]
+        }];
     },
 
     renderHTML() {
-        return ['p', { class: 'description' }, 0]
+        return ['p', { class: 'description' }, 0];
     },
-})
+});

@@ -1,7 +1,8 @@
 <template>
     <div v-if="notes">
         <div class="hover-box container">
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t('%Ve') }}</div>
                 <div class="hover-show">
                     <button v-if="hasWrite" type="button" class="button icon edit gray" @click.prevent="editThisMember" />

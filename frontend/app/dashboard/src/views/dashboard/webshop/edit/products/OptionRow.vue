@@ -37,7 +37,6 @@ import { OptionMenu } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 
-
 const props = defineProps<{
     optionMenu: OptionMenu;
     option: Option;

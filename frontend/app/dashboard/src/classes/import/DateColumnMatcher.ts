@@ -14,7 +14,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
             if (!(cell.v instanceof Date) || !cell.v) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: $t(`%18I`),
+                    message: $t('%18I'),
                 });
             }
 
@@ -35,11 +35,10 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
             // for some crazy reason, sheetJS already added the UTC time offset to the UTC value (wtf why?). So we need to remove it again
             const corrected_date = new Date(date_info.getUTCFullYear(), date_info.getUTCMonth(), date_info.getUTCDate(), date_info.getUTCHours(), date_info.getUTCMinutes(), date_info.getUTCSeconds());
             return corrected_date;
-        }
-        else if (cell.t !== 's' || typeof cell.v !== 'string' || !cell.v) {
+        } else if (cell.t !== 's' || typeof cell.v !== 'string' || !cell.v) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18J`),
+                message: $t('%18J'),
             });
         }
 
@@ -54,7 +53,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
         if (parts.length !== 3) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18K`),
+                message: $t('%18K'),
             });
         }
 
@@ -65,12 +64,11 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
             if (part.match(/^\s*\d+\s*$/)) {
                 const num = parseInt(part.trim());
                 numbersClean.push(num);
-            }
-            else {
+            } else {
                 if (hadMonth) {
                     throw new SimpleError({
                         code: 'invalid_type',
-                        message: $t(`%18K`),
+                        message: $t('%18K'),
                     });
                 }
                 hadMonth = true;
@@ -84,7 +82,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
         if (numbersClean.length !== 3) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18K`),
+                message: $t('%18K'),
             });
         }
 
@@ -101,19 +99,19 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
             if (first < currentYear - maxAge || first > currentYear) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: $t(`%18L`, { year: first }),
+                    message: $t('%18L', { year: first }),
                 });
             }
             if (numbersClean[1] > 12 || numbersClean[1] < 1) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: $t(`%18M`, { date: numbersClean[1] }),
+                    message: $t('%18M', { date: numbersClean[1] }),
                 });
             }
             if (numbersClean[2] > 31 || numbersClean[2] < 1) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: $t(`%18N`, { date: numbersClean[2] }),
+                    message: $t('%18N', { date: numbersClean[2] }),
                 });
             }
             return new Date(numbersClean[0], numbersClean[1] - 1, numbersClean[2]);
@@ -125,7 +123,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
             if (last < currentYear - maxAge || last > currentYear) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: $t(`%18L`, { year: last }),
+                    message: $t('%18L', { year: last }),
                 });
             }
 
@@ -140,13 +138,13 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
             if (numbersClean[1] > 12 || numbersClean[1] < 1) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: $t(`%18M`, { date: numbersClean[1] }),
+                    message: $t('%18M', { date: numbersClean[1] }),
                 });
             }
             if (numbersClean[0] > 31 || numbersClean[0] < 1) {
                 throw new SimpleError({
                     code: 'invalid_type',
-                    message: $t(`%18N`, { date: numbersClean[2] }),
+                    message: $t('%18N', { date: numbersClean[2] }),
                 });
             }
             return new Date(numbersClean[2], numbersClean[1] - 1, numbersClean[0]);
@@ -156,7 +154,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
         if (last > 99 || last < 0) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18O`),
+                message: $t('%18O'),
             });
         }
 
@@ -172,21 +170,20 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
         if (numbersClean[1] > 12 || numbersClean[1] < 1) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18M`, { date: numbersClean[1] }),
+                message: $t('%18M', { date: numbersClean[1] }),
             });
         }
         if (numbersClean[0] > 31 || numbersClean[0] < 1) {
             throw new SimpleError({
                 code: 'invalid_type',
-                message: $t(`%18N`, { date: numbersClean[2] }),
+                message: $t('%18N', { date: numbersClean[2] }),
             });
         }
 
         if (last <= year) {
             // 21th century
             return new Date(numbersClean[2] + 2000, numbersClean[1] - 1, numbersClean[0]);
-        }
-        else {
+        } else {
             // 20th century
             return new Date(numbersClean[2] + 1900, numbersClean[1] - 1, numbersClean[0]);
         }
@@ -219,7 +216,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
 
         throw new SimpleError({
             code: 'invalid_type',
-            message: $t(`%18P`, { date: str }),
+            message: $t('%18P', { date: str }),
         });
     }
 
@@ -239,7 +236,7 @@ export class DateColumnMatcher extends GeneralMemberDetailsMatcher<Date> {
 
         throw new SimpleError({
             code: 'invalid_type',
-            message: $t(`%18K`),
+            message: $t('%18K'),
         });
     }
 }

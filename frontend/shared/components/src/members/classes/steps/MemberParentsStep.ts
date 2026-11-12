@@ -15,7 +15,7 @@ export class MemberParentsStep implements EditMemberStep {
     }
 
     getName(manager: MemberStepManager) {
-        return $t(`%XH`);
+        return $t('%XH');
     }
 
     isEnabled(manager: MemberStepManager) {
@@ -48,10 +48,10 @@ export class MemberParentsStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return AsyncComponent(() => import('#members/MemberStepView.vue'), {
-            title: $t(`%XH`),
+            title: $t('%XH'),
             member: manager.member,
             component: markRaw(EditMemberParentsBox),
-            saveText: $t(`%16p`),
+            saveText: $t('%16p'),
             markReviewed: ['parents'],
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

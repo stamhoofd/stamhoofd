@@ -64,7 +64,7 @@ async function submit() {
         });
 
         await dismiss({ force: true });
-        new Toast($t(`%v0`), 'success').show();
+        new Toast($t('%v0'), 'success').show();
     } catch (e) {
         errorBox.value = new ErrorBox(e);
     }

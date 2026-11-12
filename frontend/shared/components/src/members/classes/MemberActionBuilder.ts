@@ -186,7 +186,7 @@ export class MemberActionBuilder {
             }
             return this.organizations.map((org) => {
                 return new MenuTableAction({
-                    name: $t(`%eg`) + ' ' + org.name,
+                    name: $t('%eg') + ' ' + org.name,
                     groupIndex: 0,
                     childActions: () => this.getRegisterActions(org),
                 });
@@ -196,7 +196,7 @@ export class MemberActionBuilder {
         const getForPeriod = (period: OrganizationRegistrationPeriod, addPeriodDescription = false) => {
             return [
                 new MenuTableAction({
-                    name: $t(`%eh`),
+                    name: $t('%eh'),
                     groupIndex: 0,
                     description: addPeriodDescription ? period.period.name : undefined,
                     enabled: () => period.waitingLists.length > 0,
@@ -337,7 +337,7 @@ export class MemberActionBuilder {
         const getForPeriod = (period: OrganizationRegistrationPeriod, addPeriodDescription = false) => {
             return [
                 new MenuTableAction({
-                    name: $t(`%eh`),
+                    name: $t('%eh'),
                     groupIndex: 1,
                     enabled: () => period.waitingLists.length > 0,
                     description: addPeriodDescription ? period.period.name : undefined,
@@ -365,7 +365,7 @@ export class MemberActionBuilder {
 
         return [
             new MenuTableAction({
-                name: $t(`%HB`),
+                name: $t('%HB'),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
@@ -417,14 +417,14 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`%1KS`),
+                name: $t('%1KS'),
                 priority: 1,
                 groupIndex: 7,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (members: PlatformMember[]) => {
                     if (members.length > 100) {
-                        Toast.error($t(`%ei`)).show();
+                        Toast.error($t('%ei')).show();
                         return;
                     }
                     await this.present({
@@ -448,14 +448,14 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`%1GU`),
+                name: $t('%1GU'),
                 priority: 1,
                 groupIndex: 7,
                 needsSelection: true,
                 allowAutoSelectAll: false,
                 handler: async (members: PlatformMember[]) => {
                     if (members.length > 100) {
-                        Toast.error($t(`%ei`)).show();
+                        Toast.error($t('%ei')).show();
                         return;
                     }
                     await this.present({
@@ -481,7 +481,7 @@ export class MemberActionBuilder {
 
         return [
             new InMemoryTableAction({
-                name: $t(`%zt`),
+                name: $t('%zt'),
                 priority: 1,
                 groupIndex: 1,
                 needsSelection: true,
@@ -501,7 +501,7 @@ export class MemberActionBuilder {
         }
 
         return [new InMemoryTableAction({
-            name: $t(`%zu`),
+            name: $t('%zu'),
             icon: 'no-edit',
             destructive: true,
             priority: 10,
@@ -517,7 +517,7 @@ export class MemberActionBuilder {
 
     getChargeAction() {
         return new AsyncTableAction({
-            name: $t(`%Gu`),
+            name: $t('%Gu'),
             icon: 'calculator',
             priority: 13,
             groupIndex: 4,
@@ -582,7 +582,7 @@ export class MemberActionBuilder {
 
         const allActions: TableAction<PlatformMember>[] = [
             new InMemoryTableAction({
-                name: $t(`%XO`),
+                name: $t('%XO'),
                 icon: 'edit',
                 priority: 2,
                 groupIndex: 1,
@@ -594,7 +594,7 @@ export class MemberActionBuilder {
                 },
             }),
             new AsyncTableAction({
-                name: $t(`%1GW`),
+                name: $t('%1GW'),
                 icon: 'send',
                 priority: 12,
                 groupIndex: 3,
@@ -610,7 +610,7 @@ export class MemberActionBuilder {
             ...this.getAuditLogAction(),
             ...this.getShowMessagesAction(),
             new MenuTableAction({
-                name: $t(`%dh`),
+                name: $t('%dh'),
                 priority: 1,
                 groupIndex: 5,
                 needsSelection: true,
@@ -625,7 +625,7 @@ export class MemberActionBuilder {
 
         if (!includeOnlyRelevantForWaitingList) {
             allActions.push(new InMemoryTableAction({
-                name: $t(`%ej`),
+                name: $t('%ej'),
                 icon: 'star',
                 priority: 0,
                 groupIndex: 1,
@@ -773,7 +773,7 @@ export class MemberActionBuilder {
 
         const actions = [
             new MenuTableAction({
-                name: $t(`%1QU`),
+                name: $t('%1QU'),
                 priority: this.isWaitingList ? 2 : 1,
                 groupIndex: this.isWaitingList ? 2 : 5,
                 needsSelection: true,
@@ -789,7 +789,7 @@ export class MemberActionBuilder {
 
         if (this.isWaitingList) {
             actions.push(new MenuTableAction({
-                name: $t(`%1RK`),
+                name: $t('%1RK'),
                 priority: 1,
                 groupIndex: 2,
                 needsSelection: true,
@@ -808,7 +808,7 @@ export class MemberActionBuilder {
 
     private getSmsAction() {
         return new InMemoryTableAction({
-            name: $t(`%PI`),
+            name: $t('%PI'),
             icon: 'feedback-line',
             priority: 9,
             groupIndex: 3,
@@ -840,7 +840,7 @@ export class MemberActionBuilder {
             options: [
                 {
                     id: 'all',
-                    name: $t(`%L8`),
+                    name: $t('%L8'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.Members,
@@ -851,12 +851,12 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'none',
-                    name: $t(`%el`),
+                    name: $t('%el'),
                     value: [],
                 },
                 {
                     id: 'adults',
-                    name: $t(`%em`),
+                    name: $t('%em'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.Members,
@@ -880,7 +880,7 @@ export class MemberActionBuilder {
             options: [
                 {
                     id: 'minors',
-                    name: $t(`%en`),
+                    name: $t('%en'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberParents,
@@ -898,7 +898,7 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'all',
-                    name: $t(`%eo`),
+                    name: $t('%eo'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberParents,
@@ -909,7 +909,7 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'none',
-                    name: $t(`%ep`),
+                    name: $t('%ep'),
                     value: [],
                 },
             ],
@@ -920,12 +920,12 @@ export class MemberActionBuilder {
             options: [
                 {
                     id: 'none',
-                    name: $t(`%eq`),
+                    name: $t('%eq'),
                     value: [],
                 },
                 {
                     id: 'minors',
-                    name: $t(`%er`),
+                    name: $t('%er'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberUnverified,
@@ -943,7 +943,7 @@ export class MemberActionBuilder {
                 },
                 {
                     id: 'all',
-                    name: $t(`%es`),
+                    name: $t('%es'),
                     value: [
                         EmailRecipientSubfilter.create({
                             type: EmailRecipientFilterType.MemberUnverified,
@@ -1231,7 +1231,7 @@ export async function presentEditMember({ member, present, context }: { member: 
         components: [
             AsyncComponent(() => import('#members/MemberStepView.vue'), {
                 member,
-                title: $t(`%15E`, { firstName: member.member.firstName }),
+                title: $t('%15E', { firstName: member.member.firstName }),
                 component: markRaw(EditMemberAllBox),
                 categorized: true,
                 saveHandler: async ({ dismiss }: NavigationActions) => {
@@ -1252,7 +1252,7 @@ export async function presentEditResponsibilities({ member, present }: { member:
         components: [
             AsyncComponent(() => import('#members/MemberStepView.vue'), {
                 member,
-                title: $t(`%et`) + ' ' + member.member.firstName,
+                title: $t('%et') + ' ' + member.member.firstName,
                 component: markRaw(EditMemberResponsibilitiesBox),
                 saveHandler: async ({ dismiss }: NavigationActions) => {
                     Toast.success($t('%ZeU', { firstName: member.patchedMember.firstName })).show();
@@ -1288,11 +1288,11 @@ export async function presentDeleteMembers({ members, present, platformFamilyMan
         components: [
             AsyncComponent(() => import('../../views/DeleteView.vue'), {
                 title: isBulk ? $t('%Zne', { count }) : $t('%15Y', { name }),
-                description: isBulk ? $t('%Znl', { count }) : $t(`%15X`, { name }),
-                confirmationTitle: $t(`%eu`),
-                confirmationPlaceholder: isBulk ? $t('%ZgB') : $t(`%10H`),
+                description: isBulk ? $t('%Znl', { count }) : $t('%15X', { name }),
+                confirmationTitle: $t('%eu'),
+                confirmationPlaceholder: isBulk ? $t('%ZgB') : $t('%10H'),
                 confirmationCode: isBulk ? count.toString() : name,
-                checkboxText: $t(`%6P`),
+                checkboxText: $t('%6P'),
                 onDelete: async () => {
                     const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
                     for (const member of members) {

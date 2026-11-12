@@ -1,4 +1,3 @@
-
 export function validateTranslations(
     translations: unknown,
 ): { valid: boolean; message?: string } {

@@ -10,10 +10,7 @@
         "importHelpers": true,
         "isolatedModules": true,
         "jsx": "preserve",
-        "lib": [
-            "es2023",
-            "dom"
-        ],
+        "lib": ["es2023", "dom"],
         "module": "nodenext",
         "moduleResolution": "nodenext",
         "noErrorTruncation": true,
@@ -26,9 +23,7 @@
         "strict": false,
         "strictNullChecks": true,
         "target": "es2023",
-        "types": [
-            "node"
-        ],
+        "types": ["node"],
         "useDefineForClassFields": true
     }
 }

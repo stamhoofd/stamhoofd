@@ -89,11 +89,11 @@ export class Toast {
         }
 
         if (isModuleImportError((errors as Error))) {
-            return new Toast($t(`%ge`), 'error red');
+            return new Toast($t('%ge'), 'error red');
         }
 
         if (Request.isNetworkError((errors as Error))) {
-            return new Toast($t(`%ge`), 'error red');
+            return new Toast($t('%ge'), 'error red');
         }
         return new Toast(simpleErrors.getHuman(), 'error red');
     }

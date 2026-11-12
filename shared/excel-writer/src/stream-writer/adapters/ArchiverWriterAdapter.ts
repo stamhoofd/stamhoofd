@@ -62,8 +62,7 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
         archive.on('warning', function (err) {
             if (err.code === 'ENOENT') {
                 console.warn(err);
-            }
-            else {
+            } else {
                 console.error(err);
                 throw err;
             }
@@ -93,8 +92,7 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
             try {
                 await fs.promises.unlink(tmpFile);
                 await fs.promises.rmdir(path.dirname(tmpFile));
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Error while deleting tmp file', tmpFile, e);
             }
         }
@@ -104,8 +102,7 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
         for (const { stream } of this.fileStreams) {
             try {
                 await stream.abort();
-            }
-            catch (e) {
+            } catch (e) {
                 // Ignore
             }
         }
@@ -115,8 +112,7 @@ export class ArchiverWriterAdapter implements ZipWriterAdapter {
             try {
                 await fs.promises.unlink(tmpFile);
                 await fs.promises.rmdir(path.dirname(tmpFile));
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Error while deleting tmp file', tmpFile, e);
             }
         }

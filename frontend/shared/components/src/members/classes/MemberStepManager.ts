@@ -1,6 +1,6 @@
 import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import type { PlatformMember } from '@stamhoofd/structures';
-import type { DisplayOptions, NavigationActions} from '../../types/NavigationActions';
+import type { DisplayOptions, NavigationActions } from '../../types/NavigationActions';
 import { defaultDisplayOptions, glueNavigationActions, runDisplayOptions } from '../../types/NavigationActions';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 
@@ -42,8 +42,7 @@ export class MemberStepManager {
                     await nextStep.getComponent(this),
                 ],
             });
-        }
-        else {
+        } else {
             // Assure that if the next step uses navigate.show, while the displayoptions are 'present', and we never presented
             // any view, we map the navigate show to something like present to match the display options
             const gluedNavigate = glueNavigationActions(currentStep !== null, navigate, this.displayOptions);

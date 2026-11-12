@@ -43,7 +43,7 @@ export class CheckEmailBouncesEndpoint extends Endpoint<Params, Query, Body, Res
             throw new SimpleError({
                 code: 'too_many_recipients',
                 message: 'Too many recipients',
-                human: $t(`%ER`),
+                human: $t('%ER'),
                 field: 'recipients',
             });
         }

@@ -12,7 +12,7 @@ export class WebshopAuthHelper {
             throw new SimpleError({
                 code: 'not_authenticated',
                 message: 'Not authenticated',
-                human: $t(`%w5`),
+                human: $t('%w5'),
                 statusCode: 401,
             });
         }
@@ -29,7 +29,7 @@ export class WebshopAuthHelper {
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Order not found',
-                human: $t(`%FY`),
+                human: $t('%FY'),
             });
         }
     }

@@ -18,7 +18,7 @@ export default class ReleaseBumpStructures extends BaseCommand {
     static flags = {
         ...this.verbosityFlags(),
         'dry-run': dryRunFlag,
-        force: Flags.boolean({ description: 'Skip the git checks (clean working tree, on main, up to date with origin/main).', default: false }),
+        'force': Flags.boolean({ description: 'Skip the git checks (clean working tree, on main, up to date with origin/main).', default: false }),
     };
 
     async run(): Promise<void> {

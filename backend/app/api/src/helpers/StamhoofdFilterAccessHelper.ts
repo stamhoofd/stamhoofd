@@ -18,7 +18,7 @@ export class StamhoofdFilterAccessHelper {
                     code: 'invalid_field',
                     field: 'filter',
                     message: 'You must filter on a group of the organization you are trying to access',
-                    human: $t(`%1HG`),
+                    human: $t('%1HG'),
                 });
             }
 

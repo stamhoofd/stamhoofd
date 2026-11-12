@@ -25,7 +25,8 @@
             {{ $t('%9O') }}
         </p>
 
-        <hr><h2>{{ $t('%9P') }}</h2>
+        <hr>
+        <h2>{{ $t('%9P') }}</h2>
         <p>{{ $t('%9Q') }}</p>
 
         <STInputBox :title="$t('%7g')" error-fields="defaultMembershipTypeId" :error-box="errors.errorBox">
@@ -39,7 +40,8 @@
             </Dropdown>
         </STInputBox>
 
-        <hr><h2>{{ $t('%9S') }}</h2>
+        <hr>
+        <h2>{{ $t('%9S') }}</h2>
         <p>{{ $t('%9T') }}</p>
 
         <div class="split-inputs">
@@ -55,14 +57,16 @@
             {{ $t('%9U', {startYear: startYear.toString()}) }}
         </p>
 
-        <hr><h2>{{ $t('%9V') }}</h2>
+        <hr>
+        <h2>{{ $t('%9V') }}</h2>
 
         <div class="split-inputs">
             <NumberInputBox v-model="minimumRequiredMembers" error-fields="minimumRequiredMembers" :error-box="errors.errorBox" :title="$t(`%Ho`)" :required="true" suffix="leden" suffix-singular="lid" :placeholder="$t(`%1FW`)" :validator="errors.validator" />
         </div>
 
         <div class="container">
-            <hr><STList v-if="organizationTagIds === null">
+            <hr>
+            <STList v-if="organizationTagIds === null">
                 <STListItem :selectable="true" element-name="button" @click="organizationTagIds = []">
                     <template #left>
                         <span class="icon add gray" />
@@ -85,7 +89,8 @@
             </template>
         </div>
 
-        <hr><h2>{{ $t('%HL') }}</h2>
+        <hr>
+        <h2>{{ $t('%HL') }}</h2>
         <p>{{ $t('%9Y') }}</p>
 
         <InheritedRecordsConfigurationBox :group-level="true" :inherited-records-configuration="inheritedRecordsConfiguration" :records-configuration="recordsConfiguration" @patch:records-configuration="patchRecordsConfiguration" />
@@ -162,8 +167,7 @@ const save = async () => {
         }
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -191,8 +195,7 @@ const doDelete = async () => {
     try {
         await props.deleteHandler();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

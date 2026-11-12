@@ -33,7 +33,7 @@ const props = withDefaults(
         items: { name: string; value: T; description?: string }[];
     }>(), {
         nullable: false as any,
-        nullableLabel: () => $t(`%c9`),
+        nullableLabel: () => $t('%c9'),
     },
 );
 
@@ -52,8 +52,7 @@ const allGroups = computed({
     set: (allGroups) => {
         if (allGroups) {
             model.value = null as Arr;
-        }
-        else {
+        } else {
             model.value = (lastCachedValue.value ?? []).slice();
         }
     },
@@ -69,8 +68,7 @@ function setGroupValue(group: T, value: boolean) {
     }
     if (value) {
         model.value = [...model.value.filter(t => t !== group), group] as Arr;
-    }
-    else {
+    } else {
         model.value = model.value.filter(t => t !== group) as Arr;
     }
 }

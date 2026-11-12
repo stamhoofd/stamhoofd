@@ -76,7 +76,7 @@ const isLoggedIn = computed(() => context.value?.isComplete() ?? false);
 const company = computed(() => props.organization.defaultCompanies[0] as Company);
 
 async function logout() {
-    if (!(await CenteredMessage.confirm($t(`%10Q`), $t(`%10R`), $t(`%10S`)))) {
+    if (!(await CenteredMessage.confirm($t('%10Q'), $t('%10R'), $t('%10S')))) {
         return;
     }
     await context.value.logout();

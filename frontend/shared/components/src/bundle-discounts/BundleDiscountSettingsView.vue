@@ -139,7 +139,7 @@ defineRoute({
                 },
             };
         }
-        Toast.error($t(`%15y`)).show();
+        Toast.error($t('%15y')).show();
         throw new Error('Discount not found');
     },
 

@@ -81,20 +81,20 @@ const memberViewLoaders = useMemberViewLoaders();
 
 const tabs = computed(() => {
     const base = [{
-        name: $t(`%zM`),
+        name: $t('%zM'),
         component: AsyncComponent(memberViewLoaders.details, {}),
     }];
 
     if (STAMHOOFD.userMode === 'platform') {
         base.push({
-            name: $t(`%1Ny`),
+            name: $t('%1Ny'),
             component: AsyncComponent(() => import('./tabs/MemberPlatformMembershipTab.vue'), {}),
         });
     }
 
     if (organization.value && auth.hasAccessRight(AccessRight.MemberReadFinancialData)) {
         base.push({
-            name: $t(`%zN`),
+            name: $t('%zN'),
             component: AsyncComponent(() => import('./tabs/MemberPaymentsTab.vue'), {}),
         });
     }

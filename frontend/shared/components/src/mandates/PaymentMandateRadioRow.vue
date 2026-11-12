@@ -35,7 +35,6 @@
     </STGridItem>
 </template>
 
-
 <script lang="ts" setup>
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import STGridItem from '../layout/STGridItem.vue';

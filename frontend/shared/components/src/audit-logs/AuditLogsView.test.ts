@@ -49,8 +49,7 @@ test('forwards filters and custom renderers to content and recursively filtered 
         expect(second.properties.openLogs).toBe(openLogs);
         expect(content.props('objectIds')).toEqual(['initial-object']);
         expect(present).toHaveBeenCalledTimes(2);
-    }
-    finally {
+    } finally {
         wrapper.unmount();
     }
 });

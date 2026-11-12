@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder} from '@common/encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray, patchContainsChanges } from '@common/encoding';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '#errors/useErrors.ts';
@@ -6,9 +6,9 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatchPlatform } from '#hooks/usePatchPlatform.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
-import type { Group, MemberResponsibility, PermissionRoleDetailed, PermissionRoleForResponsibility} from '@stamhoofd/structures';
+import type { Group, MemberResponsibility, PermissionRoleDetailed, PermissionRoleForResponsibility } from '@stamhoofd/structures';
 import { Organization, OrganizationPrivateMetaData, Platform, PlatformConfig, PlatformPrivateConfig, Version } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 
 export function useRoles() {
@@ -148,17 +148,14 @@ export function usePatchRoles() {
                 organizationPatch.value.id = organization.value.id;
                 await organizationManager.value.patch(organizationPatch.value);
                 await succeededHandler();
-            }
-            catch (e) {
+            } catch (e) {
                 errors.errorBox = new ErrorBox(e);
             }
-        }
-        else {
+        } else {
             try {
                 await patchPlatform(platformPatch.value);
                 await succeededHandler();
-            }
-            catch (e) {
+            } catch (e) {
                 errors.errorBox = new ErrorBox(e);
             }
         }
@@ -197,8 +194,7 @@ export function usePatchRoles() {
                         list.push({ responsibility, group, role });
                     }
                 }
-            }
-            else {
+            } else {
                 const role = patchedOrganization.value?.privateMeta?.inheritedResponsibilityRoles.find(r => r.responsibilityId === responsibility.id && r.responsibilityGroupId === null) ?? null;
                 list.push({ responsibility, group: null, role });
             }

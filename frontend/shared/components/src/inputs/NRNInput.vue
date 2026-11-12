@@ -146,7 +146,7 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: nrrRaw.value.length === 0 ? (props.requiredMessage ?? $t(`%z4`)) : $t(`%1T9`),
+                message: nrrRaw.value.length === 0 ? (props.requiredMessage ?? $t('%z4')) : $t('%1T9'),
                 field: 'nationalRegisterNumber',
             }));
         }
@@ -155,7 +155,7 @@ function validate(final = true, silent = false) {
         if (!silent) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%Zt8`),
+                message: $t('%Zt8'),
                 field: 'nationalRegisterNumber',
             }));
         }

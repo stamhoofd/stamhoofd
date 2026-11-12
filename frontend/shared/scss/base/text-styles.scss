@@ -11,19 +11,33 @@
     @include style-side-view-shadow();
 }
 %style-input-shadow {
-    box-shadow: 
-        inset 0px 0.5px 1.4px 0.1px rgba(0, 0, 0, 0.02), 
+    box-shadow:
+        inset 0px 0.5px 1.4px 0.1px rgba(0, 0, 0, 0.02),
         0px 0px 0px 1px rgba(0, 0, 0, 0.02), // Smoothen border
         0px 0.7px 0.7px 0px rgba(0, 0, 0, 0.015),
         0px 1.4px 1.4px 0px rgba(0, 0, 0, calc(0.015 - 0.015 / 4)),
         0px 2.8px 2.8px 0px rgba(0, 0, 0, calc(0.015 - 0.015 / 4 - 0.015 / 4));
 
-    box-shadow: 
-        inset 0px 0.5px 1.4px 0.1px rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), 0.02), 
+    box-shadow:
+        inset 0px 0.5px 1.4px 0.1px
+            rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), 0.02),
         0px 0px 0px 1px rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), 0.02), // Smoothen border
-        0px 0.7px 0.7px 0px rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), 0.015),
-        0px 1.4px 1.4px 0px rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), calc(0.015 - 0.015 / 4)),
-        0px 2.8px 2.8px 0px rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), calc(0.015 - 0.015 / 4 - 0.015 / 4));
+        0px 0.7px 0.7px 0px
+            rgba(var(--rgb-shadow, 0), var(--rgb-shadow, 0), var(--rgb-shadow, 0), 0.015),
+        0px 1.4px 1.4px 0px
+            rgba(
+                var(--rgb-shadow, 0),
+                var(--rgb-shadow, 0),
+                var(--rgb-shadow, 0),
+                calc(0.015 - 0.015 / 4)
+            ),
+        0px 2.8px 2.8px 0px
+            rgba(
+                var(--rgb-shadow, 0),
+                var(--rgb-shadow, 0),
+                var(--rgb-shadow, 0),
+                calc(0.015 - 0.015 / 4 - 0.015 / 4)
+            );
 }
 
 %style-input-box {
@@ -35,10 +49,11 @@
     transition: border-color 0.2s;
     @extend %style-input-shadow;
 
-    &:disabled, &.disabled {
+    &:disabled,
+    &.disabled {
         border-color: $color-border;
     }
-    
+
     &:focus,
     &:focus-within {
         border-color: $color-primary;
@@ -52,10 +67,16 @@
 }
 
 %style-overlay-shadow {
-    box-shadow: 0px 20px 25px 0px rgba(0, 0, 0, 0.05), 0px 20px 20px 0px rgba(0, 0, 0, 0.05), 0px 20px 10px 0px rgba(0, 0, 0, 0.05);
+    box-shadow:
+        0px 20px 25px 0px rgba(0, 0, 0, 0.05),
+        0px 20px 20px 0px rgba(0, 0, 0, 0.05),
+        0px 20px 10px 0px rgba(0, 0, 0, 0.05);
 
     @media (prefers-color-scheme: dark) {
-        box-shadow: 0 0 0 1px $color-border, 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+        box-shadow:
+            0 0 0 1px $color-border,
+            0px 10px 60px 0px $color-overlay-shadow,
+            0px 15px 30px 0px $color-overlay-shadow;
     }
 }
 
@@ -100,9 +121,10 @@
     border-radius: 5px;
     background: $color-background-shade-darker;
     background-attachment: fixed;
-    background-image: linear-gradient(90deg, 
-        $color-background-shade-darker 0px, 
-        $color-background-shade 40px, 
+    background-image: linear-gradient(
+        90deg,
+        $color-background-shade-darker 0px,
+        $color-background-shade 40px,
         $color-background-shade-darker 80px,
         $color-background-shade-darker 50vw,
         $color-background-shade calc(50vw + 40px),
@@ -119,7 +141,8 @@
     0% {
         background-position: -50vw;
     }
-    80%, 100% {
+    80%,
+    100% {
         background-position: 100vw;
     }
 }
@@ -139,7 +162,7 @@
 }
 
 %style-text-gradient {
-    background: linear-gradient(94.7deg, #0053FF 31.34%, #7000FF 68.57%);
+    background: linear-gradient(94.7deg, #0053ff 31.34%, #7000ff 68.57%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -155,7 +178,9 @@
         font-size: 24px;
     }
 
-    &.with-icons, &:has(.icon), &:has(.style-tag) {
+    &.with-icons,
+    &:has(.icon),
+    &:has(.style-tag) {
         display: flex;
         align-items: center;
         gap: 5px;
@@ -220,7 +245,8 @@
         }
     }
 
-    &.with-icons, &:has(.icon) {
+    &.with-icons,
+    &:has(.icon) {
         display: flex;
         align-items: center;
         gap: 5px;
@@ -248,8 +274,8 @@
         }
     }
 
-    +p:not([class]),
-    +p.style-description {
+    + p:not([class]),
+    + p.style-description {
         @extend %style-description-block;
     }
 }
@@ -263,7 +289,6 @@
         margin-left: 5px;
     }
 }
-
 
 %style-title-2-larger {
     font-size: 24px;
@@ -292,7 +317,8 @@
         font-size: 14px;
     }
 
-    body.web-android &, body.native-android & {
+    body.web-android &,
+    body.native-android & {
         // Increase title size a bit
         font-size: 16px;
         letter-spacing: -0.015em;
@@ -369,23 +395,21 @@
 
     @media (max-width: 600px) {
         font-size: 14px;
-        
     }
 
     @media (max-width: 400px) {
         font-size: 14px;
-        
     }
 
     + p {
-       padding-top: 3px; 
+        padding-top: 3px;
     }
 
     &.smaller {
         font-size: 14px;
         line-height: 1.4;
 
-        +p {
+        + p {
             padding-top: 3px;
         }
 
@@ -398,14 +422,14 @@
         font-size: 17px;
 
         + p {
-            padding-top: 4px; 
+            padding-top: 4px;
         }
 
         @media (max-width: 400px) {
             font-size: 16px;
 
             + p {
-                padding-top: 3px; 
+                padding-top: 3px;
             }
         }
     }
@@ -414,14 +438,14 @@
         font-size: 20px;
 
         + p {
-            padding-top: 5px; 
+            padding-top: 5px;
         }
 
         @media (max-width: 400px) {
             font-size: 17px;
 
             + p {
-                padding-top: 3px; 
+                padding-top: 3px;
             }
         }
     }
@@ -571,7 +595,7 @@
     line-height: 1.4;
     font-weight: $font-weight-semibold;
     color: $color-primary;
-    
+
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -592,7 +616,6 @@
     }
 }
 
-
 %style-value-old {
     font-size: 15px;
     line-height: 1.4;
@@ -609,7 +632,6 @@
     line-height: 1.4;
     font-weight: $font-weight-medium;
     color: $color-success-dark;
-
 }
 
 %style-discount-old-price {
@@ -659,7 +681,7 @@
         color: $color-gray-text;
     }
 
-     &.with-icons {
+    &.with-icons {
         display: flex;
         align-items: center;
         gap: 4px;
@@ -704,7 +726,7 @@
         @extend %style-strong;
     }
 
-     @media (max-width: 600px) {
+    @media (max-width: 600px) {
         font-size: 14px;
     }
 }
@@ -723,7 +745,6 @@
     }
 }
 
-
 %inline-size {
     // The width of the description should not affect the width of the parent
     contain: inline-size;
@@ -741,7 +762,9 @@
     /**
         Small optimizations for modern browsers only
     */
-    &.flex, &:has(> .icon), &:has(> svg) {
+    &.flex,
+    &:has(> .icon),
+    &:has(> svg) {
         display: inline-flex;
         align-items: center;
         gap: 5px;
@@ -758,12 +781,19 @@
     }
 }
 
-
-%style-description, %style-description-large, %style-description-small, %style-title-list, %style-title-prefix, %style-definition-label {
+%style-description,
+%style-description-large,
+%style-description-small,
+%style-title-list,
+%style-title-prefix,
+%style-definition-label {
     /**
         Small optimizations for modern browsers only
     */
-    &.flex, &:has(> .icon), &:has(> svg), &:has(> .style-tag) {
+    &.flex,
+    &:has(> .icon),
+    &:has(> svg),
+    &:has(> .style-tag) {
         display: flex;
         align-items: center;
         gap: 7px;
@@ -774,7 +804,10 @@
     /**
         Small optimizations for modern browsers only
     */
-    &.flex, &:has(> .icon), &:has(> svg), &:has(> %style-tag) {
+    &.flex,
+    &:has(> .icon),
+    &:has(> svg),
+    &:has(> %style-tag) {
         display: flex;
         align-items: center;
         gap: 7px;
@@ -805,7 +838,9 @@
         display: none;
     }
 
-    &+ .warning-box, &+ .info-box, &+ .error-box {
+    & + .warning-box,
+    & + .info-box,
+    & + .error-box {
         margin-top: 0px;
     }
 }
@@ -888,7 +923,8 @@
         font-size: 16px;
     }
 
-    body.web-iOS &, body.native-iOS & {
+    body.web-iOS &,
+    body.native-iOS & {
         // Fix zoom on iOS devices
         font-size: 16px;
     }
@@ -1017,9 +1053,8 @@
 %style-with-button {
     display: flex;
     flex-direction: row;
-    
 
-    &> *:first-child {
+    & > *:first-child {
         flex-grow: 1;
         text-align: left;
 
@@ -1036,7 +1071,7 @@
         }
     }
 
-    &> *:last-child:not(:first-child) {
+    & > *:last-child:not(:first-child) {
         flex-shrink: 0;
         margin-top: -13px;
 
@@ -1069,7 +1104,7 @@
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     user-select: none;
     max-width: fit-content;
-    
+
     &:before {
         content: '';
         position: absolute;
@@ -1124,25 +1159,29 @@
     padding: 10px 0;
 
     &:not(:empty) {
-        + .st-list, + .st-grid {
+        + .st-list,
+        + .st-grid {
             margin-top: 20px;
         }
 
         // Same but stacked in divs:
         + div {
-            .st-list:first-child, .st-grid:first-child {
+            .st-list:first-child,
+            .st-grid:first-child {
                 margin-top: 20px;
             }
         }
 
         + div > div:first-child {
-            .st-list:first-child, .st-grid:first-child {
+            .st-list:first-child,
+            .st-grid:first-child {
                 margin-top: 20px;
             }
         }
-        
+
         + div > div:first-child > div:first-child {
-            .st-list:first-child, .st-grid:first-child {
+            .st-list:first-child,
+            .st-grid:first-child {
                 margin-top: 20px;
             }
         }
@@ -1172,9 +1211,9 @@
 
     dd {
         @extend %style-definition-description;
-        
+
         -webkit-touch-callout: default;
-        
+
         // user-select contain is not supported in safari
         -webkit-user-select: text;
         user-select: text;
@@ -1182,7 +1221,7 @@
         position: relative;
         z-index: 1;
 
-        transition: color 0.2s;    
+        transition: color 0.2s;
 
         > p.style-description:first-child {
             color: $color-dark;
@@ -1202,7 +1241,6 @@
         opacity: 0;
     }
 
-
     @media (hover: hover) {
         dd:after {
             content: '';
@@ -1219,7 +1257,8 @@
         }
 
         &.hover {
-            dt:hover + dd, dd:hover{
+            dt:hover + dd,
+            dd:hover {
                 &:not(.icons):after {
                     opacity: 1;
                 }
@@ -1233,14 +1272,15 @@
         }
     }
 
-    dd.copied, dd.button:active {
+    dd.copied,
+    dd.button:active {
         color: $color-primary;
 
         &:before {
             opacity: 1;
         }
     }
-    
+
     %center {
         align-self: center;
     }
@@ -1270,54 +1310,65 @@
 }
 
 %main-text-container {
-    &, .container {
-        > h1:not([class]):first-child, > %style-title-prefix:first-child + h1:not([class]) {
+    &,
+    .container {
+        > h1:not([class]):first-child,
+        > %style-title-prefix:first-child + h1:not([class]) {
             padding-bottom: 10px;
             @extend %style-title-1;
 
-            + p:not([class]), + p.style-description {
+            + p:not([class]),
+            + p.style-description {
                 @extend %style-description-block;
 
-                + h2, + .st-errors-default + h2 {
-                    padding-top:  20px;
-                }
-            }
-
-            + h2, + .st-errors-default + h2 {
-                padding-top:  20px !important;
-            }
-        }
-
-        > h1.larger:first-child, > %style-title-prefix:first-child + h1.larger {
-            @extend %style-navigation-title;
-
-            + p:not([class]), + p.style-description {
-                @extend %style-description-block;
-
-                + h2 , + .st-errors-default + h2 {
+                + h2,
+                + .st-errors-default + h2 {
                     padding-top: 20px;
                 }
             }
 
-            + h2 , + .st-errors-default + h2 {
-                padding-top:  20px;
+            + h2,
+            + .st-errors-default + h2 {
+                padding-top: 20px !important;
             }
         }
 
-        > h2, > h3.larger {
+        > h1.larger:first-child,
+        > %style-title-prefix:first-child + h1.larger {
+            @extend %style-navigation-title;
+
+            + p:not([class]),
+            + p.style-description {
+                @extend %style-description-block;
+
+                + h2,
+                + .st-errors-default + h2 {
+                    padding-top: 20px;
+                }
+            }
+
+            + h2,
+            + .st-errors-default + h2 {
+                padding-top: 20px;
+            }
+        }
+
+        > h2,
+        > h3.larger {
             @extend %style-title-2;
             padding-bottom: 11px;
 
-             @media (max-width: 600px) {
+            @media (max-width: 600px) {
                 padding-bottom: 7px;
             }
         }
 
-        > h2.smaller, > h3:not([class]) {
+        > h2.smaller,
+        > h3:not([class]) {
             @extend %style-title-3;
             padding-bottom: 11px;
 
-             @media (max-width: 600px) {
+            @media (max-width: 600px) {
                 padding-bottom: 7px;
             }
         }
@@ -1326,7 +1377,7 @@
             @extend %style-title-2-larger;
             padding-bottom: 10px;
 
-             @media (max-width: 600px) {
+            @media (max-width: 600px) {
                 padding-bottom: 7px;
             }
         }
@@ -1344,11 +1395,10 @@
         }
 
         > h2 + p {
-            &:not([class]), &.style-description {
+            &:not([class]),
+            &.style-description {
                 @extend %style-description-block;
             }
-
-            
         }
 
         > hr {
@@ -1360,7 +1410,10 @@
                 margin: var(--st-hr-margin, 20px) calc(-1 * var(--st-horizontal-padding, 40px));
             }
 
-            + h2, + .container > h2:first-child, + h3, + .container > h3:first-child {
+            + h2,
+            + .container > h2:first-child,
+            + h3,
+            + .container > h3:first-child {
                 margin-top: 40px;
             }
         }
@@ -1397,7 +1450,7 @@
     position: relative;
     // Default color primary for icon
     color: $color-primary-dark;
-    
+
     figure {
         background: $color-primary-light;
         color: $color-primary-dark;
@@ -1409,7 +1462,7 @@
             object-fit: contain;
         }
 
-        > img.small{
+        > img.small {
             width: 24px;
             height: 24px;
             object-fit: contain;
@@ -1446,12 +1499,12 @@
 
     &.white {
         color: $color-dark;
-        
+
         figure {
             background: $color-background;
             color: $color-dark;
 
-            box-shadow: 
+            box-shadow:
                 inset 1px 1px 0.5px 0px rgba(255, 255, 255, calc(1 - var(--is-dark-mode) * 0.9)),
                 inset -1px -1px 0.5px 0px rgba(255, 255, 255, calc(1 - var(--is-dark-mode) * 0.9)),
                 inset -5px -5px 20px 0px rgba(0, 0, 0, calc(0.01 - var(--is-dark-mode) * 0.01)),
@@ -1459,8 +1512,8 @@
                 0 0px 10px 0 rgba(0, 0, 0, 0.03),
                 0px 10px 20px 5px rgba(0, 0, 0, 0.03);
         }
-    
-        >aside {
+
+        > aside {
             color: $color-dark;
         }
     }
@@ -1503,7 +1556,7 @@
 
     &.gray {
         color: $color-dark;
-        
+
         figure {
             background: $color-background-shade-darker;
             color: $color-dark;
@@ -1513,7 +1566,7 @@
             color: $color-dark;
         }
     }
-    
+
     &.transparent {
         figure {
             background: transparent;
@@ -1611,7 +1664,8 @@
         @supports (transform: scale(calc(10px / 15px), calc(10px / 15px))) {
             --block-aside-scale: min(1, calc(var(--block-width, 40px) / 36px));
         }
-        transform: scale(var(--block-aside-scale, 1), var(--block-aside-scale, 1)) translate(50%, 50%);
+        transform: scale(var(--block-aside-scale, 1), var(--block-aside-scale, 1))
+            translate(50%, 50%);
 
         line-height: 1;
         display: block;
@@ -1704,7 +1758,7 @@
     align-items: flex-end;
     justify-content: flex-end;
 
-    >* {
+    > * {
         flex-basis: 350px;
     }
 
@@ -1732,7 +1786,8 @@
         font-style: italic;
     }
 
-    p:not([class]), p.is-empty {
+    p:not([class]),
+    p.is-empty {
         margin: 0;
         padding: 0;
         font-size: inherit;
@@ -1741,7 +1796,8 @@
         color: $color-dark;
     }
 
-    ul, ol {
+    ul,
+    ol {
         padding-left: 25px;
         font-size: inherit;
 
@@ -1755,17 +1811,19 @@
     }
 
     &.gray {
-        p:not([class]), p.is-empty {
+        p:not([class]),
+        p.is-empty {
             color: $color-gray-text;
         }
     }
 
     p:empty::after {
-        content: "\200B";
+        content: '\200B';
         visibility: hidden;
     }
 
-    p.warning-box, p.info-box {
+    p.warning-box,
+    p.info-box {
         display: block !important;
     }
 
@@ -1782,7 +1840,9 @@
     }
 
     a {
-        &, &:link, &:visited {
+        &,
+        &:link,
+        &:visited {
             color: $color-primary;
             font-weight: $font-weight-semibold;
             text-decoration: underline;
@@ -1791,7 +1851,9 @@
 
     &.subtle-links {
         a {
-            &, &:link, &:visited {
+            &,
+            &:link,
+            &:visited {
                 color: $color-gray-text;
                 font-weight: $font-weight-default;
                 text-decoration: underline;
@@ -1806,7 +1868,9 @@
 
     &.no-underline-links {
         a {
-            &, &:link, &:visited {
+            &,
+            &:link,
+            &:visited {
                 color: $color-primary;
                 text-decoration: none;
 
@@ -1826,15 +1890,15 @@
         background: none;
         display: block;
         border: 0;
-    
+
         &:after {
-            content: "";
+            content: '';
             display: block;
             height: 1px;
             background: $color-border;
             width: 100%;
         }
-    
+
         &.ProseMirror-selectednode {
             &:after {
                 background: $color-primary;
@@ -1864,12 +1928,17 @@
 %style-inline-resource {
     font-weight: $font-weight-default;
 
-    &:is(button), &:is(a), &:is(.style-tooltip) {
+    &:is(button),
+    &:is(a),
+    &:is(.style-tooltip) {
         font-weight: $font-weight-default;
         text-decoration: underline;
         text-decoration-color: $color-border;
 
-        &:link, &:visited, &:hover, &:active {
+        &:link,
+        &:visited,
+        &:hover,
+        &:active {
             font-weight: $font-weight-default;
             text-decoration: underline;
             text-decoration-color: $color-border;
@@ -1880,7 +1949,11 @@
 }
 
 %style-subtle-link {
-    &, &:link, &:visited, &:hover, &:active {
+    &,
+    &:link,
+    &:visited,
+    &:hover,
+    &:active {
         color: $color-gray-text;
         font-weight: $font-weight-default;
         text-decoration: underline;
@@ -1930,7 +2003,7 @@
     flex-wrap: wrap;
     gap: 15px;
 
-    &>div {
+    & > div {
         flex-shrink: 0;
         flex-grow: 1;
         min-width: 0;
@@ -1943,9 +2016,8 @@
     }
 }
 
-
 %style-list {
-    list-style: none; 
+    list-style: none;
     @extend %style-normal;
     padding-left: 30px;
     margin-bottom: 20px;
@@ -1955,9 +2027,9 @@
     }
 
     li::before {
-        content: ""; 
+        content: '';
         background: $color-primary;
-        display: inline-block; 
+        display: inline-block;
         vertical-align: middle;
         width: 5px;
         height: 5px;
@@ -1990,8 +2062,6 @@
     margin-bottom: 25px;
     margin-top: 25px;
 
-
-
     @media (max-width: 450px) {
         padding: 0;
         margin-bottom: 15px;
@@ -2019,9 +2089,9 @@
     }
 
     &.closed {
-        >h2 {
+        > h2 {
             padding: 20px 15px;
-            
+
             @media (max-width: 450px) {
                 padding: 15px 15px;
             }

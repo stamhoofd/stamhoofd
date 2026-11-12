@@ -207,8 +207,7 @@ describe('Endpoint.StartMailchimpSync', () => {
             try {
                 await expect(start(context, MailchimpSyncRequest.create({ full: true, confirmedConsent: true })))
                     .rejects.toThrow(STExpect.simpleError({ code: 'sync_running' }));
-            }
-            finally {
+            } finally {
                 release();
                 await running;
             }
@@ -304,8 +303,7 @@ describe('Endpoint.StartMailchimpSync', () => {
                 expect(second.result.processed).toBe(second.result.total);
                 expect(second.result).toMatchObject({ added: 0, updated: 3, failed: 0 });
                 expect(mailchimp.requests.slice(requestsBefore).filter(r => r.method === 'PUT' || r.path.endsWith('/tags'))).toEqual([]);
-            }
-            finally {
+            } finally {
                 const editing = await Platform.getForEditing();
                 editing.config.featureFlags = editing.config.featureFlags.filter(f => f !== 'mailchimp');
                 editing.config.name = original.name;
@@ -367,8 +365,7 @@ describe('Endpoint.StartMailchimpSync', () => {
                 await connectMailchimp(mailchimp, context);
                 await expect(start(context, MailchimpSyncRequest.create({ type: MailchimpSyncType.Orders, webshopId: 'x', confirmedConsent: true })))
                     .rejects.toThrow(STExpect.simpleError({ code: 'not_available' }));
-            }
-            finally {
+            } finally {
                 const editing = await Platform.getForEditing();
                 editing.config.featureFlags = editing.config.featureFlags.filter(f => f !== 'mailchimp');
                 editing.privateConfig.mailchimp = null;

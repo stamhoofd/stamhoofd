@@ -66,7 +66,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         }
 
         if (!await Context.auth.hasSomeAccessInPeriod(period.id, putGroup.organizationId)) {
-            throw Context.auth.error($t(`%1HQ`));
+            throw Context.auth.error($t('%1HQ'));
         }
 
         if (!group) {
@@ -120,7 +120,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Empty groups',
-                    human: $t(`%DV`),
+                    human: $t('%DV'),
                 });
             }
 
@@ -128,7 +128,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Empty default age groups',
-                    human: $t(`%DW`),
+                    human: $t('%DW'),
                 });
             }
 
@@ -136,7 +136,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Empty organization tag ids',
-                    human: $t(`%DX`),
+                    human: $t('%DX'),
                 });
             }
 
@@ -181,7 +181,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Event not found',
-                    human: $t(`%DY`),
+                    human: $t('%DY'),
                 });
             }
 
@@ -191,7 +191,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Cannot patch organizationCache',
-                    human: $t(`%DZ`),
+                    human: $t('%DZ'),
                     field: 'meta.organizationCache',
                 });
             }
@@ -305,7 +305,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         throw new SimpleError({
                             code: 'not_found',
                             message: 'Webshop not found',
-                            human: $t(`%DY`),
+                            human: $t('%DY'),
                             field: 'webshopId',
                         });
                     }
@@ -368,7 +368,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty groups',
-                human: $t(`%DV`),
+                human: $t('%DV'),
             });
         }
 
@@ -376,7 +376,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty default age groups',
-                human: $t(`%DW`),
+                human: $t('%DW'),
             });
         }
 
@@ -384,7 +384,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty organization tag ids',
-                human: $t(`%DX`),
+                human: $t('%DX'),
             });
         }
     }
@@ -403,7 +403,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid typeId',
-                human: $t(`%Da`),
+                human: $t('%Da'),
                 field: 'typeId',
             });
         }
@@ -417,7 +417,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Name is too short',
-                human: $t(`%Db`),
+                human: $t('%Db'),
                 field: 'name',
             });
         }
@@ -426,7 +426,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             throw new SimpleError({
                 code: 'invalid_dates',
                 message: 'End date is before start date',
-                human: $t(`%Dc`),
+                human: $t('%Dc'),
                 field: 'endDate',
             });
         }
@@ -439,7 +439,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Empty number',
-                        human: $t(`%vQ`),
+                        human: $t('%vQ'),
                         field: 'event_required',
                     });
                 }
@@ -459,9 +459,9 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'minimum_days',
                         message: 'An event with this type has a minimum of ' + type.minimumDays + ' days',
-                        human: $t(`%14D`, {
+                        human: $t('%14D', {
                             name: type.name,
-                            days: Formatter.pluralText(type.minimumDays, $t(`%1N7`), $t(`%1N6`)),
+                            days: Formatter.pluralText(type.minimumDays, $t('%1N7'), $t('%1N6')),
                         }),
                         field: 'startDate',
                     });
@@ -471,9 +471,9 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'maximum_days',
                         message: 'An event with this type has a maximum of ' + type.maximumDays + ' days',
-                        human: $t(`%14E`, {
+                        human: $t('%14E', {
                             name: type.name,
-                            days: Formatter.pluralText(type.maximumDays, $t(`%1N7`), $t(`%1N6`)),
+                            days: Formatter.pluralText(type.maximumDays, $t('%1N7'), $t('%1N6')),
                         }),
                         field: 'startDate',
                     });
@@ -498,7 +498,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                         throw new SimpleError({
                             code: 'type_maximum_reached',
                             message: 'Maximum number of events with this type reached',
-                            human: $t(`%Dd`) + ' ' + type.name + ' ' + $t(`%De`) + type.maximum + ')',
+                            human: $t('%Dd') + ' ' + type.name + ' ' + $t('%De') + type.maximum + ')',
                             field: 'typeId',
                         });
                     }
@@ -506,7 +506,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                     throw new SimpleError({
                         code: 'invalid_period',
                         message: 'No period found for this start date',
-                        human: $t(`%Df`),
+                        human: $t('%Df'),
                         field: 'startDate',
                     });
                 }
@@ -528,7 +528,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         const originalGroupType = existingGroup.type;
 
         if (!await Context.auth.canAccessGroup(existingGroup)) {
-            throw Context.auth.error($t(`%1N9`));
+            throw Context.auth.error($t('%1N9'));
         }
 
         if (event.organizationId !== existingGroup.organizationId) {

@@ -19,7 +19,7 @@ import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
 export class PaymentFilterBuilders {
     static get method() {
         return new MultipleChoiceFilterBuilder({
-            name: $t(`%M7`),
+            name: $t('%M7'),
             options: Object.values(PaymentMethod).filter(m => m !== PaymentMethod.AccountDeductions).map((method) => {
                 return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(method), method);
             }),
@@ -33,7 +33,7 @@ export class PaymentFilterBuilders {
 
     static get methodForMembershipOrganization() {
         return new MultipleChoiceFilterBuilder({
-            name: $t(`%M7`),
+            name: $t('%M7'),
             options: Object.values(PaymentMethod).map((method) => {
                 return new MultipleChoiceUIFilterOption(PaymentMethodHelper.getNameCapitalized(method), method);
             }),
@@ -47,7 +47,7 @@ export class PaymentFilterBuilders {
 
     static get status() {
         return new MultipleChoiceFilterBuilder({
-            name: $t(`%1A`),
+            name: $t('%1A'),
             options: Object.values(PaymentStatus).map((method) => {
                 return new MultipleChoiceUIFilterOption(PaymentStatusHelper.getNameCapitalized(method), method);
             }),
@@ -61,7 +61,7 @@ export class PaymentFilterBuilders {
 
     static get invoiced() {
         return new MultipleChoiceFilterBuilder({
-            name: $t(`%1JO`),
+            name: $t('%1JO'),
             options: [
                 new MultipleChoiceUIFilterOption($t('%1JB'), null),
             ],
@@ -73,7 +73,7 @@ export class PaymentFilterBuilders {
 
     static get settlements() {
         return new MultipleChoiceFilterBuilder({
-            name: $t(`%ZkA`),
+            name: $t('%ZkA'),
             options: [
                 new MultipleChoiceUIFilterOption($t('%ZkA'), {
                     settlements: {
@@ -94,7 +94,7 @@ export class PaymentFilterBuilders {
 
     static get type() {
         return new MultipleChoiceFilterBuilder({
-            name: $t(`%1LP`),
+            name: $t('%1LP'),
             options: Object.values(PaymentType).map((method) => {
                 return new MultipleChoiceUIFilterOption(Formatter.capitalizeFirstLetter(PaymentTypeHelper.getName(method)), method);
             }),
@@ -108,7 +108,7 @@ export class PaymentFilterBuilders {
 
     static get price() {
         return new NumberFilterBuilder({
-            name: $t(`%1IP`),
+            name: $t('%1IP'),
             type: NumberFilterFormat.Currency,
             key: 'price',
         });
@@ -116,14 +116,14 @@ export class PaymentFilterBuilders {
 
     static get paidAt() {
         return new DateFilterBuilder({
-            name: $t(`%1Jb`),
+            name: $t('%1Jb'),
             key: 'paidAt',
         });
     }
 
     static get createdAt() {
         return new DateFilterBuilder({
-            name: $t(`%1Jc`),
+            name: $t('%1Jc'),
             key: 'createdAt',
         });
     }

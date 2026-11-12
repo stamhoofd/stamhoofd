@@ -364,7 +364,7 @@ async function readFromQueue(queueUrl: string) {
     if (didProcess) {
         console.log(`[AWS Queue] Processed ${didProcess} message(s) from queue`);
     } else {
-        console.log(`[AWS Queue] No message to process from queue`);
+        console.log('[AWS Queue] No message to process from queue');
     }
     return didProcess;
 }

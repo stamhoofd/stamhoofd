@@ -1,28 +1,28 @@
 packages:
-  - 'frontend/app/*'
-  - 'frontend/shared/*'
-  - 'frontend/tests'
-  - 'backend/app/*'
-  - 'backend/shared/*'
-  - 'shared/*'
-  # Register imported libraries individually until they are integrated.
-  - 'packages/common/errors'
-  - 'packages/common/opentelemetry-decorators'
-  - 'packages/common/encoding'
-  - 'packages/common/networking'
-  - 'packages/node/endpoints'
-  - 'packages/node/database'
-  - 'packages/node/logging'
-  - 'packages/node/dev-tools'
-  - 'packages/node/observability'
-  - 'packages/node/nuxt-observability'
-  - 'packages/node/opentelemetry-terminal'
-  - 'packages/node/terminal'
-  - 'packages/node/opentelemetry-process'
-  - 'packages/browser/navigation'
-  - 'tests/*'
-  - '.development/*'
-  - 'docs'
+    - 'frontend/app/*'
+    - 'frontend/shared/*'
+    - 'frontend/tests'
+    - 'backend/app/*'
+    - 'backend/shared/*'
+    - 'shared/*'
+    # Register imported libraries individually until they are integrated.
+    - 'packages/common/errors'
+    - 'packages/common/opentelemetry-decorators'
+    - 'packages/common/encoding'
+    - 'packages/common/networking'
+    - 'packages/node/endpoints'
+    - 'packages/node/database'
+    - 'packages/node/logging'
+    - 'packages/node/dev-tools'
+    - 'packages/node/observability'
+    - 'packages/node/nuxt-observability'
+    - 'packages/node/opentelemetry-terminal'
+    - 'packages/node/terminal'
+    - 'packages/node/opentelemetry-process'
+    - 'packages/browser/navigation'
+    - 'tests/*'
+    - '.development/*'
+    - 'docs'
 
 verifyDepsBeforeRun: false
 # Run the native dependency postinstall check even when npm dependencies are unchanged.
@@ -32,57 +32,57 @@ linkWorkspacePackages: true
 minimumReleaseAge: 10080
 strictDepBuilds: true
 allowBuilds:
-  protobufjs@7.6.6: false
-  '@parcel/watcher@2.6.0': true
-  argon2@0.45.1: true
-  better-sqlite3@12.11.1: true
-  core-js@3.51.0: false
-  esbuild@0.25.12 || 0.28.2: true
-  nx@22.7.12: false
-  puppeteer: true
-  unrs-resolver@1.12.2: true
-  vue-demi@0.14.10: true
+    protobufjs@7.6.6: false
+    '@parcel/watcher@2.6.0': true
+    argon2@0.45.1: true
+    better-sqlite3@12.11.1: true
+    core-js@3.51.0: false
+    esbuild@0.25.12 || 0.28.2: true
+    nx@22.7.12: false
+    puppeteer: true
+    unrs-resolver@1.12.2: true
+    vue-demi@0.14.10: true
 
 overrides:
-  '@types/node': '22.20.4'
-  axios: '1.21.0'
-  cookie: '2.0.1'
-  node-forge: '1.4.3'
-  nodemailer: '10.3.1'
-  pacote: '21.5.1'
-  semver: '7.8.5'
-  sharp: '0.35.5'
-  tar: '7.5.22'
-  vue: '3.5.44'
-  # Keep older consumers patched without downgrading consumers of newer majors.
-  'yargs@<18': '17.7.3'
-  'js-yaml@<5': '4.3.2'
-  '@colors/colors': '1.6.1'
-  'nx>brace-expansion': '5.0.12'
-  'nx>follow-redirects': '1.16.2'
-  'nx>smol-toml': '1.9.0'
-  'xcode>uuid': '11.1.1'
-  'fontless>esbuild': '0.28.2'
-  '@nuxt/content>zod': '4.6.7'
-  'openai>zod': '4.6.7'
-  '@anthropic-ai/sdk>zod': '4.6.7'
-  '@eslint/config-array>minimatch': '11.0.1'
-  '@npmcli/arborist>minimatch': '11.0.1'
-  '@npmcli/map-workspaces>minimatch': '11.0.1'
-  '@nuxt/content>minimatch': '11.0.1'
-  '@nx/devkit>minimatch': '11.0.1'
-  '@oclif/core>minimatch': '11.0.1'
-  '@tufjs/models>minimatch': '11.0.1'
-  '@typescript-eslint/typescript-estree>minimatch': '11.0.1'
-  'editorconfig>minimatch': '11.0.1'
-  'eslint>minimatch': '11.0.1'
-  'ignore-walk>minimatch': '11.0.1'
-  'nodemon>minimatch': '11.0.1'
-  'nx>minimatch': '11.0.1'
-  '@npmcli/map-workspaces>glob': '14.0.2'
-  '@npmcli/package-json>glob': '14.0.2'
-  '@vercel/nft>glob': '14.0.2'
-  'archiver-utils>glob': '14.0.2'
-  'cacache>glob': '14.0.2'
-  'js-beautify>glob': '14.0.2'
-  'rimraf>glob': '14.0.2'
+    '@types/node': '22.20.4'
+    axios: '1.21.0'
+    cookie: '2.0.1'
+    node-forge: '1.4.3'
+    nodemailer: '10.3.1'
+    pacote: '21.5.1'
+    semver: '7.8.5'
+    sharp: '0.35.5'
+    tar: '7.5.22'
+    vue: '3.5.44'
+    # Keep older consumers patched without downgrading consumers of newer majors.
+    'yargs@<18': '17.7.3'
+    'js-yaml@<5': '4.3.2'
+    '@colors/colors': '1.6.1'
+    'nx>brace-expansion': '5.0.12'
+    'nx>follow-redirects': '1.16.2'
+    'nx>smol-toml': '1.9.0'
+    'xcode>uuid': '11.1.1'
+    'fontless>esbuild': '0.28.2'
+    '@nuxt/content>zod': '4.6.7'
+    'openai>zod': '4.6.7'
+    '@anthropic-ai/sdk>zod': '4.6.7'
+    '@eslint/config-array>minimatch': '11.0.1'
+    '@npmcli/arborist>minimatch': '11.0.1'
+    '@npmcli/map-workspaces>minimatch': '11.0.1'
+    '@nuxt/content>minimatch': '11.0.1'
+    '@nx/devkit>minimatch': '11.0.1'
+    '@oclif/core>minimatch': '11.0.1'
+    '@tufjs/models>minimatch': '11.0.1'
+    '@typescript-eslint/typescript-estree>minimatch': '11.0.1'
+    'editorconfig>minimatch': '11.0.1'
+    'eslint>minimatch': '11.0.1'
+    'ignore-walk>minimatch': '11.0.1'
+    'nodemon>minimatch': '11.0.1'
+    'nx>minimatch': '11.0.1'
+    '@npmcli/map-workspaces>glob': '14.0.2'
+    '@npmcli/package-json>glob': '14.0.2'
+    '@vercel/nft>glob': '14.0.2'
+    'archiver-utils>glob': '14.0.2'
+    'cacache>glob': '14.0.2'
+    'js-beautify>glob': '14.0.2'
+    'rimraf>glob': '14.0.2'

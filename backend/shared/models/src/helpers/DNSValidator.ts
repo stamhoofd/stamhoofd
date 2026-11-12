@@ -36,7 +36,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                             record.errors = new SimpleErrors(new SimpleError({
                                 code: 'not_found',
                                 message: '',
-                                human: $t(`%GA`) + ' ' + record.name + ' ' + $t(`%GB`),
+                                human: $t('%GA') + ' ' + record.name + ' ' + $t('%GB'),
                             }));
                         }
                     } else if (addresses.length > 1) {
@@ -47,7 +47,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                         record.errors = new SimpleErrors(new SimpleError({
                             code: 'too_many_fields',
                             message: '',
-                            human: $t(`%GC`) + ' ' + record.name + $t(`%GD`),
+                            human: $t('%GC') + ' ' + record.name + $t('%GD'),
                         }));
                     } else {
                         if (addresses[0] + '.' === record.value) {
@@ -62,7 +62,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                                 record.errors = new SimpleErrors(new SimpleError({
                                     code: 'wrong_value',
                                     message: '',
-                                    human: $t(`%GE`) + ' ' + record.name + $t(`%GF`) + ' ' + addresses[0] + '.',
+                                    human: $t('%GE') + ' ' + record.name + $t('%GF') + ' ' + addresses[0] + '.',
                                 }));
                             }
                         }
@@ -85,7 +85,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                             record.errors = new SimpleErrors(new SimpleError({
                                 code: 'not_found',
                                 message: '',
-                                human: $t(`%GG`) + ' ' + record.name + ' ' + $t(`%GB`),
+                                human: $t('%GG') + ' ' + record.name + ' ' + $t('%GB'),
                             }));
                         }
                     } else if (records.length > 1) {
@@ -94,7 +94,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                         record.errors = new SimpleErrors(new SimpleError({
                             code: 'too_many_fields',
                             message: '',
-                            human: $t(`%GH`) + ' ' + record.name + $t(`%GD`),
+                            human: $t('%GH') + ' ' + record.name + $t('%GD'),
                         }));
                     } else {
                         const val = records[0].join('').trim();
@@ -109,7 +109,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                                 record.errors = new SimpleErrors(new SimpleError({
                                     code: 'wrong_value',
                                     message: '',
-                                    human: $t(`%GI`) + ' ' + record.name + $t(`%GF`) + ' ' + records[0].join(''),
+                                    human: $t('%GI') + ' ' + record.name + $t('%GF') + ' ' + records[0].join(''),
                                 }));
                             }
                         }
@@ -125,7 +125,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                     record.errors = new SimpleErrors(new SimpleError({
                         code: 'not_found',
                         message: '',
-                        human: $t(`%GJ`) + ' ' + record.name + ' ' + $t(`%GB`),
+                        human: $t('%GJ') + ' ' + record.name + ' ' + $t('%GB'),
                     }));
                 }
             } else {
@@ -134,7 +134,7 @@ export async function validateDNSRecords(dnsRecords: DNSRecord[], didRetry = fal
                     record.errors = new SimpleErrors(new SimpleError({
                         code: 'not_found',
                         message: '',
-                        human: $t(`%GK`),
+                        human: $t('%GK'),
                     }));
                 }
             }

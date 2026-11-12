@@ -7,7 +7,7 @@ import { markRaw, onBeforeUnmount, onDeactivated } from 'vue';
  * its requests/retries and remove its GlobalEventBus listeners. Keep-alive
  * deactivation does this only when cancelOnDeactivated is true (default false).
  */
-export function useRequestOwner(custom: any = undefined, options?: {cancelOnDeactivated?: boolean}): object {
+export function useRequestOwner(custom: any = undefined, options?: { cancelOnDeactivated?: boolean }): object {
     const owner = markRaw(custom === undefined ? {} : custom);
 
     onBeforeUnmount(() => {
@@ -19,7 +19,7 @@ export function useRequestOwner(custom: any = undefined, options?: {cancelOnDeac
         onDeactivated(() => {
             Request.cancelAll(owner);
             GlobalEventBus.removeListener(owner);
-        })
+        });
     }
 
     return owner;

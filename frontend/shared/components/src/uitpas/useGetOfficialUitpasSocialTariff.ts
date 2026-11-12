@@ -30,14 +30,12 @@ export function useGetOfficialUitpasSocialTariff() {
                     message: 'No social tariff found received uitpas event',
                     human: $t('%1C4'),
                 });
-            }
-            else if (reducedPrices.length > 1) {
+            } else if (reducedPrices.length > 1) {
                 console.warn('Received multiple reduced prices for uitpas social tariff', reducedPrices);
             }
 
             return reducedPrices[0];
-        }
-        catch (e) {
+        } catch (e) {
             if (!Request.isAbortError(e)) {
                 throw e;
             }

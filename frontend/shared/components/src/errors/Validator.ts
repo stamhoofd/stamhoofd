@@ -17,8 +17,7 @@ export class Validator {
             const set = this.keyMap.get(key);
             if (set) {
                 set.add(owner);
-            }
-            else {
+            } else {
                 this.keyMap.set(key, new Set([owner]));
             }
         }

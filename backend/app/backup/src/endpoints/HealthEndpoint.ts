@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request} from '@node/endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { BackupHealth, getHealth } from '../helpers/backup.js';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
@@ -65,8 +65,7 @@ export class HealthEndpoint extends Endpoint<Params, Query, Body, ResponseBody> 
         if (STAMHOOFD.IS_REPLICA) {
             try {
                 await checkReplicaStatus();
-            }
-            catch (e) {
+            } catch (e) {
                 health.replicationError = e.message;
                 health.status = 'error';
             }

@@ -14,7 +14,7 @@ export class UniqueMemberNumberService {
     static async check() {
         await logger.setContext({
             prefixes: [
-                new StyledText(`[UniqueMemberNumberService] `).addClass('unique-member-number-service', 'tag'),
+                new StyledText('[UniqueMemberNumberService] ').addClass('unique-member-number-service', 'tag'),
             ],
             tags: ['unique-member-number-service'],
         }, async () => {

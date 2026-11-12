@@ -13,7 +13,8 @@
             {{ $t('%i3') }}
         </p>
 
-        <hr><h2>{{ $t('%i4') }}</h2>
+        <hr>
+        <h2>{{ $t('%i4') }}</h2>
         <p>{{ $t('%i5') }}</p>
 
         <STInputBox class="max" :title="$t(`%vC`)">
@@ -31,14 +32,16 @@
             {{ $t('%i6') }}
         </p>
 
-        <hr><h2>{{ $t('%i7') }}</h2>
+        <hr>
+        <h2>{{ $t('%i7') }}</h2>
         <p>{{ $t('%i8') }}</p>
 
         <STInputBox class="max" :title="$t(`%iC`)">
             <input v-model="warningText" class="input" :placeholder="inheritedDataPermission?.warningText || DataPermissionsSettings.defaultWarningText">
         </STInputBox>
 
-        <hr><h2>{{ $t('%i9') }}</h2>
+        <hr>
+        <h2>{{ $t('%i9') }}</h2>
         <p>{{ $t('%iA') }}</p>
 
         <STInputBox class="max" :title="$t(`%iD`)">
@@ -120,8 +123,8 @@ const checkboxWarning = computed({
 
 const checkboxWarningPlaceholder = computed(() => {
     const base = props.inheritedDataPermission?.checkboxWarning || DataPermissionsSettings.defaultCheckboxWarning;
-    if (!base) return $t(`%10k`);
-    return base + ' ' + $t(`%br`);
+    if (!base) return $t('%10k');
+    return base + ' ' + $t('%br');
 });
 
 async function save() {
@@ -132,8 +135,7 @@ async function save() {
     try {
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
     saving.value = false;
@@ -143,7 +145,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

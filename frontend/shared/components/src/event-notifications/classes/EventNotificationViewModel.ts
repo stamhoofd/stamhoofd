@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType, Decoder} from '@common/encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { ArrayDecoder, PatchableArray } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
@@ -67,7 +67,7 @@ export class EventNotificationViewModel {
     }
 
     get type() {
-        return this.platform.config.eventNotificationTypes.find(t => t.id === this.eventNotification.typeId) ?? EventNotificationType.create({ title: $t(`%Gr`) });
+        return this.platform.config.eventNotificationTypes.find(t => t.id === this.eventNotification.typeId) ?? EventNotificationType.create({ title: $t('%Gr') });
     }
 
     useType() {
@@ -100,8 +100,7 @@ export class EventNotificationViewModel {
                     const arr = new PatchableArray();
                     if (this.isNew) {
                         arr.addPut(this.eventNotification.patch(patch));
-                    }
-                    else {
+                    } else {
                         patch.id = this.eventNotification.id;
                         arr.addPatch(patch);
                     }
@@ -134,8 +133,7 @@ export class EventNotificationViewModel {
                         await this.saveHandler(this);
                     }
                     return Promise.resolve();
-                }
-                finally {
+                } finally {
                     this.isSaving = false;
                 }
             },
@@ -168,8 +166,7 @@ export class EventNotificationViewModel {
 
                     this.isNew = true;
                     return Promise.resolve();
-                }
-                finally {
+                } finally {
                     this.isSaving = false;
                 }
             },

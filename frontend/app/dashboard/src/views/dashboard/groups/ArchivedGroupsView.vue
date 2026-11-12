@@ -49,8 +49,6 @@ import { useOrganizationManager } from '@stamhoofd/frontend-application/Organiza
 import type { Group } from '@stamhoofd/structures';
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue';
 
-
-
 const organizationManager = useOrganizationManager();
 const show = useShow();
 const requestOwner = {};

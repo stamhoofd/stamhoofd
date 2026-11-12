@@ -29,7 +29,8 @@
             </p>
         </template>
 
-        <hr><h2>{{ $t('%2D') }}</h2>
+        <hr>
+        <h2>{{ $t('%2D') }}</h2>
         <p>{{ $t('%HV') }}</p>
 
         <LogoEditor :meta-data="patched.config" :dark-mode="DarkMode.Auto" :validator="errors.validator" @patch="addPatch(Platform.patch({config: $event}))" />
@@ -52,7 +53,8 @@
             </div>
         </div>
 
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <div>{{ $t('%7M') }}</div>
             <div>
                 <button v-if="coverPhoto" type="button" class="button text only-icon-smartphone" @click="coverPhoto = null">
@@ -72,7 +74,8 @@
 
         <ImageComponent v-if="coverPhoto" :image="coverPhoto" :auto-height="true" style="max-height: 400px;" />
 
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <div>{{ $t('%HY') }}</div>
             <div>
                 <button v-if="coverBottomLeftOverlayImage" type="button" class="button text only-icon-smartphone" @click="coverBottomLeftOverlayImage = null">
@@ -88,13 +91,15 @@
 
         <ImageComponent v-if="coverBottomLeftOverlayImage" :image="coverBottomLeftOverlayImage" :auto-height="true" :style="'width: ' + coverBottomLeftOverlayWidth + 'px'" />
 
-        <hr><h2>{{ $t('%M') }}</h2>
+        <hr>
+        <h2>{{ $t('%M') }}</h2>
 
         <STInputBox error-fields="footerText" :error-box="errors.errorBox" class="max">
             <WYSIWYGTextInput v-model="footerText" editor-class="gray subtle-links" :placeholder="$t(`%Hi`)" />
         </STInputBox>
 
-        <hr><h2>{{ $t('%1Z') }}</h2>
+        <hr>
+        <h2>{{ $t('%1Z') }}</h2>
 
         <STInputBox error-fields="shopFooterText" :error-box="errors.errorBox" class="max">
             <WYSIWYGTextInput v-model="shopFooterText" editor-class="gray subtle-links" :placeholder="$t(`%Hi`)" />
@@ -134,7 +139,7 @@ const pop = usePop();
 const { patched, patch, hasChanges, addPatch } = usePatch(platform);
 const saving = ref(false);
 
-const title = $t(`%5d`);
+const title = $t('%5d');
 
 const $name = computed({
     get: () => patched.value.config.name,
@@ -195,7 +200,7 @@ const coverBottomLeftOverlayWidth = computed({
 
         if (coverBottomLeftOverlayImage.value) {
             coverBottomLeftOverlayImage.value = null;
-            Toast.error($t(`%Hj`)).setHide(15 * 1000).show();
+            Toast.error($t('%Hj')).setHide(15 * 1000).show();
         }
     },
 });
@@ -214,7 +219,7 @@ async function save() {
         }
 
         await patchPlatform(patch.value);
-        new Toast($t(`%HA`), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
         await pop({ force: true });
     } catch (e) {
         errors.errorBox = new ErrorBox(e);

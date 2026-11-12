@@ -9,7 +9,7 @@ Stamhoofd has a couple checkout flows. These are endpoints that currently follow
 ---
 
 ```typescript
-const toPay: {balance: BalanceItem, amount: number}[] = [];
+const toPay: { balance: BalanceItem; amount: number }[] = [];
 ```
 
 #### 1. Creating balance items
@@ -64,6 +64,7 @@ await invoice.officialize();
 ```
 
 What happens when officializing an invoice?
+
 - A number for the invoice is created.
 - The invoice is sent via PEPPOL or email.
 - A new balance item is created with type Invoice, and linked to the correct user, member or organization.

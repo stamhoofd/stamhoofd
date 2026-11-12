@@ -136,9 +136,9 @@ export class Order extends QueryableModel {
 
     generateBalanceDescription(webshop: Webshop) {
         if (!this.number) {
-            return $t(`%x2`) + ' ' + webshop.meta.name;
+            return $t('%x2') + ' ' + webshop.meta.name;
         }
-        return $t(`%x3`) + this.number.toString() + ' - ' + webshop.meta.name;
+        return $t('%x3') + this.number.toString() + ' - ' + webshop.meta.name;
     }
 
     /**
@@ -852,7 +852,7 @@ export class Order extends QueryableModel {
             throw new SimpleError({
                 code: 'missing_iban',
                 message: 'Missing IBAN',
-                human: $t(`%w2`),
+                human: $t('%w2'),
             });
         }
 

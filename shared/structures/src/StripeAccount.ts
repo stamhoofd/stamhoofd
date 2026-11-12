@@ -126,93 +126,93 @@ export class StripeMetaData extends AutoEncoder {
 function requirementsToString(list: string[]) {
     let missing = list.map((key) => {
         if (key.match(/person_.+?\.verification.document/)) {
-            return $t(`%nL`);
+            return $t('%nL');
         }
 
         if (key.match(/(?:representative|person|individual|director)\.address/)) {
-            return $t(`%nM`);
+            return $t('%nM');
         }
 
         if (key.match(/(?:representative|person|individual|director)\.phone/)) {
-            return $t(`%nN`);
+            return $t('%nN');
         }
 
         if (key.match(/(?:representative|person|individual|director)\.email/)) {
-            return $t(`%nO`);
+            return $t('%nO');
         }
 
         if (key.match(/(?:representative|person|individual|director)\.dob/)) {
-            return $t(`%nP`);
+            return $t('%nP');
         }
 
         if (key.match(/(?:representative|person|individual|director)\.(?:first|last)_name/)) {
-            return $t(`%nQ`);
+            return $t('%nQ');
         }
 
         if (key.match(/(?:representative|person|individual|director)?\.relationship.title/)) {
-            return $t(`%nR`);
+            return $t('%nR');
         }
 
         if (key.match(/person_.+?\.address/)) {
-            return $t(`%nS`);
+            return $t('%nS');
         }
 
         if (key.match(/person_.+?\.phone/)) {
-            return $t(`%nT`);
+            return $t('%nT');
         }
 
         if (key.match(/person_.+?\.email/)) {
-            return $t(`%nU`);
+            return $t('%nU');
         }
 
         if (key.match(/person_.+?\.dob/)) {
-            return $t(`%nV`);
+            return $t('%nV');
         }
 
         if (key.match(/person_.+?\.(?:first|last)_name/)) {
-            return $t(`%nW`);
+            return $t('%nW');
         }
 
         if (key.match(/person_.+?\.relationship.title/)) {
-            return $t(`%nX`);
+            return $t('%nX');
         }
 
         if (key.match(/(?:representative|person|individual|director)_/)) {
-            return $t(`%nY`);
+            return $t('%nY');
         }
 
         if (key.match(/company_.+?\.address/)) {
-            return $t(`%nZ`);
+            return $t('%nZ');
         }
 
         if (key === 'company.phone') {
-            return $t(`%na`);
+            return $t('%na');
         }
 
         if (key === 'company.name') {
-            return $t(`%nb`);
+            return $t('%nb');
         }
 
         if (key === 'company.verification.document') {
-            return $t(`%nc`);
+            return $t('%nc');
         }
 
         if (key === 'individual.verification.document') {
-            return $t(`%nd`);
+            return $t('%nd');
         }
 
         if (key === 'business_profile.product_description') {
-            return $t(`%ne`);
+            return $t('%ne');
         }
 
         if (key === 'business_profile.url') {
-            return $t(`%nf`);
+            return $t('%nf');
         }
 
-        return $t(`%tu`);
+        return $t('%tu');
     });
     missing = Formatter.uniqueArray(missing);
-    return Formatter.joinLast(missing, ', ', ' ' + $t(`%M1`) + ' ');
+    return Formatter.joinLast(missing, ', ', ' ' + $t('%M1') + ' ');
 }
 
 export class StripeAccountPatch extends AutoEncoder {
@@ -244,7 +244,7 @@ export class StripeAccount extends AutoEncoder {
     get warning(): { text: string; type: 'warning' | 'error' } | undefined {
         if (this.meta.requirements.current_deadline) {
             const missing = this.missingData;
-            const m = $t(`%Zg4`);
+            const m = $t('%Zg4');
 
             return {
                 text: $t('%Zq7', { date: Formatter.date(new Date(this.meta.requirements.current_deadline * 1000)) })
@@ -257,18 +257,18 @@ export class StripeAccount extends AutoEncoder {
 
         if (this.meta.charges_enabled && this.meta.paymentMethods.length < 3) {
             const missing = [PaymentMethod.CreditCard, PaymentMethod.Bancontact, PaymentMethod.iDEAL].filter(m => !this.meta.paymentMethods.includes(m));
-            const text = Formatter.joinLast(missing.map(m => PaymentMethodHelper.getName(m)), ', ', ' ' + $t(`%M1`) + ' ');
+            const text = Formatter.joinLast(missing.map(m => PaymentMethodHelper.getName(m)), ', ', ' ' + $t('%M1') + ' ');
             const missingText = this.missingData;
-            const m = $t(`%Zg4`);
+            const m = $t('%Zg4');
 
             if (missing.length === 1) {
                 return {
-                    text: $t(`%nh`, { method: text }) + ' ' + (missingText ? (' ' + m + ' ' + missingText + '.') : ''),
+                    text: $t('%nh', { method: text }) + ' ' + (missingText ? (' ' + m + ' ' + missingText + '.') : ''),
                     type: 'error',
                 };
             }
             return {
-                text: $t(`%ni`, { methods: text }) + ' ' + (missingText ? (' ' + m + ' ' + missingText + '.') : ''),
+                text: $t('%ni', { methods: text }) + ' ' + (missingText ? (' ' + m + ' ' + missingText + '.') : ''),
                 type: 'error',
             };
         }
@@ -276,7 +276,7 @@ export class StripeAccount extends AutoEncoder {
         if (this.meta.future_requirements.current_deadline) {
             const missing = this.missingData;
             const d = new Date(this.meta.future_requirements.current_deadline * 1000);
-            const m = $t(`%Zg4`);
+            const m = $t('%Zg4');
 
             return {
                 text: $t('%Zq7',
@@ -294,7 +294,7 @@ export class StripeAccount extends AutoEncoder {
             // Try to convert to readable text
             const missing = this.missingData;
             return {
-                text: $t(`%nj`) + ' ' + missing + '.',
+                text: $t('%nj') + ' ' + missing + '.',
                 type: 'warning',
             };
         }

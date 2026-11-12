@@ -34,7 +34,8 @@
             </div>
             <ScrollableSegmentedControl v-model="selectedTab" :items="tabItems" :labels="yearLabels" />
             <div v-for="(group, index) of groupedTemplates" :key="group.title" class="container">
-                <hr v-if="index > 0"><h2 v-if="shouldShowTitles">
+                <hr v-if="index > 0">
+                <h2 v-if="shouldShowTitles">
                     {{ Formatter.capitalizeFirstLetter(group.title) }}
                 </h2>
                 <STList>
@@ -183,7 +184,7 @@ function setTabItemFromYear(year: number) {
 const yearLabels = tabItems.map((y) => {
     switch (y) {
         case TabItem.Archive: return $t('%1IZ');
-        default: return $t(`%1Ib`, { year: y.toString() });
+        default: return $t('%1Ib', { year: y.toString() });
     }
 },
 );
@@ -292,7 +293,7 @@ function groupTemplates(templates: DocumentTemplatePrivate[]): GroupedTemplates[
 
     return Array.from(map.entries())
         .sort(([a], [b]) => b - a)
-        .map(([year, templates]) => ({ title: $t(`%1Ib`, { year: year.toString() }), templates }));
+        .map(([year, templates]) => ({ title: $t('%1Ib', { year: year.toString() }), templates }));
 }
 
 useGlobalEventListener('document-template-deleted', async () => {

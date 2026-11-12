@@ -1,4 +1,4 @@
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { ref } from 'vue';
 
 const width = ref(0);
@@ -9,7 +9,7 @@ function add() {
 
     window.addEventListener('resize', () => {
         width.value = document.documentElement.clientWidth;
-    }, { passive: true })
+    }, { passive: true });
 }
 
 export function useDeviceWidth(): Ref<number> {

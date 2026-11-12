@@ -65,7 +65,7 @@ function getRoot() {
     const calendarTab = new TabBarItem({
         id: 'events',
         icon: 'calendar',
-        name: $t(`%uB`),
+        name: $t('%uB'),
         url: buildTranslatedUrl({ nl: 'activiteiten', fr: 'activites', en: 'activities' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('./views/events/EventsOverview.vue'), {}),
@@ -75,7 +75,7 @@ function getRoot() {
     const communicationTab = new TabBarItem({
         id: 'communication',
         icon: 'email-filled',
-        name: $t(`%1DK`),
+        name: $t('%1DK'),
         url: buildTranslatedUrl({ nl: 'berichten', fr: 'messages', en: 'messages' }),
         component: new ComponentWithProperties(NavigationController, {
             root: AsyncComponent(() => import('./views/communication/MemberCommunicationView.vue'), {}),
@@ -93,7 +93,7 @@ function getRoot() {
                     new TabBarItem({
                         id: 'start',
                         icon: 'home',
-                        name: $t(`%I`),
+                        name: $t('%I'),
                         component: startView,
                         url: buildTranslatedUrl({ nl: 'start', fr: 'debut', en: 'start' }),
                     }),
@@ -102,7 +102,7 @@ function getRoot() {
                     new TabBarItem({
                         id: 'cart',
                         icon: 'basket',
-                        name: $t(`%X5`),
+                        name: $t('%X5'),
                         url: buildTranslatedUrl({ nl: 'mandje', fr: 'panier', en: 'basket' }),
                         component: cartRoot,
                         badge: computed(() => memberManager.family.checkout.cart.count === 0 ? '' : memberManager.family.checkout.cart.count.toFixed(0)),

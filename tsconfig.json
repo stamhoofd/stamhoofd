@@ -1,9 +1,5 @@
 {
     "extends": "./tsconfig.base.json",
     "files": [],
-    "include": [
-        "./vitest.config.ts",
-        "./*.d.ts",
-        "./backend/stamhoofd.d.ts"  
-    ]
+    "include": ["./vitest.config.ts", "./*.d.ts", "./backend/stamhoofd.d.ts"]
 }

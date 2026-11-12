@@ -49,7 +49,7 @@ export class ChargeOrganizationsEndpoint extends Endpoint<Params, Query, Body, R
             throw new SimpleError({
                 code: 'charge_pending',
                 message: 'Charge organizations already pending',
-                human: $t(`%Cu`),
+                human: $t('%Cu'),
             });
         }
 

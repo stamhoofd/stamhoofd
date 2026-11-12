@@ -9,7 +9,8 @@
                 {{ $t('%42') }}
             </p>
 
-            <hr><h2 class="style-with-button">
+            <hr>
+            <h2 class="style-with-button">
                 <div>{{ $t('%Oa') }}</div>
                 <div>
                     <a :href="organization.registerUrl" target="_blank" rel="noopener" class="button text">
@@ -23,7 +24,8 @@
                 {{ $t('%2u') }}
             </p>
 
-            <hr><h2>{{ $t('%Oc') }}</h2>
+            <hr>
+            <h2>{{ $t('%Oc') }}</h2>
 
             <STList>
                 <STListItem :selectable="true" element-name="a" :href="$domains.getDocs('')" target="_blank">

@@ -54,7 +54,7 @@ export function toMatchMap(actual, map: Map<any, any>) {
     }
 
     return {
-        message: () => `ok`,
+        message: () => 'ok',
         pass: true,
     };
 };

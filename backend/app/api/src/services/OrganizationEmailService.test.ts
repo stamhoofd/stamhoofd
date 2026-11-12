@@ -24,7 +24,7 @@ function setupEnvironment() {
     // The notification emails localize the marketing domain, which the shared test environment does not set
     TestUtils.setEnvironment('domains', {
         ...STAMHOOFD.domains,
-        marketing: { '': 'stamhoofd.dev', BE: 'be.stamhoofd.dev', NL: 'nl.stamhoofd.dev' },
+        marketing: { '': 'stamhoofd.dev', 'BE': 'be.stamhoofd.dev', 'NL': 'nl.stamhoofd.dev' },
     });
 }
 

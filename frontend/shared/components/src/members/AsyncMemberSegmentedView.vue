@@ -17,7 +17,7 @@ import MemberSegmentedView from '../members/MemberSegmentedView.vue';
 import { Toast } from '../overlays/Toast';
 
 const props = defineProps<{
-    memberId: string
+    memberId: string;
 }>();
 
 const member = ref<PlatformMember | null>(null);
@@ -37,10 +37,10 @@ async function fetchMember(id: string): Promise<PlatformMember> {
 }
 
 fetchMember(props.memberId)
-.then(m => member.value = m)
-.catch(error => {
-    console.error(error);
-    Toast.error($t('%1U7')).show();
-    dismiss().catch(console.error);
-});
+    .then(m => member.value = m)
+    .catch((error) => {
+        console.error(error);
+        Toast.error($t('%1U7')).show();
+        dismiss().catch(console.error);
+    });
 </script>

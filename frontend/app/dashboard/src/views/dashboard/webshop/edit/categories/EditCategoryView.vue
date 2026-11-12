@@ -16,7 +16,8 @@
             <textarea v-model="description" class="input" type="text" autocomplete="off" :placeholder="$t(`%Ry`)" />
         </STInputBox>
 
-        <hr><h2 v-if="isTickets">
+        <hr>
+        <h2 v-if="isTickets">
             {{ $t('%1t') }}
         </h2>
         <h2 v-else>
@@ -37,7 +38,8 @@
         </p>
 
         <div v-if="!isNew" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%LS') }}
             </h2>
 

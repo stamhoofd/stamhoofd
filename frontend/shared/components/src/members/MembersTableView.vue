@@ -101,7 +101,7 @@ const title = computed(() => {
         return props.category.settings.name;
     }
 
-    return $t(`%L8`);
+    return $t('%L8');
 });
 
 const estimatedRows = computed(() => {
@@ -312,7 +312,7 @@ let groupsLinkedToWaitingList: Group[] = [];
 async function createActions(): Promise<void> {
     const results: TableAction<ObjectType>[] = [
         new InMemoryTableAction({
-            name: $t(`%zh`),
+            name: $t('%zh'),
             icon: 'add',
             priority: 0,
             groupIndex: 1,

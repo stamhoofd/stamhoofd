@@ -14,17 +14,17 @@ async function cancelTicketSale(access_token: string, ticketSaleId: string) {
         // Handle network errors
         throw new SimpleError({
             code: 'uitpas_unreachable_registering_ticket_sales',
-            message: `Network issue when registering UiTPAS ticket sales`,
+            message: 'Network issue when registering UiTPAS ticket sales',
             human: $t(
-                `We konden UiTPAS niet bereiken om de ticket verkoop te registreren bij UiTPAS. Probeer het later opnieuw.`,
+                'We konden UiTPAS niet bereiken om de ticket verkoop te registreren bij UiTPAS. Probeer het later opnieuw.',
             ),
         });
     });
     if (!response.ok) {
         throw new SimpleError({
             code: 'unsuccessful_response_registering_ticket_sales',
-            message: `Unsuccessful response when registering UiTPAS ticket sales`,
-            human: $t(`%18C`),
+            message: 'Unsuccessful response when registering UiTPAS ticket sales',
+            human: $t('%18C'),
         });
     }
     return ticketSaleId;

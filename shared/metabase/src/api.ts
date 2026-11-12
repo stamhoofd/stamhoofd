@@ -181,8 +181,7 @@ export class MetabaseApi {
         let user: MetabaseUser;
         try {
             user = await this.currentUser();
-        }
-        catch (error) {
+        } catch (error) {
             if (error instanceof MetabaseApiError && (error.status === 401 || error.status === 403)) {
                 throw new Error(`${this.baseUrl} rejected the api key. Create a new one under Admin > Settings > Authentication > API keys and update it in 1Password.`, { cause: error });
             }
@@ -379,7 +378,7 @@ export class MetabaseApi {
             dataset_query: {
                 type: 'native',
                 database: input.databaseId,
-                native: { query: input.query, 'template-tags': input.templateTags },
+                native: { 'query': input.query, 'template-tags': input.templateTags },
             },
         };
 

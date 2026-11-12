@@ -148,7 +148,7 @@ export class SessionManagerStatic {
                         throw new SimpleError({
                             code: 'invalid_organization',
                             message: e.message,
-                            human: $t(`%kz`),
+                            human: $t('%kz'),
                         });
                     }
                 }
@@ -158,7 +158,7 @@ export class SessionManagerStatic {
                     throw new SimpleError({
                         code: 'network_error',
                         message: e.message,
-                        human: $t(`%l0`),
+                        human: $t('%l0'),
                     });
                 }
 
@@ -183,7 +183,7 @@ export class SessionManagerStatic {
                         const error = new SimpleError({
                             code: 'invalid_organization',
                             message: e.message,
-                            human: $t(`%kz`),
+                            human: $t('%kz'),
                         });
                         Toast.fromError(error).show();
                         session.setLoadingError(error);
@@ -364,7 +364,7 @@ export class SessionManagerStatic {
                 throw new SimpleError({
                     code: 'invalid_organization',
                     message: e.message,
-                    human: $t(`%kz`),
+                    human: $t('%kz'),
                 });
             }
             throw e;

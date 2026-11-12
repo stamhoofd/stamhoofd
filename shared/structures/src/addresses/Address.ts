@@ -36,14 +36,14 @@ export class Address extends AutoEncoder {
         return trimAndJoin([
             this.street !== '' ? this.street + ' ' + this.number : '', // if no street the number is irrelevant
             this.postalCode + ' ' + this.city, // if no city the postal code may still be relevant
-            CountryHelper.getName(this.country)
+            CountryHelper.getName(this.country),
         ]);
     }
 
     shortString(): string {
         return trimAndJoin([
             this.street !== '' ? this.street + ' ' + this.number : '',
-            this.city
+            this.city,
         ]);
     }
 
@@ -102,7 +102,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty postalcode',
-                human: $t(`%no`),
+                human: $t('%no'),
             });
         }
 
@@ -110,7 +110,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty city',
-                human: $t(`%np`),
+                human: $t('%np'),
             });
         }
 
@@ -122,7 +122,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid country',
-                human: $t(`%nq`),
+                human: $t('%nq'),
                 field: 'country',
             });
         }
@@ -132,7 +132,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Invalid city',
-                human: $t(`%nr`),
+                human: $t('%nr'),
                 field: 'city',
             });
         }
@@ -143,7 +143,7 @@ export class Address extends AutoEncoder {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postalCode',
-                    human: $t(`%ns`),
+                    human: $t('%ns'),
                     field: 'postalCode',
                 });
             }
@@ -158,7 +158,7 @@ export class Address extends AutoEncoder {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid postalCode',
-                    human: $t(`%nt`),
+                    human: $t('%nt'),
                     field: 'postalCode',
                 });
             }
@@ -183,7 +183,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty address line 1',
-                human: $t(`%nu`),
+                human: $t('%nu'),
             });
         }
 
@@ -191,7 +191,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty address line 1',
-                human: $t(`%nv`),
+                human: $t('%nv'),
             });
         }
 
@@ -200,7 +200,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty address line 1',
-                human: $t(`%nw`),
+                human: $t('%nw'),
             });
         }
         const cleanAddress = Formatter.removeDuplicateSpaces(Formatter.normalizeWhitespace(addressLine1)).trim();
@@ -240,7 +240,7 @@ export class Address extends AutoEncoder {
         throw new SimpleError({
             code: 'invalid_field',
             message: 'Missing number in address line 1',
-            human: $t(`%nx`),
+            human: $t('%nx'),
         });
     }
 
@@ -249,7 +249,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty street',
-                human: $t(`%ny`),
+                human: $t('%ny'),
             });
         }
 
@@ -257,7 +257,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty number',
-                human: $t(`%nz`),
+                human: $t('%nz'),
             });
         }
 
@@ -265,7 +265,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty postal code',
-                human: $t(`%o0`),
+                human: $t('%o0'),
             });
         }
 
@@ -273,7 +273,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty city',
-                human: $t(`%o1`),
+                human: $t('%o1'),
             });
         }
 
@@ -281,7 +281,7 @@ export class Address extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Empty country',
-                human: $t(`%o2`),
+                human: $t('%o2'),
             });
         }
     }

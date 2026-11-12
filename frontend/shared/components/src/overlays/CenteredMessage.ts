@@ -76,7 +76,7 @@ export class CenteredMessage {
         }
 
         if (simpleErrors.hasCode('network_error') || simpleErrors.hasCode('network_timeout')) {
-            return new CenteredMessage($t(`%gT`), $t(`%gU`), 'error');
+            return new CenteredMessage($t('%gT'), $t('%gU'), 'error');
         }
 
         return new CenteredMessage(simpleErrors.getHuman(), '', 'error');
@@ -96,7 +96,7 @@ export class CenteredMessage {
         }
     }
 
-    addCloseButton(text = $t(`%9b`), action?: (() => Promise<any>)) {
+    addCloseButton(text = $t('%9b'), action?: (() => Promise<any>)) {
         this.buttons.push(new CenteredMessageButton(text, { type: 'secundary', action }));
         return this;
     }
@@ -155,7 +155,7 @@ export class CenteredMessage {
                     requireAcceptCheckbox: options.requireCheckbox !== undefined,
                 },
                 {
-                    text: options.cancelText ?? $t(`%1Lh`),
+                    text: options.cancelText ?? $t('%1Lh'),
                     type: 'secundary',
                     value: false,
                 },

@@ -503,14 +503,14 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
 
             if (price === 0) {
                 if (sorted.length === 1) {
-                    parts.push($t(`%1Mn`));
+                    parts.push($t('%1Mn'));
                 } else {
-                    parts.push(amount + ' ' + $t(`%s8`));
+                    parts.push(amount + ' ' + $t('%s8'));
                 }
             } else {
                 if (sorted.length === 1 || amount === 1) {
                     if (amount > 1) {
-                        parts.push(Formatter.price(Math.abs(price)) + ' ' + $t(`%s9`));
+                        parts.push(Formatter.price(Math.abs(price)) + ' ' + $t('%s9'));
                     } else {
                         parts.push(Formatter.price(Math.abs(price)));
                     }
@@ -575,7 +575,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
 
         if (this.seats.length) {
             descriptions.push(
-                (this.seats.length === 1 ? $t(`%sA`) : $t(`%sB`)) + ': '
+                (this.seats.length === 1 ? $t('%sA') : $t('%sB')) + ': '
                 + this.seats.slice().sort(ReservedSeat.sort).map(s => s.getShortName(this.product)).join(', '),
             );
         }
@@ -633,7 +633,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             errors.addError(new SimpleError({
                 code: 'product_unavailable',
                 message: 'Product unavailable',
-                human: $t(`%sC`, { product: this.product.name }),
+                human: $t('%sC', { product: this.product.name }),
             }));
         } else {
             this.product = CartItem.getProductSnapshot(product, webshop);
@@ -643,13 +643,13 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                     errors.addError(new SimpleError({
                         code: 'product_price_unavailable',
                         message: 'Product price unavailable',
-                        human: $t(`%sD`, { product: this.product.name }),
+                        human: $t('%sD', { product: this.product.name }),
                     }));
                 } else {
                     errors.addError(new SimpleError({
                         code: 'product_price_unavailable',
                         message: 'Product price unavailable',
-                        human: $t(`%sE`, { price: this.productPrice.name, product: this.product.name }),
+                        human: $t('%sE', { price: this.productPrice.name, product: this.product.name }),
                     }));
                 }
             } else {
@@ -674,7 +674,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                     errors.addError(new SimpleError({
                         code: 'option_menu_unavailable',
                         message: 'Option menu unavailable',
-                        human: $t(`%sF`, { product: this.product.name }),
+                        human: $t('%sF', { product: this.product.name }),
                     }));
                     continue;
                 }
@@ -691,7 +691,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                     errors.addError(new SimpleError({
                         code: 'option_unavailable',
                         message: 'Option unavailable',
-                        human: $t(`%sF`, { product: this.product.name }),
+                        human: $t('%sF', { product: this.product.name }),
                     }));
                     continue;
                 }
@@ -707,7 +707,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                         new SimpleError({
                             code: 'missing_menu',
                             message: 'Missing menu',
-                            human: $t(`%1B8`, { option_menu_name: remaining.name }),
+                            human: $t('%1B8', { option_menu_name: remaining.name }),
                             field: 'optionMenus.' + remaining.id,
                             meta: { recoverable: true },
                         }),
@@ -898,7 +898,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: $t(`%sC`, { product: this.product.name }),
+                    human: $t('%sC', { product: this.product.name }),
                 });
             }
 
@@ -906,7 +906,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'product_price_unavailable',
                     message: 'Product price unavailable',
-                    human: $t(`%sG`, { price: this.productPrice.name }),
+                    human: $t('%sG', { price: this.productPrice.name }),
                 });
             }
 
@@ -914,7 +914,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: $t(`%sH`, { product: this.product.name }),
+                    human: $t('%sH', { product: this.product.name }),
                 });
             }
 
@@ -926,7 +926,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'product_unavailable',
                     message: 'Product unavailable',
-                    human: stockDefinition?.text || $t(`%sI`, { count: minimumRemaining.toString(), product: this.product.name }),
+                    human: stockDefinition?.text || $t('%sI', { count: minimumRemaining.toString(), product: this.product.name }),
                     meta: { recoverable: minimumRemaining > 0 },
                 });
             }
@@ -948,7 +948,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'seating_plan_unavailable',
                     message: 'Invalid seating plan',
-                    human: $t(`%sJ`, { product: this.product.name }),
+                    human: $t('%sJ', { product: this.product.name }),
                 });
             }
 
@@ -973,7 +973,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                 throw new SimpleError({
                     code: 'seats_unavailable',
                     message: 'Seats unavailable',
-                    human: $t(`%sK`) + ' ' + invalidSeats.map(s => s.getNameString(webshop, this.product)).join(', '),
+                    human: $t('%sK') + ' ' + invalidSeats.map(s => s.getNameString(webshop, this.product)).join(', '),
                     meta: { recoverable: true },
                 });
             }
@@ -985,14 +985,14 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'invalid_seats',
                         message: 'Invalid seats',
-                        human: $t(`%sL`, { seats: Formatter.pluralText(this.amount, $t(`%12Y`), $t(`%UL`)) }),
+                        human: $t('%sL', { seats: Formatter.pluralText(this.amount, $t('%12Y'), $t('%UL')) }),
                         meta: { recoverable: true },
                     });
                 }
                 throw new SimpleError({
                     code: 'invalid_seats',
                     message: 'Invalid seats',
-                    human: $t(`%sM`, { seats: Formatter.pluralText(this.amount - this.seats.length, $t(`%12Y`), $t(`%UL`)) }),
+                    human: $t('%sM', { seats: Formatter.pluralText(this.amount - this.seats.length, $t('%12Y'), $t('%UL')) }),
                     meta: { recoverable: true },
                 });
             }
@@ -1005,7 +1005,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                         throw new SimpleError({
                             code: 'seats_unavailable',
                             message: 'Seats unavailable',
-                            human: $t(`%sN`) + ' ' + seat.getNameString(webshop, this.product),
+                            human: $t('%sN') + ' ' + seat.getNameString(webshop, this.product),
                         });
                     }
                 }
@@ -1026,7 +1026,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
                     throw new SimpleError({
                         code: 'select_connected_seats',
                         message: 'Select connected seats',
-                        human: $t(`%sO`),
+                        human: $t('%sO'),
                         meta: { recoverable: true },
                     });
                 }

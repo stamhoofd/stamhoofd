@@ -210,7 +210,7 @@ export class BuckarooHelper {
             throw new SimpleError({
                 code: 'buckaroo_error',
                 message: 'Failed to create payment',
-                human: $t(`%wk`),
+                human: $t('%wk'),
             });
         }
     }

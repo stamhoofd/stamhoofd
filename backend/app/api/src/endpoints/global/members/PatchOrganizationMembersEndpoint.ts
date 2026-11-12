@@ -182,7 +182,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 throw new SimpleError({
                     code: 'missing_organization',
                     message: 'Missing organization',
-                    human: $t(`%Di`),
+                    human: $t('%Di'),
                     statusCode: 400,
                 });
             }
@@ -240,7 +240,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'not_allowed',
                         message: 'Cannot override details',
-                        human: $t(`%Dj`),
+                        human: $t('%Dj'),
                         field: 'details',
                     });
                 }
@@ -307,7 +307,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             // Update responsibilities
             for (const patchResponsibility of patch.responsibilities.getPatches()) {
                 if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
-                    throw Context.auth.error($t(`%Dk`));
+                    throw Context.auth.error($t('%Dk'));
                 }
 
                 const responsibilityRecord = await MemberResponsibilityRecord.getByID(patchResponsibility.id);
@@ -315,21 +315,21 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'permission_denied',
                         message: "You don't have permissions to access this endpoint",
-                        human: $t(`%Dl`),
+                        human: $t('%Dl'),
                     });
                 }
 
                 const responsibility = platform.config.responsibilities.find(r => r.id === patchResponsibility.responsibilityId);
 
                 if (responsibility && !responsibility.organizationBased && !Context.auth.hasPlatformFullAccess()) {
-                    throw Context.auth.error($t(`%Dm`));
+                    throw Context.auth.error($t('%Dm'));
                 }
 
                 // Allow patching begin and end date
                 if (patchResponsibility.endDate !== undefined) {
                     if (responsibilityRecord.endDate) {
                         if (!Context.auth.hasPlatformFullAccess()) {
-                            throw Context.auth.error($t(`%Dn`));
+                            throw Context.auth.error($t('%Dn'));
                         }
                     }
                     responsibilityRecord.endDate = patchResponsibility.endDate;
@@ -337,7 +337,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
                 if (patchResponsibility.startDate !== undefined) {
                     if (patchResponsibility.startDate.getTime() > Date.now() + 5 * 60 * 1000) {
-                        throw Context.auth.error($t(`%Do`));
+                        throw Context.auth.error($t('%Do'));
                     }
                     if (patchResponsibility.startDate.getTime() > Date.now()) {
                         patchResponsibility.startDate = new Date(); // force now
@@ -346,7 +346,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     const daysDiff = Math.abs((new Date().getTime() - patchResponsibility.startDate.getTime()) / (1000 * 60 * 60 * 24));
 
                     if (daysDiff > 60 && !Context.auth.hasPlatformFullAccess()) {
-                        throw Context.auth.error($t(`%Dp`));
+                        throw Context.auth.error($t('%Dp'));
                     }
                     responsibilityRecord.startDate = patchResponsibility.startDate;
                 }
@@ -389,7 +389,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 if (!Context.auth.hasPlatformFullAccess() && !(organization && await Context.auth.hasFullAccess(organization.id))) {
-                    throw Context.auth.error($t(`%Dk`));
+                    throw Context.auth.error($t('%Dk'));
                 }
 
                 const platformResponsibility = platform.config.responsibilities.find(r => r.id === put.responsibilityId);
@@ -399,7 +399,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: $t(`%Dq`),
+                        human: $t('%Dq'),
                         field: 'organizationId',
                     });
                 }
@@ -409,7 +409,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid responsibility',
-                        human: $t(`%Dr`),
+                        human: $t('%Dr'),
                         field: 'responsibilityId',
                     });
                 }
@@ -418,7 +418,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: $t(`%Ds`),
+                        human: $t('%Ds'),
                         field: 'organizationId',
                     });
                 }
@@ -459,7 +459,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: $t(`%Dt`),
+                        human: $t('%Dt'),
                         field: 'organizationId',
                     });
                 }
@@ -469,7 +469,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Missing groupId',
-                            human: $t(`%Du`),
+                            human: $t('%Du'),
                             field: 'groupId',
                         });
                     }
@@ -479,7 +479,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid groupId',
-                            human: $t(`%Dv`),
+                            human: $t('%Dv'),
                             field: 'groupId',
                         });
                     }
@@ -488,7 +488,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid groupId',
-                            human: $t(`%Dw`),
+                            human: $t('%Dw'),
                             field: 'groupId',
                         });
                     }
@@ -500,7 +500,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 model.endDate = put.endDate;
 
                 if (put.startDate.getTime() > Date.now() + 5 * 60 * 1000) {
-                    throw Context.auth.error($t(`%Do`));
+                    throw Context.auth.error($t('%Do'));
                 }
 
                 if (put.startDate.getTime() > Date.now()) {
@@ -508,7 +508,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                 }
 
                 if (put.endDate && put.endDate > new Date(Date.now() + 60 * 1000)) {
-                    throw Context.auth.error($t(`%Dx`));
+                    throw Context.auth.error($t('%Dx'));
                 }
 
                 model.startDate = put.startDate;
@@ -544,7 +544,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid email',
-                        human: $t(`%Dy`),
+                        human: $t('%Dy'),
                     });
                 }
 
@@ -561,7 +561,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t(`%A9`),
+                            human: Context.i18n.$t('%A9'),
                             field: 'periodId',
                         });
                     }
@@ -570,7 +570,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t(`%AA`, { period: period?.getBaseStructure().name }),
+                            human: Context.i18n.$t('%AA', { period: period?.getBaseStructure().name }),
                             field: 'periodId',
                         });
                     }
@@ -580,13 +580,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid organization',
-                        human: $t(`%Dz`),
+                        human: $t('%Dz'),
                         field: 'organizationId',
                     });
                 }
 
                 if (!await Context.auth.hasFullAccess(put.organizationId)) {
-                    throw Context.auth.error($t(`%E0`));
+                    throw Context.auth.error($t('%E0'));
                 }
 
                 const putForOrganization = await Context.auth.getOrganization(put.organizationId);
@@ -598,7 +598,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'membershipTypeId',
                         message: 'Invalid membership type',
-                        human: $t(`%E1`),
+                        human: $t('%E1'),
                     });
                 }
 
@@ -620,7 +620,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'membershipTypeId',
                         message: 'Invalid membership type',
-                        human: $t(`%E2`),
+                        human: $t('%E2'),
                     });
                 }
 
@@ -706,7 +706,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                             code: 'invalid_field',
                             field: 'startDate',
                             message: 'Overlapping memberships',
-                            human: $t(`%1NA`),
+                            human: $t('%1NA'),
                         });
                     }
                     if (existing.locked) {
@@ -714,7 +714,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                             code: 'invalid_field',
                             field: 'startDate',
                             message: 'Overlapping memberships',
-                            human: $t(`%1NB`),
+                            human: $t('%1NB'),
                         });
                     }
                     if (!existing.generated) {
@@ -722,14 +722,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                             code: 'invalid_field',
                             field: 'startDate',
                             message: 'Overlapping memberships',
-                            human: $t(`%1NC`),
+                            human: $t('%1NC'),
                         });
                     }
                     throw new SimpleError({
                         code: 'invalid_field',
                         field: 'startDate',
                         message: 'Overlapping memberships',
-                        human: $t(`%1ND`),
+                        human: $t('%1ND'),
                     });
                 } else if (existing) {
                     await existing.doDelete();
@@ -759,12 +759,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'id',
                         message: 'Invalid id',
-                        human: $t(`%E3`),
+                        human: $t('%E3'),
                     });
                 }
 
                 if (!await Context.auth.hasFullAccess(membership.organizationId)) {
-                    throw Context.auth.error($t(`%E4`));
+                    throw Context.auth.error($t('%E4'));
                 }
 
                 if (membership.periodId !== platform.periodId) {
@@ -774,7 +774,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: $t(`%BZ`),
+                            human: $t('%BZ'),
                             field: 'periodId',
                         });
                     }
@@ -783,7 +783,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: $t(`%Ba`),
+                            human: $t('%Ba'),
                             field: 'periodId',
                         });
                     }
@@ -816,12 +816,12 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         code: 'invalid_field',
                         field: 'id',
                         message: 'Invalid id',
-                        human: $t(`%E3`),
+                        human: $t('%E3'),
                     });
                 }
 
                 if (!await Context.auth.hasFullAccess(membership.organizationId)) {
-                    throw Context.auth.error($t(`%E5`));
+                    throw Context.auth.error($t('%E5'));
                 }
 
                 if (membership.periodId !== platform.periodId) {
@@ -831,7 +831,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t(`%AB`),
+                            human: Context.i18n.$t('%AB'),
                             field: 'periodId',
                         });
                     }
@@ -840,7 +840,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid period',
-                            human: Context.i18n.$t(`%AC`, { period: period?.getBaseStructure().name }),
+                            human: Context.i18n.$t('%AC', { period: period?.getBaseStructure().name }),
                             field: 'periodId',
                         });
                     }
@@ -851,14 +851,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
                         throw new SimpleError({
                             code: 'invalid_field',
                             message: 'Invalid invoice',
-                            human: $t(`%E6`),
+                            human: $t('%E6'),
                         });
                     }
 
                     throw new SimpleError({
                         code: 'invalid_field',
                         message: 'Invalid invoice',
-                        human: $t(`%E7`),
+                        human: $t('%E7'),
                     });
                 }
 
@@ -910,7 +910,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
         for (const id of ids) {
             const member = await Member.getByIdWithUsersAndRegistrations(id);
             if (!member || !await Context.auth.canDeleteMember(member)) {
-                throw Context.auth.error($t(`%E8`));
+                throw Context.auth.error($t('%E8'));
             }
 
             await MemberUserSyncer.onDeleteMember(member);
@@ -1142,14 +1142,14 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             securityCodeLimiter.track(member.details.name, 1);
         } catch (e) {
             Email.sendWebmaster({
-                subject: $t(`%E9`),
-                text: $t(`%EA`) + ' ' + member.details.name + ' ' + $t(`%1G`) + ' ' + member.id + ')' + '\n\n' + e.message + '\n\nStamhoofd',
+                subject: $t('%E9'),
+                text: $t('%EA') + ' ' + member.details.name + ' ' + $t('%1G') + ' ' + member.id + ')' + '\n\n' + e.message + '\n\nStamhoofd',
             });
 
             throw new SimpleError({
                 code: 'too_many_tries',
                 message: 'Too many securityCodes limited',
-                human: $t(`%EB`),
+                human: $t('%EB'),
                 field: 'details.securityCode',
             });
         }
@@ -1221,7 +1221,7 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             throw new SimpleError({
                 code: 'known_member_missing_rights',
                 message: 'Creating known member without sufficient access rights',
-                human: $t(`%ZbD`, {
+                human: $t('%ZbD', {
                     member: member.details.firstName,
                     email: Context.auth.user.email,
                 }),
@@ -1275,13 +1275,13 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             } catch (e) {
                 Email.sendWebmaster({
                     subject: '[Limiet] Limiet bereikt voor aantal duplicate checks per member name',
-                    text: $t(`%EA`) + ' ' + member.details.name + ' ' + '(Org: ' + ' ' + member.organizationId + ')' + ' by ' + Context.user?.id + '\n\n' + e.message + '\n\nStamhoofd',
+                    text: $t('%EA') + ' ' + member.details.name + ' ' + '(Org: ' + ' ' + member.organizationId + ')' + ' by ' + Context.user?.id + '\n\n' + e.message + '\n\nStamhoofd',
                 });
 
                 throw new SimpleError({
                     code: 'too_many_tries',
                     message: 'Too many names',
-                    human: $t(`%ZbQ`),
+                    human: $t('%ZbQ'),
                     field: 'details.name',
                 });
             }

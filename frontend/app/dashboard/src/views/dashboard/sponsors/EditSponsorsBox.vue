@@ -39,7 +39,6 @@ import { Sponsor, SponsorConfig } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 
-
 const props = defineProps<{
     config: SponsorConfig | null;
 }>();

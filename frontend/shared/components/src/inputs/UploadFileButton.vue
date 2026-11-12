@@ -66,7 +66,7 @@ function changedFile(event: Event) {
     if (file.size > props.maxSize) {
         const error = new SimpleError({
             code: 'file_too_large',
-            message: $t(`%yz`),
+            message: $t('%yz'),
         });
         Toast.fromError(error).setHide(null).show();
         return;

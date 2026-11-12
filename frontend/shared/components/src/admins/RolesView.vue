@@ -187,7 +187,7 @@ const editRole = async (role: PermissionRoleDetailed | PermissionRoleForResponsi
 
 const save = async () => {
     await rawSave(() => {
-        new Toast($t(`%HA`), 'success green').show();
+        new Toast($t('%HA'), 'success green').show();
         void pop({ force: true });
     });
 };
@@ -196,7 +196,7 @@ const shouldNavigateAway = async () => {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 };
 
 defineExpose({

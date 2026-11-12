@@ -16,8 +16,7 @@ export class EventBus<E, Value> {
         const existing = this.listeners.get(owner);
         if (existing) {
             existing.push({ type, listener });
-        }
-        else {
+        } else {
             this.listeners.set(owner, [{ type, listener }]);
         }
     }

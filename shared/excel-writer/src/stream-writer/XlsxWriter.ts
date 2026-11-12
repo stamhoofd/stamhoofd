@@ -97,7 +97,7 @@ export class XlsxWriter implements XlsxWriterAdapter {
 
         // Add sheet to content types
         await this.contentTypes.addOverride({
-            partName: `/xl/styles.xml`,
+            partName: '/xl/styles.xml',
             contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml',
         });
 
@@ -109,7 +109,7 @@ export class XlsxWriter implements XlsxWriterAdapter {
 
         // Add theme to content types: todo
         await this.contentTypes.addOverride({
-            partName: `/xl/theme/theme1.xml`,
+            partName: '/xl/theme/theme1.xml',
             contentType: 'application/vnd.openxmlformats-officedocument.theme+xml',
         });
 
@@ -121,7 +121,7 @@ export class XlsxWriter implements XlsxWriterAdapter {
 
         // Add shared strings to content types: todo
         await this.contentTypes.addOverride({
-            partName: `/xl/sharedStrings.xml`,
+            partName: '/xl/sharedStrings.xml',
             contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml',
         });
     }
@@ -213,8 +213,7 @@ export class XlsxWriter implements XlsxWriterAdapter {
         for (const writer of this.sheetWriters.values()) {
             try {
                 await writer.abort();
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Error closing sheet writer', e);
             }
         }
@@ -222,80 +221,70 @@ export class XlsxWriter implements XlsxWriterAdapter {
         // Close styles
         try {
             await this.styles.abort();
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error closing styles', e);
         }
 
         // Close shared strings
         try {
             await this.sharedStrings.abort();
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error closing shared strings', e);
         }
 
         // Close workbook
         try {
             await this.workbook.abort();
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error closing workbook', e);
         }
 
         // Close workbook relations
         try {
             await this.workbookRelations.abort();
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error closing workbook relations', e);
         }
 
         // Close global relations
         try {
             await this.globalRelations.abort();
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error closing global relations', e);
         }
 
         // Close core props
         try {
             await this.coreProps.abort();
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error closing core props', e);
         }
 
         // Close app props
         try {
             await this.appProps.abort();
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error closing app props', e);
         }
 
         // Close theme
         try {
             await this.theme.abort();
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error closing theme', e);
         }
 
         // Close content types
         try {
             await this.contentTypes.abort();
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error closing content types', e);
         }
 
         // All write streams should be closed now
         try {
             await this.zipWriter.abort();
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error closing zip writer', e);
         }
     }

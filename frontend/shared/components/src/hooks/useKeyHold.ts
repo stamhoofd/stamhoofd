@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import type { KeyMatcher} from './useKeyDown';
+import type { KeyMatcher } from './useKeyDown';
 import { useKeyDown } from './useKeyDown';
 import { useKeyUp } from './useKeyUp';
 

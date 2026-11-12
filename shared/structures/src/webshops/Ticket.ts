@@ -67,7 +67,7 @@ export class TicketPublic extends Ticket {
 
     getTitle() {
         if (!this.isSingle) {
-            return $t(`%2K`);
+            return $t('%2K');
         }
         return this.items[0].product.name;
     }
@@ -94,9 +94,9 @@ export class TicketPublic extends Ticket {
         const from = this.originalSeat.getNameString(webshop, item.product);
 
         if (isCustomer) {
-            return $t(`%tE`, { from, to });
+            return $t('%tE', { from, to });
         }
-        return $t(`%tF`, { from, to });
+        return $t('%tF', { from, to });
     }
 
     getIndexDescriptionString(webshop: Webshop | WebshopPreview) {
@@ -125,8 +125,8 @@ export class TicketPublic extends Ticket {
         }
         return [
             {
-                title: $t(`%sA`),
-                value: $t(`%tG`),
+                title: $t('%sA'),
+                value: $t('%tG'),
             },
         ];
     }

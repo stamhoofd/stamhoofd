@@ -36,8 +36,7 @@ export async function mergeDuplicates(onProgress?: ProgressCallback) {
                 const existingMap = translationsForKeys.get(key);
                 if (existingMap) {
                     existingMap.set(filePath, value);
-                }
-                else {
+                } else {
                     translationsForKeys.set(key, new Map([[
                         filePath, value,
                     ]]));

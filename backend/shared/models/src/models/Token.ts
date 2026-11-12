@@ -178,5 +178,4 @@ export class Token extends QueryableModel {
 
         return token.setRelation(Token.user, user);
     }
-
 }

@@ -23,46 +23,46 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
         sheets: [
             new SelectableSheet({
                 id: 'receivableBalances',
-                name: $t(`%99`),
-                description: $t(`%Mf`),
+                name: $t('%99'),
+                description: $t('%Mf'),
                 columns: [
                     ...getGeneralColumns($t, $feature),
                     new SelectableColumn({
                         id: 'amountOpen',
-                        name: $t(`%76`),
+                        name: $t('%76'),
                     }),
                     new SelectableColumn({
                         id: 'amountPending',
-                        name: $t(`%1OL`),
+                        name: $t('%1OL'),
                     }),
                 ],
             }),
             new SelectableSheet({
                 id: 'balanceItems',
-                name: $t(`%Mg`),
-                description: $t(`%Mh`),
+                name: $t('%Mg'),
+                description: $t('%Mh'),
                 columns: [
                     new SelectableColumn({
                         id: 'id',
-                        name: $t(`%d`),
-                        description: $t(`%Mi`),
+                        name: $t('%d'),
+                        description: $t('%Mi'),
                     }),
 
-                    ...getGeneralColumns($t, $feature, { category: $t(`%Mj`) }).map((c) => {
+                    ...getGeneralColumns($t, $feature, { category: $t('%Mj') }).map((c) => {
                         c.id = `receivableBalance.${c.id}`;
                         return c;
                     }),
 
                     new SelectableColumn({
                         id: 'type',
-                        name: $t(`%1B`),
-                        description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' ' + $t(`%M1`) + ' '),
+                        name: $t('%1B'),
+                        description: Formatter.joinLast(Object.values(BalanceItemType).map(type => getBalanceItemTypeName(type)), ', ', ' ' + $t('%M1') + ' '),
                     }),
 
                     new SelectableColumn({
                         id: 'category',
-                        name: $t(`%M2`),
-                        description: $t(`%Mk`),
+                        name: $t('%M2'),
+                        description: $t('%Mk'),
                     }),
 
                     new SelectableColumn({
@@ -78,47 +78,47 @@ export function getSelectableWorkbook($t: ReturnType<typeof useTranslate>, $feat
 
                     new SelectableColumn({
                         id: 'amount',
-                        name: $t(`%M4`),
+                        name: $t('%M4'),
                     }),
 
                     new SelectableColumn({
                         id: 'unitPrice',
-                        name: $t(`%6q`),
+                        name: $t('%6q'),
                     }),
 
                     new SelectableColumn({
                         id: 'price',
-                        name: $t(`%1IP`),
+                        name: $t('%1IP'),
                     }),
 
                     new SelectableColumn({
                         id: 'pricePaid',
-                        name: $t(`%Ml`),
+                        name: $t('%Ml'),
                     }),
 
                     new SelectableColumn({
                         id: 'pricePending',
-                        name: $t(`%1OL`),
+                        name: $t('%1OL'),
                     }),
 
                     new SelectableColumn({
                         id: 'priceOpen',
-                        name: $t(`%76`),
+                        name: $t('%76'),
                     }),
 
                     new SelectableColumn({
                         id: 'createdAt',
-                        name: $t(`%1JJ`),
+                        name: $t('%1JJ'),
                     }),
 
                     new SelectableColumn({
                         id: 'dueAt',
-                        name: $t(`%wW`),
+                        name: $t('%wW'),
                     }),
 
                     new SelectableColumn({
                         id: 'status',
-                        name: $t(`%1A`),
+                        name: $t('%1A'),
                     }),
                 ],
             }),
@@ -131,12 +131,12 @@ function getGeneralColumns($t: ReturnType<typeof useTranslate>, $feature: Return
         return [
             new SelectableColumn({
                 id: 'id',
-                name: $t(`%wd`),
-                description: $t(`%Mm`),
+                name: $t('%wd'),
+                description: $t('%Mm'),
             }),
             new SelectableColumn({
                 id: 'name',
-                name: $t(`%Mn`),
+                name: $t('%Mn'),
                 ...options,
             }),
             ...($feature('organization-receivable-balances')
@@ -150,7 +150,7 @@ function getGeneralColumns($t: ReturnType<typeof useTranslate>, $feature: Return
                 : []),
             new SelectableColumn({
                 id: 'objectType',
-                name: $t(`%Mo`),
+                name: $t('%Mo'),
                 ...options,
             }),
         ];

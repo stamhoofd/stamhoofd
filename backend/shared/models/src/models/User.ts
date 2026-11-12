@@ -470,7 +470,7 @@ export class User extends QueryableModel {
                 throw new SimpleError({
                     code: 'duplicate_login_provider',
                     message: 'This account is already linked to another account',
-                    human: $t(`%GQ`),
+                    human: $t('%GQ'),
                     statusCode: 400,
                 });
             }
@@ -480,7 +480,7 @@ export class User extends QueryableModel {
                 throw new SimpleError({
                     code: 'password_based_account',
                     message: 'This user uses a password to login. Log in with the password and link the external account through the settings.',
-                    human: $t(`%GR`),
+                    human: $t('%GR'),
                     statusCode: 400,
                 });
             }

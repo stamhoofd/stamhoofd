@@ -6,8 +6,8 @@ export async function initMembershipOrganization() {
         return await Organization.getByID(platform.membershipOrganizationId, true);
     }
 
-    const membershipOrganization =  await new OrganizationFactory({}).create();
+    const membershipOrganization = await new OrganizationFactory({}).create();
     platform.membershipOrganizationId = membershipOrganization.id;
-    await platform.save()
-    return membershipOrganization
+    await platform.save();
+    return membershipOrganization;
 }

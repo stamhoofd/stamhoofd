@@ -71,7 +71,8 @@
                 </p>
 
                 <template v-if="!validatedRegisterCode">
-                    <hr><h2 data-testid="acquisition-title">
+                    <hr>
+                    <h2 data-testid="acquisition-title">
                         {{ $t('%Wd') }}
                     </h2>
 
@@ -140,7 +141,6 @@ import { AcquisitionType, Address, Organization, OrganizationMetaData, Organizat
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
-
 
 useMetaInfo({
     title: 'Sluit jouw vereniging aan | Stamhoofd',
@@ -478,7 +478,7 @@ const typeOptions: { value: OrganizationType; title: string; imgSrc: string }[] 
     },
     {
         value: OrganizationType.Culture,
-        title: $t(`%1U6`),
+        title: $t('%1U6'),
         imgSrc: stageIllustration,
     }, {
         value: OrganizationType.Youth,
@@ -487,7 +487,7 @@ const typeOptions: { value: OrganizationType; title: string; imgSrc: string }[] 
     },
     {
         value: OrganizationType.School,
-        title: $t(`%p`),
+        title: $t('%p'),
         imgSrc: educationIllustration,
     },
     {
@@ -497,7 +497,7 @@ const typeOptions: { value: OrganizationType; title: string; imgSrc: string }[] 
     },
     {
         value: OrganizationType.Other,
-        title: $t(`%1JG`),
+        title: $t('%1JG'),
         imgSrc: teamIllustration,
     },
 

@@ -44,14 +44,14 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
         for (const patch of request.body.getPatches()) {
             const document = await Document.getByID(patch.id);
             if (!document || !(await Context.auth.canAccessDocument(document, PermissionLevel.Write))) {
-                throw Context.auth.notFoundOrNoAccess($t(`%EK`));
+                throw Context.auth.notFoundOrNoAccess($t('%EK'));
             }
 
             if (document.isLocked) {
                 throw new SimpleError({
                     code: 'locked',
                     message: 'Document is locked',
-                    human: $t(`%1Uc`),
+                    human: $t('%1Uc'),
                 });
             }
 
@@ -69,7 +69,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Document not found',
-                        human: $t(`%EL`),
+                        human: $t('%EL'),
                     });
                 }
 
@@ -90,7 +90,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Document template not found',
-                    human: $t(`%EM`),
+                    human: $t('%EM'),
                 });
             }
             const document = new Document();
@@ -109,7 +109,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Registration not found',
-                        human: $t(`%EN`),
+                        human: $t('%EN'),
                     });
                 }
                 document.registrationId = put.registrationId;
@@ -121,7 +121,7 @@ export class PatchDocumentEndpoint extends Endpoint<Params, Query, Body, Respons
                     throw new SimpleError({
                         code: 'not_found',
                         message: 'Member not found',
-                        human: $t(`%EO`),
+                        human: $t('%EO'),
                     });
                 }
                 document.memberId = put.memberId;

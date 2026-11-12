@@ -11,7 +11,7 @@ export function usePatchOrganization() {
     const context = useContext();
     const owner = useRequestOwner();
 
-    return async function patch(patch: AutoEncoderPatchType<Organization>, options: { shouldRetry?: boolean} = {}) {
+    return async function patch(patch: AutoEncoderPatchType<Organization>, options: { shouldRetry?: boolean } = {}) {
         if (!organization.value) {
             throw new SimpleError({
                 code: 'no_organization',
@@ -27,7 +27,7 @@ export function usePatchOrganization() {
             body: patch,
             decoder: Organization as Decoder<Organization>,
             shouldRetry: options.shouldRetry ?? false,
-            owner
+            owner,
         });
 
         // Keep admins
@@ -39,5 +39,5 @@ export function usePatchOrganization() {
         }
 
         await GlobalEventBus.sendEvent('organization-updated', organization.value);
-    }
+    };
 }

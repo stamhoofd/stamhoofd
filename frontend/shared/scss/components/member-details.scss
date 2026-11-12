@@ -1,4 +1,4 @@
-@use "../base/variables.scss" as *;
+@use '../base/variables.scss' as *;
 @use '../base/text-styles.scss';
 
 .member-view-details {
@@ -37,9 +37,9 @@
         > hr:first-child {
             display: none;
 
-             + h2 {
-                    margin-top: 0;
-                }
+            + h2 {
+                margin-top: 0;
+            }
         }
     }
 
@@ -106,7 +106,9 @@
                 padding-left: 5px;
                 transform: translate(0, 0);
                 opacity: 0.5;
-                transition: transform 0.2s, opacity 0.2s;
+                transition:
+                    transform 0.2s,
+                    opacity 0.2s;
             }
 
             &:hover {

@@ -146,7 +146,7 @@ export class GetEventNotificationsEndpoint extends Endpoint<Params, Query, Body,
 
         for (const notification of notifications) {
             if (!await Context.auth.canAccessEventNotification(notification)) {
-                throw Context.auth.error($t(`%DT`));
+                throw Context.auth.error($t('%DT'));
             }
         }
 

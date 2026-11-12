@@ -94,7 +94,7 @@ describe('ObjectDiffer', () => {
                 Parent.create({
                     id: a.parents[0].id,
                     firstName: 'Oudertje',
-                    createdAt: a.parents[0].createdAt
+                    createdAt: a.parents[0].createdAt,
                 }),
             ],
         });

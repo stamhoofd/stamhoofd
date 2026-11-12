@@ -13,7 +13,7 @@
         <p class="style-description-block">
             {{ $t('%Hv') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('%Hw') }}</a> {{ $t('%Hx') }}
         </p>
-        
+
         <EditRecordCategoriesBox :categories="patched.recordCategories" :settings="editorSettings" @patch:categories="addCategoriesPatch" />
     </SaveView>
 </template>
@@ -32,7 +32,7 @@ import EditRecordCategoriesBox from '@stamhoofd/components/records/components/Ed
 import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
 import type { OrganizationLevelRecordsConfiguration, RecordCategory } from '@stamhoofd/structures';
 import { Address, Organization, OrganizationPrivateMetaData } from '@stamhoofd/structures';
-import { Country } from "@stamhoofd/types/Country";
+import { Country } from '@stamhoofd/types/Country';
 import { computed, ref } from 'vue';
 
 const props = defineProps<{
@@ -63,12 +63,12 @@ const editorSettings = computed(() => {
             return getOrganizationUIFilterBuildersForTags(platform.value)[0];
         },
         exampleValue: Organization.create({
-            name: $t(`%ID`),
+            name: $t('%ID'),
             address: Address.create({
-                street: $t(`%IE`),
+                street: $t('%IE'),
                 number: '1',
                 postalCode: '1234AB',
-                city: $t(`%IF`),
+                city: $t('%IF'),
                 country: Country.Belgium,
             }),
             privateMeta: OrganizationPrivateMetaData.create({}),
@@ -86,8 +86,7 @@ async function save() {
     try {
         await props.saveHandler(patchRecords.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

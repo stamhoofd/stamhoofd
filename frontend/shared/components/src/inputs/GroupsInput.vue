@@ -34,7 +34,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { GroupType, NamedObject, RegistrationPeriodList } from '@stamhoofd/structures';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref, watch, watchEffect } from 'vue';
 
 const props = withDefaults(
@@ -101,8 +101,7 @@ const options = computed(() => {
             };
         },
         );
-    }
-    else {
+    } else {
         result = groupsToChoose.map((group) => {
             return {
                 group,
@@ -146,8 +145,7 @@ const allGroups = computed({
     set: (allGroups) => {
         if (allGroups) {
             model.value = null;
-        }
-        else {
+        } else {
             model.value = (lastCachedValue.value ?? []).slice();
         }
     },
@@ -163,8 +161,7 @@ function setGroupValue(group: NamedObject, value: boolean) {
     }
     if (value) {
         model.value = [...model.value.filter(t => t.id !== group.id), group];
-    }
-    else {
+    } else {
         model.value = model.value.filter(t => t.id !== group.id);
     }
 }

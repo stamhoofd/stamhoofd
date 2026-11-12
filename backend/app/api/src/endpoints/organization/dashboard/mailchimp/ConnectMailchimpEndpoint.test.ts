@@ -78,8 +78,7 @@ describe('Endpoint.ConnectMailchimp', () => {
             const { token } = await initMailchimpOrganization();
             await expect(mailchimpRequest(endpoint, 'POST', '/mailchimp/connect', STAMHOOFD.domains.api, token, { apiKey: mailchimp.apiKey }))
                 .rejects.toThrow(STExpect.simpleError({ code: 'permission_denied' }));
-        }
-        finally {
+        } finally {
             const editing = await Platform.getForEditing();
             editing.config.featureFlags = editing.config.featureFlags.filter(f => f !== 'mailchimp');
             editing.privateConfig.mailchimp = null;

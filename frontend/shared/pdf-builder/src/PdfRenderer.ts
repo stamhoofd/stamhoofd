@@ -98,8 +98,7 @@ export class DownloadablePdf {
 
         if (AppManager.shared.downloadFile) {
             await AppManager.shared.downloadFile(blob, fileName);
-        }
-        else {
+        } else {
             const link = document.createElement('a');
             const href = window.URL.createObjectURL(blob);
             link.href = href;

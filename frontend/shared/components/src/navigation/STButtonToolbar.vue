@@ -12,7 +12,6 @@ import { useHideTabBar } from '../containers/TabBarController.vue';
 useHideTabBar();
 </script>
 
-
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
 
@@ -21,7 +20,7 @@ useHideTabBar();
     margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
     margin-bottom: calc(-1 * var(--st-vertical-padding, 40px) - var(--st-safe-area-bottom, 0px));
     padding-top: var(--st-vertical-padding, 20px);
-    
+
     > div {
         flex-shrink: 0;
         height: 60px;
@@ -44,7 +43,7 @@ useHideTabBar();
 
         position: sticky;
         bottom: 0;
-        
+
         > .button, > .upload-button {
             flex-grow: 1;
 

@@ -84,7 +84,7 @@ export function usePermissionsCache() {
 /**
  * Will load admins automatically. Use useLoadAdmins if you want to load them manually or need more control over the loading state.
  */
-export function useAdmins(options?: {forceLoadOnMount?: boolean}) {
+export function useAdmins(options?: { forceLoadOnMount?: boolean }) {
     const organization = useOrganization();
     const { admins, hasAdmins, loading, load, loadPromise } = useLoadAdmins();
     let lastLoaded = new Date();
@@ -176,19 +176,19 @@ export function useAdmins(options?: {forceLoadOnMount?: boolean}) {
         }
     };
 
-    return { 
-        memberHasFullAccess, 
-        loading, 
-        admins, 
-        loadPromise, 
-        sortedAdmins, 
-        sortedMembers, 
-        getPermissionsPatch, 
-        pushInMemory, 
+    return {
+        memberHasFullAccess,
+        loading,
+        admins,
+        loadPromise,
+        sortedAdmins,
+        sortedMembers,
+        getPermissionsPatch,
+        pushInMemory,
         dropFromMemory,
         getPermissions,
         getUnloadedPermissions,
         memberHasNoRoles,
-        clearPermissionCache
+        clearPermissionCache,
     };
 }

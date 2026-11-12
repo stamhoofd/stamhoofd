@@ -70,8 +70,7 @@ export class ColorHelper {
         document.body.classList.remove('dark', 'light');
         if (darkMode === DarkMode.On) {
             document.body.classList.add('dark');
-        }
-        else if (darkMode === DarkMode.Off) {
+        } else if (darkMode === DarkMode.Off) {
             document.body.classList.add('light');
         }
     }

@@ -100,10 +100,9 @@ watch(() => model.value, (value) => {
     }
 });
 
-function setModelValue(value: number | null, {final}: {final: boolean} = { final: true }) {
+function setModelValue(value: number | null, { final }: { final: boolean } = { final: true }) {
     if (value !== model.value) {
         model.value = value;
-        
     }
     if (final) {
         updateText(value);

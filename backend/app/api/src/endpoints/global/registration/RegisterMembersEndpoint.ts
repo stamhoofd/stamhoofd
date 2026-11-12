@@ -65,7 +65,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'not_supported',
                     message: 'This version is no longer supported',
-                    human: $t(`%vd`),
+                    human: $t('%vd'),
                 });
             }
             return [true, params as Params];
@@ -91,7 +91,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to register members manually',
-                    human: $t(`%ve`),
+                    human: $t('%ve'),
                     statusCode: 403,
                 });
             }
@@ -105,7 +105,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to checkout as this organization for a different organization',
-                    human: $t(`%1HR`),
+                    human: $t('%1HR'),
                     statusCode: 403,
                 });
             }
@@ -129,7 +129,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'too_many_emails_period',
                     message: 'Too many e-mails limited',
-                    human: $t(`%vf`),
+                    human: $t('%vf'),
                     field: 'recipients',
                 });
             }
@@ -159,7 +159,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (balanceItemsModels.length !== balanceItemIds.length) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`%vg`),
+                    message: $t('%vg'),
                 });
             }
             memberBalanceItemsStructs = balanceItemsModels.map(i => i.getStructure());
@@ -198,7 +198,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (group.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`%vh`),
+                    message: $t('%vh'),
                 });
             }
         }
@@ -213,7 +213,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to register this member',
-                    human: $t(`%vi`),
+                    human: $t('%vi'),
                     statusCode: 403,
                 });
             }
@@ -279,7 +279,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     throw new SimpleError({
                         code: 'forbidden',
                         message: 'No permission to register as this organization for a different organization',
-                        human: $t(`%ve`),
+                        human: $t('%ve'),
                         statusCode: 403,
                     });
                 }
@@ -314,7 +314,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
         if (checkout.cart.isEmpty) {
             throw new SimpleError({
                 code: 'empty_data',
-                message: $t(`%vj`),
+                message: $t('%vj'),
             });
         }
 
@@ -333,7 +333,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 // This never leaks information because in this case the user already has full access to the organization (asOrganizationId) or the member
                 throw new SimpleError({
                     code: 'changed_price',
-                    message: $t(`%vk`, { total: Formatter.price(totalPrice) }),
+                    message: $t('%vk', { total: Formatter.price(totalPrice) }),
                 });
             }
         }
@@ -353,7 +353,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!member) {
                 throw new SimpleError({
                     code: 'invalid_member',
-                    message: $t(`%vm`),
+                    message: $t('%vm'),
                 });
             }
 
@@ -361,7 +361,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!group) {
                 throw new SimpleError({
                     code: 'invalid_member',
-                    message: $t(`%vn`),
+                    message: $t('%vn'),
                 });
             }
 
@@ -394,7 +394,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 if (existingRegistration.registeredAt !== null && existingRegistration.deactivatedAt === null) {
                     throw new SimpleError({
                         code: 'already_registered',
-                        message: $t(`%vo`, { member: member.firstName, group: group.settings.name }),
+                        message: $t('%vo', { member: member.firstName, group: group.settings.name }),
                     });
                 }
             }
@@ -504,7 +504,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'Permission denied: you are not allowed to delete registrations',
-                    human: $t(`%vr`),
+                    human: $t('%vr'),
                     statusCode: 403,
                 });
             }
@@ -513,7 +513,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             if (!existingRegistration || existingRegistration.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`%vs`),
+                    message: $t('%vs'),
                 });
             }
 
@@ -521,7 +521,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'forbidden',
                     message: 'No permission to delete this registration',
-                    human: $t(`%vt`),
+                    human: $t('%vt'),
                     statusCode: 403,
                 });
             }
@@ -530,7 +530,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: 'Cannot delete inactive registration',
-                    human: $t(`%vu`),
+                    human: $t('%vu'),
                 });
             }
 
@@ -816,7 +816,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const balanceItem = new BalanceItem();
             balanceItem.type = BalanceItemType.FreeContribution;
             balanceItem.unitPrice = checkout.freeContribution;
-            balanceItem.name = `Vrije bijdrage`;
+            balanceItem.name = 'Vrije bijdrage';
             balanceItem.pricePaid = 0;
             balanceItem.userId = user.id;
             balanceItem.organizationId = organization.id;
@@ -836,7 +836,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const balanceItem = new BalanceItem();
             balanceItem.type = BalanceItemType.AdministrationFee;
             balanceItem.unitPrice = checkout.administrationFee;
-            balanceItem.name = `Administratiekosten`;
+            balanceItem.name = 'Administratiekosten';
             balanceItem.pricePaid = 0;
             balanceItem.organizationId = organization.id;
 

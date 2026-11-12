@@ -218,16 +218,16 @@ export class ViewportHelper {
                 if (bottomPadding > 200) {
                     // We are showing the keyboard
                     document.documentElement.style.setProperty('--keyboard-height', `${bottomPadding.toFixed(2)}px`);
-                    document.documentElement.style.setProperty('--bottom-padding', `0px`);
+                    document.documentElement.style.setProperty('--bottom-padding', '0px');
 
-                    document.documentElement.style.setProperty('--keyboard-open', `1`);
-                    document.documentElement.style.setProperty('--keyboard-closed', `0`);
+                    document.documentElement.style.setProperty('--keyboard-open', '1');
+                    document.documentElement.style.setProperty('--keyboard-closed', '0');
                 } else {
                     document.documentElement.style.setProperty('--bottom-padding', `${bottomPadding.toFixed(2)}px`);
-                    document.documentElement.style.setProperty('--keyboard-height', `0px`);
+                    document.documentElement.style.setProperty('--keyboard-height', '0px');
 
-                    document.documentElement.style.setProperty('--keyboard-open', `0`);
-                    document.documentElement.style.setProperty('--keyboard-closed', `1`);
+                    document.documentElement.style.setProperty('--keyboard-open', '0');
+                    document.documentElement.style.setProperty('--keyboard-closed', '1');
                 }
             }
         }

@@ -1,9 +1,7 @@
 @use '../base/variables' as *;
 @use '../base/text-styles';
 
-
 .icon-base {
-
     &:before {
         line-height: 1;
         font-size: 24px;
@@ -14,7 +12,6 @@
     }
 }
 
-
 .icon {
     width: 24px;
     font-size: 24px;
@@ -22,7 +19,7 @@
     overflow: hidden;
     white-space: nowrap;
     flex-shrink: 0;
-    
+
     display: inline; // fallback
     display: inline-flex; // needed for proper vertical alignemnt of icons
     vertical-align: middle;
@@ -39,7 +36,10 @@
         }
     }
 
-    &.small, .button.text &, .button.primary &, .button.secundary & {
+    &.small,
+    .button.text &,
+    .button.primary &,
+    .button.secundary & {
         width: 20px;
         height: 20px;
         font-size: 20px;
@@ -49,7 +49,8 @@
         }
     }
 
-    &.tiny, .button.text.small & {
+    &.tiny,
+    .button.text.small & {
         width: 16px;
         height: 16px;
         font-size: 16px;
@@ -84,7 +85,7 @@
             color: var(--color-current-background, #{$color-background});
             -webkit-text-stroke: 5px $color-background;
             -webkit-text-stroke: 5px var(--color-current-background, #{$color-background});
-            z-index: -1;            
+            z-index: -1;
         }
     }
 
@@ -98,7 +99,7 @@
             grid-row: 1 / 1;
         }
     }
-    
+
     &.light-gray {
         color: $color-gray-2;
     }
@@ -120,7 +121,7 @@
     }
 
     &.stripe {
-        color: #635BFF;
+        color: #635bff;
     }
 
     &.red {
@@ -152,18 +153,19 @@
     }
 
     &.color-word {
-        color: #0023DB;
+        color: #0023db;
     }
 
     &.color-excel {
-        color: #1D7200;
+        color: #1d7200;
     }
 
     &.color-pdf {
-        color: #EE0000;
+        color: #ee0000;
     }
 
-    &.custom-color, .button &.custom-color {
+    &.custom-color,
+    .button &.custom-color {
         color: var(--color);
     }
 

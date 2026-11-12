@@ -669,14 +669,14 @@ export class PaymentService {
             if (price > 0 && price > Math.max(balanceItem.priceOpen, balanceItem.priceDue - balanceItem.pricePaid)) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`%vv`),
+                    message: $t('%vv'),
                 });
             }
 
             if (price < 0 && price < Math.min(balanceItem.priceOpen, balanceItem.priceDue - balanceItem.pricePaid)) {
                 throw new SimpleError({
                     code: 'invalid_data',
-                    message: $t(`%vw`),
+                    message: $t('%vw'),
                 });
             }
 
@@ -691,7 +691,7 @@ export class PaymentService {
                 if (!member) {
                     throw new SimpleError({
                         code: 'invalid_data',
-                        message: $t(`%vx`),
+                        message: $t('%vx'),
                     });
                 }
                 names.push({
@@ -706,7 +706,7 @@ export class PaymentService {
         if (price < 0) {
             throw new SimpleError({
                 code: 'negative_price',
-                message: $t(`%vl`),
+                message: $t('%vl'),
             });
         }
 
@@ -725,7 +725,7 @@ export class PaymentService {
         if (checkout.totalPrice !== null && checkout.totalPrice !== balanceItemsPrice && checkout.totalPrice !== price) {
             throw new SimpleError({
                 code: 'changed_price',
-                message: $t(`%vk`, { total: Formatter.price(price) }),
+                message: $t('%vk', { total: Formatter.price(price) }),
             });
         }
     }
@@ -751,7 +751,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'missing_fields',
                     message: 'customer is required when paying as an organization',
-                    human: $t(`%vz`),
+                    human: $t('%vz'),
                 });
             }
 
@@ -759,7 +759,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'missing_fields',
                     message: 'customer.company is required when paying as an organization',
-                    human: $t(`%w0`),
+                    human: $t('%w0'),
                 });
             }
 
@@ -773,7 +773,7 @@ export class PaymentService {
                     throw new SimpleError({
                         code: 'invalid_data',
                         message: 'Cannot set company data. Please save the company data to the paying organization meta data before using it.',
-                        human: $t(`%w1`),
+                        human: $t('%w1'),
                     });
                 }
 
@@ -786,7 +786,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: 'Cannot change company data. Please save the company data to the paying organization meta data before using it.',
-                    human: $t(`%w1`),
+                    human: $t('%w1'),
                 });
             }
 
@@ -1321,7 +1321,7 @@ export class PaymentService {
             throw new SimpleError({
                 code: 'missing_fields',
                 message: 'redirectUrl or cancelUrl is missing and is required for non-zero online payments',
-                human: $t(`%vq`),
+                human: $t('%vq'),
             });
         }
 
@@ -1378,7 +1378,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'no_iban',
                     message: 'No IBAN',
-                    human: $t(`%w2`),
+                    human: $t('%w2'),
                 });
             }
 
@@ -1471,7 +1471,7 @@ export class PaymentService {
                         i18n: Context.i18n,
                         organization,
                         customer: {
-                            name: customer.name ?? names[0]?.name ?? $t(`%Gr`),
+                            name: customer.name ?? names[0]?.name ?? $t('%Gr'),
                             email: customer.email,
                         },
                     });
@@ -1518,7 +1518,7 @@ export class PaymentService {
                     if ((payment.status as any) === PaymentStatus.Failed) {
                         throw new SimpleError({
                             code: 'payment_failed',
-                            message: $t(`%w3`, { method: PaymentMethodHelper.getName(payment.method) }),
+                            message: $t('%w3', { method: PaymentMethodHelper.getName(payment.method) }),
                         });
                     }
                 }
@@ -1718,7 +1718,7 @@ export class PaymentService {
                 throw new SimpleError({
                     code: 'cannot_create_mandate_without_payment',
                     message: 'Cannot create saved payment method without payment of a small amount',
-                    human: $t(`%1Ss`),
+                    human: $t('%1Ss'),
                 });
             }
 
@@ -1780,7 +1780,7 @@ export class PaymentService {
         if (method === PaymentMethod.Unknown) {
             throw new SimpleError({
                 code: 'invalid_data',
-                message: $t(`%vy`),
+                message: $t('%vy'),
             });
         }
 
@@ -1794,7 +1794,7 @@ export class PaymentService {
         if (!allowedPaymentMethods.includes(method)) {
             throw new SimpleError({
                 code: 'invalid_payment_method',
-                message: $t(`%vp`),
+                message: $t('%vp'),
             });
         }
 

@@ -13,8 +13,7 @@ const realCli = path.join(getProjectPath(), 'shared/cli');
 async function requireShell(shell: string, context: TestContext): Promise<void> {
     // Zsh coverage is best-effort on developer machines and CI; Bash coverage always runs.
     if (shell !== 'zsh') return;
-    try { await execute(shell, ['--version']); }
-    catch (error) {
+    try { await execute(shell, ['--version']); } catch (error) {
         if ((error as NodeJS.ErrnoException).code === 'ENOENT') context.skip('Zsh executable is not installed; Bash and core completion tests still run.');
         throw error;
     }
@@ -52,12 +51,14 @@ describe('generated oclif completion with live local environments', () => {
         const { stdout: activation } = await execute('stam', ['completion', shell], { cwd: path.join(root, 'shared/cli'), env });
         const activationPath = path.join(root, 'activation');
         await fs.writeFile(activationPath, activation);
-        const request = shell === 'bash' ? `
+        const request = shell === 'bash'
+            ? `
             COMP_WORDS=(stam docs image publish v1.2.3 --environment example-b)
             COMP_CWORD=6
             _stam_local_completion
             printf '%s\\n' "\${COMPREPLY[@]}"
-        ` : `
+        `
+            : `
             compadd() { shift; print -l -- "$@"; }
             words=(stam docs image publish v1.2.3 --environment example-b)
             CURRENT=7
@@ -86,22 +87,26 @@ describe('generated oclif completion with live local environments', () => {
     it.for(['bash', 'zsh'])('completes equals-form environment values in %s', async (shell, context) => {
         await requireShell(shell, context);
         const { stdout: activation } = await execute('stam', ['completion', shell], { env });
-        const requests = shell === 'bash' ? [
-            { words: 'stam docs image publish v1.2.3 --environment = example-b', current: 7, expected: 'example-blue' },
-            { words: 'stam docs image publish v1.2.3 --environment = ""', current: 7, expected: 'example-blue\nexample-green' },
-            { words: 'stam docs image publish v1.2.3 --environment =', current: 6, expected: 'example-blue\nexample-green' },
-            { words: 'stam docs image publish v1.2.3 --environment=example-b', current: 5, expected: '--environment=example-blue' },
-        ] : [
-            { words: 'stam docs image publish v1.2.3 --environment=example-b', current: 6, expected: '--environment=example-blue' },
-            { words: 'stam docs image publish v1.2.3 --environment=', current: 6, expected: '--environment=example-blue\n--environment=example-green' },
-        ];
+        const requests = shell === 'bash'
+            ? [
+                    { words: 'stam docs image publish v1.2.3 --environment = example-b', current: 7, expected: 'example-blue' },
+                    { words: 'stam docs image publish v1.2.3 --environment = ""', current: 7, expected: 'example-blue\nexample-green' },
+                    { words: 'stam docs image publish v1.2.3 --environment =', current: 6, expected: 'example-blue\nexample-green' },
+                    { words: 'stam docs image publish v1.2.3 --environment=example-b', current: 5, expected: '--environment=example-blue' },
+                ]
+            : [
+                    { words: 'stam docs image publish v1.2.3 --environment=example-b', current: 6, expected: '--environment=example-blue' },
+                    { words: 'stam docs image publish v1.2.3 --environment=', current: 6, expected: '--environment=example-blue\n--environment=example-green' },
+                ];
         for (const request of requests) {
-            const script = shell === 'bash' ? `
+            const script = shell === 'bash'
+                ? `
                 COMP_WORDS=(${request.words})
                 COMP_CWORD=${request.current}
                 _stam_local_completion
                 printf '%s\\n' "\${COMPREPLY[@]}"
-            ` : `
+            `
+                : `
                 compadd() { shift; print -l -- "$@"; }
                 words=(${request.words})
                 CURRENT=${request.current}
@@ -141,13 +146,15 @@ describe('generated oclif completion with live local environments', () => {
         const completion = path.join(root, shell === 'bash' ? 'stam' : '_stam');
         await fs.writeFile(completion, stdout);
         const requestPath = path.join(root, 'root-suggestions');
-        const script = shell === 'bash' ? `
+        const script = shell === 'bash'
+            ? `
             source '${completion}'
             COMP_WORDS=(stam "")
             COMP_CWORD=1
             _stam_local_completion
             printf '%s\\n' "\${COMPREPLY[@]}"
-        ` : `
+        `
+            : `
             fpath=('${root}' $fpath)
             autoload -Uz _stam
             _arguments() { state=cmds; }
@@ -178,13 +185,15 @@ describe('generated oclif completion with live local environments', () => {
         await fs.rm(path.join(root, 'cache'), { recursive: true, force: true });
         const completion = path.join(root, shell === 'bash' ? 'stam' : '_stam');
         await fs.writeFile(completion, stdout);
-        const script = shell === 'bash' ? `
+        const script = shell === 'bash'
+            ? `
             source '${completion}'
             COMP_WORDS=(stam docs image publish v1 --environment example-b)
             COMP_CWORD=6
             _stam_local_completion
             printf '%s\\n' "\${COMPREPLY[@]}"
-        ` : `
+        `
+            : `
             fpath=('${root}' $fpath)
             autoload -Uz _stam
             compadd() { shift; print -l -- "$@"; }

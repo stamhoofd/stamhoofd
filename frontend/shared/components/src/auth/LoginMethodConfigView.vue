@@ -61,7 +61,7 @@ import ArrayInput from '#inputs/ArrayInput.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, PartialWithoutMethods } from '@common/encoding';
 import { usePop } from '@browser/navigation';
-import type { LoginMethod} from '@stamhoofd/structures';
+import type { LoginMethod } from '@stamhoofd/structures';
 import { LoginMethodConfig } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
@@ -127,8 +127,7 @@ async function save() {
         await props.saveHandler(patch.value);
 
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

@@ -30,7 +30,7 @@ const owner = useRequestOwner();
 const context = useContext();
 const errors = useErrors();
 const payableBalanceCollection = ref(null) as Ref<DetailedPayableBalanceCollection | null>;
-const memberManager = useMemberManager()
+const memberManager = useMemberManager();
 const show = useShow();
 const platform = usePlatform();
 const dismiss = useDismiss();
@@ -42,7 +42,7 @@ async function updateBalance() {
     try {
         const response = await context.value.authenticatedServer.request({
             method: 'GET',
-            path: `/user/payable-balance/detailed`,
+            path: '/user/payable-balance/detailed',
             decoder: DetailedPayableBalanceCollection as Decoder<DetailedPayableBalanceCollection>,
             shouldRetry: true,
             owner,
@@ -50,8 +50,7 @@ async function updateBalance() {
         });
 
         payableBalanceCollection.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }
@@ -71,30 +70,30 @@ async function checkout(item: DetailedPayableBalance) {
             return await show({
                 components: [
                     AsyncComponent(() => import('@stamhoofd/components/payments/SelectBalanceItemsView.vue'), {
-                            title: $t(`%1Qf`),
-                            items,
-                            isPayable: true,
-                            openBalanceItems: item.balanceItems,
-                            canCustomizeItemValue: (item: BalanceItem) => {
-                                return item.organizationId !== platform.value.membershipOrganizationId;
-                            },
-                            saveHandler: async (navigate: NavigationActions, list: BalanceItemPaymentDetailed[]) => {
-                                // First clear
-                                for (const g of items) {
-                                    checkout.removeBalanceItemByBalance(g);
-                                }
+                        title: $t('%1Qf'),
+                        items,
+                        isPayable: true,
+                        openBalanceItems: item.balanceItems,
+                        canCustomizeItemValue: (item: BalanceItem) => {
+                            return item.organizationId !== platform.value.membershipOrganizationId;
+                        },
+                        saveHandler: async (navigate: NavigationActions, list: BalanceItemPaymentDetailed[]) => {
+                            // First clear
+                            for (const g of items) {
+                                checkout.removeBalanceItemByBalance(g);
+                            }
 
-                                // Then add
-                                for (const g of list) {
-                                    if (g.price !== 0) {
-                                        checkout.addBalanceItem(g.balanceItem, g.price)
-                                    }
+                            // Then add
+                            for (const g of list) {
+                                if (g.price !== 0) {
+                                    checkout.addBalanceItem(g.balanceItem, g.price);
                                 }
+                            }
 
-                                await navigate.pop({ force: true });
-                                await goToCheckout(checkout, item);
-                            },
-                        }),
+                            await navigate.pop({ force: true });
+                            await goToCheckout(checkout, item);
+                        },
+                    }),
                 ],
             });
         }
@@ -113,17 +112,16 @@ async function checkout(item: DetailedPayableBalance) {
     }
 }
 
-const loadOrganization = useLoadOrganization()
+const loadOrganization = useLoadOrganization();
 
 async function goToCheckout(checkout: RegisterCheckout, item: DetailedPayableBalance) {
     if (!checkout.defaultOrganization || checkout.defaultOrganization?.id !== item.organization.id) {
-        const org = await loadOrganization(item.organization.id)
-        checkout.defaultOrganization = org
+        const org = await loadOrganization(item.organization.id);
+        checkout.defaultOrganization = org;
     }
-    Toast.success($t(`%10h`)).setIcon('basket').show();
+    Toast.success($t('%10h')).setIcon('basket').show();
     await dismiss({ force: true });
     await GlobalEventBus.sendEvent('selectTabById', 'cart');
 }
-
 
 </script>

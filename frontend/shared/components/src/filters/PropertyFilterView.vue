@@ -63,7 +63,7 @@ async function shouldNavigateAway() {
     if (!isChanged()) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 }
 
 defineExpose({ shouldNavigateAway });

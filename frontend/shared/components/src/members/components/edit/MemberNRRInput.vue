@@ -58,12 +58,12 @@ const isNationalRegisterNumberCollectedForTaxCertificates = computed(() => {
 const lidSuffix = computed(() => {
     if (firstName.value.length < 2) {
         if (props.member.patchedMember.details.defaultAge < 24) {
-            return ' ' + $t(`%105`);
+            return ' ' + $t('%105');
         }
         return '';
     }
     if (props.member.patchedMember.details.defaultAge < 24) {
-        return ' ' + $t(`%155`, { name: firstName.value });
+        return ' ' + $t('%155', { name: firstName.value });
     }
     return '';
 });

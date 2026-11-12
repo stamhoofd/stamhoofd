@@ -24,8 +24,7 @@ async function calls(): Promise<string[][]> {
     try {
         const content = (await readFile(path.join(directory, 'calls'), 'utf8')).trim();
         return content ? content.split('\n').map(line => JSON.parse(line)) : [];
-    }
-    catch (error) {
+    } catch (error) {
         if (error.code === 'ENOENT') {
             return [];
         }
@@ -78,8 +77,7 @@ if (args[0] === 'exec' && !fs.existsSync(file('queried'))) {
             if (started) {
                 await run('wait').catch(() => undefined);
             }
-        }
-        finally {
+        } finally {
             await rm(directory, { recursive: true, force: true });
         }
     });

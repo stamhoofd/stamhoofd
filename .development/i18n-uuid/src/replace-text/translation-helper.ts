@@ -7,8 +7,7 @@ export function wrapWithTranslationFunction(value: string, skipQuoteTypes?: Quot
 
     if (hasQuoteType("'")) {
         quoteType = hasQuoteType('"') ? '`' : '"';
-    }
-    else if (hasQuoteType('"')) {
+    } else if (hasQuoteType('"')) {
         quoteType = '`';
     }
 

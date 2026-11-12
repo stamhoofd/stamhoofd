@@ -14,21 +14,21 @@ export interface ProductStockTag {
 export function getProductStockTag({ product, webshop, cart, admin, editExisting }: { product: Product; webshop: Webshop; cart: Cart; admin: boolean; editExisting: boolean }): ProductStockTag | null {
     if (product.enableInFuture) {
         return {
-            text: $t(`%kR`, { date: product.enableAfter ? Formatter.dateTime(product.enableAfter) : '?' }),
+            text: $t('%kR', { date: product.enableAfter ? Formatter.dateTime(product.enableAfter) : '?' }),
             style: '',
         };
     }
 
     if (!product.isEnabled && !admin) {
         return {
-            text: $t(`%Tk`),
+            text: $t('%Tk'),
             style: 'error',
         };
     }
 
     if (product.isSoldOut) {
         return {
-            text: $t(`%12p`),
+            text: $t('%12p'),
             style: 'error',
         };
     }
@@ -37,7 +37,7 @@ export function getProductStockTag({ product, webshop, cart, admin, editExisting
 
     if (remainingWithoutCart === 0) {
         return {
-            text: $t(`%12p`),
+            text: $t('%12p'),
             style: 'error',
         };
     }
@@ -49,7 +49,7 @@ export function getProductStockTag({ product, webshop, cart, admin, editExisting
         }
 
         return {
-            text: $t(`%12q`, { count: product.getRemainingStockText(remainingWithoutCart) }),
+            text: $t('%12q', { count: product.getRemainingStockText(remainingWithoutCart) }),
             style: 'warn',
         };
     }
@@ -60,7 +60,7 @@ export function getProductStockTag({ product, webshop, cart, admin, editExisting
 
     if (maxOrder && maxOrder.remaining === 0) {
         return {
-            text: $t(`%zD`),
+            text: $t('%zD'),
             style: 'error',
         };
     }
@@ -75,13 +75,13 @@ export function getProductStockTag({ product, webshop, cart, admin, editExisting
 
     if (remaining === 0) {
         return {
-            text: $t(`%zD`),
+            text: $t('%zD'),
             style: 'error',
         };
     }
 
     return {
-        text: $t(`%12q`, { count: product.getRemainingStockText(remaining) }),
+        text: $t('%12q', { count: product.getRemainingStockText(remaining) }),
         style: 'warn',
     };
 }

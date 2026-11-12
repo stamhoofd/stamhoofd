@@ -11,14 +11,16 @@
 
             <div v-if="rowCategories" class="container">
                 <div v-if="rowCategories.requiredRows.length" class="container">
-                    <hr><h2>{{ $t('%Ws') }}</h2>
+                    <hr>
+                    <h2>{{ $t('%Ws') }}</h2>
                     <STList class="info">
                         <ResponsibilityReview v-for="row in rowCategories.requiredRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :invalid-members="row.invalidMembers ?? []" :count="row.count" :progress="row.progress" :total="row.total" />
                     </STList>
                 </div>
 
                 <div v-if="rowCategories.optionalRows.length" class="container">
-                    <hr><h2>{{ $t('%Wt') }}</h2>
+                    <hr>
+                    <h2>{{ $t('%Wt') }}</h2>
                     <STList class="info">
                         <ResponsibilityReview v-for="row in rowCategories.optionalRows" :key="row.responsibility.id" :responsibility="row.responsibility" :group="row.group" :members="row.members" :invalid-members="row.invalidMembers ?? []" :count="row.count" :progress="row.progress" :total="row.total" />
                     </STList>

@@ -6,11 +6,11 @@ must initialize an SDK and context manager before executing instrumented operati
 
 ## Choose an entry point
 
-| API | Use when |
-| --- | --- |
-| `@instrument(name, options?)` | Decorating a method. |
-| `instrument(name, fn, options?)` | Defining a reusable instrumented function. Each call creates a span. |
-| `withSpan(name, callback, options?)` | Executing a block of work immediately inside a span. |
+| API                                  | Use when                                                             |
+| ------------------------------------ | -------------------------------------------------------------------- |
+| `@instrument(name, options?)`        | Decorating a method.                                                 |
+| `instrument(name, fn, options?)`     | Defining a reusable instrumented function. Each call creates a span. |
+| `withSpan(name, callback, options?)` | Executing a block of work immediately inside a span.                 |
 
 `instrument` distinguishes the forms by its second argument: a function creates
 a wrapper, while an options object (or no argument) creates a decorator.
@@ -26,16 +26,24 @@ class Service {
     }
 }
 
-const sync = instrument('service.sync', async (name: string) => {
-    log('info', 'Synchronizing');
-}, { fields: ([name]) => ({ environment: name }) });
+const sync = instrument(
+    'service.sync',
+    async (name: string) => {
+        log('info', 'Synchronizing');
+    },
+    { fields: ([name]) => ({ environment: name }) },
+);
 
 await sync('production');
 
 // Immediate execution uses plain fields rather than an argument selector.
-await withSpan('service.sync', async () => {
-    log('info', 'Synchronizing');
-}, { label: 'Synchronizing', fields: { environment: 'production' } });
+await withSpan(
+    'service.sync',
+    async () => {
+        log('info', 'Synchronizing');
+    },
+    { label: 'Synchronizing', fields: { environment: 'production' } },
+);
 ```
 
 The decorator supports the repository's legacy TypeScript method decorators

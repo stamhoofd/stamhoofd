@@ -39,11 +39,11 @@ export enum GroupStatus {
 export function getGroupStatusName(status: GroupStatus | 'RegistrationStartDate', startDate?: Date | null) {
     switch (status) {
         case GroupStatus.Open:
-            return $t(`%1EN`);
+            return $t('%1EN');
         case GroupStatus.Closed:
-            return $t(`%1PH`);
+            return $t('%1PH');
         case GroupStatus.Archived:
-            return $t(`%1Pg`);
+            return $t('%1Pg');
         case 'RegistrationStartDate': {
             if (startDate) {
                 return $t('%kR', { date: Formatter.startDate(startDate) });

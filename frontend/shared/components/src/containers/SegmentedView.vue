@@ -26,7 +26,7 @@ const props = withDefaults(defineProps<{
 });
 
 defineOptions({
-    name: $t(`%2M`),
+    name: $t('%2M'),
 });
 const emit = defineEmits<{ (e: 'change', item: Item): void }>();
 

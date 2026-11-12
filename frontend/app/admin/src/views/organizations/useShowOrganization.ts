@@ -19,7 +19,7 @@ export function useShowOrganization() {
                         limit: 1,
                     }));
                     if (organizations.results.length === 0) {
-                        Toast.error($t(`%yZ`)).show();
+                        Toast.error($t('%yZ')).show();
                         throw new Error('Organization not found');
                     }
                     const OrganizationView = (await import('./OrganizationView.vue')).default;

@@ -59,11 +59,11 @@ const showDescriptionInTitle = computed(() => props.log.type === AuditLogType.Un
 
 if (props.log.user) {
     if (props.log.source === AuditLogSource.User) {
-        userDescription.push($t(`%uX`) + ' ');
+        userDescription.push($t('%uX') + ' ');
     } else if (props.log.source === AuditLogSource.Payment) {
-        userDescription.push($t(`%uY`) + ' ');
+        userDescription.push($t('%uY') + ' ');
     } else {
-        userDescription.push($t(`%uZ`) + ' ');
+        userDescription.push($t('%uZ') + ' ');
     }
 
     userDescription.push(AuditLogReplacement.create({
@@ -72,13 +72,13 @@ if (props.log.user) {
         type: AuditLogReplacementType.User,
     }));
 } else if (props.log.source === AuditLogSource.User) {
-    userDescription.push($t(`%ua`));
+    userDescription.push($t('%ua'));
 } else if (props.log.source === AuditLogSource.Anonymous) {
-    userDescription.push($t(`%ub`));
+    userDescription.push($t('%ub'));
 } else if (props.log.source === AuditLogSource.System) {
-    userDescription.push($t(`%uc`));
+    userDescription.push($t('%uc'));
 } else if (props.log.source === AuditLogSource.Payment) {
-    userDescription.push($t(`%ud`));
+    userDescription.push($t('%ud'));
 }
 
 async function showContext(event: MouseEvent) {
@@ -89,7 +89,7 @@ async function showContext(event: MouseEvent) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`%ue`),
+                name: $t('%ue'),
                 action: async () => {
                     await props.openLogs(objectId);
                 },

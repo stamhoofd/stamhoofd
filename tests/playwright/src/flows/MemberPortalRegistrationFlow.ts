@@ -1,4 +1,4 @@
-import type { Page} from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { test } from '@playwright/test';
 import type { Pages } from '../helpers/index.js';
 

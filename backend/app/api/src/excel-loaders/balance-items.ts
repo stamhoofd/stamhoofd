@@ -19,7 +19,7 @@ ExportToExcelEndpoint.loaders.set(ExcelExportType.BalanceItems, {
     getSheets: () => [
         {
             id: 'balanceItems',
-            name: $t(`%1LA`),
+            name: $t('%1LA'),
             columns: [
                 ...getBalanceItemColumns(),
             ],
@@ -31,7 +31,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
     return [
         {
             id: 'id',
-            name: $t(`%d`),
+            name: $t('%d'),
             width: 40,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.id,
@@ -44,7 +44,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'type',
-            name: $t(`%1B`),
+            name: $t('%1B'),
             width: 30,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: getBalanceItemTypeName(object.type),
@@ -52,7 +52,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'category',
-            name: $t(`%M2`),
+            name: $t('%M2'),
             width: 30,
             getValue: (object: BalanceItemWithPayments) => {
                 return {
@@ -70,7 +70,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'createdAt',
-            name: $t(`%wV`),
+            name: $t('%wV'),
             width: 16,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.createdAt,
@@ -83,7 +83,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'dueAt',
-            name: $t(`%wW`),
+            name: $t('%wW'),
             width: 16,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.dueAt,
@@ -115,7 +115,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'quantity',
-            name: $t(`%M4`),
+            name: $t('%M4'),
             width: 20,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.quantity,
@@ -128,7 +128,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'unitPrice',
-            name: $t(`%6q`),
+            name: $t('%6q'),
             width: 20,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.unitPrice / 1_0000,
@@ -141,7 +141,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
         },
         {
             id: 'payablePriceWithVAT',
-            name: $t(`%1IP`),
+            name: $t('%1IP'),
             width: 20,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.payablePriceWithVAT / 1_0000,
@@ -155,7 +155,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
 
         {
             id: 'priceOpen',
-            name: $t(`%1LB`),
+            name: $t('%1LB'),
             width: 40,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.priceOpen / 1_0000,
@@ -169,7 +169,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
 
         {
             id: 'pricePaid',
-            name: $t(`%1LC`),
+            name: $t('%1LC'),
             width: 40,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.pricePaid / 1_0000,
@@ -183,7 +183,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<BalanceItemWithPayments>
 
         {
             id: 'pricePending',
-            name: $t(`%1LD`),
+            name: $t('%1LD'),
             width: 40,
             getValue: (object: BalanceItemWithPayments) => ({
                 value: object.pricePending / 1_0000,

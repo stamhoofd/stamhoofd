@@ -46,7 +46,7 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'You cannot delete your own account',
-                human: $t(`%FE`),
+                human: $t('%FE'),
             });
         }
 
@@ -55,7 +55,7 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'permission_denied',
                 message: 'User not found or no access',
-                human: $t(`%FF`),
+                human: $t('%FF'),
             });
         }
 

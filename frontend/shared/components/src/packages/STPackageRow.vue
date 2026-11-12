@@ -45,7 +45,6 @@
     </STListItem>
 </template>
 
-
 <script lang="ts" setup>
 import type { STPackage } from '@stamhoofd/structures';
 import IconContainer from '#icons/IconContainer.vue';
@@ -60,6 +59,6 @@ const props = withDefaults(
         selectable: false,
     },
 );
-const now = useNow()
+const now = useNow();
 
 </script>

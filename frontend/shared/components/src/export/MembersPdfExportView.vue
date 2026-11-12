@@ -23,14 +23,14 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder} from '@common/encoding';
+import type { Decoder } from '@common/encoding';
 import { ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
 import { useAuth } from '#hooks/useAuth.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
-import type { Group, Organization, Platform, PlatformMember} from '@stamhoofd/structures';
+import type { Group, Organization, Platform, PlatformMember } from '@stamhoofd/structures';
 import { SelectablePdfDocumentFilter, Version } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
 import { getAllSelectablePdfDataForMemberDetails, getAllSelectablePdfDataForSummary } from '../members/classes/getSelectablePdfData';
@@ -100,8 +100,7 @@ onMounted(async () => {
                 selectableDocument.from(filter.data);
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to load filter', e);
     }
 });
@@ -112,8 +111,7 @@ async function saveFilter() {
 
     try {
         await Storage.keyValue.setItem(STORAGE_FILTER_KEY, JSON.stringify(encoded));
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to save filter', e);
     }
 }
@@ -128,8 +126,7 @@ async function startExport() {
     try {
         await saveFilter();
         await doExport();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
         console.error(e);
     }
@@ -155,8 +152,7 @@ async function doExport() {
 
     try {
         await document.download();
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
         console.error(e);
     }

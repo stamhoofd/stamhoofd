@@ -4,11 +4,10 @@ import type { ViewStep, ViewStepNavigation } from '@stamhoofd/components/steps/V
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import type { OrganizationCheckoutViewModel } from '../OrganizationCheckoutViewModel';
 
-
 export class PaymentSelectionWithMandatesStep implements ViewStep {
     model: OrganizationCheckoutViewModel;
 
-    constructor({model}: { model: OrganizationCheckoutViewModel;}) {
+    constructor({ model }: { model: OrganizationCheckoutViewModel }) {
         this.model = model;
     }
 

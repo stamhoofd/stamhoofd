@@ -63,7 +63,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType} from '@common/encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { PatchMap } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { ComponentWithProperties, usePresent } from '@browser/navigation';
@@ -78,10 +78,9 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useValidation } from '@stamhoofd/components/errors/useValidation.ts';
 import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
-import type { Option, OptionMenu, PrivateWebshop, Product, ProductPrice} from '@stamhoofd/structures';
+import type { Option, OptionMenu, PrivateWebshop, Product, ProductPrice } from '@stamhoofd/structures';
 import { OptionSelectionRequirement, OptionSelectionRequirementHelper, ProductSelector } from '@stamhoofd/structures';
 import { computed } from 'vue';
-
 
 const props = withDefaults(defineProps<{
     webshop: PrivateWebshop;
@@ -189,8 +188,7 @@ function setOptionSelected(menu: OptionMenu, option: Option, selected: boolean) 
 
     if (selected) {
         map.set(option.id, OptionSelectionRequirement.Optional);
-    }
-    else {
+    } else {
         map.set(option.id, OptionSelectionRequirement.Excluded);
     }
 

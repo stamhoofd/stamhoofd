@@ -51,7 +51,8 @@ Only show if tabbar is visible
     }
 }
 
-body.web-android, body.native-android {
+body.web-android,
+body.native-android {
     .hide-android {
         display: none !important;
     }

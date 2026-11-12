@@ -85,8 +85,6 @@ import type { PrivateWebshop, Product, ProductPrice } from '@stamhoofd/structure
 import { ProductsSelector } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
-
-
 const props = withDefaults(defineProps<{
     webshop: PrivateWebshop;
     productSelector: ProductsSelector;

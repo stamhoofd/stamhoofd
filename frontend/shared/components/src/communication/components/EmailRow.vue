@@ -41,7 +41,7 @@
 import ProgressRing from '#icons/ProgressRing.vue';
 import { useInterval } from '#hooks/useInterval.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
-import type { EmailPreview} from '@stamhoofd/structures';
+import type { EmailPreview } from '@stamhoofd/structures';
 import { EmailStatus } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useEmailStatus } from '../hooks/useEmailStatus';

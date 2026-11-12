@@ -93,10 +93,10 @@ through the standard test command; it is also included in `stam test unit`.
 
 `stam setup shortcut` installs standalone completions alongside the launcher:
 
-| Platform | Bash | Zsh |
-| --- | --- | --- |
-| Linux | `/usr/share/bash-completion/completions/stam` | `/usr/share/zsh/site-functions/_stam` |
-| macOS | `$(brew --prefix)/etc/bash_completion.d/stam` | `$(brew --prefix)/share/zsh/site-functions/_stam` |
+| Platform | Bash                                          | Zsh                                               |
+| -------- | --------------------------------------------- | ------------------------------------------------- |
+| Linux    | `/usr/share/bash-completion/completions/stam` | `/usr/share/zsh/site-functions/_stam`             |
+| macOS    | `$(brew --prefix)/etc/bash_completion.d/stam` | `$(brew --prefix)/share/zsh/site-functions/_stam` |
 
 The installed files do not depend on a user's cache or checkout path. Re-run setup
 after command/flag changes; `stam setup` detects missing or outdated files.
@@ -353,63 +353,63 @@ overflowing capture fails rather than returning successful partial JSON. Failure
 summaries repeat stderr only when it was not fully presented (including quiet mode).
 The CLI uses an always-on local sampler; remote export remains opt-in.
 
-| Area        | Command                                | Purpose                                                                    |
-| ----------- | -------------------------------------- | -------------------------------------------------------------------------- |
-| Build       | `pnpm stam build`                      | Build shared packages and all app packages for the selected environment.   |
-| Setup       | `pnpm stam setup`                      | Check the machine, offer fixes, and recheck for newly revealed issues.     |
-| Setup       | `pnpm stam setup node`                 | Install the Node.js version from `.nvmrc` using fnm or nvm.                |
-| Setup       | `pnpm stam setup pnpm`                 | Repair the pinned pnpm runtime through Corepack.                           |
-| Setup       | `pnpm stam setup vcs`                  | Validate and repair Git and existing JJ repositories.                      |
-| Setup       | `pnpm stam setup dns`                  | Configure local `.stamhoofd` DNS.                                          |
-| Setup       | `pnpm stam setup privileged-ports`     | Configure Linux privileged port redirects with iptables.                   |
-| Setup       | `pnpm stam setup caddy`                | Install Caddy with Homebrew on macOS.                                      |
-| Setup       | `pnpm stam setup cert`                 | Trust the local Caddy HTTPS authority.                                     |
-| Development | `pnpm stam dev all`                    | Start shared services and the full app stack.                              |
-| Development | `pnpm stam dev backend`                | Start backend apps for the current instance.                               |
-| Development | `pnpm stam dev frontend`               | Start frontend apps only.                                                  |
-| Development | `pnpm stam dev instance`               | Start this workspace instance using shared services.                       |
-| Services    | `pnpm stam services up`                | Start shared Docker services.                                              |
-| Services    | `pnpm stam services status`            | Show shared service status.                                                |
-| Services    | `pnpm stam services logs`              | Tail shared service logs.                                                  |
-| Services    | `pnpm stam services restart`           | Restart shared services with interactive progress output.                  |
-| Services    | `pnpm stam services down`              | Stop shared services.                                                      |
-| Services    | `pnpm stam services stop`              | Alias for `pnpm stam services down`.                                       |
-| Status      | `pnpm stam status`                     | Show shared services, active instances, URLs, and credentials.             |
-| Config      | `pnpm stam config explain`             | Explain resolved instance config.                                          |
-| Config      | `pnpm stam config print`               | Print resolved domains and backend environment values as JSON.             |
-| Database    | `pnpm stam db shell`                   | Open a MySQL shell for the current local database.                         |
-| Database    | `pnpm stam db migrate`                 | Build shared packages and run migrations.                                  |
-| SSO         | `pnpm stam sso config`                 | Print local SSO client, user, and issuer settings.                         |
-| SSO         | `pnpm stam sso start <redirect-uri>`   | Start Keycloak and import the local realm.                                 |
-| SSO         | `pnpm stam sso logs`                   | Tail Keycloak logs.                                                        |
-| SSO         | `pnpm stam sso stop`                   | Stop the local Keycloak container.                                         |
-| Report      | `pnpm stam platform-report start`      | Migrate the statistics database, start Metabase with the report, and sync. |
-| Report      | `pnpm stam platform-report dashboards` | Rewrite the report's questions and dashboards in Metabase.                 |
-| Report      | `pnpm stam platform-report config`     | Print the Metabase URL, login, and data source settings.                   |
-| Report      | `pnpm stam platform-report logs`       | Tail Metabase logs.                                                        |
-| Report      | `pnpm stam platform-report stop`       | Stop the local Metabase container.                                         |
-| Tests       | `pnpm stam test unit`                  | Run unit tests with isolated MySQL.                                        |
-| Tests       | `pnpm stam test coverage`              | Run package coverage with isolated MySQL.                                  |
-| Tests       | `pnpm stam test e2e`                   | Run Playwright tests.                                                      |
-| Tests       | `pnpm stam test all --ci`              | Run unit and E2E tests in CI mode.                                         |
-| Checks      | `pnpm stam check lint`                 | Run ESLint across the monorepo.                                            |
-| Checks      | `pnpm stam check typecheck`            | Run TypeScript checks across the monorepo.                                 |
-| Checks      | `pnpm stam check all`                  | Run build, lint, typecheck, unit tests, and E2E tests.                     |
-| Release     | `pnpm stam release bump-structures`    | Replace `...NextVersion` by the next structures version and bump `Version.ts`. |
-| Translations | `pnpm stam translate`             | Show translation help; never modify files without a subcommand.           |
-| Translations | `pnpm stam translate auto`        | Replace keys, clean up translations, and machine-translate.                |
-| Translations | `pnpm stam translate manual keys` | Replace translation keys.                                                  |
-| Translations | `pnpm stam translate manual cleanup` | Merge duplicates and remove unused keys.                                |
-| Translations | `pnpm stam translate manual machine` | Machine-translate missing translations.                                 |
-| Translations | `pnpm stam translate manual source` | Wrap untranslated source text in translation calls.                      |
-| Translations | `pnpm stam translate manual review` | Review machine translations identical to the original.                   |
-| Translations | `pnpm stam translate maintenance` | Show specialist cache, key, and repair tools.                             |
-| Cleanup     | `pnpm stam clean build`                | Remove build artifacts.                                                    |
-| Cleanup     | `pnpm stam clean db`                   | Drop the selected local MySQL database after confirmation.                 |
-| Cleanup     | `pnpm stam clean sso`                  | Stop the local SSO server.                                                 |
-| Cleanup     | `pnpm stam clean metabase`             | Stop Metabase and drop its application database after confirmation.        |
-| Cleanup     | `pnpm stam clean services`             | Stop shared services.                                                      |
-| Cleanup     | `pnpm stam clean all`                  | Clean build artifacts and stop shared services.                            |
+| Area         | Command                                | Purpose                                                                        |
+| ------------ | -------------------------------------- | ------------------------------------------------------------------------------ |
+| Build        | `pnpm stam build`                      | Build shared packages and all app packages for the selected environment.       |
+| Setup        | `pnpm stam setup`                      | Check the machine, offer fixes, and recheck for newly revealed issues.         |
+| Setup        | `pnpm stam setup node`                 | Install the Node.js version from `.nvmrc` using fnm or nvm.                    |
+| Setup        | `pnpm stam setup pnpm`                 | Repair the pinned pnpm runtime through Corepack.                               |
+| Setup        | `pnpm stam setup vcs`                  | Validate and repair Git and existing JJ repositories.                          |
+| Setup        | `pnpm stam setup dns`                  | Configure local `.stamhoofd` DNS.                                              |
+| Setup        | `pnpm stam setup privileged-ports`     | Configure Linux privileged port redirects with iptables.                       |
+| Setup        | `pnpm stam setup caddy`                | Install Caddy with Homebrew on macOS.                                          |
+| Setup        | `pnpm stam setup cert`                 | Trust the local Caddy HTTPS authority.                                         |
+| Development  | `pnpm stam dev all`                    | Start shared services and the full app stack.                                  |
+| Development  | `pnpm stam dev backend`                | Start backend apps for the current instance.                                   |
+| Development  | `pnpm stam dev frontend`               | Start frontend apps only.                                                      |
+| Development  | `pnpm stam dev instance`               | Start this workspace instance using shared services.                           |
+| Services     | `pnpm stam services up`                | Start shared Docker services.                                                  |
+| Services     | `pnpm stam services status`            | Show shared service status.                                                    |
+| Services     | `pnpm stam services logs`              | Tail shared service logs.                                                      |
+| Services     | `pnpm stam services restart`           | Restart shared services with interactive progress output.                      |
+| Services     | `pnpm stam services down`              | Stop shared services.                                                          |
+| Services     | `pnpm stam services stop`              | Alias for `pnpm stam services down`.                                           |
+| Status       | `pnpm stam status`                     | Show shared services, active instances, URLs, and credentials.                 |
+| Config       | `pnpm stam config explain`             | Explain resolved instance config.                                              |
+| Config       | `pnpm stam config print`               | Print resolved domains and backend environment values as JSON.                 |
+| Database     | `pnpm stam db shell`                   | Open a MySQL shell for the current local database.                             |
+| Database     | `pnpm stam db migrate`                 | Build shared packages and run migrations.                                      |
+| SSO          | `pnpm stam sso config`                 | Print local SSO client, user, and issuer settings.                             |
+| SSO          | `pnpm stam sso start <redirect-uri>`   | Start Keycloak and import the local realm.                                     |
+| SSO          | `pnpm stam sso logs`                   | Tail Keycloak logs.                                                            |
+| SSO          | `pnpm stam sso stop`                   | Stop the local Keycloak container.                                             |
+| Report       | `pnpm stam platform-report start`      | Migrate the statistics database, start Metabase with the report, and sync.     |
+| Report       | `pnpm stam platform-report dashboards` | Rewrite the report's questions and dashboards in Metabase.                     |
+| Report       | `pnpm stam platform-report config`     | Print the Metabase URL, login, and data source settings.                       |
+| Report       | `pnpm stam platform-report logs`       | Tail Metabase logs.                                                            |
+| Report       | `pnpm stam platform-report stop`       | Stop the local Metabase container.                                             |
+| Tests        | `pnpm stam test unit`                  | Run unit tests with isolated MySQL.                                            |
+| Tests        | `pnpm stam test coverage`              | Run package coverage with isolated MySQL.                                      |
+| Tests        | `pnpm stam test e2e`                   | Run Playwright tests.                                                          |
+| Tests        | `pnpm stam test all --ci`              | Run unit and E2E tests in CI mode.                                             |
+| Checks       | `pnpm stam check lint`                 | Run ESLint across the monorepo.                                                |
+| Checks       | `pnpm stam check typecheck`            | Run TypeScript checks across the monorepo.                                     |
+| Checks       | `pnpm stam check all`                  | Run build, lint, typecheck, unit tests, and E2E tests.                         |
+| Release      | `pnpm stam release bump-structures`    | Replace `...NextVersion` by the next structures version and bump `Version.ts`. |
+| Translations | `pnpm stam translate`                  | Show translation help; never modify files without a subcommand.                |
+| Translations | `pnpm stam translate auto`             | Replace keys, clean up translations, and machine-translate.                    |
+| Translations | `pnpm stam translate manual keys`      | Replace translation keys.                                                      |
+| Translations | `pnpm stam translate manual cleanup`   | Merge duplicates and remove unused keys.                                       |
+| Translations | `pnpm stam translate manual machine`   | Machine-translate missing translations.                                        |
+| Translations | `pnpm stam translate manual source`    | Wrap untranslated source text in translation calls.                            |
+| Translations | `pnpm stam translate manual review`    | Review machine translations identical to the original.                         |
+| Translations | `pnpm stam translate maintenance`      | Show specialist cache, key, and repair tools.                                  |
+| Cleanup      | `pnpm stam clean build`                | Remove build artifacts.                                                        |
+| Cleanup      | `pnpm stam clean db`                   | Drop the selected local MySQL database after confirmation.                     |
+| Cleanup      | `pnpm stam clean sso`                  | Stop the local SSO server.                                                     |
+| Cleanup      | `pnpm stam clean metabase`             | Stop Metabase and drop its application database after confirmation.            |
+| Cleanup      | `pnpm stam clean services`             | Stop shared services.                                                          |
+| Cleanup      | `pnpm stam clean all`                  | Clean build artifacts and stop shared services.                                |
 
 The `setup privileged-ports` and `setup caddy` actions accept `--dry-run` to preview
 commands and `--yes` to skip confirmation, matching the interactive setup repairs.
@@ -633,12 +633,12 @@ Each environment reports on its own **platform statistics database**, so a dashb
 Keeo never reads Ravot numbers. `stam platform-report start` creates and migrates that database, and
 registers it as a data source named after the environment:
 
-| Command                                 | MySQL database                    |
-| --------------------------------------- | --------------------------------- |
-| `stam platform-report start`            | `statistics-development` |
-| `stam platform-report start --env keeo` | `statistics-keeo`        |
-| `stam platform-report start --env ravot`| `statistics-ravot`       |
-| `stam platform-report start --env jambo`| `statistics-jamboree`    |
+| Command                                  | MySQL database           |
+| ---------------------------------------- | ------------------------ |
+| `stam platform-report start`             | `statistics-development` |
+| `stam platform-report start --env keeo`  | `statistics-keeo`        |
+| `stam platform-report start --env ravot` | `statistics-ravot`       |
+| `stam platform-report start --env jambo` | `statistics-jamboree`    |
 
 The names come from `databases.platformStatistics` in `src/config/development-config.ts`, which
 follows the same rules as the main development database: environments keep their historical label

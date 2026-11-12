@@ -88,7 +88,8 @@
             </div>
 
             <div v-if="false && isBelgium && getOS() === 'iOS' && payment.price > 0 && payment.status !== 'Succeeded'" class="only-smartphone container">
-                <hr><h2>{{ $t('%kf') }}</h2>
+                <hr>
+                <h2>{{ $t('%kf') }}</h2>
                 <p>{{ $t('%kg') }}</p>
 
                 <STList>
@@ -289,16 +290,16 @@ function getOS(): string {
 usePreventLeave(() => {
     if (props.type === 'registration') {
         // This message is not visible on most browsers
-        return $t(`%12t`);
+        return $t('%12t');
     }
 
     if (props.type === 'packages') {
         // This message is not visible on most browsers
-        return $t(`%1Qe`);
+        return $t('%1Qe');
     }
 
     // This message is not visible on most browsers
-    return $t(`%12u`);
+    return $t('%12u');
 });
 
 function shouldNavigateAway() {
@@ -344,11 +345,11 @@ async function generateQRCode() {
 
 function helpMe() {
     if (props.type === 'packages') {
-        new CenteredMessage($t(`%kI`), $t(`%1UH`)).addCloseButton().show();
+        new CenteredMessage($t('%kI'), $t('%1UH')).addCloseButton().show();
     } else if (props.type === 'order') {
-        new CenteredMessage($t(`%kI`), $t(`%12v`)).addCloseButton().show();
+        new CenteredMessage($t('%kI'), $t('%12v')).addCloseButton().show();
     } else {
-        new CenteredMessage($t(`%kI`), $t(`%12w`)).addCloseButton().show();
+        new CenteredMessage($t('%kI'), $t('%12w')).addCloseButton().show();
     }
 }
 

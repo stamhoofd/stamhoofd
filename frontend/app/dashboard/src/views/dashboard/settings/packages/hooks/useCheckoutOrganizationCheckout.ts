@@ -6,17 +6,17 @@ import { CheckoutResponse } from '@stamhoofd/structures';
 
 export function useCheckoutOrganizationCheckout() {
     const context = useContext();
-    const owner = useRequestOwner()
+    const owner = useRequestOwner();
 
-    async function checkoutOrganizationCheckout(sellingOrganizationId: string, checkout: OrganizationCheckout, options?: {shouldRetry?: boolean, owner?: any}) {
+    async function checkoutOrganizationCheckout(sellingOrganizationId: string, checkout: OrganizationCheckout, options?: { shouldRetry?: boolean; owner?: any }) {
         const response = await context.value.authenticatedServer.request({
             method: 'POST',
-            path: '/billing/'+sellingOrganizationId+'/checkout',
+            path: '/billing/' + sellingOrganizationId + '/checkout',
             body: checkout,
             shouldRetry: options?.shouldRetry ?? false,
             timeout: 60_000,
             owner: options?.owner ?? owner,
-            decoder: CheckoutResponse as Decoder<CheckoutResponse>
+            decoder: CheckoutResponse as Decoder<CheckoutResponse>,
         });
 
         if (!checkout.proForma) {

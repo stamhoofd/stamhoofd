@@ -28,7 +28,7 @@ export function useSwitchablePeriod(options?: Options) {
             });
             const found = list.organizationPeriods.find(o => o.period.id === p.id);
             if (!found) {
-                new CenteredMessage($t(`%10G`), $t(`%1XQ`)).addCloseButton().show();
+                new CenteredMessage($t('%10G'), $t('%1XQ')).addCloseButton().show();
                 return false;
             }
 

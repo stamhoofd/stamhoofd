@@ -204,7 +204,7 @@ export class SetupStepUpdater {
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Organization not found',
-                human: $t(`%Fu`),
+                human: $t('%Fu'),
             });
         }
 

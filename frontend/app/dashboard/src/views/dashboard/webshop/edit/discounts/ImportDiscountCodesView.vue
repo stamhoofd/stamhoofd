@@ -26,7 +26,8 @@
         </STList>
 
         <template v-if="sheet">
-            <hr><h2>{{ $t('%Zv9') }}</h2>
+            <hr>
+            <h2>{{ $t('%Zv9') }}</h2>
             <p>{{ $t('%ZuC') }}</p>
 
             <STList>
@@ -52,7 +53,8 @@
             </STList>
 
             <template v-if="importErrors.length">
-                <hr><h2>{{ $t('%Zu0') }}</h2>
+                <hr>
+                <h2>{{ $t('%Zu0') }}</h2>
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -208,8 +210,7 @@ function changedFile(event: Event) {
             mapping.value = inferMapping(columns.value);
             importErrors.value = [];
             errors.errorBox = null;
-        }
-        catch (e) {
+        } catch (e) {
             console.error(e);
             sheet.value = null;
             columns.value = [];
@@ -299,8 +300,7 @@ function inferMapping(columns: ImportColumn[]): Record<MappingField, string> {
         }
         if (used.has(key)) {
             next[field.id] = '';
-        }
-        else {
+        } else {
             used.add(key);
         }
     }
@@ -362,12 +362,14 @@ function parseRows(): { rows: ParsedDiscountCodeRow[]; importErrors: ImportError
         const rawCode = getCellString(currentSheet, row, mappedColumns.code);
         const rawEmail = getCellString(currentSheet, row, mappedColumns.email).toLowerCase();
         const description = mappedColumns.description === null ? undefined : getCellString(currentSheet, row, mappedColumns.description);
-        const maximumUsage = mappedColumns.maximumUsage === null ? undefined : parseMaximumUsage(
-            getCellString(currentSheet, row, mappedColumns.maximumUsage),
-            row,
-            mappedColumns.maximumUsage,
-            nextErrors,
-        );
+        const maximumUsage = mappedColumns.maximumUsage === null
+            ? undefined
+            : parseMaximumUsage(
+                    getCellString(currentSheet, row, mappedColumns.maximumUsage),
+                    row,
+                    mappedColumns.maximumUsage,
+                    nextErrors,
+                );
 
         const email = rawEmail.length > 0 ? rawEmail : null;
         if (email && !DataValidator.isEmailValid(email)) {
@@ -509,12 +511,10 @@ async function save() {
         props.afterImport(response.data);
         new Toast(emails.length > 0 ? $t('%Zwt') : $t('%ZuK'), 'success green').show();
         pop({ force: true })?.catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         saving.value = false;
     }
 }

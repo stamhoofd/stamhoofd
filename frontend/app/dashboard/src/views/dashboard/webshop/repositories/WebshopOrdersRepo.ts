@@ -485,8 +485,7 @@ export class OrdersStore {
 
         if (this.lastSorted && this.lastSorted.ids === ids && this.lastSorted.sortKey === sortKey && this.lastSorted.token === token) {
             entries = this.lastSorted.entries;
-        }
-        else {
+        } else {
             const isCached = this.indexValuesToken === token && this.indexValues.has(sortItem.key);
             const values = (sortItem.key === 'id' || isCached || ids.size > maxIdsToSortWithoutIndexValues)
                 ? await this.getIndexValues(sortItem.key, token)
@@ -513,8 +512,7 @@ export class OrdersStore {
                 const middle = (start + end) >>> 1;
                 if (compare(entries[middle], afterEntry) <= 0) {
                     start = middle + 1;
-                }
-                else {
+                } else {
                     end = middle;
                 }
             }
@@ -858,8 +856,7 @@ export class OrdersStore {
                 }
                 if (position === 0) {
                     cursor.continue();
-                }
-                else {
+                } else {
                     cursor.continuePrimaryKey(afterInIndex.value, afterInIndex.id);
                 }
                 return true;
@@ -1018,7 +1015,7 @@ class WebshopOrdersApiClient {
             fetch: async (data: LimitedFilteredRequest) => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/orders`,
+                    path: '/webshop/orders',
                     decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
                     query: data,
                     shouldRetry: false,
@@ -1030,7 +1027,7 @@ class WebshopOrdersApiClient {
             fetchCount: async (data: CountFilteredRequest): Promise<number> => {
                 const response = await this.context.authenticatedServer.request({
                     method: 'GET',
-                    path: `/webshop/orders/count`,
+                    path: '/webshop/orders/count',
                     decoder: CountResponse as Decoder<CountResponse>,
                     query: data,
                     shouldRetry: false,
@@ -1058,7 +1055,7 @@ class WebshopOrdersApiClient {
     async getById(id: string): Promise<PrivateOrder | undefined> {
         const response = await this.context.authenticatedServer.request({
             method: 'GET',
-            path: `/webshop/orders`,
+            path: '/webshop/orders',
             decoder: new PaginatedResponseDecoder(new ArrayDecoder(PrivateOrder as Decoder<PrivateOrder>), LimitedFilteredRequest as Decoder<LimitedFilteredRequest>),
             query: new LimitedFilteredRequest({
                 filter: { webshopId: this.webshopId, id },
@@ -1088,6 +1085,4 @@ class WebshopOrdersApiClient {
     async clearLastFetchedOrder() {
         await this.state.clear();
     }
-
-
 }

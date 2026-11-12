@@ -1,7 +1,7 @@
 import { Database } from '@node/database';
 
 export async function checkReplicaStatus() {
-    const [rows] = await Database.select(`SHOW REPLICA STATUS`);
+    const [rows] = await Database.select('SHOW REPLICA STATUS');
 
     if (rows.length === 0) {
         throw new Error('No replica status found');

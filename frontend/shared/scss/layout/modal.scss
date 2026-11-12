@@ -1,9 +1,9 @@
-@use "../base/variables" as *;
-@use "../base/text-styles" as *;
+@use '../base/variables' as *;
+@use '../base/text-styles' as *;
 
 // Registered so views that change their own width while open can transition it.
 @property --st-popup-width {
-    syntax: "<length>";
+    syntax: '<length>';
     inherits: true;
     initial-value: 800px;
 }
@@ -11,7 +11,7 @@
 .modal-backdrop {
     &::after {
         background: rgba(black, 0.7);
-        content: "";
+        content: '';
         position: absolute;
         left: 0;
         top: 0;
@@ -36,9 +36,9 @@
     display: block;
     z-index: 10000;
     contain: strict;
-    
+
     //transform: translate3d(0, 0, 0);
-    
+
     // Android fix / fix where position fixed is 100vh, and isn't the same as the viewport
     bottom: auto;
     height: 100vh;
@@ -55,30 +55,44 @@
         --navigation-bar-margin: 10px;
     }
 
-    body.web-iOS &, body.native-iOS & {
+    body.web-iOS &,
+    body.native-iOS & {
         --navigation-bar-horizontal-padding: 15px;
     }
 
-
     --popup-padding-top-raw: var(--st-safe-area-top, 0px);
-    --popup-padding-bottom-raw: max(0px, var(--st-safe-area-bottom, 0px), var(--keyboard-height, 0px), var(--bottom-padding, 0px));
+    --popup-padding-bottom-raw: max(
+        0px,
+        var(--st-safe-area-bottom, 0px),
+        var(--keyboard-height, 0px),
+        var(--bottom-padding, 0px)
+    );
 
     // We use an intermediate value to allow customisation of the calculation without needing the dependency
     --popup-padding-top-full: var(--popup-padding-top-raw);
     --popup-padding-bottom-full: var(--popup-padding-bottom-raw);
-                    
+
     // Padding visible below the popup (we'll set this to zero if the keyboard is open to save space)
     --popup-padding-top-outside: var(--popup-padding-top-full, 0px);
     --popup-padding-bottom-outside: var(--popup-padding-bottom-full, 0px);
-    
-    --popup-height: calc(var(--vh, 1vh) * 100 - var(--popup-padding-top-outside, 0px) - var(--popup-padding-bottom-outside, 0px));
+
+    --popup-height: calc(
+        var(--vh, 1vh) * 100 - var(--popup-padding-top-outside, 0px) -
+            var(--popup-padding-bottom-outside, 0px)
+    );
 
     // Improve performance
 
     > div:first-child {
-        --popup-padding-top-inside: max(0px, calc(var(--popup-padding-top-full, 0px) - var(--popup-padding-top-outside, 0px)));
-        --popup-padding-bottom-inside: max(0px, calc(var(--popup-padding-bottom-full, 0px) - var(--popup-padding-bottom-outside, 0px)));
-        
+        --popup-padding-top-inside: max(
+            0px,
+            calc(var(--popup-padding-top-full, 0px) - var(--popup-padding-top-outside, 0px))
+        );
+        --popup-padding-bottom-inside: max(
+            0px,
+            calc(var(--popup-padding-bottom-full, 0px) - var(--popup-padding-bottom-outside, 0px))
+        );
+
         // Rounded corners need overflow hidden on scroll
         overflow: hidden;
         overflow: clip; // More modern + disables scrolling
@@ -99,7 +113,7 @@
         touch-action: auto;
         overscroll-behavior: contain;
 
-        >.scrollable-container {
+        > .scrollable-container {
             overflow: hidden;
             overflow: clip; // More modern + disables scrolling
             contain: layout style paint;
@@ -120,7 +134,7 @@
 
         &::after {
             background: rgba(black, 0.4);
-            content: "";
+            content: '';
             position: absolute;
             left: 0;
             top: 0;
@@ -131,7 +145,9 @@
             //will-change: opacity, visibility;
             visibility: hidden;
             z-index: 20000;
-            transition: opacity 0.3s, visibility step-end 0.3s;
+            transition:
+                opacity 0.3s,
+                visibility step-end 0.3s;
         }
 
         .st-view:not(.st-view .st-view) {
@@ -141,7 +157,6 @@
         }
     }
 
-
     &.show-enter-active {
         &::after {
             transition: opacity 0.3s;
@@ -149,7 +164,9 @@
 
         & > div:first-child {
             // Decelerated easing
-            transition: transform 0.3s cubic-bezier(0.0, 0.0, 0.2, 1), opacity 0.3s;
+            transition:
+                transform 0.3s cubic-bezier(0, 0, 0.2, 1),
+                opacity 0.3s;
         }
     }
 
@@ -160,7 +177,9 @@
 
         & > div:first-child {
             // Accelerated easing
-            transition: transform 0.3s cubic-bezier(0.4, 0.0, 1, 1), opacity 0.3s;
+            transition:
+                transform 0.3s cubic-bezier(0.4, 0, 1, 1),
+                opacity 0.3s;
         }
     }
 

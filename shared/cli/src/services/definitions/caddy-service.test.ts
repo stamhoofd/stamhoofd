@@ -7,7 +7,7 @@ import type { CliContext } from '../../context/create-context.js';
 import * as docker from '../docker.js';
 import { CaddyService } from './caddy-service.js';
 
-vi.mock('../docker.js', async (importOriginal) => ({
+vi.mock('../docker.js', async importOriginal => ({
     ...await importOriginal<typeof import('../docker.js')>(),
     imageExists: vi.fn(),
     buildImage: vi.fn(),

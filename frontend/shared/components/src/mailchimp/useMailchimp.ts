@@ -86,8 +86,7 @@ export function getMailchimpRecordGroups(organization: Organization | null, plat
         for (const group of organization.period.groups) {
             groups.push({ title: $t('%ZvB', { group: group.settings.name.toString() }), records: getRecords(group.settings.recordCategories) });
         }
-    }
-    else {
+    } else {
         for (const ageGroup of platform.config.defaultAgeGroups) {
             groups.push({ title: $t('%Zua', { group: ageGroup.name }), records: getRecords(ageGroup.recordsConfiguration.recordCategories) });
         }

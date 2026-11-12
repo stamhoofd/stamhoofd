@@ -64,7 +64,7 @@ export class TagHelper {
 
         return false;
     }
-    
+
     static getAllDescendants(tagId: string, tags: { allTags: OrganizationTag[] } | { tagMap: Map<string, OrganizationTag> }): string[] {
         const tagMap = 'tagMap' in tags ? tags.tagMap : new Map(tags.allTags.map(tag => [tag.id, tag]));
 

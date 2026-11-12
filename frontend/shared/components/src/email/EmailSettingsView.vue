@@ -59,7 +59,6 @@ import { OrganizationEmail } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 
-
 const organization = useOrganization();
 const platform = usePlatform();
 const emails = computed(() => (organization.value ? organization.value.privateMeta?.emails : platform.value.privateConfig?.emails) ?? []);

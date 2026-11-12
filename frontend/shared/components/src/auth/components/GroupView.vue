@@ -514,7 +514,7 @@ function groupName(id: string): string {
     const { name, periodName } = getGroupInfo(id);
 
     if (periodName) {
-        return $t(`%Zct`, {
+        return $t('%Zct', {
             group: name,
             period: periodName,
         });

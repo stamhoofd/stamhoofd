@@ -11,16 +11,16 @@ import { getFilterBuildersForOptionMenus } from './option-menus';
 
 export function getCartFilterBuilder(webshop: Webshop) {
     return new GroupUIFilterBuilder({
-        name: $t(`%1DQ`),
+        name: $t('%1DQ'),
         description: $t('%17R'),
         builders: [
             new NumberFilterBuilder({
-                name: $t(`%17T`),
+                name: $t('%17T'),
                 type: NumberFilterFormat.Number,
                 key: 'amount',
             }),
             new MultipleChoiceFilterBuilder({
-                name: $t(`%Sc`),
+                name: $t('%Sc'),
                 options: webshop.products.map((product) => {
                     return new MultipleChoiceUIFilterOption(product.name, product.id);
                 }),
@@ -110,7 +110,7 @@ export function useCheckoutInMemoryFilterBuilders() {
         if (webshop.meta.checkoutMethods.length > 1) {
             all.push(
                 new MultipleChoiceFilterBuilder({
-                    name: $t(`%1Mf`),
+                    name: $t('%1Mf'),
                     options: webshop.meta.checkoutMethods.map((method) => {
                         return new MultipleChoiceUIFilterOption(method.typeName + ': ' + method.name, method.id);
                     }),

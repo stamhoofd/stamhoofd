@@ -301,7 +301,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'invalid_email_address',
                         message: 'Invalid email address',
-                        human: $t(`%1Mi`),
+                        human: $t('%1Mi'),
                     }),
                 );
             } catch (e) {
@@ -322,7 +322,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'all_filtered',
                         message: 'All recipients are filtered due to hard bounce or spam',
-                        human: data.to.length > 1 ? $t(`%G4`) : $t('%1E7'),
+                        human: data.to.length > 1 ? $t('%G4') : $t('%1E7'),
                     }),
                 );
             } catch (e) {
@@ -346,7 +346,7 @@ class EmailStatic {
                     new SimpleError({
                         code: 'email_skipped_whitelist',
                         message: 'All recipients are filtered due to environment',
-                        human: data.to.length > 1 ? $t(`%G5`) : $t('%1E8'),
+                        human: data.to.length > 1 ? $t('%G5') : $t('%1E8'),
                     }),
                 );
             } catch (e) {
@@ -469,8 +469,8 @@ class EmailStatic {
                 if (STAMHOOFD.environment === 'production') {
                     if (data.from.email !== this.getWebmasterFromEmail().email) {
                         this.sendWebmaster({
-                            subject: $t(`%G6`),
-                            text: $t(`%G7`, { email: data.from.email, to: mail.to }) + ': \n\n' + e + '\n\n' + (mail.text ?? ''),
+                            subject: $t('%G6'),
+                            text: $t('%G7', { email: data.from.email, to: mail.to }) + ': \n\n' + e + '\n\n' + (mail.text ?? ''),
                             type: (data.type === 'transactional') ? 'broadcast' : 'transactional',
                         });
                     }

@@ -49,7 +49,7 @@ export class MemberGeneralStep implements EditMemberStep {
     }
 
     getName(manager: MemberStepManager) {
-        return $t(`%f2`);
+        return $t('%f2');
     }
 
     isEnabled(manager: MemberStepManager) {
@@ -96,10 +96,10 @@ export class MemberGeneralStep implements EditMemberStep {
 
     getComponent(manager: MemberStepManager): ComponentWithProperties {
         return AsyncComponent(() => import('#members/MemberStepView.vue'), {
-            title: $t(`%f2`),
+            title: $t('%f2'),
             member: manager.member,
             component: markRaw(EditMemberGeneralBox),
-            saveText: $t(`%16p`),
+            saveText: $t('%16p'),
             getMarkReviewed: (member: PlatformMember) => getMarkReviewedForGeneralStep(member),
             saveHandler: async (navigate: NavigationActions) => {
                 await manager.saveHandler(this, navigate);

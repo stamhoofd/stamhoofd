@@ -3,25 +3,25 @@ import path from 'path';
 
 // wip: color replacements
 const builtInColorNames: Record<string, string[]> = {
-    'primary': [
+    primary: [
         '#0053FF',
-        '#0053ff'
+        '#0053ff',
     ],
-    'primarySlightlyDarker': [
-        '#0046D7'
+    primarySlightlyDarker: [
+        '#0046D7',
     ],
-    'primaryDarker': [
-        '#002573'
+    primaryDarker: [
+        '#002573',
     ],
-    'red': [
-        '#FF1741'
+    red: [
+        '#FF1741',
     ],
-    'warning': [
-        '#FFC900'
-    ]
+    warning: [
+        '#FFC900',
+    ],
 };
 
-function replaceSource(id: string, source: string, options: {namespace: string, colors?: Record<string, `#${string}`>}) {
+function replaceSource(id: string, source: string, options: { namespace: string; colors?: Record<string, `#${string}`> }) {
     if (options.colors && id.endsWith('.svg') && id.includes('/assets/images/illustrations/')) {
         let newCode = source;
         for (const [colorName, replaceColorValue] of Object.entries(options.colors ?? {})) {
@@ -40,26 +40,25 @@ function replaceSource(id: string, source: string, options: {namespace: string, 
     }
 }
 
-
-export default function svgNamespacePlugin(options: {namespace: string, colors?: Record<string, `#${string}`>}): import('vite').Plugin[] {
+export default function svgNamespacePlugin(options: { namespace: string; colors?: Record<string, `#${string}`> }): import('vite').Plugin[] {
     const name = 'svg-namespace-plugin';
-    let base: Partial<import('vite').Plugin> = {}
+    let base: Partial<import('vite').Plugin> = {};
 
     if (options.namespace) {
         base = {
-            async resolveId(source: string, importer: string|undefined, resolveOptions) {
+            async resolveId(source: string, importer: string | undefined, resolveOptions) {
                 if (!importer) {
                     return null;
                 }
 
                 if (source.startsWith('@stamhoofd/assets/images/illustrations/')) {
                     // Replace with namespace
-                    const replaced = source.replace('@stamhoofd/assets/images/illustrations/', '@stamhoofd/assets/images/illustrations/'+options.namespace + '/')
+                    const replaced = source.replace('@stamhoofd/assets/images/illustrations/', '@stamhoofd/assets/images/illustrations/' + options.namespace + '/');
 
                     const resolved = await this.resolve(
                         replaced,
                         importer,
-                        Object.assign({ skipSelf: true }, resolveOptions)
+                        Object.assign({ skipSelf: true }, resolveOptions),
                     );
 
                     if (resolved) {
@@ -70,8 +69,8 @@ export default function svgNamespacePlugin(options: {namespace: string, colors?:
                 }
 
                 return null;
-            }
-        }
+            },
+        };
     }
 
     return [
@@ -85,25 +84,25 @@ export default function svgNamespacePlugin(options: {namespace: string, colors?:
                 if (options.colors && id.endsWith('.svg') && id.includes('/assets/images/illustrations/')) {
                     const source = fs.readFileSync(id, 'utf-8');
 
-                    const updatedSource = replaceSource(id, source, options)
+                    const updatedSource = replaceSource(id, source, options);
                     if (updatedSource) {
                         const referenceId = this.emitFile({
                             type: 'asset',
                             name: path.basename(id),
-                            source: updatedSource
+                            source: updatedSource,
                         });
                         return `export default import.meta.ROLLUP_FILE_URL_${referenceId};`;
                     }
                 }
-            }
+            },
         },
         {
             enforce: 'pre', // load before other plugins
             name,
             apply: 'serve',
 
-            ...base
+            ...base,
             // todo: replace colors
-        }
-    ]
+        },
+    ];
 }

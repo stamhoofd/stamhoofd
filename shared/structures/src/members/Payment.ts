@@ -117,7 +117,7 @@ export class Payment extends AutoEncoder {
     get title() {
         if (this.method !== PaymentMethod.Unknown) {
             if (this.type !== PaymentType.Payment) {
-                return $t(`%1z`) + ' ' + PaymentMethodHelper.getName(this.method);
+                return $t('%1z') + ' ' + PaymentMethodHelper.getName(this.method);
             }
             return PaymentMethodHelper.getNameCapitalized(this.method);
         }
@@ -135,7 +135,7 @@ export class Payment extends AutoEncoder {
     }
 
     getHTMLTable(): string {
-        let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
+        let str = '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
 
         /**
          * Replacement.create({
@@ -161,26 +161,26 @@ export class Payment extends AutoEncoder {
          */
         const data = [
             {
-                title: $t(`%M7`),
+                title: $t('%M7'),
                 value: this.method ? Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(this.method)) : '',
             },
             {
-                title: $t(`%m0`),
+                title: $t('%m0'),
                 value: this.status !== PaymentStatus.Succeeded ? Formatter.price(this?.price ?? 0) : Formatter.price(0),
             },
             ...(
                 this.method === PaymentMethod.Transfer
                     ? [
                             {
-                                title: $t(`%J8`),
+                                title: $t('%J8'),
                                 value: this.transferDescription ?? '',
                             },
                             {
-                                title: $t(`%kc`),
+                                title: $t('%kc'),
                                 value: this.transferSettings?.iban ?? '',
                             },
                             {
-                                title: $t(`%J5`),
+                                title: $t('%J5'),
                                 value: this.transferSettings?.creditor ?? '',
                             },
                         ]

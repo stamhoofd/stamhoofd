@@ -1,4 +1,4 @@
-import type { ComponentWithProperties, PushOptions} from '@browser/navigation';
+import type { ComponentWithProperties, PushOptions } from '@browser/navigation';
 import { useDismiss, useNavigationController, usePop, usePresent, useShow } from '@browser/navigation';
 import type { UnwrapRef } from 'vue';
 
@@ -54,8 +54,7 @@ export function glueNavigationActions(didShowView: boolean, currentNavigate: Nav
             let options: PushOptions;
             if (!(o as any).components) {
                 options = ({ components: [o as ComponentWithProperties] });
-            }
-            else {
+            } else {
                 options = o as PushOptions;
             }
 

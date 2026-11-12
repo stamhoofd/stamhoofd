@@ -1,6 +1,7 @@
 <template>
     <div class="hover-box container">
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <span class="icon-spacer">{{ $t('%16X') }}</span>
         </h2>
 
@@ -64,7 +65,7 @@ const platformFamilyManager = usePlatformFamilyManager();
 const chooseGroupForMember = useChooseGroupForMember();
 
 async function editMember() {
-    await $editMember(props.member, { title: $t(`%XO`) });
+    await $editMember(props.member, { title: $t('%XO') });
 }
 async function addRegistration() {
     await chooseGroupForMember({ member: props.member, displayOptions: { action: 'show' } });
@@ -77,12 +78,12 @@ async function deleteMember() {
     await present({
         components: [
             AsyncComponent(() => import('#views/DeleteView.vue'), {
-                title: $t(`%15Y`, { name }),
-                description: $t(`%15Z`, { name }),
-                confirmationTitle: $t(`%eu`),
-                confirmationPlaceholder: $t(`%10H`),
+                title: $t('%15Y', { name }),
+                description: $t('%15Z', { name }),
+                confirmationTitle: $t('%eu'),
+                confirmationPlaceholder: $t('%10H'),
                 confirmationCode: name,
-                checkboxText: $t(`%6P`),
+                checkboxText: $t('%6P'),
                 onDelete: async () => {
                     const patch = new PatchableArray() as PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
                     patch.addDelete(member.id);

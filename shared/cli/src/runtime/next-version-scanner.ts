@@ -42,8 +42,7 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
             // Ignore until the closing quote, skipping escaped characters
             if (char === '\\') {
                 i++;
-            }
-            else if (char === state.stringQuote) {
+            } else if (char === state.stringQuote) {
                 state.stringQuote = '';
             }
             continue;
@@ -65,8 +64,7 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
 
         if (char === '/') {
             state.commentLineStack += '/';
-        }
-        else {
+        } else {
             state.commentLineStack = '';
         }
 
@@ -114,50 +112,40 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
 
                             state.contentStack = '';
                         }
-                    }
-                    else {
+                    } else {
                         state.contentStack = '';
                     }
                 }
             }
-        }
-        else if (state.atStack === '@fie') {
+        } else if (state.atStack === '@fie') {
             if (char === 'l') {
                 state.atStack = '@field';
-            }
-            else {
+            } else {
                 state.atStack = '';
                 state.contentStack = '';
             }
-        }
-        else if (state.atStack === '@fi') {
+        } else if (state.atStack === '@fi') {
             if (char === 'e') {
                 state.atStack = '@fie';
-            }
-            else {
+            } else {
                 state.atStack = '';
                 state.contentStack = '';
             }
-        }
-        else if (state.atStack === '@f') {
+        } else if (state.atStack === '@f') {
             if (char === 'i') {
                 state.atStack = '@fi';
-            }
-            else {
+            } else {
                 state.atStack = '';
                 state.contentStack = '';
             }
-        }
-        else if (state.atStack === '@') {
+        } else if (state.atStack === '@') {
             if (char === 'f') {
                 state.atStack = '@f';
-            }
-            else {
+            } else {
                 state.atStack = '';
                 state.contentStack = '';
             }
-        }
-        else if (char === '@') {
+        } else if (char === '@') {
             state.atStack = '@';
         }
     }

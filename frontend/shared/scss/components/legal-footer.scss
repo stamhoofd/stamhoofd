@@ -9,7 +9,8 @@
     opacity: 0.9;
 
     .st-view > main > & {
-        margin: 0 calc(-1 * max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px)));
+        margin: 0
+            calc(-1 * max(var(--st-view-center-padding, 0px), var(--st-horizontal-padding, 40px)));
         margin-bottom: calc(-1 * var(--st-vertical-padding, 40px));
         margin-top: auto;
     }
@@ -20,7 +21,6 @@
         margin-top: auto;
         padding: 15px 0 0 0;
     }
-    
 
     &.shade {
         background: $color-background-shade;
@@ -38,19 +38,19 @@
         min-width: 0;
         gap: 15px;
 
-        .stamhoofd-logo-container {            
+        .stamhoofd-logo-container {
             svg {
                 width: 140px;
             }
         }
 
-         @media (max-width: 500px) {
-             .stamhoofd-logo-container {
-                 svg {
-                     width: 120px;
-                 }
-             }
-         }
+        @media (max-width: 500px) {
+            .stamhoofd-logo-container {
+                svg {
+                    width: 120px;
+                }
+            }
+        }
 
         > div,
         > aside {
@@ -65,7 +65,7 @@
                 flex-direction: row;
                 flex-wrap: wrap;
                 gap: 7px;
-                
+
                 &:first-child {
                     padding-bottom: 5px;
 
@@ -75,7 +75,7 @@
                 }
             }
 
-             &:last-child {
+            &:last-child {
                 --color-primary: #{$color-primary-original};
                 text-align: right;
 
@@ -88,17 +88,17 @@
                     flex-wrap: wrap;
                     gap: 10px;
 
-                     &,
-                     &:hover,
-                     &:link,
-                     &:active,
-                     &:visited {
-                         color: $color-gray-text;
-                         font-weight: 600;
-                         text-decoration: none;
-                     }
-                 }
-             }
-         }
-     }
- }
+                    &,
+                    &:hover,
+                    &:link,
+                    &:active,
+                    &:visited {
+                        color: $color-gray-text;
+                        font-weight: 600;
+                        text-decoration: none;
+                    }
+                }
+            }
+        }
+    }
+}

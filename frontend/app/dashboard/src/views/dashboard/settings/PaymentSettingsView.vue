@@ -9,7 +9,8 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <template v-if="isBuckarooActive">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%Na') }}
             </h2>
 
@@ -112,7 +113,8 @@
         </div>
 
         <template v-if="stripeAccounts.length && canCreateMultipleStripeAccounts">
-            <hr><div class="style-button-bar">
+            <hr>
+            <div class="style-button-bar">
                 <LoadingButton v-if="stripeAccounts.length === 0 || creatingStripeAccount || canCreateMultipleStripeAccounts" :loading="creatingStripeAccount">
                     <button type="button" class="button secundary" :disabled="creatingStripeAccount" @click="createStripeAccount">
                         <span class="icon add" />
@@ -131,7 +133,8 @@
         </template>
 
         <div v-if="stripeAccounts.length === 0 || creatingStripeAccount" class="container">
-            <hr><aside class="style-title-prefix">
+            <hr>
+            <aside class="style-title-prefix">
                 {{ $t('%Nm') }}
             </aside>
 
@@ -290,7 +293,8 @@
         </p>
 
         <template v-if="isStamhoofd">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%NU') }}
             </h2>
 

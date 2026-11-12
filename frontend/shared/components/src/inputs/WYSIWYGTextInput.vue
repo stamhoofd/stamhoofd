@@ -26,7 +26,8 @@
                 <button class="button icon italic" type="button" :class="{ 'is-active': editor.isActive('italic') }" v-tooltip="$t('%aH')" @click="editor.chain().focus().toggleItalic().run()" />
                 <button class="button icon underline" type="button" :class="{ 'is-active': editor.isActive('underline') }" v-tooltip="$t('%aI')" @click="editor.chain().focus().toggleUnderline().run()" />
 
-                <hr v-if="!$isMobile"><button class="button icon text-style" type="button" v-tooltip="$t('%vC')" @click="openTextStyles" />
+                <hr v-if="!$isMobile">
+                <button class="button icon text-style" type="button" v-tooltip="$t('%vC')" @click="openTextStyles" />
                 <button class="button icon hr" type="button" v-tooltip="$t('%aB')" @click="editor.chain().focus().setHorizontalRule().run()" @mousedown.stop />
                 <button class="button icon link" type="button" :class="{ 'is-active': editor.isActive('link') }" v-tooltip="$t('%aC')" @click.prevent.stop="openLinkEditor()" @mousedown.stop />
             </div>
@@ -168,7 +169,7 @@ function openLinkEditor() {
         return;
     }
     if (!editor.value!.isActive('link') && editor.value!.state.selection.empty) {
-        new Toast($t(`%v8`), 'info').show();
+        new Toast($t('%v8'), 'info').show();
         return;
     }
     editLink.value = editor.value!.getAttributes('link')?.href ?? '';
@@ -187,7 +188,7 @@ function openTextStyles(event: Event) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: $t(`%vC`),
+                name: $t('%vC'),
                 icon: 'h1',
                 selected: editor.value.isActive('heading', { level: props.headingStartLevel }),
                 action: () => {
@@ -196,7 +197,7 @@ function openTextStyles(event: Event) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%aJ`),
+                name: $t('%aJ'),
                 icon: 'h2',
                 selected: editor.value.isActive('heading', { level: props.headingStartLevel + 1 }),
                 action: () => {
@@ -205,7 +206,7 @@ function openTextStyles(event: Event) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%zJ`),
+                name: $t('%zJ'),
                 icon: 'warning',
                 selected: editor.value.isActive('warningBox', { type: 'warning' }),
                 action: () => {
@@ -214,7 +215,7 @@ function openTextStyles(event: Event) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%J`),
+                name: $t('%J'),
                 icon: 'info',
                 selected: editor.value.isActive('warningBox', { type: 'info' }),
                 action: () => {
@@ -225,7 +226,7 @@ function openTextStyles(event: Event) {
         ],
         [
             new ContextMenuItem({
-                name: $t(`%aL`),
+                name: $t('%aL'),
                 icon: 'ul',
                 selected: editor.value.isActive('bulletList'),
                 action: () => {
@@ -234,7 +235,7 @@ function openTextStyles(event: Event) {
                 },
             }),
             new ContextMenuItem({
-                name: $t(`%vF`),
+                name: $t('%vF'),
                 icon: 'ol',
                 selected: editor.value.isActive('orderedList'),
                 action: () => {
@@ -285,7 +286,7 @@ function saveLink() {
     }
 
     if (!isValidHttpUrl(cleanedUrl)) {
-        new Toast($t(`%zK`), 'error red').show();
+        new Toast($t('%zK'), 'error red').show();
         return;
     }
 

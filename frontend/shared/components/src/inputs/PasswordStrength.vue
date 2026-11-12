@@ -106,18 +106,18 @@ const type = computed(() => {
 
 const description = computed(() => {
     if (strength.value < 50) {
-        return $t(`%z7`);
+        return $t('%z7');
     }
 
     if (strength.value < 75) {
-        return $t(`%z8`);
+        return $t('%z8');
     }
 
     if (strength.value < 100) {
-        return $t(`%z9`);
+        return $t('%z9');
     }
 
-    return $t(`%zA`);
+    return $t('%zA');
 });
 </script>
 

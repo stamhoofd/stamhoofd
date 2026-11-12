@@ -131,8 +131,7 @@ export class MailchimpService {
         let accountName: string;
         try {
             accountName = await client.getAccountName();
-        }
-        catch (e) {
+        } catch (e) {
             throw this.toSimpleError(e);
         }
 
@@ -175,8 +174,7 @@ export class MailchimpService {
         try {
             const lists = await client.getLists();
             return lists.map(l => MailchimpAudience.create(l));
-        }
-        catch (e) {
+        } catch (e) {
             throw this.toSimpleError(e);
         }
     }
@@ -201,8 +199,7 @@ export class MailchimpService {
             if (patch.audienceId === null) {
                 settings.audienceId = null;
                 settings.audienceName = null;
-            }
-            else {
+            } else {
                 const lists = await this.getAudiences(organization);
                 const list = lists.find(l => l.id === patch.audienceId);
                 if (!list) {
@@ -257,8 +254,7 @@ export class MailchimpService {
             for (const group of groups) {
                 categories.push(...group.settings.recordCategories);
             }
-        }
-        else {
+        } else {
             for (const ageGroup of platform.config.defaultAgeGroups) {
                 categories.push(...ageGroup.recordsConfiguration.recordCategories);
             }
@@ -290,12 +286,11 @@ export class MailchimpService {
             }
             if (record.type === RecordType.Checkbox) {
                 settings.newsletterChoiceIds = [];
-            }
-            else if (settings.newsletterChoiceIds.length === 0 || settings.newsletterChoiceIds.some(id => !record.choices.find(c => c.id === id))) {
+            } else if (settings.newsletterChoiceIds.length === 0 || settings.newsletterChoiceIds.some(id => !record.choices.find(c => c.id === id))) {
                 throw new SimpleError({
                     code: 'invalid_field',
                     message: 'Invalid newsletter choices',
-                    human: $t("%Zvj"),
+                    human: $t('%Zvj'),
                     field: 'newsletterChoiceIds',
                 });
             }
@@ -346,8 +341,7 @@ export class MailchimpService {
                     statusCode: 400,
                 });
             }
-        }
-        else {
+        } else {
             if (!organization) {
                 throw new SimpleError({
                     code: 'not_available',
@@ -517,8 +511,7 @@ export class MailchimpService {
             }
             try {
                 await client.createMergeField(listId, field);
-            }
-            catch (e) {
+            } catch (e) {
                 // A retried create after a 5xx can hit a field that was created after all
                 if (!(e instanceof MailchimpApiError && e.status === 400 && /already exists/i.test(e.detail))) {
                     throw e;
@@ -583,8 +576,7 @@ export class MailchimpService {
             try {
                 mergeFields = await this.ensureMergeFields(client, listId, organization, kind, tags.i18n);
                 existing = await client.getMembers(listId, signal);
-            }
-            catch (e) {
+            } catch (e) {
                 throw this.toSimpleError(e);
             }
 
@@ -628,12 +620,10 @@ export class MailchimpService {
                     await client.updateTags(listId, upsert.email, upsert.tags);
                     if (upsert.isNew) {
                         result.added++;
-                    }
-                    else {
+                    } else {
                         result.updated++;
                     }
-                }
-                catch (e) {
+                } catch (e) {
                     handleError(upsert.email, e);
                 }
                 result.processed++;
@@ -650,8 +640,7 @@ export class MailchimpService {
                     if (removal.markAsRemoved) {
                         result.removed++;
                     }
-                }
-                catch (e) {
+                } catch (e) {
                     handleError(removal.email, e);
                 }
                 result.processed++;
@@ -659,8 +648,7 @@ export class MailchimpService {
             }, signal);
 
             sync.status = MailchimpSyncStatus.Done;
-        }
-        catch (e) {
+        } catch (e) {
             console.error('[Mailchimp] Sync failed', sync.id, e);
             sync.status = MailchimpSyncStatus.Failed;
             sync.errorMessage = isSimpleError(e) || isSimpleErrors(e) ? e.getHuman() : $t('%ZuZ');

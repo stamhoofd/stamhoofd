@@ -1,7 +1,7 @@
 import { Factory } from '@node/database';
 import { RegistrationPeriodSettings } from '@stamhoofd/structures';
 
-import type { Organization} from '../models/index.js';
+import type { Organization } from '../models/index.js';
 import { RegistrationPeriod } from '../models/index.js';
 
 class Options {

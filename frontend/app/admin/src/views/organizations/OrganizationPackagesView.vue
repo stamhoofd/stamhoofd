@@ -59,7 +59,6 @@ import type { Organization, STPackage } from '@stamhoofd/structures';
 import { OrganizationPackagesStatus, STPackageBundle, STPackageBundleHelper } from '@stamhoofd/structures';
 import { onMounted, ref } from 'vue';
 
-
 const props = withDefaults(
     defineProps<{
         organization: Organization;
@@ -74,13 +73,13 @@ const errors = useErrors();
 const loading = ref(false);
 const context = useContext();
 const owner = useRequestOwner();
-const present = usePresent()
+const present = usePresent();
 const platform = usePlatform();
 const auth = useAuth();
 const canEditPackages = auth.hasPlatformFullAccess();
 
 onMounted(() => {
-    reload().catch(console.error)
+    reload().catch(console.error);
 });
 
 async function reload() {
@@ -96,15 +95,14 @@ async function reload() {
             method: 'GET',
             path: '/organization/packages',
             query: {
-                includeExpired: true
+                includeExpired: true,
             },
             owner,
             decoder: OrganizationPackagesStatus as Decoder<OrganizationPackagesStatus>,
         });
 
         packageStatus.value = response.data;
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -112,9 +110,9 @@ async function reload() {
 }
 
 async function createPackage() {
-    const pack = STPackageBundleHelper.getCurrentPackage(STPackageBundle.Webshops, new Date())
-    pack.validAt = new Date()
-    
+    const pack = STPackageBundleHelper.getCurrentPackage(STPackageBundle.Webshops, new Date());
+    pack.validAt = new Date();
+
     await present({
         components: [
             AsyncComponent(() => import('./EditPackageView.vue'), {
@@ -123,12 +121,12 @@ async function createPackage() {
                 saveHandler: async (patch: AutoEncoderPatchType<STPackage>) => {
                     const status = OrganizationPackagesStatus.patch({});
                     status.packages.addPut(pack.patch(patch));
-                    await applyPatch(status)
-                }
-            })
+                    await applyPatch(status);
+                },
+            }),
         ],
-        modalDisplayStyle: 'popup'
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function editPackage(pack: STPackage) {
@@ -140,24 +138,23 @@ async function editPackage(pack: STPackage) {
                 saveHandler: async (patch: AutoEncoderPatchType<STPackage>) => {
                     const status = OrganizationPackagesStatus.patch({});
                     patch.id = pack.id;
-                    status.packages.addPatch(patch)
-                    await applyPatch(status)
-                }
-            })
+                    status.packages.addPatch(patch);
+                    await applyPatch(status);
+                },
+            }),
         ],
-        modalDisplayStyle: 'popup'
-    })
+        modalDisplayStyle: 'popup',
+    });
 }
 
 async function applyPatch(patch: AutoEncoderPatchType<OrganizationPackagesStatus>) {
     const response = await context.value.getAuthenticatedServerForOrganization(props.organization.id).request({
-        method: "PATCH",
-        path: "/organization/packages",
+        method: 'PATCH',
+        path: '/organization/packages',
         body: patch,
-        decoder: OrganizationPackagesStatus as Decoder<OrganizationPackagesStatus>
-    })
-    packageStatus.value = response.data
+        decoder: OrganizationPackagesStatus as Decoder<OrganizationPackagesStatus>,
+    });
+    packageStatus.value = response.data;
 }
-
 
 </script>

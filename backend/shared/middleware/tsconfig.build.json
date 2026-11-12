@@ -4,13 +4,7 @@
         "outDir": "dist",
         "rootDir": "src"
     },
-    "exclude": [
-        "./src/**/*.spec.ts", 
-        "./src/**/*.test.ts"
-    ],
+    "exclude": ["./src/**/*.spec.ts", "./src/**/*.test.ts"],
     "extends": ["../../../tsconfig.base.json", "../../../tsconfig.runtime.json"],
-    "include": [
-        "./src",
-        "../../stamhoofd.d.ts"
-    ]
+    "include": ["./src", "../../stamhoofd.d.ts"]
 }

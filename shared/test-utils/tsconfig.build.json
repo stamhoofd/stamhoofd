@@ -5,10 +5,5 @@
         "rootDir": "src"
     },
     "extends": ["../../tsconfig.test.json", "../../tsconfig.runtime.json"],
-    "include": [
-        "./src",
-        "./src/*.json",
-        "../stamhoofd.d.ts",
-        "../../jest-extended.d.ts"
-    ]
+    "include": ["./src", "./src/*.json", "../stamhoofd.d.ts", "../../jest-extended.d.ts"]
 }

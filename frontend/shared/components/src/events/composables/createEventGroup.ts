@@ -1,4 +1,4 @@
-import type { Event, Organization} from '@stamhoofd/structures';
+import type { Event, Organization } from '@stamhoofd/structures';
 import { Group, GroupSettings, GroupStatus, GroupType, TranslatedString } from '@stamhoofd/structures';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';

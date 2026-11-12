@@ -70,7 +70,7 @@ ${current}/${total}`));
                         if (dryRun) {
                             continue;
                         }
-                        const promptResult = await promptYesNoOrDoubt(chalk.yellow(`> Accept (press [y] or [enter])?`));
+                        const promptResult = await promptYesNoOrDoubt(chalk.yellow('> Accept (press [y] or [enter])?'));
 
                         switch (promptResult) {
                             case YesNoOrDoubt.Yes:
@@ -101,8 +101,7 @@ ${current}/${total}`));
 
             if (errorMessage === null) {
                 filteredDictionary.set(key, value);
-            }
-            else {
+            } else {
                 errors = errors + 1;
             }
         }

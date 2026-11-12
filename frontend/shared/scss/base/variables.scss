@@ -1,4 +1,4 @@
-@use "sass:color";
+@use 'sass:color';
 
 $input-height-original: 38px;
 $input-height: var(--input-height, $input-height-original);
@@ -19,88 +19,137 @@ $border-radius-modals: 16px;
 
 @function invertColor($color, $offset: 0) {
     @return hsl(
-        color.hue($color), 
-        calc(0.5 * color.saturation($color)), 
+        color.hue($color),
+        calc(0.5 * color.saturation($color)),
         calc(100% - color.lightness($color) - ($offset * 1%))
     );
 }
 
 @function changeHue($color, $hue) {
     @return hsl(
-        #{$hue}, 
-        calc(var(--color-saturation-factor, 1) * var(--color-primary-saturation-factor, 1) * color.saturation($color)), 
+        #{$hue},
+        calc(
+            var(--color-saturation-factor, 1) * var(--color-primary-saturation-factor, 1) *
+                color.saturation($color)
+        ),
         #{color.lightness($color)}
     );
 }
 
 @function changeHueInvert($color, $hue, $offset: 0) {
     @return hsl(
-        #{$hue}, 
-        calc(var(--color-saturation-factor, 1) * var(--color-primary-saturation-factor, 1) * color.saturation($color)), 
+        #{$hue},
+        calc(
+            var(--color-saturation-factor, 1) * var(--color-primary-saturation-factor, 1) *
+                color.saturation($color)
+        ),
         calc(100% - color.lightness($color) - ($offset * 1%))
     );
 }
 
 @function shade($color, $times) {
-    @return color.adjust($color, $lightness: -$times * 3%)
+    @return color.adjust($color, $lightness: -$times * 3%);
 }
 
 // -----------------------------------------------------------------------------
 // -------- Colors -------------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-
 // -----------------------------------------------------------------------------
 // -------- Primary (needed first) ---------------------------------------------
 // -----------------------------------------------------------------------------
 
 $color-primary-original: #0053ff;
-$color-primary-lighter-original: #F7FAFF;
+$color-primary-lighter-original: #f7faff;
 $color-primary-light-original: #dfe9ff;
-$color-primary-background-original: #ECF0F9;
-$color-primary-dark-original: #001F61;
-$color-primary-gray-light-original: #9DB7EC;
+$color-primary-background-original: #ecf0f9;
+$color-primary-dark-original: #001f61;
+$color-primary-gray-light-original: #9db7ec;
 
 // These hints will get replaced by JavaScript if needed
 // And will be used to generate some colors
 $color-primary-hue: var(--color-primary-hue, color.hue($color-primary-original));
-$color-primary-saturation: var(--color-primary-saturation, color.saturation($color-primary-original));
+$color-primary-saturation: var(
+    --color-primary-saturation,
+    color.saturation($color-primary-original)
+);
 
 $color-primary: var(--color-primary, $color-primary-original);
 $dark-theme-color-primary: var(--dark-theme-color-primary, $color-primary-original);
 
-$color-primary-lighter: var(--color-primary-lighter, #{changeHue($color-primary-lighter-original, $color-primary-hue)});
-$color-primary-light: var(--color-primary-light, #{changeHue($color-primary-light-original, $color-primary-hue)});
-$color-primary-background: var(--color-primary-background, #{changeHue($color-primary-background-original, $color-primary-hue)});
-$color-primary-dark: var(--color-primary-dark, #{changeHue($color-primary-dark-original, $color-primary-hue)});
-$color-primary-gray-light: var(--color-primary-gray-light, #{changeHue($color-primary-gray-light-original, $color-primary-hue)});
+$color-primary-lighter: var(
+    --color-primary-lighter,
+    #{changeHue($color-primary-lighter-original, $color-primary-hue)}
+);
+$color-primary-light: var(
+    --color-primary-light,
+    #{changeHue($color-primary-light-original, $color-primary-hue)}
+);
+$color-primary-background: var(
+    --color-primary-background,
+    #{changeHue($color-primary-background-original, $color-primary-hue)}
+);
+$color-primary-dark: var(
+    --color-primary-dark,
+    #{changeHue($color-primary-dark-original, $color-primary-hue)}
+);
+$color-primary-gray-light: var(
+    --color-primary-gray-light,
+    #{changeHue($color-primary-gray-light-original, $color-primary-hue)}
+);
 
-$dark-theme-color-primary-lighter: changeHueInvert($color-primary-lighter-original, $color-primary-hue, -8);
-$dark-theme-color-primary-light: changeHueInvert($color-primary-light-original, $color-primary-hue, -8);
-// The primary background color in dark mode should be adjusted a bit for contrast 
+$dark-theme-color-primary-lighter: changeHueInvert(
+    $color-primary-lighter-original,
+    $color-primary-hue,
+    -8
+);
+$dark-theme-color-primary-light: changeHueInvert(
+    $color-primary-light-original,
+    $color-primary-hue,
+    -8
+);
+// The primary background color in dark mode should be adjusted a bit for contrast
 // -> hence we don't invert the same color
-$dark-theme-color-primary-background: changeHueInvert($color-primary-background-original, $color-primary-hue, -8);
-$dark-theme-color-primary-dark: changeHueInvert($color-primary-dark-original, $color-primary-hue, -8);
-$dark-theme-color-primary-gray-light: changeHueInvert($color-primary-gray-light-original, $color-primary-hue, -8);
+$dark-theme-color-primary-background: changeHueInvert(
+    $color-primary-background-original,
+    $color-primary-hue,
+    -8
+);
+$dark-theme-color-primary-dark: changeHueInvert(
+    $color-primary-dark-original,
+    $color-primary-hue,
+    -8
+);
+$dark-theme-color-primary-gray-light: changeHueInvert(
+    $color-primary-gray-light-original,
+    $color-primary-hue,
+    -8
+);
 
 // -----------------------------------------------------------------------------
 // -------- Dark (black) -------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-dark-original: hsl(240, 2%, 19%); 
+$color-dark-original: hsl(240, 2%, 19%);
 $color-dark: var(--color-dark, #{changeHue($color-dark-original, $color-primary-hue)});
 $dark-theme-color-dark: invertColor($color-dark-original, -19); // hsl(0deg, 0%, 90%);
 
-$color-darkest-original: black; 
+$color-darkest-original: black;
 $color-darkest: var(--color-darkest, #{$color-darkest-original});
 $dark-theme-color-darkest: white;
 
 $color-dark-lighter-original: shade($color-dark-original, -2);
-$color-dark-lighter: var(--color-dark-lighter, #{changeHue($color-dark-lighter-original, $color-primary-hue)});
-$dark-theme-color-dark-lighter: invertColor($color-dark-lighter-original, -19); 
+$color-dark-lighter: var(
+    --color-dark-lighter,
+    #{changeHue($color-dark-lighter-original, $color-primary-hue)}
+);
+$dark-theme-color-dark-lighter: invertColor($color-dark-lighter-original, -19);
 
 $color-dark-light-original: #5e5959;
-$color-dark-light: var(--color-dark-light, #{changeHue($color-dark-light-original, $color-primary-hue)});
+$color-dark-light: var(
+    --color-dark-light,
+    #{changeHue($color-dark-light-original, $color-primary-hue)}
+);
 $dark-theme-color-dark-light: invertColor($color-dark-light-original, -19); // hsl(0deg, 0%, 80%);
 
 // -----------------------------------------------------------------------------
@@ -116,12 +165,21 @@ $color-background-shade: var(--color-background-shade, $color-background-shade-o
 $dark-theme-color-background-shade: invertColor($color-background-shade-original, -8);
 
 $color-background-shade-darker-original: shade($color-background-original, 2);
-$color-background-shade-darker: var(--color-background-shade-darker, $color-background-shade-darker-original);
-$dark-theme-color-background-shade-darker: invertColor($color-background-shade-darker-original, -8); 
+$color-background-shade-darker: var(
+    --color-background-shade-darker,
+    $color-background-shade-darker-original
+);
+$dark-theme-color-background-shade-darker: invertColor($color-background-shade-darker-original, -8);
 
 $color-background-shade-darker-darker-original: shade($color-background-original, 3);
-$color-background-shade-darker-darker: var(--color-background-shade-darker-darker, $color-background-shade-darker-darker-original);
-$dark-theme-color-background-shade-darker-darker: invertColor($color-background-shade-darker-darker-original, -8); 
+$color-background-shade-darker-darker: var(
+    --color-background-shade-darker-darker,
+    $color-background-shade-darker-darker-original
+);
+$dark-theme-color-background-shade-darker-darker: invertColor(
+    $color-background-shade-darker-darker-original,
+    -8
+);
 
 $color-background-shade-4-original: shade($color-background-original, 4);
 $color-background-shade-4: var(--color-background-shade-4, $color-background-shade-4-original);
@@ -130,7 +188,6 @@ $dark-theme-color-background-shade-4: invertColor($color-background-shade-4-orig
 $color-background-shade-5-original: shade($color-background-original, 5);
 $color-background-shade-5: var(--color-background-shade-5, $color-background-shade-5-original);
 $dark-theme-color-background-shade-5: invertColor($color-background-shade-5-original, -8);
-
 
 // Used for segmented control in dark mode: instead of darker, it should become lighter
 $color-background-highlight: var(--color-background-highlight, #ffffff);
@@ -142,7 +199,10 @@ $dark-theme-color-background-interactive: invertColor(#ffffff, 0);
 
 $color-background-lighter: var(--color-background-lighter, #ffffff);
 $color-background-lighter-shade: var(--color-background-lighter-shade, #{shade(#ffffff, 1)});
-$color-background-lighter-shade-darker: var(--color-background-lighter-shade-darker, #{shade(#ffffff, 2)});
+$color-background-lighter-shade-darker: var(
+    --color-background-lighter-shade-darker,
+    #{shade(#ffffff, 2)}
+);
 $dark-theme-color-background-lighter: invertColor(#ffffff, 0);
 $dark-theme-color-background-lighter-shade: invertColor(#ffffff, -8);
 $dark-theme-color-background-lighter-shade-darker: invertColor(#ffffff, -16);
@@ -153,18 +213,21 @@ $dark-theme-color-background-lighter-shade-darker: invertColor(#ffffff, -16);
 
 $color-primary-constrast-original: $color-background-original;
 $color-primary-contrast: var(--color-primary-contrast, $color-primary-constrast-original);
-$dark-theme-color-primary-contrast: var(--dark-theme-color-primary-contrast, $color-primary-constrast-original);
+$dark-theme-color-primary-contrast: var(
+    --dark-theme-color-primary-contrast,
+    $color-primary-constrast-original
+);
 
 // -----------------------------------------------------------------------------
 // -------- Error (red) --------------------------------------------------------
 // -----------------------------------------------------------------------------
 
 $color-error-original: #f0153d;
-$color-error-border-original: #FFCAD3;
-$color-error-background-original: #FBDAE0;
+$color-error-border-original: #ffcad3;
+$color-error-background-original: #fbdae0;
 $color-error-dark-original: #630012;
 
-$color-error-border-shade-original: #FF7A91;
+$color-error-border-shade-original: #ff7a91;
 $color-error-border-shade: var(--color-error-border-shade, $color-error-border-shade-original);
 
 $dark-theme-color-error-border: invertColor($color-error-border-original, -5);
@@ -182,10 +245,10 @@ $color-error-border-focus: $color-error;
 // -------- Success (green) ----------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-success-original: #15C16B;
-$color-success-background-original: #E0F5E4;
+$color-success-original: #15c16b;
+$color-success-background-original: #e0f5e4;
 $color-success-dark-original: #006108;
-$color-success-border-original: #AEDBB2;
+$color-success-border-original: #aedbb2;
 
 $dark-theme-color-success-background: invertColor($color-success-background-original, -5);
 $dark-theme-color-success-dark: invertColor($color-success-dark-original, -5);
@@ -201,10 +264,10 @@ $color-success-border-focus: $color-success;
 // -------- Warning (yellow) ----------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-warning-original: #FFAA00;
-$color-warning-background-original: #FBF4DA;
+$color-warning-original: #ffaa00;
+$color-warning-background-original: #fbf4da;
 $color-warning-dark-original: #634e00;
-$color-warning-border-original: #DBD1AE;
+$color-warning-border-original: #dbd1ae;
 
 $dark-theme-color-warning-background: invertColor($color-warning-background-original, -5);
 $dark-theme-color-warning-dark: invertColor($color-warning-dark-original, -5);
@@ -223,11 +286,11 @@ $color-gray-original: #868686;
 $color-gray-1: var(--color-gray-1, $color-gray-original);
 $dark-theme-color-gray-1: invertColor($color-gray-original, -8); //hsl(color.hue($color-gray-original), color.saturation($color-gray-original), calc(100% - #{color.lightness($color-gray-original)}));
 
-$color-gray-2-original: #D1D1D1;
+$color-gray-2-original: #d1d1d1;
 $color-gray-2: var(--color-gray-2, $color-gray-2-original);
 $dark-theme-color-gray-2: invertColor($color-gray-2-original, 0); //hsl(color.hue($color-gray-2-original), color.saturation($color-gray-2-original), calc(100% - #{color.lightness($color-gray-2-original)}));
 
-$color-gray-3-original: #E5E5E5;
+$color-gray-3-original: #e5e5e5;
 $color-gray-3: var(--color-gray-3, $color-gray-3-original);
 $dark-theme-color-gray-3: invertColor($color-gray-3-original, -8); //hsl(color.hue($color-gray-3-original), color.saturation($color-gray-3-original), calc(100% - #{color.lightness($color-gray-3-original)}));
 
@@ -247,17 +310,20 @@ $dark-theme-color-gray-5: invertColor($color-gray-5-original, -8); //hsl(color.h
 // -------- Secundary (purple) -------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-secundary-original: #8B17FF;
-$color-secundary-background-original: #EBDAFB;
+$color-secundary-original: #8b17ff;
+$color-secundary-background-original: #ebdafb;
 $color-secundary-dark-original: #300061;
-$color-secundary-border-original: #C5AEDB;
+$color-secundary-border-original: #c5aedb;
 
 $dark-theme-color-secundary-background: invertColor($color-secundary-background-original, -8);
 $dark-theme-color-secundary-dark: invertColor($color-secundary-dark-original, -8);
 $dark-theme-color-secundary-border: invertColor($color-secundary-border-original, -8);
 
 $color-secundary: var(--color-secundary, $color-secundary-original);
-$color-secundary-background: var(--color-secundary-background, $color-secundary-background-original);
+$color-secundary-background: var(
+    --color-secundary-background,
+    $color-secundary-background-original
+);
 $color-secundary-dark: var(--color-secundary-dark, $color-secundary-dark-original);
 $color-secundary-border: var(--color-secundary-border, $color-secundary-border-original);
 $color-secundary-border-focus: $color-secundary;
@@ -266,10 +332,10 @@ $color-secundary-border-focus: $color-secundary;
 // -------- Tertiary (pink) -------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-tertiary-original: #FF17B2;
-$color-tertiary-background-original: #FBDAF0;
+$color-tertiary-original: #ff17b2;
+$color-tertiary-background-original: #fbdaf0;
 $color-tertiary-dark-original: #610041;
-$color-tertiary-border-original: #DBAECC;
+$color-tertiary-border-original: #dbaecc;
 
 $dark-theme-color-tertiary-background: invertColor($color-tertiary-background-original, -8);
 $dark-theme-color-tertiary-dark: invertColor($color-tertiary-dark-original, -8);
@@ -285,10 +351,10 @@ $color-tertiary-border-focus: $color-tertiary;
 // -------- Payconiq (pink) -------------------------------------------------
 // -----------------------------------------------------------------------------
 
-$color-payconiq-original: #FF4785;
-$color-payconiq-background-original: #FFD6E4;
+$color-payconiq-original: #ff4785;
+$color-payconiq-background-original: #ffd6e4;
 $color-payconiq-dark-original: #692038;
-$color-payconiq-border-original: #DBAEBD;
+$color-payconiq-border-original: #dbaebd;
 
 $dark-theme-color-payconiq-background: invertColor($color-payconiq-background-original, -8);
 $dark-theme-color-payconiq-dark: invertColor($color-payconiq-dark-original, -8);
@@ -305,7 +371,7 @@ $color-payconiq-border-focus: $color-payconiq;
 // -----------------------------------------------------------------------------
 
 $color-discount-original: #ff4747;
-$color-discount-background-original: #FBDADA;
+$color-discount-background-original: #fbdada;
 $color-discount-dark-original: #692020;
 $color-discount-border-original: #dbaeae;
 
@@ -325,11 +391,11 @@ $color-border-lighter: $color-gray-3;
 $color-border-original: $color-gray-2-original;
 $color-border: $color-gray-2;
 
-$color-border-shade-original: #BDBDBD;
+$color-border-shade-original: #bdbdbd;
 $color-border-shade: var(--color-border-shade, $color-border-shade-original);
 $dark-theme-color-border-shade: invertColor($color-border-shade-original, -8);
 
-$color-border-shade-darker-original: #A8A8A8;
+$color-border-shade-darker-original: #a8a8a8;
 $color-border-shade-darker: var(--color-border-shade-darker, $color-border-shade-darker-original);
 $dark-theme-color-border-shade-darker: invertColor($color-border-shade-darker-original, -8);
 
@@ -358,9 +424,9 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
 @mixin dark-modus {
     color-scheme: dark;
 
-    --rgb-shadow: 255; 
-    --rgb-background: #{color.channel($dark-theme-color-background, "red", $space: rgb)};
-    --rgb-background-shade: #{color.channel($dark-theme-color-background-shade, "red", $space: rgb)};
+    --rgb-shadow: 255;
+    --rgb-background: #{color.channel($dark-theme-color-background, 'red', $space: rgb)};
+    --rgb-background-shade: #{color.channel($dark-theme-color-background-shade, 'red', $space: rgb)};
     --is-dark-mode: 1;
 
     // Reduce color a little bit
@@ -371,7 +437,6 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
     --color-background-shade-darker-darker: #{$dark-theme-color-background-shade-darker-darker};
     --color-background-shade-4: #{$dark-theme-color-background-shade-4};
     --color-background-shade-5: #{$dark-theme-color-background-shade-5};
-
 
     --color-darkest: #{$dark-theme-color-darkest};
     --color-dark: #{$dark-theme-color-dark};
@@ -457,20 +522,24 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
             }
         }
 
-        >div {
-            box-shadow: 0 0 0 1px $color-border, 0px 10px 60px 0px $color-overlay-shadow, 0px 15px 30px 0px $color-overlay-shadow;
+        > div {
+            box-shadow:
+                0 0 0 1px $color-border,
+                0px 10px 60px 0px $color-overlay-shadow,
+                0px 15px 30px 0px $color-overlay-shadow;
         }
     }
 
     .split-view-controller {
-        &[data-has-detail="true"], &[data-has-detail="false"] {
-            >.master {
+        &[data-has-detail='true'],
+        &[data-has-detail='false'] {
+            > .master {
                 border-right: $border-width-thin solid $color-border;
                 background: $color-background-interactive;
                 --color-current-background: #{$color-background-lighter};
                 --color-current-background-shade: #{$color-background-lighter-shade};
-            --color-current-background-shade-darker: #{$color-background-lighter-shade-darker};
-    
+                --color-current-background-shade-darker: #{$color-background-lighter-shade-darker};
+
                 body.modern & {
                     overflow: hidden;
                 }
@@ -493,7 +562,6 @@ $color-current-background-shade: var(--color-current-background-shade, #{$color-
         --color-current-background-shade: #{$color-background-lighter-shade};
         --color-current-background-shade-darker: #{$color-background-lighter-shade-darker};
     }
-
 
     /*.st-view.box-shade {
         @media (min-width: 801px) and (min-height: 701px) {

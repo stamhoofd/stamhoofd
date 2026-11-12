@@ -12,7 +12,8 @@
         </p>
 
         <div v-for="({title: groupTitle, responsibilities}, index) of groupedResponsibilites" :key="''+index" class="container">
-            <hr v-if="index > 0 || !(!organization && items.length)"><h2 v-if="groupTitle && groupedResponsibilites.length > 1">
+            <hr v-if="index > 0 || !(!organization && items.length)">
+            <h2 v-if="groupTitle && groupedResponsibilites.length > 1">
                 {{ groupTitle }}
             </h2>
 
@@ -53,7 +54,8 @@
         </div>
 
         <div v-if="deletedMemberResponsibilityRecords.length > 0" class="container">
-            <hr><h2>{{ $t('%8u') }}</h2>
+            <hr>
+            <h2>{{ $t('%8u') }}</h2>
             <STList>
                 <STListItem v-for="record of deletedMemberResponsibilityRecords" :key="record.id" element-name="label" :selectable="true">
                     <template #left>
@@ -93,7 +95,7 @@ import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import { Formatter } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../../../errors/ErrorBox';
 import type { Validator } from '../../../errors/Validator';
@@ -176,14 +178,14 @@ const groupedResponsibilites = computed(() => {
 
     if (groupedPlatformResponsibilities.length > 0) {
         groups.push({
-            title: selectedOrganization.value === null ? '' : $t(`%uM`),
+            title: selectedOrganization.value === null ? '' : $t('%uM'),
             responsibilities: groupedPlatformResponsibilities,
         });
     }
 
     if (groupedOrganizationResponsibilities.length > 0) {
         groups.push({
-            title: $t(`%109`),
+            title: $t('%109'),
             responsibilities: groupedOrganizationResponsibilities,
         });
     }
@@ -208,11 +210,11 @@ const deletedMemberResponsibilityRecords = computed(() => {
 });
 
 const labels = computed(() => {
-    return items.value.map(o => o === null ? $t(`%10A`) : o.name);
+    return items.value.map(o => o === null ? $t('%10A') : o.name);
 });
 
 const title = computed(() => {
-    return $t(`%et`) + ' ' + props.member.patchedMember.firstName;
+    return $t('%et') + ' ' + props.member.patchedMember.firstName;
 });
 
 useValidation(errors.validator, () => {
@@ -236,9 +238,9 @@ function getResponsibilityEnabledDescription(responsibility: MemberResponsibilit
 
     if (rr) {
         if (!rr.endDate) {
-            return $t(`%TA`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`%10B`);
+            return $t('%TA') + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t('%10B');
         }
-        return $t(`%TA`) + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t(`%10C`) + ' ' + Formatter.date(rr.endDate, true);
+        return $t('%TA') + ' ' + Formatter.date(rr.startDate, true) + ' ' + $t('%10C') + ' ' + Formatter.date(rr.endDate, true);
     }
 
     return null;
@@ -247,9 +249,9 @@ function getResponsibilityEnabledDescription(responsibility: MemberResponsibilit
 function getResponsibilityRecordEnabledDescription(record: MemberResponsibilityRecord | undefined) {
     if (record) {
         if (!record.endDate) {
-            return $t(`%TA`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`%10B`);
+            return $t('%TA') + ' ' + Formatter.date(record.startDate, true) + ' ' + $t('%10B');
         }
-        return $t(`%TA`) + ' ' + Formatter.date(record.startDate, true) + ' ' + $t(`%10C`) + ' ' + Formatter.date(record.endDate, true);
+        return $t('%TA') + ' ' + Formatter.date(record.startDate, true) + ' ' + $t('%10C') + ' ' + Formatter.date(record.endDate, true);
     }
 
     return null;
@@ -309,8 +311,7 @@ function setResponsibilityEnabled(responsibility: MemberResponsibility, groupId:
             id: current.id,
             endDate: new Date(),
         }));
-    }
-    else {
+    } else {
         patch.addDelete(current.id);
     }
 
@@ -368,7 +369,7 @@ function getResponsibilityMergedRoleDescription(responsibility: MemberResponsibi
 }
 
 function getResponsibilityFromRecord(record: MemberResponsibilityRecord): {
-    responsibility: MemberResponsibility;groupId: string | null; } | null {
+    responsibility: MemberResponsibility; groupId: string | null; } | null {
     for (const groupData of groupedResponsibilites.value) {
         const responsibility = groupData.responsibilities.find(r => r.responsibility.id === record.responsibilityId);
 

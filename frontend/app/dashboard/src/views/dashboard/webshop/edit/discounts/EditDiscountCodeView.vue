@@ -49,7 +49,8 @@
             </STListItem>
         </STList>
 
-        <hr><h2>
+        <hr>
+        <h2>
             {{ $t('%Pm') }}
         </h2>
         <p>{{ $t('%S4') }}</p>
@@ -78,7 +79,8 @@
         </p>
 
         <div v-if="!isNew" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%S6') }}
             </h2>
 

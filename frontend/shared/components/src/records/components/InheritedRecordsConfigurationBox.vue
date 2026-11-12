@@ -132,8 +132,8 @@ const settings = new RecordEditorSettings({
     exampleValue: new PlatformMember({
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
-                firstName: $t(`%ID`),
-                lastName: $t(`%1PM`),
+                firstName: $t('%ID'),
+                lastName: $t('%1PM'),
                 dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),
             }),
@@ -148,8 +148,8 @@ family.members.push(settings.exampleValue);
 const nameStepTaxCertificates = $t('%Zsq');
 
 const properties = [
-    buildPropertyRefs('gender', $t(`%1d`)),
-    buildPropertyRefs('birthDay', $t(`%17w`)),
+    buildPropertyRefs('gender', $t('%1d')),
+    buildPropertyRefs('birthDay', $t('%17w')),
     buildBooleanPropertyRefs(
         'taxCertificates',
         nameStepTaxCertificates,
@@ -157,35 +157,35 @@ const properties = [
     ),
     buildPropertyRefs(
         'nationalRegisterNumber',
-        $t(`%wK`) + ' ' + $t(`%11R`),
+        $t('%wK') + ' ' + $t('%11R'),
         {
             description: $t('%Zso'),
-            warning: $t(`%ZsU`, { nameStep: nameStepTaxCertificates }),
+            warning: $t('%ZsU', { nameStep: nameStepTaxCertificates }),
         },
     ),
-    buildPropertyRefs('parents', $t(`%11P`), {
-        description: $t(`%11Q`),
+    buildPropertyRefs('parents', $t('%11P'), {
+        description: $t('%11Q'),
     }),
-    buildPropertyRefs('phone', $t('%2k') + ' ' + $t(`%11R`), {
-        description: $t(`%11S`),
-        warning: $t(`%11T`),
+    buildPropertyRefs('phone', $t('%2k') + ' ' + $t('%11R'), {
+        description: $t('%11S'),
+        warning: $t('%11T'),
         preventAlways: true,
     }),
-    buildPropertyRefs('emailAddress', $t(`%11U`), {
-        description: $t(`%11V`),
-        warning: $t(`%11W`),
+    buildPropertyRefs('emailAddress', $t('%11U'), {
+        description: $t('%11V'),
+        warning: $t('%11W'),
         preventAlways: true,
     }),
-    buildPropertyRefs('address', $t(`%11X`), {
-        description: $t(`%11Y`),
-        warning: $t(`%11Z`),
+    buildPropertyRefs('address', $t('%11X'), {
+        description: $t('%11Y'),
+        warning: $t('%11Z'),
         preventAlways: true,
     }),
-    buildPropertyRefs('emergencyContacts', $t(`%11a`), {
-        description: $t(`%11b`),
+    buildPropertyRefs('emergencyContacts', $t('%11a'), {
+        description: $t('%11b'),
     }),
-    buildPropertyRefs('uitpasNumber', $t(`%wF`), {
-        warning: $t(`%11c`),
+    buildPropertyRefs('uitpasNumber', $t('%wF'), {
+        warning: $t('%11c'),
         preventAlways: true,
     }),
 ];
@@ -209,7 +209,7 @@ const financialSupport = {
         set: (value: boolean) => {
             if (value) {
                 if (!dataPermissions.enabled.value) {
-                    Toast.error($t(`%11d`)).show();
+                    Toast.error($t('%11d')).show();
                     return;
                 }
                 addPatch({
@@ -351,7 +351,7 @@ function buildRefForInheritedCategory(categoryId: string) {
 
             if (enable) {
                 if (requiresDataPermissions.value && !dataPermissions.enabled.value) {
-                    Toast.error($t(`%10m`)).show();
+                    Toast.error($t('%10m')).show();
                     return;
                 }
 
@@ -373,7 +373,7 @@ function buildRefForInheritedCategory(categoryId: string) {
     const configuration = computed(() => enabled.value ? (patched.value.inheritedRecordCategories.get(categoryId) ?? category.value?.filter ?? PropertyFilter.createDefault()) : null);
 
     return ref({
-        title: category.value?.name ?? $t(`%CL`),
+        title: category.value?.name ?? $t('%CL'),
         enabled,
         locked,
         configuration,

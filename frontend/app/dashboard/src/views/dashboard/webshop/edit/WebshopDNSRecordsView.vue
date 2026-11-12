@@ -103,12 +103,10 @@ async function validate() {
         if (response.data.meta.domainActive) {
             new Toast($t('%ZoP'), 'success green').show();
             dismiss({ force: true }).catch(console.error);
-        }
-        else {
+        } else {
             new Toast($t('%ZoE'), 'error red').show();
         }
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
         saving.value = false;

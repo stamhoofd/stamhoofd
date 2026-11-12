@@ -78,8 +78,7 @@ watch(() => model.value, (val: Date | null) => {
         day.value = val.getDate();
         month.value = val.getMonth() + 1;
         year.value = val.getFullYear();
-    }
-    else {
+    } else {
         day.value = null;
         month.value = null;
         year.value = null;
@@ -93,8 +92,7 @@ function monthText(month: number) {
 function updateDate() {
     if (year.value && month.value && day.value) {
         model.value = new Date(year.value, month.value - 1, day.value, 12);
-    }
-    else {
+    } else {
         model.value = null;
     }
 }
@@ -123,7 +121,7 @@ function validate() {
 
     errors.errorBox = new ErrorBox(new SimpleError({
         code: 'empty_field',
-        message: $t(`%yq`),
+        message: $t('%yq'),
         field: 'birthDay',
     }));
 

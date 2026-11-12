@@ -38,10 +38,10 @@ import { useContext } from '#hooks/useContext.ts';
 import { useErrors } from '#errors/useErrors.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
-import type { UitpasOrganizerResponse} from '@stamhoofd/structures';
+import type { UitpasOrganizerResponse } from '@stamhoofd/structures';
 import { UitpasOrganizersResponse } from '@stamhoofd/structures';
 import { throttle } from '@stamhoofd/utility';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { ref, watch } from 'vue';
 
 const props = withDefaults(
@@ -92,8 +92,7 @@ const updateResults = async () => {
             return;
         }
         results.value = response.data.member;
-    }
-    catch (e) {
+    } catch (e) {
         if (cachedCount !== counter) {
             // A new request have started already
             return;
@@ -141,11 +140,9 @@ async function doSelectOrganizer(organizer: UitpasOrganizerResponse) {
     selectedOrganizerId.value = organizer.id;
     try {
         await props.selectOrganizer(organizer, navigationActions);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
-    }
-    finally {
+    } finally {
         loadingAfterOrganizerSelect.value = false;
     }
 }

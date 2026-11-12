@@ -55,7 +55,7 @@ async function retry() {
         }
     } catch (e) {
         console.error(e);
-        new Toast($t(`%1YJ`), 'error red').show();
+        new Toast($t('%1YJ'), 'error red').show();
     } finally {
         loading.value = false;
     }

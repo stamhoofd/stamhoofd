@@ -1,4 +1,4 @@
-import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery} from './SQLExpression.js';
+import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery } from './SQLExpression.js';
 import { SQLJoinType, SQLSelectBase } from './SQLQueryContracts.js';
 import { Whereable } from './SQLWhere.js';

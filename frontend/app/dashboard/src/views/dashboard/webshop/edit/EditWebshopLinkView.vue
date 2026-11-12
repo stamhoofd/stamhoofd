@@ -494,7 +494,7 @@ async function validate() {
                     code: '',
                     field: 'customUrl',
                     message: 'Reserved subdomain',
-                    human: $t("%Zor"),
+                    human: $t('%Zor'),
                 });
             }
         } catch (e) {

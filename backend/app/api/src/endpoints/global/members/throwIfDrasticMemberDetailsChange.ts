@@ -31,7 +31,7 @@ export function throwIfDrasticMemberDetailsChange(patch: MemberDetails | AutoEnc
             throw new SimpleError({
                 code: 'not_allowed',
                 message: 'Drastic first name change is not allowed',
-                human: $t(`%Zbq`),
+                human: $t('%Zbq'),
                 field: 'firstName',
             });
         }
@@ -50,7 +50,7 @@ export function throwIfDrasticMemberDetailsChange(patch: MemberDetails | AutoEnc
             throw new SimpleError({
                 code: 'not_allowed',
                 message: 'Drastic birth date change is not allowed',
-                human: $t(`%Zbr`),
+                human: $t('%Zbr'),
                 field: 'birthDay',
             });
         }

@@ -163,7 +163,7 @@ useValidation(errors.validator, () => {
     if (selectedOrganization.value === null) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%12V`),
+            message: $t('%12V'),
             field: 'organization',
         }));
     }
@@ -171,7 +171,7 @@ useValidation(errors.validator, () => {
     if (name.value.trim().length === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%Cr`),
+            message: $t('%Cr'),
             field: 'name',
         }));
     }
@@ -179,7 +179,7 @@ useValidation(errors.validator, () => {
     if (price.value === 0) {
         se.addError(new SimpleError({
             code: 'invalid_field',
-            message: $t(`%Cs`),
+            message: $t('%Cs'),
             field: 'price',
         }));
     }
@@ -236,11 +236,10 @@ async function save() {
             owner,
         });
 
-        new Toast($t(`%12W`), 'success green').show();
+        new Toast($t('%12W'), 'success green').show();
 
         await pop({ force: true });
-    }
-    catch (error: any) {
+    } catch (error: any) {
         errors.errorBox = new ErrorBox(error);
     }
 

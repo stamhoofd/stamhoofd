@@ -408,7 +408,7 @@ async function showMember(memberId: string) {
                     limit: 1,
                 }));
                 if (members.results.length === 0) {
-                    Toast.error($t(`%yX`)).show();
+                    Toast.error($t('%yX')).show();
                     throw new Error('Member not found');
                 }
                 return AsyncComponent(() => import('#members/MemberSegmentedView.vue'), {

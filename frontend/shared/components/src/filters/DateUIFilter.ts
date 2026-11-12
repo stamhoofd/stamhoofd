@@ -88,10 +88,10 @@ export class DateUIFilter extends UIFilter<DateFilterBuilder> implements DateUIF
 
     getCombinationWord(mode: UIDateFilterMode): string {
         switch (mode) {
-            case UIDateFilterMode.GreaterThan: return $t(`%1Yv`);
-            case UIDateFilterMode.LessThan: return $t(`%1b2`);
-            case UIDateFilterMode.Equals: return $t(`%1G1`);
-            case UIDateFilterMode.NotEquals: return $t(`%bT`);
+            case UIDateFilterMode.GreaterThan: return $t('%1Yv');
+            case UIDateFilterMode.LessThan: return $t('%1b2');
+            case UIDateFilterMode.Equals: return $t('%1G1');
+            case UIDateFilterMode.NotEquals: return $t('%bT');
         }
     }
 

@@ -37,5 +37,4 @@ export function useGetPeriods() {
 
         return response.data.results;
     };
-
 }

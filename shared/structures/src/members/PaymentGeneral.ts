@@ -51,7 +51,7 @@ export class PaymentGeneral extends PrivatePayment {
             return id ? [id] : [];
         });
 
-        return Formatter.joinLast(Formatter.uniqueArray(ids), ', ', ' ' + $t(`%M1`) + ' ');
+        return Formatter.joinLast(Formatter.uniqueArray(ids), ', ', ' ' + $t('%M1') + ' ');
     }
 
     getBalanceItemPaymentsHtmlTable() {
@@ -62,7 +62,7 @@ export class PaymentGeneral extends PrivatePayment {
      * Customer name, phone, payment method and total price
      */
     getPaymentDataHTMLTable() {
-        let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
+        let str = '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
 
         const customer = this.customer;
 
@@ -71,57 +71,57 @@ export class PaymentGeneral extends PrivatePayment {
         if (customer) {
             if (customer.company) {
                 replacements.push({
-                    title: customer.company.VATNumber || customer.company.companyNumber ? $t(`%1JI`) : $t('%1PW'),
+                    title: customer.company.VATNumber || customer.company.companyNumber ? $t('%1JI') : $t('%1PW'),
                     value: customer.company.name,
                 });
 
                 if (customer.company.address) {
                     replacements.push({
-                        title: customer.company.VATNumber || customer.company.companyNumber ? $t(`%MW`) : $t('%1Sh'),
+                        title: customer.company.VATNumber || customer.company.companyNumber ? $t('%MW') : $t('%1Sh'),
                         value: customer.company.address.toString(),
                     });
                 }
 
                 if (customer.company.VATNumber) {
                     replacements.push({
-                        title: $t(`%1CK`),
+                        title: $t('%1CK'),
                         value: customer.company.VATNumber,
                     });
                 } else if (customer.company.companyNumber) {
                     replacements.push({
-                        title: $t(`%wa`),
+                        title: $t('%wa'),
                         value: customer.company.companyNumber,
                     });
                 } else {
                     replacements.push({
-                        title: $t(`%wa`),
+                        title: $t('%wa'),
                         value: $t('%1FW') + ' (' + $t('%1QY') + ')',
                     });
                 }
             } else {
                 replacements.push({
-                    title: $t(`%1Os`),
+                    title: $t('%1Os'),
                     value: customer.dynamicName,
                 });
             }
 
             if (customer.phone) {
                 replacements.push({
-                    title: $t(`%18Z`),
+                    title: $t('%18Z'),
                     value: customer.phone,
                 });
             }
 
             if (customer.email) {
                 replacements.push({
-                    title: $t(`%1FK`),
+                    title: $t('%1FK'),
                     value: customer.email,
                 });
             }
         } else {
             // Information missing - default to email recipient data
             replacements.push({
-                title: $t(`%1Os`),
+                title: $t('%1Os'),
                 value: '{{firstName}} {{lastName}}', // will get replaced automatically by the email template system
             });
         }
@@ -164,7 +164,7 @@ export class PaymentGeneral extends PrivatePayment {
             }
         }
 
-        return Formatter.capitalizeFirstLetter(Formatter.joinLast(arr, ', ', ' ' + $t(`%M1`) + ' '));
+        return Formatter.capitalizeFirstLetter(Formatter.joinLast(arr, ', ', ' ' + $t('%M1') + ' '));
     }
 }
 
@@ -178,7 +178,7 @@ export function getBalanceItemPaymentsHtmlTable(balanceItemPayments: BalanceItem
     });
 
     let str = '';
-    str += `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
+    str += '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
 
     for (const payment of payments) {
         const title = payment.itemTitle;
@@ -186,7 +186,7 @@ export function getBalanceItemPaymentsHtmlTable(balanceItemPayments: BalanceItem
 
         if (payment.quantity !== 1) {
             if (description) {
-                description += `\n`;
+                description += '\n';
             }
             description += `${Formatter.escapeHtml(Formatter.float(payment.quantity))} x ${Formatter.escapeHtml(Formatter.price(payment.unitPrice))}`;
         }

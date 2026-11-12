@@ -47,7 +47,7 @@ const props = withDefaults(
     }>(), {
         nullable: false,
         defaultPeriodId: null,
-        title: () => $t(`%wP`),
+        title: () => $t('%wP'),
         addButtonText: null,
     },
 );

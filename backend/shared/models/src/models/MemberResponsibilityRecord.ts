@@ -1,6 +1,6 @@
 import { column } from '@node/database';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
-import type { Group as GroupStruct} from '@stamhoofd/structures';
+import type { Group as GroupStruct } from '@stamhoofd/structures';
 import { MemberResponsibilityRecordBase, MemberResponsibilityRecord as MemberResponsibilityRecordStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -31,7 +31,7 @@ export class WebshopFieldAnswer extends AutoEncoder {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'This field is required',
-                human: $t(`%tH`),
+                human: $t('%tH'),
                 field: 'answer',
             });
         }

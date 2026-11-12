@@ -42,8 +42,8 @@ export class SearchUitpasEventsEndpoint extends Endpoint<Params, Query, Body, Re
         if (!organization.meta.uitpasOrganizerId) {
             throw new SimpleError({
                 code: 'no_uitpas_organizer_id',
-                message: `No UiTPAS organizer ID set for organization`,
-                human: $t(`%1BH`),
+                message: 'No UiTPAS organizer ID set for organization',
+                human: $t('%1BH'),
             });
         }
         const uitpasOrganizersResponse = await UitpasService.searchUitpasEvents(organization.id, organization.meta.uitpasOrganizerId, request.query.text);

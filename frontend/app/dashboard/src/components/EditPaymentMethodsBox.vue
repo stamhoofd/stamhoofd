@@ -157,7 +157,7 @@ if (props.validator) {
         if (loadingStripeAccounts.value) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'loading',
-                message: $t(`%JO`),
+                message: $t('%JO'),
             }));
             return false;
         }
@@ -165,7 +165,7 @@ if (props.validator) {
         if (props.config.paymentMethods.length === 0) {
             errors.errorBox = new ErrorBox(new SimpleError({
                 code: 'no_payment_methods',
-                message: $t(`%JP`),
+                message: $t('%JP'),
             }));
             return false;
         }
@@ -234,7 +234,7 @@ async function loadStripeAccounts() {
         }).catch(console.error);
     } catch (e) {
         console.error(e);
-        new Toast($t(`%JQ`), 'error red').show();
+        new Toast($t('%JQ'), 'error red').show();
     }
     loadingStripeAccounts.value = false;
 }
@@ -349,25 +349,25 @@ function getDescription(paymentMethod: PaymentMethod): string {
         case PaymentMethod.Payconiq:
             return providerText(provider, {
                 [PaymentProvider.Payconiq]: $t('%1ce'),
-                [PaymentProvider.Buckaroo]: $t(`%1F`),
+                [PaymentProvider.Buckaroo]: $t('%1F'),
             });
         case PaymentMethod.Bancontact:
             return providerText(provider, {
-                [PaymentProvider.Buckaroo]: $t(`%1F`),
-                [PaymentProvider.Mollie]: $t(`%w`),
+                [PaymentProvider.Buckaroo]: $t('%1F'),
+                [PaymentProvider.Mollie]: $t('%w'),
                 [PaymentProvider.Stripe]: '',
             });
 
         case PaymentMethod.iDEAL:
             return providerText(provider, {
-                [PaymentProvider.Buckaroo]: $t(`%1F`),
-                [PaymentProvider.Mollie]: $t(`%w`),
+                [PaymentProvider.Buckaroo]: $t('%1F'),
+                [PaymentProvider.Mollie]: $t('%w'),
                 [PaymentProvider.Stripe]: '',
             });
         case PaymentMethod.CreditCard:
             return providerText(provider, {
-                [PaymentProvider.Buckaroo]: $t(`%1F`),
-                [PaymentProvider.Mollie]: $t(`%w`),
+                [PaymentProvider.Buckaroo]: $t('%1F'),
+                [PaymentProvider.Mollie]: $t('%w'),
                 [PaymentProvider.Stripe]: '',
             });
         case PaymentMethod.Unknown: return '';
@@ -383,34 +383,34 @@ function getSettingsDescription(paymentMethod: PaymentMethod): string {
 
     if (settings) {
         if (settings.minimumAmount !== 0) {
-            texts.push($t(`%JR`) + ' ' + Formatter.price(settings.minimumAmount));
+            texts.push($t('%JR') + ' ' + Formatter.price(settings.minimumAmount));
         }
 
         if (settings.warningText) {
             if (settings.warningAmount !== null) {
-                texts.push($t(`%JS`) + ' ' + Formatter.price(settings.warningAmount));
+                texts.push($t('%JS') + ' ' + Formatter.price(settings.warningAmount));
             } else {
-                texts.push($t(`%JT`));
+                texts.push($t('%JT'));
             }
         }
 
         if (settings.companiesOnly) {
-            texts.push($t(`%JU`));
+            texts.push($t('%JU'));
         }
     }
 
     if (paymentMethod === PaymentMethod.Transfer) {
         if (!props.config.transferSettings.iban) {
-            texts.push($t(`%JV`));
+            texts.push($t('%JV'));
         } else {
-            texts.push($t(`%JW`) + ' ' + props.config.transferSettings.iban);
+            texts.push($t('%JW') + ' ' + props.config.transferSettings.iban);
         }
 
         if (props.config.transferSettings.creditor) {
-            texts.push($t(`%JX`) + ' ' + props.config.transferSettings.creditor);
+            texts.push($t('%JX') + ' ' + props.config.transferSettings.creditor);
         }
 
-        texts.push($t(`%JY`) + ' ' + transferTypes.value.find(t => t.value === props.config.transferSettings.type)?.name + (prefix.value && props.config.transferSettings.type !== TransferDescriptionType.Structured ? ' (' + prefix.value + ')' : ''));
+        texts.push($t('%JY') + ' ' + transferTypes.value.find(t => t.value === props.config.transferSettings.type)?.name + (prefix.value && props.config.transferSettings.type !== TransferDescriptionType.Structured ? ' (' + prefix.value + ')' : ''));
     }
 
     return texts.join('\n');
@@ -441,7 +441,7 @@ function setPaymentMethod(method: PaymentMethod, enabled: boolean, force = false
         arr.addPut(method);
     } else {
         if (!force && props.choices === null && props.config.paymentMethods.length === 1) {
-            new Toast($t(`%JZ`), 'error red').show();
+            new Toast($t('%JZ'), 'error red').show();
             return;
         }
 
@@ -469,9 +469,9 @@ const hasMollieOrBuckaroo = computed(() => {
 
 const mollieOrBuckarooName = computed(() => {
     if (organization.value.privateMeta?.buckarooSettings !== null) {
-        return $t(`%2Q`);
+        return $t('%2Q');
     }
-    return $t(`%1x`);
+    return $t('%1x');
 });
 
 function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined {
@@ -490,7 +490,7 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
     switch (paymentMethod) {
         case PaymentMethod.Payconiq: {
             if ((organization.value.privateMeta?.payconiqApiKey ?? '').length === 0) {
-                return $t(`%Ja`);
+                return $t('%Ja');
             }
             break;
         }
@@ -500,7 +500,7 @@ function getEnableErrorMessage(paymentMethod: PaymentMethod): string | undefined
         case PaymentMethod.DirectDebit:
         case PaymentMethod.Bancontact: {
             if (stripeAccountObject.value) {
-                return $t(`%14e`, { paymentMethod: PaymentMethodHelper.getNameCapitalized(paymentMethod) });
+                return $t('%14e', { paymentMethod: PaymentMethodHelper.getNameCapitalized(paymentMethod) });
             }
             break;
         }
@@ -603,11 +603,11 @@ const transferTypes = computed(() => {
         },
         {
             value: TransferDescriptionType.Reference,
-            name: props.type === 'registration' ? $t(`%JG`) : $t(`%xA`),
+            name: props.type === 'registration' ? $t('%JG') : $t('%xA'),
         },
         {
             value: TransferDescriptionType.Fixed,
-            name: $t(`%JI`),
+            name: $t('%JI'),
         },
     ];
 });

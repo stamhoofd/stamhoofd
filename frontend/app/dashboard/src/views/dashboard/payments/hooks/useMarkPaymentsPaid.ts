@@ -24,7 +24,7 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
         }
 
         if (![PaymentMethod.Unknown, PaymentMethod.Transfer, PaymentMethod.PointOfSale].includes(payment.method)) {
-            new Toast($t(`%MX`), 'error red').setHide(4000).show();
+            new Toast($t('%MX'), 'error red').setHide(4000).show();
             return;
         }
 
@@ -35,8 +35,7 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
                     status: PaymentStatus.Succeeded,
                 }));
             }
-        }
-        else {
+        } else {
             if (payment.status == PaymentStatus.Succeeded) {
                 data.addPatch(Payment.patch({
                     id: payment.id,
@@ -47,7 +46,7 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
     }
 
     if (data.changes.length > 0) {
-        if (!await CenteredMessage.confirm($t(`%MY`), paid ? $t(`%1JQ`) : $t(`%MZ`), paid && hasOrder ? $t(`%Ma`) : undefined)) {
+        if (!await CenteredMessage.confirm($t('%MY'), paid ? $t('%1JQ') : $t('%MZ'), paid && hasOrder ? $t('%Ma') : undefined)) {
             return;
         }
 
@@ -62,17 +61,15 @@ async function markPaymentsPaid(context: SessionContext, payments: PaymentGenera
 
             deepSetArray(payments, response.data);
 
-            new Toast($t(`%Mb`), 'success').setHide(3000).show();
+            new Toast($t('%Mb'), 'success').setHide(3000).show();
 
             for (const payment of response.data) {
                 GlobalEventBus.sendEvent('paymentPatch', payment).catch(console.error);
             }
-        }
-        catch (e) {
+        } catch (e) {
             Toast.fromError(e).show();
         }
-    }
-    else {
-        new Toast(paid ? $t(`%Mc`) : payments.length === 1 ? $t(`%Md`) : $t(`%Me`), 'error red').show();
+    } else {
+        new Toast(paid ? $t('%Mc') : payments.length === 1 ? $t('%Md') : $t('%Me'), 'error red').show();
     }
 }

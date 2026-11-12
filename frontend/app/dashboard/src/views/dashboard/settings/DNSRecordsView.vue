@@ -53,7 +53,6 @@ import { computed, ref } from 'vue';
 
 import DNSRecordBox from '../../../components/DNSRecordBox.vue';
 
-
 const context = useContext();
 const organization = useRequiredOrganization();
 const show = useShow();

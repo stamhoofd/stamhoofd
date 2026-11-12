@@ -47,7 +47,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             throw new SimpleError({
                 code: 'not_found',
                 message: 'Email not found',
-                human: $t(`%DR`),
+                human: $t('%DR'),
                 statusCode: 404,
             });
         }
@@ -84,7 +84,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'invalid_sender',
                     message: 'Sender not found',
-                    human: $t(`%1Cx`),
+                    human: $t('%1Cx'),
                     statusCode: 400,
                 });
             }
@@ -99,7 +99,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'invalid_sender',
                     message: 'Sender not found',
-                    human: $t(`%1Cy`),
+                    human: $t('%1Cy'),
                     statusCode: 400,
                 });
             }
@@ -141,7 +141,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_draft',
                     message: 'Email is not a draft',
-                    human: $t(`%1Dy`),
+                    human: $t('%1Dy'),
                     statusCode: 400,
                 });
             }
@@ -150,7 +150,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'already_created',
                     message: 'Recipients already created',
-                    human: $t(`%1Ko`),
+                    human: $t('%1Ko'),
                     statusCode: 400,
                 });
             }
@@ -164,7 +164,7 @@ export class PatchEmailEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 throw new SimpleError({
                     code: 'not_draft',
                     message: 'Email is not a draft',
-                    human: $t(`%1Dz`),
+                    human: $t('%1Dz'),
                     statusCode: 400,
                 });
             }

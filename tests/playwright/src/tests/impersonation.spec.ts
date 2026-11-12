@@ -88,8 +88,7 @@ async function openLinkInPrivateWindow(browser: Browser, link: string, run: (pag
         const page = await context.newPage();
         await page.goto(link);
         await run(page);
-    }
-    finally {
+    } finally {
         await context.close();
     }
 }
@@ -200,8 +199,7 @@ test.describe('Impersonation @impersonation', () => {
             const accountView = await openAccountSettings(signedInPage);
             await expect(accountView.getByTestId('email-input')).toHaveValue(admin.email, { timeout: 20_000 });
             await expect(accountView.getByTestId('impersonation-notice')).toBeHidden();
-        }
-        finally {
+        } finally {
             await context.close();
         }
     });

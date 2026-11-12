@@ -5,7 +5,7 @@ import { QueryableModel } from '@stamhoofd/sql';
 import { Category, DNSRecordStatus, Product, WebshopMetaData, WebshopPrivateMetaData, WebshopServerMetaData } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { validateDNSRecords } from '../helpers/DNSValidator.js';
-import type {Organization} from './Organization.js';
+import type { Organization } from './Organization.js';
 
 export class Webshop extends QueryableModel {
     static table = 'webshops';
@@ -202,8 +202,7 @@ export class Webshop extends QueryableModel {
                 // + prevent ping pong emails when the dns is not workign properly
             }
             this.meta.domainActive = true;
-        }
-        else {
+        } else {
             this.meta.domainActive = false;
         }
         await this.save();

@@ -5,7 +5,7 @@ describe('frontend translation replacements', () => {
     test('preserves literal keys, repeated placeholders, empty and stringifiable values', () => {
         const i18n = new I18n();
         expect(i18n.replace('{a.b} {a.b}/{empty}/{value}/{missing}', {
-            'a.b': 'Jan', empty: '', value: { toString: () => '42' },
+            'a.b': 'Jan', 'empty': '', 'value': { toString: () => '42' },
         })).toBe('Jan Jan//42/{missing}');
     });
 

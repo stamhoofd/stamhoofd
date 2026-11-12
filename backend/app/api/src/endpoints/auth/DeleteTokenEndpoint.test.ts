@@ -25,5 +25,4 @@ describe('Endpoint.DeleteToken', () => {
         expect(await UserSession.getByID(otherSession.sessionId)).toBeDefined();
         expect(await Token.getByAccessToken(otherSession.accessToken, true)).toBeDefined();
     });
-
 });

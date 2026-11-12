@@ -30,7 +30,8 @@
             </STListItem>
         </STList>
 
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <div>{{ $t('%2D') }}</div>
             <div>
                 <button v-if="logo" type="button" class="button icon trash" @click="logo = null" />
@@ -41,7 +42,8 @@
 
         <ImageComponent v-if="logo" :image="logo" :max-height="150" :auto-height="true" />
 
-        <hr><h2 class="style-with-button">
+        <hr>
+        <h2 class="style-with-button">
             <div>{{ $t('%22') }}</div>
             <div>
                 <button v-if="banner" type="button" class="button icon trash" @click="logo = null" />
@@ -53,7 +55,8 @@
         <ImageComponent v-if="banner" :image="banner" :max-height="150" :auto-height="true" />
 
         <div v-if="!isNew" class="container">
-            <hr><h2>
+            <hr>
+            <h2>
                 {{ $t('%PP') }}
             </h2>
 
@@ -81,7 +84,7 @@ import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
 import UrlInput from '@stamhoofd/components/inputs/UrlInput.vue';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
-import type { Image} from '@stamhoofd/structures';
+import type { Image } from '@stamhoofd/structures';
 import { ResolutionRequest, Sponsor } from '@stamhoofd/structures';
 import { computed } from 'vue';
 
@@ -127,8 +130,7 @@ async function save() {
     try {
         props.saveHandler(patchSponsor.value);
         pop({ force: true })?.catch(console.error);
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 }

@@ -482,22 +482,22 @@ export class Product extends AutoEncoder {
     getRemainingStockText(stock: number): string {
         if (stock === 1) {
             if (this.type === ProductType.Ticket) {
-                return $t(`%t9`);
+                return $t('%t9');
             }
             if (this.type === ProductType.Person) {
-                return $t(`%tA`);
+                return $t('%tA');
             }
-            return $t(`%tB`);
+            return $t('%tB');
         }
 
         if (this.type === ProductType.Ticket) {
-            return stock + ' ' + $t(`%m`);
+            return stock + ' ' + $t('%m');
         }
 
         if (this.type === ProductType.Person) {
-            return stock + ' ' + $t(`%12R`);
+            return stock + ' ' + $t('%12R');
         }
-        return stock + ' ' + $t(`%12S`);
+        return stock + ' ' + $t('%12S');
     }
 
     get stockText(): string | null {
@@ -506,34 +506,34 @@ export class Product extends AutoEncoder {
         }
 
         if (this.remainingStockWithOptions === 0) {
-            return $t(`%12p`);
+            return $t('%12p');
         }
 
-        return $t(`%Un`) + ' ' + this.getRemainingStockText(this.remainingStockWithOptions);
+        return $t('%Un') + ' ' + this.getRemainingStockText(this.remainingStockWithOptions);
     }
 
     get isEnabledTextLong() {
         if (this.hidden) {
-            return $t(`%UC`);
+            return $t('%UC');
         }
 
         if (!this.enabled) {
-            return $t(`%Tk`);
+            return $t('%Tk');
         }
 
         if (this.enableInFuture && this.enableAfter) {
             if (this.disableAfter) {
-                return $t(`%tC`) + ' ' + Formatter.dateTime(this.enableAfter) + ' ' + $t(`%10C`) + ' ' + Formatter.dateTime(this.disableAfter);
+                return $t('%tC') + ' ' + Formatter.dateTime(this.enableAfter) + ' ' + $t('%10C') + ' ' + Formatter.dateTime(this.disableAfter);
             }
-            return $t(`%tC`) + ' ' + Formatter.dateTime(this.enableAfter);
+            return $t('%tC') + ' ' + Formatter.dateTime(this.enableAfter);
         }
 
         if (!this.isEnabled) {
-            return $t(`%Tk`);
+            return $t('%Tk');
         }
 
         if (this.disableAfter) {
-            return $t(`%tD`) + ' ' + Formatter.dateTime(this.disableAfter);
+            return $t('%tD') + ' ' + Formatter.dateTime(this.disableAfter);
         }
     }
 
@@ -545,7 +545,7 @@ export class Product extends AutoEncoder {
         if (this.disableAfter) {
             const diff = this.disableAfter.getTime() - new Date().getTime();
             if (diff < 24 * 60 * 60 * 1000) {
-                return $t(`%tD`) + ' ' + Formatter.time(this.disableAfter);
+                return $t('%tD') + ' ' + Formatter.time(this.disableAfter);
             }
         }
         return null;

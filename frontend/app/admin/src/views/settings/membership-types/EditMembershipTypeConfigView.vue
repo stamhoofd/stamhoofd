@@ -41,7 +41,8 @@
 
         <PlatformMembershipTypePriceConfigEditBox v-for="(priceConfig, index) of prices" :key="priceConfig.id" :config="patched" :has-multiple-prices="prices.length > 1" :show-start-date="index > 0" :show-price-per-day="$showPricePerDay" :error-box="errors.errorBox" :validator="errors.validator" :price-config="priceConfig" @patch:price-config="patchPrice(priceConfig, $event)" @delete="deletePrice(priceConfig)" />
 
-        <hr><p>
+        <hr>
+        <p>
             <button class="button text" type="button" @click="addPrice">
                 <span class="icon add" />
                 <span>{{ $t('%3V') }}</span>
@@ -134,15 +135,14 @@ const save = async () => {
         if (patched.value.expireDate && (patched.value.expireDate.getTime() > patched.value.endDate.getTime() || patched.value.expireDate.getTime() < patched.value.startDate.getTime())) {
             throw new SimpleError({
                 code: 'invalid_date_range',
-                message: $t(`%I4`),
+                message: $t('%I4'),
                 field: 'expireDate',
             });
         }
 
         await props.saveHandler(patch.value);
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 
@@ -171,8 +171,7 @@ const doDelete = async () => {
     try {
         await props.deleteHandler();
         await pop({ force: true });
-    }
-    catch (e) {
+    } catch (e) {
         errors.errorBox = new ErrorBox(e);
     }
 

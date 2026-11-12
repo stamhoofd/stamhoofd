@@ -108,7 +108,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                     throw new SimpleError({
                         code: 'not_allowed',
                         message: 'Cannot override details',
-                        human: $t(`%Dj`),
+                        human: $t('%Dj'),
                         field: 'details',
                     });
                 }
@@ -153,7 +153,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
                 throw new SimpleError({
                     code: 'invalid_data',
                     message: 'No details provided',
-                    human: $t(`%EG`),
+                    human: $t('%EG'),
                     field: 'details',
                 });
             }
@@ -212,7 +212,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         if (details.firstName.length < 2) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%EH`),
+                message: $t('%EH'),
                 field: 'firstName',
             });
         }
@@ -220,7 +220,7 @@ export class PatchUserMembersEndpoint extends Endpoint<Params, Query, Body, Resp
         if (details.lastName.length < 2) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%EI`),
+                message: $t('%EI'),
                 field: 'lastName',
             });
         }

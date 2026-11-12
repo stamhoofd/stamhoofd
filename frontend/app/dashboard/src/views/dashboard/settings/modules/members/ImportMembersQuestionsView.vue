@@ -437,8 +437,8 @@ function getGroupAutoAssignCountForPriority(group: Group) {
 function openAssignment() {
     autoAssignMembers(props.importMemberResults);
     present(AsyncComponent(() => import('./ImportAutoAssignedView.vue'), {
-        title: $t(`%19I`),
-        description: $t(`%19J`),
+        title: $t('%19I'),
+        description: $t('%19J'),
         members: membersNeedingAssignment.value.flatMap((m) => {
             if (m.importRegistrationResult.autoAssignedGroup === null) {
                 return [];
@@ -454,8 +454,8 @@ function openAssignment() {
 
 function openPriorityAssignedToGroup(group: Group) {
     present(AsyncComponent(() => import('./ImportAutoAssignedView.vue'), {
-        title: $t(`%19K`, { group: group.settings.name }),
-        description: $t(`%19L`, { group: group.settings.name }),
+        title: $t('%19K', { group: group.settings.name }),
+        description: $t('%19L', { group: group.settings.name }),
         members: membersWithMultipleGroups.value.flatMap((m) => {
             if (m.importRegistrationResult.group !== null) {
                 return [];
@@ -476,8 +476,8 @@ function openPriorityAssignedToGroup(group: Group) {
 
 function openMultipleGroups() {
     present(AsyncComponent(() => import('./ImportAutoAssignedView.vue'), {
-        title: $t(`%19M`),
-        description: $t(`%19N`),
+        title: $t('%19M'),
+        description: $t('%19N'),
         members: membersWithMultipleGroups.value.flatMap((m) => {
             if (m.importRegistrationResult.group !== null) {
                 return [];
@@ -499,16 +499,16 @@ function getParentDescription(parent: Parent): string[] {
         description.push(type + ': ' + parent.name);
     }
     if (parent.phone) {
-        description.push(type + ' ' + $t(`%zY`) + ': ' + parent.phone);
+        description.push(type + ' ' + $t('%zY') + ': ' + parent.phone);
     }
     if (parent.email) {
-        description.push(type + ' ' + $t(`%19O`) + ': ' + parent.email);
+        description.push(type + ' ' + $t('%19O') + ': ' + parent.email);
     }
     if (parent.address) {
-        description.push(type + ' ' + $t(`%19P`) + ': ' + parent.address.toString());
+        description.push(type + ' ' + $t('%19P') + ': ' + parent.address.toString());
     }
     if (parent.nationalRegisterNumber) {
-        description.push(type + ' ' + $t(`%19Q`) + ': ' + parent.nationalRegisterNumber.toString());
+        description.push(type + ' ' + $t('%19Q') + ': ' + parent.nationalRegisterNumber.toString());
     }
     return description;
 }
@@ -522,15 +522,15 @@ function getEmergencyContactDescription(emergencyContact: EmergencyContact, inde
 
 function openResultView() {
     present(AsyncComponent(() => import('./ImportAutoAssignedView.vue'), {
-        title: $t(`%19R`),
-        description: $t(`%19S`),
+        title: $t('%19R'),
+        description: $t('%19S'),
         members: props.importMemberResults.map((member) => {
             const description: string[] = [];
             const registration = memberImporter.buildRegistration(member, isWaitingList.value);
 
             if (registration !== null) {
                 const group = groups.find(g => g.id === registration.group.id);
-                const groupName = (group?.settings.name ?? $t(`%19T`));
+                const groupName = (group?.settings.name ?? $t('%19T'));
 
                 let suffix = '';
 
@@ -545,31 +545,31 @@ function openResultView() {
                 if (member.existingMember) {
                     if (registration !== null) {
                         if (registration.group.type === GroupType.WaitingList) {
-                            description.push($t(`%1Bv`, { group: groupName }) + suffix);
+                            description.push($t('%1Bv', { group: groupName }) + suffix);
                         } else {
-                            description.push($t(`%19U`, { group: groupName }) + suffix);
+                            description.push($t('%19U', { group: groupName }) + suffix);
                         }
 
                         // Delete conflicting registrations (based on categories too!)
                         const deleteRegs = memberImporter.getOverrideRegistrations(registration, member);
                         for (const r of deleteRegs) {
-                            const groupName = (groups.find(g => g.id === r.groupId)?.settings.name ?? $t(`%19T`));
+                            const groupName = (groups.find(g => g.id === r.groupId)?.settings.name ?? $t('%19T'));
                             if (r.group.type === GroupType.WaitingList) {
-                                description.push($t(`%19V`, { group: groupName }));
+                                description.push($t('%19V', { group: groupName }));
                             } else {
-                                description.push($t(`%19W`, { group: groupName }));
+                                description.push($t('%19W', { group: groupName }));
                             }
                         }
                     }
                 } else {
                     if (registration.group.type === GroupType.WaitingList) {
-                        description.push($t(`%1Bw`, { group: groupName }) + suffix);
+                        description.push($t('%1Bw', { group: groupName }) + suffix);
                     } else {
-                        description.push($t(`%19X`, { group: groupName }) + suffix);
+                        description.push($t('%19X', { group: groupName }) + suffix);
                     }
                 }
             } else if (member.isExisting) {
-                description.push($t(`%19Y`));
+                description.push($t('%19Y'));
             }
 
             if (member.existingMember) {
@@ -577,34 +577,34 @@ function openResultView() {
                 const patched = member.patchedDetails;
 
                 if (patched.name !== undefined && existingDetails.name !== patched.name) {
-                    description.push($t(`%19Z`, { name: patched.name }));
+                    description.push($t('%19Z', { name: patched.name }));
                 }
                 if (patched.nationalRegisterNumber && patched.nationalRegisterNumber !== existingDetails.nationalRegisterNumber) {
-                    description.push($t(`%19a`, { nationalRegisterNumber: patched.nationalRegisterNumber.toString() }));
+                    description.push($t('%19a', { nationalRegisterNumber: patched.nationalRegisterNumber.toString() }));
                 }
                 if (patched.gender !== undefined && existingDetails.gender !== patched.gender) {
-                    description.push($t(`%19b`, { gender: getGenderName(patched.gender) }));
+                    description.push($t('%19b', { gender: getGenderName(patched.gender) }));
                 }
                 if (patched.email !== undefined && patched.email && existingDetails.email !== patched.email) {
-                    description.push($t(`%19c`, { email: patched.email }));
+                    description.push($t('%19c', { email: patched.email }));
                 }
                 if (patched.phone !== undefined && patched.phone && existingDetails.phone !== patched.phone) {
-                    description.push($t(`%19d`, { phone: patched.phone }));
+                    description.push($t('%19d', { phone: patched.phone }));
                 }
                 if (patched.birthDay && (!existingDetails.birthDay || (Formatter.dateIso(existingDetails.birthDay) !== Formatter.dateIso(patched.birthDay)))) {
-                    description.push($t(`%19e`, { birthDay: Formatter.date(patched.birthDay, true) }));
+                    description.push($t('%19e', { birthDay: Formatter.date(patched.birthDay, true) }));
                 }
 
                 if (patched.address && patched.address.toString() !== existingDetails.address?.toString()) {
-                    description.push($t(`%19f`, { address: patched.address.toString() }));
+                    description.push($t('%19f', { address: patched.address.toString() }));
                 }
 
                 if (patched.memberNumber && patched.memberNumber !== existingDetails.memberNumber) {
-                    description.push($t(`%19g`, { memberNumber: patched.memberNumber }));
+                    description.push($t('%19g', { memberNumber: patched.memberNumber }));
                 }
 
                 if (patched.uitpasNumberDetails && patched.uitpasNumberDetails.uitpasNumber !== existingDetails.uitpasNumberDetails?.uitpasNumber) {
-                    description.push($t(`%19h`, { number: patched.uitpasNumberDetails.uitpasNumber }));
+                    description.push($t('%19h', { number: patched.uitpasNumberDetails.uitpasNumber }));
                 }
 
                 for (const parent of member.getChangedParents()) {
@@ -623,34 +623,34 @@ function openResultView() {
                 const patched = member.patchedDetails;
 
                 if (patched.name) {
-                    description.push($t(`%1Os`) + ': ' + patched.name);
+                    description.push($t('%1Os') + ': ' + patched.name);
                 }
                 if (patched.nationalRegisterNumber) {
-                    description.push($t(`%wK`) + ': ' + patched.nationalRegisterNumber.toString());
+                    description.push($t('%wK') + ': ' + patched.nationalRegisterNumber.toString());
                 }
                 if (patched.gender) {
-                    description.push($t(`%19i`) + ': ' + getGenderName(patched.gender));
+                    description.push($t('%19i') + ': ' + getGenderName(patched.gender));
                 }
                 if (patched.email) {
-                    description.push($t(`%xB`) + ': ' + patched.email);
+                    description.push($t('%xB') + ': ' + patched.email);
                 }
                 if (patched.phone) {
-                    description.push($t(`%wD`) + ': ' + patched.phone);
+                    description.push($t('%wD') + ': ' + patched.phone);
                 }
                 if (patched.birthDay) {
-                    description.push($t(`%17w`) + ': ' + Formatter.date(patched.birthDay, true));
+                    description.push($t('%17w') + ': ' + Formatter.date(patched.birthDay, true));
                 }
 
                 if (patched.address) {
-                    description.push($t(`%Cn`) + ': ' + patched.address.toString());
+                    description.push($t('%Cn') + ': ' + patched.address.toString());
                 }
 
                 if (patched.memberNumber) {
-                    description.push($t(`%19j`) + ': ' + patched.memberNumber);
+                    description.push($t('%19j') + ': ' + patched.memberNumber);
                 }
 
                 if (patched.uitpasNumberDetails) {
-                    description.push($t(`%wF`) + ': ' + patched.uitpasNumberDetails.uitpasNumber);
+                    description.push($t('%wF') + ': ' + patched.uitpasNumberDetails.uitpasNumber);
                 }
 
                 for (const parent of patched.parents) {
@@ -687,8 +687,8 @@ const draggableGroups = computed({
 
 function openWithoutMatchingGroups() {
     present(AsyncComponent(() => import('./ImportAutoAssignedView.vue'), {
-        title: $t(`%19k`),
-        description: $t(`%19l`),
+        title: $t('%19k'),
+        description: $t('%19l'),
         members: membersWithoutMatchingGroups.value.flatMap((m) => {
             return [{
                 name: m.patchedDetails.name,
@@ -705,7 +705,7 @@ async function goNext() {
 
     saving.value = true;
 
-    const toast = new Toast($t(`%19m`), 'spinner').setHide(null).show();
+    const toast = new Toast($t('%19m'), 'spinner').setHide(null).show();
 
     try {
         autoAssignMembers(props.importMemberResults);
@@ -725,7 +725,7 @@ async function goNext() {
                 },
             })).catch(console.error);
         } else {
-            new Toast($t(`%19n`), 'success green').show();
+            new Toast($t('%19n'), 'success green').show();
             navigate.dismiss({ force: true }).catch(console.error);
         }
     } catch (e) {

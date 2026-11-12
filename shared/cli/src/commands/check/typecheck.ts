@@ -11,6 +11,7 @@ export default class CheckTypecheck extends BaseCommand {
         'stam check typecheck --filter "@stamhoofd/*"',
         'stam check typecheck --quiet',
     ];
+
     static args = {
         target: Args.string({ description: 'Package in @stamhoofd, such as mobile, or a fully scoped package name', required: false }),
     };

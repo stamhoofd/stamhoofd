@@ -6,7 +6,8 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <hr><h2 v-if="app === 'admin'">
+        <hr>
+        <h2 v-if="app === 'admin'">
             {{ $t('%9r') }}
         </h2>
         <h2 v-else>
@@ -30,7 +31,8 @@
 
         <InheritedRecordsConfigurationBox :inherited-records-configuration="props.inheritedRecordsConfiguration" :records-configuration="patched" @patch:records-configuration="addPatch" />
 
-        <hr><h2 v-if="app === 'admin'">
+        <hr>
+        <h2 v-if="app === 'admin'">
             {{ $t('%9w') }}
         </h2>
         <h2 v-else>

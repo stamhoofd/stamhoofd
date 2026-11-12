@@ -115,8 +115,7 @@ const hasCompany = computed({
             addPatch({
                 company: Company.create({}),
             });
-        }
-        else {
+        } else {
             addPatch({
                 company: null,
             });

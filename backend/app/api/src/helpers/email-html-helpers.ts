@@ -4,7 +4,7 @@ import { CheckoutMethodType, PaymentGeneral, PaymentMethod, PaymentMethodHelper,
 import { Formatter } from '@stamhoofd/utility';
 
 export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string {
-    let str = `<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>`;
+    let str = '<table width="100%" cellspacing="0" cellpadding="0" class="email-data-table"><tbody>';
 
     const data = [
         {
@@ -14,14 +14,14 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
         {
             title: ((order) => {
                 if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
-                    return $t(`%Uq`);
+                    return $t('%Uq');
                 }
 
                 if (order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) {
-                    return $t(`%8a`);
+                    return $t('%8a');
                 }
 
-                return $t(`%Us`);
+                return $t('%Us');
             })(order),
             value: ((order) => {
                 if (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout) {
@@ -39,7 +39,7 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
             (order.data.checkoutMethod?.type === CheckoutMethodType.Takeout || order.data.checkoutMethod?.type === CheckoutMethodType.OnSite) && ((order.data.checkoutMethod as any)?.address)
                 ? [
                         {
-                            title: $t(`%Cn`),
+                            title: $t('%Cn'),
                             value: ((order) => {
                                 return (order.data.checkoutMethod as WebshopTakeoutMethod)?.address?.shortString() ?? '';
                             })(order),
@@ -48,21 +48,21 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
                 : []
         ),
         {
-            title: $t(`%7R`),
+            title: $t('%7R'),
             value: Formatter.capitalizeFirstLetter(order.data.timeSlot?.dateString() ?? ''),
         },
         {
-            title: $t(`%1GD`),
+            title: $t('%1GD'),
             value: order.data.timeSlot?.timeRangeString() ?? '',
         },
         {
-            title: $t(`%1Os`),
+            title: $t('%1Os'),
             value: order.data.customer.name,
         },
         ...(order.data.customer.phone
             ? [
                     {
-                        title: $t(`%18Z`),
+                        title: $t('%18Z'),
                         value: order.data.customer.phone,
                     },
                 ]
@@ -79,7 +79,7 @@ export function createOrderDataHTMLTable(order: Order, webshop: Webshop): string
             (order.data.paymentMethod !== PaymentMethod.Unknown)
                 ? [
                         {
-                            title: $t(`%M7`),
+                            title: $t('%M7'),
                             value: Formatter.capitalizeFirstLetter(PaymentMethodHelper.getName(order.data.paymentMethod)),
                         },
                     ]

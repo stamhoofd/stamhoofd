@@ -29,7 +29,7 @@ export class IDDeleteRegisterItem extends AutoEncoder {
         throw new SimpleError({
             code: 'not_found',
             message: 'Registration not found',
-            human: $t(`%qn`),
+            human: $t('%qn'),
             field: 'deleteRegistrations',
         });
     }

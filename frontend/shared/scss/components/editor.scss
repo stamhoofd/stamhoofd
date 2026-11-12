@@ -2,7 +2,6 @@
 @use '../base/text-styles';
 
 .editor-button-bar {
-
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -23,7 +22,7 @@
         flex-wrap: wrap;
         flex-grow: 1;
 
-        >.button {
+        > .button {
             flex-grow: 1;
         }
     }
@@ -41,22 +40,28 @@
         }
 
         border-radius: $border-radius-modals;
-        transition: transform 0.2s, opacity 0.2s, visibility 0.2s step-start;
+        transition:
+            transform 0.2s,
+            opacity 0.2s,
+            visibility 0.2s step-start;
 
         &.hidden {
             transform: translate(0, 100%);
             opacity: 0;
             //visibility: hidden;
-            transition: transform 0.2s, opacity 0.2s, visibility 0.2s step-end;
+            transition:
+                transform 0.2s,
+                opacity 0.2s,
+                visibility 0.2s step-end;
         }
 
-        >.button {
+        > .button {
             padding: 12px 5px;
         }
     }
 
-    >.button,
-    >.upload-button {
+    > .button,
+    > .upload-button {
         padding: 5px 10px;
         margin: 0 auto;
 
@@ -70,7 +75,7 @@
         }
     }
 
-    >hr {
+    > hr {
         width: $border-width;
         height: 15px;
         flex-shrink: 0;
@@ -81,7 +86,7 @@
     }
 
     &.small {
-        >hr {
+        > hr {
             // todo
         }
     }

@@ -63,8 +63,7 @@ export abstract class TableAction<T extends { id: string }> {
         }
         if (this.childActions instanceof Array) {
             return this.childActions.length > 0;
-        }
-        else {
+        } else {
             // function
             return true;
         }
@@ -80,8 +79,7 @@ export abstract class TableAction<T extends { id: string }> {
     getChildActions(): TableAction<T>[] {
         if (this.childActions instanceof Array) {
             return this.childActions;
-        }
-        else {
+        } else {
             return this.childActions();
         }
     }
@@ -145,7 +143,7 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
      */
     disableIfAll?: (item: T) => boolean;
 
-    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[], wereItemsFetched: boolean) => Promise<void> | void; fetchLimitSettings?: FetchLimitSettings, disableIfAll?: (item: T) => boolean }) {
+    constructor(settings: Partial<TableAction<T>> & { handler: (item: T[], wereItemsFetched: boolean) => Promise<void> | void; fetchLimitSettings?: FetchLimitSettings; disableIfAll?: (item: T) => boolean }) {
         super(settings);
         this.handler = settings.handler ?? (() => { throw new Error('No handler defined'); });
         this.fetchLimitSettings = settings.fetchLimitSettings;
@@ -174,7 +172,7 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
         return await fetchAll(initialRequest, objectFetcher, { ...options, fetchLimitSettings: this.fetchLimitSettings });
     }
 
-    private getSelectionSync(selection: TableActionSelection<T>) {        
+    private getSelectionSync(selection: TableActionSelection<T>) {
         if (selection.cachedAllValues) {
             return selection.cachedAllValues;
         }
@@ -187,39 +185,37 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
         return [];
     }
 
-    async getSelection(selection: TableActionSelection<T>, options: FetchAllOptions<T>): Promise<{items: T[], wereItemsFetched: boolean}> {
+    async getSelection(selection: TableActionSelection<T>, options: FetchAllOptions<T>): Promise<{ items: T[]; wereItemsFetched: boolean }> {
         if (selection.cachedAllValues) {
-            return {items: selection.cachedAllValues, wereItemsFetched: false};
+            return { items: selection.cachedAllValues, wereItemsFetched: false };
         }
 
         if (selection.markedRows.size && selection.markedRowsAreSelected === true) {
             // No async needed
-            return {items: Array.from(selection.markedRows.values()), wereItemsFetched: false};
-        }
-        else {
-            return {items: await this.fetchAll(selection.filter, selection.fetcher, options), wereItemsFetched: true};
+            return { items: Array.from(selection.markedRows.values()), wereItemsFetched: false };
+        } else {
+            return { items: await this.fetchAll(selection.filter, selection.fetcher, options), wereItemsFetched: true };
         }
     }
 
     async handle(data: TableActionSelection<T>) {
-        const toast: Toast = new Toast($t(`%jf`), 'spinner').setHide(null);
+        const toast: Toast = new Toast($t('%jf'), 'spinner').setHide(null);
         const timer = setTimeout(() => {
             toast.show();
         }, 1000);
 
         try {
-            const {items, wereItemsFetched} = this.needsSelection
+            const { items, wereItemsFetched } = this.needsSelection
                 ? (await this.getSelection(data, {
                         onProgress(count, total) {
                             toast.setProgress(total !== 0 ? (count / total) : 0);
                         },
                     }))
-                : {items: [], wereItemsFetched: false};
+                : { items: [], wereItemsFetched: false };
             toast.setProgress(1);
-            toast.message = $t(`%jg`);
+            toast.message = $t('%jg');
             await this.handler(items, wereItemsFetched);
-        }
-        finally {
+        } finally {
             clearTimeout(timer);
             toast.hide();
         }

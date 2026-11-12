@@ -47,8 +47,7 @@ export class FileCache {
         try {
             const data = await fs.readFile(path);
             return data;
-        }
-        catch {
+        } catch {
             // ignore
         }
 

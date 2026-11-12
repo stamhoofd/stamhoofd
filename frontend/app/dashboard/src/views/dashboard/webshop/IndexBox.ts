@@ -1,4 +1,4 @@
-import type { Data, Decoder, EncodableObject, Encodeable, EncodeContext} from '@common/encoding';
+import type { Data, Decoder, EncodableObject, Encodeable, EncodeContext } from '@common/encoding';
 import { encodeObject } from '@common/encoding';
 
 export type IndexedDbIndexValue = string | number | null | undefined;

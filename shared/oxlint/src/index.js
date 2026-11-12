@@ -10,7 +10,7 @@ function merge(...a) {
         return {
             plugins: [],
             rules: {},
-        }
+        };
     }
     if (a.length === 1) {
         return a;
@@ -26,13 +26,13 @@ function mergeTwo(a, b) {
         plugins: [...new Set([...a.plugins, ...b.plugins]).values()],
         rules: {
             ...a.rules,
-            ...b.rules
+            ...b.rules,
         },
         overrides: [
             ...(a.overrides ?? []),
-            ...(b.overrides ?? [])
-        ]
-    }
+            ...(b.overrides ?? []),
+        ],
+    };
 }
 
 export default {
@@ -40,15 +40,15 @@ export default {
         base: baseRules,
         frontend: merge(
             baseRules,
-            frontend
+            frontend,
         ),
         backend: merge(
             baseRules,
-            node
+            node,
         ),
         shared: merge(
             baseRules,
-            node
-        )
+            node,
+        ),
     },
 };

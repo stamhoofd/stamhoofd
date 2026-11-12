@@ -10,6 +10,7 @@ export default class DbMove extends BaseCommand {
         'stam db move --from stamhoofd-development --to stamhoofd-development-old',
         'stam db mv --env keeo --from stamhoofd-keeo --to stamhoofd-keeo-copy',
     ];
+
     static flags = {
         ...BaseCommand.instanceFlags,
         from: Flags.string({ description: 'Database name to move from' }),

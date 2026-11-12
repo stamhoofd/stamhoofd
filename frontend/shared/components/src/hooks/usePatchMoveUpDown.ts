@@ -1,6 +1,6 @@
 import type { AutoEncoder, NonScalarIdentifiable, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { computed, unref } from 'vue';
 
 export function usePatchMoveUpDown<T extends AutoEncoder & NonScalarIdentifiable<any>>(

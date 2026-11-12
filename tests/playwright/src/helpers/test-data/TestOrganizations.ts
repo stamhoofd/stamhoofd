@@ -2,7 +2,7 @@ import type {
     Group,
     Organization,
     OrganizationRegistrationPeriod,
-    RegistrationPeriod} from '@stamhoofd/models';
+    RegistrationPeriod } from '@stamhoofd/models';
 import {
     OrganizationRegistrationPeriodFactory,
     RegistrationPeriodFactory,

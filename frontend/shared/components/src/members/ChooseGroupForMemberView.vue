@@ -37,7 +37,8 @@
                 </div>
 
                 <div v-for="({ category, groups }, index) of filteredCategories" :key="category.id" class="container">
-                    <hr v-if="index > 0 || !showControl || showGroupSearch"><h2 class="style-with-button">
+                    <hr v-if="index > 0 || !showControl || showGroupSearch">
+                    <h2 class="style-with-button">
                         <div>
                             {{ category.settings.name }}
                             <span v-if="!category.settings.public" v-tooltip="$t('%dl')" class="icon tiny lock gray" />
@@ -262,8 +263,8 @@ const alreadyRegisteredMessage = computed(() => {
 
     if (groups.length > 0) {
         const firstName = props.member.patchedMember.firstName;
-        const groupsString = Formatter.joinLast(groups.map(g => g.settings.name.toString()), ', ', ' ' + $t(`%M1`) + ' ');
-        return $t(`%15W`, { firstName, groups: groupsString });
+        const groupsString = Formatter.joinLast(groups.map(g => g.settings.name.toString()), ', ', ' ' + $t('%M1') + ' ');
+        return $t('%15W', { firstName, groups: groupsString });
     }
 
     return null;
@@ -292,10 +293,10 @@ const noGroupsMessage = computed(() => {
     const organizationName = selectedOrganization.value?.name;
 
     if (groups.length > 0) {
-        return $t(`%zL`, { organization: organizationName ?? '', member: firstName });
+        return $t('%zL', { organization: organizationName ?? '', member: firstName });
     }
 
-    return $t(`%14G`, {
+    return $t('%14G', {
         member: firstName,
         organization: organizationName ?? '',
     });

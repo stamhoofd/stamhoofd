@@ -12,8 +12,7 @@ class StaticSQLLogger {
             const explainQuery = 'EXPLAIN ' + query;
             const [explainRows] = await Database.select(explainQuery, params, { nestTables: true });
             return explainRows[0]?.[''] ?? null;
-        }
-        catch (e) {
+        } catch (e) {
             console.error('Error running EXPLAIN on slow query', e);
         }
         return null;
@@ -64,8 +63,7 @@ class StaticSQLLogger {
         for (const logger of this.customLoggers) {
             try {
                 logger(query, params, elapsedTimeMs);
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('Error in custom SQL logger', e);
             }
         }

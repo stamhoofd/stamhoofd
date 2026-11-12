@@ -6,7 +6,12 @@
     "sideEffects": false,
     "main": "./dist/index.js",
     "types": "./dist-types/index.d.ts",
-    "exports": { ".": { "types": "./dist-types/index.d.ts", "default": "./dist/index.js" } },
+    "exports": {
+        ".": {
+            "types": "./dist-types/index.d.ts",
+            "default": "./dist/index.js"
+        }
+    },
     "scripts": {
         "build": "tsc --build tsconfig.build.json",
         "build:types": "tsc --project tsconfig.types.json",
@@ -14,6 +19,14 @@
         "lint": "eslint . --quiet",
         "test": "vitest run"
     },
-    "dependencies": { "@opentelemetry/api": "1.10.0", "tslib": "2.8.1" },
-    "devDependencies": { "@opentelemetry/sdk-node": "0.300.0", "@opentelemetry/sdk-trace": "3.0.0", "vitest": "4.1.12", "eslint-plugin-stamhoofd": "workspace:*" }
+    "dependencies": {
+        "@opentelemetry/api": "1.10.0",
+        "tslib": "2.8.1"
+    },
+    "devDependencies": {
+        "@opentelemetry/sdk-node": "0.300.0",
+        "@opentelemetry/sdk-trace": "3.0.0",
+        "vitest": "4.1.12",
+        "eslint-plugin-stamhoofd": "workspace:*"
+    }
 }

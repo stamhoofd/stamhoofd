@@ -7,11 +7,11 @@ import { useOrganizationManager } from '@stamhoofd/frontend-application/Organiza
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type {
     SetupStep,
-    SetupStepType} from '@stamhoofd/structures';
+    SetupStepType } from '@stamhoofd/structures';
 import {
-    OrganizationRegistrationPeriod
+    OrganizationRegistrationPeriod,
 } from '@stamhoofd/structures';
-import type { ComputedRef, Ref} from 'vue';
+import type { ComputedRef, Ref } from 'vue';
 import { computed, readonly, ref } from 'vue';
 
 export type ReviewCheckboxData = {
@@ -69,8 +69,7 @@ export function useReview(type: SetupStepType): UseReview {
                 });
 
             $organization.value?.updatePeriods([updatedPeriod.data]);
-        }
-        catch (error) {
+        } catch (error) {
             Toast.fromError(error).show();
             isSaving.value = false;
             return false;
@@ -84,8 +83,8 @@ export function useReview(type: SetupStepType): UseReview {
         if (!hasChanges.value) return true;
 
         const isConfirm = $checkboxValue.value
-            ? await CenteredMessage.confirm($t(`%jh`), $t(`%jC`))
-            : await CenteredMessage.confirm($t(`%ji`), $t(`%wo`));
+            ? await CenteredMessage.confirm($t('%jh'), $t('%jC'))
+            : await CenteredMessage.confirm($t('%ji'), $t('%wo'));
 
         if (!isConfirm) return false;
 

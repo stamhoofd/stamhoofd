@@ -11,7 +11,7 @@ import { initPlatformAdmin } from '../../../../tests/init/index.js';
 import { initMembershipOrganization } from '../../../../tests/init/initMembershipOrganization.js';
 import { GetOrganizationsEndpoint } from './GetOrganizationsEndpoint.js';
 
-const baseUrl = `/admin/organizations`;
+const baseUrl = '/admin/organizations';
 const endpoint = new GetOrganizationsEndpoint();
 
 describe('Endpoint.GetOrganizationsEndpoint', () => {

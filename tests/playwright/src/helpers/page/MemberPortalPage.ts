@@ -7,8 +7,7 @@ export class MemberPortalPage {
     async goto() {
         if (STAMHOOFD.userMode === 'platform') {
             await this.page.goto(`${WorkerData.urls.dashboard}/leden`);
-        }
-        else {
+        } else {
             throw new Error(
                 'Registration page is not implemented for usermode: '
                 + STAMHOOFD.userMode,

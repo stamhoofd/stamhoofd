@@ -230,7 +230,7 @@ const route = {
 
 const actions: TableAction<ObjectType>[] = [
     new InMemoryTableAction({
-        name: $t(`%1B7`),
+        name: $t('%1B7'),
         icon: 'download',
         priority: 5,
         groupIndex: 2,
@@ -246,7 +246,7 @@ const actions: TableAction<ObjectType>[] = [
     }),
 
     new InMemoryTableAction({
-        name: $t(`%CJ`),
+        name: $t('%CJ'),
         icon: 'trash',
         priority: 0,
         groupIndex: 3,
@@ -350,7 +350,7 @@ async function downloadInvoices(invoices: Invoice[], onlyVAT?: boolean) {
     if (onlyVAT === undefined) {
         const v = await CenteredMessage.show({
             title: $t('%1Rq'),
-            description: $t(`%1SZ`),
+            description: $t('%1SZ'),
             buttons: [
                 {
                     text: $t('%1U5'),

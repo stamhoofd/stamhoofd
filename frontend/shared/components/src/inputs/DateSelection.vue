@@ -41,9 +41,9 @@ import DateSelectionView from '../overlays/DateSelectionView.vue';
 
 type DateInputType = 'day' | 'month' | 'year';
 
-const dayPlaceholder = $t(`%dS`);
-const monthPlaceholder = $t(`%17f`);
-const yearPlaceholder = $t(`%17g`);
+const dayPlaceholder = $t('%dS');
+const monthPlaceholder = $t('%17f');
+const yearPlaceholder = $t('%17g');
 
 type InputConfig = {
     readonly type: DateInputType;
@@ -75,7 +75,7 @@ const props = withDefaults(defineProps<{
     adjustInitialTime?: boolean;
 }>(), {
     required: true,
-    placeholder: () => $t(`%yx`),
+    placeholder: () => $t('%yx'),
     placeholderDate: null,
     min: () => new Date(1900, 0, 1, 0, 0, 0, 0),
     max: () => new Date(2100, 0, 1, 0, 0, 0, 0),

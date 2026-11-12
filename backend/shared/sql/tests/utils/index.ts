@@ -54,8 +54,7 @@ export async function testSelect({ filter, filters, query }: { filter: Stamhoofd
     let sql: SQLQuery;
     try {
         sql = select.getSQL();
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Error in testSelect:', e);
         console.error('testSelect', select, where, (where instanceof SQLWhereAnd ? where.children : where));
 
@@ -115,8 +114,7 @@ function closeDatabaseAfterTests() {
     TestUtils.addAfterAll(async () => {
         try {
             await Database.end();
-        }
-        catch (error) {
+        } catch (error) {
             console.error('Failed to close database connection after tests:', error);
         }
     });
@@ -137,8 +135,7 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
 
     try {
         await Database.statement(createTableSQL);
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Failed to create test table:', error);
         throw error;
     }
@@ -149,19 +146,16 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
         for (const [key, value] of Object.entries(row)) {
             if (value === null) {
                 mappedValues[key] = null;
-            }
-            else if (typeof value === 'object' && !(value instanceof Date)) {
+            } else if (typeof value === 'object' && !(value instanceof Date)) {
                 mappedValues[key] = JSON.stringify(value);
-            }
-            else {
+            } else {
                 mappedValues[key] = value;
             }
         }
 
         try {
             await Database.insert('INSERT INTO `' + tableName + '` SET ?', [mappedValues]);
-        }
-        catch (insertError) {
+        } catch (insertError) {
             console.error('Failed to insert row:', insertError, row);
             throw insertError;
         }
@@ -176,8 +170,7 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
             let results: SQLResultNamespacedRow[];
             try {
                 results = await select.fetch();
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('SQL error for filter:', filter, 'on table:', tableName, 'with where:', select.getSQL(), e);
                 throw e;
             }
@@ -199,8 +192,7 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
             let results: SQLResultNamespacedRow[];
             try {
                 results = await select.fetch();
-            }
-            catch (e) {
+            } catch (e) {
                 console.error('SQL error for filter:', filter, 'on table:', tableName, 'with where:', select.getSQL(), e);
                 throw e;
             }
@@ -215,17 +207,14 @@ export async function testMatch({ tableDefinition, rows, doMatch, doNotMatch, fi
                     query: query.query.replaceAll('`' + tableName + '`', '`test_table`'),
                     params: query.params,
                 }).toMatchSnapshot('SQL Query for not match filter: ' + JSON.stringify(filter));
-            }
-            else {
+            } else {
                 expect('always false').toMatchSnapshot('SQL Query for not match filter: ' + JSON.stringify(filter));
             }
         }
-    }
-    finally {
+    } finally {
         try {
             await Database.statement(`DROP TABLE IF EXISTS \`${tableName}\``);
-        }
-        catch (dropError) {
+        } catch (dropError) {
             console.error('Failed to drop table after error:', dropError);
         }
     }

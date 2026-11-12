@@ -103,7 +103,7 @@ function changedFile(event: Event) {
     if (file.size > 20 * 1024 * 1024) {
         errorBox.value = new ErrorBox(new SimpleError({
             code: 'file_too_large',
-            message: $t(`%yz`),
+            message: $t('%yz'),
         }));
         return;
     }
@@ -135,7 +135,7 @@ function changedFile(event: Event) {
             if (Request.isNetworkError(e)) {
                 e = new SimpleError({
                     code: 'network_error',
-                    message: $t(`%16m`),
+                    message: $t('%16m'),
                 });
             }
             errorBox.value = new ErrorBox(e);

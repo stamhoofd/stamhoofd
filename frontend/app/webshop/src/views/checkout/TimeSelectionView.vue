@@ -101,8 +101,7 @@ async function goNext() {
 
     try {
         await props.continueCheckout(navigationActions);
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         errors.errorBox = new ErrorBox(e);
     }

@@ -125,10 +125,10 @@ const { patched, addPatch, hasChanges, patch } = usePatch(props.parent);
 const errors = useErrors();
 const pop = usePop();
 const loading = ref(false);
-const saveText = ref($t(`%1Op`));
+const saveText = ref($t('%1Op'));
 const app = useAppContext();
 const parentTypes = ParentTypeHelper.getPublicTypes();
-const title = computed(() => !props.isNew ? `${patched.value.firstName || $t(`%14u`)} bewerken` : $t(`%fV`));
+const title = computed(() => !props.isNew ? `${patched.value.firstName || $t('%14u')} bewerken` : $t('%fV'));
 const navigate = useNavigationActions();
 
 const canEditEmails = useCanEditEmails(props.member, props.parent);
@@ -322,14 +322,14 @@ async function save() {
         if (firstName.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%uH`),
+                message: $t('%uH'),
                 field: 'firstName',
             }));
         }
         if (lastName.value.length < 2) {
             se.addError(new SimpleError({
                 code: 'invalid_field',
-                message: $t(`%104`),
+                message: $t('%104'),
                 field: 'lastName',
             }));
         }
@@ -342,7 +342,7 @@ async function save() {
                     if (member.patchedMember.details.nationalRegisterNumber === nationalRegisterNumber.value) {
                         se.addError(new SimpleError({
                             code: 'invalid_field',
-                            message: $t(`%156`, { firstName: member.patchedMember.firstName }),
+                            message: $t('%156', { firstName: member.patchedMember.firstName }),
                             field: 'nationalRegisterNumber',
                         }));
                     }
@@ -353,7 +353,7 @@ async function save() {
             if (parent) {
                 se.addError(new SimpleError({
                     code: 'invalid_field',
-                    message: $t(`%157`, { name: parent.name }),
+                    message: $t('%157', { name: parent.name }),
                     field: 'nationalRegisterNumber',
                 }));
             }
@@ -385,10 +385,10 @@ async function save() {
             const minorMembers = family.members.filter(m => m.id !== props.member!.id && m.isPropertyEnabled('parents'));
 
             if (minorMembers.length > 0 && !await CenteredMessage.confirm(
-                $t(`%10D`),
-                $t(`%101`),
-                $t(`%158`, { memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t(`%M1`) + ' ') }),
-                $t(`%zT`),
+                $t('%10D'),
+                $t('%101'),
+                $t('%158', { memberNames: Formatter.joinLast(minorMembers.map(m => m.member.firstName), ', ', ' ' + $t('%M1') + ' ') }),
+                $t('%zT'),
                 false)) {
                 props.member.addParent(patched.value);
             } else {
@@ -430,10 +430,10 @@ async function modifyAddress(from: Address, to: Address) {
     }
 
     if (!await CenteredMessage.confirm(
-        $t(`%zP`),
-        $t(`%zQ`),
-        $t(`%159`, { from: from.shortString(), to: to.shortString(), names: Formatter.joinLast(occurrences, ', ', ' ' + $t(`%M1`) + ' ') }),
-        $t(`%zT`),
+        $t('%zP'),
+        $t('%zQ'),
+        $t('%159', { from: from.shortString(), to: to.shortString(), names: Formatter.joinLast(occurrences, ', ', ' ' + $t('%M1') + ' ') }),
+        $t('%zT'),
         false)
     ) {
         return;
@@ -446,7 +446,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value && !loading.value) {
         return true;
     }
-    return await CenteredMessage.confirm($t(`%A0`), $t(`%4X`));
+    return await CenteredMessage.confirm($t('%A0'), $t('%4X'));
 }
 
 defineExpose({

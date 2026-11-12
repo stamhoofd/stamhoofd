@@ -138,11 +138,11 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         // Its registration group lives in the same period as the event
         const eventGroup = withEventRegistrations
             ? await new GroupFactory({
-                organization,
-                period,
-                type: GroupType.EventRegistration,
-                name: new TranslatedString(eventName),
-            }).create()
+                    organization,
+                    period,
+                    type: GroupType.EventRegistration,
+                    name: new TranslatedString(eventName),
+                }).create()
             : undefined;
 
         const event = await new EventFactory({

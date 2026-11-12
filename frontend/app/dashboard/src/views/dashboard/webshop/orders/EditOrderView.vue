@@ -12,7 +12,8 @@
             </STInputBox>
         </template>
         <template v-else>
-            <hr><h2>{{ cartTitle }}</h2>
+            <hr>
+            <h2>{{ cartTitle }}</h2>
 
             <p v-for="code of patchedOrder.data.discountCodes" :key="code.id" class="discount-box icon label">
                 <span>{{ $t('%1MX') }} <span class="style-discount-code">{{ code.code }}</span></span>
@@ -42,7 +43,8 @@
             <AddDiscountCodeBox v-if="webshop.meta.allowDiscountCodeEntry" :apply-code="applyCode" />
 
             <template v-if="checkoutMethods.length > 1">
-                <hr><h2>{{ $t('%xE') }}</h2>
+                <hr>
+                <h2>{{ $t('%xE') }}</h2>
 
                 <STList>
                     <STListItem v-for="checkoutMethod in checkoutMethods" :key="checkoutMethod.id" :selectable="true" element-name="label" class="right-stack left-center">
@@ -68,7 +70,8 @@
             </template>
 
             <template v-if="selectedMethod && timeSlots.length > 0">
-                <hr><h2 v-if="selectedMethod.type === 'Takeout'">
+                <hr>
+                <h2 v-if="selectedMethod.type === 'Takeout'">
                     {{ $t('%Uo') }}
                 </h2>
                 <h2 v-else-if="selectedMethod.type === 'Delivery'">
@@ -110,7 +113,8 @@
             </template>
 
             <template v-if="selectedMethod && selectedMethod.type === 'Delivery'">
-                <hr><h2>{{ $t('%Us') }}</h2>
+                <hr>
+                <h2>{{ $t('%Us') }}</h2>
                 <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== patchedOrder.data.deliveryPrice" class="info-box">
                     {{ $t('%Ut', {min: formatPrice(deliveryMethod.price.minimumPrice), price: formatPrice(deliveryMethod.price.discountPrice)}) }}
                 </div>
@@ -131,7 +135,8 @@
                 <AddressInput v-model="address" :required="true" :validator="errors.validator" :validate-server="server" :title="$t(`%V0`)" />
             </template>
 
-            <hr><h2>{{ $t('%Ul') }}</h2>
+            <hr>
+            <h2>{{ $t('%Ul') }}</h2>
 
             <template v-if="contactPersonCandidates.length > 0">
                 <p class="style-description-block">
@@ -168,13 +173,16 @@
             </template>
 
             <div v-for="category in recordCategories.filter(c => c.isEnabled(patchedOrder.data))" :key="category.id" class="container">
-                <hr><FillRecordCategoryBox :category="category" :value="patchedOrder.data" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
+                <hr>
+                <FillRecordCategoryBox :category="category" :value="patchedOrder.data" :validator="errors.validator" :level="2" :all-optional="true" :force-mark-reviewed="true" @patch="addRecordAnswersPatch" />
             </div>
 
-            <hr><PriceBreakdownBox :price-breakdown="patchedOrder.data.priceBreakown" />
+            <hr>
+            <PriceBreakdownBox :price-breakdown="patchedOrder.data.priceBreakown" />
 
             <template v-if="isNew">
-                <hr><h2>{{ $t('%M7') }}</h2>
+                <hr>
+                <h2>{{ $t('%M7') }}</h2>
 
                 <PaymentSelectionList v-model="paymentMethod" :payment-configuration="paymentConfiguration" :country="organization!.address.country" :context="paymentContext" :amount="patchedOrder.data.totalPrice" />
             </template>

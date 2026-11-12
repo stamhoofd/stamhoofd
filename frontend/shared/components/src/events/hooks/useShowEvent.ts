@@ -6,7 +6,6 @@ import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import { useEventViewLoaders } from '#events/eventViewLoaders.ts';
 import { Toast } from '../../overlays/Toast';
 
-
 export function useShowEvent() {
     const present = usePresent();
     const eventFetcher = useEventsObjectFetcher();
@@ -23,7 +22,7 @@ export function useShowEvent() {
                         limit: 1,
                     }));
                     if (events.results.length === 0) {
-                        Toast.error($t(`%yY`)).show();
+                        Toast.error($t('%yY')).show();
                         throw new Error('Event not found');
                     }
                     return AsyncComponent(loaders.overview, {
