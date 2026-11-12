@@ -104,6 +104,23 @@ table:
 await Migration.runAll(__dirname + '/migrations', { database: statistics });
 ```
 
+## Remote TLS
+
+`PoolOptions.useSSL` enables TLS; `ca`, `cert` and `key` are PEM file paths. Set
+`verifyIdentity: true` for verified server authentication: pass `useSSL: true`,
+`ca` and a DNS `host` matching the server certificate explicitly. The installed mysql2 driver
+needs its `ssl.verifyIdentity` option explicitly; CA validation alone does not
+check endpoint identity. Optional `connectHost` pins TCP to a separate private
+address while retaining `host` for certificate verification, with no DNS fallback.
+It does not establish a private route or configure network access.
+
+Set both `cert: null` and `key: null` for explicit server-only authentication.
+Unlike omitted options, these suppress `DB_CERT`/`DB_KEY` environment fallback.
+
+The focused `DatabaseTLS` tests exercise the installed driver's TLS upgrade against
+a local TLS listener using temporary DNS certificates. They require OpenSSL and
+do not create another MySQL instance.
+
 ## Running tests
 
 To run tests, make sure you create a .env file first. Setup a test database and run the migrations first.

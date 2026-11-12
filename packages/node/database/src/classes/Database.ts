@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { AsyncLocalStorage } from 'async_hooks';
 import mysql from 'mysql2/promise';
+import net from 'node:net';
 import type { DatabaseStoredValue } from './DatabaseStoredValue.js';
 export type SQLResultRow = Record<string, DatabaseStoredValue>;
 export type SQLResultNamespacedRow = Record<string, SQLResultRow>;
@@ -8,7 +9,6 @@ export type SQLResultNamespacedRow = Record<string, SQLResultRow>;
 type SelectOptions = { connection?: mysql.PoolConnection; nestTables?: boolean };
 export type PoolOptions = {
     debug?: boolean;
-    host?: string;
     user?: string;
     password?: string;
     port?: number;
@@ -16,14 +16,16 @@ export type PoolOptions = {
     connectionLimit?: number;
     multipleStatements?: boolean;
     charset?: string;
-    useSSL?: boolean;
-    /** Path to the CA certificate file */
-    ca?: string;
-    /** Path to the client private key file (for mutual TLS) */
-    key?: string;
-    /** Path to the client certificate file (for mutual TLS) */
-    cert?: string;
-};
+    /** TCP destination when host is the TLS reference identity (e.g. a private overlay route). No DNS fallback. */
+    connectHost?: string;
+    /** Path to the client private key file (for mutual TLS); null disables environment fallback. */
+    key?: string | null;
+    /** Path to the client certificate file (for mutual TLS); null disables environment fallback. */
+    cert?: string | null;
+} & (
+    | { verifyIdentity: true; useSSL: true; host: string; ca: string }
+    | { verifyIdentity?: false; useSSL?: boolean; host?: string; ca?: string }
+);
 
 /// Database is a wrapper arround mysql, because we want to use promises + types
 export class DatabaseInstance {
@@ -76,16 +78,24 @@ export class DatabaseInstance {
             charset: options.charset ?? process.env.DB_CHARSET ?? 'utf8mb4_0900_ai_ci',
             useSSL: options.useSSL ?? !!process.env.DB_USE_SSL,
             ca: options.ca ?? process.env.DB_CA,
-            key: options.key ?? process.env.DB_KEY,
-            cert: options.cert ?? process.env.DB_CERT,
+            key: options.key === undefined ? process.env.DB_KEY : options.key,
+            cert: options.cert === undefined ? process.env.DB_CERT : options.cert,
         };
 
         if (settings.database === undefined) {
             throw new Error('Environment variable DB_DATABASE is missing');
         }
 
+        if (options.verifyIdentity && (!options.useSSL || !options.ca?.trim())) {
+            throw new Error('Verified database TLS requires SSL and a CA certificate path');
+        }
+        if (options.verifyIdentity && (!options.host?.trim() || net.isIP(options.host))) {
+            throw new Error('Verified database TLS requires a DNS hostname');
+        }
+
         this.pool = mysql.createPool({
             host: settings.host,
+            stream: options.connectHost ? () => net.connect(settings.port, options.connectHost!) : undefined,
             user: settings.user,
             password: settings.password,
             port: settings.port,
@@ -103,6 +113,7 @@ export class DatabaseInstance {
                       key: settings.key ? fs.readFileSync(settings.key) : undefined,
                       cert: settings.cert ? fs.readFileSync(settings.cert) : undefined,
                       rejectUnauthorized: settings.ca ? true : false,
+                      verifyIdentity: options.verifyIdentity ?? false,
                   }
                 : undefined,
         });

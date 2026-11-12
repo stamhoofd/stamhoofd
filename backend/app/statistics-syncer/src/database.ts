@@ -1,4 +1,5 @@
 import { DatabaseInstance } from '@node/database';
+import type { PoolOptions } from '@node/database';
 import type { StatisticsEnvironment } from '@stamhoofd/types/Environment';
 
 export type StatisticsDatabaseConfig = StatisticsEnvironment['statisticsDatabase'];
@@ -35,7 +36,7 @@ export function getStatisticsDatabaseConfig(): StatisticsDatabaseConfig {
 
 /**
  * Whether the statistics database is on a different machine than the process reading the
- * administration. It is wherever this is deployed -- the schema lives next to Metabase -- and it is
+ * administration. It is wherever this is deployed, and it is
  * not in development or in the tests, which put both on the same MySQL.
  */
 function isOnAnotherServer(config: StatisticsDatabaseConfig): boolean {
@@ -57,42 +58,50 @@ function getStatisticsPort(config: StatisticsDatabaseConfig): number | undefined
 }
 
 /**
- * Where to reach the statistics database. It lives next to Metabase rather than on the server this
- * runs on, so every connection detail is spelled out instead of inherited from the main database.
+ * Where to reach the statistics writer/primary. Connection details are independent of the local
+ * administration, and reads through this connection deliberately stay on the primary.
  */
-export function getStatisticsPoolOptions(): {
-    host: string;
-    user: string;
-    password: string;
-    port: number | undefined;
-    useSSL: boolean;
-    ca?: string;
-    cert?: string;
-    key?: string;
-} {
+export function getStatisticsPoolOptions(): PoolOptions {
     const config = getStatisticsDatabaseConfig();
     const useSSL = isOnAnotherServer(config);
 
-    // The login is created with REQUIRE X509: MySQL reports a missing client certificate as a plain
-    // "access denied", so refuse early with a message that names the actual cause.
-    if (useSSL && (!config.DB_CERT || !config.DB_KEY)) {
+    // Legacy logins use REQUIRE X509. Server-only authentication must be explicitly selected;
+    // otherwise a missing client certificate is an error, not an implicit downgrade.
+    if (useSSL && config.DB_TLS_MODE !== 'server' && (!config.DB_CERT || !config.DB_KEY)) {
         throw new Error(
             'STAMHOOFD.statisticsDatabase.DB_CERT and DB_KEY are required to connect to a statistics database on another server',
         );
     }
 
-    return {
+    if (config.DB_TLS_MODE === 'server' && (!useSSL || !config.DB_TLS_SERVER_NAME)) {
+        throw new Error('Server-auth TLS requires a remote destination and DB_TLS_SERVER_NAME');
+    }
+
+    const base = {
         host: config.DB_HOST,
         user: config.DB_USER,
         password: config.DB_PASS,
         port: getStatisticsPort(config),
-
-        // Left off where both databases are on the same MySQL, which is development and the tests.
-        useSSL,
-        ca: useSSL ? config.DB_CA : undefined,
-        cert: useSSL ? config.DB_CERT : undefined,
-        key: useSSL ? config.DB_KEY : undefined,
+        cert: config.DB_TLS_MODE === 'server' ? null : useSSL ? config.DB_CERT : undefined,
+        key: config.DB_TLS_MODE === 'server' ? null : useSSL ? config.DB_KEY : undefined,
     };
+
+    if (!useSSL) {
+        if (config.DB_TLS_SERVER_NAME) {
+            throw new Error('DB_TLS_SERVER_NAME requires a remote TLS destination');
+        }
+        return { ...base, useSSL: false };
+    }
+    if (!config.DB_CA) {
+        throw new Error('STAMHOOFD.statisticsDatabase.DB_CA is required for remote TLS');
+    }
+    if (config.DB_TLS_SERVER_NAME) {
+        return {
+            ...base, useSSL: true, ca: config.DB_CA, verifyIdentity: true,
+            host: config.DB_TLS_SERVER_NAME, connectHost: config.DB_HOST,
+        };
+    }
+    return { ...base, useSSL: true, ca: config.DB_CA };
 }
 
 let connection: DatabaseInstance | undefined;
@@ -101,8 +110,7 @@ let connection: DatabaseInstance | undefined;
  * A connection of its own to the platform statistics database.
  *
  * The shared `Database` stays pointed at the main administration, which the sync reads through the
- * models: the statistics database lives on the Metabase server, so the two are not even the same
- * MySQL to point a single connection at.
+ * models. Remote destinations use a separate MySQL; the administration never moves with them.
  */
 export function getStatisticsConnection(): DatabaseInstance {
     connection ??= new DatabaseInstance({
