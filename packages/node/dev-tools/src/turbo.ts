@@ -21,7 +21,12 @@ const appNames = new Map([
  */
 export function forwardTurboLine(line: string, write: (stream: 'stdout' | 'stderr', text: string) => void) {
     let value: unknown;
-    try { value = JSON.parse(line); } catch { write('stdout', line + '\n'); return; }
+    try {
+        value = JSON.parse(line);
+    } catch {
+        write('stdout', line + '\n');
+        return;
+    }
     const record = value && typeof value === 'object' ? value as Record<string, unknown> : undefined;
     if (!record || typeof record.source !== 'string' || typeof record.text !== 'string'
         || typeof record.level !== 'string' || !['info', 'warn', 'error', 'stdout', 'stderr'].includes(record.level)) {
@@ -62,13 +67,22 @@ export async function runTurbo(args: string[], { bufferOutput = false }: { buffe
     }
     child.stderr?.setEncoding('utf8').on('data', (text: string) => write('stderr', text));
     let cancelled = false;
-    const interrupt = () => { cancelled = true; child.kill('SIGINT'); };
-    const terminate = () => { cancelled = true; child.kill('SIGTERM'); };
+    const interrupt = () => {
+        cancelled = true;
+        child.kill('SIGINT');
+    };
+    const terminate = () => {
+        cancelled = true;
+        child.kill('SIGTERM');
+    };
     process.on('SIGINT', interrupt);
     process.on('SIGTERM', terminate);
     try {
         const code = await new Promise<number>((resolve) => {
-            child.once('error', (error) => { console.error(error); resolve(1); });
+            child.once('error', (error) => {
+                console.error(error);
+                resolve(1);
+            });
             child.once('close', code => resolve(code ?? 1));
         });
         if (file && code !== 0 && !cancelled) {

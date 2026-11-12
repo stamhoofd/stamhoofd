@@ -420,9 +420,8 @@ function getDefaultStamhoofdFilter(): StamhoofdFilter {
         if (groupsToFilterEventsOn) {
             groupIds = [null, ...groupsToFilterEventsOn];
         }
-    }
-    // only show events for organizations with tag where user can edit event for if platform scope
-    else {
+    } else {
+        // only show events for organizations with tag where user can edit event for if platform scope
         const tagsToFilterEventsOn = eventPermissions.tagsToFilterEventsOn();
         if (tagsToFilterEventsOn) {
             organizationTagIds = tagsToFilterEventsOn;

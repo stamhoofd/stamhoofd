@@ -299,10 +299,8 @@ function getProgress(row: RowData): { count?: number; progress?: number; total?:
     // count will be lower
     if (minimumMembers !== null && count < minimumMembers) {
         total = minimumMembers;
-    }
-
-    // count will exceed
-    else if (maximumMembers !== null && count + (invalidMembers?.length ?? 0) > maximumMembers) {
+    } else if (maximumMembers !== null && count + (invalidMembers?.length ?? 0) > maximumMembers) {
+        // count will exceed
         count = count + (invalidMembers?.length ?? 0);
         total = maximumMembers;
     } else {

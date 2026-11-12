@@ -11,7 +11,9 @@ import type { Command } from 'concurrently';
 const [names, ...commands] = process.argv.slice(2);
 const verbose = process.env.STAM_DEV_VERBOSE === '1';
 let stopping = false;
-const onSignal = () => { stopping = true; };
+const onSignal = () => {
+    stopping = true;
+};
 process.on('SIGINT', onSignal);
 process.on('SIGTERM', onSignal);
 
@@ -36,6 +38,8 @@ const { result } = concurrently(commands.map((command, index) => ({ command, nam
     logger: new DevLogger({ prefixFormat: '[{name}]' }),
     killOthersOn: ['failure'],
 });
-await result.catch(() => { process.exitCode = 1; });
+await result.catch(() => {
+    process.exitCode = 1;
+});
 process.off('SIGINT', onSignal);
 process.off('SIGTERM', onSignal);

@@ -23,7 +23,9 @@ export function devLifecyclePlugin(app: DevApp) {
             const ready = () => emitter?.emit('ready');
             if (server.httpServer?.listening) ready();
             else server.httpServer?.once('listening', ready);
-            server.httpServer?.once('close', () => { void emitter?.close(); });
+            server.httpServer?.once('close', () => {
+                void emitter?.close();
+            });
         },
         async closeBundle() {
             await emitter?.close();

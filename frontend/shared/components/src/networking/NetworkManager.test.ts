@@ -35,7 +35,9 @@ describe('networking application integration', () => {
         vi.useFakeTimers();
         vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true);
         vi.spyOn(console, 'error').mockImplementation(() => {});
-        const show = vi.spyOn(Toast.prototype, 'show').mockImplementation(function (this: Toast) { return this; });
+        const show = vi.spyOn(Toast.prototype, 'show').mockImplementation(function (this: Toast) {
+            return this;
+        });
         const manager = new NetworkManagerStatic();
         const first = new Request(manager.server, { method: 'GET', path: '/platform' });
         const second = new Request(manager.server, { method: 'GET', path: '/platform' });
@@ -62,7 +64,9 @@ describe('networking application integration', () => {
 
     test('native update-required errors invoke the updater without retrying', async () => {
         vi.spyOn(console, 'error').mockImplementation(() => {});
-        vi.spyOn(Toast.prototype, 'show').mockImplementation(function (this: Toast) { return this; });
+        vi.spyOn(Toast.prototype, 'show').mockImplementation(function (this: Toast) {
+            return this;
+        });
         vi.spyOn(AppManager.shared, 'isNative', 'get').mockReturnValue(true);
         const update = vi.spyOn(AppManager.shared, 'checkUpdates').mockResolvedValue();
         const manager = new NetworkManagerStatic();

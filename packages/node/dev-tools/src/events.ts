@@ -93,8 +93,13 @@ export function createDevEmitter(app: DevApp, env: NodeJS.ProcessEnv = process.e
             if (!socket) {
                 socket = net.createConnection(env.STAM_DEV_SOCKET);
                 socket.unref();
-                socket.on('error', () => { closed = true; socket?.destroy(); });
-                socket.on('close', () => { closed = true; });
+                socket.on('error', () => {
+                    closed = true;
+                    socket?.destroy();
+                });
+                socket.on('close', () => {
+                    closed = true;
+                });
             }
             if (socket.writableLength + Buffer.byteLength(line) > maxEventBytes * 4) {
                 closed = true;
@@ -110,7 +115,10 @@ export function createDevEmitter(app: DevApp, env: NodeJS.ProcessEnv = process.e
             const connection = socket;
             await new Promise<void>((resolve) => {
                 const timer = setTimeout(() => connection.destroy(), 250);
-                connection.once('close', () => { clearTimeout(timer); resolve(); });
+                connection.once('close', () => {
+                    clearTimeout(timer);
+                    resolve();
+                });
                 connection.end();
             });
         },

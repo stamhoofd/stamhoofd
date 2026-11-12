@@ -19,7 +19,9 @@ emitter.emit('build.started', { cycleId });
 const args = ['run', 'build:shared', ...(process.argv.includes('--verbose') ? [] : ['--output-logs=new-only'])];
 let cancelled = false;
 for (const signal of ['SIGTERM', 'SIGINT']) {
-    process.on(signal, () => { cancelled = true; });
+    process.on(signal, () => {
+        cancelled = true;
+    });
 }
 const code = await runTurbo(args, { bufferOutput: true });
 if (!cancelled) {

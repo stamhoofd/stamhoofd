@@ -57,5 +57,7 @@ export function watchTypeScript(app: DevApp, config = 'tsconfig.build.json') {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
     const watcher = watchTypeScript(process.argv[2] as DevApp);
-    for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, () => { void watcher.close(); });
+    for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, () => {
+        void watcher.close();
+    });
 }

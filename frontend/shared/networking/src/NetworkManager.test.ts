@@ -40,7 +40,9 @@ describe('transport callbacks', () => {
         vi.useFakeTimers();
         vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true);
         vi.spyOn(console, 'error').mockImplementation(() => {});
-        const show = vi.spyOn(Toast.prototype, 'show').mockImplementation(function (this: Toast) { return this; });
+        const show = vi.spyOn(Toast.prototype, 'show').mockImplementation(function (this: Toast) {
+            return this;
+        });
         const manager = new NetworkManagerStatic();
         const requests = [0, 1].map(() => new Request(manager.server, { method: 'GET', path: '/platform' }));
         for (const request of requests) {

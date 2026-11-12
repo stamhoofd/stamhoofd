@@ -65,7 +65,9 @@ it('keeps unchanged files and reserved metadata untouched', async () => {
 });
 
 it('does not change any translation files when the shared scan fails', async () => {
-    vi.mocked(fs.readFileSync).mockImplementationOnce(() => { throw new Error('unreadable source'); });
+    vi.mocked(fs.readFileSync).mockImplementationOnce(() => {
+        throw new Error('unreadable source');
+    });
     await expect(unusedKeys()).rejects.toThrow('unreadable source');
     expect(writeTranslation).not.toHaveBeenCalled();
 });
@@ -97,7 +99,10 @@ it('replaces adjacent, nested, and Handlebars duplicate usages in one source pas
 
 it('reports unused-key scan progress, yields to the CLI, and returns a removal summary', async () => {
     let yielded = false;
-    const scheduled = new Promise<void>(resolve => setImmediate(() => { yielded = true; resolve(); }));
+    const scheduled = new Promise<void>(resolve => setImmediate(() => {
+        yielded = true;
+        resolve();
+    }));
     const progress = vi.fn();
     const removed = await unusedKeys(progress);
     expect(yielded).toBe(true);

@@ -143,9 +143,9 @@ Only when stable:
 console.log("Loaded WRapper request");
 
 (function () {
-	console.log("Loaded WRapper request")
-	// Keep reference to old XMLHTTPRequest
-	//const oldXMLHttpRequest = window.XMLHttpRequest;
-	window.XMLHttpRequest = WrapperHTTPRequest
+    console.log("Loaded WRapper request")
+    // Keep reference to old XMLHTTPRequest
+    //const oldXMLHttpRequest = window.XMLHttpRequest;
+    window.XMLHttpRequest = WrapperHTTPRequest
 })()
 */

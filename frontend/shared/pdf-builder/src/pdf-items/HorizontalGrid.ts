@@ -233,9 +233,8 @@ export class HorizontalGrid implements PdfItem {
                         // if next row is below the bottom of the page, go to next page
                         if (nextRowTop > pageBottomLimit) {
                             shouldGoToNextPage = true;
-                        }
-                        // else go to next row
-                        else {
+                        } else {
+                            // else go to next row
                             goToNextRow(nextRowTop);
                         }
                     }
@@ -384,9 +383,8 @@ export class HorizontalGrid implements PdfItem {
                         // if next row is below the bottom of the page, go to next page
                         if (nextRowTop > pageBottomLimit) {
                             shouldGoToNextPage = true;
-                        }
-                        // else go to next row
-                        else {
+                        } else {
+                            // else go to next row
                             goToNextRow(nextRowTop);
                         }
                     }

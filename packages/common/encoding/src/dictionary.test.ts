@@ -143,7 +143,9 @@ describe('dictionary security', () => {
 
     test('cloning does not consult an own constructor getter', () => {
         const input = { nested: {} };
-        Object.defineProperty(input, 'constructor', { get() { throw new Error('not a prototype source'); } });
+        Object.defineProperty(input, 'constructor', { get() {
+            throw new Error('not a prototype source');
+        } });
         const output = cloneObject(input);
         expect(Object.getPrototypeOf(output)).toBe(Object.prototype);
         expect(output.nested).toBe(input.nested);

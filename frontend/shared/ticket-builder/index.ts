@@ -68,7 +68,9 @@ export class TicketBuilder {
         const buffer = await new Promise<Buffer>((resolve, reject) => {
             try {
                 this.dataBuffer = [];
-                this.document.on('data', (d: Buffer) => { this.dataBuffer.push(d); });
+                this.document.on('data', (d: Buffer) => {
+                    this.dataBuffer.push(d);
+                });
                 this.document.on('end', () => {
                     const buf = Buffer.concat(this.dataBuffer);
                     resolve(buf);

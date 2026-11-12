@@ -77,9 +77,8 @@ async function calculateStrength(password: string) {
         warning.value = result.feedback.warning ?? '';
         strength.value = result.score * 25;
         duration.value = result.crackTimesSeconds.offlineSlowHashing1e4PerSecond;
-    }
     // eslint-disable-next-line secure-coding/no-fail-open-auth -- This is an advisory strength indicator, not password acceptance or authentication.
-    catch (e) {
+    } catch (e) {
         // ignore
     }
 

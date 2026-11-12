@@ -7,7 +7,9 @@ import { globals } from '../shared/globals.js';
 import { TranslatorType } from '../enums/TranslatorType.js';
 
 const { start } = vi.hoisted(() => ({ start: vi.fn() }));
-vi.mock('./AutoTranslator.js', () => ({ AutoTranslator: vi.fn(function () { return { start }; }) }));
+vi.mock('./AutoTranslator.js', () => ({ AutoTranslator: vi.fn(function () {
+    return { start };
+}) }));
 vi.mock('./TranslationManager.js', () => ({ TranslationManager: vi.fn(function () {}) }));
 vi.mock('./PromptLogger.js', () => ({ promptLogger: { initialize: vi.fn(), close: vi.fn() } }));
 

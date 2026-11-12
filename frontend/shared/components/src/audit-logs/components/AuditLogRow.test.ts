@@ -44,7 +44,9 @@ function mountRow(objectId: string | null, canFilter = true, customRenderers?: A
 }
 
 test('the context menu opens logs for the selected object through the supplied callback', async () => {
-    const show = vi.spyOn(ContextMenu.prototype, 'show').mockImplementation(async function (this: ContextMenu) { return this; });
+    const show = vi.spyOn(ContextMenu.prototype, 'show').mockImplementation(async function (this: ContextMenu) {
+        return this;
+    });
     const { wrapper, openLogs } = mountRow('selected-object');
     try {
         expect(wrapper.text()).toContain('Audit entry');
@@ -77,7 +79,9 @@ test.each([
     { objectId: null, canFilter: true },
     { objectId: 'selected-object', canFilter: false },
 ])('does not offer object navigation for $objectId with canFilter=$canFilter', async ({ objectId, canFilter }) => {
-    const show = vi.spyOn(ContextMenu.prototype, 'show').mockImplementation(async function (this: ContextMenu) { return this; });
+    const show = vi.spyOn(ContextMenu.prototype, 'show').mockImplementation(async function (this: ContextMenu) {
+        return this;
+    });
     const { wrapper, openLogs } = mountRow(objectId, canFilter);
     try {
         await wrapper.trigger('contextmenu');

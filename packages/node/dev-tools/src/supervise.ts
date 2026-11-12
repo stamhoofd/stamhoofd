@@ -47,7 +47,10 @@ for (const signal of ['SIGTERM', 'SIGINT'] as const) {
     });
 }
 const code = await new Promise<number>((resolve) => {
-    child.once('error', (error) => { console.error(error); resolve(1); });
+    child.once('error', (error) => {
+        console.error(error);
+        resolve(1);
+    });
     child.once('close', code => resolve(code ?? 1));
 });
 if (deadline) clearTimeout(deadline);

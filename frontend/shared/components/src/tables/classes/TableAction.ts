@@ -124,7 +124,9 @@ export class AsyncTableAction<T extends { id: string }> extends TableAction<T> {
 
     constructor(settings: Partial<TableAction<T>> & { handler: (selection: TableActionSelection<T>) => Promise<void> | void }) {
         super(settings);
-        this.handler = settings.handler ?? (() => { throw new Error('No handler defined'); });
+        this.handler = settings.handler ?? (() => {
+            throw new Error('No handler defined');
+        });
     }
 
     async handle(selection: TableActionSelection<T>) {
@@ -145,7 +147,9 @@ export class InMemoryTableAction<T extends { id: string }> extends TableAction<T
 
     constructor(settings: Partial<TableAction<T>> & { handler: (item: T[], wereItemsFetched: boolean) => Promise<void> | void; fetchLimitSettings?: FetchLimitSettings; disableIfAll?: (item: T) => boolean }) {
         super(settings);
-        this.handler = settings.handler ?? (() => { throw new Error('No handler defined'); });
+        this.handler = settings.handler ?? (() => {
+            throw new Error('No handler defined');
+        });
         this.fetchLimitSettings = settings.fetchLimitSettings;
         this.disableIfAll = settings.disableIfAll;
     }

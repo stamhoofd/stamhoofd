@@ -39,7 +39,10 @@ export const devLifecycleModule: NuxtModule<{ lifecycle?: { ready(): Promise<voi
         built = false;
         if (cycleId) emitter.emit('build.failed', { cycleId });
     });
-    nuxt.hook('listen', async () => { listening = true; await ready(); });
+    nuxt.hook('listen', async () => {
+        listening = true;
+        await ready();
+    });
     nuxt.hook('nitro:init', (nitro) => {
         let serverCycle: string | undefined;
         nitro.hooks.hook('dev:start', () => {

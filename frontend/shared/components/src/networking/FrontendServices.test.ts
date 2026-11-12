@@ -77,7 +77,9 @@ describe('frontend service composition', () => {
     test.each(['login', 'enrollment'])('%s completion prepares the real session and loads its translations', async (flow) => {
         I18nController.manualLocales = locales;
         const session = new SessionContext(null, Platform.create({}));
-        vi.spyOn(session, 'updateData').mockImplementation(async () => { session.user = createUser(); });
+        vi.spyOn(session, 'updateData').mockImplementation(async () => {
+            session.user = createUser();
+        });
         const token = createToken();
         const server = session.identityServer;
         vi.spyOn(session, 'identityServer', 'get').mockReturnValue(server);

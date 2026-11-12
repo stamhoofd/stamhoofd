@@ -23,7 +23,9 @@ describe('session preparation', () => {
         vi.spyOn(session, 'updateData').mockRejectedValue(new SimpleError({ code: 'invalid_organization', message: 'Invalid organization' }));
         vi.spyOn(console, 'error').mockImplementation(() => {});
         vi.spyOn(I18nController, 'loadDefault').mockResolvedValue();
-        const show = vi.spyOn(Toast.prototype, 'show').mockImplementation(function (this: Toast) { return this; });
+        const show = vi.spyOn(Toast.prototype, 'show').mockImplementation(function (this: Toast) {
+            return this;
+        });
         const manager = new SessionManagerStatic();
         const storage = await manager.getSessionStorage();
         vi.spyOn(manager, 'getSessionStorage').mockResolvedValue(storage);

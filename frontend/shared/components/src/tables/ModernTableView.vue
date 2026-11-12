@@ -1434,33 +1434,37 @@ function updateColumnWidth(afterColumn: Column<any, any> | null = null, strategy
 
         const shrinking = distributeWidth < 0;
 
-        const columnPriorities: ((col: Column<any, any>) => boolean)[] = shrinking ? [
-            // First, shrink all the columns that are larger than the recommendedWidth
-            c => c.width !== null && c.width > c.recommendedWidth,
+        const columnPriorities: ((col: Column<any, any>) => boolean)[] = shrinking
+            ? [
+                    // First, shrink all the columns that are larger than the recommendedWidth
+                    c => c.width !== null && c.width > c.recommendedWidth,
 
-            // At last, only shrink columns larger than the minimum width
-            c => c.width !== null && c.width > c.minimumWidth,
-        ] : [
-            // First grow all the columns that are smaller than the recommendedWidth
-            c => c.width !== null && c.width < c.minimumWidth,
-            c => c.width !== null && c.width < c.recommendedWidth,
+                    // At last, only shrink columns larger than the minimum width
+                    c => c.width !== null && c.width > c.minimumWidth,
+                ]
+            : [
+                    // First grow all the columns that are smaller than the recommendedWidth
+                    c => c.width !== null && c.width < c.minimumWidth,
+                    c => c.width !== null && c.width < c.recommendedWidth,
 
-            // Grow only columns that have grow = true (unless none of the columns have grow = true, in which case this step is skipped automatically)
-            c => c.width !== null && c.grow === true,
+                    // Grow only columns that have grow = true (unless none of the columns have grow = true, in which case this step is skipped automatically)
+                    c => c.width !== null && c.grow === true,
 
-            // At last, grow any column, exept when they don't have width yet
-            c => c.width !== null,
-        ];
+                    // At last, grow any column, exept when they don't have width yet
+                    c => c.width !== null,
+                ];
 
-        const columnLimits: { minimum?: (col: Column<any, any>) => number; maximum?: (col: Column<any, any>) => number }[] = shrinking ? [
-            { minimum: c => c.recommendedWidth },
-            { minimum: c => c.minimumWidth },
-        ] : [
-            { maximum: c => c.minimumWidth }, // Grow to recommended size and continue to next step
-            { maximum: c => c.recommendedWidth }, // Grow to recommended size and continue to next step
-            { },
-            { },
-        ];
+        const columnLimits: { minimum?: (col: Column<any, any>) => number; maximum?: (col: Column<any, any>) => number }[] = shrinking
+            ? [
+                    { minimum: c => c.recommendedWidth },
+                    { minimum: c => c.minimumWidth },
+                ]
+            : [
+                    { maximum: c => c.minimumWidth }, // Grow to recommended size and continue to next step
+                    { maximum: c => c.recommendedWidth }, // Grow to recommended size and continue to next step
+                    { },
+                    { },
+                ];
 
         let columnPriorityIndex = 0;
 

@@ -270,9 +270,8 @@ function onPop() {
     }
     if (canDismiss.value) {
         dismiss().catch(console.error);
-    }
-    // Go back using the history API
-    else if (window.history.length > 1) {
+    } else if (window.history.length > 1) {
+        // Go back using the history API
         window.history.back();
     } else {
         // Go to marketing site

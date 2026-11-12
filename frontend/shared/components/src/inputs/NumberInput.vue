@@ -132,9 +132,8 @@ function validate(value: string, { final }: { final: boolean } = { final: true }
     if (final) {
         if (props.autoFix) {
             number = numberInput.constrain(number);
-        }
-        // If required the model value should never be null because a patch will not be able to set null as a value on the structure.
-        else if (props.required && number === null) {
+        } else if (props.required && number === null) {
+            // If required the model value should never be null because a patch will not be able to set null as a value on the structure.
             number = props.min ?? 0;
         }
 
