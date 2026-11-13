@@ -25,12 +25,12 @@
         "lint": "eslint . --quiet"
     },
     "dependencies": {
-        "@vue/shared": "3.5.44",
-        "vue": "3.5.44",
+        "@vue/shared": "3.5.45",
+        "vue": "3.5.45",
         "tslib": "2.8.1"
     },
     "devDependencies": {
-        "@vue/runtime-core": "3.5.44",
+        "@vue/runtime-core": "3.5.45",
         "@vitejs/plugin-vue": "5.2.4",
         "@vitest/browser-playwright": "4.1.12",
         "playwright": "1.64.1",
