@@ -43,6 +43,11 @@ allowBuilds:
     unrs-resolver@1.12.2: true
     vue-demi@0.14.10: true
 
+# deepmerge 4.3.1 has no patched version. It is only called with static defaults at build time (nitropack > @rollup/plugin-node-resolve).
+auditConfig:
+    ignoreGhsas:
+        - GHSA-gcqx-w48m-w2h4
+
 overrides:
     '@types/node': '22.20.4'
     axios: '1.21.0'
@@ -58,6 +63,9 @@ overrides:
     'yargs@<18': '17.7.3'
     'js-yaml@<5': '4.3.2'
     '@colors/colors': '1.6.1'
+    # Transitive via docs > docus > @nuxtjs/mcp-toolkit > @modelcontextprotocol/sdk; patch bumps within the SDK's declared ranges.
+    hono: '4.13.16'
+    '@hono/node-server': '2.1.6'
     'nx>brace-expansion': '5.0.12'
     'nx>follow-redirects': '1.16.2'
     'nx>smol-toml': '1.9.0'
