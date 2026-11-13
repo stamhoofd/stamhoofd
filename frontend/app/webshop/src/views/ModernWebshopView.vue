@@ -67,6 +67,7 @@ import type { useDismiss, usePopup } from '@browser/navigation';
 import { ComponentWithProperties, NavigationController, ReactiveUrl, useNavigationController, usePresent, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { injectCustomCode } from '@stamhoofd/components/helpers/injectCustomCode.ts';
+import { getSingleFormStepReason, hasWebshopDescription } from '@stamhoofd/components/helpers/singleFormStep.ts';
 import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo.ts';
 import { getProductListTitle } from '@stamhoofd/components/helpers/webshopWording.ts';
 import PreviewOutlet from '@stamhoofd/components/layout/PreviewOutlet.vue';
@@ -306,8 +307,7 @@ const almostClosed = computed(() => webshop.value.isClosed(6 * 60 * 60 * 1000) &
 const showOpenAt = computed(() => closed.value && webshop.value.opensInTheFuture());
 const products = computed(() => getVisibleProducts(webshop.value));
 
-// Check the text: a description that was cleared in the editor still has html like <p></p>
-const hasDescription = computed(() => webshop.value.meta.description.text.trim().length > 0);
+const hasDescription = computed(() => hasWebshopDescription(webshop.value));
 
 // Next to the content, above the products. The embedded form defaults to the name of the product instead
 const orderListTitle = computed(() => webshop.value.meta.orderTitle || getProductListTitle(webshop.value));
@@ -328,8 +328,7 @@ const embeddedProduct = computed(() => {
         return product;
     }
 
-    const productHasDescription = product.description.trim().length > 0;
-    if (product.images.length > 0 || (hasDescription.value && productHasDescription)) {
+    if (getSingleFormStepReason(webshop.value, product)) {
         return null;
     }
     return product;
