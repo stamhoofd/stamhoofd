@@ -1,0 +1,218 @@
+{
+  "$id": "urn:f:d:2026:86:2",
+  "$schema": "https://belcotax.be/fiches/schema/1",
+  "additionalProperties": false,
+  "description": "Kinderopvangkosten",
+  "properties": {
+    "$s": {
+      "oneOf": [
+        {
+          "const": "urn:f:d:2026:86:2"
+        },
+        {
+          "const": "urn:f:d:2026:86:2:fr"
+        },
+        {
+          "const": "urn:f:d:2026:86:2:nl"
+        },
+        {
+          "const": "urn:f:d:2026:86:2:de"
+        }
+      ],
+      "title": "Schema van de fiche",
+      "type": "string"
+    },
+    "2010": {
+      "title": "Volgnummer van het attest",
+      "type": "string"
+    },
+    "2031": {
+      "oneOf": [
+        {
+          "const": "0",
+          "title": "niet van toepassing"
+        },
+        {
+          "const": "1",
+          "title": "dat men toegelaten is, erkend, gesubsidieerd, gecontroleerd of onder toezicht staat of een kwaliteitslabel ontvangen van « l'Office de la Naissance et de l'Enfance » of van « Kind & Gezin »\n/ « Opgroeien regie » of van de Duitstalige Gemeenschap"
+        },
+        {
+          "const": "2",
+          "title": "dat men toegelaten is, erkend, gesubsidieerd of gecontroleerd is door de plaatselijke, communautaire of gewestelijke overheidsbesturen"
+        },
+        {
+          "const": "3",
+          "title": "dat men toegelaten is, erkend, gesubsidieerd of gecontroleerd is door de buitenlandse overheidsinstellingen die gevestigd zijn in een andere lidstaat van de Europese Economische Ruimte"
+        },
+        {
+          "const": "4",
+          "title": "dat men een band heeft met een school die gevestigd is in een lidstaat van de Europese\nEconomische Ruimte of met de inrichtende macht van een school die gevestigd is in een lidstaat van\nde Europese Economische Ruimte, overeenkomstig 145/35, par. 2, 3°, van het Wetboek van de\ninkomstenbelastingen"
+        }
+      ],
+      "title": "De instantie of persoon die de opvang verzekert, certificeer",
+      "type": "string"
+    },
+    "2064": {
+      "minimum": 0,
+      "multipleOf": 0.01,
+      "readOnly": true,
+      "title": "Totaal",
+      "type": "number",
+      "unit": "euro"
+    },
+    "2164": {
+      "format": "date",
+      "title": "Begindatum van de geldigheid van hetgeen is gecertificeerd in  a)",
+      "type": "string"
+    },
+    "2171": {
+      "format": "date",
+      "title": "Einddatum van de geldigheid van hetgeen is gecertificeerd in a)",
+      "type": "string"
+    },
+    "2205": {
+      "oneOf": [
+        {
+          "const": "3",
+          "title": "annuleert en vervangt een fiche"
+        }
+      ],
+      "title": "Indien gewijzigd, soort wijziging",
+      "type": "string"
+    },
+    "4101": {
+      "items": {
+        "properties": {
+          "2055": {
+            "format": "date",
+            "title": "Van (begindatum van de periode)",
+            "type": "string"
+          },
+          "2056": {
+            "format": "date",
+            "title": "Tot (einddatum van de periode)",
+            "type": "string"
+          },
+          "2110": {
+            "minimum": 1,
+            "multipleOf": 1,
+            "title": "Aantal dagen",
+            "type": "number",
+            "unit": "day"
+          },
+          "2111": {
+            "minimum": 0.01,
+            "multipleOf": 0.01,
+            "title": "Dagtarief",
+            "type": "number",
+            "unit": "euro"
+          },
+          "2060": {
+            "minimum": 0,
+            "multipleOf": 0.01,
+            "not": {
+              "const": 0
+            },
+            "title": "Ontvangen bedrag",
+            "type": "number",
+            "unit": "euro"
+          }
+        },
+        "required": [
+          "2055",
+          "2056",
+          "2060",
+          "2110"
+        ],
+        "type": "object"
+      },
+      "maxItems": 4,
+      "minItems": 1,
+      "title": "Periode",
+      "type": "array",
+      "uniqueItems": false
+    },
+    "5100": {
+      "minimum": 0,
+      "multipleOf": 0.01,
+      "readOnly": true,
+      "title": "Referentiebedrag",
+      "type": "number",
+      "unit": "euro"
+    },
+    "5200": {
+      "minimum": 0,
+      "multipleOf": 0.01,
+      "readOnly": true,
+      "title": "Bedrijfsvoorheffing",
+      "type": "number",
+      "unit": "euro"
+    },
+    "5300": {
+      "minimum": 0,
+      "multipleOf": 0.01,
+      "readOnly": true,
+      "title": "Sociale bijdragen",
+      "type": "number",
+      "unit": "euro"
+    },
+    "b": {
+      "title": "Uw referentie voor de schuldenaar van de uitgaven voor kinderoppas",
+      "type": "string",
+      "entities": [
+        "person"
+      ],
+      "role": "beneficiary",
+      "zoneType": "entity"
+    },
+    "c": {
+      "title": "Uw referentie voor de contactgegevens",
+      "type": "string",
+      "zoneType": "contact"
+    },
+    "certRef": {
+      "title": "Uw referentie voor de certificeringsinstantie van de opvanginstantie",
+      "type": "string",
+      "entities": [
+        "organisation"
+      ],
+      "role": "certificator",
+      "zoneType": "entity"
+    },
+    "childRef": {
+      "title": "Uw referentie voor het kind",
+      "type": "string",
+      "entities": [
+        "person"
+      ],
+      "role": "child",
+      "zoneType": "entity"
+    },
+    "d": {
+      "title": "Uw referentie voor de instantie of de persoon (hierna 'de instantie') die instaat voor de opvang",
+      "type": "string",
+      "entities": [
+        "organisation",
+        "person"
+      ],
+      "role": "debtor",
+      "zoneType": "entity"
+    },
+    "k": {
+      "title": "Uw referentie voor de fiche",
+      "type": "string",
+      "zoneType": "key"
+    }
+  },
+  "required": [
+    "$s",
+    "4101",
+    "b",
+    "c",
+    "childRef",
+    "d",
+    "k"
+  ],
+  "title": "281.86",
+  "type": "object"
+}
