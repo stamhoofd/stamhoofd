@@ -84,6 +84,14 @@ export class FiscalDocumentYearHelper {
     }
 
     /**
+     * FOD publishes the fiche schemas per income year, so a new year is only supported once the backend has them:
+     * keep this in step with FICHE_86_VERSIONS in BelcotaxJsonlService.
+     */
+    isJsonlExportSupported(calendarYear: number): boolean {
+        return calendarYear === 2026;
+    }
+
+    /**
      * Check if the fiscal document XML can be downloaded. It can be downloaded if the fiscal document was created after the max publish date or if now is before the max publish date.
      */
     isAfterDeadline(calendarYear: number): boolean {
