@@ -33,6 +33,7 @@ export * from './addresses/CountryDecoder.js';
 export * from './addresses/Premise.js';
 export * from './addresses/Province.js';
 export * from './addresses/SearchRegions.js';
+export * from './JsonlExport.js';
 export * from './Company.js';
 export * from './DefaultAgeGroup.js';
 export * from './Document.js';
