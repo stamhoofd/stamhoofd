@@ -2,7 +2,7 @@ import { ManyToOneRelation } from '@node/database';
 import { encodeObject } from '@common/encoding';
 import {
     BalanceItem,
-    Document,
+    DocumentTemplate,
     Group,
     Member,
     Organization,
@@ -89,6 +89,8 @@ export const RegistrationService = {
                 type: EmailTemplateType.RegistrationConfirmation,
             });
         }
+
+        await DocumentTemplate.reissueForRegistrations([registration]);
 
         const member = await Member.getByID(registration.memberId);
         if (member) {
@@ -360,7 +362,7 @@ export const RegistrationService = {
 
         await PlatformMembershipService.updateMembershipsForId(registration.memberId);
 
-        await Document.deleteForRegistrations([registration]);
+        await DocumentTemplate.deleteForRegistrations([registration]);
     },
 
     /**
