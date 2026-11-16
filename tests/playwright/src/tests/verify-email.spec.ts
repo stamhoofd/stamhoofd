@@ -207,10 +207,12 @@ async function loginViaUI(page: Page, { email, password }: { email: string; pass
 }
 
 /**
- * Sign in by setting the token in local storage (same as routing.spec.ts).
+ * Sign in by setting the token in local storage (same as routing.spec.ts). The session is
+ * fresh, like the one a login through the form produces: changing the email address is a
+ * credential change and needs a recent authentication.
  */
 async function loginAs({ page, user }: { page: Page; user: User }) {
-    const token = await SessionService.createSession(user);
+    const token = await SessionService.createSession(user, { authenticatedAt: new Date() });
     const tokenString = JSON.stringify(
         new TokenStruct(token).encode({ version: Version }),
     );

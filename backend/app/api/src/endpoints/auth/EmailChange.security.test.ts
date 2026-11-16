@@ -39,6 +39,14 @@ describe('Security.EmailChange', () => {
         vi.restoreAllMocks();
     });
 
+    /**
+     * Changing the email address requires recent authentication, so the session of the
+     * user that asks for the change has to be fresh.
+     */
+    async function createFreshSession(user: User) {
+        return await SessionService.createSession(user, { authenticatedAt: new Date() });
+    }
+
     async function requestEmailChange(
         organization: Organization,
         user: User,
@@ -65,7 +73,7 @@ describe('Security.EmailChange', () => {
         const error = await requestEmailChange(
             organization,
             user,
-            await SessionService.createSession(user),
+            await createFreshSession(user),
             victim.email,
         );
 
@@ -81,7 +89,7 @@ describe('Security.EmailChange', () => {
         await requestEmailChange(
             organization,
             user,
-            await SessionService.createSession(user),
+            await createFreshSession(user),
             'link-only@example.com',
         );
 
@@ -97,6 +105,23 @@ describe('Security.EmailChange', () => {
             { timeout: 5000 },
         );
         expect(email.html).toContain('link only: https://');
+    });
+
+    test('a stale session cannot start an email change', async () => {
+        // A stolen access token stays usable for a long time. Moving the account to an
+        // address of the attacker is a takeover, so it needs the credentials again.
+        const organization = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({ organization, password }).create();
+
+        const error = await requestEmailChange(
+            organization,
+            user,
+            await SessionService.createSession(user),
+            'attacker@example.com',
+        );
+
+        expect(error).toMatchObject({ code: 'require_fresh_auth' });
+        expect(await EmailVerificationCode.where({ userId: user.id })).toHaveLength(0);
     });
 
     describe('nobody changes the address of another user', () => {
@@ -181,7 +206,7 @@ describe('Security.EmailChange', () => {
             const error = await requestEmailChange(
                 organization,
                 user,
-                await SessionService.createSession(user),
+                await createFreshSession(user),
                 'new@example.com',
             );
 

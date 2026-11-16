@@ -70,6 +70,17 @@ export class PatchUserEndpoint extends Endpoint<Params, Query, Body, ResponseBod
             throw Context.auth.notFoundOrNoAccess($t('%DE'));
         }
 
+        // The email address is a credential of its own: whoever controls it can reset the
+        // password. Replacing it needs recent authentication, like the other login methods.
+        // Checked before anything is written, so a stale session changes nothing at all.
+        if (
+            request.body.email &&
+            request.body.email !== editUser.email &&
+            (await Context.auth.canEditUserEmail(editUser))
+        ) {
+            await Context.authenticateFresh({ allowWithoutAccount: true });
+        }
+
         if (await Context.auth.canEditUserName(editUser)) {
             if (editUser.memberId) {
                 const member = await Member.getByID(editUser.memberId);
