@@ -26,7 +26,9 @@
             </template>
         </UContentToc>
         <nav v-if="categories.length" class="docs-article-categories" aria-labelledby="docs-categories-title">
-            <h2 id="docs-categories-title">Alle categorieën</h2>
+            <h2 id="docs-categories-title">
+                Alle categorieën
+            </h2>
             <ul>
                 <li v-for="category in categories" :key="category.path">
                     <NuxtLink :to="`/#categorie-${category.path.split('/').filter(Boolean).join('-')}`">{{ category.title }}</NuxtLink>
