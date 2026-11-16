@@ -1,6 +1,8 @@
 import { Request } from '@node/endpoints';
+import { EmailMocker } from '@stamhoofd/email';
 import {
     AuditLog,
+    EmailTemplateFactory,
     EmailVerificationCode,
     Member,
     MemberFactory,
@@ -13,6 +15,7 @@ import type { Organization } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import {
     AuditLogType,
+    EmailTemplateType,
     LoginProviderType,
     PermissionRole,
     Permissions,
@@ -241,6 +244,40 @@ describe('Endpoint.VerifyEmail', () => {
             (await Token.getByAccessToken((response.body as TokenStruct).accessToken))!.user.id,
         ).toBe(user.id);
         expect((await User.getByID(user.id))!.email).toBe('new@example.com');
+    });
+
+    describe('the address that is left behind is notified', () => {
+        beforeEach(async () => {
+            await new EmailTemplateFactory({
+                type: EmailTemplateType.EmailChangedNotification,
+                html: '<p>moved to {{newEmail}}, was {{email}}</p>',
+                text: 'moved to {{newEmail}}, was {{email}}',
+            }).create();
+        });
+
+        test('the old address learns that the account moved away from it', async () => {
+            // The link only reaches the new mailbox, so this is the only signal the owner of
+            // the old one gets that their account was taken somewhere else.
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                email: 'owner@example.com',
+            }).create();
+
+            await verifyEmail(organization, user, 'moved@example.com');
+
+            const email = await vi.waitFor(
+                async () => {
+                    const sent = (await EmailMocker.transactional.getSucceededEmails()).filter(
+                        (e) => e.to.includes('owner@example.com'),
+                    );
+                    expect(sent).toHaveLength(1);
+                    return sent[0];
+                },
+                { timeout: 5000 },
+            );
+            expect(email.html).toContain('moved to moved@example.com, was owner@example.com');
+        });
     });
 
     test('parallel wrong guesses cannot exceed the maximum number of tries', async () => {
