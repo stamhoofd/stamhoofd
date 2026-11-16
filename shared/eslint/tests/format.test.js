@@ -18,7 +18,8 @@ async function run(cwd, fix = false) {
     }
 }
 
-describe('formatting without semantic linting', () => {
+// Every test spawns ESLint with the full frontend config, which is slow on loaded CI runners.
+describe('formatting without semantic linting', { timeout: 15_000 }, () => {
     let cwd;
 
     beforeEach(async () => {
@@ -38,7 +39,7 @@ describe('formatting without semantic linting', () => {
         expect(result.code, result.stdout + result.stderr).toBe(0);
         expect(await readFile(file, 'utf8')).toBe('const name: number = \'Ada\';\n');
         expect((await run(cwd)).code).toBe(0);
-    }, 15_000);
+    });
 
     it('formats JSX without requiring a project', async () => {
         const file = path.join(cwd, 'example.jsx');
