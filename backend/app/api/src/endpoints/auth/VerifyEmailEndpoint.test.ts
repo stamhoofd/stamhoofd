@@ -3,6 +3,7 @@ import { EmailMocker } from '@stamhoofd/email';
 import {
     AuditLog,
     EmailTemplateFactory,
+    Platform,
     EmailVerificationCode,
     Member,
     MemberFactory,
@@ -250,15 +251,17 @@ describe('Endpoint.VerifyEmail', () => {
         beforeEach(async () => {
             await new EmailTemplateFactory({
                 type: EmailTemplateType.EmailChangedNotification,
-                html: '<p>moved to {{newEmail}}, was {{email}}</p>',
-                text: 'moved to {{newEmail}}, was {{email}}',
+                html: '<p>at {{organizationName}}: moved to {{newEmail}}, was {{email}}</p>',
+                text: 'at {{organizationName}}: moved to {{newEmail}}, was {{email}}',
             }).create();
         });
 
         test('the old address learns that the account moved away from it', async () => {
             // The link only reaches the new mailbox, so this is the only signal the owner of
             // the old one gets that their account was taken somewhere else.
-            const organization = await new OrganizationFactory({}).create();
+            const organization = await new OrganizationFactory({
+                name: 'Toneelgroep De Maan',
+            }).create();
             const user = await new UserFactory({
                 organization,
                 email: 'owner@example.com',
@@ -276,7 +279,9 @@ describe('Endpoint.VerifyEmail', () => {
                 },
                 { timeout: 5000 },
             );
-            expect(email.html).toContain('moved to moved@example.com, was owner@example.com');
+            expect(email.html).toContain(
+                'at Toneelgroep De Maan: moved to moved@example.com, was owner@example.com',
+            );
         });
 
         test('in platform mode, where the request carries no organization', async () => {
@@ -308,8 +313,12 @@ describe('Endpoint.VerifyEmail', () => {
                 },
                 { timeout: 5000 },
             );
+            // Without an organization the name of the platform stands in for it, instead of
+            // the raw {{organizationName}} token ending up in the email
+            const platformName = (await Platform.getSharedPrivateStruct()).config.name;
+            expect(platformName).not.toBe('');
             expect(email.html).toContain(
-                'moved to platform.moved@example.com, was platform.owner@example.com',
+                `at ${platformName}: moved to platform.moved@example.com, was platform.owner@example.com`,
             );
         });
     });
