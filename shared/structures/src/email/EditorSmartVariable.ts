@@ -116,6 +116,10 @@ export class EditorSmartVariable extends AutoEncoder {
                 name: $t('%oc'),
             }),
             EditorSmartVariable.create({
+                id: 'newEmail',
+                name: $t('Nieuw e-mailadres'),
+            }),
+            EditorSmartVariable.create({
                 id: 'fromAddress',
                 name: $t('%od'),
             }),
