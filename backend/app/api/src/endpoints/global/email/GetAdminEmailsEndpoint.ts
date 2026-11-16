@@ -88,6 +88,7 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
                         $in: ids,
                     },
                     status: {
+                        // Drafts of other users are hidden here for convenience, although access is permitted (see canAccessEmail)
                         $neq: EmailStatus.Draft,
                     },
                 });
@@ -106,6 +107,7 @@ export class GetAdminEmailsEndpoint extends Endpoint<Params, Query, Body, Respon
                     $or: [
                         {
                             status: {
+                                // Drafts of other users are hidden here for convenience, although access is permitted (see canAccessEmail)
                                 $neq: EmailStatus.Draft,
                             },
                         },
