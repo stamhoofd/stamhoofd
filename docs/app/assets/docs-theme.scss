@@ -13,7 +13,11 @@
         font-size: 60px;
         font-weight: 700;
         line-height: 1.2;
-        background: linear-gradient(94.7deg, var(--site-primary) 31.34%, var(--site-accent-end) 68.57%);
+        background: linear-gradient(
+            94.7deg,
+            var(--site-primary) 31.34%,
+            var(--site-accent-end) 68.57%
+        );
         background-clip: text;
         color: transparent;
     }
@@ -277,7 +281,9 @@
         }
     }
 
-    .docs-article-categories a { color: var(--ui-text-muted); }
+    .docs-article-categories a {
+        color: var(--ui-text-muted);
+    }
 
     .docs-toc-child-list {
         margin: 0;
@@ -316,7 +322,9 @@
     line-height: 1.6;
     overflow-wrap: anywhere;
 
-    > * { min-width: 0; }
+    > * {
+        min-width: 0;
+    }
 
     > p {
         margin: 8px 0;
@@ -362,14 +370,29 @@
         margin: 20px 0 5px;
         font-size: 40px;
 
-        &:first-child { margin-top: 0; }
-        &:first-child::before { display: none; }
-        &::before { margin-top: 20px; }
+        &:first-child {
+            margin-top: 0;
+        }
+        &:first-child::before {
+            display: none;
+        }
+        &::before {
+            margin-top: 20px;
+        }
     }
-    > h3 { margin: 50px 0 5px; font-size: 22px; }
-    > h4 { margin: 40px 0 5px; font-size: 18px; }
+    > h3 {
+        margin: 50px 0 5px;
+        font-size: 22px;
+    }
+    > h4 {
+        margin: 40px 0 5px;
+        font-size: 18px;
+    }
     > h5,
-    > h6 { margin: 20px 0 5px; font-size: 17px; }
+    > h6 {
+        margin: 20px 0 5px;
+        font-size: 17px;
+    }
 
     > ul,
     > ol {
@@ -382,11 +405,17 @@
             padding-left: 0;
         }
 
-        p { margin: 8px 0; }
+        p {
+            margin: 8px 0;
+        }
     }
 
-    > ul { list-style-type: '\2013  '; }
-    > ol { list-style-type: decimal; }
+    > ul {
+        list-style-type: '\2013  ';
+    }
+    > ol {
+        list-style-type: decimal;
+    }
 
     :where(p, li, td, blockquote) > a {
         color: var(--ui-primary);
@@ -405,7 +434,9 @@
         line-height: inherit;
 
         &::before,
-        &::after { content: none; }
+        &::after {
+            content: none;
+        }
     }
 
     pre {
@@ -449,23 +480,34 @@
 }
 
 @media (max-width: 1300px) {
-    .docs-article-navigation { padding-left: 40px; }
+    .docs-article-navigation {
+        padding-left: 40px;
+    }
 }
 
 @media (max-width: 1200px) {
-    .docs-category li a { padding: 7px 0; }
+    .docs-category li a {
+        padding: 7px 0;
+    }
 }
 
 @media (max-width: 1100px) {
-    .docs-article-layout { grid-template-columns: minmax(0, 1fr) 300px; }
+    .docs-article-layout {
+        grid-template-columns: minmax(0, 1fr) 300px;
+    }
 }
 
 @media (min-width: 1024px) {
-    .docs-toc-chevron { display: none; }
+    .docs-toc-chevron {
+        display: none;
+    }
 }
 
 @media (max-width: 1023px) {
-    .docs-article-layout { display: flex; flex-direction: column; }
+    .docs-article-layout {
+        display: flex;
+        flex-direction: column;
+    }
     .docs-article-navigation {
         position: static;
         width: 100%;
@@ -496,34 +538,66 @@
             overflow-y: auto;
 
             // Anchor scrolling must use the collapsed article position.
-            &[data-state='closed'] { animation: none; }
+            &[data-state='closed'] {
+                animation: none;
+            }
         }
     }
-    .docs-article-categories { display: none; }
+    .docs-article-categories {
+        display: none;
+    }
 }
 
 @media (max-width: 800px) {
-    .docs-home-hero h1 { font-size: 50px; }
-    .docs-home-hero p { font-size: 17px; }
-    .docs-category-grid { grid-template-columns: minmax(0, 1fr); gap: 50px; padding: 0 15px; }
-    .docs-category h2 { font-size: 18px; }
-    .docs-article-header h1 { font-size: 35px; }
-    .docs-prose > h1 { font-size: 35px; }
-    .docs-prose > h2 { font-size: 24px; }
-    .docs-prose > h3 { font-size: 18px; }
-    .docs-prose > h4 { font-size: 16px; }
+    .docs-home-hero h1 {
+        font-size: 50px;
+    }
+    .docs-home-hero p {
+        font-size: 17px;
+    }
+    .docs-category-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 50px;
+        padding: 0 15px;
+    }
+    .docs-category h2 {
+        font-size: 18px;
+    }
+    .docs-article-header h1 {
+        font-size: 35px;
+    }
+    .docs-prose > h1 {
+        font-size: 35px;
+    }
+    .docs-prose > h2 {
+        font-size: 24px;
+    }
+    .docs-prose > h3 {
+        font-size: 18px;
+    }
+    .docs-prose > h4 {
+        font-size: 16px;
+    }
 }
 
 @media (max-width: 600px) {
-    .docs-prose { font-size: 15px; }
+    .docs-prose {
+        font-size: 15px;
+    }
 }
 
 @media (max-width: 500px) {
     .docs-prose {
-        > p { margin: 10px 0; }
-        > h2 { margin-top: 10px; }
+        > p {
+            margin: 10px 0;
+        }
+        > h2 {
+            margin-top: 10px;
+        }
         > ul,
-        > ol { margin: 0; }
+        > ol {
+            margin: 0;
+        }
 
         pre {
             max-height: calc(700px + 30px + 2px);
@@ -531,18 +605,42 @@
             font-size: 13px;
         }
     }
-    .docs-article-layout { padding-top: 0; padding-bottom: 60px; }
+    .docs-article-layout {
+        padding-top: 0;
+        padding-bottom: 60px;
+    }
 }
 
 @media (max-width: 400px) {
-    .docs-home-hero h1 { font-size: 32px; }
-    .docs-home-hero p { font-size: 16px; }
-    .docs-category h2 { font-size: 17px; }
-    .docs-category li a { font-size: 14px; line-height: 1.6; }
-    .docs-article-header h1 { font-size: 32px; }
-    .docs-prose { font-size: 14px; }
-    .docs-prose > h1 { font-size: 32px; }
-    .docs-prose > h2 { font-size: 22px; }
-    .docs-prose > h3 { font-size: 17px; }
-    .docs-prose > h4 { font-size: 15px; }
+    .docs-home-hero h1 {
+        font-size: 32px;
+    }
+    .docs-home-hero p {
+        font-size: 16px;
+    }
+    .docs-category h2 {
+        font-size: 17px;
+    }
+    .docs-category li a {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    .docs-article-header h1 {
+        font-size: 32px;
+    }
+    .docs-prose {
+        font-size: 14px;
+    }
+    .docs-prose > h1 {
+        font-size: 32px;
+    }
+    .docs-prose > h2 {
+        font-size: 22px;
+    }
+    .docs-prose > h3 {
+        font-size: 17px;
+    }
+    .docs-prose > h4 {
+        font-size: 15px;
+    }
 }

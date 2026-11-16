@@ -84,7 +84,9 @@ body {
         width: 24px;
         height: 24px;
 
-        &::before { line-height: 1; }
+        &::before {
+            line-height: 1;
+        }
     }
 
     &:focus-visible {
@@ -108,8 +110,12 @@ body {
         inset: -5px -10px;
     }
 
-    &:hover { color: var(--site-primary); }
-    &:active { opacity: 0.6; }
+    &:hover {
+        color: var(--site-primary);
+    }
+    &:active {
+        opacity: 0.6;
+    }
 }
 
 .site-button {
@@ -122,10 +128,16 @@ body {
     background: #0053ff;
     box-shadow: 0 8px 30px rgb(4 75 255 / 20%);
 
-    > .icon:last-child { margin-right: -5px; }
+    > .icon:last-child {
+        margin-right: -5px;
+    }
 
-    &:hover { background: #0045d6; }
-    &:active { opacity: 0.8; }
+    &:hover {
+        background: #0045d6;
+    }
+    &:active {
+        opacity: 0.8;
+    }
 }
 
 .site-header {
@@ -205,13 +217,21 @@ body {
 }
 
 // Shared app styles dim SVG images; the logo artwork must retain its colors.
-body .site-logo-image img[class] { filter: none; }
+body .site-logo-image img[class] {
+    filter: none;
+}
 
-.site-logo-dark { display: none; }
+.site-logo-dark {
+    display: none;
+}
 
 html.dark {
-    .site-logo-light { display: none; }
-    .site-logo-dark { display: block; }
+    .site-logo-light {
+        display: none;
+    }
+    .site-logo-dark {
+        display: block;
+    }
 }
 
 .site-logo-label {
@@ -298,15 +318,23 @@ html.dark {
 }
 
 @media (max-width: 800px) {
-    .site-header { padding-bottom: 0; }
-    .site-header-bar { padding: 0 20px; }
-    .site-logo-image { width: 30px; }
+    .site-header {
+        padding-bottom: 0;
+    }
+    .site-header-bar {
+        padding: 0 20px;
+    }
+    .site-logo-image {
+        width: 30px;
+    }
     .site-logo-label {
         font-size: 14px;
         color: var(--site-text);
         background: none;
     }
-    .site-header-home .site-logo-label { display: none; }
+    .site-header-home .site-logo-label {
+        display: none;
+    }
     .site-header-actions {
         gap: 8px;
 
@@ -314,34 +342,56 @@ html.dark {
             width: 44px;
             min-height: 44px;
 
-            &::after { content: none; }
-            > span:not(.icon) { display: none; }
+            &::after {
+                content: none;
+            }
+            > span:not(.icon) {
+                display: none;
+            }
         }
     }
-    .site-support { padding: 100px 15px; }
-    .site-support-content {
-        h2 { font-size: 40px; }
-        p { font-size: 17px; }
+    .site-support {
+        padding: 100px 15px;
     }
-    .site-footer { margin-top: 50px; }
+    .site-support-content {
+        h2 {
+            font-size: 40px;
+        }
+        p {
+            font-size: 17px;
+        }
+    }
+    .site-footer {
+        margin-top: 50px;
+    }
     .site-footer-links {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 20px;
         padding: 30px 25px;
 
-        .site-action { justify-content: flex-start; }
+        .site-action {
+            justify-content: flex-start;
+        }
     }
-    .site-footer-copy { padding-top: 100px; }
-    .site-footer-color-mode { top: 40px; }
+    .site-footer-copy {
+        padding-top: 100px;
+    }
+    .site-footer-color-mode {
+        top: 40px;
+    }
 }
 
 @media (max-width: 450px) {
-    .site-action { font-size: 16px; }
+    .site-action {
+        font-size: 16px;
+    }
 }
 
 @media (max-width: 500px) {
-    .site-support { padding: 60px 15px; }
+    .site-support {
+        padding: 60px 15px;
+    }
     .site-footer-links {
         grid-template-columns: 1fr;
         padding: 30px 15px;
@@ -350,8 +400,12 @@ html.dark {
 
 @media (max-width: 400px) {
     .site-support-content {
-        h2 { font-size: 32px; }
-        p { font-size: 16px; }
+        h2 {
+            font-size: 32px;
+        }
+        p {
+            font-size: 16px;
+        }
     }
 }
 
