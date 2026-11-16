@@ -99,6 +99,14 @@ export class MFAToken extends QueryableModel {
     }
 
     /**
+     * Completing a challenge hands out a session, so an outstanding one survives the
+     * removal of the credentials of an account.
+     */
+    static async clearFor(userId: string): Promise<void> {
+        await this.delete().where('userId', userId).delete();
+    }
+
+    /**
      * Remove every expired token. Tokens are also dropped when they are looked up after
      * expiring, but a token that is never used again would stay behind forever.
      */

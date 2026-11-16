@@ -124,6 +124,14 @@ export class EmailVerificationCode extends QueryableModel {
     }
 
     /**
+     * Redeeming a code hands out a session, so an outstanding one survives the removal of
+     * the credentials of an account.
+     */
+    static async clearFor(userId: string): Promise<void> {
+        await this.delete().where('userId', userId).delete();
+    }
+
+    /**
      * Return true if this token is still valid (used for automatic polling in code view)
      */
     static async poll(organizationId: string | null, token: string): Promise<boolean> {

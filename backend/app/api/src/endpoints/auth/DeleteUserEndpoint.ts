@@ -1,9 +1,12 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 
+import { EmailVerificationCode, MFAToken, PasswordToken } from '@stamhoofd/models';
+
 import { getDefaultEmailFrom, sendEmailTemplate } from '../../helpers/EmailBuilder.js';
 import { EmailTemplateType, Recipient } from '@stamhoofd/structures';
 import { Context } from '../../helpers/Context.js';
+import { SessionService } from '../../services/SessionService.js';
 
 type Params = Record<string, never>;
 type Query = undefined;
@@ -26,7 +29,7 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     async handle(_: DecodedRequest<Params, Query, Body>) {
         const organization = await Context.setOptionalOrganizationScope();
-        const { user, token } = await Context.authenticate({ allowWithoutAccount: true });
+        const { user } = await Context.authenticate({ allowWithoutAccount: true });
 
         // This deletes the account of the session, which while impersonating is the
         // administrator's own - never what they meant to do from inside somebody else's
@@ -60,8 +63,18 @@ export class DeleteUserEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         // Soft delete until processed manually
         user.verified = false;
         user.password = null;
+
+        // Without this, hasAccount() stays true and the identity provider can sign the
+        // user back in.
+        if (user.meta) {
+            user.meta.loginProviderIds = new Map();
+        }
         await user.save();
-        await token.delete();
+
+        await SessionService.deleteAllFor({ userId: user.id });
+        await PasswordToken.clearFor(user.id);
+        await EmailVerificationCode.clearFor(user.id);
+        await MFAToken.clearFor(user.id);
 
         return new Response(undefined);
     }
