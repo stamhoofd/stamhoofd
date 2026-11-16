@@ -278,6 +278,40 @@ describe('Endpoint.VerifyEmail', () => {
             );
             expect(email.html).toContain('moved to moved@example.com, was owner@example.com');
         });
+
+        test('in platform mode, where the request carries no organization', async () => {
+            // Platform accounts have no organization of their own and the verification link is
+            // unscoped, so the endpoint sends with organization null: the template is looked up
+            // at platform level and the sender falls back to the platform address.
+            TestUtils.setEnvironment('userMode', 'platform');
+            const user = await new UserFactory({
+                email: 'platform.owner@example.com',
+            }).create();
+            expect(user.organizationId).toBeNull();
+
+            const code = await EmailVerificationCode.createFor(user, 'platform.moved@example.com');
+            await testServer.test(
+                endpoint,
+                Request.buildJson('POST', '/verify-email', STAMHOOFD.domains.api, {
+                    token: code.token,
+                    code: code.code,
+                }),
+            );
+
+            const email = await vi.waitFor(
+                async () => {
+                    const sent = (await EmailMocker.transactional.getSucceededEmails()).filter(
+                        (e) => e.to.includes('platform.owner@example.com'),
+                    );
+                    expect(sent).toHaveLength(1);
+                    return sent[0];
+                },
+                { timeout: 5000 },
+            );
+            expect(email.html).toContain(
+                'moved to platform.moved@example.com, was platform.owner@example.com',
+            );
+        });
     });
 
     test('parallel wrong guesses cannot exceed the maximum number of tries', async () => {
