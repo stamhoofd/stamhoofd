@@ -1567,6 +1567,78 @@ describe('Endpoint.GetMembersEndpoint', () => {
             ]);
         });
 
+        test('Allowed: A platform admin with read access to all organizations can read and filter record answers of unregistered members', async () => {
+            const recordCategory = await new RecordCategoryFactory({
+                records: [
+                    {
+                        type: RecordType.Text,
+                    },
+                ],
+            }).create();
+
+            await initPlatformRecordCategory({ recordCategory });
+            const record = recordCategory.records[0];
+
+            const user = await new UserFactory({
+                globalPermissions: Permissions.create({
+                    level: PermissionLevel.None,
+                    roles: [],
+                    resources: new Map([
+                        [
+                            PermissionsResourceType.OrganizationTags,
+                            new Map([
+                                [
+                                    PermissionsResourceKey.All,
+                                    ResourcePermissions.create({
+                                        level: PermissionLevel.Read,
+                                        accessRights: [],
+                                    }),
+                                ],
+                            ]),
+                        ],
+                    ]),
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+            const member = await new MemberFactory({}).create();
+
+            const value = 'Unregistered answer ' + member.id;
+            const answer = RecordTextAnswer.create({ settings: record });
+            answer.value = value;
+            member.details.recordAnswers.set(record.id, answer);
+            await member.save();
+
+            const request = Request.get({
+                path: baseUrl,
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        details: {
+                            recordAnswers: {
+                                [record.id]: {
+                                    value: {
+                                        $contains: value,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + token.accessToken,
+                },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results.members).toHaveLength(1);
+            expect(response.body.results.members[0].id).toBe(member.id);
+            expect(
+                response.body.results.members[0].details.recordAnswers.get(record.id)?.stringValue,
+            ).toBe(value);
+        });
+
         test('Not allowed: A platform admin cannot filter on record answer if no permission for all members', async () => {
             const resources = new Map();
 

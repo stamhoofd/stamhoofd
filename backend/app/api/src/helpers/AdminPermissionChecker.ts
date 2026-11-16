@@ -2458,7 +2458,7 @@ export class AdminPermissionChecker {
 
         // All member access, means also having access to record categories of non-registered members
         if (this.canAccessAllPlatformMembers(level)) {
-            // needs to be full to also inherit record category access
+            // Intentionally at the requested level: access to all organizations already grants the same level on their record categories through tag inheritance
             return true;
         }
 
