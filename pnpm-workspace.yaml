@@ -66,6 +66,8 @@ overrides:
     '@nuxt/content>zod': '4.6.7'
     'openai>zod': '4.6.7'
     '@anthropic-ai/sdk>zod': '4.6.7'
+    '@modelcontextprotocol/sdk>hono': '4.13.16'
+    '@modelcontextprotocol/sdk>@hono/node-server': '2.1.6'
     '@eslint/config-array>minimatch': '11.0.1'
     '@npmcli/arborist>minimatch': '11.0.1'
     '@npmcli/map-workspaces>minimatch': '11.0.1'
