@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { Cart } from './Cart.js';
 import { CartItem } from './CartItem.js';
+import { Customer } from './Customer.js';
 import {
     CartReservedSeat,
     SeatingPlan,
@@ -113,6 +114,76 @@ describe('Cart.validate', () => {
         expect(() => cart.validate(webshop)).toThrow(
             expect.objectContaining({ code: 'duplicate_uitpas_numbers' }),
         );
+    });
+});
+
+/**
+ * Items with a participant of their own share the same code, so the item to change has to be found by its id
+ */
+describe('Cart.removeItem and Cart.replaceItem with a participant per item', () => {
+    function setup() {
+        const product = Product.create({ name: 'A', enableCustomer: true });
+        const withCustomer = (firstName: string) =>
+            CartItem.create({
+                product,
+                productPrice: product.prices[0],
+                amount: 1,
+                customer: Customer.create({ firstName }),
+            });
+        const first = withCustomer('First');
+        const second = withCustomer('Second');
+        const third = withCustomer('Third');
+        const cart = Cart.create({ items: [first, second, third] });
+        return { cart, first, second, third };
+    }
+
+    const names = (cart: Cart) => cart.items.map((i) => i.customer?.firstName);
+
+    it('removes the chosen item', () => {
+        const { cart, third } = setup();
+        cart.removeItem(third.clone());
+        expect(names(cart)).toEqual(['First', 'Second']);
+    });
+
+    it('replaces the chosen item with its edited copy', () => {
+        const { cart, first, second, third } = setup();
+        const edited = third.clone();
+        edited.customer!.firstName = 'Edited';
+
+        cart.replaceItem(third, edited);
+
+        expect(names(cart)).toEqual(['First', 'Second', 'Edited']);
+        expect(cart.items.map((i) => i.id)).toEqual([first.id, second.id, third.id]);
+    });
+
+    it('still merges an edited item without a participant into an item with the same choices', () => {
+        const option = Option.create({ name: 'Option' });
+        const product = Product.create({
+            name: 'B',
+            optionMenus: [
+                OptionMenu.create({
+                    name: 'Menu',
+                    options: [Option.create({ name: 'Default' }), option],
+                }),
+            ],
+        });
+        const plain = CartItem.createDefault(
+            product,
+            Cart.create({}),
+            Webshop.create({ products: [product] }),
+            { admin: false },
+        );
+        const withOption = plain.clone();
+        withOption.id = 'other';
+        withOption.options[0].option = option;
+        const cart = Cart.create({ items: [withOption, plain] });
+
+        const edited = plain.clone();
+        edited.options[0].option = option;
+        cart.replaceItem(plain, edited);
+
+        expect(cart.items).toEqual([withOption]);
+        expect(withOption.amount).toBe(2);
     });
 });
 

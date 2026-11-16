@@ -81,16 +81,20 @@ export class Cart extends AutoEncoder {
         this.items.push(item);
     }
 
+    /**
+     * Finds the item by its id: items with a participant of their own share the same code. Pass an item of this
+     * cart or a clone of it.
+     */
     removeItem(item: CartItem) {
-        const c = item.code;
-        for (const [index, i] of this.items.entries()) {
-            if (i.code === c) {
-                this.items.splice(index, 1);
-                return;
-            }
+        const index = this.items.findIndex((i) => i.id === item.id);
+        if (index !== -1) {
+            this.items.splice(index, 1);
         }
     }
 
+    /**
+     * Replaces the item with the id of old, or merges item into another item with the same code like addItem
+     */
     replaceItem(old: CartItem, item: CartItem) {
         // First check if code is already used
         const c = item.code;
@@ -106,11 +110,10 @@ export class Cart extends AutoEncoder {
             }
         }
 
-        for (const [index, i] of this.items.entries()) {
-            if (i.code === oldCode) {
-                this.items.splice(index, 1, item);
-                return;
-            }
+        const index = this.items.findIndex((i) => i.id === old.id);
+        if (index !== -1) {
+            this.items.splice(index, 1, item);
+            return;
         }
 
         if (item.amount === 0) {
