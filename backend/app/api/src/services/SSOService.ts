@@ -679,12 +679,7 @@ export class SSOServiceWithSession {
 
             this.service.validateEmail(claims.email);
 
-            // The address is this application's account key: the lookup below selects an
-            // existing account by it, and member sync attaches members to their contact
-            // email. A provider that states it did not verify the address is telling us it
-            // does not vouch for who is behind it, so nothing is left tying this login to
-            // the account it would unlock. A provider that omits the claim says nothing
-            // either way and is left alone.
+            // a provider that explicitly states the email is unverified, is blocked here
             if (claims.email_verified !== undefined && !claims.email_verified) {
                 throw new SimpleError({
                     code: 'invalid_user',
