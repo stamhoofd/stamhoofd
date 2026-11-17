@@ -48,6 +48,10 @@
                     </RadioGroup>
                 </STInputBox>
 
+                <STInputBox v-if="canEditMemberNumber" error-fields="details.memberNumber" :error-box="errors.errorBox" :title="$t('Lidnummer')">
+                    <input v-model.trim="memberNumber" class="input" data-testid="member-number-input" type="text" autocomplete="off" :placeholder="$t('Geen lidnummer')">
+                </STInputBox>
+
                 <template v-if="!member.isNew">
                     <PhoneInput v-if="isPropertyEnabled('phone') || phone" v-model="phone" error-fields="phone" :error-box="errors.errorBox" :title="$t('%2k') + lidSuffix " :validator="validator" :required="isPropertyRequired('phone')" :placeholder="isPropertyRequired('phone', true) ? $t(`%fP`): $t(`%fQ`)" />
                     <EmailInput v-if="(isPropertyEnabled('emailAddress') || email) && (!isPropertyEnabled('birthDay') || birthDay)" v-model="email" :required="isPropertyRequired('emailAddress')" :title="$t(`%1FK`) + lidSuffix " :placeholder="isPropertyRequired('emailAddress', true) ? $t(`%fP`): $t(`%fQ`)" :validator="validator" :disabled="!canEditEmails">
@@ -106,6 +110,7 @@
 </template>
 
 <script setup lang="ts">
+import { useFeatureFlag } from '#hooks/useFeatureFlag.ts';
 import { useShowMemberLanguage } from '#members/hooks/useShowMemberLanguage.ts';
 import { SimpleError, SimpleErrors } from '@common/errors';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
@@ -152,6 +157,13 @@ const isAdmin = app === 'dashboard' || app === 'admin';
 const showLanguage = useShowMemberLanguage(computed(() => props.member));
 const availableLanguages = I18nController.shared.availableLanguages;
 const canEditEmails = useCanEditEmails(props.member);
+const getFeatureFlag = useFeatureFlag();
+const canEditMemberNumber = computed(() => isAdmin && getFeatureFlag('edit-member-number'));
+
+const memberNumber = computed({
+    get: () => props.member.patchedMember.details.memberNumber ?? '',
+    set: (value: string) => props.member.addDetailsPatch({ memberNumber: value || null }),
+});
 
 const language = computed({
     get: () => props.member.patchedMember.details.language,

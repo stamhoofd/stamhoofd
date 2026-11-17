@@ -1,5 +1,7 @@
+import { OrganizationPrivateMetaData, Platform } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 import { expect, test } from 'vitest';
+import { userEvent } from 'vitest/browser';
 import { render } from 'vitest-browser-vue';
 import Checkbox from '#inputs/Checkbox.vue';
 import STListItem from '#layout/STListItem.vue';
@@ -11,11 +13,12 @@ import type { TaxCertificateMemberOptions } from '../../testing/createTaxCertifi
 import { createTaxCertificateMember } from '../../testing/createTaxCertificateMember';
 import EditMemberGeneralBox from './EditMemberGeneralBox.vue';
 
-function renderBox(options: TaxCertificateMemberOptions = {}) {
+function renderBox(options: TaxCertificateMemberOptions & { featureFlags?: string[]; app?: string } = {}) {
     const { member, organization } = createTaxCertificateMember(options);
     organization.language = Language.Dutch;
+    organization.privateMeta = OrganizationPrivateMetaData.create({ featureFlags: options.featureFlags ?? [] });
 
-    return render(EditMemberGeneralBox, {
+    render(EditMemberGeneralBox, {
         props: {
             member,
             validator: new Validator(),
@@ -36,9 +39,10 @@ function renderBox(options: TaxCertificateMemberOptions = {}) {
                         hasPlatformFullAccess: () => true,
                     },
                     organization,
+                    platform: Platform.create({}),
                     user: null,
                 },
-                stamhoofd_app: 'dashboard',
+                stamhoofd_app: options.app ?? 'dashboard',
             },
             config: {
                 globalProperties: {
@@ -52,6 +56,12 @@ function renderBox(options: TaxCertificateMemberOptions = {}) {
             },
         },
     });
+
+    return { member };
+}
+
+function memberNumberInput(): HTMLInputElement | null {
+    return document.querySelector<HTMLInputElement>('input[data-testid="member-number-input"]');
 }
 
 function nationalRegisterNumberInput(): HTMLInputElement | null {
@@ -80,4 +90,34 @@ test('does not ask the number of a new member yet', () => {
     renderBox({ taxCertificates: false, nationalRegisterNumberEnabled: true, isNew: true });
 
     expect(nationalRegisterNumberInput()).toBeNull();
+});
+
+test('hides the member number without the feature flag', () => {
+    renderBox();
+
+    expect(memberNumberInput()).toBeNull();
+});
+
+test('hides the member number for members editing their own data', () => {
+    renderBox({ featureFlags: ['edit-member-number'], app: 'registration' });
+
+    expect(memberNumberInput()).toBeNull();
+});
+
+test('admins can set a member number when the member has none', async () => {
+    const { member } = renderBox({ featureFlags: ['edit-member-number'] });
+
+    const input = memberNumberInput()!;
+    expect(input.value).toBe('');
+
+    await userEvent.fill(input, ' 12345 ');
+    expect(member.patchedMember.details.memberNumber).toBe('12345');
+});
+
+test('clearing the member number removes it', async () => {
+    const { member } = renderBox({ featureFlags: ['edit-member-number'] });
+    member.addDetailsPatch({ memberNumber: '12345' });
+
+    await userEvent.clear(memberNumberInput()!);
+    expect(member.patchedMember.details.memberNumber).toBeNull();
 });

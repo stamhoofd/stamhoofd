@@ -181,6 +181,18 @@
                     {{ $t('%Zdl') }}
                 </p>
             </STListItem>
+
+            <STListItem v-if="STAMHOOFD.userMode === 'organization' && !organization.isSGVSyncOrganization" :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox :model-value="getFeatureFlag('edit-member-number')" @update:model-value="setFeatureFlag('edit-member-number', !!$event)" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Lidnummers manueel aanpassen') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Beheerders kunnen het lidnummer van een lid instellen of wijzigen, ook als het lid nog geen lidnummer heeft.') }}
+                </p>
+            </STListItem>
         </STList>
 
         <div v-if="isStamhoofd" key="stamhoofd-settings" class="container">
