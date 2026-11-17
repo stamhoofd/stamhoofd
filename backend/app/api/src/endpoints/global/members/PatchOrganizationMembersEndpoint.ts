@@ -74,17 +74,19 @@ type Query = undefined;
 type Body = PatchableArrayAutoEncoder<MemberWithRegistrationsBlob>;
 type ResponseBody = MembersBlob;
 
+const MINUTES = 60 * 1000;
+const HOURS = 60 * MINUTES;
+
 export const securityCodeLimiter = new RateLimiter({
     limits: [
         {
-            // Max 5 per 15 minutes (this makes sure accidental enters block maximum 15 minutes and not the whole day)
+            // this makes sure accidental enters block maximum 15 minutes and not the whole day
             limit: 5,
-            duration: 15 * 60 * 1000 * 60,
+            duration: 15 * MINUTES,
         },
         {
-            // Max 12 a day
             limit: 12,
-            duration: 24 * 60 * 1000 * 60,
+            duration: 24 * HOURS,
         },
     ],
 });
@@ -94,17 +96,17 @@ export const duplicateCheckLimiter = new RateLimiter({
         {
             // Max 5 requests per 5 minutes
             limit: 5,
-            duration: 15 * 60 * 1000,
+            duration: 5 * MINUTES,
         },
         {
             // Max 10 requests per 10 minutes
             limit: 10,
-            duration: 15 * 60 * 1000,
+            duration: 10 * MINUTES,
         },
         {
             // Max 15 requests per day
             limit: 15,
-            duration: 24 * 60 * 60 * 1000,
+            duration: 24 * HOURS,
         },
     ],
 });
