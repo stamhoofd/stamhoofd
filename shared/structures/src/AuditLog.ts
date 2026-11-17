@@ -107,6 +107,10 @@ export enum AuditLogType {
     UserTwoFactorMethodDeleted = 'UserTwoFactorMethodDeleted',
     UserRecoveryCodesRegenerated = 'UserRecoveryCodesRegenerated',
 
+    // Data retention
+    DataRetentionPolicyChanged = 'DataRetentionPolicyChanged',
+    DataRetentionPendingChangeCancelled = 'DataRetentionPendingChangeCancelled',
+
     // Impersonation
     UserImpersonated = 'UserImpersonated',
 
@@ -247,6 +251,11 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return $t('%Zhl');
         case AuditLogType.UserRecoveryCodesRegenerated:
             return $t('%ZgW');
+
+        case AuditLogType.DataRetentionPolicyChanged:
+            return $t('Gewijzigde bewaartermijnen');
+        case AuditLogType.DataRetentionPendingChangeCancelled:
+            return $t('Geannuleerde wijzigingen van bewaartermijnen');
 
         case AuditLogType.UserImpersonated:
             return $t('%Zn3');
@@ -421,6 +430,11 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return ['key', 'trash red stroke'];
         case AuditLogType.UserRecoveryCodesRegenerated:
             return ['recovery-keys', 'sync stroke'];
+
+        case AuditLogType.DataRetentionPolicyChanged:
+            return [`privacy`, `edit stroke`];
+        case AuditLogType.DataRetentionPendingChangeCancelled:
+            return [`privacy`, `canceled red`];
 
         case AuditLogType.UserImpersonated:
             return ['user', 'eye'];
@@ -605,6 +619,15 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
         case AuditLogType.UserRecoveryCodesRegenerated:
             return $t('%ZgU');
 
+        case AuditLogType.DataRetentionPolicyChanged:
+            return $t(
+                '{{u}} wijzigde de bewaartermijn van {{category}} van ‘{{before}}’ naar ‘{{after}}’, geldig vanaf {{from}}',
+            );
+        case AuditLogType.DataRetentionPendingChangeCancelled:
+            return $t(
+                '{{u}} annuleerde de geplande wijziging van de bewaartermijn van {{category}} naar ‘{{after}}’',
+            );
+
         case AuditLogType.UserImpersonated:
             return $t('%Zms');
 
@@ -778,6 +801,11 @@ export function getAuditLogTypeReplacements(type: AuditLogType): string[] {
         case AuditLogType.UserTwoFactorMethodAdded:
         case AuditLogType.UserTwoFactorMethodDeleted:
             return ['u', 'method'];
+
+        case AuditLogType.DataRetentionPolicyChanged:
+            return ['u', 'category', 'before', 'after', 'from'];
+        case AuditLogType.DataRetentionPendingChangeCancelled:
+            return ['u', 'category', 'after'];
 
         case AuditLogType.UserImpersonated:
             return ['u', 'u2'];

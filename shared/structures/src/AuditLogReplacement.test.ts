@@ -37,6 +37,7 @@ describe('AuditLogReplacement', () => {
             'BalanceItemType',
             'CheckoutMethodType',
             'Country',
+            'DataRetentionCategory',
             'DocumentStatus',
             'EmailTemplateType',
             'EventNotificationStatus',
@@ -62,9 +63,9 @@ describe('AuditLogReplacement', () => {
                 type: AuditLogReplacementType.Key,
             }).toString(),
         ).toBe('%mu');
-        // EventNotificationStatus, Language, MFAMethodType and the BalanceItem/VAT enums are not registered as legacy enums
+        // EventNotificationStatus, Language, MFAMethodType, DataRetentionCategory and the BalanceItem/VAT enums are not registered as legacy enums
         expect(AuditLogReplacementDependencies.enumHelpers).toHaveLength(
-            getRegisteredAuditLogEnums().length - 7,
+            getRegisteredAuditLogEnums().length - 8,
         );
         expect(
             AuditLogReplacement.enum(

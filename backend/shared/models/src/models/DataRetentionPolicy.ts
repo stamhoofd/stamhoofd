@@ -116,6 +116,34 @@ export class DataRetentionPolicy extends QueryableModel {
         });
     }
 
+    setTerms(terms: DataRetentionTerms) {
+        this.anonymizeAfterMonths = terms.anonymizeAfterMonths;
+        this.deleteAfterMonths = terms.deleteAfterMonths;
+        this.protectedPeriods = terms.protectedPeriods;
+    }
+
+    /**
+     * Pass null to remove the pending change.
+     */
+    setPendingTerms(pending: { terms: DataRetentionTerms; from: Date } | null) {
+        this.pendingAnonymizeAfterMonths = pending?.terms.anonymizeAfterMonths ?? null;
+        this.pendingDeleteAfterMonths = pending?.terms.deleteAfterMonths ?? null;
+        this.pendingProtectedPeriods = pending?.terms.protectedPeriods ?? null;
+        this.pendingFrom = pending?.from ?? null;
+    }
+
+    static async getFor(
+        tenantId: string,
+        organizationId: string | null,
+        category: DataRetentionCategory,
+    ): Promise<DataRetentionPolicy | null> {
+        return await DataRetentionPolicy.select()
+            .where('tenantId', tenantId)
+            .where('scopeId', organizationId ?? PLATFORM_SCOPE_ID)
+            .where('category', category)
+            .first(false);
+    }
+
     /**
      * The saved policy of this level, or the default policy of this level when nothing was saved yet.
      */
@@ -124,16 +152,17 @@ export class DataRetentionPolicy extends QueryableModel {
         organizationId: string | null,
         category: DataRetentionCategory,
     ): Promise<DataRetentionPolicyStruct> {
-        const model = await DataRetentionPolicy.select()
-            .where('tenantId', tenantId)
-            .where('scopeId', organizationId ?? PLATFORM_SCOPE_ID)
-            .where('category', category)
-            .first(false);
+        const model = await DataRetentionPolicy.getFor(tenantId, organizationId, category);
+        return (
+            model?.getStructure() ??
+            DataRetentionPolicy.getDefaultStructure(organizationId, category)
+        );
+    }
 
-        if (model) {
-            return model.getStructure();
-        }
-
+    static getDefaultStructure(
+        organizationId: string | null,
+        category: DataRetentionCategory,
+    ): DataRetentionPolicyStruct {
         const isTopLevel = organizationId === null || STAMHOOFD.userMode === 'organization';
         return DataRetentionPolicyStruct.createDefault(category, { isTopLevel });
     }

@@ -16,6 +16,7 @@ import {
     VATExcemptReason,
 } from '../BalanceItem.js';
 import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
+import { DataRetentionCategory, getDataRetentionCategoryName } from '../DataRetention.js';
 import { DocumentStatus, DocumentStatusHelper } from '../Document.js';
 import { EmailTemplate, EmailTemplateType } from '../email/EmailTemplate.js';
 import {
@@ -74,6 +75,7 @@ registerAuditLogEnum(
 );
 registerAuditLogEnum('Language', Language, LanguageHelper.getName);
 registerAuditLogEnum('MFAMethodType', MFAMethodType, getMFAMethodTypeName);
+registerAuditLogEnum('DataRetentionCategory', DataRetentionCategory, getDataRetentionCategoryName);
 registerAuditLogEnum('BalanceItemStatus', BalanceItemStatus, getBalanceItemStatusName);
 registerAuditLogEnum('BalanceItemType', BalanceItemType, getBalanceItemTypeName);
 registerAuditLogEnum(
