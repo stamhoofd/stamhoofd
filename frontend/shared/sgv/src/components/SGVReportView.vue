@@ -67,25 +67,11 @@
                 :items="report.skipped.map((x) => x.details.name)"
             />
 
-            <template v-if="report.trial.length > 0">
-                <hr>
-                <h2>{{ $t("Niet gesynchroniseerd: proefperiode") }}</h2>
-                <p>
-                    {{
-                        $t(
-                            "Deze leden zijn nog in hun proefperiode en worden pas naar de groepsadministratie overgezet bij een synchronisatie na het einde van hun proefperiode.",
-                        )
-                    }}
-                </p>
-                <STList>
-                    <STListItem
-                        v-for="member in report.trial"
-                        :key="member.id"
-                    >
-                        {{ member.details.name }}
-                    </STListItem>
-                </STList>
-            </template>
+            <ReportList
+                :title="$t('Niet gesynchroniseerd: proefperiode')"
+                :description="$t('Deze leden zijn nog in hun proefperiode en worden pas naar de groepsadministratie overgezet bij een synchronisatie na het einde van hun proefperiode.')"
+                :items="report.trial.map((x) => x.details.name)"
+            />
 
             <template v-if="report.unmanagedInStamhoofd.length > 0">
                 <hr>
@@ -191,6 +177,7 @@ function getErrorMemberName(error: Error): string | null {
 const ReportList = defineComponent({
     props: {
         title: { type: String, required: true },
+        description: { type: String, default: null },
         items: { type: Array<string>, required: true },
     },
     setup(props) {
@@ -202,6 +189,7 @@ const ReportList = defineComponent({
                     }, [
                         h('hr'),
                         h('h2', props.title),
+                        props.description ? h('p', props.description) : null,
                         h(STList, {}, () =>
                             props.items.map((item, index) =>
                                 h(STListItem, { key: index }, () => item),

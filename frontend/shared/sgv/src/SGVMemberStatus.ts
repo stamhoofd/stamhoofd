@@ -20,9 +20,9 @@ function getActiveMembershipRegistrations(member: MemberWithRegistrationsBlob, o
  * Registrations in their trial period are excluded: the group would pay a membership fee
  * for members who might stop after the trial.
  */
-export function getSGVGroups(member: MemberWithRegistrationsBlob, organization: Organization): Group[] {
+export function getSGVGroups(member: MemberWithRegistrationsBlob, organization: Organization, now = new Date()): Group[] {
     return getActiveMembershipRegistrations(member, organization)
-        .filter(registration => !registration.isTrial)
+        .filter(registration => !registration.isTrialAt(now))
         .map(registration => registration.group);
 }
 

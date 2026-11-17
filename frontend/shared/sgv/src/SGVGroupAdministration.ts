@@ -496,8 +496,9 @@ export class SGVGroupAdministration implements RequestMiddleware {
         try {
             for (const member of this.leden) {
                 const found = matched.find(m => m.sgvId == member.id);
-                // Members in their trial period are not synced, but should not be offered for removal either
-                if (!found && !trialMembers.some(m => member.isEqual(m))) {
+                // Members in their trial period are not synced, but should not be offered for removal either.
+                // Small typos are allowed, like the matching of synced members.
+                if (!found && !trialMembers.some(m => member.isEqual(m) || member.isProbablyEqual(m))) {
                     const lid = await this.fetchLid(member.id);
                     if (isManaged(lid, this.functies)) {
                         // Alleen vragen om leden te schrappen die een vaste functie hebben in de groepsadministratie

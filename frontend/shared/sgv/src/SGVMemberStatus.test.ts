@@ -220,12 +220,12 @@ describe('SGVMemberStatus', () => {
 
     test('excludes groups of registrations in a running trial period', () => {
         const member = createMember({
-            trialUntil: new Date(Date.now() + 1000 * 60 * 60 * 24),
+            trialUntil: new Date(now.getTime() + 1000 * 60 * 60 * 24),
         });
         const organization = createOrganization();
 
-        expect(getSGVGroups(member, organization)).toEqual([]);
-        expect(isOnlyInSGVTrial(member, organization)).toBe(true);
+        expect(getSGVGroups(member, organization, now)).toEqual([]);
+        expect(isOnlyInSGVTrial(member, organization, now)).toBe(true);
 
         member.registrations.push(
             Registration.create({
@@ -235,25 +235,47 @@ describe('SGVMemberStatus', () => {
                     periodId: 'period-id',
                 }),
                 groupPrice: GroupPrice.create({}),
-                registeredAt: new Date(),
+                registeredAt: now,
                 deactivatedAt: null,
             }),
         );
 
-        expect(getSGVGroups(member, organization).map(group => group.id)).toEqual(['other-group']);
-        expect(isOnlyInSGVTrial(member, organization)).toBe(false);
+        expect(getSGVGroups(member, organization, now).map(group => group.id)).toEqual(['other-group']);
+        expect(isOnlyInSGVTrial(member, organization, now)).toBe(false);
+    });
+
+    test('returns ok for synced members that also have a registration in a running trial period', () => {
+        const lastExternalSync = new Date(now.getTime() - 1000 * 60);
+        const member = createMember({ lastExternalSync, updatedAt: lastExternalSync });
+        member.registrations.push(
+            Registration.create({
+                group: Group.create({
+                    id: 'trial-group',
+                    type: GroupType.Membership,
+                    periodId: 'period-id',
+                }),
+                groupPrice: GroupPrice.create({}),
+                registeredAt: new Date(now.getTime() - 1000),
+                deactivatedAt: null,
+                trialUntil: new Date(now.getTime() + 1000 * 60 * 60 * 24),
+            }),
+        );
+
+        expect(getSGVSyncStatus(member, { now, organization: createOrganization() })).toBe(
+            SGVSyncStatus.Ok,
+        );
     });
 
     test('includes groups once the trial period has ended', () => {
         const member = createMember({
-            trialUntil: new Date(Date.now() - 1000),
+            trialUntil: new Date(now.getTime() - 1000),
         });
         const organization = createOrganization();
 
-        expect(getSGVGroups(member, organization).map(group => group.id)).toEqual([
+        expect(getSGVGroups(member, organization, now).map(group => group.id)).toEqual([
             GroupType.Membership,
         ]);
-        expect(isOnlyInSGVTrial(member, organization)).toBe(false);
+        expect(isOnlyInSGVTrial(member, organization, now)).toBe(false);
     });
 
     test('ignores deactivated registrations when determining outdated status', () => {
