@@ -1,8 +1,9 @@
 import { useAuth } from '@stamhoofd/components/hooks/useAuth';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization';
-import { useProvideSGVSyncFactory } from '@stamhoofd/components/members/sgvSync';
-import { RecordWarning, RecordWarningType, SGVSyncStatus, TranslatedString } from '@stamhoofd/structures';
+import { SGVSyncStatus, useProvideSGVSyncFactory } from '@stamhoofd/components/members/sgvSync';
+import { RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
 import { computed, toValue } from 'vue';
+import { getSGVSyncStatus } from './SGVMemberStatus.ts';
 import { isMemberManaged } from './SGVSyncReport.ts';
 import { useSGVSync } from './useSGVSync.ts';
 
@@ -22,7 +23,7 @@ export function useProvideSGVSync() {
                 if (!isMemberManaged(member, organization.value)) {
                     continue;
                 }
-                const status = member.getSGVSyncStatus({ organization: organization.value });
+                const status = getSGVSyncStatus(member, { organization: organization.value });
                 if (status === SGVSyncStatus.Never) {
                     warnings.push(RecordWarning.create({
                         text: TranslatedString.create($t('%1Xa', { action: actionText })),

@@ -67,6 +67,12 @@
                 :items="report.skipped.map((x) => x.details.name)"
             />
 
+            <ReportList
+                :title="$t('Niet gesynchroniseerd: proefperiode')"
+                :description="$t('Deze leden zijn nog in hun proefperiode en worden pas naar de groepsadministratie overgezet bij een synchronisatie na het einde van hun proefperiode.')"
+                :items="report.trial.map((x) => x.details.name)"
+            />
+
             <template v-if="report.unmanagedInStamhoofd.length > 0">
                 <hr>
                 <h2>{{ $t("%1W6") }}</h2>
@@ -171,6 +177,7 @@ function getErrorMemberName(error: Error): string | null {
 const ReportList = defineComponent({
     props: {
         title: { type: String, required: true },
+        description: { type: String, default: null },
         items: { type: Array<string>, required: true },
     },
     setup(props) {
@@ -182,6 +189,7 @@ const ReportList = defineComponent({
                     }, [
                         h('hr'),
                         h('h2', props.title),
+                        props.description ? h('p', props.description) : null,
                         h(STList, {}, () =>
                             props.items.map((item, index) =>
                                 h(STListItem, { key: index }, () => item),

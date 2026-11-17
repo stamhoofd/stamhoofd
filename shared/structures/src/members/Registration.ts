@@ -185,11 +185,13 @@ export class Registration extends AutoEncoder implements ObjectWithRecords {
     }
 
     get isTrial() {
+        return this.isTrialAt(new Date());
+    }
+
+    isTrialAt(date: Date) {
         return (
             this.trialUntil !== null &&
-            (this.deactivatedAt
-                ? this.trialUntil >= this.deactivatedAt
-                : this.trialUntil > new Date())
+            (this.deactivatedAt ? this.trialUntil >= this.deactivatedAt : this.trialUntil > date)
         );
     }
 

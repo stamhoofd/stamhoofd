@@ -25,10 +25,11 @@ import {
     MemberDetails,
     MemberWithRegistrationsBlob, Organization,
     OrganizationPrivateMetaData,
-    SGVSyncStatus,
 } from '@stamhoofd/structures';
+import { SGVSyncStatus } from '@stamhoofd/components/members/sgvSync';
 import { Formatter, sleep } from '@stamhoofd/utility';
 
+import { getSGVGroups, getSGVSyncStatus } from './SGVMemberStatus.ts';
 import type { SGVOAuth } from './SGVOAuth.ts';
 import { SGVOldMemberAction } from './SGVOldMemberAction.ts';
 import type { GroepFunctie, SGVSyncReport } from './SGVSyncReport.ts';
@@ -484,6 +485,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
         present: (options: PushOptions | ComponentWithProperties) => Promise<void>,
         report: SGVSyncReport,
         matched: SGVLidMatch[],
+        trialMembers: MemberWithRegistrationsBlob[],
     ): Promise<{ oldMembers: SGVLid[]; action: SGVOldMemberAction }> {
         // Determine the missing members by checking the matches
         const oldMembers: SGVLid[] = [];
@@ -494,7 +496,9 @@ export class SGVGroupAdministration implements RequestMiddleware {
         try {
             for (const member of this.leden) {
                 const found = matched.find(m => m.sgvId == member.id);
-                if (!found) {
+                // Members in their trial period are not synced, but should not be offered for removal either.
+                // Small typos are allowed, like the matching of synced members.
+                if (!found && !trialMembers.some(m => member.isEqual(m) || member.isProbablyEqual(m))) {
                     const lid = await this.fetchLid(member.id);
                     if (isManaged(lid, this.functies)) {
                         // Alleen vragen om leden te schrappen die een vaste functie hebben in de groepsadministratie
@@ -621,7 +625,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
         for (const match of matched) {
             try {
                 // If updatedAt close to lastsynced at (5 seconds)
-                if (match.stamhoofd.getSGVSyncStatus({
+                if (getSGVSyncStatus(match.stamhoofd, {
                     organization: organization,
                 }) === SGVSyncStatus.Ok) {
                     // report.addWarning(match.stamhoofd.details.firstName+" "+match.stamhoofd.details.lastName+" werd overgeslagen: geen wijzigingen sinds laatste synchronisatie");
@@ -826,9 +830,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
                 match.stamhoofd,
                 lid,
                 this.groupNumber!,
-                match.stamhoofd.getGroups(
-                    this.organizationManager.organization,
-                ),
+                getSGVGroups(match.stamhoofd, this.organizationManager.organization),
                 this.functies,
                 report,
                 withHacks,
@@ -901,7 +903,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
                 functies: [],
             },
             this.groupNumber!,
-            member.getGroups(this.organizationManager.organization),
+            getSGVGroups(member, this.organizationManager.organization),
             this.functies,
             report,
         );

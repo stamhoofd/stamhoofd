@@ -1,3 +1,4 @@
+import { SGVSyncStatus } from '@stamhoofd/components/members/sgvSync';
 import {
     Group,
     GroupPrice,
@@ -11,7 +12,6 @@ import {
     OrganizationType,
     Registration,
     RegistrationPeriod,
-    SGVSyncStatus,
     TranslatedString,
     UmbrellaOrganization,
 } from '@stamhoofd/structures';

@@ -90,6 +90,7 @@ import {
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { SGVGroupAdministration } from '../SGVGroupAdministration';
+import { splitSGVTrialMembers } from '../SGVMemberStatus.ts';
 import { SGVOAuth } from '../SGVOAuth';
 import { SGVSyncReport } from '../SGVSyncReport.ts';
 
@@ -150,17 +151,24 @@ async function sync() {
     try {
         const report = new SGVSyncReport();
         await sgv.downloadAll();
-        const allMembers = await loadOrganizationMembers();
+        const { syncMembers, trialMembers } = splitSGVTrialMembers(
+            await loadOrganizationMembers(),
+            organization.value,
+        );
+        for (const member of trialMembers) {
+            report.markTrial(member);
+        }
         const { matchedMembers, newMembers } = await sgv.matchAndSync(
             present,
             () => toast.hide(),
-            allMembers,
+            syncMembers,
         );
         toast.hide();
         const { oldMembers, action } = await sgv.prepareSync(
             present,
             report,
             matchedMembers,
+            trialMembers,
         );
         const syncToast = new Toast($t('%1Y0'), 'spinner')
             .setProgress(0)
