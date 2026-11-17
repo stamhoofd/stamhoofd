@@ -134,7 +134,7 @@ export class EventNotificationService {
         for (const user of platformAdmins) {
             const p = new AdminPermissionChecker(user, platform);
 
-            if (await p.canReviewEventNotification(notification)) {
+            if (await p.canReceiveEventNotificationReviewEmails(notification)) {
                 recipients.push(
                     Recipient.create({
                         firstName: user.firstName,
