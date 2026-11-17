@@ -1,16 +1,17 @@
-import { useSGVSync } from '@stamhoofd/components/members/sgvSync';
+import { SGVSyncStatus, useSGVSync } from '@stamhoofd/components/members/sgvSync';
 import type { SGVSyncWarning } from '@stamhoofd/components/members/sgvSync';
-import { MemberWithRegistrationsBlob, Organization, RecordWarning, SGVSyncStatus, TranslatedString } from '@stamhoofd/structures';
+import { MemberWithRegistrationsBlob, Organization, RecordWarning, TranslatedString } from '@stamhoofd/structures';
 import { mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { computed, defineComponent, h, ref, shallowRef } from 'vue';
 import { useProvideSGVSync } from './provideSGVSync';
 import { useSGVSync as useSGVSyncImplementation } from './useSGVSync';
 
-const { open, hasFullAccess, isMemberManaged } = vi.hoisted(() => ({
+const { open, hasFullAccess, isMemberManaged, getSGVSyncStatus } = vi.hoisted(() => ({
     open: vi.fn<() => Promise<void>>(),
     hasFullAccess: vi.fn<() => boolean>(),
     isMemberManaged: vi.fn<() => boolean>(),
+    getSGVSyncStatus: vi.fn<() => SGVSyncStatus>(),
 }));
 
 vi.mock('@stamhoofd/components/hooks/useAuth', () => ({
@@ -20,6 +21,7 @@ vi.mock('@stamhoofd/components/hooks/useOrganization', () => ({
     useOrganization: () => ref(null),
 }));
 vi.mock('./SGVSyncReport.ts', () => ({ isMemberManaged }));
+vi.mock('./SGVMemberStatus.ts', () => ({ getSGVSyncStatus }));
 vi.mock('./useSGVSync.ts', () => ({
     useSGVSync: vi.fn(() => ({
         sgvSyncOpen: open,
@@ -30,7 +32,7 @@ vi.mock('./useSGVSync.ts', () => ({
 
 function useTestSync(status: SGVSyncStatus = SGVSyncStatus.Never) {
     const member = MemberWithRegistrationsBlob.create({});
-    vi.spyOn(member, 'getSGVSyncStatus').mockReturnValue(status);
+    getSGVSyncStatus.mockReturnValue(status);
     const organization = shallowRef(Organization.create({}));
     vi.spyOn(organization.value, 'isSGVSyncOrganization', 'get').mockReturnValue(true);
     let sync!: ReturnType<typeof useSGVSync>;

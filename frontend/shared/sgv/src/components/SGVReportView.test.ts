@@ -62,6 +62,7 @@ describe('SGVReportView', () => {
         report.markCreated(created, createSgvMember('Nieuw', 'Lid') as any);
         report.markSynced(synced, createSgvMember('Aangepast', 'Lid') as any);
         report.markSkipped(skipped);
+        report.markTrial(createMember('Proefperiode Lid'));
         report.markDeleted(new SGVLid({
             id: 'deleted',
             firstName: 'Geschrapt',
@@ -105,6 +106,8 @@ describe('SGVReportView', () => {
         expect(text).toContain('Geschrapt Lid');
         expect(text).toContain('Overgeslagen');
         expect(text).toContain('Overgeslagen Lid');
+        expect(text).toContain('Niet gesynchroniseerd: proefperiode');
+        expect(text).toContain('Proefperiode Lid');
         expect(text).toContain($t('%1W6'));
         expect(text).toContain('Leiding Stamhoofd: Leiding');
         expect(text).toContain($t('%1YV'));

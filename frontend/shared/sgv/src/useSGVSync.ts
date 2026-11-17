@@ -2,16 +2,15 @@ import { defineRoute, useNavigate } from '@browser/navigation';
 import { useAuth } from '@stamhoofd/components/hooks/useAuth.ts';
 import { useOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import type { SGVSyncWarning } from '@stamhoofd/components/members/sgvSync';
+import { SGVSyncStatus } from '@stamhoofd/components/members/sgvSync';
 import type {
     MemberWithRegistrationsBlob,
     Organization,
 } from '@stamhoofd/structures';
-import {
-    SGVSyncStatus,
-} from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { ComputedRef, MaybeRefOrGetter } from 'vue';
 import { computed, toValue } from 'vue';
+import { getSGVSyncStatus } from './SGVMemberStatus.ts';
 import { isMemberManaged } from './SGVSyncReport.ts';
 
 enum Routes {
@@ -115,7 +114,7 @@ export function getSGVSyncWarning(
             continue;
         }
 
-        const status = member.getSGVSyncStatus({
+        const status = getSGVSyncStatus(member, {
             organization,
         });
         if (

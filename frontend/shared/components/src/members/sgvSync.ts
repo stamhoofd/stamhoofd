@@ -1,6 +1,14 @@
-import type { MemberWithRegistrationsBlob, Organization, RecordWarning, SGVSyncStatus } from '@stamhoofd/structures';
+import type { MemberWithRegistrationsBlob, Organization, RecordWarning } from '@stamhoofd/structures';
 import type { ComputedRef, InjectionKey, MaybeRefOrGetter } from 'vue';
 import { computed, inject, provide } from 'vue';
+
+/** High-level SGV sync state shown in member lists and used to decide whether attention is needed. */
+export enum SGVSyncStatus {
+    Never = 'never',
+    Outdated = 'outdated',
+    Changed = 'changed',
+    Ok = 'ok',
+}
 
 export type SGVSyncWarning = {
     status:

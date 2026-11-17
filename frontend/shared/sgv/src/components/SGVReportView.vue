@@ -67,6 +67,26 @@
                 :items="report.skipped.map((x) => x.details.name)"
             />
 
+            <template v-if="report.trial.length > 0">
+                <hr>
+                <h2>{{ $t("Niet gesynchroniseerd: proefperiode") }}</h2>
+                <p>
+                    {{
+                        $t(
+                            "Deze leden zijn nog in hun proefperiode en worden pas naar de groepsadministratie overgezet bij een synchronisatie na het einde van hun proefperiode.",
+                        )
+                    }}
+                </p>
+                <STList>
+                    <STListItem
+                        v-for="member in report.trial"
+                        :key="member.id"
+                    >
+                        {{ member.details.name }}
+                    </STListItem>
+                </STList>
+            </template>
+
             <template v-if="report.unmanagedInStamhoofd.length > 0">
                 <hr>
                 <h2>{{ $t("%1W6") }}</h2>

@@ -18,6 +18,7 @@ import {
     ParentType,
 } from '@stamhoofd/structures';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
+import { getSGVGroups } from './SGVMemberStatus.ts';
 
 export type GroepFunctie = {
     id: string;
@@ -68,6 +69,7 @@ export class SGVSyncReport {
     deleted: SGVLid[] = [];
     imported: MemberWithRegistrationsBlob[] = [];
     skipped: MemberWithRegistrationsBlob[] = [];
+    trial: MemberWithRegistrationsBlob[] = [];
 
     addWarning(text: string) {
         this.warnings.push(text);
@@ -91,6 +93,10 @@ export class SGVSyncReport {
 
     markSkipped(member: MemberWithRegistrationsBlob) {
         this.skipped.push(member);
+    }
+
+    markTrial(member: MemberWithRegistrationsBlob) {
+        this.trial.push(member);
     }
 
     markImported(member: MemberWithRegistrationsBlob) {
@@ -144,7 +150,7 @@ export class SGVSyncReport {
                     adressen: [],
                     contacten: [],
                     functies: [],
-                }, '1234', member.getGroups(organization), getDefaultGroepFuncties());
+                }, '1234', getSGVGroups(member, organization), getDefaultGroepFuncties());
 
                 if (post.functies) {
                     for (const functie of post.functies) {
@@ -472,7 +478,7 @@ export function isMemberManaged(member: MemberWithRegistrationsBlob, organizatio
             adressen: [],
             contacten: [],
             functies: [],
-        }, '1234', member.getGroups(organization), getDefaultGroepFuncties());
+        }, '1234', getSGVGroups(member, organization), getDefaultGroepFuncties());
 
         if (post.functies.length > 0) {
             return true;
