@@ -22,11 +22,7 @@ import {
     mysqlInternalPort,
     rustfsInternalApiPort,
 } from '../config/shared-service-config.js';
-import {
-    buildCaddyServiceProfile,
-    buildSharedServiceProfile,
-    caddyProtocols,
-} from '../config/shared-service-profile.js';
+import { buildSharedServiceProfile } from '../config/shared-service-profile.js';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { CaddyService } from './definitions/caddy-service.js';
 import { CorednsService } from './definitions/coredns-service.js';
@@ -203,6 +199,7 @@ describe('shared service Docker args', () => {
 
         expect(args).toContain(localhostPortMapping(80, 80));
         expect(args).toContain(localhostPortMapping(443, 443));
+        expect(args).toContain(`${localhostPortMapping(443, 443)}/udp`);
         expect(args).toContain(localhostPortMapping(caddyAdminPort, caddyAdminPort));
         expect(args).not.toContain('--network');
     });
@@ -285,6 +282,7 @@ describe('CoreDNS Corefile', () => {
             return await fs.readFile(prepared.corefile, 'utf-8');
         } finally {
             vi.unstubAllEnvs();
+            await fs.rm(generatedDir, { recursive: true, force: true });
         }
     }
 
@@ -294,6 +292,16 @@ describe('CoreDNS Corefile', () => {
         expect(corefile).toContain('IN A 127.0.0.1');
         expect(corefile).toContain('IN AAAA ::1');
         expect(corefile).toContain('template IN ANY');
+    });
+
+    it('puts the catch-all after the address templates', async () => {
+        // The template plugin answers with the first template that matches, so a catch-all placed
+        // first would turn every A and AAAA lookup into an empty answer.
+        for (const corefile of [await corefileFor(), await corefileFor('192.168.1.7')]) {
+            const catchAll = corefile.indexOf('template IN ANY');
+            expect(catchAll).toBeGreaterThan(corefile.indexOf('template IN A '));
+            expect(catchAll).toBeGreaterThan(corefile.lastIndexOf('template IN AAAA'));
+        }
     });
 
     it('answers the zone with the public IP and keeps other types out of SERVFAIL', async () => {
@@ -314,15 +322,5 @@ describe('CoreDNS Corefile', () => {
         for (const corefile of [await corefileFor(), await corefileFor('192.168.1.7')]) {
             expect(corefile).toMatch(/authority "\{\{ \.Zone \}\} \d+ IN SOA /);
         }
-    });
-});
-
-describe('Caddy protocols', () => {
-    it('leaves HTTP/3 out when only TCP is published', () => {
-        expect(caddyProtocols(buildCaddyServiceProfile('darwin'))).toEqual(['h1', 'h2']);
-    });
-
-    it('keeps the Caddy default in host network mode', () => {
-        expect(caddyProtocols(buildCaddyServiceProfile('linux'))).toBeUndefined();
     });
 });

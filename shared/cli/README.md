@@ -578,14 +578,17 @@ PUBLIC_IP=192.168.1.7 stam dev all
 CoreDNS then answers the whole `.stamhoofd` zone with that address and forwards everything else, and
 Caddy and the shared services listen on `0.0.0.0` instead of localhost.
 
+This only works on macOS. On Linux, Caddy runs in host network mode on `127.0.0.1` and CoreDNS
+listens on port 1053, so a device on the network can reach neither.
+
 On the device:
 
 - Point its DNS at your machine. Android has no DNS-only field, so switch the Wi-Fi network to a
   static IP and use your machine's IP as DNS 1. Leave DNS 2 empty: a public resolver there can be
   picked for a query and never resolves `.stamhoofd`. Make sure Private DNS is off, because
   DNS-over-TLS to a provider bypasses CoreDNS.
-- Install the Caddy root CA from `~/Library/Application Support/Caddy/pki/authorities/local/root.crt`
-  (`$XDG_DATA_HOME/caddy/...` on Linux), or every request fails on an untrusted certificate. Android
+- Install the Caddy root CA from `~/Library/Application Support/Caddy/pki/authorities/local/root.crt`,
+  or every request fails on an untrusted certificate. Android
   only installs a CA through Settings, not by opening the file. Firefox for Android ignores the
   system CA store entirely and needs an exception accepted per host, including the API and files
   domains, because `fetch` cannot prompt for one.
@@ -595,8 +598,8 @@ On the device:
   `ERR_TOO_MANY_RETRIES`. Nothing leaves the device, so a packet capture on the host stays empty and
   it looks like a DNS or network fault; `chrome://net-export` on the device names the real cause.
 
-The IP usually comes from DHCP, so after a reconnect check it again (`ipconfig getifaddr en0` on
-macOS) and restart with the new value.
+The IP usually comes from DHCP, so after a reconnect check it again (`ipconfig getifaddr en0`) and
+restart with the new value.
 
 ### Shared Services
 

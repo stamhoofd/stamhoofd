@@ -18,7 +18,6 @@ import type { SharedServiceProfile } from '../../config/shared-service-profile.j
 import {
     buildCaddyServiceProfile,
     buildSharedServiceProfile,
-    caddyProtocols,
     SharedServiceCaddyRunMode,
 } from '../../config/shared-service-profile.js';
 import type { CliContext } from '../../context/create-context.js';
@@ -205,7 +204,6 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
     private static async writeRuntimeConfig(context: CliContext): Promise<string> {
         const profile = buildSharedServiceProfile(await docker.getContainerRuntime());
         return await writeCaddyConfig(context, {
-            protocols: caddyProtocols(profile),
             httpPort: profile.caddyHttpListenPort,
             httpsPort: profile.caddyHttpsListenPort,
             disableRedirects: profile.needsPrivilegedRedirects,
@@ -232,6 +230,10 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
                 localhostPortMapping(profile.caddyHttpHostPort, profile.caddyHttpListenPort),
                 '-p',
                 localhostPortMapping(profile.caddyHttpsHostPort, profile.caddyHttpsListenPort),
+                // Caddy advertises HTTP/3 over Alt-Svc. Without the UDP port, a browser that takes
+                // the offer retries QUIC against a closed port until it fails the navigation.
+                '-p',
+                `${localhostPortMapping(profile.caddyHttpsHostPort, profile.caddyHttpsListenPort)}/udp`,
                 '-p',
                 localhostPortMapping(caddyAdminPort, caddyAdminPort),
                 '-v',

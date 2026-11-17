@@ -67,21 +67,6 @@ export function buildCaddyServiceProfile(
     };
 }
 
-/**
- * The HTTP protocols Caddy may serve, or undefined to leave it at its own default.
- *
- * Bridge mode publishes the HTTPS port over TCP only, so an advertised HTTP/3 endpoint is
- * unreachable: a browser that takes the Alt-Svc offer (Chrome does, eagerly) talks QUIC to a UDP
- * port nothing listens on and retries until it fails the navigation. Host network mode has no port
- * mapping to leave out, so h3 stays enabled there.
- */
-export function caddyProtocols(profile: CaddyServiceProfile): string[] | undefined {
-    if (profile.caddyRunMode === SharedServiceCaddyRunMode.Bridge) {
-        return ['h1', 'h2'];
-    }
-    return undefined;
-}
-
 export function buildSharedServiceProfile(
     runtime: ContainerRuntime,
     platform: NodeJS.Platform = process.platform,
