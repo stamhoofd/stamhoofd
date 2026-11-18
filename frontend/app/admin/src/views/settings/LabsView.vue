@@ -131,6 +131,10 @@
             {{ $t('%Zui') }}
         </Checkbox>
 
+        <Checkbox :model-value="getFeatureFlag('belcotax-api')" @update:model-value="setFeatureFlag('belcotax-api', !!$event)">
+            {{ $t('Belcotax API (fiscale attesten rechtstreeks doorsturen, in test)') }}
+        </Checkbox>
+
         <Checkbox v-model="onlyAdminCanChangeOrganizationName">
             {{ $t('%Zyq') }}
         </Checkbox>
