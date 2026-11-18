@@ -146,21 +146,29 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
     wrapper?: WrapperFilter;
     allowCreation?: boolean;
 
-    constructor(data: { builders: UIFilterBuilder[]; name?: string; description?: string; wrapFilter?: UIFilterWrapper | null; wrapper?: WrapperFilter; allowCreation?: boolean }) {
+    /**
+     * How filters added to a new group are combined. Use Or when the subfilters exclude each other.
+     */
+    defaultMode: GroupUIFilterMode;
+
+    constructor(data: { builders: UIFilterBuilder[]; name?: string; description?: string; wrapFilter?: UIFilterWrapper | null; wrapper?: WrapperFilter; allowCreation?: boolean; defaultMode?: GroupUIFilterMode }) {
         this.builders = data.builders;
         this.name = data.name ?? this.name;
         this.description = data.description ?? this.description;
         this.wrapFilter = data.wrapFilter ?? null;
         this.wrapper = data.wrapper;
         this.allowCreation = data.allowCreation;
+        this.defaultMode = data.defaultMode ?? GroupUIFilterMode.And;
 
         markRaw(this);
     }
 
     create(options: { isInverted?: boolean } = {}): GroupUIFilter {
-        return new GroupUIFilter({
+        const filter = new GroupUIFilter({
             builder: this,
         }, options);
+        filter.mode = this.defaultMode;
+        return filter;
     }
 
     fromFilter(filter: StamhoofdFilter): UIFilter | null {
@@ -171,7 +179,7 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
             filter = result.markerValue ?? [];
         }
 
-        let mode = GroupUIFilterMode.And;
+        let mode = this.defaultMode;
         if (typeof filter === 'object' && filter !== null && ('$and' in filter)) {
             filter = filter.$and;
             mode = GroupUIFilterMode.And;

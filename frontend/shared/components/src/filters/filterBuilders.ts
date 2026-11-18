@@ -3,13 +3,13 @@ import { useEventTypes } from '#hooks/useEventTypes.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform, WrapperFilter } from '@stamhoofd/structures';
-import { AuditLogType, BalanceItemRelationType, BalanceItemStatus, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, getAuditLogTypeName, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
+import { AuditLogType, AuditLogTypeCategory, BalanceItemRelationType, BalanceItemStatus, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, getAuditLogTypeCategory, getAuditLogTypeCategoryName, getAuditLogTypeName, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { MaybeRefOrGetter } from 'vue';
 import { computed, toValue } from 'vue';
 import { DateFilterBuilder } from './DateUIFilter';
 import { getFilterBuildersForRecordCategories } from './filter-builders/record-categories';
-import { GroupUIFilterBuilder } from './GroupUIFilter';
+import { GroupUIFilterBuilder, GroupUIFilterMode } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 import { NumberFilterFormat } from './NumberFilterFormat';
 import { NumberFilterBuilder } from './NumberUIFilter';
@@ -672,19 +672,30 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
 export function useAuditLogUIFilterBuilders() {
     const all: UIFilterBuilder<UIFilter>[] = [];
 
-    const options: MultipleChoiceUIFilterOption[] = Object.values(AuditLogType).map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type), type));
+    const categoryFilters = Object.values(AuditLogTypeCategory).map((category) => {
+        const types = Object.values(AuditLogType).filter(type => getAuditLogTypeCategory(type) === category);
 
-    const typeFilter = new MultipleChoiceFilterBuilder({
-        name: $t('%1B'),
-        options,
-        wrapper: {
-            type: {
-                $in: FilterWrapperMarker,
+        return new MultipleChoiceFilterBuilder({
+            name: getAuditLogTypeCategoryName(category),
+            options: types.map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type), type)),
+            wrapper: {
+                type: {
+                    $in: FilterWrapperMarker,
+                },
             },
-        },
-    });
+            multipleChoiceConfiguration: {
+                showOptionSelectAll: types.length > 1,
+            },
+        });
+    }).filter(builder => builder.multipleChoiceOptions.length > 0);
 
-    all.push(typeFilter);
+    // A log has a single type, so the category filters are combined with "or" by default
+    all.push(new GroupUIFilterBuilder({
+        name: $t('%1B'),
+        description: $t('Filter op het soort gebeurtenis, per categorie'),
+        builders: categoryFilters,
+        defaultMode: GroupUIFilterMode.Or,
+    }));
 
     all.unshift(
         new GroupUIFilterBuilder({
