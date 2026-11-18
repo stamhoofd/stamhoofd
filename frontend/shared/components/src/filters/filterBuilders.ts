@@ -670,9 +670,7 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
 
 // Events
 export function useAuditLogUIFilterBuilders() {
-    const all: UIFilterBuilder<UIFilter>[] = [];
-
-    const categoryFilters = Object.values(AuditLogTypeCategory).map((category) => {
+    const all: UIFilterBuilder<UIFilter>[] = Object.values(AuditLogTypeCategory).map((category) => {
         const types = Object.values(AuditLogType).filter(type => getAuditLogTypeCategory(type) === category);
 
         return new MultipleChoiceFilterBuilder({
@@ -687,19 +685,12 @@ export function useAuditLogUIFilterBuilders() {
                 showOptionSelectAll: types.length > 1,
             },
         });
-    }).filter(builder => builder.multipleChoiceOptions.length > 0);
-
-    // A log has a single type, so the category filters are combined with "or" by default
-    all.push(new GroupUIFilterBuilder({
-        name: $t('%1B'),
-        description: $t('Filter op het soort gebeurtenis, per categorie'),
-        builders: categoryFilters,
-        defaultMode: GroupUIFilterMode.Or,
-    }));
+    });
 
     all.unshift(
         new GroupUIFilterBuilder({
             builders: all,
+            defaultMode: GroupUIFilterMode.Or,
         }),
     );
 

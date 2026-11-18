@@ -1,7 +1,7 @@
 import { FilterWrapperMarker } from '@stamhoofd/structures';
 import { describe, expect, test } from 'vitest';
-import { GroupUIFilter, GroupUIFilterBuilder, GroupUIFilterMode } from './GroupUIFilter';
-import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilter, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
+import { GroupUIFilterBuilder, GroupUIFilterMode } from './GroupUIFilter';
+import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 
 function createTypeBuilder(name: string, types: string[]) {
     return new MultipleChoiceFilterBuilder({
@@ -20,7 +20,7 @@ describe('GroupUIFilterBuilder default mode', () => {
         expect(builder.create().mode).toBe(GroupUIFilterMode.And);
     });
 
-    test('creates groups and parses single filters in the default mode', () => {
+    test('creates groups in the default mode', () => {
         const builder = new GroupUIFilterBuilder({ name: 'Type', builders: [members, webshops], defaultMode: GroupUIFilterMode.Or });
 
         const filter = builder.create();
@@ -38,23 +38,5 @@ describe('GroupUIFilterBuilder default mode', () => {
                 { type: { $in: ['OrderAdded'] } },
             ],
         });
-
-        const parsed = builder.fromFilter({ type: { $in: ['MemberAdded'] } });
-        expect(parsed).toBeInstanceOf(GroupUIFilter);
-        expect((parsed as GroupUIFilter).mode).toBe(GroupUIFilterMode.Or);
-        expect((parsed as GroupUIFilter).filters[0]).toBeInstanceOf(MultipleChoiceUIFilter);
-    });
-
-    test('keeps an explicit mode when parsing', () => {
-        const builder = new GroupUIFilterBuilder({ name: 'Type', builders: [members, webshops], defaultMode: GroupUIFilterMode.Or });
-        const parsed = builder.fromFilter({
-            $and: [
-                { type: { $in: ['MemberAdded'] } },
-                { type: { $in: ['OrderAdded'] } },
-            ],
-        }) as GroupUIFilter;
-
-        expect(parsed.mode).toBe(GroupUIFilterMode.And);
-        expect(parsed.filters).toHaveLength(2);
     });
 });

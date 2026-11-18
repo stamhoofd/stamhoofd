@@ -147,7 +147,8 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
     allowCreation?: boolean;
 
     /**
-     * How filters added to a new group are combined. Use Or when the subfilters exclude each other.
+     * How filters added to a new group are combined. Use Or when the subfilters exclude each other,
+     * such as filters on different values of the same field.
      */
     defaultMode: GroupUIFilterMode;
 
@@ -179,7 +180,7 @@ export class GroupUIFilterBuilder implements UIFilterBuilder<GroupUIFilter> {
             filter = result.markerValue ?? [];
         }
 
-        let mode = this.defaultMode;
+        let mode = GroupUIFilterMode.And;
         if (typeof filter === 'object' && filter !== null && ('$and' in filter)) {
             filter = filter.$and;
             mode = GroupUIFilterMode.And;

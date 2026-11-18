@@ -4,18 +4,17 @@ import { useAuditLogUIFilterBuilders } from './filterBuilders';
 import { GroupUIFilterBuilder, GroupUIFilterMode } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder } from './MultipleChoiceUIFilter';
 
-function getTypeBuilder() {
-    const typeBuilder = useAuditLogUIFilterBuilders()[1];
-    if (!(typeBuilder instanceof GroupUIFilterBuilder)) {
-        throw new Error('Expected the type filter to be a group of category filters');
+function getBuilders() {
+    const [root, ...categoryBuilders] = useAuditLogUIFilterBuilders();
+    if (!(root instanceof GroupUIFilterBuilder) || !categoryBuilders.every(b => b instanceof MultipleChoiceFilterBuilder)) {
+        throw new Error('Expected a root group with one multiple choice filter per category');
     }
-    return typeBuilder;
+    return { root, categoryBuilders: categoryBuilders as MultipleChoiceFilterBuilder[] };
 }
 
-describe('audit log type filter', () => {
+describe('audit log type filters', () => {
     test('has one filter per category that together contain every type once', () => {
-        const typeBuilder = getTypeBuilder();
-        const categoryBuilders = typeBuilder.builders as MultipleChoiceFilterBuilder[];
+        const { categoryBuilders } = getBuilders();
 
         expect(categoryBuilders.map(b => b.name)).toEqual(Object.values(AuditLogTypeCategory).map(c => getAuditLogTypeCategoryName(c)));
 
@@ -30,18 +29,21 @@ describe('audit log type filter', () => {
         }
     });
 
-    test('combines categories with or', () => {
-        const typeBuilder = getTypeBuilder();
-        const [members, registrations] = typeBuilder.builders as MultipleChoiceFilterBuilder[];
+    test('combines categories that are added separately with or', () => {
+        const { root, categoryBuilders } = getBuilders();
+        const [members, registrations] = categoryBuilders;
 
-        const filter = typeBuilder.create();
+        const filter = root.create();
         expect(filter.mode).toBe(GroupUIFilterMode.Or);
 
+        // Same as adding each filter from the filter menu
         const membersFilter = members.create();
         membersFilter.selectedOptions = [...members.multipleChoiceOptions];
+        filter.filters.push(membersFilter.flatten()!);
+
         const registrationsFilter = registrations.create();
         registrationsFilter.selectedOptions = [registrations.multipleChoiceOptions[0]];
-        filter.filters = [membersFilter, registrationsFilter];
+        filter.filters.push(registrationsFilter.flatten()!);
 
         expect(filter.build()).toEqual({
             $or: [
