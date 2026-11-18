@@ -1,5 +1,6 @@
-import type { AuditLogTypeContext } from '@stamhoofd/structures';
-import { AuditLogType, AuditLogTypeCategory, auditLogTypeOrder, getAuditLogTypeCategory, getAuditLogTypeCategoryName } from '@stamhoofd/structures';
+import { AuditLogType } from '@stamhoofd/structures';
+import type { AuditLogTypeContext } from '#audit-logs/auditLogTypeCategories.ts';
+import { AuditLogTypeCategory, auditLogTypeOrder, getAuditLogTypeCategory, getAuditLogTypeCategoryName } from '#audit-logs/auditLogTypeCategories.ts';
 import { describe, expect, test } from 'vitest';
 import { getAuditLogUIFilterBuilders } from './filterBuilders';
 import { GroupUIFilterBuilder, GroupUIFilterMode } from './GroupUIFilter';

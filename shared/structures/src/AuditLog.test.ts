@@ -59,7 +59,7 @@ describe('AuditLog', () => {
 
     test('Every type has a name and an icon', () => {
         for (const type of Object.values(AuditLogType)) {
-            expect(getAuditLogTypeName(type, { isPlatform: true, isOrganizationLog: false }), type).toBeTruthy();
+            expect(getAuditLogTypeName(type), type).toBeTruthy();
             expect(getAuditLogTypeIcon(type)[0], type).toBeTruthy();
         }
     });
