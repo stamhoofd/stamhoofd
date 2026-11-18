@@ -24,7 +24,8 @@ async function requireShell(shell: string, context: TestContext): Promise<void> 
     }
 }
 
-describe('generated oclif completion with live local environments', () => {
+// Every test starts the CLI and a shell as subprocesses, which can take longer than the default 5 seconds on CI
+describe('generated oclif completion with live local environments', { timeout: 30_000 }, () => {
     let root: string;
     let env: NodeJS.ProcessEnv;
     let modulePath: string;
@@ -119,7 +120,6 @@ describe('generated oclif completion with live local environments', () => {
             await fs.rm(modulePath);
             expect((await complete()).stdout.trim()).toBe('');
         },
-        30_000,
     );
 
     it.for(['bash', 'zsh'])(
@@ -185,7 +185,6 @@ describe('generated oclif completion with live local environments', () => {
                 );
             }
         },
-        30_000,
     );
 
     it('retains the maintained generator for command and flag suggestions', async () => {
@@ -260,7 +259,7 @@ describe('generated oclif completion with live local environments', () => {
                 `stam ${command}`,
             );
         }
-    }, 30_000);
+    });
 
     it.for(['bash', 'zsh'])(
         'exports standalone %s completion usable after deleting the generation cache',
