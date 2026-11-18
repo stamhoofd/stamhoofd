@@ -1,4 +1,4 @@
-import { AuditLogType, AuditLogTypeCategory, getAuditLogTypeCategory, getAuditLogTypeCategoryName } from '@stamhoofd/structures';
+import { AuditLogType, AuditLogTypeCategory, auditLogTypeOrder, getAuditLogTypeCategory, getAuditLogTypeCategoryName } from '@stamhoofd/structures';
 import { describe, expect, test } from 'vitest';
 import { getAuditLogUIFilterBuilders } from './filterBuilders';
 import { GroupUIFilterBuilder, GroupUIFilterMode } from './GroupUIFilter';
@@ -81,5 +81,32 @@ describe('audit log type filters', () => {
         const admin = typesOf({ isPlatform: false, isOrganizationLog: false });
         expect(admin.types.has(AuditLogType.OrganizationAdded)).toBe(true);
         expect(admin.types.has(AuditLogType.PlatformSettingsChanged)).toBe(false);
+    });
+
+    test('lists new, changed and deleted objects in that order', () => {
+        expect(new Set(auditLogTypeOrder)).toEqual(new Set(Object.values(AuditLogType)));
+        expect(auditLogTypeOrder).toHaveLength(Object.values(AuditLogType).length);
+
+        const { categoryBuilders } = getBuilders();
+        const typesOf = (category: AuditLogTypeCategory) => categoryBuilders
+            .find(b => b.name === getAuditLogTypeCategoryName(category))!
+            .multipleChoiceOptions.map(o => o.value);
+
+        expect(typesOf(AuditLogTypeCategory.Members)).toEqual([AuditLogType.MemberAdded, AuditLogType.MemberEdited, AuditLogType.MemberDeleted]);
+        expect(typesOf(AuditLogTypeCategory.Webshops)).toEqual([
+            AuditLogType.WebshopAdded,
+            AuditLogType.WebshopEdited,
+            AuditLogType.WebshopDeleted,
+            AuditLogType.OrderAdded,
+            AuditLogType.OrderEdited,
+            AuditLogType.OrderDeleted,
+        ]);
+        expect(typesOf(AuditLogTypeCategory.Emails).slice(5, 10)).toEqual([
+            AuditLogType.EmailAddressHardBounced,
+            AuditLogType.EmailAddressSoftBounced,
+            AuditLogType.EmailAddressMarkedAsSpam,
+            AuditLogType.EmailAddressFraudComplaint,
+            AuditLogType.EmailAddressUnsubscribed,
+        ]);
     });
 });

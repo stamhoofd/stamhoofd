@@ -3,7 +3,7 @@ import { useEventTypes } from '#hooks/useEventTypes.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform, WrapperFilter } from '@stamhoofd/structures';
-import { AuditLogType, AuditLogTypeCategory, BalanceItemRelationType, BalanceItemStatus, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, getAuditLogTypeCategory, getAuditLogTypeCategoryName, getAuditLogTypeName, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
+import { AuditLogType, AuditLogTypeCategory, auditLogTypeOrder, BalanceItemRelationType, BalanceItemStatus, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, getAuditLogTypeCategory, getAuditLogTypeCategoryName, getAuditLogTypeName, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { MaybeRefOrGetter } from 'vue';
 import { computed, toValue } from 'vue';
@@ -705,9 +705,16 @@ function getUnavailableAuditLogTypes({ isPlatform, isOrganizationLog }: { isPlat
 
 export function getAuditLogUIFilterBuilders(options: { isPlatform: boolean; isOrganizationLog: boolean }) {
     const unavailable = getUnavailableAuditLogTypes(options);
+    // Types missing from the order are listed last instead of being left out
+    const getOrderIndex = (type: AuditLogType) => {
+        const index = auditLogTypeOrder.indexOf(type);
+        return index === -1 ? auditLogTypeOrder.length : index;
+    };
 
     const all: UIFilterBuilder<UIFilter>[] = Object.values(AuditLogTypeCategory).map((category) => {
-        const types = Object.values(AuditLogType).filter(type => getAuditLogTypeCategory(type) === category && !unavailable.has(type));
+        const types = Object.values(AuditLogType)
+            .filter(type => getAuditLogTypeCategory(type) === category && !unavailable.has(type))
+            .sort((a, b) => getOrderIndex(a) - getOrderIndex(b));
 
         return new MultipleChoiceFilterBuilder({
             name: getAuditLogTypeCategoryName(category),

@@ -314,8 +314,13 @@ export function getAuditLogTypeName(type: AuditLogType): string {
     }
 }
 
+/**
+ * The order of the values is the order in which the categories are shown.
+ */
 export enum AuditLogTypeCategory {
     Members = 'Members',
+    Responsibilities = 'Responsibilities',
+    PlatformMemberships = 'PlatformMemberships',
     Registrations = 'Registrations',
     Groups = 'Groups',
     Events = 'Events',
@@ -323,13 +328,105 @@ export enum AuditLogTypeCategory {
     Payments = 'Payments',
     Emails = 'Emails',
     Users = 'Users',
-    Responsibilities = 'Responsibilities',
-    PlatformMemberships = 'PlatformMemberships',
     Documents = 'Documents',
     Organizations = 'Organizations',
     Settings = 'Settings',
     Other = 'Other',
 }
+
+/**
+ * Order in which audit log types are listed within their category: new, changed and deleted
+ * objects, with related types next to each other.
+ */
+export const auditLogTypeOrder: AuditLogType[] = [
+    AuditLogType.MemberAdded,
+    AuditLogType.MemberEdited,
+    AuditLogType.MemberDeleted,
+
+    AuditLogType.MemberResponsibilityRecordAdded,
+    AuditLogType.MemberResponsibilityRecordEdited,
+    AuditLogType.MemberResponsibilityRecordDeleted,
+
+    AuditLogType.MemberPlatformMembershipAdded,
+    AuditLogType.MemberPlatformMembershipEdited,
+    AuditLogType.MemberPlatformMembershipDeleted,
+
+    AuditLogType.MemberRegistered,
+    AuditLogType.MemberUnregistered,
+    AuditLogType.RegistrationInvitationAdded,
+    AuditLogType.RegistrationInvitationDeleted,
+
+    AuditLogType.GroupAdded,
+    AuditLogType.GroupEdited,
+    AuditLogType.GroupDeleted,
+    AuditLogType.WaitingListAdded,
+    AuditLogType.WaitingListEdited,
+    AuditLogType.WaitingListDeleted,
+
+    AuditLogType.EventAdded,
+    AuditLogType.EventEdited,
+    AuditLogType.EventDeleted,
+    AuditLogType.EventNotificationAdded,
+    AuditLogType.EventNotificationEdited,
+    AuditLogType.EventNotificationDeleted,
+
+    AuditLogType.WebshopAdded,
+    AuditLogType.WebshopEdited,
+    AuditLogType.WebshopDeleted,
+    AuditLogType.OrderAdded,
+    AuditLogType.OrderEdited,
+    AuditLogType.OrderDeleted,
+
+    AuditLogType.PaymentAdded,
+    AuditLogType.PaymentEdited,
+    AuditLogType.PaymentDeleted,
+    AuditLogType.BalanceItemAdded,
+    AuditLogType.BalanceItemEdited,
+    AuditLogType.BalanceItemDeleted,
+
+    // Messages, then problems with e-mail addresses, then templates
+    AuditLogType.EmailSending,
+    AuditLogType.EmailSent,
+    AuditLogType.EmailPublished,
+    AuditLogType.EmailEdited,
+    AuditLogType.EmailDeleted,
+    AuditLogType.EmailAddressHardBounced,
+    AuditLogType.EmailAddressSoftBounced,
+    AuditLogType.EmailAddressMarkedAsSpam,
+    AuditLogType.EmailAddressFraudComplaint,
+    AuditLogType.EmailAddressUnsubscribed,
+    AuditLogType.EmailTemplateAdded,
+    AuditLogType.EmailTemplateEdited,
+    AuditLogType.EmailTemplateDeleted,
+
+    AuditLogType.UserAdded,
+    AuditLogType.UserEdited,
+    AuditLogType.UserDeleted,
+    AuditLogType.UserTwoFactorMethodAdded,
+    AuditLogType.UserTwoFactorMethodDeleted,
+    AuditLogType.UserRecoveryCodesRegenerated,
+    AuditLogType.MemberSecurityCodeRequested,
+    AuditLogType.MemberSecurityCodeUsed,
+    AuditLogType.UserImpersonated,
+
+    AuditLogType.DocumentTemplateAdded,
+    AuditLogType.DocumentTemplateEdited,
+    AuditLogType.DocumentTemplateDeleted,
+
+    AuditLogType.OrganizationAdded,
+    AuditLogType.OrganizationDeleted,
+
+    AuditLogType.OrganizationEdited,
+    AuditLogType.PlatformSettingsChanged,
+    AuditLogType.RegistrationPeriodAdded,
+    AuditLogType.RegistrationPeriodEdited,
+    AuditLogType.RegistrationPeriodDeleted,
+    AuditLogType.StripeAccountAdded,
+    AuditLogType.StripeAccountEdited,
+    AuditLogType.StripeAccountDeleted,
+
+    AuditLogType.Unknown,
+];
 
 export function getAuditLogTypeCategory(type: AuditLogType): AuditLogTypeCategory {
     switch (type) {
