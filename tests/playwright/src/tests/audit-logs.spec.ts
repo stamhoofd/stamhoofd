@@ -9,7 +9,7 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { AuditLog, OrganizationFactory, UserFactory } from '@stamhoofd/models';
 import type { Organization, User } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Permissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
+import { AuditLogReplacement, AuditLogType, Permissions, STPackageBundle, Token as TokenStruct, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import { randomUUID } from 'node:crypto';
@@ -104,4 +104,87 @@ test.describe('Audit log navigation @audit', () => {
             await expect(activeLogs(page).getByText('Audit target yesterday', { exact: true })).toHaveCount(0);
         });
     }
+});
+
+function filterMenuRow(page: Page, title: string) {
+    return page.locator('h3.style-title-list:visible').filter({ hasText: new RegExp(`^\\s*${title}\\s*$`) }).last();
+}
+
+async function applyFilter(page: Page) {
+    await page.locator('button:visible').filter({ hasText: /^\s*Toepassen\s*$/ }).last().click();
+}
+
+test.describe('Audit log type filter @audit', () => {
+    let organization: Organization;
+    let user: User;
+
+    const memberAdded = 'Emma Peeters werd aangemaakt';
+    const memberEdited = 'De gegevens van Noah Maes werden gewijzigd';
+    const orderAdded = 'Bestelling #124 werd geplaatst (voor Spaghettiavond)';
+    const webshopEdited = 'De webshop Spaghettiavond werd gewijzigd';
+    const memberRegistered = 'Lotte Wouters werd ingeschreven voor Kapoenen';
+
+    test.beforeAll(async () => {
+        TestUtils.setPermanentEnvironment('userMode', 'organization');
+        TestUtils.setPermanentEnvironment('singleOrganization', undefined);
+        organization = await new OrganizationFactory({ packages: [STPackageBundle.Members, STPackageBundle.Webshops] }).create();
+        await STPackageService.updateOrganizationPackages(organization.id);
+        user = await new UserFactory({
+            organization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+
+        const value = (v: string) => AuditLogReplacement.create({ value: v });
+        for (const [type, replacements] of [
+            [AuditLogType.MemberAdded, { m: value('Emma Peeters') }],
+            [AuditLogType.MemberEdited, { m: value('Noah Maes') }],
+            [AuditLogType.OrderAdded, { o: value('bestelling #124'), w: value('Spaghettiavond') }],
+            [AuditLogType.WebshopEdited, { w: value('Spaghettiavond') }],
+            [AuditLogType.MemberRegistered, { m: value('Lotte Wouters'), g: value('Kapoenen') }],
+        ] as const) {
+            const log = new AuditLog();
+            log.organizationId = organization.id;
+            log.type = type;
+            log.replacements = new Map(Object.entries(replacements));
+            await log.save();
+        }
+    });
+
+    test.afterAll(async () => {
+        await WorkerData.resetDatabase();
+    });
+
+    test('combines types from different categories with or', async ({ page }) => {
+        await loginAs(page, user);
+        await page.goto(WorkerData.urls.dashboard + '/beheerders/' + organization.uri + '/audit-logs');
+
+        const main = activeLogs(page);
+        for (const text of [memberAdded, memberEdited, orderAdded, webshopEdited, memberRegistered]) {
+            await expect(main.getByText(text, { exact: true })).toBeVisible();
+        }
+
+        await main.locator('button').filter({ hasText: /^\s*Filter\s*$/ }).click();
+
+        // Categories that never appear in the log of an organization outside a platform are left out
+        await expect(filterMenuRow(page, 'Leden')).toBeVisible();
+        await expect(filterMenuRow(page, 'Aansluitingen')).toHaveCount(0);
+        await expect(filterMenuRow(page, 'Lokale groepen')).toHaveCount(0);
+
+        await filterMenuRow(page, 'Leden').click();
+        await page.locator('h3:visible').filter({ hasText: /^\s*Selecteer alles\s*$/ }).click();
+        await applyFilter(page);
+
+        await filterMenuRow(page, 'Webshops en bestellingen').click();
+        await filterMenuRow(page, 'Nieuwe bestellingen').click();
+        await applyFilter(page);
+
+        // The filter menu applies changes immediately; click outside it to close it
+        await page.mouse.click(120, 500);
+
+        await expect(main.getByText(memberAdded, { exact: true })).toBeVisible();
+        await expect(main.getByText(memberEdited, { exact: true })).toBeVisible();
+        await expect(main.getByText(orderAdded, { exact: true })).toBeVisible();
+        await expect(main.getByText(webshopEdited, { exact: true })).toHaveCount(0);
+        await expect(main.getByText(memberRegistered, { exact: true })).toHaveCount(0);
+    });
 });
