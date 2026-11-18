@@ -2,11 +2,11 @@
     <SaveView
         :title="$t('Controle')"
         :loading="downloading"
-        :disabled="result.isBlocked"
+        :disabled="result.isBlocked && !!download"
         :save-text="saveText"
-        save-icon="download"
-        :add-extra-cancel="true"
-        @save="downloadWithoutIssues"
+        :save-icon="download ? 'download' : undefined"
+        :add-extra-cancel="!!download"
+        @save="save"
     >
         <h1>{{ title }}</h1>
         <p>{{ description }}</p>
@@ -26,7 +26,9 @@
                 <hr>
                 <h2>{{ rejectedTitle }}</h2>
                 <p class="style-description">
-                    {{ $t('Belcotax zou deze weigeren. Pas ze aan of download zonder deze attesten.') }}
+                    {{ download
+                        ? $t('Belcotax zou deze weigeren. Pas ze aan of download zonder deze attesten.')
+                        : $t('Belcotax zou deze attesten weigeren. Ze gaan niet mee tot je ze aanpast.') }}
                 </p>
 
                 <STList>
@@ -51,7 +53,9 @@
                 <hr>
                 <h2>{{ incompleteTitle }}</h2>
                 <p class="style-description">
-                    {{ $t('Enkel gepubliceerde attesten staan in het bestand. Vul de ontbrekende gegevens aan of download zonder deze attesten.') }}
+                    {{ download
+                        ? $t('Enkel gepubliceerde attesten staan in het bestand. Vul de ontbrekende gegevens aan of download zonder deze attesten.')
+                        : $t('Enkel gepubliceerde attesten gaan mee. Vul de ontbrekende gegevens aan om ze mee te sturen.') }}
                 </p>
 
                 <STList>
@@ -73,7 +77,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useShow } from '@browser/navigation';
+import { ComponentWithProperties, usePop, useShow } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useDocumentsObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentsObjectFetcher.ts';
 import STList from '@stamhoofd/components/layout/STList.vue';
@@ -91,13 +95,14 @@ const props = defineProps<{
     /**
      * Builds the file again, so the lists and the download match the documents as they are now
      */
-    check: () => Promise<JsonlExportResult | null>;
+    check?: (() => Promise<JsonlExportResult | null>) | null;
     /**
-     * Downloads the given file and returns its name
+     * Downloads the given file and returns its name. Without it, only the check is shown (before submitting to Belcotax).
      */
-    download: (result: JsonlExportResult) => Promise<string>;
+    download?: ((result: JsonlExportResult) => Promise<string>) | null;
 }>();
 
+const pop = usePop();
 const show = useShow();
 const fetcher = useDocumentsObjectFetcher();
 const downloading = ref(false);
@@ -134,7 +139,9 @@ const description = computed(() => {
         : $t('De andere {count} attesten staan wel in het bestand.', { count: result.value.documentCount.toString() });
 });
 
-const saveText = computed(() => $t('Downloaden zonder deze {count}', { count: total.value.toString() }));
+const saveText = computed(() => props.download
+    ? $t('Downloaden zonder deze {count}', { count: total.value.toString() })
+    : $t('Terug'));
 
 const documents = computed(() => {
     const map = new Map<string, { id: string; description: string | null; messages: string[] }>();
@@ -159,7 +166,7 @@ onActivated(() => {
 });
 
 async function recheck() {
-    if (checking.value) {
+    if (checking.value || !props.check) {
         return;
     }
     checking.value = true;
@@ -190,8 +197,17 @@ async function openDocument(id: string) {
     }
 }
 
+async function save() {
+    // Without a download this view only shows the check, before submitting to Belcotax
+    if (!props.download) {
+        await pop();
+        return;
+    }
+    await downloadWithoutIssues();
+}
+
 async function downloadWithoutIssues() {
-    if (downloading.value || checking.value) {
+    if (downloading.value || checking.value || !props.download) {
         return;
     }
     downloading.value = true;

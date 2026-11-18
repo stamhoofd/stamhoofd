@@ -100,13 +100,18 @@ import type { NavigationActions } from '@stamhoofd/components/types/NavigationAc
 import type { PatchAnswers, RecordAnswer } from '@stamhoofd/structures';
 import { JsonlExportResult, DocumentPrivateSettings, DocumentSettings, DocumentStatus, DocumentTemplateGroup, DocumentTemplatePrivate, RecordCategory, RecordCheckboxAnswer, RecordTextAnswer, RecordType, TranslatedString } from '@stamhoofd/structures';
 import { FiscalDocumentYearHelper, Formatter } from '@stamhoofd/utility';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
+import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
+import { BelcotaxFeatureFlag } from '@stamhoofd/structures/belcotax/BelcotaxConnection.js';
+import { BelcotaxSubmission, BelcotaxSubmissionStatusHelper } from '@stamhoofd/structures/belcotax/BelcotaxSubmission.js';
 
+import { currentUrlWithoutBelcotaxResult, useBelcotaxConnect } from '../settings/useBelcotaxConnect';
+import { takeBelcotaxSubmissionFromUrl } from './belcotaxSubmissionLink';
 import { fiscal } from './definitions/fiscal';
 import { participation } from './definitions/participation.ts';
 
@@ -469,24 +474,27 @@ function hasJsonlCompanyNumber() {
     return !!companyNumber;
 }
 
-async function exportJsonl() {
+/**
+ * The checks before the download and before submitting: both send the same file to Belcotax
+ */
+async function checkJsonlExport(lateConfirmText: string): Promise<boolean> {
     // Belcotax refuses the whole file for an organiser without a company number, so a feitelijke vereniging cannot use it
     if (!hasJsonlCompanyNumber()) {
         new CenteredMessage(
             $t('Ondernemingsnummer nodig'),
             $t('Het bestand voor Belcotax werkt enkel voor een organisator met een ondernemingsnummer. Heeft je vereniging een ondernemingsnummer? Vul het dan in bij de facturatiegegevens. Als feitelijke vereniging zonder ondernemingsnummer geef je de fiscale attesten rechtstreeks in op Belcotax-on-web.'),
         ).addCloseButton().show();
-        return;
+        return false;
     }
 
     if (props.template.updatesEnabled) {
         Toast.error($t('%1Kr')).show();
-        return;
+        return false;
     }
 
     if (!fiscalDocumentYearHelper.canDownloadFiscalDocumentXML(props.template.year)) {
         Toast.error($t('%1IX')).show();
-        return;
+        return false;
     }
 
     if (fiscalDocumentYearHelper.isAfterDeadline(props.template.year)) {
@@ -495,7 +503,7 @@ async function exportJsonl() {
             description: $t('Je moet fiscale attesten voor 1 maart indienen in Belcotax. Enkel in heel uitzonderlijke gevallen kan je nog later indienen.'),
             buttons: [
                 {
-                    text: $t('Toch downloaden'),
+                    text: lateConfirmText,
                     value: false,
                     type: 'destructive',
                     availabilityDelay: 2_000,
@@ -507,8 +515,15 @@ async function exportJsonl() {
             ],
         });
         if (stop) {
-            return;
+            return false;
         }
+    }
+    return true;
+}
+
+async function exportJsonl() {
+    if (!(await checkJsonlExport($t('Toch downloaden')))) {
+        return;
     }
 
     const c = gotoRecordCategory(getJsonlExportCategories(), 0, (component) => {
@@ -600,6 +615,137 @@ async function downloadJsonl() {
     });
 }
 
+const belcotaxFeature = useFeatureFlagComputed(BelcotaxFeatureFlag);
+const canUseBelcotaxApi = computed(() => belcotaxFeature.value && isJsonlExport.value);
+const belcotaxConnect = useBelcotaxConnect();
+const lastSubmission = ref<BelcotaxSubmission | null>(null);
+
+async function submitToBelcotax() {
+    if (!(await checkJsonlExport($t('Toch doorsturen')))) {
+        return;
+    }
+
+    // FOD Financiën returns here after connecting, before any sheet changes the URL
+    const returnUrl = currentUrlWithoutBelcotaxResult().href;
+    const c = gotoRecordCategory(getJsonlExportCategories(), 0, (component) => {
+        component.show(AsyncComponent(() => import('./BelcotaxSubmitView.vue'), {
+            template: props.template,
+            returnUrl,
+        })).catch(console.error);
+    });
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: c ?? AsyncComponent(() => import('./BelcotaxSubmitView.vue'), {
+                    template: props.template,
+                    returnUrl,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    });
+}
+
+async function showBelcotaxSubmitSheet() {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./BelcotaxSubmitView.vue'), {
+                    template: props.template,
+                    returnUrl: currentUrlWithoutBelcotaxResult().href,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'sheet',
+    });
+}
+
+async function showBelcotaxSubmissions() {
+    await present({
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('./BelcotaxSubmissionsView.vue'), {
+                    template: props.template,
+                }),
+            }),
+        ],
+        modalDisplayStyle: 'popup',
+    });
+}
+
+async function loadLastSubmission() {
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/organization/document-templates/' + encodeURIComponent(props.template.id) + '/belcotax/submissions',
+            decoder: new ArrayDecoder(BelcotaxSubmission as Decoder<BelcotaxSubmission>),
+            shouldRetry: false,
+            owner: requestOwner,
+        });
+        lastSubmission.value = response.data[0] ?? null;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+const lastSubmissionDescription = computed(() => {
+    const submission = lastSubmission.value;
+    if (!submission) {
+        return $t('Nog geen zendingen');
+    }
+    return $t('Laatste: {date}, {count} attesten, {status}', {
+        date: Formatter.date(submission.createdAt, true),
+        count: submission.documentCount.toString(),
+        status: BelcotaxSubmissionStatusHelper.getName(submission.status).toLocaleLowerCase(),
+    });
+});
+
+/**
+ * Opened from the email about the result of a submission
+ */
+async function openSubmissionFromUrl() {
+    const id = takeBelcotaxSubmissionFromUrl();
+    if (!id) {
+        return;
+    }
+    try {
+        const response = await context.value.authenticatedServer.request({
+            method: 'GET',
+            path: '/organization/belcotax/submissions/' + encodeURIComponent(id),
+            decoder: BelcotaxSubmission as Decoder<BelcotaxSubmission>,
+            shouldRetry: false,
+            owner: requestOwner,
+        });
+        await present({
+            components: [
+                new ComponentWithProperties(NavigationController, {
+                    root: AsyncComponent(() => import('./BelcotaxSubmissionView.vue'), {
+                        submission: response.data,
+                        template: props.template,
+                    }),
+                }),
+            ],
+            modalDisplayStyle: 'popup',
+        });
+    } catch (e) {
+        Toast.fromError(e).show();
+    }
+}
+
+onMounted(() => {
+    if (!canUseBelcotaxApi.value) {
+        return;
+    }
+    loadLastSubmission().catch(console.error);
+    openSubmissionFromUrl().catch(console.error);
+    // Back from connecting at FOD Financiën, which only starts from the sheet
+    belcotaxConnect.checkResult().then((result) => {
+        if (result === 'connected') {
+            return showBelcotaxSubmitSheet();
+        }
+    }).catch(console.error);
+});
+
 const documentTemplateActions = computed<ActionButton[]>(() => [
     {
         name: $t('%Zak'),
@@ -626,6 +772,25 @@ const documentTemplateActions = computed<ActionButton[]>(() => [
         listItemClass: 'left-center',
         enabled: !isDraft.value && !isLocked.value && isJsonlExport.value && fiscalDocumentYearHelper.isJsonlExportSupported(props.template.year),
         action: exportJsonl,
+    },
+    {
+        name: $t('Doorsturen naar Belcotax'),
+        description: $t('Stuurt de nieuwe, gewijzigde en verwijderde attesten rechtstreeks door'),
+        icon: 'government',
+        asideIcon: 'upload stroke small',
+        listItemClass: 'left-center',
+        testId: 'belcotax-submit-action',
+        enabled: !isDraft.value && !isLocked.value && canUseBelcotaxApi.value,
+        action: submitToBelcotax,
+    },
+    {
+        name: $t('Zendingen'),
+        description: lastSubmissionDescription.value,
+        icon: 'history',
+        listItemClass: 'left-center',
+        testId: 'belcotax-submissions-action',
+        enabled: canUseBelcotaxApi.value,
+        action: showBelcotaxSubmissions,
     },
     {
         name: $t('%Ke'),
