@@ -1,4 +1,5 @@
 import { countDays } from '@stamhoofd/models/helpers/countDays.js';
+import { createHash } from 'node:crypto';
 import { getBelcotaxCompanyNumber } from '@stamhoofd/structures/belcotax/BelcotaxConnection.js';
 import type { CountryCode } from '@stamhoofd/types/Country';
 import { Country } from '@stamhoofd/types/Country';
@@ -88,13 +89,36 @@ export type BelcotaxIssue = {
     isMappingError?: boolean;
 };
 
+export type JsonLine = Record<string, unknown>;
+
+/**
+ * The lines of one document: its debtor, child and fiche, and the certifier the fiche refers to.
+ * The hash covers these lines and the shared resources, so a change of the organiser or contact changes it too.
+ */
+export type BelcotaxFiche = {
+    documentId: string;
+    lines: JsonLine[];
+    certifier: JsonLine | null;
+    hash: string;
+};
+
+export type BelcotaxDeletion = {
+    documentId: string;
+    line: JsonLine;
+    hash: string;
+};
+
 export type BelcotaxExport = {
     jsonl: string;
     includedDocumentIds: string[];
     issues: BelcotaxIssue[];
+    /**
+     * The contact and organiser every fiche refers to
+     */
+    resources: JsonLine[];
+    fiches: BelcotaxFiche[];
+    deletions: BelcotaxDeletion[];
 };
-
-type JsonLine = Record<string, unknown>;
 
 /**
  * Prefix of every key we generate, said to be good practice to avoid other software (or manual uploaded documents) to use the same keys.
@@ -248,9 +272,7 @@ export class BelcotaxJsonlService {
         }
         shared.push(contact, organiser.line);
 
-        const certifiers = new Map<string, JsonLine>();
-        const fiches: JsonLine[] = [];
-        const includedDocumentIds: string[] = [];
+        const fiches: BelcotaxFiche[] = [];
 
         for (const document of input.documents) {
             const documentIssues: string[] = [];
@@ -304,31 +326,64 @@ export class BelcotaxJsonlService {
                 continue;
             }
 
-            if (certification.line) {
-                certifiers.set(certification.line['k'] as string, certification.line);
-            }
-            fiches.push(debtor.line, child.line, fiche);
-            includedDocumentIds.push(document.id);
+            const lines = [debtor.line, child.line, fiche];
+            fiches.push({
+                documentId: document.id,
+                lines,
+                certifier: certification.line,
+                hash: this.hash([...shared, certification.line, ...lines]),
+            });
         }
 
         // We verified on the FOD pre-production environment (2026-11-18): a delete line for a key Belcotax does not
         // know is accepted, so a deletion can be sent without knowing whether the fiche was ever uploaded.
-        const deletions: JsonLine[] = input.deletedDocumentIds.map((id) => ({
-            $s: 'urn:f:x:1',
-            k: this.ficheKey(input.year, id),
-        }));
-        for (const line of deletions) {
+        const deletions: BelcotaxDeletion[] = input.deletedDocumentIds.map((id) => {
+            const line = { $s: 'urn:f:x:1', k: this.ficheKey(input.year, id) };
             if (!this.isValid(v.deleteFiche, line)) {
                 throw new Error('Invalid Belcotax delete line');
             }
-        }
+            return { documentId: id, line, hash: this.hash([line]) };
+        });
 
-        const lines = [...shared, ...certifiers.values(), ...fiches, ...deletions];
+        return {
+            jsonl: this.toJsonl({ resources: shared, fiches, deletions }).jsonl,
+            includedDocumentIds: fiches.map((f) => f.documentId),
+            issues,
+            resources: shared,
+            fiches,
+            deletions,
+        };
+    }
+
+    /**
+     * The file with the resources, the certifiers the fiches refer to, the fiches and the deletions, in that order.
+     * Also returns the key of each line, because Belcotax reports format errors by line number.
+     */
+    static toJsonl(selection: {
+        resources: JsonLine[];
+        fiches: BelcotaxFiche[];
+        deletions: BelcotaxDeletion[];
+    }): { jsonl: string; lineKeys: string[] } {
+        const certifiers = new Map<string, JsonLine>();
+        for (const fiche of selection.fiches) {
+            if (fiche.certifier) {
+                certifiers.set(fiche.certifier['k'] as string, fiche.certifier);
+            }
+        }
+        const lines = [
+            ...selection.resources,
+            ...certifiers.values(),
+            ...selection.fiches.flatMap((f) => f.lines),
+            ...selection.deletions.map((d) => d.line),
+        ];
         return {
             jsonl: lines.map((line) => JSON.stringify(line)).join('\n') + '\n',
-            includedDocumentIds,
-            issues,
+            lineKeys: lines.map((line) => line['k'] as string),
         };
+    }
+
+    private static hash(lines: (JsonLine | null)[]): string {
+        return createHash('sha256').update(JSON.stringify(lines)).digest('hex');
     }
 
     private static isValid(validate: ValidateFunction, line: JsonLine): boolean {
