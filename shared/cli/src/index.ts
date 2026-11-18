@@ -34,6 +34,10 @@ export type {
 export { CaddyService } from './services/definitions/caddy-service.js';
 export { SsoService, type SsoServiceVariant } from './services/definitions/sso-service.js';
 export {
+    belcotaxClientId,
+    belcotaxRealm,
+    belcotaxRepresentatives,
+    readOrCreateBelcotaxClientKey,
     ssoClientId,
     ssoClientSecret,
     ssoRealm,

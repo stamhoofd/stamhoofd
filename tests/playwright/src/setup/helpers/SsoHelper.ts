@@ -1,4 +1,4 @@
-import { createContext, SsoService } from '@stamhoofd/cli';
+import { createContext, readOrCreateBelcotaxClientKey, SsoService } from '@stamhoofd/cli';
 import { CaddyConfigHelper } from './CaddyConfigHelper.js';
 
 /**
@@ -36,9 +36,16 @@ export class SsoHelper {
 
         await service.start(context, {
             redirectUris: CaddyConfigHelper.getSsoRedirectUris(workerCount),
+            belcotaxRedirectUris: CaddyConfigHelper.getBelcotaxRedirectUris(workerCount),
             background: true,
         });
         await service.waitUntilReady(context);
+
+        // The realm holds the public part of this key; workers inherit the environment of the
+        // global setup and sign the Belcotax client assertion with it
+        process.env.PLAYWRIGHT_BELCOTAX_PRIVATE_KEY = JSON.stringify(
+            (await readOrCreateBelcotaxClientKey(context)).privateJwk,
+        );
     }
 
     static async stop(): Promise<void> {

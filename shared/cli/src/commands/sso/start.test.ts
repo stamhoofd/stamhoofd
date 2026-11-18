@@ -40,6 +40,7 @@ describe('SsoStart command', () => {
         expect(CaddyService.reload).toHaveBeenCalledWith(createContext());
         expect(ssoService.start).toHaveBeenCalledWith(createContext(), {
             redirectUris: [redirectUri],
+            belcotaxRedirectUris: [expect.stringMatching(/^https:\/\/api\.\S+\/oauth\/belcotax$/)],
             background: false,
         });
     });
@@ -55,6 +56,7 @@ describe('SsoStart command', () => {
         expect(startServices).toHaveBeenCalledWith(createContext(), sharedServiceDefinitions);
         expect(ssoService.start).toHaveBeenCalledWith(createContext(), {
             redirectUris: [redirectUri],
+            belcotaxRedirectUris: [expect.stringMatching(/^https:\/\/api\.\S+\/oauth\/belcotax$/)],
             background: true,
         });
     });
