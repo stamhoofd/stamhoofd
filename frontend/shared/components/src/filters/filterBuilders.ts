@@ -681,7 +681,8 @@ export function useAuditLogUIFilterBuilders() {
  * Types that can never appear in the log that is shown, so they are left out of the filters.
  */
 function getUnavailableAuditLogTypes({ isPlatform, isOrganizationLog }: { isPlatform: boolean; isOrganizationLog: boolean }): Set<AuditLogType> {
-    const unavailable = new Set<AuditLogType>();
+    // Only used for old logs from before types existed; filtering on it is not useful
+    const unavailable = new Set<AuditLogType>([AuditLogType.Unknown]);
 
     if (!isPlatform) {
         unavailable.add(AuditLogType.PlatformSettingsChanged);

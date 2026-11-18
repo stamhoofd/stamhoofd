@@ -13,16 +13,18 @@ function getBuilders(options = { isPlatform: true, isOrganizationLog: false }) {
 }
 
 describe('audit log type filters', () => {
-    test('has one filter per category that together contain every type once in the platform admin', () => {
+    test('has one filter per category that together contain every known type once in the platform admin', () => {
         const { categoryBuilders } = getBuilders();
+        const categories = Object.values(AuditLogTypeCategory).filter(c => c !== AuditLogTypeCategory.Other);
+        const knownTypes = Object.values(AuditLogType).filter(t => t !== AuditLogType.Unknown);
 
-        expect(categoryBuilders.map(b => b.name)).toEqual(Object.values(AuditLogTypeCategory).map(c => getAuditLogTypeCategoryName(c)));
+        expect(categoryBuilders.map(b => b.name)).toEqual(categories.map(c => getAuditLogTypeCategoryName(c)));
 
         const types = categoryBuilders.flatMap(b => b.multipleChoiceOptions.map(o => o.value));
-        expect(types).toHaveLength(Object.values(AuditLogType).length);
-        expect(new Set(types)).toEqual(new Set(Object.values(AuditLogType)));
+        expect(types).toHaveLength(knownTypes.length);
+        expect(new Set(types)).toEqual(new Set(knownTypes));
 
-        for (const [index, category] of Object.values(AuditLogTypeCategory).entries()) {
+        for (const [index, category] of categories.entries()) {
             for (const option of categoryBuilders[index].multipleChoiceOptions) {
                 expect(getAuditLogTypeCategory(option.value as AuditLogType)).toBe(category);
             }
