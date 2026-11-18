@@ -1,15 +1,17 @@
 import { useContext } from '#hooks/useContext.ts';
 import { useEventTypes } from '#hooks/useEventTypes.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
+import type { AuditLogTypeContext } from '#audit-logs/auditLogTypeCategories.ts';
+import { AuditLogTypeCategory, auditLogTypeOrder, getAuditLogTypeCategory, getAuditLogTypeCategoryName, getAuditLogTypeFilterName } from '#audit-logs/auditLogTypeCategories.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform, WrapperFilter } from '@stamhoofd/structures';
-import { AuditLogType, BalanceItemRelationType, BalanceItemStatus, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, getAuditLogTypeName, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
+import { AuditLogType, BalanceItemRelationType, BalanceItemStatus, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { MaybeRefOrGetter } from 'vue';
 import { computed, toValue } from 'vue';
 import { DateFilterBuilder } from './DateUIFilter';
 import { getFilterBuildersForRecordCategories } from './filter-builders/record-categories';
-import { GroupUIFilterBuilder } from './GroupUIFilter';
+import { GroupUIFilterBuilder, GroupUIFilterMode } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder, MultipleChoiceUIFilterOption } from './MultipleChoiceUIFilter';
 import { NumberFilterFormat } from './NumberFilterFormat';
 import { NumberFilterBuilder } from './NumberUIFilter';
@@ -670,25 +672,114 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
 
 // Events
 export function useAuditLogUIFilterBuilders() {
-    const all: UIFilterBuilder<UIFilter>[] = [];
-
-    const options: MultipleChoiceUIFilterOption[] = Object.values(AuditLogType).map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type), type));
-
-    const typeFilter = new MultipleChoiceFilterBuilder({
-        name: $t('%1B'),
-        options,
-        wrapper: {
-            type: {
-                $in: FilterWrapperMarker,
-            },
+    const organization = useOrganization();
+    const packages = organization.value?.meta.packages;
+    return getAuditLogUIFilterBuilders({
+        isPlatform: STAMHOOFD.userMode === 'platform',
+        isOrganizationLog: !!organization.value,
+        // The admin panel shows logs of all organizations
+        packages: {
+            members: packages?.useMembers ?? true,
+            webshops: packages?.useWebshops ?? true,
         },
     });
+}
 
-    all.push(typeFilter);
+export type AuditLogFilterContext = AuditLogTypeContext & {
+    /**
+     * Packages that are currently active. Types of other packages are left out of the filters.
+     */
+    packages: { members: boolean; webshops: boolean };
+};
+
+const membersPackageCategories = new Set([
+    AuditLogTypeCategory.Members,
+    AuditLogTypeCategory.Responsibilities,
+    AuditLogTypeCategory.PlatformMemberships,
+    AuditLogTypeCategory.Registrations,
+    AuditLogTypeCategory.Groups,
+    AuditLogTypeCategory.Events,
+    AuditLogTypeCategory.Documents,
+]);
+
+const membersPackageTypes = new Set([
+    AuditLogType.RegistrationPeriodAdded,
+    AuditLogType.RegistrationPeriodEdited,
+    AuditLogType.RegistrationPeriodDeleted,
+    AuditLogType.MemberSecurityCodeRequested,
+    AuditLogType.MemberSecurityCodeUsed,
+]);
+
+/**
+ * Types that can not appear in the log that is shown, so they are left out of the filters.
+ */
+function getUnavailableAuditLogTypes(context: AuditLogFilterContext): Set<AuditLogType> {
+    const { isPlatform, isOrganizationLog, packages } = context;
+
+    // Only used for old logs from before types existed; filtering on it is not useful
+    const unavailable = new Set<AuditLogType>([AuditLogType.Unknown]);
+
+    if (!isPlatform) {
+        unavailable.add(AuditLogType.PlatformSettingsChanged);
+        unavailable.add(AuditLogType.MemberPlatformMembershipAdded);
+        unavailable.add(AuditLogType.MemberPlatformMembershipEdited);
+        unavailable.add(AuditLogType.MemberPlatformMembershipDeleted);
+        unavailable.add(AuditLogType.EventNotificationAdded);
+        unavailable.add(AuditLogType.EventNotificationEdited);
+        unavailable.add(AuditLogType.EventNotificationDeleted);
+    }
+
+    if (isOrganizationLog) {
+        // These logs are saved without an organization, so they are only visible in the admin panel
+        unavailable.add(AuditLogType.PlatformSettingsChanged);
+        unavailable.add(AuditLogType.OrganizationAdded);
+        unavailable.add(AuditLogType.OrganizationDeleted);
+    }
+
+    for (const type of Object.values(AuditLogType)) {
+        const category = getAuditLogTypeCategory(type, context);
+        if (!packages.members && (membersPackageCategories.has(category) || membersPackageTypes.has(type))) {
+            unavailable.add(type);
+        }
+        if (!packages.webshops && category === AuditLogTypeCategory.Webshops) {
+            unavailable.add(type);
+        }
+    }
+
+    return unavailable;
+}
+
+export function getAuditLogUIFilterBuilders(context: AuditLogFilterContext) {
+    const unavailable = getUnavailableAuditLogTypes(context);
+    // Types missing from the order are listed last instead of being left out
+    const getOrderIndex = (type: AuditLogType) => {
+        const index = auditLogTypeOrder.indexOf(type);
+        return index === -1 ? auditLogTypeOrder.length : index;
+    };
+
+    const all: UIFilterBuilder<UIFilter>[] = Object.values(AuditLogTypeCategory).map((category) => {
+        const types = Object.values(AuditLogType)
+            .filter(type => getAuditLogTypeCategory(type, context) === category && !unavailable.has(type))
+            .sort((a, b) => getOrderIndex(a) - getOrderIndex(b));
+
+        return new MultipleChoiceFilterBuilder({
+            name: getAuditLogTypeCategoryName(category, context),
+            options: types.map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeFilterName(type, context), type)),
+            wrapper: {
+                type: {
+                    $in: FilterWrapperMarker,
+                },
+            },
+            multipleChoiceConfiguration: {
+                showOptionSelectAll: types.length > 1,
+            },
+        });
+    }).filter(builder => builder.multipleChoiceOptions.length > 0);
 
     all.unshift(
         new GroupUIFilterBuilder({
             builders: all,
+            defaultMode: GroupUIFilterMode.Or,
         }),
     );
 
