@@ -671,16 +671,49 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
 // Events
 export function useAuditLogUIFilterBuilders() {
     const organization = useOrganization();
+    const packages = organization.value?.meta.packages;
     return getAuditLogUIFilterBuilders({
         isPlatform: STAMHOOFD.userMode === 'platform',
         isOrganizationLog: !!organization.value,
+        // The admin panel shows logs of all organizations
+        packages: {
+            members: packages?.useMembers ?? true,
+            webshops: packages?.useWebshops ?? true,
+        },
     });
 }
 
+export type AuditLogFilterContext = AuditLogTypeContext & {
+    /**
+     * Packages that are currently active. Types of other packages are left out of the filters.
+     */
+    packages: { members: boolean; webshops: boolean };
+};
+
+const membersPackageCategories = new Set([
+    AuditLogTypeCategory.Members,
+    AuditLogTypeCategory.Responsibilities,
+    AuditLogTypeCategory.PlatformMemberships,
+    AuditLogTypeCategory.Registrations,
+    AuditLogTypeCategory.Groups,
+    AuditLogTypeCategory.Events,
+    AuditLogTypeCategory.Documents,
+]);
+
+const membersPackageTypes = new Set([
+    AuditLogType.RegistrationPeriodAdded,
+    AuditLogType.RegistrationPeriodEdited,
+    AuditLogType.RegistrationPeriodDeleted,
+    AuditLogType.MemberSecurityCodeRequested,
+    AuditLogType.MemberSecurityCodeUsed,
+]);
+
 /**
- * Types that can never appear in the log that is shown, so they are left out of the filters.
+ * Types that can not appear in the log that is shown, so they are left out of the filters.
  */
-function getUnavailableAuditLogTypes({ isPlatform, isOrganizationLog }: AuditLogTypeContext): Set<AuditLogType> {
+function getUnavailableAuditLogTypes(context: AuditLogFilterContext): Set<AuditLogType> {
+    const { isPlatform, isOrganizationLog, packages } = context;
+
     // Only used for old logs from before types existed; filtering on it is not useful
     const unavailable = new Set<AuditLogType>([AuditLogType.Unknown]);
 
@@ -701,10 +734,20 @@ function getUnavailableAuditLogTypes({ isPlatform, isOrganizationLog }: AuditLog
         unavailable.add(AuditLogType.OrganizationDeleted);
     }
 
+    for (const type of Object.values(AuditLogType)) {
+        const category = getAuditLogTypeCategory(type, context);
+        if (!packages.members && (membersPackageCategories.has(category) || membersPackageTypes.has(type))) {
+            unavailable.add(type);
+        }
+        if (!packages.webshops && category === AuditLogTypeCategory.Webshops) {
+            unavailable.add(type);
+        }
+    }
+
     return unavailable;
 }
 
-export function getAuditLogUIFilterBuilders(context: AuditLogTypeContext) {
+export function getAuditLogUIFilterBuilders(context: AuditLogFilterContext) {
     const unavailable = getUnavailableAuditLogTypes(context);
     // Types missing from the order are listed last instead of being left out
     const getOrderIndex = (type: AuditLogType) => {

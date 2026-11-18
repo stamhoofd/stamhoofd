@@ -7,8 +7,8 @@ import { MultipleChoiceFilterBuilder } from './MultipleChoiceUIFilter';
 
 const platformAdmin: AuditLogTypeContext = { isPlatform: true, isOrganizationLog: false };
 
-function getBuilders(options: AuditLogTypeContext = platformAdmin) {
-    const [root, ...categoryBuilders] = getAuditLogUIFilterBuilders(options);
+function getBuilders(options: AuditLogTypeContext = platformAdmin, packages = { members: true, webshops: true }) {
+    const [root, ...categoryBuilders] = getAuditLogUIFilterBuilders({ ...options, packages });
     if (!(root instanceof GroupUIFilterBuilder) || !categoryBuilders.every(b => b instanceof MultipleChoiceFilterBuilder)) {
         throw new Error('Expected a root group with one multiple choice filter per category');
     }
@@ -133,5 +133,37 @@ describe('audit log type filters', () => {
 
         expect(getAuditLogTypeCategoryName(AuditLogTypeCategory.Events, platformAdmin)).toBe('Activiteiten en kampmeldingen');
         expect(getAuditLogTypeCategoryName(AuditLogTypeCategory.Events, organizationLog)).toBe('Activiteiten');
+    });
+
+    test('leaves out types of packages that the organization does not use', () => {
+        const organizationLog: AuditLogTypeContext = { isPlatform: false, isOrganizationLog: true };
+        const filtersFor = (packages: { members: boolean; webshops: boolean }) => {
+            const { categoryBuilders } = getBuilders(organizationLog, packages);
+            return {
+                categories: categoryBuilders.map(b => b.name),
+                types: new Set(categoryBuilders.flatMap(b => b.multipleChoiceOptions.map(o => o.value))),
+            };
+        };
+        const name = (category: AuditLogTypeCategory) => getAuditLogTypeCategoryName(category, organizationLog);
+
+        const webshopsOnly = filtersFor({ members: false, webshops: true });
+        expect(webshopsOnly.categories).toEqual([
+            name(AuditLogTypeCategory.Webshops),
+            name(AuditLogTypeCategory.Payments),
+            name(AuditLogTypeCategory.Emails),
+            name(AuditLogTypeCategory.Users),
+            name(AuditLogTypeCategory.Settings),
+        ]);
+        expect(webshopsOnly.types.has(AuditLogType.RegistrationPeriodAdded)).toBe(false);
+        expect(webshopsOnly.types.has(AuditLogType.MemberSecurityCodeUsed)).toBe(false);
+        expect(webshopsOnly.types.has(AuditLogType.UserTwoFactorMethodAdded)).toBe(true);
+        expect(webshopsOnly.types.has(AuditLogType.StripeAccountAdded)).toBe(true);
+        expect(webshopsOnly.types.has(AuditLogType.OrganizationEdited)).toBe(true);
+
+        const membersOnly = filtersFor({ members: true, webshops: false });
+        expect(membersOnly.categories).not.toContain(name(AuditLogTypeCategory.Webshops));
+        expect(membersOnly.categories).toContain(name(AuditLogTypeCategory.Members));
+        expect(membersOnly.types.has(AuditLogType.RegistrationPeriodAdded)).toBe(true);
+        expect(membersOnly.types.has(AuditLogType.MemberSecurityCodeUsed)).toBe(true);
     });
 });
