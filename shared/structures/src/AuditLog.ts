@@ -240,7 +240,7 @@ export function getAuditLogTypeName(type: AuditLogType, context: AuditLogTypeCon
         case AuditLogType.BalanceItemDeleted:
             return $t('Verwijderde openstaande bedragen');
         case AuditLogType.DocumentTemplateAdded:
-            return $t('Nieuwe document');
+            return $t('Nieuwe documenten');
         case AuditLogType.DocumentTemplateEdited:
             return $t('Wijzigingen aan documenten');
         case AuditLogType.DocumentTemplateDeleted:
