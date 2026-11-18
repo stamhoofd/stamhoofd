@@ -57,6 +57,6 @@ function switchAccount() {
 
 <style lang="scss" scoped>
 :deep(.st-navigation-bar .header .left) {
-    overflow: auto;
+    overflow: hidden;
 }
 </style>
