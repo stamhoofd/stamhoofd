@@ -9,6 +9,7 @@ import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { BelcotaxCallbackEndpoint } from '../../src/endpoints/global/belcotax/BelcotaxCallbackEndpoint.js';
 import { BelcotaxConnectEndpoint } from '../../src/endpoints/organization/dashboard/belcotax/BelcotaxConnectEndpoint.js';
+import { BelcotaxSubmissionService } from '../../src/services/belcotax/BelcotaxSubmissionService.js';
 import { BelcotaxFodDecision, BelcotaxFodMocker } from '../helpers/BelcotaxFodMocker.js';
 import { testServer } from '../helpers/TestServer.js';
 import { initAdmin } from './initAdmin.js';
@@ -34,8 +35,13 @@ export function initBelcotaxApi(
     const mocker = new BelcotaxFodMocker(environment);
     mocker.start();
 
+    // Tests poll themselves, instead of timers that outlive the test
+    const followUpDelays = BelcotaxSubmissionService.followUpDelays;
+    BelcotaxSubmissionService.followUpDelays = [];
+
     TestUtils.scheduleAfterThisTest(() => {
         mocker.stop();
+        BelcotaxSubmissionService.followUpDelays = followUpDelays;
     });
 
     return mocker;

@@ -150,6 +150,30 @@ function getReplacements() {
             token: 'reviewUrl',
             value: 'https://www.example.com/review',
         }),
+        documentTemplateName: Replacement.create({
+            token: 'documentTemplateName',
+            value: $t('Fiscaal attest kinderopvang 2026'),
+        }),
+        submissionDate: Replacement.create({
+            token: 'submissionDate',
+            value: Formatter.dateTime(new Date()),
+        }),
+        documentCount: Replacement.create({
+            token: 'documentCount',
+            value: '214',
+        }),
+        issueCount: Replacement.create({
+            token: 'issueCount',
+            value: '2',
+        }),
+        unknownReason: Replacement.create({
+            token: 'unknownReason',
+            value: $t('Belcotax gaf binnen 24 uur geen resultaat.'),
+        }),
+        submissionUrl: Replacement.create({
+            token: 'submissionUrl',
+            value: 'https://www.example.com/submission',
+        }),
         submitterName: Replacement.create({
             token: 'submitterName',
             value: $t('%13f'),

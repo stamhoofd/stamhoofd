@@ -12,6 +12,7 @@ import {
 } from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
+import { BelcotaxDocumentStatus } from './belcotax/BelcotaxSubmission.js';
 import { NamedObject } from './Event.js';
 import {
     baseInMemoryFilterCompilers,
@@ -370,6 +371,12 @@ export class Document extends AutoEncoder implements ObjectWithRecords {
 
     @field({ decoder: StringDecoder })
     templateId: string;
+
+    /**
+     * Result of the last submission to the Belcotax API this document was part of, null when it was never sent
+     */
+    @field({ decoder: new EnumDecoder(BelcotaxDocumentStatus), nullable: true, ...NextVersion })
+    belcotaxStatus: BelcotaxDocumentStatus | null = null;
 
     isRecordEnabled(_record: RecordSettings): boolean {
         return true;

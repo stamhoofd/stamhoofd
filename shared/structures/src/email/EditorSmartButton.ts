@@ -53,6 +53,17 @@ export class EditorSmartButton extends AutoEncoder {
 
         buttons.push(
             EditorSmartButton.create({
+                id: 'submissionUrl',
+                name: $t('Knop naar de zending'),
+                text: $t('Zending bekijken'),
+                hint: $t(
+                    'Opent de zending naar Belcotax met het resultaat en de fouten per attest.',
+                ),
+            }),
+        );
+
+        buttons.push(
+            EditorSmartButton.create({
                 id: 'downloadUrl',
                 name: $t('%oJ'),
                 text: $t('%2E'),

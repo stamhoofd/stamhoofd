@@ -2,56 +2,27 @@ import * as jose from 'jose';
 
 import { BelcotaxConfig } from '../connection/BelcotaxConfig.js';
 import { BelcotaxOidcClient } from '../connection/BelcotaxOidcClient.js';
+import { BelcotaxMockBulks } from './BelcotaxBulkApiMockBulks.js';
+import type { BelcotaxMockApiResponse, BelcotaxMockApiRoute } from './BelcotaxMockApi.js';
+import { belcotaxProblem } from './BelcotaxMockApi.js';
 
-export type BelcotaxMockApiRequest = {
-    method: string;
-    /**
-     * Relative to the base URL of the API, without query string
-     */
-    path: string;
-    /**
-     * Company the access token was issued for
-     */
-    companyNumber: string;
-    match: RegExpExecArray;
-    /**
-     * Raw request body, e.g. the multipart form of a submission
-     */
-    body: string;
-    contentType: string | undefined;
-};
-
-export type BelcotaxMockApiResponse = [status: number, body: unknown];
-
-export type BelcotaxMockApiRoute = {
-    method: string;
-    path: RegExp;
-    handle(
-        request: BelcotaxMockApiRequest,
-    ): BelcotaxMockApiResponse | Promise<BelcotaxMockApiResponse>;
-};
-
-/**
- * RFC 9457 problem in the Belgif format FOD uses (§5.4 of "How to access FPS Finances's APIs")
- */
-export function belcotaxProblem(status: number, type: string, title: string, detail: string) {
-    return {
-        type: 'urn:problem-type:belgif:' + type,
-        href: `https://www.belgif.be/specification/rest/api-guide/problems/${type}.html`,
-        status,
-        title,
-        detail,
-    };
-}
+export type {
+    BelcotaxMockApiRequest,
+    BelcotaxMockApiResponse,
+    BelcotaxMockApiRoute,
+} from './BelcotaxMockApi.js';
+export { belcotaxProblem } from './BelcotaxMockApi.js';
 
 /**
  * Stand-in for the Belcotax bulk API (schemas/openapi.yml) next to the
  * local Keycloak realm, which issues the access tokens. Only registered in development and tests.
  *
- * Only checks the access token for now: submitting, validations and feedback add their routes
- * (and the outcome they simulate) to `routes`.
+ * Submitting, validations and feedback are in BelcotaxMockBulks, which also chooses the outcome.
  */
 export class BelcotaxBulkApiMock {
+    /**
+     * Extra routes for tests, before the ones of BelcotaxMockBulks
+     */
     static routes: BelcotaxMockApiRoute[] = [];
 
     static async handle(
@@ -93,7 +64,7 @@ export class BelcotaxBulkApiMock {
             ];
         }
 
-        for (const route of this.routes) {
+        for (const route of [...this.routes, ...BelcotaxMockBulks.routes]) {
             const routeMatch = route.method === method ? route.path.exec(path) : null;
             if (routeMatch) {
                 return await route.handle({
