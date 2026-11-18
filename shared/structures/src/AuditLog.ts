@@ -419,9 +419,9 @@ export function getAuditLogTypeCategory(type: AuditLogType): AuditLogTypeCategor
 
         case AuditLogType.OrganizationAdded:
         case AuditLogType.OrganizationDeleted:
-        case AuditLogType.OrganizationEdited:
             return AuditLogTypeCategory.Organizations;
 
+        case AuditLogType.OrganizationEdited:
         case AuditLogType.PlatformSettingsChanged:
         case AuditLogType.RegistrationPeriodEdited:
         case AuditLogType.RegistrationPeriodAdded:

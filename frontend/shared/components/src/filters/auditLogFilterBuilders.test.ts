@@ -1,11 +1,11 @@
 import { AuditLogType, AuditLogTypeCategory, getAuditLogTypeCategory, getAuditLogTypeCategoryName } from '@stamhoofd/structures';
 import { describe, expect, test } from 'vitest';
-import { useAuditLogUIFilterBuilders } from './filterBuilders';
+import { getAuditLogUIFilterBuilders } from './filterBuilders';
 import { GroupUIFilterBuilder, GroupUIFilterMode } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder } from './MultipleChoiceUIFilter';
 
-function getBuilders() {
-    const [root, ...categoryBuilders] = useAuditLogUIFilterBuilders();
+function getBuilders(options = { isPlatform: true, isOrganizationLog: false }) {
+    const [root, ...categoryBuilders] = getAuditLogUIFilterBuilders(options);
     if (!(root instanceof GroupUIFilterBuilder) || !categoryBuilders.every(b => b instanceof MultipleChoiceFilterBuilder)) {
         throw new Error('Expected a root group with one multiple choice filter per category');
     }
@@ -13,7 +13,7 @@ function getBuilders() {
 }
 
 describe('audit log type filters', () => {
-    test('has one filter per category that together contain every type once', () => {
+    test('has one filter per category that together contain every type once in the platform admin', () => {
         const { categoryBuilders } = getBuilders();
 
         expect(categoryBuilders.map(b => b.name)).toEqual(Object.values(AuditLogTypeCategory).map(c => getAuditLogTypeCategoryName(c)));
@@ -51,5 +51,35 @@ describe('audit log type filters', () => {
                 { type: { $in: [registrations.multipleChoiceOptions[0].value] } },
             ],
         });
+    });
+
+    test('leaves out types that never appear in the log of an organization', () => {
+        const typesOf = (options: { isPlatform: boolean; isOrganizationLog: boolean }) => {
+            const { categoryBuilders } = getBuilders(options);
+            expect(categoryBuilders.every(b => b.multipleChoiceOptions.length > 0)).toBe(true);
+            return {
+                categories: categoryBuilders.map(b => b.name),
+                types: new Set(categoryBuilders.flatMap(b => b.multipleChoiceOptions.map(o => o.value))),
+            };
+        };
+
+        const platformOrganization = typesOf({ isPlatform: true, isOrganizationLog: true });
+        expect(platformOrganization.types.has(AuditLogType.MemberPlatformMembershipAdded)).toBe(true);
+        expect(platformOrganization.types.has(AuditLogType.EventNotificationAdded)).toBe(true);
+        expect(platformOrganization.types.has(AuditLogType.OrganizationEdited)).toBe(true);
+        expect(platformOrganization.types.has(AuditLogType.OrganizationAdded)).toBe(false);
+        expect(platformOrganization.types.has(AuditLogType.PlatformSettingsChanged)).toBe(false);
+        expect(platformOrganization.categories).not.toContain(getAuditLogTypeCategoryName(AuditLogTypeCategory.Organizations));
+
+        const organization = typesOf({ isPlatform: false, isOrganizationLog: true });
+        expect(organization.types.has(AuditLogType.MemberPlatformMembershipAdded)).toBe(false);
+        expect(organization.types.has(AuditLogType.EventNotificationAdded)).toBe(false);
+        expect(organization.types.has(AuditLogType.EventAdded)).toBe(true);
+        expect(organization.types.has(AuditLogType.OrganizationEdited)).toBe(true);
+        expect(organization.categories).not.toContain(getAuditLogTypeCategoryName(AuditLogTypeCategory.PlatformMemberships));
+
+        const admin = typesOf({ isPlatform: false, isOrganizationLog: false });
+        expect(admin.types.has(AuditLogType.OrganizationAdded)).toBe(true);
+        expect(admin.types.has(AuditLogType.PlatformSettingsChanged)).toBe(false);
     });
 });

@@ -670,8 +670,44 @@ function getEventUIFilterBuilders({ platform, organizations, app, permissions, g
 
 // Events
 export function useAuditLogUIFilterBuilders() {
+    const organization = useOrganization();
+    return getAuditLogUIFilterBuilders({
+        isPlatform: STAMHOOFD.userMode === 'platform',
+        isOrganizationLog: !!organization.value,
+    });
+}
+
+/**
+ * Types that can never appear in the log that is shown, so they are left out of the filters.
+ */
+function getUnavailableAuditLogTypes({ isPlatform, isOrganizationLog }: { isPlatform: boolean; isOrganizationLog: boolean }): Set<AuditLogType> {
+    const unavailable = new Set<AuditLogType>();
+
+    if (!isPlatform) {
+        unavailable.add(AuditLogType.PlatformSettingsChanged);
+        unavailable.add(AuditLogType.MemberPlatformMembershipAdded);
+        unavailable.add(AuditLogType.MemberPlatformMembershipEdited);
+        unavailable.add(AuditLogType.MemberPlatformMembershipDeleted);
+        unavailable.add(AuditLogType.EventNotificationAdded);
+        unavailable.add(AuditLogType.EventNotificationEdited);
+        unavailable.add(AuditLogType.EventNotificationDeleted);
+    }
+
+    if (isOrganizationLog) {
+        // These logs are saved without an organization, so they are only visible in the admin panel
+        unavailable.add(AuditLogType.PlatformSettingsChanged);
+        unavailable.add(AuditLogType.OrganizationAdded);
+        unavailable.add(AuditLogType.OrganizationDeleted);
+    }
+
+    return unavailable;
+}
+
+export function getAuditLogUIFilterBuilders(options: { isPlatform: boolean; isOrganizationLog: boolean }) {
+    const unavailable = getUnavailableAuditLogTypes(options);
+
     const all: UIFilterBuilder<UIFilter>[] = Object.values(AuditLogTypeCategory).map((category) => {
-        const types = Object.values(AuditLogType).filter(type => getAuditLogTypeCategory(type) === category);
+        const types = Object.values(AuditLogType).filter(type => getAuditLogTypeCategory(type) === category && !unavailable.has(type));
 
         return new MultipleChoiceFilterBuilder({
             name: getAuditLogTypeCategoryName(category),
@@ -685,7 +721,7 @@ export function useAuditLogUIFilterBuilders() {
                 showOptionSelectAll: types.length > 1,
             },
         });
-    });
+    }).filter(builder => builder.multipleChoiceOptions.length > 0);
 
     all.unshift(
         new GroupUIFilterBuilder({
