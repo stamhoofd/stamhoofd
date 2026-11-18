@@ -155,91 +155,91 @@ export enum AuditLogType {
 export function getAuditLogTypeName(type: AuditLogType): string {
     switch (type) {
         case AuditLogType.MemberEdited:
-            return 'Wijzigingen aan gegevens van leden';
+            return $t('Wijzigingen aan gegevens van leden');
         case AuditLogType.MemberAdded:
-            return 'Nieuwe leden';
+            return $t('Nieuwe leden');
         case AuditLogType.MemberDeleted:
-            return 'Verwijderde leden';
+            return $t('Verwijderde leden');
         case AuditLogType.MemberRegistered:
-            return 'Inschrijvingen';
+            return $t('Inschrijvingen');
         case AuditLogType.MemberUnregistered:
-            return 'Uitschrijvingen';
+            return $t('Uitschrijvingen');
         case AuditLogType.Unknown:
-            return 'Onbekende actie';
+            return $t('Onbekende actie');
         case AuditLogType.PlatformSettingsChanged:
-            return 'Wijzigingen aan platforminstellingen';
+            return $t('Wijzigingen aan platforminstellingen');
         case AuditLogType.OrganizationEdited:
-            return 'Wijzigingen aan instellingen van een groep';
+            return $t('Wijzigingen aan instellingen van een groep');
         case AuditLogType.OrganizationAdded:
-            return 'Nieuwe lokale groepen';
+            return $t('Nieuwe lokale groepen');
         case AuditLogType.OrganizationDeleted:
-            return 'Verwijderde lokale groepen';
+            return $t('Verwijderde lokale groepen');
         case AuditLogType.EventEdited:
-            return 'Wijzigingen aan activiteiten';
+            return $t('Wijzigingen aan activiteiten');
         case AuditLogType.EventAdded:
-            return 'Nieuwe activiteiten';
+            return $t('Nieuwe activiteiten');
         case AuditLogType.EventDeleted:
-            return 'Verwijderde activiteiten';
+            return $t('Verwijderde activiteiten');
         case AuditLogType.GroupEdited:
-            return 'Wijzigingen aan groepen';
+            return $t('Wijzigingen aan groepen');
         case AuditLogType.GroupAdded:
-            return 'Nieuwe groepen';
+            return $t('Nieuwe groepen');
         case AuditLogType.GroupDeleted:
-            return 'Verwijderde groepen';
+            return $t('Verwijderde groepen');
         case AuditLogType.WaitingListEdited:
-            return 'Wijzigingen aan wachtlijsten';
+            return $t('Wijzigingen aan wachtlijsten');
         case AuditLogType.WaitingListAdded:
-            return 'Nieuwe wachtlijsten';
+            return $t('Nieuwe wachtlijsten');
         case AuditLogType.WaitingListDeleted:
-            return 'Verwijderde wachtlijsten';
+            return $t('Verwijderde wachtlijsten');
         case AuditLogType.RegistrationPeriodEdited:
-            return 'Wijzigingen aan werkjaren';
+            return $t('Wijzigingen aan werkjaren');
         case AuditLogType.RegistrationPeriodAdded:
-            return 'Nieuwe werkjaren';
+            return $t('Nieuwe werkjaren');
         case AuditLogType.RegistrationPeriodDeleted:
-            return 'Verwijderde werkjaren';
+            return $t('Verwijderde werkjaren');
         case AuditLogType.StripeAccountAdded:
-            return 'Stripe account aangemaakt';
+            return $t('Stripe account aangemaakt');
         case AuditLogType.StripeAccountDeleted:
-            return 'Stripe account verwijderd';
+            return $t('Stripe account verwijderd');
         case AuditLogType.StripeAccountEdited:
-            return 'Stripe account gewijzigd';
+            return $t('Stripe account gewijzigd');
         case AuditLogType.WebshopEdited:
-            return 'Wijzigingen aan webshops';
+            return $t('Wijzigingen aan webshops');
         case AuditLogType.WebshopAdded:
-            return 'Nieuwe webshops';
+            return $t('Nieuwe webshops');
         case AuditLogType.WebshopDeleted:
-            return 'Verwijderde webshops';
+            return $t('Verwijderde webshops');
         case AuditLogType.OrderAdded:
-            return 'Nieuwe bestellingen';
+            return $t('Nieuwe bestellingen');
         case AuditLogType.OrderEdited:
-            return 'Wijzigingen aan bestellingen';
+            return $t('Wijzigingen aan bestellingen');
         case AuditLogType.OrderDeleted:
-            return 'Verwijderde bestellingen';
+            return $t('Verwijderde bestellingen');
         case AuditLogType.PaymentAdded:
-            return 'Nieuwe betalingen';
+            return $t('Nieuwe betalingen');
         case AuditLogType.PaymentEdited:
-            return 'Wijzigingen aan betalingen';
+            return $t('Wijzigingen aan betalingen');
         case AuditLogType.PaymentDeleted:
-            return 'Verwijderde betalingen';
+            return $t('Verwijderde betalingen');
         case AuditLogType.BalanceItemAdded:
-            return 'Nieuwe openstaande bedragen';
+            return $t('Nieuwe openstaande bedragen');
         case AuditLogType.BalanceItemEdited:
-            return 'Wijzigingen aan openstaande bedragen';
+            return $t('Wijzigingen aan openstaande bedragen');
         case AuditLogType.BalanceItemDeleted:
-            return 'Verwijderde openstaande bedragen';
+            return $t('Verwijderde openstaande bedragen');
         case AuditLogType.DocumentTemplateAdded:
-            return 'Nieuwe document';
+            return $t('Nieuwe document');
         case AuditLogType.DocumentTemplateEdited:
-            return 'Wijzigingen aan documenten';
+            return $t('Wijzigingen aan documenten');
         case AuditLogType.DocumentTemplateDeleted:
-            return 'Verwijderde documenten';
+            return $t('Verwijderde documenten');
         case AuditLogType.UserAdded:
-            return 'Nieuwe accounts';
+            return $t('Nieuwe accounts');
         case AuditLogType.UserEdited:
-            return 'Wijzigingen aan accounts';
+            return $t('Wijzigingen aan accounts');
         case AuditLogType.UserDeleted:
-            return 'Verwijderde accounts';
+            return $t('Verwijderde accounts');
 
         case AuditLogType.UserTwoFactorMethodAdded:
             return $t('%ZhN');
@@ -252,65 +252,65 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return $t('%Zn3');
 
         case AuditLogType.MemberResponsibilityRecordAdded:
-            return 'Nieuwe toegekende functies';
+            return $t('Nieuwe toegekende functies');
         case AuditLogType.MemberResponsibilityRecordEdited:
-            return 'Wijzigingen aan toegekende functies';
+            return $t('Wijzigingen aan toegekende functies');
         case AuditLogType.MemberResponsibilityRecordDeleted:
-            return 'Verwijderde functies';
+            return $t('Verwijderde functies');
 
         case AuditLogType.MemberPlatformMembershipAdded:
-            return 'Nieuwe aansluitingen';
+            return $t('Nieuwe aansluitingen');
         case AuditLogType.MemberPlatformMembershipEdited:
-            return 'Wijzigingen aan aansluitingen';
+            return $t('Wijzigingen aan aansluitingen');
         case AuditLogType.MemberPlatformMembershipDeleted:
-            return 'Verwijderde aansluitingen';
+            return $t('Verwijderde aansluitingen');
 
         case AuditLogType.EmailSent:
-            return 'Succesvol verzonden e-mails';
+            return $t('Succesvol verzonden e-mails');
         case AuditLogType.EmailSending:
-            return 'E-mail gestart met verzenden';
+            return $t('E-mail gestart met verzenden');
         case AuditLogType.EmailPublished:
-            return 'Gepubliceerde berichten';
+            return $t('Gepubliceerde berichten');
         case AuditLogType.EmailEdited:
-            return 'Wijzigingen aan berichten';
+            return $t('Wijzigingen aan berichten');
         case AuditLogType.EmailDeleted:
-            return 'Verwijderde berichten';
+            return $t('Verwijderde berichten');
 
         case AuditLogType.EmailAddressMarkedAsSpam:
-            return 'E-mailadressen gemarkeerd als spam';
+            return $t('E-mailadressen gemarkeerd als spam');
         case AuditLogType.EmailAddressHardBounced:
-            return 'E-mailadressen die hard gebounced zijn';
+            return $t('E-mailadressen die hard gebounced zijn');
         case AuditLogType.EmailAddressSoftBounced:
-            return 'E-mailadressen die soft gebounced zijn';
+            return $t('E-mailadressen die soft gebounced zijn');
         case AuditLogType.EmailAddressUnsubscribed:
-            return 'E-mailadressen die zich hebben uitgeschreven';
+            return $t('E-mailadressen die zich hebben uitgeschreven');
 
         case AuditLogType.EmailTemplateAdded:
-            return 'Nieuw e-mailsjabloon';
+            return $t('Nieuw e-mailsjabloon');
         case AuditLogType.EmailTemplateEdited:
-            return 'Wijzigingen aan e-mailsjablonen';
+            return $t('Wijzigingen aan e-mailsjablonen');
         case AuditLogType.EmailTemplateDeleted:
-            return 'Verwijderde E-mailsjablonen';
+            return $t('Verwijderde E-mailsjablonen');
 
         case AuditLogType.EmailAddressFraudComplaint:
-            return 'E-mailadressen die een fraudeklacht hebben ingediend';
+            return $t('E-mailadressen die een fraudeklacht hebben ingediend');
 
         case AuditLogType.MemberSecurityCodeUsed:
-            return 'Gebruik van beveiligingscodes';
+            return $t('Gebruik van beveiligingscodes');
 
         case AuditLogType.MemberSecurityCodeRequested:
-            return 'Aangevraagde beveiligingscodes';
+            return $t('Aangevraagde beveiligingscodes');
 
         case AuditLogType.RegistrationInvitationAdded:
-            return 'Nieuwe uitnodigingen';
+            return $t('Nieuwe uitnodigingen');
         case AuditLogType.RegistrationInvitationDeleted:
-            return 'Verwijderde uitnodigingen';
+            return $t('Verwijderde uitnodigingen');
         case AuditLogType.EventNotificationAdded:
-            return 'Nieuwe kampmeldingen';
+            return $t('Nieuwe kampmeldingen');
         case AuditLogType.EventNotificationEdited:
-            return 'Wijzigingen aan kampmeldingen';
+            return $t('Wijzigingen aan kampmeldingen');
         case AuditLogType.EventNotificationDeleted:
-            return 'Verwijderde kampmeldingen';
+            return $t('Verwijderde kampmeldingen');
     }
 }
 
