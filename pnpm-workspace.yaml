@@ -58,6 +58,10 @@ overrides:
     'yargs@<18': '17.7.3'
     'js-yaml@<5': '4.3.2'
     '@colors/colors': '1.6.1'
+    # Docs-only transitive advisories (mcp-toolkit > @modelcontextprotocol/sdk, nitropack 2.13.6 > archiver 8 > readdir-glob 3).
+    hono: '4.13.16'
+    '@hono/node-server': '2.1.6'
+    'readdir-glob@>=3>minimatch': '11.0.3'
     'nx>brace-expansion': '5.0.12'
     'nx>follow-redirects': '1.16.2'
     'nx>smol-toml': '1.9.0'
