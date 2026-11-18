@@ -50,7 +50,6 @@ onMounted(() => {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    max-width: 40vw;
     display: block;
     font-size: 16px;
 }
@@ -60,7 +59,6 @@ onMounted(() => {
     width: 100%;
     position: relative;
     display: block;
-    max-width: 200px;
     line-height: 40px;
 
     &.expand {

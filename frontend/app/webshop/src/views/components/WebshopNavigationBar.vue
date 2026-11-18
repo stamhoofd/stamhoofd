@@ -54,3 +54,9 @@ function switchAccount() {
     }).catch(console.error);
 }
 </script>
+
+<style lang="scss" scoped>
+:deep(.st-navigation-bar .header .left) {
+    overflow: auto;
+}
+</style>
