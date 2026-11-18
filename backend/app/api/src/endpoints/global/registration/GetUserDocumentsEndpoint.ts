@@ -74,8 +74,10 @@ export class GetUserDocumentsEndpoint extends Endpoint<Params, Query, Body, Resp
 
         const filteredDocuments = documents.filter((document) => {
             const template = templates.find((t) => t.id == document.templateId);
+            // Without an organization scope the templates above were not filtered on their status yet
             if (
                 !template ||
+                template.status !== DocumentStatus.Published ||
                 (!template.updatesEnabled && document.status === DocumentStatus.MissingData)
             ) {
                 return false;

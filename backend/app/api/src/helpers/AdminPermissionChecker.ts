@@ -14,6 +14,7 @@ import type {
 } from '@stamhoofd/models';
 import {
     CachedBalance,
+    DocumentTemplate,
     Event,
     EventNotification,
     Group,
@@ -42,6 +43,7 @@ import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import {
+    DocumentStatus,
     EmailTemplate as EmailTemplateStruct,
     EventPeriodHelper,
     EventPermissionChecker,
@@ -1148,7 +1150,9 @@ export class AdminPermissionChecker {
             const members = await Member.getMembersWithRegistrationForUser(this.user);
 
             if (members.find((m) => m.id == document.memberId)) {
-                return true;
+                // A member only reaches a document once its template is published, like the list in the member portal
+                const template = await DocumentTemplate.getByID(document.templateId);
+                return template?.status === DocumentStatus.Published;
             }
         }
 
