@@ -152,7 +152,18 @@ export enum AuditLogType {
     EventNotificationDeleted = 'EventNotificationDeleted',
 }
 
-export function getAuditLogTypeName(type: AuditLogType): string {
+/**
+ * Where audit logs are shown. Some names and categories depend on it.
+ */
+export type AuditLogTypeContext = {
+    isPlatform: boolean;
+    /**
+     * True for the log of a single organization, false for the admin panel.
+     */
+    isOrganizationLog: boolean;
+};
+
+export function getAuditLogTypeName(type: AuditLogType, context: AuditLogTypeContext): string {
     switch (type) {
         case AuditLogType.MemberEdited:
             return $t('Wijzigingen aan gegevens van leden');
@@ -169,11 +180,11 @@ export function getAuditLogTypeName(type: AuditLogType): string {
         case AuditLogType.PlatformSettingsChanged:
             return $t('Wijzigingen aan platforminstellingen');
         case AuditLogType.OrganizationEdited:
-            return $t('Wijzigingen aan instellingen van een groep');
+            return context.isOrganizationLog ? $t('Wijzigingen aan deze #lokale-groep') : $t('Wijzigingen aan #lokale-groepen');
         case AuditLogType.OrganizationAdded:
-            return $t('Nieuwe lokale groepen');
+            return $t('Nieuwe #lokale-groepen');
         case AuditLogType.OrganizationDeleted:
-            return $t('Verwijderde lokale groepen');
+            return $t('Verwijderde #lokale-groepen');
         case AuditLogType.EventEdited:
             return $t('Wijzigingen aan activiteiten');
         case AuditLogType.EventAdded:
@@ -414,9 +425,9 @@ export const auditLogTypeOrder: AuditLogType[] = [
     AuditLogType.DocumentTemplateDeleted,
 
     AuditLogType.OrganizationAdded,
+    AuditLogType.OrganizationEdited,
     AuditLogType.OrganizationDeleted,
 
-    AuditLogType.OrganizationEdited,
     AuditLogType.PlatformSettingsChanged,
     AuditLogType.RegistrationPeriodAdded,
     AuditLogType.RegistrationPeriodEdited,
@@ -428,7 +439,7 @@ export const auditLogTypeOrder: AuditLogType[] = [
     AuditLogType.Unknown,
 ];
 
-export function getAuditLogTypeCategory(type: AuditLogType): AuditLogTypeCategory {
+export function getAuditLogTypeCategory(type: AuditLogType, context: AuditLogTypeContext): AuditLogTypeCategory {
     switch (type) {
         case AuditLogType.MemberEdited:
         case AuditLogType.MemberAdded:
@@ -519,6 +530,9 @@ export function getAuditLogTypeCategory(type: AuditLogType): AuditLogTypeCategor
             return AuditLogTypeCategory.Organizations;
 
         case AuditLogType.OrganizationEdited:
+            // Within an organization, these are changes to its own settings
+            return context.isOrganizationLog ? AuditLogTypeCategory.Settings : AuditLogTypeCategory.Organizations;
+
         case AuditLogType.PlatformSettingsChanged:
         case AuditLogType.RegistrationPeriodEdited:
         case AuditLogType.RegistrationPeriodAdded:
@@ -533,7 +547,7 @@ export function getAuditLogTypeCategory(type: AuditLogType): AuditLogTypeCategor
     }
 }
 
-export function getAuditLogTypeCategoryName(category: AuditLogTypeCategory): string {
+export function getAuditLogTypeCategoryName(category: AuditLogTypeCategory, context: AuditLogTypeContext): string {
     switch (category) {
         case AuditLogTypeCategory.Members:
             return $t('Leden');
@@ -542,7 +556,7 @@ export function getAuditLogTypeCategoryName(category: AuditLogTypeCategory): str
         case AuditLogTypeCategory.Groups:
             return $t('Groepen en wachtlijsten');
         case AuditLogTypeCategory.Events:
-            return $t('Activiteiten en kampmeldingen');
+            return context.isPlatform ? $t('Activiteiten en kampmeldingen') : $t('Activiteiten');
         case AuditLogTypeCategory.Webshops:
             return $t('Webshops en bestellingen');
         case AuditLogTypeCategory.Payments:
@@ -558,7 +572,7 @@ export function getAuditLogTypeCategoryName(category: AuditLogTypeCategory): str
         case AuditLogTypeCategory.Documents:
             return $t('Documenten');
         case AuditLogTypeCategory.Organizations:
-            return $t('Lokale groepen');
+            return $t('#Lokale-groepen');
         case AuditLogTypeCategory.Settings:
             return $t('Instellingen en werkjaren');
         case AuditLogTypeCategory.Other:

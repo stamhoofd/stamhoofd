@@ -2,7 +2,7 @@ import { useContext } from '#hooks/useContext.ts';
 import { useEventTypes } from '#hooks/useEventTypes.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform, WrapperFilter } from '@stamhoofd/structures';
+import type { AppType, AuditLogTypeContext, EventNotificationType, Group, LoadedPermissions, Organization, Platform, WrapperFilter } from '@stamhoofd/structures';
 import { AuditLogType, AuditLogTypeCategory, auditLogTypeOrder, BalanceItemRelationType, BalanceItemStatus, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, getAuditLogTypeCategory, getAuditLogTypeCategoryName, getAuditLogTypeName, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { MaybeRefOrGetter } from 'vue';
@@ -680,7 +680,7 @@ export function useAuditLogUIFilterBuilders() {
 /**
  * Types that can never appear in the log that is shown, so they are left out of the filters.
  */
-function getUnavailableAuditLogTypes({ isPlatform, isOrganizationLog }: { isPlatform: boolean; isOrganizationLog: boolean }): Set<AuditLogType> {
+function getUnavailableAuditLogTypes({ isPlatform, isOrganizationLog }: AuditLogTypeContext): Set<AuditLogType> {
     // Only used for old logs from before types existed; filtering on it is not useful
     const unavailable = new Set<AuditLogType>([AuditLogType.Unknown]);
 
@@ -704,8 +704,8 @@ function getUnavailableAuditLogTypes({ isPlatform, isOrganizationLog }: { isPlat
     return unavailable;
 }
 
-export function getAuditLogUIFilterBuilders(options: { isPlatform: boolean; isOrganizationLog: boolean }) {
-    const unavailable = getUnavailableAuditLogTypes(options);
+export function getAuditLogUIFilterBuilders(context: AuditLogTypeContext) {
+    const unavailable = getUnavailableAuditLogTypes(context);
     // Types missing from the order are listed last instead of being left out
     const getOrderIndex = (type: AuditLogType) => {
         const index = auditLogTypeOrder.indexOf(type);
@@ -714,12 +714,12 @@ export function getAuditLogUIFilterBuilders(options: { isPlatform: boolean; isOr
 
     const all: UIFilterBuilder<UIFilter>[] = Object.values(AuditLogTypeCategory).map((category) => {
         const types = Object.values(AuditLogType)
-            .filter(type => getAuditLogTypeCategory(type) === category && !unavailable.has(type))
+            .filter(type => getAuditLogTypeCategory(type, context) === category && !unavailable.has(type))
             .sort((a, b) => getOrderIndex(a) - getOrderIndex(b));
 
         return new MultipleChoiceFilterBuilder({
-            name: getAuditLogTypeCategoryName(category),
-            options: types.map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type), type)),
+            name: getAuditLogTypeCategoryName(category, context),
+            options: types.map(type => new MultipleChoiceUIFilterOption(getAuditLogTypeName(type, context), type)),
             wrapper: {
                 type: {
                     $in: FilterWrapperMarker,

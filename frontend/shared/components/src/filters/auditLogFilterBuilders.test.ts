@@ -1,10 +1,13 @@
+import type { AuditLogTypeContext } from '@stamhoofd/structures';
 import { AuditLogType, AuditLogTypeCategory, auditLogTypeOrder, getAuditLogTypeCategory, getAuditLogTypeCategoryName } from '@stamhoofd/structures';
 import { describe, expect, test } from 'vitest';
 import { getAuditLogUIFilterBuilders } from './filterBuilders';
 import { GroupUIFilterBuilder, GroupUIFilterMode } from './GroupUIFilter';
 import { MultipleChoiceFilterBuilder } from './MultipleChoiceUIFilter';
 
-function getBuilders(options = { isPlatform: true, isOrganizationLog: false }) {
+const platformAdmin: AuditLogTypeContext = { isPlatform: true, isOrganizationLog: false };
+
+function getBuilders(options: AuditLogTypeContext = platformAdmin) {
     const [root, ...categoryBuilders] = getAuditLogUIFilterBuilders(options);
     if (!(root instanceof GroupUIFilterBuilder) || !categoryBuilders.every(b => b instanceof MultipleChoiceFilterBuilder)) {
         throw new Error('Expected a root group with one multiple choice filter per category');
@@ -18,7 +21,7 @@ describe('audit log type filters', () => {
         const categories = Object.values(AuditLogTypeCategory).filter(c => c !== AuditLogTypeCategory.Other);
         const knownTypes = Object.values(AuditLogType).filter(t => t !== AuditLogType.Unknown);
 
-        expect(categoryBuilders.map(b => b.name)).toEqual(categories.map(c => getAuditLogTypeCategoryName(c)));
+        expect(categoryBuilders.map(b => b.name)).toEqual(categories.map(c => getAuditLogTypeCategoryName(c, platformAdmin)));
 
         const types = categoryBuilders.flatMap(b => b.multipleChoiceOptions.map(o => o.value));
         expect(types).toHaveLength(knownTypes.length);
@@ -26,7 +29,7 @@ describe('audit log type filters', () => {
 
         for (const [index, category] of categories.entries()) {
             for (const option of categoryBuilders[index].multipleChoiceOptions) {
-                expect(getAuditLogTypeCategory(option.value as AuditLogType)).toBe(category);
+                expect(getAuditLogTypeCategory(option.value as AuditLogType, platformAdmin)).toBe(category);
             }
         }
     });
@@ -56,7 +59,7 @@ describe('audit log type filters', () => {
     });
 
     test('leaves out types that never appear in the log of an organization', () => {
-        const typesOf = (options: { isPlatform: boolean; isOrganizationLog: boolean }) => {
+        const typesOf = (options: AuditLogTypeContext) => {
             const { categoryBuilders } = getBuilders(options);
             expect(categoryBuilders.every(b => b.multipleChoiceOptions.length > 0)).toBe(true);
             return {
@@ -71,14 +74,14 @@ describe('audit log type filters', () => {
         expect(platformOrganization.types.has(AuditLogType.OrganizationEdited)).toBe(true);
         expect(platformOrganization.types.has(AuditLogType.OrganizationAdded)).toBe(false);
         expect(platformOrganization.types.has(AuditLogType.PlatformSettingsChanged)).toBe(false);
-        expect(platformOrganization.categories).not.toContain(getAuditLogTypeCategoryName(AuditLogTypeCategory.Organizations));
+        expect(platformOrganization.categories).not.toContain(getAuditLogTypeCategoryName(AuditLogTypeCategory.Organizations, platformAdmin));
 
         const organization = typesOf({ isPlatform: false, isOrganizationLog: true });
         expect(organization.types.has(AuditLogType.MemberPlatformMembershipAdded)).toBe(false);
         expect(organization.types.has(AuditLogType.EventNotificationAdded)).toBe(false);
         expect(organization.types.has(AuditLogType.EventAdded)).toBe(true);
         expect(organization.types.has(AuditLogType.OrganizationEdited)).toBe(true);
-        expect(organization.categories).not.toContain(getAuditLogTypeCategoryName(AuditLogTypeCategory.PlatformMemberships));
+        expect(organization.categories).not.toContain(getAuditLogTypeCategoryName(AuditLogTypeCategory.PlatformMemberships, platformAdmin));
 
         const admin = typesOf({ isPlatform: false, isOrganizationLog: false });
         expect(admin.types.has(AuditLogType.OrganizationAdded)).toBe(true);
@@ -91,7 +94,7 @@ describe('audit log type filters', () => {
 
         const { categoryBuilders } = getBuilders();
         const typesOf = (category: AuditLogTypeCategory) => categoryBuilders
-            .find(b => b.name === getAuditLogTypeCategoryName(category))!
+            .find(b => b.name === getAuditLogTypeCategoryName(category, platformAdmin))!
             .multipleChoiceOptions.map(o => o.value);
 
         expect(typesOf(AuditLogTypeCategory.Members)).toEqual([AuditLogType.MemberAdded, AuditLogType.MemberEdited, AuditLogType.MemberDeleted]);
@@ -110,5 +113,25 @@ describe('audit log type filters', () => {
             AuditLogType.EmailAddressFraudComplaint,
             AuditLogType.EmailAddressUnsubscribed,
         ]);
+    });
+
+    test('names and groups changes to organizations depending on where the log is shown', () => {
+        const optionsOf = (context: AuditLogTypeContext, category: AuditLogTypeCategory) => {
+            const builder = getBuilders(context).categoryBuilders.find(b => b.name === getAuditLogTypeCategoryName(category, context));
+            return builder?.multipleChoiceOptions.map(o => ({ type: o.value, name: o.name })) ?? [];
+        };
+
+        expect(optionsOf(platformAdmin, AuditLogTypeCategory.Organizations)).toEqual([
+            { type: AuditLogType.OrganizationAdded, name: 'Nieuwe #lokale-groepen' },
+            { type: AuditLogType.OrganizationEdited, name: 'Wijzigingen aan #lokale-groepen' },
+            { type: AuditLogType.OrganizationDeleted, name: 'Verwijderde #lokale-groepen' },
+        ]);
+
+        const organizationLog: AuditLogTypeContext = { isPlatform: false, isOrganizationLog: true };
+        expect(optionsOf(organizationLog, AuditLogTypeCategory.Organizations)).toEqual([]);
+        expect(optionsOf(organizationLog, AuditLogTypeCategory.Settings)[0]).toEqual({ type: AuditLogType.OrganizationEdited, name: 'Wijzigingen aan deze #lokale-groep' });
+
+        expect(getAuditLogTypeCategoryName(AuditLogTypeCategory.Events, platformAdmin)).toBe('Activiteiten en kampmeldingen');
+        expect(getAuditLogTypeCategoryName(AuditLogTypeCategory.Events, organizationLog)).toBe('Activiteiten');
     });
 });
