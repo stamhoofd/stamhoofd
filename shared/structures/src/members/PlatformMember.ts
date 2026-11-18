@@ -625,6 +625,8 @@ export class PlatformRegistration extends Registration {
     member: PlatformMember;
 
     updateFrom(object: PlatformRegistration) {
+        this.balances = object.balances;
+
         this.member.family.copyFromClone(object.member.family);
     }
 
