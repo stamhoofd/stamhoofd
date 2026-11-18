@@ -84,6 +84,15 @@ export class MemberJudicialRecord extends AutoEncoder {
     /** When a reviewer decided, null while nobody has looked. */
     @field({ decoder: DateDecoder, nullable: true })
     reviewedAt: Date | null = null;
+
+    /**
+     * Whether the document is still there to be looked at.
+     *
+     * Not the same question as `reviewStatus === UnderReview`: the retention window removes the document from a
+     * record nobody got to, which leaves a review that can no longer be carried out.
+     */
+    @field({ decoder: BooleanDecoder })
+    hasDocument = false;
 }
 
 /** The stored extract, and why it is gone once it is. */
