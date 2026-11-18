@@ -195,6 +195,33 @@ export type BackendSpecificEnvironment = {
     readonly UITPAS_API_CLIENT_ID?: string;
     readonly UITPAS_API_CLIENT_SECRET?: string;
 
+    // Belcotax API of FOD Financiën (OpenID Connect with private_key_jwt client authentication)
+    /**
+     * Which authorization server and Belcotax API the connections use. `local` is the Keycloak
+     * realm that `stam sso start` (and the e2e tests) run as a stand-in for FOD, with a small mock
+     * of the Belcotax API served by this API; never available in production. Not set: disabled.
+     */
+    readonly BELCOTAX_ENVIRONMENT?: 'local' | 'acceptance' | 'production';
+    /**
+     * Client ID that FOD registered for us. Defaults to the client of the local realm.
+     */
+    readonly BELCOTAX_CLIENT_ID?: string;
+    /**
+     * RSA private key (RS256, JWK with `kid`) that signs the client assertion. Its public part is
+     * published on /belcotax/jwks.
+     */
+    readonly BELCOTAX_PRIVATE_KEY?: jose.JWK;
+    /**
+     * OpenID Connect issuer. Required for `local`, where the endpoints come from its discovery
+     * document; overrides the documented issuer of FOD otherwise (with FOD's paths
+     * /authorize, /access_token and /connect/jwk_uri).
+     */
+    readonly BELCOTAX_ISSUER?: string;
+    /**
+     * Overrides the base URL of the Belcotax bulk API of the chosen environment.
+     */
+    readonly BELCOTAX_API_URL?: string;
+
     // SMS via gatewayapi.com
     readonly GATEWAYAPI_TOKEN?: string;
 
