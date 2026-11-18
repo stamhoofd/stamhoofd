@@ -755,23 +755,10 @@ export class DocumentTemplate extends QueryableModel {
             fieldAnswers.set(answer.settings.id, answer);
         }
 
-        // Verify answers
-        if (!missingData) {
-            for (const answer of fieldAnswers.values()) {
-                try {
-                    answer.validate();
-                } catch (e) {
-                    missingData = true;
-
-                    console.log(
-                        'Missing data because of validation error',
-                        e,
-                        answer,
-                        answer.settings,
-                    );
-                    break;
-                }
-            }
+        // Template-wide answers are not data of one document: an empty required one would otherwise mark every new
+        // document incomplete without a warning, while every later build only looks at the document's own fields
+        if (!missingData && !this.areAnswersComplete(fieldAnswers)) {
+            missingData = true;
         }
 
         return {
