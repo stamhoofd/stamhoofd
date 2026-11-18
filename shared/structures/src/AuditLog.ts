@@ -336,8 +336,6 @@ export function getAuditLogTypeCategory(type: AuditLogType): AuditLogTypeCategor
         case AuditLogType.MemberEdited:
         case AuditLogType.MemberAdded:
         case AuditLogType.MemberDeleted:
-        case AuditLogType.MemberSecurityCodeUsed:
-        case AuditLogType.MemberSecurityCodeRequested:
             return AuditLogTypeCategory.Members;
 
         case AuditLogType.MemberRegistered:
@@ -400,6 +398,8 @@ export function getAuditLogTypeCategory(type: AuditLogType): AuditLogTypeCategor
         case AuditLogType.UserTwoFactorMethodDeleted:
         case AuditLogType.UserRecoveryCodesRegenerated:
         case AuditLogType.UserImpersonated:
+        case AuditLogType.MemberSecurityCodeUsed:
+        case AuditLogType.MemberSecurityCodeRequested:
             return AuditLogTypeCategory.Users;
 
         case AuditLogType.MemberResponsibilityRecordAdded:
