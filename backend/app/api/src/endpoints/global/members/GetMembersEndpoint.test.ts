@@ -13,6 +13,7 @@ import {
     CachedBalance,
     EventFactory,
     GroupFactory,
+    JudicialRecord,
     MemberFactory,
     MemberPlatformMembership,
     MemberResponsibilityRecordFactory,
@@ -34,6 +35,7 @@ import {
     EventMeta,
     GroupStatus,
     GroupType,
+    JudicialRecordReviewDecision,
     JudicialRecordStatus,
     LimitedFilteredRequest,
     MemberDetails,
@@ -4256,6 +4258,40 @@ describe('Endpoint.GetMembersEndpoint', () => {
             expect(response.status).toBe(200);
             return response.body.results.members.map((m) => m.id);
         }
+
+        /** Approves the extract of a member, the way a reviewer would. */
+        async function approve(member: Member, reviewDecision = JudicialRecordReviewDecision.Ok) {
+            const record = new JudicialRecord();
+            record.memberId = member.id;
+            record.reviewDecision = reviewDecision;
+            record.reviewedAt = new Date();
+            await record.save();
+            return record;
+        }
+
+        test('Returns the stored record alongside the member, so the list and the member view agree', async () => {
+            const { token, members, memberIds } = await setupMembers();
+            await approve(members.adult);
+
+            const response = await testServer.test(endpoint, Request.get({
+                path: baseUrl,
+                host: platformHost,
+                query: new LimitedFilteredRequest({ filter: { id: { $in: memberIds } }, sort: [{ key: 'id', order: SortItemDirection.ASC }], limit: 100 }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            }));
+            expect(response.status).toBe(200);
+
+            const approved = response.body.results.members.find(m => m.id === members.adult.id);
+            expect(approved?.judicialRecord?.reviewDecision).toBe(JudicialRecordReviewDecision.Ok);
+
+            // A member who delivered nothing carries no record, rather than an empty one
+            const other = response.body.results.members.find(m => m.id === members.turnsTwentyToday.id);
+            expect(other?.judicialRecord).toBeNull();
+
+            // And the filter, which reads the database instead of the blob, puts them in the same status
+            expect(await fetchMemberIds({ token, filter: { id: { $in: memberIds }, judicialRecordStatus: { $in: [JudicialRecordStatus.Ok] } } }))
+                .toIncludeSameMembers([members.adult.id]);
+        });
 
         test('Lists the members that need an extract', async () => {
             const { token, members, memberIds } = await setupMembers();

@@ -2,8 +2,9 @@ import { MemberResponsibility } from '../MemberResponsibility.js';
 import { Organization } from '../Organization.js';
 import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
 import { Platform, PlatformConfig } from '../Platform.js';
-import type { JudicialRecordResponsibility } from './JudicialRecordHelper.js';
-import { JudicialRecordHelper, JudicialRecordStatus } from './JudicialRecordHelper.js';
+import { JudicialRecordReviewDecision } from '../members/JudicialRecordReview.js';
+import type { JudicialRecordCurrentRecord, JudicialRecordResponsibility } from './JudicialRecordHelper.js';
+import { JUDICIAL_RECORD_VALIDITY_YEARS, JudicialRecordHelper, JudicialRecordStatus } from './JudicialRecordHelper.js';
 import { judicialRecordFeatureFlag } from './judicialRecordFeature.js';
 
 describe('JudicialRecordHelper.getForMember', () => {
@@ -284,5 +285,66 @@ describe('JudicialRecordHelper.asksForExtract', () => {
                 ),
             }),
         ).toBe(true);
+    });
+});
+
+describe('JudicialRecordHelper.getStoredStatus', () => {
+    const atDate = new Date(2026, 5, 15);
+
+    function record(reviewDecision: JudicialRecordReviewDecision, options: { reviewedAt?: Date | null } = {}): JudicialRecordCurrentRecord {
+        return {
+            reviewDecision,
+            reviewedAt: options.reviewedAt === undefined ? new Date(2026, 0, 1) : options.reviewedAt,
+        };
+    }
+
+    /** Every review outcome, and the status it gives the member: one for one, nothing collapsed. */
+    const mapping: [JudicialRecordReviewDecision, JudicialRecordStatus][] = [
+        [JudicialRecordReviewDecision.UnderReview, JudicialRecordStatus.UnderReview],
+        [JudicialRecordReviewDecision.Ok, JudicialRecordStatus.Ok],
+        [JudicialRecordReviewDecision.ConditionallyAccepted, JudicialRecordStatus.ConditionallyAccepted],
+        [JudicialRecordReviewDecision.TemporarilyRejected, JudicialRecordStatus.TemporarilyRejected],
+        [JudicialRecordReviewDecision.PermanentlyRejected, JudicialRecordStatus.PermanentlyRejected],
+    ];
+
+    test.each(mapping)('%s gives the member %s', (reviewDecision, expected) => {
+        expect(JudicialRecordHelper.getStoredStatus(record(reviewDecision), atDate)).toBe(expected);
+    });
+
+    test('a conditional acceptance permits, but is not an unconditional one', () => {
+        const status = JudicialRecordHelper.getStoredStatus(record(JudicialRecordReviewDecision.ConditionallyAccepted), atDate);
+
+        expect(status).toBe(JudicialRecordStatus.ConditionallyAccepted);
+        expect(status).not.toBe(JudicialRecordStatus.Ok);
+    });
+
+    test('an approval older than the validity window decides nothing', () => {
+        const expired = new Date(atDate);
+        expired.setFullYear(expired.getFullYear() - JUDICIAL_RECORD_VALIDITY_YEARS);
+        expired.setDate(expired.getDate() - 1);
+
+        expect(JudicialRecordHelper.getStoredStatus(record(JudicialRecordReviewDecision.Ok, { reviewedAt: expired }), atDate)).toBeNull();
+    });
+
+    test('a temporary rejection does not expire, because it already asks for a new extract', () => {
+        const longAgo = new Date(2000, 0, 1);
+
+        expect(JudicialRecordHelper.getStoredStatus(record(JudicialRecordReviewDecision.TemporarilyRejected, { reviewedAt: longAgo }), atDate))
+            .toBe(JudicialRecordStatus.TemporarilyRejected);
+    });
+
+    test('an unreviewed record cannot expire', () => {
+        expect(JudicialRecordHelper.hasExpired(null, atDate)).toBe(false);
+    });
+
+    test('only NotRequired, Ok and ConditionallyAccepted let a member act', () => {
+        const permitted = Object.values(JudicialRecordStatus).filter(status =>
+            status === JudicialRecordStatus.NotRequired
+            || status === JudicialRecordStatus.Ok
+            || status === JudicialRecordStatus.ConditionallyAccepted,
+        );
+
+        expect(permitted).toHaveLength(3);
+        expect(Object.values(JudicialRecordStatus)).toHaveLength(7);
     });
 });
