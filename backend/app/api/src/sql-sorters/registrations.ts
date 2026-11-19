@@ -1,12 +1,22 @@
+import type { SQLResultNamespacedRow } from '@node/database';
 import { Group, Member, Organization } from '@stamhoofd/models';
 import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
-import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/sql';
+import {
+    SQL,
+    SQLAlias,
+    SQLIfNull,
+    SQLOrderBy,
+    SQLSelectAs,
+} from '@stamhoofd/sql';
 import type {
     MemberWithRegistrationsBlob,
     Organization as OrganizationStruct,
     RegistrationWithMemberBlob,
 } from '@stamhoofd/structures';
-import { Formatter } from '@stamhoofd/utility';
+import {
+    Formatter,
+} from '@stamhoofd/utility';
+import { judicialRecordStatusExpression } from '../helpers/judicialRecordStatus.js';
 import {
     memberCachedBalanceForOrganizationJoin,
     registrationCachedBalanceJoin,
@@ -19,15 +29,21 @@ export class RegistrationSortData {
     readonly registration: RegistrationWithMemberBlob;
     private organizations: OrganizationStruct[];
 
+    /** The row the registration was selected with, for sorters that order on a derived value. */
+    readonly rawSelectedRow: SQLResultNamespacedRow | null;
+
     constructor({
         registration,
         organizations,
+        rawSelectedRow = null,
     }: {
         registration: RegistrationWithMemberBlob;
         organizations: OrganizationStruct[];
+        rawSelectedRow?: SQLResultNamespacedRow | null;
     }) {
         this.registration = registration;
         this.organizations = organizations;
+        this.rawSelectedRow = rawSelectedRow;
     }
 
     get organization() {
@@ -49,10 +65,15 @@ export class RegistrationSortData {
     }
 }
 
-export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = new Map<
-    string,
-    SQLSortDefinition<RegistrationSortData>
->([
+export const registrationSorters = ({
+    judicialRecordMinimumAges,
+}: {
+    judicialRecordMinimumAges?: Map<string, number>;
+} = {}): SQLSortDefinitions<RegistrationSortData> => {
+    const sorters: SQLSortDefinitions<RegistrationSortData> = new Map<
+        string,
+        SQLSortDefinition<RegistrationSortData>
+    >([
     // WARNING! TEST NEW SORTERS THOROUGHLY!
     // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
     // An example: sorting on 'name' is not a good idea, because it is a concatenation of two fields.
@@ -315,6 +336,33 @@ export const registrationSorters: SQLSortDefinitions<RegistrationSortData> = new
         },
     ],
 ]);
+
+    if (judicialRecordMinimumAges?.size) {
+        // The status is derived from the member's responsibilities, so it is selected along with the registration to
+        // keep getValue (and with it the page filter) identical to what the database ordered on.
+        const expression = judicialRecordStatusExpression(judicialRecordMinimumAges);
+
+        sorters.set('member.judicialRecordStatus', {
+            getValue({ rawSelectedRow }) {
+                const row = rawSelectedRow?.['data'];
+                if (!row || !('judicialRecordStatus' in row)) {
+                    throw new Error('judicialRecordStatus was not selected when selecting this registration');
+                }
+                return row['judicialRecordStatus'] as string;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: expression,
+                    direction,
+                });
+            },
+            join: memberJoin,
+            select: [new SQLSelectAs(expression, new SQLAlias('data__judicialRecordStatus'))],
+        });
+    }
+
+    return sorters;
+};
 
 /**
  * Helper function for simple sort on member column
