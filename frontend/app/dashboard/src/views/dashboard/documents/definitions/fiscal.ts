@@ -215,6 +215,36 @@ export const fiscal = DocumentTemplateDefinition.create({
             ],
         }),
         RecordCategory.create({
+            id: 'period',
+            name: TranslatedString.create($t('Periode van de opvang')),
+            records: [
+                RecordSettings.create({
+                    id: 'registration.startDate',
+                    name: TranslatedString.create($t('Begindatum')),
+                    required: true,
+                    type: RecordType.Date,
+                    warning: RecordWarning.create({
+                        id: 'missing.registration.startDate',
+                        text: TranslatedString.create($t('De begindatum van de opvang ontbreekt. Belcotax weigert een attest zonder periode.')),
+                        type: RecordWarningType.Error,
+                        inverted: true,
+                    }),
+                }),
+                RecordSettings.create({
+                    id: 'registration.endDate',
+                    name: TranslatedString.create($t('Einddatum')),
+                    required: true,
+                    type: RecordType.Date,
+                    warning: RecordWarning.create({
+                        id: 'missing.registration.endDate',
+                        text: TranslatedString.create($t('De einddatum van de opvang ontbreekt. Belcotax weigert een attest zonder periode.')),
+                        type: RecordWarningType.Error,
+                        inverted: true,
+                    }),
+                }),
+            ],
+        }),
+        RecordCategory.create({
             id: 'price',
             name: TranslatedString.create($t('%1IP')),
             description: TranslatedString.create($t('%xy')),
