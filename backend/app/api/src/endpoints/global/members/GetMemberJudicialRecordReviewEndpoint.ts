@@ -35,9 +35,9 @@ export class GetMemberJudicialRecordReviewEndpoint extends Endpoint<Params, Quer
         await Context.setOptionalOrganizationScope();
         await Context.authenticate();
 
-        const member = await Member.getByIdWithUsers(request.params.id);
+        const member = await Member.getWithRegistrations(request.params.id);
 
-        if (!member || !Context.auth.canReviewJudicialRecord()) {
+        if (!member || !(await Context.auth.canReviewJudicialRecord(member))) {
             throw Context.auth.memberNotFoundOrNoAccess();
         }
 
