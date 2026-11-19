@@ -79,6 +79,12 @@ function setForLanguage(val: string, lang: Language | null) {
         return;
     }
 
+    if (!val && value.value.languages.length <= 1) {
+        // Nothing left to translate, so drop back to an untranslated value like TInputButton does
+        value.value = value.value.patch('');
+        return;
+    }
+
     value.value = value.value.patch({
         [lang]: val || null,
     });
