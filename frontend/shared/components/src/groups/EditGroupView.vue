@@ -988,6 +988,7 @@ useValidation(errors.validator, () => {
             try {
                 group.settings.validateName();
                 group.settings.throwIfInvalidPrices();
+                group.settings.throwIfInvalidOptionMenus();
             } catch (e) {
                 errors.errorBox = new ErrorBox(e);
                 return false;

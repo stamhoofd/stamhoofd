@@ -14,6 +14,7 @@ import type { AutoEncoderPatchType } from '@common/encoding';
 import { usePop } from '@browser/navigation';
 import type { Group, GroupOptionMenu } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
+import { ErrorBox } from '#errors/ErrorBox.ts';
 import { useErrors } from '../../errors/useErrors';
 import { usePatch } from '#hooks/usePatch.ts';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
@@ -53,11 +54,13 @@ async function save() {
     }
 
     saving.value = true;
+    errors.errorBox = null;
     try {
+        patched.value.throwIfEmpty();
         await props.saveHandler(patch.value);
         await pop({ force: true });
     } catch (e) {
-        Toast.fromError(e).show();
+        errors.errorBox = new ErrorBox(e);
     } finally {
         saving.value = false;
     }
