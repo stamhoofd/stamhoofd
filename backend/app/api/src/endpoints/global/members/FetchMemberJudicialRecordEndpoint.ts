@@ -1,0 +1,210 @@
+import type { Decoder } from '@common/encoding';
+import { AutoEncoder, StringDecoder, field } from '@common/encoding';
+import { SimpleError } from '@common/errors';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
+import { readJudicialRecordExtractUrl } from '@stamhoofd/judicial-record-check';
+import { Member, RateLimiter } from '@stamhoofd/models';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
+import { Context } from '../../../helpers/Context.js';
+import { MAXIMUM_UPLOAD_SIZE } from './DeliverMemberJudicialRecordEndpoint.js';
+
+type Params = { id: string };
+type Query = undefined;
+class Body extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    url: string;
+}
+type ResponseBody = Buffer;
+
+export const FETCH_TIMEOUT_IN_MS = 10 * 1000;
+
+export const judicialRecordFetchMemberLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 10,
+            duration: 60 * 60 * 1000,
+        },
+        {
+            limit: 20,
+            duration: 24 * 60 * 60 * 1000,
+        },
+    ],
+});
+
+export const judicialRecordFetchUserLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 30,
+            duration: 60 * 60 * 1000,
+        },
+        {
+            limit: 60,
+            duration: 24 * 60 * 60 * 1000,
+        },
+    ],
+});
+
+/** Caps what we ask of FOD Justitie as a whole, however many accounts are within their own limits. */
+export const judicialRecordFetchGlobalLimiter = new RateLimiter({
+    limits: [
+        {
+            limit: 500,
+            duration: 60 * 60 * 1000,
+        },
+        {
+            limit: 2000,
+            duration: 24 * 60 * 60 * 1000,
+        },
+    ],
+});
+
+const globalLimiterKey = 'judicial-record-fetch';
+
+/**
+ * In: a url pointing to FOD Justitie. Out: the pdf. Not stored, not checked, not parsed.
+ *
+ * This exists because the browser cannot make the call itself: the viewer of FOD Justitie answers
+ * without any cross-origin header.
+ */
+export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
+    bodyDecoder = Body as Decoder<Body>;
+
+    protected doesMatch(request: Request): [true, Params] | [false] {
+        if (request.method !== 'POST') {
+            return [false];
+        }
+
+        const params = Endpoint.parseParameters(request.url, '/members/@id/judicial-record/fetch', { id: String });
+
+        if (params) {
+            return [true, params as Params];
+        }
+        return [false];
+    }
+
+    async handle(request: DecodedRequest<Params, Query, Body>) {
+        await Context.setOptionalOrganizationScope();
+        const { user } = await Context.authenticate();
+
+        const member = await Member.getByIdWithUsersAndRegistrations(request.params.id);
+
+        // The same audience as delivering: the member's own account, or an administrator with full
+        // access to them, who scans the same code when they upload on someone's behalf.
+        if (!member || !(Context.auth.isUserManager(member) || await Context.auth.canAccessMember(member, PermissionLevel.Full))) {
+            throw Context.auth.memberNotFoundOrNoAccess();
+        }
+
+        const url = readJudicialRecordExtractUrl(request.body.url);
+
+        if (url === null) {
+            throw new SimpleError({
+                code: 'invalid_field',
+                message: 'Not a url of FOD Justitie',
+                human: $t('Deze QR-code komt niet van FOD Justitie. Scan de QR-code op het uittreksel dat je van FOD Justitie kreeg.'),
+                field: 'url',
+                statusCode: 400,
+            });
+        }
+
+        this.trackLimits(user.id, member.id);
+
+        const response = new Response(await this.readPdf(url));
+
+        // Bytes from outside are never rendered on the api origin, whatever they turn out to hold
+        response.headers['content-type'] = 'application/octet-stream';
+        response.headers['content-disposition'] = 'attachment; filename="uittreksel.pdf"';
+        response.headers['x-content-type-options'] = 'nosniff';
+
+        return response;
+    }
+
+    private trackLimits(userId: string, memberId: string) {
+        try {
+            judicialRecordFetchGlobalLimiter.track(globalLimiterKey, 1);
+            judicialRecordFetchUserLimiter.track(userId, 1);
+            judicialRecordFetchMemberLimiter.track(memberId, 1);
+        } catch (error) {
+            throw new SimpleError({
+                code: 'too_many_requests',
+                message: 'Too many judicial record fetches',
+                human: $t('Je hebt te veel uittreksels opgehaald. Probeer het later opnieuw.'),
+                statusCode: 429,
+            });
+        }
+    }
+
+    private async readPdf(url: string): Promise<Buffer> {
+        let response: globalThis.Response;
+
+        try {
+            response = await fetch(url, {
+                method: 'GET',
+                redirect: 'error', // The url is already the canonical one, so anywhere it points next is not FOD Justitie
+                signal: AbortSignal.timeout(FETCH_TIMEOUT_IN_MS),
+                credentials: 'omit',
+                referrerPolicy: 'no-referrer',
+            });
+        } catch (error) {
+            throw this.notAPdf();
+        }
+
+        if (!response.ok || !response.body) {
+            console.error('[judicial-record] FOD Justitie answered status', response.status);
+            throw this.notAPdf();
+        }
+
+        const contentType = response.headers.get('content-type') ?? '';
+
+        if (!contentType.toLowerCase().startsWith('application/pdf')) {
+            throw this.notAPdf();
+        }
+
+        const bytes = await this.readCapped(response.body);
+
+        // A content type is only what the other end claims, so the bytes have to say it too
+        if (bytes.subarray(0, 5).toString('latin1') !== '%PDF-') {
+            throw this.notAPdf();
+        }
+
+        return bytes;
+    }
+
+    /** Stops at the cap rather than reading whole and measuring after: the other end decides how much it sends. */
+    private async readCapped(body: ReadableStream<Uint8Array>): Promise<Buffer> {
+        const reader = body.getReader();
+        const chunks: Uint8Array[] = [];
+        let size = 0;
+
+        try {
+            for (;;) {
+                const { done, value } = await reader.read();
+
+                if (done) {
+                    break;
+                }
+
+                size += value.length;
+
+                if (size > MAXIMUM_UPLOAD_SIZE) {
+                    throw this.notAPdf();
+                }
+
+                chunks.push(value);
+            }
+        } finally {
+            await reader.cancel().catch(() => undefined);
+        }
+
+        return Buffer.concat(chunks);
+    }
+
+    private notAPdf(): SimpleError {
+        return new SimpleError({
+            code: 'judicial_record_not_available',
+            message: 'FOD Justitie did not return a pdf',
+            human: $t('We konden je uittreksel niet ophalen bij FOD Justitie. Probeer het over 20 minuten nog eens of upload het originele document.'),
+            statusCode: 400,
+        });
+    }
+}
