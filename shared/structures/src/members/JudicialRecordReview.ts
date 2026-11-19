@@ -125,6 +125,16 @@ export class MemberJudicialRecord extends AutoEncoder {
      */
     @field({ decoder: StringDecoder, nullable: true })
     comment: string | null = null;
+
+    /**
+     * Who decided, for the reviewers allowed to see it. Null while nobody has looked, and for everyone else.
+     *
+     * Only this field is withheld, never the record: the status the rest of the view shows is derived from
+     * `reviewDecision`, so a member who is approved would otherwise read as `Required` here while the member list
+     * went on showing the truth.
+     */
+    @field({ decoder: JudicialRecordReviewDetails, nullable: true })
+    reviewDetails: JudicialRecordReviewDetails | null = null;
 }
 
 /** The stored extract, and why it is gone once it is. */

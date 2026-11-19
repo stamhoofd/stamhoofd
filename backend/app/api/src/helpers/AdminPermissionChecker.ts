@@ -2125,7 +2125,17 @@ export class AdminPermissionChecker {
             return true;
         }
 
-        // First list all organizations this member is part of
+        return await this.hasMemberAccessRight(member, AccessRight.MemberManageNRN);
+    }
+
+    /**
+     * Whether the user holds an access right for this member, through any organization the member is part of or
+     * through the platform.
+     *
+     * An access right the platform granted for an organization tag arrives on that organization's permissions,
+     * so both have to be asked.
+     */
+    private async hasMemberAccessRight(member: MemberWithUsersAndRegistrations, right: AccessRight): Promise<boolean> {
         const organizations: Organization[] = [];
 
         if (member.organizationId) {
@@ -2142,27 +2152,50 @@ export class AdminPermissionChecker {
             }
         }
 
-        // Loop all organizations.
         for (const organization of organizations) {
             const permissions = await this.getOrganizationPermissions(organization);
-            if (!permissions) {
-                continue;
-            }
 
-            if (permissions.hasAccessRight(AccessRight.MemberManageNRN)) {
+            if (permissions?.hasAccessRight(right)) {
                 return true;
             }
         }
 
-        // Platform data
-        const platformPermissions = this.platformPermissions;
-        if (platformPermissions) {
-            if (platformPermissions.hasAccessRight(AccessRight.MemberManageNRN)) {
-                return true;
-            }
+        return this.platformPermissions?.hasAccessRight(right) ?? false;
         }
 
-        return false;
+    /**
+     * Whether the user may record a review decision on this member's delivered extract, and read the document
+     * and the audit trail it rests on.
+     *
+     * `MemberReviewJudicialRecord` is never granted by an organization itself, so an organization's own full
+     * admin does not have it. Deliberately not `isUserManager`, unlike every other member right: a member and
+     * their parents are the last people who should decide whether their own extract is acceptable.
+     */
+    async canReviewJudicialRecord(member: MemberWithUsersAndRegistrations): Promise<boolean> {
+        if (!this.user.permissions) {
+            return false;
+        }
+
+        if (!await this.canAccessMember(member, PermissionLevel.Read)) {
+            return false;
+        }
+
+        return await this.hasMemberAccessRight(member, AccessRight.MemberReviewJudicialRecord);
+    }
+
+    /**
+     * Whether the user may deliver an extract for this member.
+     *
+     * Full access rather than the review right, because delivering decides nothing: the automatic checks settle
+     * the outcome and a document that is not a genuine extract fails them. The reviewer's right is the narrow
+     * one because a reviewer can accept an extract those checks rejected.
+     */
+    async canDeliverJudicialRecordFor(member: MemberWithUsersAndRegistrations): Promise<boolean> {
+        if (this.isUserManager(member)) {
+            return true;
+        }
+
+        return await this.canAccessMember(member, PermissionLevel.Full);
     }
 
     private async getSingleRecord(id: string): Promise<RecordCacheEntry | null> {
@@ -2949,19 +2982,6 @@ export class AdminPermissionChecker {
 
     hasPlatformFullAccess(): boolean {
         return !!this.platformPermissions && !!this.platformPermissions.hasFullAccess();
-    }
-    /**
-     * Whether this user may read a member's delivered judicial record extract and decide it.
-     *
-     * A right of its own, not an aspect of `canAccessMember`: full access to a member is held by many people
-     * who have no business reading their judicial record extract, and an approval granted here holds for every
-     * organization the member is in.
-     *
-     * Deliberately the whole gate in one place, platform full access for now, because an access right of its
-     * own is being added separately.
-     */
-    canReviewJudicialRecord(): boolean {
-        return this.hasPlatformFullAccess();
     }
 
     getPlatformAccessibleOrganizationTags(level: PermissionLevel): string[] | 'all' {

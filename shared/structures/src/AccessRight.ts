@@ -31,6 +31,8 @@ export class AccessRightHelper {
 
             case AccessRight.MemberManageNRN:
                 return $t('%lD');
+            case AccessRight.MemberReviewJudicialRecord:
+                return $t(`Uittreksels uit het strafregister beoordelen`);
             case AccessRight.SendMessages:
                 return $t('%1DA');
             case AccessRight.ManageEmailTemplates:
@@ -72,6 +74,8 @@ export class AccessRightHelper {
                 return $t('%lH');
             case AccessRight.MemberManageNRN:
                 return $t('%lD');
+            case AccessRight.MemberReviewJudicialRecord:
+                return $t(`Uittreksels beoordelen`);
             case AccessRight.SendMessages:
                 return $t('%1DC');
             case AccessRight.ManageEmailTemplates:
@@ -107,6 +111,8 @@ export class AccessRightHelper {
                 return $t('%lR');
             case AccessRight.MemberManageNRN:
                 return $t('%lS');
+            case AccessRight.MemberReviewJudicialRecord:
+                return $t(`Leden hun uittreksels uit het strafregister beoordelen.`);
             case AccessRight.SendMessages:
                 return $t('%1DE');
             case AccessRight.ManageEmailTemplates:
@@ -130,6 +136,8 @@ export class AccessRightHelper {
                 return $t('%lX');
             case AccessRight.MemberManageNRN:
                 return $t('%lY');
+            case AccessRight.MemberReviewJudicialRecord:
+                return $t(`De uittreksels uit het strafregister beoordelen die niet blanco zijn of waarbij de automatische controle mislukt.`);
             case AccessRight.ManageEmailTemplates:
                 return $t('%1DF');
         }
@@ -149,6 +157,11 @@ export class AccessRightHelper {
                 return PermissionLevel.Write;
             case AccessRight.OrganizationEventNotificationReviewer:
                 return null; // Never granted to full-admins, unless given by the platform
+            case AccessRight.MemberReviewJudicialRecord:
+                // In platform mode a review binds every organization the member is registered with, not just
+                // the one reviewing, so only the platform hands it out. In organization mode there is no other
+                // organization to bind, which leaves nobody to grant it if it stays platform-only.
+                return STAMHOOFD.userMode === 'organization' ? PermissionLevel.Full : null;
             case AccessRight.PlatformCreateOrganizations:
                 return null;
         }

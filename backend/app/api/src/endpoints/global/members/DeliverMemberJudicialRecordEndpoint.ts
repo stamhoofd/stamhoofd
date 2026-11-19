@@ -45,20 +45,13 @@ export const judicialRecordUserLimiter = new RateLimiter({
     ],
 });
 
-export class DeliverMemberJudicialRecordEndpoint extends Endpoint<
-    Params,
-    Query,
-    Body,
-    ResponseBody
-> {
+export class DeliverMemberJudicialRecordEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
         if (request.method !== 'POST') {
             return [false];
         }
 
-        const params = Endpoint.parseParameters(request.url, '/members/@id/judicial-record', {
-            id: String,
-        });
+        const params = Endpoint.parseParameters(request.url, '/members/@id/judicial-record', { id: String });
 
         if (params) {
             return [true, params as Params];
@@ -70,17 +63,11 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<
         await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
+        // With registrations, because an administrator's access to this member can come from a group they
+        // are registered in rather than from the organization they belong to.
         const member = await Member.getByIdWithUsersAndRegistrations(request.params.id);
 
-        // The member's own account, or an administrator with full access to them: the level the member
-        // detail already asks for the member's security code, which is the same kind of secret.
-        if (
-            !member ||
-            !(
-                Context.auth.isUserManager(member) ||
-                (await Context.auth.canAccessMember(member, PermissionLevel.Full))
-            )
-        ) {
+        if (!member || !await Context.auth.canDeliverJudicialRecordFor(member)) {
             throw Context.auth.memberNotFoundOrNoAccess();
         }
 
@@ -93,10 +80,7 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<
         try {
             const file = await this.parseForm(request, uploadDirectory);
 
-            const status = await JudicialRecordService.deliver(
-                member,
-                await fs.readFile(file.filepath),
-            );
+            const status = await JudicialRecordService.deliver(member, await fs.readFile(file.filepath));
 
             return new Response(JudicialRecordDeliveryResponse.create({ status }));
         } finally {
@@ -120,10 +104,7 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<
         }
     }
 
-    private async parseForm(
-        request: DecodedRequest<Params, Query, Body>,
-        uploadDirectory: string,
-    ): Promise<formidable.File> {
+    private async parseForm(request: DecodedRequest<Params, Query, Body>, uploadDirectory: string): Promise<formidable.File> {
         const incoming = request.request.request;
 
         if (!incoming) {
@@ -174,19 +155,13 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<
 
     /** Every way the body can fail to hold a document is the client's mistake, so none of them is a 500 - a full disk is ours and keeps its status. */
     private formError(error: unknown): unknown {
-        const code =
-            typeof error === 'object' && error !== null && 'code' in error ? error.code : null;
+        const code = typeof error === 'object' && error !== null && 'code' in error ? error.code : null;
 
-        if (
-            code === formidableErrors.biggerThanMaxFileSize ||
-            code === formidableErrors.biggerThanTotalMaxFileSize
-        ) {
+        if (code === formidableErrors.biggerThanMaxFileSize || code === formidableErrors.biggerThanTotalMaxFileSize) {
             return new SimpleError({
                 code: 'file_too_large',
                 message: 'The uploaded file is too large',
-                human: $t(
-                    'Dit bestand is te groot. Laad het originele pdf-bestand op dat je van FOD Justitie kreeg.',
-                ),
+                human: $t('Dit bestand is te groot. Laad het originele pdf-bestand op dat je van FOD Justitie kreeg.'),
                 field: 'file',
                 statusCode: 400,
             });
