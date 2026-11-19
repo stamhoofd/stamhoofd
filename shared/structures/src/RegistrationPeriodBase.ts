@@ -92,6 +92,14 @@ export class RegistrationPeriodBase extends AutoEncoder {
     }
 
     /**
+     * Start date for a new group in this period: now, or the period start when now is outside the period.
+     * The backend applies the same rule when a group is saved without custom dates.
+     */
+    getDefaultGroupStartDate(now = new Date()): Date {
+        return this.includesDate(now) ? now : new Date(this.startDate);
+    }
+
+    /**
      * Earliest date an organization is allowed to switch to this period as default.
      */
     get switchDate() {
