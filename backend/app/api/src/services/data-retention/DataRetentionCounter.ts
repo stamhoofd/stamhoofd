@@ -1,5 +1,4 @@
-import type { DataRetentionRun } from '@stamhoofd/models';
-import { DataRetentionRunPhase } from '@stamhoofd/models';
+import { DataRetentionRun, DataRetentionRunPhase } from '@stamhoofd/models';
 import {
     DataRetentionAction,
     DataRetentionCategory,
@@ -29,7 +28,6 @@ const NEXT_PHASE: Record<DataRetentionRunPhase, DataRetentionRunPhase | null> = 
     [DataRetentionRunPhase.PlatformData]: DataRetentionRunPhase.Accounts,
     [DataRetentionRunPhase.Accounts]: null,
 };
-const PLATFORM_SCOPE = 'platform';
 
 /**
  * Counts what the retention terms would do, without changing any data.
@@ -244,7 +242,7 @@ function getMemberOrganizationIds(facts: MemberRetentionFacts): (string | null)[
 function getScopes(organizationIds: (string | null)[]): string[] {
     const scopes = new Set<string>(organizationIds.filter((id) => id !== null));
     if (STAMHOOFD.userMode === 'platform') {
-        scopes.add(PLATFORM_SCOPE);
+        scopes.add(DataRetentionRun.PLATFORM_SCOPE);
     }
     return [...scopes];
 }

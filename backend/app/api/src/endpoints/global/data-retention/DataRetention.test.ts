@@ -4,16 +4,26 @@ import type { Organization, Token, User } from '@stamhoofd/models';
 import {
     AuditLog,
     DataRetentionPolicy,
+    DataRetentionRun,
     OrganizationFactory,
     Platform,
     UserFactory,
 } from '@stamhoofd/models';
 import type { DataRetentionSettings } from '@stamhoofd/structures';
-import { AuditLogType, DataRetentionCategory, Permissions, Version } from '@stamhoofd/structures';
+import {
+    AuditLogType,
+    DataRetentionAction,
+    DataRetentionCategory,
+    DataRetentionCount,
+    DataRetentionOverview,
+    Permissions,
+    Version,
+} from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 
 import { testServer } from '../../../../tests/helpers/TestServer.js';
+import { TenantContext } from '../../../helpers/TenantContext.js';
 import { SessionService } from '../../../services/SessionService.js';
 import { DeleteDataRetentionPendingEndpoint } from './DeleteDataRetentionPendingEndpoint.js';
 import { GetDataRetentionEndpoint } from './GetDataRetentionEndpoint.js';
@@ -295,6 +305,96 @@ describe('Endpoint.DataRetention', () => {
             expect(getPolicy(body, DataRetentionCategory.Members).terms.protectedPeriods).toBe(2);
             expect(getPolicy(body, DataRetentionCategory.Accounts)).toBeDefined();
             expect(body.platformPolicies).toEqual([]);
+        });
+    });
+
+    describe('Overview', () => {
+        const calculatedAt = new Date('2026-11-01T03:00:00.000Z');
+
+        function overview(due: number) {
+            return DataRetentionOverview.create({
+                calculatedAt,
+                counts: [
+                    DataRetentionCount.create({
+                        category: DataRetentionCategory.Members,
+                        action: DataRetentionAction.Anonymize,
+                        due,
+                        upcoming: new Map([['2027-01', 3]]),
+                    }),
+                ],
+            });
+        }
+
+        async function saveResult(result: Map<string, DataRetentionOverview>) {
+            await DataRetentionRun.delete();
+            const run = await DataRetentionRun.getOrCreate(TenantContext.currentOrRoot.tenantId);
+            run.result = result;
+            run.finishedAt = calculatedAt;
+            await run.save();
+        }
+
+        function get(host: string, token: Token) {
+            return send<DataRetentionSettings>(getEndpoint, 'GET', '/data-retention', host, token);
+        }
+
+        test('There is no overview before a first run completed', async () => {
+            await DataRetentionRun.delete();
+            const { token, host } = await initOrganization();
+
+            expect((await get(host, token)).body.overview).toBeNull();
+        });
+
+        test('An organization only sees its own counts, and the platform its own', async () => {
+            const { organization, token, host } = await initOrganization();
+            const other = await new OrganizationFactory({}).create();
+            await saveResult(
+                new Map([
+                    [organization.id, overview(5)],
+                    [other.id, overview(7)],
+                    [DataRetentionRun.PLATFORM_SCOPE, overview(12)],
+                ]),
+            );
+
+            const organizationOverview = (await get(host, token)).body.overview!;
+            expect(organizationOverview.calculatedAt).toEqual(calculatedAt);
+            expect(organizationOverview.counts).toHaveLength(1);
+            expect(organizationOverview.counts[0].due).toBe(5);
+            expect(organizationOverview.counts[0].upcoming.get('2027-01')).toBe(3);
+
+            const platform = await initPlatform();
+            expect((await get(platform.host, platform.token)).body.overview!.counts[0].due).toBe(
+                12,
+            );
+        });
+
+        test('An organization without anything to count gets an empty overview', async () => {
+            const { token, host } = await initOrganization();
+            await saveResult(new Map([[DataRetentionRun.PLATFORM_SCOPE, overview(12)]]));
+
+            const result = (await get(host, token)).body.overview!;
+            expect(result.calculatedAt).toEqual(calculatedAt);
+            expect(result.counts).toHaveLength(0);
+        });
+
+        test('The overview of another tenant is never shown', async () => {
+            await DataRetentionRun.delete();
+            const { organization, token, host } = await initOrganization();
+            const run = await DataRetentionRun.getOrCreate('other-tenant');
+            run.result = new Map([[organization.id, overview(5)]]);
+            run.finishedAt = calculatedAt;
+            await run.save();
+
+            expect((await get(host, token)).body.overview).toBeNull();
+        });
+
+        test('A running run does not change the overview', async () => {
+            const { organization, token, host } = await initOrganization();
+            await saveResult(new Map([[organization.id, overview(5)]]));
+            const run = await DataRetentionRun.getOrCreate(TenantContext.currentOrRoot.tenantId);
+            run.progress = new Map([[organization.id, overview(9)]]);
+            await run.save();
+
+            expect((await get(host, token)).body.overview!.counts[0].due).toBe(5);
         });
     });
 

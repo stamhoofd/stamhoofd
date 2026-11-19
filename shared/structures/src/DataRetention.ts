@@ -311,20 +311,6 @@ export class DataRetentionPolicy extends AutoEncoder {
 }
 
 /**
- * What an administrator can see and change. The frontend combines both levels with resolveDataRetentionTerms.
- */
-export class DataRetentionSettings extends AutoEncoder {
-    @field({ decoder: new ArrayDecoder(DataRetentionPolicy) })
-    policies: DataRetentionPolicy[] = [];
-
-    /**
-     * Only for an organization within a platform.
-     */
-    @field({ decoder: new ArrayDecoder(DataRetentionPolicy) })
-    platformPolicies: DataRetentionPolicy[] = [];
-}
-
-/**
  * Replaces all terms of one category, for the level of the request.
  */
 export class DataRetentionPolicyUpdate extends AutoEncoder {
@@ -376,6 +362,26 @@ export class DataRetentionOverview extends AutoEncoder {
 
     @field({ decoder: new ArrayDecoder(DataRetentionCount) })
     counts: DataRetentionCount[] = [];
+}
+
+/**
+ * What an administrator can see and change. The frontend combines both levels with resolveDataRetentionTerms.
+ */
+export class DataRetentionSettings extends AutoEncoder {
+    @field({ decoder: new ArrayDecoder(DataRetentionPolicy) })
+    policies: DataRetentionPolicy[] = [];
+
+    /**
+     * Only for an organization within a platform.
+     */
+    @field({ decoder: new ArrayDecoder(DataRetentionPolicy) })
+    platformPolicies: DataRetentionPolicy[] = [];
+
+    /**
+     * The counts of the last complete nightly run for this level. Null until a first run completed.
+     */
+    @field({ decoder: DataRetentionOverview, nullable: true })
+    overview: DataRetentionOverview | null = null;
 }
 
 export type ResolvedDataRetentionTerms = {

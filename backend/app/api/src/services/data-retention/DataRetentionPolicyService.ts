@@ -1,6 +1,6 @@
 import { SimpleError } from '@common/errors';
 import type { Organization, User } from '@stamhoofd/models';
-import { DataRetentionPolicy } from '@stamhoofd/models';
+import { DataRetentionPolicy, DataRetentionRun } from '@stamhoofd/models';
 import { SQLWhereSign } from '@stamhoofd/sql';
 import type { DataRetentionCategory } from '@stamhoofd/structures';
 import {
@@ -71,6 +71,10 @@ export class DataRetentionPolicyService {
                       ),
                   )
                 : [],
+            overview: await DataRetentionRun.getOverview(
+                tenantId,
+                organizationId ?? DataRetentionRun.PLATFORM_SCOPE,
+            ),
         });
     }
 
