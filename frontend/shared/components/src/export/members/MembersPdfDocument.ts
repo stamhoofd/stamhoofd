@@ -19,7 +19,7 @@ import { MembersSummaryPdfItem } from './MembersSummaryPdfItem';
 const pageMargin = mmToPoints(15);
 
 export class MembersPdfDocument {
-    constructor(private readonly items: PlatformMember[], private readonly memberDetailsDocument: SelectablePdfSheet<PlatformMember>, private readonly membersSummaryDocument: SelectablePdfSheet<PlatformMember>, private readonly title: string, private readonly logoImage: Image | null) {
+    constructor(private readonly items: PlatformMember[], private readonly memberDetailsDocument: SelectablePdfSheet<PlatformMember>, private readonly membersSummaryDocument: SelectablePdfSheet<PlatformMember>, private readonly title: string, private readonly fileName: string, private readonly logoImage: Image | null) {
     }
 
     private async createDoc(): Promise<PDFKit.PDFDocument> {
@@ -98,6 +98,6 @@ export class MembersPdfDocument {
     }
 
     async download() {
-        return (await this.render()).download('Stamhoofd');
+        return (await this.render()).download(this.fileName);
     }
 }
