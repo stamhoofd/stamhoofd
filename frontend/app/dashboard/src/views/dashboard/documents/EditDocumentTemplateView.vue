@@ -197,6 +197,11 @@ const recordAnswers = computed(() => {
 const getFeatureFlag = useFeatureFlag();
 
 function calculateHasBeenExported() {
+    // Only the XML export asks for organization.companyNumber (the refertenummer), which saving the settings must not overwrite
+    if (patchedDocument.value.privateSettings.templateDefinition.type === fiscal.type && !fiscalDocumentYearHelper.isXmlExportSupported(patchedDocument.value.year)) {
+        return false;
+    }
+
     const allowedIds = new Set<string>();
     for (const field of patchedDocument.value.privateSettings.templateDefinition.fieldCategories.flatMap(c => c.getAllRecords())) {
         allowedIds.add(field.id);
