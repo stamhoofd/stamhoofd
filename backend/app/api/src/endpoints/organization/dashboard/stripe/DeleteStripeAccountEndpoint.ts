@@ -49,7 +49,7 @@ export class DeleteStripeAccountEndpoint extends Endpoint<Params, Query, Body, R
         if (STAMHOOFD.STRIPE_ACCOUNT_ID && model.accountId === STAMHOOFD.STRIPE_ACCOUNT_ID) {
             throw new SimpleError({
                 code: 'invalid_request',
-                message: 'Je kan het hoofdaccount van het platform niet verwijderen.',
+                message: $t('Je kan het hoofdaccount van het platform niet verwijderen.'),
                 statusCode: 400,
             });
         }
