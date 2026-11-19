@@ -48,6 +48,7 @@ import {
     FinancialSupportSettings,
     GroupStatus,
     GroupType,
+    LoadedPermissions,
     PermissionsResourceKey,
     ReceivableBalanceType,
     UitpasNumberDetails,
@@ -1971,6 +1972,52 @@ export class AdminPermissionChecker {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Whether this user should receive the reviewer emails for an event notification: they need to be able to review it,
+     * and with the feature flag, full platform admins only qualify if the reviewer access right was granted explicitly (e.g. via a role).
+     */
+    async canReceiveEventNotificationReviewEmails(eventNotification: { organizationId: string }) {
+        if (!(await this.canReviewEventNotification(eventNotification))) {
+            return false;
+        }
+
+        if (!this.platform.config.featureFlags.includes('event-notification-explicit-reviewers')) {
+            return true;
+        }
+
+        // Full platform admins receive the reviewer right implicitly (see UserPermissions.forPlatform),
+        // so load their platform permissions without that step. Organization level permissions can't grant it.
+        const globalPermissions = this.user.permissions?.applicableGlobalPermissions(
+            this.platform,
+            this.user.email,
+        );
+        const explicitPlatformPermissions = globalPermissions
+            ? LoadedPermissions.from(
+                  globalPermissions,
+                  this.platform.getRoles(),
+                  [],
+                  this.platform.config.responsibilities,
+              )
+            : null;
+
+        if (!explicitPlatformPermissions?.hasFullAccess()) {
+            // The reviewer right is never granted implicitly to users without full platform access
+            return true;
+        }
+
+        const organization = await this.getOrganization(eventNotification.organizationId);
+        const tags =
+            organization.meta.tags.length === 0
+                ? [PermissionsResourceKey.All]
+                : organization.meta.tags;
+
+        return tags.some((tag) =>
+            explicitPlatformPermissions
+                .getMergedResourcePermissions(PermissionsResourceType.OrganizationTags, tag)
+                .hasAccessRight(AccessRight.OrganizationEventNotificationReviewer),
+        );
     }
 
     async hasFullAccess(
