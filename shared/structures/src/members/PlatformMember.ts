@@ -876,6 +876,7 @@ export class PlatformMember implements ObjectWithRecords {
                 endDate: record.endDate,
                 minimumAge: this.getResponsibility(record)?.judicialRecordMinimumAge ?? null,
             })),
+            record: this.patchedMember.judicialRecord,
         });
     }
 
