@@ -679,6 +679,18 @@ export class SSOServiceWithSession {
 
             this.service.validateEmail(claims.email);
 
+            // a provider that explicitly states the email is unverified, is blocked here
+            if (claims.email_verified !== undefined && !claims.email_verified) {
+                throw new SimpleError({
+                    code: 'invalid_user',
+                    message: 'Email address not verified by the identity provider',
+                    human: $t(
+                        'Je e-mailadres is niet bevestigd bij je loginprovider. Bevestig het daar en probeer daarna opnieuw.',
+                    ),
+                    statusCode: 403,
+                });
+            }
+
             if (this.session.userId) {
                 if (!claims.auth_time || claims.auth_time * 1000 < Date.now() - 1000 * 60 * 5) {
                     if (
