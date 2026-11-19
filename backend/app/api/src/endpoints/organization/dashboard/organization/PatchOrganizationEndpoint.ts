@@ -290,8 +290,9 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                             if (!payment) {
                                 throw new SimpleError({
                                     code: 'invalid_field',
-                                    message:
+                                    message: $t(
                                         'De API-key voor Payconiq is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.',
+                                    ),
                                     field: 'payconiqAccounts',
                                 });
                             }
@@ -347,8 +348,9 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         if (!(await buckaroo.createTest())) {
                             throw new SimpleError({
                                 code: 'invalid_field',
-                                message:
+                                message: $t(
                                     'De key of secret voor Buckaroo is niet geldig. Kijk eens na of je wel de juiste key hebt ingevuld.',
+                                ),
                                 field: 'buckarooSettings',
                             });
                         }
@@ -370,8 +372,9 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         if (!account || account.organizationId !== organization.id) {
                             throw new SimpleError({
                                 code: 'invalid_field',
-                                message:
+                                message: $t(
                                     'Het Stripe account dat je hebt gekozen bestaat niet (meer)',
+                                ),
                                 field: 'registrationPaymentConfiguration.stripeAccountId',
                             });
                         }
@@ -420,8 +423,9 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         if (i !== -1) {
                             throw new SimpleError({
                                 code: 'invalid_field',
-                                message:
+                                message: $t(
                                     'Je kan Payconiq niet activeren omdat je geen Payconiq API Key hebt ingesteld. Schakel Payconiq uit voor je verder gaat.',
+                                ),
                                 field: 'paymentMethods',
                             });
                         }
@@ -461,16 +465,14 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                         if (i !== -1) {
                             throw new SimpleError({
                                 code: 'invalid_field',
-                                message:
-                                    'Je kan ' +
-                                    PaymentMethodHelper.getName(
-                                        organization.meta.paymentMethods[i],
-                                    ) +
-                                    ' niet activeren omdat je daarvoor nog niet aangesloten bent bij een betaalpartner. Schakel ' +
-                                    PaymentMethodHelper.getName(
-                                        organization.meta.paymentMethods[i],
-                                    ) +
-                                    ' uit voor je verder gaat.',
+                                message: $t(
+                                    'Je kan {paymentMethod} niet activeren omdat je daarvoor nog niet aangesloten bent bij een betaalpartner. Schakel {paymentMethod} uit voor je verder gaat.',
+                                    {
+                                        paymentMethod: PaymentMethodHelper.getName(
+                                            organization.meta.paymentMethods[i],
+                                        ),
+                                    },
+                                ),
                                 field: 'paymentMethods',
                             });
                         }

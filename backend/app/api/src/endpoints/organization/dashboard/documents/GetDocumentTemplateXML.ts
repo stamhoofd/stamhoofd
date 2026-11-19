@@ -64,8 +64,9 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
         if (!xml) {
             throw new SimpleError({
                 code: 'failed_generating',
-                message:
+                message: $t(
                     'Er ging iets mis bij het aanmaken van het document. Probeer later opieuw en neem contact met ons op als het probleem blijft herhalen.',
+                ),
             });
         }
 

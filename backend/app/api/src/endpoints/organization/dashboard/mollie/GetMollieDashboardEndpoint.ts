@@ -39,8 +39,9 @@ export class GetMollieDashboardEndpoint extends Endpoint<Params, Query, Body, Re
         if (!mollie) {
             throw new SimpleError({
                 code: 'not_yet_linked',
-                message:
+                message: $t(
                     'Mollie is nog niet gekoppeld. Koppel Mollie eerst voor je de gegevens aanvult',
+                ),
             });
         }
 
@@ -60,8 +61,9 @@ export class GetMollieDashboardEndpoint extends Endpoint<Params, Query, Body, Re
             await mollie.delete();
             throw new SimpleError({
                 code: 'not_yet_linked',
-                message:
+                message: $t(
                     'Mollie is nog niet gekoppeld. Koppel Mollie eerst voor je de gegevens aanvult',
+                ),
             });
         }
     }

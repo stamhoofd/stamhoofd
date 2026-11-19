@@ -49,7 +49,7 @@ export class ConnectMollieEndpoint extends Endpoint<Params, Query, Body, Respons
         if (models.length > 0 && !canCreateMultipleStripeAccounts) {
             throw new SimpleError({
                 code: 'already_connected',
-                message: 'Je hebt al een Stripe account gekoppeld',
+                message: $t('Je hebt al een Stripe account gekoppeld'),
             });
         }
 
