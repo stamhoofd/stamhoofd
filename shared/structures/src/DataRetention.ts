@@ -65,6 +65,12 @@ export const DATA_RETENTION_MAXIMUM_PROTECTED_PERIODS = 20;
 export const DATA_RETENTION_DEFAULT_PROTECTED_PERIODS = 2;
 export const DATA_RETENTION_WAITING_DAYS = 30;
 
+/**
+ * The term of an account starts at its last activity, but never before this date: users.lastActiveAt only exists since
+ * 30 July 2026, so an older or missing value says nothing. Move this to the launch date of data retention before it goes live.
+ */
+export const DATA_RETENTION_LAUNCH_DATE = new Date('2026-07-30T00:00:00+02:00');
+
 export function getDataRetentionCategoryName(category: DataRetentionCategory): string {
     switch (category) {
         case DataRetentionCategory.Members:

@@ -177,6 +177,27 @@ export function planOrder(
     };
 }
 
+/**
+ * For the categories that only follow a date: e-mails, documents, the audit log and accounts.
+ * They can only be deleted, and nothing holds them: what should be kept is left out of these categories.
+ */
+export function planDeletion(
+    organizationId: string | null,
+    category: DataRetentionCategory,
+    start: Date,
+    index: DataRetentionPolicyIndex,
+    now: Date,
+): DataRetentionDecision {
+    return {
+        action: DataRetentionAction.Delete,
+        dueAt: getDueAt(
+            [{ start, timeline: index.getTimeline(organizationId, category, now) }],
+            (terms) => terms.deleteAfterMonths,
+        ),
+        heldBy: [],
+    };
+}
+
 function planMemberAction(
     action: DataRetentionAction,
     facts: MemberRetentionFacts,

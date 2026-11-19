@@ -157,6 +157,16 @@ export enum AuditLogType {
     EventNotificationDeleted = 'EventNotificationDeleted',
 }
 
+/**
+ * Logs about the retention terms themselves. They are kept for a fixed 5 years: the AuditLogs retention term never applies to them,
+ * so nobody can shorten a term and remove the proof of that change at the same time.
+ */
+export const FixedRetentionAuditLogTypes: AuditLogType[] = [
+    AuditLogType.DataRetentionPolicyChanged,
+    AuditLogType.DataRetentionPendingChangeCancelled,
+    AuditLogType.DataRetentionPendingChangeApplied,
+];
+
 export function getAuditLogTypeName(type: AuditLogType): string {
     switch (type) {
         case AuditLogType.MemberEdited:

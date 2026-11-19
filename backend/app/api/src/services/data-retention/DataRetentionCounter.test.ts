@@ -1,8 +1,11 @@
-import type { Organization } from '@stamhoofd/models';
 import {
+    AuditLog,
     BalanceItemFactory,
     DataRetentionPolicy,
     DataRetentionRun,
+    Document,
+    DocumentTemplateFactory,
+    Email,
     GroupFactory,
     Member,
     MemberFactory,
@@ -10,17 +13,24 @@ import {
     MemberResponsibilityRecordFactory,
     Order,
     OrderFactory,
+    Organization,
     OrganizationFactory,
     RegistrationFactory,
+    User,
     UserFactory,
     WebshopFactory,
 } from '@stamhoofd/models';
 import type { DataRetentionOverview } from '@stamhoofd/structures';
 import {
+    AuditLogType,
     CartItem,
+    DATA_RETENTION_LAUNCH_DATE,
     DataRetentionAction,
     DataRetentionCategory,
     DataRetentionHoldReason,
+    DataRetentionTerms,
+    DocumentStatus,
+    EmailStatus,
     Permissions,
     Product,
     ProductDateRange,
@@ -32,6 +42,7 @@ import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
 import { v4 as uuidv4 } from 'uuid';
 
+import { DataRetentionAuditLogService } from './DataRetentionAuditLogService.js';
 import { DataRetentionCounter } from './DataRetentionCounter.js';
 
 const longAgo = new Date('2018-08-31T00:00:00.000Z');
@@ -78,6 +89,50 @@ async function countAll() {
         // Keep going until the run is complete
     }
     return run;
+}
+
+async function setPlatformTerms(
+    category: DataRetentionCategory,
+    terms: { anonymizeAfterMonths?: number; deleteAfterMonths?: number },
+) {
+    const policy = new DataRetentionPolicy();
+    policy.tenantId = '1';
+    policy.category = category;
+    policy.anonymizeAfterMonths = terms.anonymizeAfterMonths ?? null;
+    policy.deleteAfterMonths = terms.deleteAfterMonths ?? null;
+    await policy.save();
+}
+
+async function createEmail(
+    organization: Organization | null,
+    options: { sentAt: Date | null; deletedAt?: Date | null },
+) {
+    const email = new Email();
+    email.subject = 'Test';
+    email.status = options.sentAt ? EmailStatus.Sent : EmailStatus.Draft;
+    email.json = {};
+    email.organizationId = organization?.id ?? null;
+    email.sentAt = options.sentAt;
+    email.deletedAt = options.deletedAt ?? null;
+    await email.save();
+}
+
+async function createAuditLog(organization: Organization | null, createdAt: Date) {
+    const log = new AuditLog();
+    log.type = AuditLogType.Unknown;
+    log.organizationId = organization?.id ?? null;
+    log.description = 'Test';
+    log.createdAt = createdAt;
+    await log.save();
+}
+
+/**
+ * The counts of the platform also include everything other tests created, so these tests compare before and after.
+ */
+async function getPlatformDeletions(category: DataRetentionCategory) {
+    const run = await countAll();
+    const count = getCount(run.result.get('platform'), category, DataRetentionAction.Delete);
+    return { due: count?.due ?? 0, upcoming: new Map(count?.upcoming ?? []) };
 }
 
 function monthsFromNow(months: number) {
@@ -326,11 +381,14 @@ describe('DataRetentionCounter', () => {
             await createFormerMember(organization);
         }
 
-        // One call per member and order, plus one to finish. More calls would mean the cursor is not saved.
+        // One call per member, order, organization and account, one for the data without an organization, and one to finish.
+        // More calls would mean the cursor is not saved.
         const maxCalls =
             (await Member.select().count()) +
             (await Order.select().where('anonymizedAt', null).count()) +
-            1;
+            (await Organization.select().count()) +
+            (await User.select().count()) +
+            2;
 
         // Reload the run from the database after every batch, as the next cron call would
         let complete = false;
@@ -573,5 +631,195 @@ describe('DataRetentionCounter', () => {
         );
         expect(count?.due).toBe(0);
         expect(count?.heldBy.get(DataRetentionHoldReason.OpenBalance)).toBe(1);
+    });
+    describe('Categories that only follow a date', () => {
+        async function getOrganizationDeletions(
+            organization: Organization,
+            category: DataRetentionCategory,
+        ) {
+            const run = await countAll();
+            return getCount(run.result.get(organization.id), category, DataRetentionAction.Delete);
+        }
+
+        test('Sent e-mails are counted from their send date, drafts and deleted e-mails are not', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            await setOrganizationTerms(organization, DataRetentionCategory.Emails, {
+                deleteAfterMonths: 12,
+            });
+            const recent = monthsFromNow(-6);
+            await createEmail(organization, { sentAt: longAgo });
+            await createEmail(organization, { sentAt: longAgo });
+            await createEmail(organization, { sentAt: recent });
+            await createEmail(organization, { sentAt: null });
+            await createEmail(organization, { sentAt: longAgo, deletedAt: new Date() });
+
+            const count = await getOrganizationDeletions(
+                organization,
+                DataRetentionCategory.Emails,
+            );
+
+            expect(count?.due).toBe(2);
+            expect(count?.upcoming.get(getMonthKey(monthsFromNow(6)))).toBe(1);
+            expect([...count!.upcoming.values()].reduce((a, b) => a + b, 0)).toBe(1);
+        });
+
+        test('Documents are counted from their creation, except deleted documents', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            await setOrganizationTerms(organization, DataRetentionCategory.Documents, {
+                deleteAfterMonths: 12,
+            });
+            const group = await new GroupFactory({ organization }).create();
+            const template = await new DocumentTemplateFactory({ groups: [group] }).create();
+            for (const status of [DocumentStatus.Published, DocumentStatus.Deleted]) {
+                const document = new Document();
+                document.organizationId = organization.id;
+                document.templateId = template.id;
+                document.status = status;
+                document.createdAt = longAgo;
+                await document.save();
+            }
+
+            const count = await getOrganizationDeletions(
+                organization,
+                DataRetentionCategory.Documents,
+            );
+
+            expect(count?.due).toBe(1);
+        });
+
+        test('Audit logs are counted from their date, except the logs about the terms themselves', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            await setOrganizationTerms(organization, DataRetentionCategory.AuditLogs, {
+                deleteAfterMonths: 12,
+            });
+            await createAuditLog(organization, longAgo);
+
+            const policy = new DataRetentionPolicy();
+            policy.tenantId = '1';
+            policy.organizationId = organization.id;
+            policy.category = DataRetentionCategory.Emails;
+            await policy.save();
+            await DataRetentionAuditLogService.logPendingChangeApplied(
+                policy,
+                DataRetentionTerms.create({}),
+            );
+            await AuditLog.update()
+                .set('createdAt', longAgo)
+                .where('organizationId', organization.id)
+                .where('type', AuditLogType.DataRetentionPendingChangeApplied)
+                .update();
+
+            const count = await getOrganizationDeletions(
+                organization,
+                DataRetentionCategory.AuditLogs,
+            );
+
+            expect(count?.due).toBe(1);
+        });
+
+        test('E-mails and audit logs without an organization follow the platform', async () => {
+            await setPlatformTerms(DataRetentionCategory.AuditLogs, { deleteAfterMonths: 12 });
+            await setPlatformTerms(DataRetentionCategory.Emails, { deleteAfterMonths: 12 });
+            const auditLogsBefore = await getPlatformDeletions(DataRetentionCategory.AuditLogs);
+            const emailsBefore = await getPlatformDeletions(DataRetentionCategory.Emails);
+
+            await createAuditLog(null, longAgo);
+            await createEmail(null, { sentAt: longAgo });
+
+            const auditLogsAfter = await getPlatformDeletions(DataRetentionCategory.AuditLogs);
+            const emailsAfter = await getPlatformDeletions(DataRetentionCategory.Emails);
+            expect(auditLogsAfter.due - auditLogsBefore.due).toBe(1);
+            expect(emailsAfter.due - emailsBefore.due).toBe(1);
+        });
+
+        test('Items of one day are only due when the latest of that day is due', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            await setOrganizationTerms(organization, DataRetentionCategory.Emails, {
+                deleteAfterMonths: 12,
+            });
+
+            // Three on one day and one on another day, both long ago
+            for (let i = 0; i < 3; i++) {
+                await createEmail(organization, { sentAt: longAgo });
+            }
+            await createEmail(organization, { sentAt: new Date('2018-06-01T10:00:00.000Z') });
+
+            // Grouped per day in UTC: the start of this day has passed its term, the end has not
+            const day = DateTime.now().toUTC().minus({ months: 12 }).startOf('day');
+            await createEmail(organization, { sentAt: day.plus({ seconds: 1 }).toJSDate() });
+            await createEmail(organization, {
+                sentAt: day.endOf('day').startOf('second').toJSDate(),
+            });
+
+            const count = await getOrganizationDeletions(
+                organization,
+                DataRetentionCategory.Emails,
+            );
+
+            expect(count?.due).toBe(4);
+            expect([...count!.upcoming.values()].reduce((a, b) => a + b, 0)).toBe(2);
+        });
+
+        test('Accounts are counted from their last activity, and only when they are not linked to anything', async () => {
+            await setPlatformTerms(DataRetentionCategory.Accounts, { deleteAfterMonths: 3 });
+            const organization = await new OrganizationFactory({}).create();
+            const before = await getPlatformDeletions(DataRetentionCategory.Accounts);
+
+            // Not active since the launch date: due 3 months after the launch date
+            await new UserFactory({}).create();
+
+            // Never counted: the member's own account, the system account and an API account
+            const ownAccount = await new UserFactory({}).create();
+            ownAccount.memberId = (await new MemberFactory({ organization }).create()).id;
+            await ownAccount.save();
+            if (!(await User.getByID('1'))) {
+                const system = await new UserFactory({}).create();
+                await User.update().set('id', '1').where('id', system.id).update();
+            }
+            await new UserFactory({ apiUser: true, verified: true }).create();
+
+            const active = await new UserFactory({}).create();
+            active.lastActiveAt = new Date();
+            await active.save();
+
+            const member = await new MemberFactory({ organization }).create();
+            const parent = await new UserFactory({}).create();
+            await Member.users.link(member, [parent]);
+
+            await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const debtor = await new UserFactory({}).create();
+            await new BalanceItemFactory({
+                organizationId: organization.id,
+                userId: debtor.id,
+                amount: 1,
+                unitPrice: 10_00,
+            }).create();
+
+            const after = await getPlatformDeletions(DataRetentionCategory.Accounts);
+            const delta = (month: string) =>
+                (after.upcoming.get(month) ?? 0) - (before.upcoming.get(month) ?? 0);
+
+            // Only the account that was never active, and the active account, are counted
+            const neverActiveDue = DateTime.fromJSDate(DATA_RETENTION_LAUNCH_DATE, {
+                zone: Formatter.timezone,
+            })
+                .plus({ months: 3 })
+                .toJSDate();
+            const activeMonth = getMonthKey(monthsFromNow(3));
+            if (neverActiveDue <= new Date()) {
+                expect(after.due - before.due).toBe(1);
+                expect(delta(activeMonth)).toBe(1);
+            } else {
+                const neverActiveMonth = getMonthKey(neverActiveDue);
+                expect(after.due - before.due).toBe(0);
+                expect(delta(neverActiveMonth) + delta(activeMonth)).toBe(
+                    neverActiveMonth === activeMonth ? 4 : 2,
+                );
+            }
+        });
     });
 });

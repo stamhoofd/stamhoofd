@@ -9,15 +9,42 @@ import {
     RegistrationPeriod,
     User,
 } from '@stamhoofd/models';
-import { SQL, SQLAlias, SQLOrderBy, SQLSelectAs, SQLWhereSign } from '@stamhoofd/sql';
-import type {
+import type { SQLWhere } from '@stamhoofd/sql';
+import {
+    SQL,
+    SQLAlias,
+    SQLCount,
+    SQLMax,
+    SQLOrderBy,
+    SQLSelectAs,
+    SQLWhereSign,
+} from '@stamhoofd/sql';
+import type { DataRetentionPolicy as DataRetentionPolicyStruct } from '@stamhoofd/structures';
+import {
+    BalanceItemStatus,
+    DATA_RETENTION_LAUNCH_DATE,
     DataRetentionCategory,
-    DataRetentionPolicy as DataRetentionPolicyStruct,
+    DocumentStatus,
+    FixedRetentionAuditLogTypes,
 } from '@stamhoofd/structures';
-import { BalanceItemStatus } from '@stamhoofd/structures';
 
 import type { MemberRetentionFacts, OrderRetentionFacts } from './DataRetentionPlanner.js';
 import { DataRetentionPolicyIndex } from './DataRetentionPlanner.js';
+
+/**
+ * How many items of a category share the same day. start is the latest date of that day, so the group is only due
+ * when every item in it is due.
+ */
+export type DataRetentionDateCount = {
+    category: DataRetentionCategory;
+    start: Date;
+    count: number;
+};
+
+/**
+ * An account that is not linked to anything anymore. Accounts that are still linked are not in the category at all.
+ */
+export type AccountRetentionFacts = { organizationId: string | null; start: Date };
 
 /**
  * Collects everything the planner needs, per batch, to avoid a query per member or order.
@@ -257,6 +284,122 @@ export class DataRetentionFactsLoader {
         return { lastId: orders[orders.length - 1].id, facts };
     }
 
+    async loadOrganizationBatch(
+        afterId: string | null,
+        limit: number,
+    ): Promise<{ lastId: string; organizationIds: string[] } | null> {
+        const rows = await SQL.select(SQL.column('id'))
+            .from('organizations')
+            .where('id', SQLWhereSign.Greater, afterId ?? '')
+            .orderBy(new SQLOrderBy({ column: SQL.column('id'), direction: 'ASC' }))
+            .limit(limit)
+            .fetch();
+        if (rows.length === 0) {
+            return null;
+        }
+        const organizationIds = rows.map((row) => row.organizations.id as string);
+        return { lastId: organizationIds[organizationIds.length - 1], organizationIds };
+    }
+
+    /**
+     * E-mails, documents and audit logs of one organization, or those without an organization.
+     * Grouped per day, so this stays one query per category, also for a large organization.
+     *
+     * Left out: drafts (an e-mail without a send date), and what was deleted by hand, which the cleanup after 30 days removes.
+     */
+    async loadDateCounts(organizationId: string | null): Promise<DataRetentionDateCount[]> {
+        const counts = [
+            ...(await countPerDay(
+                'emails',
+                'sentAt',
+                DataRetentionCategory.Emails,
+                SQL.where('organizationId', organizationId)
+                    .and(SQL.whereNot('sentAt', null))
+                    .and('deletedAt', null),
+            )),
+            ...(await countPerDay(
+                'audit_logs',
+                'createdAt',
+                DataRetentionCategory.AuditLogs,
+                SQL.where('organizationId', organizationId).and(
+                    SQL.whereNot('type', FixedRetentionAuditLogTypes),
+                ),
+            )),
+        ];
+
+        if (organizationId) {
+            counts.push(
+                ...(await countPerDay(
+                    'documents',
+                    'createdAt',
+                    DataRetentionCategory.Documents,
+                    SQL.where('organizationId', organizationId).and(
+                        SQL.whereNot('status', DocumentStatus.Deleted),
+                    ),
+                )),
+            );
+        }
+        return counts;
+    }
+
+    /**
+     * The next accounts after the given id, in id order, that are not linked to anything anymore. Returns null when there are none left.
+     */
+    async loadAccountBatch(
+        afterId: string | null,
+        limit: number,
+    ): Promise<{ lastId: string; facts: AccountRetentionFacts[] } | null> {
+        const users = await User.select(
+            'id',
+            'organizationId',
+            'memberId',
+            'permissions',
+            'lastActiveAt',
+            'email',
+            'verified',
+        )
+            .where('id', SQLWhereSign.Greater, afterId ?? '')
+            .orderBy(new SQLOrderBy({ column: SQL.column('id'), direction: 'ASC' }))
+            .limit(limit)
+            .fetch();
+
+        if (users.length === 0) {
+            return null;
+        }
+
+        const userIds = users.map((u) => u.id);
+        const linked = new Set(
+            (
+                await SQL.select(SQL.column('usersId'))
+                    .from('_members_users')
+                    .where('usersId', userIds)
+                    .fetch()
+            ).map((row) => row._members_users.usersId as string),
+        );
+        const withOpenBalance = new Set(await getIdsWithOpenBalance('userId', userIds));
+
+        const facts = users
+            .filter(
+                (user) =>
+                    !user.isSystemUser &&
+                    !user.isApiUser &&
+                    !user.memberId &&
+                    !linked.has(user.id) &&
+                    (!user.permissions || user.permissions.isEmpty) &&
+                    !withOpenBalance.has(user.id),
+            )
+            .map((user) => ({
+                // Within a platform, accounts are shared between organizations, so only the platform term applies
+                organizationId: STAMHOOFD.userMode === 'platform' ? null : user.organizationId,
+                start:
+                    user.lastActiveAt && user.lastActiveAt > DATA_RETENTION_LAUNCH_DATE
+                        ? user.lastActiveAt
+                        : DATA_RETENTION_LAUNCH_DATE,
+            }));
+
+        return { lastId: userIds[userIds.length - 1], facts };
+    }
+
     /**
      * Reads only settings.endDate, because group settings are large.
      */
@@ -294,7 +437,7 @@ export class DataRetentionFactsLoader {
  * Same condition as the outstanding balance in CachedBalance: something is still open or a payment is still pending.
  */
 async function getIdsWithOpenBalance(
-    column: 'memberId' | 'orderId',
+    column: 'memberId' | 'orderId' | 'userId',
     ids: string[],
 ): Promise<string[]> {
     if (ids.length === 0) {
@@ -312,4 +455,26 @@ async function getIdsWithOpenBalance(
         )
         .fetch();
     return items.map((item) => item[column]).filter((id) => id !== null);
+}
+
+async function countPerDay(
+    table: string,
+    column: string,
+    category: DataRetentionCategory,
+    where: SQLWhere,
+): Promise<DataRetentionDateCount[]> {
+    const rows = await SQL.select(
+        new SQLSelectAs(new SQLMax(SQL.column(column)), new SQLAlias('data__start')),
+        new SQLSelectAs(new SQLCount(), new SQLAlias('data__count')),
+    )
+        .from(table)
+        .where(where)
+        .groupBy(SQL.cast(SQL.column(column), 'DATE'))
+        .fetch();
+
+    return rows.map((row) => ({
+        category,
+        start: row.data.start as Date,
+        count: row.data.count as number,
+    }));
 }

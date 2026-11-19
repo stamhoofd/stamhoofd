@@ -7,6 +7,15 @@ import { v4 as uuidv4 } from 'uuid';
 export enum DataRetentionRunPhase {
     Members = 'Members',
     Orders = 'Orders',
+    /**
+     * E-mails, documents and audit logs, per organization.
+     */
+    OrganizationData = 'OrganizationData',
+    /**
+     * E-mails and audit logs without an organization.
+     */
+    PlatformData = 'PlatformData',
+    Accounts = 'Accounts',
 }
 
 /**
@@ -35,7 +44,7 @@ export class DataRetentionRun extends QueryableModel {
     phase: DataRetentionRunPhase | null = null;
 
     /**
-     * The last id that was processed in the current phase.
+     * The last id that was processed in the current phase. The PlatformData phase has a single step, and stores 'done' once it ran.
      */
     @column({ type: 'string', nullable: true })
     cursor: string | null = null;

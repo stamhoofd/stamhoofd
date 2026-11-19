@@ -11,10 +11,24 @@ import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
 
 import type { DataRetentionDecision, MemberRetentionFacts } from './DataRetentionPlanner.js';
-import { planMember, planOrder } from './DataRetentionPlanner.js';
+import { planDeletion, planMember, planOrder } from './DataRetentionPlanner.js';
 import { DataRetentionFactsLoader } from './DataRetentionFactsLoader.js';
 
 const BATCH_SIZE = 100;
+const ORGANIZATION_BATCH_SIZE = 10;
+
+/**
+ * The cursor of the PlatformData phase, which has a single step, once that step ran.
+ */
+const PLATFORM_DATA_DONE = 'done';
+
+const NEXT_PHASE: Record<DataRetentionRunPhase, DataRetentionRunPhase | null> = {
+    [DataRetentionRunPhase.Members]: DataRetentionRunPhase.Orders,
+    [DataRetentionRunPhase.Orders]: DataRetentionRunPhase.OrganizationData,
+    [DataRetentionRunPhase.OrganizationData]: DataRetentionRunPhase.PlatformData,
+    [DataRetentionRunPhase.PlatformData]: DataRetentionRunPhase.Accounts,
+    [DataRetentionRunPhase.Accounts]: null,
+};
 const PLATFORM_SCOPE = 'platform';
 
 /**
@@ -40,20 +54,46 @@ export class DataRetentionCounter {
             run.startedAt = new Date();
         }
 
+        let phase = run.phase;
         const loader = await DataRetentionFactsLoader.create(run.tenantId);
 
         let batches = 0;
         while (Date.now() < deadline.getTime() && batches < maxBatches) {
-            const now = new Date();
+            if (await this.continuePhase(run, phase, loader, batchSize, new Date())) {
+                batches += 1;
+                continue;
+            }
 
-            if (run.phase === DataRetentionRunPhase.Members) {
+            const nextPhase = NEXT_PHASE[phase];
+            if (!nextPhase) {
+                await this.finish(run);
+                return true;
+            }
+            phase = nextPhase;
+            run.phase = phase;
+            run.cursor = null;
+        }
+
+        await run.save();
+        return false;
+    }
+
+    /**
+     * Counts the next batch of the current phase. Returns false when the phase has nothing left.
+     */
+    private static async continuePhase(
+        run: DataRetentionRun,
+        phase: DataRetentionRunPhase,
+        loader: DataRetentionFactsLoader,
+        batchSize: number,
+        now: Date,
+    ): Promise<boolean> {
+        switch (phase) {
+            case DataRetentionRunPhase.Members: {
                 const batch = await loader.loadMemberBatch(run.cursor, batchSize, now);
                 if (!batch) {
-                    run.phase = DataRetentionRunPhase.Orders;
-                    run.cursor = null;
-                    continue;
+                    return false;
                 }
-
                 for (const memberFacts of batch.facts) {
                     const scopes = getScopes(getMemberOrganizationIds(memberFacts));
                     for (const decision of planMember(memberFacts, loader.index, now)) {
@@ -69,34 +109,80 @@ export class DataRetentionCounter {
                     }
                 }
                 run.cursor = batch.lastId;
-                batches += 1;
-                continue;
-            }
-
-            const batch = await loader.loadOrderBatch(run.cursor, batchSize);
-            if (!batch) {
-                await this.finish(run);
                 return true;
             }
 
-            for (const orderFacts of batch.facts) {
-                const decision = planOrder(orderFacts, loader.index, now);
-                if (decision) {
+            case DataRetentionRunPhase.Orders: {
+                const batch = await loader.loadOrderBatch(run.cursor, batchSize);
+                if (!batch) {
+                    return false;
+                }
+                for (const orderFacts of batch.facts) {
+                    const decision = planOrder(orderFacts, loader.index, now);
+                    if (decision) {
+                        count(
+                            run,
+                            getScopes([orderFacts.organizationId]),
+                            DataRetentionCategory.Orders,
+                            decision,
+                            now,
+                        );
+                    }
+                }
+                run.cursor = batch.lastId;
+                return true;
+            }
+
+            case DataRetentionRunPhase.OrganizationData: {
+                // Each organization takes a few grouped queries, so fewer organizations fit in one batch
+                const batch = await loader.loadOrganizationBatch(
+                    run.cursor,
+                    Math.min(batchSize, ORGANIZATION_BATCH_SIZE),
+                );
+                if (!batch) {
+                    return false;
+                }
+                for (const organizationId of batch.organizationIds) {
+                    await countDates(run, loader, organizationId, now);
+                }
+                run.cursor = batch.lastId;
+                return true;
+            }
+
+            case DataRetentionRunPhase.PlatformData: {
+                // Without a platform, nothing follows a platform term
+                if (STAMHOOFD.userMode !== 'platform' || run.cursor === PLATFORM_DATA_DONE) {
+                    return false;
+                }
+                await countDates(run, loader, null, now);
+                run.cursor = PLATFORM_DATA_DONE;
+                return true;
+            }
+
+            case DataRetentionRunPhase.Accounts: {
+                const batch = await loader.loadAccountBatch(run.cursor, batchSize);
+                if (!batch) {
+                    return false;
+                }
+                for (const account of batch.facts) {
                     count(
                         run,
-                        getScopes([orderFacts.organizationId]),
-                        DataRetentionCategory.Orders,
-                        decision,
+                        getScopes([account.organizationId]),
+                        DataRetentionCategory.Accounts,
+                        planDeletion(
+                            account.organizationId,
+                            DataRetentionCategory.Accounts,
+                            account.start,
+                            loader.index,
+                            now,
+                        ),
                         now,
                     );
                 }
+                run.cursor = batch.lastId;
+                return true;
             }
-            run.cursor = batch.lastId;
-            batches += 1;
         }
-
-        await run.save();
-        return false;
     }
 
     /**
@@ -114,6 +200,28 @@ export class DataRetentionCounter {
         run.cursor = null;
         run.finishedAt = calculatedAt;
         await run.save();
+    }
+}
+
+/**
+ * E-mails, documents and audit logs of one organization, or those without an organization when organizationId is null.
+ */
+async function countDates(
+    run: DataRetentionRun,
+    loader: DataRetentionFactsLoader,
+    organizationId: string | null,
+    now: Date,
+) {
+    const scopes = getScopes([organizationId]);
+    for (const { category, start, count: amount } of await loader.loadDateCounts(organizationId)) {
+        count(
+            run,
+            scopes,
+            category,
+            planDeletion(organizationId, category, start, loader.index, now),
+            now,
+            amount,
+        );
     }
 }
 
@@ -142,7 +250,7 @@ function getScopes(organizationIds: (string | null)[]): string[] {
 }
 
 /**
- * Adds one decision to the progress of each scope, in exactly one of three buckets:
+ * Adds a decision for amount items to the progress of each scope, in exactly one of three buckets:
  * - upcoming, per month, when the term has not passed yet
  * - held, with each reason, when the term has passed but something holds it
  * - due, when the term has passed and nothing holds it
@@ -155,6 +263,7 @@ function count(
     category: DataRetentionCategory,
     decision: DataRetentionDecision,
     now: Date,
+    amount = 1,
 ) {
     if (!decision.dueAt) {
         return;
@@ -174,14 +283,14 @@ function count(
 
         if (decision.dueAt > now) {
             const month = getUpcomingMonth(decision.dueAt, now);
-            counts.upcoming.set(month, (counts.upcoming.get(month) ?? 0) + 1);
+            counts.upcoming.set(month, (counts.upcoming.get(month) ?? 0) + amount);
         } else if (decision.heldBy.length > 0) {
-            counts.held += 1;
+            counts.held += amount;
             for (const reason of decision.heldBy) {
-                counts.heldBy.set(reason, (counts.heldBy.get(reason) ?? 0) + 1);
+                counts.heldBy.set(reason, (counts.heldBy.get(reason) ?? 0) + amount);
             }
         } else {
-            counts.due += 1;
+            counts.due += amount;
         }
     }
 }
