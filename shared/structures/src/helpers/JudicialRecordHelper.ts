@@ -56,9 +56,15 @@ export interface JudicialRecordResponsibility {
     minimumAge: number | null;
 }
 
-/** The member's current judicial record, reduced to what decides their status. */
+/**
+ * The member's current judicial record, reduced to what decides their status.
+ *
+ * `identityMatches` is the comparison of the record's identity hash against the member's, already made by the
+ * backend: this helper is told the answer rather than the hashes, so nothing here can derive one.
+ */
 export interface JudicialRecordCurrentRecord {
     reviewDecision: JudicialRecordReviewDecision;
+    identityMatches: boolean;
 
     /** When a reviewer decided, null while nobody has looked. */
     reviewedAt: Date | null;
@@ -123,6 +129,11 @@ export class JudicialRecordHelper {
      */
     static getStoredStatus(record: JudicialRecordCurrentRecord | null, atDate: Date = new Date()): JudicialRecordStatus | null {
         if (record === null) {
+            return null;
+        }
+
+        // The approval was granted to a different name or birth date, so it says nothing about this member.
+        if (!record.identityMatches) {
             return null;
         }
 

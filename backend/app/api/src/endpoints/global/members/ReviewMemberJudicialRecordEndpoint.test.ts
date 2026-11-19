@@ -79,6 +79,7 @@ describe('Endpoint.ReviewMemberJudicialRecord', () => {
         const record = new JudicialRecord();
         record.memberId = member.id;
         record.reviewDecision = JudicialRecordReviewDecision.UnderReview;
+        record.identityHash = member.judicialIdentityHash!;
         record.file = { reference: key, removedAt: null, removedReason: null } as never;
         await record.save();
 

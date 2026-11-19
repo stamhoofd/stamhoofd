@@ -96,6 +96,14 @@ export class MemberJudicialRecord extends AutoEncoder {
     @field({ decoder: new EnumDecoder(JudicialRecordReviewDecision) })
     reviewDecision: JudicialRecordReviewDecision;
 
+    /**
+     * Whether the member is still the person the extract was drawn up for.
+     *
+     * Carries the comparison rather than the hashes, so that nothing outside the backend can derive one.
+     */
+    @field({ decoder: BooleanDecoder })
+    identityMatches = true;
+
     /** When a reviewer decided, null while nobody has looked. */
     @field({ decoder: DateDecoder, nullable: true })
     reviewedAt: Date | null = null;
