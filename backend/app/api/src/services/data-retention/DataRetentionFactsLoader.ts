@@ -1,15 +1,15 @@
-import type { Member, Order } from '@stamhoofd/models';
 import {
     BalanceItem,
     DataRetentionPolicy,
-    Group,
+    Member,
     MemberPlatformMembership,
     MemberResponsibilityRecord,
+    Order,
     Registration,
     RegistrationPeriod,
     User,
 } from '@stamhoofd/models';
-import { SQL, SQLWhereSign } from '@stamhoofd/sql';
+import { SQL, SQLAlias, SQLOrderBy, SQLSelectAs, SQLWhereSign } from '@stamhoofd/sql';
 import type {
     DataRetentionCategory,
     DataRetentionPolicy as DataRetentionPolicyStruct,
@@ -21,11 +21,19 @@ import { DataRetentionPolicyIndex } from './DataRetentionPlanner.js';
 
 /**
  * Collects everything the planner needs, per batch, to avoid a query per member or order.
+ * Only the columns the planner uses are selected, so large JSON columns (member details, group settings...) are not decoded.
+ *
+ * Create one per call: it keeps the end dates of groups between batches.
  */
 export class DataRetentionFactsLoader {
-    static async loadPolicyIndex(
-        tenantId: string,
-    ): Promise<{ index: DataRetentionPolicyIndex; periodEndDates: Map<string, Date> }> {
+    private readonly groupEndDates = new Map<string, Date | null>();
+
+    private constructor(
+        readonly index: DataRetentionPolicyIndex,
+        private readonly periodEndDates: Map<string, Date>,
+    ) {}
+
+    static async create(tenantId: string): Promise<DataRetentionFactsLoader> {
         const platform = new Map<DataRetentionCategory, DataRetentionPolicyStruct>();
         const organizations = new Map<
             string,
@@ -48,7 +56,11 @@ export class DataRetentionFactsLoader {
 
         const previousPeriodIds = new Map<string, string | null>();
         const periodEndDates = new Map<string, Date>();
-        for (const period of await RegistrationPeriod.select().fetch()) {
+        for (const period of await RegistrationPeriod.select(
+            'id',
+            'previousPeriodId',
+            'endDate',
+        ).fetch()) {
             previousPeriodIds.set(period.id, period.previousPeriodId);
             periodEndDates.set(period.id, period.endDate);
         }
@@ -72,14 +84,27 @@ export class DataRetentionFactsLoader {
             currentPeriodIds,
             previousPeriodIds,
         });
-        return { index, periodEndDates };
+        return new DataRetentionFactsLoader(index, periodEndDates);
     }
 
-    static async loadMemberFacts(
-        members: Member[],
-        periodEndDates: Map<string, Date>,
+    /**
+     * The next members after the given id, in id order. Returns null when there are none left.
+     */
+    async loadMemberBatch(
+        afterId: string | null,
+        limit: number,
         now: Date,
-    ): Promise<Map<string, MemberRetentionFacts>> {
+    ): Promise<{ lastId: string; facts: MemberRetentionFacts[] } | null> {
+        const members = await Member.select('id', 'createdAt', 'organizationId', 'anonymizedAt')
+            .where('id', SQLWhereSign.Greater, afterId ?? '')
+            .orderBy(new SQLOrderBy({ column: SQL.column('id'), direction: 'ASC' }))
+            .limit(limit)
+            .fetch();
+
+        if (members.length === 0) {
+            return null;
+        }
+
         const memberIds = members.map((m) => m.id);
         const facts = new Map<string, MemberRetentionFacts>(
             members.map((member) => [
@@ -97,26 +122,25 @@ export class DataRetentionFactsLoader {
             ]),
         );
 
-        if (memberIds.length === 0) {
-            return facts;
-        }
-
-        const registrations = await Registration.select()
+        const registrations = await Registration.select(
+            'id',
+            'memberId',
+            'organizationId',
+            'groupId',
+            'periodId',
+            'endDate',
+            'deactivatedAt',
+        )
             .where('memberId', memberIds)
             .whereNot('registeredAt', null)
             .fetch();
-        const groups = new Map(
-            (await Group.getByIDs(...new Set(registrations.map((r) => r.groupId)))).map((g) => [
-                g.id,
-                g,
-            ]),
-        );
+        await this.loadGroupEndDates(registrations.map((r) => r.groupId));
 
         for (const registration of registrations) {
             const endDate =
                 registration.endDate ??
-                groups.get(registration.groupId)?.settings.endDate ??
-                periodEndDates.get(registration.periodId);
+                this.groupEndDates.get(registration.groupId) ??
+                this.periodEndDates.get(registration.periodId);
             if (!endDate) {
                 continue;
             }
@@ -130,7 +154,15 @@ export class DataRetentionFactsLoader {
             });
         }
 
-        const memberships = await MemberPlatformMembership.select()
+        const memberships = await MemberPlatformMembership.select(
+            'id',
+            'memberId',
+            'organizationId',
+            'periodId',
+            'endDate',
+            'locked',
+            'balanceItemId',
+        )
             .where('memberId', memberIds)
             .where('deletedAt', null)
             .fetch();
@@ -144,7 +176,7 @@ export class DataRetentionFactsLoader {
             });
         }
 
-        const responsibilities = await MemberResponsibilityRecord.select()
+        const responsibilities = await MemberResponsibilityRecord.select('id', 'memberId')
             .where('memberId', memberIds)
             .where(SQL.where('endDate', null).or('endDate', SQLWhereSign.Greater, now))
             .fetch();
@@ -156,13 +188,15 @@ export class DataRetentionFactsLoader {
             .from('_members_users')
             .where('membersId', memberIds)
             .fetch();
-        const users = new Map(
-            (
-                await User.getByIDs(
-                    ...new Set(links.map((l) => l._members_users.usersId as string)),
-                )
-            ).map((u) => [u.id, u]),
-        );
+        const userIds = [...new Set(links.map((l) => l._members_users.usersId as string))];
+        const users =
+            userIds.length === 0
+                ? new Map<string, User>()
+                : new Map(
+                      (await User.select('id', 'permissions').where('id', userIds).fetch()).map(
+                          (u) => [u.id, u],
+                      ),
+                  );
         for (const link of links) {
             const permissions = users.get(link._members_users.usersId as string)?.permissions;
             if (permissions && !permissions.isEmpty) {
@@ -170,66 +204,118 @@ export class DataRetentionFactsLoader {
             }
         }
 
-        for (const memberId of await this.getIdsWithOpenBalance('memberId', memberIds)) {
+        for (const memberId of await getIdsWithOpenBalance('memberId', memberIds)) {
             facts.get(memberId)!.hasOpenBalance = true;
         }
 
-        return facts;
+        return { lastId: memberIds[memberIds.length - 1], facts: [...facts.values()] };
     }
 
-    static async loadOrderFacts(orders: Order[]): Promise<Map<string, OrderRetentionFacts>> {
+    /**
+     * The next orders after the given id that were not anonymized yet, in id order. Returns null when there are none left.
+     */
+    async loadOrderBatch(
+        afterId: string | null,
+        limit: number,
+    ): Promise<{ lastId: string; facts: OrderRetentionFacts[] } | null> {
+        const orders = await Order.select(
+            'id',
+            'organizationId',
+            'createdAt',
+            'anonymizedAt',
+            'data',
+        )
+            .where('id', SQLWhereSign.Greater, afterId ?? '')
+            .where('anonymizedAt', null)
+            .orderBy(new SQLOrderBy({ column: SQL.column('id'), direction: 'ASC' }))
+            .limit(limit)
+            .fetch();
+
+        if (orders.length === 0) {
+            return null;
+        }
+
         const withOpenBalance = new Set(
-            await this.getIdsWithOpenBalance(
+            await getIdsWithOpenBalance(
                 'orderId',
                 orders.map((o) => o.id),
             ),
         );
 
-        return new Map(
-            orders.map((order) => {
-                const eventDates = [
-                    order.data.timeSlot?.date,
-                    ...order.data.cart.items.map((item) => item.product.dateRange?.endDate),
-                ].filter((d) => !!d);
+        const facts = orders.map((order) => {
+            const eventDates = [
+                order.data.timeSlot?.date,
+                ...order.data.cart.items.map((item) => item.product.dateRange?.endDate),
+            ].filter((d) => !!d);
 
-                return [
-                    order.id,
-                    {
-                        organizationId: order.organizationId,
-                        createdAt: order.createdAt,
-                        eventDate:
-                            eventDates.length > 0
-                                ? new Date(Math.max(...eventDates.map((d) => d.getTime())))
-                                : null,
-                        anonymizedAt: order.anonymizedAt,
-                        hasOpenBalance: withOpenBalance.has(order.id),
-                    },
-                ];
-            }),
-        );
+            return {
+                organizationId: order.organizationId,
+                createdAt: order.createdAt,
+                eventDate:
+                    eventDates.length > 0
+                        ? new Date(Math.max(...eventDates.map((d) => d.getTime())))
+                        : null,
+                anonymizedAt: order.anonymizedAt,
+                hasOpenBalance: withOpenBalance.has(order.id),
+            };
+        });
+
+        return { lastId: orders[orders.length - 1].id, facts };
     }
 
     /**
-     * Same condition as the outstanding balance in CachedBalance: something is still open or a payment is still pending.
+     * Reads only settings.endDate, because group settings are large.
      */
-    private static async getIdsWithOpenBalance(
-        column: 'memberId' | 'orderId',
-        ids: string[],
-    ): Promise<string[]> {
-        if (ids.length === 0) {
-            return [];
+    private async loadGroupEndDates(groupIds: string[]) {
+        const missing = [...new Set(groupIds)].filter((id) => !this.groupEndDates.has(id));
+        if (missing.length === 0) {
+            return;
         }
-        const items = await BalanceItem.select()
-            .where(column, ids)
-            .whereNot('status', BalanceItemStatus.Hidden)
-            .where(
-                SQL.where(SQL.column('priceOpen'), SQLWhereSign.NotEqual, 0).or(
-                    'pricePending',
-                    SQLWhereSign.NotEqual,
-                    0,
-                ),
-            )
+
+        const rows = await SQL.select(
+            SQL.column('id'),
+            new SQLSelectAs(
+                SQL.jsonValue(SQL.column('settings'), '$.value.endDate', 'UNSIGNED'),
+                new SQLAlias('groups__endDate'),
+            ),
+        )
+            .from('groups')
+            .where('id', missing)
             .fetch();
-        return items.map((item) => item[column]).filter((id) => id !== null);
+
+        for (const id of missing) {
+            this.groupEndDates.set(id, null);
+        }
+        for (const row of rows) {
+            const endDate = row.groups.endDate as number | null;
+            this.groupEndDates.set(
+                row.groups.id as string,
+                endDate === null ? null : new Date(endDate),
+            );
+        }
     }
+}
+
+/**
+ * Same condition as the outstanding balance in CachedBalance: something is still open or a payment is still pending.
+ */
+async function getIdsWithOpenBalance(
+    column: 'memberId' | 'orderId',
+    ids: string[],
+): Promise<string[]> {
+    if (ids.length === 0) {
+        return [];
+    }
+    const items = await BalanceItem.select('id', column)
+        .where(column, ids)
+        .whereNot('status', BalanceItemStatus.Hidden)
+        .where(
+            SQL.where(SQL.column('priceOpen'), SQLWhereSign.NotEqual, 0).or(
+                'pricePending',
+                SQLWhereSign.NotEqual,
+                0,
+            ),
+        )
+        .fetch();
+    return items.map((item) => item[column]).filter((id) => id !== null);
 }

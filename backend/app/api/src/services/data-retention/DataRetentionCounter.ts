@@ -1,6 +1,5 @@
 import type { DataRetentionRun } from '@stamhoofd/models';
-import { DataRetentionRunPhase, Member, Order } from '@stamhoofd/models';
-import { SQL, SQLOrderBy, SQLWhereSign } from '@stamhoofd/sql';
+import { DataRetentionRunPhase } from '@stamhoofd/models';
 import {
     DataRetentionAction,
     DataRetentionCategory,
@@ -31,32 +30,20 @@ export class DataRetentionCounter {
             run.startedAt = new Date();
         }
 
-        const { index, periodEndDates } = await DataRetentionFactsLoader.loadPolicyIndex(
-            run.tenantId,
-        );
+        const loader = await DataRetentionFactsLoader.create(run.tenantId);
 
         while (Date.now() < deadline.getTime()) {
             const now = new Date();
 
             if (run.phase === DataRetentionRunPhase.Members) {
-                const members = await Member.select()
-                    .where('id', SQLWhereSign.Greater, run.cursor ?? '')
-                    .orderBy(new SQLOrderBy({ column: SQL.column('id'), direction: 'ASC' }))
-                    .limit(BATCH_SIZE)
-                    .fetch();
-
-                if (members.length === 0) {
+                const batch = await loader.loadMemberBatch(run.cursor, BATCH_SIZE, now);
+                if (!batch) {
                     run.phase = DataRetentionRunPhase.Orders;
                     run.cursor = null;
                     continue;
                 }
 
-                const facts = await DataRetentionFactsLoader.loadMemberFacts(
-                    members,
-                    periodEndDates,
-                    now,
-                );
-                for (const memberFacts of facts.values()) {
+                for (const memberFacts of batch.facts) {
                     // A member counts for every organization it was registered at, or for its own organization when it never registered
                     const scopes = getScopes([
                         ...memberFacts.registrations.map((r) => r.organizationId),
@@ -64,7 +51,7 @@ export class DataRetentionCounter {
                             ? [memberFacts.organizationId]
                             : []),
                     ]);
-                    for (const decision of planMember(memberFacts, index, now)) {
+                    for (const decision of planMember(memberFacts, loader.index, now)) {
                         count(
                             run,
                             scopes,
@@ -76,25 +63,18 @@ export class DataRetentionCounter {
                         );
                     }
                 }
-                run.cursor = members[members.length - 1].id;
+                run.cursor = batch.lastId;
                 continue;
             }
 
-            const orders = await Order.select()
-                .where('id', SQLWhereSign.Greater, run.cursor ?? '')
-                .where('anonymizedAt', null)
-                .orderBy(new SQLOrderBy({ column: SQL.column('id'), direction: 'ASC' }))
-                .limit(BATCH_SIZE)
-                .fetch();
-
-            if (orders.length === 0) {
+            const batch = await loader.loadOrderBatch(run.cursor, BATCH_SIZE);
+            if (!batch) {
                 await this.finish(run);
                 return true;
             }
 
-            const facts = await DataRetentionFactsLoader.loadOrderFacts(orders);
-            for (const orderFacts of facts.values()) {
-                const decision = planOrder(orderFacts, index, now);
+            for (const orderFacts of batch.facts) {
+                const decision = planOrder(orderFacts, loader.index, now);
                 if (decision) {
                     count(
                         run,
@@ -105,7 +85,7 @@ export class DataRetentionCounter {
                     );
                 }
             }
-            run.cursor = orders[orders.length - 1].id;
+            run.cursor = batch.lastId;
         }
 
         await run.save();
