@@ -47,6 +47,19 @@ export class JudicialRecord extends QueryableModel {
     @column({ type: 'string' })
     identityHash: string;
 
+    /** Set once the member has been warned that this decision is about to expire, so it is sent once. */
+    @column({ type: 'datetime', nullable: true })
+    expiryNotifiedAt: Date | null = null;
+
+    /**
+     * Set once the member has been told that this decision no longer matches their name or birth date.
+     *
+     * Separate from `expiryNotifiedAt` because the two causes are independent: a record can drift and later
+     * expire, and one marker would let the first notice swallow the second.
+     */
+    @column({ type: 'datetime', nullable: true })
+    identityNotifiedAt: Date | null = null;
+
     @column({
         type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {

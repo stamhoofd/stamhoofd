@@ -39,9 +39,38 @@ export type EmailTemplateOptions = {
     webshop?: Webshop | null;
     group?: Group | null;
     organizationId?: string | null;
+
+    /**
+     * Resolve the platform level row and nothing else.
+     *
+     * Without this, a send with no organization matches on type alone, unordered and with both platform
+     * fallbacks skipped, so it can resolve whichever organization's row the database returns first. Callers
+     * that mean "the default wording" have to say so rather than relying on a null organization to mean it.
+     */
+    platformLevel?: boolean;
 };
 
 export async function getEmailTemplate(data: EmailTemplateOptions) {
+    if (data.platformLevel) {
+        const platformTemplates = await EmailTemplate.select()
+            .where('type', data.type)
+            .where('organizationId', null)
+            .where('groupId', null)
+            .where('webshopId', null)
+            .limit(1)
+            .fetch();
+
+        if (platformTemplates.length === 0) {
+            if (STAMHOOFD.environment === 'test') {
+                return;
+            }
+            console.error('Could not find platform email template for type ' + data.type);
+            return;
+        }
+
+        return platformTemplates[0];
+    }
+
     // Most specific template: for specific group
     const q = EmailTemplate.select().where('type', data.type);
 
