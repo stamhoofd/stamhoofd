@@ -1,6 +1,7 @@
 import { SimpleError } from '@common/errors';
 import type { Organization, User } from '@stamhoofd/models';
 import { DataRetentionPolicy } from '@stamhoofd/models';
+import { SQLWhereSign } from '@stamhoofd/sql';
 import type { DataRetentionCategory } from '@stamhoofd/structures';
 import {
     DATA_RETENTION_WAITING_DAYS,
@@ -156,6 +157,25 @@ export class DataRetentionPolicyService {
             model,
             policy.pendingTerms,
         );
+    }
+
+    /**
+     * Moves pending changes that started to apply to the current terms, and logs that they did.
+     * The planner already follows a pending change from pendingFrom on, so this only keeps the stored terms and the log in line with that.
+     */
+    static async applyDuePendingChanges(tenantId: string, now: Date) {
+        const policies = await DataRetentionPolicy.select()
+            .where('tenantId', tenantId)
+            .where('pendingFrom', SQLWhereSign.LessEqual, now)
+            .fetch();
+
+        for (const policy of policies) {
+            const applied = policy.getStructure().pendingTerms!;
+            policy.setTerms(applied);
+            policy.setPendingTerms(null);
+            await policy.save();
+            await DataRetentionAuditLogService.logPendingChangeApplied(policy, applied);
+        }
     }
 
     /**

@@ -38,6 +38,22 @@ export class DataRetentionAuditLogService {
         await log.save();
     }
 
+    /**
+     * Logged by the system, when the nightly run moves a pending change that started to apply to the current terms.
+     */
+    static async logPendingChangeApplied(policy: DataRetentionPolicy, applied: DataRetentionTerms) {
+        const log = new AuditLog();
+        log.type = AuditLogType.DataRetentionPendingChangeApplied;
+        log.source = AuditLogSource.System;
+        log.objectId = policy.id;
+        log.organizationId = policy.organizationId;
+        log.replacements = new Map([
+            ['category', AuditLogReplacement.enum('DataRetentionCategory', policy.category)!],
+            ['after', AuditLogReplacement.string(applied.getDescription())],
+        ]);
+        await log.save();
+    }
+
     private static create(type: AuditLogType, user: User, policy: DataRetentionPolicy): AuditLog {
         const log = new AuditLog();
         log.type = type;

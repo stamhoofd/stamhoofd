@@ -1,6 +1,6 @@
 /**
- * Counts every night what the retention terms would anonymize or delete. It does not change any data yet:
- * processing comes later, behind the data-retention-execute feature flag.
+ * Every night: applies pending changes of the retention terms that started to apply, and counts what the terms would
+ * anonymize or delete. It does not change any other data yet: processing comes later, behind the data-retention-execute feature flag.
  */
 
 import { DataRetentionRun, Platform } from '@stamhoofd/models';
@@ -9,6 +9,7 @@ import { DateTime } from 'luxon';
 
 import { TenantContext } from '../helpers/TenantContext.js';
 import { DataRetentionCounter } from '../services/data-retention/DataRetentionCounter.js';
+import { DataRetentionPolicyService } from '../services/data-retention/DataRetentionPolicyService.js';
 import { registerTenantCron } from './helpers/registerTenantCron.js';
 
 /**
@@ -42,7 +43,10 @@ export async function runDataRetention(now = new Date()) {
         return;
     }
 
-    const run = await DataRetentionRun.getOrCreate(TenantContext.currentOrRoot.tenantId);
+    const tenantId = TenantContext.currentOrRoot.tenantId;
+    await DataRetentionPolicyService.applyDuePendingChanges(tenantId, now);
+
+    const run = await DataRetentionRun.getOrCreate(tenantId);
     if (!run.phase && run.finishedAt && isSameDay(run.finishedAt, now)) {
         return;
     }

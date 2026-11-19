@@ -1,4 +1,10 @@
-import { DataRetentionRun, Platform } from '@stamhoofd/models';
+import {
+    DataRetentionPolicy,
+    DataRetentionRun,
+    OrganizationFactory,
+    Platform,
+} from '@stamhoofd/models';
+import { DataRetentionCategory, DataRetentionTerms } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
@@ -62,6 +68,26 @@ describe('cron.data-retention', () => {
         await runDataRetention(todayAt(12));
 
         expect(await getRun()).toBeNull();
+    });
+
+    test('It applies pending changes that started to apply', async () => {
+        const organization = await new OrganizationFactory({}).create();
+        const policy = new DataRetentionPolicy();
+        policy.tenantId = TenantContext.currentOrRoot.tenantId;
+        policy.organizationId = organization.id;
+        policy.category = DataRetentionCategory.Orders;
+        policy.anonymizeAfterMonths = 60;
+        policy.setPendingTerms({
+            terms: DataRetentionTerms.create({ anonymizeAfterMonths: 24 }),
+            from: new Date(Date.now() - 24 * 60 * 60 * 1000),
+        });
+        await policy.save();
+
+        await runDataRetention(todayAt(2));
+
+        const reloaded = (await DataRetentionPolicy.getByID(policy.id))!;
+        expect(reloaded.anonymizeAfterMonths).toBe(24);
+        expect(reloaded.pendingFrom).toBeNull();
     });
 
     test('It does not run without the feature flag', async () => {

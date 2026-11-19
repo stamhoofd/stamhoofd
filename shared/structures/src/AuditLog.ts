@@ -110,6 +110,7 @@ export enum AuditLogType {
     // Data retention
     DataRetentionPolicyChanged = 'DataRetentionPolicyChanged',
     DataRetentionPendingChangeCancelled = 'DataRetentionPendingChangeCancelled',
+    DataRetentionPendingChangeApplied = 'DataRetentionPendingChangeApplied',
 
     // Impersonation
     UserImpersonated = 'UserImpersonated',
@@ -256,6 +257,8 @@ export function getAuditLogTypeName(type: AuditLogType): string {
             return $t('Gewijzigde bewaartermijnen');
         case AuditLogType.DataRetentionPendingChangeCancelled:
             return $t('Geannuleerde wijzigingen van bewaartermijnen');
+        case AuditLogType.DataRetentionPendingChangeApplied:
+            return $t('Ingegane wijzigingen van bewaartermijnen');
 
         case AuditLogType.UserImpersonated:
             return $t('%Zn3');
@@ -435,6 +438,8 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
             return [`privacy`, `edit stroke`];
         case AuditLogType.DataRetentionPendingChangeCancelled:
             return [`privacy`, `canceled red`];
+        case AuditLogType.DataRetentionPendingChangeApplied:
+            return [`privacy`, `success`];
 
         case AuditLogType.UserImpersonated:
             return ['user', 'eye'];
@@ -627,6 +632,10 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return $t(
                 '{{u}} annuleerde de geplande wijziging van de bewaartermijn van {{category}} naar ‘{{after}}’',
             );
+        case AuditLogType.DataRetentionPendingChangeApplied:
+            return $t(
+                'De geplande wijziging van de bewaartermijn van {{category}} naar ‘{{after}}’ is ingegaan',
+            );
 
         case AuditLogType.UserImpersonated:
             return $t('%Zms');
@@ -806,6 +815,8 @@ export function getAuditLogTypeReplacements(type: AuditLogType): string[] {
             return ['u', 'category', 'before', 'after', 'from'];
         case AuditLogType.DataRetentionPendingChangeCancelled:
             return ['u', 'category', 'after'];
+        case AuditLogType.DataRetentionPendingChangeApplied:
+            return ['category', 'after'];
 
         case AuditLogType.UserImpersonated:
             return ['u', 'u2'];
