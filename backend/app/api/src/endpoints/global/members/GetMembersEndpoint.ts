@@ -18,6 +18,7 @@ import { DataValidator } from '@stamhoofd/utility';
 import parsePhoneNumber from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
+import { getJudicialRecordMinimumAges } from '../../../helpers/judicialRecordStatus.js';
 import { memberFilterCompilers } from '../../../sql-filters/members.js';
 import { memberSorters } from '../../../sql-sorters/members.js';
 import { getMemberScopeFilter } from './helpers/getMemberScopeFilter.js';
@@ -52,7 +53,8 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         permissionLevel: PermissionLevel = PermissionLevel.Read,
     ) {
         const organization = Context.organization;
-        const scopedFilterCompilers = filterCompilers(organization?.id ?? null);
+        const judicialRecordMinimumAges = await getJudicialRecordMinimumAges(organization ?? null);
+        const scopedFilterCompilers = filterCompilers(organization?.id ?? null, { judicialRecordMinimumAges });
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         if (
@@ -101,7 +103,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            await applySQLSorter(query, q.sort, sorters(organization?.id ?? null));
+            await applySQLSorter(query, q.sort, sorters(organization?.id ?? null, { judicialRecordMinimumAges }));
             query.limit(q.limit);
         }
 
@@ -206,6 +208,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
         permissionLevel = PermissionLevel.Read,
     ) {
         const organization = Context.organization;
+        const judicialRecordMinimumAges = await getJudicialRecordMinimumAges(organization ?? null);
         const query = await GetMembersEndpoint.buildQuery(requestQuery, permissionLevel);
         let data: Member[];
 
@@ -242,7 +245,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             const lastObject = members[members.length - 1];
             const nextFilter = getSortFilter(
                 lastObject,
-                sorters(organization?.id ?? null),
+                sorters(organization?.id ?? null, { judicialRecordMinimumAges }),
                 requestQuery.sort,
             );
 

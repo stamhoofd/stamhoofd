@@ -3,7 +3,7 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { Group, Member, Registration } from '@stamhoofd/models';
-import type { SQLExpression, SQLSortDefinitions } from '@stamhoofd/sql';
+import type { SQLExpression } from '@stamhoofd/sql';
 import { SQL, SQLSelect, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type {
     CountFilteredRequest,
@@ -24,6 +24,7 @@ import {
 import type { SQLResultNamespacedRow } from '@node/database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
+import { getJudicialRecordMinimumAges } from '../../../helpers/judicialRecordStatus.js';
 import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper.js';
 import { groupJoin, registrationFilterCompilers } from '../../../sql-filters/registrations.js';
 import { RegistrationSortData, registrationSorters } from '../../../sql-sorters/registrations.js';
@@ -34,9 +35,6 @@ type Params = Record<string, never>;
 type Query = LimitedFilteredRequest;
 type Body = undefined;
 type ResponseBody = PaginatedResponse<RegistrationsBlob, LimitedFilteredRequest>;
-
-const sorters: SQLSortDefinitions<RegistrationSortData> = registrationSorters;
-const filterCompilers = registrationFilterCompilers;
 
 export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     queryDecoder = LimitedFilteredRequest as Decoder<LimitedFilteredRequest>;
@@ -83,6 +81,8 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                 throw new Error('Missing data for model ' + Group.table);
             }
 
+            d.rawSelectedRow = row;
+
             return d.setRelation(Registration.group, g);
         };
 
@@ -99,6 +99,8 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         permissionLevel: PermissionLevel = PermissionLevel.Read,
     ) {
         const organization = Context.organization;
+        const judicialRecordMinimumAges = await getJudicialRecordMinimumAges(organization ?? null);
+        const filterCompilers = registrationFilterCompilers({ judicialRecordMinimumAges });
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         // First do a quick validation of the groups, so that prevents the backend from having to add a scope filter
@@ -253,7 +255,7 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            await applySQLSorter(query, q.sort, sorters);
+            await applySQLSorter(query, q.sort, registrationSorters({ judicialRecordMinimumAges }));
             query.limit(q.limit);
         }
 
@@ -264,6 +266,8 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
         requestQuery: LimitedFilteredRequest,
         permissionLevel = PermissionLevel.Read,
     ) {
+        const organization = Context.organization;
+        const judicialRecordMinimumAges = await getJudicialRecordMinimumAges(organization ?? null);
         const query = await GetRegistrationsEndpoint.buildQuery(requestQuery, permissionLevel);
         let data: (Registration & {
             group: Group;
@@ -302,6 +306,9 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
 
         const registrationsBlob = await AuthenticatedStructures.registrationsBlob(data, members);
 
+        // Sorters that order on a derived value read it back from the row the registration was selected with
+        const rawSelectedRows = new Map(data.map(registration => [registration.id, registration.rawSelectedRow]));
+
         const next = LimitedFilteredRequestHelper.fixInfiniteLoadingLoopWithTransform<
             RegistrationWithMemberBlob,
             RegistrationSortData
@@ -312,8 +319,9 @@ export class GetRegistrationsEndpoint extends Endpoint<Params, Query, Body, Resp
                 new RegistrationSortData({
                     registration,
                     organizations: registrationsBlob.organizations,
+                rawSelectedRow: rawSelectedRows.get(registration.id) ?? null,
                 }),
-            sorters,
+            sorters: registrationSorters({ judicialRecordMinimumAges }),
         });
 
         return new PaginatedResponse<RegistrationsBlob, LimitedFilteredRequest>({
