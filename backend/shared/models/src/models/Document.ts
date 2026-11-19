@@ -1,5 +1,6 @@
 import { column } from '@node/database';
 import { DocumentData, DocumentStatus, Document as DocumentStruct } from '@stamhoofd/structures';
+import type { BelcotaxDocumentStatus } from '@stamhoofd/structures/belcotax/BelcotaxSubmission.js';
 import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@common/errors';
@@ -58,6 +59,20 @@ export class Document extends QueryableModel {
      */
     @column({ type: 'json', decoder: DocumentData })
     data = DocumentData.create({});
+
+    /**
+     * Result of the last submission to the Belcotax API with this document. Only changed with a query (not save),
+     * so it is no edit of the document and also works for locked documents.
+     */
+    @column({ type: 'string', nullable: true })
+    belcotaxStatus: BelcotaxDocumentStatus | null = null;
+
+    /**
+     * Hash of the lines of the version Belcotax accepted: the fiche with its persons and resources, or the delete
+     * line. Belcotax has no version of the document when null.
+     */
+    @column({ type: 'string', nullable: true })
+    belcotaxHash: string | null = null;
 
     @column({ type: 'datetime' })
     createdAt: Date = new Date();

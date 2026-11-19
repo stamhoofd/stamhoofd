@@ -19,6 +19,7 @@ import './delete-expired-mfa-tokens.js';
 import './delete-expired-impersonation-tokens.js';
 import './delete-archived-data.js';
 import './delete-old-belcotax-api-logs.js';
+import './belcotax-submissions.js';
 import './mollie-chargebacks.js';
 import './mollie-refunds.js';
 import './fake-settlements.js';

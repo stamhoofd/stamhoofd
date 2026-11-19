@@ -143,8 +143,9 @@ export const boot = async (options: { killProcess: boolean; lifecycle?: Applicat
     await router.loadAllEndpoints(import.meta.dirname + '/endpoints/organization/shared/*');
     await router.loadAllEndpoints(import.meta.dirname + '/endpoints/system');
 
-    if (BelcotaxConfig.servesMockApi) {
-        // Stand-in for the Belcotax API next to the local Keycloak realm, never in production
+    // Stand-in for the Belcotax API next to the local Keycloak realm, never in production. The e2e tests switch to
+    // the local environment after booting; the endpoint itself refuses outside it.
+    if (BelcotaxConfig.servesMockApi || STAMHOOFD.environment === 'test') {
         await router.loadAllEndpoints(import.meta.dirname + '/endpoints/development/belcotax');
     }
 

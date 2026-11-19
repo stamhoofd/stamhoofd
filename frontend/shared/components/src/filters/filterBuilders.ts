@@ -1,3 +1,4 @@
+import { BelcotaxDocumentStatus, BelcotaxDocumentStatusHelper } from '@stamhoofd/structures/belcotax/BelcotaxSubmission.js';
 import { useContext } from '#hooks/useContext.ts';
 import { useEventTypes } from '#hooks/useEventTypes.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -786,7 +787,10 @@ export function getAuditLogUIFilterBuilders(context: AuditLogFilterContext) {
     return all;
 }
 
-export function getDocumentsUIFilterBuilders() {
+/**
+ * @param options.belcotax Adds the status of the last submission to the Belcotax API
+ */
+export function getDocumentsUIFilterBuilders(options: { belcotax?: boolean } = {}) {
     const builders: UIFilterBuilders = [
         new StringFilterBuilder({
             name: $t('%Kq'),
@@ -815,6 +819,25 @@ export function getDocumentsUIFilterBuilders() {
             },
         }),
     ];
+
+    if (options.belcotax) {
+        builders.push(
+            new MultipleChoiceFilterBuilder({
+                name: $t('Belcotax'),
+                options: [null, ...Object.values(BelcotaxDocumentStatus)].map((status) => {
+                    return new MultipleChoiceUIFilterOption(
+                        BelcotaxDocumentStatusHelper.getName(status),
+                        status,
+                    );
+                }),
+                wrapper: {
+                    belcotaxStatus: {
+                        $in: FilterWrapperMarker,
+                    },
+                },
+            }),
+        );
+    }
     const groupFilter = new GroupUIFilterBuilder({ builders });
 
     return [groupFilter, ...builders];

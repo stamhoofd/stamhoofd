@@ -8,6 +8,7 @@ import {
 } from '../../src/services/belcotax/connection/BelcotaxConfig.js';
 import { BelcotaxOidcClient } from '../../src/services/belcotax/connection/BelcotaxOidcClient.js';
 import { BelcotaxBulkApiMock } from '../../src/services/belcotax/local/BelcotaxBulkApiMock.js';
+import { BelcotaxMockBulks } from '../../src/services/belcotax/local/BelcotaxBulkApiMockBulks.js';
 import { resetNock } from './resetNock.js';
 
 /**
@@ -136,6 +137,7 @@ export class BelcotaxFodMocker {
     }
 
     stop() {
+        BelcotaxMockBulks.reset();
         BelcotaxConfig.clearCache();
         BelcotaxOidcClient.clearJwksCache();
         resetNock();

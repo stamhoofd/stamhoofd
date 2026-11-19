@@ -426,6 +426,41 @@ export class EditorSmartVariable extends AutoEncoder {
 
         variables.push(
             EditorSmartVariable.create({
+                id: 'documentTemplateName',
+                name: $t('Naam van de documenten'),
+            }),
+        );
+
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'submissionDate',
+                name: $t('Datum van de zending'),
+            }),
+        );
+
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'documentCount',
+                name: $t('Aantal attesten in de zending'),
+            }),
+        );
+
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'issueCount',
+                name: $t('Aantal fouten van Belcotax'),
+            }),
+        );
+
+        variables.push(
+            EditorSmartVariable.create({
+                id: 'unknownReason',
+                name: $t('Reden waarom het resultaat onbekend is'),
+            }),
+        );
+
+        variables.push(
+            EditorSmartVariable.create({
                 id: 'eventName',
                 name: $t('%w9'),
             }),
