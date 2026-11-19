@@ -21,7 +21,7 @@ export function useCreateEventGroup() {
             periodId: organization.value?.period.period.id,
             type: GroupType.EventRegistration,
             settings: GroupSettings.create({
-                name: TranslatedString.create(event.name),
+                name: event.name,
             }),
             status: GroupStatus.Closed,
         });

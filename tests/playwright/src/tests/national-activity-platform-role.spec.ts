@@ -83,7 +83,7 @@ test.describe('National activity access through a platform role @national-activi
         await page.goto(`${WorkerData.urls.dashboard}/platform`);
         await page.locator('[data-testid="tab-button"][data-tab-id="events"]:visible').first().click();
 
-        const eventRow = page.locator('#settings-view .st-list-item:visible h3 span').filter({ hasText: event.name });
+        const eventRow = page.locator('#settings-view .st-list-item:visible h3 span').filter({ hasText: event.name.toString() });
         await expect(eventRow).toHaveCount(1);
         await eventRow.click();
 
