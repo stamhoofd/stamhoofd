@@ -32,6 +32,18 @@ export enum JudicialRecordReviewDecision {
  */
 export const JUDICIAL_RECORD_MAX_COMMENT_LENGTH = 1000;
 
+/**
+ * The outcomes a reviewer can pick, in the order they are offered.
+ *
+ * `UnderReview` is not among them: it is the absence of a decision, so a reviewer cannot choose it.
+ */
+export const judicialRecordReviewOutcomes: readonly JudicialRecordReviewDecision[] = [
+    JudicialRecordReviewDecision.Ok,
+    JudicialRecordReviewDecision.ConditionallyAccepted,
+    JudicialRecordReviewDecision.TemporarilyRejected,
+    JudicialRecordReviewDecision.PermanentlyRejected,
+];
+
 /** Why a stored extract is no longer there. */
 export enum JudicialRecordFileRemovedReason {
     /** A reviewer decided, so the document is not needed any more. */
@@ -73,7 +85,13 @@ export class JudicialRecordReviewDetails extends AutoEncoder {
     comment: string | null = null;
 }
 
-/** A member's current judicial record, as much of it as deciding their status needs. */
+/**
+ * A member's current judicial record, as much of it as deciding their status needs.
+ *
+ * This is on the member blob, which a member reads about themselves as well as an administrator, so it carries
+ * nothing a member may not see: the reviewer's name and their comment are served by the review endpoint, to
+ * someone who is allowed to review.
+ */
 export class MemberJudicialRecord extends AutoEncoder {
     @field({ decoder: new EnumDecoder(JudicialRecordReviewDecision) })
     reviewDecision: JudicialRecordReviewDecision;
