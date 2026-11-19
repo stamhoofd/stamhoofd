@@ -43,6 +43,6 @@ jobs:
               env:
                   TAG: ${{ github.ref_name }}
                   STAM_DOCS_REGISTRY: ${{ vars.STAM_DOCS_REGISTRY }}
-                  STAM_DOCS_REGISTRY_USERNAME: ${{ vars.STAM_DOCS_REGISTRY_USERNAME }}
+                  STAM_DOCS_REGISTRY_USERNAME: ${{ secrets.STAM_DOCS_REGISTRY_USERNAME }}
                   STAM_DOCS_REGISTRY_PASSWORD: ${{ secrets.STAM_DOCS_REGISTRY_PASSWORD }}
               run: pnpm stam docs image publish "$TAG" --latest
