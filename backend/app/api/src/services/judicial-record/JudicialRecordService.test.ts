@@ -1,4 +1,8 @@
+import { Database } from '@node/database';
 import { SimpleError, isSimpleError } from '@common/errors';
+import { EmailMocker } from '@stamhoofd/email';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import type { Member, Organization } from '@stamhoofd/models';
 import { Image, JudicialRecord, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, PlatformResponsibilityFactory } from '@stamhoofd/models';
 import { JUDICIAL_RECORD_MAX_COMMENT_LENGTH, JudicialRecordCheck, JudicialRecordCheckReport, JudicialRecordCheckResult, JudicialRecordCheckStatus, JudicialRecordFileRemovedReason, JudicialRecordReviewDecision, JudicialRecordStatus, judicialRecordChecksInOrder, MemberResponsibility } from '@stamhoofd/structures';
@@ -417,5 +421,110 @@ describe('JudicialRecordService.review', () => {
         }).then(() => null, (error: unknown) => error);
 
         expect(isSimpleError(error) && error.code).toBe('judicial_record_not_found');
+    });
+});
+
+/**
+ * That the write path notifies at all, rather than only that the service would if it were called.
+ *
+ * Every approval is announced, an automatic one included, so the trigger has to sit on the write and not only
+ * on a reviewer's action - which is the thing a unit test of the notification service cannot show.
+ */
+describe('judicial record notifications are triggered by the write path', () => {
+    useFakeBucket();
+
+    let organization: Organization;
+    let responsibility: MemberResponsibility;
+    let originalResponsibilities: MemberResponsibility[];
+    let member: Member;
+
+    const reviewer = { id: 'user-1', name: 'Simon', email: 'simon@example.com', organizationId: null };
+
+    beforeAll(async () => {
+        organization = await new OrganizationFactory({}).create();
+
+        const platform = await Platform.getForEditing();
+        originalResponsibilities = platform.config.responsibilities;
+
+        responsibility = await new PlatformResponsibilityFactory({ name: 'Notified', judicialRecordMinimumAge: 18 }).create();
+        await Platform.clearCache();
+
+        member = await new MemberFactory({ organization, birthDay: { year: 1990, month: 1, day: 1 } }).create();
+        member.details.email = 'nora@example.com';
+        await member.save();
+
+        await new MemberResponsibilityRecordFactory({
+            member,
+            organizationId: organization.id,
+            responsibility,
+            startDate: new Date(2020, 0, 1),
+        }).create();
+
+        for (const file of [
+            '../../migrations/1794326107-default-judicial-record-email-templates.sql',
+            '../../migrations/1794326109-default-judicial-record-identity-email-template.sql',
+        ]) {
+            await Database.statement(await readFile(path.resolve(import.meta.dirname, file), 'utf-8'));
+        }
+    });
+
+    afterAll(async () => {
+        const platform = await Platform.getForEditing();
+        platform.config.responsibilities = originalResponsibilities;
+        await platform.save();
+        await Platform.clearCache();
+    });
+
+    function mockChecks(passed: boolean) {
+        checkJudicialRecordMock.mockReset();
+        assertChainNotRevokedMock.mockReset();
+        assertChainNotRevokedMock.mockResolvedValue(undefined);
+        checkJudicialRecordMock.mockResolvedValue({
+            report: passed
+                ? report({})
+                : report({ [JudicialRecordCheck.EmptyRecord]: JudicialRecordCheckStatus.Failed }),
+            certificatePath: CERTIFICATE_PATH,
+        });
+    }
+
+    test('an extract the checks approved on their own still tells the member', async () => {
+        mockChecks(true);
+
+        await JudicialRecordService.deliver(member, PDF);
+
+        const emails = await EmailMocker.transactional.getSucceededEmails();
+        expect(emails).toHaveLength(1);
+        expect(emails[0].to).toContain('nora@example.com');
+        expect(emails[0].text).toContain('goedgekeurd');
+    });
+
+    test('an extract waiting for a person does not tell the member it was decided', async () => {
+        mockChecks(false);
+
+        await JudicialRecordService.deliver(member, PDF);
+
+        const toMember = (await EmailMocker.transactional.getSucceededEmails())
+            .filter(email => email.to.includes('nora@example.com'));
+
+        expect(toMember).toHaveLength(0);
+    });
+
+    test('a reviewer decision reaches the member, with the reason they are allowed to read', async () => {
+        mockChecks(false);
+        await JudicialRecordService.deliver(member, PDF);
+        EmailMocker.transactional.reset();
+
+        await JudicialRecordService.review({
+            member,
+            outcome: JudicialRecordReviewDecision.TemporarilyRejected,
+            comment: 'Niet leesbaar.',
+            reviewer,
+        });
+
+        const emails = (await EmailMocker.transactional.getSucceededEmails())
+            .filter(email => email.to.includes('nora@example.com'));
+
+        expect(emails).toHaveLength(1);
+        expect(emails[0].text).toContain('Niet leesbaar.');
     });
 });

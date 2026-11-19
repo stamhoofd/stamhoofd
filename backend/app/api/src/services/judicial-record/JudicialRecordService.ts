@@ -3,10 +3,13 @@ import { assertChainNotRevoked } from '@stamhoofd/certificate-revocation';
 import { checkJudicialRecord } from '@stamhoofd/judicial-record-check';
 import type { Member } from '@stamhoofd/models';
 import { JudicialRecord, MemberResponsibilityRecord, Organization, Platform } from '@stamhoofd/models';
+import type { JudicialRecordForMember } from '@stamhoofd/structures';
 import { JUDICIAL_RECORD_MAX_COMMENT_LENGTH, JudicialRecordFile, JudicialRecordFileRemovedReason, JudicialRecordHelper, JudicialRecordReviewDetails, JudicialRecordReviewDecision, JudicialRecordStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { JudicialRecordFileStore } from './JudicialRecordFileStore.js';
+import { JudicialRecordNotificationService } from './JudicialRecordNotificationService.js';
+import { getJudicialRecordMinimumAges } from './judicialRecordResponsibilities.js';
 
 /**
  * A month, as the member is told when they request one. The member portal counts the same thirty days
@@ -87,6 +90,15 @@ export class JudicialRecordService {
 
         await record.save();
 
+        // Sent from here rather than from the endpoint, because an approval the checks reached on their own is
+        // still an approval the member is owed a record of, and it never passes a reviewer.
+        if (data === null) {
+            await JudicialRecordNotificationService.sendDecision(record, member);
+        }
+        else {
+            await JudicialRecordNotificationService.sendAwaitingReview(record, member);
+        }
+
         return data === null
             ? JudicialRecordStatus.Ok
             : JudicialRecordStatus.UnderReview;
@@ -157,6 +169,8 @@ export class JudicialRecordService {
         });
 
         await record.save();
+
+        await JudicialRecordNotificationService.sendDecision(record, request.member);
     }
 
     /** The member's record, the one a decision is recorded on. */
@@ -195,11 +209,17 @@ export class JudicialRecordService {
         }
     }
 
-    private static async assertExtractRequired(member: Member): Promise<void> {
+    /**
+     * Whether the member's responsibilities ask them for an extract, ignoring whatever they delivered before.
+     *
+     * Answers `Required` or `NotRequired` only, because no record is passed: the question is the requirement,
+     * not the standing of a delivery.
+     */
+    static async getRequirement(member: Member): Promise<JudicialRecordForMember> {
         const records = await MemberResponsibilityRecord.where({ memberId: member.id });
-        const minimumAges = await this.getMinimumAges(records);
+        const minimumAges = await getJudicialRecordMinimumAges(records);
 
-        const { status, description } = JudicialRecordHelper.getForMember({
+        return JudicialRecordHelper.getForMember({
             firstName: member.details.firstName,
             birthDay: member.details.birthDay,
             responsibilities: records.map(record => ({
@@ -208,6 +228,10 @@ export class JudicialRecordService {
                 minimumAge: minimumAges.get(record.responsibilityId) ?? null,
             })),
         });
+    }
+
+    private static async assertExtractRequired(member: Member): Promise<void> {
+        const { status, description } = await this.getRequirement(member);
 
         if (status !== JudicialRecordStatus.Required) {
             throw new SimpleError({
@@ -220,27 +244,5 @@ export class JudicialRecordService {
                 statusCode: 400,
             });
         }
-    }
-
-    /**
-     * Each record is resolved against its own organization instead of against one organization in
-     * scope, because an extract is delivered from the member portal, which on a platform is in no
-     * organization at all. Organizations define responsibilities with a `judicialRecordMinimumAge`
-     * of their own, so a null scope would read one of those as no requirement and refuse a member
-     * who does have to deliver.
-     */
-    private static async getMinimumAges(records: MemberResponsibilityRecord[]): Promise<Map<string, number | null>> {
-        const platform = await Platform.getSharedStruct();
-        const responsibilities = [...platform.config.responsibilities];
-
-        const organizationIds = Formatter.uniqueArray(records.map(record => record.organizationId));
-
-        if (organizationIds.length > 0) {
-            for (const organization of await Organization.getByIDs(...organizationIds)) {
-                responsibilities.push(...organization.privateMeta.responsibilities);
-            }
-        }
-
-        return new Map(responsibilities.map(responsibility => [responsibility.id, responsibility.judicialRecordMinimumAge]));
     }
 }

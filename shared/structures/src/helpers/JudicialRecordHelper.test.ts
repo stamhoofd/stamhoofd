@@ -171,6 +171,132 @@ describe('JudicialRecordHelper.getForMember', () => {
         expect(judicialRecord.status).toBe(JudicialRecordStatus.Required);
         expect(judicialRecord.description).toBe('Sinds {date}, de startdatum van de functie.');
     });
+
+    test('an expired approval explains the renewal instead of the responsibility', () => {
+        const judicialRecord = JudicialRecordHelper.getForMember({
+            firstName,
+            birthDay,
+            responsibilities: [createResponsibility()],
+            record: {
+                reviewDecision: JudicialRecordReviewDecision.Ok,
+                identityMatches: true,
+                reviewedAt: new Date(2026, 5, 14 - 365 * JUDICIAL_RECORD_VALIDITY_YEARS),
+            },
+            atDate,
+        });
+
+        expect(judicialRecord.status).toBe(JudicialRecordStatus.Required);
+        expect(judicialRecord.description).toBe('De vorige beoordeling is verlopen op {date}. Er is een nieuw uittreksel nodig.');
+    });
+
+    test('an expired rejection is not described as an expired approval', () => {
+        const judicialRecord = JudicialRecordHelper.getForMember({
+            firstName,
+            birthDay,
+            responsibilities: [createResponsibility()],
+            record: {
+                reviewDecision: JudicialRecordReviewDecision.PermanentlyRejected,
+                identityMatches: true,
+                reviewedAt: new Date(2026, 5, 14 - 365 * JUDICIAL_RECORD_VALIDITY_YEARS),
+            },
+            atDate,
+        });
+
+        expect(judicialRecord.status).toBe(JudicialRecordStatus.Required);
+        expect(judicialRecord.description).toBe('De vorige beoordeling is verlopen op {date}. Er is een nieuw uittreksel nodig.');
+        expect(judicialRecord.description).not.toContain('goedkeuring');
+    });
+
+    test('a changed name explains the renewal without blaming the member', () => {
+        const judicialRecord = JudicialRecordHelper.getForMember({
+            firstName,
+            birthDay,
+            responsibilities: [createResponsibility()],
+            record: {
+                reviewDecision: JudicialRecordReviewDecision.Ok,
+                identityMatches: false,
+                reviewedAt: new Date(2026, 0, 1),
+            },
+            atDate,
+        });
+
+        expect(judicialRecord.status).toBe(JudicialRecordStatus.Required);
+        expect(judicialRecord.description).toBe('De naam of geboortedatum van {name} is gewijzigd na de goedkeuring, waardoor die niet meer geldt. Er is een nieuw uittreksel nodig.');
+    });
+
+    test('a mismatching identity is explained before an expiry, so one record gives one answer', () => {
+        const judicialRecord = JudicialRecordHelper.getForMember({
+            firstName,
+            birthDay,
+            responsibilities: [createResponsibility()],
+            record: {
+                reviewDecision: JudicialRecordReviewDecision.Ok,
+                identityMatches: false,
+                reviewedAt: new Date(2026, 5, 14 - 365 * JUDICIAL_RECORD_VALIDITY_YEARS),
+            },
+            atDate,
+        });
+
+        expect(judicialRecord.description).toBe('De naam of geboortedatum van {name} is gewijzigd na de goedkeuring, waardoor die niet meer geldt. Er is een nieuw uittreksel nodig.');
+    });
+
+    test('a standing approval has no renewal reason, so the responsibility is still described', () => {
+        const judicialRecord = JudicialRecordHelper.getForMember({
+            firstName,
+            birthDay,
+            responsibilities: [createResponsibility()],
+            record: {
+                reviewDecision: JudicialRecordReviewDecision.Ok,
+                identityMatches: true,
+                reviewedAt: new Date(2026, 0, 1),
+            },
+            atDate,
+        });
+
+        expect(judicialRecord.status).toBe(JudicialRecordStatus.Ok);
+        expect(judicialRecord.description).toBe('Sinds {date}, de startdatum van de functie.');
+    });
+
+    test('a member who no longer needs an extract is not asked to renew one', () => {
+        const judicialRecord = JudicialRecordHelper.getForMember({
+            firstName,
+            birthDay,
+            responsibilities: [createResponsibility({ minimumAge: null })],
+            record: {
+                reviewDecision: JudicialRecordReviewDecision.Ok,
+                identityMatches: false,
+                reviewedAt: new Date(2026, 0, 1),
+            },
+            atDate,
+        });
+
+        expect(judicialRecord.status).toBe(JudicialRecordStatus.NotRequired);
+        expect(judicialRecord.description).toBe('Geen enkele functie van {name} vraagt een uittreksel uit het strafregister.');
+    });
+
+    test('a member who never delivered keeps the responsibility description', () => {
+        const judicialRecord = JudicialRecordHelper.getForMember({
+            firstName,
+            birthDay,
+            responsibilities: [createResponsibility()],
+            record: null,
+            atDate,
+        });
+
+        expect(judicialRecord.status).toBe(JudicialRecordStatus.Required);
+        expect(judicialRecord.description).toBe('Sinds {date}, de startdatum van de functie.');
+    });
+});
+
+describe('JudicialRecordHelper.getExpiryDate', () => {
+    test('a record nobody decided has no expiry date', () => {
+        expect(JudicialRecordHelper.getExpiryDate(null)).toBeNull();
+    });
+
+    test('the expiry date runs from the start of the review day', () => {
+        expect(JudicialRecordHelper.getExpiryDate(new Date(2026, 5, 15, 13, 45)))
+            .toEqual(new Date(2026 + JUDICIAL_RECORD_VALIDITY_YEARS, 5, 15));
+    });
 });
 
 describe('JudicialRecordHelper.asksForExtract', () => {
