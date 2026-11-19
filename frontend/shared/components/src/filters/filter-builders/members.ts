@@ -12,7 +12,7 @@ import { Language } from '@stamhoofd/types/Language';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { FilterWrapperMarker, Gender, GroupType, LanguageHelper, OrganizationRecordsConfiguration, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
+import { FilterWrapperMarker, Gender, GroupType, JudicialRecordHelper, JudicialRecordStatus, LanguageHelper, OrganizationRecordsConfiguration, UitpasSocialTariffStatus, unwrapFilter } from '@stamhoofd/structures';
 import type { ComputedRef, Ref } from 'vue';
 import { computed, ref } from 'vue';
 import { DateFilterBuilder } from '../DateUIFilter';
@@ -727,6 +727,24 @@ export function createMemberWithRegistrationsBlobFilterBuilders({ organization, 
                 wrapper: {
                     responsibilities: {
                         $elemMatch: FilterWrapperMarker,
+                    },
+                },
+            }),
+        );
+    }
+
+    const asksForJudicialRecord = JudicialRecordHelper.asksForExtract({ platform, organization: organization.value });
+
+    if (asksForJudicialRecord) {
+        all.push(
+            new MultipleChoiceFilterBuilder({
+                name: $t('Uittreksel uit het strafregister'),
+                options: Object.values(JudicialRecordStatus).map((status) => {
+                    return new MultipleChoiceUIFilterOption(JudicialRecordHelper.getStatusName(status), status);
+                }),
+                wrapper: {
+                    judicialRecordStatus: {
+                        $in: FilterWrapperMarker,
                     },
                 },
             }),
