@@ -101,6 +101,12 @@ export class Member extends QueryableModel {
     details: MemberDetails;
 
     /**
+     * Set when the personal data was removed because a retention term passed. The row is kept for registrations and balances.
+     */
+    @column({ type: 'datetime', nullable: true })
+    anonymizedAt: Date | null = null;
+
+    /**
      * @deprecated
      * Unreliable since a member can have outstanding balance to multiple organizations now
      */

@@ -4,7 +4,9 @@ import {
     DateDecoder,
     EnumDecoder,
     field,
+    MapDecoder,
     NumberDecoder,
+    StringDecoder,
 } from '@common/encoding';
 import { SimpleError, SimpleErrors } from '@common/errors';
 
@@ -37,6 +39,24 @@ const CATEGORY_CAPABILITIES: Record<
     [DataRetentionCategory.Emails]: { anonymize: false, delete: true, protectedPeriods: false },
     [DataRetentionCategory.AuditLogs]: { anonymize: false, delete: true, protectedPeriods: false },
 };
+
+export enum DataRetentionAction {
+    Anonymize = 'Anonymize',
+    Delete = 'Delete',
+    RemoveSensitiveData = 'RemoveSensitiveData',
+}
+
+/**
+ * Why data is kept after its term has passed. It is processed once the reason is gone.
+ */
+export enum DataRetentionHoldReason {
+    ActiveResponsibility = 'ActiveResponsibility',
+    ActiveMembership = 'ActiveMembership',
+    AdminAccount = 'AdminAccount',
+    OpenBalance = 'OpenBalance',
+    ProtectedPeriod = 'ProtectedPeriod',
+    UnchargedMembership = 'UnchargedMembership',
+}
 
 export const DATA_RETENTION_MINIMUM_MONTHS = 3;
 export const DATA_RETENTION_MAXIMUM_MONTHS = 20 * 12;
@@ -307,6 +327,49 @@ export class DataRetentionPolicyUpdate extends AutoEncoder {
 
     @field({ decoder: DataRetentionTerms })
     terms: DataRetentionTerms;
+}
+
+/**
+ * How many items of one category are processed by one action.
+ */
+export class DataRetentionCount extends AutoEncoder {
+    @field({ decoder: new EnumDecoder(DataRetentionCategory) })
+    category: DataRetentionCategory;
+
+    @field({ decoder: new EnumDecoder(DataRetentionAction) })
+    action: DataRetentionAction;
+
+    /**
+     * The term has passed and nothing holds it, so the next run processes it.
+     */
+    @field({ decoder: NumberDecoder })
+    due = 0;
+
+    /**
+     * The term has passed, but it is kept for now.
+     */
+    @field({ decoder: NumberDecoder })
+    held = 0;
+
+    /**
+     * Per reason. One item can be held for several reasons, so the sum can be higher than held.
+     */
+    @field({ decoder: new MapDecoder(new EnumDecoder(DataRetentionHoldReason), NumberDecoder) })
+    heldBy = new Map<DataRetentionHoldReason, number>();
+
+    /**
+     * Per month (yyyy-mm) in which the term passes, for the next 12 months. Later terms are counted under 'later'.
+     */
+    @field({ decoder: new MapDecoder(StringDecoder, NumberDecoder) })
+    upcoming = new Map<string, number>();
+}
+
+export class DataRetentionOverview extends AutoEncoder {
+    @field({ decoder: DateDecoder })
+    calculatedAt = new Date();
+
+    @field({ decoder: new ArrayDecoder(DataRetentionCount) })
+    counts: DataRetentionCount[] = [];
 }
 
 export type ResolvedDataRetentionTerms = {

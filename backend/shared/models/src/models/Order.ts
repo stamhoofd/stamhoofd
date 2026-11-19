@@ -90,6 +90,12 @@ export class Order extends QueryableModel {
     @column({ type: 'datetime', nullable: true })
     validAt: Date | null = null;
 
+    /**
+     * Set when the personal data was removed because a retention term passed. Products, amounts and status are kept.
+     */
+    @column({ type: 'datetime', nullable: true })
+    anonymizedAt: Date | null = null;
+
     @column({ type: 'string' })
     status = OrderStatus.Created;
 

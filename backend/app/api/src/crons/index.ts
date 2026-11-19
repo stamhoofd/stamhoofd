@@ -18,6 +18,7 @@ import './delete-old-email-drafts.js';
 import './delete-expired-mfa-tokens.js';
 import './delete-expired-impersonation-tokens.js';
 import './delete-archived-data.js';
+import './data-retention.js';
 import './mollie-chargebacks.js';
 import './mollie-refunds.js';
 import './fake-settlements.js';
