@@ -7,7 +7,7 @@ import {
     StringDecoder,
 } from '@common/encoding';
 import { DataValidator } from '@stamhoofd/utility';
-import wordDictionary from './data/audit-log-words.js';
+import { getAuditLogWords } from './data/audit-log-words.js';
 
 type AuditLogEnumObject<T extends string = string> = Record<string, T>;
 type AuditLogEnumRegistration<T extends string = string> = {
@@ -111,7 +111,7 @@ export function getLegacyAuditLogEnumRegistrations(): {
  * has been rolled out everywhere.
  */
 export function getLegacyAuditLogEnumReplacement(key: string): AuditLogReplacement | null {
-    if (wordDictionary[key]) {
+    if (getAuditLogWords()[key]) {
         return null;
     }
 
@@ -419,8 +419,9 @@ export function getAuditLogPatchKeyName(key: string) {
         }
     }
 
-    if (wordDictionary[key]) {
-        return wordDictionary[key];
+    const word = getAuditLogWords()[key];
+    if (word) {
+        return word;
     }
 
     // Check first letter is a capital letter
