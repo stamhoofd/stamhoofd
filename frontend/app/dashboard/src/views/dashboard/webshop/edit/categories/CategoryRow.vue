@@ -57,10 +57,10 @@ function moveDown() {
 }
 
 async function onDelete(keepArticles = false) {
-    const name = props.category.name || 'Naamloos';
+    const name = props.category.name || $t('Naamloos');
     if (!(await CenteredMessage.confirm({
         title: keepArticles ? $t('%Zm4', { name }) : $t('‘{name}’ en artikels verwijderen?', { name }),
-        confirmText: 'Verwijderen',
+        confirmText: $t('Verwijderen'),
         description: $t('%Zm5'),
         availabilityDelay: 2_000,
     }))) {
@@ -82,7 +82,7 @@ function showContextMenu(event: TouchEvent | MouseEvent | undefined) {
     const menu = new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Verplaats omhoog',
+                name: $t('Verplaats omhoog'),
                 icon: 'arrow-up',
                 action: () => {
                     moveUp();
@@ -90,7 +90,7 @@ function showContextMenu(event: TouchEvent | MouseEvent | undefined) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Verplaats omlaag',
+                name: $t('Verplaats omlaag'),
                 icon: 'arrow-down',
                 action: () => {
                     moveDown();
@@ -102,7 +102,7 @@ function showContextMenu(event: TouchEvent | MouseEvent | undefined) {
             ...(props.webshop.categories.length === 1
                 ? [
                         new ContextMenuItem({
-                            name: 'Verwijder en behoud artikels',
+                            name: $t('Verwijder en behoud artikels'),
                             action: () => {
                                 onDelete(true).catch(console.error);
                                 return true;
@@ -111,7 +111,7 @@ function showContextMenu(event: TouchEvent | MouseEvent | undefined) {
                     ]
                 : []),
             new ContextMenuItem({
-                name: 'Verwijderen',
+                name: $t('Verwijderen'),
                 destructive: true,
                 icon: 'trash',
                 action: () => {

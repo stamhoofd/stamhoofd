@@ -240,9 +240,9 @@ function onClickSeat(seat: ReservedSeat) {
 
     // Check if this seat is reserved in the product
     if (selectedProduct.value?.reservedSeats.find(r => r.equals(seat))) {
-        new Toast('Deze plaats is gereserveerd, maar de bestelling is nog niet bevestigd. Dit kan voorkomen als de besteller nog aan het afrekenen is.', 'info').show();
+        new Toast($t('Deze plaats is gereserveerd, maar de bestelling is nog niet bevestigd. Dit kan voorkomen als de besteller nog aan het afrekenen is.'), 'info').show();
     } else {
-        new Toast('Er is nog geen bestelling gekoppeld aan deze plaats.', 'info').show();
+        new Toast($t('Er is nog geen bestelling gekoppeld aan deze plaats.'), 'info').show();
     }
 }
 

@@ -71,8 +71,9 @@ export class SGVGroupAdministration implements RequestMiddleware {
             if (groups.length === 0) {
                 throw new SimpleError({
                     code: '',
-                    message:
+                    message: $t(
                         'We konden jouw scoutsgroep niet vinden in dit groepsadministratie account. Controleer het adres en de naam die je in Stamhoofd hebt ingesteld en zorg dat deze overeen komt met de naam in de groepsadministratie.',
+                    ),
                 });
             }
             if (groups.length > 1) {
@@ -96,8 +97,9 @@ export class SGVGroupAdministration implements RequestMiddleware {
                 // not fixed? throw
                 throw new SimpleError({
                     code: '',
-                    message:
+                    message: $t(
                         'We vonden meerdere scoutsgroepen die verbonden zijn met dit groepsadministratie account én waarmee de naam of adres overeenkomt met die van jouw groep in Stamhoofd. Daardoor konden we niet automatisch de juiste groep selecteren. Neem contact op via hallo@stamhoofd.be om dit op te lossen.',
+                    ),
                 });
             }
 
@@ -107,8 +109,9 @@ export class SGVGroupAdministration implements RequestMiddleware {
             if (!this.groupNumber) {
                 throw new SimpleError({
                     code: 'missing_group_number',
-                    message:
+                    message: $t(
                         'We konden het groepsnummer niet achterhalen van jouw scoutsgroep. Mogelijks is er een tijdelijk probleem met de connectie met de groepsadministratie. Herlaad eventueel de pagina. Neem contact op met hallo@stamhoofd.be als het probleem blijft aanhouden.',
+                    ),
                 });
             }
 
@@ -131,7 +134,13 @@ export class SGVGroupAdministration implements RequestMiddleware {
                 if (externalGroupNumber !== this.groupNumber) {
                     throw new SimpleError({
                         code: 'wrong_group_number',
-                        message: `Het groepsnummer dat we hebben gevonden in de groepsadministratie van dit S&GV account komt niet overeen met het groepsnummer van de scoutsgroep waarmee Stamhoofd het laatst heeft gesynchroniseerd. Kijk na of wel bent ingelogd op het juiste account in de groepsadministratie en probeer opnieuw. Welke van de twee groepsnummers is juist? Laatst gebruikt: ${externalGroupNumber} of groepsnummer huidige account: ${this.groupNumber}? Geef het door aan hallo@stamhoofd.be om het te corrigeren.`,
+                        message: $t(
+                            'Het groepsnummer dat we hebben gevonden in de groepsadministratie van dit S&GV account komt niet overeen met het groepsnummer van de scoutsgroep waarmee Stamhoofd het laatst heeft gesynchroniseerd. Kijk na of wel bent ingelogd op het juiste account in de groepsadministratie en probeer opnieuw. Welke van de twee groepsnummers is juist? Laatst gebruikt: {lastUsedGroupNumber} of groepsnummer huidige account: {currentGroupNumber}? Geef het door aan hallo@stamhoofd.be om het te corrigeren.',
+                            {
+                                lastUsedGroupNumber: externalGroupNumber ?? '',
+                                currentGroupNumber: this.groupNumber,
+                            },
+                        ),
                     });
                 }
             }
@@ -235,8 +244,9 @@ export class SGVGroupAdministration implements RequestMiddleware {
         ) {
             throw new SimpleError({
                 code: 'permission_denied',
-                message:
+                message: $t(
                     'Je kan enkel synchroniseren vanaf een account in de groepsadministratie met de functie (Adjunct) Verantwoordelijke Groepsadministratie (VGA).',
+                ),
             });
         }
         await this.getFuncties();
@@ -313,7 +323,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
             this.leden = await this.downloadWithCurrentFilter();
         } catch (e) {
             console.error(e);
-            new Toast('Leden ophalen mislukt', 'error red').show();
+            new Toast($t('Leden ophalen mislukt'), 'error red').show();
             throw e;
         }
     }
@@ -447,7 +457,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
                             reject(
                                 new SimpleError({
                                     code: '',
-                                    message: 'Synchronisatie geannuleerd',
+                                    message: $t('Synchronisatie geannuleerd'),
                                 }),
                             );
                         },
@@ -489,7 +499,10 @@ export class SGVGroupAdministration implements RequestMiddleware {
     ): Promise<{ oldMembers: SGVLid[]; action: SGVOldMemberAction }> {
         // Determine the missing members by checking the matches
         const oldMembers: SGVLid[] = [];
-        const toast = new Toast('Controleren op gestopte leden...', 'spinner')
+        const toast = new Toast(
+            $t('Controleren op gestopte leden...'),
+            'spinner',
+        )
             .setHide(null)
             .show();
 
@@ -529,7 +542,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
                             reject(
                                 new SimpleError({
                                     code: '',
-                                    message: 'Synchronisatie geannuleerd',
+                                    message: $t('Synchronisatie geannuleerd'),
                                 }),
                             );
                         },
@@ -687,8 +700,11 @@ export class SGVGroupAdministration implements RequestMiddleware {
         return response.data;
     }
 
-    private unknownErrorMessage
-        = 'De groepsadministratie van Scouts en Gidsen Vlaanderen gaf een foutmelding. Kijk ook even na of er geen rare of foutieve gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie zelf (bv. onbestaand adres, dubbele ouders, fout geschreven straatnaam, ontbrekende spatie in straat, ...). Zoek het adres van het lid (en ouders) op in Google Maps en corrigeer indien nodig. Pas de gegevens aan in Stamhoofd en probeer opnieuw te synchroniseren. Vind je de oorzaak niet? Mogelijks zit er een fout in de groepsadministratie, neem dan contact met ons op via hallo@stamhoofd.be.';
+    private get unknownErrorMessage(): string {
+        return $t(
+            'De groepsadministratie van Scouts en Gidsen Vlaanderen gaf een foutmelding. Kijk ook even na of er geen rare of foutieve gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie zelf (bv. onbestaand adres, dubbele ouders, fout geschreven straatnaam, ontbrekende spatie in straat, ...). Zoek het adres van het lid (en ouders) op in Google Maps en corrigeer indien nodig. Pas de gegevens aan in Stamhoofd en probeer opnieuw te synchroniseren. Vind je de oorzaak niet? Mogelijks zit er een fout in de groepsadministratie, neem dan contact met ons op via hallo@stamhoofd.be.',
+        );
+    }
 
     async tryRequest<T>(
         request: RequestInitializer<T>,
@@ -707,8 +723,9 @@ export class SGVGroupAdministration implements RequestMiddleware {
 
                 throw new SimpleError({
                     code: 'sgv_timeout',
-                    message:
+                    message: $t(
                         'De groepsadministratie van Scouts en Gidsen Vlaanderen reageerde niet binnen 30 seconden. Mogelijks is Scouts en Gidsen Vlaanderen even onbereikbaar of heb je een onstabiele internetverbinding. Probeer het later opnieuw.',
+                    ),
                 });
             }
 
@@ -783,7 +800,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
             return error;
         }
         if (error === null || typeof error !== 'object') {
-            return 'Er is een onbekende fout opgetreden';
+            return $t('Er is een onbekende fout opgetreden');
         }
 
         if (error instanceof SGVMemberError) {
@@ -791,7 +808,9 @@ export class SGVGroupAdministration implements RequestMiddleware {
         }
 
         if (Request.isNetworkError(error)) {
-            return 'De groepsadministratie reageerde niet. Kijk ook even na of er geen rare of foute gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie zelf (bv. onbestaand adres, dubbele ouders, lege velden...). Pas de gegevens aan en probeer daarna opnieuw te synchroniseren. Vind je de oorzaak niet? Mogelijks zit er een fout in de groepsadministratie, neem dan contact met ons op via hallo@stamhoofd.be.';
+            return $t(
+                'De groepsadministratie reageerde niet. Kijk ook even na of er geen rare of foute gegevens staan ingesteld bij dit lid in Stamhoofd of in de groepsadministratie zelf (bv. onbestaand adres, dubbele ouders, lege velden...). Pas de gegevens aan en probeer daarna opnieuw te synchroniseren. Vind je de oorzaak niet? Mogelijks zit er een fout in de groepsadministratie, neem dan contact met ons op via hallo@stamhoofd.be.',
+            );
         }
         if (!isSimpleError(error) && !isSimpleErrors(error)) {
             if ('message' in error && typeof error.message === 'string') {
@@ -805,7 +824,7 @@ export class SGVGroupAdministration implements RequestMiddleware {
 
                 return error.message;
             }
-            return 'Er is een onleesbare fout opgetreden';
+            return $t('Er is een onleesbare fout opgetreden');
         }
         return error.message;
     }
@@ -840,8 +859,9 @@ export class SGVGroupAdministration implements RequestMiddleware {
             if (patch.adressen && patch.adressen.length === 0) {
                 throw new SimpleError({
                     code: '',
-                    message:
+                    message: $t(
                         'Je moet minstens één adres toevoegen bij dit lid. Voeg een adres toe in Stamhoofd en probeer daarna opnieuw te synchroniseren.',
+                    ),
                 });
             }
 
@@ -912,8 +932,9 @@ export class SGVGroupAdministration implements RequestMiddleware {
         if (!post.adressen || post.adressen.length === 0) {
             throw new SimpleError({
                 code: '',
-                message:
+                message: $t(
                     'Je moet minstens één adres toevoegen bij dit lid. Voeg een adres toe in Stamhoofd en probeer daarna opnieuw te synchroniseren.',
+                ),
             });
         }
 

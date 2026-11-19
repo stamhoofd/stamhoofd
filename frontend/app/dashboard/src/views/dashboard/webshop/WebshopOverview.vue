@@ -632,7 +632,7 @@ defineRoute({
     present: 'popup',
     component: async () => (await import('@stamhoofd/components/admins/EditResourceRolesView.vue')).default,
     defaultProperties: () => ({
-        description: 'Kies hier welke beheerdersrollen deze webshop kunnen bekijken, bewerken of beheren.',
+        description: $t('Kies hier welke beheerdersrollen deze webshop kunnen bekijken, bewerken of beheren.'),
         resource: {
             id: props.preview.id,
             name: props.preview.meta.name,
@@ -732,7 +732,7 @@ defineRoute({
                     }
                 } catch (e) {
                     console.error(e);
-                    new Toast('Er ging iets mis bij het overnemen van de e-mails in de nieuwe webshop', 'warning').show();
+                    new Toast($t('Er ging iets mis bij het overnemen van de e-mails in de nieuwe webshop'), 'warning').show();
                 }
             },
         };
@@ -772,7 +772,7 @@ const hasSeating = computed(() => webshopManager.value.preview.meta.seatingPlans
 
 function openPackages() {
     if (!auth.hasAccessRight(AccessRight.OrganizationFinanceDirector)) {
-        new CenteredMessage('Enkel voor hoofdbeheerders', 'Het aanpassen van pakketten is enkel beschikbaar voor hoofdbeheerders. Vraag hen om de verlenging in orde te brengen.').addCloseButton().show();
+        new CenteredMessage($t('Enkel voor hoofdbeheerders'), $t('Het aanpassen van pakketten is enkel beschikbaar voor hoofdbeheerders. Vraag hen om de verlenging in orde te brengen.')).addCloseButton().show();
         return;
     }
 
@@ -804,7 +804,7 @@ const canCreateWebshops = computed(() => context.value.organizationAuth.hasAcces
 
 function duplicateWebshop() {
     if (!canCreateWebshops.value) {
-        new Toast('Je hebt geen toegang om nieuwe webshops te maken. Vraag toegang aan een hoofdbeheerder van je vereniging.').show();
+        new Toast($t('Je hebt geen toegang om nieuwe webshops te maken. Vraag toegang aan een hoofdbeheerder van je vereniging.')).show();
         return;
     }
 
@@ -813,11 +813,11 @@ function duplicateWebshop() {
 
 async function closeWebshop() {
     if (isArchive.value) {
-        if (!await CenteredMessage.confirm('Ben je zeker dat je de webshop wilt terugzetten?', 'Ja, terugzetten', 'Je kan daarna de webshop eventueel terug openen.')) {
+        if (!await CenteredMessage.confirm($t('Ben je zeker dat je de webshop wilt terugzetten?'), $t('Ja, terugzetten'), $t('Je kan daarna de webshop eventueel terug openen.'))) {
             return;
         }
     } else {
-        if (!await CenteredMessage.confirm("Ben je zeker dat je de webshop '" + webshopManager.value.preview.meta.name + "' wilt sluiten?", 'Ja, sluiten', 'Er kunnen daarna geen nieuwe bestellingen worden gemaakt. Je kan de webshop later terug openen.')) {
+        if (!await CenteredMessage.confirm($t("Ben je zeker dat je de webshop '{name}' wilt sluiten?", { name: webshopManager.value.preview.meta.name }), $t('Ja, sluiten'), $t('Er kunnen daarna geen nieuwe bestellingen worden gemaakt. Je kan de webshop later terug openen.'))) {
             return;
         }
     }
@@ -830,14 +830,14 @@ async function closeWebshop() {
                 }),
             }),
         );
-        new Toast('De webshop is gesloten', 'success green').show();
+        new Toast($t('De webshop is gesloten'), 'success green').show();
     } catch (e) {
         Toast.fromError(e).show();
     }
 }
 
 async function openWebshop() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je de webshop terug wilt openen?', 'Ja, openen')) {
+    if (!await CenteredMessage.confirm($t('Ben je zeker dat je de webshop terug wilt openen?'), $t('Ja, openen'))) {
         return;
     }
 
@@ -850,14 +850,14 @@ async function openWebshop() {
                 }),
             }),
         );
-        new Toast('De webshop is terug open', 'success green').show();
+        new Toast($t('De webshop is terug open'), 'success green').show();
     } catch (e) {
         Toast.fromError(e).show();
     }
 }
 
 async function archiveWebshop() {
-    if (!await CenteredMessage.confirm('Ben je zeker dat je de webshop wilt archiveren?', 'Ja, archiveren', 'De gegevens van de webshop blijven daarna nog bereikbaar, maar de webshop wordt niet meer zo prominent in het menu weergegeven.')) {
+    if (!await CenteredMessage.confirm($t('Ben je zeker dat je de webshop wilt archiveren?'), $t('Ja, archiveren'), $t('De gegevens van de webshop blijven daarna nog bereikbaar, maar de webshop wordt niet meer zo prominent in het menu weergegeven.'))) {
         return;
     }
 
@@ -869,7 +869,7 @@ async function archiveWebshop() {
                 }),
             }),
         );
-        new Toast('De webshop is gearchiveerd', 'success green').show();
+        new Toast($t('De webshop is gearchiveerd'), 'success green').show();
     } catch (e) {
         Toast.fromError(e).show();
     }
@@ -877,9 +877,9 @@ async function archiveWebshop() {
 
 async function deleteWebshop() {
     if (!await CenteredMessage.confirm({
-        title: "'" + webshopManager.value.preview.meta.name + "' verwijderen?",
-        confirmText: 'Ja, verwijderen',
-        description: 'Alle bijhorende bestellingen worden ook definitief verwijderd. Je kan dit niet ongedaan maken.',
+        title: $t("'{name}' verwijderen?", { name: webshopManager.value.preview.meta.name }),
+        confirmText: $t('Ja, verwijderen'),
+        description: $t('Alle bijhorende bestellingen worden ook definitief verwijderd. Je kan dit niet ongedaan maken.'),
         availabilityDelay: 2_000,
     })) {
         return;
@@ -891,7 +891,7 @@ async function deleteWebshop() {
             path: '/webshop/' + webshopManager.value.preview.id,
             shouldRetry: false,
         });
-        new Toast('Webshop verwijderd', 'success green').show();
+        new Toast($t('Webshop verwijderd'), 'success green').show();
 
         if (organization.value) {
             organization.value.webshops = organization.value.webshops.filter(w => w.id !== webshopManager.value.preview.id);
@@ -935,8 +935,8 @@ const todoList = computed(() => {
     list.push({
         icon: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? 'ticket' : 'box',
         subIcon: 'add',
-        title: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? 'Voeg tickets toe aan je webshop' : 'Voeg artikels toe aan je webshop',
-        description: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? 'Geef al dan niet de keuze uit verschillende tickets, of voeg gewoon één ticket toe.' : 'Geef al dan niet de keuze uit verschillende artikels of voeg gewoon één artikel toe.',
+        title: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? $t('Voeg tickets toe aan je webshop') : $t('Voeg artikels toe aan je webshop'),
+        description: webshopManager.value.preview.meta.ticketType === WebshopTicketType.Tickets ? $t('Geef al dan niet de keuze uit verschillende tickets, of voeg gewoon één ticket toe.') : $t('Geef al dan niet de keuze uit verschillende artikels of voeg gewoon één artikel toe.'),
         action: () => $navigate(Routes.EditProducts),
         done: !!webshop.value?.products && webshop.value.products.length > 0,
     });
@@ -944,8 +944,8 @@ const todoList = computed(() => {
     if (webshopManager.value.preview.meta.type === WebshopType.Performance) {
         list.push({
             icon: 'seat',
-            title: 'Koppel een zaalplan',
-            description: 'Lees de gids door hoe je een zaalplan instelt.',
+            title: $t('Koppel een zaalplan'),
+            description: $t('Lees de gids door hoe je een zaalplan instelt.'),
             action: () => openSeatDocs(),
             done: !!webshop.value?.products && webshop.value.products.some(p => p.seatingPlanId !== null),
         });
@@ -955,8 +955,8 @@ const todoList = computed(() => {
         list.push({
             icon: 'location',
             subIcon: 'add',
-            title: 'Stel afhaal of leveringsmethodes in',
-            description: 'Stel in hoe, waar en wanneer bestellers hun bestelling kunnen afhalen of geleverd krijgen.',
+            title: $t('Stel afhaal of leveringsmethodes in'),
+            description: $t('Stel in hoe, waar en wanneer bestellers hun bestelling kunnen afhalen of geleverd krijgen.'),
             action: () => $navigate(Routes.EditCheckoutMethods),
             done: webshopManager.value.preview.meta.checkoutMethods.length > 0,
         });
@@ -965,8 +965,8 @@ const todoList = computed(() => {
     if (webshopManager.value.preview.meta.type === WebshopType.TakeawayAndDelivery) {
         list.push({
             icon: 'image',
-            title: 'Stel een omslagfoto, logo, kleur en beschrijving in',
-            description: 'Maak je webshop helemaal professioneel door deze in te stellen.',
+            title: $t('Stel een omslagfoto, logo, kleur en beschrijving in'),
+            description: $t('Maak je webshop helemaal professioneel door deze in te stellen.'),
             action: () => $navigate(Routes.EditPage),
             done: webshopManager.value.preview.meta.description.text.length > 0
                 || !!webshopManager.value.preview.meta.useLogo
@@ -987,7 +987,7 @@ const todoList = computed(() => {
 
     list.push({
         icon: 'bank',
-        title: 'Stel online betalingen in',
+        title: $t('Stel online betalingen in'),
         description: organization.value.address?.country === Country.Netherlands ? $t('%1We') : $t('%1YS'),
         action: () => $navigate(Routes.EditPaymentMethods),
         done: webshopManager.value.preview.meta.paymentConfiguration.paymentMethods.includes(PaymentMethod.CreditCard)
@@ -1000,8 +1000,8 @@ const todoList = computed(() => {
     if (webshopManager.value.preview.meta.status !== WebshopStatus.Open) {
         list.push({
             icon: 'clock',
-            title: 'Open je webshop als je er klaar voor bent',
-            description: 'Je kan je webshop openen op een bepaald tijdstip, of manueel via de knop onderaan.',
+            title: $t('Open je webshop als je er klaar voor bent'),
+            description: $t('Je kan je webshop openen op een bepaald tijdstip, of manueel via de knop onderaan.'),
             action: () => $navigate(Routes.EditGeneral),
             done: false,
         });
@@ -1010,8 +1010,8 @@ const todoList = computed(() => {
     if (organization.value.meta.packages.isWebshopsTrial) {
         list.push({
             icon: 'power',
-            title: 'Activeer Stamhoofd als je wilt beginnen verkopen',
-            description: 'Beëindig je proefperiode en ga van start',
+            title: $t('Activeer Stamhoofd als je wilt beginnen verkopen'),
+            description: $t('Beëindig je proefperiode en ga van start'),
             action: () => openPackages(),
             done: false,
         });

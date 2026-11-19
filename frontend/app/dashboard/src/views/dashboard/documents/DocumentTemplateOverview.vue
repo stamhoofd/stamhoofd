@@ -157,7 +157,7 @@ async function publishTemplate() {
         return;
     }
 
-    if (!(await CenteredMessage.confirm('Ben je zeker dat je alle documenten wilt publiceren?', 'Publiceren', 'Je kan de documenten hierna niet meer bewerken, en ze zijn zichtbaar voor alle leden.'))) {
+    if (!(await CenteredMessage.confirm($t('Ben je zeker dat je alle documenten wilt publiceren?'), $t('Publiceren'), $t('Je kan de documenten hierna niet meer bewerken, en ze zijn zichtbaar voor alle leden.')))) {
         return;
     }
     await changeStatus(DocumentStatus.Published);
@@ -168,7 +168,7 @@ async function draftTemplate() {
         return;
     }
 
-    if (!(await CenteredMessage.confirm('Ben je zeker dat je alle documenten weer wilt verbergen?', 'Verbergen', 'Leden zullen de documenten opeens niet meer kunnen bekijken.'))) {
+    if (!(await CenteredMessage.confirm($t('Ben je zeker dat je alle documenten weer wilt verbergen?'), $t('Verbergen'), $t('Leden zullen de documenten opeens niet meer kunnen bekijken.')))) {
         return;
     }
     await changeStatus(DocumentStatus.Draft);
@@ -268,8 +268,8 @@ async function deleteTemplate() {
 
     if (!(await CenteredMessage.confirm({
         title: $t('%Zmn', { name: props.template.settings.name }),
-        confirmText: 'Verwijderen',
-        description: 'Verwijder nooit officiële documenten!',
+        confirmText: $t('Verwijderen'),
+        description: $t('Verwijder nooit officiële documenten!'),
         availabilityDelay: 2_000,
     }))) {
         return;
@@ -377,14 +377,14 @@ async function downloadXml() {
         if (!Request.isAbortError(e as Error)) {
             Toast.fromError(e).show();
         } else {
-            new Toast('Downloaden geannuleerd', 'info').show();
+            new Toast($t('Downloaden geannuleerd'), 'info').show();
         }
     }
 }
 
 function gotoRecordCategory(index: number) {
     if (index >= props.template.privateSettings.templateDefinition.exportFieldCategories.length) {
-        const pendingToast = new Toast('Aanmaken...', 'spinner').setProgress(0).setHide(null).show();
+        const pendingToast = new Toast($t('Aanmaken...'), 'spinner').setProgress(0).setHide(null).show();
         downloadXml().catch(console.error).finally(() => {
             pendingToast.hide();
         });

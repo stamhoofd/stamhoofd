@@ -46,7 +46,7 @@ watch(root, (value) => {
     if (value) {
         value.addEventListener('copy', (event) => {
             try {
-                (event as any).clipboardData.setData('text/plain', props.optionMenu.name || 'Naamloos');
+                (event as any).clipboardData.setData('text/plain', props.optionMenu.name || $t('Naamloos'));
                 (event as any).clipboardData.setData('web stamhoofd/webshop-option-menu', JSON.stringify(new VersionBox(props.optionMenu).encode({ version: Version })));
                 event.preventDefault();
             } catch (e) {
@@ -62,7 +62,7 @@ function showContextMenu(event: MouseEvent) {
         [
             ...(clipboardSupported
                 ? [new ContextMenuItem({
-                        name: 'Kopiëren',
+                        name: $t('Kopiëren'),
                         icon: 'copy',
                         action: () => {
                             const blob = new Blob([
@@ -75,14 +75,14 @@ function showContextMenu(event: MouseEvent) {
                                     }),
                                 ],
                             ).then(() => {
-                                new Toast(isMac ? 'Keuzemenu gekopieërd. Gebruik CMD+V om dit keuzemenu ergens anders te plakken' : 'Keuzemenu gekopieërd. Gebruik CTRL+V om dit keuzemenu ergens anders te plakken', 'copy').show();
+                                new Toast(isMac ? $t('Keuzemenu gekopieërd. Gebruik CMD+V om dit keuzemenu ergens anders te plakken') : $t('Keuzemenu gekopieërd. Gebruik CTRL+V om dit keuzemenu ergens anders te plakken'), 'copy').show();
                             }).catch(console.error);
                             return true;
                         },
                     })]
                 : []),
             new ContextMenuItem({
-                name: 'Verwijderen',
+                name: $t('Verwijderen'),
                 destructive: true,
                 icon: 'trash',
                 action: () => {

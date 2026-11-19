@@ -265,7 +265,7 @@ const uitpasBaseProductPriceId = computed({
         if (value) {
             if (!name.value) {
                 // If no name is set for this price, we suggest the name UiTPAS kansentarief.
-                name.value = 'UiTPAS kansentarief';
+                name.value = $t('UiTPAS kansentarief');
             }
             useDiscount.value = false; // Disable discount if uitpas social tariff is enabled
         }
@@ -310,7 +310,7 @@ const enableUitpasSocialTariff = computed({
                 await navigationActions.dismiss();
             }
             if (!name.value) {
-                name.value = 'UiTPAS kansentarief';
+                name.value = $t('UiTPAS kansentarief');
             }
             uitpasBaseProductPriceId.value = productPricesAvailableForUitpasBaseProductPrice.value[0]?.id ?? null;
         }).catch((e) => {

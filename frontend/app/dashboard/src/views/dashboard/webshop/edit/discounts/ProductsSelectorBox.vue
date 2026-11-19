@@ -1,6 +1,6 @@
 <template>
     <div class="product-selector-box">
-        <STInputBox title="Artikel(s)" error-fields="productId" :error-box="errorBox" class="max">
+        <STInputBox :title="$t('Artikel(s)')" error-fields="productId" :error-box="errorBox" class="max">
             <div class="style-input-box" @click="changeProduct">
                 <STList v-if="products.length > 0">
                     <STListItem v-for="{product} of products" :key="product.id" :selectable="true" element-name="label">
@@ -136,7 +136,7 @@ async function validate() {
     if (props.productSelector.products.length === 0) {
         errorBox.value = new ErrorBox(new SimpleError({
             code: 'invalid_field',
-            message: 'Kies een artikel',
+            message: $t('Kies een artikel'),
             field: 'productId',
         }));
         return false;

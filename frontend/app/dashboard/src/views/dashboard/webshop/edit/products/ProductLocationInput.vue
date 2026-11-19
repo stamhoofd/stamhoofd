@@ -52,7 +52,7 @@ async function isValid(): Promise<boolean> {
         errors.errorBox = new ErrorBox(new SimpleError({
             code: 'invalid_field',
             field: 'name',
-            message: 'Vul een locatienaam in',
+            message: $t('Vul een locatienaam in'),
         }));
         return false;
     }

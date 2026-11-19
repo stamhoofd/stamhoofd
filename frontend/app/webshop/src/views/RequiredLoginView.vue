@@ -108,7 +108,7 @@ useMetaInfo({
         {
             id: 'description',
             name: 'description',
-            content: 'Log in om door te gaan',
+            content: $t('Log in om door te gaan'),
         },
         {
             id: 'og:site_name',

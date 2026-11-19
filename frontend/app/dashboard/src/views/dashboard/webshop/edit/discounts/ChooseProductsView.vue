@@ -47,7 +47,7 @@ const props = withDefaults(defineProps<{
     selectedProductIds: () => [],
 });
 
-const title = 'Selecteer één of meerdere artikels';
+const title = $t('Selecteer één of meerdere artikels');
 const editableSelectedProductIds = ref([...props.selectedProductIds]);
 
 function getCategoryProducts(category: Category) {

@@ -75,7 +75,7 @@ const errors = useErrors();
 const pop = usePop();
 
 const isTakeout = computed(() => props.takeoutMethod.type === CheckoutMethodType.Takeout);
-const locationTitleName = computed(() => isTakeout.value ? 'Afhaallocatie' : 'Ter plaatse consumeren');
+const locationTitleName = computed(() => isTakeout.value ? $t('Afhaallocatie') : $t('Ter plaatse consumeren'));
 const name = computed({
     get: () => patchedTakeoutMethod.value.name,
     set: name => addPatch({ name }),
@@ -108,7 +108,7 @@ async function save() {
 async function deleteMe() {
     if (!await CenteredMessage.confirm({
         title: name.value ? $t('%Zn2', { name: name.value }) : $t('Deze locatie verwijderen?'),
-        confirmText: 'Verwijderen',
+        confirmText: $t('Verwijderen'),
         description: $t('%ZmC'),
         availabilityDelay: 2_000,
     })) {
@@ -127,7 +127,7 @@ async function shouldNavigateAway() {
     if (!hasChanges.value) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je wilt sluiten zonder op te slaan?', 'Niet opslaan');
+    return await CenteredMessage.confirm($t('Ben je zeker dat je wilt sluiten zonder op te slaan?'), $t('Niet opslaan'));
 }
 
 defineExpose({

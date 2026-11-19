@@ -1008,7 +1008,7 @@ function getInsertMenu(row: SeatingPlanRow, seatIndex: number) {
     return new ContextMenu([
         [
             new ContextMenuItem({
-                name: 'Zetel',
+                name: $t('Zetel'),
                 icon: 'seat',
                 action: () => {
                     if (seatIndex >= 0) {
@@ -1028,7 +1028,7 @@ function getInsertMenu(row: SeatingPlanRow, seatIndex: number) {
                 },
             }),
             new ContextMenuItem({
-                name: 'Gang',
+                name: $t('Gang'),
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
@@ -1087,8 +1087,8 @@ function getInsertMenu(row: SeatingPlanRow, seatIndex: number) {
                             },
                         }),
                         new ContextMenuItem({
-                            name: 'Automatisch',
-                            description: 'Neemt de volledige beschikbare ruimte in',
+                            name: $t('Automatisch'),
+                            description: $t('Neemt de volledige beschikbare ruimte in'),
                             action: () => {
                                 if (seatIndex >= 0) {
                                     row.seats.splice(seatIndex, 0, SeatingPlanSeat.create({
@@ -1131,7 +1131,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
-                            name: 'Dupliceren',
+                            name: $t('Dupliceren'),
                             icon: 'copy',
                             action: () => {
                                 const clonedRow = row.clone();
@@ -1149,7 +1149,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
                         }),
 
                         new ContextMenuItem({
-                            name: 'Verplaats naar boven',
+                            name: $t('Verplaats naar boven'),
                             icon: 'arrow-up',
                             disabled: clonedSeatingPlanSection.value.rows.indexOf(row) <= 0,
                             action: () => {
@@ -1163,7 +1163,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
                             },
                         }),
                         new ContextMenuItem({
-                            name: 'Verplaats naar beneden',
+                            name: $t('Verplaats naar beneden'),
                             icon: 'arrow-down',
                             disabled: clonedSeatingPlanSection.value.rows.indexOf(row) >= clonedSeatingPlanSection.value.rows.length - 1,
                             action: () => {
@@ -1177,7 +1177,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
                             },
                         }),
                         new ContextMenuItem({
-                            name: 'Verwijderen',
+                            name: $t('Verwijderen'),
                             destructive: true,
                             icon: 'trash',
                             action: () => {
@@ -1204,11 +1204,11 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
         }
         items.push([
             new ContextMenuItem({
-                name: 'Zetel verplaatsen',
+                name: $t('Zetel verplaatsen'),
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
-                            name: 'Links',
+                            name: $t('Links'),
                             icon: 'arrow-left',
                             disabled: row.seats.indexOf(seat) <= 0,
                             action: () => {
@@ -1222,7 +1222,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
                             },
                         }),
                         new ContextMenuItem({
-                            name: 'Rechts',
+                            name: $t('Rechts'),
                             icon: 'arrow-right',
                             disabled: row.seats.indexOf(seat) >= row.seats.length - 1,
                             action: () => {
@@ -1239,16 +1239,16 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
                 ]),
             }),
             new ContextMenuItem({
-                name: 'Invoegen',
+                name: $t('Invoegen'),
                 icon: 'add',
                 childMenu: new ContextMenu([
                     [
                         new ContextMenuItem({
-                            name: 'Links',
+                            name: $t('Links'),
                             childMenu: getInsertMenu(row, row.seats.indexOf(seat)),
                         }),
                         new ContextMenuItem({
-                            name: 'Rechts',
+                            name: $t('Rechts'),
                             childMenu: getInsertMenu(row, row.seats.indexOf(seat) + 1),
                         }),
                     ],
@@ -1260,7 +1260,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
     // Multi seat items
     items.push([
         new ContextMenuItem({
-            name: 'Breedte',
+            name: $t('Breedte'),
             childMenu: new ContextMenu([
                 [
                     new ContextMenuItem({
@@ -1310,8 +1310,8 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
                 ],
                 [
                     new ContextMenuItem({
-                        name: 'Automatisch',
-                        description: 'Groei automatisch om de volledige rij te vullen',
+                        name: $t('Automatisch'),
+                        description: $t('Groei automatisch om de volledige rij te vullen'),
                         action: () => {
                             for (const seat of selectedSeats.value) {
                                 seat.blockWidth = 2;
@@ -1325,11 +1325,11 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
             ]),
         }),
         new ContextMenuItem({
-            name: 'Type',
+            name: $t('Type'),
             childMenu: new ContextMenu([
                 [
                     new ContextMenuItem({
-                        name: 'Zetel',
+                        name: $t('Zetel'),
                         selected: !!selectedSeats.value.find(seat => seat.type === SeatType.Seat),
                         action: () => {
                             for (const seat of selectedSeats.value) {
@@ -1340,7 +1340,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
                         },
                     }),
                     new ContextMenuItem({
-                        name: 'Gang',
+                        name: $t('Gang'),
                         selected: !!selectedSeats.value.find(seat => seat.type === SeatType.Space),
                         action: () => {
                             for (const seat of selectedSeats.value) {
@@ -1354,11 +1354,11 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
             ]),
         }),
         new ContextMenuItem({
-            name: 'Markeringen',
+            name: $t('Markeringen'),
             childMenu: new ContextMenu([
                 [
                     new ContextMenuItem({
-                        name: 'Mindervalide plaats',
+                        name: $t('Mindervalide plaats'),
                         icon: 'disabled-person',
                         selected: !!selectedSeats.value.find(seat => seat.markings.includes(SeatMarkings.DisabledPerson)),
                         action: () => {
@@ -1384,7 +1384,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
         }),
         ...((props.seatingPlan.categories.length > 1)
             ? [new ContextMenuItem({
-                    name: 'Categorie',
+                    name: $t('Categorie'),
                     childMenu: new ContextMenu([
                         props.seatingPlan.categories.map((category) => {
                             let allMatching = true;
@@ -1414,7 +1414,7 @@ function openContextMenu(event: MouseEvent | TouchEvent, seat: SeatingPlanSeat) 
                 })]
             : []),
         new ContextMenuItem({
-            name: 'Zetel verwijderen',
+            name: $t('Zetel verwijderen'),
             icon: 'trash',
             destructive: true,
             action: () => {

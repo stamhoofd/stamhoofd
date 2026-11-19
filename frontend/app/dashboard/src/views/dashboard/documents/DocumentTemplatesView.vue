@@ -125,7 +125,7 @@ defineRoute({
             if (templates.results.length === 1) {
                 template = templates.results[0];
             } else {
-                Toast.error('Document niet gevonden').show();
+                Toast.error($t('Document niet gevonden')).show();
                 throw new Error('Document not found');
             }
         }
