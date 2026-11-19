@@ -39,6 +39,18 @@ export enum JudicialRecordReviewDecision {
  */
 export const JUDICIAL_RECORD_MAX_COMMENT_LENGTH = 1000;
 
+/**
+ * The outcomes a reviewer can pick, in the order they are offered.
+ *
+ * `UnderReview` is not among them: it is the absence of a decision, so a reviewer cannot choose it.
+ */
+export const judicialRecordReviewOutcomes: readonly JudicialRecordReviewDecision[] = [
+    JudicialRecordReviewDecision.Ok,
+    JudicialRecordReviewDecision.ConditionallyAccepted,
+    JudicialRecordReviewDecision.TemporarilyRejected,
+    JudicialRecordReviewDecision.PermanentlyRejected,
+];
+
 /** Why a stored extract is no longer there. */
 export enum JudicialRecordFileRemovedReason {
     /** A reviewer decided, so the document is not needed any more. */

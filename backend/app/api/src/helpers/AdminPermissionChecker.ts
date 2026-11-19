@@ -2950,6 +2950,19 @@ export class AdminPermissionChecker {
     hasPlatformFullAccess(): boolean {
         return !!this.platformPermissions && !!this.platformPermissions.hasFullAccess();
     }
+    /**
+     * Whether this user may read a member's delivered judicial record extract and decide it.
+     *
+     * A right of its own, not an aspect of `canAccessMember`: full access to a member is held by many people
+     * who have no business reading their judicial record extract, and an approval granted here holds for every
+     * organization the member is in.
+     *
+     * Deliberately the whole gate in one place, platform full access for now, because an access right of its
+     * own is being added separately.
+     */
+    canReviewJudicialRecord(): boolean {
+        return this.hasPlatformFullAccess();
+    }
 
     getPlatformAccessibleOrganizationTags(level: PermissionLevel): string[] | 'all' {
         if (!this.hasSomePlatformAccess()) {
