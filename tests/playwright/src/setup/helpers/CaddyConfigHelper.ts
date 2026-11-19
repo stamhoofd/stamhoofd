@@ -1,7 +1,7 @@
 import { Formatter } from '@stamhoofd/utility';
 import type { FrontendProjectName } from './frontend-project-name.js';
 import type { CaddyRoute, CaddyRouteOptions } from '@stamhoofd/cli';
-import { cspFrontendSubroutes, ssoRealm } from '@stamhoofd/cli';
+import { belcotaxRealm, cspFrontendSubroutes, ssoRealm } from '@stamhoofd/cli';
 
 /**
  * Every port and domain of a worker is derived from its slot, not from its worker id: an e2e run
@@ -148,6 +148,24 @@ export class CaddyConfigHelper {
         const uris: string[] = [];
         for (let workerId = 0; workerId < workerCount; workerId += 1) {
             uris.push(`${this.getUrl('api', workerId.toString())}/openid/callback`);
+        }
+        return uris;
+    }
+
+    /**
+     * Issuer of the realm of the same server that stands in for the login of FOD Financiën
+     */
+    static getBelcotaxIssuer() {
+        return `https://${this.getSsoDomain()}/dex/realms/${belcotaxRealm}`;
+    }
+
+    /**
+     * The Belcotax client redirects to the callback of every worker
+     */
+    static getBelcotaxRedirectUris(workerCount: number) {
+        const uris: string[] = [];
+        for (let workerId = 0; workerId < workerCount; workerId += 1) {
+            uris.push(`${this.getUrl('api', workerId.toString())}/oauth/belcotax`);
         }
         return uris;
     }

@@ -42,6 +42,7 @@ export default class SsoStart extends BaseCommand {
         await CaddyService.reload(context);
         await ssoService.start(context, {
             redirectUris: [args.redirectUri],
+            belcotaxRedirectUris: [`https://${buildDomains(context).api}/oauth/belcotax`],
             background: flags.background,
         });
     }

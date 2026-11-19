@@ -1,4 +1,5 @@
 import { countDays } from '@stamhoofd/models/helpers/countDays.js';
+import { getBelcotaxCompanyNumber } from '@stamhoofd/structures/belcotax/BelcotaxConnection.js';
 import type { CountryCode } from '@stamhoofd/types/Country';
 import { Country } from '@stamhoofd/types/Country';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
@@ -404,11 +405,7 @@ export class BelcotaxJsonlService {
     }
 
     private static normalizeCompanyNumber(companyNumber: string | null): string | null {
-        let value = digits(companyNumber);
-        if (value.length === 9) {
-            value = '0' + value;
-        }
-        return /^[019]\d{9}$/.test(value) ? value : null;
+        return getBelcotaxCompanyNumber({ companyNumber });
     }
 
     private static buildContact(templateId: string, contact: BelcotaxContact): JsonLine {

@@ -67,6 +67,9 @@ export * from './RegistrationPeriod.js';
 
 export * from './UitpasClientCredential.js';
 
+export * from './BelcotaxApiLog.js';
+export * from './BelcotaxConnection.js';
+
 export * from './Invoice.js';
 export * from './InvoicedBalanceItem.js';
 export * from './RegistrationInvitation.js';

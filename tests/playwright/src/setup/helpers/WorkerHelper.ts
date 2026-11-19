@@ -159,6 +159,11 @@ class WorkerHelperInstance {
             UITPAS_API_CLIENT_SECRET: 'sk_test_test',
             UITPAS_API_CLIENT_ID: 'sk_test_test',
             UITPAS_API_URL: 'https://api-test.uitpas.be',
+            // Only used by tests that set BELCOTAX_ENVIRONMENT to local
+            BELCOTAX_ISSUER: CaddyConfigHelper.getBelcotaxIssuer(),
+            BELCOTAX_PRIVATE_KEY: process.env.PLAYWRIGHT_BELCOTAX_PRIVATE_KEY
+                ? JSON.parse(process.env.PLAYWRIGHT_BELCOTAX_PRIVATE_KEY)
+                : undefined,
         };
 
         for (const key in config) {

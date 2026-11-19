@@ -1,0 +1,440 @@
+openapi: 3.0.4
+info:
+  title: bulks-api-external OpenApi
+  version: 1.1.1
+servers:
+- url: https://server.minfin.be/external/api/bulks/v1
+security:
+- BearerAuth: []
+tags:
+- name: Bulk External
+- description: Health and monitoring endpoints
+  name: Monitoring
+paths:
+  /health:
+    get:
+      externalDocs:
+        url: https://www.belgif.be/specification/rest/api-guide/#health
+      operationId: checkHealth
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                responseUp:
+                  description: API is available
+                  value:
+                    status: UP
+                responseDegraded:
+                  description: "API is available, but with reduced functionality"
+                  value:
+                    status: DEGRADED
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+          description: The service is UP or DEGRADED
+        "503":
+          content:
+            application/json:
+              examples:
+                responseDown:
+                  value:
+                    status: DOWN
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+          description: The service is DOWN
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: a problem
+      security: []
+      summary: Check health of the service
+      tags:
+      - Monitoring
+  /bulks/submit:
+    post:
+      operationId: submitBulk
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/SubmitBulkRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionResult"
+          description: Submission was accepted
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+          description: Feedback response
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: a problem
+      tags:
+      - Bulk External
+  /bulks/{bulkId}/validations/last:
+    get:
+      operationId: getLastValidationDetails
+      parameters:
+      - explode: false
+        in: path
+        name: bulkId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Validation"
+          description: Details of a specific validation
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: a problem
+      tags:
+      - Bulk External
+  /bulks/{bulkId}/validations/last/feedback:
+    get:
+      operationId: downloadLastValidationFeedback
+      parameters:
+      - explode: false
+        in: path
+        name: bulkId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+          description: Download of feedback
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+          description: a problem
+      tags:
+      - Bulk External
+components:
+  parameters:
+    BulkId:
+      explode: false
+      in: path
+      name: bulkId
+      required: true
+      schema:
+        type: string
+      style: simple
+  responses:
+    HealthUpOrDegradedResponse:
+      content:
+        application/json:
+          examples:
+            responseUp:
+              description: API is available
+              value:
+                status: UP
+            responseDegraded:
+              description: "API is available, but with reduced functionality"
+              value:
+                status: DEGRADED
+          schema:
+            $ref: "#/components/schemas/HealthStatus"
+      description: The service is UP or DEGRADED
+    HealthDownResponse:
+      content:
+        application/json:
+          examples:
+            responseDown:
+              value:
+                status: DOWN
+          schema:
+            $ref: "#/components/schemas/HealthStatus"
+      description: The service is DOWN
+    ProblemResponse:
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+      description: a problem
+    SubmissionResult:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SubmissionResult"
+      description: Submission was accepted
+    Validation:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Validation"
+      description: Details of a specific validation
+  schemas:
+    HealthStatus:
+      description: Response message for the API health
+      example:
+        status: status
+      properties:
+        status:
+          description: "Level indicating the health status of the service: UP (functioning\
+            \ as expected), DOWN (suffering unexpected failures), DEGRADED (partly\
+            \ unavailable but service can be continued with reduced functionality),\
+            \ or a custom status value"
+          type: string
+      required:
+      - status
+      type: object
+    Problem:
+      description: "A Problem Details object (RFC 9457).\n\nAdditional properties\
+        \ specific to the problem type may be present.    \n"
+      example:
+        type: urn:problem-type:exampleOrganization:exampleProblem
+        href: https://www.belgif.be/specification/rest/api-guide/#standardized-problem-types
+        title: Description of the type of problem that occurred
+        status: 400
+        detail: Description of specific occurrence of the problem
+        instance: urn:uuid:123e4567-e89b-12d3-a456-426614174000
+      properties:
+        type:
+          default: about:blank
+          description: An absolute URI that identifies the problem type
+          format: uri
+          type: string
+        href:
+          description: "An absolute URI that, when dereferenced, provides human-readable\
+            \ documentation for the problem type (e.g. using HTML)."
+          format: uri
+          type: string
+        title:
+          description: A short summary of the problem type. Written in English and
+            readable for engineers (usually not suited for non technical stakeholders
+            and not localized).
+          example: Service Unavailable
+          type: string
+        status:
+          description: The HTTP status code generated by the origin server for this
+            occurrence of the problem.
+          example: 503
+          exclusiveMaximum: true
+          format: int32
+          maximum: 600
+          minimum: 400
+          type: integer
+        detail:
+          description: A human-readable explanation specific to this occurrence of
+            the problem
+          type: string
+        instance:
+          description: An absolute URI that identifies the specific occurrence of
+            the problem. It may or may not yield further information if dereferenced.
+          format: uri
+          type: string
+      type: object
+    SubmitBulkRequest:
+      description: Multipart form data used to submit a bulk
+      properties:
+        content:
+          description: Bulk file content
+          format: binary
+          type: string
+      required:
+      - content
+      type: object
+    SubmissionResult:
+      description: Represents the result of a submission
+      example:
+        count: 123
+        id: "123"
+      properties:
+        id:
+          description: The identifier for the submission result
+          example: "123"
+          type: string
+        count:
+          description: The count associated with this submission
+          example: 123
+          type: integer
+      type: object
+    Feedback:
+      allOf:
+      - $ref: "#/components/schemas/InputValidationProblem"
+      - properties:
+          issues:
+            items:
+              $ref: "#/components/schemas/FeedbackIssue"
+            type: array
+        type: object
+      example:
+        type: urn:problem-type:belcotax:feedback
+        title: Bulk feedback
+        status: 400
+        detail: Errors occurred while validating the submission
+        issues:
+        - type: urn:problem-type:belcotax:issue:exception:readOnlyProperty
+          title: Property is read-only
+          detail: Property 1234 is read-only and cannot be modified
+          line: 5
+          key: F123
+    InputValidationProblem:
+      allOf:
+      - $ref: "#/components/schemas/Problem"
+      example:
+        type: urn:problem-type:belgif:badRequest
+        href: https://www.belgif.be/specification/rest/api-guide/problems/badRequest.html
+        title: Bad Request
+        status: 400
+        detail: The input message is incorrect
+        instance: urn:uuid:123456-1234-1235-4567489798
+        issues:
+        - type: urn:problem-type:belgif:input-validation:schemaViolation
+          detail: exampleNumericProperty with value xyz should be numeric
+          in: path
+          name: exampleNumericProperty
+          value: abc
+        - type: urn:problem-type:belgif:input-validation:schemaViolation
+          title: Input isn't valid with respect to schema
+          detail: "examplePropertyWithPattern a2345678901 doesn't match pattern '^\\\
+            d{11}$'"
+          in: body
+          name: "items[0].examplePropertyWithPattern"
+          value: a2345678901
+      properties:
+        issues:
+          items:
+            $ref: "#/components/schemas/InputValidationIssue"
+          type: array
+      type: object
+    InputValidationIssue:
+      allOf:
+      - $ref: "#/components/schemas/Problem"
+      description: |
+        An issue detected during input validation.
+
+        `status` is usually not present.
+        `href`, if present, refers to documentation of the issue type.
+        Additional properties specific to the issue type may be present.
+      properties:
+        in:
+          description: The location of the invalid input
+          enum:
+          - body
+          - header
+          - path
+          - query
+          type: string
+        name:
+          description: The name of the invalid input
+          type: string
+        value:
+          description: The value of the erroneous input
+      type: object
+    FeedbackIssue:
+      allOf:
+      - $ref: "#/components/schemas/InputValidationIssue"
+      - additionalProperties: true
+        properties:
+          line:
+            description: Line number where the validation issue occurred
+            example: 5
+            format: int32
+            type: integer
+          column:
+            description: Column number where the validation issue occurred
+            example: 10
+            format: int32
+            type: integer
+          key:
+            description: Key associated with the validation issue
+            example: F123
+            type: string
+        type: object
+      example:
+        type: urn:problem-type:belcotax:issue:exception:readOnlyProperty
+        title: Property is read-only
+        detail: Property 1234 is read-only and cannot be modified
+        line: 5
+        key: F123
+    Validation:
+      allOf:
+      - $ref: "#/components/schemas/Links"
+      description: Schema representing a validation request or response
+      example:
+        requestDateTime: 2023-10-10T10:00:00Z
+        id: "123"
+        status: accepted
+      properties:
+        id:
+          description: Validation ID
+          example: "123"
+          type: string
+        requestDateTime:
+          description: The timestamp for when the validation request was made
+          example: 2023-10-10T10:00:00Z
+          format: date-time
+          type: string
+        status:
+          $ref: "#/components/schemas/ValidationStatus"
+      required:
+      - id
+      - requestDateTime
+      - status
+      type: object
+    Links:
+      properties:
+        links:
+          items:
+            $ref: "#/components/schemas/Link"
+          type: array
+      type: object
+    Link:
+      description: Link (action) available for a resource
+      properties:
+        rel:
+          description: Relation between the resource and the link. Use standard IANA
+            link relations where possible.
+          example: self
+          type: string
+        href:
+          example: "http://localhost:8080/bulks/v1/bulks/{id}/download"
+          format: uri
+          type: string
+        disabled:
+          description: Indicates whether this action is currently disabled. When omitted
+            the action is considered enabled.
+          type: boolean
+      required:
+      - href
+      - rel
+      type: object
+    ValidationStatus:
+      description: Status of the validation
+      enum:
+      - accepted
+      - rejected
+      - inProgress
+      example: accepted
+      type: string
+  securitySchemes:
+    BearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http

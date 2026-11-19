@@ -25,6 +25,7 @@ import { HumanErrorMessageMiddleware } from './middleware/HumanErrorMessageMiddl
 import { TenantScopeMiddleware } from './middleware/TenantScopeMiddleware.js';
 import { AuditLogService } from './services/AuditLogService.js';
 import { BalanceItemService } from './services/BalanceItemService.js';
+import { BelcotaxConfig } from './services/belcotax/connection/BelcotaxConfig.js';
 import { BootChecksService } from './services/BootChecksService.js';
 import { DocumentService } from './services/DocumentService.js';
 import { FileSignService } from './services/FileSignService.js';
@@ -141,6 +142,11 @@ export const boot = async (options: { killProcess: boolean; lifecycle?: Applicat
     await router.loadAllEndpoints(import.meta.dirname + '/endpoints/organization/shared');
     await router.loadAllEndpoints(import.meta.dirname + '/endpoints/organization/shared/*');
     await router.loadAllEndpoints(import.meta.dirname + '/endpoints/system');
+
+    if (BelcotaxConfig.servesMockApi) {
+        // Stand-in for the Belcotax API next to the local Keycloak realm, never in production
+        await router.loadAllEndpoints(import.meta.dirname + '/endpoints/development/belcotax');
+    }
 
     router.endpoints.push(new CORSPreflightEndpoint());
 

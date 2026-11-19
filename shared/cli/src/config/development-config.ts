@@ -10,6 +10,7 @@ import path from 'node:path';
 import type { CliContext } from '../context/create-context.js';
 import { createContext } from '../context/create-context.js';
 import { buildPorts } from '../context/ports.js';
+import { belcotaxRealm, readOrCreateBelcotaxClientKey } from '../services/sso-config.js';
 import { applyInternalSecrets } from './internal-secrets.js';
 import {
     defaultDomain,
@@ -137,7 +138,15 @@ export async function buildDevelopmentEnvironment(
     service: AppService,
 ): Promise<AppEnvironment> {
     const context = await createContext({ env, verbose: false });
-    const appEnv = buildDevelopmentConfig(context, service).appEnv;
+    let appEnv = buildDevelopmentConfig(context, service).appEnv;
+    if ('backend' in service && service.backend === BackendApp.Api) {
+        // Generated once per instance: the same key is in the Keycloak realm
+        appEnv = {
+            ...appEnv,
+            BELCOTAX_PRIVATE_KEY: (await readOrCreateBelcotaxClientKey(context))
+                .privateJwk as BackendEnvironment['BELCOTAX_PRIVATE_KEY'],
+        } as BackendEnvironment;
+    }
     return await applyInternalSecrets(context, service, appEnv);
 }
 
@@ -249,6 +258,9 @@ function buildAppEnvironment(
         FILE_SIGNING_PUBLIC_KEY: fileSigningPublicKey,
         FILE_SIGNING_PRIVATE_KEY: fileSigningPrivateKey,
         FILE_SIGNING_ALG: 'ES256',
+        // The Keycloak realm of `stam sso start` stands in for FOD; the key is added below
+        BELCOTAX_ENVIRONMENT: 'local',
+        BELCOTAX_ISSUER: `https://${domains.sso}/dex/realms/${belcotaxRealm}`,
         CRONS_DISABLED: false,
         WHITELISTED_EMAIL_DESTINATIONS: ['*'],
         CACHE_PATH: path.join(context.rootDir, 'backend/app', service.backend, '.cache'),

@@ -130,6 +130,18 @@
                 </p>
             </STListItem>
 
+            <STListItem v-if="isStamhoofd" :selectable="true" element-name="label" data-testid="belcotax-api-feature-checkbox">
+                <template #left>
+                    <Checkbox :model-value="getFeatureFlag('belcotax-api')" @update:model-value="setFeatureFlag('belcotax-api', !!$event)" />
+                </template>
+                <h3 class="style-title-list">
+                    {{ $t('Belcotax API') }}
+                </h3>
+                <p class="style-description-small">
+                    {{ $t('Fiscale attesten rechtstreeks doorsturen naar de FOD Financiën (in test)') }}
+                </p>
+            </STListItem>
+
             <STListItem :selectable="true" element-name="label" data-testid="mailchimp-feature-checkbox">
                 <template #left>
                     <Checkbox :model-value="getFeatureFlag('mailchimp')" @update:model-value="setFeatureFlag('mailchimp', !!$event)" />
