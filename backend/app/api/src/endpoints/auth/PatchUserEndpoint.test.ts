@@ -21,12 +21,13 @@ describe('Endpoint.PatchUser', () => {
 
     /**
      * A user with both a password and an SSO link needs recent authentication to
-     * replace the password or remove either login method. The access token is
-     * newly issued, but its authentication timestamp is an hour old: freshness
-     * depends on proving identity, not on when the token was issued.
+     * replace the password, remove either login method or move the account to
+     * another email address. The access token is newly issued, but its
+     * authentication timestamp is an hour old: freshness depends on proving
+     * identity, not on when the token was issued.
      * Each patch must return the reauthentication signal `require_fresh_auth`.
      */
-    test.each(['password', 'remove-password', 'remove-provider'])(
+    test.each(['password', 'remove-password', 'remove-provider', 'email'])(
         'an old session cannot change login credentials: %s',
         async (action) => {
             const organization = await new OrganizationFactory({}).create();
@@ -43,6 +44,8 @@ describe('Endpoint.PatchUser', () => {
                 body.password = 'replacement-password-1234';
             } else if (action === 'remove-password') {
                 body.hasPassword = false;
+            } else if (action === 'email') {
+                body.email = 'replacement@example.com';
             } else {
                 const meta = UserMeta.patch({});
                 meta.loginProviderIds.set(LoginProviderType.SSO, null);

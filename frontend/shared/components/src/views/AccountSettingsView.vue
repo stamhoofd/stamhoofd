@@ -343,7 +343,9 @@ async function save() {
     saving.value = true;
 
     try {
-        const result = await LoginHelper.patchUser($context.value, patch.value);
+        // Changing the email address requires recent authentication: complete it and
+        // retry the patch once. Cancellation or failure reaches the error box.
+        const result = await runFresh(() => LoginHelper.patchUser($context.value, patch.value));
 
         if (result.verificationEmailSent) {
             new CenteredMessage(
