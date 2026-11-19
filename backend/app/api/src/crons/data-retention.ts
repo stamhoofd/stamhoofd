@@ -4,6 +4,8 @@
  */
 
 import { DataRetentionRun, Platform } from '@stamhoofd/models';
+import { Formatter } from '@stamhoofd/utility';
+import { DateTime } from 'luxon';
 
 import { TenantContext } from '../helpers/TenantContext.js';
 import { DataRetentionCounter } from '../services/data-retention/DataRetentionCounter.js';
@@ -15,16 +17,22 @@ import { registerTenantCron } from './helpers/registerTenantCron.js';
  */
 const MAX_DURATION = 20 * 1000;
 
-registerTenantCron('data-retention', runDataRetention);
+registerTenantCron('data-retention', () => runDataRetention());
 
 function isInWindow(now: Date) {
-    // Between 1 and 6 AM - except in development
-    const hour = now.getHours();
+    // Between 1 and 6 AM in Belgian time - except in development
+    const hour = DateTime.fromJSDate(now, { zone: Formatter.timezone }).hour;
     return STAMHOOFD.environment === 'development' || (hour >= 1 && hour < 6);
 }
 
-export async function runDataRetention() {
-    const now = new Date();
+function isSameDay(a: Date, b: Date) {
+    return DateTime.fromJSDate(a, { zone: Formatter.timezone }).hasSame(
+        DateTime.fromJSDate(b, { zone: Formatter.timezone }),
+        'day',
+    );
+}
+
+export async function runDataRetention(now = new Date()) {
     if (!isInWindow(now)) {
         return;
     }
@@ -35,9 +43,9 @@ export async function runDataRetention() {
     }
 
     const run = await DataRetentionRun.getOrCreate(TenantContext.currentOrRoot.tenantId);
-    if (!run.phase && run.finishedAt && run.finishedAt.toDateString() === now.toDateString()) {
+    if (!run.phase && run.finishedAt && isSameDay(run.finishedAt, now)) {
         return;
     }
 
-    await DataRetentionCounter.continueRun(run, new Date(now.getTime() + MAX_DURATION));
+    await DataRetentionCounter.continueRun(run, { deadline: new Date(Date.now() + MAX_DURATION) });
 }

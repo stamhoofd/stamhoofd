@@ -5,6 +5,7 @@ import {
     DataRetentionHoldReason,
     resolveDataRetentionTerms,
 } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
 
 export type MemberRetentionFacts = {
@@ -329,8 +330,9 @@ function getMemberHolds(
 }
 
 /**
+ * In Belgian time, so a date at midnight stays on the same day of the month.
  * Clamps to the end of the month: 31 August plus 6 months is 28 February, not 3 March.
  */
 function addMonths(date: Date, months: number): Date {
-    return DateTime.fromJSDate(date, { zone: 'utc' }).plus({ months }).toJSDate();
+    return DateTime.fromJSDate(date, { zone: Formatter.timezone }).plus({ months }).toJSDate();
 }

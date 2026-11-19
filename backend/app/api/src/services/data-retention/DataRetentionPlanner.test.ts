@@ -213,7 +213,7 @@ describe('DataRetentionPlanner', () => {
 
         test('Sensitive data follows its own term', () => {
             const decisions = planMember(
-                member({ registrations: [registration('A', '2025-08-31')] }),
+                member({ registrations: [registration('A', '2025-08-31T23:59:59+02:00')] }),
                 index({
                     platform: {
                         [DataRetentionCategory.SensitiveData]: { deleteAfterMonths: 6 },
@@ -223,11 +223,12 @@ describe('DataRetentionPlanner', () => {
                 now,
             );
 
+            // Clamped to the end of February, at the same time of day in Belgium (winter time)
             expect(decision(decisions, DataRetentionAction.RemoveSensitiveData)?.dueAt).toEqual(
-                new Date('2026-02-28'),
+                new Date('2026-02-28T23:59:59+01:00'),
             );
             expect(decision(decisions, DataRetentionAction.Anonymize)?.dueAt).toEqual(
-                new Date('2030-08-31'),
+                new Date('2030-08-31T23:59:59+02:00'),
             );
         });
 

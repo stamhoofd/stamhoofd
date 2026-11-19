@@ -358,7 +358,7 @@ export class DataRetentionCount extends AutoEncoder {
     heldBy = new Map<DataRetentionHoldReason, number>();
 
     /**
-     * Per month (yyyy-mm) in which the term passes, for the next 12 months. Later terms are counted under 'later'.
+     * Per month (yyyy-mm, Belgian time) in which the term passes, for the current month and the 12 months after it. Later terms are counted under 'later'.
      */
     @field({ decoder: new MapDecoder(StringDecoder, NumberDecoder) })
     upcoming = new Map<string, number>();

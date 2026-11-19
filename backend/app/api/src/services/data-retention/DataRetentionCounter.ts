@@ -7,7 +7,10 @@ import {
     DataRetentionOverview,
 } from '@stamhoofd/structures';
 
-import type { DataRetentionDecision } from './DataRetentionPlanner.js';
+import { Formatter } from '@stamhoofd/utility';
+import { DateTime } from 'luxon';
+
+import type { DataRetentionDecision, MemberRetentionFacts } from './DataRetentionPlanner.js';
 import { planMember, planOrder } from './DataRetentionPlanner.js';
 import { DataRetentionFactsLoader } from './DataRetentionFactsLoader.js';
 
@@ -20,9 +23,16 @@ const PLATFORM_SCOPE = 'platform';
  */
 export class DataRetentionCounter {
     /**
-     * Continues the run where it stopped, until the deadline. Returns true when the run is complete.
+     * Continues the run where it stopped, until the deadline or after processing maxBatches batches. Returns true when the run is complete.
      */
-    static async continueRun(run: DataRetentionRun, deadline: Date): Promise<boolean> {
+    static async continueRun(
+        run: DataRetentionRun,
+        {
+            deadline,
+            batchSize = BATCH_SIZE,
+            maxBatches = Infinity,
+        }: { deadline: Date; batchSize?: number; maxBatches?: number },
+    ): Promise<boolean> {
         if (!run.phase) {
             run.phase = DataRetentionRunPhase.Members;
             run.cursor = null;
@@ -32,11 +42,12 @@ export class DataRetentionCounter {
 
         const loader = await DataRetentionFactsLoader.create(run.tenantId);
 
-        while (Date.now() < deadline.getTime()) {
+        let batches = 0;
+        while (Date.now() < deadline.getTime() && batches < maxBatches) {
             const now = new Date();
 
             if (run.phase === DataRetentionRunPhase.Members) {
-                const batch = await loader.loadMemberBatch(run.cursor, BATCH_SIZE, now);
+                const batch = await loader.loadMemberBatch(run.cursor, batchSize, now);
                 if (!batch) {
                     run.phase = DataRetentionRunPhase.Orders;
                     run.cursor = null;
@@ -44,13 +55,7 @@ export class DataRetentionCounter {
                 }
 
                 for (const memberFacts of batch.facts) {
-                    // A member counts for every organization it was registered at, or for its own organization when it never registered
-                    const scopes = getScopes([
-                        ...memberFacts.registrations.map((r) => r.organizationId),
-                        ...(memberFacts.registrations.length === 0
-                            ? [memberFacts.organizationId]
-                            : []),
-                    ]);
+                    const scopes = getScopes(getMemberOrganizationIds(memberFacts));
                     for (const decision of planMember(memberFacts, loader.index, now)) {
                         count(
                             run,
@@ -64,10 +69,11 @@ export class DataRetentionCounter {
                     }
                 }
                 run.cursor = batch.lastId;
+                batches += 1;
                 continue;
             }
 
-            const batch = await loader.loadOrderBatch(run.cursor, BATCH_SIZE);
+            const batch = await loader.loadOrderBatch(run.cursor, batchSize);
             if (!batch) {
                 await this.finish(run);
                 return true;
@@ -86,6 +92,7 @@ export class DataRetentionCounter {
                 }
             }
             run.cursor = batch.lastId;
+            batches += 1;
         }
 
         await run.save();
@@ -108,6 +115,18 @@ export class DataRetentionCounter {
         run.finishedAt = calculatedAt;
         await run.save();
     }
+}
+
+/**
+ * The organizations whose terms decide over this member, the same ones as the planner uses:
+ * every organization it was registered at. Without registrations, a member only follows its own organization
+ * in userMode organization, and only the platform otherwise.
+ */
+function getMemberOrganizationIds(facts: MemberRetentionFacts): (string | null)[] {
+    if (facts.registrations.length > 0) {
+        return facts.registrations.map((r) => r.organizationId);
+    }
+    return STAMHOOFD.userMode === 'platform' ? [] : [facts.organizationId];
 }
 
 /**
@@ -168,11 +187,15 @@ function count(
 }
 
 /**
- * The key in DataRetentionCount.upcoming: the month of the due date as yyyy-mm (UTC),
- * or 'later' when it is 12 months or more away.
+ * The key in DataRetentionCount.upcoming: the month of the due date as yyyy-mm in Belgian time,
+ * or 'later' after the current month and the 12 months after it.
  */
 function getUpcomingMonth(dueAt: Date, now: Date): string {
-    const limit = new Date(now);
-    limit.setMonth(limit.getMonth() + 12);
-    return dueAt < limit ? dueAt.toISOString().slice(0, 7) : 'later';
+    const limit = DateTime.fromJSDate(now, { zone: Formatter.timezone })
+        .startOf('month')
+        .plus({ months: 13 });
+    if (dueAt >= limit.toJSDate()) {
+        return 'later';
+    }
+    return DateTime.fromJSDate(dueAt, { zone: Formatter.timezone }).toFormat('yyyy-MM');
 }

@@ -24,6 +24,9 @@ import { DataRetentionPolicyIndex } from './DataRetentionPlanner.js';
  * Only the columns the planner uses are selected, so large JSON columns (member details, group settings...) are not decoded.
  *
  * Create one per call: it keeps the end dates of groups between batches.
+ *
+ * Only the policies are filtered on the tenant. Organizations, periods, members and orders are not, which is only
+ * correct while registerTenantCron does not fan out over tenants (see the warning there).
  */
 export class DataRetentionFactsLoader {
     private readonly groupEndDates = new Map<string, Date | null>();
@@ -184,23 +187,14 @@ export class DataRetentionFactsLoader {
             facts.get(record.memberId)!.hasActiveResponsibility = true;
         }
 
-        const links = await SQL.select(SQL.column('membersId'), SQL.column('usersId'))
-            .from('_members_users')
-            .where('membersId', memberIds)
+        // Only the member's own account: parents' accounts are linked to the member as well
+        const users = await User.select('id', 'memberId', 'permissions')
+            .where('memberId', memberIds)
+            .where('permissions', '!=', null)
             .fetch();
-        const userIds = [...new Set(links.map((l) => l._members_users.usersId as string))];
-        const users =
-            userIds.length === 0
-                ? new Map<string, User>()
-                : new Map(
-                      (await User.select('id', 'permissions').where('id', userIds).fetch()).map(
-                          (u) => [u.id, u],
-                      ),
-                  );
-        for (const link of links) {
-            const permissions = users.get(link._members_users.usersId as string)?.permissions;
-            if (permissions && !permissions.isEmpty) {
-                facts.get(link._members_users.membersId as string)!.hasAdminAccount = true;
+        for (const user of users) {
+            if (user.memberId && user.permissions && !user.permissions.isEmpty) {
+                facts.get(user.memberId)!.hasAdminAccount = true;
             }
         }
 

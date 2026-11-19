@@ -11,6 +11,8 @@ import { TenantContext } from '../../helpers/TenantContext.js';
  * `lastFullRun`, a saved iterator) to run once a day or to resume a cursor. Called once per tenant in
  * a loop, the first tenant would set that state and every other tenant would be skipped for the rest
  * of the day — or worse, share the cursor.
+ * Some crons also query organizations, members or orders without filtering on the tenant (e.g. DataRetentionFactsLoader):
+ * those queries have to be filtered first, or each tenant would process the data of every other tenant.
  */
 export function withAllTenantsScope(method: () => Promise<void>): () => Promise<void> {
     return async () => {
