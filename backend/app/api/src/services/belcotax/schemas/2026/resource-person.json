@@ -1,0 +1,203 @@
+{
+  "$defs": {
+    "address": {
+      "additionalProperties": false,
+      "properties": {
+        "b": {
+          "examples": [
+            "5"
+          ],
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Bus",
+          "type": "string"
+        },
+        "n": {
+          "examples": [
+            "15"
+          ],
+          "maxLength": 20,
+          "minLength": 1,
+          "title": "Nummer",
+          "type": "string"
+        },
+        "s": {
+          "examples": [
+            "Hoofdstraat"
+          ],
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Straat",
+          "type": "string"
+        },
+        "c": {
+          "examples": [
+            "Brussel"
+          ],
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Stad",
+          "type": "string"
+        },
+        "p": {
+          "examples": [
+            "1000"
+          ],
+          "maxLength": 50,
+          "minLength": 1,
+          "title": "Postcode",
+          "type": "string"
+        },
+        "l": {
+          "description": "NIS-code, zie https://www.socialsecurity.be",
+          "examples": [
+            "150"
+          ],
+          "pattern": "^[0-9]{3}$",
+          "title": "Land",
+          "type": "string"
+        }
+      },
+      "required": [
+        "l"
+      ],
+      "title": "Adres",
+      "type": "object"
+    }
+  },
+  "$id": "urn:r:d:p:1:nl",
+  "$schema": "https://belcotax.be/resources/schema/1",
+  "additionalProperties": false,
+  "properties": {
+    "$s": {
+      "oneOf": [
+        {
+          "const": "urn:r:d:p:1"
+        },
+        {
+          "const": "urn:r:d:p:1:fr"
+        },
+        {
+          "const": "urn:r:d:p:1:nl"
+        },
+        {
+          "const": "urn:r:d:p:1:de"
+        }
+      ],
+      "title": "Schema",
+      "type": "string"
+    },
+    "integrityHash": {
+      "description": "Integrity hash",
+      "title": "Integrity hash",
+      "type": "string"
+    },
+    "k": {
+      "description": "Sleutel gebruikt om naar deze bron te verwijzen",
+      "examples": [
+        "PERS-12345"
+      ],
+      "maxLength": 255,
+      "minLength": 1,
+      "title": "Sleutel",
+      "type": "string"
+    },
+    "i": {
+      "additionalProperties": false,
+      "description": "Identificatiesleutels van de persoon",
+      "minProperties": 1,
+      "properties": {
+        "ssin": {
+          "examples": [
+            "80010100107"
+          ],
+          "mask": "00.00.00-000.00",
+          "pattern": "^[0-9]{2}(0[0-9]|1[0-2]|2[0-9]|3[0-2]|4[0-9]|5[0-2])([0-2][0-9]|3[01])[0-9]{3}([0-8][0-9]|[9][0-7])$",
+          "title": "Rijksregisternummer",
+          "type": "string"
+        },
+        "cbein": {
+          "examples": [
+            "0123456789"
+          ],
+          "mask": "0000.000.000",
+          "pattern": "^[0-1][0-9]{9}$",
+          "title": "Ondernemingsnummer",
+          "type": "string"
+        },
+        "tin": {
+          "examples": [
+            "BE0123456789"
+          ],
+          "pattern": "^[a-zA-Z0-9]*$",
+          "title": "Fiscaal identificatienummer",
+          "type": "string"
+        }
+      },
+      "title": "Identificaties",
+      "type": "object"
+    },
+    "fn": {
+      "examples": [
+        [
+          "John",
+          "David"
+        ]
+      ],
+      "items": {
+        "maxLength": 50,
+        "minLength": 1,
+        "title": "Voornaam",
+        "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "title": "Voornamen",
+      "type": "array"
+    },
+    "ln": {
+      "examples": [
+        [
+          "Doe",
+          "Smith"
+        ]
+      ],
+      "items": {
+        "maxLength": 50,
+        "minLength": 1,
+        "title": "Achternaam",
+        "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "title": "Achternamen",
+      "type": "array"
+    },
+    "bd": {
+      "examples": [
+        "1980-01-31"
+      ],
+      "format": "date",
+      "title": "Geboortedatum",
+      "type": "string"
+    },
+    "bp": {
+      "examples": [
+        "Brussel, België"
+      ],
+      "maxLength": 255,
+      "minLength": 1,
+      "title": "Geboorteplaats",
+      "type": "string"
+    },
+    "a": {
+      "$ref": "#/$defs/address"
+    }
+  },
+  "required": [
+    "$s",
+    "k"
+  ],
+  "title": "Persoon",
+  "type": "object"
+}

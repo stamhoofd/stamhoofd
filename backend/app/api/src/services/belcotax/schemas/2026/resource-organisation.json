@@ -1,0 +1,211 @@
+{
+  "$defs": {
+    "address": {
+      "additionalProperties": false,
+      "properties": {
+        "b": {
+          "examples": [
+            "5"
+          ],
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Bus",
+          "type": "string"
+        },
+        "n": {
+          "examples": [
+            "15"
+          ],
+          "maxLength": 20,
+          "minLength": 1,
+          "title": "Nummer",
+          "type": "string"
+        },
+        "s": {
+          "examples": [
+            "Hoofdstraat"
+          ],
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Straat",
+          "type": "string"
+        },
+        "c": {
+          "examples": [
+            "Brussel"
+          ],
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Stad",
+          "type": "string"
+        },
+        "p": {
+          "examples": [
+            "1000"
+          ],
+          "maxLength": 50,
+          "minLength": 1,
+          "title": "Postcode",
+          "type": "string"
+        },
+        "l": {
+          "description": "NIS-code, zie https://www.socialsecurity.be",
+          "examples": [
+            "150"
+          ],
+          "pattern": "^[0-9]{3}$",
+          "title": "Land",
+          "type": "string"
+        }
+      },
+      "required": [
+        "l"
+      ],
+      "title": "Adres",
+      "type": "object"
+    }
+  },
+  "$id": "urn:r:d:o:1:nl",
+  "$schema": "https://belcotax.be/resources/schema/1",
+  "additionalProperties": false,
+  "properties": {
+    "$s": {
+      "oneOf": [
+        {
+          "const": "urn:r:d:o:1"
+        },
+        {
+          "const": "urn:r:d:o:1:fr"
+        },
+        {
+          "const": "urn:r:d:o:1:nl"
+        },
+        {
+          "const": "urn:r:d:o:1:de"
+        }
+      ],
+      "title": "Schema",
+      "type": "string"
+    },
+    "integrityHash": {
+      "description": "Integrity hash",
+      "title": "Integrity hash",
+      "type": "string"
+    },
+    "k": {
+      "description": "Sleutel gebruikt om naar deze bron te verwijzen",
+      "examples": [
+        "ORGA-12345"
+      ],
+      "maxLength": 255,
+      "minLength": 1,
+      "title": "Sleutel",
+      "type": "string"
+    },
+    "i": {
+      "additionalProperties": false,
+      "description": "Identificatiesleutels van de organisatie",
+      "minProperties": 1,
+      "properties": {
+        "cbein": {
+          "examples": [
+            "0123456789"
+          ],
+          "mask": "0000.000.000",
+          "pattern": "^[019][0-9]{9}$",
+          "title": "Ondernemingsnummer van de Kruispuntbank van Ondernemingen",
+          "type": "string"
+        },
+        "tin": {
+          "examples": [
+            "BE0123456789"
+          ],
+          "pattern": "^[a-zA-Z0-9]*$",
+          "title": "Fiscaal identificatienummer",
+          "type": "string"
+        },
+        "vat": {
+          "examples": [
+            "BE0123456789"
+          ],
+          "maxLength": 25,
+          "pattern": "^[A-Z]{2}[A-Z0-9]+$",
+          "title": "BTW-nummer",
+          "type": "string"
+        },
+        "fain": {
+          "maxLength": 25,
+          "title": "Fiscale verenigingsidentificatienummer",
+          "type": "string"
+        },
+        "vcode": {
+          "examples": [
+            "V1234567"
+          ],
+          "pattern": "^V[0-9]{7}$",
+          "title": "Verenigingsnummer",
+          "type": "string"
+        }
+      },
+      "title": "Identificaties",
+      "type": "object"
+    },
+    "n": {
+      "additionalProperties": false,
+      "description": "De namen van de organisatie in verschillende talen",
+      "minProperties": 1,
+      "properties": {
+        "fr": {
+          "examples": [
+            "Nom d'exemple d'organisation"
+          ],
+          "maxLength": 255,
+          "minLength": 1,
+          "title": "Frans",
+          "type": "string"
+        },
+        "nl": {
+          "examples": [
+            "Voorbeeld Organisatie Naam"
+          ],
+          "maxLength": 255,
+          "minLength": 1,
+          "title": "Nederlands",
+          "type": "string"
+        },
+        "de": {
+          "examples": [
+            "Beispiel Organisation Name"
+          ],
+          "maxLength": 255,
+          "minLength": 1,
+          "title": "Duits",
+          "type": "string"
+        }
+      },
+      "title": "Namen",
+      "type": "object"
+    },
+    "f": {
+      "description": "Juridische vorm Engelse afkorting, zie https://economie.fgov.be/en",
+      "examples": [
+        "PLC",
+        "PLIMCO",
+        "OTHER"
+      ],
+      "pattern": "^[A-Z]{1,15}$",
+      "title": "Rechtsvorm",
+      "type": "string"
+    },
+    "a": {
+      "$ref": "#/$defs/address"
+    }
+  },
+  "required": [
+    "$s",
+    "k",
+    "n"
+  ],
+  "title": "Organisatie",
+  "type": "object"
+}
