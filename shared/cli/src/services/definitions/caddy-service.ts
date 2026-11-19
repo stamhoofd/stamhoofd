@@ -230,6 +230,10 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
                 localhostPortMapping(profile.caddyHttpHostPort, profile.caddyHttpListenPort),
                 '-p',
                 localhostPortMapping(profile.caddyHttpsHostPort, profile.caddyHttpsListenPort),
+                // Caddy advertises HTTP/3 over Alt-Svc. Without the UDP port, a browser that takes
+                // the offer retries QUIC against a closed port until it fails the navigation.
+                '-p',
+                `${localhostPortMapping(profile.caddyHttpsHostPort, profile.caddyHttpsListenPort)}/udp`,
                 '-p',
                 localhostPortMapping(caddyAdminPort, caddyAdminPort),
                 '-v',
