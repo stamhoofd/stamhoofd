@@ -4,6 +4,7 @@
         :filter-builders="filterBuilders"
         :title="title"
         :column-configuration-id="configurationId"
+        :default-filter="defaultFilter"
         :actions="actions"
         :all-columns="allColumns"
         :prefix-column="allColumns[0]"
@@ -25,13 +26,14 @@ import { Column } from '@stamhoofd/components/tables/classes/Column.ts';
 import { useTableObjectFetcher } from '@stamhoofd/components/tables/classes/TableObjectFetcher.ts';
 import ModernTableView from '@stamhoofd/components/tables/ModernTableView.vue';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
-import type { Document, DocumentTemplatePrivate, RecordWarning } from '@stamhoofd/structures';
+import type { Document, DocumentTemplatePrivate, RecordWarning, StamhoofdFilter } from '@stamhoofd/structures';
 import { DocumentStatus, DocumentStatusHelper, RecordWarningType, SortItemDirection } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 import { useDocumentsObjectFetcher } from '@stamhoofd/components/fetchers/useDocumentsObjectFetcher.ts';
 import { computed } from 'vue';
 import { DocumentActionBuilder } from './DocumentActionBuilder';
+import { getBelcotaxKey, hasDocumentNumbers } from './hasDocumentNumbers';
 
 const props = defineProps<{
     template: DocumentTemplatePrivate;
@@ -50,35 +52,44 @@ const tableObjectFetcher = useTableObjectFetcher<Document>(objectFetcher);
 
 const filterBuilders: UIFilterBuilders = getDocumentsUIFilterBuilders();
 
+// A removed document is kept for its deletion in Belcotax, it is no longer a document of the organization
+const defaultFilter: StamhoofdFilter = {
+    status: {
+        $in: Object.values(DocumentStatus).filter(status => status !== DocumentStatus.Deleted),
+    },
+};
+
+const numberColumn = new Column<Document, number | null>({
+    id: 'number',
+    name: $t('%cH'),
+    getValue: v => v.number,
+    compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
+    format: n => n ? n.toString() : $t('%1SV'),
+    getStyle: (status) => {
+        if (status === null) {
+            return 'gray';
+        }
+        return '';
+    },
+    minimumWidth: 100,
+    recommendedWidth: 200,
+    grow: false,
+    enabled: false,
+});
+
 const allColumns: Column<Document, any>[] = [
     new Column<Document, string>({
         id: 'id',
         enabled: false,
-        name: $t('%Kq'),
-        getValue: v => v.id,
+        name: hasDocumentNumbers(props.template) ? $t('%Kq') : $t('Sleutel voor Belcotax'),
+        getValue: v => hasDocumentNumbers(props.template) ? v.id : getBelcotaxKey(props.template, v),
         compare: (a, b) => Sorter.byStringValue(a, b),
         minimumWidth: 100,
         recommendedWidth: 370,
         grow: false,
     }),
 
-    new Column<Document, number | null>({
-        id: 'number',
-        name: $t('%cH'),
-        getValue: v => v.number,
-        compare: (a, b) => Sorter.byNumberValue(b ?? 0, a ?? 0),
-        format: n => n ? n.toString() : $t('%1SV'),
-        getStyle: (status) => {
-            if (status === null) {
-                return 'gray';
-            }
-            return '';
-        },
-        minimumWidth: 100,
-        recommendedWidth: 200,
-        grow: false,
-        enabled: false,
-    }),
+    ...(hasDocumentNumbers(props.template) ? [numberColumn] : []),
 
     new Column<Document, string>({
         id: 'description',

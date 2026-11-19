@@ -48,12 +48,20 @@
                     </p>
                 </STListItem>
 
-                <STListItem>
+                <STListItem v-if="hasDocumentNumbers(template)">
                     <h3 class="style-definition-label">
                         {{ $t('%Kq') }}
                     </h3>
                     <p class="style-definition-text">
                         {{ document.id }} ({{ document.number || 'Zonder nummer' }})
+                    </p>
+                </STListItem>
+                <STListItem v-else>
+                    <h3 class="style-definition-label">
+                        {{ $t('Sleutel voor Belcotax') }}
+                    </h3>
+                    <p v-copyable class="style-definition-text style-copyable">
+                        {{ getBelcotaxKey(template, document) }}
                     </p>
                 </STListItem>
 
@@ -99,6 +107,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { computed } from 'vue';
 import { DocumentActionBuilder } from './DocumentActionBuilder';
+import { getBelcotaxKey, hasDocumentNumbers } from './hasDocumentNumbers';
 
 const props = withDefaults(defineProps<{
     document: Document;
