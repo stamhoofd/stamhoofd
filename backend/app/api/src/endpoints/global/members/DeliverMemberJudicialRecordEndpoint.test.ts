@@ -325,24 +325,7 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
         expect(deliver).not.toHaveBeenCalled();
     });
 
-    test('It does not accept a delivery from an administrator with only read access', async () => {
-        const { organization, member } = await setup();
-        const admin = await new UserFactory({
-            organization,
-            permissions: Permissions.create({ level: PermissionLevel.Read }),
-        }).create();
-        const adminToken = await SessionService.createSession(admin);
-
-        await expect(testServer.test(endpoint, buildRequest({
-            token: adminToken.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-        }))).rejects.toThrow(STExpect.errorWithCode('not_found'));
-
-        expect(deliver).not.toHaveBeenCalled();
-    });
-
-    test('It accepts a delivery from an administrator of the member', async () => {
+    test('It accepts a delivery from an administrator with full access to the member', async () => {
         const { organization, member } = await setup();
         const admin = await new UserFactory({
             organization,
@@ -357,7 +340,42 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
         }));
 
         expect(response.body.status).toBe(JudicialRecordStatus.Ok);
-        expect(deliver).toHaveBeenCalled();
+        expect(deliver).toHaveBeenCalledOnce();
+    });
+
+    test('It does not accept a delivery from an administrator without full access to the member', async () => {
+        const { organization, member } = await setup();
+        const admin = await new UserFactory({
+            organization,
+            permissions: Permissions.create({ level: PermissionLevel.Write }),
+        }).create();
+        const adminToken = await SessionService.createSession(admin);
+
+        await expect(testServer.test(endpoint, buildRequest({
+            token: adminToken.accessToken,
+            organizationHost: organization.getApiHost(),
+            memberId: member.id,
+        }))).rejects.toThrow(STExpect.errorWithCode('not_found'));
+
+        expect(deliver).not.toHaveBeenCalled();
+    });
+
+    test('It does not accept a delivery from an administrator of another organization', async () => {
+        const { member } = await setup();
+        const otherOrganization = await new OrganizationFactory({}).create();
+        const admin = await new UserFactory({
+            organization: otherOrganization,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        const adminToken = await SessionService.createSession(admin);
+
+        await expect(testServer.test(endpoint, buildRequest({
+            token: adminToken.accessToken,
+            organizationHost: otherOrganization.getApiHost(),
+            memberId: member.id,
+        }))).rejects.toThrow(STExpect.errorWithCode('not_found'));
+
+        expect(deliver).not.toHaveBeenCalled();
     });
 
     test('It limits the number of deliveries for one member', async () => {

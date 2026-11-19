@@ -1006,12 +1006,14 @@ export class AuthenticatedStructures {
             blob.registrationInvitations = memberRegistrationInvitations.get(blob.id) ?? [];
 
             const record = judicialRecords.find(r => r.memberId === blob.id);
+            const member = members.find(m => m.id === blob.id);
 
-            blob.judicialRecord = record
+            blob.judicialRecord = record && member
                 ? MemberJudicialRecord.create({
                         reviewDecision: record.reviewDecision,
                         reviewedAt: record.reviewedAt,
                         hasDocument: (record.file?.reference ?? null) !== null,
+                        reviewDetails: await Context.auth.canReviewJudicialRecord(member) ? record.reviewDetails : null,
                     })
                 : null;
         }

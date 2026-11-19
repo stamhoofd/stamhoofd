@@ -43,7 +43,7 @@ export class ReviewMemberJudicialRecordEndpoint extends Endpoint<Params, Query, 
 
         const member = await Member.getWithRegistrations(request.params.id);
 
-        if (!member || !Context.auth.canReviewJudicialRecord()) {
+        if (!member || !(await Context.auth.canReviewJudicialRecord(member))) {
             throw Context.auth.memberNotFoundOrNoAccess();
         }
 

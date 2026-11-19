@@ -119,7 +119,11 @@ describe('Endpoint.ReviewMemberJudicialRecord', () => {
         expect(objects.has(key)).toBe(false);
     });
 
-    test('a member manager cannot review their own member, however much access they have to them', async () => {
+    /**
+     * In organization mode there is no second organization for a review to bind, so the right is one a full
+     * administrator of the organization holds. Platform mode still refuses them, which the structures tests pin.
+     */
+    test('a full administrator reviews their own member in organization mode', async () => {
         const { organization, member } = await setup();
 
         const user = await new UserFactory({
@@ -128,15 +132,20 @@ describe('Endpoint.ReviewMemberJudicialRecord', () => {
         }).create();
         const token = (await SessionService.createSession(user)).accessToken;
 
-        await expect(testServer.test(reviewEndpoint, reviewRequest({
+        await testServer.test(reviewEndpoint, reviewRequest({
             token,
             host: organization.getApiHost(),
             memberId: member.id,
             body: { reviewDecision: JudicialRecordReviewDecision.Ok, comment: null },
-        }))).rejects.toThrow(STExpect.errorWithCode('not_found'));
+        }));
+
+        const records = await JudicialRecord.select().where('memberId', member.id).fetch();
+
+        expect(records[0].reviewDecision).toBe(JudicialRecordReviewDecision.Ok);
+        expect(records[0].reviewDetails?.userId).toBe(user.id);
     });
 
-    test('a member manager cannot read the document either', async () => {
+    test('a full administrator reads the document in organization mode', async () => {
         const { organization, member } = await setup();
 
         const user = await new UserFactory({
@@ -148,8 +157,30 @@ describe('Endpoint.ReviewMemberJudicialRecord', () => {
         const request = Request.buildJson('GET', `/v1/members/${member.id}/judicial-record/document`, organization.getApiHost(), undefined);
         request.headers.authorization = 'Bearer ' + token;
 
-        await expect(testServer.test(documentEndpoint, request)).rejects.toThrow(STExpect.errorWithCode('not_found'));
+        const response = await testServer.test(documentEndpoint, request);
+
+        expect(response.status).toBe(200);
     });
+
+    /** Holding the right is not enough: the reviewer still has to be able to read the member. */
+    test('an administrator of another organization is refused', async () => {
+        const { member } = await setup();
+
+        const other = await new OrganizationFactory({}).create();
+        const user = await new UserFactory({
+            organization: other,
+            permissions: Permissions.create({ level: PermissionLevel.Full }),
+        }).create();
+        const token = (await SessionService.createSession(user)).accessToken;
+
+        await expect(testServer.test(reviewEndpoint, reviewRequest({
+            token,
+            host: other.getApiHost(),
+            memberId: member.id,
+            body: { reviewDecision: JudicialRecordReviewDecision.Ok, comment: null },
+        }))).rejects.toThrow(STExpect.errorWithCode('not_found'));
+    });
+
 
     test('a reviewer reads the document, and it is not served as a pdf', async () => {
         const { organization, member } = await setup();

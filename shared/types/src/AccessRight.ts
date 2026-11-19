@@ -34,6 +34,14 @@ export enum AccessRight {
      */
     MemberManageNRN = 'MemberManageNRN',
 
+    /**
+     * Review a delivered judicial record extract, and read the document and audit trail behind it.
+     *
+     * Only the platform can grant this, never an organization itself: the decision it records holds for every
+     * organization the member is registered in, so one organization would otherwise decide for all the others.
+     */
+    MemberReviewJudicialRecord = 'MemberReviewJudicialRecord',
+
     // Webshop level permissions
     WebshopScanTickets = 'WebshopScanTickets',
 

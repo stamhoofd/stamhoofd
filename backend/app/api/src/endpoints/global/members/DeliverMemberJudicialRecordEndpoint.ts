@@ -63,11 +63,11 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<Params, Query,
         await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
+        // With registrations, because an administrator's access to this member can come from a group they
+        // are registered in rather than from the organization they belong to.
         const member = await Member.getByIdWithUsersAndRegistrations(request.params.id);
 
-        // The member's own account, or an administrator with full access to them: the level the member
-        // detail already asks for the member's security code, which is the same kind of secret.
-        if (!member || !(Context.auth.isUserManager(member) || await Context.auth.canAccessMember(member, PermissionLevel.Full))) {
+        if (!member || !await Context.auth.canDeliverJudicialRecordFor(member)) {
             throw Context.auth.memberNotFoundOrNoAccess();
         }
 
