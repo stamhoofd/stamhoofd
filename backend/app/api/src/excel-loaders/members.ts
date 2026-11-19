@@ -3,13 +3,14 @@ import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
 import type {
     LimitedFilteredRequest,
-    PlatformMember,
     Platform as PlatformStruct,
+    PlatformMember,
 } from '@stamhoofd/structures';
 import {
     ExcelExportType,
     Gender,
     GroupType,
+    JudicialRecordHelper,
     LanguageHelper,
     MembershipStatus,
     PlatformFamily,
@@ -185,6 +186,14 @@ export const getBaseMemberColumns = (
                 value: formatMembershipStatus(member.membershipStatus),
             };
         },
+    },
+    {
+        id: 'judicialRecordStatus',
+        name: $t(`Uittreksel uit het strafregister`),
+        width: 30,
+        getValue: (member: PlatformMember) => ({
+            value: JudicialRecordHelper.getStatusName(member.judicialRecord.status),
+        }),
     },
     {
         id: 'organization',
