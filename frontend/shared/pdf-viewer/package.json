@@ -1,0 +1,33 @@
+{
+    "name": "@stamhoofd/frontend-pdf-viewer",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "sideEffects": false,
+    "exports": {
+        "./*.ts": "./src/*.ts",
+        "./*.vue": "./src/*.vue",
+        "./*": "./src/*.ts"
+    },
+    "scripts": {
+        "lint": "eslint --quiet",
+        "test": "vitest run",
+        "typecheck": "vue-tsc --noEmit --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
+    },
+    "dependencies": {
+        "@stamhoofd/scss": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "pdfjs-dist": "6.4.299",
+        "vue": "3.5.44"
+    },
+    "devDependencies": {
+        "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/vite-config": "workspace:*",
+        "@vitest/browser": "4.1.12",
+        "@vue/test-utils": "2.5.1",
+        "eslint-plugin-stamhoofd": "workspace:*",
+        "vite": "8.3.5",
+        "vitest": "4.1.12",
+        "vitest-browser-vue": "2.1.0"
+    }
+}
