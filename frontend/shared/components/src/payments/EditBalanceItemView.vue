@@ -92,6 +92,7 @@
                     </template>
                     <DateSelection v-model="dueAt" :required="false" :time="{hours: 0, minutes: 0, seconds: 0}" :placeholder="$t(`%gr`)" />
                 </STInputBox>
+                <DueAtDescription :due-at="dueAt" />
             </div>
         </div>
 
@@ -188,6 +189,7 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import DateSelection from '#inputs/DateSelection.vue';
+import DueAtDescription from '#payments/components/DueAtDescription.vue';
 import PriceInput from '#inputs/PriceInput.vue';
 import { useShowMember } from '#members/hooks/useShowMember.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
