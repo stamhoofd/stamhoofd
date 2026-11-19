@@ -9,6 +9,10 @@
                 {{ $t('Aangeleverd op {date}.', { date: Formatter.dateTime(deliveredAt) }) }}
             </p>
 
+            <p v-if="!judicialRecord?.identityMatches" class="warning-box icon user">
+                {{ $t('De naam of geboortedatum van dit lid is gewijzigd sinds dit uittreksel werd aangeleverd. Het zegt dus niets over wie dit lid nu is.') }}
+            </p>
+
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <template v-if="documentMissing">

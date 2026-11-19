@@ -73,6 +73,9 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
 
             /** Null leaves it unreviewed, which is what UnderReview means. */
             reviewedAt?: Date | null;
+
+            /** Snapshots a different identity, as a rename or a corrected birth date does. */
+            identityChanged?: boolean;
         };
     };
 
@@ -235,12 +238,27 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
                 record: { reviewDecision: JudicialRecordReviewDecision.PermanentlyRejected, reviewedAt: expired },
             },
             {
+                name: 'approved, but the member has been renamed since',
+                ...requiredAdult(),
+                record: { reviewDecision: JudicialRecordReviewDecision.Ok, reviewedAt: justReviewed, identityChanged: true },
+            },
+            {
                 name: 'approved, but no responsibility asks for an extract any more',
                 birthDay: { year: 1990, month: 3, day: 10 },
                 responsibilities: [{ responsibility: withAge, startDate: longAgo, endDate: daysFromNow(-1) }],
                 record: { reviewDecision: JudicialRecordReviewDecision.Ok, reviewedAt: daysFromNow(-1) },
             },
         ];
+    }
+
+    /** The identity hash the database generated for this member, which a record snapshots verbatim. */
+    async function selectIdentityHash(memberId: string): Promise<string> {
+        const rows = await SQL.select(SQL.column('members', 'judicialIdentityHash'))
+            .from(SQL.table(Member.table))
+            .where(SQL.column('members', 'id'), memberId)
+            .fetch();
+
+        return rows[0]['members']['judicialIdentityHash'] as string;
     }
 
     /** Creates the member of a scenario and returns what both engines need to judge it */
@@ -270,14 +288,24 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
         let record: JudicialRecordCurrentRecord | null = null;
 
         if (scenario.record) {
+            const identityHash = await selectIdentityHash(member.id);
+
+            // A changed identity is a snapshot of a hash that is not the member's any more. Written as a
+            // different hash rather than by renaming the member, so the scenario stays a property of the row.
+            const snapshot = scenario.record.identityChanged
+                ? identityHash.replace(/^./, character => (character === 'a' ? 'b' : 'a'))
+                : identityHash;
+
             const current = new JudicialRecord();
             current.memberId = member.id;
             current.reviewDecision = scenario.record.reviewDecision;
             current.reviewedAt = scenario.record.reviewedAt ?? null;
+            current.identityHash = snapshot;
             await current.save();
 
             record = {
                 reviewDecision: scenario.record.reviewDecision,
+                identityMatches: !scenario.record.identityChanged,
                 reviewedAt: scenario.record.reviewedAt ?? null,
             };
         }

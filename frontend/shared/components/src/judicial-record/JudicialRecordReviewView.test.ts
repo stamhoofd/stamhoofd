@@ -61,7 +61,7 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
-function createMember({ hasDocument = true }: { hasDocument?: boolean } = {}) {
+function createMember({ identityMatches = true, hasDocument = true }: { identityMatches?: boolean; hasDocument?: boolean } = {}) {
     const platform = Platform.create({});
     const organization = Organization.create({ name: 'KSA Sint-Jan' });
     const family = new PlatformFamily({ platform, contextOrganization: organization });
@@ -77,6 +77,7 @@ function createMember({ hasDocument = true }: { hasDocument?: boolean } = {}) {
             }),
             judicialRecord: MemberJudicialRecord.create({
                 reviewDecision: JudicialRecordReviewDecision.UnderReview,
+                identityMatches,
                 reviewedAt: null,
                 hasDocument,
             }),
@@ -244,6 +245,12 @@ test('says so when the document is gone, and offers nothing to decide', async ()
     expect(document.querySelector('input[name="judicial-record-outcome"]')).toBeNull();
     expect(saveButton().disabled).toBe(true);
     expect(check).not.toHaveBeenCalled();
+});
+
+test('warns that the member is no longer the person the extract was drawn up for', async () => {
+    const { view } = renderView({ member: createMember({ identityMatches: false }) });
+
+    await expect.element(view.getByText('gewijzigd sinds dit uittreksel werd aangeleverd', { exact: false })).toBeVisible();
 });
 
 test('shows what a previous reviewer wrote down, so a second look starts from it', async () => {
