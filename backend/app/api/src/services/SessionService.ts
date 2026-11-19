@@ -304,6 +304,15 @@ export class SessionService {
     }
 
     /**
+     * Sign out every session of this user, the one the request was made with included.
+     * For when the account itself goes away.
+     */
+    static async deleteAllFor({ userId }: { userId: string }): Promise<void> {
+        await UserSession.delete().where('userId', userId).delete();
+        await this.deleteForUsers({ userIds: [userId], keepAccessToken: null });
+    }
+
+    /**
      * Sign out every session of this user, except the one the request was made with.
      */
     static async clearFor({
