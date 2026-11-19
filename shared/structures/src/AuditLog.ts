@@ -490,22 +490,24 @@ export function getAuditLogTypeIcon(type: AuditLogType): [icon: string, subIcon?
 function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
     switch (type) {
         case AuditLogType.MemberAdded:
-            return '{{m}} werd aangemaakt';
+            return $t('{{m}} werd aangemaakt');
         case AuditLogType.MemberDeleted:
-            return '{{m}} werd verwijderd';
+            return $t('{{m}} werd verwijderd');
         case AuditLogType.MemberEdited:
-            return 'De gegevens van {{m}} werden gewijzigd';
+            return $t('De gegevens van {{m}} werden gewijzigd');
         case AuditLogType.MemberRegistered:
-            return '{{m}} werd ingeschreven voor {{g}}{{if org " (" org ")"}}';
+            return $t('{{m}} werd ingeschreven voor {{g}}{{if org " (" org ")"}}');
         case AuditLogType.MemberUnregistered:
-            return '{{m}} werd uitgeschreven voor {{g}}{{if org " (" org ")"}}';
+            return $t('{{m}} werd uitgeschreven voor {{g}}{{if org " (" org ")"}}');
         case AuditLogType.Unknown:
-            return 'Onbekende actie';
+            return $t('Onbekende actie');
         case AuditLogType.PlatformSettingsChanged:
-            return 'De platforminstellingen werden gewijzigd';
+            return $t('De platforminstellingen werden gewijzigd');
 
         case AuditLogType.OrganizationEdited:
-            return `{{if org 'De instellingen van ' org ' werden gewijzigd'}}{{unless org 'De instellingen werden gewijzigd'}}`;
+            return $t(
+                `{{if org 'De instellingen van ' org ' werden gewijzigd'}}{{unless org 'De instellingen werden gewijzigd'}}`,
+            );
 
         case AuditLogType.OrganizationAdded:
             return $t('%1Mq');
@@ -514,89 +516,89 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return $t('%1Mr');
 
         case AuditLogType.EventEdited:
-            return 'De activiteit {{e}}{{if org " (" org ")"}} werd gewijzigd';
+            return $t('De activiteit {{e}}{{if org " (" org ")"}} werd gewijzigd');
 
         case AuditLogType.EventAdded:
-            return 'De activiteit {{e}}{{if org " (" org ")"}} werd aangemaakt';
+            return $t('De activiteit {{e}}{{if org " (" org ")"}} werd aangemaakt');
 
         case AuditLogType.EventDeleted:
-            return 'De activiteit {{e}}{{if org " (" org ")"}} werd verwijderd';
+            return $t('De activiteit {{e}}{{if org " (" org ")"}} werd verwijderd');
 
         case AuditLogType.GroupEdited:
-            return 'De groep {{g}}{{if org " (" org ")"}} werd gewijzigd';
+            return $t('De groep {{g}}{{if org " (" org ")"}} werd gewijzigd');
 
         case AuditLogType.GroupAdded:
-            return 'De groep {{g}}{{if org " (" org ")"}} werd aangemaakt';
+            return $t('De groep {{g}}{{if org " (" org ")"}} werd aangemaakt');
 
         case AuditLogType.GroupDeleted:
-            return 'De groep {{g}}{{if org " (" org ")"}} werd verwijderd';
+            return $t('De groep {{g}}{{if org " (" org ")"}} werd verwijderd');
 
         case AuditLogType.WaitingListEdited:
-            return 'De wachtlijst {{g}}{{if org " (" org ")"}} werd gewijzigd';
+            return $t('De wachtlijst {{g}}{{if org " (" org ")"}} werd gewijzigd');
 
         case AuditLogType.WaitingListAdded:
-            return 'De wachtlijst {{g}}{{if org " (" org ")"}} werd aangemaakt';
+            return $t('De wachtlijst {{g}}{{if org " (" org ")"}} werd aangemaakt');
 
         case AuditLogType.WaitingListDeleted:
-            return 'De wachtlijst {{g}}{{if org " (" org ")"}} werd verwijderd';
+            return $t('De wachtlijst {{g}}{{if org " (" org ")"}} werd verwijderd');
 
         case AuditLogType.RegistrationPeriodEdited:
-            return 'Het werkjaar {{p}} werd gewijzigd';
+            return $t('Het werkjaar {{p}} werd gewijzigd');
 
         case AuditLogType.RegistrationPeriodAdded:
-            return 'Het werkjaar {{p}} werd aangemaakt';
+            return $t('Het werkjaar {{p}} werd aangemaakt');
 
         case AuditLogType.RegistrationPeriodDeleted:
-            return 'Het werkjaar {{p}} werd verwijderd';
+            return $t('Het werkjaar {{p}} werd verwijderd');
 
         case AuditLogType.StripeAccountAdded:
-            return 'Stripe account {{a}}{{if org " (" org ")"}} aangemaakt';
+            return $t('Stripe account {{a}}{{if org " (" org ")"}} aangemaakt');
         case AuditLogType.StripeAccountDeleted:
-            return 'Stripe account {{a}}{{if org " (" org ")"}} verwijderd';
+            return $t('Stripe account {{a}}{{if org " (" org ")"}} verwijderd');
         case AuditLogType.StripeAccountEdited:
-            return 'Stripe account {{a}}{{if org " (" org ")"}} gewijzigd';
+            return $t('Stripe account {{a}}{{if org " (" org ")"}} gewijzigd');
 
         case AuditLogType.WebshopEdited:
-            return 'De webshop {{w}}{{if org " (" org ")"}} werd gewijzigd';
+            return $t('De webshop {{w}}{{if org " (" org ")"}} werd gewijzigd');
         case AuditLogType.WebshopAdded:
-            return 'De webshop {{w}}{{if org " (" org ")"}} werd aangemaakt';
+            return $t('De webshop {{w}}{{if org " (" org ")"}} werd aangemaakt');
         case AuditLogType.WebshopDeleted:
-            return 'De webshop {{w}}{{if org " (" org ")"}} werd verwijderd';
+            return $t('De webshop {{w}}{{if org " (" org ")"}} werd verwijderd');
 
         case AuditLogType.OrderAdded:
-            return '{{capitalizeFirstLetter o}} werd geplaatst (voor {{w}})';
+            return $t('{{capitalizeFirstLetter o}} werd geplaatst (voor {{w}})');
         case AuditLogType.OrderEdited:
-            return '{{capitalizeFirstLetter o}} werd gewijzigd ({{w}})';
+            return $t('{{capitalizeFirstLetter o}} werd gewijzigd ({{w}})');
         case AuditLogType.OrderDeleted:
-            return '{{capitalizeFirstLetter o}} werd verwijderd ({{w}})';
+            return $t('{{capitalizeFirstLetter o}} werd verwijderd ({{w}})');
 
         case AuditLogType.PaymentAdded:
-            return '{{capitalizeFirstLetter p}} werd aangemaakt';
+            return $t('{{capitalizeFirstLetter p}} werd aangemaakt');
         case AuditLogType.PaymentEdited:
-            return '{{capitalizeFirstLetter p}} werd gewijzigd';
+            return $t('{{capitalizeFirstLetter p}} werd gewijzigd');
         case AuditLogType.PaymentDeleted:
-            return '{{capitalizeFirstLetter p}} werd verwijderd';
+            return $t('{{capitalizeFirstLetter p}} werd verwijderd');
 
         case AuditLogType.BalanceItemAdded:
-            return 'Openstaand bedrag {{b}} van {{payer}} werd aangemaakt';
+            return $t('Openstaand bedrag {{b}} van {{payer}} werd aangemaakt');
         case AuditLogType.BalanceItemEdited:
-            return 'Openstaand bedrag {{b}} van {{payer}} werd gewijzigd';
+            return $t('Openstaand bedrag {{b}} van {{payer}} werd gewijzigd');
         case AuditLogType.BalanceItemDeleted:
-            return 'Openstaand bedrag {{b}} van {{payer}} werd verwijderd';
+            return $t('Openstaand bedrag {{b}} van {{payer}} werd verwijderd');
 
         case AuditLogType.DocumentTemplateAdded:
-            return 'Document {{d}}{{if org " (" org ")"}} werd aangemaakt';
+            return $t('Document {{d}}{{if org " (" org ")"}} werd aangemaakt');
         case AuditLogType.DocumentTemplateEdited:
-            return 'Document {{d}}{{if org " (" org ")"}} werd gewijzigd';
+            return $t('Document {{d}}{{if org " (" org ")"}} werd gewijzigd');
         case AuditLogType.DocumentTemplateDeleted:
-            return 'Document {{d}}{{if org " (" org ")"}} werd verwijderd';
+            return $t('Document {{d}}{{if org " (" org ")"}} werd verwijderd');
 
         case AuditLogType.UserAdded:
-            return 'Account {{u}} werd aangemaakt';
+            return $t('Account {{u}} werd aangemaakt');
         case AuditLogType.UserEdited:
-            return 'Account {{u}} werd gewijzigd';
+            return $t('Account {{u}} werd gewijzigd');
         case AuditLogType.UserDeleted:
-            return 'Account {{u}} werd verwijderd';
+            return $t('Account {{u}} werd verwijderd');
 
         case AuditLogType.UserTwoFactorMethodAdded:
             return $t('%Zhy');
@@ -609,74 +611,94 @@ function getAuditLogTypeTitleTemplate(type: AuditLogType): string {
             return $t('%Zms');
 
         case AuditLogType.MemberResponsibilityRecordAdded:
-            return 'Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd toegekend aan {{m}}';
+            return $t(
+                'Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd toegekend aan {{m}}',
+            );
         case AuditLogType.MemberResponsibilityRecordEdited:
-            return 'Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd gewijzigd bij {{m}}';
+            return $t(
+                'Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd gewijzigd bij {{m}}',
+            );
         case AuditLogType.MemberResponsibilityRecordDeleted:
-            return 'Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd verwijderd van {{m}}';
+            return $t(
+                'Functie {{r}}{{if g " van " g}}{{if org " (" org ")"}} werd verwijderd van {{m}}',
+            );
 
         case AuditLogType.MemberPlatformMembershipAdded:
-            return 'Aansluiting {{pm}} werd toegevoegd bij {{m}}{{if org " via " org}}';
+            return $t('Aansluiting {{pm}} werd toegevoegd bij {{m}}{{if org " via " org}}');
         case AuditLogType.MemberPlatformMembershipEdited:
-            return 'Aansluiting {{pm}} werd gewijzigd bij {{m}}{{if org " via " org}}';
+            return $t('Aansluiting {{pm}} werd gewijzigd bij {{m}}{{if org " via " org}}');
         case AuditLogType.MemberPlatformMembershipDeleted:
-            return 'Aansluiting {{pm}} werd verwijderd bij {{m}}{{if org " via " org}}';
+            return $t('Aansluiting {{pm}} werd verwijderd bij {{m}}{{if org " via " org}}');
 
         case AuditLogType.EmailSent:
-            return `E-mail {{e}} werd succesvol verzonden aan {{c}} {{ plural c 'ontvanger' 'ontvangers' }}`;
+            return $t(
+                `E-mail {{e}} werd succesvol verzonden aan {{c}} {{ plural c 'ontvanger' 'ontvangers' }}`,
+            );
 
         case AuditLogType.EmailPublished:
-            return 'Bericht {{e}} werd succesvol gepubliceerd';
+            return $t('Bericht {{e}} werd succesvol gepubliceerd');
 
         case AuditLogType.EmailEdited:
-            return 'Bericht {{e}} werd gewijzigd';
+            return $t('Bericht {{e}} werd gewijzigd');
 
         case AuditLogType.EmailDeleted:
-            return 'Bericht {{e}} werd verwijderd';
+            return $t('Bericht {{e}} werd verwijderd');
 
         case AuditLogType.EmailSending:
-            return `E-mail {{e}} werd ingepland om te verzenden aan {{c}} {{ plural c 'ontvanger' 'ontvangers' }}`;
+            return $t(
+                `E-mail {{e}} werd ingepland om te verzenden aan {{c}} {{ plural c 'ontvanger' 'ontvangers' }}`,
+            );
 
         case AuditLogType.EmailAddressMarkedAsSpam:
-            return `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} werd door {{e}} als spam gemarkeerd`;
+            return $t(
+                `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} werd door {{e}} als spam gemarkeerd`,
+            );
 
         case AuditLogType.EmailAddressFraudComplaint:
-            return `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} werd door {{e}} als fraude, phishing of virus gemarkeerd`;
+            return $t(
+                `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} werd door {{e}} als fraude, phishing of virus gemarkeerd`,
+            );
 
         case AuditLogType.EmailAddressHardBounced:
-            return `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} naar {{e}} is permanent mislukt`;
+            return $t(
+                `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} naar {{e}} is permanent mislukt`,
+            );
 
         case AuditLogType.EmailAddressSoftBounced:
-            return `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} naar {{e}} is mislukt`;
+            return $t(
+                `{{if subject 'De e-mail ‘', subject '’'}}{{unless subject 'Een e-mail'}} naar {{e}} is mislukt`,
+            );
 
         case AuditLogType.EmailAddressUnsubscribed:
-            return '{{e}} heeft zich uitgeschreven voor e-mails';
+            return $t('{{e}} heeft zich uitgeschreven voor e-mails');
 
         case AuditLogType.EmailTemplateAdded:
-            return 'E-mailsjabloon {{e}} werd aangemaakt {{if org " voor " org}}';
+            return $t('E-mailsjabloon {{e}} werd aangemaakt {{if org " voor " org}}');
 
         case AuditLogType.EmailTemplateEdited:
-            return 'E-mailsjabloon {{e}} werd gewijzigd {{if org " voor " org}}';
+            return $t('E-mailsjabloon {{e}} werd gewijzigd {{if org " voor " org}}');
 
         case AuditLogType.EmailTemplateDeleted:
-            return 'E-mailsjabloon {{e}} werd verwijderd {{if org " voor " org}}';
+            return $t('E-mailsjabloon {{e}} werd verwijderd {{if org " voor " org}}');
 
         case AuditLogType.MemberSecurityCodeUsed:
-            return 'De beveiligingscode werd gebruikt om toegang te krijgen tot {{m}}';
+            return $t('De beveiligingscode werd gebruikt om toegang te krijgen tot {{m}}');
 
         case AuditLogType.MemberSecurityCodeRequested:
-            return `De beveiligingscode van {{m}} werd opgevraagd{{if method ' via ' method}}{{if recipient ' naar ' recipient}}`;
+            return $t(
+                `De beveiligingscode van {{m}} werd opgevraagd{{if method ' via ' method}}{{if recipient ' naar ' recipient}}`,
+            );
 
         case AuditLogType.RegistrationInvitationAdded:
-            return '{{m}} werd uitgenodigd voor {{g}}{{if org " (" org ")"}}';
+            return $t('{{m}} werd uitgenodigd voor {{g}}{{if org " (" org ")"}}');
         case AuditLogType.RegistrationInvitationDeleted:
-            return 'De uitnodiging van {{m}} voor {{g}}{{if org " (" org ")"}} werd verwijderd';
+            return $t('De uitnodiging van {{m}} voor {{g}}{{if org " (" org ")"}} werd verwijderd');
         case AuditLogType.EventNotificationAdded:
-            return 'De kampmelding {{n}}{{if org " (" org ")"}} werd aangemaakt';
+            return $t('De kampmelding {{n}}{{if org " (" org ")"}} werd aangemaakt');
         case AuditLogType.EventNotificationEdited:
-            return 'De kampmelding {{n}}{{if org " (" org ")"}} werd gewijzigd';
+            return $t('De kampmelding {{n}}{{if org " (" org ")"}} werd gewijzigd');
         case AuditLogType.EventNotificationDeleted:
-            return 'De kampmelding {{n}}{{if org " (" org ")"}} werd verwijderd';
+            return $t('De kampmelding {{n}}{{if org " (" org ")"}} werd verwijderd');
     }
 }
 
@@ -686,16 +708,24 @@ function getAuditLogTypeDescriptionTemplate(type: AuditLogType): string | undefi
             return '{{html}}';
 
         case AuditLogType.EmailAddressMarkedAsSpam:
-            return `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}Soms doen mensen dit per ongeluk. Vraag hen dan de e-mail terug als 'geen spam' te markeren.`;
+            return $t(
+                `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}Soms doen mensen dit per ongeluk. Vraag hen dan de e-mail terug als 'geen spam' te markeren.`,
+            );
 
         case AuditLogType.EmailAddressHardBounced:
-            return `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}De e-mailprovider gaat ervanuit dat dit een permanent probleem is, dus toekomstige e-mails zullen niet meer verzonden worden naar dit adres. Meestal komt dit voor bij een ongeldig e-mailadres.`;
+            return $t(
+                `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}De e-mailprovider gaat ervanuit dat dit een permanent probleem is, dus toekomstige e-mails zullen niet meer verzonden worden naar dit adres. Meestal komt dit voor bij een ongeldig e-mailadres.`,
+            );
 
         case AuditLogType.EmailAddressSoftBounced:
-            return `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}Wellicht gaat het om een tijdelijk probleem (bv. volle inbox).`;
+            return $t(
+                `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response '\n'}}Wellicht gaat het om een tijdelijk probleem (bv. volle inbox).`,
+            );
 
         case AuditLogType.EmailAddressFraudComplaint:
-            return `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response}}`;
+            return $t(
+                `Verzonden door {{sender}} {{if org " (" org ")"}}\n{{if subType 'Reden: ' subType '\n'}}{{if response 'Volledig antwoord: ' response}}`,
+            );
     }
 }
 
