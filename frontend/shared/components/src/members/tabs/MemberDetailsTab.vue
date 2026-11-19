@@ -4,6 +4,7 @@
             <ViewMemberWarningsBox v-if="isMobile" :member="member" />
             <ViewMemberGeneralBox :member="member" />
             <ViewMemberResponsibilitiesBox :member="member" />
+            <ViewMemberJudicialRecordBox :member="member" />
             <ViewMemberRegistrationsBox :member="member" />
             <ViewMemberUnverifiedBox :member="member" />
             <ViewMemberNotesBox :member="member" />
@@ -30,6 +31,7 @@ import ViewMemberAccountsBox from '#members/components/view/ViewMemberAccountsBo
 import ViewMemberEmergencyContactsBox from '#members/components/view/ViewMemberEmergencyContactsBox.vue';
 import ViewMemberFamilyBox from '#members/components/view/ViewMemberFamilyBox.vue';
 import ViewMemberGeneralBox from '#members/components/view/ViewMemberGeneralBox.vue';
+import ViewMemberJudicialRecordBox from '#members/components/view/ViewMemberJudicialRecordBox.vue';
 import ViewMemberNotesBox from '#members/components/view/ViewMemberNotesBox.vue';
 import ViewMemberParentsBox from '#members/components/view/ViewMemberParentsBox.vue';
 import ViewMemberRecordCategoriesBox from '#members/components/view/ViewMemberRecordCategoriesBox.vue';
