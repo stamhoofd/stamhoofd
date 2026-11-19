@@ -60,6 +60,13 @@ export class MemberResponsibility extends AutoEncoder {
     @field({ decoder: new EnumDecoder(PermissionLevel), version: 279 })
     groupPermissionLevel: PermissionLevel = PermissionLevel.None;
 
+    /**
+     * Members with this responsibility need their judicial record checked from this age on.
+     * 0 means any age; null means not required
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    judicialRecordMinimumAge: number | null = null;
+
     get isGroupBased() {
         return this.defaultAgeGroupIds !== null;
     }
