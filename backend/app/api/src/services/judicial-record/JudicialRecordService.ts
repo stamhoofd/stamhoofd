@@ -8,7 +8,7 @@ import {
     Organization,
     Platform,
 } from '@stamhoofd/models';
-import type { Platform as PlatformStruct } from '@stamhoofd/structures';
+import type { JudicialRecordForMember, Platform as PlatformStruct } from '@stamhoofd/structures';
 import {
     hasJudicialRecordFeature,
     JUDICIAL_RECORD_MAX_COMMENT_LENGTH,
@@ -22,6 +22,8 @@ import {
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 import { JudicialRecordFileStore } from './JudicialRecordFileStore.js';
+import { JudicialRecordNotificationService } from './JudicialRecordNotificationService.js';
+import { getJudicialRecordMinimumAges } from './judicialRecordResponsibilities.js';
 
 /**
  * A month, as the member is told when they request one. The member portal counts the same thirty days
@@ -104,6 +106,14 @@ export class JudicialRecordService {
 
         await record.save();
 
+        // Sent from here rather than from the endpoint, because an approval the checks reached on their own is
+        // still an approval the member is owed a record of, and it never passes a reviewer.
+        if (data === null) {
+            await JudicialRecordNotificationService.sendDecision(record, member);
+        } else {
+            await JudicialRecordNotificationService.sendAwaitingReview(record, member);
+        }
+
         return data === null ? JudicialRecordStatus.Ok : JudicialRecordStatus.UnderReview;
     }
 
@@ -177,6 +187,8 @@ export class JudicialRecordService {
         });
 
         await record.save();
+
+        await JudicialRecordNotificationService.sendDecision(record, request.member);
     }
 
     /** The member's record, the one a decision is recorded on. */
@@ -213,16 +225,17 @@ export class JudicialRecordService {
         }
     }
 
-    private static async assertExtractRequired(member: Member): Promise<void> {
+    /**
+     * Whether the member's responsibilities ask them for an extract, ignoring whatever they delivered before.
+     *
+     * Answers `Required` or `NotRequired` only, because no record is passed: the question is the requirement,
+     * not the standing of a delivery.
+     */
+    static async getRequirement(member: Member): Promise<JudicialRecordForMember> {
         const records = await MemberResponsibilityRecord.where({ memberId: member.id });
-        const platform = await Platform.getSharedStruct();
-        const organizations = await this.getOrganizations(records);
+        const minimumAges = await getJudicialRecordMinimumAges(records);
 
-        this.assertFeatureEnabled(platform, organizations);
-
-        const minimumAges = this.getMinimumAges(platform, organizations);
-
-        const { status, description } = JudicialRecordHelper.getForMember({
+        return JudicialRecordHelper.getForMember({
             firstName: member.details.firstName,
             birthDay: member.details.birthDay,
             responsibilities: records.map((record) => ({
@@ -231,6 +244,19 @@ export class JudicialRecordService {
                 minimumAge: minimumAges.get(record.responsibilityId) ?? null,
             })),
         });
+    }
+
+    private static async assertExtractRequired(member: Member): Promise<void> {
+        const records = await MemberResponsibilityRecord.where({ memberId: member.id });
+
+        // Asked here and not in getRequirement: the flag decides whether an extract may be delivered, while
+        // the requirement is a question the expiry cron asks about members on platforms that never enabled it.
+        this.assertFeatureEnabled(
+            await Platform.getSharedStruct(),
+            await this.getOrganizations(records),
+        );
+
+        const { status, description } = await this.getRequirement(member);
 
         if (status !== JudicialRecordStatus.Required) {
             throw new SimpleError({
@@ -296,22 +322,5 @@ export class JudicialRecordService {
         }
 
         return await Organization.getByIDs(...organizationIds);
-    }
-
-    private static getMinimumAges(
-        platform: PlatformStruct,
-        organizations: Organization[],
-    ): Map<string, number | null> {
-        const responsibilities = [
-            ...platform.config.responsibilities,
-            ...organizations.flatMap((organization) => organization.privateMeta.responsibilities),
-        ];
-
-        return new Map(
-            responsibilities.map((responsibility) => [
-                responsibility.id,
-                responsibility.judicialRecordMinimumAge,
-            ]),
-        );
     }
 }
