@@ -30,15 +30,21 @@ export async function convertEventNameToJson(tableName = 'events') {
     }
 
     if (temporaryType === null) {
-        await Database.statement(`ALTER TABLE ${escapedTable} ADD COLUMN \`nameJson\` json NULL AFTER \`typeId\``);
+        await Database.statement(
+            `ALTER TABLE ${escapedTable} ADD COLUMN \`nameJson\` json NULL AFTER \`typeId\``,
+        );
     }
 
     if (nameType !== null && nameType !== 'json') {
-        await Database.statement(`UPDATE ${escapedTable} SET \`nameJson\` = JSON_OBJECT('value', \`name\`, 'version', 0) WHERE \`nameJson\` IS NULL`);
+        await Database.statement(
+            `UPDATE ${escapedTable} SET \`nameJson\` = JSON_OBJECT('value', \`name\`, 'version', 0) WHERE \`nameJson\` IS NULL`,
+        );
         await Database.statement(`ALTER TABLE ${escapedTable} DROP COLUMN \`name\``);
     }
 
-    await Database.statement(`ALTER TABLE ${escapedTable} CHANGE COLUMN \`nameJson\` \`name\` json NOT NULL`);
+    await Database.statement(
+        `ALTER TABLE ${escapedTable} CHANGE COLUMN \`nameJson\` \`name\` json NOT NULL`,
+    );
 }
 
 export default new Migration(async () => {

@@ -18,7 +18,9 @@ type Scope = { host: string; token: Token };
 describe('Endpoint.GetEventsEndpoint', () => {
     beforeEach(() => {
         TestUtils.setEnvironment('userMode', 'platform');
-        TestUtils.setEnvironment('locales', { [Country.Belgium]: [Language.Dutch, Language.English, Language.French] });
+        TestUtils.setEnvironment('locales', {
+            [Country.Belgium]: [Language.Dutch, Language.English, Language.French],
+        });
     });
 
     /**
@@ -31,13 +33,28 @@ describe('Endpoint.GetEventsEndpoint', () => {
         return { organization, host: organization.getApiHost(), token };
     }
 
-    async function get(scope: Scope, { filter, sort, limit = 100, search, language = Language.Dutch }: { filter?: StamhoofdFilter; sort?: SortList; limit?: number; search?: string; language?: Language }) {
+    async function get(
+        scope: Scope,
+        {
+            filter,
+            sort,
+            limit = 100,
+            search,
+            language = Language.Dutch,
+        }: {
+            filter?: StamhoofdFilter;
+            sort?: SortList;
+            limit?: number;
+            search?: string;
+            language?: Language;
+        },
+    ) {
         const request = Request.get({
             path: baseUrl,
             host: scope.host,
             query: new LimitedFilteredRequest({ filter, sort, limit, search }),
             headers: {
-                'authorization': 'Bearer ' + scope.token.accessToken,
+                authorization: 'Bearer ' + scope.token.accessToken,
                 'x-locale': `${language}-BE`,
             },
         });
@@ -48,9 +65,21 @@ describe('Endpoint.GetEventsEndpoint', () => {
      * Follows the 'next' request of every page, like the frontend does. That request is built from the
      * sorter's getValue, so this covers getValue -> page filter -> query -> SQL for the name sorter.
      */
-    async function fetchAllPages(scope: Scope, { filter, sort, limit, language }: { filter: StamhoofdFilter; sort: SortList; limit: number; language?: Language }) {
+    async function fetchAllPages(
+        scope: Scope,
+        {
+            filter,
+            sort,
+            limit,
+            language,
+        }: { filter: StamhoofdFilter; sort: SortList; limit: number; language?: Language },
+    ) {
         const ids: string[] = [];
-        let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ filter, sort, limit });
+        let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({
+            filter,
+            sort,
+            limit,
+        });
         let pages = 0;
 
         while (query) {
@@ -59,7 +88,7 @@ describe('Endpoint.GetEventsEndpoint', () => {
                 host: scope.host,
                 query,
                 headers: {
-                    'authorization': 'Bearer ' + scope.token.accessToken,
+                    authorization: 'Bearer ' + scope.token.accessToken,
                     'x-locale': `${language ?? Language.Dutch}-BE`,
                 },
             });
@@ -67,7 +96,7 @@ describe('Endpoint.GetEventsEndpoint', () => {
             const response = await testServer.test(endpoint, request);
             expect(response.status).toBe(200);
 
-            ids.push(...response.body.results.map(e => e.id));
+            ids.push(...response.body.results.map((e) => e.id));
             query = response.body.next;
             pages += 1;
 
@@ -94,16 +123,27 @@ describe('Endpoint.GetEventsEndpoint', () => {
             new TranslatedString({ en: 'Dance night', fr: 'Soirée dansante' }),
             new TranslatedString({ nl: 'Weekend', en: 'Weekend' }),
         ]) {
-            events.push(await new EventFactory({ organization: scope.organization, name }).create());
+            events.push(
+                await new EventFactory({ organization: scope.organization, name }).create(),
+            );
         }
 
         const [zomerkamp, bosspel, avondspel, danceNight, weekend] = events;
-        return { scope, filter: { organizationId: scope.organization.id }, zomerkamp, bosspel, avondspel, danceNight, weekend };
+        return {
+            scope,
+            filter: { organizationId: scope.organization.id },
+            zomerkamp,
+            bosspel,
+            avondspel,
+            danceNight,
+            weekend,
+        };
     }
 
     describe('Name sorter', () => {
         test('Events are sorted by name ascending across all pages, mixing legacy and translated names', async () => {
-            const { scope, filter, zomerkamp, bosspel, avondspel, danceNight, weekend } = await createMixedEvents();
+            const { scope, filter, zomerkamp, bosspel, avondspel, danceNight, weekend } =
+                await createMixedEvents();
 
             const ids = await fetchAllPages(scope, {
                 filter,
@@ -111,11 +151,18 @@ describe('Endpoint.GetEventsEndpoint', () => {
                 limit: 2,
             });
 
-            expect(ids).toEqual([avondspel.id, bosspel.id, danceNight.id, weekend.id, zomerkamp.id]);
+            expect(ids).toEqual([
+                avondspel.id,
+                bosspel.id,
+                danceNight.id,
+                weekend.id,
+                zomerkamp.id,
+            ]);
         });
 
         test('Events are sorted by name descending across all pages', async () => {
-            const { scope, filter, zomerkamp, bosspel, avondspel, danceNight, weekend } = await createMixedEvents();
+            const { scope, filter, zomerkamp, bosspel, avondspel, danceNight, weekend } =
+                await createMixedEvents();
 
             const ids = await fetchAllPages(scope, {
                 filter,
@@ -123,11 +170,18 @@ describe('Endpoint.GetEventsEndpoint', () => {
                 limit: 2,
             });
 
-            expect(ids).toEqual([zomerkamp.id, weekend.id, danceNight.id, bosspel.id, avondspel.id]);
+            expect(ids).toEqual([
+                zomerkamp.id,
+                weekend.id,
+                danceNight.id,
+                bosspel.id,
+                avondspel.id,
+            ]);
         });
 
         test('Events are sorted on the name in the language of the request', async () => {
-            const { scope, filter, zomerkamp, bosspel, avondspel, danceNight, weekend } = await createMixedEvents();
+            const { scope, filter, zomerkamp, bosspel, avondspel, danceNight, weekend } =
+                await createMixedEvents();
 
             const ids = await fetchAllPages(scope, {
                 filter,
@@ -136,14 +190,26 @@ describe('Endpoint.GetEventsEndpoint', () => {
                 language: Language.English,
             });
 
-            expect(ids).toEqual([avondspel.id, danceNight.id, bosspel.id, weekend.id, zomerkamp.id]);
+            expect(ids).toEqual([
+                avondspel.id,
+                danceNight.id,
+                bosspel.id,
+                weekend.id,
+                zomerkamp.id,
+            ]);
         });
 
         test('Events with the same name are not skipped or duplicated between pages', async () => {
             const scope = await createScope();
             const events: Event[] = [];
             for (let i = 0; i < 5; i++) {
-                events.push(await new EventFactory({ organization: scope.organization, name: i % 2 === 0 ? 'Kamp' : new TranslatedString({ nl: 'Kamp', en: 'Camp' }) }).create());
+                events.push(
+                    await new EventFactory({
+                        organization: scope.organization,
+                        name:
+                            i % 2 === 0 ? 'Kamp' : new TranslatedString({ nl: 'Kamp', en: 'Camp' }),
+                    }).create(),
+                );
             }
 
             const ids = await fetchAllPages(scope, {
@@ -152,7 +218,7 @@ describe('Endpoint.GetEventsEndpoint', () => {
                 limit: 2,
             });
 
-            expect(ids).toIncludeSameMembers(events.map(e => e.id));
+            expect(ids).toIncludeSameMembers(events.map((e) => e.id));
         });
     });
 
@@ -162,19 +228,24 @@ describe('Endpoint.GetEventsEndpoint', () => {
 
             const response = await get(scope, { filter: { ...filter, name: 'Zomerkamp' } });
             expect(response.status).toBe(200);
-            expect(response.body.results.map(e => e.id)).toEqual([zomerkamp.id]);
+            expect(response.body.results.map((e) => e.id)).toEqual([zomerkamp.id]);
         });
 
         test('Filters on a translated name in the language of the request', async () => {
             const { scope, filter, bosspel } = await createMixedEvents();
 
             const dutch = await get(scope, { filter: { ...filter, name: 'Bosspel' } });
-            expect(dutch.body.results.map(e => e.id)).toEqual([bosspel.id]);
+            expect(dutch.body.results.map((e) => e.id)).toEqual([bosspel.id]);
 
-            const english = await get(scope, { filter: { ...filter, name: 'Forest game' }, language: Language.English });
-            expect(english.body.results.map(e => e.id)).toEqual([bosspel.id]);
+            const english = await get(scope, {
+                filter: { ...filter, name: 'Forest game' },
+                language: Language.English,
+            });
+            expect(english.body.results.map((e) => e.id)).toEqual([bosspel.id]);
 
-            const englishNameInDutchRequest = await get(scope, { filter: { ...filter, name: 'Forest game' } });
+            const englishNameInDutchRequest = await get(scope, {
+                filter: { ...filter, name: 'Forest game' },
+            });
             expect(englishNameInDutchRequest.body.results).toHaveLength(0);
         });
 
@@ -182,17 +253,20 @@ describe('Endpoint.GetEventsEndpoint', () => {
             const { scope, filter, danceNight } = await createMixedEvents();
 
             const response = await get(scope, { filter: { ...filter, name: 'Dance night' } });
-            expect(response.body.results.map(e => e.id)).toEqual([danceNight.id]);
+            expect(response.body.results.map((e) => e.id)).toEqual([danceNight.id]);
         });
 
         test('Searching matches legacy and translated names', async () => {
             const { scope, filter, zomerkamp, bosspel, avondspel } = await createMixedEvents();
 
             const response = await get(scope, { filter, search: 'spel' });
-            expect(response.body.results.map(e => e.id)).toIncludeSameMembers([bosspel.id, avondspel.id]);
+            expect(response.body.results.map((e) => e.id)).toIncludeSameMembers([
+                bosspel.id,
+                avondspel.id,
+            ]);
 
             const kamp = await get(scope, { filter, search: 'kamp' });
-            expect(kamp.body.results.map(e => e.id)).toEqual([zomerkamp.id]);
+            expect(kamp.body.results.map((e) => e.id)).toEqual([zomerkamp.id]);
         });
     });
 });

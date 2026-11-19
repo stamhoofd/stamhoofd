@@ -41,13 +41,20 @@ describe('Event.name: string → TranslatedString', () => {
         // What a client on the previous version sends when it changes the name
         const encodedPatch = { id: 'event-1', name: 'Kamp' };
 
-        const decoded = new ObjectData(encodedPatch, { version: Version - 1 }).decode(Event.patchType());
+        const decoded = new ObjectData(encodedPatch, { version: Version - 1 }).decode(
+            Event.patchType(),
+        );
         expect(decoded.name).toEqual(new TranslatedStringPatch({ [Language.Dutch]: 'Kamp' }));
-        expect(event.patch(decoded).name).toEqual(new TranslatedString({ nl: 'Kamp', en: 'Summer camp' }));
+        expect(event.patch(decoded).name).toEqual(
+            new TranslatedString({ nl: 'Kamp', en: 'Summer camp' }),
+        );
     });
 
     it('downgrades a translation patch to the string for the current language', () => {
-        const patch = Event.patch({ id: 'event-1', name: TranslatedString.patch({ nl: 'Kamp', en: 'Camp' }) });
+        const patch = Event.patch({
+            id: 'event-1',
+            name: TranslatedString.patch({ nl: 'Kamp', en: 'Camp' }),
+        });
         const encoded = patch.encode({ version: Version - 1 }) as { name: unknown };
         expect(encoded.name).toBe($getLanguage() === Language.English ? 'Camp' : 'Kamp');
     });

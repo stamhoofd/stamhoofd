@@ -1185,17 +1185,23 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             }).create();
 
             const body: Body = new PatchableArray();
-            body.addPatch(Event.patch({
-                id: event.id,
-                name: TranslatedString.patch({ en: 'Camp', fr: 'Camp d\'été' }),
-            }));
+            body.addPatch(
+                Event.patch({
+                    id: event.id,
+                    name: TranslatedString.patch({ en: 'Camp', fr: "Camp d'été" }),
+                }),
+            );
 
             const result = await TestRequest.patch({ body, user, organization });
             expect(result.status).toBe(200);
-            expect(result.body[0].name).toEqual(new TranslatedString({ nl: 'Zomerkamp', en: 'Camp', fr: 'Camp d\'été' }));
+            expect(result.body[0].name).toEqual(
+                new TranslatedString({ nl: 'Zomerkamp', en: 'Camp', fr: "Camp d'été" }),
+            );
 
             const model = await EventModel.getByID(event.id);
-            expect(model!.name).toEqual(new TranslatedString({ nl: 'Zomerkamp', en: 'Camp', fr: 'Camp d\'été' }));
+            expect(model!.name).toEqual(
+                new TranslatedString({ nl: 'Zomerkamp', en: 'Camp', fr: "Camp d'été" }),
+            );
         });
 
         test('A patch with a plain string replaces the translations', async () => {
@@ -1211,10 +1217,12 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             }).create();
 
             const body: Body = new PatchableArray();
-            body.addPatch(Event.patch({
-                id: event.id,
-                name: TranslatedString.create('Kamp'),
-            }));
+            body.addPatch(
+                Event.patch({
+                    id: event.id,
+                    name: TranslatedString.create('Kamp'),
+                }),
+            );
 
             const result = await TestRequest.patch({ body, user, organization });
             expect(result.status).toBe(200);
@@ -1233,15 +1241,21 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
             }).create();
             await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
-            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const group = await new GroupFactory({
+                organization,
+                period,
+                type: GroupType.EventRegistration,
+            }).create();
             const event = await new EventFactory({ organization, group }).create();
 
             const name = new TranslatedString({ nl: 'Zomerkamp', en: 'Summer camp' });
             const body: Body = new PatchableArray();
-            body.addPatch(Event.patch({
-                id: event.id,
-                name,
-            }));
+            body.addPatch(
+                Event.patch({
+                    id: event.id,
+                    name,
+                }),
+            );
 
             const result = await TestRequest.patch({ body, user, organization });
             expect(result.status).toBe(200);
@@ -1259,13 +1273,15 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             }).create();
 
             const body: Body = new PatchableArray();
-            body.addPut(Event.create({
-                organizationId: organization.id,
-                typeId: (await new PlatformEventTypeFactory({}).create()).id,
-                name: new TranslatedString({ nl: 'Zomerkamp', en: 'C' }),
-                startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            }));
+            body.addPut(
+                Event.create({
+                    organizationId: organization.id,
+                    typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                    name: new TranslatedString({ nl: 'Zomerkamp', en: 'C' }),
+                    startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                }),
+            );
 
             await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
                 STExpect.simpleError({ code: 'invalid_field', field: 'name' }),
@@ -1280,13 +1296,15 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             }).create();
 
             const body: Body = new PatchableArray();
-            body.addPut(Event.create({
-                organizationId: organization.id,
-                typeId: (await new PlatformEventTypeFactory({}).create()).id,
-                name: new TranslatedString({ nl: 'K', en: 'C' }),
-                startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            }));
+            body.addPut(
+                Event.create({
+                    organizationId: organization.id,
+                    typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                    name: new TranslatedString({ nl: 'K', en: 'C' }),
+                    startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                }),
+            );
 
             await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
                 STExpect.simpleError({ code: 'invalid_field', field: 'name' }),
